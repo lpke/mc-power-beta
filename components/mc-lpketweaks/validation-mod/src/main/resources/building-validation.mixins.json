@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "package": "local.luke.building.validation.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ValidationMixin",
+    "ClickInvoker",
+    "MiningAccessor",
+    "ChatInvoker",
+    "ItemUseFaultMixin",
+    "ScreenInvoker"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

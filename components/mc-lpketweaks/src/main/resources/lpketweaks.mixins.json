@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.tweaks.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MiningMixin",
+    "CameraLifecycleMixin",
+    "CameraOptionsMixin",
+    "CameraRendererMixin",
+    "CameraHandMixin",
+    "CameraParticlesMixin",
+    "CameraLabelsMixin",
+    "CameraVanillaHandMixin",
+    "CameraArsenicHandMixin",
+    "HotbarInputMixin",
+    "HotbarHudMixin",
+    "KeyTranslationsMixin",
+    "HotbarUniTweaksMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "plugin": "local.luke.tweaks.mixin.CameraMixinPlugin"
+}

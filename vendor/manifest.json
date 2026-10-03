@@ -1,0 +1,227 @@
+[
+  {
+    "file": "vendor/optional/AlwaysMoreItems-1.10.4.jar.disabled",
+    "id": "alwaysmoreitems",
+    "version": "1.10.4",
+    "sha256": "e992a15ec867fa6346733ac4e2917cfb8a3155236e789a1f4e8743fe5eba0ed8",
+    "license": "MIT",
+    "source": "https://github.com/Glass-Series/Always-More-Items",
+    "enabled": false
+  },
+  {
+    "file": "vendor/jars/BetterScreenshots-1.6.0.jar",
+    "id": "betterscreenshots",
+    "version": "1.6.0",
+    "sha256": "9aba794b4a3c852a12ec9a85757973732750ed2b3b316a0b24ac0cb11a6863c2",
+    "license": "MIT",
+    "source": "https://github.com/telvarost/BetterScreenshots-StationAPI/",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/GlassConfigAPI-3.2.5.jar",
+    "id": "gcapi3",
+    "version": "3.2.5",
+    "sha256": "521fd621dd3aede2132fa06572e3493cd2dc99e453cc5a1fde79aee9f37c639f",
+    "license": "CC0-1.0",
+    "source": "https://github.com/calmilamsy/Glass-Config-API",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/GoldenTweaks-1.6.2.jar",
+    "id": "goldentweaks",
+    "version": "1.6.2",
+    "sha256": "1e68146563c1179c9d881d414404816892c47e1eeb60f98f341dbe6d6b694a63",
+    "license": "MIT",
+    "source": "https://github.com/telvarost/GoldenTweaks-StationAPI/",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/HudTweaks-1.9.0.jar",
+    "id": "hudtweaks",
+    "version": "1.9.0",
+    "sha256": "2f79535e09f7918ebcf63d13f9f7d0a2089c8f4538b28f1e6fa8795283994a89",
+    "license": "MIT",
+    "source": "https://github.com/telvarost/HudTweaks-StationAPI/",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/InventoryTweaks-2.6.1.jar",
+    "id": "inventorytweaks",
+    "version": "2.6.1",
+    "sha256": "cfc7fe94d943c01eea85c8aca6d056500143413bd4ac219eea928d1a2c60c6c8",
+    "license": "CC0-1.0",
+    "source": "https://github.com/telvarost/InventoryTweaks-StationAPI/",
+    "enabled": true
+  },
+  {
+    "file": "vendor/optional/Macula-2.0.jar.disabled",
+    "id": "macula",
+    "version": "2.0",
+    "sha256": "c3e713d280cb1b869479bd03c2ea73daf8ec54107f83a62d38752e727cd646a6",
+    "license": "MIT",
+    "source": "https://github.com/mineLdiver/Macula",
+    "enabled": false
+  },
+  {
+    "file": "vendor/jars/MiscTweaks-5.5.2.jar",
+    "id": "misctweaks",
+    "version": "5.5.2",
+    "sha256": "c5237cb74cf1de980fb61713a8610495876ed8f353d2253cbe88e45b60f96b03",
+    "license": "MIT",
+    "source": "https://github.com/telvarost/MiscTweaks-StationAPI/",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/QuickAdditions-2.12.0.jar",
+    "id": "quickadditions",
+    "version": "2.12.0",
+    "sha256": "34387285d4b4a7ec2001aa321deebf3422344040d8be72cb8cc24dfb9c9e44eb",
+    "license": "CC0-1.0",
+    "source": "https://github.com/telvarost/QuickAdditions-StationAPI/",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/SmoothBeta-1.1.8.jar",
+    "id": "smoothbeta",
+    "version": "1.1.8",
+    "sha256": "0acfa6a2eb59e4472808026d1108d85580aff776aa3deb2cdcf89fcd8f580bce",
+    "license": "CC0-1.0",
+    "source": "https://github.com/mineLdiver/smoothbeta",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/StationAPI-2.0.0-alpha.6.4.jar",
+    "id": "stationapi",
+    "version": "2.0.0-alpha.6.4",
+    "sha256": "9df028a04f9101863cbfccebd41794802ab5445dd942d19c4d68eaf65775f729",
+    "license": "MIT",
+    "source": "https://github.com/ModificationStation/StationAPI",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/UniTweaks-0.31.0.jar",
+    "id": "unitweaks",
+    "version": "0.31.0",
+    "sha256": "50db30a7e4ff32a6a23216e966aca6b39982f28b21c3ea81fb114073072c7431",
+    "license": "MIT",
+    "source": "https://github.com/danygames2014/UniTweaks",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/UniTweaksTelsAddons-1.9.1.jar",
+    "id": "unitweakstelsaddons",
+    "version": "1.9.1",
+    "sha256": "16c004b80701a659d155f1bb17267aa52202c6cfd9b372aa59eab18d1bd8913c",
+    "license": "MIT",
+    "source": "https://github.com/telvarost/UniTweaksTelsAddons-StationAPI/",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/ZastavkaAPI-1.1.2.jar",
+    "id": "zastavkaapi",
+    "version": "1.1.2",
+    "sha256": "afc2c7c6aad49b3facdb941d7be826970c3be8ad9756ef3bdaad59f393b53f8d",
+    "license": "MIT",
+    "source": "https://github.com/telvarost/ZastavkaAPI/",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/appleslices-1.0.1.jar",
+    "id": "appleslices",
+    "version": "1.0.1",
+    "sha256": "6e84ee32ee81a7e59aa8c7ca10b64990179762e8a97702352b083cf66a735067",
+    "license": "MIT",
+    "source": "https://github.com/AITYunivers/AppleSlices",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/entityculling-fabric-babric-1.7.0-candidate.1.jar",
+    "id": "entityculling",
+    "version": "1.7.0-candidate.1",
+    "sha256": "7f65d17acaf2b2d54b67ff5cf0abce774ee9ea291678bf70bbaed995f1b24d25",
+    "license": "CC0",
+    "source": "https://github.com/viciscat/EntityCulling",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/freecam-0.3.2.jar",
+    "id": "freecam",
+    "version": "0.3.2",
+    "sha256": "f35c5b07ef0359d76f07d1ff5c1b4b8c32030e1fdbb6aca900f9e7b7326f7283",
+    "license": "CC0-1.0",
+    "source": "https://github.com/ralf2oo2/freecam-stapi",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/gambac-1.4.0.jar",
+    "id": "gambac",
+    "version": "1.4.0",
+    "sha256": "233f9029df890685a05c3cb36c4b0adcd9e14bcbb9923d31dd95b0fff118a78e",
+    "license": "MIT",
+    "source": null,
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/glass-networking-1.0.7.jar",
+    "id": "glassnetworking",
+    "version": "1.0.7",
+    "sha256": "992190f8e7f904afe6e1e311ad17ea18c1c2ebced6dbee41a8a62b9723c3751d",
+    "license": "MIT",
+    "source": "https://github.com/calmilamsy/Glass-Networking",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/mojangfixstationapi-2.4.5.jar",
+    "id": "mojangfixstationapi",
+    "version": "2.4.5",
+    "sha256": "1815109e09d14e2b834cdbaf671965d51fcfd1a518fd56db310f8ee85c6653ca",
+    "license": "LGPL-3.0-only",
+    "source": "https://github.com/js6pak/mojangfix",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/oldlogo-1.2.jar",
+    "id": "oldlogo",
+    "version": "1.2",
+    "sha256": "6a6f322b091c85316f63056c803784d32071d9564c79a2d308889669d01dccbe",
+    "license": "MIT",
+    "source": "https://github.com/Lukiiy/OldMCLogo",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/player-list-mod-1.1.1.jar",
+    "id": "player_list",
+    "version": "1.1.1",
+    "sha256": "86b064cde8624418332548c3f5e4d341f04c4ad48f9989bbdac5ec28c37523d2",
+    "license": "CC0-1.0",
+    "source": "https://github.com/FabricMC/fabric-example-mod",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/retroauth-1.3.1+mcb1.7.3-babric.jar",
+    "id": "retroauth",
+    "version": "1.3.1+mcb1.7.3",
+    "sha256": "975e5c0e289f1132d9d51ad6d17704606545a3dc208f32b5a4b820c4044f2aca",
+    "license": "MIT",
+    "source": "https://github.com/matthewperiut/retroauth",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/retrocommands-0.5.10.jar",
+    "id": "retrocommands",
+    "version": "0.5.10",
+    "sha256": "b82604ed559bdd6c910206ab377e108330295c9841b58eaa0043c08f1aa5c99f",
+    "license": "CC0-1.0",
+    "source": "https://github.com/calmilamsy/BIN-fabric-example-mod",
+    "enabled": true
+  },
+  {
+    "file": "vendor/jars/stapi-fast-intro-2.0.0.jar",
+    "id": "stapi-fast-intro",
+    "version": "2.0.0",
+    "sha256": "51f8d39f77c1dd5a81868f8f5267e51a78058ebc403cc1b6adb8b0ba9fcd99f5",
+    "license": "CC0-1.0",
+    "source": "https://github.com/viciscat/stapi-fast-intro",
+    "enabled": true
+  }
+]

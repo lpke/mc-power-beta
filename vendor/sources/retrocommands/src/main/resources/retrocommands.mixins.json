@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.matthewperiut.retrocommands.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "com.matthewperiut.retrocommands.mixin.plugin.RetroCommandsMixinPlugin",
+  "mixins": [
+    "access.EntityAccessor",
+    "feature.BlockBaseMixin",
+    "feature.MixinItemInstance",
+    "feature.PlayerBaseMixin"
+  ],
+  "server": [
+    "access.ServerPlayerPacketHandlerAccessor",
+    "communicate.PlayerManagerMixin",
+    "intercept.CommandManagerMixin",
+    "intercept.ServerPlayerPacketHandlerMixin"
+  ],
+  "client": [
+    "client.ChatScreenMixin",
+    "client.MinecraftMixinChatEnabler",
+    "communicate.ClientPlayNetworkHandlerMixin",
+    "intercept.AbstractClientPlayerMixin",
+    "intercept.ClientPlayerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

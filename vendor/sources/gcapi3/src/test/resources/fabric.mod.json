@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "id": "gcapi3test",
+  "version": "${version}",
+
+  "name": "Glass Config API 3 Test",
+  "description": "An actually pretty good config GUI with an API to match. Heavily hackable and extendable.",
+  "authors": [
+    "calmilamsy"
+  ],
+  "contact": {
+    "homepage": "https://glass-launcher.net/",
+    "sources": "https://github.com/calmilamsy/Glass-Config-API",
+    "issues": "https://github.com/calmilamsy/Glass-Config-API/issues"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/gcapi3test/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "gcapi3": [
+      "net.glasslauncher.mods.gcapi3test.impl.example.ExampleConfig"
+    ],
+    "gcapi3:factory_provider": [
+      "net.glasslauncher.mods.gcapi3test.impl.example.ExampleConfigEnumFactories"
+    ],
+    "gcapi3:presave": [
+      "net.glasslauncher.mods.gcapi3test.impl.example.ExampleEntryPointListeners"
+    ],
+    "gcapi3:postload": [
+      "net.glasslauncher.mods.gcapi3test.impl.example.ExampleEntryPointListeners"
+    ]
+  },
+
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3"
+  },
+  "suggests": {
+    "modmenu": "*"
+  }
+}

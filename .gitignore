@@ -1,0 +1,7 @@
+**/.gradle/
+**/build/
+**/run/
+**/.idea/
+**/__pycache__/
+*.iml
+dist/

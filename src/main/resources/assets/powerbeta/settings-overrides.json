@@ -1,0 +1,453 @@
+{
+  "creative.flight": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Creative flight",
+    "description": "Double-tap Jump to start flying. Jump rises; Sneak descends."
+  },
+  "creative.landStopsFlight": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Stop flying on landing",
+    "description": "Return to walking when you touch the ground."
+  },
+  "creative.sprintFlight": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Flight sprint",
+    "description": "Use the sprint key to fly faster."
+  },
+  "creative.sprintToggle": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Sprint activation",
+    "description": "Toggle keeps sprint flight active after releasing the key. Hold requires the key to stay down."
+  },
+  "creative.flightSpeed": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Flight speed, %",
+    "description": "100% matches the modern creative flight target."
+  },
+  "creative.sprintMultiplier": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Sprint speed, %",
+    "description": "Multiplier applied while sprint flight is active."
+  },
+  "creative.glide": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Flight drift",
+    "description": "0 stops immediately when movement keys are released. 5 uses full modern-style drift."
+  },
+  "creative.doubleTapTicks": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Double-tap window, ticks",
+    "description": "Maximum interval between Jump presses. 20 ticks is one second."
+  },
+  "creative.modePicker": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Gamemode picker",
+    "description": "Hold F3, press F4 to cycle, then release F3 to select."
+  },
+  "creative.spectatorScroll": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Scroll to change speed",
+    "description": "Adjust spectator flight speed with the mouse wheel."
+  },
+  "creative.showSpectatorSpeed": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Show spectator speed",
+    "description": "Display the current speed while it changes."
+  },
+  "creative.spectatorSpeed": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Spectator speed, %",
+    "description": "Starting spectator movement speed."
+  },
+  "creative.spectatorScrollStep": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Speed step, %",
+    "description": "Speed change for each wheel step."
+  },
+  "creative.blockReach": {
+    "page": "Creative",
+    "group": "Interaction",
+    "label": "Block reach",
+    "description": "Reach in blocks. Only applies in Creative.",
+    "min": 3,
+    "max": 10,
+    "step": 0.5
+  },
+  "creative.entityReach": {
+    "page": "Creative",
+    "group": "Interaction",
+    "label": "Entity reach",
+    "description": "Reach in blocks. Only applies in Creative.",
+    "min": 3,
+    "max": 10,
+    "step": 0.5
+  },
+  "creative.destroySlot": {
+    "page": "Creative",
+    "group": "Inventory",
+    "label": "Destroy slot",
+    "description": "Drag items to the slot beside the hotbar to delete them."
+  },
+  "creative.shiftClearsInventory": {
+    "page": "Creative",
+    "group": "Inventory",
+    "label": "Shift-click clears inventory",
+    "description": "Shift-click the destroy slot to clear inventory and armor."
+  },
+  "worldedit.enabled": {
+    "page": "World editing",
+    "group": "Access",
+    "label": "World editing",
+    "description": "Master switch for all editor commands and wand actions."
+  },
+  "worldedit.creativeOnly": {
+    "page": "World editing",
+    "group": "Access",
+    "label": "Require Creative mode",
+    "description": "Require Creative when the creative-mode system is available. A world override can change this rule."
+  },
+  "worldedit.wandEnabled": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Selection wand",
+    "description": ""
+  },
+  "worldedit.wandItem": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Wand item ID",
+    "description": ""
+  },
+  "worldedit.showSelection": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Selection outline",
+    "description": ""
+  },
+  "worldedit.throughWalls": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Show through blocks",
+    "description": ""
+  },
+  "worldedit.color": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Outline color",
+    "description": ""
+  },
+  "worldedit.opacity": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Outline opacity, %",
+    "description": ""
+  },
+  "worldedit.lineWidth": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Outline width",
+    "description": ""
+  },
+  "worldedit.blockLimit": {
+    "page": "World editing",
+    "group": "Limits and history",
+    "label": "Maximum blocks per edit",
+    "description": "Reject edits above this limit before making changes."
+  },
+  "worldedit.blocksPerTick": {
+    "page": "World editing",
+    "group": "Limits and history",
+    "label": "Blocks processed per tick",
+    "description": "Lower values keep large edits responsive."
+  },
+  "worldedit.historySize": {
+    "page": "World editing",
+    "group": "Limits and history",
+    "label": "Undo history",
+    "description": "Maximum number of edit records kept in memory."
+  },
+  "tweaks.placement.enabled": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Fast placement",
+    "description": "Hold right-click to keep placing blocks."
+  },
+  "tweaks.placement.attemptsPerTick": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Placement attempts per tick",
+    "description": "Maximum placement attempts per game tick."
+  },
+  "tweaks.placement.slabMode": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Vertical slab placement",
+    "description": "Continuous layers, double slabs, or repeat the first slab configuration."
+  },
+  "tweaks.placement.rememberOrientation": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Remember orientation",
+    "description": "Keep the initial orientation during continuous placement."
+  },
+  "tweaks.placement.restrictionEnabled": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Placement restriction",
+    "description": "Constrain continued placement using the first successful placement."
+  },
+  "tweaks.placement.restrictionTiedToFast": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Tie restriction to fast placement",
+    "description": "Turning fast placement on or off also changes the restriction switch."
+  },
+  "tweaks.placement.restrictionMode": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Restriction rule",
+    "description": "Face, plane, layer, column, line or diagonal."
+  },
+  "tweaks.placement.listMode": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Item filter",
+    "description": "Choose whether to allow all items, exclude listed items, or only allow listed items."
+  },
+  "tweaks.placement.blacklist": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Excluded items",
+    "description": "Item IDs separated by commas, for example 1, 44:2."
+  },
+  "tweaks.placement.whitelist": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Allowed items",
+    "description": "Item IDs separated by commas, for example 1, 44:2. An empty allow-list permits nothing."
+  },
+  "tweaks.flexible.enabled": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Flexible placement",
+    "description": ""
+  },
+  "tweaks.flexible.showOverlay": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Target face overlay",
+    "description": ""
+  },
+  "tweaks.flexible.showPreview": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Destination preview",
+    "description": ""
+  },
+  "tweaks.flexible.placeAgainstContainers": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Place against containers",
+    "description": ""
+  },
+  "tweaks.flexible.overlayColor": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Overlay color",
+    "description": ""
+  },
+  "tweaks.flexible.overlayOpacity": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Overlay opacity, %",
+    "description": ""
+  },
+  "tweaks.hotbar.swap": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Swap hotbar rows",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.scroll": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Scroll to choose a row",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.numberRowKeys": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Modifier + number selects row",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.overlay": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Row preview",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.reverseScroll": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Reverse row scrolling",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.rememberRow": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Remember the selected row",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.selectedRow": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Starting row",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.alignment": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Preview alignment",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.offsetX": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Horizontal offset",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.offsetY": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Vertical offset",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.freeLook": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Free look",
+    "description": ""
+  },
+  "tweaks.freeLookToggle": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Free look activation",
+    "description": ""
+  },
+  "tweaks.freeLookPerspective": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Free look perspective",
+    "description": ""
+  },
+  "tweaks.freeLookFollowThirdPerson": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Follow current third-person view",
+    "description": ""
+  },
+  "tweaks.clickMining": {
+    "page": "Building",
+    "group": "Mining",
+    "label": "Continuous click mining",
+    "description": "Remove the delay between breaking blocks in singleplayer."
+  },
+  "tweaks.boatSteering": {
+    "page": "Movement",
+    "group": "Vehicles",
+    "label": "Boat steering and collision protection",
+    "description": ""
+  },
+  "tweaks.fastMinecarts": {
+    "page": "Movement",
+    "group": "Vehicles",
+    "label": "Faster minecarts",
+    "description": ""
+  },
+  "tweaks.sneak.enabled": {
+    "page": "Movement",
+    "group": "Walking",
+    "label": "Edge protection",
+    "description": "Prevent walking off ledges without crouching or slowing down."
+  },
+  "tweaks.sneak.announceToggle": {
+    "page": "Movement",
+    "group": "Walking",
+    "label": "Edge-protection messages",
+    "description": ""
+  },
+  "tweaks.slabs.enabled": {
+    "page": "Building",
+    "group": "Slab completion",
+    "label": "Complete slabs through adjacent faces",
+    "description": ""
+  },
+  "tweaks.slabs.announceToggle": {
+    "page": "Building",
+    "group": "Slab completion",
+    "label": "Slab-completion messages",
+    "description": ""
+  },
+  "logo.logo.lines": {
+    "page": "Interface",
+    "group": "Title screen",
+    "label": "Title lettering",
+    "description": "Rows use the letter block palette. Spaces leave gaps.",
+    "default": [
+      "**  *** * * *** **      **  *** ***  * ",
+      "* * * * * * *   * *     * * *    *  * *",
+      "**  * * * * **  **      **  **   *  ***",
+      "*   * * *** *   * *     * * *    *  * *",
+      "*   *** * * *** * *     **  ***  *  * *"
+    ]
+  },
+  "quickadditions:config.MUSIC_CONFIG.volumeNetherPortalAmbient": {
+    "page": "Audio",
+    "group": "Individual sounds",
+    "label": "Nether portal",
+    "description": "Volume multiplier from 0 to 1.",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "quickadditions:config.MUSIC_CONFIG.volumeRainAmbient": {
+    "page": "Audio",
+    "group": "Individual sounds",
+    "label": "Rain ambience",
+    "description": "Volume multiplier from 0 to 1.",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "quickadditions:config.MUSIC_CONFIG.volumeCaveAmbient": {
+    "page": "Audio",
+    "group": "Individual sounds",
+    "label": "Cave ambience",
+    "description": "Volume multiplier from 0 to 1.",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "quickadditions:config.MUSIC_CONFIG.volumeGhastAmbient": {
+    "page": "Audio",
+    "group": "Individual sounds",
+    "label": "Ghast ambience",
+    "description": "Volume multiplier from 0 to 1.",
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  }
+}

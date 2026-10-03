@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "worldedit_beta",
+  "version": "${version}",
+  "name": "WorldEdit Beta",
+  "description": "Singleplayer region editing, clipboard and undo for Beta 1.7.3.",
+  "authors": [
+    "Luke"
+  ],
+  "license": "LGPL-3.0-only",
+  "environment": "client",
+  "entrypoints": {
+    "modmenu": [
+      "local.luke.worldedit.config.ModMenuIntegration"
+    ],
+    "main": [
+      "local.luke.worldedit.chat.RetroCommandsBridge"
+    ]
+  },
+  "mixins": [
+    "worldedit-beta.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.6",
+    "minecraft": [
+      "1.0.0-beta.7.3",
+      "b1.7.3"
+    ],
+    "java": ">=17",
+    "mixinextras": ">=0.5.0"
+  },
+  "breaks": {
+    "creativeeditorwands": "*"
+  },
+  "contact": {
+    "sources": "https://github.com/lpke/mc-worldedit-beta"
+  },
+  "icon": "assets/worldedit_beta/icon.png"
+}

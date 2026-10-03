@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "lpketweaks",
+  "version": "${version}",
+  "name": "LpkeTweaks",
+  "description": "Building, movement, camera and mining controls for Beta 1.7.3.",
+  "authors": [
+    "Luke"
+  ],
+  "license": "LGPL-3.0-only",
+  "environment": "client",
+  "icon": "assets/lpketweaks/icon.png",
+  "entrypoints": {
+    "modmenu": [
+      "local.luke.tweaks.config.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "beta-autowalk.mixins.json",
+    "beta-transport.mixins.json",
+    "beta-fastplace.mixins.json",
+    "beta-flexible-placement.mixins.json",
+    "beta-fake-sneak.mixins.json",
+    "beta-slab-placement.mixins.json",
+    "lpketweaks.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.6",
+    "minecraft": [
+      "1.0.0-beta.7.3",
+      "b1.7.3"
+    ],
+    "java": ">=17",
+    "mixinextras": ">=0.5.0"
+  },
+  "breaks": {
+    "beta_autowalk": "*",
+    "beta_transport": "*",
+    "beta_fastplace": "*",
+    "beta_flexible_placement": "*",
+    "beta_fake_sneak": "*",
+    "beta_slab_placement": "*",
+    "omnilook": "*",
+    "click-mining-forever": "*"
+  },
+  "contact": {
+    "sources": "https://github.com/lpke/mc-lpketweaks"
+  }
+}

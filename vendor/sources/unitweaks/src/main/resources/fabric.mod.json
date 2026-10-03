@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "unitweaks",
+  "version": "${version}",
+  "name": "UniTweaks",
+  "description":
+    "An attempt at an all-in-one fixes and tweaks package for Beta 1.7.3",
+
+  "authors": [
+    {
+      "name": "DanyGames2014",
+      "contact": {
+        "sources": "https://github.com/danygames2014",
+        "discord": "danygames2014"
+      }
+    },
+    {
+      "name": "Telvarost",
+      "contact": {
+        "sources": "https://github.com/telvarost"
+      }
+    }
+  ],
+
+  "contact": {
+    "sources": "https://github.com/danygames2014/UniTweaks"
+  },
+
+  "license": "MIT",
+  "icon": "assets/unitweaks/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "net.danygames2014.unitweaks.event.InitListener",
+      "net.danygames2014.unitweaks.tweaks.recipes.RecipeListener",
+      "net.danygames2014.unitweaks.tweaks.recipes.FurnaceRecipeListener",
+      "net.danygames2014.unitweaks.bugfixes.slabminingfix.MiningListener"
+    ],
+    "stationapi:event_bus_client": [
+      "net.danygames2014.unitweaks.tweaks.morekeybinds.KeyPressedListener",
+      "net.danygames2014.unitweaks.tweaks.morekeybinds.KeyBindingListener"
+    ],
+    "stationapi:event_bus_server": [
+    ],
+    "gcapi3":[
+      "net.danygames2014.unitweaks.UniTweaks"
+    ],
+    "gcapi3:factory_provider": [
+      "net.danygames2014.unitweaks.util.ConfigFactories"
+    ]
+  },
+  "mixins": [
+    "unitweaks.mixins.json"
+  ],
+  "accessWidener": "unitweaks.accesswidener",
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": "*"
+  },
+
+  "recommends": {
+    "modmenu": "*",
+    "stationapi": "*"
+  },
+
+  "conflicts": {
+    "smallcraftingtweaks": "*",
+    "extremeview": "*",
+    "nowobtainablerecipes": "*"
+  },
+
+  "breaks": {
+    "annoyancefix": "*",
+    "mostlymodernrecipes": "*",
+    "betatweaks": "*",
+    "finalbeta": "*",
+    "gameplayessentials": "*",
+    "clientsideessentials": "*",
+    "photomode": "*",
+    "thirdpersonfix": "*"
+  }
+}

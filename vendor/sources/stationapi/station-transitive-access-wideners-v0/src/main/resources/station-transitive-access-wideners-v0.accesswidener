@@ -1,0 +1,77 @@
+accessWidener	v2	named
+
+# --- Methods ---
+
+# NBT
+transitive-accessible	method	net/minecraft/nbt/NbtElement	write	(Ljava/io/DataOutput;)V
+transitive-accessible	method	net/minecraft/nbt/NbtElement	read	(Ljava/io/DataInput;)V
+transitive-accessible	method	net/minecraft/nbt/NbtList	write	(Ljava/io/DataOutput;)V
+transitive-accessible	method	net/minecraft/nbt/NbtList	read	(Ljava/io/DataInput;)V
+
+# Blocks
+transitive-accessible	method	net/minecraft/block/Block	<init>	(ILnet/minecraft/block/material/Material;)V
+transitive-accessible	method	net/minecraft/block/Block	ignoreMetaUpdates	()Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/Block	<init>	(IILnet/minecraft/block/material/Material;)V
+transitive-accessible	method	net/minecraft/block/Block	setSoundGroup	(Lnet/minecraft/sound/BlockSoundGroup;)Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/Block	setOpacity	(I)Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/Block	setLuminance	(F)Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/Block	setResistance	(F)Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/Block	setHardness	(F)Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/Block	setUnbreakable	()Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/Block	setTickRandomly	(Z)Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/Block	disableTrackingStatistics	()Lnet/minecraft/block/Block;
+transitive-accessible	method	net/minecraft/block/ButtonBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/CactusBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/CakeBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/ChestBlock	<init>	(I)V
+transitive-accessible	method	net/minecraft/block/CropBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/DeadBushBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/DirtBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/DispenserBlock	<init>	(I)V
+transitive-accessible	method	net/minecraft/block/DoorBlock	<init>	(ILnet/minecraft/block/material/Material;)V
+transitive-accessible	method	net/minecraft/block/FarmlandBlock	<init>	(I)V
+transitive-accessible	method	net/minecraft/block/FireBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/FlowingLiquidBlock	<init>	(ILnet/minecraft/block/material/Material;)V
+transitive-accessible	method	net/minecraft/block/LiquidBlock	<init>	(ILnet/minecraft/block/material/Material;)V
+transitive-accessible	method	net/minecraft/block/FurnaceBlock	<init>	(IZ)V
+transitive-accessible	method	net/minecraft/block/GrassBlock	<init>	(I)V
+transitive-accessible	method	net/minecraft/block/JukeboxBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/LadderBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/LeavesBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/TransparentBlock	<init>	(IILnet/minecraft/block/material/Material;Z)V
+transitive-accessible	method	net/minecraft/block/LeverBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/LockedChestBlock	<init>	(I)V
+transitive-accessible	method	net/minecraft/block/LogBlock	<init>	(I)V
+transitive-accessible	method	net/minecraft/block/SpawnerBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/MushroomPlantBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/PlantBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/PressurePlateBlock	<init>	(IILnet/minecraft/block/PressurePlateActivationRule;Lnet/minecraft/block/material/Material;)V
+transitive-accessible	method	net/minecraft/block/PumpkinBlock	<init>	(IIZ)V
+transitive-accessible	method	net/minecraft/block/RailBlock	<init>	(IIZ)V
+transitive-accessible	method	net/minecraft/block/RepeaterBlock	<init>	(IZ)V
+transitive-accessible	method	net/minecraft/block/RedstoneTorchBlock	<init>	(IIZ)V
+transitive-accessible	method	net/minecraft/block/SaplingBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/SignBlock	<init>	(ILjava/lang/Class;Z)V
+transitive-accessible	method	net/minecraft/block/SnowyBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/SnowBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/SpongeBlock	<init>	(I)V
+transitive-accessible	method	net/minecraft/block/StairsBlock	<init>	(ILnet/minecraft/block/Block;)V
+transitive-accessible	method	net/minecraft/block/StillLiquidBlock	<init>	(ILnet/minecraft/block/material/Material;)V
+transitive-accessible	method	net/minecraft/block/SugarCaneBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/TallPlantBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/TorchBlock	<init>	(II)V
+transitive-accessible	method	net/minecraft/block/TranslucentBlock	<init>	(IILnet/minecraft/block/material/Material;Z)V
+transitive-accessible	method	net/minecraft/block/TrapdoorBlock	<init>	(ILnet/minecraft/block/material/Material;)V
+transitive-accessible	method	net/minecraft/block/WorkbenchBlock	<init>	(I)V
+
+# Items
+transitive-accessible	method	net/minecraft/item/Item	<init>	(I)V
+transitive-accessible	method	net/minecraft/item/Item	setHasSubtypes	(Z)Lnet/minecraft/item/Item;
+transitive-accessible	method	net/minecraft/item/Item	setMaxDamage	(I)Lnet/minecraft/item/Item;
+transitive-accessible	method	net/minecraft/item/AxeItem	<init>	(ILnet/minecraft/item/ToolMaterial;)V
+transitive-accessible	method	net/minecraft/item/PickaxeItem	<init>	(ILnet/minecraft/item/ToolMaterial;)V
+transitive-accessible	method	net/minecraft/item/ToolItem	<init>	(IILnet/minecraft/item/ToolMaterial;[Lnet/minecraft/block/Block;)V
+transitive-accessible	method	net/minecraft/item/MapItem	<init>	(I)V
+transitive-accessible	method	net/minecraft/item/NetworkSyncedItem	<init>	(I)V
+transitive-accessible	method	net/minecraft/item/MusicDiscItem	<init>	(ILjava/lang/String;)V
+transitive-extendable	method	net/minecraft/item/Item	getTextureId	(Lnet/minecraft/item/ItemStack;)I

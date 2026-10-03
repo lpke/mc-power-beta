@@ -1,0 +1,35 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.telvarost.quickadditions.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "com.github.telvarost.quickadditions.QuickAdditionsMixinPlugin",
+  "mixins": [
+    "BiomeMixin",
+    "ForestBiomeMixin",
+    "HellBiomeMixin",
+    "LivingEntityMixin",
+    "MonsterEntityMixin",
+    "NaturalSpawnerGroupSizeMixin",
+    "NaturalSpawnerMixin",
+    "PigEntityMixin",
+    "PlayerEntityMixin",
+    "SkyBiomeMixin",
+    "TaigaBiomeMixin",
+    "WorldMixin"
+  ],
+  "server": [
+    "server.ServerPlayNetworkHandlerMixin"
+  ],
+  "client": [
+    "client.GameRendererMixin",
+    "client.InGameHudMixin",
+    "client.MinecraftMixin",
+    "client.SoundManagerAccessor",
+    "client.SoundManagerMixin",
+    "client.TitleScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

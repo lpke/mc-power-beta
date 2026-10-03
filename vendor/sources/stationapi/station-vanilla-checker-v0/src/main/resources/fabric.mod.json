@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "station-vanilla-checker-v0",
+  "version": "${version}",
+
+  "name": "Station Vanilla Checker (v0)",
+  "description": "Verifies client mods when it connects to a server, or checks if server is vanilla-friendly.",
+  "authors": [
+    "Modification Station"
+  ],
+  "contact": {
+    "homepage": "https://glass-launcher.net/repo/mod/stationapi",
+    "sources": "https://github.com/ModificationStation/StationAPI",
+    "issues": "https://github.com/ModificationStation/StationAPI/issues"
+  },
+
+  "license": "MIT",
+  "icon": "assets/station-vanilla-checker-v0/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "net.modificationstation.stationapi.impl.network.VanillaChecker"
+    ],
+    "stationapi:event_bus_server": [
+      "net.modificationstation.stationapi.impl.server.network.ServerVanillaChecker"
+    ],
+    "stationapi:event_bus_client": [
+      "net.modificationstation.stationapi.impl.client.network.ClientVanillaChecker"
+    ]
+  },
+  "mixins": [
+    "station-vanilla-checker-v0.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "1.0.0-beta.7.3"
+  },
+
+  "custom": {
+    "modmenu:api": true
+  }
+}

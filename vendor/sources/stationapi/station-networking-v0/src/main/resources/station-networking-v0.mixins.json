@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.modificationstation.stationapi.mixin.network",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "AbstractPacketAccessor",
+    "ConnectionMixin",
+    "PacketMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

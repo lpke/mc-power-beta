@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "glassnetworking",
+  "version": "${version}",
+
+  "name": "Glass Networking",
+  "description": "Aims to make packet handling without StationAPI 1000% less painful by abusing the poor NBT system. Probably not the best way to do it.",
+  "authors": [
+    "calmilamsy"
+  ],
+  "contact": {
+    "homepage": "https://glass-launcher.net/",
+    "sources": "https://github.com/calmilamsy/Glass-Networking"
+  },
+
+  "license": "MIT",
+  "icon": "assets/glassnetworking/icon.png",
+
+  "environment": "*",
+  "accessWidener": "glassnetworking.accesswidener",
+  "entrypoints": {
+    "main": [
+      "net.glasslauncher.mods.networking.GlassNetworking"
+    ]
+  },
+  "mixins": [
+    "glassnetworking.mixins.json"
+  ],
+
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3"
+  },
+
+  "custom": {
+    "modmenu:api": true
+  }
+}

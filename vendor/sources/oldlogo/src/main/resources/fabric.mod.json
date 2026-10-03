@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "oldlogo",
+  "version": "${version}",
+  "name": "OldLogo",
+  "description": "Readds the silly block rendered logo from Minecraft Alpha versions!",
+  "authors": [ "Lukiiy" ],
+  "contact": {
+    "sources": "https://github.com/Lukiiy/OldMCLogo",
+    "issues": "https://github.com/Lukiiy/OldMCLogo/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/oldLogo/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "me.lukiiy.oldLogo.OldLogo"
+    ]
+  },
+  "mixins": [
+    "oldLogo.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.13.3",
+    "minecraft": "1.0.0-beta.7.3"
+  }
+}

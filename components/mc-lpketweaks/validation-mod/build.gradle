@@ -1,0 +1,40 @@
+plugins { id 'babric-loom' version '1.5-SNAPSHOT' }
+
+group = 'local.luke'
+version = project.mod_version
+base.archivesName = 'building-validation'
+
+loom {
+    gluedMinecraftJar()
+    customMinecraftManifest.set('https://babric.github.io/manifest-polyfill/b1.7.3.json')
+    intermediaryUrl.set('https://maven.glass-launcher.net/babric/babric/intermediary/%1$s/intermediary-%1$s-v2.jar')
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://api.modrinth.com/maven" }
+    maven { url = 'https://maven.glass-launcher.net/babric' }
+}
+
+dependencies {
+    minecraft 'com.mojang:minecraft:b1.7.3'
+    mappings 'babric:barn:b1.7.3+build.8:v2'
+    modImplementation files('../build/libs/lpketweaks-1.2.1.jar')
+    modImplementation files('../../mc-worldedit-beta/build/libs/worldedit-beta-1.2.1.jar')
+    modImplementation 'babric:fabric-loader:0.15.6-babric.2'
+    modCompileOnly('maven.modrinth:vf3X9pHM:eqQFtReE') { transitive = false }
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand version: project.version }
+}
+
+java { withSourcesJar() }
+test { useJUnitPlatform() }
+tasks.withType(JavaCompile).configureEach { options.release = 17 }
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}

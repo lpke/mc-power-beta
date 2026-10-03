@@ -1,0 +1,5 @@
+accessWidener v2 named
+
+accessible method net/minecraft/world/biome/Biome setGrassColor (I)Lnet/minecraft/world/biome/Biome;
+accessible method net/minecraft/world/biome/Biome setName (Ljava/lang/String;)Lnet/minecraft/world/biome/Biome;
+accessible method net/minecraft/world/biome/Biome disableRain ()Lnet/minecraft/world/biome/Biome;

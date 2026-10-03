@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "station-registry-sync-v0",
+  "version": "${version}",
+
+  "name": "Station Registry Sync (v0)",
+  "description": "Registry synchronization between server and client.",
+  "authors": [
+    "Modification Station"
+  ],
+  "contact": {
+    "homepage": "https://glass-launcher.net/repo/mod/stationapi",
+    "sources": "https://github.com/ModificationStation/StationAPI",
+    "issues": "https://github.com/ModificationStation/StationAPI/issues"
+  },
+
+  "license": "MIT",
+  "icon": "assets/station-registry-sync-v0/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus_server": [
+      "net.modificationstation.stationapi.impl.server.registry.ServerRegistrySender",
+      "net.modificationstation.stationapi.impl.server.registry.ServerRegistrySynchronizer"
+    ],
+    "stationapi:event_bus_client": [
+      "net.modificationstation.stationapi.impl.client.registry.ClientServerRegistryRemapper",
+      "net.modificationstation.stationapi.impl.client.registry.ClientRegistryRestorer"
+    ],
+    "stationapi:event_bus": [
+      "net.modificationstation.stationapi.impl.network.RegistryNetworkingInit"
+    ],
+    "client": [
+      "net.modificationstation.stationapi.impl.client.network.ClientRegistryNetworkingInit"
+    ]
+  },
+
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "1.0.0-beta.7.3"
+  },
+
+  "custom": {
+    "modmenu:api": true
+  }
+}

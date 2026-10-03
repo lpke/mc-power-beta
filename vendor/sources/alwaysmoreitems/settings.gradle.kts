@@ -1,0 +1,16 @@
+rootProject.name = "AlwaysMoreItems"
+
+pluginManagement {
+    repositories {
+        maven (
+//            name = Fabric
+            url = "https://maven.fabricmc.net/"
+        )
+        maven (
+//            name = Babric
+            url = "https://maven.glass-launcher.net/babric"
+        )
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}

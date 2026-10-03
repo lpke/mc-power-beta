@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.github.telvarost.zastavkaapi.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "FallingBlockEntityMixin",
+    "LivingEntityMixin",
+    "WorldMixin"
+  ],
+  "server": [
+    "server.EntityTrackerEntryMixin"
+  ],
+  "client": [
+    "client.ClientNetworkHandlerMixin",
+    "client.LivingEntityRendererMixin",
+    "client.SoundHelperMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

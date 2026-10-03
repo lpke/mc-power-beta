@@ -1,0 +1,3742 @@
+{
+  "betterscreenshots:config.addBasicScreenshotsToClipboard": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Add basic screenshots to clipboard",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "betterscreenshots:config.customResolutionPhotoHeight": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Custom screenshot height in pixels",
+    "description": "",
+    "default": 2240,
+    "restart": false,
+    "min": 16,
+    "max": 16384,
+    "step": 1
+  },
+  "betterscreenshots:config.customResolutionPhotoWidth": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Custom screenshot width in pixels",
+    "description": "",
+    "default": 7680,
+    "restart": false,
+    "min": 16,
+    "max": 16384,
+    "step": 1
+  },
+  "betterscreenshots:config.disableRenderingNetherBedrock": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Disable rendering nether bedrock",
+    "description": "Reload world for changes to take effect",
+    "default": false,
+    "restart": false
+  },
+  "betterscreenshots:config.isometricPhotoScale": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Isometric screenshot resolution",
+    "description": "",
+    "default": 8,
+    "restart": false,
+    "min": 1,
+    "max": 32,
+    "step": 1
+  },
+  "betterscreenshots:config.isometricPhotoRotation": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Isometric screenshot rotation",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "betterscreenshots:config.isometricPhotoRotationOffset": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Isometric screenshot rotation offset",
+    "description": "Zero degrees recommended for best angle",
+    "default": 0,
+    "restart": false,
+    "min": -360,
+    "max": 360,
+    "step": 1
+  },
+  "betterscreenshots:config.mirrorIsometricScreenshot": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Mirror isometric screenshot",
+    "description": "Flips the isometric screenshot horizontally",
+    "default": false,
+    "restart": false
+  },
+  "entityculling:config.disableEntityCulling": {
+    "page": "Video",
+    "group": "Visibility culling",
+    "label": "Disable entity culling",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "entityculling:config.disableBlockEntityCulling": {
+    "page": "Video",
+    "group": "Visibility culling",
+    "label": "Disable block entity culling",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "entityculling:config.showF3Info": {
+    "page": "Video",
+    "group": "Visibility culling",
+    "label": "F3 info",
+    "description": "If BetterF3 is installed disable there instead",
+    "default": true,
+    "restart": false
+  },
+  "entityculling:config.f3InfoYOffset": {
+    "page": "Video",
+    "group": "Visibility culling",
+    "label": "F3 info y offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "entityculling:config.glassCulls": {
+    "page": "Video",
+    "group": "Visibility culling",
+    "label": "Make glass cull entities and blocks",
+    "description": "for funsies/debugging",
+    "default": false,
+    "restart": false
+  },
+  "freecam:config.speed": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Freecam speed",
+    "description": "Changing this value will change the speed of the freecam",
+    "default": 10.0,
+    "restart": false,
+    "min": 0.1,
+    "max": 100,
+    "step": 0.1
+  },
+  "freecam:config.drag": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Freecam drag",
+    "description": "Changing this value will change the drag of the freecam, The lower the drag, the longer it takes for the camera to stop. This option doesn't do anything for classic movement",
+    "default": 4.0,
+    "restart": false,
+    "min": 0.1,
+    "max": 100,
+    "step": 0.1
+  },
+  "freecam:config.collision": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Freecam collisions",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "freecam:config.showCamera": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Show freecam",
+    "description": "When this option is enabled, a 3D camera is rendered at the position of the freecam",
+    "default": true,
+    "restart": false
+  },
+  "freecam:config.classicMovement": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Classic freecam movement",
+    "description": "When this option is enabled the freecam will move like in older versions of Freecam",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableFishingRodLuckOfTheSea": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Fishing rod luck of the sea",
+    "description": "10% chance to catch a gold ingot with a fish",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldAppleCureFire": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold apple cure fire",
+    "description": "Cancels fire effect one time when eaten",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldAxeSilkTouch": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold axe silk touch",
+    "description": "Tool must be effective on block for effect",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldBlockHerobrineSummoner": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold block herobrine summoner",
+    "description": "Converts a gold block into a sponge when lit",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldBootsSoulSpeed": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold boots soul speed",
+    "description": "Negates the slow-down effect of soul sand",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldChestplateProjectileProtection": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold chestplate projectile protection",
+    "description": "Only reduces skeleton arrow damage",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldHelmetBlastProtection": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold helmet blast protection",
+    "description": "Only reduces creeper explosion damage",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldHoeFortune": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold hoe fortune",
+    "description": "Fortune is just x2 on crops and flint",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldLeggingsThorns": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold leggings thorns",
+    "description": "Only damages attacking zombies and spiders",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldPickaxeSilkTouch": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold pickaxe silk touch",
+    "description": "Tool must be effective on block for effect",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldShovelSilkTouch": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold shovel silk touch",
+    "description": "Tool must be effective on block for effect",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableGoldSwordLooting": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Gold sword looting",
+    "description": "Looting is a simple +1 to mob drops",
+    "default": false,
+    "restart": false
+  },
+  "goldentweaks:config.enableSpongeSoaksUpWater": {
+    "page": "Gameplay",
+    "group": "Gold equipment abilities",
+    "label": "Sponge soaking up water",
+    "description": "Will soak up a 5x5 water cube when placed",
+    "default": false,
+    "restart": false
+  },
+  "hudtweaks:config.enableChatScroll": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Allow chat scroll",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "hudtweaks:config.chatHistorySize": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Chat history size",
+    "description": "50 = vanilla, 100 = default",
+    "default": 100,
+    "restart": false,
+    "min": 1,
+    "max": 10000,
+    "step": 1
+  },
+  "hudtweaks:config.chatFadeTime": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Chat message fade time",
+    "description": "100 = vanilla, 10 = 1 second",
+    "default": 100,
+    "restart": false,
+    "min": 1,
+    "max": 12000,
+    "step": 1
+  },
+  "hudtweaks:config.coordinateDisplay": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Coordinate display for debug overlay",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "hudtweaks:config.disableCrosshair": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Disable crosshair",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "hudtweaks:config.disableVignette": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Disable vignette",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "hudtweaks:config.drawXboxXAndYButtons": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Draw xbox x and y buttons",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "hudtweaks:config.enableHotbarBlockRenderingFix": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Hotbar block rendering fix",
+    "description": "For fixing blocks rendering over messages",
+    "default": true,
+    "restart": false
+  },
+  "hudtweaks:config.enableHotbarItemSelectionTooltips": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Hotbar item selection tooltips",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "hudtweaks:config.hotbarItemSelectionFadeTime": {
+    "page": "Interface",
+    "group": "HUD and chat",
+    "label": "Hotbar item selection fade time",
+    "description": "40 = default",
+    "default": 40,
+    "restart": false,
+    "min": 1,
+    "max": 12000,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.enableVisibility": {
+    "page": "Interface",
+    "group": "Hotbar position",
+    "label": "Visibility",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.horizontalPosition": {
+    "page": "Interface",
+    "group": "Hotbar position",
+    "label": "Horizontal position",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.horizontalPositionOffset": {
+    "page": "Interface",
+    "group": "Hotbar position",
+    "label": "Horizontal position offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.verticalPosition": {
+    "page": "Interface",
+    "group": "Hotbar position",
+    "label": "Vertical position",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.verticalPositionOffset": {
+    "page": "Interface",
+    "group": "Hotbar position",
+    "label": "Vertical position offset",
+    "description": "Use position bottom with offset -32 for Xbox",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.enableVisibility": {
+    "page": "Interface",
+    "group": "Hearts position",
+    "label": "Visibility",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.horizontalPosition": {
+    "page": "Interface",
+    "group": "Hearts position",
+    "label": "Horizontal position",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.horizontalPositionOffset": {
+    "page": "Interface",
+    "group": "Hearts position",
+    "label": "Horizontal position offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPosition": {
+    "page": "Interface",
+    "group": "Hearts position",
+    "label": "Vertical position",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPositionOffset": {
+    "page": "Interface",
+    "group": "Hearts position",
+    "label": "Vertical position offset",
+    "description": "Use position bottom with offset -32 for Xbox",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.enableVisibility": {
+    "page": "Interface",
+    "group": "Armor position",
+    "label": "Visibility",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.horizontalPosition": {
+    "page": "Interface",
+    "group": "Armor position",
+    "label": "Horizontal position",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.horizontalPositionOffset": {
+    "page": "Interface",
+    "group": "Armor position",
+    "label": "Horizontal position offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.verticalPosition": {
+    "page": "Interface",
+    "group": "Armor position",
+    "label": "Vertical position",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.verticalPositionOffset": {
+    "page": "Interface",
+    "group": "Armor position",
+    "label": "Vertical position offset",
+    "description": "Use position bottom with offset -32 for Xbox",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.enableVisibility": {
+    "page": "Interface",
+    "group": "Oxygen position",
+    "label": "Visibility",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.horizontalPosition": {
+    "page": "Interface",
+    "group": "Oxygen position",
+    "label": "Horizontal position",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.horizontalPositionOffset": {
+    "page": "Interface",
+    "group": "Oxygen position",
+    "label": "Horizontal position offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.verticalPosition": {
+    "page": "Interface",
+    "group": "Oxygen position",
+    "label": "Vertical position",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.verticalPositionOffset": {
+    "page": "Interface",
+    "group": "Oxygen position",
+    "label": "Vertical position offset",
+    "description": "Use position bottom with offset -32 for Xbox",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.enableVisibility": {
+    "page": "Interface",
+    "group": "Overlay message position",
+    "label": "Visibility",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.horizontalPosition": {
+    "page": "Interface",
+    "group": "Overlay message position",
+    "label": "Horizontal position",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.horizontalPositionOffset": {
+    "page": "Interface",
+    "group": "Overlay message position",
+    "label": "Horizontal position offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.verticalPosition": {
+    "page": "Interface",
+    "group": "Overlay message position",
+    "label": "Vertical position",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.verticalPositionOffset": {
+    "page": "Interface",
+    "group": "Overlay message position",
+    "label": "Vertical position offset",
+    "description": "Use position bottom with offset -32 for Xbox",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.SIMPLE_HUD_POSITION_CONFIG.enableVisibility": {
+    "page": "Interface",
+    "group": "Simple hud position",
+    "label": "Visibility",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPosition": {
+    "page": "Interface",
+    "group": "Simple hud position",
+    "label": "Horizontal position",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPositionOffset": {
+    "page": "Interface",
+    "group": "Simple hud position",
+    "label": "Horizontal position offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition": {
+    "page": "Interface",
+    "group": "Simple hud position",
+    "label": "Vertical position",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPositionOffset": {
+    "page": "Interface",
+    "group": "Simple hud position",
+    "label": "Vertical position offset",
+    "description": "Use position bottom with offset -32 for Xbox",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "hudtweaks:hudpositions.hudPositioningSystem": {
+    "page": "Interface",
+    "group": "HUD layout",
+    "label": "Hud positioning system",
+    "description": "Which configs or defaults to use for the HUD",
+    "default": 1,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.putOverlayMessagesBelowHotbar": {
+    "page": "Interface",
+    "group": "HUD layout",
+    "label": "Put overlay messages below hotbar",
+    "description": "Adjusts overlay text vertical offset only",
+    "default": false,
+    "restart": false
+  },
+  "hudtweaks:hudpositions.putStatusBarIconsBelowHotbar": {
+    "page": "Interface",
+    "group": "HUD layout",
+    "label": "Put status bar icons below hotbar",
+    "description": "Adjusts status bar vertical offsets only",
+    "default": false,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.CRAFTING_RESULT_CONFIG.EnableCtrlClickCrafting": {
+    "page": "Inventory",
+    "group": "Crafting result",
+    "label": "[CTRL-click] crafting",
+    "description": "Craft a single stack of items into inventory",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.CRAFTING_RESULT_CONFIG.EnableRightClickCrafting": {
+    "page": "Inventory",
+    "group": "Crafting result",
+    "label": "[right-click] crafting",
+    "description": "Craft a single stack of items into cursor",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.CRAFTING_RESULT_CONFIG.EnableShiftClickCrafting": {
+    "page": "Inventory",
+    "group": "Crafting result",
+    "label": "[shift-click] crafting",
+    "description": "Crafts as many items as it can into inventory",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.CRAFTING_RESULT_CONFIG.StopShiftClickCraftingWhenItemChanges": {
+    "page": "Inventory",
+    "group": "Crafting result",
+    "label": "Stop [shift-click] crafting when item changes",
+    "description": "Shift crafting will craft only one item type",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.EnableShiftClickingItemsIntoArmorSlots": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Allow [shift-clicking] items into armor slots",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.EnableShiftClickingItemsIntoFurnaces": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Allow [shift-clicking] items into furnaces",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.DoubleLeftClickItemPickup": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Double [left-click] fill cursor stack",
+    "description": "Initially empty cursor double click to pickup",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.EnableDragGraphics": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "[click + drag] graphics",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.EnableLeftClickDrag": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "[left-click + drag]",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.EnableRightClickDrag": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "[right-click + drag]",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.MultiplayerShiftClickingItemsIntoDispensers": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Multiplayer [shift-clicking] into dispensers",
+    "description": "Must be installed on the server also to work",
+    "default": false,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.LMBPreferShiftClick": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Prefer [shift-click] over [left-click + drag]",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.RMBPreferShiftClick": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Prefer [shift-click] over [right-click + drag]",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.UseDropKeyInInventory": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Use [drop_key] to drop inventory items",
+    "description": "Cursor must not be holding any items",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.LCtrlStackDrop": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Use [lctrl + drop_key] to drop entire stack",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MODERN_MINECRAFT_CONFIG.NumKeyHotbarSwap": {
+    "page": "Inventory",
+    "group": "Modern minecraft",
+    "label": "Use [number_keys] to swap items to hotbar",
+    "description": "Hover over the slot or swap cursor item",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MOUSE_TWEAKS_CONFIG.SCROLL_WHEEL_CONFIG.enableScrollWheelTweaks": {
+    "page": "Inventory",
+    "group": "Scroll wheel",
+    "label": "Scroll wheel controls",
+    "description": "Does not work in multiplayer",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MOUSE_TWEAKS_CONFIG.SCROLL_WHEEL_CONFIG.invertScrollCursorSlotDirection": {
+    "page": "Inventory",
+    "group": "Scroll wheel",
+    "label": "Invert scroll direction: cursor/slot",
+    "description": "For cursor/slot item transfer",
+    "default": false,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MOUSE_TWEAKS_CONFIG.LMBTweakShiftClickAny": {
+    "page": "Inventory",
+    "group": "Mouse tweaks",
+    "label": "Empty cursor [shift + left-click + drag]",
+    "description": "[Shift-Click] items of any type",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MOUSE_TWEAKS_CONFIG.LMBTweakShiftClick": {
+    "page": "Inventory",
+    "group": "Mouse tweaks",
+    "label": "Item in cursor [shift + left-click + drag]",
+    "description": "[Shift-Click] items of the held type",
+    "default": true,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MOUSE_TWEAKS_CONFIG.RMBTweak": {
+    "page": "Inventory",
+    "group": "Mouse tweaks",
+    "label": "[right-click + drag] over existing slots",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "inventorytweaks:inventoryTweaks.MOUSE_TWEAKS_CONFIG.LMBTweakPickUp": {
+    "page": "Inventory",
+    "group": "Mouse tweaks",
+    "label": "[left-click + drag] to pick up items",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "misctweaks:config.EQUIPMENT_CONFIG.bowsHaveDurability": {
+    "page": "Gameplay",
+    "group": "Equipment",
+    "label": "Bows have durability",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.EQUIPMENT_CONFIG.equalizeBaseArmorDurability": {
+    "page": "Gameplay",
+    "group": "Equipment",
+    "label": "Equalize base armor durability",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.EQUIPMENT_CONFIG.modernArmorDefensePoints": {
+    "page": "Gameplay",
+    "group": "Equipment",
+    "label": "Modern armor defense points",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.enableSnowballsExtinguishFire": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Allow fire to be extinguished by snowballs",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.enableFireTurnsGrassIntoDirt": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Allow fire to turn grass into dirt",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.enableGhastFireballsToInstaKillGhasts": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Allow ghast fireballs to insta-kill ghasts",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.enableDefusingTnt": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Allow TNT defusing with shears",
+    "description": "Use Left-Click with shears to defuse",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.chanceBlocksDropWhenExploded": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Chance blocks drop when exploded",
+    "description": "Float value between 0.0 (0%) and 1.0 (100%)",
+    "default": 0.3,
+    "restart": false,
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.disableAllExplosionsBreakingBlocks": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Disable all explosions breaking blocks",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.disableCreeperExplosionBreakingBlocks": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Disable creeper explosion breaking blocks",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionBreakingBlocks": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Disable ghast explosion breaking blocks",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionCausingFire": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Disable ghast explosion causing fire",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.disableLightningStrikeCausingFire": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Disable lightning strike causing fire",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.EXPLOSION_AND_FIRE_CONFIG.disableTntExplosionBreakingBlocks": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Disable TNT explosion breaking blocks",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.FLORA_CONFIG.enableRandomStickDropFromDeadBushes": {
+    "page": "Gameplay",
+    "group": "Flora",
+    "label": "Allow random stick drop from dead bushes",
+    "description": "Chance is the same as seeds from tall grass",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.FLORA_CONFIG.enableShearsCollectDeadBush": {
+    "page": "Gameplay",
+    "group": "Flora",
+    "label": "Allow shears to collect dead bushes",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.FLORA_CONFIG.enableShearsCollectFern": {
+    "page": "Gameplay",
+    "group": "Flora",
+    "label": "Allow shears to collect ferns",
+    "description": "Requires BHCreative as item is non-vanilla",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.FLORA_CONFIG.enableShearsCollectTallGrass": {
+    "page": "Gameplay",
+    "group": "Flora",
+    "label": "Allow shears to collect tall grass",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.FLORA_CONFIG.appleDropChance": {
+    "page": "Gameplay",
+    "group": "Flora",
+    "label": "Apple drop chance from oak leaves",
+    "description": "0 = disabled, 0.5 = modern drop chance (0.5%)",
+    "default": 0.0,
+    "restart": false,
+    "min": 0,
+    "max": 100,
+    "step": 0.05
+  },
+  "misctweaks:config.FLORA_CONFIG.enableLogRotation": {
+    "page": "Gameplay",
+    "group": "Flora",
+    "label": "Log rotation",
+    "description": "Disabling converts rotated logs to weird oak",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.FLORA_CONFIG.enablePlayerPlacedLeafPersistence": {
+    "page": "Gameplay",
+    "group": "Flora",
+    "label": "Player placed leaf persistence",
+    "description": "Disables leaf decay for player placed leaves",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.INTERACTIVE_BLOCK_CONFIG.enableChestsOpenWithBlockAbove": {
+    "page": "Gameplay",
+    "group": "Interactive block",
+    "label": "Allow chests to open even when blocked",
+    "description": "Chests can open when a block is above them",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.INTERACTIVE_BLOCK_CONFIG.enableColorSignsWithDye": {
+    "page": "Gameplay",
+    "group": "Interactive block",
+    "label": "Allow coloring signs with dye",
+    "description": "Dye will be consumed on use",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.INTERACTIVE_BLOCK_CONFIG.enableEditSignsWithFeathers": {
+    "page": "Gameplay",
+    "group": "Interactive block",
+    "label": "Allow editing signs with a feather",
+    "description": "Feather will be consumed on use",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.INTERACTIVE_BLOCK_CONFIG.enableGlueTrapdoorsWithSlimeballs": {
+    "page": "Gameplay",
+    "group": "Interactive block",
+    "label": "Allow gluing trapdoors with a slimeball",
+    "description": "Slimeball will be consumed on use",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.MOB_CONFIG.enableZombieDropItem": {
+    "page": "Gameplay",
+    "group": "Mob",
+    "label": "Chance zombies drop config item",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.MOB_CONFIG.enableZombiePigmanDropItem": {
+    "page": "Gameplay",
+    "group": "Mob",
+    "label": "Chance zombie pigmen drop config item",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "misctweaks:config.MOB_CONFIG.zombieDropItem": {
+    "page": "Gameplay",
+    "group": "Mob",
+    "label": "Chance zombies drop this item",
+    "description": "Only works if setting is enabled above",
+    "default": 0,
+    "restart": false
+  },
+  "misctweaks:config.MOB_CONFIG.zombiePigmanDropItem": {
+    "page": "Gameplay",
+    "group": "Mob",
+    "label": "Chance zombie pigmen drop this item",
+    "description": "Only works if setting is enabled above",
+    "default": 0,
+    "restart": false
+  },
+  "misctweaks:config.MOB_CONFIG.disableTramplingFarmland": {
+    "page": "Gameplay",
+    "group": "Mob",
+    "label": "Disable trampling farmland",
+    "description": "Player/mobs will no longer trample farmland",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.MOB_CONFIG.disableTrampleFarmlandWhenBarefoot": {
+    "page": "Gameplay",
+    "group": "Mob",
+    "label": "Do not trample farmland when barefoot",
+    "description": "Only affects player without boots",
+    "default": false,
+    "restart": false
+  },
+  "misctweaks:config.MOB_CONFIG.disableTrampleFarmlandWithLeatherBoots": {
+    "page": "Gameplay",
+    "group": "Mob",
+    "label": "Do not trample farmland with leather boots",
+    "description": "Only affects player with leather boots",
+    "default": false,
+    "restart": false
+  },
+  "mojangfixstationapi:config.disableServerListIpAddresses": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Disable server list IP addresses",
+    "description": "Hides IP addresses for the server list only",
+    "default": false,
+    "restart": false
+  },
+  "mojangfixstationapi:config.disableStatsChecksumVerification": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Disable stats checksum verification",
+    "description": "Allows stats to be reorganized by mods",
+    "default": true,
+    "restart": false
+  },
+  "mojangfixstationapi:config.enableAuthenticationChanges": {
+    "page": "Advanced",
+    "group": "Resource and account services",
+    "label": "Authentication changes",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableBitDepthFix": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Bit depth fix",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableCommandKey": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Command key",
+    "description": "Restart required for changes to take effect",
+    "default": true,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableControlsChanges": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Controls changes",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableChatChanges": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Chat changes",
+    "description": "Restart required for changes to take effect",
+    "default": true,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableDeathScreenScoreFix": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Death screen score fix",
+    "description": "Restart required for changes to take effect",
+    "default": true,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableDebugGraphChanges": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Debug graph changes",
+    "description": "Restart required for changes to take effect",
+    "default": true,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableDebugGraphModernToggle": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Debug graph toggle as keybind+F3",
+    "description": "False=Toggle debug graph with just KEYBIND",
+    "default": true,
+    "restart": false
+  },
+  "mojangfixstationapi:config.enableDebugMenuWorldSeed": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Debug menu world seed",
+    "description": "Restart required for changes to take effect",
+    "default": true,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableInventoryChanges": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Inventory changes",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableMojangFixTextOnTitleScreen": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Compatibility credits on title screen",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "mojangfixstationapi:config.enableMultiplayerServerChanges": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Multiplayer server changes",
+    "description": "Restart required for changes to take effect",
+    "default": true,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableSkinChanges": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Skin changes",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableWoodenSignChanges": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Wooden sign changes",
+    "description": "Restart required for changes to take effect",
+    "default": true,
+    "restart": true
+  },
+  "mojangfixstationapi:config.enableQuitButton": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Quit button",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "mojangfixstationapi:config.USE_ALTERNATE_RESOURCES_DOWNLOAD_URL": {
+    "page": "Advanced",
+    "group": "Resource and account services",
+    "label": "Minecraft resources use alternate url",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "mojangfixstationapi:config.RESOURCES_DOWNLOAD_URL": {
+    "page": "Advanced",
+    "group": "Resource and account services",
+    "label": "Minecraft resources download url",
+    "description": "Restart required for changes to take effect",
+    "default": "http://s3.betacraft.uk:11705/MinecraftResources/",
+    "restart": true
+  },
+  "mojangfixstationapi:config.ALTERNATE_RESOURCES_DOWNLOAD_URL": {
+    "page": "Advanced",
+    "group": "Resource and account services",
+    "label": "Minecraft resources download url alternate",
+    "description": "Restart required for changes to take effect",
+    "default": "http://mcresources.modification-station.net/MinecraftResources/",
+    "restart": true
+  },
+  "mojangfixstationapi:config.renderCape": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Render player capes",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "mojangfixstationapi:config.raiseSlimSkinShoulders": {
+    "page": "Fixes",
+    "group": "Client fixes",
+    "label": "Raise slim skin shoulders",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "mojangfixstationapi:config.useResourcesDownloadURL": {
+    "page": "Advanced",
+    "group": "Resource and account services",
+    "label": "Use resources download url",
+    "description": "Restart required for changes to take effect",
+    "default": true,
+    "restart": true
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.OPEN_INVENTORY": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: open inventory",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.MINE_WOOD": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: mine wood",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.CRAFT_WORKBENCH": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: craft workbench",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.CRAFT_PICKAXE": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: craft pickaxe",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.CRAFT_FURNACE": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: craft furnace",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.AQUIRE_IRON": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: aquire iron",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.CRAFT_HOE": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: craft hoe",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.MAKE_BREAD": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: make bread",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.BAKE_CAKE": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: bake cake",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.CRAFT_BETTER_PICKAXE": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: craft better pickaxe",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.COOK_FISH": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: cook fish",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.ON_A_RAIL": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: on a rail",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.CRAFT_SWORD": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: craft sword",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.KILL_ENEMY": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: kill enemy",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.KILL_COW": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: kill cow",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MISSING_ACHIEVEMENTS_CONFIG.FLY_PIG": {
+    "page": "Advanced",
+    "group": "Achievement recovery",
+    "label": "Mark achieved: fly pig",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableChickenEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Chicken entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableCowEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Cow entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableCreeperEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Creeper entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableGhastEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Ghast entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enablePigEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Pig entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSheepEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Sheep entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSkeletonEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Skeleton entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSlimeEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Slime entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSpiderEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Spider entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSquidEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Squid entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableWolfEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Wolf entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableZombieEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Zombie entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableZombiePigmanEntitySpawning": {
+    "page": "Gameplay",
+    "group": "Spawn list",
+    "label": "Zombie pigman entity spawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.disableLivingEntitiesDespawning": {
+    "page": "Gameplay",
+    "group": "Entity spawn mechanics",
+    "label": "Disable living entities despawning",
+    "description": "Living entities will no longer despawn",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.disableSaddledPigsDespawning": {
+    "page": "Gameplay",
+    "group": "Entity spawn mechanics",
+    "label": "Disable saddled pigs despawning",
+    "description": "Saddled pigs will no longer despawn",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.doNotCountSaddledPigs": {
+    "page": "Gameplay",
+    "group": "Entity spawn mechanics",
+    "label": "Do not count saddled pigs",
+    "description": "Saddled pigs are not in passive count",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.monstersSpawnAtOrBelowLightLevel": {
+    "page": "Gameplay",
+    "group": "Entity spawn mechanics",
+    "label": "Monsters spawn at or below light level",
+    "description": "4 = Nighttime Light Level",
+    "default": 7,
+    "restart": false,
+    "min": 0,
+    "max": 15,
+    "step": 1
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_GROUP_SIZE": {
+    "page": "Gameplay",
+    "group": "Entity spawn mechanics",
+    "label": "Spawn group size",
+    "description": "Does not effect ghasts, wolves cap at 8",
+    "default": 4,
+    "restart": false,
+    "min": 1,
+    "max": 64,
+    "step": 1
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_MONSTER": {
+    "page": "Gameplay",
+    "group": "Entity spawn mechanics",
+    "label": "Spawn capacity max: monster",
+    "description": "",
+    "default": 70,
+    "restart": false,
+    "min": 0,
+    "max": 1024,
+    "step": 1
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_PASSIVE": {
+    "page": "Gameplay",
+    "group": "Entity spawn mechanics",
+    "label": "Spawn capacity max: passive",
+    "description": "",
+    "default": 15,
+    "restart": false,
+    "min": 0,
+    "max": 1024,
+    "step": 1
+  },
+  "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_SQUID": {
+    "page": "Gameplay",
+    "group": "Entity spawn mechanics",
+    "label": "Spawn capacity max: squid",
+    "description": "",
+    "default": 5,
+    "restart": false,
+    "min": 0,
+    "max": 1024,
+    "step": 1
+  },
+  "quickadditions:config.MUSIC_CONFIG.stopCurrentBgmOnPortalUse": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Dimension change stops background music",
+    "description": "Using portals stops any active BGM",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MUSIC_CONFIG.stopDimensionSpecificSongOnPortalUse": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Dimension change stops level specific songs",
+    "description": "Using portals stops dimension specific songs",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MUSIC_CONFIG.disableBackgroundMusic": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Disable background music",
+    "description": "Disables randomly playing background music",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MUSIC_CONFIG.mainMenuThemeEnabled": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Main menu theme",
+    "description": "Plays 'mainmenu' song file if one is found",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MUSIC_CONFIG.mainMenuThemeOverridesBGM": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Main menu theme overrides background music",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MUSIC_CONFIG.disableDefaultMinecraftBGM": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Minecraft default background music disabled",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "quickadditions:config.MUSIC_CONFIG.musicCoundownRandomIntervalMin": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Music countdown random interval min",
+    "description": "",
+    "default": 12000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.MUSIC_CONFIG.musicCoundownRandomIntervalMax": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Music countdown random interval max",
+    "description": "",
+    "default": 12000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.MUSIC_CONFIG.overlayForMusicInDebug": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Overlay for music in debug",
+    "description": "If using Better F3 use its module config",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset": {
+    "page": "Audio",
+    "group": "Music and ambience",
+    "label": "Overlay for music in debug y offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "quickadditions:config.MUSIC_CONFIG.volumeNetherPortalAmbient": {
+    "page": "Audio",
+    "group": "Individual sounds",
+    "label": "Nether portal",
+    "description": "Volume multiplier from 0 to 1.",
+    "default": 1.0,
+    "restart": false,
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "quickadditions:config.MUSIC_CONFIG.volumeRainAmbient": {
+    "page": "Audio",
+    "group": "Individual sounds",
+    "label": "Rain ambience",
+    "description": "Volume multiplier from 0 to 1.",
+    "default": 1.0,
+    "restart": false,
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "quickadditions:config.MUSIC_CONFIG.volumeGhastAmbient": {
+    "page": "Audio",
+    "group": "Individual sounds",
+    "label": "Ghast ambience",
+    "description": "Volume multiplier from 0 to 1.",
+    "default": 1.0,
+    "restart": false,
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "quickadditions:config.MUSIC_CONFIG.volumeCaveAmbient": {
+    "page": "Audio",
+    "group": "Individual sounds",
+    "label": "Cave ambience",
+    "description": "Volume multiplier from 0 to 1.",
+    "default": 1.0,
+    "restart": false,
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "quickadditions:config.SLEEP_CONFIG.asleepPlayerPercentageForSkippingNight": {
+    "page": "Gameplay",
+    "group": "Sleep",
+    "label": "Asleep player percentage for skipping night",
+    "description": "Float value between 0.0 (0%) and 1.0 (100%)",
+    "default": 1.0,
+    "restart": false,
+    "min": 0,
+    "max": 1,
+    "step": 0.05
+  },
+  "quickadditions:config.SLEEP_CONFIG.bedsSpeedUpNightRatherThanSkipIt": {
+    "page": "Gameplay",
+    "group": "Sleep",
+    "label": "Beds speed up night rather than skip it",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.SLEEP_CONFIG.bedsSpeedUpNightTickRate": {
+    "page": "Gameplay",
+    "group": "Sleep",
+    "label": "Beds speed up night tick rate",
+    "description": "1 = normal speed",
+    "default": 20,
+    "restart": false,
+    "min": 1,
+    "max": 100,
+    "step": 1
+  },
+  "quickadditions:config.SLEEP_CONFIG.bedsSpeedUpNightTickWorld": {
+    "page": "Gameplay",
+    "group": "Sleep",
+    "label": "Beds speed up night tick world",
+    "description": "Night speed up ticks world as well",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.SLEEP_CONFIG.handSwingClickToExitBedsEnabled": {
+    "page": "Gameplay",
+    "group": "Sleep",
+    "label": "Click or swing hand to exit beds",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.WEATHER_CONFIG.enableAlwaysSnowAboveSetYLevel": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Always snow above set y level",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.WEATHER_CONFIG.alwaysSnowAboveThisYLevel": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Always snow above this y level",
+    "description": "",
+    "default": 100,
+    "restart": false,
+    "min": 0,
+    "max": 128,
+    "step": 1
+  },
+  "quickadditions:config.WEATHER_CONFIG.disableRain": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Disable rain",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.WEATHER_CONFIG.disableThunder": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Disable thunder",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.WEATHER_CONFIG.disableRainInSavannaBiomes": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Disable rain in savanna biomes",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "quickadditions:config.WEATHER_CONFIG.sleepOnlyResetsWeatherWhenRaining": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Sleep only resets weather when raining",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.WEATHER_CONFIG.timeUntilRainRandomLimit": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Time until rain: random limit",
+    "description": "Added to minimum to find rain time",
+    "default": 168000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.WEATHER_CONFIG.timeUntilRainMinimum": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Time until rain: minimum",
+    "description": "Minimum time in ticks until rain occurs",
+    "default": 12000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.WEATHER_CONFIG.rainDurationRandomLimit": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Time rain duration: random limit",
+    "description": "Added to minimum to find rain duration",
+    "default": 12000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.WEATHER_CONFIG.rainDurationMinimum": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Time rain duration: minimum",
+    "description": "Minimum time in ticks until rain ends",
+    "default": 12000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.WEATHER_CONFIG.timeUntilThunderRandomLimit": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Time until thunder: random limit",
+    "description": "Added to minimum to find thunder time",
+    "default": 168000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.WEATHER_CONFIG.timeUntilThunderMinimum": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Time until thunder: minimum",
+    "description": "Minimum time in ticks until thunder occurs",
+    "default": 12000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.WEATHER_CONFIG.thunderDurationRandomLimit": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Time thunder duration: random limit",
+    "description": "Added to minimum to find thunder duration",
+    "default": 12000,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.WEATHER_CONFIG.thunderDurationMinimum": {
+    "page": "Gameplay",
+    "group": "Weather",
+    "label": "Time thunder duration: minimum",
+    "description": "Minimum time in ticks until thunder ends",
+    "default": 3600,
+    "restart": false,
+    "min": 1,
+    "max": 2400000,
+    "step": 1
+  },
+  "quickadditions:config.forceDisplayActive": {
+    "page": "Gameplay",
+    "group": "World rules",
+    "label": "Force display active",
+    "description": "Game will not pause when tabbing away",
+    "default": false,
+    "restart": false
+  },
+  "quickadditions:config.SPAWN_PROTECTION_RADIUS": {
+    "page": "Gameplay",
+    "group": "World rules",
+    "label": "Spawn protection radius",
+    "description": "Restart required; Overridden By the game settings",
+    "default": 16,
+    "restart": true,
+    "min": 0,
+    "max": 128,
+    "step": 1
+  },
+  "quickadditions:config.ENABLE_SOUL_SAND_RECIPE": {
+    "page": "Gameplay",
+    "group": "World rules",
+    "label": "Soul sand crafting recipe enable",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "quickadditions:config.SOUL_SAND_OUTPUT": {
+    "page": "Gameplay",
+    "group": "World rules",
+    "label": "Soul sand recipe output: 1-16",
+    "description": "Restart required for changes to take effect",
+    "default": 4,
+    "restart": true,
+    "min": 1,
+    "max": 16,
+    "step": 1
+  },
+  "station-api-configuration:config.loadingScreenOption": {
+    "page": "Interface",
+    "group": "Loading screen",
+    "label": "Loading screen style",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "unitweaks:bugfixes.bitDepthFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Bit depth fix",
+    "description": "Increases the buffer depth from 8 to 24 to fix graphical issues on AMD graphic cards",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.farLandsJitterFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Far lands jitter fix",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.enableSlimeSplitFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Slime split fix",
+    "description": "Fixes slimes not splitting when their health is below zero after dying",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.nightmarePathfindingFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Nightmare pathfinding fix",
+    "description": "Fixes the pathfinding calculation of nightmares",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.multiplayerEntityJitterFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Multiplayer entity jitter fix",
+    "description": "Fixes entities jittering in multiplayer",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.boatDismountFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Boat dismount fix",
+    "description": "Fixes sometimes falling through the boat when dismounting it",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.sleepingCameraRotationFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Sleeping camera rotation fix",
+    "description": "Fixes incorrectly rotated camera when sleeping and the ability to erroneously rotate it",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.stairsDropFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Stairs drop fix",
+    "description": "Stairs will drop themselves instead of the base block",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.blockEffectivenessFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Block effectiveness fix",
+    "description": "Fixes axes and pickaxes not being effective on various blocks",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.pigSaddleDropFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Pig saddle drop fix",
+    "description": "Fixes pigs not dropping saddle on death",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.fenceBoundingBoxFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Fence bounding box fix",
+    "description": "Fixes fence bounding box not reflecting the fence state",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.pickBlockFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Pick block fix",
+    "description": "Fixes some blocks not being pickable using Pick Block",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.springPropagationFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Spring propagation fix",
+    "description": "Fixes water source blocks not forming when a block below is water",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.lavaWithoutSourceFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Lava without source fix",
+    "description": "Fixes lava not dissapearing without a source block",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.liquidBlockDropFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Liquid block drop fix",
+    "description": "Fixes liquid flowing down from above not dropping items such as torches and rails when broken",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.bowHeldFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Bow held fix",
+    "description": "Skeletons and Players now hold bows properly",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.leggingsWhenRidingFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Leggings when riding fix",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.itemstackRenderingFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Itemstack rendering fix",
+    "description": "Fixes itemstacks being render below text in containers",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.fishVelocityFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Fish velocity fix",
+    "description": "Fixes fish flying above the player head when caught",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.furnaceConsumeBucketFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Furnace consume bucket fix",
+    "description": "Fixes furnace consuming lava bucket as fuel",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.armorIconsFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Armor icon fix",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.droppedItemSizeFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Dropped item size fix",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.breakingAnimationFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Breaking animation fix",
+    "description": "Fixes the breaking animation not rendering on bottom face",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.deathScreenFormattingFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Death screen formatting fix",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.hotbarRenderingFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Hotbar rendering fix",
+    "description": "Fixes hotbar turning white when looking at entity with no clouds rendering on Fast graphics",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.woodenSlabMiningFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Wooden slab mining fix",
+    "description": "Fixes wooden slab not being mineable by hand and axe",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.grassBlockItemFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Grass block item fix",
+    "description": "Fixes grass block top texture being wrong",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.miningDelayFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Multiplayer mining delay fix",
+    "description": "WARNING: This could be considered a hack on some servers",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.lastDurabilityFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Last durability fix",
+    "description": "Fixes blocks not dropping on the last durability point of a tool",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.fenceLightingFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Fence lighting fix",
+    "description": "Fixes the bottom face of a fence being dark when placed on block",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.torchBottomFaceFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "Torch bottom face fix",
+    "description": "Fixes torches not having bottom faces rendered",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:bugfixes.firstPersonRidingHandFix": {
+    "page": "Fixes",
+    "group": "Game fixes",
+    "label": "First person riding hand fix",
+    "description": "Fixes the player's hand being misplaced when riding and using F5",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:features.fastLeafDecay.enableFastLeafDecay": {
+    "page": "Gameplay",
+    "group": "Fast leaf decay",
+    "label": "Fast leaf decay",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:features.fastLeafDecay.minimumDecayTime": {
+    "page": "Gameplay",
+    "group": "Fast leaf decay",
+    "label": "Minimum decay time",
+    "description": "",
+    "default": 10,
+    "restart": false,
+    "min": 0.0,
+    "max": 1200.0,
+    "step": 1
+  },
+  "unitweaks:features.fastLeafDecay.maximumDecayTime": {
+    "page": "Gameplay",
+    "group": "Fast leaf decay",
+    "label": "Maximum decay time",
+    "description": "",
+    "default": 25,
+    "restart": false,
+    "min": 0.0,
+    "max": 1200.0,
+    "step": 1
+  },
+  "unitweaks:features.betterBurning.enableBetterBurning": {
+    "page": "Gameplay",
+    "group": "Better burning",
+    "label": "Better burning",
+    "description": "Master switch for all features here",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:features.betterBurning.skeletonsBurningArrows": {
+    "page": "Gameplay",
+    "group": "Better burning",
+    "label": "Skeletons on fire shoot flaming arrows",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:features.betterBurning.skeletonBurningArrowChance": {
+    "page": "Gameplay",
+    "group": "Better burning",
+    "label": "Skeletons on fire flaming arrow chance (0-100)",
+    "description": "",
+    "default": 70,
+    "restart": false,
+    "min": 0.0,
+    "max": 100.0,
+    "step": 1
+  },
+  "unitweaks:features.betterBurning.burningArrowsSetOnFire": {
+    "page": "Gameplay",
+    "group": "Better burning",
+    "label": "Burning arrows set entities on fire",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:features.betterBurning.burningEntitySpread": {
+    "page": "Gameplay",
+    "group": "Better burning",
+    "label": "Burning entities spread fire to others",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:features.betterBurning.burningEntitySpreadChance": {
+    "page": "Gameplay",
+    "group": "Better burning",
+    "label": "Burning entities spread fire chance (0-100)",
+    "description": "",
+    "default": 30,
+    "restart": false,
+    "min": 0.0,
+    "max": 100.0,
+    "step": 1
+  },
+  "unitweaks:features.stepAssist": {
+    "page": "Gameplay",
+    "group": "Optional mechanics",
+    "label": "Step assist",
+    "description": "Allows you to step up one block",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:features.moreSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "More sounds",
+    "description": "Adds sounds for various things (tool breaking, sheep shearing, eating etc.)",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:features.moreSoundsChests": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "More sounds (chests)",
+    "description": "Adds sounds for chests (a few options are available)",
+    "default": 2,
+    "restart": false
+  },
+  "unitweaks:features.fallingPipe": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "More sounds (falling pipe)",
+    "description": "Makes the tool break sound play a falling pipe sound",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:gameplay.noFoodWastage": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "No food wastage",
+    "description": "Prevents you from eating when your health is full",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:gameplay.pickBlockFromInventory": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Pick block from inventory",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:gameplay.shiftPlacing": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Shift placing",
+    "description": "Ignores block actions allowing you to place blocks when crouching",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:gameplay.shiftPlacingBlacklist": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Shift placing blacklist",
+    "description": "Identifiers of blocks that won't have their block action skipped. (Requires extended block identifiers)",
+    "default": [],
+    "restart": true
+  },
+  "unitweaks:gameplay.rightClickEquipArmor": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Equip armor using right-click",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:gameplay.fenceJumping": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Fence jump",
+    "description": "Only works if fence bounding box fix is enabled",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:general.pauseOnLostFocus": {
+    "page": "General",
+    "group": "Game and input",
+    "label": "Pause on lost focus",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:general.autosaveInterval": {
+    "page": "General",
+    "group": "Game and input",
+    "label": "Autosave interval (seconds)",
+    "description": "",
+    "default": 30,
+    "restart": true,
+    "min": 1,
+    "max": 3600,
+    "step": 1
+  },
+  "unitweaks:general.tcpNoDelay": {
+    "page": "Advanced",
+    "group": "Network and resources",
+    "label": "Tcp nodelay",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:general.rawInput": {
+    "page": "General",
+    "group": "Game and input",
+    "label": "Raw input",
+    "description": "You probably don't want this",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:general.disableControllerInit": {
+    "page": "General",
+    "group": "Game and input",
+    "label": "Disable controller init",
+    "description": "Disables the initialization of LWJGL Controllers as it only causes issues anyway",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:general.resourceDownloadUrl": {
+    "page": "Advanced",
+    "group": "Network and resources",
+    "label": "Resource download url",
+    "description": "BetaCraft Resource Proxy by Default",
+    "default": "http://s3.betacraft.uk:11705/MinecraftResources/",
+    "restart": false
+  },
+  "unitweaks:general.disabledDimensions": {
+    "page": "Advanced",
+    "group": "Network and resources",
+    "label": "Disabled dimensions (server only)",
+    "description": "Dimensions which wont be loaded on server boot",
+    "default": [
+      2
+    ],
+    "restart": false
+  },
+  "unitweaks:oldfeatures.disableDeadBushGeneration": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Disable dead bush generation",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:oldfeatures.disableTallGrassGeneration": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Disable tall grass generation",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:oldfeatures.punchSheepForWool": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Punch sheep for wool",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:oldfeatures.punchTntToIgnite": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Punch TNT to ignite",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:oldfeatures.punchTntToDefuse": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Punch primed TNT to defuse",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:oldfeatures.hoeGrassForSeeds": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Hoe grass for seeds",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:oldfeatures.boatElevators": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Boat elevators",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:oldfeatures.ladderGaps": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Ladder gaps",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:oldfeatures.minecartBoosters": {
+    "page": "Gameplay",
+    "group": "Older mechanics",
+    "label": "Minecart boosters",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:recipes.enableRecipes": {
+    "page": "Crafting",
+    "group": "Recipes",
+    "label": "Recipe controls",
+    "description": "Acts as a master switch for all recipe tweaks",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.furnaceFuels": {
+    "page": "Crafting",
+    "group": "Recipes",
+    "label": "Make more wooden items burnable",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.toolRepair": {
+    "page": "Crafting",
+    "group": "Recipes",
+    "label": "Allow tool repair in crafting grid",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.shapelessFlintAndSteel": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Shapeless flint and steel",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.shapelessMushroomStew": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Shapeless mushroom stew",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.shapelessChestMinecart": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Shapeless chest minecart",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.shapelessFurnaceMinecart": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Shapeless furnace minecart",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.shapelessStickyPistons": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Shapeless sticky pistons",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.booksRequireLeather": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Books require leather",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.woolRedyeing": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Wool redyeing",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.sixSlabsPerCraft": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "6 slabs per craft",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.oneStonePerButton": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Button requires 1 stone",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.modernFenceRecipe": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Modern fence recipe (4 planks,2 sticks)",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.snowLayerRecipe": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "Snow layer recipe",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.modern.threeLaddersPerCraft": {
+    "page": "Crafting",
+    "group": "Modern",
+    "label": "3 ladders per craft",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.tweaked.shapelessJackOLantern": {
+    "page": "Crafting",
+    "group": "Tweaked",
+    "label": "Shapeless jack o' lantern",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.tweaked.stairsPerCraft": {
+    "page": "Crafting",
+    "group": "Tweaked",
+    "label": "Stairs per craft",
+    "description": "",
+    "default": 4,
+    "restart": true,
+    "min": 1,
+    "max": 64,
+    "step": 1
+  },
+  "unitweaks:recipes.tweaked.trapdoorsPerCraft": {
+    "page": "Crafting",
+    "group": "Tweaked",
+    "label": "Trapdoors per craft",
+    "description": "",
+    "default": 2,
+    "restart": true,
+    "min": 1,
+    "max": 64,
+    "step": 1
+  },
+  "unitweaks:recipes.obtainable.craftableGrassBlocks": {
+    "page": "Crafting",
+    "group": "Obtainable",
+    "label": "Craftable grass blocks",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.obtainable.craftableCobwebs": {
+    "page": "Crafting",
+    "group": "Obtainable",
+    "label": "Craftable cobwebs",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.obtainable.craftableFire": {
+    "page": "Crafting",
+    "group": "Obtainable",
+    "label": "Craftable fire",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.obtainable.craftableCoalOre": {
+    "page": "Crafting",
+    "group": "Obtainable",
+    "label": "Craftable coal ore (8 coal around a stone)",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.obtainable.craftableIronOre": {
+    "page": "Crafting",
+    "group": "Obtainable",
+    "label": "Craftable iron ore (8 iron ingots around a stone)",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.obtainable.craftableGoldOre": {
+    "page": "Crafting",
+    "group": "Obtainable",
+    "label": "Craftable gold ore (8 gold ingots around a stone)",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.obtainable.craftableLapisOre": {
+    "page": "Crafting",
+    "group": "Obtainable",
+    "label": "Craftable lapis lazuli ore (8 lapis lazuli around a stone)",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:recipes.obtainable.craftableDiamondOre": {
+    "page": "Crafting",
+    "group": "Obtainable",
+    "label": "Craftable diamond ore (8 diamonds around a stone)",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweaks:tweaks.sugarCaneOnSand": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Allow placing sugar cane on sand",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.boatsDropThemselves": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Boats drop themselves when broken by a player",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.boatsDontBreak": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Boats don't break on impact",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.pumpkinsPlaceableLikeNormal": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Pumpkins placeable like normal",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.fencesPlaceableLikeNormal": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Fences placeable like normal",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.fencesConnectBlocks": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Fences connect to blocks",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.bookshelvesDropBooks": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Bookshelves drop 3 books",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.pressurePlatesOnFences": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Pressure plates on fences",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.shearHarvesting": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Allow shears to harvest cobwebs and tall grass",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.expandChickenHitbox": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Expand chicken hitbox",
+    "description": "Expands chicken hitbox to it's modern size",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.stackableChests": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Stackable chests",
+    "description": "Allows you to stack chests on top of each other",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.modernFlintAndSteel": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Don't damage flint and steel on failed ignite",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.disableSleeping": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Disable sleeping but retain respawning",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.disableSleepSpawning": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Disable spawning mobs when you sleep",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.preventItemsStoppingMinecarts": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Prevent items stopping minecarts",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.allowIgnitingEntities": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Allow igniting entities with flint and steel",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.allowTrapdoorsWithoutSupport": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Allow placing trapdoors without support",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:tweaks.beta18LeavesRendering": {
+    "page": "Gameplay",
+    "group": "Blocks and entities",
+    "label": "Beta 1.8 leaves rendering",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:userinterface.showQuitButton": {
+    "page": "Interface",
+    "group": "Menus",
+    "label": "Show quit button",
+    "description": "Shows Quit Button on the Main Menu",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:userinterface.improvedControlsMenu": {
+    "page": "Interface",
+    "group": "Menus",
+    "label": "Improved controls menu",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:userinterface.hideAchievementToast": {
+    "page": "Interface",
+    "group": "Menus",
+    "label": "Hide achievement toast",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:userinterface.achievementBackToMenu": {
+    "page": "Interface",
+    "group": "Menus",
+    "label": "Achievement screen back to menu",
+    "description": "Done button will lead to Game Menu instead of unpausing",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:userinterface.disableDebugEntityIdTags": {
+    "page": "Interface",
+    "group": "Menus",
+    "label": "Disable F3 entity id tags",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:userinterface.frontViewThirdPerson": {
+    "page": "Camera",
+    "group": "Third person",
+    "label": "Front view third person",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "unitweaks:userinterface.clearTextFieldWithRightClick": {
+    "page": "Interface",
+    "group": "Menus",
+    "label": "Clear text field with right click",
+    "description": "Right clicking on a text field will clear it",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:userinterface.fovSlider": {
+    "page": "Interface",
+    "group": "Menus",
+    "label": "Fov slider",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:userinterface.videoSettingsConfig.brightnessSlider": {
+    "page": "Video",
+    "group": "Available controls",
+    "label": "Brightness slider",
+    "description": "Requires a restart to take effect",
+    "default": true,
+    "restart": true
+  },
+  "unitweaks:userinterface.videoSettingsConfig.cloudHeightSlider": {
+    "page": "Video",
+    "group": "Available controls",
+    "label": "Cloud height slider",
+    "description": "Requires a restart to take effect",
+    "default": true,
+    "restart": true
+  },
+  "unitweaks:userinterface.videoSettingsConfig.cloudsToggle": {
+    "page": "Video",
+    "group": "Available controls",
+    "label": "Clouds toggle",
+    "description": "Requires a restart to take effect",
+    "default": true,
+    "restart": true
+  },
+  "unitweaks:userinterface.videoSettingsConfig.fogDensitySlider": {
+    "page": "Video",
+    "group": "Available controls",
+    "label": "Fog density slider",
+    "description": "Requires a restart to take effect",
+    "default": true,
+    "restart": true
+  },
+  "unitweaks:userinterface.videoSettingsConfig.guiScaleSlider": {
+    "page": "Video",
+    "group": "Available controls",
+    "label": "Gui scale slider",
+    "description": "Requires a restart to take effect",
+    "default": true,
+    "restart": true
+  },
+  "unitweaks:userinterface.videoSettingsConfig.fpsLimitSlider": {
+    "page": "Video",
+    "group": "Available controls",
+    "label": "Fps limit slider",
+    "description": "Requires a restart to take effect",
+    "default": true,
+    "restart": true
+  },
+  "unitweaks:userinterface.videoSettingsConfig.renderDistanceSlider": {
+    "page": "Video",
+    "group": "Available controls",
+    "label": "Render distance slider",
+    "description": "Requires a restart to take effect",
+    "default": true,
+    "restart": true
+  },
+  "unitweaks:userinterface.videoSettingsConfig.vanillaFarValues": {
+    "page": "Video",
+    "group": "Available controls",
+    "label": "Vanilla far fog values",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:userinterface.versionTextConfig.showVersionTextIngame": {
+    "page": "Interface",
+    "group": "Version label",
+    "label": "Show version text ingame",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:userinterface.versionTextConfig.unlicensedCopy": {
+    "page": "Interface",
+    "group": "Version label",
+    "label": "Unlicensed copy",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:userinterface.versionTextConfig.enableCustomVersionText": {
+    "page": "Interface",
+    "group": "Version label",
+    "label": "Custom version text",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:userinterface.versionTextConfig.customVersionText": {
+    "page": "Interface",
+    "group": "Version label",
+    "label": "Custom version text",
+    "description": "Only has effect if custom version text is enabled",
+    "default": "Power Beta | Minecraft Beta 1.7.3",
+    "restart": false
+  },
+  "unitweaks:userinterface.panoramaConfig.enablePanorma": {
+    "page": "Interface",
+    "group": "Title background",
+    "label": "Panorama",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweaks:userinterface.panoramaConfig.blurBackground": {
+    "page": "Interface",
+    "group": "Title background",
+    "label": "Blur panorama",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweaks:userinterface.panoramaConfig.panoramaFolder": {
+    "page": "Interface",
+    "group": "Title background",
+    "label": "Panorama folder to use",
+    "description": "Default included : beta18, glacier",
+    "default": "glacier",
+    "restart": false
+  },
+  "unitweaks:userinterface.photoModeConfig.enablePhotoModeButton": {
+    "page": "Interface",
+    "group": "Screenshots",
+    "label": "Photo mode button",
+    "description": "Enables the Photo Mode button in game menu",
+    "default": true,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableAllParticles": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable all particles",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableWaterBubbleParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable water bubble particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableFireSmokeParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable smoke particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableNoteParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable note particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disablePortalParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable portal particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableExplosionParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable explosion particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableFlameParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable flame particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableLavaEmberParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable lava ember particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableFootstepParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable footstep particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableWaterSplashParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable water splash particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableLargeFireSmokeParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable large smoke particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableRedDustParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable redstone dust particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableSnowballParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable snowball particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableSnowShovelParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable snow shovel particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableSlimeParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable slime particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.PARTICLES_CONFIG.disableHeartParticle": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Disable heart particle",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.STACK_SIZE_CONFIG.enableModernWoodDoorStackSize": {
+    "page": "Inventory",
+    "group": "Stack sizes",
+    "label": "Modern wood door stack size",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweakstelsaddons:config.STACK_SIZE_CONFIG.enableModernIronDoorStackSize": {
+    "page": "Inventory",
+    "group": "Stack sizes",
+    "label": "Modern iron door stack size",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweakstelsaddons:config.STACK_SIZE_CONFIG.enableModernSignStackSize": {
+    "page": "Inventory",
+    "group": "Stack sizes",
+    "label": "Modern sign stack size",
+    "description": "",
+    "default": false,
+    "restart": true
+  },
+  "unitweakstelsaddons:config.SHOVELS_CONFIG.enableShovelsEffectiveOnSoulSand": {
+    "page": "Gameplay",
+    "group": "Shovels",
+    "label": "Effective on soul sand",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.addBiomeToDebugOverlay": {
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Add biome to debug overlay",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.addDayCounterToDebugOverlay": {
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Add day counter to debug overlay",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.addTotalPlayTimeToDebugOverlay": {
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Add hours played to debug overlay",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.addLightLevelToDebugOverlay": {
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Add light level to debug overlay",
+    "description": "Calculated at player's eye level",
+    "default": true,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.addSlimeChunkToDebugOverlay": {
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Add slime chunk to debug overlay",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.overlayAdditionsYOffset": {
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Additions to debug overlay y offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "unitweakstelsaddons:config.disableColoredSheepSpawning": {
+    "page": "Gameplay",
+    "group": "Optional mechanics",
+    "label": "Disable colored sheep spawning",
+    "description": "Makes sheep always spawn with white wool",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.milkSquids": {
+    "page": "Gameplay",
+    "group": "Optional mechanics",
+    "label": "Milk squids",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.pigsDropBrownMushrooms": {
+    "page": "Gameplay",
+    "group": "Optional mechanics",
+    "label": "Pigs drop brown mushrooms",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.plantReplacementFixesEnabled": {
+    "page": "Gameplay",
+    "group": "Optional mechanics",
+    "label": "Plant replacement fixes",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.slabPlacementFixesEnabled": {
+    "page": "Gameplay",
+    "group": "Optional mechanics",
+    "label": "Slab placement fixes",
+    "description": "Restart required for changes to take effect",
+    "default": false,
+    "restart": true
+  },
+  "unitweakstelsaddons:config.allowCraftingInventorySlots": {
+    "page": "Gameplay",
+    "group": "Optional mechanics",
+    "label": "Use player 2x2 crafting grid as inventory",
+    "description": "",
+    "default": false,
+    "restart": false
+  },
+  "unitweakstelsaddons:config.vehicleLogoutLoginFixesEnabled": {
+    "page": "Gameplay",
+    "group": "Optional mechanics",
+    "label": "Vehicle logout/login fix",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "creative.flight": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Creative flight",
+    "description": "Double-tap Jump to start flying. Jump rises; Sneak descends."
+  },
+  "creative.landStopsFlight": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Stop flying on landing",
+    "description": "Return to walking when you touch the ground."
+  },
+  "creative.sprintFlight": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Flight sprint",
+    "description": "Use the sprint key to fly faster."
+  },
+  "creative.sprintToggle": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Sprint activation",
+    "description": "Toggle keeps sprint flight active after releasing the key. Hold requires the key to stay down."
+  },
+  "creative.flightSpeed": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Flight speed, %",
+    "description": "100% matches the modern creative flight target."
+  },
+  "creative.sprintMultiplier": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Sprint speed, %",
+    "description": "Multiplier applied while sprint flight is active."
+  },
+  "creative.glide": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Flight drift",
+    "description": "0 stops immediately when movement keys are released. 5 uses full modern-style drift."
+  },
+  "creative.doubleTapTicks": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Double-tap window, ticks",
+    "description": "Maximum interval between Jump presses. 20 ticks is one second."
+  },
+  "creative.modePicker": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Gamemode picker",
+    "description": "Hold F3, press F4 to cycle, then release F3 to select."
+  },
+  "creative.spectatorScroll": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Scroll to change speed",
+    "description": "Adjust spectator flight speed with the mouse wheel."
+  },
+  "creative.showSpectatorSpeed": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Show spectator speed",
+    "description": "Display the current speed while it changes."
+  },
+  "creative.spectatorSpeed": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Spectator speed, %",
+    "description": "Starting spectator movement speed."
+  },
+  "creative.spectatorScrollStep": {
+    "page": "Creative",
+    "group": "Gamemodes",
+    "label": "Speed step, %",
+    "description": "Speed change for each wheel step."
+  },
+  "creative.blockReach": {
+    "page": "Creative",
+    "group": "Interaction",
+    "label": "Block reach",
+    "description": "Reach in blocks. Only applies in Creative.",
+    "min": 3,
+    "max": 10,
+    "step": 0.5
+  },
+  "creative.entityReach": {
+    "page": "Creative",
+    "group": "Interaction",
+    "label": "Entity reach",
+    "description": "Reach in blocks. Only applies in Creative.",
+    "min": 3,
+    "max": 10,
+    "step": 0.5
+  },
+  "creative.destroySlot": {
+    "page": "Creative",
+    "group": "Inventory",
+    "label": "Destroy slot",
+    "description": "Drag items to the slot beside the hotbar to delete them."
+  },
+  "creative.shiftClearsInventory": {
+    "page": "Creative",
+    "group": "Inventory",
+    "label": "Shift-click clears inventory",
+    "description": "Shift-click the destroy slot to clear inventory and armor."
+  },
+  "worldedit.enabled": {
+    "page": "World editing",
+    "group": "Access",
+    "label": "World editing",
+    "description": "Master switch for all editor commands and wand actions."
+  },
+  "worldedit.creativeOnly": {
+    "page": "World editing",
+    "group": "Access",
+    "label": "Require Creative mode",
+    "description": "Require Creative when the creative-mode system is available. A world override can change this rule."
+  },
+  "worldedit.wandEnabled": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Selection wand",
+    "description": ""
+  },
+  "worldedit.wandItem": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Wand item ID",
+    "description": ""
+  },
+  "worldedit.showSelection": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Selection outline",
+    "description": ""
+  },
+  "worldedit.throughWalls": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Show through blocks",
+    "description": ""
+  },
+  "worldedit.color": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Outline color",
+    "description": ""
+  },
+  "worldedit.opacity": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Outline opacity, %",
+    "description": ""
+  },
+  "worldedit.lineWidth": {
+    "page": "World editing",
+    "group": "Selection",
+    "label": "Outline width",
+    "description": ""
+  },
+  "worldedit.blockLimit": {
+    "page": "World editing",
+    "group": "Limits and history",
+    "label": "Maximum blocks per edit",
+    "description": "Reject edits above this limit before making changes."
+  },
+  "worldedit.blocksPerTick": {
+    "page": "World editing",
+    "group": "Limits and history",
+    "label": "Blocks processed per tick",
+    "description": "Lower values keep large edits responsive."
+  },
+  "worldedit.historySize": {
+    "page": "World editing",
+    "group": "Limits and history",
+    "label": "Undo history",
+    "description": "Maximum number of edit records kept in memory."
+  },
+  "tweaks.placement.enabled": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Fast placement",
+    "description": "Hold right-click to keep placing blocks."
+  },
+  "tweaks.placement.attemptsPerTick": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Placement attempts per tick",
+    "description": "Maximum placement attempts per game tick."
+  },
+  "tweaks.placement.slabMode": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Vertical slab placement",
+    "description": "Continuous layers, double slabs, or repeat the first slab configuration."
+  },
+  "tweaks.placement.rememberOrientation": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Remember orientation",
+    "description": "Keep the initial orientation during continuous placement."
+  },
+  "tweaks.placement.restrictionEnabled": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Placement restriction",
+    "description": "Constrain continued placement using the first successful placement."
+  },
+  "tweaks.placement.restrictionTiedToFast": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Tie restriction to fast placement",
+    "description": "Turning fast placement on or off also changes the restriction switch."
+  },
+  "tweaks.placement.restrictionMode": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Restriction rule",
+    "description": "Face, plane, layer, column, line or diagonal."
+  },
+  "tweaks.placement.listMode": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Item filter",
+    "description": "Choose whether to allow all items, exclude listed items, or only allow listed items."
+  },
+  "tweaks.placement.blacklist": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Excluded items",
+    "description": "Item IDs separated by commas, for example 1, 44:2."
+  },
+  "tweaks.placement.whitelist": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Allowed items",
+    "description": "Item IDs separated by commas, for example 1, 44:2. An empty allow-list permits nothing."
+  },
+  "tweaks.flexible.enabled": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Flexible placement",
+    "description": ""
+  },
+  "tweaks.flexible.showOverlay": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Target face overlay",
+    "description": ""
+  },
+  "tweaks.flexible.showPreview": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Destination preview",
+    "description": ""
+  },
+  "tweaks.flexible.placeAgainstContainers": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Place against containers",
+    "description": ""
+  },
+  "tweaks.flexible.overlayColor": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Overlay color",
+    "description": ""
+  },
+  "tweaks.flexible.overlayOpacity": {
+    "page": "Building",
+    "group": "Flexible placement",
+    "label": "Overlay opacity, %",
+    "description": ""
+  },
+  "tweaks.hotbar.swap": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Swap hotbar rows",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.scroll": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Scroll to choose a row",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.numberRowKeys": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Modifier + number selects row",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.overlay": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Row preview",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.reverseScroll": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Reverse row scrolling",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.rememberRow": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Remember the selected row",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.selectedRow": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Starting row",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.alignment": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Preview alignment",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.offsetX": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Horizontal offset",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.hotbar.offsetY": {
+    "page": "Inventory",
+    "group": "Hotbar swapping",
+    "label": "Vertical offset",
+    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+  },
+  "tweaks.freeLook": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Free look",
+    "description": ""
+  },
+  "tweaks.freeLookToggle": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Free look activation",
+    "description": ""
+  },
+  "tweaks.freeLookPerspective": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Free look perspective",
+    "description": ""
+  },
+  "tweaks.freeLookFollowThirdPerson": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Follow current third-person view",
+    "description": ""
+  },
+  "tweaks.clickMining": {
+    "page": "Building",
+    "group": "Mining",
+    "label": "Continuous click mining",
+    "description": "Remove the delay between breaking blocks in singleplayer."
+  },
+  "tweaks.boatSteering": {
+    "page": "Movement",
+    "group": "Vehicles",
+    "label": "Boat steering and collision protection",
+    "description": ""
+  },
+  "tweaks.fastMinecarts": {
+    "page": "Movement",
+    "group": "Vehicles",
+    "label": "Faster minecarts",
+    "description": ""
+  },
+  "tweaks.sneak.enabled": {
+    "page": "Movement",
+    "group": "Walking",
+    "label": "Edge protection",
+    "description": "Prevent walking off ledges without crouching or slowing down."
+  },
+  "tweaks.sneak.announceToggle": {
+    "page": "Movement",
+    "group": "Walking",
+    "label": "Edge-protection messages",
+    "description": ""
+  },
+  "tweaks.slabs.enabled": {
+    "page": "Building",
+    "group": "Slab completion",
+    "label": "Complete slabs through adjacent faces",
+    "description": ""
+  },
+  "tweaks.slabs.announceToggle": {
+    "page": "Building",
+    "group": "Slab completion",
+    "label": "Slab-completion messages",
+    "description": ""
+  },
+  "logo.logo.lines": {
+    "page": "Interface",
+    "group": "Title screen",
+    "label": "Title lettering",
+    "description": "Rows use the letter block palette. Spaces leave gaps.",
+    "default": [
+      "**  *** * * *** **      **  *** ***  * ",
+      "* * * * * * *   * *     * * *    *  * *",
+      "**  * * * * **  **      **  **   *  ***",
+      "*   * * *** *   * *     * * *    *  * *",
+      "*   *** * * *** * *     **  ***  *  * *"
+    ]
+  }
+}

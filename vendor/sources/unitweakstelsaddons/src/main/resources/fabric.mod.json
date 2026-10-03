@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "unitweakstelsaddons",
+  "version": "${version}",
+
+  "name": "UniTweaksTelsAddons",
+  "description": "Provides features from incompatible mods of mine to UniTweaks.",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "issues": "https://github.com/telvarost/UniTweaksTelsAddons-StationAPI/issues",
+    "homepage": "https://github.com/telvarost/UniTweaksTelsAddons-StationAPI/",
+    "sources": "https://github.com/telvarost/UniTweaksTelsAddons-StationAPI/"
+  },
+
+  "license": "MIT",
+  "icon": "assets/unitweakstelsaddons/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "com.github.telvarost.unitweakstelsaddons.events.RegistryListener"
+    ],
+    "stationapi:event_bus_client": [
+    ],
+    "stationapi:event_bus_server": [
+    ],
+    "gcapi3": [
+      "com.github.telvarost.unitweakstelsaddons.Config"
+    ],
+    "gcapi3:presave": [
+      "com.github.telvarost.unitweakstelsaddons.events.ConfigListener"
+    ]
+  },
+  "mixins": [
+    "unitweakstelsaddons.mixins.json"
+  ],
+
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": ">=3.0.2",
+    "stationapi": "*"
+  },
+
+  "recommends": {
+    "unitweaks": "*",
+    "modmenu": "*"
+  },
+
+  "conflicts": {
+    "smallcraftingtweaks": "*",
+    "nowobtainablerecipes": "*"
+  },
+
+  "breaks": {
+    "annoyancefix": "*",
+    "mostlymodernrecipes": "*",
+    "betatweaks": "*",
+    "finalbeta": "*",
+    "extremeview": "*",
+    "gameplayessentials": "*",
+    "clientsideessentials": "*"
+  },
+
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_54": [
+        "com/github/telvarost/unitweakstelsaddons/VehicleInterface"
+      ]
+    }
+  }
+}

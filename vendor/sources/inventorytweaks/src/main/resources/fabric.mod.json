@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "inventorytweaks",
+  "version": "${version}",
+
+  "name": "InventoryTweaks",
+  "description": "Adds the modern Left-Click + Drag and Right-Click + Drag mechanics, MouseTweaks, and more to the game! Special thanks to YaLTeR and js6pak for inspiring a lot of the concepts in this mod.",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "issues": "https://github.com/telvarost/InventoryTweaks-StationAPI/issues",
+    "homepage": "https://github.com/telvarost/InventoryTweaks-StationAPI/",
+    "sources": "https://github.com/telvarost/InventoryTweaks-StationAPI/"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/inventorytweaks/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.github.telvarost.inventorytweaks.ModHelper"
+    ],
+    "gcapi3": [
+      "com.github.telvarost.inventorytweaks.Config"
+    ]
+  },
+  "mixins": [
+    "inventorytweaks.mixins.json"
+  ],
+
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": ">=3.0.1"
+  },
+
+  "recommends": {
+    "stationapi": "*",
+    "modmenu": "*"
+  },
+
+  "custom": {
+    "modmenu:clientsideOnly": true
+  }
+}

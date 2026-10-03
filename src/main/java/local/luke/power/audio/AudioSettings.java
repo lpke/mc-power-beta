@@ -1,0 +1,38 @@
+package local.luke.power.audio;
+import java.util.*;
+public final class AudioSettings {
+  public enum MusicMode { VANILLA, ADD, REPLACE }
+  public int master=100;
+  public Map<String,Integer> categories=new LinkedHashMap<>();
+  public Map<String,Integer> sounds=new TreeMap<>();
+  public MusicMode musicMode=MusicMode.VANILLA;
+  public List<String> musicDirectories=new ArrayList<>();
+  public List<String> menuDirectories=new ArrayList<>();
+  public boolean recursive=false,shuffle=true,avoidRepeats=true;
+  public AudioSettings(){for(String key:List.of("blocks","hostile","passive","players","weather","ambient","interface","records"))categories.put(key,100);}
+  public void validate(){
+    volume(master);if(categories==null||sounds==null||musicDirectories==null||menuDirectories==null||musicMode==null)throw new IllegalArgumentException("Audio settings are incomplete");
+    for(var e:categories.entrySet()){if(!new AudioSettings().categories.containsKey(e.getKey()))throw new IllegalArgumentException("Unknown audio category");volume(e.getValue());}
+    if(sounds.size()>4096)throw new IllegalArgumentException("Too many sound overrides");
+    for(var e:sounds.entrySet()){if(!e.getKey().matches("[A-Za-z0-9_.:/-]{1,256}"))throw new IllegalArgumentException("Invalid sound identifier");volume(e.getValue());}
+    for(List<String> dirs:List.of(musicDirectories,menuDirectories)){
+      if(dirs.size()>32)throw new IllegalArgumentException("Use at most 32 music folders");
+      for(String dir:dirs)if(dir==null||dir.isBlank()||dir.length()>4096||dir.indexOf('\0')>=0)throw new IllegalArgumentException("Invalid music folder");
+    }
+  }
+  private static void volume(Integer value){if(value==null||value<0||value>100)throw new IllegalArgumentException("Volume must be 0 to 100%");}
+  public double gain(String sound,boolean menu){return master/100.0*categories.getOrDefault(category(sound,menu),100)/100.0*sounds.getOrDefault(sound,100)/100.0;}
+  public static String category(String id,boolean interfaceSound){
+    if(id==null)return "ambient";
+    if(id.startsWith("ambient.weather")||id.contains("thunder"))return "weather";
+    if(id.startsWith("ambient")||id.startsWith("portal"))return "ambient";
+    if(id.startsWith("mob.")){
+      String mob=id.substring(4).split("\\.")[0];
+      return Set.of("cow","pig","sheep","chicken","wolf","squid").contains(mob)?"passive":"hostile";
+    }
+    if(id.startsWith("step.")||id.startsWith("dig.")||id.startsWith("tile.")||id.startsWith("fire.")||id.startsWith("liquid.")||id.startsWith("note."))return "blocks";
+    if(id.startsWith("records.")||id.startsWith("streaming."))return "records";
+    if(id.equals("random.click")||interfaceSound)return "interface";
+    return "players";
+  }
+}

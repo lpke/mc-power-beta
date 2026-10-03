@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "local.luke.fakesneak.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MinecraftAccessor",
+    "MinecraftMixin",
+    "GameOptionsMixin",
+    "EntityMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

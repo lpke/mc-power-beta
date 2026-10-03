@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.mine_diver.macula.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "server": [
+  ],
+  "client": [
+    "BlockRenderManagerMixin",
+    "ChunkBuilderMixin",
+    "GameRendererMixin",
+    "LivingEntityRendererMixin",
+    "ScrollableBaseAccessor",
+    "TessellatorMixin",
+    "WorldRendererMixin",
+    "gui.VideoSettingsScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

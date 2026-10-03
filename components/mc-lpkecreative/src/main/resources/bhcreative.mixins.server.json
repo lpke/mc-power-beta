@@ -1,0 +1,15 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "paulevs.bhcreative.mixin.server",
+	"compatibilityLevel": "JAVA_17",
+	"server": [
+		"ServerPlayerPacketHandlerAccessor",
+		"MinecraftServerMixin",
+		"CommandManagerMixin",
+		"DimensionFileMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

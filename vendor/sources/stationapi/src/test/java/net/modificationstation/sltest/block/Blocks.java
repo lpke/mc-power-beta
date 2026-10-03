@@ -1,0 +1,71 @@
+package net.modificationstation.sltest.block;
+
+import net.mine_diver.unsafeevents.listener.EventListener;
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.modificationstation.sltest.mixin.BlockBaseAccessor;
+import net.modificationstation.stationapi.api.event.registry.BlockRegistryEvent;
+import net.modificationstation.stationapi.api.mod.entrypoint.EntrypointManager;
+import net.modificationstation.stationapi.api.template.block.TemplateBlock;
+import net.modificationstation.stationapi.api.template.block.TemplateDoorBlock;
+import net.modificationstation.stationapi.api.template.block.TemplateLeavesBlock;
+import net.modificationstation.stationapi.api.template.block.TemplateLogBlock;
+import net.modificationstation.stationapi.api.util.Identifier;
+
+import java.lang.invoke.MethodHandles;
+import java.util.Arrays;
+import java.util.function.Function;
+
+import static net.modificationstation.sltest.SLTest.NAMESPACE;
+import static net.modificationstation.stationapi.api.util.Identifier.of;
+
+public enum Blocks {
+
+    TEST_BLOCK("test_block", id -> new TemplateBlock(id, Material.STONE).setHardness(1)),
+    TEST_ANIMATED_BLOCK("test_animated_block", id -> new ModdedMetaBlock(id, Material.NETHER_PORTAL)),
+    CUSTOM_MODEL_BLOCK("farlands_block", id -> new ModdedModelBlock(id, Material.SOIL).setHardness(1)),
+    FREEZER("freezer", id -> new BlockFreezer(id).setHardness(2.5F).setSoundGroup(TemplateBlock.DEFAULT_SOUND_GROUP)),
+    ALTAR("altar", id -> new BlockAltar(id, Material.STONE).setHardness(3)),
+    VARIATION_BLOCK("variation_block", id -> new VariationBlock(id, Material.STONE).setHardness(.5F).setSoundGroup(Block.DEFAULT_SOUND_GROUP).disableAutoItemRegistration()),
+    EMISSION_CHECKER("emission_checker", LampBlock::new),
+    INDISPENSABLE_BLOCK("indispensable_block", IndispensableBlock::new),
+    MODDED_LEAVES("modded_leaves", id -> new TemplateLeavesBlock(id, 52)),
+    MODDED_LOG("modded_log", TemplateLogBlock::new),
+    EFFECT_BLOCK("effect_block", EffectBlock::new),
+    EFFECT_BLOCK_INF("effect_block_inf", EffectBlockInf::new),
+    EFFECT_BLOCK_CLEAR("effect_block_clear", EffectBlockClear::new),
+    FANCY_WOOD_DOOR("fancy_wood_door_block", id -> new TemplateDoorBlock(id, Material.WOOD));
+
+    private final Runnable register;
+    private Block block;
+
+    Blocks(String id, Function<Identifier, Block> factory) {
+        this.register = () -> block = factory.apply(of(NAMESPACE, id));
+    }
+
+    public Block get() {
+        return block;
+    }
+
+    public static class Init {
+        static {
+            EntrypointManager.registerLookup(MethodHandles.lookup());
+        }
+
+        @EventListener
+        private static void registerBlocks(BlockRegistryEvent event) {
+//            BlockBase.ALLOWS_GRASS_UNDER[BlockBase.STILL_WATER.id] = BlockBase.ALLOWS_GRASS_UNDER[BlockBase.FLOWING_WATER.id] = true;
+            ((BlockBaseAccessor) Block.BEDROCK).invokeSetHardness(2);
+//            int blocksAmount = 100000;
+//            BLOCKS = new TemplateBlockBase[blocksAmount];
+//            Random random = new Random(42);
+//            for (int i = 0; i < blocksAmount; i++) {
+//                BlockBase block = new ColouredBlock(Material.DIRT, random.nextInt()).setHardness(0.8F).setSounds(BlockBase.GLASS_SOUNDS).setTranslationKey(MODID, "testBlock" + i);
+//                Registry.register(event.registry, of(MODID, "test_block_" + i), block);
+//            }
+            Arrays.stream(values()).forEach(blocks -> blocks.register.run());
+        }
+
+//        public static BlockBase[] BLOCKS;
+    }
+}

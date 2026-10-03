@@ -1,0 +1,27 @@
+accessWidener v2 named
+
+# Haha, cope mine L diver
+accessible field net/minecraft/client/Minecraft INSTANCE Lnet/minecraft/client/Minecraft;
+accessible method net/minecraft/client/Minecraft logGlError (Ljava/lang/String;)V
+
+accessible field net/minecraft/client/gui/screen/ingame/HandledScreen backgroundWidth I
+accessible field net/minecraft/client/gui/screen/ingame/HandledScreen backgroundHeight I
+accessible method net/minecraft/client/gui/screen/ingame/HandledScreen getSlotAt (II)Lnet/minecraft/screen/slot/Slot;
+
+accessible field net/minecraft/server/network/ServerPlayNetworkHandler player Lnet/minecraft/entity/player/ServerPlayerEntity;
+accessible field net/minecraft/server/network/ServerPlayNetworkHandler server Lnet/minecraft/server/MinecraftServer;
+
+accessible field net/minecraft/client/font/TextRenderer characterWidths [I
+
+accessible field net/minecraft/inventory/CraftingInventory stacks [Lnet/minecraft/item/ItemStack;
+
+accessible field net/minecraft/recipe/ShapelessRecipe input Ljava/util/List;
+
+accessible field net/minecraft/recipe/ShapedRecipe input [Lnet/minecraft/item/ItemStack;
+accessible field net/minecraft/recipe/ShapedRecipe width I
+accessible field net/minecraft/recipe/ShapedRecipe height I
+
+accessible method net/minecraft/nbt/NbtCompound write (Ljava/io/DataOutput;)V
+accessible method net/minecraft/nbt/NbtCompound read (Ljava/io/DataInput;)V
+
+accessible field net/minecraft/client/gui/screen/ConnectScreen networkHandler Lnet/minecraft/client/network/ClientNetworkHandler;

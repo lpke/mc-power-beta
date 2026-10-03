@@ -1,0 +1,47 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.modificationstation.stationapi.mixin.item",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "BlockMixin",
+    "CropBlockMixin",
+    "DyeItemMixin",
+    "EntityAccessor",
+    "EntityMixin",
+    "InventoryS2CPacketMixin",
+    "ItemMixin",
+    "ItemStackMixin",
+    "PlayerEntityMixin",
+    "PlayerInventoryMixin",
+    "SaplingBlockMixin",
+    "ScreenHandlerMixin",
+    "SeedsItemMixin",
+    "StatsMixin",
+    "dispenser.block.DispenserBlockMixin",
+    "dispenser.block.entity.DispenserBlockEntityMixin"
+  ],
+  "server": [
+    "server.class_70Mixin",
+    "server.ServerPlayNetworkHandlerMixin",
+    "server.network.class_174Mixin",
+    "server.network.ServerPlayerEntityMixin",
+    "server.network.ServerPlayNetworkHandlerMixin"
+  ],
+  "client": [
+    "client.ClientNetworkHandlerAccessor",
+    "client.ContainerScreenMixin",
+    "client.DrawContextAccessor",
+    "client.GameRendererMixin",
+    "client.HandledScreenAccessor",
+    "client.InteractionManagerMixin",
+    "client.ItemRendererMixin",
+    "client.MultiplayerInteractionManagerMixin",
+    "client.OtherPlayerEntityMixin",
+    "client.SingleplayerInteractionManagerMixin",
+    "client.network.itemnbt.MultiplayerInteractionManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

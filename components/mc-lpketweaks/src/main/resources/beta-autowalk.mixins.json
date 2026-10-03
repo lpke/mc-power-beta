@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "local.luke.autowalk.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "GameOptionsMixin",
+    "MinecraftMixin",
+    "KeyboardInputMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

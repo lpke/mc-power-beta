@@ -1,0 +1,19 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "paulevs.bhcreative.mixin.common",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+		"AbstractBlockStateMixin",
+		"LivingEntityAccessor",
+		"WalkingEntityMixin",
+		"LivingEntityMixin",
+		"PlayerEntityMixin",
+		"BucketItemMixin",
+		"ItemStackMixin",
+		"EntityMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

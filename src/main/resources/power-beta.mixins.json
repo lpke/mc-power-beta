@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ClientMixin",
+    "OptionsAccessor",
+    "OptionsMixin",
+    "SoundPoolAccessor",
+    "SoundManagerAccessor",
+    "SoundMixin",
+    "ButtonAccessor",
+    "PauseMixin",
+    "TitleMixin",
+    "SoundPoolMixin",
+    "ResourceDownloadMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
