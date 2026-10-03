@@ -50,7 +50,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private Setting dragging;
   private double dragLeft, dragSpan;
 
-  private int uiWidth() { return Math.min(width, height * 21 / 9); }
+  private int uiWidth() { return Math.min(width, height * 16 / 9); }
   private int origin() { return (width - uiWidth()) / 2; }
   private int right() { return origin() + uiWidth(); }
   private int footerY() { return height - (uiWidth() < 470 ? 51 : 28); }

@@ -22,7 +22,7 @@ public final class FolderScreen extends UiScreen {
     for (var v : setting.value.getAsJsonArray()) folders.add(v.getAsString());
   }
 
-  private int panelWidth() { return Math.min(width, height * 21 / 9); }
+  private int panelWidth() { return Math.min(width, height * 16 / 9); }
   private int panelLeft() { return (width - panelWidth()) / 2; }
   private int panelRight() { return panelLeft() + panelWidth(); }
 

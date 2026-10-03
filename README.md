@@ -24,7 +24,7 @@ including live previews. A `*` marks settings that need a restart.
 Scale, audio, mouse sensitivity, field of view, camera distance and textures
 preview immediately. Auto scale chooses the largest integer scale that leaves
 at least 320 by 240 GUI pixels; a smaller window can limit the requested scale.
-The menu is centered and capped at a 21:9 aspect ratio. Hover any setting for an
+The menu is centered and capped at a 16:9 aspect ratio. Hover any setting for an
 explanation; hover a binding's `!` for the other actions sharing that key.
 
 Key bindings accept keyboard and mouse buttons with Ctrl, Shift and Alt, including

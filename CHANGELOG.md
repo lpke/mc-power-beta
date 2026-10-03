@@ -10,7 +10,7 @@
   and a clickable unsaved-changes filter beside Reset page.
 - Added concise explanations for every setting, removed repeated names and
   usage boilerplate, and listed shared bindings in conflict tooltips.
-- Darkened the active page and centered menus within a 21:9 maximum width.
+- Darkened the active page and centered menus within a 16:9 maximum width.
 - Simplified reset wording and the creative Shift tooltip to Clear inventory.
 - Default perspective cycling now skips front view. Added adjustable camera
   distance while retaining vanilla four-block distance and collision handling.
