@@ -1,0 +1,20 @@
+package local.luke.power.capture;
+
+import net.mine_diver.unsafeevents.listener.EventListener;
+import net.minecraft.client.option.KeyBinding;
+import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
+import org.lwjgl.input.Keyboard;
+
+public class KeyBindingListener {
+    public KeyBindingListener() {
+        local.luke.power.input.Bindings.onMousePress("photo-capture", CaptureActions::press);
+    }
+    public static KeyBinding takeCustomResolutionScreenshot;
+    public static KeyBinding takeIsometricScreenshot;
+
+    @EventListener
+    public void registerKeyBindings(KeyBindingRegisterEvent event) {
+        event.keyBindings.add(takeCustomResolutionScreenshot = new KeyBinding("Custom Photo", Keyboard.KEY_F8));
+        event.keyBindings.add(takeIsometricScreenshot = new KeyBinding("Isometric Photo", Keyboard.KEY_F7));
+    }
+}

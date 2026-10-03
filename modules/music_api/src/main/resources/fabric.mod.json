@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "power_music_api",
+  "version": "${version}",
+  "name": "Power Beta Music Api",
+  "description": "Provides an API for freezing entities, getting currently playing sound, and other data.",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_music_api/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [],
+    "stationapi:event_bus_client": [],
+    "stationapi:event_bus_server": []
+  },
+  "mixins": [
+    "power_music_api.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3"
+  },
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_127": [
+        "local/luke/power/music_api/interfaces/FrozenInterface"
+      ]
+    }
+  }
+}

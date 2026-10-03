@@ -41,8 +41,8 @@ class AudioTest {
     assertEquals("blocks", AudioSettings.category("step.stone", false));
     assertEquals("interface", AudioSettings.category("random.click", true));
     assertEquals("records", AudioSettings.category("records.cat", false));
-    assertEquals("passive", AudioSettings.category("unitweaks:entity.sheep.shear", false));
-    assertEquals("blocks", AudioSettings.category("unitweaks:random.chestopen", false));
+    assertEquals("passive", AudioSettings.category("power_controls:entity.sheep.shear", false));
+    assertEquals("blocks", AudioSettings.category("power_controls:random.chestopen", false));
   }
 
   @Test

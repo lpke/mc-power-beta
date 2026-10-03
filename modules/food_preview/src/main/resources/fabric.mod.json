@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "power_food_preview",
+  "version": "${version}",
+  "name": "Power Beta Food Preview",
+  "description": "Adds the food health preview from AppleSkin",
+  "authors": [
+    "Yunivers"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_food_preview/icon.png",
+  "environment": "*",
+  "mixins": [
+    "power_food_preview.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3"
+  }
+}

@@ -414,7 +414,7 @@
       " *   * * *   * *** *** * * * * *    * "
     ]
   },
-  "quickadditions:config.MUSIC_CONFIG.volumeNetherPortalAmbient": {
+  "power_environment:config.MUSIC_CONFIG.volumeNetherPortalAmbient": {
     "page": "Audio",
     "group": "Individual sounds",
     "label": "Nether portal",
@@ -423,7 +423,7 @@
     "max": 1,
     "step": 0.05
   },
-  "quickadditions:config.MUSIC_CONFIG.volumeRainAmbient": {
+  "power_environment:config.MUSIC_CONFIG.volumeRainAmbient": {
     "page": "Audio",
     "group": "Individual sounds",
     "label": "Rain ambience",
@@ -432,7 +432,7 @@
     "max": 1,
     "step": 0.05
   },
-  "quickadditions:config.MUSIC_CONFIG.volumeCaveAmbient": {
+  "power_environment:config.MUSIC_CONFIG.volumeCaveAmbient": {
     "page": "Audio",
     "group": "Individual sounds",
     "label": "Cave ambience",
@@ -441,7 +441,7 @@
     "max": 1,
     "step": 0.05
   },
-  "quickadditions:config.MUSIC_CONFIG.volumeGhastAmbient": {
+  "power_environment:config.MUSIC_CONFIG.volumeGhastAmbient": {
     "page": "Audio",
     "group": "Individual sounds",
     "label": "Ghast ambience",

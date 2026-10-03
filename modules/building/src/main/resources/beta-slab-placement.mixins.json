@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "local.luke.power.slabplacement.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MinecraftAccessor",
+    "MinecraftMixin",
+    "GameOptionsMixin",
+    "ItemStackMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

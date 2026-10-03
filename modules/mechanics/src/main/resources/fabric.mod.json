@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "power_mechanics",
+  "version": "${version}",
+  "name": "Power Beta Mechanics",
+  "description": "Random tweaks like stopping creeper explosions, coloring signs with dye, disabling farmland trampling under certain conditions, and more!",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_mechanics/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "local.luke.power.mechanics.events.init.RecipeListener"
+    ],
+    "stationapi:event_bus_client": [
+      "local.luke.power.mechanics.events.init.ClientInitListener"
+    ],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.mechanics.Config"
+    ],
+    "gcapi3:factory_provider": [
+      "local.luke.power.mechanics.ZombieDropEnumFactory",
+      "local.luke.power.mechanics.ZombiePigmanDropEnumFactory"
+    ]
+  },
+  "mixins": [
+    "power_mechanics.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": ">=3.0.1"
+  }
+}

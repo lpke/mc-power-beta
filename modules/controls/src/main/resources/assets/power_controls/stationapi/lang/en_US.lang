@@ -1,0 +1,60 @@
+# Keybinds
+key.power_controls.panorama_screenshot=Panorama Screenshot
+key.power_controls.hotbar_1=Hotbar 1
+key.power_controls.hotbar_2=Hotbar 2
+key.power_controls.hotbar_3=Hotbar 3
+key.power_controls.hotbar_4=Hotbar 4
+key.power_controls.hotbar_5=Hotbar 5
+key.power_controls.hotbar_6=Hotbar 6
+key.power_controls.hotbar_7=Hotbar 7
+key.power_controls.hotbar_8=Hotbar 8
+key.power_controls.hotbar_9=Hotbar 9
+key.power_controls.hide_hud=Hide HUD
+key.power_controls.take_screenshot=Take Screenshot
+key.power_controls.debug_hud=Debug HUD
+key.power_controls.third_person=Third Person
+key.power_controls.cinematic_camera=Cinematic Camera
+key.power_controls.toggle_fullscreen=Toggle Fullscreen
+key.power_controls.dismount=Dismount
+key.power_controls.zoom=Zoom
+key.power_controls.release_mouse=Release Mouse
+key.power_controls.photo_mode=Photo Mode
+key.power_controls.rescan=Rescan Mouse
+key.power_controls.toggle_raw_input=Toggle Raw Input
+
+# FOV
+options.power_controls.fov=FOV
+options.power_controls.fov.normal=Normal
+options.power_controls.fov.max=Quake Pro
+
+# Fog
+options.power_controls.fog=Fog
+options.power_controls.fog.off=Disabled
+options.power_controls.fog.normal=Normal
+options.power_controls.fog.max=Silent Hill
+options.power_controls.multiplier_symbol=x
+
+# Clouds
+options.power_controls.clouds=Clouds
+options.power_controls.cloud_height=Cloud Height
+
+# FPS Limit
+options.power_controls.fps_limit=FPS Limit
+options.power_controls.fps_limit.max=Unlimited
+
+# Render Distance
+options.power_controls.render_distance=Render Distance
+options.power_controls.render_distance.chunks=chunks
+options.power_controls.render_distance.tiny=Tiny
+options.power_controls.render_distance.short=Short
+options.power_controls.render_distance.normal=Normal
+options.power_controls.render_distance.far=Far
+
+# Brightness
+options.power_controls.brightness=Brightness
+options.power_controls.brightness.min=Normal
+options.power_controls.brightness.max=Bright
+
+# GUI Scale
+options.power_controls.gui_scale=GUI Scale
+options.power_controls.gui_scale.auto=Auto

@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.music_api.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "FallingBlockEntityMixin",
+    "LivingEntityMixin",
+    "WorldMixin"
+  ],
+  "server": [
+    "server.EntityTrackerEntryMixin"
+  ],
+  "client": [
+    "client.ClientNetworkHandlerMixin",
+    "client.LivingEntityRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

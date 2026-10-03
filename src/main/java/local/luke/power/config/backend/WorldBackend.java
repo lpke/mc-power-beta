@@ -14,8 +14,8 @@ public final class WorldBackend implements Backend {
   private WorldBackend(Minecraft mc) throws Exception {
     this.mc = mc;
     world = mc.world;
-    api = Class.forName("local.luke.worldedit.WorldEditBeta");
-    type = Class.forName("local.luke.worldedit.config.WorldOverride");
+    api = Class.forName("local.luke.power.worldedit.WorldEditor");
+    type = Class.forName("local.luke.power.worldedit.config.WorldOverride");
   }
 
   public static void register(ConfigSession s, Minecraft mc) throws Exception {

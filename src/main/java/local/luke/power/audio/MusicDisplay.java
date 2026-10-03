@@ -14,7 +14,7 @@ final class MusicDisplay {
       resolved = true;
       try {
         current =
-            Class.forName("com.github.telvarost.quickadditions.ModHelper$ModHelperFields")
+            Class.forName("local.luke.power.environment.ModHelper$ModHelperFields")
                 .getField("currentBGM");
       } catch (ReflectiveOperationException e) {
         PowerBeta.LOG.warn("Music debug display is unavailable", e);

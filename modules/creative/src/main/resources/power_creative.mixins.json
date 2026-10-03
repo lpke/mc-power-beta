@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.creative.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "ClientMixin",
+    "CommandMixin",
+    "OptionsMixin",
+    "FlightMixin",
+    "SpectatorEntityMixin",
+    "ReachMixin",
+    "RendererMixin",
+    "SinglePlayerReachMixin",
+    "CreativeHudMixin",
+    "SpectatorRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

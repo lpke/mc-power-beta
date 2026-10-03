@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "power_beta",
   "version": "${version}",
-  "name": "Power Beta",
+  "name": "Power Beta Configuration",
   "description": "Classic Minecraft with unified controls and optional improvements.",
   "authors": [
     "lpke"
@@ -19,16 +19,13 @@
     "java": ">=17",
     "gcapi3": ">=3.2.5",
     "mixinextras": ">=0.5.0",
-    "lpkecreative": ">=1.1.0",
-    "lpketweaks": ">=1.2.1",
-    "worldedit_beta": ">=1.2.1",
-    "unitweaks": "*",
-    "quickadditions": ">=2.12.0",
-    "zastavkaapi": ">=1.1.2",
-    "oldlogo": ">=1.2"
-  },
-  "breaks": {
-    "modmenu": "*"
+    "power_creative": ">=1.1.0",
+    "power_building": ">=1.2.1",
+    "power_worldedit": ">=1.2.1",
+    "power_controls": "*",
+    "power_environment": ">=2.12.0",
+    "power_music_api": ">=1.1.2",
+    "power_title": ">=1.2"
   },
   "contact": {
     "sources": "https://github.com/lpke/mc-power-beta"
@@ -36,6 +33,9 @@
   "entrypoints": {
     "preLaunch": [
       "local.luke.power.Bootstrap"
+    ],
+    "stationapi:event_bus": [
+      "local.luke.power.input.GameplayKeys"
     ]
   },
   "languageAdapters": {

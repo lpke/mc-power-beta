@@ -20,7 +20,7 @@ public final class FileTransaction implements AutoCloseable {
 
   public static FileTransaction begin(Path game, List<Path> files) throws IOException {
     game = game.toAbsolutePath().normalize();
-    Path root = game.resolve("config/power-beta/backups");
+    Path root = game.resolve("power-beta-data/settings-backups");
     checkPath(game, root);
     Files.createDirectories(root);
     Path dir = Files.createTempDirectory(root, "save-");
@@ -62,7 +62,11 @@ public final class FileTransaction implements AutoCloseable {
 
   public static void recover(Path game) throws IOException {
     game = game.toAbsolutePath().normalize();
-    Path root = game.resolve("config/power-beta/backups");
+    recoverRoot(game, game.resolve("config/power-beta/backups"));
+    recoverRoot(game, game.resolve("power-beta-data/settings-backups"));
+  }
+
+  private static void recoverRoot(Path game, Path root) throws IOException {
     checkPath(game, root);
     if (!Files.isDirectory(root)) return;
     try (var dirs = Files.list(root)) {

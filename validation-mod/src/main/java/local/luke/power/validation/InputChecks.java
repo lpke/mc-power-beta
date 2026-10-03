@@ -35,7 +35,7 @@ public final class InputChecks {
       var session = SettingsRegistry.open(mc);
       bind(session, "key.inventory", -99, Chord.CTRL);
       bind(session, "Fake sneak (toggle)", -98, Chord.ALT);
-      bind(session, "key.unitweaks.hotbar_2", -100, Chord.SHIFT);
+      bind(session, "key.power_controls.hotbar_2", -100, Chord.SHIFT);
       set(session, "tweaks.sneak.enabled", new JsonPrimitive(false));
       session.save(Path.of(".").toAbsolutePath()); mc.setScreen(null);
     } else if (action.equals("restore")) {

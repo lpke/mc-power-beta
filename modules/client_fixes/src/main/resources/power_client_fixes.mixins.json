@@ -1,0 +1,48 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.client_fixes.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "local.luke.power.client_fixes.mixin.ClientFixesMixinPlugin",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "client.MinecraftAccessor",
+    "client.ScreenAccessor",
+    "client.auth.ClientNetworkHandlerMixin",
+    "client.auth.SessionMixin",
+    "client.controls.ControlsOptionsScreenMixin",
+    "client.controls.GameOptionsMixin",
+    "client.controls.KeyBindingMixin",
+    "client.misc.DebugGraphMixin",
+    "client.misc.InGameHudMixin",
+    "client.misc.MinecraftMixin",
+    "client.misc.PlayerStatsMixin",
+    "client.misc.ScreenMixin",
+    "client.multiplayer.ReturnToMainMenuMixin",
+    "client.multiplayer.TitleScreenMixin",
+    "client.multiplayer.TranslationStorageMixin",
+    "client.skin.BipedEntityModelMixin",
+    "client.skin.ClientPlayerEntityMixin",
+    "client.skin.EntityRenderDispatcherMixin",
+    "client.skin.ModelPartMixin",
+    "client.skin.OtherPlayerEntityMixin",
+    "client.skin.PlayerEntityMixin",
+    "client.skin.PlayerEntityRendererMixin",
+    "client.skin.SkinImageProcessorMixin",
+    "client.skin.WorldRendererMixin",
+    "client.text.TextFieldWidgetMixin",
+    "client.text.chat.ChatScreenMixin",
+    "client.text.chat.SleepingChatScreenMixin",
+    "client.text.sign.ClientNetworkHandlerMixin",
+    "client.text.sign.SignBlockEntityMixin",
+    "client.text.sign.SignBlockEntityRendererMixin",
+    "client.text.sign.SignEditScreenMixin"
+  ],
+  "server": [
+    "server.auth.ServerNetworkHandlerAccessor",
+    "server.auth.ServerNetworkHandlerMixin"
+  ],
+  "mixins": []
+}

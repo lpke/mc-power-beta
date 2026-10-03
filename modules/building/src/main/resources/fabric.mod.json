@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "power_building",
+  "version": "${version}",
+  "name": "Power Beta Building",
+  "description": "Building, movement, camera and mining controls for Beta 1.7.3.",
+  "authors": [
+    "Luke"
+  ],
+  "license": "LGPL-3.0-only",
+  "environment": "client",
+  "icon": "assets/power_building/icon.png",
+  "entrypoints": {},
+  "mixins": [
+    "beta-autowalk.mixins.json",
+    "beta-transport.mixins.json",
+    "beta-fastplace.mixins.json",
+    "beta-flexible-placement.mixins.json",
+    "beta-fake-sneak.mixins.json",
+    "beta-slab-placement.mixins.json",
+    "power_building.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.6",
+    "minecraft": [
+      "1.0.0-beta.7.3",
+      "b1.7.3"
+    ],
+    "java": ">=17",
+    "mixinextras": ">=0.5.0"
+  },
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "power_hud",
+  "version": "${version}",
+  "name": "Power Beta Hud",
+  "description": "Adds some HUD tweaks such as chat log scrolling and moving hotbar up/down. Special thanks to cen0b for the suggestions!",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_hud/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "stationapi:event_bus": [],
+    "stationapi:event_bus_client": [],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.hud.Config"
+    ],
+    "gcapi3:factory_provider": [
+      "local.luke.power.hud.enums.CoordinateDisplayEnumFactory",
+      "local.luke.power.hud.enums.HudPositioningSystemEnumFactory",
+      "local.luke.power.hud.enums.ScreenPositionHorizontalEnumFactory",
+      "local.luke.power.hud.enums.ScreenPositionVerticalEnumFactory"
+    ],
+    "gcapi3:presave": [
+      "local.luke.power.hud.events.ConfigListener"
+    ]
+  },
+  "mixins": [
+    "power_hud.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": ">=3.0.1"
+  }
+}

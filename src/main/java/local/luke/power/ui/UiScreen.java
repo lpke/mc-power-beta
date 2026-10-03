@@ -43,6 +43,20 @@ public abstract class UiScreen extends Screen {
         !enabled ? 0xa0a0a0 : hovered ? 0xffffa0 : 0xe0e0e0);
   }
 
+  protected void iconButton(String icon, int x, int y, int w, int mx, int my, boolean enabled) {
+    button("", x, y, w, 18, mx, my, enabled);
+    int color = enabled ? 0xffdddddd : 0xff777777;
+    int cx = x + w / 2, cy = y + 9;
+    String[] pixels = switch (icon) {
+      case "speaker" -> new String[]{"   #   # ", "  ## #  #", "####  # #", "####  # #", "####  # #", "  ## #  #", "   #   # "};
+      case "reset" -> new String[]{"  ####  ", " ##  ## ", "##    ##", "#     ##", "##   ###", " ##    #", "  ####  "};
+      default -> new String[]{" #   #  ", "########", " #   #  ", "   #   #", "########", "   #   #", "        "};
+    };
+    for (int row = 0; row < pixels.length; row++)
+      for (int col = 0; col < pixels[row].length(); col++) if (pixels[row].charAt(col) == '#')
+        fill(cx - 4 + col, cy - 4 + row, cx - 3 + col, cy - 3 + row, color);
+  }
+
   protected void slider(String label, int x, int y, int w, int mx, int my, double fraction) {
     button("", x, y, w, 18, mx, my, false);
     int thumb = x + (int) Math.round(Math.max(0, Math.min(1, fraction)) * Math.max(0, w - 8));

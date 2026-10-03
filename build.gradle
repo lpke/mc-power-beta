@@ -20,13 +20,14 @@ dependencies {
     minecraft 'com.mojang:minecraft:b1.7.3'
     mappings 'babric:barn:b1.7.3+build.8:v2'
     modImplementation 'babric:fabric-loader:0.15.6-babric.2'
-    modCompileOnly files('vendor/jars/GlassConfigAPI-3.2.5.jar', 'source-build/build/unitweaks/libs/unitweaks-0.31.0+powerbeta.1.jar')
-    modCompileOnly fileTree('build/platform-compile') { include 'station-api-base-*.jar', 'station-resource-loader-v0-*.jar' }
+    modCompileOnly files('vendor/jars/GlassConfigAPI-3.2.5.jar', 'source-build/build/power_controls/libs/power_controls-0.31.0+powerbeta.1.jar')
+    modCompileOnly fileTree('build/platform-compile') { include '*.jar' }
     compileOnly 'com.google.code.gson:gson:2.8.9'
     compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
     compileOnly 'io.github.llamalad7:mixinextras-common:0.5.0'
     annotationProcessor 'io.github.llamalad7:mixinextras-common:0.5.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    testImplementation files('vendor/libraries/Simple-Yaml-1.8.4.jar','input-api/build/libs/power-beta-input-1.0.0.jar')
     testImplementation 'com.google.code.gson:gson:2.8.9'
 }
 configurations.configureEach {
@@ -39,19 +40,21 @@ def utilityModules = new groovy.json.JsonSlurper().parse(file('source-build/modu
 repositories {
     flatDir {
         dirs utilityModules.keySet().collect { "source-build/build/${it}/libs" }
-        dirs 'components/mc-lpkecreative/build/libs', 'components/mc-lpketweaks/build/libs',
-             'components/mc-worldedit-beta/build/libs', 'vendor/libraries'
+        dirs 'modules/creative/build/libs', 'modules/building/build/libs',
+             'modules/worldedit/build/libs', 'vendor/libraries'
     }
 }
 dependencies {
     utilityModules.each { id, spec ->
         if (spec.enabled) include "local.powerbeta:${id}:${spec.version}+powerbeta.1"
     }
-    include 'local.powerbeta:lpkecreative:1.1.0'
-    include 'local.powerbeta:lpketweaks:1.2.1'
-    include 'local.powerbeta:worldedit-beta:1.2.1'
+    include 'local.powerbeta:power_creative:1.1.0'
+    include 'local.powerbeta:power_building:1.2.1'
+    include 'local.powerbeta:power-worldedit:1.2.1'
     include 'local.powerbeta:MCAuthLib:d9d773e5d50327c33898c65cd545a4f6ef3ba1b5'
     include 'blue.endless:jankson:1.2.1'
+    include 'local.powerbeta:Simple-Yaml:1.8.4'
+    include 'com.google.guava:guava:33.2.1-jre'
 }
 
 processResources {

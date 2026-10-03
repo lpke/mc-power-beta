@@ -1,5 +1,50 @@
 # Changelog
 
+## Unified settings and interaction update, 2026-10-04
+
+- Remember the last Options page, scroll position and collapsed groups during a session.
+- Play Next/Previous music immediately while Options is open, including a paused world.
+  Retain bounded track history and clear it when playlists or world/menu contexts change.
+- Add speaker-icon previews to individual sound controls. Filter cached audio assets
+  against actual Beta sounds plus sounds explicitly supplied by the pack.
+- Put master volume first and Music and ambience above Individual sounds. Split extra
+  eating, burping, shearing, tool-break, armor-break and chest sounds into separate toggles.
+- Replace raw-input advice with an explanation of device input and troubleshooting.
+- Preview all Video changes immediately. Fix render-distance rounding and renderer
+  updates; always expose the full controls. F cycles Beta fog levels and reports the result.
+- Rename culling controls positively and invert their backing values correctly. Both
+  entity and block-entity culling default on.
+- Darken hovered rows; add click sounds to buttons without sounding sliders or headings.
+- Flatten Controls, hide disabled-feature bindings by default, add Show Disabled,
+  related-settings links and circular reset icons. Clicking a conflict indicator opens
+  a stable conflict list, with the source binding first. Fix narrow-layout hit areas.
+- Move Mouse and GUI scale to General and explain each bound action in its tooltip.
+- Add optional slash-to-chat, off by default and on in Configured. Enable the assigned
+  auto-walk action in Configured; verify movement and focus/menu cancellation.
+- Default slab fast placement to Double slabs. Separate boat steering, higher speed
+  and collision protection into independent switches.
+- Replace the approximate light display with actual block light at the player feet.
+  Render debug additions once per frame and keep the setting optional.
+- Colour WorldEdit help commands separately from arguments and headings. Verify single
+  command execution, history and double-slash completion.
+- Add optional container carrying with full NBT preservation, occupied-target checks,
+  double-chest restrictions, durable recovery journals and retained recovery archives.
+  Support Sneak-use while creative flying.
+- Add held-key container contents previews, including ordered double chests and storage
+  minecarts, without opening inventories or moving items.
+- Add freecam sprint using creative flight bindings, speed multiplier and Hold/Toggle
+  mode. Forward release clears toggle sprint. Add independent door/trapdoor collisions.
+- Fix Create New World title placement at large GUI heights.
+- Move owned code and runtime IDs into Power Beta modules. Consolidate native options,
+  module settings, bindings and saved camera positions into config/power-beta.json.
+  Import old preferences with verified backups; retain old names only for migration,
+  platform compatibility and provenance. Move backups/reports out of live configuration.
+- Remove duplicate inventory, fog-control availability, boat-break, chat-shortcut,
+  bit-depth, death-score, Quit-button and download-URL switches and redundant handlers.
+- Build the configuration API from source against unified storage; keep permitted
+  platform/performance binaries separate. Remove the obsolete title-credit toggle.
+- Add migration-aware profile creation and backed-up updates that refuse running games.
+
 ## Menu and texture update, 2026-10-04
 
 - Fixed GUI scale waiting for Done and ignoring mouse-held resize requests.

@@ -1,0 +1,20 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.inventory.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "DispenserScreenHandlerMixin"
+  ],
+  "server": [],
+  "client": [
+    "ContainerBaseMixin",
+    "FurnaceBlockEntityAccessor",
+    "FurnaceScreenAccessor",
+    "PlayerMixin",
+    "MinecraftAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

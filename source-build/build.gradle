@@ -10,7 +10,7 @@ def moduleId = providers.gradleProperty('module').get()
 def modules = new JsonSlurper().parse(file('modules.json'))
 def module = modules[moduleId]
 if (module == null) throw new GradleException("Unknown utility module: ${moduleId}")
-def sources = new File(packRoot, "vendor/sources/${moduleId}")
+def sources = new File(packRoot, module.source)
 group = 'local.luke.power.utility'
 version = module.version + '+powerbeta.1'
 base.archivesName = moduleId
@@ -36,11 +36,12 @@ dependencies {
     module.dependencies.each { dep ->
         modImplementation files(file("build/${dep}/libs/${dep}-${modules[dep].version}+powerbeta.1.jar"))
     }
-    if (moduleId == 'retrocommands') modCompileOnly files(new File(packRoot, 'components/mc-lpkecreative/build/libs/lpkecreative-1.1.0.jar'))
+    if (moduleId == 'power_commands') modCompileOnly files(new File(packRoot, 'modules/creative/build/libs/power_creative-1.1.0.jar'))
     implementation fileTree(new File(packRoot, 'vendor/libraries')) { include '*.jar' }
     compileOnly 'com.google.code.gson:gson:2.13.2'
     compileOnly 'com.google.guava:guava:33.2.1-jre'
     compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
+    compileOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
     compileOnly 'org.slf4j:slf4j-api:1.8.0-beta4'
     compileOnly 'org.apache.commons:commons-lang3:3.12.0'
     compileOnly 'org.checkerframework:checker-qual:3.42.0'

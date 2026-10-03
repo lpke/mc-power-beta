@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.title.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "BlockRendererMixin",
+    "MinecraftAccessor",
+    "MinecraftMixin",
+    "ScreenMixin",
+    "TitleScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

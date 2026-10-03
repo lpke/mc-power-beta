@@ -1,0 +1,28 @@
+# @ is a shorthand for the current mod id, which is power_recipestest.
+
+item.@.amitestitem.name=AMI Debug Item
+
+power_recipes.actionButton.@.dummy0=Dummy Action 0
+power_recipes.actionButton.@.dummy1=Dummy Action 1
+power_recipes.actionButton.@.dummy2=Dummy Action 2
+power_recipes.actionButton.@.dummy3=Dummy Action 3
+power_recipes.actionButton.@.dummy4=Dummy Action 4
+power_recipes.actionButton.@.dummy5=Dummy Action 5
+power_recipes.actionButton.@.dummy6=Dummy Action 6
+power_recipes.actionButton.@.dummy7=Dummy Action 7
+power_recipes.actionButton.@.dummy8=Dummy Action 8
+power_recipes.actionButton.@.dummy9=Dummy Action 9
+power_recipes.actionButton.@.dummy10=Dummy Action 10
+power_recipes.actionButton.@.dummy11=Dummy Action 11
+power_recipes.actionButton.@.dummy12=Dummy Action 12
+power_recipes.actionButton.@.dummy13=Dummy Action 13
+power_recipes.actionButton.@.dummy14=Dummy Action 14
+power_recipes.actionButton.@.cheat_dummy=Cheaty Dummy
+
+description.@.wooden.door.1=Wooden Doors allow you to block monsters from entering your building.\nTesting sentences.
+description.@.wooden.door.2=Clicking on a door changes its state from open to closed and vice versa.
+description.@.wooden.door.3=Wooden Doors can be opened/closed via Redstone Circuits.
+
+multiblock.@.test=Test Multiblock
+multiblock.@.diverse_test=Diverse Test Multiblock
+multiblock.@.giant=Giant Multiblock

@@ -1,0 +1,50 @@
+# @ is a shorthand for the current mod id, which is power_recipes.
+@.actionButton.@.heal=Heal
+@.actionButton.@.heal.alt=Click with MMB to stop being considered alive
+@.actionButton.@.set_time_day=Set Time To Day
+@.actionButton.@.set_time_night=Set Time to Night
+@.actionButton.@.toggle_weather=Toggle Weather
+
+button.@.trash=Trash
+button.@.trash.alt=Clear Inventory
+button.@.trash.cursor=Destroy %s
+
+key.@.toggleOverlay=Toggle Overlay
+key.@.showRecipe=Show Recipe
+key.@.showUses=Show Uses
+key.@.recipeBack=Recipe Back
+
+gui.@.category.craftingTable=Crafting Table
+gui.@.category.smelting=Smelting
+gui.@.category.fuel=Fuel
+gui.@.category.fuel.burnTime=Burn time: %s
+gui.@.category.fuel.burnTime.seconds=S: %s
+gui.@.category.fuel.burnTime.seconds.full=Seconds
+gui.@.category.fuel.burnTime.items=I: %s
+gui.@.category.fuel.burnTime.items.full=Items
+gui.@.category.itemDescription=Description
+
+gui.@.nextCharacter=>
+gui.@.previousCharacter=<
+gui.@.transferRecipesCharacter=+
+
+@.tooltip.show.all.recipes=Show all recipes
+@.tooltip.transfer=Transfer Items
+@.tooltip.transfer.max=Transfer Maximum Items
+@.tooltip.error.recipe.transfer.missing=Missing Items
+@.tooltip.error.recipe.transfer.inventory.full=Inventory is too full
+
+gui.config.power_recipes.overlaymode.recipe=Recipe Mode
+gui.config.power_recipes.overlaymode.cheat=Cheat Mode
+gui.config.power_recipes.overlaymode.utility=Utility Mode
+
+gui.power_recipes.multiblock.description_hint=Hold shift for description!
+gui.power_recipes.multiblock.layer.all=All
+
+# Minecraft name fixes
+
+tile.pistonHead.name=Piston Head
+tile.tallgrass.name=Tall Grass
+tile.deadbush.name=Dead Bush
+tile.pistonMoving.name=Moving Piston
+tile.diode.name=Redstone Repeater

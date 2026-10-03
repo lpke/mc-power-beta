@@ -32,7 +32,7 @@ public final class UiChecks {
     int oldScale = find(before, "native.guiScale").value.getAsInt();
     var parent = mc.currentScreen;
     PowerOptionsScreen s = new PowerOptionsScreen(parent); mc.setScreen(s);
-    byte[] options = Files.readAllBytes(Path.of("options.txt"));
+    byte[] options = Files.readAllBytes(local.luke.power.storage.PowerConfig.path());
     test("all settings have useful title-free explanations", () -> {
       for (Setting v : s.session().settings()) {
         check(!v.description.isBlank(), "Missing help: " + v.id);
@@ -43,7 +43,7 @@ public final class UiChecks {
     test("live GUI scale resizes existing screen without saving", () -> {
       Setting scale = find(s.session(), "native.guiScale"); scale.value = new JsonPrimitive(1); s.changed(scale);
       check(mc.currentScreen == s && s.width == mc.displayWidth, "screen did not resize");
-      check(Arrays.equals(options, Files.readAllBytes(Path.of("options.txt"))), "preview saved options");
+      check(Arrays.equals(options, Files.readAllBytes(local.luke.power.storage.PowerConfig.path())), "preview saved options");
       scale.value = new JsonPrimitive(2); s.changed(scale);
       check(s.width == (mc.displayWidth + 1) / 2, "2x width incorrect");
     });
@@ -51,15 +51,15 @@ public final class UiChecks {
       Setting music = find(s.session(), "native.music"); music.value = new JsonPrimitive(27); s.changed(music);
       check(Math.abs(mc.options.musicVolume - .27) < .0001, "music is not live");
       Setting invert = find(s.session(), "native.invert"); invert.cycle(1); s.changed(invert);
-      check(Arrays.equals(options, Files.readAllBytes(Path.of("options.txt"))), "preview saved options");
+      check(Arrays.equals(options, Files.readAllBytes(local.luke.power.storage.PowerConfig.path())), "preview saved options");
     });
     test("base texture preview is live and does not save", () -> {
       Setting pack = find(s.session(), "native.texturePack"); pack.cycle(1); s.changed(pack);
       check(!mc.field_2768.field_1175.field_1137.equals("Default"), "base pack not previewed");
-      check(Arrays.equals(options, Files.readAllBytes(Path.of("options.txt"))), "pack preview saved options");
+      check(Arrays.equals(options, Files.readAllBytes(local.luke.power.storage.PowerConfig.path())), "pack preview saved options");
     });
     test("legacy soundtrack toggle filters playback immediately", () -> {
-      Setting toggle = find(s.session(), "quickadditions:config.MUSIC_CONFIG.disableDefaultMinecraftBGM");
+      Setting toggle = find(s.session(), "power_environment:config.MUSIC_CONFIG.disableDefaultMinecraftBGM");
       toggle.value = new JsonPrimitive(true); s.changed(toggle);
       check(local.luke.power.audio.AudioController.choose(java.util.List.of(
           new net.minecraft.class_267("calm1.ogg", new java.net.URL("file:/tmp/music.ogg")))) == null,
@@ -90,7 +90,7 @@ public final class UiChecks {
       check(mc.currentScreen==s,"Apply closed screen");
       check(s.session().changes()==0,"Apply left unsaved values");
       check(field(s,"page").equals("Audio") && ((TextInput)field(s,"search")).text.equals("volume") && field(s,"scroll").equals(scroll),"Apply moved location");
-      check(Files.readString(Path.of("options.txt")).contains("music:0.37"),"Apply did not save");
+      check(Math.abs(local.luke.power.storage.PowerConfig.section("native").get("music").getAsDouble()-.37)<.0001,"Apply did not save");
     });
     // Return every saved value to the initial state.
     ConfigSession restore=SettingsRegistry.open(mc);

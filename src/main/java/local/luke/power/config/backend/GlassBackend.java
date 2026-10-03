@@ -31,6 +31,9 @@ public final class GlassBackend implements Backend {
             });
   }
 
+  private static boolean inverted(String key) { return key.equals("entityculling:config.disableEntityCulling") || key.equals("entityculling:config.disableBlockEntityCulling"); }
+  private static JsonElement encode(String key, Object value) { return inverted(key) ? new JsonPrimitive(!(Boolean)value) : Catalog.JSON.toJsonTree(value); }
+
   private void visit(String prefix, ConfigCategoryHandler category) {
     for (ConfigHandlerBase child : category.values.values()) {
       if (child instanceof ConfigCategoryHandler nested) {
@@ -40,6 +43,7 @@ public final class GlassBackend implements Backend {
       ConfigEntryHandler<?> h = (ConfigEntryHandler<?>) child;
       ConfigEntry m = h.parentField.getAnnotation(ConfigEntry.class);
       String key = id + "." + prefix + h.id;
+      if (Catalog.text(Catalog.metadata(key), "group", "").equals("Available controls")) continue;
       handlers.put(key, h);
       Class<?> type = h.parentField.getType();
       List<String> choices =
@@ -68,8 +72,8 @@ public final class GlassBackend implements Backend {
               h.name,
               h.description,
               kind,
-              Catalog.JSON.toJsonTree(h.value),
-              Catalog.JSON.toJsonTree(h.defaultValue),
+              encode(key, h.value),
+              encode(key, h.defaultValue),
               m.minValue() == 0 ? m.minLength() : m.minValue(),
               m.maxValue() == 32 ? m.maxLength() : m.maxValue(),
               kind == Setting.Kind.DECIMAL ? .05 : 1,
@@ -83,13 +87,7 @@ public final class GlassBackend implements Backend {
   }
 
   public List<Path> files() {
-    return List.of(
-        GCCore.getSaveFolder()
-            .toPath()
-            .resolve(root.modContainer().getMetadata().getId())
-            .resolve(
-                root.configCategoryHandler().parentField.getAnnotation(ConfigRoot.class).value()
-                    + ".yml"));
+    return List.of(local.luke.power.storage.PowerConfig.path());
   }
 
   public void validate(Map<String, JsonElement> values) throws Exception {
@@ -127,8 +125,8 @@ public final class GlassBackend implements Backend {
   }
 
   public boolean previews(Setting s) {
-    return !s.restart && (s.page.equals("Audio")
-        || s.id.equals("unitweaks:userinterface.frontViewThirdPerson"));
+    return !s.restart && (s.page.equals("Audio") || s.page.equals("Video")
+        || s.id.equals("power_controls:userinterface.frontViewThirdPerson"));
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -136,7 +134,7 @@ public final class GlassBackend implements Backend {
     for (var e : values.entrySet()) {
       ConfigEntryHandler h = handlers.get(e.getKey());
       Class<?> type = h.parentField.getType();
-      h.value = Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
+      h.value = inverted(e.getKey()) ? !e.getValue().getAsBoolean() : Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
       h.saveToField();
     }
     local.luke.power.audio.AudioController.rulesChanged();
@@ -147,7 +145,7 @@ public final class GlassBackend implements Backend {
     for (var e : values.entrySet()) {
       ConfigEntryHandler h = handlers.get(e.getKey());
       Class<?> type = h.parentField.getType();
-      h.value = Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
+      h.value = inverted(e.getKey()) ? !e.getValue().getAsBoolean() : Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
     }
     GCCore.saveConfig(
         root.modContainer(), root.configCategoryHandler(), EventStorage.EventSource.USER_SAVE);

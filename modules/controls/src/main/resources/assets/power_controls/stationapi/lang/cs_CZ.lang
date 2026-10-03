@@ -1,0 +1,60 @@
+# Keybinds
+key.power_controls.panorama_screenshot=Panoramatický Snímek Obrazovky
+key.power_controls.hotbar_1=Lišta 1
+key.power_controls.hotbar_2=Lišta 2
+key.power_controls.hotbar_3=Lišta 3
+key.power_controls.hotbar_4=Lišta 4
+key.power_controls.hotbar_5=Lišta 5
+key.power_controls.hotbar_6=Lišta 6
+key.power_controls.hotbar_7=Lišta 7
+key.power_controls.hotbar_8=Lišta 8
+key.power_controls.hotbar_9=Lišta 9
+key.power_controls.hide_hud=Skrýt HUD
+key.power_controls.take_screenshot=Pořídit Snímek Obrazovky
+key.power_controls.debug_hud=Debug HUD
+key.power_controls.third_person=Pohled z třetí osoby
+key.power_controls.cinematic_camera=Filmová Kamera
+key.power_controls.toggle_fullscreen=Celá Obrazovka
+key.power_controls.dismount=Vystoupit z vozidla
+key.power_controls.zoom=Příblížit
+key.power_controls.release_mouse=Odemknout Kurzor
+key.power_controls.photo_mode=Foto Režim
+key.power_controls.rescan=Skenovat Myši
+key.power_controls.toggle_raw_input=Přepnout Raw Input
+
+# FOV
+options.power_controls.fov=Zorné Pole
+options.power_controls.fov.normal=Normální
+options.power_controls.fov.max=Quake Pro
+
+# Fog
+options.power_controls.fog=Mlha
+options.power_controls.fog.off=Vypnuto
+options.power_controls.fog.normal=Normální
+options.power_controls.fog.max=Maximální
+options.power_controls.multiplier_symbol=x
+
+# Clouds
+options.power_controls.clouds=Mraky
+options.power_controls.cloud_height=Výška Mraků
+
+# FPS Limit
+options.power_controls.fps_limit=Omezovač FPS
+options.power_controls.fps_limit.max=Neomezené
+
+# Render Distance
+options.power_controls.render_distance=Vykreslovací Vzdálenost
+options.power_controls.render_distance.chunks=chunků
+options.power_controls.render_distance.tiny=Malá
+options.power_controls.render_distance.short=Krátká
+options.power_controls.render_distance.normal=Normální
+options.power_controls.render_distance.far=Vzdálená
+
+# Brightness
+options.power_controls.brightness=Jas
+options.power_controls.brightness.min=Normální
+options.power_controls.brightness.max=Světlý
+
+# GUI Scale
+options.power_controls.gui_scale=Velikost GUI
+options.power_controls.gui_scale.auto=Automatická

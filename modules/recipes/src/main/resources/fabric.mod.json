@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "power_recipes",
+  "version": "${version}",
+  "name": "Power Beta Recipes",
+  "description": "AMI is a total conversion mod aiming to revitalize old Minecraft versions by adding QoL changes and new content.",
+  "authors": [
+    "calmilamsy",
+    "danygames2014"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_recipes/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "local.luke.power.recipes.util.RecipeBrowser",
+      "local.luke.power.recipes.init.CommonInit",
+      "local.luke.power.recipes.init.AfterBlockAndItemListener",
+      "local.luke.power.recipes.init.ActionButtonListener"
+    ],
+    "stationapi:event_bus_client": [
+      "local.luke.power.recipes.init.ClientInit",
+      "local.luke.power.recipes.init.KeybindListener",
+      "local.luke.power.recipes.gui.AMITooltipSystem",
+      "local.luke.power.recipes.event.MultiplayerLogoutListener"
+    ],
+    "stationapi:event_bus_server": [
+      "local.luke.power.recipes.event.PlayerJoinedListener"
+    ],
+    "power_recipes:plugin": [
+      "local.luke.power.recipes.plugins.ami.AMIPlugin",
+      "local.luke.power.recipes.plugins.vanilla.VanillaPlugin",
+      "local.luke.power.recipes.plugins.multiblock.MultiblockPluginProvider"
+    ],
+    "gcapi3": [
+      "local.luke.power.recipes.config.AMIConfig"
+    ],
+    "gcapi3:factory_provider": [
+      "local.luke.power.recipes.config.AMIConfigFactories"
+    ],
+    "gcapi3:presave": [
+      "local.luke.power.recipes.config.ConfigChangedListener"
+    ]
+  },
+  "mixins": [
+    "power_recipes.mixins.json"
+  ],
+  "accessWidener": "power_recipes.accesswidener",
+  "depends": {
+    "gcapi3": "3.*",
+    "glassnetworking": "1.*",
+    "stationapi": ">=2.0.0-alpha.4",
+    "minecraft": "1.0.0-beta.7.3",
+    "fabricloader": ">=0.15.0"
+  },
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_8": [
+        "local/luke/power/recipes/api/AMINbt"
+      ]
+    }
+  }
+}

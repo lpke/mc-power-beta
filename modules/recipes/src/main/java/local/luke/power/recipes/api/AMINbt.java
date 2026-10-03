@@ -1,0 +1,15 @@
+package local.luke.power.recipes.api;
+
+import java.util.Map;
+import java.util.Set;
+
+public interface AMINbt {
+
+    void always_More_Items$removeTag(String name);
+
+    Set<String> always_More_Items$getKeySet();
+
+    boolean always_More_Items$hasNoTags();
+
+    Set<Map.Entry> always_More_Items$entrySet();
+}

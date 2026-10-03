@@ -46,7 +46,9 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("keys-")) InputChecks.run(mc, command.substring(5));
+      if (command.startsWith("feature-")) FeatureChecks.run(mc,command.substring(8));
+      else if (command.startsWith("revision-")) RevisionChecks.run(mc,command.substring(9));
+      else if (command.startsWith("keys-")) InputChecks.run(mc, command.substring(5));
       else if (command.equals("chat-check")) ChatChecks.run(mc);
       else if (command.startsWith("chat ")) ChatChecks.submit(mc, command.substring(5));
       else if (command.equals("audit")) audit(mc);
@@ -69,7 +71,7 @@ public final class Validation {
         ConfigSession s = SettingsRegistry.open(mc);
         find(s, parts[1]).value = JsonParser.parseString(parts[2]);
         s.save(Path.of(".").toAbsolutePath());
-      } else if (command.equals("defaults-check")) {
+      } else if ((command.equals("defaults-check") || command.equals("profile-defaults"))) {
         failures = 0;
         ConfigSession s = SettingsRegistry.open(mc);
         for (Setting setting : s.settings())
@@ -77,7 +79,9 @@ public final class Validation {
               "pack default " + setting.id,
               () ->
                   check(
-                      setting.value.equals(setting.defaultValue)
+                      (command.equals("profile-defaults") && setting.id.equals("native.guiScale") && setting.value.getAsInt()==4)
+                          || (command.equals("profile-defaults") && setting.id.equals("native.sensitivity") && Math.abs(setting.value.getAsDouble()-80)<.001)
+                          || setting.value.equals(setting.defaultValue)
                           || setting.value.isJsonPrimitive()
                               && setting.value.getAsJsonPrimitive().isNumber()
                               && Math.abs(
@@ -132,7 +136,7 @@ public final class Validation {
             s.validate(s.value);
             check(PowerOptionsScreen.PAGES.contains(s.page), "unknown page");
             check(
-                !s.label.matches("(?i).*(UniTweaks|MojangFix|Lpke|key\\.).*"),
+                !s.label.matches("(?i).*(ControlFeatures|MojangFix|Lpke|key\\.).*"),
                 "untranslated label");
           });
       n++;
@@ -166,7 +170,7 @@ public final class Validation {
     edits.put("creative.glide", new JsonPrimitive(2));
     edits.put("tweaks.freeLook", new JsonPrimitive(true));
     edits.put("worldedit.opacity", new JsonPrimitive(70));
-    edits.put("hudtweaks:config.chatHistorySize", new JsonPrimitive(101));
+    edits.put("power_hud:config.chatHistorySize", new JsonPrimitive(101));
     edits.put("logo.logo.animation.enabled", new JsonPrimitive(false));
     Object[] inventory = mc.player == null ? null : mc.player.inventory.main.clone();
     for (var e : edits.entrySet()) {
@@ -245,7 +249,7 @@ public final class Validation {
         "legacy portal stop requests are consumed",
         () -> {
           Field stop =
-              Class.forName("com.github.telvarost.zastavkaapi.ZastavkaHelper")
+              Class.forName("local.luke.power.music_api.ZastavkaHelper")
                   .getField("cancelCurrentBGM");
           stop.setBoolean(null, true);
           AudioController.blockBackground();
@@ -317,7 +321,7 @@ public final class Validation {
           "music debug HUD follows custom playback",
           () ->
               check(
-                  Class.forName("com.github.telvarost.quickadditions.ModHelper$ModHelperFields")
+                  Class.forName("local.luke.power.environment.ModHelper$ModHelperFields")
                       .getField("currentBGM")
                       .get(null)
                       .equals(AudioController.nowPlaying()),

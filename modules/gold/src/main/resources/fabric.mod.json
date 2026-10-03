@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "power_gold",
+  "version": "${version}",
+  "name": "Power Beta Gold",
+  "description": "Gives gold tools special properties such as silk touch or looting. Also, gives small advantages to gold armor.",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_gold/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [],
+    "stationapi:event_bus_client": [
+      "local.luke.power.gold.events.init.ClientInitListener"
+    ],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.gold.Config"
+    ]
+  },
+  "mixins": [
+    "power_gold.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": ">=3.0.1"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "building_validation",
+  "version": "${version}",
+  "name": "Power Beta Configuration",
+  "environment": "client",
+  "mixins": [
+    "building-validation.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.6",
+    "power_building": "*",
+    "power_worldedit": "*"
+  },
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  }
+}

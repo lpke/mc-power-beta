@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "power_creative",
+  "version": "${version}",
+  "name": "Power Beta Creative",
+  "description": "Creative flight, spectator mode and creative inventory for Minecraft Beta 1.7.3.",
+  "authors": [
+    "lpke",
+    "paulevs (CreativeInventory)"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_creative/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "stationapi:event_bus_client": [
+      "local.luke.power.creative.inventory.listeners.ClientInitListener",
+      "local.luke.power.creative.Reach"
+    ],
+    "stationapi:event_bus": [
+      "local.luke.power.creative.inventory.listeners.CommonInitListener"
+    ],
+    "power_creative_inventory:event_bus": [
+      "local.luke.power.creative.inventory.listeners.VanillaTabListener"
+    ]
+  },
+  "mixins": [
+    "power_creative_inventory.mixins.common.json",
+    "power_creative_inventory.mixins.client.json",
+    "power_creative.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "stationapi": ">=2.0-alpha.4",
+    "mixinextras": ">=0.5.0",
+    "java": ">=17"
+  },
+  "provides": [
+    "power_creative_inventory"
+  ],
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_54": [
+        "local/luke/power/creative/inventory/interfaces/CreativePlayer"
+      ],
+      "net/minecraft/class_591": [
+        "local/luke/power/creative/inventory/interfaces/CreativeLevel"
+      ],
+      "net/minecraft/class_7": [
+        "local/luke/power/creative/inventory/interfaces/CreativeLevel"
+      ]
+    }
+  }
+}

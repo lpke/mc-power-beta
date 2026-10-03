@@ -18,7 +18,8 @@ public final class ConfigAudit {
         .sorted(Map.Entry.comparingByKey())
         .forEach(
             root -> visit(root.getKey(), "", root.getValue().configCategoryHandler(), entries));
-    Path out = FabricLoader.getInstance().getGameDir().resolve("power-beta-settings-audit.json");
+    Path out = FabricLoader.getInstance().getGameDir().resolve("power-beta-data/reports/settings-audit.json");
+    Files.createDirectories(out.getParent());
     Files.writeString(out, JSON.toJson(entries));
     local.luke.power.PowerBeta.LOG.info("Audited " + entries.size() + " settings");
     Files.writeString(

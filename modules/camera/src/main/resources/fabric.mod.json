@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "power_camera",
+  "version": "${version}",
+  "name": "Power Beta Camera",
+  "description": "This mod adds a freecam to the game",
+  "authors": [
+    "Ralf2oo2"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/power_camera/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [],
+    "stationapi:event_bus_client": [
+      "local.luke.power.camera.Freecam",
+      "local.luke.power.camera.listener.KeyPressedListener",
+      "local.luke.power.camera.registry.KeyBindingRegistry"
+    ],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.camera.FreecamConfig"
+    ]
+  },
+  "mixins": [
+    "power_camera.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3"
+  }
+}

@@ -32,9 +32,9 @@ public final class NativeBackend implements Backend {
         index -> local.luke.power.visual.PackSelection.select(mc, packs.get(index)));
     slider("music", "Audio", "Volume", "Music", Option.MUSIC, 0, 100, 1, 100);
     slider("sound", "Audio", "Volume", "Sound effects", Option.SOUND, 0, 100, 1, 100);
-    slider("sensitivity", "Controls", "Mouse", "Sensitivity", Option.SENSITIVITY, 0, 200, 1, 100);
+    slider("sensitivity", "General", "Mouse", "Sensitivity", Option.SENSITIVITY, 0, 200, 1, 100);
     toggle(
-        "invert", "Controls", "Mouse", "Invert mouse", Option.INVERT_MOUSE, o.invertYMouse, false);
+        "invert", "General", "Mouse", "Invert mouse", Option.INVERT_MOUSE, o.invertYMouse, false);
     toggle("bobbing", "Camera", "View", "View bobbing", Option.VIEW_BOBBING, o.bobView, true);
     toggle("anaglyph", "Video", "Rendering", "3D anaglyph", Option.ANAGLYPH, o.anaglyph3d, false);
     toggle(
@@ -56,7 +56,7 @@ public final class NativeBackend implements Backend {
         2,
         List.of("Peaceful", "Easy", "Normal", "Hard"),
         v -> o.setInt(Option.DIFFICULTY, v - o.difficulty));
-    Class<?> mod = Class.forName("net.danygames2014.unitweaks.util.ModOptions");
+    Class<?> mod = Class.forName("local.luke.power.controls.util.ModOptions");
     for (String[] spec :
         new String[][] {
           {"fov", "fovOption", "Camera", "View", "Field of view", "70", "110", "70"},
@@ -88,8 +88,8 @@ public final class NativeBackend implements Backend {
           {
             "guiScale",
             "guiScaleOption",
+            "General",
             "Interface",
-            "Scale",
             "GUI scale",
             "0",
             "8",
@@ -150,11 +150,12 @@ public final class NativeBackend implements Backend {
                 k.translationKey
                     .replaceAll("^(key\\.)?", "")
                     .replaceAll(
-                        "(lpketweaks|lpkecreative|omnilook|unitweaks|freecam|betterscreenshots|mojangfixstationapi)\\.",
+                        "(power_building|power_creative|free_look|power_controls|freecam|power_capture|power_client_fixes)\\.",
                         "")
                     .replace('.', ' '));
       }
-      if (k.translationKey.toLowerCase(Locale.ROOT).contains("omnilook")) label = "Free look";
+      if (k.translationKey.toLowerCase(Locale.ROOT).contains("free_look")) label = "Free look";
+      if (k.translationKey.equals("powerbeta.containerPreview")) label = "Preview container contents";
       entries.add(
           new Setting(
               key,
@@ -162,7 +163,7 @@ public final class NativeBackend implements Backend {
               "Controls",
               "Key bindings",
               label,
-              "Bind a key or mouse button, with Ctrl, Shift or Alt. Escape cancels; Delete clears.",
+              ControlLinks.description(key),
               Setting.Kind.KEY,
               new JsonPrimitive(new Chord(k.code, Bindings.modifiers(k.translationKey)).encoded()),
               new JsonPrimitive(defaultKey(k)),
@@ -194,17 +195,17 @@ public final class NativeBackend implements Backend {
       case "Command" -> Keyboard.KEY_SLASH;
       case "Debug Graph" -> Keyboard.KEY_LCONTROL;
       case "key.fog" -> Keyboard.KEY_F;
-      case "key.unitweaks.hide_hud" -> Keyboard.KEY_F1;
-      case "key.unitweaks.take_screenshot" -> Keyboard.KEY_F2;
-      case "key.unitweaks.debug_hud", "lpkecreative.modifier" -> Keyboard.KEY_F3;
-      case "lpkecreative.picker" -> Keyboard.KEY_F4;
-      case "key.unitweaks.third_person" -> Keyboard.KEY_F5;
-      case "key.unitweaks.toggle_fullscreen" -> Keyboard.KEY_F11;
-      case "key.unitweaks.dismount" -> Keyboard.KEY_LSHIFT;
-      case "lpkecreative.sprint" -> Keyboard.KEY_LCONTROL;
+      case "key.power_controls.hide_hud" -> Keyboard.KEY_F1;
+      case "key.power_controls.take_screenshot" -> Keyboard.KEY_F2;
+      case "key.power_controls.debug_hud", "power_creative.modifier" -> Keyboard.KEY_F3;
+      case "power_creative.picker" -> Keyboard.KEY_F4;
+      case "key.power_controls.third_person" -> Keyboard.KEY_F5;
+      case "key.power_controls.toggle_fullscreen" -> Keyboard.KEY_F11;
+      case "key.power_controls.dismount" -> Keyboard.KEY_LSHIFT;
+      case "power_creative.sprint" -> Keyboard.KEY_LCONTROL;
       case "playerList" -> Keyboard.KEY_TAB;
       default ->
-          k.translationKey.matches("key.unitweaks.hotbar_[1-9]")
+          k.translationKey.matches("key.power_controls.hotbar_[1-9]")
               ? Integer.parseInt(k.translationKey.substring(k.translationKey.length() - 1)) + 1
               : 0;
     };
@@ -242,8 +243,8 @@ public final class NativeBackend implements Backend {
     if (key.equals("guiScale")) {
       setters.put("native." + key, v -> {
         float scale = v.getAsFloat() / 8;
-        net.danygames2014.unitweaks.util.ModOptions.guiScale = scale;
-        net.danygames2014.unitweaks.util.ModOptions.realGuiScale = scale;
+        local.luke.power.controls.util.ModOptions.guiScale = scale;
+        local.luke.power.controls.util.ModOptions.realGuiScale = scale;
         mc.options.guiScale = v.getAsInt();
         if (mc.currentScreen != null) {
           var size = new net.minecraft.class_564(mc.options, mc.displayWidth, mc.displayHeight);
@@ -254,8 +255,8 @@ public final class NativeBackend implements Backend {
     }
     if (key.equals("brightness")) {
       setters.put("native." + key, v -> {
-        net.danygames2014.unitweaks.util.ModOptions.brightness = v.getAsFloat() / 100;
-        net.danygames2014.unitweaks.util.ModOptions.updateWorldLightTable(mc);
+        local.luke.power.controls.util.ModOptions.brightness = v.getAsFloat() / 100;
+        local.luke.power.controls.util.ModOptions.updateWorldLightTable(mc);
       });
       return;
     }
@@ -344,7 +345,7 @@ public final class NativeBackend implements Backend {
   }
 
   public List<Path> files() {
-    return List.of(FabricLoader.getInstance().getGameDir().resolve("options.txt"), KeyConfig.file());
+    return List.of(local.luke.power.storage.PowerConfig.path());
   }
 
   public void validate(Map<String, JsonElement> values) {
@@ -353,7 +354,7 @@ public final class NativeBackend implements Backend {
   }
 
   public boolean previews(Setting s) {
-    return Set.of("native.guiScale", "native.music", "native.sound", "native.sensitivity",
+    return s.page.equals("Video") || Set.of("native.guiScale", "native.music", "native.sound", "native.sensitivity",
         "native.invert", "native.fov", "native.fogDensity", "native.cloudHeight",
         "native.clouds", "native.bobbing", "native.texturePack").contains(s.id);
   }
@@ -362,9 +363,13 @@ public final class NativeBackend implements Backend {
     values.forEach((key, value) -> {
       switch (key) {
         // Vanilla's setInt also saves options.txt; previews must stay in memory.
+        case "native.fancy" -> { mc.options.fancyGraphics = value.getAsBoolean(); if (mc.worldRenderer != null) mc.worldRenderer.method_1537(); }
+        case "native.ao" -> { mc.options.ao = value.getAsBoolean(); if (mc.worldRenderer != null) mc.worldRenderer.method_1537(); }
+        case "native.opengl" -> { mc.options.advancedOpengl = value.getAsBoolean(); if (mc.worldRenderer != null) mc.worldRenderer.method_1537(); }
+        case "native.anaglyph" -> { mc.options.anaglyph3d = value.getAsBoolean(); mc.textureManager.method_1096(); if (mc.worldRenderer != null) mc.worldRenderer.method_1537(); }
         case "native.invert" -> mc.options.invertYMouse = value.getAsBoolean();
         case "native.bobbing" -> mc.options.bobView = value.getAsBoolean();
-        case "native.clouds" -> net.danygames2014.unitweaks.util.ModOptions.clouds = value.getAsBoolean();
+        case "native.clouds" -> local.luke.power.controls.util.ModOptions.clouds = value.getAsBoolean();
         default -> setters.get(key).accept(value);
       }
     });

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "power_recipestest",
+  "version": "${version}",
+  "name": "Power Beta Configuration",
+  "description": "This is the content part of the total conversion mod known as Always More Items.",
+  "authors": [
+    "calmilamsy",
+    "danygames2014"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/power_recipestest/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "local.luke.power.recipes.testmod.TestMod",
+      "local.luke.power.recipes.testmod.init.RecipeListener"
+    ],
+    "stationapi:event_bus_client": [],
+    "stationapi:event_bus_server": [],
+    "power_recipes:action": [
+      "local.luke.power.recipes.testmod.init.ActionButtonListener"
+    ],
+    "power_recipes:plugin": [
+      "local.luke.power.recipes.testmod.init.DebugPlugin"
+    ]
+  },
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3"
+  }
+}

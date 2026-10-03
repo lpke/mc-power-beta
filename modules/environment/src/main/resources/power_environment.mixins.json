@@ -1,0 +1,33 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.environment.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "local.luke.power.environment.EnvironmentFeaturesMixinPlugin",
+  "mixins": [
+    "BiomeMixin",
+    "ForestBiomeMixin",
+    "HellBiomeMixin",
+    "LivingEntityMixin",
+    "MonsterEntityMixin",
+    "NaturalSpawnerGroupSizeMixin",
+    "NaturalSpawnerMixin",
+    "PigEntityMixin",
+    "PlayerEntityMixin",
+    "SkyBiomeMixin",
+    "TaigaBiomeMixin",
+    "WorldMixin"
+  ],
+  "server": [
+    "server.ServerPlayNetworkHandlerMixin"
+  ],
+  "client": [
+    "client.GameRendererMixin",
+    "client.InGameHudMixin",
+    "client.MinecraftMixin",
+    "client.SoundManagerAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -10,5 +10,10 @@
     "sha256": "24b623b63b5acdef19ba65a2444154e95f8c965e103ed1ef94f6adc2948ce5fc",
     "from": "mojangfixstationapi",
     "purpose": "Authentication/configuration library"
+  },
+  {
+    "file": "vendor/libraries/Simple-Yaml-1.8.4.jar",
+    "sha256": "bb25b3300d34601a0a2adf12db24558c00d176e75d737382f932a6c26c24979b",
+    "source": "GCAPI3 3.2.5 nested library"
   }
 ]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Create fresh Prism profiles from the built pack, without copying worlds or account data."""
 from pathlib import Path
-import argparse, json, re, shutil, zipfile
+import argparse, json, re, shutil, zipfile, os, subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -15,6 +15,13 @@ def update_properties(path, changes, sep='='):
     values = properties(path, sep)
     values.update(changes)
     path.write_text(('[General]\n' if path.suffix == '.cfg' else '') + '\n'.join(k + sep + str(v) for k, v in values.items()) + '\n')
+
+
+def migrate(game):
+    gson = next((Path.home() / '.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.13.2').glob('*/*.jar'))
+    classpath = os.pathsep.join(str(p) for p in [ROOT / 'build/classes/java/main', ROOT / 'build/resources/main', ROOT / 'input-api/build/libs/power-beta-input-1.0.0.jar', ROOT / 'vendor/libraries/Simple-Yaml-1.8.4.jar', gson])
+    java = str(Path(os.environ['JAVA_HOME']) / 'bin/java')
+    subprocess.run([java, '-cp', classpath, 'local.luke.power.config.ConfigMigration', str(game.resolve())], check=True)
 
 
 def create(output, reference, java=None):
@@ -31,7 +38,19 @@ def create(output, reference, java=None):
             update_properties(target / 'instance.cfg', {'OverrideJavaLocation': 'true', 'JavaPath': java})
         game = target / '.minecraft'
         migrated = []
-        if configured:
+        unified_reference = reference / 'config/power-beta.json'
+        legacy_import = configured and not unified_reference.exists()
+        if configured and unified_reference.exists():
+            shutil.copy2(unified_reference, game / 'config/power-beta.json')
+            migrated.append('config/power-beta.json')
+        if legacy_import:
+            # Import old profiles in this new instance, never in the reference directory.
+            (game / 'config/power-beta.json').unlink()
+            defaults = ROOT / 'src/main/resources/assets/powerbeta/defaults'
+            for name in (defaults / 'index.txt').read_text().splitlines():
+                dest = game / name
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(defaults / name, dest)
             # Copy only settings files for components in this pack; keep obsolete mods out.
             for dest in (game / 'config').rglob('*'):
                 rel = dest.relative_to(game)
@@ -89,8 +108,16 @@ def create(output, reference, java=None):
             # User's latest explicit camera-cycle preference supersedes the old profile.
             p = game / 'config/unitweaks/userinterface.yml'
             p.write_text(re.sub(r'^frontViewThirdPerson:.*$', 'frontViewThirdPerson: 0', p.read_text(), flags=re.M))
+        migrate(game)
+        path = game / 'config/power-beta.json'
+        document = json.loads(path.read_text())
+        settings = document['settings']
+        if configured:
+            settings.setdefault('visual', {})['slashChat'] = True
+            settings.setdefault('building', {})['autoWalk'] = True
         else:
-            update_properties(game / 'options.txt', {'gui_scale':'0.5', 'guiScale':'4', 'mouseSensitivity':'0.4'}, ':')
+            settings.setdefault('native', {}).update(gui_scale='0.5', guiScale='4', mouseSensitivity='0.4')
+        path.write_text(json.dumps(document, indent=2) + '\n')
         # Resources contain only downloaded game audio/icons, never profile credentials.
         if (reference / 'resources').is_dir(): shutil.copytree(reference / 'resources', game / 'resources', dirs_exist_ok=True)
         (target / 'PROFILE.json').write_text(json.dumps({

@@ -1,0 +1,21 @@
+multiplayer.power_client_fixes.hidden=Hidden
+
+multiplayer.power_client_fixes.title=Play Multiplayer
+multiplayer.power_client_fixes.edit=Edit
+multiplayer.power_client_fixes.delete=Delete
+multiplayer.power_client_fixes.join=Join Server
+multiplayer.power_client_fixes.connect=Connect
+multiplayer.power_client_fixes.directConnect=Direct Connect
+multiplayer.power_client_fixes.addServer=Add Server
+multiplayer.power_client_fixes.refresh=Refresh
+multiplayer.power_client_fixes.cancel=Cancel
+
+multiplayer.power_client_fixes.deleteConfirm1=Are you sure you want to remove this server?
+multiplayer.power_client_fixes.deleteConfirm2=will be lost forever! (A long time!)
+
+multiplayer.power_client_fixes.editServerInfo=Edit Server Info
+multiplayer.power_client_fixes.serverName=Server Name
+multiplayer.power_client_fixes.serverAddress=Server Address
+multiplayer.power_client_fixes.badPing=(no connection)
+multiplayer.power_client_fixes.pingTime=ms
+multiplayer.power_client_fixes.polling=Polling...

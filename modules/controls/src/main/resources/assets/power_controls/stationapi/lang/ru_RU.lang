@@ -1,0 +1,53 @@
+key.power_controls.panorama_screenshot=Панорамный снимок экрана
+key.power_controls.hotbar_1=Слот 1
+key.power_controls.hotbar_2=Слот 2
+key.power_controls.hotbar_3=Слот 3
+key.power_controls.hotbar_4=Слот 4
+key.power_controls.hotbar_5=Слот 5
+key.power_controls.hotbar_6=Слот 6
+key.power_controls.hotbar_7=Слот 7
+key.power_controls.hotbar_8=Слот 8
+key.power_controls.hotbar_9=Слот 9
+key.power_controls.hide_hud=Скрыть экран
+key.power_controls.take_screenshot=Сделать снимок экрана
+key.power_controls.debug_hud=Экран отладки
+key.power_controls.third_person=Третье лицо
+key.power_controls.cinematic_camera=Кинематографичная камера
+key.power_controls.toggle_fullscreen=Полноэкранный режим
+key.power_controls.dismount=Спешится
+key.power_controls.zoom=Приближение (Zoom)
+key.power_controls.release_mouse=Отпустить курсор
+key.power_controls.photo_mode=Фоторежим
+
+# FOV
+options.power_controls.fov=Поле зрения
+options.power_controls.fov.normal=Нормально
+options.power_controls.fov.max=Quake Pro
+
+# Fog
+options.power_controls.fog=Туман
+options.power_controls.fog.off=Отключен
+options.power_controls.fog.normal=Нормальный
+options.power_controls.fog.max=Сайлент Хилл
+options.power_controls.multiplier_symbol=x
+
+# Clouds
+options.power_controls.clouds=Облака
+options.power_controls.cloud_height=Высота облаков
+
+# FPS Limit
+options.power_controls.fps_limit=Лимит FPS
+options.power_controls.fps_limit.max=Неограниченно
+
+# Render Distance
+options.power_controls.render_distance=Прорисовка
+options.power_controls.render_distance.chunks=чанков
+options.power_controls.render_distane.tiny=Крошечная
+options.power_controls.render_distane.short=Короткая
+options.power_controls.render_distane.normal=Нормальная
+options.power_controls.render_distane.far=Дальняя
+
+# Brightness
+options.power_controls.brightness=Яркость
+options.power_controls.brightness.min=Нормально
+options.power_controls.brightness.max=Ярко

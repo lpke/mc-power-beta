@@ -1,5 +1,0 @@
-{
-  "required": true, "package": "local.luke.fastplace.mixin", "compatibilityLevel": "JAVA_17",
-  "client": ["MinecraftMixin", "GameOptionsMixin", "BlockItemAccessor"],
-  "injectors": {"defaultRequire": 1}
-}

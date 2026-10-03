@@ -1,0 +1,11 @@
+package local.luke.power.recipes.api.gui;
+
+/**
+ * A timer to help render things that normally depend on ticks.
+ * Get an instance from the IGuiHelper
+ */
+public interface TickTimer {
+    int getValue();
+
+    int getMaxValue();
+}

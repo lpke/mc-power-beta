@@ -18,11 +18,11 @@ public final class MouseActions {
     for (KeyBinding key : mc.options.allKeys) {
       if (!Bindings.matches(key, code)) continue;
       switch (key.translationKey) {
-        case "key.unitweaks.hide_hud" -> mc.options.hideHud = !mc.options.hideHud;
-        case "key.unitweaks.debug_hud" -> mc.options.debugHud = !mc.options.debugHud;
-        case "key.unitweaks.third_person" -> mc.options.thirdPerson = !mc.options.thirdPerson;
-        case "key.unitweaks.cinematic_camera" -> mc.options.cinematicMode = !mc.options.cinematicMode;
-        case "key.unitweaks.toggle_fullscreen" -> mc.toggleFullscreen();
+        case "key.power_controls.hide_hud" -> mc.options.hideHud = !mc.options.hideHud;
+        case "key.power_controls.debug_hud" -> mc.options.debugHud = !mc.options.debugHud;
+        case "key.power_controls.third_person" -> mc.options.thirdPerson = !mc.options.thirdPerson;
+        case "key.power_controls.cinematic_camera" -> mc.options.cinematicMode = !mc.options.cinematicMode;
+        case "key.power_controls.toggle_fullscreen" -> mc.toggleFullscreen();
         default -> {}
       }
     }

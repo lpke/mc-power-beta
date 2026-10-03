@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "power_compat",
+  "version": "${version}",
+  "name": "Power Beta Compat",
+  "description": "Provides features from incompatible mods of mine to ControlFeatures.",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_compat/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "local.luke.power.compat.events.RegistryListener"
+    ],
+    "stationapi:event_bus_client": [],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.compat.Config"
+    ],
+    "gcapi3:presave": [
+      "local.luke.power.compat.events.ConfigListener"
+    ]
+  },
+  "mixins": [
+    "power_compat.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": ">=3.0.2",
+    "stationapi": "*"
+  },
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_54": [
+        "local/luke/power/compat/VehicleInterface"
+      ]
+    }
+  }
+}

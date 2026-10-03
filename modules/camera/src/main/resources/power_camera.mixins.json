@@ -1,0 +1,22 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.camera.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [],
+  "server": [],
+  "client": [
+    "GameRendererMixin",
+    "EntityMixin",
+    "MovementInputFromOptionsMixin",
+    "WorldRendererMixin",
+    "InGameHudMixin",
+    "InteractionManagerMixin",
+    "WorldAccessor",
+    "MinecraftMixin",
+    "EntityRenderDispatcherMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

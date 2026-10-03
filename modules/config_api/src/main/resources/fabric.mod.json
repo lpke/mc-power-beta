@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "gcapi3",
+  "version": "${version}",
+  "name": "Power Beta Configuration",
+  "description": "Shared settings storage and compatibility API.",
+  "authors": [
+    "calmilamsy"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/gcapi3/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "preLaunch": [
+      "net.glasslauncher.mods.gcapi3.impl.GCCore"
+    ],
+    "gcapi3:factory_provider": [
+      "net.glasslauncher.mods.gcapi3.impl.factory.DefaultFactoryProvider"
+    ],
+    "glassnetworking": [
+      "net.glasslauncher.mods.gcapi3.impl.event.PacketInit"
+    ]
+  },
+  "mixins": [
+    "gcapi3.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3"
+  }
+}

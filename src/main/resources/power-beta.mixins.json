@@ -20,7 +20,11 @@
     "MouseBindingMixin",
     "TextureResourceMixin",
     "PackSelectionMixin",
-    "CameraDistanceMixin"
+    "CameraDistanceMixin",
+    "CreateWorldMixin",
+    "ContainerPreviewMixin",
+    "ChatTextAccessor",
+    "NativeStorageMixin"
   ],
   "injectors": {
     "defaultRequire": 1

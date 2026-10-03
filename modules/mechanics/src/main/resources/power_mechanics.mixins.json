@@ -1,0 +1,49 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.mechanics.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "local.luke.power.mechanics.MechanicFeaturesMixinPlugin",
+  "mixins": [
+    "ArmorMixin",
+    "BowItemMixin",
+    "ChestMixin",
+    "CreeperMixin",
+    "DeadBushMixin",
+    "DyeMixin",
+    "ExplosionMixin",
+    "FarmlandMixin",
+    "FireballEntityMixin",
+    "FireBlockMixin",
+    "GhastDamageMixin",
+    "GhastMixin",
+    "ItemBaseMixin",
+    "LeavesBlockMixin",
+    "LeavesItemMixin",
+    "WorldMixin",
+    "LightningEntityMixin",
+    "LogBlockMixin",
+    "LogItemMixin",
+    "PlayerInventoryMixin",
+    "PrimedTntMixin",
+    "SignBlockEntityMixin",
+    "SnowballEntityMixin",
+    "TallGrassMixin",
+    "TrapdoorBlockMixin",
+    "ZombieMixin",
+    "ZombiePigmanMixin",
+    "server.UpdateSign0x82C2SPacketMixin"
+  ],
+  "server": [
+    "server.ServerWorldMixin",
+    "server.ServerPlayerPacketHandlerMixin"
+  ],
+  "client": [
+    "client.BlockRenderManagerMixin",
+    "client.EditSignMixin",
+    "client.MinecraftAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

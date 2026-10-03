@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "power_environment",
+  "version": "${version}",
+  "name": "Power Beta Environment",
+  "description": "Adds in features that were requested, but didn't have enough time to make more real solutions.",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/power_environment/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "local.luke.power.environment.events.init.RecipeListener"
+    ],
+    "stationapi:event_bus_client": [],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.environment.Config"
+    ],
+    "gcapi3:presave": [
+      "local.luke.power.environment.events.ConfigListener"
+    ]
+  },
+  "mixins": [
+    "power_environment.mixins.json"
+  ],
+  "accessWidener": "power_environment.accesswidener",
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "power_music_api": "*",
+    "stationapi": "*",
+    "gcapi3": ">=3.0.2"
+  }
+}

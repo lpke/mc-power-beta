@@ -1,0 +1,180 @@
+package local.luke.power.controls.tweaks.morekeybinds;
+
+import local.luke.power.controls.tweaks.photomode.PhotoModeScreen;
+import local.luke.power.controls.tweaks.rawinput.RawInputHandler;
+import local.luke.power.controls.util.Util;
+import net.fabricmc.loader.api.FabricLoader;
+import net.mine_diver.unsafeevents.listener.EventListener;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Screenshot;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
+import net.modificationstation.stationapi.api.client.event.keyboard.KeyStateChangedEvent;
+import net.modificationstation.stationapi.api.network.packet.PacketHelper;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+
+@SuppressWarnings({"unused", "deprecation"})
+public class KeyPressedListener {
+
+    public KeyPressedListener() {
+        local.luke.power.input.Bindings.onMousePress("utility-controls", KeyPressedListener::press);
+    }
+    static Minecraft minecraft = null;
+    public static boolean releasedMouse = false;
+    private static long lastEvent = Long.MIN_VALUE;
+
+    @EventListener
+    public void stationKeyPress(KeyStateChangedEvent event) {
+        keyPress();
+    }
+
+    public static void keyPress() {
+        if (!Keyboard.getEventKeyState() || Keyboard.isRepeatEvent()) return;
+        long event = Keyboard.getEventNanoseconds();
+        if (event == lastEvent) return;
+        lastEvent = event;
+        press(Keyboard.getEventKey());
+    }
+
+    private static void press(int keyCode) {
+        if (keyCode == Keyboard.KEY_NONE) {
+            return;
+        }
+
+        if (minecraft == null) {
+            minecraft = ((Minecraft) FabricLoader.getInstance().getGameInstance());
+        }
+
+        if (minecraft.currentScreen == null) {
+            // Release Mouse
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.releaseMouse)) {
+                if (Mouse.isGrabbed()) {
+                    Mouse.setGrabbed(false);
+                    releasedMouse = true;
+                } else {
+                    Mouse.setGrabbed(true);
+                    releasedMouse = false;
+                }
+            }
+        }
+
+        if (minecraft.currentScreen == null) {
+            // Photo Mode
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.photoMode)) {
+                minecraft.setScreen(new PhotoModeScreen(null));
+            }
+
+            // Panorama Screenshot
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.panoramaScreenshot)) {
+                panoramaScreenshot();
+            }
+
+            // Dismount
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.dismount)) {
+                dismount();
+            }
+
+            // Rescan Mouse
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.rescanMouse)) {
+                RawInputHandler.getMouse("Player Triggered Rescan");
+                Util.notify("Rescanning for Mice", true);
+            }
+
+            // Toggle Raw Input
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.toggleRawInput)) {
+                RawInputHandler.toggleRawInput();
+            }
+
+            // Hotbar Slots
+            if (minecraft.currentScreen == null) {
+                if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar1)) {
+                    minecraft.player.inventory.selectedSlot = 0;
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar2)) {
+                    minecraft.player.inventory.selectedSlot = 1;
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar3)) {
+                    minecraft.player.inventory.selectedSlot = 2;
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar4)) {
+                    minecraft.player.inventory.selectedSlot = 3;
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar5)) {
+                    minecraft.player.inventory.selectedSlot = 4;
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar6)) {
+                    minecraft.player.inventory.selectedSlot = 5;
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar7)) {
+                    minecraft.player.inventory.selectedSlot = 6;
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar8)) {
+                    minecraft.player.inventory.selectedSlot = 7;
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar9)) {
+                    minecraft.player.inventory.selectedSlot = 8;
+                }
+            }
+        }
+
+
+    }
+
+    public static void dismount() {
+        if (minecraft.player == null) {
+            return;
+        }
+
+        if (minecraft.player.vehicle == null) {
+            return;
+        }
+
+        if (!minecraft.world.isRemote) {
+            minecraft.player.vehicle.interact(minecraft.player);
+        } else {
+            PacketHelper.send(new PlayerInteractEntityC2SPacket(minecraft.player.id, minecraft.player.vehicle.id, 0));
+        }
+    }
+
+    public static void panoramaScreenshot() {
+        // FOV 70 and 2560x1440 -> 2304x1440 scaling works well
+        if (minecraft.player == null) {
+            return;
+        }
+
+        minecraft.options.hideHud = true;
+
+        for (int i = 0; i < 6; i++) {
+            facePlayer(i);
+            minecraft.player.baseTick();
+            minecraft.gameRenderer.onFrameUpdate(0F);
+            System.out.println(i);
+            Screenshot.take(Minecraft.getRunDirectory(), minecraft.displayWidth, minecraft.displayHeight);
+        }
+
+        minecraft.options.hideHud = false;
+    }
+
+    public static void facePlayer(int direction) {
+        minecraft.player.x = Math.floor(minecraft.player.x) + 0.5;
+        minecraft.player.z = Math.floor(minecraft.player.z) + 0.5;
+        switch (direction) {
+            case 0 -> {
+                minecraft.player.pitch = 0;
+                minecraft.player.yaw = 0;
+            }
+            case 1 -> {
+                minecraft.player.pitch = 0;
+                minecraft.player.yaw = 90;
+            }
+            case 2 -> {
+                minecraft.player.pitch = 0;
+                minecraft.player.yaw = 180;
+            }
+            case 3 -> {
+                minecraft.player.pitch = 0;
+                minecraft.player.yaw = 270;
+            }
+            case 4 -> {
+                minecraft.player.pitch = 90;
+                minecraft.player.yaw = 0;
+            }
+            case 5 -> {
+                minecraft.player.pitch = -90;
+                minecraft.player.yaw = 0;
+            }
+        }
+    }
+}

@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.recipes.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "LeavesBlockItemMixin",
+    "MixinSlab",
+    "NbtCompoundMixin",
+    "ShapedRecipeMixin",
+    "ShapelessRecipeMixin",
+    "StationShapedRecipeMixin",
+    "StationShapelessRecipeMixin",
+    "WorldMixin"
+  ],
+  "server": [],
+  "client": [
+    "client.class_555Mixin",
+    "client.ConnectScreenMixin",
+    "client.FixCraftingTableGhostItemsMixin",
+    "client.HandledScreenMixin",
+    "client.MinecraftMixin",
+    "client.OverlayScreenInjectionsMixin",
+    "client.TextRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

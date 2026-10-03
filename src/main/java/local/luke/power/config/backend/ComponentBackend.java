@@ -27,13 +27,13 @@ public final class ComponentBackend implements Backend {
   public static void register(ConfigSession session) throws Exception {
     for (String[] spec :
         new String[][] {
-          {"tweaks", "local.luke.tweaks.config.Config", "current", "lpketweaks.properties"},
-          {"creative", "local.luke.creative.config.Config", "current", "lpkecreative.properties"},
+          {"tweaks", "local.luke.power.building.config.Config", "current", "power_building.properties"},
+          {"creative", "local.luke.power.creative.config.Config", "current", "power_creative.properties"},
           {
             "worldedit",
-            "local.luke.worldedit.WorldEditBeta",
+            "local.luke.power.worldedit.WorldEditor",
             "settings",
-            "worldedit-beta.properties"
+            "power-worldedit.properties"
           }
         }) {
       ComponentBackend b = new ComponentBackend(spec[0], spec[1], spec[2], spec[3]);
@@ -155,7 +155,7 @@ public final class ComponentBackend implements Backend {
     if (value instanceof List<?> list)
       return new JsonPrimitive(
           (String)
-              Class.forName("local.luke.fastplace.config.Settings")
+              Class.forName("local.luke.power.fastplace.config.Settings")
                   .getMethod("formatFilters", List.class)
                   .invoke(null, list));
     return Catalog.JSON.toJsonTree(value);
@@ -191,7 +191,7 @@ public final class ComponentBackend implements Backend {
   }
 
   public List<Path> files() {
-    return List.of(FabricLoader.getInstance().getConfigDir().resolve(file));
+    return List.of(local.luke.power.storage.PowerConfig.path());
   }
 
   private Object draft(Map<String, JsonElement> changes) throws Exception {
@@ -209,7 +209,7 @@ public final class ComponentBackend implements Backend {
           t.isEnum()
               ? t.getEnumConstants()[e.getValue().getAsInt()]
               : t == List.class
-                  ? Class.forName("local.luke.fastplace.config.Settings")
+                  ? Class.forName("local.luke.power.fastplace.config.Settings")
                       .getMethod("parseFilters", String.class)
                       .invoke(null, e.getValue().getAsString())
                   : Catalog.JSON.fromJson(e.getValue(), t);
@@ -226,8 +226,8 @@ public final class ComponentBackend implements Backend {
     else
       Class.forName(
               id.equals("tweaks")
-                  ? "local.luke.tweaks.config.ConfigStore"
-                  : "local.luke.worldedit.config.ConfigStore")
+                  ? "local.luke.power.building.config.ConfigStore"
+                  : "local.luke.power.worldedit.config.ConfigStore")
           .getMethod("validate", type)
           .invoke(null, draft);
   }

@@ -16,7 +16,7 @@ public record MusicRules(
     float ghast) {
   public static MusicRules read() {
     try {
-      Class<?> root = Class.forName("com.github.telvarost.quickadditions.Config");
+      Class<?> root = Class.forName("local.luke.power.environment.Config");
       Object config = root.getField("config").get(null);
       Object m = config.getClass().getField("MUSIC_CONFIG").get(config);
       return new MusicRules(

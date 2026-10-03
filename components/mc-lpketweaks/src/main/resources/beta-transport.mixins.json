@@ -1,7 +1,0 @@
-{
-  "required": true,
-  "package": "local.luke.transport.mixin",
-  "compatibilityLevel": "JAVA_17",
-  "client": ["BoatMixin", "MinecartMixin"],
-  "injectors": {"defaultRequire": 1}
-}

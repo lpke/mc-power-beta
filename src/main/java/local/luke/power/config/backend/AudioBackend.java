@@ -87,7 +87,7 @@ public final class AudioBackend implements Backend {
         "Prevents the same track playing twice when another is available.",
         List.of());
     Set<String> sounds = AudioController.sounds(mc);
-    sounds.addAll(s.sounds.keySet());
+
     for (String sound : sounds) {
       if (sound.startsWith("music:")) continue;
       if (Set.of("portal.portal", "ambient.weather.rain", "ambient.cave.cave", "mob.ghast.moan")

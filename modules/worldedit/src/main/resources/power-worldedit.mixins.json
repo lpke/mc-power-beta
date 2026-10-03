@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.worldedit.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MinecraftMixin",
+    "ChatMixin",
+    "ChunkMixin",
+    "FlattenedChunkMixin",
+    "WorldRendererMixin",
+    "BlockEntityFactory",
+    "CommandMixin",
+    "WorldPropertiesMixin",
+    "EntityAccess",
+    "CarryWorldAccess"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

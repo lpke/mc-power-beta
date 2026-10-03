@@ -1,0 +1,21 @@
+multiplayer.power_client_fixes.hidden=Приховано
+
+multiplayer.power_client_fixes.title=Гра в мережі
+multiplayer.power_client_fixes.edit=Редагувати
+multiplayer.power_client_fixes.delete=Видалити
+multiplayer.power_client_fixes.join=Під'єднатися
+multiplayer.power_client_fixes.connect=Під'єднатися
+multiplayer.power_client_fixes.directConnect=Пряме підключен.
+multiplayer.power_client_fixes.addServer=Додати сервер
+multiplayer.power_client_fixes.refresh=Оновити
+multiplayer.power_client_fixes.cancel=Скасувати
+
+multiplayer.power_client_fixes.deleteConfirm1=Ви певні, що хочеш видалити цей сервер?
+multiplayer.power_client_fixes.deleteConfirm2=буде втрачено назавжди! (На дуже довго!)
+
+multiplayer.power_client_fixes.editServerInfo=Ред. інфо. серв.
+multiplayer.power_client_fixes.serverName=Назва сервера
+multiplayer.power_client_fixes.serverAddress=IP сервера
+multiplayer.power_client_fixes.badPing=(немає з’єднання)
+multiplayer.power_client_fixes.pingTime=мс
+multiplayer.power_client_fixes.polling=Чекаємо...

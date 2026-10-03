@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "power_capture",
+  "version": "${version}",
+  "name": "Power Beta Capture",
+  "description": "Adds isometric and custom resolution screenshots to the game. Huge thanks to Birevan and Exalm for all the help!",
+  "authors": [
+    "Telvarost"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_capture/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "stationapi:event_bus": [],
+    "stationapi:event_bus_client": [
+      "local.luke.power.capture.KeyBindingListener"
+    ],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.capture.Config"
+    ],
+    "gcapi3:factory_provider": [
+      "local.luke.power.capture.IsometricAngleEnumFactory"
+    ]
+  },
+  "mixins": [
+    "power_capture.mixins.json"
+  ],
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": ">=3.0.1",
+    "stationapi": "*"
+  }
+}

@@ -1,110 +1,134 @@
 {
-  "unitweaks": {
+  "power_config_api": {
+    "version": "3.2.5",
+    "mapping": "net.glasslauncher:biny:b1.7.3+a00e3b0:v2",
+    "dependencies": [],
+    "enabled": true,
+    "source": "modules/config_api"
+  },
+  "power_controls": {
     "version": "0.31.0",
     "mapping": "net.glasslauncher:biny:b1.7.3+e1fe071:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/controls"
   },
-  "betterscreenshots": {
+  "power_capture": {
     "version": "1.6.0",
     "mapping": "net.glasslauncher:biny:b1.7.3+4cbd9c8:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/capture"
   },
-  "goldentweaks": {
+  "power_gold": {
     "version": "1.6.2",
     "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/gold"
   },
-  "hudtweaks": {
+  "power_hud": {
     "version": "1.9.0",
     "mapping": "net.glasslauncher:biny:b1.7.3+2f404bc:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/hud"
   },
-  "inventorytweaks": {
+  "power_inventory": {
     "version": "2.6.1",
     "mapping": "net.glasslauncher:biny:b1.7.3+2f404bc:v2",
     "dependencies": [
-      "unitweaks"
+      "power_controls"
     ],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/inventory"
   },
-  "misctweaks": {
+  "power_mechanics": {
     "version": "5.5.2",
     "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/mechanics"
   },
-  "zastavkaapi": {
+  "power_music_api": {
     "version": "1.1.2",
     "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/music_api"
   },
-  "quickadditions": {
+  "power_environment": {
     "version": "2.12.0",
     "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
     "dependencies": [
-      "zastavkaapi"
+      "power_music_api"
     ],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/environment"
   },
-  "unitweakstelsaddons": {
+  "power_compat": {
     "version": "1.9.1",
     "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/compat"
   },
-  "freecam": {
+  "power_camera": {
     "version": "0.3.2",
     "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/camera"
   },
-  "gambac": {
+  "power_window": {
     "version": "1.4.0",
     "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/window"
   },
-  "mojangfixstationapi": {
+  "power_client_fixes": {
     "version": "2.4.5",
     "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/client_fixes"
   },
-  "oldlogo": {
+  "power_title": {
     "version": "1.2",
     "mapping": "babric:barn:b1.7.3+build.8:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/title"
   },
-  "player_list": {
+  "power_player_list": {
     "version": "1.1.1",
     "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/player_list"
   },
-  "retrocommands": {
+  "power_commands": {
     "version": "0.5.10",
     "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
     "dependencies": [
-      "mojangfixstationapi"
+      "power_client_fixes"
     ],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/commands"
   },
-  "alwaysmoreitems": {
+  "power_recipes": {
     "version": "1.10.4",
     "mapping": "net.glasslauncher:biny:b1.7.3+2f404bc:v2",
     "dependencies": [],
-    "enabled": false
+    "enabled": false,
+    "source": "modules/recipes"
   },
-  "appleslices": {
+  "power_food_preview": {
     "version": "1.0.1",
     "mapping": "babric:barn:b1.7.3+build.8:v2",
     "dependencies": [],
-    "enabled": true
+    "enabled": true,
+    "source": "modules/food_preview"
   }
 }

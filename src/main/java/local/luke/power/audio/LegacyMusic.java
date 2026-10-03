@@ -9,7 +9,7 @@ final class LegacyMusic {
 
   static {
     try {
-      Class<?> helper = Class.forName("com.github.telvarost.zastavkaapi.ZastavkaHelper");
+      Class<?> helper = Class.forName("local.luke.power.music_api.MusicState");
       cancel = helper.getField("cancelCurrentBGM");
       song = helper.getField("currentMusicSong");
       record = helper.getField("currentStreamingSong");

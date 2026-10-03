@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "power_worldedit",
+  "version": "${version}",
+  "name": "Power Beta World Editing",
+  "description": "Singleplayer region editing, clipboard and undo for Beta 1.7.3.",
+  "authors": [
+    "Luke"
+  ],
+  "license": "LGPL-3.0-only",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "local.luke.power.worldedit.chat.ClientCommandsBridge"
+    ]
+  },
+  "mixins": [
+    "power-worldedit.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.6",
+    "minecraft": [
+      "1.0.0-beta.7.3",
+      "b1.7.3"
+    ],
+    "java": ">=17",
+    "mixinextras": ">=0.5.0"
+  },
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "icon": "assets/power_worldedit/icon.png"
+}

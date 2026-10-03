@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.window.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [],
+  "server": [],
+  "client": [
+    "MinecraftAppletMixin",
+    "MinecraftMixin",
+    "MouseHelperMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

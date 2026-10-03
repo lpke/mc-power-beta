@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "power_client_fixes",
+  "version": "${version}",
+  "name": "Power Beta Client Fixes",
+  "description": "MojangFix with compatibility and customization config options. Fixes skins, authentication, and more.",
+  "authors": [
+    "Telvarost",
+    "js6pak"
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "LGPL-3.0-only",
+  "icon": "assets/power_client_fixes/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "local.luke.power.client_fixes.ClientFixesMod"
+    ],
+    "client": [
+      "local.luke.power.client_fixes.client.ClientFixesClientMod"
+    ],
+    "stationapi:event_bus": [],
+    "stationapi:event_bus_client": [],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.client_fixes.Config"
+    ]
+  },
+  "mixins": [
+    "power_client_fixes.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "*",
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": ">=3.0.1"
+  }
+}

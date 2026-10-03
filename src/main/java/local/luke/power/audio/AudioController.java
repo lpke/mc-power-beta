@@ -37,18 +37,74 @@ public final class AudioController {
       menuMusic = "",
       status = "Music folders have not been scanned";
   private static int cleanup, menuCooldown;
+  private static final List<class_267> history = new ArrayList<>();
+  private static int historyIndex = -1;
+
+  private static void remember(class_267 track) {
+    while (history.size() > historyIndex + 1) history.remove(history.size() - 1);
+    history.add(track);
+    if (history.size() > 128) history.remove(0);
+    historyIndex = history.size() - 1;
+  }
+
+  private static void play(class_267 track) {
+    SoundSystem system = system();
+    if (system == null || client == null) return;
+    if (track == null || rules().disabled()) {
+      system.stop("BgMusic"); system.stop("PowerBetaMenu");
+      currentMusic = ""; menuMusic = "";
+      return;
+    }
+    system.stop("BgMusic");
+    system.stop("PowerBetaMenu");
+    menuMusic = "";
+    currentMusic = "music:" + track.field_2126;
+    paused = false;
+    int dimension = client.player == null ? 0 : client.player.dimensionId;
+    LegacyMusic.selected(track.field_2126, client.world != null && TrackRules.dimensionSpecific(track.field_2126, dimension) ? dimension : Integer.MAX_VALUE);
+    system.backgroundMusic("BgMusic", track.field_2127, track.field_2126, false);
+    system.setVolume("BgMusic", musicVolume(currentMusic));
+    system.play("BgMusic");
+    nextDelay((SoundManagerAccessor) client.soundManager);
+  }
+
+  public static void previous() {
+    if (history.isEmpty()) { next(); return; }
+    historyIndex = Math.max(0, historyIndex - 1);
+    play(history.get(historyIndex));
+  }
+
+  public static void previewSound(String id) {
+    if (client == null || system() == null) return;
+    var manager = (SoundManagerAccessor) client.soundManager;
+    boolean record = id.startsWith("records.");
+    var pool = record ? manager.power$records() : manager.power$sounds();
+    class_267 track;
+    synchronized (pool) { track = pool.method_958(record ? id.substring(8) : id); }
+    if (track == null) return;
+    SoundSystem system = system();
+    system.stop("PowerBetaPreview");
+    system.removeSource("PowerBetaPreview");
+    system.newSource(false, "PowerBetaPreview", track.field_2127, track.field_2126, false, 0, 0, 0, 0, 0);
+    system.setVolume("PowerBetaPreview", mix("PowerBetaPreview", id, client.options.soundVolume, false));
+    system.play("PowerBetaPreview");
+  }
 
   private AudioController() {}
 
   public static void settingsChanged() {
     dirty = true;
+    history.clear();
+    historyIndex = -1;
     nextAfterScan = true;
   }
 
   public static void rulesChanged() {
     MusicRules before = rules();
     rules = MusicRules.read();
-    if (before.vanillaDisabled() != rules.vanillaDisabled() || before.disabled() != rules.disabled()) next();
+    if (before.vanillaDisabled() != rules.vanillaDisabled() || before.disabled() != rules.disabled()) {
+      history.clear(); historyIndex = -1; next();
+    }
     refresh();
   }
 
@@ -127,7 +183,12 @@ public final class AudioController {
     boolean inWorld = mc.world != null;
     if (inWorld != wasWorld) {
       system.stop("PowerBetaMenu");
+      system.stop("BgMusic");
+      currentMusic = "";
       menuMusic = "";
+      history.clear();
+      historyIndex = -1;
+      paused = false;
       wasWorld = inWorld;
     }
     if (paused) return;
@@ -145,7 +206,7 @@ public final class AudioController {
         && !system.playing("PowerBetaMenu")
         && !system.playing("streaming")
         && mc.options.musicVolume > 0) {
-      if (!system.playing("BgMusic") || rules().menuOverrides()) {
+      if (!system.playing("BgMusic")) {
         MusicLibrary.Track track =
             MENU.choose(
                 library.menu.tracks(),
@@ -155,12 +216,9 @@ public final class AudioController {
                 t -> t.path().toString());
         try {
           menuCooldown = 20;
-          system.stop("BgMusic");
-          menuMusic = "music:" + track.name();
-          system.backgroundMusic(
-              "PowerBetaMenu", track.path().toUri().toURL(), track.name(), false);
-          system.setVolume("PowerBetaMenu", musicVolume(menuMusic));
-          system.play("PowerBetaMenu");
+          class_267 selected = new class_267(track.name(), track.path().toUri().toURL());
+          remember(selected);
+          play(selected);
         } catch (Exception e) {
           PowerBeta.LOG.warn("Could not play menu music", e);
         }
@@ -179,6 +237,7 @@ public final class AudioController {
       currentMusic = "";
     }
     return paused
+        || (client != null && client.world == null && rules().menuEnabled() && rules().menuOverrides() && !library.menu.tracks().isEmpty())
         || rules().disabled()
         || AudioConfig.current().master == 0
         || (s != null && s.playing("PowerBetaMenu"));
@@ -210,6 +269,7 @@ public final class AudioController {
     class_267 chosen =
         WORLD.choose(tracks, s.shuffle, s.avoidRepeats, RANDOM, t -> t.field_2127.toExternalForm());
     if (chosen != null) {
+      remember(chosen);
       currentMusic = "music:" + chosen.field_2126;
       LegacyMusic.selected(
           chosen.field_2126,
@@ -299,13 +359,24 @@ public final class AudioController {
   }
 
   public static void next() {
-    SoundSystem s = system();
-    if (s != null) {
-      s.stop("BgMusic");
-      s.stop("PowerBetaMenu");
-    }
+    if (client == null || system() == null) return;
+    if (rules().disabled()) { play(null); return; }
     paused = false;
-    if (client != null) ((SoundManagerAccessor) client.soundManager).power$countdown(0);
+    if (historyIndex + 1 < history.size()) { play(history.get(++historyIndex)); return; }
+    if (client.world == null && rules().menuEnabled() && !library.menu.tracks().isEmpty()) {
+      var track = MENU.choose(library.menu.tracks(), AudioConfig.current().shuffle,
+          AudioConfig.current().avoidRepeats, RANDOM, t -> t.path().toString());
+      try {
+        var selected = new class_267(track.name(), track.path().toUri().toURL());
+        remember(selected);
+        play(selected);
+      } catch (Exception e) { PowerBeta.LOG.warn("Could not play music", e); }
+      return;
+    }
+    var pool = ((SoundManagerAccessor) client.soundManager).power$music();
+    List<class_267> tracks;
+    synchronized (pool) { tracks = List.copyOf(((SoundPoolAccessor) pool).power$tracks()); }
+    play(choose(tracks));
   }
 
   public static Set<String> sounds(Minecraft mc) {
@@ -319,6 +390,7 @@ public final class AudioController {
       for (String key : ((SoundPoolAccessor) record).power$groups().keySet())
         result.add("records." + key);
     }
+    result.removeIf(id -> !BetaSounds.contains(id));
     return result;
   }
 

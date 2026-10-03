@@ -3,6 +3,7 @@ package local.luke.power.audio;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import local.luke.power.storage.PowerConfig;
 import local.luke.power.PowerBeta;
 import local.luke.power.config.*;
 import net.fabricmc.loader.api.FabricLoader;
@@ -11,14 +12,13 @@ public final class AudioConfig {
   private static AudioSettings current = load();
 
   public static Path path() {
-    return FabricLoader.getInstance().getConfigDir().resolve("power-beta/audio.json");
+    return PowerConfig.path();
   }
 
   private static AudioSettings load() {
     try {
       if (!Files.exists(path())) return new AudioSettings();
-      if (Files.size(path()) > 262144) throw new IOException("Audio settings exceed 256 KiB");
-      AudioSettings s = Catalog.JSON.fromJson(Files.readString(path()), AudioSettings.class);
+      AudioSettings s = PowerConfig.read("audio", AudioSettings.class);
       s.validate();
       return s;
     } catch (Exception e) {
@@ -48,7 +48,7 @@ public final class AudioConfig {
 
   public static void save(AudioSettings next) throws IOException {
     next.validate();
-    FileTransaction.atomicWrite(path(), Catalog.JSON.toJson(next).getBytes(StandardCharsets.UTF_8));
+    PowerConfig.save("audio", next);
     preview(next);
   }
 }

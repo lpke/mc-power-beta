@@ -16,7 +16,7 @@ public final class LogoBackend implements Backend {
   private final Object config;
 
   public LogoBackend() throws Exception {
-    Class<?> logo = Class.forName("me.lukiiy.oldLogo.OldLogo");
+    Class<?> logo = Class.forName("local.luke.power.title.TitleFeatures");
     config = logo.getField("CONFIG").get(null);
     for (Field f : logo.getFields()) {
       if (!f.getType().getSimpleName().equals("ConfigKey")) continue;
@@ -81,7 +81,7 @@ public final class LogoBackend implements Backend {
   }
 
   public List<Path> files() {
-    return List.of(FabricLoader.getInstance().getConfigDir().resolve("oldLogo.json"));
+    return List.of(local.luke.power.storage.PowerConfig.path());
   }
 
   public void validate(Map<String, JsonElement> values) {
@@ -124,10 +124,7 @@ public final class LogoBackend implements Backend {
 
   public void apply(Map<String, JsonElement> values) throws Exception {
     Path file = files().get(0);
-    JsonObject data =
-        Files.exists(file)
-            ? JsonParser.parseString(Files.readString(file)).getAsJsonObject()
-            : new JsonObject();
+    JsonObject data = local.luke.power.storage.PowerConfig.section("title");
     for (var e : values.entrySet()) {
       String[] path = e.getKey().substring(5).split("\\.");
       JsonObject at = data;
@@ -137,7 +134,7 @@ public final class LogoBackend implements Backend {
       }
       at.add(path[path.length - 1], e.getValue().deepCopy());
     }
-    FileTransaction.atomicWrite(file, Catalog.JSON.toJson(data).getBytes(StandardCharsets.UTF_8));
+    local.luke.power.storage.PowerConfig.put("title", data);
     config.getClass().getMethod("load").invoke(config);
     for (Object key : keys.values()) key.getClass().getMethod("load").invoke(key);
   }

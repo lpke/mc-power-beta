@@ -1,0 +1,31 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.compat.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "plugin": "local.luke.power.compat.CompatibilityFeaturesMixinPlugin",
+  "mixins": [
+    "disablecoloredsheep.SheepEntityMixin",
+    "keepplayercraftinggrid.PlayerBaseMixin",
+    "keepplayercraftinggrid.PlayerContainerMixin",
+    "milksquids.SquidEntityMixin",
+    "modernplantreplacement.BlockItemMixin",
+    "modernslabplacement.SlabBlockMixin",
+    "modernslabplacement.SlabBlockItemMixin",
+    "pigmushrooms.PigEntityMixin",
+    "shoveleffectivity.ShovelItemMixin",
+    "vehicleloginlogoutfix.PlayerBaseMixin",
+    "vehicleloginlogoutfix.WorldMixin"
+  ],
+  "server": [
+    "vehicleloginlogoutfix.ServerLoginNetworkHandlerMixin",
+    "vehicleloginlogoutfix.ServerPlayerConnectionManagerMixin"
+  ],
+  "client": [
+    "extradebuginfo.InGameHudMixin",
+    "particledisabler.WorldRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

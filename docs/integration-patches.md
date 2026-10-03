@@ -4,8 +4,9 @@
   collapsible sections, search, draft edits, exact numeric entry and key capture.
   Its layout follows BTA 7.3_04. Native pause-menu button handlers remain intact,
   including incremental world saving and normal quit behavior.
-- Module IDs remain unchanged. This preserves mixin integrations, config loading,
-  block/item registrations and creative-mode compatibility checks.
+- Owned code uses Power Beta packages, module IDs and assets. Legacy config and
+  world-data identifiers are recognized only by migration adapters. The configuration
+  API keeps its binary identity for the retained platform and performance modules.
 - Utility modules compile from editable sources through `source-build`. Their JARs
   are build outputs nested inside Power Beta, not external utility dependencies.
   The retained binaries are the platform, authentication and performance layer.
@@ -19,8 +20,8 @@
 - Existing cached sounds load before the legacy resource-download request, with
   bounded network timeouts and duplicate-safe sound pool insertion. This avoids
   a stalled legacy resource server leaving the game silent.
-- The config library's two Mod Menu compatibility mixins are removed from the
-  packaged artifact. Its config loader, serializers and save hooks are retained.
+- The configuration API is compiled from source. Its storage adapter owns sections
+  in the unified JSON. Mod Menu hooks and duplicate Glass Networking code are removed.
 - Defaults and interrupted-save recovery run when Fabric constructs the pack's
   language adapter, before mixin plugins and config-library preLaunch entrypoints.
   Installing them in an ordinary preLaunch hook was too late for these libraries.
@@ -45,7 +46,7 @@
   Its two injection descriptors were remapped to Barn. The food preview is unchanged.
 - Platform compile copies normalize Loom/access-widener metadata for the pinned
   build toolchain. Runtime platform code is not changed by that normalization.
-  GCAPI's obsolete Mod Menu hook removal is the only packaged binary patch.
+  Runtime binaries are shipped without the previous configuration-JAR patch.
 
 ## Chunk writes and compact buttons
 
@@ -58,3 +59,21 @@ failed edit cannot masquerade as a successful inventory restoration.
 The shared Options renderer retains all four native texture edges and tiles the
 interior. Native Beta buttons crop the bottom at compact heights and omit a column
 on odd widths. The custom renderer fixes both without changing hitboxes.
+
+## Unified storage and container recovery
+
+- `PowerConfig` is the sole settings writer. Native options and key mappings,
+  camera positions and all owned modules share `config/power-beta.json`.
+- Migration verifies a byte-for-byte archive before committing the new document.
+  A pending-import record resumes old-file cleanup after interruption. Changed or
+  malformed originals are preserved. Settings transactions remain recoverable.
+- Archives move under `power-beta-data`; world-local container journals stay with
+  their world. Compatibility readers preserve older creative/editing NBT values.
+- Container transfer uses the existing edit scope to suppress item-drop callbacks.
+  It flushes original NBT before removal and target intent before placement. Loaded
+  chunks, reach, block metadata, inventory checksums and placement occupancy are
+  checked before mutation. Successful transfers retain full recovery archives.
+- Position records use an explicit Gson decoder because the game's Gson 2.8.9
+  predates Java record support. Journal tests use that exact Gson generation.
+- Retired the one-off upstream catalog/default import generators. The reviewed
+  catalog, code defaults and legacy migration fixtures are now maintained directly.

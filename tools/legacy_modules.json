@@ -1,0 +1,20 @@
+{
+  "unitweaks": "power_controls",
+  "betterscreenshots": "power_capture",
+  "goldentweaks": "power_gold",
+  "hudtweaks": "power_hud",
+  "inventorytweaks": "power_inventory",
+  "misctweaks": "power_mechanics",
+  "zastavkaapi": "power_music_api",
+  "quickadditions": "power_environment",
+  "unitweakstelsaddons": "power_compat",
+  "freecam": "power_camera",
+  "gambac": "power_window",
+  "mojangfixstationapi": "power_client_fixes",
+  "oldlogo": "power_title",
+  "player_list": "power_player_list",
+  "retrocommands": "power_commands",
+  "alwaysmoreitems": "power_recipes",
+  "appleslices": "power_food_preview",
+  "powerconfig": "power_config_api"
+}

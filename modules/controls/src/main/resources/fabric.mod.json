@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "id": "power_controls",
+  "version": "${version}",
+  "name": "Power Beta Controls",
+  "description": "An attempt at an all-in-one fixes and tweaks package for Beta 1.7.3",
+  "authors": [
+    {
+      "name": "DanyGames2014",
+      "contact": {
+        "sources": "https://github.com/danygames2014",
+        "discord": "danygames2014"
+      }
+    },
+    {
+      "name": "Telvarost",
+      "contact": {
+        "sources": "https://github.com/telvarost"
+      }
+    }
+  ],
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  },
+  "license": "MIT",
+  "icon": "assets/power_controls/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "stationapi:event_bus": [
+      "local.luke.power.controls.event.InitListener",
+      "local.luke.power.controls.tweaks.recipes.RecipeListener",
+      "local.luke.power.controls.tweaks.recipes.FurnaceRecipeListener",
+      "local.luke.power.controls.bugfixes.slabminingfix.MiningListener"
+    ],
+    "stationapi:event_bus_client": [
+      "local.luke.power.controls.tweaks.morekeybinds.KeyPressedListener",
+      "local.luke.power.controls.tweaks.morekeybinds.KeyBindingListener"
+    ],
+    "stationapi:event_bus_server": [],
+    "gcapi3": [
+      "local.luke.power.controls.ControlFeatures"
+    ],
+    "gcapi3:factory_provider": [
+      "local.luke.power.controls.util.ConfigFactories"
+    ]
+  },
+  "mixins": [
+    "power_controls.mixins.json"
+  ],
+  "accessWidener": "power_controls.accesswidener",
+  "depends": {
+    "minecraft": "1.0.0-beta.7.3",
+    "gcapi3": "*"
+  }
+}

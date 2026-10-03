@@ -1,1 +1,16 @@
-{"schemaVersion":1,"id":"power_beta_validation","version":"1.0.0","name":"Power Beta Validation (development only)","environment":"client","mixins":["power-beta-validation.mixins.json"],"depends":{"power_beta":"*"}}
+{
+  "schemaVersion": 1,
+  "id": "power_beta_validation",
+  "version": "1.0.0",
+  "name": "Power Beta Configuration",
+  "environment": "client",
+  "mixins": [
+    "power-beta-validation.mixins.json"
+  ],
+  "depends": {
+    "power_beta": "*"
+  },
+  "contact": {
+    "sources": "https://github.com/lpke/mc-power-beta"
+  }
+}

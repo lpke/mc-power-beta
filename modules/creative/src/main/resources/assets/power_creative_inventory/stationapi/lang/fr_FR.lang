@@ -1,0 +1,14 @@
+tab.power_creative_inventory.full_blocks.name=Blocs pleins de Minecraft
+tab.power_creative_inventory.other_blocks.name=Autres blocs de Minecraft
+tab.power_creative_inventory.tools.name=Outils de Minecraft
+tab.power_creative_inventory.weapons.name=Armes de Minecraft
+tab.power_creative_inventory.resources.name=Ressources de Minecraft
+tab.power_creative_inventory.food.name=Nourriture de Minecraft
+tab.power_creative_inventory.other_items.name=Objets de Minecraft
+title.power_creative_inventory.selectWorld.survival=Survie
+title.power_creative_inventory.selectWorld.creative=Créatif
+title.power_creative_inventory.selectGame.inventory=Inventaire
+title.power_creative_inventory.selectGame.creative=Créatif
+item.power_creative_inventory.tall_grass.name=Herbe haute
+item.power_creative_inventory.fern.name=Fourgère
+tile.power_creative_inventory.dead_bush.name=Arbuste mort
