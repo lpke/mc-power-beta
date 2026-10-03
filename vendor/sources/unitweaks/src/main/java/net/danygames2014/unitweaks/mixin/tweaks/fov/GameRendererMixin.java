@@ -47,7 +47,7 @@ public abstract class GameRendererMixin {
     public float getFovMultiplier(float partialTicks, boolean isHand, float originalValue) {
         fov = isHand ? originalValue : originalValue + ModOptions.getFovOffsetInDegrees();
 
-        if (Keyboard.isKeyDown(KeyBindingListener.zoom.code) && client.currentScreen == null) {
+        if (local.luke.power.input.Bindings.down(KeyBindingListener.zoom) && client.currentScreen == null) {
             if (!zoomedIn) {
                 ModOptions.zoomFovOffset = 0;
                 fovZoom = 0F;
@@ -84,7 +84,7 @@ public abstract class GameRendererMixin {
             return original;
         }
         
-        return original || Keyboard.isKeyDown(KeyBindingListener.zoom.code);
+        return original || local.luke.power.input.Bindings.down(KeyBindingListener.zoom);
     }
 
     @WrapOperation(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;getFov(F)F"))

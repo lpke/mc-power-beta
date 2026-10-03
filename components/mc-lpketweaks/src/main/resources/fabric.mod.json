@@ -10,11 +10,7 @@
   "license": "LGPL-3.0-only",
   "environment": "client",
   "icon": "assets/lpketweaks/icon.png",
-  "entrypoints": {
-    "modmenu": [
-      "local.luke.tweaks.config.ModMenuIntegration"
-    ]
-  },
+  "entrypoints": {},
   "mixins": [
     "beta-autowalk.mixins.json",
     "beta-transport.mixins.json",

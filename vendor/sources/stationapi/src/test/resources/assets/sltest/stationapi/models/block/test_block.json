@@ -1,6 +1,0 @@
-{
-  "parent": "block/legacy/cube_all",
-  "textures": {
-    "all": "sltest:blocks/testBlock"
-  }
-}

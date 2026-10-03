@@ -13,8 +13,7 @@
     "StationShapelessRecipeMixin",
     "WorldMixin"
   ],
-  "server": [
-  ],
+  "server": [],
   "client": [
     "client.class_555Mixin",
     "client.ConnectScreenMixin",

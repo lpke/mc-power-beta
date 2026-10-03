@@ -3,10 +3,8 @@
   "minVersion": "0.8",
   "package": "ralf2oo2.freecam.mixin",
   "compatibilityLevel": "JAVA_8",
-  "mixins": [
-  ],
-  "server": [
-  ],
+  "mixins": [],
+  "server": [],
   "client": [
     "GameRendererMixin",
     "EntityMixin",

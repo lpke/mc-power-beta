@@ -1,5 +1,7 @@
 package local.luke.worldedit;
 
+import local.luke.worldedit.chat.ChatFormat;
+
 import java.io.IOException;
 import java.lang.reflect.*;
 import local.luke.worldedit.config.*;
@@ -121,7 +123,7 @@ public final class WorldEditBeta {
           new BlockParser(id -> id < Block.BLOCKS.length && Block.BLOCKS[id] != null);
       editor =
           new Editor(
-              new MinecraftWorld(world), parser, s -> mc.inGameHud.addChatMessage("[WE] " + s));
+              new MinecraftWorld(world), parser, s -> mc.inGameHud.addChatMessage(ChatFormat.info(s)));
       editor.limit = settings.blockLimit;
       editor.engine.configure(settings.blockLimit, settings.historySize);
     }
@@ -155,23 +157,22 @@ public final class WorldEditBeta {
     if (!available(mc)) {
       if (mc.inGameHud != null)
         mc.inGameHud.addChatMessage(
-            "[WE] "
-                + (!localPlayer(mc)
-                    ? "WorldEdit Beta requires a live local singleplayer world."
+            ChatFormat.error(!localPlayer(mc)
+                    ? "World editing requires a live local singleplayer world."
                     : !settings.enabled
-                        ? "WorldEdit is disabled in Mod Menu."
+                        ? "World editing is disabled in Options."
                         : worldOverride(mc) == WorldOverride.DISABLED
                             ? "WorldEdit is disabled in this world."
-                            : "WorldEdit requires creative mode. Change access in Mod Menu."));
+                            : "WorldEdit requires creative mode. Change access in Options."));
       return true;
     }
     try {
       new Commands(editor(mc), player(mc)).run(text);
     } catch (IllegalArgumentException | ArithmeticException e) {
-      mc.inGameHud.addChatMessage("[WE] " + e.getMessage());
+      mc.inGameHud.addChatMessage(ChatFormat.error(e.getMessage()));
     } catch (RuntimeException e) {
       LOG.error("WorldEdit command failed", e);
-      mc.inGameHud.addChatMessage("[WE] Command failed. See game log.");
+      mc.inGameHud.addChatMessage(ChatFormat.error("Command failed. See game log."));
     }
     return true;
   }
@@ -255,7 +256,7 @@ public final class WorldEditBeta {
   }
 
   private static void message(Minecraft mc, String s) {
-    mc.inGameHud.addChatMessage("[WE] " + s);
+    mc.inGameHud.addChatMessage(ChatFormat.info(s));
   }
 
   public static boolean holdingWand(Minecraft mc) {

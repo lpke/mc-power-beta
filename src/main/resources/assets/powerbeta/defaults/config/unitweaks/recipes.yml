@@ -1,0 +1,29 @@
+enableRecipes: false
+furnaceFuels: false
+toolRepair: false
+modern:
+  shapelessFlintAndSteel: false
+  shapelessMushroomStew: false
+  shapelessChestMinecart: false
+  shapelessFurnaceMinecart: false
+  shapelessStickyPistons: false
+  booksRequireLeather: false
+  woolRedyeing: false
+  sixSlabsPerCraft: false
+  oneStonePerButton: false
+  modernFenceRecipe: false
+  snowLayerRecipe: false
+  threeLaddersPerCraft: false
+tweaked:
+  shapelessJackOLantern: false
+  stairsPerCraft: 4
+  trapdoorsPerCraft: 2
+obtainable:
+  craftableGrassBlocks: false
+  craftableCobwebs: false
+  craftableFire: false
+  craftableCoalOre: false
+  craftableIronOre: false
+  craftableGoldOre: false
+  craftableLapisOre: false
+  craftableDiamondOre: false

@@ -273,13 +273,14 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
   @Unique
   private void creative_destroySlot(int x, int y) {
     if (!local.luke.creative.config.Config.current().destroySlot) return;
-    int left = x - 22, top = y + 137;
-    fill(left + 1, top, x + 4, top + 26, 0xFF000000);
-    fill(left, top + 1, x + 4, top + 25, 0xFF000000);
-    fill(left + 1, top + 1, x + 4, top + 24, 0xFFC6C6C6);
+    int left = x - 22, top = y + 137, bottom = y + containerHeight;
+    // The extension shares the inventory's bottom border, including its two shadow pixels.
+    fill(left + 1, top, x + 4, bottom, 0xFF000000);
+    fill(left, top + 1, x + 4, bottom - 1, 0xFF000000);
+    fill(left + 1, top + 1, x + 4, bottom - 1, 0xFFC6C6C6);
     fill(left + 2, top + 1, x + 4, top + 3, 0xFFFFFFFF);
-    fill(left + 1, top + 2, left + 3, top + 23, 0xFFFFFFFF);
-    fill(left + 2, top + 23, x + 4, top + 25, 0xFF555555);
+    fill(left + 1, top + 2, left + 3, bottom - 3, 0xFFFFFFFF);
+    fill(left + 2, bottom - 3, x + 4, bottom - 1, 0xFF555555);
     local.luke.creative.ui.Texture.draw(
         minecraft, "inventory", x - 18, y + 141, 18, 18, 172, 111, 18, 18, 256, 256);
     if ((Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
@@ -438,6 +439,10 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
 
   @Override
   protected void mouseClicked(int mouseX, int mouseY, int button) {
+    if (local.luke.power.input.Bindings.matches(minecraft.options.inventoryKey, button - 100)) {
+      minecraft.player.closeContainer();
+      return;
+    }
     if (creative_isInCreative()) {
       int posX = (this.width - this.containerWidth) / 2;
       int posY = (this.height - this.containerHeight) / 2;

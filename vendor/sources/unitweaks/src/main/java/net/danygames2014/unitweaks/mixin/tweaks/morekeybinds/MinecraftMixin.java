@@ -21,36 +21,36 @@ public class MinecraftMixin {
     // F1
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 59))
     public int modifyHideHudKeybind(int constant) {
-        return KeyBindingListener.hideHUD.code;
+        return local.luke.power.input.Bindings.eventCode(KeyBindingListener.hideHUD);
     }
 
-    // F2
-    @ModifyConstant(method = "handleScreenshotKey", constant = @Constant(intValue = 60))
-    public int modifyTakeScreenshotKeybind(int constant) {
-        return KeyBindingListener.takeScreenshot.code;
+    // Screenshot handling polls held state rather than comparing a keyboard event.
+    @WrapOperation(method = "handleScreenshotKey", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Keyboard;isKeyDown(I)Z", remap = false))
+    public boolean power$screenshot(int code, Operation<Boolean> original) {
+        return local.luke.power.input.Bindings.down(KeyBindingListener.takeScreenshot);
     }
 
     // F3
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 61))
     public int modifyDebugHudKeybind(int constant) {
-        return KeyBindingListener.debugHud.code;
+        return local.luke.power.input.Bindings.eventCode(KeyBindingListener.debugHud);
     }
 
     // F5
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 63))
     public int modifyThirdPersonKeybind(int constant) {
-        return KeyBindingListener.thirdPerson.code;
+        return local.luke.power.input.Bindings.eventCode(KeyBindingListener.thirdPerson);
     }
 
     // F6
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 66))
     public int modifyCinematicCameraKeybind(int constant) {
-        return KeyBindingListener.cinematicCamera.code;
+        return local.luke.power.input.Bindings.eventCode(KeyBindingListener.cinematicCamera);
     }
 
     // F11
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 87))
     public int modifyToggleFullscreenKeybind(int constant) {
-        return KeyBindingListener.toggleFullscreen.code;
+        return local.luke.power.input.Bindings.eventCode(KeyBindingListener.toggleFullscreen);
     }
 }

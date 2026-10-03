@@ -4,10 +4,8 @@ import com.matthewperiut.retrocommands.RetroCommands;
 import com.matthewperiut.retrocommands.api.Command;
 import com.matthewperiut.retrocommands.command.extra.*;
 import com.matthewperiut.retrocommands.command.optional.Gamemode;
-import com.matthewperiut.retrocommands.command.optional.ReloadCryonicConfig;
 import com.matthewperiut.retrocommands.command.server.*;
 import com.matthewperiut.retrocommands.command.vanilla.*;
-import com.periut.cryonicconfig.CryonicConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -55,7 +53,7 @@ public class RetroChatUtil {
         commands.add(new Kill());
         commands.add(new Warp());
         commands.add(new WhoAmI());
-        if (RetroCommands.cryConfig) { commands.add(new ReloadCryonicConfig()); }
+
 
         for (Command c : commands) {
             if (!c.disableInSingleplayer() || FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER)
@@ -70,13 +68,7 @@ public class RetroChatUtil {
 
         String wanted = help ? segments[1] : segments[0];
 
-        if (RetroCommands.cryConfig) {
-            ConfigUtil.refreshDisabledCommands();
-            if (RetroCommands.disabled_commands.contains(command)) {
-                commandSource.sendFeedback("Command '" + segments[0] + "' not found. Try /help");
-                return false;
-            }
-        }
+
 
         for (Command c : commands) {
             if (c.name() == null)

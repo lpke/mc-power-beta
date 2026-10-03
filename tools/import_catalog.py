@@ -66,6 +66,7 @@ for e in audit:
  if root=='unitweaks:features' and isinstance(default,bool):default=False
  if root=='misctweaks:config' and isinstance(default,bool):default=False
  if root=='quickadditions:config' and isinstance(default,bool):default=False
+ if root=='quickadditions:config' and '.SPAWN_LIST_CONFIG.' in i:default=True
  if root=='unitweakstelsaddons:config' and leaf in ['enableShovelsEffectiveOnSoulSand','slabPlacementFixesEnabled']:default=False
  if root=='unitweaks:gameplay' and leaf=='noFoodWastage':default=False
  if root=='unitweaks:userinterface' and leaf in ['enablePanorma','showVersionTextIngame']:default=False

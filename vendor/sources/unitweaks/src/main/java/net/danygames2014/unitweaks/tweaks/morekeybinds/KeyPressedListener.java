@@ -16,8 +16,12 @@ import org.lwjgl.input.Mouse;
 @SuppressWarnings({"unused", "deprecation"})
 public class KeyPressedListener {
 
+    public KeyPressedListener() {
+        local.luke.power.input.Bindings.onMousePress("utility-controls", KeyPressedListener::press);
+    }
     static Minecraft minecraft = null;
     public static boolean releasedMouse = false;
+    private static long lastEvent = Long.MIN_VALUE;
 
     @EventListener
     public void stationKeyPress(KeyStateChangedEvent event) {
@@ -25,8 +29,14 @@ public class KeyPressedListener {
     }
 
     public static void keyPress() {
-        int keyCode = Keyboard.getEventKey();
+        if (!Keyboard.getEventKeyState() || Keyboard.isRepeatEvent()) return;
+        long event = Keyboard.getEventNanoseconds();
+        if (event == lastEvent) return;
+        lastEvent = event;
+        press(Keyboard.getEventKey());
+    }
 
+    private static void press(int keyCode) {
         if (keyCode == Keyboard.KEY_NONE) {
             return;
         }
@@ -35,9 +45,9 @@ public class KeyPressedListener {
             minecraft = ((Minecraft) FabricLoader.getInstance().getGameInstance());
         }
 
-        if (!Keyboard.getEventKeyState() && minecraft.currentScreen == null) {
+        if (minecraft.currentScreen == null) {
             // Release Mouse
-            if (keyCode == KeyBindingListener.releaseMouse.code) {
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.releaseMouse)) {
                 if (Mouse.isGrabbed()) {
                     Mouse.setGrabbed(false);
                     releasedMouse = true;
@@ -48,52 +58,52 @@ public class KeyPressedListener {
             }
         }
 
-        if (Keyboard.getEventKeyState() && minecraft.currentScreen == null) {
+        if (minecraft.currentScreen == null) {
             // Photo Mode
-            if (keyCode == KeyBindingListener.photoMode.code) {
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.photoMode)) {
                 minecraft.setScreen(new PhotoModeScreen(null));
             }
 
             // Panorama Screenshot
-            if (keyCode == KeyBindingListener.panoramaScreenshot.code) {
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.panoramaScreenshot)) {
                 panoramaScreenshot();
             }
 
             // Dismount
-            if (keyCode == KeyBindingListener.dismount.code) {
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.dismount)) {
                 dismount();
             }
 
             // Rescan Mouse
-            if (keyCode == KeyBindingListener.rescanMouse.code) {
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.rescanMouse)) {
                 RawInputHandler.getMouse("Player Triggered Rescan");
                 Util.notify("Rescanning for Mice", true);
             }
 
             // Toggle Raw Input
-            if (keyCode == KeyBindingListener.toggleRawInput.code) {
+            if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.toggleRawInput)) {
                 RawInputHandler.toggleRawInput();
             }
 
             // Hotbar Slots
             if (minecraft.currentScreen == null) {
-                if (keyCode == KeyBindingListener.hotbar1.code) {
+                if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar1)) {
                     minecraft.player.inventory.selectedSlot = 0;
-                } else if (keyCode == KeyBindingListener.hotbar2.code) {
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar2)) {
                     minecraft.player.inventory.selectedSlot = 1;
-                } else if (keyCode == KeyBindingListener.hotbar3.code) {
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar3)) {
                     minecraft.player.inventory.selectedSlot = 2;
-                } else if (keyCode == KeyBindingListener.hotbar4.code) {
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar4)) {
                     minecraft.player.inventory.selectedSlot = 3;
-                } else if (keyCode == KeyBindingListener.hotbar5.code) {
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar5)) {
                     minecraft.player.inventory.selectedSlot = 4;
-                } else if (keyCode == KeyBindingListener.hotbar6.code) {
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar6)) {
                     minecraft.player.inventory.selectedSlot = 5;
-                } else if (keyCode == KeyBindingListener.hotbar7.code) {
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar7)) {
                     minecraft.player.inventory.selectedSlot = 6;
-                } else if (keyCode == KeyBindingListener.hotbar8.code) {
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar8)) {
                     minecraft.player.inventory.selectedSlot = 7;
-                } else if (keyCode == KeyBindingListener.hotbar9.code) {
+                } else if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.hotbar9)) {
                     minecraft.player.inventory.selectedSlot = 8;
                 }
             }

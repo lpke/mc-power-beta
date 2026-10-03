@@ -25,9 +25,7 @@
     "client.GameRendererMixin",
     "client.InGameHudMixin",
     "client.MinecraftMixin",
-    "client.SoundManagerAccessor",
-    "client.SoundManagerMixin",
-    "client.TitleScreenMixin"
+    "client.SoundManagerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

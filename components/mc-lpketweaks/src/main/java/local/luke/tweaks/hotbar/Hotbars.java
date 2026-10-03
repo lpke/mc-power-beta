@@ -46,7 +46,7 @@ public final class Hotbars {
 
   public static void tick(Minecraft mc) {
     HotbarTransaction.tick();
-    boolean down = Input.down(SCROLL.code);
+    boolean down = local.luke.power.input.Bindings.down(SCROLL);
     boolean eligible = eligible(mc);
     if (!eligible || owner != null && owner != mc.player) {
       scrolling = false;
@@ -95,9 +95,9 @@ public final class Hotbars {
   }
 
   private static boolean rowDown(int i) {
-    return Input.down(ROWS[i].code)
+    return local.luke.power.input.Bindings.down(ROWS[i])
         || Config.current().hotbar.numberRowKeys
-            && Input.down(BASE.code)
+            && local.luke.power.input.Bindings.down(BASE)
             && Input.down(Keyboard.KEY_1 + i);
   }
 
@@ -110,7 +110,7 @@ public final class Hotbars {
     if (delta == 0
         || !eligible(mc)
         || !Config.current().hotbar.scroll
-        || !Input.down(SCROLL.code)
+        || !local.luke.power.input.Bindings.down(SCROLL)
         || blocked) return delta;
     if (!scrolling) {
       scrolling = true;
@@ -125,9 +125,9 @@ public final class Hotbars {
   private static int boundRow(int code) {
     for (int i = 0; i < 3; i++)
       if (code != 0
-          && (code == ROWS[i].code
+          && (code == local.luke.power.input.Bindings.eventCode(ROWS[i])
               || Config.current().hotbar.numberRowKeys
-                  && Input.down(BASE.code)
+                  && local.luke.power.input.Bindings.down(BASE)
                   && code == Keyboard.KEY_1 + i)) return i;
     return -1;
   }
@@ -136,7 +136,7 @@ public final class Hotbars {
     if (!eligible(mc) || !Config.current().hotbar.swap) return false;
     int i = boundRow(code);
     if (i < 0) return false;
-    if (down && !held[i] && !scrolling && !Input.down(SCROLL.code)) swap(mc, i);
+    if (down && !held[i] && !scrolling && !local.luke.power.input.Bindings.down(SCROLL)) swap(mc, i);
     held[i] = down;
     return true;
   }
@@ -159,19 +159,19 @@ public final class Hotbars {
     if (button < 0 || !eligible(mc)) return false;
     int code = button - 100;
     var settings = Config.current().hotbar;
-    return settings.swap && (code == BASE.code || boundRow(code) >= 0)
-        || settings.scroll && code == SCROLL.code;
+    return settings.swap && (code == local.luke.power.input.Bindings.eventCode(BASE) || boundRow(code) >= 0)
+        || settings.scroll && code == local.luke.power.input.Bindings.eventCode(SCROLL);
   }
 
   public static boolean showSwap(Minecraft mc) {
     return eligible(mc)
         && Config.current().hotbar.overlay
         && Config.current().hotbar.swap
-        && Input.down(BASE.code);
+        && local.luke.power.input.Bindings.down(BASE);
   }
 
   public static boolean showScroll(Minecraft mc) {
-    return eligible(mc) && Config.current().hotbar.overlay && scrolling && Input.down(SCROLL.code);
+    return eligible(mc) && Config.current().hotbar.overlay && scrolling && local.luke.power.input.Bindings.down(SCROLL);
   }
 
   public static int row() {

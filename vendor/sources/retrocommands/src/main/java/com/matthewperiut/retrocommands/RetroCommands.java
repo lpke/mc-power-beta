@@ -1,6 +1,5 @@
 package com.matthewperiut.retrocommands;
 
-import com.matthewperiut.retrocommands.util.ConfigUtil;
 import com.matthewperiut.retrocommands.util.RetroChatUtil;
 import com.matthewperiut.retrocommands.util.VanillaMobs;
 import net.fabricmc.api.ModInitializer;
@@ -13,7 +12,6 @@ public class RetroCommands implements ModInitializer {
 
     // other mods located
     public static boolean mojangFix = false;
-    public static boolean cryConfig = false;
     public static boolean bhCreative = false;
 
     // Multiplayer
@@ -27,7 +25,6 @@ public class RetroCommands implements ModInitializer {
     @Override
     public void onInitialize() {
         mojangFix = FabricLoader.getInstance().isModLoaded("mojangfixstationapi");
-        cryConfig = FabricLoader.getInstance().isModLoaded("cryonicconfig");
         bhCreative = FabricLoader.getInstance().isModLoaded("bhcreative");
 
         RetroChatUtil.addDefaultCommands();

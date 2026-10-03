@@ -118,7 +118,7 @@ public class Config {
             public Boolean enableCustomVersionText = false;
 
             @ConfigEntry(name = "Custom Version Text", maxValue = 64, description = "Only has effect if custom version text is enabled")
-            public String customVersionText = "Minecraft Beta 1.7.3 (UniTweaks)";
+            public String customVersionText = "Minecraft Beta 1.7.3";
         }
         
         public static class PhotoModeConfig {

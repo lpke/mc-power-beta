@@ -6,8 +6,7 @@
   "mixins": [
     "DispenserScreenHandlerMixin"
   ],
-  "server": [
-  ],
+  "server": [],
   "client": [
     "ContainerBaseMixin",
     "FurnaceBlockEntityAccessor",

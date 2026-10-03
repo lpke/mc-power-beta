@@ -1,0 +1,12 @@
+plugins { id 'java-library' }
+group = 'local.luke.power'
+version = '1.0.0'
+repositories { mavenCentral() }
+dependencies {
+    compileOnly('org.lwjgl.lwjgl:lwjgl:2.9.3') { transitive = false }
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+java { withSourcesJar() }
+test { useJUnitPlatform() }
+tasks.withType(JavaCompile).configureEach { options.release = 17 }
+tasks.withType(AbstractArchiveTask).configureEach { preserveFileTimestamps = false; reproducibleFileOrder = true }

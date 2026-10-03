@@ -407,11 +407,11 @@
     "label": "Title lettering",
     "description": "Rows use the letter block palette. Spaces leave gaps.",
     "default": [
-      "**  *** * * *** **      **  *** ***  * ",
-      "* * * * * * *   * *     * * *    *  * *",
-      "**  * * * * **  **      **  **   *  ***",
-      "*   * * *** *   * *     * * *    *  * *",
-      "*   *** * * *** * *     **  ***  *  * *"
+      " *   * * *   * *** *** *** *** *** ***",
+      " ** ** * **  * *   *   * * * * *    * ",
+      " * * * * * * * **  *   **  *** **   * ",
+      " *   * * *  ** *   *   * * * * *    * ",
+      " *   * * *   * *** *** * * * * *    * "
     ]
   },
   "quickadditions:config.MUSIC_CONFIG.volumeNetherPortalAmbient": {

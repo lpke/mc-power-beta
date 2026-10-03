@@ -64,13 +64,13 @@ public final class FlexiblePlacement {
   public static void tick(Minecraft mc) {
     beginTick(
         mc,
-        Input.down(Keys.ALL[0].code),
+        local.luke.power.input.Bindings.down(Keys.ALL[0]),
         new Modes(
-            Input.down(Keys.ALL[1].code),
-            Input.down(Keys.ALL[2].code),
-            Input.down(Keys.ALL[3].code),
-            Input.down(Keys.ALL[4].code),
-            Input.down(Keys.ALL[5].code)),
+            local.luke.power.input.Bindings.down(Keys.ALL[1]),
+            local.luke.power.input.Bindings.down(Keys.ALL[2]),
+            local.luke.power.input.Bindings.down(Keys.ALL[3]),
+            local.luke.power.input.Bindings.down(Keys.ALL[4]),
+            local.luke.power.input.Bindings.down(Keys.ALL[5])),
         Display.isCreated() && Display.isActive());
   }
 
@@ -85,10 +85,10 @@ public final class FlexiblePlacement {
         apply(next);
         mc.inGameHud.addChatMessage(
             "Flexible placement: "
-                + (local.luke.tweaks.config.Config.current().flexible.enabled ? "ON" : "OFF"));
+                + (local.luke.tweaks.config.Config.current().flexible.enabled ? "\u00a7aON\u00a7r" : "\u00a7cOFF\u00a7r"));
       } catch (IOException e) {
         LOG.error("Could not save Flexible Placement settings", e);
-        mc.inGameHud.addChatMessage("Flexible Placement settings could not be saved.");
+        mc.inGameHud.addChatMessage("\u00a7cFlexible placement settings could not be saved.\u00a7r");
       }
     }
     toggleDown = toggle;

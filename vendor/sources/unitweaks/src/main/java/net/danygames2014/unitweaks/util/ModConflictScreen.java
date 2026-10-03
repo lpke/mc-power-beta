@@ -40,8 +40,8 @@ public class ModConflictScreen extends Screen {
         int lineHeight = this.height / 4 - 60;
 
         this.drawCenteredTextWithShadow(this.textRenderer, "Mod Conflict", this.width / 2, lineHeight += 20, 16777215);
-        this.drawTextWithShadow(this.textRenderer, "UniTweaks has detected a conflict with another mod.", this.width / 2 - 140, lineHeight += 20, 10526880);
-        this.drawTextWithShadow(this.textRenderer, "This is either because it is completely replaced by UniTweaks", this.width / 2 - 140, lineHeight += 20, 10526880);
+        this.drawTextWithShadow(this.textRenderer, "A conflicting additional mod was detected.", this.width / 2 - 140, lineHeight += 20, 10526880);
+        this.drawTextWithShadow(this.textRenderer, "Its features may already be included in Power Beta", this.width / 2 - 140, lineHeight += 20, 10526880);
         this.drawTextWithShadow(this.textRenderer, "or it has conflicting features.", this.width / 2 - 140, lineHeight += 10, 10526880);
 
         lineHeight += 10;

@@ -5,3 +5,7 @@
 **/__pycache__/
 *.iml
 dist/
+
+hs_err_pid*.log
+core.*
+replay_pid*.log

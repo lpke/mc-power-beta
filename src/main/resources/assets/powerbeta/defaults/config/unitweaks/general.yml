@@ -1,0 +1,7 @@
+pauseOnLostFocus: true
+autosaveInterval: 30
+tcpNoDelay: true
+rawInput: false
+disableControllerInit: true
+resourceDownloadUrl: "http://s3.betacraft.uk:11705/MinecraftResources/"
+disabledDimensions: [2]

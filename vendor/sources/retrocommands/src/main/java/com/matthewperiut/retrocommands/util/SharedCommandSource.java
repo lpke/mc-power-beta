@@ -84,7 +84,8 @@ public class SharedCommandSource {
 
     @Environment(EnvType.CLIENT)
     private void sendClientFeedback(String feedback) {
-        ((Minecraft) FabricLoader.getInstance().getGameInstance()).inGameHud.addChatMessage(feedback);
+        ((Minecraft) FabricLoader.getInstance().getGameInstance()).inGameHud.addChatMessage(feedback.indexOf('\u00a7') >= 0 ? feedback
+                : (feedback.startsWith("Usage") || feedback.startsWith("/") ? "\u00a7b" : "\u00a77") + feedback + "\u00a7r");
     }
 
     @Environment(EnvType.SERVER)

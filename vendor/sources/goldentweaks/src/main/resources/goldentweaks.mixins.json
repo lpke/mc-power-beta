@@ -31,10 +31,8 @@
     "StoneMixin",
     "ToolMaterialMixin"
   ],
-  "server": [
-  ],
-  "client": [
-  ],
+  "server": [],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   }

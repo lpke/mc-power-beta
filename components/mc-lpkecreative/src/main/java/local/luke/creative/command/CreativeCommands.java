@@ -28,7 +28,7 @@ public final class CreativeCommands {
         throw new IllegalArgumentException("Exit freecam before changing gamemode.");
       Modes.change(mc, GameMode.parse(args[1]));
     } catch (IllegalArgumentException e) {
-      mc.overlay.addChatMessage("[LpkeCreative] " + e.getMessage());
+      mc.overlay.addChatMessage("\u00a7c" + e.getMessage() + "\u00a7r");
     }
     return true;
   }
@@ -63,7 +63,7 @@ public final class CreativeCommands {
                       case "manual" -> {
                         Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
                         mc.overlay.addChatMessage(
-                            "/gamemode <survival|creative|spectator> [target]");
+                            "\u00a7b/gamemode <survival|creative|spectator> [target]\u00a7r");
                         yield null;
                       }
                       case "suggestion" -> {

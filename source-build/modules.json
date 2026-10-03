@@ -1,0 +1,110 @@
+{
+  "unitweaks": {
+    "version": "0.31.0",
+    "mapping": "net.glasslauncher:biny:b1.7.3+e1fe071:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "betterscreenshots": {
+    "version": "1.6.0",
+    "mapping": "net.glasslauncher:biny:b1.7.3+4cbd9c8:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "goldentweaks": {
+    "version": "1.6.2",
+    "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "hudtweaks": {
+    "version": "1.9.0",
+    "mapping": "net.glasslauncher:biny:b1.7.3+2f404bc:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "inventorytweaks": {
+    "version": "2.6.1",
+    "mapping": "net.glasslauncher:biny:b1.7.3+2f404bc:v2",
+    "dependencies": [
+      "unitweaks"
+    ],
+    "enabled": true
+  },
+  "misctweaks": {
+    "version": "5.5.2",
+    "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "zastavkaapi": {
+    "version": "1.1.2",
+    "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "quickadditions": {
+    "version": "2.12.0",
+    "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
+    "dependencies": [
+      "zastavkaapi"
+    ],
+    "enabled": true
+  },
+  "unitweakstelsaddons": {
+    "version": "1.9.1",
+    "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "freecam": {
+    "version": "0.3.2",
+    "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "gambac": {
+    "version": "1.4.0",
+    "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "mojangfixstationapi": {
+    "version": "2.4.5",
+    "mapping": "net.glasslauncher:biny:b1.7.3+e0778a3:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "oldlogo": {
+    "version": "1.2",
+    "mapping": "babric:barn:b1.7.3+build.8:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "player_list": {
+    "version": "1.1.1",
+    "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
+    "dependencies": [],
+    "enabled": true
+  },
+  "retrocommands": {
+    "version": "0.5.10",
+    "mapping": "net.glasslauncher:biny:b1.7.3+c6a9668:v2",
+    "dependencies": [
+      "mojangfixstationapi"
+    ],
+    "enabled": true
+  },
+  "alwaysmoreitems": {
+    "version": "1.10.4",
+    "mapping": "net.glasslauncher:biny:b1.7.3+2f404bc:v2",
+    "dependencies": [],
+    "enabled": false
+  },
+  "appleslices": {
+    "version": "1.0.1",
+    "mapping": "babric:barn:b1.7.3+build.8:v2",
+    "dependencies": [],
+    "enabled": true
+  }
+}

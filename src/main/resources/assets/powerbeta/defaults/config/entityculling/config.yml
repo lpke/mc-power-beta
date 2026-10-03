@@ -1,0 +1,5 @@
+disableEntityCulling: false
+disableBlockEntityCulling: false
+showF3Info: true
+f3InfoYOffset: 0
+glassCulls: false

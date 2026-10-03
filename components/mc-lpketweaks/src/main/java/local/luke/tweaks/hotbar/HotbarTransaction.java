@@ -108,7 +108,7 @@ final class HotbarTransaction {
               + journalPath,
           error);
       mc.inGameHud.addChatMessage(
-          "Hotbar swap stopped. Inventory recovery snapshots are in lpketweaks-hotbar-backups.");
+          "\u00a7cHotbar swap stopped. Inventory recovery snapshots are in lpketweaks-hotbar-backups.\u00a7r");
       return false;
     } finally {
       busy = false;

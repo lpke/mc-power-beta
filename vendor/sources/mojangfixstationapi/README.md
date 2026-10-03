@@ -1,10 +1,14 @@
-# MojangFix
-Minecraft b1.7.3 mod that fixes skins, authentication and more
+# MojangFixStationAPI
+A more compatible version of [MojangFix](https://modrinth.com/mod/mojangfix) for Minecraft b1.7.3 with [GlassConfigAPI](https://modrinth.com/mod/glass-config-api) configs to increase the mod's compatibility. Fixes skins, authentication, and more.
+* For more InventoryTweaks (ex: `left-click + drag`) consider : https://modrinth.com/mod/inventorytweaks
+* For better auth/skin fixes use RetroAuth: https://modrinth.com/mod/retroauth
 
 ## Features
 <details><summary>Skin and cape fix (including 1.8+ outer layers)</summary>
 
 ![mintoyatsu standing with a working skin](https://user-images.githubusercontent.com/35262707/158473931-1ae3ea4f-4673-4baa-aa3d-044275d462ea.png)
+- Added ability to raise slim skin shoulders with GlassConfigAPI
+- Added ability to toggle rendering the player cape with GlassConfigAPI
 </details>
 
 <details><summary>Authentication fix</summary>
@@ -27,10 +31,50 @@ Allows the server to verify that the connecting player is logged in
 
 <details><summary>Better text edition</summary>
 
-![text](https://user-images.githubusercontent.com/35262707/159060408-8e35a074-0ee1-426a-bc51-1152d6adca34.gif)
+![Allow pasting text into chat and onto signs with LCTRL + V](https://user-images.githubusercontent.com/35262707/159060408-8e35a074-0ee1-426a-bc51-1152d6adca34.gif)
 </details>
 
-<details><summary>Inventory tweaks</summary>
+<details><summary>Basic inventory tweaks</summary>
 
 <video controls src="https://user-images.githubusercontent.com/35262707/159063818-e450561d-f13d-435a-b46b-879cc54a8a0f.mp4" />
 </details>
+
+<details><summary>Previously unlisted changes</summary>
+
+- (New) Disable stats checksum verification
+  - Allows mods to rearrange stats (for instance when converting a vanilla instance to a StationAPI one)
+- Enable Bit Depth Fix
+- Enable Command Keybinding
+  - Used to more quickly open up the chat window and type in a command
+- Enable Death Screen Score Fix
+- Enable Debug Graph Hidden By Default
+  - Use the new keybind (default: LCtrl) + F3 to open up debug screen with graph
+  - Optionally using GCAPI config switch keybind to toggle debug graph whenever pressed
+- Enable Displaying World Seed In Debug Menu
+- Enable MojangFix Version Text On Title Screen
+- Enable Quit Button
+- Change Resources Download URL
+  - This edition of MojangFix lets you change it yourself as well in the config settings
+</details>
+
+## Installation using Prism Launcher
+
+1. Download an instance of Babric for Prism Launcher: https://github.com/Glass-Series/babric-prism-instance
+2. Install Java 17 and set the instance to use it: https://adoptium.net/temurin/releases/
+3. Add GlassConfigAPI 3.0.2+ to the mod folder for the instance: https://modrinth.com/mod/glass-config-api
+4. Add Glass Networking to the mod folder for the instance: https://modrinth.com/mod/glass-networking
+5. (Optional) Add StationAPI to the mod folder for the instance: https://modrinth.com/mod/stationapi
+6. (Optional) Add Mod Menu to the mod folder for the instance: https://modrinth.com/mod/modmenu-beta
+7. Add this mod to the mod folder for the instance: https://github.com/telvarost/BetaTweaks-StationAPI/releases
+8. Run and enjoy! 👍
+
+## FAQ
+
+* Q. Why is minecraft so small and part of my screen white?
+  * A. You probably have screen scaling on or are using a high DPI screen. There are 5 possible ways to fix this:
+    * The best option is to install Gambac: [https://modrinth.com/mod/gambac](https://modrinth.com/mod/gambac)
+    * You could also pass the following string in as a java argument in the settings tab
+      * `-Dsun.java2d.uiScale=1.0`
+    * You could also install ClientsideEssentials mod or UniTweaks and use their screen scaling fix from GCAPI config options (fix may produce small artifacts with this option)
+    * You could also change the DPI settings for Prism Launcher to system
+    * Or, you could change your screen scaling to 100%

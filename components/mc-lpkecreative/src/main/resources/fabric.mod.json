@@ -25,9 +25,6 @@
     ],
     "bhcreative:event_bus": [
       "paulevs.bhcreative.listeners.VanillaTabListener"
-    ],
-    "modmenu": [
-      "local.luke.creative.config.ModMenuIntegration"
     ]
   },
   "mixins": [

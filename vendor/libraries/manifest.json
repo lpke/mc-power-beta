@@ -1,0 +1,14 @@
+[
+  {
+    "file": "vendor/libraries/MCAuthLib-d9d773e5d50327c33898c65cd545a4f6ef3ba1b5.jar",
+    "sha256": "4c2cde0ada018faa722ffdbb8de1e571dbf9d587499fcd6cb0203de53711746d",
+    "from": "mojangfixstationapi",
+    "purpose": "Authentication/configuration library"
+  },
+  {
+    "file": "vendor/libraries/jankson-1.2.1.jar",
+    "sha256": "24b623b63b5acdef19ba65a2444154e95f8c965e103ed1ef94f6adc2948ce5fc",
+    "from": "mojangfixstationapi",
+    "purpose": "Authentication/configuration library"
+  }
+]

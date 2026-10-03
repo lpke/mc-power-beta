@@ -37,7 +37,7 @@ public final class RetroCommandsBridge implements ModInitializer {
                       case "manual" -> {
                         Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
                         mc.inGameHud.addChatMessage(
-                            "[WE] Use //help [1-6] for WorldEdit Beta commands.");
+                            ChatFormat.info("Use //help [1-6] for world-editing commands."));
                         yield null;
                       }
                       case "suggestion" -> {

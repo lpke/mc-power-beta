@@ -1239,7 +1239,7 @@ public abstract class ContainerBaseMixin extends Screen {
 		}
 
 		if (Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.UseDropKeyInInventory) {
-			if (keyCode == this.minecraft.options.dropKey.code) {
+			if (keyCode == local.luke.power.input.Bindings.eventCode(this.minecraft.options.dropKey)) {
 				if (this.minecraft.player.inventory.getCursorStack() != null) {
 					return;
 				}

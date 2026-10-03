@@ -36,6 +36,21 @@ public abstract class CreateLevelScreenMixin extends Screen {
 			}
 		}
 	}
+
+	@Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+	private void creative_cycleBack(int x, int y, int mouseButton, CallbackInfo info) {
+		if (mouseButton != 1) return;
+		for (Object entry : this.buttons) {
+			Button button = (Button) entry;
+			if (button.id == 2 && button.isMouseOver(minecraft, x, y)) {
+				// There are two modes, so either direction toggles to the other.
+				this.buttonClicked(button);
+				minecraft.soundHelper.playSound("random.click", 1.0F, 1.0F);
+				info.cancel();
+				return;
+			}
+		}
+	}
 	
 	@Unique
 	private String creative_getButtonName() {

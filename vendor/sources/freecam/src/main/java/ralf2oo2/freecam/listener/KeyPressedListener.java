@@ -16,10 +16,15 @@ import ralf2oo2.freecam.registry.KeyBindingRegistry;
 import java.util.Arrays;
 
 public class KeyPressedListener {
+    public KeyPressedListener() {
+        local.luke.power.input.Bindings.onMousePress("free-camera", this::press);
+    }
     private String[] validCharacters = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"}; // For alphabetic character support add '"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "Q", "Y", "Z", '
     @EventListener
     public void keyPressed(KeyStateChangedEvent event) {
         if(event.environment == KeyStateChangedEvent.Environment.IN_GAME) {
+            Freecam.freecamController.updateSpeed = local.luke.power.input.Bindings.down(KeyBindingRegistry.changeSpeedKeybinding);
+            if (!Keyboard.getEventKeyState() || Keyboard.isRepeatEvent()) return;
 
             // Input cameraposition name
             if(Freecam.freecamController.savePosition || Freecam.freecamController.loadPosition){
@@ -33,7 +38,7 @@ public class KeyPressedListener {
                 }
                 if(Keyboard.isKeyDown(Keyboard.KEY_RETURN)){
                     if(Freecam.freecamController.savePosition){
-                        if(Freecam.freecamController.cameraPositionName != ""){
+                        if(!Freecam.freecamController.cameraPositionName.isEmpty()){
                             Freecam.freecamController.saveCameraPosition(Freecam.freecamController.cameraPositionName);
                         }
                         Freecam.freecamController.savePosition = false;
@@ -46,8 +51,13 @@ public class KeyPressedListener {
                 }
             }
 
+            press(Keyboard.getEventKey());
+        }
+    }
+
+    private void press(int keyCode) {
             // Toggle freecam
-            if(Keyboard.isKeyDown(KeyBindingRegistry.freecamKeybinding.code)) {
+            if(local.luke.power.input.Bindings.matches(KeyBindingRegistry.freecamKeybinding, keyCode)) {
                 ClientPlayerEntity player = Minecraft.class.cast(FabricLoader.getInstance().getGameInstance()).player;
                 if(!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && !Freecam.freecamController.isActive() || !Freecam.freecamController.cameraPositionSet){
                     Freecam.freecamController.setCameraPositionAndRotation(player.x, player.y, player.z, player.pitch, player.yaw + 180, 0);
@@ -62,19 +72,19 @@ public class KeyPressedListener {
             }
 
             // Toggle player movement
-            if(Keyboard.isKeyDown(KeyBindingRegistry.playerMovementKeybinding.code)) {
+            if(local.luke.power.input.Bindings.matches(KeyBindingRegistry.playerMovementKeybinding, keyCode)) {
                 Freecam.freecamController.allowPlayerMovement = !Freecam.freecamController.allowPlayerMovement;
             }
 
             // Change speed
-            if(Keyboard.isKeyDown(KeyBindingRegistry.changeSpeedKeybinding.code)) {
+            if(local.luke.power.input.Bindings.down(KeyBindingRegistry.changeSpeedKeybinding)) {
                 Freecam.freecamController.updateSpeed = true;
             } else {
                 Freecam.freecamController.updateSpeed = false;
             }
 
             // Save/load cameraposition
-            if(Keyboard.isKeyDown(KeyBindingRegistry.cameraPositionKeybinding.code)) {
+            if(local.luke.power.input.Bindings.matches(KeyBindingRegistry.cameraPositionKeybinding, keyCode)) {
                 if(!Freecam.freecamController.loadPosition && !Freecam.freecamController.savePosition && Freecam.freecamController.isActive()){
                     if(Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)){
                         Freecam.freecamController.savePosition = true;
@@ -85,11 +95,10 @@ public class KeyPressedListener {
             }
 
             // Open cameraposition gui
-            if(Keyboard.isKeyDown(KeyBindingRegistry.cameraPositionGuiKeybinding.code)) {
+            if(local.luke.power.input.Bindings.matches(KeyBindingRegistry.cameraPositionGuiKeybinding, keyCode)) {
                 if(Freecam.freecamController.isActive()){
                     ((Minecraft) FabricLoader.getInstance().getGameInstance()).setScreen(new GuiSavedCameraLocations());
                 }
             }
-        }
     }
 }

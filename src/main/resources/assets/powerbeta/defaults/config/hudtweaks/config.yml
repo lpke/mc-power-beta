@@ -1,0 +1,10 @@
+enableChatScroll: true
+chatHistorySize: 100
+chatFadeTime: 100
+coordinateDisplay: 0
+disableCrosshair: false
+disableVignette: false
+drawXboxXAndYButtons: false
+enableHotbarBlockRenderingFix: true
+enableHotbarItemSelectionTooltips: false
+hotbarItemSelectionFadeTime: 40

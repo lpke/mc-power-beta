@@ -20,7 +20,7 @@ public final class FlightController {
     lastJump = -100;
     jumpDown = true;
     sprinting = false;
-    sprint.reset(Keys.down(Keys.SPRINT.key));
+    sprint.reset(local.luke.power.input.Bindings.down(Keys.SPRINT));
   }
 
   public static void tick(Minecraft mc) {
@@ -30,13 +30,13 @@ public final class FlightController {
     }
     if (!ClientRuntime.active(mc)) {
       sprinting = false;
-      sprint.reset(Keys.down(Keys.SPRINT.key));
+      sprint.reset(local.luke.power.input.Bindings.down(Keys.SPRINT));
       lastJump = -100;
-      jumpDown = Keys.down(mc.options.jumpKey.key);
+      jumpDown = local.luke.power.input.Bindings.down(mc.options.jumpKey);
       return;
     }
     ticks++;
-    boolean down = Keys.down(mc.options.jumpKey.key);
+    boolean down = local.luke.power.input.Bindings.down(mc.options.jumpKey);
     if (mc.player.creative_isCreative() && Config.current().flight && down && !jumpDown) {
       if (ticks - lastJump <= Config.current().doubleTapTicks) {
         boolean fly = !mc.player.creative_isFlying();
@@ -53,8 +53,11 @@ public final class FlightController {
       mc.player.creative_setFlying(false);
     sprinting =
         sprint.update(
-            Keys.down(Keys.SPRINT.key),
-            Modes.flying(mc.player) && Config.current().sprintFlight,
+            local.luke.power.input.Bindings.down(Keys.SPRINT),
+            Modes.flying(mc.player)
+                && Config.current().sprintFlight
+                && local.luke.power.input.Bindings.down(mc.options.forwardKey)
+                && !local.luke.power.input.Bindings.down(mc.options.backKey),
             Config.current().sprintToggle);
   }
 

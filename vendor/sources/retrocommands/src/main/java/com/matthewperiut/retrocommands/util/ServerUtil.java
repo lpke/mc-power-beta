@@ -4,7 +4,6 @@ import com.matthewperiut.retrocommands.RetroCommands;
 import com.matthewperiut.retrocommands.api.PosParse;
 import com.matthewperiut.retrocommands.command.server.Tpa;
 import com.matthewperiut.retrocommands.dimension.BareTravelAgent;
-import com.periut.cryonicconfig.CryonicConfig;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
@@ -178,11 +177,7 @@ public class ServerUtil {
 
     public static void informPlayerDisabledCommands(String playerName) {
         NbtCompound nbt = new NbtCompound();
-        if (!RetroCommands.cryConfig) {
-            nbt.putString("disabled", "");
-        } else {
-            nbt.putString("disabled", String.join(",", RetroCommands.disabled_commands));
-        }
+        nbt.putString("disabled", String.join(",", RetroCommands.disabled_commands));
         ServerUtil.getConnectionManager().sendPacket(playerName, new GlassPacket(RetroCommands.MOD_ID, "disabled", nbt));
     }
 }

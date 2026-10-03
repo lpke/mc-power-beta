@@ -1,0 +1,80 @@
+MISSING_ACHIEVEMENTS_CONFIG:
+  OPEN_INVENTORY: false
+  MINE_WOOD: false
+  CRAFT_WORKBENCH: false
+  CRAFT_PICKAXE: false
+  CRAFT_FURNACE: false
+  AQUIRE_IRON: false
+  CRAFT_HOE: false
+  MAKE_BREAD: false
+  BAKE_CAKE: false
+  CRAFT_BETTER_PICKAXE: false
+  COOK_FISH: false
+  ON_A_RAIL: false
+  CRAFT_SWORD: false
+  KILL_ENEMY: false
+  KILL_COW: false
+  FLY_PIG: false
+ENTITY_SPAWN_MECHANICS_CONFIG:
+  SPAWN_LIST_CONFIG:
+    enableChickenEntitySpawning: true
+    enableCowEntitySpawning: true
+    enableCreeperEntitySpawning: true
+    enableGhastEntitySpawning: true
+    enablePigEntitySpawning: true
+    enableSheepEntitySpawning: true
+    enableSkeletonEntitySpawning: true
+    enableSlimeEntitySpawning: true
+    enableSpiderEntitySpawning: true
+    enableSquidEntitySpawning: true
+    enableWolfEntitySpawning: true
+    enableZombieEntitySpawning: true
+    enableZombiePigmanEntitySpawning: true
+  disableLivingEntitiesDespawning: false
+  disableSaddledPigsDespawning: false
+  doNotCountSaddledPigs: false
+  monstersSpawnAtOrBelowLightLevel: 7
+  SPAWN_GROUP_SIZE: 4
+  MAX_SPAWN_CAPACITY_MONSTER: 70
+  MAX_SPAWN_CAPACITY_PASSIVE: 15
+  MAX_SPAWN_CAPACITY_SQUID: 5
+MUSIC_CONFIG:
+  stopCurrentBgmOnPortalUse: false
+  stopDimensionSpecificSongOnPortalUse: false
+  disableBackgroundMusic: false
+  mainMenuThemeEnabled: false
+  mainMenuThemeOverridesBGM: false
+  disableDefaultMinecraftBGM: false
+  musicCoundownRandomIntervalMin: 12000
+  musicCoundownRandomIntervalMax: 12000
+  overlayForMusicInDebug: false
+  overlayForMusicInDebugYOffset: 0
+  volumeNetherPortalAmbient: 1.0
+  volumeRainAmbient: 1.0
+  volumeGhastAmbient: 1.0
+  volumeCaveAmbient: 1.0
+SLEEP_CONFIG:
+  asleepPlayerPercentageForSkippingNight: 1.0
+  bedsSpeedUpNightRatherThanSkipIt: false
+  bedsSpeedUpNightTickRate: 20
+  bedsSpeedUpNightTickWorld: false
+  handSwingClickToExitBedsEnabled: false
+WEATHER_CONFIG:
+  enableAlwaysSnowAboveSetYLevel: false
+  alwaysSnowAboveThisYLevel: 100
+  disableRain: false
+  disableThunder: false
+  disableRainInSavannaBiomes: false
+  sleepOnlyResetsWeatherWhenRaining: false
+  timeUntilRainRandomLimit: 168000
+  timeUntilRainMinimum: 12000
+  rainDurationRandomLimit: 12000
+  rainDurationMinimum: 12000
+  timeUntilThunderRandomLimit: 168000
+  timeUntilThunderMinimum: 12000
+  thunderDurationRandomLimit: 12000
+  thunderDurationMinimum: 3600
+forceDisplayActive: false
+SPAWN_PROTECTION_RADIUS: 16
+ENABLE_SOUL_SAND_RECIPE: false
+SOUL_SAND_OUTPUT: 4

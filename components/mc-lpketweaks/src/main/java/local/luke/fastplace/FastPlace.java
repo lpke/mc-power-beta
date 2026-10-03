@@ -52,7 +52,7 @@ public final class FastPlace {
         Mouse.isCreated()
             && Mouse.isButtonDown(1)
             && !local.luke.tweaks.hotbar.Hotbars.consumesMouse(mc, 1),
-        keyDown(KEY.code),
+        local.luke.power.input.Bindings.down(KEY),
         Display.isCreated() && Display.isActive());
   }
 
@@ -72,10 +72,10 @@ public final class FastPlace {
         apply(next);
         mc.inGameHud.addChatMessage(
             "Fast place: "
-                + (local.luke.tweaks.config.Config.current().placement.enabled ? "ON" : "OFF"));
+                + (local.luke.tweaks.config.Config.current().placement.enabled ? "\u00a7aON\u00a7r" : "\u00a7cOFF\u00a7r"));
       } catch (IOException e) {
         LOG.error("Could not save Fast Place settings", e);
-        mc.inGameHud.addChatMessage("Fast Place settings could not be saved.");
+        mc.inGameHud.addChatMessage("\u00a7cFast place settings could not be saved.\u00a7r");
       }
     }
     toggleDown = toggle;

@@ -1,11 +1,11 @@
-plugins { id 'babric-loom' version '1.5-SNAPSHOT' }
+plugins { id 'maven-publish'; id 'fabric-loom' version '1.11.8'; id 'babric-loom-extension' version '1.11.9' }
 
 group = 'local.luke'
 version = project.mod_version
 base.archivesName = 'building-validation'
 
 loom {
-    gluedMinecraftJar()
+    mixin { useLegacyMixinAp = true }
     customMinecraftManifest.set('https://babric.github.io/manifest-polyfill/b1.7.3.json')
     intermediaryUrl.set('https://maven.glass-launcher.net/babric/babric/intermediary/%1$s/intermediary-%1$s-v2.jar')
 }
@@ -22,7 +22,7 @@ dependencies {
     modImplementation files('../build/libs/lpketweaks-1.2.1.jar')
     modImplementation files('../../mc-worldedit-beta/build/libs/worldedit-beta-1.2.1.jar')
     modImplementation 'babric:fabric-loader:0.15.6-babric.2'
-    modCompileOnly('maven.modrinth:vf3X9pHM:eqQFtReE') { transitive = false }
+    modCompileOnly files('../../mc-lpkecreative/build/libs/lpkecreative-1.1.0.jar')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 
@@ -37,4 +37,10 @@ tasks.withType(JavaCompile).configureEach { options.release = 17 }
 tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
+}
+
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == 'org.ow2.asm' && requested.name == 'asm-all') useVersion '4.1'
+    }
 }

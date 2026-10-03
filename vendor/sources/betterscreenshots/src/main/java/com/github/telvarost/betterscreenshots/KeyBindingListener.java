@@ -6,6 +6,9 @@ import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegi
 import org.lwjgl.input.Keyboard;
 
 public class KeyBindingListener {
+    public KeyBindingListener() {
+        local.luke.power.input.Bindings.onMousePress("photo-capture", CaptureActions::press);
+    }
     public static KeyBinding takeCustomResolutionScreenshot;
     public static KeyBinding takeIsometricScreenshot;
 

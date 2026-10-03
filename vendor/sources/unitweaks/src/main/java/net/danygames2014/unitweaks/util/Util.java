@@ -9,7 +9,7 @@ public class Util {
     public static void notify(String message, boolean notifyInChat) {
         UniTweaks.LOGGER.info(message);
         if (Minecraft.INSTANCE.inGameHud != null && notifyInChat) {
-            Minecraft.INSTANCE.inGameHud.addChatMessage("[UniTweaks] " + message);
+            Minecraft.INSTANCE.inGameHud.addChatMessage("\u00a77" + message + "\u00a7r");
         }
     }
 

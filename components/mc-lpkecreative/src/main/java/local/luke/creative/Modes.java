@@ -41,7 +41,7 @@ public final class Modes {
     if (state.lpke_mode() == mode) return true;
     if (spectator(player) && !findExit(player)) {
       mc.overlay.addChatMessage(
-          "[LpkeCreative] No safe exit found. Move out of solid blocks first.");
+          "\u00a7cNo safe exit found. Move out of solid blocks first.");
       return false;
     }
     if (mode == GameMode.SPECTATOR) {
@@ -55,7 +55,7 @@ public final class Modes {
     }
     state.lpke_applyMode(mode);
     FlightController.reset();
-    mc.overlay.addChatMessage("Set own game mode to " + mode.label + " Mode");
+    mc.overlay.addChatMessage("\u00a77Set own game mode to \u00a7a" + mode.label + "\u00a77 Mode\u00a7r");
     return true;
   }
 

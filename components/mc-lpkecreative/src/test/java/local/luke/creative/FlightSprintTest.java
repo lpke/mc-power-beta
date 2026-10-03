@@ -17,6 +17,18 @@ class FlightSprintTest {
   }
 
   @Test
+  void forwardReleaseEndsOnlyTheCurrentSprint() {
+    var s = new FlightSprint();
+    assertTrue(s.update(true, true, true));
+    assertTrue(s.update(false, true, true));
+    assertFalse(s.update(false, false, true));
+    assertFalse(s.update(false, true, true));
+    assertTrue(s.update(true, true, true));
+    assertFalse(s.update(true, false, true));
+    assertFalse(s.update(true, true, true));
+  }
+
+  @Test
   void holdTracksTheKeyWithoutLatching() {
     var s = new FlightSprint();
     assertTrue(s.update(true, true, false));

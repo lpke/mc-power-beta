@@ -3,7 +3,6 @@ package com.matthewperiut.retrocommands.mixin.client;
 import com.matthewperiut.retrocommands.RetroCommands;
 import com.matthewperiut.retrocommands.api.Command;
 import com.matthewperiut.retrocommands.optionaldep.mojangfix.MJFChatAccess;
-import com.matthewperiut.retrocommands.util.ConfigUtil;
 import com.matthewperiut.retrocommands.util.RetroChatUtil;
 import com.matthewperiut.retrocommands.util.SharedCommandSource;
 import net.fabricmc.loader.api.FabricLoader;
@@ -71,9 +70,7 @@ public abstract class ChatScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("HEAD"))
     void init(CallbackInfo ci) {
-        if (cryConfig && !minecraft.isWorldRemote()) {
-            ConfigUtil.refreshDisabledCommands();
-        }
+
     }
 
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)

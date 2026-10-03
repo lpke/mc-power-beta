@@ -1,1 +1,0 @@
-- Fix skin rendering by @forkiesassds in https://github.com/js6pak/mojangfix/pull/16

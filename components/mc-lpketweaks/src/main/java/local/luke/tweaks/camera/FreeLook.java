@@ -38,10 +38,10 @@ public final class FreeLook {
   }
 
   public static void update(Minecraft mc) {
-    boolean down = Input.down(KEY.code);
+    boolean down = local.luke.power.input.Bindings.down(KEY);
     boolean pressed = down && !wasDown;
     wasDown = down;
-    boolean perspectiveDown = Input.down(Keyboard.KEY_F5);
+    boolean perspectiveDown = local.luke.power.input.Bindings.down("key.unitweaks.third_person");
     boolean perspectivePressed = perspectiveDown && !wasPerspectiveDown;
     wasPerspectiveDown = perspectiveDown;
     boolean eligible =
@@ -109,7 +109,7 @@ public final class FreeLook {
     active = false;
     owner = null;
     angles.clear();
-    waitForRelease = Input.down(KEY.code);
+    waitForRelease = local.luke.power.input.Bindings.down(KEY);
   }
 
   public static boolean turn(ClientPlayerEntity player, float dx, float dy) {

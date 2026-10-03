@@ -3,13 +3,13 @@ package local.luke.creative.mixin;
 import local.luke.creative.command.CreativeCommands;
 import net.minecraft.entity.living.player.AbstractClientPlayer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.*;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
 @Mixin(value = AbstractClientPlayer.class, priority = 1200)
 public abstract class CommandMixin {
-  @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
-  private void lpke$command(String text, CallbackInfo ci) {
-    if (CreativeCommands.execute(text)) ci.cancel();
+  @WrapMethod(method = "sendChatMessage")
+  private void power$command(String text, Operation<Void> original) {
+    if (!CreativeCommands.execute(text)) original.call(text);
   }
 }

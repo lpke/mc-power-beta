@@ -41,14 +41,14 @@ public final class ModePickerScreen extends Screen {
   }
 
   private boolean finishIfReleased() {
-    if (!Keys.down(Keys.PICKER.key)) cycleReady = true;
+    if (!local.luke.power.input.Bindings.down(Keys.PICKER)) cycleReady = true;
     if (finished) return true;
     if (!ClientRuntime.local(minecraft) || !Display.isActive() || ClientRuntime.freecam()) {
       finished = true;
       minecraft.openScreen(null);
       return true;
     }
-    if (!Keys.down(Keys.MODIFIER.key)) {
+    if (!local.luke.power.input.Bindings.down(Keys.MODIFIER)) {
       finished = true;
       Modes.change(minecraft, selected);
       minecraft.openScreen(null);

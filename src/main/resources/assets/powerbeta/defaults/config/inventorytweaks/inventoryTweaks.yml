@@ -1,0 +1,26 @@
+CRAFTING_RESULT_CONFIG:
+  EnableCtrlClickCrafting: true
+  EnableRightClickCrafting: true
+  EnableShiftClickCrafting: true
+  StopShiftClickCraftingWhenItemChanges: true
+MODERN_MINECRAFT_CONFIG:
+  EnableShiftClickingItemsIntoArmorSlots: true
+  EnableShiftClickingItemsIntoFurnaces: true
+  DoubleLeftClickItemPickup: true
+  EnableDragGraphics: true
+  EnableLeftClickDrag: true
+  EnableRightClickDrag: true
+  MultiplayerShiftClickingItemsIntoDispensers: false
+  LMBPreferShiftClick: true
+  RMBPreferShiftClick: true
+  UseDropKeyInInventory: true
+  LCtrlStackDrop: true
+  NumKeyHotbarSwap: true
+MOUSE_TWEAKS_CONFIG:
+  SCROLL_WHEEL_CONFIG:
+    enableScrollWheelTweaks: true
+    invertScrollCursorSlotDirection: false
+  LMBTweakShiftClickAny: true
+  LMBTweakShiftClick: true
+  RMBTweak: false
+  LMBTweakPickUp: true

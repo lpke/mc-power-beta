@@ -53,7 +53,8 @@ repositories {
 }
 
 dependencies {
-    modCompileOnly('maven.modrinth:vf3X9pHM:eqQFtReE') { transitive = false }
+    compileOnly files('../../input-api/build/libs/power-beta-input-1.0.0.jar')
+
     compileOnly 'io.github.llamalad7:mixinextras-common:0.5.0'
     annotationProcessor 'io.github.llamalad7:mixinextras-common:0.5.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'

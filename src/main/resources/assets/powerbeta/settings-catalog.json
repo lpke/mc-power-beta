@@ -968,7 +968,7 @@
     "page": "Gameplay",
     "group": "Flora",
     "label": "Allow shears to collect ferns",
-    "description": "Requires BHCreative as item is non-vanilla",
+    "description": "Shears collect ferns as inventory items.",
     "default": false,
     "restart": false
   },
@@ -1412,7 +1412,7 @@
     "group": "Spawn list",
     "label": "Chicken entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableCowEntitySpawning": {
@@ -1420,7 +1420,7 @@
     "group": "Spawn list",
     "label": "Cow entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableCreeperEntitySpawning": {
@@ -1428,7 +1428,7 @@
     "group": "Spawn list",
     "label": "Creeper entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableGhastEntitySpawning": {
@@ -1436,7 +1436,7 @@
     "group": "Spawn list",
     "label": "Ghast entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enablePigEntitySpawning": {
@@ -1444,7 +1444,7 @@
     "group": "Spawn list",
     "label": "Pig entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSheepEntitySpawning": {
@@ -1452,7 +1452,7 @@
     "group": "Spawn list",
     "label": "Sheep entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSkeletonEntitySpawning": {
@@ -1460,7 +1460,7 @@
     "group": "Spawn list",
     "label": "Skeleton entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSlimeEntitySpawning": {
@@ -1468,7 +1468,7 @@
     "group": "Spawn list",
     "label": "Slime entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSpiderEntitySpawning": {
@@ -1476,7 +1476,7 @@
     "group": "Spawn list",
     "label": "Spider entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSquidEntitySpawning": {
@@ -1484,7 +1484,7 @@
     "group": "Spawn list",
     "label": "Squid entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableWolfEntitySpawning": {
@@ -1492,7 +1492,7 @@
     "group": "Spawn list",
     "label": "Wolf entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableZombieEntitySpawning": {
@@ -1500,7 +1500,7 @@
     "group": "Spawn list",
     "label": "Zombie entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableZombiePigmanEntitySpawning": {
@@ -1508,7 +1508,7 @@
     "group": "Spawn list",
     "label": "Zombie pigman entity spawning",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "quickadditions:config.ENTITY_SPAWN_MECHANICS_CONFIG.disableLivingEntitiesDespawning": {
@@ -3732,11 +3732,11 @@
     "label": "Title lettering",
     "description": "Rows use the letter block palette. Spaces leave gaps.",
     "default": [
-      "**  *** * * *** **      **  *** ***  * ",
-      "* * * * * * *   * *     * * *    *  * *",
-      "**  * * * * **  **      **  **   *  ***",
-      "*   * * *** *   * *     * * *    *  * *",
-      "*   *** * * *** * *     **  ***  *  * *"
+      " *   * * *   * *** *** *** *** *** ***",
+      " ** ** * **  * *   *   * * * * *    * ",
+      " * * * * * * * **  *   **  *** **   * ",
+      " *   * * *  ** *   *   * * * * *    * ",
+      " *   * * *   * *** *** * * * * *    * "
     ]
   }
 }

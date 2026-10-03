@@ -1,0 +1,32 @@
+{
+  "logo": {
+    "lines": [
+      " *   * * *   * *** *** *** *** *** ***",
+      " ** ** * **  * *   *   * * * * *    * ",
+      " * * * * * * * **  *   **  *** **   * ",
+      " *   * * *  ** *   *   * * * * *    * ",
+      " *   * * *   * *** *** * * * * *    * "
+    ],
+    "rotation": [
+      15.0,
+      0.0,
+      0.0
+    ],
+    "shadow": true,
+    "animation": {
+      "enabled": true,
+      "speed": 1.0
+    }
+  },
+  "blocks": {
+    "map": {
+      "*": 1
+    },
+    "inverted": true
+  },
+  "scrollingBackground": {
+    "enabled": false,
+    "speed": 0.1,
+    "onlyTitle": false
+  }
+}

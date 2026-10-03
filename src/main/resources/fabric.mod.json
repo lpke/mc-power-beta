@@ -18,7 +18,14 @@
     "fabricloader": ">=0.15.6",
     "java": ">=17",
     "gcapi3": ">=3.2.5",
-    "mixinextras": ">=0.5.0"
+    "mixinextras": ">=0.5.0",
+    "lpkecreative": ">=1.1.0",
+    "lpketweaks": ">=1.2.1",
+    "worldedit_beta": ">=1.2.1",
+    "unitweaks": "*",
+    "quickadditions": ">=2.12.0",
+    "zastavkaapi": ">=1.1.2",
+    "oldlogo": ">=1.2"
   },
   "breaks": {
     "modmenu": "*"
@@ -30,5 +37,8 @@
     "preLaunch": [
       "local.luke.power.Bootstrap"
     ]
+  },
+  "languageAdapters": {
+    "power-beta-defaults": "local.luke.power.EarlyDefaults"
   }
 }

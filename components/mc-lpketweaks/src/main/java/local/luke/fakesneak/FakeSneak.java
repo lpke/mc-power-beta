@@ -25,7 +25,7 @@ public final class FakeSneak {
   }
 
   public static void tick(Minecraft mc) {
-    beginTick(mc, Input.down(Keys.ALL[0].code), Display.isCreated() && Display.isActive());
+    beginTick(mc, local.luke.power.input.Bindings.down(Keys.ALL[0]), Display.isCreated() && Display.isActive());
   }
 
   public static void beginTick(Minecraft mc, boolean down, boolean focused) {
@@ -49,10 +49,10 @@ public final class FakeSneak {
         if (local.luke.tweaks.config.Config.current().sneak.announceToggle)
           mc.inGameHud.addChatMessage(
               "Fake sneak: "
-                  + (local.luke.tweaks.config.Config.current().sneak.enabled ? "ON" : "OFF"));
+                  + (local.luke.tweaks.config.Config.current().sneak.enabled ? "\u00a7aON\u00a7r" : "\u00a7cOFF\u00a7r"));
       } catch (IOException e) {
         LOG.error("Could not save Fake Sneak settings", e);
-        mc.inGameHud.addChatMessage("Fake Sneak settings could not be saved.");
+        mc.inGameHud.addChatMessage("\u00a7cFake sneak settings could not be saved.\u00a7r");
       }
     }
     toggleDown = down;

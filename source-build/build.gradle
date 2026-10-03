@@ -1,0 +1,69 @@
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+plugins {
+    id 'maven-publish'
+    id 'fabric-loom' version '1.11.8'
+    id 'babric-loom-extension' version '1.11.9'
+}
+def packRoot = rootDir.parentFile
+def moduleId = providers.gradleProperty('module').get()
+def modules = new JsonSlurper().parse(file('modules.json'))
+def module = modules[moduleId]
+if (module == null) throw new GradleException("Unknown utility module: ${moduleId}")
+def sources = new File(packRoot, "vendor/sources/${moduleId}")
+group = 'local.luke.power.utility'
+version = module.version + '+powerbeta.1'
+base.archivesName = moduleId
+layout.buildDirectory = file("build/${moduleId}")
+loom {
+    mixin { useLegacyMixinAp = true }
+    customMinecraftManifest.set('https://babric.github.io/manifest-polyfill/b1.7.3.json')
+    intermediaryUrl.set('https://maven.glass-launcher.net/babric/babric/intermediary/%1$s/intermediary-%1$s-v2.jar')
+    def wideners = fileTree(new File(sources, 'src/main/resources')).matching { include '*.accesswidener' }.files
+    if (!wideners.empty) accessWidenerPath = wideners.first()
+}
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.glass-launcher.net/babric' }
+    maven { url = 'https://maven.glass-launcher.net/releases' }
+}
+dependencies {
+    compileOnly files('../input-api/build/libs/power-beta-input-1.0.0.jar')
+    minecraft 'com.mojang:minecraft:b1.7.3'
+    mappings module.mapping
+    modImplementation 'babric:fabric-loader:0.15.6-babric.2'
+    modImplementation fileTree(new File(packRoot, 'build/platform-compile')) { include '*.jar' }
+    module.dependencies.each { dep ->
+        modImplementation files(file("build/${dep}/libs/${dep}-${modules[dep].version}+powerbeta.1.jar"))
+    }
+    if (moduleId == 'retrocommands') modCompileOnly files(new File(packRoot, 'components/mc-lpkecreative/build/libs/lpkecreative-1.1.0.jar'))
+    implementation fileTree(new File(packRoot, 'vendor/libraries')) { include '*.jar' }
+    compileOnly 'com.google.code.gson:gson:2.13.2'
+    compileOnly 'com.google.guava:guava:33.2.1-jre'
+    compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
+    compileOnly 'org.slf4j:slf4j-api:1.8.0-beta4'
+    compileOnly 'org.apache.commons:commons-lang3:3.12.0'
+    compileOnly 'org.checkerframework:checker-qual:3.42.0'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
+    compileOnly 'org.projectlombok:lombok:1.18.38'
+    annotationProcessor 'org.projectlombok:lombok:1.18.38'
+    compileOnly 'io.github.llamalad7:mixinextras-common:0.5.0'
+    annotationProcessor 'io.github.llamalad7:mixinextras-common:0.5.0'
+}
+sourceSets.main {
+    java.srcDirs = [new File(sources, 'src/main/java')]
+    resources.srcDirs = [new File(sources, 'src/main/resources')]
+}
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand version: project.version }
+}
+java { withSourcesJar() }
+tasks.withType(JavaCompile).configureEach { options.release = 17; options.encoding = 'UTF-8' }
+tasks.withType(AbstractArchiveTask).configureEach { preserveFileTimestamps = false; reproducibleFileOrder = true }
+jar { from(new File(sources, 'LICENSE')) }
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == 'org.ow2.asm' && requested.name == 'asm-all') useVersion '4.1'
+    }
+}

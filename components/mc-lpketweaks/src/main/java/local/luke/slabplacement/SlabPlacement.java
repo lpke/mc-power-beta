@@ -23,7 +23,7 @@ public final class SlabPlacement {
   }
 
   public static void tick(Minecraft mc) {
-    beginTick(mc, Input.down(Keys.ALL[0].code), Display.isCreated() && Display.isActive());
+    beginTick(mc, local.luke.power.input.Bindings.down(Keys.ALL[0]), Display.isCreated() && Display.isActive());
   }
 
   public static void beginTick(Minecraft mc, boolean down, boolean focused) {
@@ -47,10 +47,10 @@ public final class SlabPlacement {
         if (local.luke.tweaks.config.Config.current().slabs.announceToggle)
           mc.inGameHud.addChatMessage(
               "Slab completion: "
-                  + (local.luke.tweaks.config.Config.current().slabs.enabled ? "ON" : "OFF"));
+                  + (local.luke.tweaks.config.Config.current().slabs.enabled ? "\u00a7aON\u00a7r" : "\u00a7cOFF\u00a7r"));
       } catch (IOException e) {
         LOG.error("Could not save Slab Placement settings", e);
-        mc.inGameHud.addChatMessage("Slab Placement settings could not be saved.");
+        mc.inGameHud.addChatMessage("\u00a7cSlab completion settings could not be saved.\u00a7r");
       }
     }
     toggleDown = down;

@@ -10,11 +10,14 @@
     "SoundPoolAccessor",
     "SoundManagerAccessor",
     "SoundMixin",
-    "ButtonAccessor",
-    "PauseMixin",
     "TitleMixin",
     "SoundPoolMixin",
-    "ResourceDownloadMixin"
+    "ResourceDownloadMixin",
+    "KeyBindingMixin",
+    "NativeBindingMixin",
+    "ContainerBindingMixin",
+    "MovementBindingMixin",
+    "MouseBindingMixin"
   ],
   "injectors": {
     "defaultRequire": 1

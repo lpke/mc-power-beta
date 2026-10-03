@@ -509,7 +509,7 @@ public final class Commands {
         "Single- and double-slash forms work. Loaded chunks only."
       }
     };
-    e.message.accept("WorldEdit Beta help " + page + "/5");
+    e.message.accept("WorldEdit Beta help " + page + "/" + help.length);
     for (String line : help[page - 1]) e.message.accept(line);
   }
 }

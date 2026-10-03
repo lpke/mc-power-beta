@@ -16,10 +16,11 @@ repositories {
     maven { url = 'https://maven.glass-launcher.net/babric' }
 }
 dependencies {
+    compileOnly files('input-api/build/libs/power-beta-input-1.0.0.jar')
     minecraft 'com.mojang:minecraft:b1.7.3'
     mappings 'babric:barn:b1.7.3+build.8:v2'
     modImplementation 'babric:fabric-loader:0.15.6-babric.2'
-    modCompileOnly files('vendor/jars/GlassConfigAPI-3.2.5.jar')
+    modCompileOnly files('vendor/jars/GlassConfigAPI-3.2.5.jar', 'source-build/build/unitweaks/libs/unitweaks-0.31.0+powerbeta.1.jar')
     compileOnly 'com.google.code.gson:gson:2.8.9'
     compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
     compileOnly 'io.github.llamalad7:mixinextras-common:0.5.0'
@@ -32,6 +33,26 @@ configurations.configureEach {
         if (requested.group == 'org.ow2.asm' && requested.name == 'asm-all') useVersion '4.1'
     }
 }
+// These are locally compiled modules. Module coordinates give Loom stable nested IDs.
+def utilityModules = new groovy.json.JsonSlurper().parse(file('source-build/modules.json'))
+repositories {
+    flatDir {
+        dirs utilityModules.keySet().collect { "source-build/build/${it}/libs" }
+        dirs 'components/mc-lpkecreative/build/libs', 'components/mc-lpketweaks/build/libs',
+             'components/mc-worldedit-beta/build/libs', 'vendor/libraries'
+    }
+}
+dependencies {
+    utilityModules.each { id, spec ->
+        if (spec.enabled) include "local.powerbeta:${id}:${spec.version}+powerbeta.1"
+    }
+    include 'local.powerbeta:lpkecreative:1.1.0'
+    include 'local.powerbeta:lpketweaks:1.2.1'
+    include 'local.powerbeta:worldedit-beta:1.2.1'
+    include 'local.powerbeta:MCAuthLib:d9d773e5d50327c33898c65cd545a4f6ef3ba1b5'
+    include 'blue.endless:jankson:1.2.1'
+}
+
 processResources {
     inputs.property 'version', project.version
     filesMatching('fabric.mod.json') { expand version: project.version }
@@ -40,3 +61,6 @@ java { withSourcesJar() }
 test { useJUnitPlatform() }
 tasks.withType(JavaCompile).configureEach { options.release = 17 }
 tasks.withType(AbstractArchiveTask).configureEach { preserveFileTimestamps = false; reproducibleFileOrder = true }
+
+jar { from(zipTree(file('input-api/build/libs/power-beta-input-1.0.0.jar'))) { exclude 'META-INF/MANIFEST.MF' } }
+test { classpath += files('input-api/build/libs/power-beta-input-1.0.0.jar') }

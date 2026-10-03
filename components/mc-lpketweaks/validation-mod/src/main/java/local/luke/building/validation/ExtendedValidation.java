@@ -121,7 +121,7 @@ public final class ExtendedValidation {
           command(mc, "//set 44:3");
           check(
               mc.world.getBlockId(1, 102, 1) == 44 && mc.world.method_1778(1, 102, 1) == 3,
-              "slab metadata");
+              "slab metadata: id=" + mc.world.getBlockId(1, 102, 1) + " meta=" + mc.world.method_1778(1, 102, 1) + " available=" + WorldEditBeta.available(mc));
           command(mc, "//undo");
           check(mc.world.getBlockId(1, 102, 1) == 0, "undo air");
           command(mc, "//redo");
@@ -138,6 +138,7 @@ public final class ExtendedValidation {
           int entities = mc.world.field_198.size();
           select(mc, 0, 101, 0, 0, 101, 0);
           command(mc, "//set air");
+          check(mc.world.getBlockId(0, 101, 0) == 0, "chest removed successfully");
           check(mc.world.field_198.size() == entities, "no item drops");
           command(mc, "//undo");
           chest = (Inventory) mc.world.method_1777(0, 101, 0);

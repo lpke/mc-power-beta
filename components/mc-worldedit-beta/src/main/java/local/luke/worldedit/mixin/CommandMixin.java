@@ -6,18 +6,17 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ClientPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 
-/** Execute after chat has recorded the submitted line, before RetroCommands handles it again. */
+/** Own command execution outside all injected legacy dispatchers. Chat records history first. */
 @Mixin(value = ClientPlayerEntity.class, priority = 1200)
 public class CommandMixin {
-  @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
-  private void worldedit$command(String text, CallbackInfo ci) {
+  @WrapMethod(method = "sendChatMessage")
+  private void power$command(String text, Operation<Void> original) {
     if (WorldEditBeta.command(
         (Minecraft) FabricLoader.getInstance().getGameInstance(), text.trim())) {
       ChatHistory.add(text.trim());
-      ci.cancel();
-    }
+    } else original.call(text);
   }
 }

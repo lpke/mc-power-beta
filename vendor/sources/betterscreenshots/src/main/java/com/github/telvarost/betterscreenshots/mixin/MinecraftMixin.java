@@ -148,7 +148,7 @@ public abstract class MinecraftMixin implements Runnable {
             )
     )
     private void checkTakingScreenshot(Minecraft instance, boolean value) {
-        if (!Keyboard.isKeyDown(KeyBindingListener.takeCustomResolutionScreenshot.code)) {
+        if (!local.luke.power.input.Bindings.down(KeyBindingListener.takeCustomResolutionScreenshot)) {
             this.screenshotKeyDown = false;
         }
     }
@@ -196,35 +196,8 @@ public abstract class MinecraftMixin implements Runnable {
     public int betterScreenshots_tickGetEventKey() {
         int eventKey = Keyboard.getEventKey();
 
-        /** - Check for CUSTOM_RESOLUTION_PHOTO keybinding pressed */
-        if(Keyboard.isKeyDown(KeyBindingListener.takeCustomResolutionScreenshot.code)) {
-            if(this.world != null) {
-                this.screenshotKeyDown = true;
-                this.inGameHud.addChatMessage(
-                        ModHelper.mainSaveCustomResolutionPhotoScreenshot((Minecraft) (Object)this,
-                                this.runDirectoryCache,
-                                this.displayWidth,
-                                this.displayHeight,
-                                Config.config.customResolutionPhotoWidth,
-                                Config.config.customResolutionPhotoHeight,
-                                (System.getProperty("os.name").toLowerCase().contains("mac"))
-                                        ? Keyboard.isKeyDown(Keyboard.KEY_LMETA) || Keyboard.isKeyDown(Keyboard.KEY_RMETA)
-                                        : Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)
-                        )
-                );
-            }
-        } else {
-            if (!Keyboard.isKeyDown(60)) {
-                this.screenshotKeyDown = false;
-            }
-        }
-
-        /** - Check for ISOMETRIC_PHOTO keybinding pressed */
-        if(this.world != null && eventKey == KeyBindingListener.takeIsometricScreenshot.code) {
-            this.progressRenderer.progressStart("Taking isometric screenshot");
-            IsometricScreenshotRenderer isoRenderer = (new IsometricScreenshotRenderer((Minecraft) (Object)this, this.runDirectoryCache));
-            isoRenderer.doRender();
-        }
+        if (!Keyboard.isRepeatEvent())
+            com.github.telvarost.betterscreenshots.CaptureActions.press(eventKey);
 
         return eventKey;
     }

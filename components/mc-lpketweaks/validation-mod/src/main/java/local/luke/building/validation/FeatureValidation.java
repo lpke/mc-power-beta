@@ -527,6 +527,11 @@ public final class FeatureValidation {
     }
     if (text.equals("hotbar-input")) {
       reset(mc);
+      local.luke.tweaks.config.Config.update(s -> {
+        s.hotbar.swap = true;
+        s.hotbar.scroll = true;
+        s.hotbar.numberRowKeys = true;
+      });
       mode(mc, "CREATIVE");
       flight(mc, true);
       mc.options.thirdPerson = false;

@@ -1,9 +1,7 @@
 package com.matthewperiut.retrocommands.command.extra;
 
-import com.matthewperiut.accessoryapi.api.PlayerExtraHP;
 import com.matthewperiut.retrocommands.api.Command;
 import com.matthewperiut.retrocommands.util.SharedCommandSource;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
 
 
@@ -25,13 +23,8 @@ public class Heal implements Command {
 
         commandSource.sendFeedback("Healed fully!");
 
-        if (FabricLoader.getInstance().isModLoaded("accessoryapi")) {
-            player.health = 20 + ((PlayerExtraHP)player).getExtraHP();
-        }
-        else
-        {
-            player.health = 20;
-        }
+        player.health = 20;
+
     }
 
     @Override

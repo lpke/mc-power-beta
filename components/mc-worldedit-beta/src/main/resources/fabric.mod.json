@@ -10,9 +10,6 @@
   "license": "LGPL-3.0-only",
   "environment": "client",
   "entrypoints": {
-    "modmenu": [
-      "local.luke.worldedit.config.ModMenuIntegration"
-    ],
     "main": [
       "local.luke.worldedit.chat.RetroCommandsBridge"
     ]

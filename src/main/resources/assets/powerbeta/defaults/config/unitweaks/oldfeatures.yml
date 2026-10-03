@@ -1,0 +1,9 @@
+disableDeadBushGeneration: false
+disableTallGrassGeneration: false
+punchSheepForWool: false
+punchTntToIgnite: false
+punchTntToDefuse: false
+hoeGrassForSeeds: false
+boatElevators: false
+ladderGaps: false
+minecartBoosters: false

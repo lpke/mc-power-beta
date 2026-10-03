@@ -14,16 +14,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftMixin {
     @Shadow public abstract boolean isWorldRemote();
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Keyboard;getEventKey()I", ordinal = 0, remap = false))
+    @Inject(method = "tick", at = @At("TAIL"))
     public void PlayerList$tabKeybind(CallbackInfo ci) {
-        if (isWorldRemote() && Keyboard.getEventKey() == PlayerListMod.PLAYER_LIST_KEY.code) {
-            if (Keyboard.getEventKeyState()) {
-                PlayerList.onTabPressed();
-            } else {
-                PlayerList.onTabReleased();
-            }
-        }
+        if (isWorldRemote() && local.luke.power.input.Bindings.down(PlayerListMod.PLAYER_LIST_KEY)) {
+            if (!PlayerList.isTabPressed()) PlayerList.onTabPressed();
+        } else if (PlayerList.isTabPressed()) PlayerList.onTabReleased();
     }
-
-
 }
