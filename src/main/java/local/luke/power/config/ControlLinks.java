@@ -70,6 +70,15 @@ public final class ControlLinks {
     Link l = LINKS.get(key.id);
     return l == null ? null : session.settings().stream().filter(s -> s.id.equals(l.setting)).findFirst().orElse(null);
   }
+  public static boolean hasControls(Setting setting) {
+    return LINKS.values().stream().anyMatch(l -> setting.id.equals(l.setting) || setting.id.equals(l.gate));
+  }
+  public static List<Setting> controls(ConfigSession session, Setting setting) {
+    return session.settings().stream().filter(s -> {
+      Link link = LINKS.get(s.id);
+      return link != null && (setting.id.equals(link.setting) || setting.id.equals(link.gate));
+    }).toList();
+  }
   public static boolean enabled(ConfigSession session, Setting key) {
     Link l = LINKS.get(key.id);
     return l == null || l.gate.isEmpty() || session.settings().stream().filter(s -> s.id.equals(l.gate))

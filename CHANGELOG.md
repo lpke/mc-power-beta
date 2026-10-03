@@ -1,5 +1,22 @@
 # Changelog
 
+## Container carrying and settings navigation, 2026-10-04
+
+- Highlight setting rows only while hovered, with a lighter background. Restore the
+  Controls reset label to R.
+- Add keyboard-icon links from settings to related controls, including disabled
+  features. Back or Escape restores the previous page, scroll, search, collapsed
+  sections and conflict filter without discarding edits.
+- Add the BTA carry pose, walking bob and centered first-person container rendering.
+  Render double chests with joined Beta textures.
+- Move double chests as one unit, preserving both inventories and their slot order.
+  Their placement axis follows the player; both spaces must be clear, loaded and
+  separate from other chests. Require releasing Use after pickup or placement so
+  holding the button cannot immediately move the container again.
+- Extend durable carry journals to both halves and recover interrupted pickup or
+  placement without overwriting unrelated blocks. Keep old single-container journals
+  readable and retain completed transfers as recovery copies.
+
 ## Unified settings and interaction update, 2026-10-04
 
 - Remember the last Options page, scroll position and collapsed groups during a session.

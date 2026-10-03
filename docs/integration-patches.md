@@ -73,6 +73,10 @@ on odd widths. The custom renderer fixes both without changing hitboxes.
   It flushes original NBT before removal and target intent before placement. Loaded
   chunks, reach, block metadata, inventory checksums and placement occupancy are
   checked before mutation. Successful transfers retain full recovery archives.
+  Paired chest records keep each half separate and checksum both payloads and
+  target coordinates. Replay checks both locations before touching either one;
+  mismatches stop the transfer and preserve the journal. Carry rendering uses
+  read-only block views and a scoped pose on player and armor models.
 - Position records use an explicit Gson decoder because the game's Gson 2.8.9
   predates Java record support. Journal tests use that exact Gson generation.
 - Retired the one-off upstream catalog/default import generators. The reviewed

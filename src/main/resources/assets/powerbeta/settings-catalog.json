@@ -3696,7 +3696,7 @@
     "page": "Inventory",
     "group": "Containers",
     "label": "Move containers",
-    "description": "Sneak and use an empty hand to pick up a chest, furnace or dispenser. Use again to place it. Contents are saved in a recovery journal.",
+    "description": "Sneak and use an empty hand to carry a chest, double chest, furnace or dispenser. Use again to place it; double chests need two clear spaces. Contents are journaled for recovery.",
     "default": false,
     "restart": false
   },

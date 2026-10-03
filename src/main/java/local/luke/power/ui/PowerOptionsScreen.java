@@ -37,6 +37,12 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private record Row(String group, Setting setting, int y, int height) {}
 
+  private record View(String page, double scroll, double sideScroll, String query,
+      boolean changedOnly, List<String> conflicts, List<String> related, Set<String> collapsed,
+      boolean showDisabled, int selected) {}
+  private final Deque<View> history = new ArrayDeque<>();
+  private List<String> relatedIds = List.of();
+
   private static String rememberedPage = "General";
   private static final Map<String, Double> positions = new HashMap<>();
   private static final Set<String> rememberedCollapsed = new HashSet<>();
@@ -93,7 +99,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void rememberPosition() {
-    if (!changedOnly && conflictIds.isEmpty() && search.text.isBlank()) {
+    if (!changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty() && search.text.isBlank()) {
       rememberedPage = page;
       positions.put(page, scroll);
       rememberedSideScroll = sideScroll;
@@ -115,14 +121,47 @@ public final class PowerOptionsScreen extends UiScreen {
     };
   }
   private boolean soundPreview(Setting s) { return previewId(s) != null; }
+  private boolean hasLink(Setting setting) {
+    return setting.kind == Setting.Kind.KEY ? ControlLinks.related(session, setting) != null
+        : ControlLinks.hasControls(setting);
+  }
   private int mainControlLeft(Row row) {
-    return controlLeft(row) + (soundPreview(row.setting) || (row.setting.kind == Setting.Kind.KEY && ControlLinks.related(session, row.setting) != null) ? 22 : 0);
+    return controlLeft(row) + (soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
+  }
+  private int searchLeft() { return left() + (history.isEmpty() ? 0 : 48); }
+  private void pushView() {
+    if (history.size() == 32) history.removeLast();
+    history.push(new View(page, scroll, sideScroll, search.text, changedOnly, conflictIds,
+        relatedIds, Set.copyOf(collapsed), showDisabled, selected));
+    search.focused = false;
+    selected = -1;
+  }
+  private void back() {
+    if (history.isEmpty()) return;
+    View view = history.pop();
+    page = view.page; scroll = view.scroll; sideScroll = view.sideScroll;
+    search.text = view.query; search.selectAll(); search.focused = false;
+    changedOnly = view.changedOnly; conflictIds = view.conflicts; relatedIds = view.related;
+    collapsed.clear(); collapsed.addAll(view.collapsed);
+    showDisabled = view.showDisabled; selected = view.selected;
+    layout();
+  }
+  private void linkedControls(Setting setting) {
+    List<Setting> bindings = ControlLinks.controls(session, setting);
+    if (bindings.isEmpty()) return;
+    rememberPosition(); pushView();
+    page = "Controls";
+    relatedIds = bindings.stream().map(s -> s.id).toList();
+    conflictIds = List.of(); changedOnly = false; search.text = ""; scroll = 0;
+    layout();
   }
   private void click() { minecraft.soundManager.method_2009("random.click", 1, 1); }
   private void related(Setting key) {
     Setting target = ControlLinks.related(session, key);
     if (target == null) return;
     rememberPosition();
+    pushView();
+    relatedIds = List.of();
     page = target.page;
     conflictIds = List.of();
     changedOnly = false;
@@ -150,7 +189,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private boolean audio() {
-    return page.equals("Audio") && search.text.isBlank() && !changedOnly && conflictIds.isEmpty();
+    return page.equals("Audio") && search.text.isBlank() && !changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty();
   }
 
   private boolean video() {
@@ -169,12 +208,13 @@ public final class PowerOptionsScreen extends UiScreen {
     if (session == null) return;
     String query = search.text.strip().toLowerCase(Locale.ROOT);
     Map<String, List<Setting>> groups = new LinkedHashMap<>();
-    List<Setting> candidates = conflictIds.isEmpty() ? session.settings() : conflictIds.stream()
+    List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
+    List<Setting> candidates = listed.isEmpty() ? session.settings() : listed.stream()
         .map(id -> session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElse(null))
         .filter(Objects::nonNull).toList();
     for (Setting s : candidates) {
-      if (conflictIds.isEmpty() && s.kind == Setting.Kind.KEY && !showDisabled && !ControlLinks.enabled(session, s)) continue;
-      if ((!changedOnly || s.changed()) && (!conflictIds.isEmpty() || (query.isEmpty()
+      if (listed.isEmpty() && s.kind == Setting.Kind.KEY && !showDisabled && !ControlLinks.enabled(session, s)) continue;
+      if ((!changedOnly || s.changed()) && (!listed.isEmpty() || (query.isEmpty()
           ? changedOnly || s.page.equals(page)
           : (s.label + " " + s.description + " " + s.group + " " + s.page).toLowerCase(Locale.ROOT).contains(query))))
         groups.computeIfAbsent(query.isEmpty() && !changedOnly ? s.group : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
@@ -190,7 +230,7 @@ public final class PowerOptionsScreen extends UiScreen {
     List<Row> next = new ArrayList<>();
     int y = 0, rowHeight = span() < 340 ? 40 : 24;
     for (var group : groups.entrySet()) {
-      boolean flat = controls() && query.isEmpty() && !changedOnly || !conflictIds.isEmpty();
+      boolean flat = controls() && query.isEmpty() && !changedOnly || !listed.isEmpty();
       if (!flat) { next.add(new Row(group.getKey(), null, y, 24)); y += 24; }
       if (!flat && query.isEmpty() && !changedOnly && collapsed.contains(page + "/" + group.getKey())) continue;
       for (Setting s : group.getValue()) {
@@ -255,7 +295,10 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (button != 0 && button != 1) return;
-    if (inside(x, y, left(), 28, span() - 22, 18)) {
+    if (button == 0 && !history.isEmpty() && inside(x, y, left(), 28, 44, 18)) {
+      click(); back(); return;
+    }
+    if (inside(x, y, searchLeft(), 28, right() - 36 - searchLeft(), 18)) {
       search.focused = true;
       if (button == 1) {
         search.text = "";
@@ -267,7 +310,9 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (inside(x, y, right() - 32, 28, 18, 18)) {
       click();
+      if (!history.isEmpty() && (!conflictIds.isEmpty() || !relatedIds.isEmpty())) { back(); return; }
       conflictIds = List.of();
+      relatedIds = List.of();
       search.text = "";
       search.selectAll();
       scroll = 0;
@@ -280,6 +325,8 @@ public final class PowerOptionsScreen extends UiScreen {
       if (index >= 0 && index < PAGES.size()) {
         rememberPosition();
         click();
+        history.clear();
+        relatedIds = List.of();
         page = PAGES.get(index);
         conflictIds = List.of();
         changedOnly = false;
@@ -331,6 +378,7 @@ public final class PowerOptionsScreen extends UiScreen {
         }
         if (s.kind == Setting.Kind.KEY && !conflicts(s).isEmpty() && x >= controlLeft(r) - 12 && x < controlLeft(r)) {
           click();
+          pushView();
           List<String> fixed = new ArrayList<>(); fixed.add(s.id);
           conflicts(s).forEach(c -> fixed.add(c.id));
           conflictIds = List.copyOf(fixed);
@@ -339,7 +387,8 @@ public final class PowerOptionsScreen extends UiScreen {
         if (x >= controlLeft(r) && x < mainControlLeft(r)) {
           click();
           if (soundPreview(s)) local.luke.power.audio.AudioController.previewSound(previewId(s));
-          else related(s);
+          else if (s.kind == Setting.Kind.KEY) related(s);
+          else linkedControls(s);
           return;
         }
         if (x < mainControlLeft(r)) return;
@@ -368,6 +417,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if ((session.changes() > 0 || changedOnly) && inside(x, y, origin() + 102, footerY(), changesEnd - origin() - 102, 20)) {
       click();
       conflictIds = List.of();
+      relatedIds = List.of();
       changedOnly = !changedOnly;
       search.text = "";
       scroll = 0;
@@ -468,6 +518,7 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (key == Keyboard.KEY_ESCAPE) {
+      if (!history.isEmpty()) { back(); return; }
       if (!conflictIds.isEmpty()) { conflictIds = List.of(); scroll = positions.getOrDefault(page, 0d); layout(); return; }
       if (search.focused) {
         search.focused = false;
@@ -488,6 +539,7 @@ public final class PowerOptionsScreen extends UiScreen {
       search.key(c, key);
       if (!before.equals(search.text)) {
         conflictIds = List.of();
+        relatedIds = List.of();
         scroll = 0;
         selected = -1;
         layout();
@@ -591,7 +643,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (sideScroll > 0) text("^", origin() + sidebar() - 10, 24, 0xcccccc);
     if (sideScroll < PAGES.size() * 22 - (bottom() - 24))
       text("v", origin() + sidebar() - 10, bottom() - 10, 0xcccccc);
-    input(search, left(), 28, span() - 22, mx, my, !conflictIds.isEmpty() ? "Conflicting bindings (x to close)" : changedOnly ? "Search changed settings..." : "Search all settings...");
+    if (!history.isEmpty()) button("Back", left(), 28, 44, 18, mx, my, true);
+    input(search, searchLeft(), 28, right() - 36 - searchLeft(), mx, my,
+        !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? "Related controls"
+        : changedOnly ? "Search changed settings..." : "Search all settings...");
     button("x", right() - 32, 28, 18, 18, mx, my, true);
     if (audio()) {
       int w = span() / 4;
@@ -619,7 +674,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       Setting s = row.setting;
       boolean hover = inside(mx, my, left(), y, span(), row.height) && my >= top() && my < bottom();
-      if (hover || selected == index) fill(left() - 2, y, right() - 12, y + row.height, 0x85000000);
+      if (hover) fill(left() - 2, y, right() - 12, y + row.height, 0x60000000);
       boolean narrow = row.height == 40;
       int cy = y + (narrow ? 16 : 2),
           controlLeft = mainControlLeft(row);
@@ -637,9 +692,8 @@ public final class PowerOptionsScreen extends UiScreen {
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, my, true);
       if (numeric) button("...", right() - 60, cy, 22, 18, mx, my, true);
-      if (s.kind == Setting.Kind.KEY) iconButton("reset", right() - 34, cy, 20, mx, my, !s.value.equals(s.defaultValue));
-      else button("R", right() - 34, cy, 20, 18, mx, my, !s.value.equals(s.defaultValue));
-      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : "settings", controlLeft(row), cy, 20, mx, my, true);
+      button("R", right() - 34, cy, 20, 18, mx, my, !s.value.equals(s.defaultValue));
+      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, true);
       List<Setting> conflicts = conflicts(s);
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
@@ -648,7 +702,7 @@ public final class PowerOptionsScreen extends UiScreen {
         else if (!conflicts.isEmpty() && inside(mx, my, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
-          tip = soundPreview(s) ? "Preview sound" : "Related settings"; hoverId += ".related";
+          tip = soundPreview(s) ? "Preview sound" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = s.description + (s.restart ? "\nRestart required." : "");
       }
     }

@@ -15,7 +15,8 @@ import org.lwjgl.opengl.GL11;
 public final class Validation {
   private static final Path COMMAND = Path.of("power-beta-validation.command"),
       REPORT = Path.of("power-beta-validation.log");
-  private static int ticks, failures;
+  private static int ticks;
+  static int failures;
 
   interface Check {
     void run() throws Exception;
@@ -46,7 +47,11 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("feature-")) FeatureChecks.run(mc,command.substring(8));
+      if (command.equals("carry-hold") || command.equals("carry-release")) NavigationCarryChecks.hold(mc,command.equals("carry-release"));
+      else if (command.equals("carry-resume-check")) NavigationCarryChecks.resumed(mc);
+      else if (command.equals("navigation-check")) NavigationCarryChecks.menu(mc);
+      else if (command.equals("double-carry") || command.equals("carry-demo")) NavigationCarryChecks.carry(mc,command.equals("carry-demo"));
+      else if (command.startsWith("feature-")) FeatureChecks.run(mc,command.substring(8));
       else if (command.startsWith("revision-")) RevisionChecks.run(mc,command.substring(9));
       else if (command.startsWith("keys-")) InputChecks.run(mc, command.substring(5));
       else if (command.equals("chat-check")) ChatChecks.run(mc);

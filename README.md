@@ -97,11 +97,13 @@ Use `--java /path/to/java` to pin the launcher runtime when needed.
 
 ## Container tools
 
-Building includes **Carry containers**, off by default. Hold Sneak with an empty
-hand and use a chest, dispenser or furnace to pick it up. Use a block face to put
-it in an empty space. Double chests must be separated first; placement beside an
-existing chest is blocked. Spectator, freecam, riding and active edits cannot
-move containers. Pickup and placement preserve full block-entity NBT, including
+Inventory includes **Move containers**, off by default. Hold Sneak with an empty
+hand and use a chest, dispenser or furnace to pick it up. Release Use, then use a
+block face to place it. Double chests move both halves and all 54 slots together;
+their placement axis follows your facing direction. Both spaces must be empty and
+clear of entities. Placement beside another chest remains blocked. Spectator, freecam, riding and active edits cannot
+move containers. A centered container model and raised-arm carry pose show what
+you are holding. Pickup and placement preserve full block-entity NBT, including
 item identity, count, damage and furnace progress.
 
 Transfers write and flush recovery records before changing the world. Held

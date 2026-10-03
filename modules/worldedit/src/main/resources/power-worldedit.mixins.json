@@ -13,7 +13,10 @@
     "CommandMixin",
     "WorldPropertiesMixin",
     "EntityAccess",
-    "CarryWorldAccess"
+    "CarryWorldAccess",
+    "CarryFirstPersonMixin",
+    "CarryPlayerRendererMixin",
+    "CarryBipedMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -49,7 +49,7 @@ public abstract class UiScreen extends Screen {
     int cx = x + w / 2, cy = y + 9;
     String[] pixels = switch (icon) {
       case "speaker" -> new String[]{"   #   # ", "  ## #  #", "####  # #", "####  # #", "####  # #", "  ## #  #", "   #   # "};
-      case "reset" -> new String[]{"  ####  ", " ##  ## ", "##    ##", "#     ##", "##   ###", " ##    #", "  ####  "};
+      case "controls" -> new String[]{"#########", "# # # # #", "#########", "# # # # #", "#########", "# ##### #", "#########"};
       default -> new String[]{" #   #  ", "########", " #   #  ", "   #   #", "########", "   #   #", "        "};
     };
     for (int row = 0; row < pixels.length; row++)
