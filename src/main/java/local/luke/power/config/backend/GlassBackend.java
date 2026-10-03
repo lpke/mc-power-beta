@@ -126,6 +126,22 @@ public final class GlassBackend implements Backend {
       throw new IllegalArgumentException("Minimum leaf decay time must be below maximum");
   }
 
+  public boolean previews(Setting s) {
+    return !s.restart && (s.page.equals("Audio")
+        || s.id.equals("unitweaks:userinterface.frontViewThirdPerson"));
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  public void preview(Map<String, JsonElement> values) throws Exception {
+    for (var e : values.entrySet()) {
+      ConfigEntryHandler h = handlers.get(e.getKey());
+      Class<?> type = h.parentField.getType();
+      h.value = Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
+      h.saveToField();
+    }
+    local.luke.power.audio.AudioController.rulesChanged();
+  }
+
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void apply(Map<String, JsonElement> values) {
     for (var e : values.entrySet()) {
@@ -135,6 +151,6 @@ public final class GlassBackend implements Backend {
     }
     GCCore.saveConfig(
         root.modContainer(), root.configCategoryHandler(), EventStorage.EventSource.USER_SAVE);
-    local.luke.power.audio.AudioController.settingsChanged();
+    local.luke.power.audio.AudioController.rulesChanged();
   }
 }

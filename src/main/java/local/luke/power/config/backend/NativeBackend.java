@@ -24,6 +24,12 @@ public final class NativeBackend implements Backend {
     KeyConfig.load();
     modifiers.putAll(Bindings.modifiers());
     GameOptions o = mc.options;
+    List<net.minecraft.class_285> packs = new ArrayList<>();
+    for (Object pack : mc.field_2768.method_1000()) packs.add((net.minecraft.class_285) pack);
+    choice("texturePack", "Video", "Textures", "Texture pack",
+        Math.max(0, packs.indexOf(mc.field_2768.field_1175)), 0,
+        packs.stream().map(p -> p.field_1137.replace(".zip", "").replace("faithful32pack", "Faithful 32")).toList(),
+        index -> local.luke.power.visual.PackSelection.select(mc, packs.get(index)));
     slider("music", "Audio", "Volume", "Music", Option.MUSIC, 0, 100, 1, 100);
     slider("sound", "Audio", "Volume", "Sound effects", Option.SOUND, 0, 100, 1, 100);
     slider("sensitivity", "Controls", "Mouse", "Sensitivity", Option.SENSITIVITY, 0, 200, 1, 100);
@@ -84,7 +90,7 @@ public final class NativeBackend implements Backend {
             "guiScaleOption",
             "Interface",
             "Scale",
-            "GUI scale, 0 is automatic",
+            "GUI scale",
             "0",
             "8",
             "0"
@@ -233,6 +239,26 @@ public final class NativeBackend implements Backend {
             step,
             List.of(),
             false));
+    if (key.equals("guiScale")) {
+      setters.put("native." + key, v -> {
+        float scale = v.getAsFloat() / 8;
+        net.danygames2014.unitweaks.util.ModOptions.guiScale = scale;
+        net.danygames2014.unitweaks.util.ModOptions.realGuiScale = scale;
+        mc.options.guiScale = v.getAsInt();
+        if (mc.currentScreen != null) {
+          var size = new net.minecraft.class_564(mc.options, mc.displayWidth, mc.displayHeight);
+          mc.currentScreen.init(mc, size.method_1857(), size.method_1858());
+        }
+      });
+      return;
+    }
+    if (key.equals("brightness")) {
+      setters.put("native." + key, v -> {
+        net.danygames2014.unitweaks.util.ModOptions.brightness = v.getAsFloat() / 100;
+        net.danygames2014.unitweaks.util.ModOptions.updateWorldLightTable(mc);
+      });
+      return;
+    }
     setters.put(
         "native." + key,
         v ->
@@ -324,6 +350,25 @@ public final class NativeBackend implements Backend {
   public void validate(Map<String, JsonElement> values) {
     for (String key : values.keySet())
       if (!setters.containsKey(key)) throw new IllegalArgumentException("Unknown game option");
+  }
+
+  public boolean previews(Setting s) {
+    return Set.of("native.guiScale", "native.music", "native.sound", "native.sensitivity",
+        "native.invert", "native.fov", "native.fogDensity", "native.cloudHeight",
+        "native.clouds", "native.bobbing", "native.texturePack").contains(s.id);
+  }
+
+  public void preview(Map<String, JsonElement> values) {
+    values.forEach((key, value) -> {
+      switch (key) {
+        // Vanilla's setInt also saves options.txt; previews must stay in memory.
+        case "native.invert" -> mc.options.invertYMouse = value.getAsBoolean();
+        case "native.bobbing" -> mc.options.bobView = value.getAsBoolean();
+        case "native.clouds" -> net.danygames2014.unitweaks.util.ModOptions.clouds = value.getAsBoolean();
+        default -> setters.get(key).accept(value);
+      }
+    });
+    local.luke.power.audio.AudioController.refresh();
   }
 
   public void apply(Map<String, JsonElement> values) throws java.io.IOException {

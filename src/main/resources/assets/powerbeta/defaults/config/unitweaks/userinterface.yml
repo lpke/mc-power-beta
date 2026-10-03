@@ -3,7 +3,7 @@ improvedControlsMenu: true
 hideAchievementToast: false
 achievementBackToMenu: true
 disableDebugEntityIdTags: true
-frontViewThirdPerson: 1
+frontViewThirdPerson: 0
 clearTextFieldWithRightClick: true
 fovSlider: true
 videoSettingsConfig:

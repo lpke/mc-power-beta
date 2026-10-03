@@ -11,6 +11,7 @@ config/misctweaks/config.yml
 config/mojangfixstationapi/config.yml
 config/oldLogo.json
 config/power-beta/audio.json
+config/power-beta/visual.json
 config/quickadditions/config.yml
 config/station-api-configuration/config.yml
 config/unitweaks/bugfixes.yml

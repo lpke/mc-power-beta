@@ -283,15 +283,13 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
     fill(left + 2, bottom - 3, x + 4, bottom - 1, 0xFF555555);
     local.luke.creative.ui.Texture.draw(
         minecraft, "inventory", x - 18, y + 141, 18, 18, 172, 111, 18, 18, 256, 256);
-    if ((Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
+    if (local.luke.creative.config.Config.current().shiftClearsInventory
+        && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
         && mouseX >= x - 18
         && mouseX < x
         && mouseY >= y + 141
         && mouseY < y + 159) {
-      creative_renderString(
-          local.luke.creative.config.Config.current().shiftClearsInventory
-              ? "Destroy Item (Shift: clear inventory)"
-              : "Destroy Item");
+      creative_renderString("Clear inventory");
     }
   }
 

@@ -1,5 +1,24 @@
 # Changelog
 
+## Menu and texture update, 2026-10-04
+
+- Fixed GUI scale waiting for Done and ignoring mouse-held resize requests.
+- Added live previews for scale, all audio controls, sensitivity, field of view,
+  camera distance, texture packs and individual texture overrides. Discard
+  restores unsaved previews. Volume changes no longer rescan music folders.
+- Added Apply without navigation, numerical sliders with exact-value editors,
+  and a clickable unsaved-changes filter beside Reset page.
+- Added concise explanations for every setting, removed repeated names and
+  usage boilerplate, and listed shared bindings in conflict tooltips.
+- Darkened the active page and centered menus within a 21:9 maximum width.
+- Simplified reset wording and the creative Shift tooltip to Clear inventory.
+- Default perspective cycling now skips front view. Added adjustable camera
+  distance while retaining vanilla four-block distance and collision handling.
+- Included Alpha, 1.14 and Faithful 32 texture packs. Added independent soft
+  rain, soft snow, old cobblestone and old brick overrides, including HD support.
+- Added fresh Defaults and Configured profile generation. Preserved existing
+  instances, running sessions and the frozen separate-mod checkpoint.
+
 ## Power Beta 1.0.0, 2026-10-03
 
 - Compiled the gameplay and utility modules from source into one Power Beta JAR

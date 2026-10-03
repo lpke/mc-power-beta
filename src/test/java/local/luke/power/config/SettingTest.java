@@ -112,4 +112,18 @@ class SettingTest {
     assertThrows(IllegalArgumentException.class, () -> s.parse("3"));
     assertThrows(IllegalArgumentException.class, () -> s.parse("-1"));
   }
+
+  @org.junit.jupiter.api.Test void slidersClampAndReachBothEndpoints() {
+    Setting s = new Setting("test", "test", "Video", "Test", "Test", "", Setting.Kind.INTEGER,
+        new com.google.gson.JsonPrimitive(2), new com.google.gson.JsonPrimitive(2), 2, 32, 1, java.util.List.of(), false);
+    s.slide(-1); org.junit.jupiter.api.Assertions.assertEquals(2, s.value.getAsInt());
+    s.slide(.5); org.junit.jupiter.api.Assertions.assertEquals(17, s.value.getAsInt());
+    s.slide(2); org.junit.jupiter.api.Assertions.assertEquals(32, s.value.getAsInt());
+  }
+  @org.junit.jupiter.api.Test void duplicateAndEmptyHelpStaysHidden() {
+    org.junit.jupiter.api.Assertions.assertEquals("", Tooltips.description("unknown", "Test", "Test"));
+    org.junit.jupiter.api.Assertions.assertEquals("", Tooltips.description("unknown", "Test", "Test."));
+    org.junit.jupiter.api.Assertions.assertEquals("", Tooltips.description("unknown", "Test", ""));
+    org.junit.jupiter.api.Assertions.assertEquals("Details.", Tooltips.description("unknown", "Test", "Test\nDetails."));
+  }
 }

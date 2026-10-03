@@ -32,7 +32,7 @@ public final class AudioController {
           new MusicLibrary.Scan(List.of(), List.of()), new MusicLibrary.Scan(List.of(), List.of()));
   private static Minecraft client;
   private static MusicRules rules;
-  private static boolean dirty = true, paused, wasWorld, rescan;
+  private static boolean dirty = true, paused, wasWorld, rescan, nextAfterScan;
   private static String currentMusic = "",
       menuMusic = "",
       status = "Music folders have not been scanned";
@@ -42,6 +42,14 @@ public final class AudioController {
 
   public static void settingsChanged() {
     dirty = true;
+    nextAfterScan = true;
+  }
+
+  public static void rulesChanged() {
+    MusicRules before = rules();
+    rules = MusicRules.read();
+    if (before.vanillaDisabled() != rules.vanillaDisabled() || before.disabled() != rules.disabled()) next();
+    refresh();
   }
 
   public static MusicRules rules() {
@@ -108,6 +116,9 @@ public final class AudioController {
       if (rescan) {
         rescan = false;
         reload();
+      } else if (nextAfterScan) {
+        nextAfterScan = false;
+        next();
       }
     }
     SoundSystem system = system();
@@ -177,7 +188,7 @@ public final class AudioController {
     AudioSettings s = AudioConfig.current();
     List<class_267> tracks = new ArrayList<>();
     if (s.musicMode != AudioSettings.MusicMode.REPLACE || library.world.tracks().isEmpty())
-      tracks.addAll(vanilla);
+      if (!rules().vanillaDisabled()) tracks.addAll(vanilla);
     if (s.musicMode != AudioSettings.MusicMode.VANILLA)
       for (var track : library.world.tracks())
         try {

@@ -43,6 +43,14 @@ public abstract class UiScreen extends Screen {
         !enabled ? 0xa0a0a0 : hovered ? 0xffffa0 : 0xe0e0e0);
   }
 
+  protected void slider(String label, int x, int y, int w, int mx, int my, double fraction) {
+    button("", x, y, w, 18, mx, my, false);
+    int thumb = x + (int) Math.round(Math.max(0, Math.min(1, fraction)) * Math.max(0, w - 8));
+    button("", thumb, y, 8, 18, mx, my, true);
+    drawCenteredTextWithShadow(textRenderer, fit(label, w - 8), x + w / 2, y + 5,
+        inside(mx, my, x, y, w, 18) ? 0xffffa0 : 0xffffff);
+  }
+
   protected void clip(int left, int top, int span, int h) {
     GL11.glEnable(GL11.GL_SCISSOR_TEST);
     double sx = (double) minecraft.displayWidth / width,

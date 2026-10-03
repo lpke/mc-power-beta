@@ -290,7 +290,7 @@ public class Config {
 
         @ConfigEntry(
                 name = "Minecraft Default Background Music Disabled",
-                description = "Restart required for changes to take effect"
+                description = "Exclude the built-in soundtrack from background playback"
         )
         public Boolean disableDefaultMinecraftBGM = false;
 

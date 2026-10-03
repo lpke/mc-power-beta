@@ -4,7 +4,7 @@ import com.google.gson.*;
 import java.math.BigDecimal;
 import java.util.*;
 
-/** A typed value in a draft. Reading and editing this object never touches live game state. */
+/** A typed draft value. ConfigSession explicitly previews eligible edits without saving them. */
 public final class Setting {
   public enum Kind {
     BOOLEAN,
@@ -45,7 +45,7 @@ public final class Setting {
     this.page = page;
     this.group = group;
     this.label = label;
-    this.description = description;
+    this.description = Tooltips.description(id, label, description);
     this.kind = kind;
     this.value = value.deepCopy();
     this.original = value.deepCopy();
@@ -91,6 +91,14 @@ public final class Setting {
       }
       default -> {}
     }
+  }
+
+  public void slide(double fraction) {
+    if (kind != Kind.INTEGER && kind != Kind.DECIMAL) return;
+    double raw = min + Math.max(0, Math.min(1, fraction)) * (max - min);
+    double next = Math.max(min, Math.min(max, min + Math.round((raw - min) / step) * step));
+    value = kind == Kind.INTEGER ? new JsonPrimitive((int) Math.round(next))
+        : new JsonPrimitive(BigDecimal.valueOf(next).setScale(6, java.math.RoundingMode.HALF_UP).stripTrailingZeros());
   }
 
   public void parse(String text) {
@@ -152,6 +160,7 @@ public final class Setting {
   }
 
   public String display(JsonElement v) {
+    if (id.equals("native.guiScale")) return v.getAsInt() == 0 ? "Auto" : v.getAsInt() + "x";
     return switch (kind) {
       case BOOLEAN ->
           choices.size() == 2

@@ -1636,7 +1636,7 @@
     "label": "Minecraft default background music disabled",
     "description": "Restart required for changes to take effect",
     "default": false,
-    "restart": true
+    "restart": false
   },
   "quickadditions:config.MUSIC_CONFIG.musicCoundownRandomIntervalMin": {
     "page": "Audio",
@@ -2908,9 +2908,9 @@
   "unitweaks:userinterface.frontViewThirdPerson": {
     "page": "Camera",
     "group": "Third person",
-    "label": "Front view third person",
-    "description": "",
-    "default": 1,
+    "label": "Third-person front view",
+    "description": "Disabled switches between first person and rear view. Normal adds a front view; Hide HUD shows it while the HUD is hidden.",
+    "default": 0,
     "restart": false
   },
   "unitweaks:userinterface.clearTextFieldWithRightClick": {

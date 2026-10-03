@@ -8,6 +8,7 @@ public final class SettingsRegistry {
     ConfigSession s = new ConfigSession();
     NativeBackend.register(s, mc);
     AudioBackend.register(s, mc);
+    VisualBackend.register(s, mc);
     ComponentBackend.register(s);
     GlassBackend.register(s);
     LogoBackend.register(s);

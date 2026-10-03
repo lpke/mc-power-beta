@@ -46,7 +46,17 @@ public final class PowerOptionsScreen extends UiScreen {
   private double scroll, sideScroll;
   private Setting capture;
   private int captureModifier;
-  private boolean confirmClose, confirmReset, savedRestart;
+  private boolean confirmClose, confirmReset, savedRestart, changedOnly;
+  private Setting dragging;
+  private double dragLeft, dragSpan;
+
+  private int uiWidth() { return Math.min(width, height * 21 / 9); }
+  private int origin() { return (width - uiWidth()) / 2; }
+  private int right() { return origin() + uiWidth(); }
+  private int footerY() { return height - (uiWidth() < 470 ? 51 : 28); }
+  private int actionWidth() { return uiWidth() < 470 ? 54 : 66; }
+  private int actionX(int i) { return right() - 8 - (3 - i) * (actionWidth() + 4); }
+
   private int selected = -1, hoverTicks;
   private String lastHover = "";
   private List<Row> rows = List.of();
@@ -76,31 +86,31 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private int sidebar() {
-    return Math.max(90, Math.min(155, width / 4));
+    return Math.max(90, Math.min(155, uiWidth() / 4));
   }
 
   private int left() {
-    return sidebar() + 16;
+    return origin() + sidebar() + 16;
   }
 
   private int span() {
-    return width - left() - 14;
+    return right() - left() - 14;
   }
 
   private boolean audio() {
-    return page.equals("Audio") && search.text.isBlank();
+    return page.equals("Audio") && search.text.isBlank() && !changedOnly;
   }
 
   private boolean video() {
-    return page.equals("Video") && search.text.isBlank();
+    return page.equals("Video") && search.text.isBlank() && !changedOnly;
   }
 
   private int top() {
-    return audio() ? 88 : video() ? 78 : 52;
+    return audio() ? 88 : 52;
   }
 
   private int bottom() {
-    return height - 44;
+    return footerY() - 16;
   }
 
   private void layout() {
@@ -108,21 +118,21 @@ public final class PowerOptionsScreen extends UiScreen {
     String query = search.text.strip().toLowerCase(Locale.ROOT);
     Map<String, List<Setting>> groups = new LinkedHashMap<>();
     for (Setting s : session.settings())
-      if (query.isEmpty()
-          ? s.page.equals(page)
+      if ((!changedOnly || s.changed()) && (query.isEmpty()
+          ? changedOnly || s.page.equals(page)
           : (s.label + " " + s.description + " " + s.group + " " + s.page)
               .toLowerCase(Locale.ROOT)
-              .contains(query))
+              .contains(query)))
         groups
             .computeIfAbsent(
-                query.isEmpty() ? s.group : s.page + " / " + s.group, k -> new ArrayList<>())
+                query.isEmpty() && !changedOnly ? s.group : s.page + " / " + s.group, k -> new ArrayList<>())
             .add(s);
     List<Row> next = new ArrayList<>();
     int y = 0, rowHeight = span() < 340 ? 40 : 24;
     for (var group : groups.entrySet()) {
       next.add(new Row(group.getKey(), null, y, 24));
       y += 24;
-      if (query.isEmpty() && collapsed.contains(page + "/" + group.getKey())) continue;
+      if (query.isEmpty() && !changedOnly && collapsed.contains(page + "/" + group.getKey())) continue;
       for (Setting s : group.getValue()) {
         next.add(new Row(group.getKey(), s, y, rowHeight));
         y += rowHeight;
@@ -135,16 +145,37 @@ public final class PowerOptionsScreen extends UiScreen {
         Math.max(0, Math.min(sideScroll, Math.max(0, PAGES.size() * 22 - (bottom() - 24))));
   }
 
-  public void tick() {
-    hoverTicks++;
+  public void tick() { hoverTicks++; }
+
+  public void changed(Setting setting) {
+    session.link(setting);
+    error = "";
+    try { session.preview(); }
+    catch (Exception e) {
+      error = "Could not preview this value. " + Objects.toString(e.getMessage(), "See the game log.");
+      PowerBeta.LOG.error("Settings preview failed", e);
+    }
+    if (changedOnly) layout();
   }
+
+  private int controlLeft(Row row) {
+    return row.height == 40 ? left() + 4 : Math.max(left() + 100, right() - 188);
+  }
+
+  private void drag(int pixelX) {
+    if (dragging == null) return;
+    var before = dragging.value.deepCopy();
+    dragging.slide((pixelX - dragLeft) / dragSpan);
+    if (!before.equals(dragging.value)) changed(dragging);
+  }
+
 
   public void onMouseEvent() {
     super.onMouseEvent();
     int wheel = Mouse.getEventDWheel();
     if (wheel == 0 || capture != null || confirmClose || confirmReset) return;
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
-    if (x < sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
+    if (x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
     else scroll -= Math.signum(wheel) * 48;
     layout();
   }
@@ -174,7 +205,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (inside(x, y, width - 32, 28, 18, 18)) {
+    if (inside(x, y, right() - 32, 28, 18, 18)) {
       search.text = "";
       search.selectAll();
       scroll = 0;
@@ -182,10 +213,11 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     search.focused = false;
-    if (button == 0 && y >= 24 && y < bottom() && x < sidebar()) {
+    if (button == 0 && y >= 24 && y < bottom() && x >= origin() && x < origin() + sidebar()) {
       int index = (int) ((y - 24 + sideScroll) / 22);
       if (index >= 0 && index < PAGES.size()) {
         page = PAGES.get(index);
+        changedOnly = false;
         search.text = "";
         search.selectAll();
         scroll = 0;
@@ -201,11 +233,7 @@ public final class PowerOptionsScreen extends UiScreen {
       else if (index == 2) local.luke.power.audio.AudioController.reload();
       return;
     }
-    if (video() && button == 0 && inside(x, y, left(), 52, span(), 20)) {
-      minecraft.setScreen(new net.minecraft.client.gui.screen.pack.PackScreen(this));
-      return;
-    }
-    if (y >= top() && y < bottom() && x >= left() && x < width - 10) {
+    if (y >= top() && y < bottom() && x >= left() && x < right() - 10) {
       for (int i = 0; i < rows.size(); i++) {
         Row r = rows.get(i);
         int ry = top() + r.y - (int) scroll;
@@ -222,30 +250,48 @@ public final class PowerOptionsScreen extends UiScreen {
         Setting s = r.setting;
         int controlY = r.height == 40 ? ry + 16 : ry + 2;
         if (y < controlY) return;
-        if (x >= width - 34) {
+        if (x >= right() - 34) {
           s.reset();
-          session.link(s);
+          changed(s);
           return;
         }
-        if ((s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) && x >= width - 60) {
+        if ((s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) && x >= right() - 60) {
           minecraft.setScreen(new ValueScreen(this, s));
           return;
         }
-        activate(s, button == 1 ? -1 : 1);
+        if (x < controlLeft(r)) return;
+        if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
+          if (button == 0) {
+            dragging = s;
+            double pixels = (double) minecraft.displayWidth / width;
+            dragLeft = (controlLeft(r) + 4) * pixels;
+            dragSpan = Math.max(1, right() - 62 - controlLeft(r) - 8) * pixels;
+            drag((int) (x * pixels));
+          } else activate(s, -1);
+        } else activate(s, button == 1 ? -1 : 1);
         return;
       }
     }
     if (button != 0) return;
-    if (inside(x, y, 8, height - 28, 88, 20)) {
+    if (inside(x, y, origin() + 8, footerY(), 88, 20)) {
       confirmReset = true;
       return;
     }
-    if (inside(x, y, width - 154, height - 28, 70, 20)) {
+    int changesEnd = uiWidth() < 470 ? right() - 8 : actionX(0) - 4;
+    if ((session.changes() > 0 || changedOnly) && inside(x, y, origin() + 102, footerY(), changesEnd - origin() - 102, 20)) {
+      changedOnly = !changedOnly;
+      search.text = "";
+      scroll = 0;
+      layout();
+      return;
+    }
+    if (inside(x, y, actionX(0), height - 28, actionWidth(), 20)) {
       if (session.changes() > 0) confirmClose = true;
       else minecraft.setScreen(parent);
       return;
     }
-    if (inside(x, y, width - 80, height - 28, 72, 20)) saveAndClose();
+    if (inside(x, y, actionX(1), height - 28, actionWidth(), 20)) save(false);
+    if (inside(x, y, actionX(2), height - 28, actionWidth(), 20)) save(true);
   }
 
   private void activate(Setting s, int direction) {
@@ -259,12 +305,12 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       default -> {
         s.cycle(direction);
-        session.link(s);
+        changed(s);
       }
     }
   }
 
-  private void saveAndClose() {
+  private void save(boolean close) {
     try {
       savedRestart |= session.restartRequired();
       session.save(FabricLoader.getInstance().getGameDir());
@@ -272,7 +318,8 @@ public final class PowerOptionsScreen extends UiScreen {
         savedRestart = false;
         error = "Saved. Restart the game for marked changes.";
         confirmClose = false;
-      } else minecraft.setScreen(parent);
+      } else if (close) minecraft.setScreen(parent);
+      layout();
     } catch (Exception e) {
       PowerBeta.LOG.error("Settings save failed; restoring previous values", e);
       Throwable cause = e;
@@ -286,14 +333,20 @@ public final class PowerOptionsScreen extends UiScreen {
     int cy = height / 2 + 12;
     if (inside(x, y, width / 2 - 102, cy, 100, 20)) {
       if (confirmReset) {
-        for (Setting s : session.settings()) if (s.page.equals(page)) s.reset();
+        List<Setting> targets = session.settings().stream()
+            .filter(s -> changedOnly ? s.changed() : s.page.equals(page)).toList();
+        for (Setting s : targets) { s.reset(); session.link(s); }
+        try { session.preview(); } catch (Exception e) { error = e.getMessage(); }
+        layout();
         confirmReset = false;
-      } else saveAndClose();
+      } else save(true);
     } else if (inside(x, y, width / 2 + 2, cy, 100, 20)) {
       if (confirmReset) confirmReset = false;
       else {
-        session.discard();
-        minecraft.setScreen(parent);
+        try {
+          session.discard();
+          minecraft.setScreen(parent);
+        } catch (Exception e) { error = "Could not restore settings: " + e.getMessage(); confirmClose = false; }
       }
     } else if (inside(x, y, width / 2 - 50, cy + 24, 100, 20)) {
       confirmClose = false;
@@ -383,11 +436,20 @@ public final class PowerOptionsScreen extends UiScreen {
         + ((mask & Chord.ALT) != 0 ? "Alt+" : "");
   }
 
-  private boolean conflict(Setting s) {
-    return s.kind == Setting.Kind.KEY
-        && s.value.getAsInt() != 0
-        && session.settings().stream()
-            .anyMatch(v -> v != s && v.kind == Setting.Kind.KEY && Chord.decode(v.value.getAsInt()).key() == Chord.decode(s.value.getAsInt()).key());
+  private List<Setting> conflicts(Setting s) {
+    if (s.kind != Setting.Kind.KEY || Chord.decode(s.value.getAsInt()).key() == 0) return List.of();
+    return session.settings().stream().filter(v -> v != s && v.kind == Setting.Kind.KEY
+        && Chord.decode(v.value.getAsInt()).key() == Chord.decode(s.value.getAsInt()).key()).toList();
+  }
+
+  private String conflictTip(Setting s, List<Setting> conflicts) {
+    StringBuilder text = new StringBuilder();
+    for (Setting v : conflicts) {
+      if (text.length() > 0) text.append('\n');
+      text.append(v.label).append(": ").append(value(v));
+    }
+    text.append("\nThe matching binding with more modifiers takes priority.");
+    return text.toString();
   }
 
   public void render(int mx, int my, float delta) {
@@ -397,42 +459,46 @@ public final class PowerOptionsScreen extends UiScreen {
       capture = null;
       captureModifier = 0;
     }
+    if (dragging != null) {
+      if (Mouse.isButtonDown(0)) drag(Mouse.getX());
+      else dragging = null;
+    }
     renderBackground();
     fill(0, 0, width, 22, 0x70000000);
-    fill(0, height - 38, width, height, 0x90000000);
+    fill(origin(), footerY() - 10, right(), height, 0x90000000);
     drawCenteredTextWithShadow(textRenderer, "Options", width / 2, 7, 0xffffff);
     if (session == null) {
       text(error, 10, 45, 0xff8888);
       button("Back", width / 2 - 50, height - 28, 100, 20, mx, my, true);
       return;
     }
-    fill(sidebar() + 4, 24, sidebar() + 7, bottom(), 0x90404040);
-    fill(sidebar() + 7, 24, sidebar() + 8, bottom(), 0x90000000);
-    clip(0, 24, sidebar() + 2, bottom() - 24);
+    fill(origin() + sidebar() + 4, 24, origin() + sidebar() + 7, bottom(), 0x90404040);
+    fill(origin() + sidebar() + 7, 24, origin() + sidebar() + 8, bottom(), 0x90000000);
+    clip(origin(), 24, sidebar() + 2, bottom() - 24);
     for (int i = 0; i < PAGES.size(); i++) {
       int y = 24 + i * 22 - (int) sideScroll;
-      boolean hover = inside(mx, my, 0, y, sidebar(), 22);
-      if (PAGES.get(i).equals(page) && search.text.isBlank())
-        fill(0, y, sidebar(), y + 21, 0x50333333);
+      boolean hover = inside(mx, my, origin(), y, sidebar(), 22);
+      if (PAGES.get(i).equals(page) && search.text.isBlank() && !changedOnly)
+        fill(origin(), y, origin() + sidebar(), y + 21, 0xc0000000);
       GL11.glPushMatrix();
       GL11.glColor4f(1, 1, 1, 1);
       icons.method_1487(
-          textRenderer, minecraft.textureManager, new ItemStack(ICONS[i], 1, 0), 7, y + 2);
+          textRenderer, minecraft.textureManager, new ItemStack(ICONS[i], 1, 0), origin() + 7, y + 2);
       GL11.glPopMatrix();
       GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glDisable(GL11.GL_DEPTH_TEST);
       text(
           fit(PAGES.get(i), sidebar() - 31),
-          28,
+          origin() + 28,
           y + 7,
           hover ? 0xffffa0 : PAGES.get(i).equals(page) ? 0xffffff : 0xaaaaaa);
     }
     unclip();
-    if (sideScroll > 0) text("^", sidebar() - 10, 24, 0xcccccc);
+    if (sideScroll > 0) text("^", origin() + sidebar() - 10, 24, 0xcccccc);
     if (sideScroll < PAGES.size() * 22 - (bottom() - 24))
-      text("v", sidebar() - 10, bottom() - 10, 0xcccccc);
-    input(search, left(), 28, span() - 22, mx, my, "Search all settings...");
-    button("x", width - 32, 28, 18, 18, mx, my, true);
+      text("v", origin() + sidebar() - 10, bottom() - 10, 0xcccccc);
+    input(search, left(), 28, span() - 22, mx, my, changedOnly ? "Search changed settings..." : "Search all settings...");
+    button("x", right() - 32, 28, 18, 18, mx, my, true);
     if (audio()) {
       int w = span() / 3;
       button("Play / pause", left(), 52, w - 3, 18, mx, my, true);
@@ -440,7 +506,6 @@ public final class PowerOptionsScreen extends UiScreen {
       button("Reload folders", left() + 2 * w, 52, w - 3, 18, mx, my, true);
       text(fit(local.luke.power.audio.AudioController.status(), span()), left(), 75, 0xaaaaaa);
     }
-    if (video()) button("Texture packs...", left(), 52, span(), 20, mx, my, true);
     String tip = "", hoverId = "";
     clip(left() - 2, top(), span() + 8, bottom() - top());
     for (int index = 0; index < rows.size(); index++) {
@@ -454,15 +519,15 @@ public final class PowerOptionsScreen extends UiScreen {
             left(),
             y + 8,
             0xffffff);
-        fill(left(), y + 21, width - 14, y + 22, 0x50555555);
+        fill(left(), y + 21, right() - 14, y + 22, 0x50555555);
         continue;
       }
       Setting s = row.setting;
       boolean hover = inside(mx, my, left(), y, span(), row.height) && my >= top() && my < bottom();
-      if (hover || selected == index) fill(left() - 2, y, width - 12, y + row.height, 0x30333333);
+      if (hover || selected == index) fill(left() - 2, y, right() - 12, y + row.height, 0x30333333);
       boolean narrow = row.height == 40;
       int cy = y + (narrow ? 16 : 2),
-          controlLeft = narrow ? left() + 4 : Math.max(left() + 100, width - 164);
+          controlLeft = controlLeft(row);
       int textWidth = narrow ? span() - 4 : controlLeft - left() - 5;
       String label = s.label + (s.restart ? " *" : "");
       text(
@@ -471,30 +536,21 @@ public final class PowerOptionsScreen extends UiScreen {
           y + (narrow ? 3 : 8),
           s.changed() ? 0xffdd88 : 0xdddddd);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
-      int valueEnd = width - (numeric ? 62 : 36);
-      button(
-          fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
-          controlLeft,
-          cy,
-          valueEnd - controlLeft,
-          18,
-          mx,
-          my,
-          true);
-      if (numeric) button("...", width - 60, cy, 22, 18, mx, my, true);
-      button("R", width - 34, cy, 20, 18, mx, my, !s.value.equals(s.defaultValue));
-      if (conflict(s)) text("!", controlLeft - 6, cy + 5, 0xff8855);
+      int valueEnd = right() - (numeric ? 62 : 36);
+      if (numeric) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my,
+          (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
+      else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
+          controlLeft, cy, valueEnd - controlLeft, 18, mx, my, true);
+      if (numeric) button("...", right() - 60, cy, 22, 18, mx, my, true);
+      button("R", right() - 34, cy, 20, 18, mx, my, !s.value.equals(s.defaultValue));
+      List<Setting> conflicts = conflicts(s);
+      if (!conflicts.isEmpty()) text("!", controlLeft - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
-        tip =
-            mx >= width - 34
-                ? "Reset to " + s.display(s.defaultValue)
-                : s.label
-                    + "\n"
-                    + s.description
-                    + (s.restart ? "\nRestart required." : "")
-                    + (conflict(s) ? "\nShared key: the matching binding with more modifiers takes priority." : "")
-                    + "\nLeft click increases; right click decreases.";
+        if (mx >= right() - 34) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
+        else if (!conflicts.isEmpty() && inside(mx, my, controlLeft - 10, cy, 10, 18)) {
+          tip = conflictTip(s, conflicts); hoverId += ".conflicts";
+        } else tip = s.description + (s.restart ? "\nRestart required." : "");
       }
     }
     unclip();
@@ -505,22 +561,21 @@ public final class PowerOptionsScreen extends UiScreen {
       if (total > track) {
         int thumb = Math.max(12, track * track / total);
         int y = top() + (int) (scroll / (total - track) * (track - thumb));
-        fill(width - 8, top(), width - 5, bottom(), 0xff222222);
-        fill(width - 8, y, width - 5, y + thumb, 0xff777777);
+        fill(right() - 8, top(), right() - 5, bottom(), 0xff222222);
+        fill(right() - 8, y, right() - 5, y + thumb, 0xff777777);
       }
     }
-    text(
-        fit(
-            error.isEmpty()
-                ? (session.changes() == 0 ? "" : session.changes() + " unsaved changes")
-                : error,
-            width - 16),
-        8,
-        height - 40,
-        error.isEmpty() ? 0xaaaaaa : 0xffbb88);
-    button("Reset page...", 8, height - 28, 88, 20, mx, my, true);
-    button("Cancel", width - 154, height - 28, 70, 20, mx, my, true);
-    button("Done", width - 80, height - 28, 72, 20, mx, my, true);
+    if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);
+    button(changedOnly ? "Reset listed..." : "Reset page...", origin() + 8, footerY(), 88, 20, mx, my, true);
+    int changesEnd = uiWidth() < 470 ? right() - 8 : actionX(0) - 4;
+    if (session.changes() > 0 || changedOnly) {
+      boolean hover = inside(mx, my, origin() + 102, footerY(), changesEnd - origin() - 102, 20);
+      text(fit(session.changes() + (session.changes() == 1 ? " unsaved change" : " unsaved changes"), changesEnd - origin() - 104),
+          origin() + 102, footerY() + 6, hover || changedOnly ? 0xffffa0 : 0xffdd88);
+    }
+    button("Cancel", actionX(0), height - 28, actionWidth(), 20, mx, my, true);
+    button("Apply", actionX(1), height - 28, actionWidth(), 20, mx, my, session.changes() > 0);
+    button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
     if (!hoverId.equals(lastHover)) {
       lastHover = hoverId;
       hoverTicks = 0;
@@ -531,7 +586,7 @@ public final class PowerOptionsScreen extends UiScreen {
       String message =
           capture != null
               ? "Press a key or mouse button"
-              : confirmReset ? "Reset " + page + " to Power Beta defaults?" : "Save your changes?";
+              : confirmReset ? "Reset " + (changedOnly ? "changed settings" : page) + " to Defaults?" : "Save your changes?";
       drawCenteredTextWithShadow(textRenderer, message, width / 2, height / 2 - 18, 0xffffff);
       if (capture != null) {
         drawCenteredTextWithShadow(

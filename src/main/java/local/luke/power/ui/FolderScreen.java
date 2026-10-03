@@ -22,6 +22,10 @@ public final class FolderScreen extends UiScreen {
     for (var v : setting.value.getAsJsonArray()) folders.add(v.getAsString());
   }
 
+  private int panelWidth() { return Math.min(width, height * 21 / 9); }
+  private int panelLeft() { return (width - panelWidth()) / 2; }
+  private int panelRight() { return panelLeft() + panelWidth(); }
+
   public void init() {
     Keyboard.enableRepeatEvents(true);
   }
@@ -82,16 +86,16 @@ public final class FolderScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int b) {
     if (b != 0) return;
-    if (inside(x, y, 16, 42, width - 128, 18)) {
+    if (inside(x, y, panelLeft() + 16, 42, panelWidth() - 128, 18)) {
       path.focused = true;
       return;
     }
     path.focused = false;
-    if (inside(x, y, width - 104, 41, 40, 20)) {
+    if (inside(x, y, panelRight() - 104, 41, 40, 20)) {
       add(path.text);
       return;
     }
-    if (inside(x, y, width - 60, 41, 44, 20)) {
+    if (inside(x, y, panelRight() - 60, 41, 44, 20)) {
       minecraft.setScreen(new DirectoryScreen(this, folder -> add(folder)));
       return;
     }
@@ -100,41 +104,42 @@ public final class FolderScreen extends UiScreen {
       if (i >= 0 && i < folders.size()) selected = i;
       return;
     }
-    if (inside(x, y, 16, height - 54, 70, 20) && selected >= 0 && selected < folders.size()) {
+    if (inside(x, y, panelLeft() + 16, height - 54, 70, 20) && selected >= 0 && selected < folders.size()) {
       folders.remove(selected);
       selected = Math.min(selected, folders.size() - 1);
       return;
     }
-    if (inside(x, y, width - 160, height - 30, 70, 20)) {
+    if (inside(x, y, panelRight() - 160, height - 30, 70, 20)) {
       JsonArray a = new JsonArray();
       folders.forEach(a::add);
       setting.value = a;
+      parent.changed(setting);
       minecraft.setScreen(parent);
     }
-    if (inside(x, y, width - 84, height - 30, 70, 20)) minecraft.setScreen(parent);
+    if (inside(x, y, panelRight() - 84, height - 30, 70, 20)) minecraft.setScreen(parent);
   }
 
   public void render(int x, int y, float delta) {
     renderBackground();
     drawCenteredTextWithShadow(textRenderer, setting.label, width / 2, 15, 0xffffff);
-    input(path, 16, 42, width - 128, x, y, "Add folder path...");
-    button("Add", width - 104, 41, 40, 20, x, y, true);
-    button("Browse", width - 60, 41, 44, 20, x, y, true);
-    clip(14, 74, width - 28, Math.max(0, height - 140));
+    input(path, panelLeft() + 16, 42, panelWidth() - 128, x, y, "Add folder path...");
+    button("Add", panelRight() - 104, 41, 40, 20, x, y, true);
+    button("Browse", panelRight() - 60, 41, 44, 20, x, y, true);
+    clip(panelLeft() + 14, 74, panelWidth() - 28, Math.max(0, height - 140));
     for (int i = 0; i < folders.size(); i++) {
       int yy = 74 + i * 24 - scroll;
-      if (i == selected) fill(14, yy, width - 14, yy + 22, 0x90555555);
-      text(fit(folders.get(i), width - 40), 20, yy + 7, 0xffffff);
+      if (i == selected) fill(panelLeft() + 14, yy, panelRight() - 14, yy + 22, 0x90555555);
+      text(fit(folders.get(i), panelWidth() - 40), panelLeft() + 20, yy + 7, 0xffffff);
     }
     unclip();
-    if (folders.isEmpty()) text("No folders selected.", 20, 82, 0xaaaaaa);
-    button("Remove", 16, height - 54, 70, 20, x, y, selected >= 0);
+    if (folders.isEmpty()) text("No folders selected.", panelLeft() + 20, 82, 0xaaaaaa);
+    button("Remove", panelLeft() + 16, height - 54, 70, 20, x, y, selected >= 0);
     text(
-        fit(error.isEmpty() ? "OGG, WAV and MUS. MP3 is not supported." : error, width - 116),
-        96,
+        fit(error.isEmpty() ? "OGG, WAV and MUS. MP3 is not supported." : error, panelWidth() - 116),
+        panelLeft() + 96,
         height - 47,
         error.isEmpty() ? 0xaaaaaa : 0xff8888);
-    button("Done", width - 160, height - 30, 70, 20, x, y, true);
-    button("Cancel", width - 84, height - 30, 70, 20, x, y, true);
+    button("Done", panelRight() - 160, height - 30, 70, 20, x, y, true);
+    button("Cancel", panelRight() - 84, height - 30, 70, 20, x, y, true);
   }
 }

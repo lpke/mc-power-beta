@@ -195,6 +195,12 @@ public final class AudioBackend implements Backend {
     draft(changes);
   }
 
+  public boolean previews(Setting s) { return true; }
+
+  public void preview(Map<String, JsonElement> changes) {
+    AudioConfig.preview(draft(changes));
+  }
+
   public void apply(Map<String, JsonElement> changes) throws Exception {
     AudioConfig.save(draft(changes));
   }

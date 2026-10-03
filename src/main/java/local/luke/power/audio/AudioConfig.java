@@ -35,10 +35,20 @@ public final class AudioConfig {
     return current;
   }
 
+  public static void preview(AudioSettings next) {
+    next.validate();
+    boolean library = !current.musicDirectories.equals(next.musicDirectories)
+        || !current.menuDirectories.equals(next.menuDirectories) || current.recursive != next.recursive;
+    boolean mode = current.musicMode != next.musicMode;
+    current = Catalog.JSON.fromJson(Catalog.JSON.toJson(next), AudioSettings.class);
+    if (library) AudioController.settingsChanged();
+    if (mode) AudioController.next();
+    AudioController.refresh();
+  }
+
   public static void save(AudioSettings next) throws IOException {
     next.validate();
     FileTransaction.atomicWrite(path(), Catalog.JSON.toJson(next).getBytes(StandardCharsets.UTF_8));
-    current = Catalog.JSON.fromJson(Catalog.JSON.toJson(next), AudioSettings.class);
-    AudioController.settingsChanged();
+    preview(next);
   }
 }

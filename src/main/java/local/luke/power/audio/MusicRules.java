@@ -5,6 +5,7 @@ import local.luke.power.PowerBeta;
 /** Snapshot of the existing music controls, shared with the unified settings backend. */
 public record MusicRules(
     boolean disabled,
+    boolean vanillaDisabled,
     boolean menuEnabled,
     boolean menuOverrides,
     int delayMin,
@@ -20,6 +21,7 @@ public record MusicRules(
       Object m = config.getClass().getField("MUSIC_CONFIG").get(config);
       return new MusicRules(
           bool(m, "disableBackgroundMusic"),
+          bool(m, "disableDefaultMinecraftBGM"),
           bool(m, "mainMenuThemeEnabled"),
           bool(m, "mainMenuThemeOverridesBGM"),
           Math.max(0, integer(m, "musicCoundownRandomIntervalMin")),
@@ -30,7 +32,7 @@ public record MusicRules(
           number(m, "volumeGhastAmbient"));
     } catch (ReflectiveOperationException e) {
       PowerBeta.LOG.error("Could not read music controls", e);
-      return new MusicRules(false, false, false, 12000, 12000, 1, 1, 1, 1);
+      return new MusicRules(false, false, false, false, 12000, 12000, 1, 1, 1, 1);
     }
   }
 

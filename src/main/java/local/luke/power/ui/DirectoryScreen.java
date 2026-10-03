@@ -24,6 +24,10 @@ public final class DirectoryScreen extends UiScreen {
     read();
   }
 
+  private int panelWidth() { return Math.min(width, height * 21 / 9); }
+  private int panelLeft() { return (width - panelWidth()) / 2; }
+  private int panelRight() { return panelLeft() + panelWidth(); }
+
   public void init() {
     Keyboard.enableRepeatEvents(true);
   }
@@ -91,12 +95,12 @@ public final class DirectoryScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int b) {
     if (b != 0) return;
-    if (inside(x, y, 14, 38, width - 76, 18)) {
+    if (inside(x, y, panelLeft() + 14, 38, panelWidth() - 76, 18)) {
       path.focused = true;
       return;
     }
     path.focused = false;
-    if (inside(x, y, width - 54, 37, 40, 20)) {
+    if (inside(x, y, panelRight() - 54, 37, 40, 20)) {
       try {
         go(MusicLibrary.resolve(FabricLoader.getInstance().getGameDir(), path.text));
       } catch (RuntimeException e) {
@@ -104,19 +108,19 @@ public final class DirectoryScreen extends UiScreen {
       }
       return;
     }
-    if (inside(x, y, 14, 62, 48, 20)) {
+    if (inside(x, y, panelLeft() + 14, 62, 48, 20)) {
       if (directory.getParent() != null) go(directory.getParent());
       return;
     }
-    if (inside(x, y, 66, 62, 52, 20)) {
+    if (inside(x, y, panelLeft() + 66, 62, 52, 20)) {
       go(Path.of(System.getProperty("user.home")));
       return;
     }
-    if (inside(x, y, 122, 62, 76, 20)) {
+    if (inside(x, y, panelLeft() + 122, 62, 76, 20)) {
       go(FabricLoader.getInstance().getGameDir());
       return;
     }
-    if (inside(x, y, 202, 62, 80, 20)) {
+    if (inside(x, y, panelLeft() + 202, 62, 80, 20)) {
       hidden = !hidden;
       read();
       return;
@@ -136,24 +140,24 @@ public final class DirectoryScreen extends UiScreen {
   public void render(int x, int y, float delta) {
     renderBackground();
     drawCenteredTextWithShadow(textRenderer, "Choose a music folder", width / 2, 14, 0xffffff);
-    input(path, 14, 38, width - 76, x, y, "");
-    button("Go", width - 54, 37, 40, 20, x, y, true);
-    button("Up", 14, 62, 48, 20, x, y, directory.getParent() != null);
-    button("Home", 66, 62, 52, 20, x, y, true);
-    button("Game folder", 122, 62, 76, 20, x, y, true);
-    button("Hidden: " + (hidden ? "On" : "Off"), 202, 62, 80, 20, x, y, true);
-    clip(14, 90, width - 28, height - 124);
+    input(path, panelLeft() + 14, 38, panelWidth() - 76, x, y, "");
+    button("Go", panelRight() - 54, 37, 40, 20, x, y, true);
+    button("Up", panelLeft() + 14, 62, 48, 20, x, y, directory.getParent() != null);
+    button("Home", panelLeft() + 66, 62, 52, 20, x, y, true);
+    button("Game folder", panelLeft() + 122, 62, 76, 20, x, y, true);
+    button("Hidden: " + (hidden ? "On" : "Off"), panelLeft() + 202, 62, 80, 20, x, y, true);
+    clip(panelLeft() + 14, 90, panelWidth() - 28, height - 124);
     for (int i = 0; i < children.size(); i++) {
       int yy = 90 + i * 20 - scroll;
-      boolean hover = inside(x, y, 14, yy, width - 28, 20);
-      if (hover) fill(14, yy, width - 14, yy + 20, 0x50555555);
+      boolean hover = inside(x, y, panelLeft() + 14, yy, panelWidth() - 28, 20);
+      if (hover) fill(panelLeft() + 14, yy, panelRight() - 14, yy + 20, 0x50555555);
       text(
-          fit("> " + children.get(i).getFileName(), width - 44),
-          20,
+          fit("> " + children.get(i).getFileName(), panelWidth() - 44),
+          panelLeft() + 20,
           yy + 6,
           hover ? 0xffffa0 : 0xdddddd);
     }
-    if (children.isEmpty()) text(error.isEmpty() ? "No subfolders." : error, 20, 96, 0xaaaaaa);
+    if (children.isEmpty()) text(error.isEmpty() ? "No subfolders." : error, panelLeft() + 20, 96, 0xaaaaaa);
     unclip();
     button("Use this folder", width / 2 - 112, height - 28, 108, 20, x, y, true);
     button("Cancel", width / 2 + 4, height - 28, 108, 20, x, y, true);

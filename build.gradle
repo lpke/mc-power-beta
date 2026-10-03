@@ -21,6 +21,7 @@ dependencies {
     mappings 'babric:barn:b1.7.3+build.8:v2'
     modImplementation 'babric:fabric-loader:0.15.6-babric.2'
     modCompileOnly files('vendor/jars/GlassConfigAPI-3.2.5.jar', 'source-build/build/unitweaks/libs/unitweaks-0.31.0+powerbeta.1.jar')
+    modCompileOnly fileTree('build/platform-compile') { include 'station-api-base-*.jar', 'station-resource-loader-v0-*.jar' }
     compileOnly 'com.google.code.gson:gson:2.8.9'
     compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
     compileOnly 'io.github.llamalad7:mixinextras-common:0.5.0'

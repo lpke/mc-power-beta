@@ -45,8 +45,38 @@ public final class ConfigSession {
     }
   }
 
-  public void discard() {
+  private final Map<String, JsonElement> previewed = new HashMap<>();
+
+  public void preview() throws Exception {
+    Map<String, Map<String, JsonElement>> changes = new LinkedHashMap<>(), old = new LinkedHashMap<>();
+    for (Setting s : settings) {
+      Backend b = backends.get(s.backend);
+      JsonElement before = previewed.getOrDefault(s.id, s.original());
+      if (!s.restart && b.previews(s) && !s.value.equals(before)) {
+        s.validate(s.value);
+        changes.computeIfAbsent(s.backend, k -> new LinkedHashMap<>()).put(s.id, s.value.deepCopy());
+        old.computeIfAbsent(s.backend, k -> new LinkedHashMap<>()).put(s.id, before.deepCopy());
+      }
+    }
+    for (var e : changes.entrySet()) backends.get(e.getKey()).validate(e.getValue());
+    List<String> attempted = new ArrayList<>();
+    try {
+      for (var e : changes.entrySet()) {
+        attempted.add(e.getKey());
+        backends.get(e.getKey()).preview(e.getValue());
+      }
+    } catch (Exception failure) {
+      Collections.reverse(attempted);
+      for (String id : attempted) try { backends.get(id).preview(old.get(id)); }
+      catch (Exception rollback) { failure.addSuppressed(rollback); }
+      throw failure;
+    }
+    changes.values().forEach(previewed::putAll);
+  }
+
+  public void discard() throws Exception {
     for (Setting s : settings) s.value = s.original();
+    preview();
   }
 
   public void save(Path gameDir) throws Exception {
@@ -83,9 +113,11 @@ public final class ConfigSession {
           } catch (Exception rollback) {
             failure.addSuppressed(rollback);
           }
+        for (Setting s : settings) if (attempted.contains(s.backend)) previewed.remove(s.id);
         throw failure;
       }
     }
     settings.forEach(Setting::accept);
+    previewed.clear();
   }
 }

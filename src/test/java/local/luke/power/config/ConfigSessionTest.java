@@ -87,4 +87,60 @@ class ConfigSessionTest {
     assertEquals(1, a.live);
     assertFalse(Files.exists(a.file));
   }
+
+  static class PreviewFake extends Fake {
+    PreviewFake(String id, Path file) { super(id, file); }
+    public boolean previews(Setting s) { return true; }
+    public void preview(Map<String, JsonElement> values) throws Exception {
+      live = values.values().iterator().next().getAsInt();
+      if (fail && live == 2) throw new java.io.IOException("preview failed");
+    }
+  }
+
+  @Test void previewDoesNotSaveAndDiscardRestoresOriginal() throws Exception {
+    PreviewFake b = new PreviewFake("a", game.resolve("a.txt"));
+    ConfigSession session = new ConfigSession(); Setting value = setting("a");
+    session.add(b, List.of(value));
+    value.value = new JsonPrimitive(2); session.preview();
+    assertEquals(2, b.live); assertEquals(1, session.changes());
+    assertFalse(Files.exists(b.file));
+    session.discard(); assertEquals(1, b.live); assertEquals(0, session.changes());
+  }
+
+  @Test void applyBecomesTheNewDiscardTarget() throws Exception {
+    PreviewFake b = new PreviewFake("a", game.resolve("a.txt"));
+    ConfigSession session = new ConfigSession(); Setting value = setting("a");
+    session.add(b, List.of(value));
+    value.value = new JsonPrimitive(2); session.preview(); session.save(game);
+    value.value = new JsonPrimitive(3); session.preview(); session.discard();
+    assertEquals(2, b.live); assertEquals("2", Files.readString(b.file));
+  }
+
+  @Test void failedPreviewRestoresAllAttemptedBackends() throws Exception {
+    PreviewFake a = new PreviewFake("a", game.resolve("a.txt")), b = new PreviewFake("b", game.resolve("b.txt"));
+    Setting x = setting("a"), y = setting("b"); ConfigSession session = new ConfigSession();
+    session.add(a, List.of(x)); session.add(b, List.of(y));
+    x.value = y.value = new JsonPrimitive(2); b.fail = true;
+    assertThrows(Exception.class, session::preview);
+    assertEquals(1, a.live); assertEquals(1, b.live);
+    assertFalse(Files.exists(a.file)); assertFalse(Files.exists(b.file));
+  }
+
+  @Test void failedSaveAfterPreviewCanBeRetriedOrDiscarded() throws Exception {
+    PreviewFake b = new PreviewFake("a", game.resolve("a.txt"));
+    Setting value = setting("a"); ConfigSession session = new ConfigSession(); session.add(b, List.of(value));
+    value.value = new JsonPrimitive(2); session.preview(); b.fail = true;
+    assertThrows(Exception.class, () -> session.save(game));
+    session.discard(); assertEquals(1, b.live);
+    assertFalse(Files.exists(b.file));
+  }
+
+  @Test void failedSaveRestoresLaterUncommittedPreviewsOnDiscard() throws Exception {
+    PreviewFake a = new PreviewFake("a", game.resolve("a.txt")), b = new PreviewFake("b", game.resolve("b.txt"));
+    Setting x = setting("a"), y = setting("b"); ConfigSession session = new ConfigSession();
+    session.add(a, List.of(x)); session.add(b, List.of(y));
+    x.value = y.value = new JsonPrimitive(2); session.preview(); a.fail = true;
+    assertThrows(Exception.class, () -> session.save(game));
+    session.discard(); assertEquals(1, a.live); assertEquals(1, b.live);
+  }
 }

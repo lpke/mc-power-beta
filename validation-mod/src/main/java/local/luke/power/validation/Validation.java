@@ -50,6 +50,8 @@ public final class Validation {
       else if (command.equals("chat-check")) ChatChecks.run(mc);
       else if (command.startsWith("chat ")) ChatChecks.submit(mc, command.substring(5));
       else if (command.equals("audit")) audit(mc);
+      else if (command.equals("ui-check")) UiChecks.run(mc);
+      else if (command.equals("texture-check")) TextureChecks.run(mc);
       else if (command.equals("roundtrip")) roundtrip(mc);
       else if (command.equals("screens")) screens(mc);
       else if (command.startsWith("options")) {

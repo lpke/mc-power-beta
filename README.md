@@ -16,8 +16,16 @@ pinned binary dependencies; see [the upstream inventory](docs/upstreams.md).
 Open **Options** from the title or pause menu. Pages group settings by function.
 Each pane scrolls independently. Search finds settings across every page.
 Left-click cycles forward; right-click cycles backward. `R` resets one setting.
-Numeric values also have an exact-value editor. Changes stay in a draft until
-saved. Cancel discards them. A `*` marks settings that need a restart.
+Numeric values use sliders; `...` opens the exact-value editor. Apply saves while
+keeping the current page, search and scroll. Done saves and exits. The unsaved
+changes counter filters the list to changed settings. Cancel discards the draft,
+including live previews. A `*` marks settings that need a restart.
+
+Scale, audio, mouse sensitivity, field of view, camera distance and textures
+preview immediately. Auto scale chooses the largest integer scale that leaves
+at least 320 by 240 GUI pixels; a smaller window can limit the requested scale.
+The menu is centered and capped at a 21:9 aspect ratio. Hover any setting for an
+explanation; hover a binding's `!` for the other actions sharing that key.
 
 Key bindings accept keyboard and mouse buttons with Ctrl, Shift and Alt, including
 either left or right modifier. Actions fire on key-down. A press retains its
@@ -65,3 +73,19 @@ The standalone mod repositories and `separate mods final` instance remain frozen
 The previously disabled recipe browser, shader module and LAN hosting module are
 retained as disabled optional artifacts. They are not part of the tested enabled
 profile. Existing modules retain their IDs and licenses for compatibility.
+
+## Textures and profiles
+
+Video includes Alpha, 1.14 and Faithful 32 alongside Default. Soft rain, soft snow,
+old cobblestone and old bricks are independent overrides on the selected pack.
+Both base-pack selection and overrides preview immediately and support Discard.
+Camera includes the perspective cycle and third-person distance; vanilla distance
+is four blocks and nearby walls still move the camera closer.
+
+`tools/create_profiles.py --output INSTANCE_DIRECTORY --reference MINECRAFT_DIRECTORY`
+creates `Power Beta - Defaults` and `Power Beta - Configured` from `dist/Power Beta`.
+It refuses existing destinations. Defaults changes only GUI scale to 4 and mouse
+sensitivity to 80. Configured migrates supported options and legacy feature/key
+preferences, without accounts or worlds. New features keep their pack defaults.
+The latest explicit two-view camera cycle overrides an older front-view preference.
+Use `--java /path/to/java` to pin the launcher runtime when needed.

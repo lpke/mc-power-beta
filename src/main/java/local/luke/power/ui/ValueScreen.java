@@ -50,6 +50,7 @@ public final class ValueScreen extends UiScreen {
   private void save() {
     try {
       setting.parse(input.text);
+      parent.changed(setting);
       minecraft.setScreen(parent);
     } catch (RuntimeException e) {
       error = e.getMessage() == null ? "Invalid value" : e.getMessage();
