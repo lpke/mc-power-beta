@@ -445,14 +445,17 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (audio() && button == 0 && y >= 52 && y < 70 && x >= left() && x < contentRight()) {
-      int index = musicAction(x);
-      if (index < 0) return;
+      AudioToolbar.Action action = musicAction(x);
+      if (action == null) return;
       click();
-      if (index == 0) local.luke.power.audio.AudioController.togglePause();
-      else if (index == 1) local.luke.power.audio.AudioController.previous();
-      else if (index == 2) local.luke.power.audio.AudioController.next();
-      else if (index == 3) local.luke.power.audio.AudioController.reload();
-      else { libraryOpen = !libraryOpen; layout(); }
+      switch (action) {
+        case PLAY -> local.luke.power.audio.AudioController.togglePause();
+        case PREVIOUS -> local.luke.power.audio.AudioController.previous();
+        case NEXT -> local.luke.power.audio.AudioController.next();
+        case QUEUE -> { libraryOpen = true; library.showQueue(); layout(); }
+        case RELOAD -> local.luke.power.audio.AudioController.reload();
+        case LIBRARY -> { libraryOpen = !libraryOpen; layout(); }
+      }
       return;
     }
     if (libraryVisible() && x >= left() && y >= 73 && y < bottom()) {
@@ -745,14 +748,13 @@ public final class PowerOptionsScreen extends UiScreen {
     return text.toString();
   }
 
-  private int[] musicWidths() {
-    int first = span() < 360 ? 42 : 54, skip = span() < 360 ? 24 : 54, reload = span() < 360 ? 48 : 86;
-    return new int[] {first, skip, skip, reload, span() - first - skip * 2 - reload - 16};
+  private List<AudioToolbar.Button> musicButtons() {
+    return AudioToolbar.layout(left(), span(), !local.luke.power.audio.MusicRequests.tracks().isEmpty(),
+        local.luke.power.audio.AudioController.musicPlaying(), libraryVisible());
   }
-  private int musicAction(int x) {
-    int left = left(); int[] sizes = musicWidths();
-    for (int i = 0; i < sizes.length; i++) { if (x >= left && x < left + sizes[i]) return i; left += sizes[i] + 4; }
-    return -1;
+  private AudioToolbar.Action musicAction(int x) {
+    for (var button : musicButtons()) if (button.contains(x)) return button.action();
+    return null;
   }
 
   public void render(int mx, int my, float delta) {
@@ -813,10 +815,10 @@ public final class PowerOptionsScreen extends UiScreen {
         : changedOnly ? "Search changed settings..." : "Search all settings...");
     if (canClear()) button("x", right() - 32, 27, 18, 20, mx, my, true);
     if (audio()) {
-      int[] sizes = musicWidths(); int x = left();
-      String[] labels = {local.luke.power.audio.AudioController.musicPlaying() ? "Pause" : "Play",
-          span() < 360 ? "<<" : "Previous", span() < 360 ? ">>" : "Next", span() < 360 ? "Reload" : "Reload folders", libraryVisible() ? "Settings" : "Music library"};
-      for (int i = 0; i < sizes.length; i++) { button(fit(labels[i], sizes[i] - 6), x, 52, sizes[i], 18, mx, my, true); x += sizes[i] + 4; }
+      for (var item : musicButtons()) {
+        if (item.icon()) iconButton("reload", item.x(), 52, item.width(), mx, my, true);
+        else button(fit(item.label(), item.width() - 4), item.x(), 52, item.width(), 18, mx, my, true);
+      }
       if (!libraryVisible()) text(fit(local.luke.power.audio.AudioController.status(), span()), left(), 77, 0xaaaaaa);
     }
     String tip = "", hoverId = "";
@@ -875,8 +877,18 @@ public final class PowerOptionsScreen extends UiScreen {
     contentBar.render(this, contentTrack());
     } else { library.render(mx, my, delta); tip = library.hoverHelp(); hoverId = "library:" + tip; }
     if (audio() && inside(mx, my, left(), 52, span(), 18)) {
-      int action = musicAction(mx);
-      if (action >= 0) { tip = new String[]{"Play or pause music", "Previous track", "Next track; queued tracks take priority", "Rescan music folders", libraryVisible() ? "Return to audio settings" : "Browse tracks, folders and the queue"}[action]; hoverId = "music." + action; }
+      var action = musicAction(mx);
+      if (action != null) {
+        tip = switch (action) {
+          case PLAY -> "Play or pause music";
+          case PREVIOUS -> "Previous track";
+          case NEXT -> "Next track; queued tracks take priority";
+          case QUEUE -> "Open the music queue";
+          case RELOAD -> "Rescan music folders";
+          case LIBRARY -> libraryVisible() ? "Return to audio settings" : "Browse tracks, folders and the queue";
+        };
+        hoverId = "music." + action;
+      }
     }
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);
     button(filtered() ? "Reset listed..." : "Reset page...", resetX(), footerY(), 88, 20, mx, my, true);

@@ -46,18 +46,18 @@ public final class AudioBackend implements Backend {
         "Music library",
         "World music folders",
         Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.musicDirectories),
+        MusicFolders.encode(s.musicDirectories, s.disabledMusicDirectories),
         new JsonArray(),
-        "Choose folders containing OGG, WAV, MUS or MP3 files. Convert MP3 in Music library. Files stay in their original folders.",
+        "Choose OGG, WAV, MUS or MP3 folders. Switch folders On or Off without removing them. Convert MP3 in the library; original files stay intact.",
         List.of());
     add(
         "menuDirectories",
         "Music library",
         "Menu music folders",
         Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.menuDirectories),
+        MusicFolders.encode(s.menuDirectories, s.disabledMenuDirectories),
         new JsonArray(),
-        "Used when menu music is enabled. OGG, WAV, MUS and converted MP3 are supported.",
+        "Used when menu music is enabled. Each folder has its own On/Off switch. Supports OGG, WAV, MUS and converted MP3.",
         List.of());
     add(
         "recursive",
@@ -186,24 +186,21 @@ public final class AudioBackend implements Backend {
           case "recursive" -> s.recursive = v.getAsBoolean();
           case "shuffle" -> s.shuffle = v.getAsBoolean();
           case "avoidRepeats" -> s.avoidRepeats = v.getAsBoolean();
-          case "musicDirectories" -> s.musicDirectories = strings(v);
-          case "menuDirectories" -> s.menuDirectories = strings(v);
+          case "musicDirectories" -> {
+            var folders = MusicFolders.decode(v);
+            s.musicDirectories = new ArrayList<>(folders.paths());
+            s.disabledMusicDirectories = new LinkedHashSet<>(folders.disabled());
+          }
+          case "menuDirectories" -> {
+            var folders = MusicFolders.decode(v);
+            s.menuDirectories = new ArrayList<>(folders.paths());
+            s.disabledMenuDirectories = new LinkedHashSet<>(folders.disabled());
+          }
           default -> throw new IllegalArgumentException("Unknown audio setting");
         }
     }
     s.validate();
     return s;
-  }
-
-  private static List<String> strings(JsonElement v) {
-    List<String> r = new ArrayList<>();
-    if (!v.isJsonArray()) throw new IllegalArgumentException("Use a list of folder paths");
-    for (var e : v.getAsJsonArray()) {
-      if (!e.isJsonPrimitive() || !e.getAsJsonPrimitive().isString())
-        throw new IllegalArgumentException("Folder paths must be text");
-      r.add(e.getAsString());
-    }
-    return r;
   }
 
   public void validate(Map<String, JsonElement> changes) {

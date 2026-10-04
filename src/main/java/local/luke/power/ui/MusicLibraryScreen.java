@@ -21,7 +21,8 @@ public final class MusicLibraryScreen extends UiScreen {
   private final ScrollBar scrollbar = new ScrollBar();
   private int conversionRevision, conversionTicks, trackScroll, queueScroll;
   private boolean queue;
-  private String folder = "", error = "", hoverHelp = "";
+  private String folder = "active", error = "", hoverHelp = "";
+  private Set<String> activeTracks = Set.of();
 
   public String hoverHelp() {
     return hoverHelp;
@@ -74,7 +75,36 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int rowHeight() {
-    return !queue && narrow() ? 62 : 44;
+    return queue ? 24 : narrow() ? 62 : 44;
+  }
+
+  private int queueWidth(int action) {
+    return switch (action) {
+      case 0, 1 -> narrow() ? 14 : 20;
+      case 2 -> narrow() ? 36 : 48;
+      case 3 -> narrow() ? 42 : 54;
+      default -> throw new IllegalArgumentException("Unknown queue action");
+    };
+  }
+
+  private int queueX(int action) {
+    int x = right();
+    for (int i = 3; i >= action; i--) x -= queueWidth(i) + (i == 3 ? 0 : 2);
+    return x;
+  }
+
+  private int filterX() {
+    return queue ? right() - Math.min(82, span() - Math.min(80, span() / 4) * 2 - 8)
+        : left() + Math.min(80, span() / 4) * 2 + 8;
+  }
+
+  public void showQueue() {
+    dragging = null;
+    parent.finishContinuousChange();
+    search.focused = false;
+    queue = true;
+    queueScroll = 0;
+    rebuild();
   }
 
   private int scroll() {
@@ -169,6 +199,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private void rebuild() {
+    activeTracks = AudioController.activeMusic(minecraft);
     List<String> source =
         queue ? MusicRequests.tracks() : new ArrayList<>(AudioController.music(minecraft));
     Map<String, Integer> scores = new HashMap<>();
@@ -189,6 +220,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private boolean inFolder(String id) {
+    if (folder.equals("active")) return activeTracks.contains(id);
     if (folder.isEmpty()) return true;
     MusicLibrary.Track t = custom.get(id);
     if (folder.equals("custom")) return t != null;
@@ -208,7 +240,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private String folderLabel() {
-    return folder.isEmpty()
+    return folder.equals("active") ? "Active tracks" : folder.isEmpty()
         ? "All tracks"
         : folder.equals("custom")
             ? "Custom tracks"
@@ -216,7 +248,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private void cycleFolder(int direction) {
-    List<String> choices = new ArrayList<>(List.of("", "custom"));
+    List<String> choices = new ArrayList<>(List.of("active", "", "custom"));
     choices.addAll(folders);
     folder = choices.get(Math.floorMod(choices.indexOf(folder) + direction, choices.size()));
     scroll(0);
@@ -230,6 +262,7 @@ public final class MusicLibraryScreen extends UiScreen {
     } else if (conversionTicks > 0) conversionTicks--;
     if (revision != AudioController.libraryRevision()) refresh();
     else if (queue && !tracks.equals(MusicRequests.tracks())) rebuild();
+    else if (!queue && folder.equals("active") && activeTracks != AudioController.activeMusic(minecraft)) rebuild();
   }
 
   public void wheel(int amount) {
@@ -294,7 +327,8 @@ public final class MusicLibraryScreen extends UiScreen {
       rebuild();
       return;
     }
-    if (inside(x, y, left() + tabW * 2 + 8, 88, span() - tabW * 2 - 8, 18)) {
+    if (inside(x, y, filterX(), 88, right() - filterX(), 18)) {
+      if (queue && tracks.isEmpty()) return;
       click();
       if (queue) queueEdit(q -> q.tracks.clear());
       else cycleFolder(b == 0 ? 1 : -1);
@@ -313,16 +347,21 @@ public final class MusicLibraryScreen extends UiScreen {
     String id = tracks.get(index);
     int rowY = listTop() + index * rowHeight() - scroll();
     if (queue) {
-      if (inside(x, y, right() - 54, rowY + 19, 54, 18)) {
+      if (!renderedQueue.equals(MusicRequests.tracks())) {
+        rebuild();
+        error = "Queue changed. Select the track again.";
+        return;
+      }
+      if (inside(x, y, queueX(3), rowY + 3, queueWidth(3), 18)) {
         click();
         queueEdit(q -> q.tracks.remove(index));
-      } else if (inside(x, y, right() - 112, rowY + 19, 54, 18) && playable(id)) {
+      } else if (inside(x, y, queueX(2), rowY + 3, queueWidth(2), 18) && playable(id)) {
         click();
         AudioController.toggleTrack(id);
-      } else if (inside(x, y, right() - 158, rowY + 19, 20, 18) && index > 0) {
+      } else if (inside(x, y, queueX(0), rowY + 3, queueWidth(0), 18) && index > 0) {
         click();
         queueEdit(q -> q.move(index, -1));
-      } else if (inside(x, y, right() - 134, rowY + 19, 20, 18) && index + 1 < tracks.size()) {
+      } else if (inside(x, y, queueX(1), rowY + 3, queueWidth(1), 18) && index + 1 < tracks.size()) {
         click();
         queueEdit(q -> q.move(index, 1));
       }
@@ -379,7 +418,7 @@ public final class MusicLibraryScreen extends UiScreen {
     int tabW = Math.min(80, span() / 4);
     tab("Tracks", !queue, left(), tabW, mx, my);
     tab("Queue (" + MusicRequests.tracks().size() + ")", queue, left() + tabW + 2, tabW, mx, my);
-    int filterX = left() + tabW * 2 + 8;
+    int filterX = filterX();
     button(
         fit(queue ? "Clear queue" : folderLabel(), right() - filterX - 8),
         filterX,
@@ -388,14 +427,16 @@ public final class MusicLibraryScreen extends UiScreen {
         18,
         mx,
         my,
-        true);
+        !queue || !tracks.isEmpty());
     String tip = "";
     if (inside(mx, my, filterX, 88, right() - filterX, 18))
       tip =
           queue
               ? "Remove queued requests. Music files and rotation stay unchanged."
-              : folder.isEmpty() || folder.equals("custom")
-                  ? "Choose all tracks, custom tracks, or a folder and its subfolders."
+              : folder.equals("active")
+                  ? "Follows soundtrack, enabled folders and current world/menu rules. Individually excluded tracks stay visible."
+                  : folder.isEmpty() || folder.equals("custom")
+                  ? "Choose active tracks, all tracks, custom tracks, or a folder and its subfolders."
                   : folder;
     if (queue) renderedQueue = List.copyOf(tracks);
     clip(left() - 2, listTop(), span() + 4, Math.max(0, bottom() - listTop()));
@@ -407,33 +448,32 @@ public final class MusicLibraryScreen extends UiScreen {
           inside(mx, my, left(), y, span(), rowHeight()) && my >= listTop() && my < bottom();
       if (hover) fill(left() - 2, y, right() + 2, y + rowHeight() - 1, 0x60000000);
       text(
-          fit((queue ? (i + 1) + ". " : "") + AudioController.musicLabel(id), span() - 4),
+          fit((queue ? (i + 1) + ". " : "") + AudioController.musicLabel(id), queue ? queueX(0) - left() - 8 : span() - 4),
           left() + 2,
-          y + 4,
+          y + (queue ? 8 : 4),
           playable(id) ? 0xdddddd : 0xffbb77);
       if (hover)
         tip = path(id) + (playable(id) ? "" : "\nConvert MP3, or reload if the file has moved.");
       if (queue) {
-        if (!playable(id)) text("Unavailable", left(), y + 24, 0xffbb77);
-        iconButton("up", right() - 158, y + 19, 20, mx, my, i > 0);
-        iconButton("down", right() - 134, y + 19, 20, mx, my, i + 1 < tracks.size());
+        iconButton("up", queueX(0), y + 3, queueWidth(0), mx, my, i > 0);
+        iconButton("down", queueX(1), y + 3, queueWidth(1), mx, my, i + 1 < tracks.size());
         button(
             AudioController.playingTrack(id) ? "Pause" : "Play",
-            right() - 112,
-            y + 19,
-            54,
+            queueX(2),
+            y + 3,
+            queueWidth(2),
             18,
             mx,
             my,
             playable(id));
-        button("Remove", right() - 54, y + 19, 54, 18, mx, my, true);
-        if (hover && my >= y + 19)
+        button("Remove", queueX(3), y + 3, queueWidth(3), 18, mx, my, true);
+        if (hover && my >= y + 3 && my < y + 21)
           tip =
-              mx >= right() - 54
+              mx >= queueX(3)
                   ? "Remove this request"
-                  : mx >= right() - 112
+                  : mx >= queueX(2)
                       ? "Play or pause this track"
-                      : mx >= right() - 134 ? "Move down" : mx >= right() - 158 ? "Move up" : tip;
+                      : mx >= queueX(1) ? "Move down" : mx >= queueX(0) ? "Move up" : tip;
       } else {
         Setting enabled = settings.get("audio.trackEnabled." + id),
             volume = settings.get("audio.sound." + id);

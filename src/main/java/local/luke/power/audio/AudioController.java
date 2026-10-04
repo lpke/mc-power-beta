@@ -40,6 +40,11 @@ public final class AudioController {
   private static boolean trackWasPlaying;
   private static AudioSettings rotationConfig;
   private static List<MusicLibrary.Track> worldRotation = List.of(), menuRotation = List.of();
+  private static List<MusicLibrary.Track> enabledWorld = List.of(), enabledMenu = List.of();
+  private record Context(boolean world, int dimension, String biome) {}
+  private record PoolKey(AudioSettings settings, MusicRules rules, Context context, int revision) {}
+  private static PoolKey activeKey;
+  private static Set<String> activeTracks = Set.of();
   private static List<MusicLibrary.Track> custom = List.of();
   private static Map<String, MusicLibrary.Track> customById = Map.of();
   private static Map<String, String> customByUrl = Map.of();
@@ -170,6 +175,12 @@ public final class AudioController {
     nextAfterScan = false;
   }
 
+  public static void rotationChanged() {
+    history.clear();
+    historyIndex = -1;
+    pause();
+  }
+
   public static void rulesChanged() {
     MusicRules before = rules();
     rules = MusicRules.read();
@@ -225,14 +236,74 @@ public final class AudioController {
     return new class_267(track.playbackName(), track.playbackPath().toUri().toURL());
   }
 
-  private static List<MusicLibrary.Track> rotation(MusicLibrary.Scan scan) {
+  private static void updateRotation() {
     AudioSettings config = AudioConfig.current();
     if (rotationConfig != config) {
-      worldRotation = library.world.tracks().stream().filter(t -> t.playable() && !config.disabledTracks.contains(t.id())).toList();
-      menuRotation = library.menu.tracks().stream().filter(t -> t.playable() && !config.disabledTracks.contains(t.id())).toList();
+      Path game = FabricLoader.getInstance().getGameDir();
+      enabledWorld = MusicFolders.enabledTracks(game, library.world, config.musicDirectories,
+          config.disabledMusicDirectories, config.recursive);
+      enabledMenu = MusicFolders.enabledTracks(game, library.menu, config.menuDirectories,
+          config.disabledMenuDirectories, config.recursive);
+      worldRotation = enabledWorld.stream().filter(t -> t.playable() && !config.disabledTracks.contains(t.id())).toList();
+      menuRotation = enabledMenu.stream().filter(t -> t.playable() && !config.disabledTracks.contains(t.id())).toList();
       rotationConfig = config;
     }
+  }
+
+  private static List<MusicLibrary.Track> rotation(MusicLibrary.Scan scan) {
+    updateRotation();
     return scan == library.menu ? menuRotation : worldRotation;
+  }
+
+  private static Context context(Minecraft mc) {
+    int dimension = mc != null && mc.player != null ? mc.player.dimensionId : 0;
+    String biome = null;
+    if (mc != null && mc.player != null && mc.world != null) {
+      var currentBiome = mc.world.method_1781().method_1787(
+          (int) Math.floor(mc.player.x), (int) Math.floor(mc.player.z));
+      if (currentBiome != null) biome = currentBiome.field_888;
+    }
+    return new Context(mc != null && mc.world != null, dimension, biome);
+  }
+
+  /** The same background candidates feed automatic selection and the library's Active filter. */
+  private static List<class_267> backgroundPool(List<class_267> vanilla, Context context,
+      boolean includeExcluded) {
+    updateRotation();
+    AudioSettings s = AudioConfig.current();
+    List<class_267> tracks = new ArrayList<>();
+    if (s.musicMode != AudioSettings.MusicMode.REPLACE || enabledWorld.stream().noneMatch(MusicLibrary.Track::playable))
+      if (!rules().vanillaDisabled()) tracks.addAll(vanilla);
+    if (s.musicMode != AudioSettings.MusicMode.VANILLA)
+      for (var track : enabledWorld)
+        try {
+          if (track.playable()) { class_267 selected = entry(track); if (selected != null) tracks.add(selected); }
+        } catch (Exception ignored) { /* A removed file cannot enter automatic rotation. */ }
+    tracks.removeIf(track -> !includeExcluded && s.disabledTracks.contains(trackId(track))
+        || !TrackRules.eligible(track.field_2126, context.dimension, context.biome));
+    return tracks;
+  }
+
+  /** Ignore per-track exclusions and volume, so users can re-enable tracks within their pool. */
+  public static Set<String> activeMusic(Minecraft mc) {
+    PoolKey key = new PoolKey(AudioConfig.current(), rules(), context(mc), libraryRevision);
+    if (key.equals(activeKey)) return activeTracks;
+    updateRotation();
+    Set<String> ids = new LinkedHashSet<>();
+    if (!rules().disabled()) {
+      List<MusicLibrary.Track> menu = !key.context.world && rules().menuEnabled()
+          ? enabledMenu.stream().filter(MusicLibrary.Track::playable).toList() : List.of();
+      menu.forEach(t -> ids.add(t.id()));
+      if (menu.isEmpty() || !rules().menuOverrides()) {
+        var pool = ((SoundManagerAccessor) mc.soundManager).power$music();
+        List<class_267> vanilla;
+        synchronized (pool) { vanilla = List.copyOf(((SoundPoolAccessor) pool).power$tracks()); }
+        backgroundPool(vanilla, key.context, true).forEach(t -> ids.add(trackId(t)));
+      }
+    }
+    activeTracks = Collections.unmodifiableSet(ids);
+    activeKey = key;
+    return activeTracks;
   }
 
   public static class_267 resolveTrack(String id) throws java.io.IOException {
@@ -411,27 +482,8 @@ public final class AudioController {
     AudioSettings s = AudioConfig.current();
     class_267 requested = queued();
     if (requested != null) { remember(requested); currentMusic = trackId(requested); musicStarted = System.nanoTime(); trackWasPlaying = false; return requested; }
-    List<class_267> tracks = new ArrayList<>();
-    if (s.musicMode != AudioSettings.MusicMode.REPLACE || library.world.tracks().isEmpty())
-      if (!rules().vanillaDisabled()) tracks.addAll(vanilla);
-    if (s.musicMode != AudioSettings.MusicMode.VANILLA)
-      for (var track : library.world.tracks())
-        try {
-          if (track.playable()) { class_267 selected = entry(track); if (selected != null) tracks.add(selected); }
-        } catch (Exception ignored) {
-        }
-    int dimension = client != null && client.player != null ? client.player.dimensionId : 0;
-    String biome = null;
-    if (client != null && client.player != null && client.world != null) {
-      var currentBiome =
-          client
-              .world
-              .method_1781()
-              .method_1787((int) Math.floor(client.player.x), (int) Math.floor(client.player.z));
-      if (currentBiome != null) biome = currentBiome.field_888;
-    }
-    String currentBiome = biome;
-    tracks.removeIf(track -> s.disabledTracks.contains(trackId(track)) || !TrackRules.eligible(track.field_2126, dimension, currentBiome));
+    Context context = context(client);
+    List<class_267> tracks = backgroundPool(vanilla, context, false);
     class_267 chosen =
         WORLD.choose(tracks, s.shuffle, s.avoidRepeats, RANDOM, t -> t.field_2127.toExternalForm());
     if (chosen != null) {
@@ -440,8 +492,8 @@ public final class AudioController {
       musicStarted = System.nanoTime(); trackWasPlaying = false;
       LegacyMusic.selected(
           chosen.field_2126,
-          TrackRules.dimensionSpecific(chosen.field_2126, dimension)
-              ? dimension
+          TrackRules.dimensionSpecific(chosen.field_2126, context.dimension)
+              ? context.dimension
               : Integer.MAX_VALUE);
     } else if (client != null) {
       ((SoundManagerAccessor) client.soundManager).power$countdown(20);

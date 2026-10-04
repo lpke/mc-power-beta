@@ -4,6 +4,7 @@ import com.google.gson.*;
 import java.nio.file.*;
 import java.util.*;
 import local.luke.power.audio.MusicLibrary;
+import local.luke.power.audio.MusicFolders;
 import local.luke.power.config.Setting;
 import net.fabricmc.loader.api.FabricLoader;
 import org.lwjgl.input.*;
@@ -12,6 +13,7 @@ public final class FolderScreen extends UiScreen {
   private final PowerOptionsScreen parent;
   private final Setting setting;
   private final List<String> folders = new ArrayList<>();
+  private final Set<String> disabled = new LinkedHashSet<>();
   private int selected = -1, scroll;
   private String error = "";
   private final TextInput path = new TextInput("", 4096);
@@ -19,7 +21,9 @@ public final class FolderScreen extends UiScreen {
   public FolderScreen(PowerOptionsScreen parent, Setting setting) {
     this.parent = parent;
     this.setting = setting;
-    for (var v : setting.value.getAsJsonArray()) folders.add(v.getAsString());
+    var selection = MusicFolders.decode(setting.value);
+    folders.addAll(selection.paths());
+    disabled.addAll(selection.disabled());
   }
 
   private final ScrollBar scrollbar = new ScrollBar();
@@ -89,6 +93,16 @@ public final class FolderScreen extends UiScreen {
   }
 
   protected void mouseClicked(int x, int y, int b) {
+    if (b != 0 && b != 1) return;
+    if (inside(x, y, panelLeft() + 16, 74, 38, height - 140)) {
+      int i = (y - 74 + scroll) / 24;
+      if (i >= 0 && i < folders.size() && (y - 74 + scroll) % 24 < 18) {
+        String folder = folders.get(i);
+        if (!disabled.remove(folder)) disabled.add(folder);
+        minecraft.soundManager.method_2009("random.click", 1, 1);
+      }
+      return;
+    }
     if (b != 0) return;
     if (scrollbar.press(track(), x, y)) { scroll = (int) scrollbar.drag(track(), y, true); return; }
     if (inside(x, y, panelLeft() + 16, 42, panelWidth() - 128, 18)) {
@@ -110,14 +124,12 @@ public final class FolderScreen extends UiScreen {
       return;
     }
     if (inside(x, y, panelLeft() + 16, height - 54, 70, 20) && selected >= 0 && selected < folders.size()) {
-      folders.remove(selected);
+      disabled.remove(folders.remove(selected));
       selected = Math.min(selected, folders.size() - 1);
       return;
     }
     if (inside(x, y, panelRight() - 160, height - 30, 70, 20)) {
-      JsonArray a = new JsonArray();
-      folders.forEach(a::add);
-      setting.value = a;
+      setting.value = MusicFolders.encode(folders, disabled);
       parent.changed(setting);
       minecraft.setScreen(parent);
     }
@@ -136,7 +148,9 @@ public final class FolderScreen extends UiScreen {
     for (int i = 0; i < folders.size(); i++) {
       int yy = 74 + i * 24 - scroll;
       if (i == selected) fill(panelLeft() + 14, yy, panelRight() - 14, yy + 22, 0x90555555);
-      text(fit(folders.get(i), panelWidth() - 40), panelLeft() + 20, yy + 7, 0xffffff);
+      button(disabled.contains(folders.get(i)) ? "Off" : "On", panelLeft() + 16, yy, 38, 18, x, y, true);
+      text(fit(folders.get(i), panelWidth() - 80), panelLeft() + 60, yy + 5,
+          disabled.contains(folders.get(i)) ? 0x999999 : 0xdddddd);
     }
     unclip();
     scrollbar.render(this, track());
@@ -149,5 +163,7 @@ public final class FolderScreen extends UiScreen {
         error.isEmpty() ? 0xaaaaaa : 0xff8888);
     button("Done", panelRight() - 160, height - 30, 70, 20, x, y, true);
     button("Cancel", panelRight() - 84, height - 30, 70, 20, x, y, true);
+    if (inside(x, y, panelLeft() + 16, 74, 38, height - 140))
+      tooltip("Include this folder in automatic music. Files and track settings stay intact.", x, y);
   }
 }

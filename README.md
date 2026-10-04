@@ -99,6 +99,14 @@ read-only, run off the game thread, skip malformed headers and symlinks, and hav
 file/depth limits. Empty or unavailable replacement libraries fall back to the
 built-in soundtrack. Changes do not move or alter music files.
 
+Each folder has an On/Off switch. Off removes it from automatic selection while
+keeping its path, track preferences, previews and explicit queue requests intact.
+The library starts on Active tracks, following the current world/menu, soundtrack
+and enabled-folder settings. Individually excluded tracks stay visible so they
+can be re-enabled. All tracks, Custom tracks and folder filters remain available.
+Playback controls sit on the left of the toolbar; Queue, Reload and Library sit
+on the right. Queue appears when requests exist and opens its compact list directly.
+
 Speaker buttons preview individual sounds, built-in music and custom tracks.
 Music previews pause the current song; click the same speaker again to resume it.
 Previous, Next and Play / pause exit the preview. Track volume changes apply live,

@@ -1,5 +1,21 @@
 # Changelog
 
+## Audio layout and folder controls, 2026-10-04
+
+- Keep Play, Previous and Next on the left; place compact Queue, Reload and
+  Library/Settings controls on the right. Queue appears only when requests exist
+  and opens the queue directly.
+- Put queue names and controls on one line, with a compact Clear queue button
+  anchored right. Keep protection against editing a queue that changed after rendering.
+- Add On/Off switches beside music folders. Preserve paths, files, per-track
+  volumes and exclusions. World and menu folders have independent switches.
+- Default the library to Active tracks, using the same soundtrack and location
+  rules as automatic playback. Keep individually excluded tracks visible for
+  re-enabling. Retain All, Custom and individual-folder filters.
+- Keep disabled-folder tracks available for manual preview and explicit queue
+  requests. Fall back to the built-in soundtrack when no replacement folder has
+  playable tracks, subject to the existing built-in music switch.
+
 ## Command access and embedded music library, 2026-10-04
 
 - Add Commands with a master switch, per-command global access rules and per-world

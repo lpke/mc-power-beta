@@ -369,7 +369,7 @@ public final class CommandsLibraryChecks {
         test(
             "queue row arrow reorders exactly one request",
             () -> {
-              click(options, right - 124, 136, 0);
+              click(options, right - 125, 120, 0);
               check(
                   MusicRequests.tracks().equals(List.of(second, first, first)), "wrong queue edit");
             });
@@ -379,7 +379,7 @@ public final class CommandsLibraryChecks {
         test(
             "stale queue click never removes a different request",
             () -> {
-              click(options, right - 25, 136, 0);
+              click(options, right - 25, 120, 0);
               check(MusicRequests.tracks().equals(before), "stale click removed wrong row");
             });
         MusicRequests.edit(q -> q.tracks.clear());

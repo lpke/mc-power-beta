@@ -16,6 +16,8 @@ public final class AudioSettings {
   public MusicMode musicMode = MusicMode.VANILLA;
   public List<String> musicDirectories = new ArrayList<>();
   public List<String> menuDirectories = new ArrayList<>();
+  public Set<String> disabledMusicDirectories = new LinkedHashSet<>();
+  public Set<String> disabledMenuDirectories = new LinkedHashSet<>();
   public boolean recursive = false, shuffle = true, avoidRepeats = true;
 
   public AudioSettings() {
@@ -37,6 +39,8 @@ public final class AudioSettings {
         || sounds == null
         || musicDirectories == null
         || menuDirectories == null
+        || disabledMusicDirectories == null
+        || disabledMenuDirectories == null
         || musicMode == null) throw new IllegalArgumentException("Audio settings are incomplete");
     for (var e : categories.entrySet()) {
       if (!new AudioSettings().categories.containsKey(e.getKey()))
@@ -61,6 +65,9 @@ public final class AudioSettings {
         if (dir == null || dir.isBlank() || dir.length() > 4096 || dir.indexOf('\0') >= 0)
           throw new IllegalArgumentException("Invalid music folder");
     }
+    if (!musicDirectories.containsAll(disabledMusicDirectories)
+        || !menuDirectories.containsAll(disabledMenuDirectories))
+      throw new IllegalArgumentException("Disabled music folders must remain in the folder list");
   }
 
   private static void volume(Integer value) {

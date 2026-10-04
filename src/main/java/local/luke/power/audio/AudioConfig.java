@@ -40,9 +40,11 @@ public final class AudioConfig {
     boolean library = !current.musicDirectories.equals(next.musicDirectories)
         || !current.menuDirectories.equals(next.menuDirectories) || current.recursive != next.recursive;
     boolean mode = current.musicMode != next.musicMode;
+    boolean folders = !current.disabledMusicDirectories.equals(next.disabledMusicDirectories)
+        || !current.disabledMenuDirectories.equals(next.disabledMenuDirectories);
     current = Catalog.JSON.fromJson(Catalog.JSON.toJson(next), AudioSettings.class);
     if (library) AudioController.settingsChanged();
-    if (mode) AudioController.pause();
+    if (mode || folders) AudioController.rotationChanged();
     AudioController.refresh();
   }
 

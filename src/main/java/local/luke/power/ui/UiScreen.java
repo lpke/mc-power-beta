@@ -52,6 +52,7 @@ public abstract class UiScreen extends Screen {
     int color = !enabled ? 0xff777777 : active ? 0xffffff55 : 0xffdddddd;
     int cx = x + w / 2, cy = y + 9;
     String[] pixels = switch (icon) {
+      case "reload" -> new String[]{"  ####  #", " #    # #", "#      ##", "#    ####", "#        ", " #    #  ", "  ####   "};
       case "speaker" -> new String[]{"   #   # ", "  ## #  #", "####  # #", "####  # #", "####  # #", "  ## #  #", "   #   # "};
       case "up" -> new String[]{"    #    ", "   ###   ", "  #####  ", "    #    ", "    #    ", "    #    ", "         "};
       case "down" -> new String[]{"    #    ", "    #    ", "    #    ", "  #####  ", "   ###   ", "    #    ", "         "};
