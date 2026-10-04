@@ -1,5 +1,33 @@
 # Changelog
 
+## Audio controls and effective settings, 2026-10-04
+
+- Show Off or Disabled for cheats-locked settings while retaining the stored
+  preferences. Keep the lock explanation available on hover.
+- Replace the playback toolbar's Play/Pause text with icons. Put Back beside
+  library search or the queue title. Add Quiet after Next to end a track without
+  pausing automatic music.
+- Make the playing-track status open All tracks and scroll to that track.
+  Add queue volume sliders and exact-value controls, sharing the track's library
+  volume without changing queue order or files. Reject clicks against queue rows
+  that changed since they were drawn, including volume edits.
+- Replace the library filter cycle with Active tracks, All tracks, Custom tracks
+  and Folder tracks tabs. The folder button cycles forward or backward through
+  configured/discovered folders. Preserve folder choice when switching tabs.
+- Add Wait between tracks, on by default. Off starts tracks back to back.
+  Add Wait before queued tracks, off by default to preserve immediate queue
+  playback. Both use the existing delay settings, with the master wait switch
+  taking priority. Manual Next/Prev/Play bypass the delay.
+- Use one automatic music scheduler for normal, custom, menu and queued music.
+  Keep Pause persistent, retain unavailable requests with an error, and show the
+  remaining wait instead of world/menu library counts when idle.
+- Show the twelve built-in music filenames with their published song titles,
+  such as calm1.ogg (Minecraft). Keep persistence keys unchanged.
+- Reorder General into Game, Interface and Input with difficulty and cheats
+  first, followed by autosave. Group menu/chat preferences under Interface and
+  mouse/controller preferences under Input. Rename Sensitivity to Mouse sensitivity.
+- Draw restart asterisks in soft red independently of the setting-name colour.
+
 ## Cheats access, commands and audio polish, 2026-10-04
 
 - Add the per-world Cheats enabled switch beside Difficulty. New worlds default

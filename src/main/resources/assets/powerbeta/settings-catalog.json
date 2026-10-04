@@ -2312,7 +2312,7 @@
   },
   "power_controls:general.pauseOnLostFocus": {
     "page": "General",
-    "group": "Game and input",
+    "group": "Interface",
     "label": "Pause on lost focus",
     "description": "",
     "default": true,
@@ -2320,7 +2320,7 @@
   },
   "power_controls:general.autosaveInterval": {
     "page": "General",
-    "group": "Game and input",
+    "group": "Game",
     "label": "Autosave interval (seconds)",
     "description": "",
     "default": 30,
@@ -2339,7 +2339,7 @@
   },
   "power_controls:general.rawInput": {
     "page": "General",
-    "group": "Game and input",
+    "group": "Input",
     "label": "Raw input",
     "description": "Reads movement directly from a mouse device, bypassing normal cursor processing. Turn off if movement stops or feels uneven.",
     "default": false,
@@ -2347,7 +2347,7 @@
   },
   "power_controls:general.disableControllerInit": {
     "page": "General",
-    "group": "Game and input",
+    "group": "Input",
     "label": "Disable controller init",
     "description": "Disables the initialization of LWJGL Controllers as it only causes issues anyway",
     "default": true,
@@ -3680,7 +3680,7 @@
   },
   "visual.slashChat": {
     "page": "General",
-    "group": "Chat",
+    "group": "Interface",
     "label": "Slash opens chat",
     "description": "Open chat with / already entered when pressing the slash key.",
     "default": false,

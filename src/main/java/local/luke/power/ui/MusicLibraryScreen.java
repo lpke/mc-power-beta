@@ -11,7 +11,11 @@ import org.lwjgl.input.Mouse;
 /** Embedded Audio panel. Edits belong to the surrounding Options session. */
 public final class MusicLibraryScreen extends UiScreen {
   public record State(
-      boolean queue, String folder, String query, int trackScroll, int queueScroll) {}
+      boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder) {
+    public State(boolean queue, String folder, String query, int trackScroll, int queueScroll) {
+      this(queue, folder, query, trackScroll, queueScroll, "");
+    }
+  }
 
   private final PowerOptionsScreen parent;
   private final TextInput search = new TextInput("", 128);
@@ -21,8 +25,10 @@ public final class MusicLibraryScreen extends UiScreen {
   private final ScrollBar scrollbar = new ScrollBar();
   private int conversionRevision, conversionTicks, trackScroll, queueScroll;
   private boolean queue;
-  private String folder = "active", error = "", hoverHelp = "";
+  private String folder = "active", lastFolder = "", error = "", hoverHelp = "";
   private Set<String> activeTracks = Set.of();
+
+  public boolean trackStatusVisible() { return error.isEmpty() && !Mp3Converter.busy() && conversionTicks == 0; }
 
   public String hoverHelp() {
     return hoverHelp;
@@ -37,13 +43,14 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public State state() {
-    return new State(queue, folder, search.text(), trackScroll, queueScroll);
+    return new State(queue, folder, search.text(), trackScroll, queueScroll, lastFolder);
   }
 
   public void restore(State state) {
     if (state == null) return;
     queue = state.queue;
     folder = state.folder;
+    lastFolder = state.lastFolder;
     search.setText(state.query);
     trackScroll = state.trackScroll;
     queueScroll = state.queueScroll;
@@ -67,7 +74,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int listTop() {
-    return controlsTop() + 24;
+    return controlsTop() + (queue ? 18 : filters().height()) + 6;
   }
 
   private int statusTop() { return parent.audioContentTop(); }
@@ -78,7 +85,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int rowHeight() {
-    return queue ? 24 : 44;
+    return 44;
   }
 
   private int queueWidth(int action) {
@@ -116,6 +123,32 @@ public final class MusicLibraryScreen extends UiScreen {
   public void showQueue() { show(true); }
   public void showTracks() { show(false); }
 
+  public void showTrack(String id) {
+    show(false);
+    folder = "";
+    search.setText("");
+    rebuild();
+    int index = tracks.indexOf(id);
+    if (index >= 0) scroll(index * rowHeight());
+  }
+
+  private boolean folderSelected() {
+    return !folder.equals("active") && !folder.isEmpty() && !folder.equals("custom");
+  }
+
+  private MusicFilters.Layout filters() {
+    return MusicFilters.layout(left(), controlsTop(), span(), folderSelected());
+  }
+
+  private void selectFilter(String id) {
+    folder = id.equals("folder")
+        ? folders.contains(lastFolder) ? lastFolder : folders.isEmpty() ? "folder" : folders.get(0)
+        : id;
+    if (folderSelected()) lastFolder = folder;
+    scroll(0);
+    rebuild();
+  }
+
   private int scroll() {
     return queue ? queueScroll : trackScroll;
   }
@@ -137,7 +170,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int volumeEnd() {
-    return right() - (narrow() ? 26 : 144);
+    return right() - (queue || narrow() ? 26 : 144);
   }
 
   private int actionY(int rowY) {
@@ -234,7 +267,7 @@ public final class MusicLibraryScreen extends UiScreen {
     if (folder.isEmpty()) return true;
     MusicLibrary.Track t = custom.get(id);
     if (folder.equals("custom")) return t != null;
-    return t != null
+    return !folder.equals("folder") && t != null
         && t.path().getParent() != null
         && t.path().startsWith(Path.of(folder));
   }
@@ -250,17 +283,13 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private String folderLabel() {
-    return folder.equals("active") ? "Active tracks" : folder.isEmpty()
-        ? "All tracks"
-        : folder.equals("custom")
-            ? "Custom tracks"
-            : Objects.toString(Path.of(folder).getFileName(), folder);
+    return folders.isEmpty() ? "No folders" : Objects.toString(Path.of(folder).getFileName(), folder);
   }
 
   private void cycleFolder(int direction) {
-    List<String> choices = new ArrayList<>(List.of("active", "", "custom"));
-    choices.addAll(folders);
-    folder = choices.get(Math.floorMod(choices.indexOf(folder) + direction, choices.size()));
+    if (folders.isEmpty()) return;
+    folder = folders.get(Math.floorMod(folders.indexOf(folder) + direction, folders.size()));
+    lastFolder = folder;
     scroll(0);
     rebuild();
   }
@@ -325,12 +354,19 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     search.focused = false;
-    if (inside(x, y, filterX(), controlsTop(), filterWidth(), 18)) {
-      if (queue && tracks.isEmpty()) return;
-      click();
-      if (queue) queueEdit(q -> q.tracks.clear());
-      else cycleFolder(b == 0 ? 1 : -1);
+    if (queue && inside(x, y, filterX(), controlsTop(), filterWidth(), 18)) {
+      if (!tracks.isEmpty()) { click(); queueEdit(q -> q.tracks.clear()); }
       return;
+    }
+    if (!queue) {
+      var tabs = filters();
+      for (var tab : tabs.tabs()) if (inside(x, y, tab.x(), tab.y(), tab.width(), 18)) {
+        click(); selectFilter(tab.id()); return;
+      }
+      if (folderSelected() && inside(x, y, tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18)) {
+        if (!folders.isEmpty()) { click(); cycleFolder(b == 0 ? 1 : -1); }
+        return;
+      }
     }
     if (!queue && inside(x, y, right() - 88, statusTop(), 88, 14)) {
       click();
@@ -342,14 +378,22 @@ public final class MusicLibraryScreen extends UiScreen {
     if (y < listTop() || y >= bottom() || x < left() || x >= right()) return;
     int index = (y - listTop() + scroll()) / rowHeight();
     if (index < 0 || index >= tracks.size()) return;
+    if (queue && !renderedQueue.equals(MusicRequests.tracks())) {
+      rebuild();
+      error = "Queue changed. Select the track again.";
+      return;
+    }
     String id = tracks.get(index);
     int rowY = listTop() + index * rowHeight() - scroll();
+    Setting volume = settings.get("audio.sound." + id);
+    int volumeY = rowY + (queue ? 24 : 19);
+    if (volume != null && inside(x, y, volumeX(), volumeY, volumeEnd() - volumeX(), 18) && b == 0) {
+      dragging = volume; slide(x); return;
+    }
+    if (volume != null && inside(x, y, volumeEnd() + 4, volumeY, 22, 18)) {
+      click(); minecraft.setScreen(new ValueScreen(parent, volume)); return;
+    }
     if (queue) {
-      if (!renderedQueue.equals(MusicRequests.tracks())) {
-        rebuild();
-        error = "Queue changed. Select the track again.";
-        return;
-      }
       if (inside(x, y, queueX(3), rowY + 3, queueWidth(3), 18)) {
         click();
         queueEdit(q -> q.tracks.remove(index));
@@ -365,20 +409,11 @@ public final class MusicLibraryScreen extends UiScreen {
       }
       return;
     }
-    Setting enabled = settings.get("audio.trackEnabled." + id),
-        volume = settings.get("audio.sound." + id);
+    Setting enabled = settings.get("audio.trackEnabled." + id);
     if (inside(x, y, left(), rowY + 19, 60, 18) && enabled != null) {
       click();
       enabled.cycle(1);
       parent.changed(enabled);
-    } else if (inside(x, y, volumeX(), rowY + 19, volumeEnd() - volumeX(), 18)
-        && volume != null
-        && b == 0) {
-      dragging = volume;
-      slide(x);
-    } else if (inside(x, y, volumeEnd() + 4, rowY + 19, 22, 18) && volume != null) {
-      click();
-      minecraft.setScreen(new ValueScreen(parent, volume));
     } else if (inside(x, y, right() - 116, actionY(rowY), 20, 18) && playable(id)) {
       click();
       AudioController.previewSound(id);
@@ -406,27 +441,33 @@ public final class MusicLibraryScreen extends UiScreen {
         parent.finishContinuousChange();
       }
     }
-    int filterX = filterX();
-    if (queue) text("Up next", left() + 2, controlsTop() + 5, 0xdddddd);
-    button(
-        fit(queue ? "Clear queue" : folderLabel(), filterWidth() - 8),
-        filterX,
-        controlsTop(),
-        filterWidth(),
-        18,
-        mx,
-        my,
-        !queue || !tracks.isEmpty());
     String tip = "";
-    if (inside(mx, my, filterX, controlsTop(), filterWidth(), 18))
-      tip =
-          queue
-              ? "Remove queued requests. Music files and rotation stay unchanged."
-              : folder.equals("active")
-                  ? "Follows soundtrack, enabled folders and current world/menu rules. Individually excluded tracks stay visible."
-                  : folder.isEmpty() || folder.equals("custom")
-                  ? "Choose active tracks, all tracks, custom tracks, or a folder and its subfolders."
-                  : folder;
+    if (queue) {
+      text("Up next", left() + 2, controlsTop() + 5, 0xdddddd);
+      button("Clear queue", filterX(), controlsTop(), filterWidth(), 18, mx, my, !tracks.isEmpty());
+      if (inside(mx, my, filterX(), controlsTop(), filterWidth(), 18))
+        tip = "Remove queued requests. Music files and rotation stay unchanged.";
+    } else {
+      var tabs = filters();
+      for (var tab : tabs.tabs()) {
+        boolean selected = tab.id().equals("folder") ? folderSelected() : tab.id().equals(folder);
+        fill(tab.x(), tab.y(), tab.x() + tab.width(), tab.y() + 18, selected ? 0xb0000000 : 0x40000000);
+        text(tab.label(), tab.x() + 4, tab.y() + 5, selected ? 0xffffff : 0xaaaaaa);
+        if (selected) fill(tab.x(), tab.y() + 17, tab.x() + tab.width(), tab.y() + 18, 0xffaaaaaa);
+        if (inside(mx, my, tab.x(), tab.y(), tab.width(), 18))
+          tip = switch (tab.id()) {
+            case "active" -> "The pool allowed by your soundtrack, folders and world/menu rules. Excluded tracks remain visible.";
+            case "" -> "All available built-in and custom music.";
+            case "custom" -> "All tracks found in your music folders.";
+            default -> "Tracks in the selected folder and its subfolders.";
+          };
+      }
+      if (folderSelected()) {
+        button(fit(folderLabel(), tabs.folderWidth() - 8), tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18, mx, my, !folders.isEmpty());
+        if (inside(mx, my, tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18))
+          tip = folders.isEmpty() ? "Add music folders in Audio settings." : folder;
+      }
+    }
     if (queue) renderedQueue = List.copyOf(tracks);
     clip(left() - 2, listTop(), span() + 4, Math.max(0, bottom() - listTop()));
     for (int i = 0; i < tracks.size(); i++) {
@@ -463,6 +504,12 @@ public final class MusicLibraryScreen extends UiScreen {
                   : mx >= queueX(2)
                       ? "Play or pause this track"
                       : mx >= queueX(1) ? "Move down" : mx >= queueX(0) ? "Move up" : tip;
+        Setting volume = settings.get("audio.sound." + id);
+        text("Volume", left() + 2, y + 29, 0xaaaaaa);
+        if (volume != null) slider(volume.display() + "%", volumeX(), y + 24,
+            volumeEnd() - volumeX(), mx, my, volume.value.getAsDouble() / 100);
+        button("...", volumeEnd() + 4, y + 24, 22, 18, mx, my, volume != null);
+        if (hover && my >= y + 24) tip = "Track volume; music and master volumes also apply.";
       } else {
         Setting enabled = settings.get("audio.trackEnabled." + id),
             volume = settings.get("audio.sound." + id);

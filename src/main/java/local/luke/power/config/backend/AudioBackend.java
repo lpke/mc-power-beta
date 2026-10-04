@@ -86,6 +86,12 @@ public final class AudioBackend implements Backend {
         new JsonPrimitive(true),
         "Prevents the same track playing twice when another is available.",
         List.of());
+    add("waitBetweenTracks", "Music library", "Wait between tracks", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.waitBetweenTracks), new JsonPrimitive(true),
+        "Use the music delay settings between tracks. Off plays tracks back to back, including the queue.", List.of());
+    add("delayQueuedTracks", "Music library", "Wait before queued tracks", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.delayQueuedTracks), new JsonPrimitive(false),
+        "Queued tracks use the same random delay as other music. Requires Wait between tracks.", List.of());
     Set<String> sounds = AudioController.sounds(mc);
 
     for (String sound : sounds) {
@@ -184,6 +190,8 @@ public final class AudioBackend implements Backend {
           case "master" -> s.master = v.getAsInt();
           case "musicMode" -> s.musicMode = AudioSettings.MusicMode.values()[v.getAsInt()];
           case "recursive" -> s.recursive = v.getAsBoolean();
+          case "waitBetweenTracks" -> s.waitBetweenTracks = v.getAsBoolean();
+          case "delayQueuedTracks" -> s.delayQueuedTracks = v.getAsBoolean();
           case "shuffle" -> s.shuffle = v.getAsBoolean();
           case "avoidRepeats" -> s.avoidRepeats = v.getAsBoolean();
           case "musicDirectories" -> {

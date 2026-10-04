@@ -50,6 +50,7 @@ public final class Validation {
       if (command.equals("cheats-creation")) CheatsChecks.creation(mc);
       else if (command.equals("cheats")) CheatsChecks.run(mc);
       else if (command.equals("modern-commands")) ModernCommandChecks.run(mc);
+      else if (command.startsWith("audio-polish-")) AudioPolishChecks.run(mc,command.substring(13));
       else if (command.startsWith("audio-layout-")) AudioLayoutChecks.run(mc,command.substring(13));
       else if (command.equals("fog-array")) FogArrayChecks.run(mc);
       else if (command.startsWith("library-check-")) CommandsLibraryChecks.run(mc,command.substring(14));

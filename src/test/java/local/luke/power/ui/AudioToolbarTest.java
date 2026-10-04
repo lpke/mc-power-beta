@@ -34,7 +34,7 @@ class AudioToolbarTest {
       for(boolean library : new boolean[]{false,true}) {
         var empty = AudioToolbar.layout(0,width,0,false,library).buttons();
         var full = AudioToolbar.layout(0,width,256,false,library).buttons();
-        assertEquals(library?7:6,empty.size());
+        assertEquals(7,empty.size());
         for(int i=0;i<empty.size();i++) {
           var a=empty.get(i);var b=full.get(i);
           assertEquals(a.x(),b.x());assertEquals(a.y(),b.y());assertEquals(a.width(),b.width());
@@ -45,7 +45,8 @@ class AudioToolbarTest {
         }
         assertEquals(AudioToolbar.Action.QUEUE,empty.get(empty.size()-3).action());
         assertEquals(AudioToolbar.Action.LIBRARY,empty.get(empty.size()-2).action());
-        if(library) assertEquals("Back",empty.get(0).label());
+        assertEquals(AudioToolbar.Action.PLAY,empty.get(0).action());
+        assertEquals("",empty.get(0).label());
       }
     }
   }

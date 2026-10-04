@@ -28,5 +28,8 @@ public interface SoundManagerAccessor {
   class_266 power$music();
 
   @Accessor("field_2675")
+  int power$countdown();
+
+  @Accessor("field_2675")
   void power$countdown(int value);
 }

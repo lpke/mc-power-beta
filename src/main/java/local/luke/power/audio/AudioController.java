@@ -32,10 +32,10 @@ public final class AudioController {
           new MusicLibrary.Scan(List.of(), List.of()), new MusicLibrary.Scan(List.of(), List.of()));
   private static Minecraft client;
   private static MusicRules rules;
-  private static boolean dirty = true, paused, wasWorld, rescan, nextAfterScan;
+  private static boolean dirty = true, paused, wasWorld, rescan, nextAfterScan, silenced;
   private static String currentMusic = "",
       menuMusic = "",
-      status = "Music folders have not been scanned";
+      status = "";
   private static int cleanup, menuCooldown, libraryRevision, conversionRevision;
   private static boolean trackWasPlaying;
   private static AudioSettings rotationConfig;
@@ -112,6 +112,9 @@ public final class AudioController {
     menuMusic = "";
     currentMusic = trackId(track);
     paused = false;
+    silenced = false;
+    status = "";
+    menuCooldown = 0;
     int dimension = client.player == null ? 0 : client.player.dimensionId;
     LegacyMusic.selected(track.field_2126, client.world != null && TrackRules.dimensionSpecific(track.field_2126, dimension) ? dimension : Integer.MAX_VALUE);
     system.backgroundMusic("BgMusic", track.field_2127, track.field_2126, false);
@@ -195,11 +198,28 @@ public final class AudioController {
     return rules;
   }
 
+  public static String currentTrackId() {
+    if (MusicPreview.active()) return MusicPreview.track();
+    if (!musicPlaying()) return "";
+    return !menuMusic.isEmpty() ? menuMusic : currentMusic;
+  }
+
+  public static int remainingDelay() {
+    if (client == null) return 0;
+    AudioSettings s = AudioConfig.current();
+    return MusicTiming.remaining(s.waitBetweenTracks, s.delayQueuedTracks,
+        !MusicRequests.tracks().isEmpty(), ((SoundManagerAccessor) client.soundManager).power$countdown());
+  }
+
   public static String status() {
     if (MusicPreview.active()) return "Previewing: " + musicLabel(MusicPreview.track());
-    return paused
-        ? "Music paused"
-        : nowPlaying().equals("none") ? status : "Playing: " + nowPlaying();
+    if (paused) return "Music paused";
+    if (rules().disabled()) return "Music disabled";
+    if (AudioConfig.current().master == 0 || client != null && client.options.musicVolume == 0)
+      return "Music muted";
+    if (!nowPlaying().equals("none")) return "Playing: " + nowPlaying();
+    if (!status.isEmpty()) return status;
+    return MusicTiming.status(remainingDelay());
   }
 
   public static List<MusicLibrary.Track> customTracks() { return custom; }
@@ -223,12 +243,14 @@ public final class AudioController {
 
   public static String musicLabel(String id) {
     MusicLibrary.Track track = customById.get(id);
-    return track == null ? id.replaceFirst("^music:", "") : track.name();
+    return track == null ? BuiltinMusic.label(id.replaceFirst("^music:", "")) : track.name();
   }
 
   public static int trackVolume(String id) {
     AudioSettings settings = AudioConfig.current();
-    return settings.sounds.getOrDefault(id, settings.sounds.getOrDefault("music:" + musicLabel(id), 100));
+    MusicLibrary.Track custom = customById.get(id);
+    String legacyId = custom == null ? id : "music:" + custom.name();
+    return settings.sounds.getOrDefault(id, settings.sounds.getOrDefault(legacyId, 100));
   }
 
   private static class_267 entry(MusicLibrary.Track track) throws java.io.IOException {
@@ -376,15 +398,8 @@ public final class AudioController {
         libraryRevision++;
         List<String> errors = new ArrayList<>(library.world.warnings());
         errors.addAll(library.menu.warnings());
-        status =
-            library.world.tracks().size()
-                + " world tracks; "
-                + library.menu.tracks().size()
-                + " menu tracks";
-        if (!errors.isEmpty()) {
-          status += "; " + errors.get(0);
-          errors.forEach(PowerBeta.LOG::warn);
-        }
+        status = errors.isEmpty() ? "" : errors.get(0);
+        errors.forEach(PowerBeta.LOG::warn);
       } catch (RuntimeException e) {
         PowerBeta.LOG.error("Music scan failed", e);
         status = "Music scan failed. Existing playlist retained.";
@@ -410,6 +425,9 @@ public final class AudioController {
       history.clear();
       historyIndex = -1;
       paused = false;
+      silenced = true;
+      trackWasPlaying = false;
+      nextDelay((SoundManagerAccessor) mc.soundManager);
       wasWorld = inWorld;
     }
     tickSoundPreview();
@@ -426,43 +444,59 @@ public final class AudioController {
       system.stop("PowerBetaMenu");
       return;
     }
-    if (system.playing("BgMusic")) trackWasPlaying = true;
-    if (!MusicRequests.tracks().isEmpty() && !system.playing("BgMusic") && !system.playing("PowerBetaMenu")
-        && !system.playing("streaming") && (trackWasPlaying || currentMusic.isEmpty() || System.nanoTime() - musicStarted > 5_000_000_000L)) {
-      // Keep unavailable requests visible, with bounded retries.
-      if (menuCooldown == 0) { playQueue(); menuCooldown = 40; }
-    }
-    if (!rules().menuEnabled() || inWorld) system.stop("PowerBetaMenu");
-    if (menuCooldown > 0) menuCooldown--;
-    if (menuCooldown == 0
-        && !inWorld
-        && rules().menuEnabled()
-        && !rotation(library.menu).isEmpty()
-        && !system.playing("PowerBetaMenu")
-        && !system.playing("streaming")
-        && mc.options.musicVolume > 0) {
-      if (!system.playing("BgMusic")) {
-        MusicLibrary.Track track =
-            MENU.choose(
-                rotation(library.menu),
-                AudioConfig.current().shuffle,
-                AudioConfig.current().avoidRepeats,
-                RANDOM,
-                t -> t.path().toString());
-        try {
-          menuCooldown = 20;
-          class_267 selected = entry(track);
-          remember(selected);
-          play(selected);
-        } catch (Exception e) {
-          PowerBeta.LOG.warn("Could not play menu music", e);
-        }
-      }
-    }
+    if (LegacyMusic.consumeStop()) quiet();
+    automaticMusic(mc, system);
     if (++cleanup >= 100) {
       cleanup = 0;
       SOURCES.keySet().removeIf(source -> !system.playing(source));
     }
+  }
+
+  private static void automaticMusic(Minecraft mc, SoundSystem system) {
+    if (menuCooldown > 0) menuCooldown--;
+    if (silenced) {
+      // SoundSystem may finish an older queued Play after Quiet's Stop.
+      if (system.playing("BgMusic")) {
+        system.setVolume("BgMusic", 0);
+        system.stop("BgMusic");
+      }
+    } else {
+      if (system.playing("BgMusic") || system.playing("PowerBetaMenu")) {
+        trackWasPlaying = true;
+        return;
+      }
+      if (!currentMusic.isEmpty() && !trackWasPlaying
+          && System.nanoTime() - musicStarted < 5_000_000_000L) return;
+    }
+    currentMusic = "";
+    menuMusic = "";
+    if (system.playing("streaming") || mc.options.musicVolume <= 0) return;
+    var sound = (SoundManagerAccessor) mc.soundManager;
+    if (remainingDelay() > 0) {
+      sound.power$countdown(Math.max(0, sound.power$countdown() - 1));
+      return;
+    }
+    if (menuCooldown > 0) return;
+    if (!MusicRequests.tracks().isEmpty()) {
+      playQueue();
+    } else {
+      next();
+    }
+    // Missing files / empty pools should not be retried every tick.
+    if (currentMusic.isEmpty()) menuCooldown = 40;
+  }
+
+  /** Ends this track, keeping automatic playback enabled and the queue intact. */
+  public static void quiet() {
+    SoundSystem s = system();
+    if (s == null || client == null) return;
+    MusicPreview.stop(s, false);
+    s.setVolume("BgMusic", 0); s.setVolume("PowerBetaMenu", 0);
+    s.stop("BgMusic"); s.stop("PowerBetaMenu");
+    currentMusic = ""; menuMusic = "";
+    trackWasPlaying = false; paused = false; silenced = true;
+    status = ""; menuCooldown = 0;
+    nextDelay((SoundManagerAccessor) client.soundManager);
   }
 
   public static boolean blockBackground() {
@@ -495,8 +529,8 @@ public final class AudioController {
           TrackRules.dimensionSpecific(chosen.field_2126, context.dimension)
               ? context.dimension
               : Integer.MAX_VALUE);
-    } else if (client != null) {
-      ((SoundManagerAccessor) client.soundManager).power$countdown(20);
+    } else {
+      status = "No tracks available for the current music settings.";
     }
     return chosen;
   }
@@ -545,8 +579,8 @@ public final class AudioController {
                   * rules().ambient(source.sound)));
     }
     if (client != null) {
-      s.setVolume("BgMusic", (MusicPreview.active() || paused) ? 0 : musicVolume(currentMusic));
-      s.setVolume("PowerBetaMenu", (MusicPreview.active() || paused) ? 0 : musicVolume(menuMusic));
+      s.setVolume("BgMusic", (MusicPreview.active() || paused || silenced) ? 0 : musicVolume(currentMusic));
+      s.setVolume("PowerBetaMenu", (MusicPreview.active() || paused || silenced) ? 0 : musicVolume(menuMusic));
       if (MusicPreview.active()) s.setVolume(MusicPreview.SOURCE, musicVolume(MusicPreview.track()));
     }
   }
@@ -586,7 +620,7 @@ public final class AudioController {
 
   public static void next() {
     if (client == null || system() == null) return;
-    MusicPreview.stop(system(), true);
+    MusicPreview.stop(system(), false);
     if (rules().disabled()) { play(null); return; }
     paused = false;
     if (!MusicRequests.tracks().isEmpty()) { playQueue(); return; }

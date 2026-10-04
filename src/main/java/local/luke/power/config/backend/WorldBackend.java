@@ -30,7 +30,7 @@ public final class WorldBackend implements Backend {
                 "world.cheats",
                 b.id(),
                 "General",
-                "World",
+                "Game",
                 "Cheats enabled",
                 "Allow game mode changes, item spawning, teleporting and world editing in this"
                     + " world. Turning off returns you to survival. Saved warps, inventories and"

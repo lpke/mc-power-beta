@@ -16,8 +16,8 @@ public final class InterfaceBackend implements Backend {
                 "interface.pauseToOptions",
                 "interface",
                 "General",
-                "Game and input",
-                "Pause opens Options",
+                "Interface",
+                "Pause opens options",
                 "Open Options directly when pausing. Menu returns to the full pause menu; Done"
                     + " returns to the game.",
                 Setting.Kind.BOOLEAN,

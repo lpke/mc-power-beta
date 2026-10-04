@@ -2,8 +2,6 @@ package local.luke.power.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.*;
 import local.luke.power.audio.AudioController;
-import net.minecraft.class_266;
-import net.minecraft.class_267;
 import net.minecraft.client.sound.SoundManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -12,34 +10,10 @@ import paulscode.sound.SoundSystem;
 
 @Mixin(SoundManager.class)
 public class SoundMixin {
+  // One scheduler owns normal, custom and queued music, including while Options is open.
   @Inject(method = "method_2017", at = @At("HEAD"), cancellable = true)
   private void power$musicGate(CallbackInfo ci) {
-    if (AudioController.blockBackground()) ci.cancel();
-  }
-
-  @WrapOperation(
-      method = "method_2017",
-      at =
-          @At(
-              value = "INVOKE",
-              target = "Lnet/minecraft/class_266;method_957()Lnet/minecraft/class_267;"))
-  private class_267 power$playlist(class_266 pool, Operation<class_267> original) {
-    synchronized (pool) {
-      return AudioController.choose(
-          java.util.List.copyOf(((SoundPoolAccessor) pool).power$tracks()));
-    }
-  }
-
-  @Inject(
-      method = "method_2017",
-      at =
-          @At(
-              value = "INVOKE",
-              target =
-                  "Lpaulscode/sound/SoundSystem;backgroundMusic(Ljava/lang/String;Ljava/net/URL;Ljava/lang/String;Z)V",
-              remap = false))
-  private void power$delay(CallbackInfo ci) {
-    AudioController.nextDelay((SoundManagerAccessor) this);
+    ci.cancel();
   }
 
   @WrapOperation(

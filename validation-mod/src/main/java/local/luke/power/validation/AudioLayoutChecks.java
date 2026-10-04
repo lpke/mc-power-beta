@@ -100,11 +100,11 @@ public final class AudioLayoutChecks {
         var library=(MusicLibraryScreen)field(options,"library");
         test("new library defaults to Active and all filter modes remain reachable", () -> {
           check(library.state().folder().equals("active"),"new filter is not Active");
-          var cycle=MusicLibraryScreen.class.getDeclaredMethod("cycleFolder",int.class);cycle.setAccessible(true);
-          cycle.invoke(library,1);check(library.state().folder().isEmpty(),"missing All");
-          cycle.invoke(library,1);check(library.state().folder().equals("custom"),"missing Custom");
-          cycle.invoke(library,1);check(((List<?>)field(library,"folders")).contains(library.state().folder()),"missing folder");
-          cycle.invoke(library,-1);check(library.state().folder().equals("custom"),"reverse filter broken");
+          var cycle=MusicLibraryScreen.class.getDeclaredMethod("selectFilter",String.class);cycle.setAccessible(true);
+          cycle.invoke(library,"");check(library.state().folder().isEmpty(),"missing All");
+          cycle.invoke(library,"custom");check(library.state().folder().equals("custom"),"missing Custom");
+          cycle.invoke(library,"folder");check(((List<?>)field(library,"folders")).contains(library.state().folder()),"missing folder");
+          cycle.invoke(library,"custom");check(library.state().folder().equals("custom"),"reverse filter broken");
         });
         test("folder toggles are local until Done and preserve rollback", () -> {
           Setting folders=find(options.session(),"audio.musicDirectories");var original=folders.value.deepCopy();
@@ -130,12 +130,15 @@ public final class AudioLayoutChecks {
           musicClick(options,AudioToolbar.Action.QUEUE);
           check(mc.currentScreen==options && library.state().queue(),"Queue shortcut opened wrong view");
           options.render(-1,-1,0);
-          check((int)call(library,"rowHeight")==24,"queue still has two-line rows");
+          check((int)call(library,"rowHeight")==44,"queue volume row missing");
           check((int)call(library,"right")-(int)call(library,"filterX")<=82,"Clear queue stretched");
           click(options,indexed(library,"queueX",1)+3,(int)call(library,"listTop")+8);
           check(MusicRequests.tracks().equals(List.of(b,a)),"inline down arrow missed");
           options.render(-1,-1,0);
           MusicRequests.edit(q -> q.tracks.remove(0));
+          int oldVolume=AudioController.trackVolume(a);
+          click(options,(int)call(library,"volumeX")+4,(int)call(library,"listTop")+29);
+          check(AudioController.trackVolume(a)==oldVolume,"stale volume click changed another track");
           click(options,indexed(library,"queueX",3)+3,(int)call(library,"listTop")+8);
           check(MusicRequests.tracks().equals(List.of(a)),"stale click removed different request");
           options.render(-1,-1,0);
@@ -158,7 +161,7 @@ public final class AudioLayoutChecks {
               && library.state().trackScroll()==tracksBefore.trackScroll(),"library state lost");
           musicClick(options,AudioToolbar.Action.QUEUE);
           check(library.state().queueScroll()==queueScroll,"queue scroll lost");
-          musicClick(options,AudioToolbar.Action.SETTINGS);
+          click(options,(int)call(options,"left")+3,32);
           check(!(boolean)field(options,"libraryOpen"),"Back did not open settings");
           MusicRequests.edit(q -> q.tracks.clear());
           musicClick(options,AudioToolbar.Action.QUEUE);
@@ -197,7 +200,7 @@ public final class AudioLayoutChecks {
             for(var button : (List<AudioToolbar.Button>)call(options,"musicButtons"))
               check(mc.textRenderer.getWidth(button.label())<=button.width()-4,"truncated button "+button.label()+" at "+size[0]);
             library.showQueue();options.render(-1,-1,0);
-            musicClick(options,AudioToolbar.Action.SETTINGS);options.render(-1,-1,0);
+            click(options,(int)call(options,"left")+3,32);options.render(-1,-1,0);
             musicClick(options,AudioToolbar.Action.LIBRARY);
             check(!library.queueVisible(),"Library button failed at "+size[0]);
             var folders=new FolderScreen(options,find(options.session(),"audio.musicDirectories"));

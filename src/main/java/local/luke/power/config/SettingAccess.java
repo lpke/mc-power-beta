@@ -24,6 +24,11 @@ public final class SettingAccess {
         && !s.id.endsWith(".sprint");
   }
 
+  /** The gate changes presentation, never the stored preference beneath it. */
+  public static String lockedValue(Setting setting) {
+    return setting.kind == Setting.Kind.BOOLEAN ? "Off" : "Disabled";
+  }
+
   public static String reason(ConfigSession session, Setting setting) {
     if (!cheat(setting)) return "";
     Setting master =
@@ -34,6 +39,6 @@ public final class SettingAccess {
     if (master == null) return "Open a singleplayer world to change cheat settings.";
     return master.value.getAsBoolean()
         ? ""
-        : "Disabled because Cheats enabled is off. Change it in General > World.";
+        : "Disabled because Cheats enabled is off. Change it in General > Game.";
   }
 }

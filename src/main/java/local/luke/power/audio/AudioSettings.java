@@ -19,6 +19,7 @@ public final class AudioSettings {
   public Set<String> disabledMusicDirectories = new LinkedHashSet<>();
   public Set<String> disabledMenuDirectories = new LinkedHashSet<>();
   public boolean recursive = false, shuffle = true, avoidRepeats = true;
+  public boolean waitBetweenTracks = true, delayQueuedTracks = false;
 
   public AudioSettings() {
     for (String key :

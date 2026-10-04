@@ -41,9 +41,9 @@ public final class NativeBackend implements Backend {
     });
     slider("music", "Audio", "Volume", "Music", Option.MUSIC, 0, 100, 1, 100);
     slider("sound", "Audio", "Volume", "Sound effects", Option.SOUND, 0, 100, 1, 100);
-    slider("sensitivity", "General", "Mouse", "Sensitivity", Option.SENSITIVITY, 0, 200, 1, 100);
+    slider("sensitivity", "General", "Input", "Mouse sensitivity", Option.SENSITIVITY, 0, 200, 1, 100);
     toggle(
-        "invert", "General", "Mouse", "Invert mouse", Option.INVERT_MOUSE, o.invertYMouse, false);
+        "invert", "General", "Input", "Invert mouse", Option.INVERT_MOUSE, o.invertYMouse, false);
     toggle("bobbing", "Camera", "View", "View bobbing", Option.VIEW_BOBBING, o.bobView, true);
     toggle("anaglyph", "Video", "Rendering", "3D anaglyph", Option.ANAGLYPH, o.anaglyph3d, false);
     toggle(
@@ -59,7 +59,7 @@ public final class NativeBackend implements Backend {
     choice(
         "difficulty",
         "General",
-        "World",
+        "Game",
         "Difficulty",
         o.difficulty,
         2,

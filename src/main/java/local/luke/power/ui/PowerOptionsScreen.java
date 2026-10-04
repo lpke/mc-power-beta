@@ -176,7 +176,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
   private boolean canClear() { return libraryVisible() ? library.hasQuery() : !search.text().isBlank() || filtered(); }
   private int searchWidth() { return right() - (canClear() ? 36 : 14) - searchLeft(); }
-  private int searchLeft() { return left() + (history.isEmpty() ? 0 : 48); }
+  private int searchLeft() { return left() + (history.isEmpty() && !libraryVisible() ? 0 : 48); }
   private void pushView() {
     if (history.size() == 32) history.removeLast();
     history.push(view());
@@ -312,6 +312,19 @@ public final class PowerOptionsScreen extends UiScreen {
       groups = ordered;
       if (groups.containsKey("Volume")) groups.get("Volume").sort(Comparator.comparingInt(s -> s.id.equals("audio.master") ? 0 : 1));
     }
+    if (page.equals("General") && query.isEmpty() && !filtered()) {
+      Map<String, List<Setting>> ordered = new LinkedHashMap<>();
+      for (String group : List.of("Game", "Interface", "Input"))
+        if (groups.containsKey(group)) ordered.put(group, groups.get(group));
+      groups.forEach(ordered::putIfAbsent);
+      groups = ordered;
+      List<String> order = List.of("native.difficulty", "world.cheats", "power_controls:general.autosaveInterval",
+          "native.guiScale", "visual.slashChat", "power_controls:general.pauseOnLostFocus", "interface.pauseToOptions",
+          "native.sensitivity", "native.invert", "power_controls:general.rawInput", "power_controls:general.disableControllerInit");
+      groups.values().forEach(entries -> entries.sort(Comparator.comparingInt(s -> {
+        int index = order.indexOf(s.id); return index < 0 ? Integer.MAX_VALUE : index;
+      })));
+    }
     if (video() && groups.containsKey("Rendering")) groups.get("Rendering").sort(Comparator.comparingInt(s -> s.id.equals("native.fpsLimit") ? 0 : 1));
     List<Row> next = new ArrayList<>();
     int y = 0, rowHeight = span() < 340 ? 40 : 24;
@@ -404,8 +417,8 @@ public final class PowerOptionsScreen extends UiScreen {
     if (button != 0 && button != 1) return;
     if (button == 0 && sidebarBar.press(sidebarTrack(), x, y)) { sideScroll = sidebarBar.drag(sidebarTrack(), y, true); return; }
     if (!libraryVisible() && button == 0 && contentBar.press(contentTrack(), x, y)) { scroll = contentBar.drag(contentTrack(), y, true); return; }
-    if (button == 0 && !history.isEmpty() && inside(x, y, left(), 27, 44, 20)) {
-      click(); back(); return;
+    if (button == 0 && (libraryVisible() || !history.isEmpty()) && inside(x, y, left(), 27, 44, 20)) {
+      click(); if (libraryVisible()) closeLibrary(); else back(); return;
     }
     if (inside(x, y, searchLeft(), 27, searchWidth(), 20)) {
       if (libraryVisible()) { library.searchClick(x, y, button); return; }
@@ -460,7 +473,7 @@ public final class PowerOptionsScreen extends UiScreen {
       AudioToolbar.Action action = item.action();
       click();
       switch (action) {
-        case SETTINGS -> closeLibrary();
+        case QUIET -> local.luke.power.audio.AudioController.quiet();
         case PLAY -> local.luke.power.audio.AudioController.togglePause();
         case PREVIOUS -> local.luke.power.audio.AudioController.previous();
         case NEXT -> local.luke.power.audio.AudioController.next();
@@ -470,6 +483,12 @@ public final class PowerOptionsScreen extends UiScreen {
         case LIBRARY -> { if (libraryVisible() && !library.queueVisible()) closeLibrary();
           else { libraryOpen = true; library.showTracks(); layout(); } }
       }
+      return;
+    }
+    if (audio() && button == 0 && (!libraryVisible() || library.trackStatusVisible()) && inside(x, y, left(), audioContentTop(),
+        span() - (libraryVisible() && !library.queueVisible() ? 92 : 0), 15)) {
+      String id = local.luke.power.audio.AudioController.currentTrackId();
+      if (!id.isEmpty()) { click(); libraryOpen = true; library.showTrack(id); layout(); }
       return;
     }
     if (libraryVisible() && x >= left() && y >= audioContentTop() && y < bottom()) {
@@ -731,6 +750,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private String value(Setting s) {
+    if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (capture == s) return modifierLabel(Bindings.heldModifiers()) + "Press key...";
     if (s.kind != Setting.Kind.KEY) return s.display();
     Chord chord = Chord.decode(s.value.getAsInt());
@@ -825,7 +845,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     unclip();
     sidebarBar.render(this, sidebarTrack());
-    if (!history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
+    if (libraryVisible() || !history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
         !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls" : "Related settings"
@@ -836,6 +856,9 @@ public final class PowerOptionsScreen extends UiScreen {
         if (item.action() == AudioToolbar.Action.PREVIOUS || item.action() == AudioToolbar.Action.NEXT)
           trackButton(item.label(), item.action() == AudioToolbar.Action.PREVIOUS,
               item.x(), item.y(), item.width(), mx, my);
+        else if (item.action() == AudioToolbar.Action.PLAY)
+          iconButton(local.luke.power.audio.AudioController.musicPlaying() ? "pause" : "play",
+              item.x(), item.y(), item.width(), mx, my, true);
         else button(fit(item.label(), item.width() - 4), item.x(), item.y(), item.width(), 18, mx, my, item.enabled());
         if (libraryVisible() && item.enabled()
             && (item.action() == AudioToolbar.Action.QUEUE && library.queueVisible()
@@ -870,12 +893,14 @@ public final class PowerOptionsScreen extends UiScreen {
       int cy = y + (narrow ? 16 : 2),
           controlLeft = mainControlLeft(row);
       int textWidth = narrow ? span() - 4 : controlLeft(row) - left() - 13;
-      String label = s.label + (s.restart ? " *" : "");
+      String label = fit(s.label, textWidth - (s.restart ? 9 : 0));
       text(
-          fit(label, textWidth),
+          label,
           left() + 3,
           y + (narrow ? 3 : 8),
           s.changed() ? 0xffdd88 : 0xc4c4c4);
+      if (s.restart) text("*", left() + 6 + textRenderer.getWidth(label),
+          y + (narrow ? 3 : 8), 0xe8a0a0);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
       int valueEnd = right() - (numeric ? 62 : 36);
       if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my,
@@ -907,7 +932,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (item != null) {
         var action = item.action();
         tip = switch (action) {
-          case SETTINGS -> "Return to audio settings without changing playback";
+          case QUIET -> "End this track and wait for the next one. Automatic music stays on.";
           case PLAY -> "Play or pause music";
           case PREVIOUS -> "Previous track";
           case NEXT -> "Next track; queued tracks take priority";
@@ -917,6 +942,10 @@ public final class PowerOptionsScreen extends UiScreen {
         };
         hoverId = "music." + action;
       }
+    }
+    if (audio() && (!libraryVisible() || library.trackStatusVisible()) && !local.luke.power.audio.AudioController.currentTrackId().isEmpty()
+        && inside(mx, my, left(), audioContentTop(), span() - (libraryVisible() && !library.queueVisible() ? 92 : 0), 15)) {
+      tip = "Show this track in All tracks"; hoverId = "music.current";
     }
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);
     button(filtered() ? "Reset listed..." : "Reset page...", resetX(), footerY(), 88, 20, mx, my, true);
