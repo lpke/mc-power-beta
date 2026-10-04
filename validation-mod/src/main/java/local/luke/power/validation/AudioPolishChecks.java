@@ -31,7 +31,7 @@ public final class AudioPolishChecks {
       case "setup" -> {
         failures = 0;
         before = AudioConfig.copy(); queueBefore = MusicRequests.tracks(); volumeBefore = mc.options.musicVolume;
-        var config = AudioConfig.copy(); config.master = 100; config.musicMode = AudioSettings.MusicMode.REPLACE;
+        var config = AudioConfig.copy(); config.master = 100; config.customMusic = AudioSettings.CustomMusic.ONLY;
         config.musicDirectories = List.of("audio-polish"); config.menuDirectories = List.of();
         config.disabledMusicDirectories.clear(); config.disabledMenuDirectories.clear(); config.disabledTracks.clear();
         config.waitBetweenTracks = true; config.delayQueuedTracks = true;
@@ -66,7 +66,7 @@ public final class AudioPolishChecks {
         musicClick(options,AudioToolbar.Action.QUEUE);
         var library=(MusicLibraryScreen)field(options,"library"); options.render(-1,-1,0);
         test("queue volume controls change gain without consuming requests", () -> {
-          click(options,(int)call(library,"volumeX")+5,(int)call(library,"listTop")+29);
+          click(options,(int)call(library,"volumeX")+4,(int)call(library,"listTop")+8);
           library.removed();
           check(AudioController.trackVolume(a)==0,"queue slider did not apply");
           check(MusicRequests.tracks().equals(List.of(a,b)),"volume modified queue");
@@ -76,10 +76,10 @@ public final class AudioPolishChecks {
         test("playing status opens All tracks and locates song", () -> {
           click(options,(int)call(options,"left")+2,(int)call(options,"audioContentTop")+4);
           check(!library.queueVisible() && library.state().folder().isEmpty(),"wrong view");
-          var tracks=(List<String>)field(library,"tracks");int index=tracks.indexOf(b);
-          check(index>=0,"current track missing");
-          check(index*44-library.state().trackScroll()>=0,"track above view");
-          check(index*44-library.state().trackScroll()<(int)call(library,"bottom")-(int)call(library,"listTop"),"track below view");
+          var rows=(List<?>)field(library,"rows");
+          Object match=rows.stream().filter(r -> {try{return b.equals(call(r,"id"));}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
+          int offset=(int)call(match,"y")-library.state().trackScroll();
+          check(offset>=0 && offset<(int)call(library,"bottom")-(int)call(library,"listTop"),"track outside view");
           check((int)call(options,"searchLeft")==(int)call(options,"left")+48,"Back not beside search");
           click(options,(int)call(options,"left")+3,32);
           check(!(boolean)field(options,"libraryOpen"),"Back did not return to settings");
@@ -88,7 +88,7 @@ public final class AudioPolishChecks {
         var config=AudioConfig.copy();config.waitBetweenTracks=true;config.delayQueuedTracks=true;AudioConfig.preview(config);
         AudioController.quiet(); sound.power$countdown(2400);
         test("Quiet keeps automatic music enabled with readable countdown", () -> {
-          check(AudioController.status().contains("mins until next track"),AudioController.status());
+          check(AudioController.status().contains("sec until next track"),AudioController.status());
           check(MusicRequests.tracks().equals(List.of(a)),"Quiet consumed queue");
         });
       }

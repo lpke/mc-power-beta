@@ -1534,88 +1534,18 @@
     "max": 1024,
     "step": 1
   },
-  "power_environment:config.MUSIC_CONFIG.stopCurrentBgmOnPortalUse": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Dimension change stops background music",
-    "description": "Using portals stops any active BGM",
-    "default": false,
-    "restart": false
-  },
-  "power_environment:config.MUSIC_CONFIG.stopDimensionSpecificSongOnPortalUse": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Dimension change stops level specific songs",
-    "description": "Using portals stops dimension specific songs",
-    "default": false,
-    "restart": false
-  },
-  "power_environment:config.MUSIC_CONFIG.disableBackgroundMusic": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Disable background music",
-    "description": "Disables randomly playing background music",
-    "default": false,
-    "restart": false
-  },
-  "power_environment:config.MUSIC_CONFIG.mainMenuThemeEnabled": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Main menu theme",
-    "description": "Plays 'mainmenu' song file if one is found",
-    "default": false,
-    "restart": false
-  },
-  "power_environment:config.MUSIC_CONFIG.mainMenuThemeOverridesBGM": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Main menu theme overrides background music",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
-  "power_environment:config.MUSIC_CONFIG.disableDefaultMinecraftBGM": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Minecraft default background music disabled",
-    "description": "Restart required for changes to take effect",
-    "default": false,
-    "restart": false
-  },
-  "power_environment:config.MUSIC_CONFIG.musicCoundownRandomIntervalMin": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Music countdown random interval min",
-    "description": "",
-    "default": 12000,
-    "restart": false,
-    "min": 1,
-    "max": 2400000,
-    "step": 1
-  },
-  "power_environment:config.MUSIC_CONFIG.musicCoundownRandomIntervalMax": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Music countdown random interval max",
-    "description": "",
-    "default": 12000,
-    "restart": false,
-    "min": 1,
-    "max": 2400000,
-    "step": 1
-  },
   "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebug": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Overlay for music in debug",
-    "description": "If using Better F3 use its module config",
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Show music in debug",
+    "description": "Show the current track in the F3 debug overlay.",
     "default": false,
     "restart": false
   },
   "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset": {
-    "page": "Audio",
-    "group": "Music and ambience",
-    "label": "Overlay for music in debug y offset",
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Music debug offset",
     "description": "",
     "default": 0,
     "restart": false,

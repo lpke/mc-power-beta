@@ -43,7 +43,7 @@ public final class MusicUpdateChecks {
         mp3 = Files.readAllBytes(Path.of("menu-update-music/mp3/Test.mp3"));
         MusicRequests.edit(q -> q.tracks.clear());
         AudioSettings next = AudioConfig.copy();
-        next.musicMode = AudioSettings.MusicMode.REPLACE;
+        next.customMusic = AudioSettings.CustomMusic.ONLY;
         next.musicDirectories =
             List.of("menu-update-music/a", "menu-update-music/b", "menu-update-music/mp3");
         next.menuDirectories = List.of();
@@ -100,7 +100,7 @@ public final class MusicUpdateChecks {
                     "music waits for menu exit"));
         playing = (String) state("currentMusic");
         AudioSettings next = AudioConfig.copy();
-        next.musicMode = AudioSettings.MusicMode.ADD;
+        next.customMusic = AudioSettings.CustomMusic.ADD;
         AudioConfig.preview(next);
       }
       case "paused" -> {

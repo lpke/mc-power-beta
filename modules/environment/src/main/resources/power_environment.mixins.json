@@ -23,9 +23,7 @@
   ],
   "client": [
     "client.GameRendererMixin",
-    "client.InGameHudMixin",
-    "client.MinecraftMixin",
-    "client.SoundManagerAccessor"
+    "client.InGameHudMixin"
   ],
   "injectors": {
     "defaultRequire": 1

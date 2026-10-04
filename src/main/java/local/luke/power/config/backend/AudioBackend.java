@@ -38,9 +38,20 @@ public final class AudioBackend implements Backend {
         Setting.Kind.CHOICE,
         new JsonPrimitive(s.musicMode.ordinal()),
         new JsonPrimitive(0),
-        "Vanilla uses the built-in soundtrack. Add mixes your tracks in; Replace uses your tracks."
-            + " An empty library falls back to the built-in soundtrack.",
-        List.of("Vanilla", "Add custom tracks", "Replace soundtrack"));
+        "Vanilla: original 12 tracks. Alpha and Beta: also six creative tracks from Volume Beta. All Minecraft: also three underwater tracks, covering overworld music through 1.14.",
+        List.of("Vanilla", "Alpha and Beta", "All Minecraft"));
+    add("customMusic", "Music library", "Custom music", Setting.Kind.CHOICE,
+        new JsonPrimitive(s.customMusic.ordinal()), new JsonPrimitive(0),
+        "Mix folder tracks with World music, or play only folder tracks. An empty custom library falls back to World music.",
+        List.of("Off", "Add to soundtrack", "Custom only"));
+    add("menuMusic", "Music library", "Menu music", Setting.Kind.CHOICE,
+        new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(0),
+        "Use World music in menus, prefer menu folders, or mix both pools. Empty menu folders fall back to World music.",
+        List.of("World soundtrack", "Menu folders", "Mix both"));
+    add("dimensionMusic", "Music library", "On dimension change", Setting.Kind.CHOICE,
+        new JsonPrimitive(s.dimensionMusic.ordinal()), new JsonPrimitive(0),
+        "Continue music, end only dimension-specific custom tracks, or end any track when using a portal.",
+        List.of("Continue", "Stop dimension tracks", "Stop all"));
     add(
         "musicDirectories",
         "Music library",
@@ -86,12 +97,20 @@ public final class AudioBackend implements Backend {
         new JsonPrimitive(true),
         "Prevents the same track playing twice when another is available.",
         List.of());
-    add("waitBetweenTracks", "Music library", "Wait between tracks", Setting.Kind.BOOLEAN,
-        new JsonPrimitive(s.waitBetweenTracks), new JsonPrimitive(true),
-        "Use the music delay settings between tracks. Off plays tracks back to back, including the queue.", List.of());
-    add("delayQueuedTracks", "Music library", "Wait before queued tracks", Setting.Kind.BOOLEAN,
+    add("delayQueuedTracks", "Music gaps", "Wait before queued tracks", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.delayQueuedTracks), new JsonPrimitive(false),
         "Queued tracks use the same random delay as other music. Requires Wait between tracks.", List.of());
+    add("waitBetweenTracks", "Music gaps", "Wait between tracks", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.waitBetweenTracks), new JsonPrimitive(true),
+        "Use the music delay settings between tracks. Off plays tracks back to back, including the queue.", List.of());
+    for (boolean minimum : new boolean[]{true, false}) {
+      String key = minimum ? "gapMinSeconds" : "gapMaxSeconds";
+      entries.add(new Setting("audio." + key, id(), "Audio", "Music gaps",
+          (minimum ? "Minimum" : "Maximum") + " gap (seconds)",
+          "A random gap within the minimum and maximum is chosen after each track. Zero allows immediate playback.",
+          Setting.Kind.INTEGER, new JsonPrimitive(minimum ? s.gapMinSeconds : s.gapMaxSeconds),
+          new JsonPrimitive(minimum ? 600 : 1200), 0, 86400, 1, List.of(), false));
+    }
     Set<String> sounds = AudioController.sounds(mc);
 
     for (String sound : sounds) {
@@ -189,6 +208,11 @@ public final class AudioBackend implements Backend {
         switch (key) {
           case "master" -> s.master = v.getAsInt();
           case "musicMode" -> s.musicMode = AudioSettings.MusicMode.values()[v.getAsInt()];
+          case "customMusic" -> s.customMusic = AudioSettings.CustomMusic.values()[v.getAsInt()];
+          case "menuMusic" -> s.menuMusic = AudioSettings.MenuMusic.values()[v.getAsInt()];
+          case "dimensionMusic" -> s.dimensionMusic = AudioSettings.DimensionMusic.values()[v.getAsInt()];
+          case "gapMinSeconds" -> s.gapMinSeconds = v.getAsInt();
+          case "gapMaxSeconds" -> s.gapMaxSeconds = v.getAsInt();
           case "recursive" -> s.recursive = v.getAsBoolean();
           case "waitBetweenTracks" -> s.waitBetweenTracks = v.getAsBoolean();
           case "delayQueuedTracks" -> s.delayQueuedTracks = v.getAsBoolean();

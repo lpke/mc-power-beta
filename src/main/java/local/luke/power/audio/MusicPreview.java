@@ -71,7 +71,7 @@ final class MusicPreview {
     track = ""; world = null;
     AudioController.refresh();
     for (String name : resume)
-      if (name.equals("streaming") ? restoreRecords : restoreMusic && !AudioController.rules().disabled())
+      if (name.equals("streaming") ? restoreRecords : restoreMusic)
         system.play(name);
     resume.clear();
     return hadMusic;

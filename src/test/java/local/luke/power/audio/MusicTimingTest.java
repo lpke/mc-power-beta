@@ -17,8 +17,8 @@ class MusicTimingTest {
   @Test void remainingTimeUsesReadableUnitsWithoutClaimingAnImmediateStart() {
     assertEquals("Not playing. Next track shortly.", MusicTiming.status(0));
     assertEquals("Not playing. 1 sec until next track.", MusicTiming.status(1));
-    assertEquals("Not playing. 1 min until next track.", MusicTiming.status(1200));
-    assertEquals("Not playing. 2 mins until next track.", MusicTiming.status(1201));
+    assertEquals("Not playing. 60 sec until next track.", MusicTiming.status(1200));
+    assertEquals("Not playing. 61 sec until next track.", MusicTiming.status(1201));
   }
 
   @Test void oldConfigsAcquireTheNewDefaultsAndNewValuesRoundTrip() {

@@ -123,13 +123,14 @@ track's rotation never deletes its file or queued requests.
 Preview speakers turn yellow while active. Click again to stop the preview;
 music previews resume the prior track afterward. Play/Pause reflects playback state.
 
-Audio combines master, category and individual sound volumes with the existing
-ambient-volume and music-timing settings. Custom music supports OGG, WAV and MUS.
-MP3 is not supported by Beta's sound engine. Dimension and biome tags such as
+Audio combines master, category, individual sound and track volumes. Custom music
+supports OGG, WAV and MUS, with MP3 conversion available in the library. Dimension and biome tags such as
 `theme-nether-specific.ogg` keep their existing behavior.
 
-Choose music folders in the in-game folder browser, then select **Add custom
-tracks** or **Replace soundtrack**. Menu music has its own folder list. Scans are
+Choose a World music set: Vanilla (12 original tracks), Alpha and Beta (18 tracks),
+or All Minecraft (21 overworld tracks through 1.14). Custom music can be off,
+mixed with that set, or used alone. Menu music can use the world soundtrack,
+prefer menu folders, or mix both pools. Scans are
 read-only, run off the game thread, skip malformed headers and symlinks, and have
 file/depth limits. Empty or unavailable replacement libraries fall back to the
 built-in soundtrack. Changes do not move or alter music files.
@@ -143,7 +144,7 @@ Playback controls sit on the left of the toolbar; Queue, Library and Reload sit
 on the right. Queue shows its request count when non-empty and is greyed out without a count when empty.
 Library opens the track list. Clicking the active Queue or Library button closes
 that panel. Back, Escape and the Audio sidebar tab return to settings. Back sits
-before Play/Pause in either music view. Prev and Next have skip icons; narrow
+beside the search field or queue title. Prev and Next have skip icons; narrow
 layouts retain compact icons and wrap the two toolbar groups when needed.
 
 Speaker buttons preview individual sounds, built-in music and custom tracks.
@@ -238,6 +239,18 @@ files in `power-beta-data/music-cache`. Originals are never changed. FFmpeg is a
 optional external executable, not a required mod or Java library. Conversion runs
 in the background, up to 256 files per batch, with a three-minute and 1 GiB output
 limit per file. Cancel stops only the converter process started by the game.
+
+Music gaps contains Wait before queued tracks, Wait between tracks, and the
+minimum/maximum gap in seconds. The default random gap is 600–1200 seconds.
+Turning Wait between tracks off bypasses both natural and queue gaps. Manual
+Play, Prev and Next start immediately. Quiet ends the current track while leaving
+automatic playback enabled. The music volume slider is the single mute control.
+
+The built-in OGG assets are bundled and streamed directly from the JAR. Era and
+folder accordions group the library. The music-note button toggles automatic
+rotation; a red slash marks excluded tracks. Queue rows share the library volume
+and keep all controls on one line. Song names appear in brackets only where they
+differ from the game filename. See [music sources](docs/music-assets.md).
 
 ### Menu preferences
 

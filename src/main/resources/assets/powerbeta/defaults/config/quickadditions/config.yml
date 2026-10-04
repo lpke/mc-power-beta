@@ -39,14 +39,6 @@ ENTITY_SPAWN_MECHANICS_CONFIG:
   MAX_SPAWN_CAPACITY_PASSIVE: 15
   MAX_SPAWN_CAPACITY_SQUID: 5
 MUSIC_CONFIG:
-  stopCurrentBgmOnPortalUse: false
-  stopDimensionSpecificSongOnPortalUse: false
-  disableBackgroundMusic: false
-  mainMenuThemeEnabled: false
-  mainMenuThemeOverridesBGM: false
-  disableDefaultMinecraftBGM: false
-  musicCoundownRandomIntervalMin: 12000
-  musicCoundownRandomIntervalMax: 12000
   overlayForMusicInDebug: false
   overlayForMusicInDebugYOffset: 0
   volumeNetherPortalAmbient: 1.0

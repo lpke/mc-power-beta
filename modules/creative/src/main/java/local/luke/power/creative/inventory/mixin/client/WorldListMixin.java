@@ -33,7 +33,7 @@ public abstract class WorldListMixin {
 		Minecraft minecraft = (Minecraft) FabricLoader.getInstance().getGameInstance();
     if (((local.luke.power.permissions.CheatWorld) meta).power$cheatsEnabled()) {
       int offset = minecraft.textRenderer.getTextWidth(levelName);
-      field_2444.drawTextWithShadow(minecraft.textRenderer, " [Cheats]", x + offset, y + 1, 0xAAAAAA);
+      field_2444.drawTextWithShadow(minecraft.textRenderer, "  [§bCheats§r]", x + offset, y + 1, 0xAAAAAA);
     }
 	}
 }

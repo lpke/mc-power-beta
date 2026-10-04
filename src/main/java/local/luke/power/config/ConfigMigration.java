@@ -210,6 +210,7 @@ public final class ConfigMigration {
     JsonObject fixes=all.getAsJsonObject("power_client_fixes:config");
     if(fixes!=null) for(String key:List.of("enableMojangFixTextOnTitleScreen","enableInventoryChanges","enableBitDepthFix","enableDeathScreenScoreFix","enableCommandKey","enableQuitButton","useResourcesDownloadURL")) fixes.remove(key);
     JsonObject tweaks=all.getAsJsonObject("power_controls:tweaks"); if(tweaks!=null)tweaks.remove("boatsDontBreak");
+    local.luke.power.audio.AudioMigration.upgrade(next);
     return next;
   }
   private static JsonElement rename(JsonElement value,Map<String,String> aliases,java.util.regex.Pattern pattern) {

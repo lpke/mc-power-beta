@@ -21,6 +21,11 @@ public abstract class UiScreen extends Screen {
 
   protected void button(
       String label, int left, int top, int span, int h, int mx, int my, boolean enabled) {
+    button(label, left, top, span, h, mx, my, enabled, -1);
+  }
+
+  protected void button(String label, int left, int top, int span, int h,
+      int mx, int my, boolean enabled, int labelColour) {
     int w = Math.max(10, span);
     boolean hovered = inside(mx, my, left, top, w, h);
     int v = 46 + (enabled ? hovered ? 2 : 1 : 0) * 20;
@@ -40,7 +45,7 @@ public abstract class UiScreen extends Screen {
       dy += sh;
     }
     drawCenteredTextWithShadow(textRenderer, label, left + w / 2, top + (h - 8) / 2,
-        !enabled ? 0xa0a0a0 : hovered ? 0xffffa0 : 0xe0e0e0);
+        !enabled ? 0xa0a0a0 : labelColour >= 0 ? labelColour : hovered ? 0xffffa0 : 0xe0e0e0);
   }
 
   protected void trackButton(String label, boolean previous, int x, int y, int w, int mx, int my) {
@@ -70,6 +75,8 @@ public abstract class UiScreen extends Screen {
     int color = !enabled ? 0xff777777 : active ? 0xffffff55 : 0xffdddddd;
     int cx = x + w / 2, cy = y + 9;
     String[] pixels = switch (icon) {
+      case "music" -> new String[]{"   ######", "   #    #", "   #    #", "   #    #", " ###  ###", "#### ####", " ##   ## "};
+      case "remove" -> new String[]{" #     # ", "  #   #  ", "   # #   ", "    #    ", "   # #   ", "  #   #  ", " #     # "};
       case "play" -> new String[]{"  #      ", "  ###    ", "  #####  ", "  #######", "  #####  ", "  ###    ", "  #      "};
       case "pause" -> new String[]{" ##  ##  ", " ##  ##  ", " ##  ##  ", " ##  ##  ", " ##  ##  ", " ##  ##  ", " ##  ##  "};
       case "reload" -> new String[]{"  ####  #", " #    # #", "#      ##", "#    ####", "#        ", " #    #  ", "  ####   "};
@@ -82,6 +89,12 @@ public abstract class UiScreen extends Screen {
     for (int row = 0; row < pixels.length; row++)
       for (int col = 0; col < pixels[row].length(); col++) if (pixels[row].charAt(col) == '#')
         fill(cx - 4 + col, cy - 4 + row, cx - 3 + col, cy - 3 + row, color);
+  }
+
+  protected void musicToggle(boolean included, int x, int y, int mx, int my, boolean enabled) {
+    iconButton("music", x, y, 20, mx, my, enabled);
+    if (!included) for (int d = 0; d < 10; d++)
+      fill(x + 5 + d, y + 13 - d, x + 7 + d, y + 14 - d, 0xffff5555);
   }
 
   void scrollbar(int x, int top, int height, int y, int thumb, boolean active) {

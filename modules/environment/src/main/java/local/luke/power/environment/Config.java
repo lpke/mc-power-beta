@@ -262,53 +262,6 @@ public class Config {
 
     public static class MusicConfig {
         @ConfigEntry(
-                name = "Dimension Change Stops Background Music",
-                description = "Using portals stops any active BGM"
-        )
-        public Boolean stopCurrentBgmOnPortalUse = true;
-
-        @ConfigEntry(
-                name = "Dimension Change Stops Level Specific Songs",
-                description = "Using portals stops dimension specific songs"
-        )
-        public Boolean stopDimensionSpecificSongOnPortalUse = true;
-
-        @ConfigEntry(
-                name = "Disable Background Music",
-                description = "Disables randomly playing background music"
-        )
-        public Boolean disableBackgroundMusic = false;
-
-        @ConfigEntry(
-                name = "Main Menu Theme Enabled",
-                description = "Plays 'mainmenu' song file if one is found"
-        )
-        public Boolean mainMenuThemeEnabled = true;
-
-        @ConfigEntry(name = "Main Menu Theme Overrides Background Music")
-        public Boolean mainMenuThemeOverridesBGM = false;
-
-        @ConfigEntry(
-                name = "Minecraft Default Background Music Disabled",
-                description = "Exclude the built-in soundtrack from background playback"
-        )
-        public Boolean disableDefaultMinecraftBGM = false;
-
-        @ConfigEntry(
-                name = "Music Countdown Random Interval Min",
-                description = "Default Value: 12000",
-                maxLength = Integer.MAX_VALUE
-        )
-        public Integer musicCoundownRandomIntervalMin = 12000;
-
-        @ConfigEntry(
-                name = "Music Countdown Random Interval Max",
-                description = "Default Value: 12000",
-                maxLength = Integer.MAX_VALUE
-        )
-        public Integer musicCoundownRandomIntervalMax = 12000;
-
-        @ConfigEntry(
                 name = "Overlay For Music In Debug Enabled",
                 description = "If using Better F3 use its module config"
         )

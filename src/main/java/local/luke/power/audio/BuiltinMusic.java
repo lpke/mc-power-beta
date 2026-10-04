@@ -1,20 +1,48 @@
 package local.luke.power.audio;
 
-import java.util.Map;
+import com.google.gson.*;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
-/** C418's published track titles; filenames remain the stable setting/queue identifiers. */
+/** Pinned game asset metadata; filenames remain stable setting and queue identifiers. */
 public final class BuiltinMusic {
   private BuiltinMusic() {}
-  private static final Map<String, String> TITLES = Map.ofEntries(
-      Map.entry("calm1", "Minecraft"), Map.entry("calm2", "Clark"), Map.entry("calm3", "Sweden"),
-      Map.entry("hal1", "Subwoofer Lullaby"), Map.entry("hal2", "Living Mice"),
-      Map.entry("hal3", "Haggstrom"), Map.entry("hal4", "Danny"),
-      Map.entry("nuance1", "Key"), Map.entry("nuance2", "Oxygène"),
-      Map.entry("piano1", "Dry Hands"), Map.entry("piano2", "Wet Hands"), Map.entry("piano3", "Mice on Venus"));
+  public record Track(String file, String title, String era, String sha1, int size) {
+    public String id() { return "music:" + file; }
+    public boolean included(AudioSettings.MusicMode mode) {
+      return era.equals("Alpha") || mode == AudioSettings.MusicMode.ALL_MINECRAFT
+          || mode == AudioSettings.MusicMode.ALPHA_BETA && era.equals("Beta");
+    }
+  }
+  public static final List<Track> TRACKS = load();
+  private static List<Track> load() {
+    try (var in = BuiltinMusic.class.getResourceAsStream("/assets/powerbeta/music/manifest.json")) {
+      if (in == null) throw new IOException("Missing soundtrack manifest");
+      JsonArray values = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8))
+          .getAsJsonObject().getAsJsonArray("tracks");
+      List<Track> tracks = new ArrayList<>();
+      Set<String> names = new HashSet<>();
+      for (JsonElement value : values) {
+        JsonObject t = value.getAsJsonObject();
+        Track track = new Track(t.get("file").getAsString(), t.get("title").getAsString(),
+            t.get("era").getAsString(), t.get("sha1").getAsString(), t.get("size").getAsInt());
+        if (!track.file.matches("[a-z0-9_]+\\.ogg") || !names.add(track.file))
+          throw new IOException("Invalid soundtrack manifest");
+        tracks.add(track);
+      }
+      return List.copyOf(tracks);
+    } catch (IOException | RuntimeException e) { throw new ExceptionInInitializerError(e); }
+  }
+
+  public static Track find(String id) {
+    String stem = id.replaceFirst("^music:", "").replaceFirst("\\.[^.]+$", "");
+    return TRACKS.stream().filter(t -> t.file.equals(stem + ".ogg")).findFirst().orElse(null);
+  }
 
   public static String label(String filename) {
-    int dot = filename.lastIndexOf('.');
-    String title = TITLES.get(dot < 0 ? filename : filename.substring(0, dot));
-    return title == null ? filename : filename + " (" + title + ")";
+    Track track = find(filename);
+    String stem = filename.replaceFirst("\\.[^.]+$", "").replace('_', ' ');
+    return track == null || stem.equalsIgnoreCase(track.title) ? filename : filename + " (" + track.title + ")";
   }
 }

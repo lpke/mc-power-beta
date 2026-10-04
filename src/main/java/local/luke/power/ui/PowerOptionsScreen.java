@@ -39,10 +39,11 @@ public final class PowerOptionsScreen extends UiScreen {
   private record Row(String group, Setting setting, int y, int height) {}
 
   private record View(String page, double scroll, double sideScroll, String query,
-      boolean changedOnly, List<String> conflicts, List<String> related, Set<String> collapsed,
+      boolean changedOnly, List<String> conflicts, List<String> related, String relatedLabel, Set<String> collapsed,
       boolean showDisabled, int selected, boolean libraryOpen, MusicLibraryScreen.State library) {}
   private final Deque<View> history = new ArrayDeque<>();
   private List<String> relatedIds = List.of();
+  private String relatedLabel = "";
 
   private static View rememberedView;
   private static List<View> rememberedHistory = List.of();
@@ -133,7 +134,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private View view() {
     return new View(page, scroll, sideScroll, search.text(), changedOnly, conflictIds,
-        relatedIds, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state());
+        relatedIds, relatedLabel, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state());
   }
 
   private void rememberPosition() {
@@ -191,7 +192,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private void restore(View view) {
     page = view.page; scroll = view.scroll; sideScroll = view.sideScroll;
     search.setText(view.query); search.selectAll(); search.focused = false;
-    changedOnly = view.changedOnly; conflictIds = view.conflicts; relatedIds = view.related;
+    changedOnly = view.changedOnly; conflictIds = view.conflicts; relatedIds = view.related; relatedLabel = view.relatedLabel;
     collapsed.clear(); collapsed.addAll(view.collapsed);
     showDisabled = view.showDisabled; selected = view.selected;
     libraryOpen = view.libraryOpen; libraryState = view.library;
@@ -204,6 +205,7 @@ public final class PowerOptionsScreen extends UiScreen {
     page = "Controls";
     libraryOpen = false;
     relatedIds = bindings.stream().map(s -> s.id).toList();
+    relatedLabel = setting.label;
     conflictIds = List.of(); changedOnly = false; search.setText(""); scroll = 0;
     layout();
   }
@@ -297,7 +299,7 @@ public final class PowerOptionsScreen extends UiScreen {
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
     }
     for (Setting s : candidates) {
-      if (query.isEmpty() && !changedOnly && listed.isEmpty() && (s.group.equals("Track rotation") || s.id.startsWith("audio.sound.music:custom/"))) continue;
+      if (query.isEmpty() && !changedOnly && listed.isEmpty() && (s.group.equals("Track rotation") || s.id.startsWith("audio.sound.music:"))) continue;
       if (listed.isEmpty() && s.kind == Setting.Kind.KEY && !showDisabled && !ControlLinks.enabled(session, s)) continue;
       if ((!changedOnly || s.changed()) && (!listed.isEmpty() || (query.isEmpty()
           ? changedOnly || s.page.equals(page)
@@ -306,7 +308,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (audio()) {
       Map<String, List<Setting>> ordered = new LinkedHashMap<>();
-      for (String group : List.of("Volume", "Music library", "Sound categories", "Extra sounds", "Music and ambience", "Individual sounds", "Individual music tracks"))
+      for (String group : List.of("Volume", "Music library", "Music gaps", "Sound categories", "Extra sounds", "Music and ambience", "Individual sounds", "Individual music tracks"))
         if (groups.containsKey(group)) ordered.put(group, groups.get(group));
       groups.forEach(ordered::putIfAbsent);
       groups = ordered;
@@ -848,7 +850,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (libraryVisible() || !history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
-        !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls" : "Related settings"
+        !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls for \"" + relatedLabel + "\"" : "Related settings"
         : changedOnly ? "Search changed settings..." : "Search all settings...");
     if (canClear()) button("x", right() - 32, 27, 18, 20, mx, my, true);
     if (audio()) {
@@ -901,17 +903,20 @@ public final class PowerOptionsScreen extends UiScreen {
           s.changed() ? 0xffdd88 : 0xc4c4c4);
       if (s.restart) text("*", left() + 6 + textRenderer.getWidth(label),
           y + (narrow ? 3 : 8), 0xe8a0a0);
+      List<Setting> conflicts = conflicts(s);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
       int valueEnd = right() - (numeric ? 62 : 36);
       if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my,
           (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
       else if (editable && ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my);
+      else if (s.kind == Setting.Kind.KEY && editable) button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
+          controlLeft, cy, valueEnd - controlLeft, 18, mx, my, true,
+          local.luke.power.input.Chord.decode(s.value.getAsInt()).key() == 0 ? 0x999999 : !conflicts.isEmpty() ? 0xff7777 : -1);
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, my, editable);
       if (numeric) button("...", right() - 60, cy, 22, 18, mx, my, editable);
       button("R", right() - 34, cy, 20, 18, mx, my, editable && !s.value.equals(s.defaultValue));
       if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
-      List<Setting> conflicts = conflicts(s);
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;

@@ -48,27 +48,28 @@ public final class AudioLayoutChecks {
         }
         MenuPreferences.update(v -> v.autoApply=false);
         MusicRequests.edit(q -> q.tracks.clear());
-        rules(new MusicRules(false,false,true,true,12000,12000,1,1,1,1));
+        rules(new MusicRules(true,true,12000,12000,1,1,1,1));
         AudioSettings next=AudioConfig.copy();next.musicDirectories=new ArrayList<>(FOLDERS);
         next.menuDirectories=new ArrayList<>(List.of("audio-layout/menu"));
+        next.menuMusic=AudioSettings.MenuMusic.CUSTOM;
         next.disabledMusicDirectories.clear();next.disabledMenuDirectories.clear();next.disabledTracks.clear();
-        next.musicMode=AudioSettings.MusicMode.VANILLA;
+        next.musicMode=AudioSettings.MusicMode.VANILLA;next.customMusic=AudioSettings.CustomMusic.OFF;
         AudioConfig.preview(next);AudioController.pause();
       }
       case "checks" -> {
         check(AudioController.customTracks().size()==3,"scan not finished");
         // A completed settings-triggered scan refreshes these rules from the environment backend.
-        rules(new MusicRules(false,false,true,true,12000,12000,1,1,1,1));
+        rules(new MusicRules(true,true,12000,12000,1,1,1,1));
         String a=id("/a/"),b=id("/b/"),menu=id("/menu/");
         var vanilla=AudioController.activeMusic(mc);
         test("Active tracks shares soundtrack rules but retains individually excluded tracks", () -> {
           check(!vanilla.isEmpty() && vanilla.stream().noneMatch(s -> s.startsWith("music:custom/")),"Vanilla includes custom");
-          var next=AudioConfig.copy();next.musicMode=AudioSettings.MusicMode.ADD;
+          var next=AudioConfig.copy();next.customMusic=AudioSettings.CustomMusic.ADD;
           next.disabledTracks.add(a);AudioConfig.preview(next);
           check(AudioController.activeMusic(mc).containsAll(List.of(a,b)),"Add missing tracks");
           check(!AudioController.activeMusic(mc).contains(menu),"menu-only track included in world");
           check(AudioController.activeMusic(mc)==AudioController.activeMusic(mc),"pool not cached");
-          next.musicMode=AudioSettings.MusicMode.REPLACE;AudioConfig.preview(next);
+          next.customMusic=AudioSettings.CustomMusic.ONLY;AudioConfig.preview(next);
           check(AudioController.activeMusic(mc).equals(Set.of(a,b)),"Replace keeps vanilla");
           for(int i=0;i<8;i++) check(AudioController.trackId(AudioController.choose(List.of())).equals(b),"excluded track enters natural rotation");
         });
@@ -130,14 +131,14 @@ public final class AudioLayoutChecks {
           musicClick(options,AudioToolbar.Action.QUEUE);
           check(mc.currentScreen==options && library.state().queue(),"Queue shortcut opened wrong view");
           options.render(-1,-1,0);
-          check((int)call(library,"rowHeight")==44,"queue volume row missing");
+          check((int)call(library,"rowHeight")==24,"queue is not one line");
           check((int)call(library,"right")-(int)call(library,"filterX")<=82,"Clear queue stretched");
           click(options,indexed(library,"queueX",1)+3,(int)call(library,"listTop")+8);
           check(MusicRequests.tracks().equals(List.of(b,a)),"inline down arrow missed");
           options.render(-1,-1,0);
           MusicRequests.edit(q -> q.tracks.remove(0));
           int oldVolume=AudioController.trackVolume(a);
-          click(options,(int)call(library,"volumeX")+4,(int)call(library,"listTop")+29);
+          click(options,(int)call(library,"volumeX")+4,(int)call(library,"listTop")+8);
           check(AudioController.trackVolume(a)==oldVolume,"stale volume click changed another track");
           click(options,indexed(library,"queueX",3)+3,(int)call(library,"listTop")+8);
           check(MusicRequests.tracks().equals(List.of(a)),"stale click removed different request");

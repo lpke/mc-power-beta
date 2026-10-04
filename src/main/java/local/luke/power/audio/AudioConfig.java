@@ -39,13 +39,16 @@ public final class AudioConfig {
     next.validate();
     boolean library = !current.musicDirectories.equals(next.musicDirectories)
         || !current.menuDirectories.equals(next.menuDirectories) || current.recursive != next.recursive;
-    boolean mode = current.musicMode != next.musicMode;
+    boolean mode = current.musicMode != next.musicMode || current.customMusic != next.customMusic
+        || current.menuMusic != next.menuMusic;
+    boolean timing = current.gapMinSeconds != next.gapMinSeconds || current.gapMaxSeconds != next.gapMaxSeconds;
     boolean folders = !current.disabledMusicDirectories.equals(next.disabledMusicDirectories)
         || !current.disabledMenuDirectories.equals(next.disabledMenuDirectories);
     current = Catalog.JSON.fromJson(Catalog.JSON.toJson(next), AudioSettings.class);
     if (library) AudioController.settingsChanged();
     if (mode || folders) AudioController.rotationChanged();
-    AudioController.refresh();
+    AudioController.rulesChanged();
+    if (timing) AudioController.resetDelay();
   }
 
   public static void save(AudioSettings next) throws IOException {

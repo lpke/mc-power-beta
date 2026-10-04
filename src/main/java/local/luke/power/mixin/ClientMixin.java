@@ -8,6 +8,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class ClientMixin {
+  @Inject(method = "method_2139", at = @At("HEAD"))
+  private void power$dimensionMusic(CallbackInfo ci) {
+    local.luke.power.audio.AudioController.changingDimension();
+  }
+
   @Inject(method = "tick", at = @At("HEAD"))
   private void power$bindings(CallbackInfo ci) {
     Minecraft mc = (Minecraft)(Object)this;

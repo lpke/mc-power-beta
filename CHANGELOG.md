@@ -1,5 +1,31 @@
 # Changelog
 
+## Soundtrack library and music gaps, 2026-10-05
+
+- Bundle all 21 overworld tracks available through Minecraft 1.14: the original
+  12, six Volume Beta creative tracks, and three Update Aquatic tracks. Add
+  Alpha and Beta and All Minecraft soundtrack choices.
+- Separate custom-track mixing from the built-in soundtrack selection. Merge
+  menu playback choices and portal music behavior into one control each. Remove
+  redundant background-music disable switches; music volume zero mutes music.
+- Group all delay controls under Music gaps, immediately after Music library.
+  Show the countdown and minimum/maximum gaps in seconds. Fix the former maximum
+  setting, which was actually a random addition to the minimum.
+- Preserve existing preferences through a backed-up, one-time migration. Remove
+  unused music mixins and the second config-save timer controller.
+- Group library tracks under collapsible era and folder headings. Show filenames
+  with song titles only when different. Replace Included/Excluded text with a
+  music-note icon and red strike-through. Keep queue volume and actions inline.
+- Remove individual music sliders from the base Audio page. Keep track volume
+  and rotation controls together in the library. Move music debug display
+  controls to Interface.
+- Prevent blank Playing labels during asynchronous audio transitions.
+- Make Nether portal transfers immediate in creative and spectator while
+  preserving survival warm-up, portal cooldowns and StationAPI destination setup.
+- Include the setting name in related-controls search placeholders. Colour
+  unbound keys grey and conflicting keys red. Add a second space before the
+  world-list Cheats suffix and colour Cheats bright blue.
+
 ## Audio controls and effective settings, 2026-10-04
 
 - Show Off or Disabled for cheats-locked settings while retaining the stored

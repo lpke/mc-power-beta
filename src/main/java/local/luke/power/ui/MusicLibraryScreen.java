@@ -11,7 +11,10 @@ import org.lwjgl.input.Mouse;
 /** Embedded Audio panel. Edits belong to the surrounding Options session. */
 public final class MusicLibraryScreen extends UiScreen {
   public record State(
-      boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder) {
+      boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed) {
+    public State(boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder) {
+      this(queue, folder, query, trackScroll, queueScroll, lastFolder, Set.of());
+    }
     public State(boolean queue, String folder, String query, int trackScroll, int queueScroll) {
       this(queue, folder, query, trackScroll, queueScroll, "");
     }
@@ -21,6 +24,11 @@ public final class MusicLibraryScreen extends UiScreen {
   private final TextInput search = new TextInput("", 128);
   private final Map<String, Setting> settings = new HashMap<>();
   private List<String> tracks = List.of(), folders = List.of();
+  private record Row(String group, String label, String id, int index, int y, int height) {}
+  private final Set<String> collapsed = new HashSet<>();
+  private List<Row> rows = List.of();
+  private int contentHeight;
+
   private final Map<String, MusicLibrary.Track> custom = new HashMap<>();
   private final ScrollBar scrollbar = new ScrollBar();
   private int conversionRevision, conversionTicks, trackScroll, queueScroll;
@@ -43,11 +51,12 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public State state() {
-    return new State(queue, folder, search.text(), trackScroll, queueScroll, lastFolder);
+    return new State(queue, folder, search.text(), trackScroll, queueScroll, lastFolder, Set.copyOf(collapsed));
   }
 
   public void restore(State state) {
     if (state == null) return;
+    collapsed.clear(); collapsed.addAll(state.collapsed);
     queue = state.queue;
     folder = state.folder;
     lastFolder = state.lastFolder;
@@ -85,16 +94,11 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int rowHeight() {
-    return 44;
+    return queue ? 24 : 44;
   }
 
   private int queueWidth(int action) {
-    return switch (action) {
-      case 0, 1 -> narrow() ? 14 : 20;
-      case 2 -> narrow() ? 36 : 48;
-      case 3 -> narrow() ? 42 : 54;
-      default -> throw new IllegalArgumentException("Unknown queue action");
-    };
+    return narrow() ? 14 : 20;
   }
 
   private int queueX(int action) {
@@ -128,8 +132,9 @@ public final class MusicLibraryScreen extends UiScreen {
     folder = "";
     search.setText("");
     rebuild();
-    int index = tracks.indexOf(id);
-    if (index >= 0) scroll(index * rowHeight());
+    collapsed.remove(group(id));
+    rebuildRows();
+    rows.stream().filter(row -> id.equals(row.id)).findFirst().ifPresent(row -> scroll(row.y));
   }
 
   private boolean folderSelected() {
@@ -156,7 +161,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private void scroll(int value) {
     int bounded =
         Math.max(
-            0, Math.min(value, Math.max(0, tracks.size() * rowHeight() - (bottom() - listTop()))));
+            0, Math.min(value, Math.max(0, contentHeight - (bottom() - listTop()))));
     if (queue) queueScroll = bounded;
     else trackScroll = bounded;
   }
@@ -166,11 +171,11 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int volumeX() {
-    return left() + 64;
+    return queue ? volumeEnd() - Math.max(44, Math.min(100, span() / 4)) : left() + 24;
   }
 
   private int volumeEnd() {
-    return right() - (queue || narrow() ? 26 : 144);
+    return queue ? queueX(0) - 24 : right() - (narrow() ? 26 : 144);
   }
 
   private int actionY(int rowY) {
@@ -179,7 +184,7 @@ public final class MusicLibraryScreen extends UiScreen {
 
   private ScrollBar.Track track() {
     return new ScrollBar.Track(
-        right() + 5, listTop(), bottom() - listTop(), tracks.size() * rowHeight(), scroll());
+        right() + 5, listTop(), bottom() - listTop(), contentHeight, scroll());
   }
 
   public boolean hasQuery() {
@@ -259,7 +264,43 @@ public final class MusicLibraryScreen extends UiScreen {
                     Comparator.comparingInt((String id) -> scores.get(id))
                         .thenComparing(AudioController::musicLabel, String.CASE_INSENSITIVE_ORDER))
                 .toList();
+    rebuildRows();
     scroll(scroll());
+  }
+
+  private String group(String id) {
+    var track = custom.get(id);
+    if (track != null) return "folder:" + Objects.toString(track.path().getParent(), "Custom tracks");
+    var builtin = BuiltinMusic.find(id);
+    return builtin == null ? "Other tracks" : builtin.era();
+  }
+
+  private int groupOrder(String group) {
+    return switch (group) { case "Alpha" -> 0; case "Beta" -> 1; case "Update Aquatic" -> 2; default -> 3; };
+  }
+
+  private void rebuildRows() {
+    List<Row> result = new ArrayList<>();
+    int y = 0;
+    if (queue) {
+      for (int i = 0; i < tracks.size(); i++, y += 24)
+        result.add(new Row("", "", tracks.get(i), i, y, 24));
+    } else {
+      Map<String, List<String>> groups = new TreeMap<>(Comparator.comparingInt(this::groupOrder)
+          .thenComparing(String.CASE_INSENSITIVE_ORDER).thenComparing(Comparator.naturalOrder()));
+      for (String id : tracks) groups.computeIfAbsent(group(id), k -> new ArrayList<>()).add(id);
+      for (var entry : groups.entrySet()) {
+        String key = entry.getKey();
+        String label = key.startsWith("folder:") ? Objects.toString(Path.of(key.substring(7)).getFileName(), key.substring(7)) : key;
+        result.add(new Row(key, label, null, -1, y, 24)); y += 24;
+        if (collapsed.contains(key) && search.text().isBlank()) continue;
+        for (String id : entry.getValue()) {
+          result.add(new Row(key, label, id, -1, y, 44)); y += 44;
+        }
+      }
+    }
+    rows = List.copyOf(result);
+    contentHeight = y;
   }
 
   private boolean inFolder(String id) {
@@ -376,21 +417,27 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     if (y < listTop() || y >= bottom() || x < left() || x >= right()) return;
-    int index = (y - listTop() + scroll()) / rowHeight();
-    if (index < 0 || index >= tracks.size()) return;
+    Row clicked = rows.stream().filter(row -> y - listTop() + scroll() >= row.y
+        && y - listTop() + scroll() < row.y + row.height).findFirst().orElse(null);
+    if (clicked == null) return;
+    if (clicked.id == null) {
+      if (!collapsed.remove(clicked.group)) collapsed.add(clicked.group);
+      rebuildRows(); scroll(scroll()); return;
+    }
+    int index = clicked.index;
     if (queue && !renderedQueue.equals(MusicRequests.tracks())) {
       rebuild();
       error = "Queue changed. Select the track again.";
       return;
     }
-    String id = tracks.get(index);
-    int rowY = listTop() + index * rowHeight() - scroll();
+    String id = clicked.id;
+    int rowY = listTop() + clicked.y - scroll();
     Setting volume = settings.get("audio.sound." + id);
-    int volumeY = rowY + (queue ? 24 : 19);
+    int volumeY = rowY + (queue ? 3 : 19);
     if (volume != null && inside(x, y, volumeX(), volumeY, volumeEnd() - volumeX(), 18) && b == 0) {
       dragging = volume; slide(x); return;
     }
-    if (volume != null && inside(x, y, volumeEnd() + 4, volumeY, 22, 18)) {
+    if (volume != null && inside(x, y, volumeEnd() + 2, volumeY, 20, 18)) {
       click(); minecraft.setScreen(new ValueScreen(parent, volume)); return;
     }
     if (queue) {
@@ -410,7 +457,7 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     Setting enabled = settings.get("audio.trackEnabled." + id);
-    if (inside(x, y, left(), rowY + 19, 60, 18) && enabled != null) {
+    if (inside(x, y, left(), rowY + 19, 20, 18) && enabled != null) {
       click();
       enabled.cycle(1);
       parent.changed(enabled);
@@ -470,15 +517,24 @@ public final class MusicLibraryScreen extends UiScreen {
     }
     if (queue) renderedQueue = List.copyOf(tracks);
     clip(left() - 2, listTop(), span() + 4, Math.max(0, bottom() - listTop()));
-    for (int i = 0; i < tracks.size(); i++) {
-      int y = listTop() + i * rowHeight() - scroll();
-      if (y + rowHeight() <= listTop() || y >= bottom()) continue;
-      String id = tracks.get(i);
+    for (Row row : rows) {
+      int y = listTop() + row.y - scroll();
+      if (y + row.height <= listTop() || y >= bottom()) continue;
+      if (row.id == null) {
+        boolean closed = collapsed.contains(row.group) && search.text().isBlank();
+        text((closed ? "> " : "v ") + fit(row.label, span() - 16), left() + 2, y + 8, 0xffffff);
+        fill(left(), y + 21, right(), y + 22, 0x50555555);
+        if (inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom())
+          tip = row.group.startsWith("folder:") ? row.group.substring(7) : row.label + " soundtrack";
+        continue;
+      }
+      int i = row.index;
+      String id = row.id;
       boolean hover =
           inside(mx, my, left(), y, span(), rowHeight()) && my >= listTop() && my < bottom();
       if (hover) fill(left() - 2, y, right() + 2, y + rowHeight() - 1, 0x60000000);
       text(
-          fit((queue ? (i + 1) + ". " : "") + AudioController.musicLabel(id), queue ? queueX(0) - left() - 8 : span() - (narrow() ? 122 : 4)),
+          fit((queue ? (i + 1) + ". " : "") + AudioController.musicLabel(id), queue ? volumeX() - left() - 8 : span() - (narrow() ? 122 : 4)),
           left() + 2,
           y + (queue ? 8 : 4),
           playable(id) ? 0xdddddd : 0xffbb77);
@@ -487,16 +543,9 @@ public final class MusicLibraryScreen extends UiScreen {
       if (queue) {
         iconButton("up", queueX(0), y + 3, queueWidth(0), mx, my, i > 0);
         iconButton("down", queueX(1), y + 3, queueWidth(1), mx, my, i + 1 < tracks.size());
-        button(
-            AudioController.playingTrack(id) ? "Pause" : "Play",
-            queueX(2),
-            y + 3,
-            queueWidth(2),
-            18,
-            mx,
-            my,
-            playable(id));
-        button("Remove", queueX(3), y + 3, queueWidth(3), 18, mx, my, true);
+        iconButton(AudioController.playingTrack(id) ? "pause" : "play", queueX(2), y + 3,
+            queueWidth(2), mx, my, playable(id));
+        iconButton("remove", queueX(3), y + 3, queueWidth(3), mx, my, true);
         if (hover && my >= y + 3 && my < y + 21)
           tip =
               mx >= queueX(3)
@@ -505,23 +554,14 @@ public final class MusicLibraryScreen extends UiScreen {
                       ? "Play or pause this track"
                       : mx >= queueX(1) ? "Move down" : mx >= queueX(0) ? "Move up" : tip;
         Setting volume = settings.get("audio.sound." + id);
-        text("Volume", left() + 2, y + 29, 0xaaaaaa);
-        if (volume != null) slider(volume.display() + "%", volumeX(), y + 24,
+        if (volume != null) slider(volume.display() + "%", volumeX(), y + 3,
             volumeEnd() - volumeX(), mx, my, volume.value.getAsDouble() / 100);
-        button("...", volumeEnd() + 4, y + 24, 22, 18, mx, my, volume != null);
-        if (hover && my >= y + 24) tip = "Track volume; music and master volumes also apply.";
+        button("...", volumeEnd() + 2, y + 3, 20, 18, mx, my, volume != null);
+        if (hover && mx >= volumeX() && mx < queueX(0)) tip = "Track volume; music and master volumes also apply.";
       } else {
         Setting enabled = settings.get("audio.trackEnabled." + id),
             volume = settings.get("audio.sound." + id);
-        button(
-            enabled != null && enabled.value.getAsBoolean() ? "Included" : "Excluded",
-            left(),
-            y + 19,
-            60,
-            18,
-            mx,
-            my,
-            enabled != null);
+        musicToggle(enabled != null && enabled.value.getAsBoolean(), left(), y + 19, mx, my, enabled != null);
         if (volume != null)
           slider(
               volume.display() + "%",
@@ -531,7 +571,7 @@ public final class MusicLibraryScreen extends UiScreen {
               mx,
               my,
               volume.value.getAsDouble() / 100);
-        button("...", volumeEnd() + 4, y + 19, 22, 18, mx, my, volume != null);
+        button("...", volumeEnd() + 2, y + 19, 20, 18, mx, my, volume != null);
         iconButton(
             "speaker",
             right() - 116,
@@ -552,11 +592,11 @@ public final class MusicLibraryScreen extends UiScreen {
             playable(id));
         button("Queue", right() - 46, actionY(y), 46, 18, mx, my, true);
         if (hover) {
-          if (inside(mx, my, left(), y + 19, 60, 18))
+          if (inside(mx, my, left(), y + 19, 20, 18))
             tip = "Include in automatic rotation. Preview and queue work even when excluded.";
           else if (inside(mx, my, volumeX(), y + 19, volumeEnd() - volumeX(), 18))
             tip = "Track volume; music and master volumes also apply.";
-          else if (inside(mx, my, volumeEnd() + 4, y + 19, 22, 18)) tip = "Enter an exact volume";
+          else if (inside(mx, my, volumeEnd() + 2, y + 19, 20, 18)) tip = "Enter an exact volume";
           else if (my >= actionY(y) && my < actionY(y) + 18 && mx >= right() - 116)
             tip =
                 mx < right() - 96

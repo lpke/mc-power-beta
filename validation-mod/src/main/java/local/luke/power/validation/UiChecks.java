@@ -65,16 +65,14 @@ public final class UiChecks {
       check(!mc.field_2768.field_1175.field_1137.equals("Default"), "base pack not previewed");
       check(Arrays.equals(options, Files.readAllBytes(local.luke.power.storage.PowerConfig.path())), "pack preview saved options");
     });
-    test("legacy soundtrack toggle filters playback immediately", () -> {
-      Setting toggle = find(s.session(), "power_environment:config.MUSIC_CONFIG.disableDefaultMinecraftBGM");
-      toggle.value = new JsonPrimitive(true); s.changed(toggle);
-      check(local.luke.power.audio.AudioController.choose(java.util.List.of(
-          new net.minecraft.class_267("calm1.ogg", new java.net.URL("file:/tmp/music.ogg")))) == null,
-          "disabled soundtrack remains eligible");
-      toggle.value = new JsonPrimitive(false); s.changed(toggle);
-      check(local.luke.power.audio.AudioController.choose(java.util.List.of(
-          new net.minecraft.class_267("calm1.ogg", new java.net.URL("file:/tmp/music.ogg")))) != null,
-          "soundtrack needs restart to re-enable");
+    test("soundtrack selection applies without reopening Options", () -> {
+      Setting mode = find(s.session(), "audio.musicMode");
+      mode.value = new JsonPrimitive(2); s.changed(mode);
+      check(local.luke.power.audio.AudioConfig.current().musicMode == local.luke.power.audio.AudioSettings.MusicMode.ALL_MINECRAFT,
+          "soundtrack mode was not live");
+      mode.value = new JsonPrimitive(0); s.changed(mode);
+      check(local.luke.power.audio.AudioConfig.current().musicMode == local.luke.power.audio.AudioSettings.MusicMode.VANILLA,
+          "soundtrack needs restart to restore");
     });
     test("changes filter includes only changed values", () -> {
       field(s, "changedOnly", true); call(s,"layout");

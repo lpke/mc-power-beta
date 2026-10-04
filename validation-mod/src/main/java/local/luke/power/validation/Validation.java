@@ -50,6 +50,7 @@ public final class Validation {
       if (command.equals("cheats-creation")) CheatsChecks.creation(mc);
       else if (command.equals("cheats")) CheatsChecks.run(mc);
       else if (command.equals("modern-commands")) ModernCommandChecks.run(mc);
+      else if (command.startsWith("music-eras-")) MusicErasChecks.run(mc,command.substring(11));
       else if (command.startsWith("audio-polish-")) AudioPolishChecks.run(mc,command.substring(13));
       else if (command.startsWith("audio-layout-")) AudioLayoutChecks.run(mc,command.substring(13));
       else if (command.equals("fog-array")) FogArrayChecks.run(mc);
@@ -271,10 +272,10 @@ public final class Validation {
         "legacy portal stop requests are consumed",
         () -> {
           Field stop =
-              Class.forName("local.luke.power.music_api.ZastavkaHelper")
+              Class.forName("local.luke.power.music_api.MusicState")
                   .getField("cancelCurrentBGM");
           stop.setBoolean(null, true);
-          AudioController.blockBackground();
+          AudioController.tick(mc);
           check(!stop.getBoolean(null), "Request not consumed");
         });
     try {
@@ -311,7 +312,7 @@ public final class Validation {
       volumeBefore = mc.options.musicVolume;
       AudioSettings s = AudioConfig.copy();
       s.musicDirectories = List.of("validation-music");
-      s.musicMode = AudioSettings.MusicMode.REPLACE;
+      s.customMusic = AudioSettings.CustomMusic.ONLY;
       s.master = 100;
       s.shuffle = false;
       s.sounds.put("music:Test song été.wav", 50);
@@ -363,7 +364,7 @@ public final class Validation {
           "music resumes without replacing stream",
           () -> check(system.playing("BgMusic"), "Resume ignored"));
       AudioSettings s = AudioConfig.copy();
-      s.musicMode = AudioSettings.MusicMode.ADD;
+      s.customMusic = AudioSettings.CustomMusic.ADD;
       AudioConfig.save(s);
     } else if (action.equals("add")) {
       var pool = ((SoundManagerAccessor) mc.soundManager).power$music();
@@ -378,7 +379,7 @@ public final class Validation {
           "add mode retains every native and custom track",
           () -> check(found.size() == nativeTracks.size() + 2, "Only " + found.size()));
       AudioSettings s = AudioConfig.copy();
-      s.musicMode = AudioSettings.MusicMode.REPLACE;
+      s.customMusic = AudioSettings.CustomMusic.ONLY;
       s.musicDirectories = List.of("missing-validation-folder");
       AudioConfig.save(s);
     } else if (action.equals("fallback")) {

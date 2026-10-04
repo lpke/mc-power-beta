@@ -5,10 +5,17 @@ import java.util.*;
 public final class AudioSettings {
   public enum MusicMode {
     VANILLA,
-    ADD,
-    REPLACE
+    ALPHA_BETA,
+    ALL_MINECRAFT
   }
 
+  public enum CustomMusic { OFF, ADD, ONLY }
+  public enum MenuMusic { WORLD, CUSTOM, MIX }
+  public enum DimensionMusic { CONTINUE, STOP_SPECIFIC, STOP_ALL }
+  public CustomMusic customMusic = CustomMusic.OFF;
+  public MenuMusic menuMusic = MenuMusic.WORLD;
+  public DimensionMusic dimensionMusic = DimensionMusic.CONTINUE;
+  public int gapMinSeconds = 600, gapMaxSeconds = 1200;
   public int master = 100;
   public Map<String, Integer> categories = new LinkedHashMap<>();
   public Map<String, Integer> sounds = new TreeMap<>();
@@ -36,6 +43,10 @@ public final class AudioSettings {
 
   public void validate() {
     volume(master);
+    if (gapMinSeconds < 0 || gapMaxSeconds < gapMinSeconds || gapMaxSeconds > 86400)
+      throw new IllegalArgumentException("Music gaps must be 0 to 86400 seconds, with maximum at least minimum");
+    if (customMusic == null || menuMusic == null || dimensionMusic == null)
+      throw new IllegalArgumentException("Music selection is incomplete");
     if (categories == null
         || sounds == null
         || musicDirectories == null

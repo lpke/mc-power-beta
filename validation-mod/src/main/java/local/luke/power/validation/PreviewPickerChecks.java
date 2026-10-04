@@ -42,7 +42,7 @@ public final class PreviewPickerChecks {
         test("individual music streams immediately while options remain open",()->check(system.playing("PowerBetaMusicPreview"),"stream not playing"));
         test("preview pauses existing music without replacing playlist track",()->{
           check(!system.playing("BgMusic"),"background overlaps");
-          check(AudioController.blockBackground(),"autoplay is not blocked");
+          check(AudioController.previewing(vanilla),"preview is not active");
           check(AudioController.status().contains(vanilla.substring(6)),"preview title missing");
         });
         AudioController.previewSound(vanilla);

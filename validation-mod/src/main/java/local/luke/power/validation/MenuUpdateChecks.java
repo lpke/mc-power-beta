@@ -30,6 +30,7 @@ public final class MenuUpdateChecks {
     PowerOptionsScreen s = new PowerOptionsScreen(null);
     mc.setScreen(s);
     field(s, "page", page);
+    field(s, "libraryOpen", false);
     field(s, "changedOnly", false);
     field(s, "conflictIds", List.of());
     field(s, "relatedIds", List.of());

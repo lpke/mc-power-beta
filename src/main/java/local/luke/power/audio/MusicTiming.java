@@ -11,8 +11,6 @@ public final class MusicTiming {
   public static String status(int ticks) {
     long seconds = (Math.max(0L, ticks) + 19) / 20;
     if (seconds == 0) return "Not playing. Next track shortly.";
-    if (seconds < 60) return "Not playing. " + seconds + " sec until next track.";
-    long minutes = (seconds + 59) / 60;
-    return "Not playing. " + minutes + (minutes == 1 ? " min" : " mins") + " until next track.";
+    return "Not playing. " + seconds + " sec until next track.";
   }
 }
