@@ -45,6 +45,19 @@ Settings saves keep recovery copies under `power-beta-data/settings-backups`. If
 fails, previous files and live values are restored. An interrupted transaction
 is recovered before configuration and recipe initialization on the next launch.
 
+## Light overlay and inventory
+
+Press **F7** to toggle light numbers on nearby block tops. Rebind it in Controls.
+**Building → Light overlay** controls the range, size, colour threshold, RGB colours,
+light source and spawnable-surface filter. It starts off and does no scans while off.
+Block light is the default, with levels below 8 red and levels 8–15 green. Combined
+light also includes daylight. These numbers describe lighting, not every mob's
+spawn rules. Scans use loaded terrain only and refresh in bounded batches.
+
+**Inventory → Clicking → Swap tools and armour** starts on. In singleplayer,
+clicking the same type of damageable equipment with different durability swaps
+both original items. Armour and crafting-output restrictions remain in force.
+
 ## Audio
 
 Audio combines master, category and individual sound volumes with the existing

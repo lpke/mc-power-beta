@@ -24,7 +24,9 @@
     "CreateWorldMixin",
     "ContainerPreviewMixin",
     "ChatTextAccessor",
-    "NativeStorageMixin"
+    "NativeStorageMixin",
+    "EquipmentSwapMixin",
+    "LightOverlayMixin"
   ],
   "injectors": {
     "defaultRequire": 1

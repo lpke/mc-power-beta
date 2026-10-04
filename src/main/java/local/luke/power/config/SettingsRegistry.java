@@ -9,6 +9,7 @@ public final class SettingsRegistry {
     NativeBackend.register(s, mc);
     AudioBackend.register(s, mc);
     VisualBackend.register(s, mc);
+    LightBackend.register(s);
     ComponentBackend.register(s);
     GlassBackend.register(s);
     LogoBackend.register(s);

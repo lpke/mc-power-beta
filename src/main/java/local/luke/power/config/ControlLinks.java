@@ -7,6 +7,7 @@ public final class ControlLinks {
   private record Link(String setting, String featureGate, String help) {}
   private static final Map<String, Link> LINKS = new HashMap<>();
   static {
+    link("powerbeta.lightOverlay", "lightOverlay.enabled", "", "Toggle light-level numbers on nearby block tops.");
     link("powerbeta.containerPreview", "visual.containerPreview", "visual.containerPreview", "Hold while aiming at a container to preview its contents without opening it.");
     link("key.forward", "", "", "Move forward.");
     link("key.back", "", "", "Move backward.");
@@ -91,6 +92,7 @@ public final class ControlLinks {
     if (setting.kind == Setting.Kind.KEY) return false;
     if (setting.id.equals(link.setting) || setting.id.equals(link.featureGate)) return true;
     String family = switch (link.setting) {
+      case "lightOverlay.enabled" -> "lightOverlay.";
       case "tweaks.placement.enabled" -> "tweaks.placement.";
       case "tweaks.flexible.enabled" -> "tweaks.flexible.";
       case "tweaks.slabs.enabled" -> "tweaks.slabs.";

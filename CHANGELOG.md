@@ -1,5 +1,18 @@
 # Changelog
 
+## Light overlay and equipment swapping, 2026-10-04
+
+- Add an F7 light overlay toggle, rebindable with keyboard, mouse and modifiers.
+  Show red/green light numbers flat on nearby exposed block tops. Off by default.
+- Configure the colour threshold, both RGB colours, range, number size, block or
+  combined light, and full-block or spawnable-surface filtering under Building.
+  Default block-light colours split at 8 for Beta, ignoring daytime sunlight.
+- Bound scans to 2,048 positions per tick and cache at most 2,048 labels. Skip
+  unloaded chunks, stop all scans while disabled and retain normal depth testing.
+- Add default-on Swap tools and armour under Inventory. Clicking matching
+  damageable equipment with different durability uses the native slot swap,
+  preserving the original stacks and slot restrictions. Singleplayer only.
+
 ## Chest splitting, search navigation and previews, 2026-10-04
 
 - Pick up only the targeted half of a double chest. Preserve the other half and

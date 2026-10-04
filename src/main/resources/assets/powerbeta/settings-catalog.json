@@ -3715,5 +3715,11 @@
     "description": "Exact block-emitted light at your feet, from 0 to 15. Excludes sunlight and screen brightness.",
     "default": true,
     "restart": false
+  },
+  "visual.swapEquipment": {
+    "page": "Inventory",
+    "group": "Clicking",
+    "label": "Swap tools and armour",
+    "description": "Click matching tools or armour with different durability to swap them. Singleplayer only; slot restrictions still apply."
   }
 }

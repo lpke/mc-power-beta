@@ -165,6 +165,7 @@ public final class NativeBackend implements Backend {
       }
       if (k.translationKey.toLowerCase(Locale.ROOT).contains("free_look")) label = "Free look";
       if (k.translationKey.equals("powerbeta.containerPreview")) label = "Preview container contents";
+      if (k.translationKey.equals("powerbeta.lightOverlay")) label = "Light overlay (toggle)";
       entries.add(
           new Setting(
               key,
@@ -192,6 +193,7 @@ public final class NativeBackend implements Backend {
 
   private static int defaultKey(KeyBinding k) {
     return switch (k.translationKey) {
+      case "powerbeta.lightOverlay" -> Keyboard.KEY_F7;
       case "key.forward" -> Keyboard.KEY_W;
       case "key.back" -> Keyboard.KEY_S;
       case "key.left" -> Keyboard.KEY_A;

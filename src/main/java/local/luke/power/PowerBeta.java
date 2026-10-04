@@ -10,6 +10,7 @@ public final class PowerBeta {
 
   public static void tick(Minecraft mc) {
     local.luke.power.audio.AudioController.tick(mc);
+    local.luke.power.light.LightOverlay.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
       try {
