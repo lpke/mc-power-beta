@@ -36,7 +36,13 @@ public final class AudioController {
   private static String currentMusic = "",
       menuMusic = "",
       status = "Music folders have not been scanned";
-  private static int cleanup, menuCooldown, libraryRevision;
+  private static int cleanup, menuCooldown, libraryRevision, conversionRevision;
+  private static boolean trackWasPlaying;
+  private static AudioSettings rotationConfig;
+  private static List<MusicLibrary.Track> worldRotation = List.of(), menuRotation = List.of();
+  private static List<MusicLibrary.Track> custom = List.of();
+  private static Map<String, MusicLibrary.Track> customById = Map.of();
+  private static Map<String, String> customByUrl = Map.of();
 
   public static int libraryRevision() { return libraryRevision; }
   private static final List<class_267> history = new ArrayList<>();
@@ -61,14 +67,14 @@ public final class AudioController {
     system.stop("BgMusic");
     system.stop("PowerBetaMenu");
     menuMusic = "";
-    currentMusic = "music:" + track.field_2126;
+    currentMusic = trackId(track);
     paused = false;
     int dimension = client.player == null ? 0 : client.player.dimensionId;
     LegacyMusic.selected(track.field_2126, client.world != null && TrackRules.dimensionSpecific(track.field_2126, dimension) ? dimension : Integer.MAX_VALUE);
     system.backgroundMusic("BgMusic", track.field_2127, track.field_2126, false);
     system.setVolume("BgMusic", musicVolume(currentMusic));
     system.play("BgMusic");
-    musicStarted = System.nanoTime();
+    musicStarted = System.nanoTime(); trackWasPlaying = false;
     nextDelay((SoundManagerAccessor) client.soundManager);
   }
 
@@ -98,18 +104,8 @@ public final class AudioController {
   }
 
   private static void previewMusic(String id) {
-    var pool = ((SoundManagerAccessor) client.soundManager).power$music();
-    class_267 selected = null;
-    synchronized (pool) {
-      for (class_267 track : ((SoundPoolAccessor) pool).power$tracks())
-        if (id.equals("music:" + track.field_2126)) { selected = track; break; }
-    }
     try {
-      if (selected == null)
-        for (var track : customTracks())
-          if (id.equals("music:" + track.name()) && Files.isRegularFile(track.path())) {
-            selected = new class_267(track.name(), track.path().toUri().toURL()); break;
-          }
+      class_267 selected = resolveTrack(id);
       if (selected == null) { status = "Track unavailable. Reload music folders."; return; }
       system().stop("PowerBetaPreview");
       MusicPreview.start(client, system(), selected, !paused && !currentMusic.isEmpty()
@@ -127,7 +123,8 @@ public final class AudioController {
     dirty = true;
     history.clear();
     historyIndex = -1;
-    nextAfterScan = true;
+    pause();
+    nextAfterScan = false;
   }
 
   public static void rulesChanged() {
@@ -145,16 +142,91 @@ public final class AudioController {
   }
 
   public static String status() {
-    if (MusicPreview.active()) return "Previewing: " + MusicPreview.track().substring(6);
+    if (MusicPreview.active()) return "Previewing: " + musicLabel(MusicPreview.track());
     return paused
         ? "Music paused"
         : nowPlaying().equals("none") ? status : "Playing: " + nowPlaying();
   }
 
-  public static List<MusicLibrary.Track> customTracks() {
-    List<MusicLibrary.Track> tracks = new ArrayList<>(library.world.tracks());
-    tracks.addAll(library.menu.tracks());
-    return List.copyOf(tracks);
+  public static List<MusicLibrary.Track> customTracks() { return custom; }
+
+  private static void indexLibrary() {
+    rotationConfig = null;
+    Map<String, MusicLibrary.Track> byId = new LinkedHashMap<>();
+    for (var scan : List.of(library.world, library.menu)) for (var track : scan.tracks()) byId.putIfAbsent(track.id(), track);
+    custom = List.copyOf(byId.values()); customById = Map.copyOf(byId);
+    Map<String, String> urls = new HashMap<>();
+    for (var track : custom) if (track.playable()) urls.put(track.playbackPath().toUri().toString(), track.id());
+    customByUrl = Map.copyOf(urls);
+  }
+
+  public static String trackId(class_267 track) {
+    // URL external forms use file:/ while Path URIs use file:///.
+    String url = track.field_2127.toExternalForm();
+    try { url = Path.of(track.field_2127.toURI()).toUri().toString(); } catch (Exception ignored) { }
+    return customByUrl.getOrDefault(url, "music:" + track.field_2126);
+  }
+
+  public static String musicLabel(String id) {
+    MusicLibrary.Track track = customById.get(id);
+    return track == null ? id.replaceFirst("^music:", "") : track.name();
+  }
+
+  public static int trackVolume(String id) {
+    AudioSettings settings = AudioConfig.current();
+    return settings.sounds.getOrDefault(id, settings.sounds.getOrDefault("music:" + musicLabel(id), 100));
+  }
+
+  private static class_267 entry(MusicLibrary.Track track) throws java.io.IOException {
+    if (!track.playable() || !Files.isRegularFile(track.playbackPath())) return null;
+    return new class_267(track.playbackName(), track.playbackPath().toUri().toURL());
+  }
+
+  private static List<MusicLibrary.Track> rotation(MusicLibrary.Scan scan) {
+    AudioSettings config = AudioConfig.current();
+    if (rotationConfig != config) {
+      worldRotation = library.world.tracks().stream().filter(t -> t.playable() && !config.disabledTracks.contains(t.id())).toList();
+      menuRotation = library.menu.tracks().stream().filter(t -> t.playable() && !config.disabledTracks.contains(t.id())).toList();
+      rotationConfig = config;
+    }
+    return scan == library.menu ? menuRotation : worldRotation;
+  }
+
+  public static class_267 resolveTrack(String id) throws java.io.IOException {
+    MusicLibrary.Track customTrack = customById.get(id);
+    if (customTrack != null) return entry(customTrack);
+    if (client == null) return null;
+    var pool = ((SoundManagerAccessor) client.soundManager).power$music();
+    synchronized (pool) {
+      for (class_267 track : ((SoundPoolAccessor) pool).power$tracks()) if (id.equals("music:" + track.field_2126)) return track;
+    }
+    return null;
+  }
+
+  public static void playNow(String id) {
+    if (system() == null) return;
+    try {
+      class_267 track = resolveTrack(id);
+      if (track == null) { status = "Track unavailable. Convert MP3 files or reload folders."; return; }
+      MusicPreview.stop(system(), false); remember(track); play(track);
+    } catch (Exception e) { status = "Could not play track"; PowerBeta.LOG.warn(status, e); }
+  }
+
+  private static class_267 queued() {
+    // Unavailable requests remain visible for repair instead of silently disappearing.
+    if (MusicRequests.tracks().isEmpty()) return null;
+    try {
+      class_267 track = resolveTrack(MusicRequests.tracks().get(0));
+      if (track == null) { status = "First queued track unavailable. Check the music library."; return null; }
+      MusicRequests.edit(q -> q.tracks.remove(0));
+      return track;
+    } catch (Exception e) { status = "Could not read or save music queue"; PowerBeta.LOG.warn(status, e); return null; }
+  }
+
+  public static void playQueue() {
+    if (system() == null || rules().disabled()) return;
+    class_267 track = queued();
+    if (track != null) { MusicPreview.stop(system(), false); remember(track); play(track); }
   }
 
   public static void reload() {
@@ -176,6 +248,7 @@ public final class AudioController {
 
   public static void tick(Minecraft mc) {
     client = mc;
+    if (conversionRevision != Mp3Converter.revision()) { conversionRevision = Mp3Converter.revision(); reload(); }
     if (dirty) {
       dirty = false;
       rules = MusicRules.read();
@@ -185,6 +258,7 @@ public final class AudioController {
     if (pending != null && pending.isDone()) {
       try {
         library = pending.join();
+        indexLibrary();
         libraryRevision++;
         List<String> errors = new ArrayList<>(library.world.warnings());
         errors.addAll(library.menu.warnings());
@@ -231,26 +305,32 @@ public final class AudioController {
       system.stop("PowerBetaMenu");
       return;
     }
+    if (system.playing("BgMusic")) trackWasPlaying = true;
+    if (!MusicRequests.tracks().isEmpty() && !system.playing("BgMusic") && !system.playing("PowerBetaMenu")
+        && !system.playing("streaming") && (trackWasPlaying || currentMusic.isEmpty() || System.nanoTime() - musicStarted > 5_000_000_000L)) {
+      // Keep unavailable requests visible, with bounded retries.
+      if (menuCooldown == 0) { playQueue(); menuCooldown = 40; }
+    }
     if (!rules().menuEnabled() || inWorld) system.stop("PowerBetaMenu");
     if (menuCooldown > 0) menuCooldown--;
     if (menuCooldown == 0
         && !inWorld
         && rules().menuEnabled()
-        && !library.menu.tracks().isEmpty()
+        && !rotation(library.menu).isEmpty()
         && !system.playing("PowerBetaMenu")
         && !system.playing("streaming")
         && mc.options.musicVolume > 0) {
       if (!system.playing("BgMusic")) {
         MusicLibrary.Track track =
             MENU.choose(
-                library.menu.tracks(),
+                rotation(library.menu),
                 AudioConfig.current().shuffle,
                 AudioConfig.current().avoidRepeats,
                 RANDOM,
                 t -> t.path().toString());
         try {
           menuCooldown = 20;
-          class_267 selected = new class_267(track.name(), track.path().toUri().toURL());
+          class_267 selected = entry(track);
           remember(selected);
           play(selected);
         } catch (Exception e) {
@@ -271,7 +351,7 @@ public final class AudioController {
       currentMusic = "";
     }
     return MusicPreview.active() || paused
-        || (client != null && client.world == null && rules().menuEnabled() && rules().menuOverrides() && !library.menu.tracks().isEmpty())
+        || (client != null && client.world == null && rules().menuEnabled() && rules().menuOverrides() && !rotation(library.menu).isEmpty())
         || rules().disabled()
         || AudioConfig.current().master == 0
         || (s != null && s.playing("PowerBetaMenu"));
@@ -279,13 +359,15 @@ public final class AudioController {
 
   public static class_267 choose(List<class_267> vanilla) {
     AudioSettings s = AudioConfig.current();
+    class_267 requested = queued();
+    if (requested != null) { remember(requested); currentMusic = trackId(requested); musicStarted = System.nanoTime(); trackWasPlaying = false; return requested; }
     List<class_267> tracks = new ArrayList<>();
     if (s.musicMode != AudioSettings.MusicMode.REPLACE || library.world.tracks().isEmpty())
       if (!rules().vanillaDisabled()) tracks.addAll(vanilla);
     if (s.musicMode != AudioSettings.MusicMode.VANILLA)
       for (var track : library.world.tracks())
         try {
-          tracks.add(new class_267(track.name(), track.path().toUri().toURL()));
+          if (track.playable()) { class_267 selected = entry(track); if (selected != null) tracks.add(selected); }
         } catch (Exception ignored) {
         }
     int dimension = client != null && client.player != null ? client.player.dimensionId : 0;
@@ -299,12 +381,13 @@ public final class AudioController {
       if (currentBiome != null) biome = currentBiome.field_888;
     }
     String currentBiome = biome;
-    tracks.removeIf(track -> !TrackRules.eligible(track.field_2126, dimension, currentBiome));
+    tracks.removeIf(track -> s.disabledTracks.contains(trackId(track)) || !TrackRules.eligible(track.field_2126, dimension, currentBiome));
     class_267 chosen =
         WORLD.choose(tracks, s.shuffle, s.avoidRepeats, RANDOM, t -> t.field_2127.toExternalForm());
     if (chosen != null) {
       remember(chosen);
-      currentMusic = "music:" + chosen.field_2126;
+      currentMusic = trackId(chosen);
+      musicStarted = System.nanoTime(); trackWasPlaying = false;
       LegacyMusic.selected(
           chosen.field_2126,
           TrackRules.dimensionSpecific(chosen.field_2126, dimension)
@@ -331,12 +414,12 @@ public final class AudioController {
   public static float musicVolume(String id) {
     float base = client == null ? 1 : client.options.musicVolume;
     AudioSettings s = AudioConfig.current();
-    return base * s.master / 100f * s.sounds.getOrDefault(id, 100) / 100f;
+    return base * s.master / 100f * trackVolume(id) / 100f;
   }
 
   public static float backgroundVolume(float original) {
     AudioSettings s = AudioConfig.current();
-    return original * s.master / 100f * s.sounds.getOrDefault(currentMusic, 100) / 100f;
+    return original * s.master / 100f * trackVolume(currentMusic) / 100f;
   }
 
   private static SoundSystem system() {
@@ -367,13 +450,19 @@ public final class AudioController {
   public static String nowPlaying() {
     SoundSystem s = system();
     if (s == null) return "none";
-    if (s.playing("PowerBetaMenu")) return menuMusic.replaceFirst("^music:", "");
-    if (s.playing("BgMusic")) return currentMusic.replaceFirst("^music:", "");
+    if (s.playing("PowerBetaMenu")) return musicLabel(menuMusic);
+    if (s.playing("BgMusic")) return musicLabel(currentMusic);
     if (s.playing("streaming")) {
       Source record = SOURCES.get("streaming");
       return record == null ? "Music disc" : record.sound.replaceFirst("^records\\.", "");
     }
     return "none";
+  }
+
+  public static void pause() {
+    paused = true;
+    SoundSystem s = system();
+    if (s != null) { MusicPreview.pause(s); s.pause("BgMusic"); s.pause("PowerBetaMenu"); }
   }
 
   public static void togglePause() {
@@ -399,12 +488,13 @@ public final class AudioController {
     MusicPreview.stop(system(), true);
     if (rules().disabled()) { play(null); return; }
     paused = false;
+    if (!MusicRequests.tracks().isEmpty()) { playQueue(); return; }
     if (historyIndex + 1 < history.size()) { play(history.get(++historyIndex)); return; }
-    if (client.world == null && rules().menuEnabled() && !library.menu.tracks().isEmpty()) {
-      var track = MENU.choose(library.menu.tracks(), AudioConfig.current().shuffle,
+    if (client.world == null && rules().menuEnabled() && !rotation(library.menu).isEmpty()) {
+      var track = MENU.choose(rotation(library.menu), AudioConfig.current().shuffle,
           AudioConfig.current().avoidRepeats, RANDOM, t -> t.path().toString());
       try {
-        var selected = new class_267(track.name(), track.path().toUri().toURL());
+        var selected = entry(track);
         remember(selected);
         play(selected);
       } catch (Exception e) { PowerBeta.LOG.warn("Could not play music", e); }
@@ -438,7 +528,7 @@ public final class AudioController {
       for (var track : ((SoundPoolAccessor) pool).power$tracks())
         ids.add("music:" + track.field_2126);
     }
-    for (var track : customTracks()) ids.add("music:" + track.name());
+    for (var track : customTracks()) ids.add(track.id());
     return ids;
   }
 }

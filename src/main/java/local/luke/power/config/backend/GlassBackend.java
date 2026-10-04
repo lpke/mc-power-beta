@@ -31,7 +31,7 @@ public final class GlassBackend implements Backend {
             });
   }
 
-  private static boolean inverted(String key) { return key.equals("entityculling:config.disableEntityCulling") || key.equals("entityculling:config.disableBlockEntityCulling"); }
+  private static boolean inverted(String key) { return key.equals("power_hud:config.disableVignette") || key.equals("entityculling:config.disableEntityCulling") || key.equals("entityculling:config.disableBlockEntityCulling"); }
   private static JsonElement encode(String key, Object value) { return inverted(key) ? new JsonPrimitive(!(Boolean)value) : Catalog.JSON.toJsonTree(value); }
 
   private void visit(String prefix, ConfigCategoryHandler category) {
@@ -123,6 +123,8 @@ public final class GlassBackend implements Backend {
     if (all.containsKey(min) && all.get(min).getAsInt() >= all.get(max).getAsInt())
       throw new IllegalArgumentException("Minimum leaf decay time must be below maximum");
   }
+
+  public boolean previewsAutomatically(Setting s) { return !s.restart; }
 
   public boolean previews(Setting s) {
     return !s.restart && (s.page.equals("Audio") || s.page.equals("Video")

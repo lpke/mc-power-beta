@@ -315,11 +315,11 @@
     "restart": false
   },
   "power_hud:config.disableVignette": {
-    "page": "Interface",
-    "group": "HUD and chat",
-    "label": "Disable vignette",
-    "description": "",
-    "default": false,
+    "page": "Video",
+    "group": "Quality",
+    "label": "Vignette",
+    "description": "Darken the screen edges in dim areas.",
+    "default": true,
     "restart": false
   },
   "power_hud:config.drawXboxXAndYButtons": {
@@ -3673,7 +3673,7 @@
     "group": "Free camera",
     "label": "Freecam door collisions",
     "description": "With camera collisions enabled, also collide with doors and trapdoors. Off passes through them.",
-    "default": true,
+    "default": false,
     "restart": false
   },
   "power_camera:config.sprint": {
@@ -3721,5 +3721,12 @@
     "group": "Clicking",
     "label": "Swap tools and armour",
     "description": "Click matching tools or armour with different durability to swap them. Singleplayer only; slot restrictions still apply."
+  },
+  "tweaks.autoWalkHoldToWalk": {
+    "label": "Hold auto-walk key to walk",
+    "description": "Tap to toggle walking. Hold beyond the threshold to stop walking when released."
+  },
+  "tweaks.autoWalkHoldMillis": {
+    "label": "Auto-walk hold time, ms"
   }
 }

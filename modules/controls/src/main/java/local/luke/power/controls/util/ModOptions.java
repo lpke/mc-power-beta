@@ -87,38 +87,26 @@ public class ModOptions {
         renderDistance = (1.0F / (maxRenderDistance - 2)) * (chunks - 2);
     }
 
+    public static int[] renderDistanceCycle = {12, 8, 4, 2};
+
     public static void cycleRenderDistance() {
-        boolean inverted = !(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
-
-        switch (getRenderDistanceChunks()) {
-            case 2, 3 -> { // Tiny
-                setRenderDistanceChunks(inverted ? 12 : 4);
-            }
-
-            case 4, 5, 6, 7 -> { // Short
-                setRenderDistanceChunks(inverted ? 2 : 8);
-            }
-
-            case 8, 9, 10, 11 -> { // Normal
-                setRenderDistanceChunks(inverted ? 4 : 12);
-            }
-
-            default -> {
-                setRenderDistanceChunks(inverted ? 8 : 2);
-            }
-        }
-        renderDistance = Util.clamp(renderDistance, 0.0F, 1.0F);
+        int[] cycle = renderDistanceCycle;
+        boolean reverse = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+        int current = getRenderDistanceChunks(), index = -1;
+        for (int i = 0; i < cycle.length; i++) if (cycle[i] == current) { index = i; break; }
+        int next = index < 0 ? (reverse ? cycle.length - 1 : 0) : Math.floorMod(index + (reverse ? -1 : 1), cycle.length);
+        setRenderDistanceChunks(cycle[next]);
     }
 
     // FPS Limit
-    public static float fpsLimit = 0.4F;
+    public static float fpsLimit = 0.12F;
 
     public static int getFpsLimitValue() {
-        return (int) (Math.floor(fpsLimit * 59F) * 5) + 5;
+        return 5 + Math.round(fpsLimit * 1000F);
     }
     
     public static boolean isFramerateLimited() {
-        return fpsLimit < 1.0F;
+        return getFpsLimitValue() <= 1000;
     }
 
     // Clouds

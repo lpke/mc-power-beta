@@ -54,6 +54,13 @@ public final class WorldEditor {
     if (next.wandItem >= Item.ITEMS.length || Item.ITEMS[next.wandItem] == null)
       throw new IllegalArgumentException("Wand item ID is not registered.");
     local.luke.power.storage.PowerConfig.save("editor", next);
+    preview(next);
+  }
+
+  public static void preview(Settings next) {
+    ConfigStore.validate(next);
+    if (next.wandItem >= Item.ITEMS.length || Item.ITEMS[next.wandItem] == null)
+      throw new IllegalArgumentException("Wand item ID is not registered.");
     settings = next.copy();
     if (editor != null) {
       editor.limit = settings.blockLimit;

@@ -7,9 +7,11 @@ public final class SettingsRegistry {
   public static ConfigSession open(Minecraft mc) throws Exception {
     ConfigSession s = new ConfigSession();
     NativeBackend.register(s, mc);
+    VideoBackend.register(s, mc);
     AudioBackend.register(s, mc);
     VisualBackend.register(s, mc);
     LightBackend.register(s);
+    InterfaceBackend.register(s);
     ComponentBackend.register(s);
     GlassBackend.register(s);
     LogoBackend.register(s);

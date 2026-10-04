@@ -219,8 +219,13 @@ public abstract class GameOptionsMixin {
             ModOptions.cloudHeight = this.parseFloat(stringArray[1]);
         }
 
+        if (stringArray[0].equals("framerate_limit")) {
+            ModOptions.fpsLimit = Math.max(0, Math.min(1, (this.parseFloat(stringArray[1]) - 5) / 1000F));
+        }
         if (stringArray[0].equals("fps_limit")) {
-            ModOptions.fpsLimit = this.parseFloat(stringArray[1]);
+            float legacy = this.parseFloat(stringArray[1]);
+            int cap = legacy >= 1 ? 1005 : Math.round((5 + legacy * 295F) / 5) * 5;
+            ModOptions.fpsLimit = (cap - 5) / 1000F;
         }
 
         if (stringArray[0].equals("render_distance")) {
@@ -248,7 +253,7 @@ public abstract class GameOptionsMixin {
 
         printWriter.println("cloud_height:" + ModOptions.cloudHeight);
 
-        printWriter.println("fps_limit: " + ModOptions.fpsLimit);
+        printWriter.println("framerate_limit: " + ModOptions.getFpsLimitValue());
 
         printWriter.println("render_distance: " + ModOptions.renderDistance);
 

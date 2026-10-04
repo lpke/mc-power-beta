@@ -6,10 +6,16 @@ import org.lwjgl.input.Keyboard;
 public final class ValueScreen extends UiScreen {
   private final PowerOptionsScreen parent;
   private final Setting setting;
+  private final net.minecraft.client.gui.screen.Screen returnTo;
   private final TextInput input;
   private String error = "";
 
   public ValueScreen(PowerOptionsScreen parent, Setting setting) {
+    this(parent, setting, parent);
+  }
+
+  public ValueScreen(PowerOptionsScreen parent, Setting setting, net.minecraft.client.gui.screen.Screen returnTo) {
+    this.returnTo = returnTo;
     this.parent = parent;
     this.setting = setting;
     input = new TextInput(setting.editText(), setting.kind == Setting.Kind.LIST ? 16384 : 4096);
@@ -44,14 +50,14 @@ public final class ValueScreen extends UiScreen {
     }
     if (b != 0) return;
     if (inside(x, y, width / 2 - 102, height - 28, 100, 20)) save();
-    if (inside(x, y, width / 2 + 2, height - 28, 100, 20)) minecraft.setScreen(parent);
+    if (inside(x, y, width / 2 + 2, height - 28, 100, 20)) minecraft.setScreen(returnTo);
   }
 
   private void save() {
     try {
       setting.parse(input.text());
       parent.changed(setting);
-      minecraft.setScreen(parent);
+      minecraft.setScreen(returnTo);
     } catch (RuntimeException e) {
       error = e.getMessage() == null ? "Invalid value" : e.getMessage();
     }
@@ -59,7 +65,7 @@ public final class ValueScreen extends UiScreen {
 
   protected void keyPressed(char c, int key) {
     if (key == Keyboard.KEY_ESCAPE) {
-      minecraft.setScreen(parent);
+      minecraft.setScreen(returnTo);
       return;
     }
     if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) {

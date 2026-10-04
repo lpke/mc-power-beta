@@ -54,8 +54,8 @@ public final class NativeBackend implements Backend {
         Option.ADVANCED_OPENGL,
         o.advancedOpengl,
         false);
-    toggle("ao", "Video", "Rendering", "Smooth lighting", Option.AMBIENT_OCCLUSION, o.ao, true);
-    toggle("fancy", "Video", "Rendering", "Fancy graphics", Option.GRAPHICS, o.fancyGraphics, true);
+    toggle("ao", "Video", "Quality", "Smooth lighting", Option.AMBIENT_OCCLUSION, o.ao, true);
+
     choice(
         "difficulty",
         "General",
@@ -88,10 +88,10 @@ public final class NativeBackend implements Backend {
             "fpsLimit",
             "fpsLimitOption",
             "Video",
-            "Performance",
-            "Frame limit, 300 is unlimited",
+            "Rendering",
+            "Framerate limit",
             "5",
-            "300",
+            "1005",
             "125"
           },
           {
@@ -266,7 +266,9 @@ public final class NativeBackend implements Backend {
     }
     if (key.equals("brightness")) {
       setters.put("native." + key, v -> {
-        local.luke.power.controls.util.ModOptions.brightness = v.getAsFloat() / 100;
+        float brightness = v.getAsFloat() / 100;
+        if (Float.compare(local.luke.power.controls.util.ModOptions.brightness, brightness) == 0) return;
+        local.luke.power.controls.util.ModOptions.brightness = brightness;
         local.luke.power.controls.util.ModOptions.updateWorldLightTable(mc);
       });
       return;

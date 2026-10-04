@@ -18,7 +18,7 @@ final class MusicPreview {
   static String track() { return track; }
 
   static void start(Minecraft mc, SoundSystem system, class_267 selected, boolean backgroundStarting) {
-    String id = "music:" + selected.field_2126;
+    String id = AudioController.trackId(selected);
     if (track.equals(id)) { stop(system, true); return; }
     if (!active()) {
       resume.clear();

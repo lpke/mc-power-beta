@@ -29,6 +29,12 @@ public final class Config {
     Settings next = settings.copy();
     ConfigStore.validate(next);
     local.luke.power.storage.PowerConfig.save("building", next);
+    preview(next);
+  }
+
+  public static void preview(Settings settings) {
+    Settings next = settings.copy();
+    ConfigStore.validate(next);
     current = next;
     if (!next.autoWalk) local.luke.power.autowalk.AutoWalk.stop();
   }

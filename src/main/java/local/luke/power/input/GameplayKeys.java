@@ -37,6 +37,12 @@ public final class GameplayKeys {
       ChatScreen chat = new ChatScreen();
       mc.setScreen(chat);
       ((ChatTextAccessor)chat).power$text("/");
+      try {
+        Class.forName("local.luke.power.commands.integration.chat.ChatWidgetAccess")
+            .getMethod("setText", String.class).invoke(null, "/");
+      } catch (ReflectiveOperationException e) {
+        local.luke.power.PowerBeta.LOG.warn("Could not seed the chat input", e);
+      }
     }
   }
 }

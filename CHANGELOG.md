@@ -1,5 +1,40 @@
 # Changelog
 
+## Menu, video and music controls, 2026-10-04
+
+- Use ranked fuzzy settings search with typo, abbreviation and omitted-space matching.
+  Remember the search, filters, page, scroll and Back history when reopening Options.
+- Match search button heights to the input and hide Clear when no filter is active.
+- Right-click Apply to enable persistent auto-apply. Sliders preview immediately
+  and save on release, avoiding a configuration write for every mouse movement.
+- Add optional direct-to-Options pausing under General / Game and input. The Menu
+  button returns to the normal pause menu and handles unsaved changes safely.
+- Add a colour picker for RGB hex settings: channel sliders, exact hex input,
+  clipboard Copy/Paste and up to 16 saved swatches.
+- Add editable fog-key cycling distances. Defaults remain [12, 8, 4, 2]; Shift+F
+  cycles backward. Keep immediate render-distance changes and chat feedback.
+- Move Framerate limit to the top of Rendering, support actual caps through 1000
+  FPS and Unlimited above 1000, and migrate existing caps without changing their
+  displayed value.
+- Replace Fancy graphics with independent Quality controls for transparent leaves,
+  grass sides, 3D clouds, layered transparency, weather detail and entity shadows.
+  Move the existing vignette switch into Quality with positive On/Off wording.
+- Add Hide options / Show options in Video to preview the world without closing.
+- Keep brightness chunk rebuilds: Beta compiles light colours into chunk geometry.
+  Avoid rebuilding a second time when Apply saves the already-previewed value.
+- Changing World music now pauses the current song without advancing it. Resume
+  continues the same track while the menu remains open.
+- Add a music library combining configured folders, searchable tracks, individual
+  rotation switches and volumes, previews, Play now, and a persistent queue with
+  reorder, remove, clear and playback controls. Equal filenames have distinct IDs.
+- Add explicit background MP3 conversion through FFmpeg into an instance-local WAV
+  cache. Original files remain untouched; conversion can be cancelled and is bounded
+  by time, size and track-count limits. No additional Java dependency is introduced.
+- Auto-walk supports short-tap toggling and hold-to-walk, enabled by default with a
+  configurable 350 ms threshold. Menus, lost focus and manual stops cancel it safely.
+- Default freecam door collisions to Off and place the main collision setting above
+  it. Slash-open-chat now seeds the visible enhanced chat input with `/`.
+
 ## Light overlay and equipment swapping, 2026-10-04
 
 - Add an F7 light overlay toggle, rebindable with keyboard, mouse and modifiers.

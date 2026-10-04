@@ -48,7 +48,7 @@ public final class AudioBackend implements Backend {
         Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.musicDirectories),
         new JsonArray(),
-        "Choose folders containing OGG, WAV or MUS files. Files stay in their original folders.",
+        "Choose folders containing OGG, WAV, MUS or MP3 files. Convert MP3 in Music library. Files stay in their original folders.",
         List.of());
     add(
         "menuDirectories",
@@ -57,7 +57,7 @@ public final class AudioBackend implements Backend {
         Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.menuDirectories),
         new JsonArray(),
-        "Used when menu music is enabled. OGG, WAV and MUS are supported.",
+        "Used when menu music is enabled. OGG, WAV, MUS and converted MP3 are supported.",
         List.of());
     add(
         "recursive",
@@ -107,11 +107,19 @@ public final class AudioBackend implements Backend {
 
   private static List<Setting> musicEntries(Minecraft mc) {
     AudioSettings config = AudioConfig.current();
-    return AudioController.music(mc).stream().map(track -> new Setting(
-        "audio.sound." + track, "audio", "Audio", "Individual music tracks", track.substring(6),
-        "Track volume in percent, multiplied by the music and master volumes.",
-        Setting.Kind.INTEGER, new JsonPrimitive(config.sounds.getOrDefault(track, 100)),
-        new JsonPrimitive(100), 0, 100, 5, List.of(), false)).toList();
+    List<Setting> result = new ArrayList<>();
+    for (String track : AudioController.music(mc)) {
+      String label = AudioController.musicLabel(track);
+      result.add(new Setting("audio.sound." + track, "audio", "Audio", "Individual music tracks", label,
+          "Track volume in percent, multiplied by the music and master volumes.",
+          Setting.Kind.INTEGER, new JsonPrimitive(AudioController.trackVolume(track)),
+          new JsonPrimitive(100), 0, 100, 5, List.of(), false));
+      result.add(new Setting("audio.trackEnabled." + track, "audio", "Audio", "Track rotation", label + " in rotation",
+          "Include this track in automatic selection. You can still preview or explicitly queue excluded tracks.",
+          Setting.Kind.BOOLEAN, new JsonPrimitive(!config.disabledTracks.contains(track)),
+          new JsonPrimitive(true), 0, 1, 1, List.of(), false));
+    }
+    return result;
   }
 
   public static boolean discoverMusic(ConfigSession session, Minecraft mc) {
@@ -164,9 +172,12 @@ public final class AudioBackend implements Backend {
       String key = e.getKey().substring(6);
       JsonElement v = e.getValue();
       if (key.startsWith("category.")) s.categories.put(key.substring(9), v.getAsInt());
-      else if (key.startsWith("sound.")) {
+      else if (key.startsWith("trackEnabled.")) {
+        String track = key.substring("trackEnabled.".length());
+        if (v.getAsBoolean()) s.disabledTracks.remove(track); else s.disabledTracks.add(track);
+      } else if (key.startsWith("sound.")) {
         String sound = key.substring(6);
-        if (v.getAsInt() == 100) s.sounds.remove(sound);
+        if (v.getAsInt() == 100 && !sound.startsWith("music:custom/")) s.sounds.remove(sound);
         else s.sounds.put(sound, v.getAsInt());
       } else
         switch (key) {

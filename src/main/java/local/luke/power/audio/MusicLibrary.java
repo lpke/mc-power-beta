@@ -6,7 +6,15 @@ import java.util.*;
 
 /** A bounded, read-only scan. Symlinks are not followed and malformed tracks are skipped. */
 public final class MusicLibrary {
-  public record Track(Path path, String name) {}
+  public record Track(Path path, String name, Path playbackPath, String id) {
+    public Track(Path path, String name, Path playbackPath) {
+      this(path, name, playbackPath, "music:custom/" + Mp3Converter.hash(path.toAbsolutePath().normalize().toString()));
+    }
+    public Track(Path path, String name) { this(path, name, path); }
+    public boolean mp3() { return name.toLowerCase(Locale.ROOT).endsWith(".mp3"); }
+    public boolean playable() { return playbackPath != null; }
+    public String playbackName() { return mp3() ? name.substring(0, name.length() - 4) + ".wav" : name; }
+  }
 
   public record Scan(List<Track> tracks, List<String> warnings) {
     public Scan {
@@ -44,7 +52,7 @@ public final class MusicLibrary {
           if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) continue;
           String name = file.getFileName().toString();
           String lower = name.toLowerCase(Locale.ROOT);
-          if (!lower.endsWith(".ogg") && !lower.endsWith(".wav") && !lower.endsWith(".mus"))
+          if (!lower.endsWith(".ogg") && !lower.endsWith(".wav") && !lower.endsWith(".mus") && !lower.endsWith(".mp3"))
             continue;
           if (tracks.size() >= MAX_TRACKS) {
             warnings.add("Music library reached the 2,048 track limit");
@@ -59,7 +67,7 @@ public final class MusicLibrary {
             continue;
           }
           Path canonical = file.toRealPath();
-          tracks.putIfAbsent(canonical, new Track(canonical, name));
+          tracks.putIfAbsent(canonical, new Track(canonical, name, lower.endsWith(".mp3") ? Mp3Converter.cached(game, canonical) : canonical));
         }
       } catch (IOException | UncheckedIOException | SecurityException e) {
         warnings.add("Could not finish reading: " + folder);
@@ -81,6 +89,7 @@ public final class MusicLibrary {
     try (InputStream in = Files.newInputStream(file)) {
       byte[] h = in.readNBytes(12);
       if (h.length < 12) return false;
+      if (name.endsWith(".mp3")) return h[0] == 'I' && h[1] == 'D' && h[2] == '3' || (h[0] & 255) == 255 && (h[1] & 224) == 224;
       if (name.endsWith(".ogg")) return h[0] == 'O' && h[1] == 'g' && h[2] == 'g' && h[3] == 'S';
       return h[0] == 'R'
           && h[1] == 'I'

@@ -42,7 +42,7 @@ public final class AudioConfig {
     boolean mode = current.musicMode != next.musicMode;
     current = Catalog.JSON.fromJson(Catalog.JSON.toJson(next), AudioSettings.class);
     if (library) AudioController.settingsChanged();
-    if (mode) AudioController.next();
+    if (mode) AudioController.pause();
     AudioController.refresh();
   }
 

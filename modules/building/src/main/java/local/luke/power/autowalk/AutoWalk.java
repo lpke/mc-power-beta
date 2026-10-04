@@ -22,7 +22,9 @@ public final class AutoWalk {
       world = minecraft.world;
       player = minecraft.player;
     }
-    TOGGLE.update(local.luke.power.input.Bindings.down(KEY), canWalk());
+    var settings = local.luke.power.building.config.Config.current();
+    TOGGLE.update(local.luke.power.input.Bindings.down(KEY), canWalk(), settings.autoWalkHoldToWalk,
+        System.nanoTime(), settings.autoWalkHoldMillis);
   }
 
   private static boolean isKeyDown(int code) {

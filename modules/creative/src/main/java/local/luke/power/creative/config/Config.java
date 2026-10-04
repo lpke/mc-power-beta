@@ -11,7 +11,8 @@ public final class Config {
     value.validate(); return value;
   }
   public static Settings current() { return settings; }
+  public static void preview(Settings next) { next.validate(); settings = next.copy(); }
   public static void apply(Settings next) throws IOException {
-    next.validate(); PowerConfig.save("creative", next); settings = next.copy();
+    next.validate(); PowerConfig.save("creative", next); preview(next);
   }
 }

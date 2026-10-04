@@ -10,7 +10,7 @@ import local.luke.power.controls.util.ModOptions;
 public final class NativeStorage {
   private static final Map<String,String> EXTENDED = Map.ofEntries(
       Map.entry("fov","fov"),Map.entry("brightness","brightness"),Map.entry("cloud_height","cloudHeight"),
-      Map.entry("clouds","clouds"),Map.entry("fog_density","fogDensity"),Map.entry("fps_limit","fpsLimit"),
+      Map.entry("clouds","clouds"),Map.entry("fog_density","fogDensity"),
       Map.entry("render_distance","renderDistance"),Map.entry("gui_scale","guiScale"));
   public static void load(GameOptions options) {
     JsonObject data = PowerConfig.section("native");
@@ -38,6 +38,14 @@ public final class NativeStorage {
       for (var e : EXTENDED.entrySet()) if (data.has(e.getKey())) {
         var field = ModOptions.class.getField(e.getValue()); field.set(null,Catalog.JSON.fromJson(data.get(e.getKey()),field.getType()));
       }
+      if (data.has("framerate_limit")) {
+        int limit = Math.max(5, Math.min(1005, data.get("framerate_limit").getAsInt()));
+        ModOptions.fpsLimit = (limit - 5) / 1000F;
+      } else if (data.has("fps_limit")) {
+        float legacy = data.get("fps_limit").getAsFloat();
+        int limit = legacy >= 1 ? 1005 : Math.round((5 + Math.max(0, legacy) * 295F) / 5) * 5;
+        ModOptions.fpsLimit = (limit - 5) / 1000F;
+      }
       ModOptions.realGuiScale = ModOptions.guiScale;
       for (var key : options.allKeys) if (data.has("key_"+key.translationKey)) key.code = data.get("key_"+key.translationKey).getAsInt();
     } catch (ReflectiveOperationException e) { throw new IllegalStateException("Cannot load game options",e); }
@@ -53,6 +61,8 @@ public final class NativeStorage {
       data.addProperty("ao",options.ao); data.addProperty("difficulty",options.difficulty);
       data.addProperty("skin",options.skin); data.addProperty("lastServer",options.lastServer);
       data.addProperty("guiScale",options.guiScale);
+      data.remove("fps_limit");
+      data.addProperty("framerate_limit", ModOptions.getFpsLimitValue());
       for (var e : EXTENDED.entrySet()) data.add(e.getKey(),Catalog.JSON.toJsonTree(ModOptions.class.getField(e.getValue()).get(null)));
       for (var key : options.allKeys) data.addProperty("key_"+key.translationKey,key.code);
       PowerConfig.put("native",data);

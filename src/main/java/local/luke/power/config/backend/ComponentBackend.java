@@ -7,7 +7,7 @@ import java.util.*;
 import local.luke.power.config.*;
 import net.fabricmc.loader.api.FabricLoader;
 
-/** Uses each component's validated, atomic save API. No live fields are edited while browsing. */
+/** Uses validated component APIs; auto-apply previews stay in memory until slider release. */
 public final class ComponentBackend implements Backend {
   private final String id, apiName, getter, file;
   private final Class<?> api, type;
@@ -73,7 +73,7 @@ public final class ComponentBackend implements Backend {
         } else if (name.startsWith("freeLook")) {
           page = "Camera";
           group = "Free look";
-        } else if (name.equals("autoWalk") || name.startsWith("sneak.")) {
+        } else if (name.startsWith("autoWalk") || name.startsWith("sneak.")) {
           page = "Movement";
           group = "Walking";
         } else if (name.equals("boatSteering") || name.equals("fastMinecarts")) {
@@ -164,6 +164,7 @@ public final class ComponentBackend implements Backend {
   private static double[] bounds(String name, String id) {
     String leaf = name.substring(name.lastIndexOf('.') + 1);
     return switch (leaf) {
+      case "autoWalkHoldMillis" -> new double[] {100, 3000, 50};
       case "attemptsPerTick" -> new double[] {1, 16, 1};
       case "overlayColor", "color" -> new double[] {0, 3, 1};
       case "overlayOpacity" -> new double[] {10, 90, 10};
@@ -230,6 +231,12 @@ public final class ComponentBackend implements Backend {
                   : "local.luke.power.worldedit.config.ConfigStore")
           .getMethod("validate", type)
           .invoke(null, draft);
+  }
+
+  public boolean previewsAutomatically(Setting s) { return !s.restart; }
+
+  public void preview(Map<String, JsonElement> changes) throws Exception {
+    api.getMethod("preview", type).invoke(null, draft(changes));
   }
 
   public void apply(Map<String, JsonElement> changes) throws Exception {

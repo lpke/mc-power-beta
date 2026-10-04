@@ -6,6 +6,28 @@ import org.junit.jupiter.api.Test;
 
 class WalkToggleTest {
   @Test
+  void shortTapTogglesButLongHoldStopsOnRelease() {
+    WalkToggle t = new WalkToggle();
+    t.update(true, true, true, 0, 350); assertTrue(t.isActive());
+    t.update(false, true, true, 100_000_000L, 350); assertTrue(t.isActive());
+    t.update(true, true, true, 200_000_000L, 350); assertFalse(t.isActive());
+    t.update(true, true, true, 600_000_000L, 350); assertTrue(t.isActive());
+    t.update(false, true, true, 650_000_000L, 350); assertFalse(t.isActive());
+  }
+
+  @Test
+  void holdReleaseWithoutIntermediateTicksAndMenuOrManualStopAreSafe() {
+    WalkToggle t = new WalkToggle();
+    t.update(true, true, true, 0, 350);
+    t.update(false, true, true, 500_000_000L, 350); assertFalse(t.isActive());
+    t.update(true, true, true, 600_000_000L, 350);
+    t.stop(); t.update(true, true, true, 1_200_000_000L, 350); assertFalse(t.isActive());
+    t.update(false, true, true, 1_300_000_000L, 350);
+    t.update(true, false, true, 1_400_000_000L, 350);
+    t.update(true, true, true, 2_000_000_000L, 350); assertFalse(t.isActive());
+  }
+
+  @Test
   void pressTogglesOnceAndReleaseDoesNotStopWalking() {
     WalkToggle toggle = new WalkToggle();
     toggle.update(true, true);

@@ -160,6 +160,7 @@ public final class Setting {
   }
 
   public String display(JsonElement v) {
+    if (id.equals("native.fpsLimit") && v.getAsInt() > 1000) return "Unlimited";
     if (id.equals("native.guiScale")) return v.getAsInt() == 0 ? "Auto" : v.getAsInt() + "x";
     return switch (kind) {
       case BOOLEAN ->

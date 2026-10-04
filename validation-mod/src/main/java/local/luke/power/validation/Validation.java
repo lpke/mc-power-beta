@@ -47,7 +47,10 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("equipment-swap")) LightInventoryChecks.inventory(mc);
+      if (command.equals("menu-persisted")) MenuUpdateChecks.persisted(mc);
+      else if (command.startsWith("music-update-")) MusicUpdateChecks.run(mc,command.substring(13));
+      else if (command.equals("menu-update")) MenuUpdateChecks.run(mc);
+      else if (command.equals("equipment-swap")) LightInventoryChecks.inventory(mc);
       else if (command.startsWith("overlay-")) LightInventoryChecks.light(mc,command.substring(8));
       else if (command.equals("split-restart-start") || command.equals("split-restart-finish")) ChestJoinChecks.restart(mc,command.endsWith("finish"));
       else if (command.startsWith("preview-audio-")) PreviewPickerChecks.audio(mc,command.substring(14));

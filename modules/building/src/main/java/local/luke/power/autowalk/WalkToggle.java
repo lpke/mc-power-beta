@@ -3,15 +3,26 @@ package local.luke.power.autowalk;
 /** Pure input state, independent of Minecraft and LWJGL. */
 public final class WalkToggle {
   private boolean active;
-  private boolean keyWasDown;
+  private boolean keyWasDown, holdEligible, longHold;
+  private long pressedAt;
 
   public boolean update(boolean keyDown, boolean canWalk) {
+    return update(keyDown, canWalk, false, 0, 350);
+  }
+
+  public boolean update(boolean keyDown, boolean canWalk, boolean holdToWalk, long now, int holdMillis) {
     boolean before = active;
     if (!canWalk) {
-      active = false;
+      stop();
     } else if (keyDown && !keyWasDown) {
       active = !active;
+      pressedAt = now; holdEligible = holdToWalk; longHold = false;
     }
+    if (canWalk && holdEligible && holdToWalk && now - pressedAt >= Math.max(100, holdMillis) * 1_000_000L) {
+      if (keyDown && !longHold) { active = true; longHold = true; }
+      if (!keyDown) active = false;
+    }
+    if (!keyDown) { holdEligible = false; longHold = false; }
     keyWasDown = keyDown;
     return before != active;
   }
@@ -21,6 +32,7 @@ public final class WalkToggle {
   }
 
   public void stop() {
+    holdEligible = false; longHold = false;
     active = false;
   }
 

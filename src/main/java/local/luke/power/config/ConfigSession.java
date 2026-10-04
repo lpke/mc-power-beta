@@ -58,12 +58,14 @@ public final class ConfigSession {
 
   private final Map<String, JsonElement> previewed = new HashMap<>();
 
-  public void preview() throws Exception {
+  public void preview() throws Exception { preview(false); }
+
+  public void preview(boolean automatic) throws Exception {
     Map<String, Map<String, JsonElement>> changes = new LinkedHashMap<>(), old = new LinkedHashMap<>();
     for (Setting s : settings) {
       Backend b = backends.get(s.backend);
       JsonElement before = previewed.getOrDefault(s.id, s.original());
-      if (!s.restart && b.previews(s) && !s.value.equals(before)) {
+      if (!s.restart && (previewed.containsKey(s.id) || (automatic ? b.previewsAutomatically(s) : b.previews(s))) && !s.value.equals(before)) {
         s.validate(s.value);
         changes.computeIfAbsent(s.backend, k -> new LinkedHashMap<>()).put(s.id, s.value.deepCopy());
         old.computeIfAbsent(s.backend, k -> new LinkedHashMap<>()).put(s.id, before.deepCopy());

@@ -31,7 +31,7 @@ public final class PreviewPickerChecks {
         test("custom tracks appear in the open menu after scanning", () -> {
           check(mc.currentScreen instanceof PowerOptionsScreen, "options screen closed");
           check(((PowerOptionsScreen)mc.currentScreen).session().settings().stream()
-              .anyMatch(s -> s.id.equals("audio.sound.music:preview-test.wav")), "custom row needs menu reopen");
+              .anyMatch(s -> s.label.equals("preview-test.wav")), "custom row needs menu reopen");
         });
         vanilla=AudioController.music(mc).stream().filter(id->!id.endsWith("preview-test.wav")).findFirst().orElseThrow();
         AudioController.next();
@@ -52,7 +52,7 @@ public final class PreviewPickerChecks {
           check(!system.playing("PowerBetaMusicPreview"),"preview not stopped");
           check(system.playing("BgMusic")&&AudioController.nowPlaying().equals(background),"original track not resumed: expected="+background+", actual="+AudioController.nowPlaying()+", playing="+system.playing("BgMusic"));
         });
-        AudioController.previewSound("music:preview-test.wav");
+        AudioController.previewSound(AudioController.customTracks().stream().filter(t -> t.name().equals("preview-test.wav")).findFirst().orElseThrow().id());
       }
       case "check-custom" -> {
         test("custom track preview streams immediately",()->check(system.playing("PowerBetaMusicPreview")&&AudioController.status().contains("preview-test.wav"),"custom preview missing"));
@@ -69,7 +69,7 @@ public final class PreviewPickerChecks {
         test("Play resumes the same background track after preview pause", () -> {
           check(system.playing("BgMusic") && AudioController.nowPlaying().equals(background), "pause skipped the original track: expected="+background+", actual="+AudioController.nowPlaying()+", status="+AudioController.status());
         });
-        AudioController.previewSound("music:preview-test.wav");
+        AudioController.previewSound(AudioController.customTracks().stream().filter(t -> t.name().equals("preview-test.wav")).findFirst().orElseThrow().id());
       }
       case "next" -> AudioController.next();
       case "finish" -> {

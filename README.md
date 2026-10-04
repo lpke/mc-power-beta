@@ -149,3 +149,25 @@ config, and installs the built pack. It leaves worlds and resource packs alone.
 Old configuration filenames and world keys exist only in migration records and
 upstream provenance. Recovery records and audit reports are under `power-beta-data`,
 separate from live configuration.
+
+### Music library and MP3
+
+Audio → Music library combines tracks from the world and menu folders. Each track
+has a rotation switch and volume control. Speaker previews preserve the current
+song; Play starts a track immediately. Explicit queue requests may include excluded
+tracks. Queue edits are saved immediately in `config/power-beta.json`, independently
+of unsaved settings. Missing files stay listed in the queue for repair or removal.
+
+OGG, WAV and MUS play directly. **Convert MP3** uses `ffmpeg` from PATH to create WAV
+files in `power-beta-data/music-cache`. Originals are never changed. FFmpeg is an
+optional external executable, not a required mod or Java library. Conversion runs
+in the background, up to 256 files per batch, with a three-minute and 1 GiB output
+limit per file. Cancel stops only the converter process started by the game.
+
+### Menu preferences
+
+Right-click Apply to toggle auto-apply. Runtime slider previews remain immediate;
+continuous edits save on release. Auto-apply and saved colour swatches persist in
+the shared configuration. General → Game and input can make pausing open Options
+directly. The Menu button returns to the normal pause menu. Search, page, scroll and
+navigation history are remembered while the game remains open.

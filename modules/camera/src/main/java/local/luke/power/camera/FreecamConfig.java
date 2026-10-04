@@ -9,8 +9,13 @@ public class FreecamConfig {
     public static class ConfigFields {
         @ConfigEntry(name = "Freecam", description = "Allow detached-camera controls.")
         public Boolean enabled = false;
+        @ConfigEntry(
+                name = "Enable Freecam Collisions",
+                multiplayerSynced = true
+        )
+        public Boolean collision = true;
         @ConfigEntry(name = "Freecam door collisions", description = "Collide with doors and trapdoors when camera collisions are enabled.")
-        public Boolean doorCollision = true;
+        public Boolean doorCollision = false;
         @ConfigEntry(name = "Freecam sprint", description = "Use the flight sprint key, multiplier and Hold/Toggle setting to boost camera speed.")
         public Boolean sprint = true;
         @ConfigEntry(
@@ -29,11 +34,6 @@ public class FreecamConfig {
         )
         public Float drag = 4f;
 
-        @ConfigEntry(
-                name = "Enable Freecam Collisions",
-                multiplayerSynced = true
-        )
-        public Boolean collision = true;
         @ConfigEntry(
                 name = "Show Freecam",
                 description = "When this option is enabled, a 3D camera is rendered at the position of the freecam"

@@ -100,6 +100,8 @@ public final class ConfigStore {
 
   public static void validate(Settings s) {
     s.hotbar.validate();
+    if (s.autoWalkHoldMillis < 100 || s.autoWalkHoldMillis > 3000)
+      throw new IllegalArgumentException("Auto-walk hold time must be 100 to 3000 ms");
     if (s.freeLookPerspective == null)
       throw new IllegalArgumentException("Choose a free look perspective");
     if (s.placement.attemptsPerTick < 1

@@ -26,7 +26,11 @@
     "ChatTextAccessor",
     "NativeStorageMixin",
     "EquipmentSwapMixin",
-    "LightOverlayMixin"
+    "LightOverlayMixin",
+    "WorldQualityMixin",
+    "SceneQualityMixin",
+    "EntityQualityMixin",
+    "GameQualityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

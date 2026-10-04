@@ -12,6 +12,7 @@ public final class AudioSettings {
   public int master = 100;
   public Map<String, Integer> categories = new LinkedHashMap<>();
   public Map<String, Integer> sounds = new TreeMap<>();
+  public Set<String> disabledTracks = new TreeSet<>();
   public MusicMode musicMode = MusicMode.VANILLA;
   public List<String> musicDirectories = new ArrayList<>();
   public List<String> menuDirectories = new ArrayList<>();
@@ -42,6 +43,8 @@ public final class AudioSettings {
         throw new IllegalArgumentException("Unknown audio category");
       volume(e.getValue());
     }
+    if (disabledTracks == null || disabledTracks.size() > 4096 || disabledTracks.stream().anyMatch(id -> id == null || !id.startsWith("music:") || id.length() > 512))
+      throw new IllegalArgumentException("Invalid excluded tracks");
     if (sounds.size() > 4096) throw new IllegalArgumentException("Too many sound overrides");
     for (var e : sounds.entrySet()) {
       String id = e.getKey();

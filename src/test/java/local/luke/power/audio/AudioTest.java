@@ -71,8 +71,30 @@ class AudioTest {
     Files.writeString(dir.resolve("track.mp3"), "not supported");
     var scan = MusicLibrary.scan(dir, List.of(".", dir.toString()), false);
     assertEquals(1, scan.tracks().size());
-    assertEquals(2, scan.warnings().size());
+    assertEquals(4, scan.warnings().size());
     assertTrue(Files.exists(dir.resolve("broken.ogg")));
+  }
+
+  @Test
+  void mp3IsListedForConversionAndEqualFilenamesHaveSeparateIds() throws Exception {
+    Path a = Files.createDirectories(dir.resolve("a")), b = Files.createDirectories(dir.resolve("b"));
+    byte[] mp3 = {'I', 'D', '3', 4, 0, 0, 0, 0, 0, 0, 0, 0};
+    Files.write(a.resolve("same.mp3"), mp3); Files.write(b.resolve("same.mp3"), mp3);
+    var scan = MusicLibrary.scan(dir, List.of("a", "b", "a"), false);
+    assertEquals(2, scan.tracks().size());
+    assertNotEquals(scan.tracks().get(0).id(), scan.tracks().get(1).id());
+    assertFalse(scan.tracks().get(0).playable());
+    assertArrayEquals(mp3, Files.readAllBytes(a.resolve("same.mp3")));
+  }
+
+  @Test
+  void queuePreservesDuplicatesAndRejectsOverflow() {
+    MusicQueue q = new MusicQueue(); q.add("music:a"); q.add("music:b"); q.add("music:a");
+    q.move(2, -1); assertEquals(List.of("music:a", "music:a", "music:b"), q.tracks);
+    q.move(-1, 1); q.move(0, -1); q.move(2, 1); q.validate();
+    while (q.tracks.size() < 256) q.add("music:a");
+    assertThrows(IllegalArgumentException.class, () -> q.add("music:b"));
+    assertEquals(256, q.tracks.size());
   }
 
   @Test
