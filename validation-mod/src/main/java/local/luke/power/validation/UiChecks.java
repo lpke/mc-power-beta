@@ -26,6 +26,13 @@ public final class UiChecks {
     ((TextInput)field(s, "search")).setText(value); call(s, "layout");
   }
   static void click(PowerOptionsScreen s, int x, int y) { ((ScreenInput)(Object)s).power$click(x,y,0); }
+  static AudioToolbar.Button musicButton(PowerOptionsScreen screen, AudioToolbar.Action action) throws Exception {
+    return ((List<AudioToolbar.Button>)call(screen,"musicButtons")).stream()
+        .filter(button -> button.action()==action).findFirst().orElseThrow();
+  }
+  static void musicClick(PowerOptionsScreen screen, AudioToolbar.Action action) throws Exception {
+    var button=musicButton(screen,action);click(screen,button.x()+3,button.y()+8);
+  }
 
   static void run(Minecraft mc) throws Exception {
     ConfigSession before = SettingsRegistry.open(mc);

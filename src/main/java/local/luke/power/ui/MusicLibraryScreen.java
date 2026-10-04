@@ -67,15 +67,18 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int listTop() {
-    return 112;
+    return controlsTop() + 24;
   }
+
+  private int statusTop() { return parent.audioContentTop(); }
+  private int controlsTop() { return statusTop() + 15; }
 
   private boolean narrow() {
     return span() < 350;
   }
 
   private int rowHeight() {
-    return queue ? 24 : narrow() ? 62 : 44;
+    return queue ? 24 : 44;
   }
 
   private int queueWidth(int action) {
@@ -94,18 +97,24 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int filterX() {
-    return queue ? right() - Math.min(82, span() - Math.min(80, span() / 4) * 2 - 8)
-        : left() + Math.min(80, span() / 4) * 2 + 8;
+    return queue ? right() - 82 : left();
   }
 
-  public void showQueue() {
+  private int filterWidth() { return queue ? 82 : Math.min(240, span()); }
+  public boolean queueVisible() { return queue; }
+
+  private void show(boolean queue) {
     dragging = null;
+    scrollbar.release();
     parent.finishContinuousChange();
     search.focused = false;
-    queue = true;
-    queueScroll = 0;
+    this.queue = queue;
+    error = "";
     rebuild();
   }
+
+  public void showQueue() { show(true); }
+  public void showTracks() { show(false); }
 
   private int scroll() {
     return queue ? queueScroll : trackScroll;
@@ -132,7 +141,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int actionY(int rowY) {
-    return rowY + (narrow() ? 39 : 19);
+    return rowY + (narrow() ? 0 : 19);
   }
 
   private ScrollBar.Track track() {
@@ -141,7 +150,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public boolean hasQuery() {
-    return !search.text().isEmpty();
+    return !queue && !search.text().isEmpty();
   }
 
   public boolean focused() {
@@ -159,6 +168,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public void focus() {
+    if (queue) showTracks();
     search.focused = true;
     search.selectAll();
   }
@@ -295,7 +305,8 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public void searchClick(int x, int y, int button) {
-    search.focused = !queue;
+    if (queue) return;
+    search.focused = true;
     if (button == 1) clearQuery();
   }
 
@@ -314,27 +325,14 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     search.focused = false;
-    int tabW = Math.min(80, span() / 4);
-    if (inside(x, y, left(), 88, tabW, 20)) {
-      click();
-      queue = false;
-      rebuild();
-      return;
-    }
-    if (inside(x, y, left() + tabW + 2, 88, tabW, 20)) {
-      click();
-      queue = true;
-      rebuild();
-      return;
-    }
-    if (inside(x, y, filterX(), 88, right() - filterX(), 18)) {
+    if (inside(x, y, filterX(), controlsTop(), filterWidth(), 18)) {
       if (queue && tracks.isEmpty()) return;
       click();
       if (queue) queueEdit(q -> q.tracks.clear());
       else cycleFolder(b == 0 ? 1 : -1);
       return;
     }
-    if (inside(x, y, right() - 88, 73, 88, 14)) {
+    if (!queue && inside(x, y, right() - 88, statusTop(), 88, 14)) {
       click();
       if (Mp3Converter.busy()) Mp3Converter.cancel();
       else
@@ -395,15 +393,8 @@ public final class MusicLibraryScreen extends UiScreen {
 
   public void renderSearch(int x, int y, int w, int mx, int my) {
     if (queue) {
-      button("Queue (" + tracks.size() + ")", x, y, w, 18, mx, my, false);
+      text("Music queue", x + 2, y + 5, 0xdddddd);
     } else input(search, x, y, w, mx, my, "Search tracks or folders...");
-  }
-
-  private void tab(String label, boolean active, int x, int w, int mx, int my) {
-    fill(x, 88, x + w, 108, active ? 0xd0202020 : 0x80555555);
-    fill(x, active ? 88 : 106, x + w, active ? 90 : 108, active ? 0xffcccccc : 0xff333333);
-    drawCenteredTextWithShadow(
-        textRenderer, fit(label, w - 6), x + w / 2, 95, active ? 0xffffff : 0xaaaaaa);
   }
 
   public void render(int mx, int my, float delta) {
@@ -415,21 +406,19 @@ public final class MusicLibraryScreen extends UiScreen {
         parent.finishContinuousChange();
       }
     }
-    int tabW = Math.min(80, span() / 4);
-    tab("Tracks", !queue, left(), tabW, mx, my);
-    tab("Queue (" + MusicRequests.tracks().size() + ")", queue, left() + tabW + 2, tabW, mx, my);
     int filterX = filterX();
+    if (queue) text("Up next", left() + 2, controlsTop() + 5, 0xdddddd);
     button(
-        fit(queue ? "Clear queue" : folderLabel(), right() - filterX - 8),
+        fit(queue ? "Clear queue" : folderLabel(), filterWidth() - 8),
         filterX,
-        88,
-        right() - filterX,
+        controlsTop(),
+        filterWidth(),
         18,
         mx,
         my,
         !queue || !tracks.isEmpty());
     String tip = "";
-    if (inside(mx, my, filterX, 88, right() - filterX, 18))
+    if (inside(mx, my, filterX, controlsTop(), filterWidth(), 18))
       tip =
           queue
               ? "Remove queued requests. Music files and rotation stay unchanged."
@@ -448,7 +437,7 @@ public final class MusicLibraryScreen extends UiScreen {
           inside(mx, my, left(), y, span(), rowHeight()) && my >= listTop() && my < bottom();
       if (hover) fill(left() - 2, y, right() + 2, y + rowHeight() - 1, 0x60000000);
       text(
-          fit((queue ? (i + 1) + ". " : "") + AudioController.musicLabel(id), queue ? queueX(0) - left() - 8 : span() - 4),
+          fit((queue ? (i + 1) + ". " : "") + AudioController.musicLabel(id), queue ? queueX(0) - left() - 8 : span() - (narrow() ? 122 : 4)),
           left() + 2,
           y + (queue ? 8 : 4),
           playable(id) ? 0xdddddd : 0xffbb77);
@@ -515,13 +504,13 @@ public final class MusicLibraryScreen extends UiScreen {
             my,
             playable(id));
         button("Queue", right() - 46, actionY(y), 46, 18, mx, my, true);
-        if (hover && my >= y + 19) {
+        if (hover) {
           if (inside(mx, my, left(), y + 19, 60, 18))
             tip = "Include in automatic rotation. Preview and queue work even when excluded.";
           else if (inside(mx, my, volumeX(), y + 19, volumeEnd() - volumeX(), 18))
             tip = "Track volume; music and master volumes also apply.";
           else if (inside(mx, my, volumeEnd() + 4, y + 19, 22, 18)) tip = "Enter an exact volume";
-          else if (my >= actionY(y) && mx >= right() - 116)
+          else if (my >= actionY(y) && my < actionY(y) + 18 && mx >= right() - 116)
             tip =
                 mx < right() - 96
                     ? "Preview without changing the current track; click again to stop."
@@ -535,17 +524,18 @@ public final class MusicLibraryScreen extends UiScreen {
       text(queue ? "Queue is empty" : "No matching tracks.", left() + 4, listTop() + 12, 0xaaaaaa);
     unclip();
     scrollbar.render(this, track());
-    button(
-        Mp3Converter.busy() ? "Cancel MP3" : "Convert MP3", right() - 88, 73, 88, 14, mx, my, true);
-    if (inside(mx, my, right() - 88, 73, 88, 14))
-      tip = "Convert MP3 with FFmpeg to a WAV cache. Original files stay untouched.";
+    if (!queue) {
+      button(Mp3Converter.busy() ? "Cancel MP3" : "Convert MP3", right() - 88, statusTop(), 88, 14, mx, my, true);
+      if (inside(mx, my, right() - 88, statusTop(), 88, 14))
+        tip = "Convert MP3 with FFmpeg to a WAV cache. Original files stay untouched.";
+    }
     String status =
         !error.isEmpty()
             ? error
             : Mp3Converter.busy() || conversionTicks > 0
                 ? Mp3Converter.status()
                 : AudioController.status();
-    text(fit(status, span() - 92), left(), 77, error.isEmpty() ? 0xaaaaaa : 0xff8888);
+    text(fit(status, span() - (queue ? 0 : 92)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
     hoverHelp = tip;
   }
 }

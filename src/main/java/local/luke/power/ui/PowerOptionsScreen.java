@@ -53,6 +53,7 @@ public final class PowerOptionsScreen extends UiScreen {
   int contentLeft() { return left(); }
   int contentRight() { return right() - 14; }
   int contentBottom() { return bottom(); }
+  int audioContentTop() { return AudioToolbar.bottom(span(), libraryVisible()) + 3; }
   private boolean libraryVisible() { return libraryOpen && audio(); }
   private int contentHeight() { return rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height + 6; }
   private ScrollBar.Track contentTrack() { return new ScrollBar.Track(right() - 8, top(), bottom() - top(), contentHeight(), scroll); }
@@ -268,7 +269,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private int top() {
-    return audio() ? 92 : 52;
+    return audio() ? audioContentTop() + 19 : 52;
   }
 
   private int bottom() {
@@ -444,21 +445,23 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (audio() && button == 0 && y >= 52 && y < 70 && x >= left() && x < contentRight()) {
-      AudioToolbar.Action action = musicAction(x);
-      if (action == null) return;
+    if (audio() && button == 0 && y >= 52 && y < audioContentTop() - 3 && x >= left() && x < contentRight()) {
+      var item = musicButton(x, y);
+      if (item == null || !item.enabled()) return;
+      AudioToolbar.Action action = item.action();
       click();
       switch (action) {
+        case SETTINGS -> { library.removed(); libraryOpen = false; layout(); }
         case PLAY -> local.luke.power.audio.AudioController.togglePause();
         case PREVIOUS -> local.luke.power.audio.AudioController.previous();
         case NEXT -> local.luke.power.audio.AudioController.next();
         case QUEUE -> { libraryOpen = true; library.showQueue(); layout(); }
         case RELOAD -> local.luke.power.audio.AudioController.reload();
-        case LIBRARY -> { libraryOpen = !libraryOpen; layout(); }
+        case LIBRARY -> { libraryOpen = true; library.showTracks(); layout(); }
       }
       return;
     }
-    if (libraryVisible() && x >= left() && y >= 73 && y < bottom()) {
+    if (libraryVisible() && x >= left() && y >= audioContentTop() && y < bottom()) {
       library.mouseClicked(x, y, button); return;
     }
     if (!libraryVisible() && y >= top() && y < bottom() && x >= left() && x < right() - 10) {
@@ -748,12 +751,13 @@ public final class PowerOptionsScreen extends UiScreen {
     return text.toString();
   }
 
-  private List<AudioToolbar.Button> musicButtons() {
-    return AudioToolbar.layout(left(), span(), !local.luke.power.audio.MusicRequests.tracks().isEmpty(),
+  private AudioToolbar.Layout musicLayout() {
+    return AudioToolbar.layout(left(), span(), local.luke.power.audio.MusicRequests.tracks().size(),
         local.luke.power.audio.AudioController.musicPlaying(), libraryVisible());
   }
-  private AudioToolbar.Action musicAction(int x) {
-    for (var button : musicButtons()) if (button.contains(x)) return button.action();
+  private List<AudioToolbar.Button> musicButtons() { return musicLayout().buttons(); }
+  private AudioToolbar.Button musicButton(int x, int y) {
+    for (var button : musicButtons()) if (button.contains(x, y)) return button;
     return null;
   }
 
@@ -816,10 +820,13 @@ public final class PowerOptionsScreen extends UiScreen {
     if (canClear()) button("x", right() - 32, 27, 18, 20, mx, my, true);
     if (audio()) {
       for (var item : musicButtons()) {
-        if (item.icon()) iconButton("reload", item.x(), 52, item.width(), mx, my, true);
-        else button(fit(item.label(), item.width() - 4), item.x(), 52, item.width(), 18, mx, my, true);
+        button(fit(item.label(), item.width() - 4), item.x(), item.y(), item.width(), 18, mx, my, item.enabled());
+        if (libraryVisible() && item.enabled()
+            && (item.action() == AudioToolbar.Action.QUEUE && library.queueVisible()
+                || item.action() == AudioToolbar.Action.LIBRARY && !library.queueVisible()))
+          fill(item.x() + 2, item.y() + 15, item.x() + item.width() - 2, item.y() + 17, 0xffb0b0b0);
       }
-      if (!libraryVisible()) text(fit(local.luke.power.audio.AudioController.status(), span()), left(), 77, 0xaaaaaa);
+      if (!libraryVisible()) text(fit(local.luke.power.audio.AudioController.status(), span()), left(), audioContentTop() + 4, 0xaaaaaa);
     }
     String tip = "", hoverId = "";
     if (!libraryVisible()) {
@@ -876,16 +883,18 @@ public final class PowerOptionsScreen extends UiScreen {
     unclip();
     contentBar.render(this, contentTrack());
     } else { library.render(mx, my, delta); tip = library.hoverHelp(); hoverId = "library:" + tip; }
-    if (audio() && inside(mx, my, left(), 52, span(), 18)) {
-      var action = musicAction(mx);
-      if (action != null) {
+    if (audio()) {
+      var item = musicButton(mx, my);
+      if (item != null) {
+        var action = item.action();
         tip = switch (action) {
+          case SETTINGS -> "Return to audio settings without changing playback";
           case PLAY -> "Play or pause music";
           case PREVIOUS -> "Previous track";
           case NEXT -> "Next track; queued tracks take priority";
-          case QUEUE -> "Open the music queue";
+          case QUEUE -> item.enabled() ? "Open the music queue" : "Queue is empty. Add tracks from the library.";
           case RELOAD -> "Rescan music folders";
-          case LIBRARY -> libraryVisible() ? "Return to audio settings" : "Browse tracks, folders and the queue";
+          case LIBRARY -> "Browse music tracks and folders";
         };
         hoverId = "music." + action;
       }

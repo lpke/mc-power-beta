@@ -1,5 +1,15 @@
 # Changelog
 
+## Audio navigation, 2026-10-04
+
+- Keep Queue visible with its live request count; grey out Queue (0).
+- Order the right toolbar group as Queue, Library, Reload. Library always opens
+  tracks, with Back to Settings beside playback controls in either music view.
+- Remove the separate Tracks/Queue tabs. Preserve each view's scroll, track
+  search and folder filter when switching or returning to settings.
+- Wrap toolbar groups at narrow widths and compact track controls into two lines.
+  Keep the full Back to Settings label, Clear queue and folder filter usable.
+
 ## Audio layout and folder controls, 2026-10-04
 
 - Keep Play, Previous and Next on the left; place compact Queue, Reload and

@@ -123,30 +123,63 @@ public final class AudioLayoutChecks {
           check(AudioConfig.current().disabledMusicDirectories.isEmpty(),"discard did not restore enabled folder");
           check(AudioConfig.current().disabledTracks.contains(a),"rollback erased track choice");
         });
-        test("conditional Queue shortcut opens its tab directly and queue controls share one line", () -> {
+        test("Queue shortcut opens directly and queue controls share one line", () -> {
           AudioController.pause();MusicRequests.edit(q -> {q.tracks.clear();q.add(a);q.add(b);});
           field(options,"libraryOpen",false);call(options,"layout");
-          var toolbar=(List<AudioToolbar.Button>)call(options,"musicButtons");
-          var button=toolbar.stream().filter(v -> v.action()==AudioToolbar.Action.QUEUE).findFirst().orElseThrow();
-          click(options,button.x()+3,60);
+          check(musicButton(options,AudioToolbar.Action.QUEUE).label().equals("Queue (2)"),"count missing");
+          musicClick(options,AudioToolbar.Action.QUEUE);
           check(mc.currentScreen==options && library.state().queue(),"Queue shortcut opened wrong view");
           options.render(-1,-1,0);
           check((int)call(library,"rowHeight")==24,"queue still has two-line rows");
           check((int)call(library,"right")-(int)call(library,"filterX")<=82,"Clear queue stretched");
-          click(options,indexed(library,"queueX",1)+3,120);
+          click(options,indexed(library,"queueX",1)+3,(int)call(library,"listTop")+8);
           check(MusicRequests.tracks().equals(List.of(b,a)),"inline down arrow missed");
           options.render(-1,-1,0);
           MusicRequests.edit(q -> q.tracks.remove(0));
-          click(options,indexed(library,"queueX",3)+3,120);
+          click(options,indexed(library,"queueX",3)+3,(int)call(library,"listTop")+8);
           check(MusicRequests.tracks().equals(List.of(a)),"stale click removed different request");
           options.render(-1,-1,0);
-          click(options,(int)call(library,"filterX")+3,96);
+          click(options,(int)call(library,"filterX")+3,(int)call(library,"controlsTop")+8);
           check(MusicRequests.tracks().isEmpty(),"Clear queue missed");
-          check(((List<AudioToolbar.Button>)call(options,"musicButtons")).stream().noneMatch(v -> v.action()==AudioToolbar.Action.QUEUE),"empty Queue shortcut remains");
+          var empty=musicButton(options,AudioToolbar.Action.QUEUE);
+          check(empty.label().equals("Queue (0)") && !empty.enabled(),"empty Queue is not visible and disabled");
+        });
+        test("direct view navigation preserves filters and positions without hiding empty queue", () -> {
+          MusicRequests.edit(q -> {for(int i=0;i<16;i++)q.add(a);});
+          library.restore(new MusicLibraryScreen.State(false,"custom","Track",24,0));
+          call(library,"rebuild");
+          var tracksBefore=library.state();
+          musicClick(options,AudioToolbar.Action.QUEUE);library.wheel(-3);
+          int queueScroll=library.state().queueScroll();
+          check(queueScroll>0,"queue fixture cannot scroll");
+          musicClick(options,AudioToolbar.Action.LIBRARY);
+          check(!library.queueVisible() && library.state().folder().equals("custom")
+              && library.state().query().equals("Track")
+              && library.state().trackScroll()==tracksBefore.trackScroll(),"library state lost");
+          musicClick(options,AudioToolbar.Action.QUEUE);
+          check(library.state().queueScroll()==queueScroll,"queue scroll lost");
+          musicClick(options,AudioToolbar.Action.SETTINGS);
+          check(!(boolean)field(options,"libraryOpen"),"Back did not open settings");
+          MusicRequests.edit(q -> q.tracks.clear());
+          musicClick(options,AudioToolbar.Action.QUEUE);
+          check(!(boolean)field(options,"libraryOpen"),"disabled Queue button navigated");
+          musicClick(options,AudioToolbar.Action.LIBRARY);
+          check(!library.queueVisible() && library.state().query().equals("Track"),"Library returned to queue or lost search");
+          library.showQueue();
+          check(!library.hasQuery(),"hidden track search leaks into queue Clear button");
+          library.searchClick(0,0,1);
+          check(library.state().query().equals("Track"),"queue title click erased track search");
+          library.showTracks();library.clearQuery();
         });
         test("audio toolbar queue and folders render at compact and wide sizes", () -> {
           for(int[] size : new int[][]{{320,240},{427,240},{550,380},{854,480}}) {
             options.init(mc,size[0],size[1]);options.render(-1,-1,0);
+            for(var button : (List<AudioToolbar.Button>)call(options,"musicButtons"))
+              check(mc.textRenderer.getWidth(button.label())<=button.width()-4,"truncated button "+button.label()+" at "+size[0]);
+            library.showQueue();options.render(-1,-1,0);
+            musicClick(options,AudioToolbar.Action.SETTINGS);options.render(-1,-1,0);
+            musicClick(options,AudioToolbar.Action.LIBRARY);
+            check(!library.queueVisible(),"Library button failed at "+size[0]);
             var folders=new FolderScreen(options,find(options.session(),"audio.musicDirectories"));
             folders.init(mc,size[0],size[1]);folders.render(-1,-1,0);
             check(GL11.glGetError()==0,"OpenGL error at "+size[0]);

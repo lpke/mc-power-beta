@@ -80,7 +80,7 @@ both original items. Armour and crafting-output restrictions remain in force.
 ## Audio
 
 The music toolbar and embedded library work while Options stays open. Tracks and
-Queue have separate scroll positions. The library remembers its tab, folder filter
+Queue have separate scroll positions. The library remembers its view, folder filter
 and search when Options reopens. Cycle the folder filter forward with left-click
 or backward with right-click. Queue arrows move individual requests; disabling a
 track's rotation never deletes its file or queued requests.
@@ -104,8 +104,11 @@ keeping its path, track preferences, previews and explicit queue requests intact
 The library starts on Active tracks, following the current world/menu, soundtrack
 and enabled-folder settings. Individually excluded tracks stay visible so they
 can be re-enabled. All tracks, Custom tracks and folder filters remain available.
-Playback controls sit on the left of the toolbar; Queue, Reload and Library sit
-on the right. Queue appears when requests exist and opens its compact list directly.
+Playback controls sit on the left of the toolbar; Queue, Library and Reload sit
+on the right. Queue always shows its request count and is disabled when empty.
+Library opens the track list. Back to Settings sits before Play/Pause in either
+music view. These buttons replace separate Tracks/Queue tabs. At narrow widths,
+the toolbar groups wrap onto two lines without shortening Back to Settings.
 
 Speaker buttons preview individual sounds, built-in music and custom tracks.
 Music previews pause the current song; click the same speaker again to resume it.
