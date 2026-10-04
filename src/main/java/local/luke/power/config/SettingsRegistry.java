@@ -16,6 +16,7 @@ public final class SettingsRegistry {
     GlassBackend.register(s);
     LogoBackend.register(s);
     WorldBackend.register(s, mc);
+    CommandsBackend.register(s, mc);
     return s;
   }
 }

@@ -1,5 +1,36 @@
 # Changelog
 
+## Command access and embedded music library, 2026-10-04
+
+- Add Commands with a master switch, per-command global access rules and per-world
+  overrides. Master Off always wins; world Allow/Block takes priority over the
+  global rule. Cheat commands default to creative-only, except `/gamemode` and
+  `/gm`, so survival players can enter creative. Information/help and WorldEdit
+  keep their existing access rules. Saved warps and command data remain intact.
+- Enforce access in chat dispatch and completion, including `/gm`. Suspend god-mode
+  protection while its command is blocked. Store policies in `power-beta.json`,
+  keyed by a stable ID saved in world metadata and shared between dimensions.
+- Remember the creative inventory's selected tab and creative/survival view for
+  the game session, without moving cursor items or changing inventory contents.
+- Remove successful container pickup/placement chat messages. Keep warnings,
+  errors and the existing transaction/recovery protections.
+- Show a colour swatch beside hex values. Dim setting labels slightly, support
+  dragging content/sidebar/folder scrollbars, and scroll an active sidebar page
+  to the top when clicked again.
+- Embed the music library in Audio. Remember its Tracks/Queue tab, folder filter,
+  query and separate list scroll positions when reopening Options.
+- Put Play/Pause, Previous, Next, Reload and Music library on one toolbar. Show
+  the current playback action, highlight active preview speakers yellow, and
+  let a second preview click stop both music and short effects.
+- Mute and pause late-starting background sources when previewing or pausing music,
+  preventing overlap after rapid Next/Preview/Pause clicks.
+- Add All/custom/individual-folder library filters, clearer tabs and compact
+  queue-row move arrows. Remove redundant queued labels. Reject stale queue
+  edits when playback has changed the list since its last render.
+- Replace the fog-cycle JSON field with an ordered distance editor: labelled
+  sliders, exact values, add/remove, reorder and Defaults. Keep edits local until
+  Done, reject duplicates/out-of-range values, and preserve the parent menu position.
+
 ## Menu, video and music controls, 2026-10-04
 
 - Use ranked fuzzy settings search with typo, abbreviation and omitted-space matching.

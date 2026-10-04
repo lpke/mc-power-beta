@@ -144,6 +144,7 @@ public abstract class ChatScreenMixin extends Screen {
                             .filter(c -> c.name().startsWith(currentWord.substring(1)))
                             .filter(c -> !ClientCommands.disabled_commands.contains(c.name()))
                             .filter(c -> (!c.disableInSingleplayer() || mc.world.isRemote))
+                        .filter(c -> mc.world.isRemote || local.luke.power.permissions.CommandPermissions.allowed(c.name()))
                             .filter(c -> (ClientCommands.mp_op || !c.needsPermissions() || !mc.world.isRemote))
                             .map(c -> c.name().substring(getText().length() - 1))
                             .toArray(String[]::new);
@@ -152,6 +153,7 @@ public abstract class ChatScreenMixin extends Screen {
                 Command command = RetroChatUtil.commands.stream()
                         .filter(c -> c.name().equals(sections[0].substring(1)))
                         .filter(c -> (!c.disableInSingleplayer() || mc.world.isRemote))
+                        .filter(c -> mc.world.isRemote || local.luke.power.permissions.CommandPermissions.allowed(c.name()))
                         .filter(c -> (ClientCommands.mp_op || !c.needsPermissions() || !mc.world.isRemote))
                         .findFirst().orElse(null);
                 if (command != null && (!command.disableInSingleplayer() || mc.world.isRemote)) {

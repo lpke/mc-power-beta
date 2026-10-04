@@ -47,7 +47,45 @@ public final class AudioController {
   public static int libraryRevision() { return libraryRevision; }
   private static final List<class_267> history = new ArrayList<>();
   private static int historyIndex = -1;
-  private static long musicStarted;
+  private static long musicStarted, soundPreviewStarted;
+  private static String soundPreview = "";
+  private static boolean soundPreviewPlaying;
+  private static Object soundPreviewWorld;
+
+  public static boolean previewing(String id) {
+    return id != null && (id.equals(soundPreview) || MusicPreview.active() && id.equals(MusicPreview.track()));
+  }
+
+  public static boolean musicPlaying() {
+    SoundSystem s = system();
+    return s != null && (MusicPreview.active() || !paused && (s.playing("BgMusic") || s.playing("PowerBetaMenu")
+        || !currentMusic.isEmpty() && System.nanoTime() - musicStarted < 1_000_000_000L));
+  }
+
+  public static boolean playingTrack(String id) {
+    return musicPlaying() && !MusicPreview.active() && (id.equals(currentMusic) || id.equals(menuMusic));
+  }
+
+  public static void toggleTrack(String id) {
+    if (MusicPreview.active()) { playNow(id); return; }
+    if (playingTrack(id)) pause();
+    else if (paused && (id.equals(currentMusic) || id.equals(menuMusic))) togglePause();
+    else playNow(id);
+  }
+
+  private static void stopSoundPreview() {
+    SoundSystem s = system();
+    if (s != null) { s.stop("PowerBetaPreview"); s.removeSource("PowerBetaPreview"); }
+    soundPreview = "";
+    soundPreviewWorld = null;
+  }
+
+  private static void tickSoundPreview() {
+    if (soundPreview.isEmpty()) return;
+    if (client.world != soundPreviewWorld) { stopSoundPreview(); return; }
+    if (system().playing("PowerBetaPreview")) soundPreviewPlaying = true;
+    else if (soundPreviewPlaying || System.nanoTime() - soundPreviewStarted > 1_000_000_000L) stopSoundPreview();
+  }
 
   private static void remember(class_267 track) {
     while (history.size() > historyIndex + 1) history.remove(history.size() - 1);
@@ -88,6 +126,7 @@ public final class AudioController {
   public static void previewSound(String id) {
     if (client == null || system() == null) return;
     if (id.startsWith("music:")) { previewMusic(id); return; }
+    if (id.equals(soundPreview)) { stopSoundPreview(); return; }
     MusicPreview.stop(system(), true);
     var manager = (SoundManagerAccessor) client.soundManager;
     boolean record = id.startsWith("records.");
@@ -100,6 +139,10 @@ public final class AudioController {
     system.removeSource("PowerBetaPreview");
     system.newSource(false, "PowerBetaPreview", track.field_2127, track.field_2126, false, 0, 0, 0, 0, 0);
     system.setVolume("PowerBetaPreview", mix("PowerBetaPreview", id, client.options.soundVolume, false));
+    soundPreview = id;
+    soundPreviewStarted = System.nanoTime();
+    soundPreviewPlaying = false;
+    soundPreviewWorld = client.world;
     system.play("PowerBetaPreview");
   }
 
@@ -107,7 +150,7 @@ public final class AudioController {
     try {
       class_267 selected = resolveTrack(id);
       if (selected == null) { status = "Track unavailable. Reload music folders."; return; }
-      system().stop("PowerBetaPreview");
+      stopSoundPreview();
       MusicPreview.start(client, system(), selected, !paused && !currentMusic.isEmpty()
           && System.nanoTime() - musicStarted < 1_000_000_000L);
     } catch (RuntimeException | java.io.IOException e) {
@@ -298,8 +341,15 @@ public final class AudioController {
       paused = false;
       wasWorld = inWorld;
     }
+    tickSoundPreview();
     MusicPreview.tick(mc, system);
-    if (MusicPreview.active() || paused) return;
+    if (MusicPreview.active()) return;
+    if (paused) {
+      // A queued play can finish after Pause. Keep it silent and enforce the pause.
+      if (system.playing("BgMusic")) system.pause("BgMusic");
+      if (system.playing("PowerBetaMenu")) system.pause("PowerBetaMenu");
+      return;
+    }
     if (rules().disabled() || AudioConfig.current().master == 0) {
       system.stop("BgMusic");
       system.stop("PowerBetaMenu");
@@ -408,7 +458,8 @@ public final class AudioController {
     if (source.equals("streaming")) LegacyMusic.record(id.replaceFirst("^records\\.", ""));
     float effects = client == null ? 1 : client.options.soundVolume;
     SOURCES.put(source, new Source(id, effects > 0 ? volume / effects : 0, ui));
-    return (float) (volume * AudioConfig.current().gain(id, ui) * rules().ambient(id));
+    return source.equals("streaming") && MusicPreview.active() ? 0
+        : (float) (volume * AudioConfig.current().gain(id, ui) * rules().ambient(id));
   }
 
   public static float musicVolume(String id) {
@@ -418,6 +469,7 @@ public final class AudioController {
   }
 
   public static float backgroundVolume(float original) {
+    if (MusicPreview.active() || paused) return 0;
     AudioSettings s = AudioConfig.current();
     return original * s.master / 100f * trackVolume(currentMusic) / 100f;
   }
@@ -434,15 +486,15 @@ public final class AudioController {
       Source source = e.getValue();
       s.setVolume(
           e.getKey(),
-          (float)
+          e.getKey().equals("streaming") && MusicPreview.active() ? 0 : (float)
               (source.base
                   * effects
                   * AudioConfig.current().gain(source.sound, source.ui)
                   * rules().ambient(source.sound)));
     }
     if (client != null) {
-      s.setVolume("BgMusic", musicVolume(currentMusic));
-      s.setVolume("PowerBetaMenu", musicVolume(menuMusic));
+      s.setVolume("BgMusic", (MusicPreview.active() || paused) ? 0 : musicVolume(currentMusic));
+      s.setVolume("PowerBetaMenu", (MusicPreview.active() || paused) ? 0 : musicVolume(menuMusic));
       if (MusicPreview.active()) s.setVolume(MusicPreview.SOURCE, musicVolume(MusicPreview.track()));
     }
   }
@@ -462,25 +514,22 @@ public final class AudioController {
   public static void pause() {
     paused = true;
     SoundSystem s = system();
-    if (s != null) { MusicPreview.pause(s); s.pause("BgMusic"); s.pause("PowerBetaMenu"); }
+    if (s != null) {
+      MusicPreview.pause(s);
+      s.setVolume("BgMusic", 0); s.setVolume("PowerBetaMenu", 0);
+      s.pause("BgMusic"); s.pause("PowerBetaMenu");
+    }
   }
 
   public static void togglePause() {
     SoundSystem s = system();
     if (s == null) return;
-    boolean resumedPreview = paused ? MusicPreview.stop(s, true) : MusicPreview.pause(s);
-    if (!paused && !resumedPreview && !s.playing("BgMusic") && !s.playing("PowerBetaMenu")) {
-      next();
-      return;
-    }
-    paused = !paused;
-    if (paused) {
-      s.pause("BgMusic");
-      s.pause("PowerBetaMenu");
-    } else {
-      if (!currentMusic.isEmpty()) s.play("BgMusic");
-      if (!menuMusic.isEmpty() && (client == null || client.world == null)) s.play("PowerBetaMenu");
-    }
+    if (musicPlaying()) { pause(); return; }
+    if (!paused || currentMusic.isEmpty() && menuMusic.isEmpty()) { next(); return; }
+    paused = false;
+    refresh();
+    if (!currentMusic.isEmpty()) s.play("BgMusic");
+    if (!menuMusic.isEmpty() && (client == null || client.world == null)) s.play("PowerBetaMenu");
   }
 
   public static void next() {

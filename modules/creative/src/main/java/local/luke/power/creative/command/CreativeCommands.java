@@ -18,6 +18,8 @@ public final class CreativeCommands {
     Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
     if (mc.level != null && mc.level.isRemote) return false;
     if (!ClientRuntime.local(mc)) return true;
+    String denial = local.luke.power.permissions.CommandPermissions.denial("gamemode");
+    if (!denial.isEmpty()) { mc.overlay.addChatMessage("§c" + denial); return true; }
     try {
       if (args.length < 2 || args.length > 3)
         throw new IllegalArgumentException(

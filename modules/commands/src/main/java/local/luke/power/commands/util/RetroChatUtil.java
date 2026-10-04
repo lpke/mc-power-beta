@@ -62,7 +62,8 @@ public class RetroChatUtil {
     }
 
     public static boolean handleCommand(SharedCommandSource commandSource, String command, boolean operator) {
-        String[] segments = command.split(" ");
+        if (command == null || command.isBlank()) return false;
+        String[] segments = command.trim().split("\\s+");
         boolean help = segments[0].equals("help") && segments.length > 1;
         boolean page = help && isDigit(segments[1].charAt(0));
 
@@ -86,6 +87,8 @@ public class RetroChatUtil {
                     c.manual(commandSource);
                     return true;
                 } else {
+                    String denial = local.luke.power.permissions.CommandPermissions.denial(c.name());
+                    if (!denial.isEmpty()) { commandSource.sendFeedback("§c" + denial); return true; }
                     try {
                         c.command(commandSource, segments);
                         return true;
@@ -100,6 +103,8 @@ public class RetroChatUtil {
         if (segments[0].equals("help"))
             for (Command c : commands) {
                 if (c.name().equals("help")) {
+                    String denial = local.luke.power.permissions.CommandPermissions.denial(c.name());
+                    if (!denial.isEmpty()) { commandSource.sendFeedback("§c" + denial); return true; }
                     try {
                         c.command(commandSource, segments);
                         return true;

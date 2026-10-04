@@ -36,7 +36,7 @@ public final class PreviewPickerChecks {
         vanilla=AudioController.music(mc).stream().filter(id->!id.endsWith("preview-test.wav")).findFirst().orElseThrow();
         AudioController.next();
         var current=AudioController.class.getDeclaredField("currentMusic");current.setAccessible(true);
-        background=((String)current.get(null)).substring(6);AudioController.previewSound(vanilla);
+        background=(String)current.get(null);AudioController.previewSound(vanilla);
       }
       case "check-vanilla" -> {
         test("individual music streams immediately while options remain open",()->check(system.playing("PowerBetaMusicPreview"),"stream not playing"));
@@ -50,7 +50,7 @@ public final class PreviewPickerChecks {
       case "resumed" -> {
         test("clicking same preview resumes original background music",()->{
           check(!system.playing("PowerBetaMusicPreview"),"preview not stopped");
-          check(system.playing("BgMusic")&&AudioController.nowPlaying().equals(background),"original track not resumed: expected="+background+", actual="+AudioController.nowPlaying()+", playing="+system.playing("BgMusic"));
+          check(system.playing("BgMusic")&&AudioController.playingTrack(background),"original track not resumed: expected="+background+", actual="+AudioController.nowPlaying()+", playing="+system.playing("BgMusic"));
         });
         AudioController.previewSound(AudioController.customTracks().stream().filter(t -> t.name().equals("preview-test.wav")).findFirst().orElseThrow().id());
       }
@@ -67,7 +67,7 @@ public final class PreviewPickerChecks {
       }
       case "check-play" -> {
         test("Play resumes the same background track after preview pause", () -> {
-          check(system.playing("BgMusic") && AudioController.nowPlaying().equals(background), "pause skipped the original track: expected="+background+", actual="+AudioController.nowPlaying()+", status="+AudioController.status());
+          check(system.playing("BgMusic") && AudioController.playingTrack(background), "pause skipped the original track: expected="+background+", actual="+AudioController.nowPlaying()+", status="+AudioController.status());
         });
         AudioController.previewSound(AudioController.customTracks().stream().filter(t -> t.name().equals("preview-test.wav")).findFirst().orElseThrow().id());
       }

@@ -47,7 +47,9 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("menu-persisted")) MenuUpdateChecks.persisted(mc);
+      if (command.equals("fog-array")) FogArrayChecks.run(mc);
+      else if (command.startsWith("library-check-")) CommandsLibraryChecks.run(mc,command.substring(14));
+      else if (command.equals("menu-persisted")) MenuUpdateChecks.persisted(mc);
       else if (command.startsWith("music-update-")) MusicUpdateChecks.run(mc,command.substring(13));
       else if (command.equals("menu-update")) MenuUpdateChecks.run(mc);
       else if (command.equals("equipment-swap")) LightInventoryChecks.inventory(mc);

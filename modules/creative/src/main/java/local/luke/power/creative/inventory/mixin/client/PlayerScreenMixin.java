@@ -43,6 +43,9 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
   @Unique
   private static final String CREATIVE_KEY_CREATIVE = "title.power_creative_inventory.selectGame.creative";
 
+  @Unique private static boolean power_lastSurvivalView;
+  @Unique private static int power_lastTab;
+
   @Unique private List<ItemStack> creative_items;
   @Unique private boolean creative_normalGUI;
   @Unique private int creative_mouseDelta;
@@ -71,13 +74,15 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
   private void creative_initPlayerInventory(PlayerEntity player, CallbackInfo info) {
     creative_creativeIcon = new ItemStack(Item.diamond);
     creative_survivalIcon = new ItemStack(Block.WORKBENCH);
-    CreativeTab tab = TabRegistry.getTabByIndex(0);
+    int remembered = Math.max(0, Math.min(power_lastTab, TabRegistry.getTabsCount() - 1));
+    CreativeTab tab = TabRegistry.getTabByIndex(remembered);
+    creative_normalGUI = power_lastSurvivalView;
     creative_tabKey = tab.getTranslationKey();
     creative_items = tab.getItems();
     creative_maxIndex = creative_getMaxItemIndex();
     creative_rowIndex = 0;
-    creative_tabIndex = 0;
-    creative_tabPage = 0;
+    creative_tabIndex = remembered % 7;
+    creative_tabPage = remembered / 7;
     creative_updateMaxIndex();
     creative_pagesCount = (int) Math.ceil(TabRegistry.getTabsCount() / 7.0F);
   }
@@ -647,6 +652,8 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
 
   @Unique
   private void creative_playSound() {
+    power_lastSurvivalView = creative_normalGUI;
+    power_lastTab = creative_tabPage * 7 + creative_tabIndex;
     this.minecraft.soundHelper.playSound("random.click", 1.0F, 1.0F);
   }
 

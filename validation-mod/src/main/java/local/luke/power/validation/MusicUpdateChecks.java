@@ -17,6 +17,7 @@ public final class MusicUpdateChecks {
   private static AudioSettings before;
   private static String playing;
   private static byte[] mp3;
+  private static PowerOptionsScreen parent;
   private static MusicLibraryScreen screen;
 
   private static String id(String folder) {
@@ -66,9 +67,9 @@ public final class MusicUpdateChecks {
                       .playable(),
                   "MP3 falsely playable before conversion");
             });
-        PowerOptionsScreen parent = (PowerOptionsScreen) mc.currentScreen;
-        screen = new MusicLibraryScreen(parent);
-        mc.setScreen(screen);
+        parent = (PowerOptionsScreen) mc.currentScreen;
+        field(parent,"page","Audio"); field(parent,"libraryOpen",true); search(parent,"");
+        screen = (MusicLibraryScreen)field(parent,"library");
         test(
             "library UI changes individual volume and rotation without saving",
             () -> {
@@ -95,7 +96,7 @@ public final class MusicUpdateChecks {
             "Play starts custom music without leaving library",
             () ->
                 check(
-                    system.playing("BgMusic") && mc.currentScreen == screen,
+                    system.playing("BgMusic") && mc.currentScreen == parent,
                     "music waits for menu exit"));
         playing = (String) state("currentMusic");
         AudioSettings next = AudioConfig.copy();
@@ -173,7 +174,7 @@ public final class MusicUpdateChecks {
                 check(
                     system.playing("BgMusic")
                         && state("currentMusic").equals(id("/mp3/"))
-                        && mc.currentScreen == screen,
+                        && mc.currentScreen == parent,
                     "converted track failed"));
         MusicRequests.edit(q -> q.tracks.clear());
         AudioController.pause();

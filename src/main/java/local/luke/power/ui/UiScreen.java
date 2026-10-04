@@ -44,17 +44,37 @@ public abstract class UiScreen extends Screen {
   }
 
   protected void iconButton(String icon, int x, int y, int w, int mx, int my, boolean enabled) {
+    iconButton(icon, x, y, w, mx, my, enabled, false);
+  }
+
+  protected void iconButton(String icon, int x, int y, int w, int mx, int my, boolean enabled, boolean active) {
     button("", x, y, w, 18, mx, my, enabled);
-    int color = enabled ? 0xffdddddd : 0xff777777;
+    int color = !enabled ? 0xff777777 : active ? 0xffffff55 : 0xffdddddd;
     int cx = x + w / 2, cy = y + 9;
     String[] pixels = switch (icon) {
       case "speaker" -> new String[]{"   #   # ", "  ## #  #", "####  # #", "####  # #", "####  # #", "  ## #  #", "   #   # "};
+      case "up" -> new String[]{"    #    ", "   ###   ", "  #####  ", "    #    ", "    #    ", "    #    ", "         "};
+      case "down" -> new String[]{"    #    ", "    #    ", "    #    ", "  #####  ", "   ###   ", "    #    ", "         "};
       case "controls" -> new String[]{"#########", "# # # # #", "#########", "# # # # #", "#########", "# ##### #", "#########"};
       default -> new String[]{" #   #  ", "########", " #   #  ", "   #   #", "########", "   #   #", "        "};
     };
     for (int row = 0; row < pixels.length; row++)
       for (int col = 0; col < pixels[row].length(); col++) if (pixels[row].charAt(col) == '#')
         fill(cx - 4 + col, cy - 4 + row, cx - 3 + col, cy - 3 + row, color);
+  }
+
+  void scrollbar(int x, int top, int height, int y, int thumb, boolean active) {
+    fill(x, top, x + 4, top + height, 0xff222222);
+    fill(x, y, x + 4, y + thumb, active ? 0xffaaaaaa : 0xff777777);
+  }
+
+  protected void colourButton(String hex, int x, int y, int w, int mx, int my) {
+    button("", x, y, w, 18, mx, my, true);
+    String label = fit(hex, Math.max(5, w - 26));
+    int start = x + Math.max(3, (w - textRenderer.getWidth(label) - 16) / 2);
+    fill(start, y + 3, start + 12, y + 15, 0xff000000);
+    fill(start + 1, y + 4, start + 11, y + 14, 0xff000000 | Integer.parseInt(hex.replace("#", ""), 16));
+    text(label, start + 16, y + 5, inside(mx, my, x, y, w, 18) ? 0xffffa0 : 0xe0e0e0);
   }
 
   protected void slider(String label, int x, int y, int w, int mx, int my, double fraction) {

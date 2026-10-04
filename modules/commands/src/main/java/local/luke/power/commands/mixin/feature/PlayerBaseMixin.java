@@ -21,7 +21,7 @@ public class PlayerBaseMixin implements PlayerWarps {
         PlayerEntity player = (PlayerEntity) (Object) this;
 
         if (God.isPlayerInvincible.containsKey(player.name))
-            if (God.isPlayerInvincible.get(player.name)) {
+            if (God.isPlayerInvincible.get(player.name) && local.luke.power.permissions.CommandPermissions.allowed("god")) {
                 if (player.fireTicks > 0)
                     player.fireTicks = 0;
 

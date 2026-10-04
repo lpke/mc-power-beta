@@ -24,6 +24,9 @@ public final class DirectoryScreen extends UiScreen {
     read();
   }
 
+  private final ScrollBar scrollbar = new ScrollBar();
+  private ScrollBar.Track track() { return new ScrollBar.Track(panelRight() - 10, 90, height - 34 - 90, children.size() * 20, scroll); }
+
   private int panelWidth() { return Math.min(width, height * 16 / 9); }
   private int panelLeft() { return (width - panelWidth()) / 2; }
   private int panelRight() { return panelLeft() + panelWidth(); }
@@ -33,6 +36,7 @@ public final class DirectoryScreen extends UiScreen {
   }
 
   public void removed() {
+    scrollbar.release();
     Keyboard.enableRepeatEvents(false);
   }
 
@@ -95,6 +99,7 @@ public final class DirectoryScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int b) {
     if (b != 0) return;
+    if (scrollbar.press(track(), x, y)) { scroll = (int) scrollbar.drag(track(), y, true); return; }
     if (inside(x, y, panelLeft() + 14, 38, panelWidth() - 76, 18)) {
       path.focused = true;
       return;
@@ -138,6 +143,8 @@ public final class DirectoryScreen extends UiScreen {
   }
 
   public void render(int x, int y, float delta) {
+    scroll = (int) scrollbar.drag(track(), y, Mouse.isButtonDown(0));
+    scroll = (int) Math.max(0, Math.min(scroll, track().maximum()));
     renderBackground();
     drawCenteredTextWithShadow(textRenderer, "Choose a music folder", width / 2, 14, 0xffffff);
     input(path, panelLeft() + 14, 38, panelWidth() - 76, x, y, "");
@@ -159,6 +166,7 @@ public final class DirectoryScreen extends UiScreen {
     }
     if (children.isEmpty()) text(error.isEmpty() ? "No subfolders." : error, panelLeft() + 20, 96, 0xaaaaaa);
     unclip();
+    scrollbar.render(this, track());
     button("Use this folder", width / 2 - 112, height - 28, 108, 20, x, y, true);
     button("Cancel", width / 2 + 4, height - 28, 108, 20, x, y, true);
   }

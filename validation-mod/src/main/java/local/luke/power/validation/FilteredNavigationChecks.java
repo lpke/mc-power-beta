@@ -16,6 +16,7 @@ public final class FilteredNavigationChecks {
     return (TextInput)field(s,"search");
   }
   private static void query(PowerOptionsScreen s, String query) throws Exception {
+    if ((boolean)call(s,"libraryVisible")) ((ScreenInput)(Object)s).power$click((int)call(s,"right")-35,60,0);
     search(s).setText(""); search(s).focused = true;
     for (char c : query.toCharArray()) ((ScreenInput)(Object)s).power$key(c,0);
     check(search(s).cursor() == query.length(), "typed cursor mismatch");
@@ -49,6 +50,7 @@ public final class FilteredNavigationChecks {
     boolean oldShow=(boolean)field(s,"showDisabled");
     try {
       field(s,"showDisabled",true);
+      field(s,"libraryOpen",false);
       for (String id:List.of("keys.Fast place (toggle)","tweaks.placement.enabled"))
         test("typed search link renders and Back restores query: "+id,()->{
           query(s,"fast place");

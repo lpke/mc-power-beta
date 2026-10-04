@@ -25,6 +25,7 @@ final class MusicPreview {
       for (String name : List.of("BgMusic", "PowerBetaMenu", "streaming")) {
         if (system.playing(name) || name.equals("BgMusic") && backgroundStarting) resume.add(name);
         // Pause even a queued source that the sound thread has not started yet.
+        system.setVolume(name, 0);
         system.pause(name);
       }
     }
@@ -39,6 +40,14 @@ final class MusicPreview {
   static void tick(Minecraft mc, SoundSystem system) {
     if (!active()) return;
     if (mc.world != world) { stop(system, false); return; }
+    // The sound thread may start a queued song after the first pause command.
+    // It was muted before queuing the preview; catch that late start here.
+    for (String name : List.of("BgMusic", "PowerBetaMenu", "streaming")) {
+      if (system.playing(name)) {
+        if (!resume.contains(name)) resume.add(name);
+        system.pause(name);
+      }
+    }
     system.setVolume(SOURCE, AudioController.musicVolume(track));
     if (system.playing(SOURCE)) playing = true;
     // SoundSystem starts streams asynchronously. Give decoding time before treating it as finished.
@@ -60,6 +69,7 @@ final class MusicPreview {
     boolean hadMusic = resume.contains("BgMusic") || resume.contains("PowerBetaMenu");
     system.stop(SOURCE); system.removeSource(SOURCE);
     track = ""; world = null;
+    AudioController.refresh();
     for (String name : resume)
       if (name.equals("streaming") ? restoreRecords : restoreMusic && !AudioController.rules().disabled())
         system.play(name);

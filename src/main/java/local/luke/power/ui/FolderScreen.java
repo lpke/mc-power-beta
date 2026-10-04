@@ -22,6 +22,9 @@ public final class FolderScreen extends UiScreen {
     for (var v : setting.value.getAsJsonArray()) folders.add(v.getAsString());
   }
 
+  private final ScrollBar scrollbar = new ScrollBar();
+  private ScrollBar.Track track() { return new ScrollBar.Track(panelRight() - 10, 74, height - 66 - 74, folders.size() * 24, scroll); }
+
   private int panelWidth() { return Math.min(width, height * 16 / 9); }
   private int panelLeft() { return (width - panelWidth()) / 2; }
   private int panelRight() { return panelLeft() + panelWidth(); }
@@ -31,6 +34,7 @@ public final class FolderScreen extends UiScreen {
   }
 
   public void removed() {
+    scrollbar.release();
     Keyboard.enableRepeatEvents(false);
   }
 
@@ -86,6 +90,7 @@ public final class FolderScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int b) {
     if (b != 0) return;
+    if (scrollbar.press(track(), x, y)) { scroll = (int) scrollbar.drag(track(), y, true); return; }
     if (inside(x, y, panelLeft() + 16, 42, panelWidth() - 128, 18)) {
       path.focused = true;
       return;
@@ -120,6 +125,8 @@ public final class FolderScreen extends UiScreen {
   }
 
   public void render(int x, int y, float delta) {
+    scroll = (int) scrollbar.drag(track(), y, Mouse.isButtonDown(0));
+    scroll = (int) Math.max(0, Math.min(scroll, track().maximum()));
     renderBackground();
     drawCenteredTextWithShadow(textRenderer, setting.label, width / 2, 15, 0xffffff);
     input(path, panelLeft() + 16, 42, panelWidth() - 128, x, y, "Add folder path...");
@@ -132,10 +139,11 @@ public final class FolderScreen extends UiScreen {
       text(fit(folders.get(i), panelWidth() - 40), panelLeft() + 20, yy + 7, 0xffffff);
     }
     unclip();
+    scrollbar.render(this, track());
     if (folders.isEmpty()) text("No folders selected.", panelLeft() + 20, 82, 0xaaaaaa);
     button("Remove", panelLeft() + 16, height - 54, 70, 20, x, y, selected >= 0);
     text(
-        fit(error.isEmpty() ? "OGG, WAV and MUS. MP3 is not supported." : error, panelWidth() - 116),
+        fit(error.isEmpty() ? "OGG, WAV, MUS; convert MP3 in Music library." : error, panelWidth() - 116),
         panelLeft() + 96,
         height - 47,
         error.isEmpty() ? 0xaaaaaa : 0xff8888);

@@ -14,7 +14,7 @@ pinned binary dependencies; see [the upstream inventory](docs/upstreams.md).
 ## Options
 
 Open **Options** from the title or pause menu. Pages group settings by function.
-Each pane scrolls independently. Reopening Options remembers the last page and scroll
+Each pane scrolls independently; its scrollbar supports dragging. Clicking the active page scrolls to the top. Reopening Options remembers the last page and scroll
 position during the game session. Search finds settings across every page. Click a
 search section heading to open that section; Back restores the results.
 Left-click cycles forward; right-click cycles backward. The reset button restores one setting. Bindings use the same R reset button.
@@ -22,6 +22,10 @@ Numeric values use sliders; `...` opens the exact-value editor. Apply saves whil
 keeping the current page, search and scroll. Done saves and exits. The unsaved
 changes counter filters the list to changed settings. Cancel discards the draft,
 including live previews. A `*` marks settings that need a restart.
+
+Fog key distances opens an ordered list of labelled sliders. Add, remove or move
+distances, and use `...` for exact values. Done accepts the list; Cancel discards
+it. Use 1 to 16 different distances between 2 and 32 chunks.
 
 All Video settings, GUI scale, audio, mouse sensitivity, field of view and camera distance
 preview immediately. Auto scale chooses the largest integer scale that leaves
@@ -45,6 +49,21 @@ Settings saves keep recovery copies under `power-beta-data/settings-backups`. If
 fails, previous files and live values are restored. An interrupted transaction
 is recovered before configuration and recipe initialization on the next launch.
 
+## Command access
+
+**Commands** controls cheat-like singleplayer commands. Master Off blocks every
+listed command. A command's **This world** override takes priority over its
+**Global command rules** setting. Use global follows that rule; Allow permits
+any mode in this world; Block prevents use here. Global rules offer Any mode,
+Creative only and Disabled. Defaults require creative, except `/gamemode` and
+its `/gm` alias. The mode picker remains available independently.
+
+Help and information commands remain accessible. WorldEdit uses its own page's
+access controls. Blocking access never removes saved warps or other command data;
+god-mode damage protection is suspended while its command is blocked.
+Per-world command rules live in the shared configuration, keyed by a world ID
+stored in level metadata. Renaming a world keeps its rules; dimensions share them.
+
 ## Light overlay and inventory
 
 Press **F7** to toggle light numbers on nearby block tops. Rebind it in Controls.
@@ -59,6 +78,15 @@ clicking the same type of damageable equipment with different durability swaps
 both original items. Armour and crafting-output restrictions remain in force.
 
 ## Audio
+
+The music toolbar and embedded library work while Options stays open. Tracks and
+Queue have separate scroll positions. The library remembers its tab, folder filter
+and search when Options reopens. Cycle the folder filter forward with left-click
+or backward with right-click. Queue arrows move individual requests; disabling a
+track's rotation never deletes its file or queued requests.
+
+Preview speakers turn yellow while active. Click again to stop the preview;
+music previews resume the prior track afterward. Play/Pause reflects playback state.
 
 Audio combines master, category and individual sound volumes with the existing
 ambient-volume and music-timing settings. Custom music supports OGG, WAV and MUS.
@@ -171,3 +199,8 @@ continuous edits save on release. Auto-apply and saved colour swatches persist i
 the shared configuration. General → Game and input can make pausing open Options
 directly. The Menu button returns to the normal pause menu. Search, page, scroll and
 navigation history are remembered while the game remains open.
+
+For an existing Power Beta instance on the same platform versions,
+`python3 tools/update_artifacts.py /path/to/instance` installs the built JAR and
+documentation with a verified backup. It refuses running instances and verifies
+that configuration and world files remain unchanged.

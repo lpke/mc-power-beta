@@ -4,7 +4,7 @@ import local.luke.power.config.Setting;
 import org.lwjgl.input.Keyboard;
 
 public final class ValueScreen extends UiScreen {
-  private final PowerOptionsScreen parent;
+  private final Runnable accepted;
   private final Setting setting;
   private final net.minecraft.client.gui.screen.Screen returnTo;
   private final TextInput input;
@@ -15,8 +15,12 @@ public final class ValueScreen extends UiScreen {
   }
 
   public ValueScreen(PowerOptionsScreen parent, Setting setting, net.minecraft.client.gui.screen.Screen returnTo) {
+    this(setting, returnTo, () -> parent.changed(setting));
+  }
+
+  public ValueScreen(Setting setting, net.minecraft.client.gui.screen.Screen returnTo, Runnable accepted) {
     this.returnTo = returnTo;
-    this.parent = parent;
+    this.accepted = accepted;
     this.setting = setting;
     input = new TextInput(setting.editText(), setting.kind == Setting.Kind.LIST ? 16384 : 4096);
     input.focused = true;
@@ -56,7 +60,7 @@ public final class ValueScreen extends UiScreen {
   private void save() {
     try {
       setting.parse(input.text());
-      parent.changed(setting);
+      accepted.run();
       minecraft.setScreen(returnTo);
     } catch (RuntimeException e) {
       error = e.getMessage() == null ? "Invalid value" : e.getMessage();

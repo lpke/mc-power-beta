@@ -13,6 +13,7 @@ public final class PowerBeta {
     local.luke.power.light.LightOverlay.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
       local.luke.power.video.VideoConfig.current();
       try {
         ConfigAudit.write(mc);

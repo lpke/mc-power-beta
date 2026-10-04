@@ -160,7 +160,6 @@ public final class ContainerCarry {
         held.write(file);
         consumingUse = Mouse.isButtonDown(1);
         mc.player.method_500();
-        message(mc, "Carrying container. Use a block face to place it.");
       } else {
         int[][] offsets = {{0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}};
         if (hit.field_1987 < 0 || hit.field_1987 >= offsets.length) return true;
@@ -193,7 +192,6 @@ public final class ContainerCarry {
         consumingUse = Mouse.isButtonDown(1);
         mc.player.method_500();
         complete();
-        message(mc, "Container placed.");
       }
       return true;
     } catch (Exception e) {

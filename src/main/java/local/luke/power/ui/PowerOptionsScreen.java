@@ -27,25 +27,37 @@ public final class PowerOptionsScreen extends UiScreen {
           "Building",
           "Creative",
           "World editing",
+          "Commands",
           "Gameplay",
           "Crafting",
           "Fixes",
           "Advanced");
   private static final int[] ICONS = {
-    58, 20, 2256, 280, 323, 345, 301, 54, 45, 2, 271, 260, 61, 265, 331
+    58, 20, 2256, 280, 323, 345, 301, 54, 45, 2, 271, 339, 260, 61, 265, 331
   };
 
   private record Row(String group, Setting setting, int y, int height) {}
 
   private record View(String page, double scroll, double sideScroll, String query,
       boolean changedOnly, List<String> conflicts, List<String> related, Set<String> collapsed,
-      boolean showDisabled, int selected) {}
+      boolean showDisabled, int selected, boolean libraryOpen, MusicLibraryScreen.State library) {}
   private final Deque<View> history = new ArrayDeque<>();
   private List<String> relatedIds = List.of();
 
   private static View rememberedView;
   private static List<View> rememberedHistory = List.of();
-  private boolean hidden, autoSavePending;
+  private boolean hidden, autoSavePending, libraryOpen;
+  private MusicLibraryScreen library;
+  private MusicLibraryScreen.State libraryState;
+  private final ScrollBar contentBar = new ScrollBar(), sidebarBar = new ScrollBar();
+  int contentLeft() { return left(); }
+  int contentRight() { return right() - 14; }
+  int contentBottom() { return bottom(); }
+  private boolean libraryVisible() { return libraryOpen && audio(); }
+  private int contentHeight() { return rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height + 6; }
+  private ScrollBar.Track contentTrack() { return new ScrollBar.Track(right() - 8, top(), bottom() - top(), contentHeight(), scroll); }
+  private ScrollBar.Track sidebarTrack() { return new ScrollBar.Track(origin() + sidebar() + 3, 24, bottom() - 24, PAGES.size() * 22, sideScroll); }
+
   private final boolean directPause;
   private static String rememberedPage = "General";
   private static final Map<String, Double> positions = new HashMap<>();
@@ -104,17 +116,23 @@ public final class PowerOptionsScreen extends UiScreen {
         PowerBeta.LOG.error("Could not open settings", e);
         error = "Settings could not be loaded. See the game log.";
       }
+    if (session != null) {
+      if (library == null) { library = new MusicLibraryScreen(this); library.restore(libraryState); }
+      library.init(minecraft, width, height);
+    }
     layout();
   }
 
   public void removed() {
     rememberPosition();
+    contentBar.release(); sidebarBar.release();
+    if (library != null) library.removed();
     Keyboard.enableRepeatEvents(false);
   }
 
   private View view() {
     return new View(page, scroll, sideScroll, search.text(), changedOnly, conflictIds,
-        relatedIds, Set.copyOf(collapsed), showDisabled, selected);
+        relatedIds, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state());
   }
 
   private void rememberPosition() {
@@ -149,7 +167,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private int mainControlLeft(Row row) {
     return controlLeft(row) + (soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
   }
-  private boolean canClear() { return !search.text().isBlank() || filtered(); }
+  private boolean canClear() { return libraryVisible() ? library.hasQuery() : !search.text().isBlank() || filtered(); }
   private int searchWidth() { return right() - (canClear() ? 36 : 14) - searchLeft(); }
   private int searchLeft() { return left() + (history.isEmpty() ? 0 : 48); }
   private void pushView() {
@@ -169,12 +187,15 @@ public final class PowerOptionsScreen extends UiScreen {
     changedOnly = view.changedOnly; conflictIds = view.conflicts; relatedIds = view.related;
     collapsed.clear(); collapsed.addAll(view.collapsed);
     showDisabled = view.showDisabled; selected = view.selected;
+    libraryOpen = view.libraryOpen; libraryState = view.library;
+    if (library != null) library.restore(libraryState);
   }
   private void linkedControls(Setting setting) {
     List<Setting> bindings = ControlLinks.controls(session, setting);
     if (bindings.isEmpty()) return;
     rememberPosition(); pushView();
     page = "Controls";
+    libraryOpen = false;
     relatedIds = bindings.stream().map(s -> s.id).toList();
     conflictIds = List.of(); changedOnly = false; search.setText(""); scroll = 0;
     layout();
@@ -187,6 +208,7 @@ public final class PowerOptionsScreen extends UiScreen {
     pushView();
     relatedIds = ControlLinks.settings(session, key).stream().map(s -> s.id).toList();
     page = target.page;
+    libraryOpen = false;
     conflictIds = List.of();
     changedOnly = false;
     search.setText("");
@@ -198,6 +220,7 @@ public final class PowerOptionsScreen extends UiScreen {
     rememberPosition();
     pushView();
     page = setting.page;
+    libraryOpen = false;
     search.setText("");
     changedOnly = false;
     conflictIds = relatedIds = List.of();
@@ -245,7 +268,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private int top() {
-    return audio() ? 110 : 52;
+    return audio() ? 92 : 52;
   }
 
   private int bottom() {
@@ -302,6 +325,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   public void tick() {
     hoverTicks++;
+    if (library != null) library.tick();
     int revision = local.luke.power.audio.AudioController.libraryRevision();
     if (session != null && revision != musicRevision) {
       musicRevision = revision;
@@ -346,6 +370,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (hidden || wheel == 0 || capture != null || confirmClose || confirmReset) return;
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     if (x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
+    else if (libraryVisible()) library.wheel(wheel);
     else scroll -= Math.signum(wheel) * 48;
     layout();
   }
@@ -369,10 +394,13 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (button != 0 && button != 1) return;
+    if (button == 0 && sidebarBar.press(sidebarTrack(), x, y)) { sideScroll = sidebarBar.drag(sidebarTrack(), y, true); return; }
+    if (!libraryVisible() && button == 0 && contentBar.press(contentTrack(), x, y)) { scroll = contentBar.drag(contentTrack(), y, true); return; }
     if (button == 0 && !history.isEmpty() && inside(x, y, left(), 27, 44, 20)) {
       click(); back(); return;
     }
     if (inside(x, y, searchLeft(), 27, searchWidth(), 20)) {
+      if (libraryVisible()) { library.searchClick(x, y, button); return; }
       search.focused = true;
       if (button == 1) {
         search.setText("");
@@ -384,6 +412,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (canClear() && inside(x, y, right() - 32, 27, 18, 20)) {
       click();
+      if (libraryVisible()) { library.clearQuery(); return; }
       if (!history.isEmpty() && (!conflictIds.isEmpty() || !relatedIds.isEmpty())) { back(); return; }
       conflictIds = List.of();
       relatedIds = List.of();
@@ -394,9 +423,11 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     search.focused = false;
+    if (library != null) library.unfocus();
     if (button == 0 && y >= 24 && y < bottom() && x >= origin() && x < origin() + sidebar()) {
       int index = (int) ((y - 24 + sideScroll) / 22);
       if (index >= 0 && index < PAGES.size()) {
+        boolean same = PAGES.get(index).equals(page);
         rememberPosition();
         click();
         history.clear();
@@ -406,26 +437,28 @@ public final class PowerOptionsScreen extends UiScreen {
         changedOnly = false;
         search.setText("");
         search.selectAll();
-        scroll = positions.getOrDefault(page, 0d);
+        scroll = same ? 0 : positions.getOrDefault(page, 0d);
+        if (same && libraryVisible()) library.top();
         selected = -1;
         layout();
       }
       return;
     }
-    if (audio() && button == 0 && y >= 52 && y < 72) {
-      int index = (x - left()) / Math.max(1, span() / 4);
-      if (x < left() || x >= right() - 14) return;
+    if (audio() && button == 0 && y >= 52 && y < 70 && x >= left() && x < contentRight()) {
+      int index = musicAction(x);
+      if (index < 0) return;
       click();
       if (index == 0) local.luke.power.audio.AudioController.togglePause();
       else if (index == 1) local.luke.power.audio.AudioController.previous();
       else if (index == 2) local.luke.power.audio.AudioController.next();
       else if (index == 3) local.luke.power.audio.AudioController.reload();
+      else { libraryOpen = !libraryOpen; layout(); }
       return;
     }
-    if (audio() && button == 0 && inside(x, y, left(), 75, 110, 20)) {
-      click(); minecraft.setScreen(new MusicLibraryScreen(this)); return;
+    if (libraryVisible() && x >= left() && y >= 73 && y < bottom()) {
+      library.mouseClicked(x, y, button); return;
     }
-    if (y >= top() && y < bottom() && x >= left() && x < right() - 10) {
+    if (!libraryVisible() && y >= top() && y < bottom() && x >= left() && x < right() - 10) {
       for (int i = 0; i < rows.size(); i++) {
         Row r = rows.get(i);
         int ry = top() + r.y - (int) scroll;
@@ -542,7 +575,10 @@ public final class PowerOptionsScreen extends UiScreen {
     switch (s.kind) {
       case KEY -> { capture = s; captureModifier = 0; }
       case TEXT, LIST -> {
-        if (s.id.equals("audio.musicDirectories") || s.id.equals("audio.menuDirectories"))
+        if (s.id.equals("video.fogCycle"))
+          minecraft.setScreen(new IntegerArrayScreen(this, s,
+              new IntegerArrayDraft.Rules(2, 32, 16, true), "Distance", "chunks"));
+        else if (s.id.equals("audio.musicDirectories") || s.id.equals("audio.menuDirectories"))
           minecraft.setScreen(new FolderScreen(this, s));
         else if (ColourScreen.accepts(s)) minecraft.setScreen(new ColourScreen(this, s));
         else minecraft.setScreen(new ValueScreen(this, s));
@@ -628,6 +664,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (key == Keyboard.KEY_ESCAPE) {
       if (!history.isEmpty()) { back(); return; }
       if (!conflictIds.isEmpty()) { conflictIds = List.of(); scroll = positions.getOrDefault(page, 0d); layout(); return; }
+      if (libraryVisible() && library.focused()) { library.unfocus(); return; }
       if (search.focused) {
         search.focused = false;
         return;
@@ -638,10 +675,12 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if ((Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
         && key == Keyboard.KEY_F) {
+      if (libraryVisible()) { library.focus(); return; }
       search.focused = true;
       search.selectAll();
       return;
     }
+    if (libraryVisible()) { library.keyPressed(c, key); return; }
     if (search.focused) {
       String before = search.text();
       search.key(c, key);
@@ -706,7 +745,21 @@ public final class PowerOptionsScreen extends UiScreen {
     return text.toString();
   }
 
+  private int[] musicWidths() {
+    int first = span() < 360 ? 42 : 54, skip = span() < 360 ? 24 : 54, reload = span() < 360 ? 48 : 86;
+    return new int[] {first, skip, skip, reload, span() - first - skip * 2 - reload - 16};
+  }
+  private int musicAction(int x) {
+    int left = left(); int[] sizes = musicWidths();
+    for (int i = 0; i < sizes.length; i++) { if (x >= left && x < left + sizes[i]) return i; left += sizes[i] + 4; }
+    return -1;
+  }
+
   public void render(int mx, int my, float delta) {
+    if (!hidden && !confirmClose && !confirmReset && capture == null) {
+      sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
+      if (!libraryVisible()) scroll = contentBar.drag(contentTrack(), my, Mouse.isButtonDown(0));
+    }
     // This wait belongs only to binding capture, never gameplay input.
     if (capture != null && captureModifier != 0 && !Bindings.physical(captureModifier)) {
       capture.value = new JsonPrimitive(captureModifier);
@@ -752,24 +805,22 @@ public final class PowerOptionsScreen extends UiScreen {
           hover ? 0xffffa0 : PAGES.get(i).equals(page) ? 0xffffff : 0xaaaaaa);
     }
     unclip();
-    if (sideScroll > 0) text("^", origin() + sidebar() - 10, 24, 0xcccccc);
-    if (sideScroll < PAGES.size() * 22 - (bottom() - 24))
-      text("v", origin() + sidebar() - 10, bottom() - 10, 0xcccccc);
+    sidebarBar.render(this, sidebarTrack());
     if (!history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
-    input(search, searchLeft(), 28, searchWidth(), mx, my,
+    if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
+    else input(search, searchLeft(), 28, searchWidth(), mx, my,
         !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls" : "Related settings"
         : changedOnly ? "Search changed settings..." : "Search all settings...");
     if (canClear()) button("x", right() - 32, 27, 18, 20, mx, my, true);
     if (audio()) {
-      int w = span() / 4;
-      button("Play / pause", left(), 52, w - 3, 18, mx, my, true);
-      button(w < 88 ? "Previous" : "Previous track", left() + w, 52, w - 3, 18, mx, my, true);
-      button(w < 88 ? "Next" : "Next track", left() + 2 * w, 52, w - 3, 18, mx, my, true);
-      button(w < 88 ? "Reload" : "Reload folders", left() + 3 * w, 52, w - 3, 18, mx, my, true);
-      button("Music library...", left(), 75, 110, 20, mx, my, true);
-      text(fit(local.luke.power.audio.AudioController.status(), span() - 117), left() + 117, 81, 0xaaaaaa);
+      int[] sizes = musicWidths(); int x = left();
+      String[] labels = {local.luke.power.audio.AudioController.musicPlaying() ? "Pause" : "Play",
+          span() < 360 ? "<<" : "Previous", span() < 360 ? ">>" : "Next", span() < 360 ? "Reload" : "Reload folders", libraryVisible() ? "Settings" : "Music library"};
+      for (int i = 0; i < sizes.length; i++) { button(fit(labels[i], sizes[i] - 6), x, 52, sizes[i], 18, mx, my, true); x += sizes[i] + 4; }
+      if (!libraryVisible()) text(fit(local.luke.power.audio.AudioController.status(), span()), left(), 77, 0xaaaaaa);
     }
     String tip = "", hoverId = "";
+    if (!libraryVisible()) {
     clip(left() - 2, top(), span() + 8, bottom() - top());
     for (int index = 0; index < rows.size(); index++) {
       Row row = rows.get(index);
@@ -797,16 +848,17 @@ public final class PowerOptionsScreen extends UiScreen {
           fit(label, textWidth),
           left() + 3,
           y + (narrow ? 3 : 8),
-          s.changed() ? 0xffdd88 : 0xdddddd);
+          s.changed() ? 0xffdd88 : 0xd0d0d0);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
       int valueEnd = right() - (numeric ? 62 : 36);
       if (numeric) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my,
           (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
+      else if (ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my);
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, my, true);
       if (numeric) button("...", right() - 60, cy, 22, 18, mx, my, true);
       button("R", right() - 34, cy, 20, 18, mx, my, !s.value.equals(s.defaultValue));
-      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, true);
+      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, true, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       List<Setting> conflicts = conflicts(s);
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
@@ -815,21 +867,16 @@ public final class PowerOptionsScreen extends UiScreen {
         else if (!conflicts.isEmpty() && inside(mx, my, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
-          tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
+          tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = s.description + (s.restart ? "\nRestart required." : "");
       }
     }
     unclip();
-    if (!rows.isEmpty()) {
-      Row last = rows.get(rows.size() - 1);
-      int total = last.y + last.height;
-      int track = bottom() - top();
-      if (total > track) {
-        int thumb = Math.max(12, track * track / total);
-        int y = top() + (int) (scroll / (total - track) * (track - thumb));
-        fill(right() - 8, top(), right() - 5, bottom(), 0xff222222);
-        fill(right() - 8, y, right() - 5, y + thumb, 0xff777777);
-      }
+    contentBar.render(this, contentTrack());
+    } else { library.render(mx, my, delta); tip = library.hoverHelp(); hoverId = "library:" + tip; }
+    if (audio() && inside(mx, my, left(), 52, span(), 18)) {
+      int action = musicAction(mx);
+      if (action >= 0) { tip = new String[]{"Play or pause music", "Previous track", "Next track; queued tracks take priority", "Rescan music folders", libraryVisible() ? "Return to audio settings" : "Browse tracks, folders and the queue"}[action]; hoverId = "music." + action; }
     }
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);
     button(filtered() ? "Reset listed..." : "Reset page...", resetX(), footerY(), 88, 20, mx, my, true);
