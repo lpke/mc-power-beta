@@ -12,7 +12,7 @@ final class BundledMusic {
     for (var track : BuiltinMusic.TRACKS) {
       var url = BundledMusic.class.getResource("/assets/powerbeta/music/" + track.file());
       if (url == null) throw new IllegalStateException("Missing bundled music: " + track.file());
-      result.put(track.id(), new class_267(track.file(), url));
+      result.put(track.id(), new class_267(track.file(), AudioResource.streaming(url)));
     }
     return Collections.unmodifiableMap(result);
   }

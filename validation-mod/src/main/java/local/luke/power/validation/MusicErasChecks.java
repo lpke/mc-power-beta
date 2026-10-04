@@ -27,8 +27,8 @@ public final class MusicErasChecks {
         MusicRequests.edit(q -> q.tracks.clear()); AudioConfig.preview(config); AudioController.pause(); mc.options.musicVolume = .1f;
       }
       case "ui" -> {
-        test("soundtrack pools are exactly 12, 18 and 21 tracks", () -> {
-          int[] counts={12,18,21};
+        test("soundtrack pools are exactly 12, 35 and 83 tracks", () -> {
+          int[] counts={12,35,83};
           for(var mode : AudioSettings.MusicMode.values()) {
             var config=AudioConfig.copy();config.musicMode=mode;AudioConfig.preview(config);
             check(AudioController.activeMusic(mc).size()==counts[mode.ordinal()], mode.toString());
@@ -52,7 +52,7 @@ public final class MusicErasChecks {
         test("era accordions collapse, locate playing tracks and remember collapse state", () -> {
           var headings=new ArrayList<String>();
           for(Object row:(List<?>)field(library,"rows")) if(call(row,"id")==null) headings.add((String)call(row,"group"));
-          check(headings.subList(0,3).equals(List.of("Alpha","Beta","Update Aquatic")),headings.toString());
+          check(headings.subList(0,BuiltinMusic.GROUPS.size()).equals(BuiltinMusic.GROUPS),headings.toString());
           int count=((List<?>)field(library,"rows")).size();
           click(options,(int)call(library,"left")+3,(int)call(library,"listTop")+9);
           check(((List<?>)field(library,"rows")).size()==count-12,"Alpha did not collapse");
@@ -71,6 +71,7 @@ public final class MusicErasChecks {
           click(options,(int)call(library,"left")+8,y+24);
           check(!AudioConfig.current().disabledTracks.contains(id),"note icon did not reinclude");
         });
+        MusicGroupChecks.run(mc, options, library);
         test("queue controls and volume stay inline at compact and wide sizes", () -> {
           MusicRequests.edit(q->{q.tracks.clear();q.add("music:calm1.ogg");q.add("music:creative4.ogg");});
           library.showQueue();

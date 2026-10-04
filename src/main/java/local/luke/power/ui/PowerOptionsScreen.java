@@ -361,7 +361,12 @@ public final class PowerOptionsScreen extends UiScreen {
   public void finishContinuousChange() { if (autoSavePending) save(false, false); }
 
   public void changed(Setting setting, boolean continuous) {
-    session.link(setting);
+    changed(List.of(setting), continuous);
+  }
+
+  /** Preview/save a group edit once, after all draft values have been updated. */
+  public void changed(Collection<Setting> settings, boolean continuous) {
+    settings.forEach(session::link);
     error = "";
     try { session.preview(MenuPreferences.current().autoApply); }
     catch (Exception e) {

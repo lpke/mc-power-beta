@@ -1,6 +1,6 @@
 {
-  "version": "1.14.4",
-  "assetIndex": "https://piston-meta.mojang.com/v1/packages/43b2f3021fe9f7d768378de95538e22da3ee8301/1.14.json",
+  "version": "26.3",
+  "assetIndex": "https://piston-meta.mojang.com/v1/packages/abfaa525f923f807df8b4e4d29c1b5e3a104adbe/34.json",
   "tracks": [
     {
       "file": "calm1.ogg",
@@ -8,7 +8,19 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/calm1.ogg",
       "sha1": "50a59a4f56e4046701b758ddbb1c1587efa4cadf",
-      "size": 2530812
+      "size": 2530812,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.cherry_grove",
+        "music.overworld.forest",
+        "music.overworld.grove",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "calm2.ogg",
@@ -16,7 +28,19 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/calm2.ogg",
       "sha1": "74da65c99aa578486efa7b69983d3533e14c0d6e",
-      "size": 1976731
+      "size": 1976731,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.cherry_grove",
+        "music.overworld.forest",
+        "music.overworld.grove",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "calm3.ogg",
@@ -24,55 +48,19 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/calm3.ogg",
       "sha1": "14ae57a6bce3d4254daa8be2b098c2d99743cc3f",
-      "size": 2232651
-    },
-    {
-      "file": "creative1.ogg",
-      "title": "Biome Fest",
-      "era": "Beta",
-      "asset": "minecraft/sounds/music/game/creative/creative1.ogg",
-      "sha1": "3fe4c878450d4dc2bf3ac304e547f20d4efabad8",
-      "size": 4271435
-    },
-    {
-      "file": "creative2.ogg",
-      "title": "Blind Spots",
-      "era": "Beta",
-      "asset": "minecraft/sounds/music/game/creative/creative2.ogg",
-      "sha1": "591f41a2c5f53bcc60d7ded982fe29e76223a8ca",
-      "size": 3704574
-    },
-    {
-      "file": "creative3.ogg",
-      "title": "Haunt Muskie",
-      "era": "Beta",
-      "asset": "minecraft/sounds/music/game/creative/creative3.ogg",
-      "sha1": "4f8c3f9b4f290f63c78bf3bbaad16906a3ccff29",
-      "size": 3834148
-    },
-    {
-      "file": "creative4.ogg",
-      "title": "Aria Math",
-      "era": "Beta",
-      "asset": "minecraft/sounds/music/game/creative/creative4.ogg",
-      "sha1": "4664de25eb2bfc88ebbd638cfae6934dd968ceaa",
-      "size": 3668042
-    },
-    {
-      "file": "creative5.ogg",
-      "title": "Dreiton",
-      "era": "Beta",
-      "asset": "minecraft/sounds/music/game/creative/creative5.ogg",
-      "sha1": "45cb6cbbff2d7fc1daefbd85b031fd9dcfc70e7b",
-      "size": 5532231
-    },
-    {
-      "file": "creative6.ogg",
-      "title": "Taswell",
-      "era": "Beta",
-      "asset": "minecraft/sounds/music/game/creative/creative6.ogg",
-      "sha1": "6254527d626a2c7d80901cc2e62dce3ba4bd81f6",
-      "size": 5468843
+      "size": 2232651,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.cherry_grove",
+        "music.overworld.forest",
+        "music.overworld.grove",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "hal1.ogg",
@@ -80,7 +68,29 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/hal1.ogg",
       "sha1": "df1ff11b79757432c5c3f279e5ecde7b63ceda64",
-      "size": 1972217
+      "size": 1972217,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.desert",
+        "music.overworld.dripstone_caves",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jagged_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.meadow",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.snowy_slopes",
+        "music.overworld.sparse_jungle",
+        "music.overworld.stony_peaks",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "hal2.ogg",
@@ -88,7 +98,27 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/hal2.ogg",
       "sha1": "ceaaaa1d57dfdfbb0bd4da5ea39628b42897a687",
-      "size": 1754429
+      "size": 1754429,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.desert",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jagged_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.meadow",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.snowy_slopes",
+        "music.overworld.sparse_jungle",
+        "music.overworld.stony_peaks"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "hal3.ogg",
@@ -96,7 +126,26 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/hal3.ogg",
       "sha1": "dd85fb564e96ee2dbd4754f711ae9deb08a169f9",
-      "size": 1923269
+      "size": 1923269,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.desert",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.meadow",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.snowy_slopes",
+        "music.overworld.sparse_jungle",
+        "music.overworld.stony_peaks"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "hal4.ogg",
@@ -104,7 +153,27 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/hal4.ogg",
       "sha1": "5e7d63e75c6e042f452bc5e151276911ef92fed8",
-      "size": 2558252
+      "size": 2558252,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.desert",
+        "music.overworld.dripstone_caves",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.meadow",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.sparse_jungle",
+        "music.overworld.stony_peaks",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "nuance1.ogg",
@@ -112,7 +181,26 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/nuance1.ogg",
       "sha1": "cc1a80b6becfc6d6489c069f053d0a8adc71c339",
-      "size": 156322
+      "size": 156322,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.desert",
+        "music.overworld.dripstone_caves",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.grove",
+        "music.overworld.jagged_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.sparse_jungle",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "nuance2.ogg",
@@ -120,7 +208,26 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/nuance2.ogg",
       "sha1": "78152dc42b036e0de7616e6e669ce5a81d17f82a",
-      "size": 219029
+      "size": 219029,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.desert",
+        "music.overworld.dripstone_caves",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.grove",
+        "music.overworld.jagged_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.sparse_jungle",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "piano1.ogg",
@@ -128,7 +235,23 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/piano1.ogg",
       "sha1": "0f374764aafba398f4ba90dba05a53a9e6166138",
-      "size": 542805
+      "size": 542805,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.forest",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jagged_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.sparse_jungle",
+        "music.overworld.stony_peaks"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "piano2.ogg",
@@ -136,7 +259,23 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/piano2.ogg",
       "sha1": "98a918eb2694defd19726436d4b9dca9e7dd6a65",
-      "size": 824333
+      "size": 824333,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.forest",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jagged_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.sparse_jungle",
+        "music.overworld.stony_peaks"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "piano3.ogg",
@@ -144,7 +283,307 @@
       "era": "Alpha",
       "asset": "minecraft/sounds/music/game/piano3.ogg",
       "sha1": "9528b6a76e7bac64ca1145cc682e8a8448cc04e5",
-      "size": 2665984
+      "size": 2665984,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.game.creative",
+        "music.overworld.badlands",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.forest",
+        "music.overworld.frozen_peaks",
+        "music.overworld.grove",
+        "music.overworld.jagged_peaks",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.sparse_jungle",
+        "music.overworld.stony_peaks"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "13.ogg",
+      "title": "Thirteen",
+      "era": "Alpha",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/13.ogg",
+      "sha1": "b0ed9fc4ce57b96c05c956b92fe077e8d7c448a6",
+      "size": 1094260,
+      "events": [
+        "music_disc.13"
+      ]
+    },
+    {
+      "file": "cat.ogg",
+      "title": "Cat",
+      "era": "Alpha",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/cat.ogg",
+      "sha1": "d4313530b3100f824e2f0b2adeed165b0b816267",
+      "size": 1400008,
+      "events": [
+        "music_disc.cat"
+      ]
+    },
+    {
+      "file": "creative1.ogg",
+      "title": "Biome Fest",
+      "era": "Beta",
+      "asset": "minecraft/sounds/music/game/creative/creative1.ogg",
+      "sha1": "3fe4c878450d4dc2bf3ac304e547f20d4efabad8",
+      "size": 4271435,
+      "events": [
+        "music.creative",
+        "music.game.creative"
+      ],
+      "usage": "Creative"
+    },
+    {
+      "file": "creative2.ogg",
+      "title": "Blind Spots",
+      "era": "Beta",
+      "asset": "minecraft/sounds/music/game/creative/creative2.ogg",
+      "sha1": "591f41a2c5f53bcc60d7ded982fe29e76223a8ca",
+      "size": 3704574,
+      "events": [
+        "music.creative",
+        "music.game.creative"
+      ],
+      "usage": "Creative"
+    },
+    {
+      "file": "creative3.ogg",
+      "title": "Haunt Muskie",
+      "era": "Beta",
+      "asset": "minecraft/sounds/music/game/creative/creative3.ogg",
+      "sha1": "4f8c3f9b4f290f63c78bf3bbaad16906a3ccff29",
+      "size": 3834148,
+      "events": [
+        "music.creative",
+        "music.game.creative"
+      ],
+      "usage": "Creative"
+    },
+    {
+      "file": "creative4.ogg",
+      "title": "Aria Math",
+      "era": "Beta",
+      "asset": "minecraft/sounds/music/game/creative/creative4.ogg",
+      "sha1": "4664de25eb2bfc88ebbd638cfae6934dd968ceaa",
+      "size": 3668042,
+      "events": [
+        "music.creative",
+        "music.game.creative"
+      ],
+      "usage": "Creative"
+    },
+    {
+      "file": "creative5.ogg",
+      "title": "Dreiton",
+      "era": "Beta",
+      "asset": "minecraft/sounds/music/game/creative/creative5.ogg",
+      "sha1": "45cb6cbbff2d7fc1daefbd85b031fd9dcfc70e7b",
+      "size": 5532231,
+      "events": [
+        "music.creative",
+        "music.game.creative"
+      ],
+      "usage": "Creative"
+    },
+    {
+      "file": "creative6.ogg",
+      "title": "Taswell",
+      "era": "Beta",
+      "asset": "minecraft/sounds/music/game/creative/creative6.ogg",
+      "sha1": "6254527d626a2c7d80901cc2e62dce3ba4bd81f6",
+      "size": 5468843,
+      "events": [
+        "music.creative",
+        "music.game.creative"
+      ],
+      "usage": "Creative"
+    },
+    {
+      "file": "beginning_2.ogg",
+      "title": "Beginning 2",
+      "era": "Beta",
+      "usage": "Menu",
+      "asset": "minecraft/sounds/music/menu/beginning_2.ogg",
+      "sha1": "fe440be99066e6efcdb809c00d706bc62a500184",
+      "size": 2176741,
+      "events": [
+        "music.menu"
+      ]
+    },
+    {
+      "file": "floating_trees.ogg",
+      "title": "Floating Trees",
+      "era": "Beta",
+      "usage": "Menu",
+      "asset": "minecraft/sounds/music/menu/floating_trees.ogg",
+      "sha1": "3cf507fd0a0288688962bd265839e4a706f5d24b",
+      "size": 2316450,
+      "events": [
+        "music.menu"
+      ]
+    },
+    {
+      "file": "moog_city_2.ogg",
+      "title": "Moog City 2",
+      "era": "Beta",
+      "usage": "Menu",
+      "asset": "minecraft/sounds/music/menu/moog_city_2.ogg",
+      "sha1": "215583bfda553bb04b5b15ef27d643abfe5fa2f1",
+      "size": 2050243,
+      "events": [
+        "music.menu"
+      ]
+    },
+    {
+      "file": "mutation.ogg",
+      "title": "Mutation",
+      "era": "Beta",
+      "usage": "Menu",
+      "asset": "minecraft/sounds/music/menu/mutation.ogg",
+      "sha1": "f5d6381c34a8154bfd3fdbb67fa87d9fca6794f0",
+      "size": 2062591,
+      "events": [
+        "music.menu"
+      ]
+    },
+    {
+      "file": "11.ogg",
+      "title": "11",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/11.ogg",
+      "sha1": "b406e1c10c0cf34fd943dddd2cea5106dab53ee9",
+      "size": 604751,
+      "events": [
+        "music_disc.11"
+      ]
+    },
+    {
+      "file": "blocks.ogg",
+      "title": "Blocks",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/blocks.ogg",
+      "sha1": "cde65556718d191e30d48fd625bad1381f1fcd06",
+      "size": 2579678,
+      "events": [
+        "music_disc.blocks"
+      ]
+    },
+    {
+      "file": "chirp.ogg",
+      "title": "Chirp",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/chirp.ogg",
+      "sha1": "8bd9484e2bc85bfa2c1c4c6dd84d102c9a7f86c0",
+      "size": 1370338,
+      "events": [
+        "music_disc.chirp"
+      ]
+    },
+    {
+      "file": "far.ogg",
+      "title": "Far",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/far.ogg",
+      "sha1": "28912fd79cfe0e4e9465503809465ec400b0926b",
+      "size": 1298177,
+      "events": [
+        "music_disc.far"
+      ]
+    },
+    {
+      "file": "mall.ogg",
+      "title": "Mall",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/mall.ogg",
+      "sha1": "62ef4f7c2da1d0ebf50c9462c9bfe7b27e865b0f",
+      "size": 1455561,
+      "events": [
+        "music_disc.mall"
+      ]
+    },
+    {
+      "file": "mellohi.ogg",
+      "title": "Mellohi",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/mellohi.ogg",
+      "sha1": "1f86ddd8bc02fb96c27583c0b38ebd0dcdaf271a",
+      "size": 693015,
+      "events": [
+        "music_disc.mellohi"
+      ]
+    },
+    {
+      "file": "stal.ogg",
+      "title": "Stal",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/stal.ogg",
+      "sha1": "d826bdcc7a5cf8a276d9dec67c71775c55d1f924",
+      "size": 1196722,
+      "events": [
+        "music_disc.stal"
+      ]
+    },
+    {
+      "file": "strad.ogg",
+      "title": "Strad",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/strad.ogg",
+      "sha1": "8d5b13c57c0689a009a5857219a2700009495afe",
+      "size": 1576397,
+      "events": [
+        "music_disc.strad"
+      ]
+    },
+    {
+      "file": "wait.ogg",
+      "title": "Wait",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/wait.ogg",
+      "sha1": "aa57d2ca2d029c3b042adac9e66838d981145606",
+      "size": 1921491,
+      "events": [
+        "music_disc.wait"
+      ]
+    },
+    {
+      "file": "ward.ogg",
+      "title": "Ward",
+      "era": "Beta",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/ward.ogg",
+      "sha1": "7b2c4354cb259a4ed7bf7dcf317012aa54bceb06",
+      "size": 2103583,
+      "events": [
+        "music_disc.ward"
+      ]
+    },
+    {
+      "file": "alpha.ogg",
+      "title": "Alpha",
+      "era": "Beta",
+      "usage": "Credits",
+      "asset": "minecraft/sounds/music/game/end/alpha.ogg",
+      "sha1": "6d689e547efb849a3641c4eee912a395187197f5",
+      "size": 7082786,
+      "events": [
+        "music.credits"
+      ]
     },
     {
       "file": "axolotl.ogg",
@@ -152,7 +591,11 @@
       "era": "Update Aquatic",
       "asset": "minecraft/sounds/music/game/water/axolotl.ogg",
       "sha1": "ee92e4ed79b3c4c47eabe71b36375b5d3f05b017",
-      "size": 10423856
+      "size": 10423856,
+      "events": [
+        "music.under_water"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "dragon_fish.ogg",
@@ -160,7 +603,11 @@
       "era": "Update Aquatic",
       "asset": "minecraft/sounds/music/game/water/dragon_fish.ogg",
       "sha1": "6be4491a5d1a5f0dd68fb36c310ecfe3501cafe1",
-      "size": 12241436
+      "size": 12241436,
+      "events": [
+        "music.under_water"
+      ],
+      "usage": "Overworld"
     },
     {
       "file": "shuniji.ogg",
@@ -168,7 +615,773 @@
       "era": "Update Aquatic",
       "asset": "minecraft/sounds/music/game/water/shuniji.ogg",
       "sha1": "fd8db6a4ceb400e6abafb2a6b3ac53d871910b42",
-      "size": 8697303
+      "size": 8697303,
+      "events": [
+        "music.under_water"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "pigstep.ogg",
+      "title": "Pigstep",
+      "era": "Nether Update",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/pigstep.ogg",
+      "sha1": "12174a8a8332a4156d57d57f370932ad28789df0",
+      "size": 1457471,
+      "events": [
+        "music_disc.pigstep"
+      ]
+    },
+    {
+      "file": "an_ordinary_day.ogg",
+      "title": "An Ordinary Day",
+      "era": "Caves & Cliffs",
+      "asset": "minecraft/sounds/music/game/an_ordinary_day.ogg",
+      "sha1": "ac88b24961961f52fbaf8efc55ae7e260b6f4ad2",
+      "size": 4424026,
+      "events": [
+        "music.overworld.dripstone_caves",
+        "music.overworld.lush_caves",
+        "music.overworld.snowy_slopes",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "comforting_memories.ogg",
+      "title": "Comforting Memories",
+      "era": "Caves & Cliffs",
+      "asset": "minecraft/sounds/music/game/comforting_memories.ogg",
+      "sha1": "1c9aa4f2710ac7025a56f99feb132a29cf5a2b64",
+      "size": 3516383,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.forest",
+        "music.overworld.grove",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.old_growth_taiga"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "floating_dream.ogg",
+      "title": "Floating Dream",
+      "era": "Caves & Cliffs",
+      "asset": "minecraft/sounds/music/game/floating_dream.ogg",
+      "sha1": "dec42f5a10b6a0018594bdb868882ddccf04f52e",
+      "size": 2239177,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.forest",
+        "music.overworld.jagged_peaks",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "infinite_amethyst.ogg",
+      "title": "Infinite Amethyst",
+      "era": "Caves & Cliffs",
+      "asset": "minecraft/sounds/music/game/infinite_amethyst.ogg",
+      "sha1": "f6dd3e263823fbc2051f441e5b12a02b2258ae84",
+      "size": 3827021,
+      "events": [
+        "music.overworld.dripstone_caves",
+        "music.overworld.grove",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "left_to_bloom.ogg",
+      "title": "Left To Bloom",
+      "era": "Caves & Cliffs",
+      "asset": "minecraft/sounds/music/game/left_to_bloom.ogg",
+      "sha1": "a971ae2004798c14bc3387cfd1b89420092b3263",
+      "size": 4663128,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.cherry_grove",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.jungle",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.meadow",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.sparse_jungle"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "one_more_day.ogg",
+      "title": "One More Day",
+      "era": "Caves & Cliffs",
+      "asset": "minecraft/sounds/music/game/one_more_day.ogg",
+      "sha1": "324f58251829988ad3f4a5f7dc39b647fdcc2639",
+      "size": 4014339,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.badlands",
+        "music.overworld.desert",
+        "music.overworld.forest",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.meadow",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.snowy_slopes"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "stand_tall.ogg",
+      "title": "Stand Tall",
+      "era": "Caves & Cliffs",
+      "asset": "minecraft/sounds/music/game/stand_tall.ogg",
+      "sha1": "e04acb34861b4ac53abf9c0e3aec3c0f83cefc0c",
+      "size": 4467248,
+      "events": [
+        "music.overworld.frozen_peaks",
+        "music.overworld.jagged_peaks",
+        "music.overworld.snowy_slopes",
+        "music.overworld.stony_peaks"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "wending.ogg",
+      "title": "Wending",
+      "era": "Caves & Cliffs",
+      "asset": "minecraft/sounds/music/game/wending.ogg",
+      "sha1": "0cfa947f3d282bb02426b1c5e666b5dc28aff8a4",
+      "size": 4545206,
+      "events": [
+        "music.overworld.dripstone_caves",
+        "music.overworld.grove",
+        "music.overworld.jagged_peaks",
+        "music.overworld.stony_peaks",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "otherside.ogg",
+      "title": "Otherside",
+      "era": "Caves & Cliffs",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/otherside.ogg",
+      "sha1": "60f3cb6da0dedefb50015b883c98e32357134231",
+      "size": 1821594,
+      "events": [
+        "music_disc.otherside"
+      ]
+    },
+    {
+      "file": "aerie.ogg",
+      "title": "Aerie",
+      "era": "The Wild Update",
+      "asset": "minecraft/sounds/music/game/swamp/aerie.ogg",
+      "sha1": "7d2d4b60ec51462992b7429aa861d03048cd43c1",
+      "size": 4081082,
+      "events": [
+        "music.overworld.forest",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.swamp"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "ancestry.ogg",
+      "title": "Ancestry",
+      "era": "The Wild Update",
+      "asset": "minecraft/sounds/music/game/ancestry.ogg",
+      "sha1": "829c044d2c7189d938efb8cb89d1bb66b77c67da",
+      "size": 4522477,
+      "events": [
+        "music.overworld.deep_dark"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "firebugs.ogg",
+      "title": "Firebugs",
+      "era": "The Wild Update",
+      "asset": "minecraft/sounds/music/game/swamp/firebugs.ogg",
+      "sha1": "bea9b17990e1d513cab127ead72c8f655995109e",
+      "size": 4459869,
+      "events": [
+        "music.overworld.forest",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.swamp"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "labyrinthine.ogg",
+      "title": "Labyrinthine",
+      "era": "The Wild Update",
+      "asset": "minecraft/sounds/music/game/swamp/labyrinthine.ogg",
+      "sha1": "c1a20b3df904eb16e6775b5624cbd3aa8619d3cb",
+      "size": 4702419,
+      "events": [
+        "music.overworld.forest",
+        "music.overworld.jungle_and_forest",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.swamp"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "5.ogg",
+      "title": "Five",
+      "era": "The Wild Update",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/5.ogg",
+      "sha1": "584ac8cfca1f68b5e1eb6d0c3554dd52f31bbec5",
+      "size": 1599985,
+      "events": [
+        "music_disc.5"
+      ]
+    },
+    {
+      "file": "a_familiar_room.ogg",
+      "title": "A Familiar Room",
+      "era": "Trails & Tales",
+      "asset": "minecraft/sounds/music/game/a_familiar_room.ogg",
+      "sha1": "7f77e186063198933a7dd67eb492ae4d74839dd9",
+      "size": 2325765,
+      "events": [
+        "music.creative",
+        "music.game"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "bromeliad.ogg",
+      "title": "Bromeliad",
+      "era": "Trails & Tales",
+      "asset": "minecraft/sounds/music/game/bromeliad.ogg",
+      "sha1": "4b7422b5e6324067f24ea7aee2b8f242ce46069b",
+      "size": 4498025,
+      "events": [
+        "music.overworld.bamboo_jungle",
+        "music.overworld.cherry_grove",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.jungle",
+        "music.overworld.sparse_jungle"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "crescent_dunes.ogg",
+      "title": "Crescent Dunes",
+      "era": "Trails & Tales",
+      "asset": "minecraft/sounds/music/game/crescent_dunes.ogg",
+      "sha1": "3de85c831b083e10d906c3ac007d7ca9f36b4075",
+      "size": 3899916,
+      "events": [
+        "music.overworld.badlands",
+        "music.overworld.desert"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "echo_in_the_wind.ogg",
+      "title": "Echo In The Wind",
+      "era": "Trails & Tales",
+      "asset": "minecraft/sounds/music/game/echo_in_the_wind.ogg",
+      "sha1": "5c97ac9788ab81e560bae32b0f5e4fc244e544b4",
+      "size": 3666137,
+      "events": [
+        "music.overworld.badlands",
+        "music.overworld.cherry_grove",
+        "music.overworld.flower_forest",
+        "music.overworld.lush_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "relic.ogg",
+      "title": "Relic",
+      "era": "Trails & Tales",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/relic.ogg",
+      "sha1": "180d3c12b20c806ad7da82a77c32238547f68214",
+      "size": 1970078,
+      "events": [
+        "music_disc.relic"
+      ]
+    },
+    {
+      "file": "deeper.ogg",
+      "title": "Deeper",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/deeper.ogg",
+      "sha1": "8e901a9a5e4daee7e3cbff8a3529d0a4148f8406",
+      "size": 4419136,
+      "events": [
+        "music.overworld.deep_dark",
+        "music.overworld.dripstone_caves",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "eld_unknown.ogg",
+      "title": "Eld Unknown",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/eld_unknown.ogg",
+      "sha1": "1346ff09e77c8506476a017f63d9a820f25f0839",
+      "size": 4959623,
+      "events": [
+        "music.overworld.dripstone_caves",
+        "music.overworld.grove",
+        "music.overworld.jagged_peaks",
+        "music.overworld.stony_peaks",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "endless.ogg",
+      "title": "Endless",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/endless.ogg",
+      "sha1": "14221fedadd7431bc557f36be1af86582955f7c5",
+      "size": 5323546,
+      "events": [
+        "music.overworld.dripstone_caves",
+        "music.overworld.grove",
+        "music.overworld.jagged_peaks",
+        "music.overworld.stony_peaks",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "featherfall.ogg",
+      "title": "Featherfall",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/featherfall.ogg",
+      "sha1": "0c62057c8a75b57a8f06e7c1bc1b21a7f88d4820",
+      "size": 4731149,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.badlands",
+        "music.overworld.cherry_grove",
+        "music.overworld.flower_forest",
+        "music.overworld.lush_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "komorebi.ogg",
+      "title": "Komorebi",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/komorebi.ogg",
+      "sha1": "c3e6d3f34a7221360ad11d18335edd6709df4609",
+      "size": 3932384,
+      "events": [
+        "music.creative",
+        "music.game"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "pokopoko.ogg",
+      "title": "Pokopoko",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/pokopoko.ogg",
+      "sha1": "2142a00de645aa748b908c74fc275a3025b8bd90",
+      "size": 4084418,
+      "events": [
+        "music.overworld.dripstone_caves",
+        "music.overworld.grove",
+        "music.overworld.jagged_peaks",
+        "music.overworld.snowy_slopes",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "puzzlebox.ogg",
+      "title": "Puzzlebox",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/puzzlebox.ogg",
+      "sha1": "cb01089f7f2a4e84b36790efa99f3ed89ef08f5e",
+      "size": 4245980,
+      "events": [
+        "music.creative",
+        "music.game"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "watcher.ogg",
+      "title": "Watcher",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/watcher.ogg",
+      "sha1": "4878a57f39655fedb891c16425e55a3cd91a2d70",
+      "size": 4645995,
+      "events": [
+        "music.creative",
+        "music.game"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "yakusoku.ogg",
+      "title": "Yakusoku",
+      "era": "Tricky Trials",
+      "asset": "minecraft/sounds/music/game/yakusoku.ogg",
+      "sha1": "e36444071568c3273ea00627ed5462275cd6828e",
+      "size": 4009698,
+      "events": [
+        "music.creative",
+        "music.game"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "creator.ogg",
+      "title": "Creator",
+      "era": "Tricky Trials",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/creator.ogg",
+      "sha1": "1b62b6e66e47b1cf034ec3ac54bb7c6baff74780",
+      "size": 1641114,
+      "events": [
+        "music_disc.creator"
+      ]
+    },
+    {
+      "file": "creator_music_box.ogg",
+      "title": "Creator (Music Box Version)",
+      "era": "Tricky Trials",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/creator_music_box.ogg",
+      "sha1": "e1b4726cf75e5d6db25fc22204ceb83279f69498",
+      "size": 603797,
+      "events": [
+        "music_disc.creator_music_box"
+      ]
+    },
+    {
+      "file": "precipice.ogg",
+      "title": "Precipice",
+      "era": "Tricky Trials",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/precipice.ogg",
+      "sha1": "043067183af1d374857b0210fc281535fcf64665",
+      "size": 2940492,
+      "events": [
+        "music_disc.precipice"
+      ]
+    },
+    {
+      "file": "below_and_above.ogg",
+      "title": "Below And Above",
+      "era": "Chase the Skies",
+      "asset": "minecraft/sounds/music/game/below_and_above.ogg",
+      "sha1": "29617ea7a07d4c3ed1b98b752b5740b8ca2e7cbf",
+      "size": 2587725,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.cherry_grove"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "broken_clocks.ogg",
+      "title": "Broken Clocks",
+      "era": "Chase the Skies",
+      "asset": "minecraft/sounds/music/game/broken_clocks.ogg",
+      "sha1": "6095be3382a6b9897a7d0caf93131436e5cea4d6",
+      "size": 2960416,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.forest"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "fireflies.ogg",
+      "title": "Fireflies",
+      "era": "Chase the Skies",
+      "asset": "minecraft/sounds/music/game/fireflies.ogg",
+      "sha1": "154255dcccfcde8af7e3727a0ccaaa72ea359ff5",
+      "size": 2030553,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.desert"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "lilypad.ogg",
+      "title": "Lilypad",
+      "era": "Chase the Skies",
+      "asset": "minecraft/sounds/music/game/lilypad.ogg",
+      "sha1": "b023b1ddac5e027086ef04a9da7234e73a4502a6",
+      "size": 2911450,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.frozen_peaks",
+        "music.overworld.grove"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "os_piano.ogg",
+      "title": "O's Piano",
+      "era": "Chase the Skies",
+      "asset": "minecraft/sounds/music/game/os_piano.ogg",
+      "sha1": "a32d22b74e0a451083c99b68a0119b501652ccd8",
+      "size": 3454882,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.lush_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "lava_chicken.ogg",
+      "title": "Steve's Lava Chicken",
+      "era": "Chase the Skies",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/lava_chicken.ogg",
+      "sha1": "3fad13f1e9f4fa6eedcab98ca691c6c112087b07",
+      "size": 1395430,
+      "events": [
+        "music_disc.lava_chicken"
+      ]
+    },
+    {
+      "file": "tears.ogg",
+      "title": "Tears",
+      "era": "Chase the Skies",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/tears.ogg",
+      "sha1": "fcfacc37f008476785db7bd0b95d1e00836697c0",
+      "size": 1598285,
+      "events": [
+        "music_disc.tears"
+      ]
+    },
+    {
+      "file": "ebb.ogg",
+      "title": "Ebb",
+      "era": "Chaos Cubed",
+      "asset": "minecraft/sounds/music/game/ebb.ogg",
+      "sha1": "5e1288786fa59686f2c000ed90c2e3b89d125460",
+      "size": 4113422,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.dripstone_caves",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jagged_peaks",
+        "music.overworld.sulfur_caves",
+        "music.overworld.swamp"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "home.ogg",
+      "title": "Home",
+      "era": "Chaos Cubed",
+      "asset": "minecraft/sounds/music/game/home.ogg",
+      "sha1": "c00e50dc3ac0d08faf529dff0e6e620a81221f47",
+      "size": 4718595,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.bamboo_jungle",
+        "music.overworld.cherry_grove",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jungle",
+        "music.overworld.meadow",
+        "music.overworld.sparse_jungle"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "memories.ogg",
+      "title": "Memories",
+      "era": "Chaos Cubed",
+      "asset": "minecraft/sounds/music/game/memories.ogg",
+      "sha1": "8a91604916a4b53e0a3a913917f5fec0539c6a2e",
+      "size": 3396348,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.badlands",
+        "music.overworld.cherry_grove",
+        "music.overworld.desert",
+        "music.overworld.flower_forest",
+        "music.overworld.forest"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "nightly.ogg",
+      "title": "Nightly",
+      "era": "Chaos Cubed",
+      "asset": "minecraft/sounds/music/game/nightly.ogg",
+      "sha1": "aebe56d3016657dfeacfadb953424079c7e3d32c",
+      "size": 4267032,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.cherry_grove",
+        "music.overworld.dripstone_caves",
+        "music.overworld.frozen_peaks",
+        "music.overworld.jagged_peaks",
+        "music.overworld.snowy_slopes",
+        "music.overworld.stony_peaks",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "shores.ogg",
+      "title": "Shores",
+      "era": "Chaos Cubed",
+      "asset": "minecraft/sounds/music/game/shores.ogg",
+      "sha1": "974c6083c8de0de74185e966d664bf0a5841bc22",
+      "size": 4414349,
+      "events": [
+        "music.creative",
+        "music.game",
+        "music.overworld.dripstone_caves",
+        "music.overworld.flower_forest",
+        "music.overworld.forest",
+        "music.overworld.grove",
+        "music.overworld.lush_caves",
+        "music.overworld.old_growth_taiga",
+        "music.overworld.sulfur_caves"
+      ],
+      "usage": "Overworld"
+    },
+    {
+      "file": "bounce.ogg",
+      "title": "Bounce",
+      "era": "Chaos Cubed",
+      "usage": "Records",
+      "asset": "minecraft/sounds/records/bounce.ogg",
+      "sha1": "e107e8f61f480575f3e8c18ffb3d42bf0f0ed7e5",
+      "size": 1981684,
+      "events": [
+        "music_disc.bounce"
+      ]
     }
-  ]
+  ],
+  "checkedSnapshot": "26.4-snapshot-2",
+  "sources": [
+    {
+      "version": "1.7.10",
+      "assetIndex": "https://launchermeta.mojang.com/v1/packages/1863782e33ce7b584fc45b037325a1964e095d3e/1.7.10.json",
+      "soundsSha1": "fce0bb3e14ade7b292a7c1d5fa785533d8106d82"
+    },
+    {
+      "version": "1.14.4",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/43b2f3021fe9f7d768378de95538e22da3ee8301/1.14.json",
+      "soundsSha1": "b9be2246b416bbff0749415d4482a06d82fee78a"
+    },
+    {
+      "version": "1.18.2",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/d31a2e85ae149dd1b1a7070b22cb8887892fda6c/1.18.json",
+      "soundsSha1": "438ca03b7388044ed19264a3813cf9cc992df4d5"
+    },
+    {
+      "version": "1.19.4",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/7eefc53baad3fe4a5af9f03d767f60c75cc044b6/3.json",
+      "soundsSha1": "539a0c2f52110193b3eb1a506a194714485571b0"
+    },
+    {
+      "version": "1.20.6",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/062ddb2dd67d41cdf332bbceb37963160a296cf0/16.json",
+      "soundsSha1": "427feddfacf01984a95a15ffad70bf3531dbf344"
+    },
+    {
+      "version": "1.21.5",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/cedfdc4e0969b0b581378ccda1827045838c389e/24.json",
+      "soundsSha1": "054ce6faf33806879f0f1f38204ee9eb080388ec"
+    },
+    {
+      "version": "1.21.6",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/c9b00f2b43d98434e27377c9312e06b4f0ec0f26/26.json",
+      "soundsSha1": "25fe1e45f2f3f67a59ccf53652f8e4182056f6cb"
+    },
+    {
+      "version": "1.21.11",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/4043c34fdd5d06b2ac1f6f46c5b91a4ac16e3452/29.json",
+      "soundsSha1": "123370fbb15bf1e85cf5038b3e8ca719ad391dfb"
+    },
+    {
+      "version": "26.1",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/2c17565f9cd7dbb95294e71fe258d65d6a8f0360/30.json",
+      "soundsSha1": "d4bdfba22b31906e9aded146b5e71ac4e16740b1"
+    },
+    {
+      "version": "26.2",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/9a622c23d8ff76c4c44787c2e171c56feed1f786/32.json",
+      "soundsSha1": "9ac006d5537ed0fa4a7bcd1eccfc505155847686"
+    },
+    {
+      "version": "26.3",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/abfaa525f923f807df8b4e4d29c1b5e3a104adbe/34.json",
+      "soundsSha1": "7975165ad4a3c0cb3c05078b914eac0f2c3b5f5f"
+    },
+    {
+      "version": "26.4-snapshot-2",
+      "assetIndex": "https://piston-meta.mojang.com/v1/packages/d41994f026f245c4802693977f4a0ff40091f4ff/35.json",
+      "soundsSha1": "6c0ecd96abb11e58c2046f87f14581fcba0ccd66"
+    }
+  ],
+  "legacyAliases": {
+    "minecraft": "calm1",
+    "clark": "calm2",
+    "sweden": "calm3",
+    "subwoofer_lullaby": "hal1",
+    "living_mice": "hal2",
+    "haggstrom": "hal3",
+    "danny": "hal4",
+    "key": "nuance1",
+    "oxygene": "nuance2",
+    "dry_hands": "piano1",
+    "wet_hands": "piano2",
+    "mice_on_venus": "piano3",
+    "biome_fest": "creative1",
+    "blind_spots": "creative2",
+    "haunt_muskie": "creative3",
+    "aria_math": "creative4",
+    "dreiton": "creative5",
+    "taswell": "creative6",
+    "menu1": "mutation",
+    "menu2": "moog_city_2",
+    "menu3": "beginning_2",
+    "menu4": "floating_trees",
+    "credits": "alpha"
+  }
 }

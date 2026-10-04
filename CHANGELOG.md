@@ -1,5 +1,26 @@
 # Changelog
 
+## Complete overworld soundtrack and group controls, 2026-10-05
+
+- Expand All Minecraft from 21 to 56 tracks through Java 26.3, also checked
+  against 26.4-snapshot-2. Add Caves & Cliffs, The Wild Update, Trails & Tales,
+  Tricky Trials, Chase the Skies and Chaos Cubed background music.
+- Also bundle all four menu tracks, 22 records and the credits song in separate
+  groups, for 83 game-supplied tracks total. Alpha and Beta includes its 35
+  available game tracks. Vanilla keeps the original 12. Preserve every existing
+  track ID, volume, exclusion and queue reference. Album-only files still need
+  local copies; document the 15 missing album extras.
+- Separate dedicated creative music into Beta / Creative. Keep shared
+  survival/creative tracks in their release groups without duplicates.
+- Add group inclusion buttons with included/total counts and mixed-state
+  highlighting. Apply to the whole era or folder even when searched/collapsed;
+  batch changes through the normal preview, Apply, Cancel and auto-apply flow.
+- Fix Beta OGG decoding from compressed JAR resources: complete short reads
+  before passing data to the old decoder, preventing silent/one-buffer playback.
+  Keep bounded streaming without file extraction or whole-song buffering.
+- Add a reproducible official sound-event audit for soundtrack completeness,
+  creative classification and asset hashes, plus full PCM stream comparisons.
+
 ## Soundtrack library and music gaps, 2026-10-05
 
 - Bundle all 21 overworld tracks available through Minecraft 1.14: the original

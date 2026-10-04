@@ -23,6 +23,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private final PowerOptionsScreen parent;
   private final TextInput search = new TextInput("", 128);
   private final Map<String, Setting> settings = new HashMap<>();
+  private final Map<String, List<Setting>> groupSettings = new HashMap<>();
   private List<String> tracks = List.of(), folders = List.of();
   private record Row(String group, String label, String id, int index, int y, int height) {}
   private final Set<String> collapsed = new HashSet<>();
@@ -242,6 +243,11 @@ public final class MusicLibraryScreen extends UiScreen {
     folders = List.copyOf(paths);
     settings.clear();
     parent.session().settings().forEach(s -> settings.put(s.id, s));
+    groupSettings.clear();
+    for (String id : AudioController.music(minecraft)) {
+      Setting enabled = settings.get("audio.trackEnabled." + id);
+      if (enabled != null) groupSettings.computeIfAbsent(group(id), key -> new ArrayList<>()).add(enabled);
+    }
     revision = AudioController.libraryRevision();
     rebuild();
   }
@@ -272,11 +278,30 @@ public final class MusicLibraryScreen extends UiScreen {
     var track = custom.get(id);
     if (track != null) return "folder:" + Objects.toString(track.path().getParent(), "Custom tracks");
     var builtin = BuiltinMusic.find(id);
-    return builtin == null ? "Other tracks" : builtin.era();
+    return builtin == null ? "Other tracks" : builtin.group();
   }
 
   private int groupOrder(String group) {
-    return switch (group) { case "Alpha" -> 0; case "Beta" -> 1; case "Update Aquatic" -> 2; default -> 3; };
+    int index = BuiltinMusic.GROUPS.indexOf(group);
+    return index < 0 ? BuiltinMusic.GROUPS.size() : index;
+  }
+
+  private List<Setting> members(String group) {
+    return groupSettings.getOrDefault(group, List.of());
+  }
+
+  private int includedCount(String group) {
+    return (int) members(group).stream().filter(s -> s.value.getAsBoolean()).count();
+  }
+
+  private void toggleGroup(String group) {
+    List<Setting> members = members(group);
+    if (members.isEmpty()) return;
+    boolean include = includedCount(group) != members.size();
+    for (Setting setting : members) setting.value = new com.google.gson.JsonPrimitive(include);
+    // Operate on the whole group even when search hides some rows. One transaction
+    // preserves Cancel/Apply behavior, volumes, queue order and all other groups.
+    parent.changed(members, false);
   }
 
   private void rebuildRows() {
@@ -421,6 +446,10 @@ public final class MusicLibraryScreen extends UiScreen {
         && y - listTop() + scroll() < row.y + row.height).findFirst().orElse(null);
     if (clicked == null) return;
     if (clicked.id == null) {
+      int rowY = listTop() + clicked.y - scroll();
+      if (inside(x, y, right() - 20, rowY + 3, 20, 18)) {
+        click(); toggleGroup(clicked.group); return;
+      }
       if (!collapsed.remove(clicked.group)) collapsed.add(clicked.group);
       rebuildRows(); scroll(scroll()); return;
     }
@@ -522,10 +551,18 @@ public final class MusicLibraryScreen extends UiScreen {
       if (y + row.height <= listTop() || y >= bottom()) continue;
       if (row.id == null) {
         boolean closed = collapsed.contains(row.group) && search.text().isBlank();
-        text((closed ? "> " : "v ") + fit(row.label, span() - 16), left() + 2, y + 8, 0xffffff);
+        int total = members(row.group).size(), included = includedCount(row.group);
+        String count = included + "/" + total;
+        int countWidth = minecraft.textRenderer.getWidth(count);
+        text((closed ? "> " : "v ") + fit(row.label, span() - countWidth - 44), left() + 2, y + 8, 0xffffff);
+        text(count, right() - 26 - countWidth, y + 8, included > 0 && included < total ? 0xffdd88 : 0xaaaaaa);
+        musicToggle(included > 0, right() - 20, y + 3, mx, my, total > 0);
         fill(left(), y + 21, right(), y + 22, 0x50555555);
         if (inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom())
-          tip = row.group.startsWith("folder:") ? row.group.substring(7) : row.label + " soundtrack";
+          tip = inside(mx, my, right() - 20, y + 3, 20, 18)
+              ? (included == total ? "Exclude" : "Include") + " every track in this group. Includes hidden search results; volumes and queue stay unchanged."
+              : (row.group.startsWith("folder:") ? row.group.substring(7) : row.label + " soundtrack")
+                  + "\n" + included + " of " + total + " tracks included in automatic rotation.";
         continue;
       }
       int i = row.index;

@@ -8,14 +8,20 @@ import java.util.*;
 /** Pinned game asset metadata; filenames remain stable setting and queue identifiers. */
 public final class BuiltinMusic {
   private BuiltinMusic() {}
-  public record Track(String file, String title, String era, String sha1, int size) {
+  public record Track(String file, String title, String era, String usage, String sha1, int size) {
     public String id() { return "music:" + file; }
+    public boolean creative() { return usage.equals("Creative"); }
+    public boolean background() { return usage.equals("Overworld") || creative(); }
+    public String group() { return era + (usage.equals("Overworld") ? "" : " / " + usage); }
     public boolean included(AudioSettings.MusicMode mode) {
-      return era.equals("Alpha") || mode == AudioSettings.MusicMode.ALL_MINECRAFT
-          || mode == AudioSettings.MusicMode.ALPHA_BETA && era.equals("Beta");
+      return mode == AudioSettings.MusicMode.ALL_MINECRAFT
+          || mode == AudioSettings.MusicMode.ALPHA_BETA && (era.equals("Alpha") || era.equals("Beta"))
+          || era.equals("Alpha") && usage.equals("Overworld");
     }
   }
   public static final List<Track> TRACKS = load();
+  /** Manifest order is chronological; shared survival/creative tracks appear only once. */
+  public static final List<String> GROUPS = TRACKS.stream().map(Track::group).distinct().toList();
   private static List<Track> load() {
     try (var in = BuiltinMusic.class.getResourceAsStream("/assets/powerbeta/music/manifest.json")) {
       if (in == null) throw new IOException("Missing soundtrack manifest");
@@ -26,7 +32,8 @@ public final class BuiltinMusic {
       for (JsonElement value : values) {
         JsonObject t = value.getAsJsonObject();
         Track track = new Track(t.get("file").getAsString(), t.get("title").getAsString(),
-            t.get("era").getAsString(), t.get("sha1").getAsString(), t.get("size").getAsInt());
+            t.get("era").getAsString(), t.get("usage").getAsString(),
+            t.get("sha1").getAsString(), t.get("size").getAsInt());
         if (!track.file.matches("[a-z0-9_]+\\.ogg") || !names.add(track.file))
           throw new IOException("Invalid soundtrack manifest");
         tracks.add(track);

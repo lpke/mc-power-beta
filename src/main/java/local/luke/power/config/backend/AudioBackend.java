@@ -38,7 +38,7 @@ public final class AudioBackend implements Backend {
         Setting.Kind.CHOICE,
         new JsonPrimitive(s.musicMode.ordinal()),
         new JsonPrimitive(0),
-        "Vanilla: original 12 tracks. Alpha and Beta: also six creative tracks from Volume Beta. All Minecraft: also three underwater tracks, covering overworld music through 1.14.",
+        "Vanilla: original 12 tracks. Alpha and Beta: C418's included music. All Minecraft: every bundled soundtrack group through 26.3. Menu, record and credits music have separate library groups; Nether and End background music is excluded.",
         List.of("Vanilla", "Alpha and Beta", "All Minecraft"));
     add("customMusic", "Music library", "Custom music", Setting.Kind.CHOICE,
         new JsonPrimitive(s.customMusic.ordinal()), new JsonPrimitive(0),
