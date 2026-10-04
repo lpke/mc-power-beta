@@ -289,7 +289,7 @@
   "power_compat:config.PARTICLES_CONFIG.disableSlimeParticle": "Hides this particle effect without changing the event that produces it.",
   "power_compat:config.PARTICLES_CONFIG.disableHeartParticle": "Hides this particle effect without changing the event that produces it.",
   "power_controls:userinterface.frontViewThirdPerson": "Disabled switches between first person and rear view. Normal adds a front view; Hide HUD shows it while the HUD is hidden.",
-  "native.texturePack": "Changes the base textures immediately. The individual weather, cobblestone and brick overrides apply on top of any pack.",
+  "native.texturePack": "Open the native texture-pack picker. Use Open texture pack folder to add your own ZIP packs.",
   "power_controls:general.rawInput": "Reads movement directly from a mouse device, bypassing normal cursor processing. Device support varies by operating system; turn off if movement stops or feels uneven.",
   "power_controls:features.moreSoundsChests": "Choose the sounds used for opening and closing chests.",
   "power_controls:features.fallingPipe": "Replace enabled tool and armor break sounds with a falling-pipe sound.",

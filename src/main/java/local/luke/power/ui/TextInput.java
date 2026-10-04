@@ -7,14 +7,23 @@ import org.lwjgl.input.Keyboard;
 
 /** Single-line editor with selection, navigation and unrestricted clipboard pasting up to a cap. */
 public final class TextInput {
-  public String text;
+  private String text;
   public boolean focused;
   private int cursor, anchor;
   private final int limit;
 
   public TextInput(String text, int limit) {
-    this.text = text;
     this.limit = limit;
+    setText(text);
+  }
+
+  public String text() {
+    return text;
+  }
+
+  /** Replace text and its selection together so rendering never sees a stale cursor. */
+  public void setText(String text) {
+    this.text = java.util.Objects.requireNonNull(text);
     cursor = anchor = text.length();
   }
 

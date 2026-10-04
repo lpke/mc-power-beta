@@ -40,7 +40,7 @@ public final class FolderScreen extends UiScreen {
       return;
     }
     if (key == Keyboard.KEY_RETURN && path.focused) {
-      add(path.text);
+      add(path.text());
       return;
     }
     path.key(c, key);
@@ -64,7 +64,7 @@ public final class FolderScreen extends UiScreen {
       String value = resolved.toAbsolutePath().normalize().toString();
       if (!folders.contains(value)) folders.add(value);
       selected = folders.indexOf(value);
-      path.text = "";
+      path.setText("");
       path.selectAll();
       error = "";
     } catch (RuntimeException e) {
@@ -92,7 +92,7 @@ public final class FolderScreen extends UiScreen {
     }
     path.focused = false;
     if (inside(x, y, panelRight() - 104, 41, 40, 20)) {
-      add(path.text);
+      add(path.text());
       return;
     }
     if (inside(x, y, panelRight() - 60, 41, 44, 20)) {

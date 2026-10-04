@@ -23,7 +23,7 @@ public final class UiChecks {
     Method m = o.getClass().getDeclaredMethod(key); m.setAccessible(true); return m.invoke(o);
   }
   static void search(PowerOptionsScreen s, String value) throws Exception {
-    ((TextInput)field(s, "search")).text = value; call(s, "layout");
+    ((TextInput)field(s, "search")).setText(value); call(s, "layout");
   }
   static void click(PowerOptionsScreen s, int x, int y) { ((ScreenInput)(Object)s).power$click(x,y,0); }
 
@@ -54,7 +54,7 @@ public final class UiChecks {
       check(Arrays.equals(options, Files.readAllBytes(local.luke.power.storage.PowerConfig.path())), "preview saved options");
     });
     test("base texture preview is live and does not save", () -> {
-      Setting pack = find(s.session(), "native.texturePack"); pack.cycle(1); s.changed(pack);
+      Setting pack = find(s.session(), "native.texturePack"); pack.value = new JsonPrimitive("Alpha.zip"); s.changed(pack);
       check(!mc.field_2768.field_1175.field_1137.equals("Default"), "base pack not previewed");
       check(Arrays.equals(options, Files.readAllBytes(local.luke.power.storage.PowerConfig.path())), "pack preview saved options");
     });
@@ -89,7 +89,7 @@ public final class UiChecks {
       click(s,(int)ax.invoke(s,1)+5,s.height-20);
       check(mc.currentScreen==s,"Apply closed screen");
       check(s.session().changes()==0,"Apply left unsaved values");
-      check(field(s,"page").equals("Audio") && ((TextInput)field(s,"search")).text.equals("volume") && field(s,"scroll").equals(scroll),"Apply moved location");
+      check(field(s,"page").equals("Audio") && ((TextInput)field(s,"search")).text().equals("volume") && field(s,"scroll").equals(scroll),"Apply moved location");
       check(Math.abs(local.luke.power.storage.PowerConfig.section("native").get("music").getAsDouble()-.37)<.0001,"Apply did not save");
     });
     // Return every saved value to the initial state.

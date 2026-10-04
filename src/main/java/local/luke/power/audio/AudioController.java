@@ -36,9 +36,12 @@ public final class AudioController {
   private static String currentMusic = "",
       menuMusic = "",
       status = "Music folders have not been scanned";
-  private static int cleanup, menuCooldown;
+  private static int cleanup, menuCooldown, libraryRevision;
+
+  public static int libraryRevision() { return libraryRevision; }
   private static final List<class_267> history = new ArrayList<>();
   private static int historyIndex = -1;
+  private static long musicStarted;
 
   private static void remember(class_267 track) {
     while (history.size() > historyIndex + 1) history.remove(history.size() - 1);
@@ -65,10 +68,12 @@ public final class AudioController {
     system.backgroundMusic("BgMusic", track.field_2127, track.field_2126, false);
     system.setVolume("BgMusic", musicVolume(currentMusic));
     system.play("BgMusic");
+    musicStarted = System.nanoTime();
     nextDelay((SoundManagerAccessor) client.soundManager);
   }
 
   public static void previous() {
+    if (system() != null) MusicPreview.stop(system(), true);
     if (history.isEmpty()) { next(); return; }
     historyIndex = Math.max(0, historyIndex - 1);
     play(history.get(historyIndex));
@@ -76,6 +81,8 @@ public final class AudioController {
 
   public static void previewSound(String id) {
     if (client == null || system() == null) return;
+    if (id.startsWith("music:")) { previewMusic(id); return; }
+    MusicPreview.stop(system(), true);
     var manager = (SoundManagerAccessor) client.soundManager;
     boolean record = id.startsWith("records.");
     var pool = record ? manager.power$records() : manager.power$sounds();
@@ -88,6 +95,30 @@ public final class AudioController {
     system.newSource(false, "PowerBetaPreview", track.field_2127, track.field_2126, false, 0, 0, 0, 0, 0);
     system.setVolume("PowerBetaPreview", mix("PowerBetaPreview", id, client.options.soundVolume, false));
     system.play("PowerBetaPreview");
+  }
+
+  private static void previewMusic(String id) {
+    var pool = ((SoundManagerAccessor) client.soundManager).power$music();
+    class_267 selected = null;
+    synchronized (pool) {
+      for (class_267 track : ((SoundPoolAccessor) pool).power$tracks())
+        if (id.equals("music:" + track.field_2126)) { selected = track; break; }
+    }
+    try {
+      if (selected == null)
+        for (var track : customTracks())
+          if (id.equals("music:" + track.name()) && Files.isRegularFile(track.path())) {
+            selected = new class_267(track.name(), track.path().toUri().toURL()); break;
+          }
+      if (selected == null) { status = "Track unavailable. Reload music folders."; return; }
+      system().stop("PowerBetaPreview");
+      MusicPreview.start(client, system(), selected, !paused && !currentMusic.isEmpty()
+          && System.nanoTime() - musicStarted < 1_000_000_000L);
+    } catch (RuntimeException | java.io.IOException e) {
+      MusicPreview.stop(system(), true);
+      status = "Could not preview track. Reload music folders.";
+      PowerBeta.LOG.warn("Music preview failed", e);
+    }
   }
 
   private AudioController() {}
@@ -114,6 +145,7 @@ public final class AudioController {
   }
 
   public static String status() {
+    if (MusicPreview.active()) return "Previewing: " + MusicPreview.track().substring(6);
     return paused
         ? "Music paused"
         : nowPlaying().equals("none") ? status : "Playing: " + nowPlaying();
@@ -153,6 +185,7 @@ public final class AudioController {
     if (pending != null && pending.isDone()) {
       try {
         library = pending.join();
+        libraryRevision++;
         List<String> errors = new ArrayList<>(library.world.warnings());
         errors.addAll(library.menu.warnings());
         status =
@@ -191,7 +224,8 @@ public final class AudioController {
       paused = false;
       wasWorld = inWorld;
     }
-    if (paused) return;
+    MusicPreview.tick(mc, system);
+    if (MusicPreview.active() || paused) return;
     if (rules().disabled() || AudioConfig.current().master == 0) {
       system.stop("BgMusic");
       system.stop("PowerBetaMenu");
@@ -236,7 +270,7 @@ public final class AudioController {
       s.stop("BgMusic");
       currentMusic = "";
     }
-    return paused
+    return MusicPreview.active() || paused
         || (client != null && client.world == null && rules().menuEnabled() && rules().menuOverrides() && !library.menu.tracks().isEmpty())
         || rules().disabled()
         || AudioConfig.current().master == 0
@@ -326,6 +360,7 @@ public final class AudioController {
     if (client != null) {
       s.setVolume("BgMusic", musicVolume(currentMusic));
       s.setVolume("PowerBetaMenu", musicVolume(menuMusic));
+      if (MusicPreview.active()) s.setVolume(MusicPreview.SOURCE, musicVolume(MusicPreview.track()));
     }
   }
 
@@ -344,7 +379,8 @@ public final class AudioController {
   public static void togglePause() {
     SoundSystem s = system();
     if (s == null) return;
-    if (!paused && !s.playing("BgMusic") && !s.playing("PowerBetaMenu")) {
+    boolean resumedPreview = paused ? MusicPreview.stop(s, true) : MusicPreview.pause(s);
+    if (!paused && !resumedPreview && !s.playing("BgMusic") && !s.playing("PowerBetaMenu")) {
       next();
       return;
     }
@@ -360,6 +396,7 @@ public final class AudioController {
 
   public static void next() {
     if (client == null || system() == null) return;
+    MusicPreview.stop(system(), true);
     if (rules().disabled()) { play(null); return; }
     paused = false;
     if (historyIndex + 1 < history.size()) { play(history.get(++historyIndex)); return; }

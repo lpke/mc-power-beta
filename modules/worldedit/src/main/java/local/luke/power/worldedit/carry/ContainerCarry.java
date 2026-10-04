@@ -144,24 +144,14 @@ public final class ContainerCarry {
         if (!Set.of(23, 54, 61, 62).contains(value.id)
             || !(world.method_1777(pos.x(), pos.y(), pos.z()) instanceof Inventory)) return false;
         if (value.nbt() == null) throw new IOException("Container data is unavailable");
-        List<Pos> pair;
         try {
-          pair = value.id == 54 ? chestPair(blocks, pos) : List.of(pos);
+          if (value.id == 54) validateChestLayout(blocks, pos);
         } catch (IOException e) {
           message(mc, e.getMessage());
           return true;
         }
-        // Canonical west/north order preserves the inventory's slot order after rotation.
-        Pos first = pair.get(0);
-        held =
-            pair.size() == 1
-                ? new CarryJournal(first, mc.player.dimensionId, blocks.get(first))
-                : new CarryJournal(
-                    first,
-                    mc.player.dimensionId,
-                    blocks.get(first),
-                    pair.get(1),
-                    blocks.get(pair.get(1)));
+        // Each chest block owns its own 27 slots. Never snapshot or remove its neighbor.
+        held = new CarryJournal(pos, mc.player.dimensionId, value);
         held.write(file); // This must succeed before the source can be touched.
         local.luke.power.input.InteractionState.carryingContainer = true;
         transfer(true);
@@ -170,17 +160,14 @@ public final class ContainerCarry {
         held.write(file);
         consumingUse = Mouse.isButtonDown(1);
         mc.player.method_500();
-        message(
-            mc,
-            "Carrying "
-                + (held.size() == 2 ? "double chest" : "container")
-                + ". Use a block face to place it.");
+        message(mc, "Carrying container. Use a block face to place it.");
       } else {
         int[][] offsets = {{0, -1, 0}, {0, 1, 0}, {0, 0, -1}, {0, 0, 1}, {-1, 0, 0}, {1, 0, 0}};
         if (hit.field_1987 < 0 || hit.field_1987 >= offsets.length) return true;
         int[] side = offsets[hit.field_1987];
         Pos target = new Pos(pos.x() + side[0], pos.y() + side[1], pos.z() + side[2]);
         boolean alongX = Math.abs(Math.sin(Math.toRadians(mc.player.yaw))) < Math.sqrt(.5);
+        // Keep placement support for double-chest journals saved by earlier versions.
         Pos other = held.size() == 2 ? target.add(alongX ? 1 : 0, 0, alongX ? 0 : 1) : null;
         List<Pos> targets = other == null ? List.of(target) : List.of(target, other);
         for (Pos p : targets) {
@@ -227,7 +214,7 @@ public final class ContainerCarry {
 
   private static final int[][] NEIGHBORS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-  private static List<Pos> chestPair(MinecraftWorld blocks, Pos p) throws IOException {
+  private static void validateChestLayout(MinecraftWorld blocks, Pos p) throws IOException {
     List<Pos> pair = new ArrayList<>();
     pair.add(p);
     for (int[] d : NEIGHBORS) {
@@ -241,8 +228,6 @@ public final class ContainerCarry {
       if (!(world.method_1777(part.x(), part.y(), part.z()) instanceof Inventory)
           || hasOutsideChest(blocks, part, pair)) throw new IOException("Chest pair is incomplete");
     }
-    pair.sort(Comparator.comparingInt(Pos::x).thenComparingInt(Pos::z));
-    return pair;
   }
 
   private static boolean canPlaceChest(MinecraftWorld blocks, Pos target, List<Pos> targets) {

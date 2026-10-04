@@ -47,7 +47,11 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("chest-join")) ChestJoinChecks.run(mc);
+      if (command.equals("split-restart-start") || command.equals("split-restart-finish")) ChestJoinChecks.restart(mc,command.endsWith("finish"));
+      else if (command.startsWith("preview-audio-")) PreviewPickerChecks.audio(mc,command.substring(14));
+      else if (command.equals("pack-picker")) PreviewPickerChecks.picker(mc);
+      else if (command.equals("filter-navigation")) FilteredNavigationChecks.run(mc);
+      else if (command.equals("chest-join")) ChestJoinChecks.run(mc);
       else if (command.equals("carry-hold") || command.equals("carry-release")) NavigationCarryChecks.hold(mc,command.equals("carry-release"));
       else if (command.equals("carry-resume-check")) NavigationCarryChecks.resumed(mc);
       else if (command.equals("navigation-check")) NavigationCarryChecks.menu(mc);

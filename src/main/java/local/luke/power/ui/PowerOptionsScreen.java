@@ -69,7 +69,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private int actionWidth() { return uiWidth() < 470 ? 54 : 66; }
   private int actionX(int i) { return right() - 8 - (3 - i) * (actionWidth() + 4); }
 
-  private int selected = -1, hoverTicks;
+  private int selected = -1, hoverTicks, musicRevision = -1;
   private String lastHover = "";
   private List<Row> rows = List.of();
 
@@ -99,7 +99,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void rememberPosition() {
-    if (!changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty() && search.text.isBlank()) {
+    if (!changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty() && search.text().isBlank()) {
       rememberedPage = page;
       positions.put(page, scroll);
       rememberedSideScroll = sideScroll;
@@ -111,7 +111,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private boolean controls() { return page.equals("Controls"); }
   private int disabledX() { return actionX(0) - 94; }
   private String previewId(Setting s) {
-    if (s.id.startsWith("audio.sound.") && !s.id.startsWith("audio.sound.music:")) return s.id.substring("audio.sound.".length());
+    if (s.id.startsWith("audio.sound.")) return s.id.substring("audio.sound.".length());
     return switch (s.id) {
       case "power_environment:config.MUSIC_CONFIG.volumeNetherPortalAmbient" -> "portal.portal";
       case "power_environment:config.MUSIC_CONFIG.volumeRainAmbient" -> "ambient.weather.rain";
@@ -131,7 +131,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private int searchLeft() { return left() + (history.isEmpty() ? 0 : 48); }
   private void pushView() {
     if (history.size() == 32) history.removeLast();
-    history.push(new View(page, scroll, sideScroll, search.text, changedOnly, conflictIds,
+    history.push(new View(page, scroll, sideScroll, search.text(), changedOnly, conflictIds,
         relatedIds, Set.copyOf(collapsed), showDisabled, selected));
     search.focused = false;
     selected = -1;
@@ -140,7 +140,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (history.isEmpty()) return;
     View view = history.pop();
     page = view.page; scroll = view.scroll; sideScroll = view.sideScroll;
-    search.text = view.query; search.selectAll(); search.focused = false;
+    search.setText(view.query); search.selectAll(); search.focused = false;
     changedOnly = view.changedOnly; conflictIds = view.conflicts; relatedIds = view.related;
     collapsed.clear(); collapsed.addAll(view.collapsed);
     showDisabled = view.showDisabled; selected = view.selected;
@@ -152,7 +152,7 @@ public final class PowerOptionsScreen extends UiScreen {
     rememberPosition(); pushView();
     page = "Controls";
     relatedIds = bindings.stream().map(s -> s.id).toList();
-    conflictIds = List.of(); changedOnly = false; search.text = ""; scroll = 0;
+    conflictIds = List.of(); changedOnly = false; search.setText(""); scroll = 0;
     layout();
   }
   private void click() { minecraft.soundManager.method_2009("random.click", 1, 1); }
@@ -165,8 +165,23 @@ public final class PowerOptionsScreen extends UiScreen {
     page = target.page;
     conflictIds = List.of();
     changedOnly = false;
-    search.text = "";
+    search.setText("");
     scroll = 0;
+    layout();
+  }
+
+  private void openGroup(Setting setting) {
+    rememberPosition();
+    pushView();
+    page = setting.page;
+    search.setText("");
+    changedOnly = false;
+    conflictIds = relatedIds = List.of();
+    collapsed.remove(page + "/" + setting.group);
+    scroll = 0;
+    layout();
+    rows.stream().filter(r -> r.group.equals(setting.group)).findFirst()
+        .ifPresent(r -> scroll = r.y);
     layout();
   }
 
@@ -198,11 +213,11 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private boolean audio() {
-    return page.equals("Audio") && search.text.isBlank() && !changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty();
+    return page.equals("Audio") && search.text().isBlank() && !changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty();
   }
 
   private boolean video() {
-    return page.equals("Video") && search.text.isBlank() && !changedOnly;
+    return page.equals("Video") && search.text().isBlank() && !changedOnly;
   }
 
   private int top() {
@@ -215,7 +230,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private void layout() {
     if (session == null) return;
-    String query = search.text.strip().toLowerCase(Locale.ROOT);
+    String query = search.text().strip().toLowerCase(Locale.ROOT);
     Map<String, List<Setting>> groups = new LinkedHashMap<>();
     List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
     List<Setting> candidates = listed.isEmpty() ? session.settings() : listed.stream()
@@ -254,7 +269,14 @@ public final class PowerOptionsScreen extends UiScreen {
         Math.max(0, Math.min(sideScroll, Math.max(0, PAGES.size() * 22 - (bottom() - 24))));
   }
 
-  public void tick() { hoverTicks++; }
+  public void tick() {
+    hoverTicks++;
+    int revision = local.luke.power.audio.AudioController.libraryRevision();
+    if (session != null && revision != musicRevision) {
+      musicRevision = revision;
+      if (local.luke.power.config.backend.AudioBackend.discoverMusic(session, minecraft)) layout();
+    }
+  }
 
   public void changed(Setting setting) {
     session.link(setting);
@@ -310,7 +332,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (inside(x, y, searchLeft(), 28, right() - 36 - searchLeft(), 18)) {
       search.focused = true;
       if (button == 1) {
-        search.text = "";
+        search.setText("");
         search.selectAll();
         scroll = 0;
         layout();
@@ -322,7 +344,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (!history.isEmpty() && (!conflictIds.isEmpty() || !relatedIds.isEmpty())) { back(); return; }
       conflictIds = List.of();
       relatedIds = List.of();
-      search.text = "";
+      search.setText("");
       search.selectAll();
       scroll = 0;
       layout();
@@ -339,7 +361,7 @@ public final class PowerOptionsScreen extends UiScreen {
         page = PAGES.get(index);
         conflictIds = List.of();
         changedOnly = false;
-        search.text = "";
+        search.setText("");
         search.selectAll();
         scroll = positions.getOrDefault(page, 0d);
         selected = -1;
@@ -363,7 +385,13 @@ public final class PowerOptionsScreen extends UiScreen {
         int ry = top() + r.y - (int) scroll;
         if (y < ry || y >= ry + r.height) continue;
         if (r.setting == null) {
-          if (button == 0) {
+          if (button == 0 && (!search.text().isBlank() || changedOnly)) {
+            // Every search header is followed by at least one setting in its section.
+            if (i + 1 < rows.size() && rows.get(i + 1).setting != null) {
+              click();
+              openGroup(rows.get(i + 1).setting);
+            }
+          } else if (button == 0) {
             String id = page + "/" + r.group;
             if (!collapsed.add(id)) collapsed.remove(id);
             layout();
@@ -391,7 +419,7 @@ public final class PowerOptionsScreen extends UiScreen {
           List<String> fixed = new ArrayList<>(); fixed.add(s.id);
           conflicts(s).forEach(c -> fixed.add(c.id));
           conflictIds = List.copyOf(fixed);
-          search.text = ""; changedOnly = false; scroll = 0; layout(); return;
+          search.setText(""); changedOnly = false; scroll = 0; layout(); return;
         }
         if (x >= controlLeft(r) && x < mainControlLeft(r)) {
           click();
@@ -428,7 +456,7 @@ public final class PowerOptionsScreen extends UiScreen {
       conflictIds = List.of();
       relatedIds = List.of();
       changedOnly = !changedOnly;
-      search.text = "";
+      search.setText("");
       scroll = 0;
       layout();
       return;
@@ -446,6 +474,10 @@ public final class PowerOptionsScreen extends UiScreen {
   private void activate(Setting s, int direction) {
     error = "";
     click();
+    if (s.id.equals("native.texturePack")) {
+      minecraft.setScreen(new TexturePackScreen(this, s));
+      return;
+    }
     switch (s.kind) {
       case KEY -> { capture = s; captureModifier = 0; }
       case TEXT, LIST -> {
@@ -543,9 +575,9 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (search.focused) {
-      String before = search.text;
+      String before = search.text();
       search.key(c, key);
-      if (!before.equals(search.text)) {
+      if (!before.equals(search.text())) {
         conflictIds = List.of();
         relatedIds = List.of();
         scroll = 0;
@@ -632,7 +664,7 @@ public final class PowerOptionsScreen extends UiScreen {
     for (int i = 0; i < PAGES.size(); i++) {
       int y = 24 + i * 22 - (int) sideScroll;
       boolean hover = inside(mx, my, origin(), y, sidebar(), 22);
-      if (PAGES.get(i).equals(page) && search.text.isBlank() && !changedOnly)
+      if (PAGES.get(i).equals(page) && search.text().isBlank() && !changedOnly)
         fill(origin(), y, origin() + sidebar(), y + 21, 0xc0000000);
       GL11.glPushMatrix();
       GL11.glColor4f(1, 1, 1, 1);
@@ -672,7 +704,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (y + row.height < top() || y >= bottom()) continue;
       if (row.setting == null) {
         text(
-            (collapsed.contains(page + "/" + row.group) && search.text.isBlank() ? "> " : "v ")
+            (collapsed.contains(page + "/" + row.group) && search.text().isBlank() ? "> " : "v ")
                 + row.group,
             left(),
             y + 8,
@@ -710,7 +742,7 @@ public final class PowerOptionsScreen extends UiScreen {
         else if (!conflicts.isEmpty() && inside(mx, my, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
-          tip = soundPreview(s) ? "Preview sound" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
+          tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = s.description + (s.restart ? "\nRestart required." : "");
       }
     }

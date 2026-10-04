@@ -24,12 +24,21 @@ public final class NativeBackend implements Backend {
     KeyConfig.load();
     modifiers.putAll(Bindings.modifiers());
     GameOptions o = mc.options;
-    List<net.minecraft.class_285> packs = new ArrayList<>();
-    for (Object pack : mc.field_2768.method_1000()) packs.add((net.minecraft.class_285) pack);
-    choice("texturePack", "Video", "Textures", "Texture pack",
-        Math.max(0, packs.indexOf(mc.field_2768.field_1175)), 0,
-        packs.stream().map(p -> p.field_1137.replace(".zip", "").replace("faithful32pack", "Faithful 32")).toList(),
-        index -> local.luke.power.visual.PackSelection.select(mc, packs.get(index)));
+    entries.add(new Setting("native.texturePack", id(), "Video", "Textures", "Texture pack",
+        "Open the texture-pack picker. Add your own ZIP packs with Open texture pack folder.",
+        Setting.Kind.TEXT, new JsonPrimitive(mc.field_2768.field_1175.field_1137),
+        new JsonPrimitive("Default"), 0, 0, 1, List.of(), false));
+    setters.put("native.texturePack", value -> {
+      mc.field_2768.method_998();
+      for (Object candidate : mc.field_2768.method_1000()) {
+        var pack = (net.minecraft.class_285) candidate;
+        if (pack.field_1137.equals(value.getAsString())) {
+          local.luke.power.visual.PackSelection.select(mc, pack);
+          return;
+        }
+      }
+      throw new IllegalArgumentException("Texture pack unavailable: " + value.getAsString());
+    });
     slider("music", "Audio", "Volume", "Music", Option.MUSIC, 0, 100, 1, 100);
     slider("sound", "Audio", "Volume", "Sound effects", Option.SOUND, 0, 100, 1, 100);
     slider("sensitivity", "General", "Mouse", "Sensitivity", Option.SENSITIVITY, 0, 200, 1, 100);

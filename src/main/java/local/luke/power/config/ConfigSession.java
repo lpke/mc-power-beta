@@ -18,6 +18,17 @@ public final class ConfigSession {
     }
   }
 
+  /** Append newly discovered options without replacing existing drafts or preview state. */
+  public boolean addDiscovered(Collection<Setting> entries) {
+    for (Setting setting : entries)
+      if (!backends.containsKey(setting.backend)) throw new IllegalArgumentException("Unknown backend " + setting.backend);
+    boolean added = false;
+    Set<String> ids = new HashSet<>();
+    settings.forEach(s -> ids.add(s.id));
+    for (Setting setting : entries) if (ids.add(setting.id)) { settings.add(setting); added = true; }
+    return added;
+  }
+
   public List<Setting> settings() {
     return Collections.unmodifiableList(settings);
   }

@@ -11,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 public class PackSelectionMixin {
   @WrapOperation(method = "method_999", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/GameOptions;save()V"))
   private void power$preview(GameOptions options, Operation<Void> original) {
-    if (!PackSelection.previewing()) original.call(options);
+    var client = (net.minecraft.client.Minecraft) net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
+    if (!PackSelection.previewing()
+        && !(client.currentScreen instanceof local.luke.power.ui.TexturePackScreen)) original.call(options);
   }
 }

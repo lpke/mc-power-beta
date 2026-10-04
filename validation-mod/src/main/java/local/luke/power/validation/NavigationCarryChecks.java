@@ -92,13 +92,13 @@ public final class NavigationCarryChecks {
           "Back preserves search collapse state and unsaved edits",
           () -> {
             TextInput search = (TextInput) field(s, "search");
-            search.text = "freecam";
+            search.setText("freecam");
             ((Set<String>) field(s, "collapsed")).add("Camera/Free look");
             call(s, "layout");
             invoke(s, "linkedControls", Setting.class, feature);
             key.value = new JsonPrimitive(0);
             call(s, "back");
-            check(search.text.equals("freecam"), "query lost");
+            check(search.text().equals("freecam"), "query lost");
             check(
                 ((Set<?>) field(s, "collapsed")).contains("Camera/Free look"),
                 "collapsed group lost");
@@ -108,7 +108,7 @@ public final class NavigationCarryChecks {
           "Back preserves fixed conflict filters",
           () -> {
             field(s, "page", "Controls");
-            ((TextInput) field(s, "search")).text = "";
+            ((TextInput) field(s, "search")).setText("");
             List<String> fixed = List.of(key.id, "keys.key.forward");
             field(s, "conflictIds", fixed);
             call(s, "layout");
@@ -274,10 +274,10 @@ public final class NavigationCarryChecks {
     mc.setScreen(null);
     ContainerCarry.tick(mc);
     test(
-        "carried double chest survives complete client restart",
+        "carried container survives complete client restart",
         () -> {
-          check(ContainerCarry.carriedCount() == 2, "pair not restored");
           CarryJournal saved = CarryJournal.read((Path) carryField("file"));
+          check(ContainerCarry.carriedCount() == saved.size(), "saved carry not restored");
           check(saved.phase.equals("held"), "unexpected stage");
           MinecraftWorld blocks = new MinecraftWorld(mc.world);
           Pos destination = saved.source.add(0, 0, 3), other = destination.add(1, 0, 0);
@@ -292,7 +292,7 @@ public final class NavigationCarryChecks {
               "restored pair not placed");
           check(
               blocks.get(destination).same(at(saved.value(0), destination))
-                  && blocks.get(other).same(at(saved.value(1), other)),
+                  && (saved.size() == 1 || blocks.get(other).same(at(saved.value(1), other))),
               "saved inventory changed");
         });
     log("RESTART CARRY FAILURES " + failures);
@@ -347,12 +347,14 @@ public final class NavigationCarryChecks {
           }
           BlockValue first = blocks.get(a), second = blocks.get(b);
           test(
-              "double pickup axis " + axis + " rotation " + angle,
+              "legacy double pickup recovery axis " + axis + " rotation " + angle,
               () -> {
-                target(mc, b, 1);
-                check(
-                    ContainerCarry.click(mc, 1) && ContainerCarry.carriedCount() == 2,
-                    "not holding pair");
+                // Simulate a journal written before single-half pickup replaced pair pickup.
+                ContainerCarry.tick(mc);
+                new CarryJournal(a, mc.player.dimensionId, first, b, second)
+                    .write((Path) carryField("file"));
+                reload(mc);
+                check(ContainerCarry.carriedCount() == 2, "legacy pair not recovered");
                 check(blocks.get(a).id == 0 && blocks.get(b).id == 0, "half remained");
                 CarryJournal journal = CarryJournal.read((Path) carryField("file"));
                 check(

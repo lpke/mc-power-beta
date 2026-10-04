@@ -1,5 +1,21 @@
 # Changelog
 
+## Chest splitting, search navigation and previews, 2026-10-04
+
+- Pick up only the targeted half of a double chest. Preserve the other half and
+  both inventories; retain recovery for double chests carried by older versions.
+- Fix crashes after opening related settings, controls or conflicts from typed
+  search results. Keep text and cursor updates together across input fields.
+- Search section headings open that section and clear the filter. Back restores
+  the search results and scroll position.
+- Keep state toggles and placement modifiers visible while off. Hide only actions
+  with disabled feature switches; repair Creative picker and flight links.
+- Preview built-in and custom music with speaker buttons, pause and resume the
+  existing song, and show newly scanned tracks without reopening Options.
+- Open Minecraft's native texture-pack picker from the existing Video button.
+  Support custom ZIP packs alongside bundled Alpha, 1.14 and Faithful 32 packs;
+  preserve menu drafts and support Cancel for pack previews.
+
 ## Chest joining and related-settings filters, 2026-10-04
 
 - Allow a carried single chest to join an existing single chest on any horizontal

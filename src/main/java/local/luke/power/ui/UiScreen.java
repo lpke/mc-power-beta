@@ -86,25 +86,25 @@ public abstract class UiScreen extends Screen {
     fill(left, top, left + span, top + 18, 0xff101010);
     clip(left + 3, top, span - 6, 18);
     int offset =
-        Math.max(0, textRenderer.getWidth(input.text.substring(0, input.cursor())) - (span - 12));
+        Math.max(0, textRenderer.getWidth(input.text().substring(0, input.cursor())) - (span - 12));
     int x = left + 4 - offset;
     if (input.focused && input.start() != input.end())
       fill(
-          x + textRenderer.getWidth(input.text.substring(0, input.start())),
+          x + textRenderer.getWidth(input.text().substring(0, input.start())),
           top + 3,
-          x + textRenderer.getWidth(input.text.substring(0, input.end())),
+          x + textRenderer.getWidth(input.text().substring(0, input.end())),
           top + 14,
           0xff335577);
     text(
-        input.text.isEmpty() && !input.focused ? placeholder : input.text,
+        input.text().isEmpty() && !input.focused ? placeholder : input.text(),
         x,
         top + 5,
-        input.text.isEmpty() && !input.focused ? 0x888888 : 0xffffff);
+        input.text().isEmpty() && !input.focused ? 0x888888 : 0xffffff);
     if (input.focused && System.currentTimeMillis() / 500 % 2 == 0)
       fill(
-          x + textRenderer.getWidth(input.text.substring(0, input.cursor())),
+          x + textRenderer.getWidth(input.text().substring(0, input.cursor())),
           top + 3,
-          x + textRenderer.getWidth(input.text.substring(0, input.cursor())) + 1,
+          x + textRenderer.getWidth(input.text().substring(0, input.cursor())) + 1,
           top + 14,
           0xffffffff);
     unclip();

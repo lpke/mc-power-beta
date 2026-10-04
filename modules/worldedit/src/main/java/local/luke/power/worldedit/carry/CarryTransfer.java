@@ -11,7 +11,7 @@ public final class CarryTransfer {
       WorldAccess world, Map<Pos, BlockValue> before, Map<Pos, BlockValue> after) {
     if (before.isEmpty() || !before.keySet().equals(after.keySet()))
       throw new IllegalArgumentException("Transfer positions differ");
-    // Check the entire pair before changing either half, including during recovery.
+    // Check all recorded positions before changing any block, including during recovery.
     for (Pos pos : before.keySet()) {
       if (!world.loaded(pos)) throw new IllegalStateException("Container chunk is unavailable");
       BlockValue found = world.get(pos);

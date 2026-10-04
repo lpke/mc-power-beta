@@ -48,7 +48,7 @@ public final class DirectoryScreen extends UiScreen {
               .sorted(
                   Comparator.comparing(p -> p.getFileName().toString().toLowerCase(Locale.ROOT)))
               .toList();
-      path.text = directory.toString();
+      path.setText(directory.toString());
       path.selectAll();
       scroll = 0;
       error = "";
@@ -84,7 +84,7 @@ public final class DirectoryScreen extends UiScreen {
     }
     if (key == Keyboard.KEY_RETURN && path.focused) {
       try {
-        go(MusicLibrary.resolve(FabricLoader.getInstance().getGameDir(), path.text));
+        go(MusicLibrary.resolve(FabricLoader.getInstance().getGameDir(), path.text()));
       } catch (RuntimeException e) {
         error = "Invalid folder path.";
       }
@@ -102,7 +102,7 @@ public final class DirectoryScreen extends UiScreen {
     path.focused = false;
     if (inside(x, y, panelRight() - 54, 37, 40, 20)) {
       try {
-        go(MusicLibrary.resolve(FabricLoader.getInstance().getGameDir(), path.text));
+        go(MusicLibrary.resolve(FabricLoader.getInstance().getGameDir(), path.text()));
       } catch (RuntimeException e) {
         error = "Invalid folder path.";
       }

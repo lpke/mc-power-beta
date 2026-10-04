@@ -4,7 +4,7 @@ import java.util.*;
 
 /** One binding-to-feature map drives help, availability and navigation. */
 public final class ControlLinks {
-  private record Link(String setting, String gate, String help) {}
+  private record Link(String setting, String featureGate, String help) {}
   private static final Map<String, Link> LINKS = new HashMap<>();
   static {
     link("powerbeta.containerPreview", "visual.containerPreview", "visual.containerPreview", "Hold while aiming at a container to preview its contents without opening it.");
@@ -12,19 +12,21 @@ public final class ControlLinks {
     link("key.back", "", "", "Move backward.");
     link("key.left", "", "", "Strafe left.");
     link("key.right", "", "", "Strafe right.");
-    link("key.jump", "creative.doubleTapFlight", "", "Jump, swim upward or ascend while flying.");
-    link("key.sneak", "creative.enabled", "", "Sneak at ledges or descend while flying.");
+    link("key.jump", "creative.doubleTapTicks", "", "Jump, swim upward or ascend while flying.");
+    link("key.sneak", "creative.flight", "", "Sneak at ledges or descend while flying.");
     link("key.drop", "", "", "Drop one item from the selected hotbar slot.");
     link("key.inventory", "", "", "Open or close your inventory.");
     link("key.chat", "", "", "Open chat to write a message or command.");
     link("key.fog", "native.renderDistance", "", "Cycle Far, Normal, Short and Tiny terrain distance. Shift reverses the cycle.");
     link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Forward/back input, menus and focus loss stop it.");
-    link("Fast place (toggle)", "tweaks.placement.enabled", "tweaks.placement.enabled", "Toggle repeated block placement while holding Use.");
-    link("Fake sneak (toggle)", "tweaks.sneak.enabled", "tweaks.sneak.enabled", "Toggle ledge protection without slowing movement.");
-    link("Slab completion (toggle)", "tweaks.slabs.enabled", "tweaks.slabs.enabled", "Toggle completing matching half slabs from adjacent faces.");
-    link("Flexible placement (toggle)", "tweaks.flexible.enabled", "tweaks.flexible.enabled", "Toggle alternate block positions and facing controls.");
+    // These settings are live toggle states, not feature-availability switches.
+    // Keep their toggles and placement modifiers visible while the state is off.
+    link("Fast place (toggle)", "tweaks.placement.enabled", "", "Toggle repeated block placement while holding Use.");
+    link("Fake sneak (toggle)", "tweaks.sneak.enabled", "", "Toggle ledge protection without slowing movement.");
+    link("Slab completion (toggle)", "tweaks.slabs.enabled", "", "Toggle completing matching half slabs from adjacent faces.");
+    link("Flexible placement (toggle)", "tweaks.flexible.enabled", "", "Toggle alternate block positions and facing controls.");
     for (String action : List.of("offset", "adjacent", "rotation", "reverse", "into face"))
-      link("Placement " + action + " (hold)", "tweaks.flexible.enabled", "tweaks.flexible.enabled", switch (action) {
+      link("Placement " + action + " (hold)", "tweaks.flexible.enabled", "", switch (action) {
         case "offset" -> "Hold to move placement outward using the targeted face regions.";
         case "adjacent" -> "Hold to place beside the target, including beyond an edge.";
         case "rotation" -> "Hold to choose block facing from the targeted face.";
@@ -35,9 +37,9 @@ public final class ControlLinks {
     link("power_building.hotbar.base", "tweaks.hotbar.swap", "tweaks.hotbar.swap", "Hold to preview inventory rows and switch the active hotbar.");
     link("power_building.hotbar.scroll", "tweaks.hotbar.scroll", "tweaks.hotbar.scroll", "Hold and scroll to cycle inventory rows through the hotbar.");
     for (int i = 1; i <= 3; i++) link("power_building.hotbar.row" + i, "tweaks.hotbar.swap", "tweaks.hotbar.swap", "Swap hotbar contents with inventory row " + i + ".");
-    link("power_creative.sprint", "creative.sprintToggle", "creative.enabled", "Boost flying speed while moving forward. Toggle ends when forward movement stops.");
-    link("power_creative.picker", "creative.enabled", "creative.enabled", "Cycle game modes while holding the mode-picker modifier; release the modifier to select.");
-    link("power_creative.modifier", "creative.enabled", "creative.enabled", "Hold with the game-mode cycle key to open the mode picker.");
+    link("power_creative.sprint", "creative.sprintToggle", "creative.sprintFlight", "Boost flight or freecam speed while moving forward. Toggle ends when forward movement stops.");
+    link("power_creative.picker", "creative.modePicker", "creative.modePicker", "Cycle game modes while holding the mode-picker modifier; release the modifier to select.");
+    link("power_creative.modifier", "creative.modePicker", "creative.modePicker", "Hold with the game-mode cycle key to open the mode picker.");
     link("Toggle Freecam", "power_camera:config.enabled", "power_camera:config.enabled", "Detach the camera from your player. Press again to return.");
     link("Toggle Player Movement", "power_camera:config.enabled", "power_camera:config.enabled", "Allow or stop player movement while the camera is detached.");
     link("Change Freecam Speed", "power_camera:config.speed", "power_camera:config.enabled", "Hold and scroll to adjust detached-camera movement speed.");
@@ -64,7 +66,7 @@ public final class ControlLinks {
     for (String[] a : actions) link("key.power_controls." + a[0], a[1], "", a[2]);
     for (int i = 1; i <= 9; i++) link("key.power_controls.hotbar_" + i, "", "", "Select hotbar slot " + i + ".");
   }
-  private static void link(String key, String setting, String gate, String help) { LINKS.put("keys." + key, new Link(setting, gate, help)); }
+  private static void link(String key, String setting, String featureGate, String help) { LINKS.put("keys." + key, new Link(setting, featureGate, help)); }
   public static String description(String id) { Link l = LINKS.get(id); return l == null ? "Activate this action using the assigned key or mouse button." : l.help; }
   public static Setting related(ConfigSession session, Setting key) {
     Link l = LINKS.get(key.id);
@@ -87,7 +89,7 @@ public final class ControlLinks {
   }
   private static boolean relates(Link link, Setting setting) {
     if (setting.kind == Setting.Kind.KEY) return false;
-    if (setting.id.equals(link.setting) || setting.id.equals(link.gate)) return true;
+    if (setting.id.equals(link.setting) || setting.id.equals(link.featureGate)) return true;
     String family = switch (link.setting) {
       case "tweaks.placement.enabled" -> "tweaks.placement.";
       case "tweaks.flexible.enabled" -> "tweaks.flexible.";
@@ -102,7 +104,8 @@ public final class ControlLinks {
     };
     if (!family.isEmpty() && setting.id.startsWith(family)) return true;
     return switch (link.setting) {
-      case "creative.sprintToggle" -> setting.page.equals("Creative") && setting.group.equals("Flight");
+      case "creative.sprintToggle" -> setting.page.equals("Creative") && setting.group.equals("Flight")
+          || setting.id.equals("power_camera:config.sprint");
       case "power_controls:userinterface.frontViewThirdPerson" -> setting.id.equals("visual.thirdPersonDistance");
       case "power_capture:config.isometricPhotoScale" -> setting.id.equals("power_capture:config.mirrorIsometricScreenshot")
           || setting.id.equals("power_capture:config.disableRenderingNetherBedrock");
@@ -110,8 +113,16 @@ public final class ControlLinks {
     };
   }
   public static boolean enabled(ConfigSession session, Setting key) {
+    // Flight and freecam share this action; either enabled use keeps it available.
+    if (key.id.equals("keys.power_creative.sprint"))
+      return featureEnabled(session, "creative.sprintFlight")
+          || featureEnabled(session, "power_camera:config.enabled")
+              && featureEnabled(session, "power_camera:config.sprint");
     Link l = LINKS.get(key.id);
-    return l == null || l.gate.isEmpty() || session.settings().stream().filter(s -> s.id.equals(l.gate))
+    return l == null || l.featureGate.isEmpty() || featureEnabled(session, l.featureGate);
+  }
+  private static boolean featureEnabled(ConfigSession session, String id) {
+    return session.settings().stream().filter(s -> s.id.equals(id))
         .allMatch(s -> s.kind != Setting.Kind.BOOLEAN || s.value.getAsBoolean());
   }
 }

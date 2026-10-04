@@ -53,6 +53,44 @@ public final class ChestJoinChecks {
     return new BlockValue(value.id, value.meta, output.toByteArray());
   }
 
+  public static void restart(Minecraft mc, boolean finish) throws Exception {
+    mc.setScreen(null);
+    MinecraftWorld blocks = new MinecraftWorld(mc.world);
+    Path expectedFile = Path.of("power-beta-split-restart.json");
+    if (!finish) {
+      VisualSettings options = VisualConfig.copy(); options.containerCarry = true; VisualConfig.preview(options);
+      Pos source = new Pos((int)Math.floor(mc.player.x) + 2, 100, (int)Math.floor(mc.player.z));
+      for (int x = -1; x <= 2; x++) for (int z = -1; z <= 4; z++) {
+        Pos p = source.add(x, 0, z); mc.world.method_214(p.x() >> 4, p.z() >> 4); blocks.set(p, BlockValue.AIR);
+      }
+      Pos neighbor = source.add(1, 0, 0);
+      fill(mc, blocks, source, 2); fill(mc, blocks, neighbor, 3);
+      new CarryJournal(source, mc.player.dimensionId, blocks.get(source), neighbor, blocks.get(neighbor)).write(expectedFile.toAbsolutePath());
+      mc.player.inventory.main[mc.player.inventory.selectedSlot] = null;
+      mc.player.method_1340(source.x() - 1.5, 101, source.z() + 1.5);
+      mc.player.field_161.field_2536 = true; aim(mc, source, 1);
+      check(ContainerCarry.click(mc, 1) && ContainerCarry.carriedCount() == 1, "restart fixture pickup failed");
+      mc.player.field_161.field_2536 = false;
+    } else {
+      failures = 0;
+      test("split chest survives full client restart with both inventories intact", () -> {
+        CarryJournal expected = CarryJournal.read(expectedFile.toAbsolutePath());
+        ContainerCarry.tick(mc);
+        check(ContainerCarry.carriedCount() == 1, "held half not recovered");
+        check(blocks.get(expected.source).id == 0, "source duplicated");
+        check(blocks.get(expected.second.source).same(expected.value(1)), "neighbor inventory changed after restart");
+        Pos target = expected.source.add(0, 0, 3);
+        blocks.set(target.add(0, -1, 0), new BlockValue(1, 0));
+        mc.player.method_1340(target.x() - 1.5, 101, target.z() - 1.5);
+        aim(mc, target.add(0, -1, 0), 1);
+        check(ContainerCarry.click(mc, 1) && !ContainerCarry.carrying(), "recovered half placement failed");
+        check(blocks.get(target).same(relocated(expected.value(), target)), "recovered inventory changed");
+        check(blocks.get(expected.second.source).same(expected.value(1)), "remaining chest changed on placement");
+      });
+      log("SPLIT RESTART FAILURES " + failures);
+    }
+  }
+
   public static void run(Minecraft mc) throws Exception {
     failures = 0;
     check(mc.world != null && mc.player != null, "Test world required");
@@ -110,35 +148,43 @@ public final class ChestJoinChecks {
                       && existingInventory.getStack(0) == existingStack,
                   "existing inventory was replaced");
             });
-        test(
-            "joined chest can be picked up as a complete pair",
-            () -> {
-              aim(mc, existing, 1);
-              check(
-                  ContainerCarry.click(mc, 1) && ContainerCarry.carriedCount() == 2,
-                  "pair pickup failed");
-              Field file = ContainerCarry.class.getDeclaredField("file");
-              file.setAccessible(true);
-              CarryJournal journal = CarryJournal.read((Path) file.get(null));
-              for (int i = 0; i < 2; i++) {
-                BlockValue expected =
-                    journal.source(i).equals(existing)
-                        ? existingValue
-                        : relocated(carried, destination);
-                check(journal.value(i).same(expected), "joined slots changed during re-pickup");
-              }
-              check(
-                  blocks.get(destination).id == 0 && blocks.get(existing).id == 0,
-                  "joined half remained");
-              blocks.set(destination.add(0, -1, 0), new BlockValue(1, 0));
-              mc.player.yaw = 0;
-              aim(mc, destination.add(0, -1, 0), 1);
-              check(
-                  ContainerCarry.click(mc, 1) && !ContainerCarry.carrying(),
-                  "pair placement failed");
-            });
+        for (Pos chosen : List.of(existing, destination)) {
+          Pos remaining = chosen.equals(existing) ? destination : existing;
+          test(
+              "split targeted half " + chosen + " and rejoin without changing neighbor",
+              () -> {
+                BlockValue chosenValue = blocks.get(chosen), remainingValue = blocks.get(remaining);
+                Inventory remainingInventory = (Inventory) mc.world.method_1777(remaining.x(), remaining.y(), remaining.z());
+                ItemStack[] remainingItems = new ItemStack[27];
+                for (int i = 0; i < 27; i++) remainingItems[i] = remainingInventory.getStack(i);
+                aim(mc, chosen, 1);
+                check(ContainerCarry.click(mc, 1) && ContainerCarry.carriedCount() == 1, "not holding targeted half");
+                Field file = ContainerCarry.class.getDeclaredField("file");
+                file.setAccessible(true);
+                CarryJournal journal = CarryJournal.read((Path) file.get(null));
+                check(journal.size() == 1 && journal.source.equals(chosen) && journal.value().same(chosenValue), "wrong inventory journaled");
+                check(blocks.get(chosen).id == 0 && blocks.get(remaining).same(remainingValue), "wrong half removed");
+                check(mc.world.method_1777(remaining.x(), remaining.y(), remaining.z()) == remainingInventory, "neighbor replaced");
+                for (int i = 0; i < 27; i++) check(remainingItems[i] == remainingInventory.getStack(i), "neighbor slot replaced");
+                // Reload while holding it, then place separately before joining it again.
+                Field world = ContainerCarry.class.getDeclaredField("world");
+                world.setAccessible(true); world.set(null, null); ContainerCarry.tick(mc);
+                check(ContainerCarry.carriedCount() == 1, "half lost after reload");
+                blocks.set(source.add(0, -1, 0), new BlockValue(1, 0));
+                aim(mc, source.add(0, -1, 0), 1);
+                check(ContainerCarry.click(mc, 1) && !ContainerCarry.carrying(), "separate placement failed");
+                check(blocks.get(source).same(relocated(chosenValue, source)), "split inventory changed");
+                check(blocks.get(remaining).same(remainingValue), "neighbor changed during placement");
+                aim(mc, source, 1);
+                check(ContainerCarry.click(mc, 1) && ContainerCarry.carriedCount() == 1, "re-pickup failed");
+                blocks.set(chosen.add(0, -1, 0), new BlockValue(1, 0));
+                aim(mc, chosen.add(0, -1, 0), 1);
+                check(ContainerCarry.click(mc, 1) && !ContainerCarry.carrying(), "rejoin failed");
+                check(blocks.get(chosen).same(chosenValue) && blocks.get(remaining).same(remainingValue), "rejoin changed inventory");
+              });
+        }
         blocks.set(destination, BlockValue.AIR);
-        blocks.set(destination.add(1, 0, 0), BlockValue.AIR);
+        blocks.set(existing, BlockValue.AIR);
       }
       fill(mc, blocks, source, 4);
       BlockValue saved = blocks.get(source);

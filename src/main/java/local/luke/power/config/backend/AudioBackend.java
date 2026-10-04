@@ -102,16 +102,20 @@ public final class AudioBackend implements Backend {
           "Volume in percent, multiplied by its category and sound-effects volumes.",
           List.of());
     }
-    for (String track : AudioController.music(mc))
-      add(
-          "sound." + track,
-          "Individual music tracks",
-          track.substring(6),
-          Setting.Kind.INTEGER,
-          new JsonPrimitive(s.sounds.getOrDefault(track, 100)),
-          new JsonPrimitive(100),
-          "Track volume in percent, multiplied by the music and master volumes.",
-          List.of());
+    entries.addAll(musicEntries(mc));
+  }
+
+  private static List<Setting> musicEntries(Minecraft mc) {
+    AudioSettings config = AudioConfig.current();
+    return AudioController.music(mc).stream().map(track -> new Setting(
+        "audio.sound." + track, "audio", "Audio", "Individual music tracks", track.substring(6),
+        "Track volume in percent, multiplied by the music and master volumes.",
+        Setting.Kind.INTEGER, new JsonPrimitive(config.sounds.getOrDefault(track, 100)),
+        new JsonPrimitive(100), 0, 100, 5, List.of(), false)).toList();
+  }
+
+  public static boolean discoverMusic(ConfigSession session, Minecraft mc) {
+    return session.addDiscovered(musicEntries(mc));
   }
 
   private void add(

@@ -15,8 +15,9 @@ pinned binary dependencies; see [the upstream inventory](docs/upstreams.md).
 
 Open **Options** from the title or pause menu. Pages group settings by function.
 Each pane scrolls independently. Reopening Options remembers the last page and scroll
-position during the game session. Search finds settings across every page.
-Left-click cycles forward; right-click cycles backward. The reset button restores one setting. Bindings use a circular-arrow icon.
+position during the game session. Search finds settings across every page. Click a
+search section heading to open that section; Back restores the results.
+Left-click cycles forward; right-click cycles backward. The reset button restores one setting. Bindings use the same R reset button.
 Numeric values use sliders; `...` opens the exact-value editor. Apply saves while
 keeping the current page, search and scroll. Done saves and exits. The unsaved
 changes counter filters the list to changed settings. Cancel discards the draft,
@@ -28,7 +29,9 @@ at least 320 by 240 GUI pixels; a smaller window can limit the requested scale.
 The menu is centered and capped at a 16:9 aspect ratio. Hover any setting for an
 explanation. A binding's `!` lists conflicts; clicking it opens a fixed list that
 stays visible while you resolve them. Gear icons jump to related settings.
-Disabled-feature bindings stay hidden until Show Disabled is selected.
+Controls hide only when their feature is disabled. Live toggles such as Fast Place
+remain visible while off. Related settings and controls open filtered lists, with
+Back restoring the previous view.
 
 Key bindings accept keyboard and mouse buttons with Ctrl, Shift and Alt, including
 either left or right modifier. Actions fire on key-down. A press retains its
@@ -55,6 +58,11 @@ read-only, run off the game thread, skip malformed headers and symlinks, and hav
 file/depth limits. Empty or unavailable replacement libraries fall back to the
 built-in soundtrack. Changes do not move or alter music files.
 
+Speaker buttons preview individual sounds, built-in music and custom tracks.
+Music previews pause the current song; click the same speaker again to resume it.
+Previous, Next and Play / pause exit the preview. Track volume changes apply live,
+and newly scanned custom tracks appear without reopening Options.
+
 ## Repository layout
 
 - `src/`: shared menu, configuration adapters, audio integration and tests.
@@ -80,7 +88,9 @@ platform API identity for compatibility with retained performance modules.
 
 ## Textures and profiles
 
-Video includes Alpha, 1.14 and Faithful 32 alongside Default. Soft rain, soft snow,
+Video's Texture pack button opens Minecraft's native picker, including its folder
+button for your own ZIP packs. Alpha, 1.14 and Faithful 32 ship as bundled packs
+alongside Default. Soft rain, soft snow,
 old cobblestone and old bricks are independent overrides on the selected pack.
 Both base-pack selection and overrides preview immediately and support Discard.
 Camera includes the perspective cycle and third-person distance; vanilla distance
@@ -99,9 +109,9 @@ Use `--java /path/to/java` to pin the launcher runtime when needed.
 
 Inventory includes **Move containers**, off by default. Hold Sneak with an empty
 hand and use a chest, dispenser or furnace to pick it up. Release Use, then use a
-block face to place it. Double chests move both halves and all 54 slots together;
-their placement axis follows your facing direction. Both spaces must be empty and
-clear of entities. A carried single chest can join one existing single chest.
+block face to place it. Target either half of a double chest to carry just that
+half and its 27 slots. The other half stays in place with its own inventory.
+A carried chest can join one existing single chest again.
 Placement beside a double chest or between two singles remains blocked. Spectator, freecam, riding and active edits cannot
 move containers. A centered container model and raised-arm carry pose show what
 you are holding. Pickup and placement preserve full block-entity NBT, including
@@ -109,7 +119,8 @@ item identity, count, damage and furnace progress.
 
 Transfers write and flush recovery records before changing the world. Held
 containers survive world reloads. A failure blocks further movement and preserves
-the record. Successful transfers retain an archive in the world's `data` folder.
+the record. Double chests already being carried by an older version can still be
+recovered and placed together. Successful transfers retain an archive in the world's `data` folder.
 Keep these records when restoring a damaged save; do not manually delete a held
 record. No software can guarantee recovery after disk or backup corruption.
 

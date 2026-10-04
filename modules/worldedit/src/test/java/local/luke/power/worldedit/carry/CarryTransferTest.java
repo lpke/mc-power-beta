@@ -62,6 +62,28 @@ class CarryTransferTest {
   }
 
   @Test
+  void splittingEitherHalfAndReplayingInterruptedWritesNeverTouchesItsNeighbor() {
+    for (Pos chosen : List.of(a, b))
+      for (boolean pickup : new boolean[] {true, false}) {
+        Pos neighbor = chosen.equals(a) ? b : a;
+        BlockValue original = chests().get(chosen), untouched = chests().get(neighbor);
+        var before = Map.of(chosen, pickup ? original : BlockValue.AIR);
+        var after = Map.of(chosen, pickup ? BlockValue.AIR : original);
+        Memory world = new Memory(chests(), 1);
+        world.blocks.putAll(before);
+        assertThrows(IllegalStateException.class, () -> CarryTransfer.apply(world, before, after));
+        assertTrue(untouched.same(world.get(neighbor)));
+        world.failAt = 0;
+        CarryTransfer.apply(world, before, after);
+        assertTrue(after.get(chosen).same(world.get(chosen)));
+        assertTrue(untouched.same(world.get(neighbor)));
+        int writes = world.writes;
+        CarryTransfer.apply(world, before, after);
+        assertEquals(writes, world.writes);
+      }
+  }
+
+  @Test
   void mismatchedSecondHalfCannotChangeFirstHalf() {
     Memory world = new Memory(chests(), 0);
     world.blocks.put(b, new BlockValue(54, 3, new byte[] {7}));
