@@ -186,13 +186,16 @@ public final class ContainerCarry {
         for (Pos p : targets) {
           if (!blocks.loaded(p)
               || blocks.get(p).id != 0
-              || held.block == 54 && hasOutsideChest(blocks, p, targets)
+              || held.block == 54 && !canPlaceChest(blocks, p, targets)
               || !world.method_156(held.block, p.x(), p.y(), p.z(), false, hit.field_1987)) {
             message(
                 mc,
-                "Choose "
-                    + (other == null ? "an empty space" : "two empty spaces")
-                    + " clear of entities and other chests.");
+                other != null
+                    ? "Choose two empty spaces clear of entities and other chests."
+                    : held.block == 54
+                        ? "Choose an empty space clear of entities. Chests can only join one single"
+                              + " chest."
+                        : "Choose an empty space clear of entities.");
             return true;
           }
         }
@@ -240,6 +243,23 @@ public final class ContainerCarry {
     }
     pair.sort(Comparator.comparingInt(Pos::x).thenComparingInt(Pos::z));
     return pair;
+  }
+
+  private static boolean canPlaceChest(MinecraftWorld blocks, Pos target, List<Pos> targets) {
+    if (targets.size() == 2) return !hasOutsideChest(blocks, target, targets);
+    Pos joining = null;
+    for (int[] offset : NEIGHBORS) {
+      Pos neighbor = target.add(offset[0], 0, offset[1]);
+      if (!blocks.loaded(neighbor)) return false;
+      if (world.getBlockId(neighbor.x(), neighbor.y(), neighbor.z()) != 54) continue;
+      // Only join one intact single chest. Check its neighboring chunks too, so
+      // an unloaded half cannot be mistaken for an empty space in a double chest.
+      if (joining != null
+          || !(world.method_1777(neighbor.x(), neighbor.y(), neighbor.z()) instanceof Inventory)
+          || hasOutsideChest(blocks, neighbor, List.of(target))) return false;
+      joining = neighbor;
+    }
+    return true;
   }
 
   private static boolean hasOutsideChest(MinecraftWorld blocks, Pos p, List<Pos> pair) {

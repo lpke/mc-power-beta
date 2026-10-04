@@ -161,15 +161,24 @@ public final class PowerOptionsScreen extends UiScreen {
     if (target == null) return;
     rememberPosition();
     pushView();
-    relatedIds = List.of();
+    relatedIds = ControlLinks.settings(session, key).stream().map(s -> s.id).toList();
     page = target.page;
     conflictIds = List.of();
     changedOnly = false;
     search.text = "";
-    collapsed.remove(page + "/" + target.group);
+    scroll = 0;
     layout();
-    rows.stream().filter(r -> r.setting == target).findFirst().ifPresent(r -> scroll = r.y);
-    layout();
+  }
+
+  private boolean filtered() {
+    return changedOnly || !relatedIds.isEmpty() || !conflictIds.isEmpty();
+  }
+
+  private List<Setting> resetTargets() {
+    List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
+    return session.settings().stream()
+        .filter(s -> changedOnly ? s.changed() : listed.isEmpty() ? s.page.equals(page) : listed.contains(s.id))
+        .toList();
   }
 
   public ConfigSession session() {
@@ -475,8 +484,7 @@ public final class PowerOptionsScreen extends UiScreen {
     int cy = height / 2 + 12;
     if (inside(x, y, width / 2 - 102, cy, 100, 20)) {
       if (confirmReset) {
-        List<Setting> targets = session.settings().stream()
-            .filter(s -> changedOnly ? s.changed() : s.page.equals(page)).toList();
+        List<Setting> targets = resetTargets();
         for (Setting s : targets) { s.reset(); session.link(s); }
         try { session.preview(); } catch (Exception e) { error = e.getMessage(); }
         layout();
@@ -645,7 +653,7 @@ public final class PowerOptionsScreen extends UiScreen {
       text("v", origin() + sidebar() - 10, bottom() - 10, 0xcccccc);
     if (!history.isEmpty()) button("Back", left(), 28, 44, 18, mx, my, true);
     input(search, searchLeft(), 28, right() - 36 - searchLeft(), mx, my,
-        !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? "Related controls"
+        !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls" : "Related settings"
         : changedOnly ? "Search changed settings..." : "Search all settings...");
     button("x", right() - 32, 28, 18, 18, mx, my, true);
     if (audio()) {
@@ -719,7 +727,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
     }
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);
-    button(changedOnly ? "Reset listed..." : "Reset page...", origin() + 8, footerY(), 88, 20, mx, my, true);
+    button(filtered() ? "Reset listed..." : "Reset page...", origin() + 8, footerY(), 88, 20, mx, my, true);
     int changesEnd = footerY() < height - 28 ? right() - 8 : (controls() ? disabledX() : actionX(0)) - 4;
     if (session.changes() > 0 || changedOnly) {
       boolean hover = inside(mx, my, origin() + 102, footerY(), changesEnd - origin() - 102, 20);
@@ -740,7 +748,7 @@ public final class PowerOptionsScreen extends UiScreen {
       String message =
           capture != null
               ? "Press a key or mouse button"
-              : confirmReset ? "Reset " + (changedOnly ? "changed settings" : page) + " to Defaults?" : "Save your changes?";
+              : confirmReset ? "Reset " + (filtered() ? "listed settings" : page) + " to Defaults?" : "Save your changes?";
       drawCenteredTextWithShadow(textRenderer, message, width / 2, height / 2 - 18, 0xffffff);
       if (capture != null) {
         drawCenteredTextWithShadow(

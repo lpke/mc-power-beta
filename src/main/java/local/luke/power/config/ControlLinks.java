@@ -70,14 +70,44 @@ public final class ControlLinks {
     Link l = LINKS.get(key.id);
     return l == null ? null : session.settings().stream().filter(s -> s.id.equals(l.setting)).findFirst().orElse(null);
   }
+  public static List<Setting> settings(ConfigSession session, Setting key) {
+    Link link = LINKS.get(key.id);
+    if (link == null) return List.of();
+    return session.settings().stream().filter(s -> relates(link, s))
+        .sorted(Comparator.comparingInt(s -> s.id.equals(link.setting) ? 0 : 1)).toList();
+  }
   public static boolean hasControls(Setting setting) {
-    return LINKS.values().stream().anyMatch(l -> setting.id.equals(l.setting) || setting.id.equals(l.gate));
+    return LINKS.values().stream().anyMatch(link -> relates(link, setting));
   }
   public static List<Setting> controls(ConfigSession session, Setting setting) {
     return session.settings().stream().filter(s -> {
       Link link = LINKS.get(s.id);
-      return link != null && (setting.id.equals(link.setting) || setting.id.equals(link.gate));
+      return link != null && relates(link, setting);
     }).toList();
+  }
+  private static boolean relates(Link link, Setting setting) {
+    if (setting.kind == Setting.Kind.KEY) return false;
+    if (setting.id.equals(link.setting) || setting.id.equals(link.gate)) return true;
+    String family = switch (link.setting) {
+      case "tweaks.placement.enabled" -> "tweaks.placement.";
+      case "tweaks.flexible.enabled" -> "tweaks.flexible.";
+      case "tweaks.slabs.enabled" -> "tweaks.slabs.";
+      case "tweaks.sneak.enabled" -> "tweaks.sneak.";
+      case "tweaks.hotbar.swap", "tweaks.hotbar.scroll" -> "tweaks.hotbar.";
+      case "tweaks.freeLook" -> "tweaks.freeLook";
+      case "power_camera:config.enabled", "power_camera:config.speed" -> "power_camera:config.";
+      case "power_capture:config.customResolutionPhotoWidth" -> "power_capture:config.customResolutionPhoto";
+      case "power_capture:config.isometricPhotoScale" -> "power_capture:config.isometricPhoto";
+      default -> "";
+    };
+    if (!family.isEmpty() && setting.id.startsWith(family)) return true;
+    return switch (link.setting) {
+      case "creative.sprintToggle" -> setting.page.equals("Creative") && setting.group.equals("Flight");
+      case "power_controls:userinterface.frontViewThirdPerson" -> setting.id.equals("visual.thirdPersonDistance");
+      case "power_capture:config.isometricPhotoScale" -> setting.id.equals("power_capture:config.mirrorIsometricScreenshot")
+          || setting.id.equals("power_capture:config.disableRenderingNetherBedrock");
+      default -> false;
+    };
   }
   public static boolean enabled(ConfigSession session, Setting key) {
     Link l = LINKS.get(key.id);

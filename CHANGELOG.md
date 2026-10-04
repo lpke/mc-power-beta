@@ -1,5 +1,15 @@
 # Changelog
 
+## Chest joining and related-settings filters, 2026-10-04
+
+- Allow a carried single chest to join an existing single chest on any horizontal
+  side. Preserve both inventories, including their full item data.
+- Continue blocking triple chests, occupied spaces and joins whose neighboring
+  chunks are unavailable. Whole double chests still require two separate spaces.
+- Filter controls-to-settings links to the related feature settings. Keep links
+  symmetric, restore the previous view with Back, and limit Reset listed to
+  the filtered settings.
+
 ## Container carrying and settings navigation, 2026-10-04
 
 - Highlight setting rows only while hovered, with a lighter background. Restore the

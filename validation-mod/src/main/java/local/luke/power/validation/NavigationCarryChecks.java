@@ -70,6 +70,10 @@ public final class NavigationCarryChecks {
           () -> {
             invoke(s, "related", Setting.class, key);
             check(field(s, "page").equals("Camera"), "not Camera");
+            check(visible(s).size() > 1 && visible(s).stream().allMatch(v -> v.id.startsWith("power_camera:config.")),
+                "unrelated camera settings are visible");
+            check(visible(s).contains(find(s.session(), "power_camera:config.speed")), "related speed missing");
+            check(visible(s).contains(find(s.session(), "power_camera:config.collision")), "related collisions missing");
             ((ScreenInput) (Object) s).power$key('\0', Keyboard.KEY_ESCAPE);
             check(
                 field(s, "page").equals("Controls")
@@ -112,6 +116,34 @@ public final class NavigationCarryChecks {
             call(s, "back");
             check(field(s, "conflictIds").equals(fixed), "conflicts changed");
           });
+      test("related settings match their reverse links and exclude unrelated rows", () -> {
+        for (Setting binding : s.session().settings()) {
+          if (binding.kind != Setting.Kind.KEY || ControlLinks.related(s.session(), binding) == null) continue;
+          invoke(s, "related", Setting.class, binding);
+          List<Setting> listed = visible(s);
+          check(!listed.isEmpty(), "empty related settings: " + binding.id);
+          check(new HashSet<>(listed).equals(new HashSet<>(ControlLinks.settings(s.session(),binding))), "incorrect filtered rows");
+          for (Setting setting : listed) check(ControlLinks.controls(s.session(),setting).contains(binding), "asymmetric link");
+          check(new HashSet<>((List<?>)call(s,"resetTargets")).equals(new HashSet<>(listed)), "reset touches hidden settings");
+          call(s,"back");
+        }
+      });
+      test("related reset preserves unrelated drafts and Back restores the filter", () -> {
+        invoke(s,"related",Setting.class,key);
+        Setting related = find(s.session(),"power_camera:config.enabled");
+        Setting unrelated = find(s.session(),"tweaks.freeLook");
+        var oldRelated = related.value.deepCopy(); var oldUnrelated = unrelated.value.deepCopy();
+        related.value = new JsonPrimitive(!related.defaultValue.getAsBoolean());
+        unrelated.value = new JsonPrimitive(!unrelated.defaultValue.getAsBoolean());
+        var draft = unrelated.value.deepCopy();
+        ((ScreenInput)(Object)s).power$click((int)call(s,"origin")+12,(int)call(s,"footerY")+8,0);
+        check((boolean)field(s,"confirmReset"),"reset dialog missing");
+        ((ScreenInput)(Object)s).power$click(s.width/2-60,s.height/2+20,0);
+        check(related.value.equals(related.defaultValue),"listed setting not reset");
+        check(unrelated.value.equals(draft),"hidden setting reset");
+        related.value=oldRelated;unrelated.value=oldUnrelated;
+        call(s,"back");
+      });
       test(
           "link hit areas and Back render at small and ultrawide sizes",
           () -> {

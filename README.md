@@ -101,7 +101,8 @@ Inventory includes **Move containers**, off by default. Hold Sneak with an empty
 hand and use a chest, dispenser or furnace to pick it up. Release Use, then use a
 block face to place it. Double chests move both halves and all 54 slots together;
 their placement axis follows your facing direction. Both spaces must be empty and
-clear of entities. Placement beside another chest remains blocked. Spectator, freecam, riding and active edits cannot
+clear of entities. A carried single chest can join one existing single chest.
+Placement beside a double chest or between two singles remains blocked. Spectator, freecam, riding and active edits cannot
 move containers. A centered container model and raised-arm carry pose show what
 you are holding. Pickup and placement preserve full block-entity NBT, including
 item identity, count, damage and furnace progress.

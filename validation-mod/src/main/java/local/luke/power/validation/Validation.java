@@ -47,7 +47,8 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("carry-hold") || command.equals("carry-release")) NavigationCarryChecks.hold(mc,command.equals("carry-release"));
+      if (command.equals("chest-join")) ChestJoinChecks.run(mc);
+      else if (command.equals("carry-hold") || command.equals("carry-release")) NavigationCarryChecks.hold(mc,command.equals("carry-release"));
       else if (command.equals("carry-resume-check")) NavigationCarryChecks.resumed(mc);
       else if (command.equals("navigation-check")) NavigationCarryChecks.menu(mc);
       else if (command.equals("double-carry") || command.equals("carry-demo")) NavigationCarryChecks.carry(mc,command.equals("carry-demo"));
