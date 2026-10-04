@@ -4,6 +4,7 @@ import com.google.gson.*;
 import java.nio.file.Path;
 import java.util.*;
 import local.luke.power.config.*;
+import local.luke.power.permissions.CheatWorld;
 import net.minecraft.client.Minecraft;
 
 public final class WorldBackend implements Backend {
@@ -26,13 +27,30 @@ public final class WorldBackend implements Backend {
         b,
         List.of(
             new Setting(
+                "world.cheats",
+                b.id(),
+                "General",
+                "World",
+                "Cheats enabled",
+                "Allow game mode changes, item spawning, teleporting and world editing in this"
+                    + " world. Turning off returns you to survival. Saved warps, inventories and"
+                    + " access rules are kept. Apply to confirm.",
+                Setting.Kind.BOOLEAN,
+                new JsonPrimitive(b.properties().power$cheatsEnabled()),
+                new JsonPrimitive(false),
+                0,
+                1,
+                1,
+                List.of(),
+                false),
+            new Setting(
                 "worldedit.worldOverride",
                 b.id(),
                 "World editing",
                 "Access",
                 "This world",
-                "The master switch takes priority. This override takes priority over the"
-                    + " creative-mode requirement.",
+                "Further restrict editing in this world. Cheats enabled and the global editing"
+                    + " switch must both be on.",
                 Setting.Kind.CHOICE,
                 new JsonPrimitive(value.ordinal()),
                 new JsonPrimitive(0),
@@ -41,6 +59,10 @@ public final class WorldBackend implements Backend {
                 1,
                 List.of("Use global setting", "Enabled", "Disabled"),
                 false)));
+  }
+
+  private CheatWorld properties() {
+    return (CheatWorld) mc.world.method_262();
   }
 
   public String id() {
@@ -58,8 +80,18 @@ public final class WorldBackend implements Backend {
 
   public void apply(Map<String, JsonElement> values) throws Exception {
     validate(values);
-    api.getMethod("worldOverride", Minecraft.class, type)
-        .invoke(
-            null, mc, type.getEnumConstants()[values.get("worldedit.worldOverride").getAsInt()]);
+    if (values.containsKey("world.cheats")) {
+      boolean enabled = values.get("world.cheats").getAsBoolean();
+      if (!enabled && properties().power$cheatsEnabled()) {
+        Class.forName("local.luke.power.creative.Modes")
+            .getMethod("disableCheats", Minecraft.class)
+            .invoke(null, mc);
+      }
+      properties().power$cheatsEnabled(enabled);
+    }
+    if (values.containsKey("worldedit.worldOverride"))
+      api.getMethod("worldOverride", Minecraft.class, type)
+          .invoke(
+              null, mc, type.getEnumConstants()[values.get("worldedit.worldOverride").getAsInt()]);
   }
 }

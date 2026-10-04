@@ -6,6 +6,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(Screen.class)
 public interface ScreenInput {
+  @org.spongepowered.asm.mixin.gen.Accessor("buttons")
+  java.util.List<net.minecraft.client.gui.widget.ButtonWidget> power$buttons();
   @Invoker("mouseClicked")
   void power$click(int x, int y, int button);
 

@@ -3,7 +3,6 @@ package local.luke.power.creative.inventory.mixin.client;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.menu.CreateLevelScreen;
 import net.minecraft.client.gui.widgets.Button;
-import net.minecraft.client.resource.language.TranslationStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,9 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(CreateLevelScreen.class)
 public abstract class CreateLevelScreenMixin extends Screen {
-	@Unique private static final String CREATIVE_KEY_SURVIVAL = "title.power_creative_inventory.selectWorld.survival";
-	@Unique private static final String CREATIVE_KEY_CREATIVE = "title.power_creative_inventory.selectWorld.creative";
-	@Unique private boolean creative = false;
+	@Unique private boolean cheats = false;
 	
 	@SuppressWarnings("unchecked")
 	@Inject(method = "init", at = @At("TAIL"))
@@ -27,12 +24,12 @@ public abstract class CreateLevelScreenMixin extends Screen {
 	@Inject(method = "buttonClicked", at = @At("TAIL"))
 	protected void creative_buttonClicked(Button button, CallbackInfo info) {
 		if (button.id == 2) {
-			creative = !creative;
+			cheats = !cheats;
 			button.text = creative_getButtonName();
 		}
 		else if (button.id == 0) {
 			if (minecraft.player != null) {
-				minecraft.player.creative_setCreative(creative);
+				((local.luke.power.permissions.CheatWorld) minecraft.level.getProperties()).power$cheatsEnabled(cheats);
 			}
 		}
 	}
@@ -54,7 +51,6 @@ public abstract class CreateLevelScreenMixin extends Screen {
 	
 	@Unique
 	private String creative_getButtonName() {
-		TranslationStorage storage = TranslationStorage.getInstance();
-		return storage.translate(creative ? CREATIVE_KEY_CREATIVE : CREATIVE_KEY_SURVIVAL);
+		return "Cheats: " + (cheats ? "On" : "Off");
 	}
 }

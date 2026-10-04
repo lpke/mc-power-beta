@@ -1,213 +1,58 @@
 package local.luke.power.commands.command.vanilla;
 
+import java.util.*;
 import local.luke.power.commands.api.Command;
-import local.luke.power.commands.api.PosParse;
-import local.luke.power.commands.api.SummonRegistry;
-import local.luke.power.commands.command.extra.Mobs;
-import local.luke.power.commands.util.SharedCommandSource;
+import local.luke.power.commands.util.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Summon implements Command {
+  // Registry retained for existing integrations; modern syntax is the public entry point.
+  public static Map<Class<? extends Entity>, String> help = new HashMap<>();
 
-    public static Map<Class<? extends Entity>, String> help = new HashMap<>();
-
-    @Override
-    public void command(SharedCommandSource commandSource, String[] parameters) {
-        PlayerEntity player = commandSource.getPlayer();
-        if (player == null) {
-            return;
-        }
-
-        if (parameters.length == 2) {
-            try {
-                Entity entity;
-                PosParse pos = new PosParse(player);
-
-                entity = EntityRegistry.create(parameters[1], player.world);
-                entity.setPosition(pos.x, pos.y, pos.z);
-                player.world.spawnEntity(entity);
-
-                commandSource.sendFeedback("Summoned " + parameters[1] + " at " + pos);
-                return;
-            } catch (Exception e) {
-                commandSource.sendFeedback("Failure to find entity (probably not registered)");
-            }
-        }
-
-        if (parameters.length == 3) {
-            if (parameters[2].startsWith("?")) {
-                try {
-                    Class<? extends Entity> entityClass = (Class<? extends Entity>) EntityRegistry.idToClass.get(parameters[1]);
-                    String msg = "Usage is /summon " + parameters[1] + " {x} {y} {z} ";
-                    if (help.containsKey(entityClass)) {
-                        msg += help.get(entityClass);
-                    }
-                    commandSource.sendFeedback(msg);
-                    return;
-                } catch (Exception e) {
-                    commandSource.sendFeedback("Failure to find entity (probably not registered)");
-                }
-            } else {
-                try {
-                    int spawnAmount = Integer.parseInt(parameters[2]);
-
-                    try {
-                        PosParse pos = new PosParse(player);
-
-                        for (int spawnIndex = 0; spawnIndex < spawnAmount; spawnIndex++) {
-                            Entity entity;
-                            entity = EntityRegistry.create(parameters[1], player.world);
-
-                            double degreeInterval = 360 / spawnAmount;
-                            double degreeOffset = degreeInterval * spawnIndex;
-                            double xOffset = Math.sin(degreeOffset);
-                            double zOffset = Math.cos(degreeOffset);
-
-                            entity.setPosition(pos.x + xOffset, pos.y, pos.z + zOffset);
-
-                            player.world.spawnEntity(entity);
-                        }
-
-                        commandSource.sendFeedback("Summoned " + spawnAmount + " " + parameters[1] + "s around " + pos);
-                        return;
-                    } catch (Exception e) {
-                        commandSource.sendFeedback("Failure to find entity (probably not registered)");
-                    }
-                } catch (NumberFormatException e) {
-                    commandSource.sendFeedback("Non-number amount");
-                    return;
-                }
-            }
-        }
-
-        if (parameters.length == 4) {
-            try {
-                int spawnAmount = Integer.parseInt(parameters[2]);
-
-
-                try {
-                    double spawnRadius = Double.parseDouble(parameters[3]);
-
-                    try {
-                        PosParse pos = new PosParse(player);
-
-                        for (int spawnIndex = 0; spawnIndex < spawnAmount; spawnIndex++) {
-                            Entity entity;
-                            entity = EntityRegistry.create(parameters[1], player.world);
-
-                            double degreeInterval = 360 / spawnAmount;
-                            double degreeOffset = degreeInterval * spawnIndex;
-                            double xOffset = Math.sin(degreeOffset) * spawnRadius;
-                            double zOffset = Math.cos(degreeOffset) * spawnRadius;
-
-                            entity.setPosition(pos.x + xOffset, pos.y, pos.z + zOffset);
-
-                            player.world.spawnEntity(entity);
-                        }
-
-                        commandSource.sendFeedback("Summoned " + spawnAmount + " " + parameters[1] + "s around " + pos);
-                        return;
-                    } catch (Exception e) {
-                        commandSource.sendFeedback("Failure to find entity (probably not registered)");
-                    }
-                } catch (NumberFormatException e) {
-                    commandSource.sendFeedback("Non-number spawn radius");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                commandSource.sendFeedback("Non-number amount");
-                return;
-            }
-        }
-
-        if (parameters.length > 4) {
-            try {
-                PosParse pos = new PosParse(player, 2, parameters);
-
-                if (!pos.valid) {
-                    commandSource.sendFeedback("Non-number position");
-                    return;
-                }
-
-                Entity entity;
-                String extraMsg = "";
-                if (parameters.length > 5) {
-                    try {
-                        Class<? extends Entity> entityClass = (Class<? extends Entity>) EntityRegistry.idToClass.get(parameters[1]);
-                        entity = SummonRegistry.create(entityClass, player.world, pos, parameters);
-                        if (entity == null) {
-                            commandSource.sendFeedback("Parameters caused entity to be null");
-                        }
-                    } catch (Exception e) {
-                        commandSource.sendFeedback("Failure to create entity (probably not registered)");
-                        return;
-                    }
-                } else {
-                    entity = EntityRegistry.create(parameters[1], player.world);
-                }
-                entity.setPosition(pos.x, pos.y, pos.z);
-                player.world.spawnEntity(entity);
-
-                commandSource.sendFeedback("Summoned " + parameters[1] + extraMsg + " at " + pos);
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                commandSource.sendFeedback("Invalid Entity");
-            }
-            return;
-        }
-        manual(commandSource);
+  public void command(SharedCommandSource s, String[] args) {
+    if (args.length != 2 && args.length != 5) {
+      manual(s);
+      return;
     }
+    var player = EntityTargets.player(s);
+    String id = EntityTargets.registryName(args[1]);
+    double[] p =
+        args.length == 2
+            ? new double[] {player.x, player.boundingBox.minY, player.z}
+            : CommandNumbers.position(
+                player.x, player.boundingBox.minY, player.z, player.yaw, player.pitch, args, 2);
+    Entity entity = EntityRegistry.create(id, player.world);
+    if (entity == null) throw new IllegalArgumentException("Cannot create this entity.");
+    // Entity types whose constructor requires payloads need dedicated game actions.
+    if (Set.of("Item", "Painting", "FallingSand", "FishingHook").contains(id))
+      throw new IllegalArgumentException(
+          "This Beta entity requires item or block data and cannot be summoned safely.");
+    entity.setPositionAndAngles(
+        p[0], p[1] + entity.standingEyeHeight, p[2], entity.yaw, entity.pitch);
+    if (!player.world.spawnEntity(entity))
+      throw new IllegalArgumentException("Entity could not be spawned here.");
+    s.sendFeedback("§aSummoned " + EntityTargets.modern(id) + ".");
+  }
 
-    @Override
-    public String name() {
-        return "summon";
+  public String name() {
+    return "summon";
+  }
+
+  public void manual(SharedCommandSource s) {
+    s.sendFeedback("/summon <entity> [x y z]");
+    s.sendFeedback(
+        "Beta entity names and minecraft: names work. Coordinates support ~ and ^. Modern entity"
+            + " NBT is unavailable in Beta.");
+  }
+
+  public String[] suggestion(SharedCommandSource s, int n, String input, String total) {
+    if (n == 1) {
+      List<String> names = new ArrayList<>();
+      for (Object id : EntityRegistry.idToClass.keySet())
+        names.add("minecraft:" + EntityTargets.modern(id.toString()));
+      return CommandSuggestions.suffix(input, names);
     }
-
-    @Override
-    public void manual(SharedCommandSource commandSource) {
-        commandSource.sendFeedback("Usage: /summon {entity}");
-        commandSource.sendFeedback("Usage: /summon {entity} {amount} {optional:radius}");
-        commandSource.sendFeedback("Usage: /summon {entity} {x} {y} {z} {optional:parameters}");
-        commandSource.sendFeedback("Info: spawns a mob or mobs into the world");
-        commandSource.sendFeedback("entity: list of entities under /mobs");
-        commandSource.sendFeedback("parameters: list of parameters under '/summon {entity} ?'");
-    }
-
-    @Override
-    public String[] suggestion(SharedCommandSource source, int parameterNum, String currentInput, String totalInput)
-    {
-        if (parameterNum == 1)
-        {
-            Map<String, Class> map = Mobs.getMobSet();
-
-            ArrayList<String> outputs = new ArrayList<>();
-            String msg = "";
-            for (Map.Entry<String, Class> entry : map.entrySet()) {
-                String key = entry.getKey();
-                if (key.startsWith(currentInput)) {
-                    outputs.add(key.substring(currentInput.length()));
-                }
-            }
-            return outputs.toArray(new String[0]);
-        }
-        else if (parameterNum > 1 && parameterNum < 5)
-        {
-            if (currentInput.length() == 0)
-            {
-                if (parameterNum == 2) {
-                    return new String[]{"~", "?"};
-                } else {
-                    return new String[]{"~"};
-                }
-            }
-        }
-
-        return new String[0];
-    }
+    return CommandSuggestions.suffix(input, n > 1 && n < 5 ? List.of("~", "^") : List.of());
+  }
 }

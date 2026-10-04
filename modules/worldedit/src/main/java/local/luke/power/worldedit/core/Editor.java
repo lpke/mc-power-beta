@@ -8,6 +8,7 @@ public final class Editor {
   public final EditEngine engine;
   public final BlockParser blocks;
   public final Consumer<String> message;
+  public Consumer<String> helpMessage;
   public Pos pos1, pos2;
   public Clipboard clipboard;
   public Pos clipboardOrigin;
@@ -19,6 +20,7 @@ public final class Editor {
     this.engine = new EditEngine(world, message);
     this.blocks = blocks;
     this.message = message;
+    this.helpMessage = message;
   }
 
   public Region region() {

@@ -148,6 +148,12 @@ public final class PowerOptionsScreen extends UiScreen {
     }
   }
 
+  private void closeLibrary() {
+    if (library != null) library.removed();
+    libraryOpen = false;
+    layout();
+  }
+
   private boolean controls() { return page.equals("Controls"); }
   private int disabledX() { return actionX(0) - 94; }
   private String previewId(Setting s) {
@@ -241,6 +247,7 @@ public final class PowerOptionsScreen extends UiScreen {
     List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
     return session.settings().stream()
         .filter(s -> changedOnly ? s.changed() : listed.isEmpty() ? s.page.equals(page) : listed.contains(s.id))
+        .filter(s -> SettingAccess.reason(session, s).isEmpty())
         .toList();
   }
 
@@ -439,7 +446,7 @@ public final class PowerOptionsScreen extends UiScreen {
         search.setText("");
         search.selectAll();
         scroll = same ? 0 : positions.getOrDefault(page, 0d);
-        if (same && libraryVisible()) library.top();
+        if (page.equals("Audio")) closeLibrary();
         selected = -1;
         layout();
       }
@@ -447,17 +454,21 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (audio() && button == 0 && y >= 52 && y < audioContentTop() - 3 && x >= left() && x < contentRight()) {
       var item = musicButton(x, y);
-      if (item == null || !item.enabled()) return;
+      if (item == null) return;
+      if (!item.enabled() && !(item.action() == AudioToolbar.Action.QUEUE
+          && libraryVisible() && library.queueVisible())) return;
       AudioToolbar.Action action = item.action();
       click();
       switch (action) {
-        case SETTINGS -> { library.removed(); libraryOpen = false; layout(); }
+        case SETTINGS -> closeLibrary();
         case PLAY -> local.luke.power.audio.AudioController.togglePause();
         case PREVIOUS -> local.luke.power.audio.AudioController.previous();
         case NEXT -> local.luke.power.audio.AudioController.next();
-        case QUEUE -> { libraryOpen = true; library.showQueue(); layout(); }
+        case QUEUE -> { if (libraryVisible() && library.queueVisible()) closeLibrary();
+          else { libraryOpen = true; library.showQueue(); layout(); } }
         case RELOAD -> local.luke.power.audio.AudioController.reload();
-        case LIBRARY -> { libraryOpen = true; library.showTracks(); layout(); }
+        case LIBRARY -> { if (libraryVisible() && !library.queueVisible()) closeLibrary();
+          else { libraryOpen = true; library.showTracks(); layout(); } }
       }
       return;
     }
@@ -485,6 +496,7 @@ public final class PowerOptionsScreen extends UiScreen {
         }
         selected = i;
         Setting s = r.setting;
+        if (!SettingAccess.reason(session, s).isEmpty()) return;
         int controlY = r.height == 40 ? ry + 16 : ry + 2;
         if (y < controlY) return;
         if (x >= right() - 34) {
@@ -572,6 +584,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void activate(Setting s, int direction) {
+    if (!SettingAccess.reason(session, s).isEmpty()) return;
     error = "";
     click();
     if (s.id.equals("native.texturePack")) {
@@ -668,9 +681,9 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (key == Keyboard.KEY_ESCAPE) {
+      if (libraryVisible()) { closeLibrary(); return; }
       if (!history.isEmpty()) { back(); return; }
       if (!conflictIds.isEmpty()) { conflictIds = List.of(); scroll = positions.getOrDefault(page, 0d); layout(); return; }
-      if (libraryVisible() && library.focused()) { library.unfocus(); return; }
       if (search.focused) {
         search.focused = false;
         return;
@@ -820,7 +833,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (canClear()) button("x", right() - 32, 27, 18, 20, mx, my, true);
     if (audio()) {
       for (var item : musicButtons()) {
-        button(fit(item.label(), item.width() - 4), item.x(), item.y(), item.width(), 18, mx, my, item.enabled());
+        if (item.action() == AudioToolbar.Action.PREVIOUS || item.action() == AudioToolbar.Action.NEXT)
+          trackButton(item.label(), item.action() == AudioToolbar.Action.PREVIOUS,
+              item.x(), item.y(), item.width(), mx, my);
+        else button(fit(item.label(), item.width() - 4), item.x(), item.y(), item.width(), 18, mx, my, item.enabled());
         if (libraryVisible() && item.enabled()
             && (item.action() == AudioToolbar.Action.QUEUE && library.queueVisible()
                 || item.action() == AudioToolbar.Action.LIBRARY && !library.queueVisible()))
@@ -846,6 +862,8 @@ public final class PowerOptionsScreen extends UiScreen {
         continue;
       }
       Setting s = row.setting;
+      String lock = SettingAccess.reason(session, s);
+      boolean editable = lock.isEmpty();
       boolean hover = inside(mx, my, left(), y, span(), row.height) && my >= top() && my < bottom();
       if (hover) fill(left() - 2, y, right() - 12, y + row.height, 0x60000000);
       boolean narrow = row.height == 40;
@@ -857,22 +875,23 @@ public final class PowerOptionsScreen extends UiScreen {
           fit(label, textWidth),
           left() + 3,
           y + (narrow ? 3 : 8),
-          s.changed() ? 0xffdd88 : 0xd0d0d0);
+          s.changed() ? 0xffdd88 : 0xc4c4c4);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
       int valueEnd = right() - (numeric ? 62 : 36);
-      if (numeric) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my,
+      if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my,
           (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
-      else if (ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my);
+      else if (editable && ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my);
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
-          controlLeft, cy, valueEnd - controlLeft, 18, mx, my, true);
-      if (numeric) button("...", right() - 60, cy, 22, 18, mx, my, true);
-      button("R", right() - 34, cy, 20, 18, mx, my, !s.value.equals(s.defaultValue));
-      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, true, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
+          controlLeft, cy, valueEnd - controlLeft, 18, mx, my, editable);
+      if (numeric) button("...", right() - 60, cy, 22, 18, mx, my, editable);
+      button("R", right() - 34, cy, 20, 18, mx, my, editable && !s.value.equals(s.defaultValue));
+      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       List<Setting> conflicts = conflicts(s);
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
-        if (mx >= right() - 34) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
+        if (!editable) tip = lock + (s.description.isEmpty() ? "" : "\n" + s.description);
+        else if (mx >= right() - 34) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
         else if (!conflicts.isEmpty() && inside(mx, my, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {

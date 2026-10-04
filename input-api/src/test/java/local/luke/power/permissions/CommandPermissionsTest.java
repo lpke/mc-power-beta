@@ -2,91 +2,125 @@ package local.luke.power.permissions;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.google.gson.Gson;
 import java.util.*;
+import local.luke.power.permissions.CommandPermissions.*;
 import org.junit.jupiter.api.Test;
 
 class CommandPermissionsTest {
-  private final CommandPermissions.Command warp =
-      CommandPermissions.COMMANDS.stream()
-          .filter(c -> c.name().equals("warp"))
-          .findFirst()
-          .orElseThrow();
-  private final CommandPermissions.Settings settings = new CommandPermissions.Settings();
+  private final Settings settings = new Settings();
 
-  private String denial(String world, boolean creative) {
-    return CommandPermissions.denial(
-        settings, warp, new CommandPermissions.Context(world, creative, false));
+  private Command command(String name) {
+    return CommandPermissions.COMMANDS.stream()
+        .filter(c -> c.name().equals(name))
+        .findFirst()
+        .orElseThrow();
   }
 
   @Test
-  void checksEveryCombinationOfMasterGlobalWorldAndMode() {
-    for (boolean master : List.of(true, false))
-      for (var global : CommandPermissions.Rule.values())
-        for (var override : CommandPermissions.Override.values())
-          for (boolean creative : List.of(true, false)) {
-            settings.enabled = master;
-            settings.rules.put("warp", global);
-            settings.worlds.put("world", Map.of("warp", override));
-            boolean allowed =
-                master
-                    && (override == CommandPermissions.Override.ALLOW
-                        || override == CommandPermissions.Override.INHERIT
-                            && (global == CommandPermissions.Rule.ANY_MODE
-                                || global == CommandPermissions.Rule.CREATIVE_ONLY && creative));
-            assertEquals(
-                allowed,
-                denial("world", creative).isEmpty(),
-                master + "/" + global + "/" + override + "/" + creative);
-          }
+  void acceptsImmutablePermissionMaps() {
+    settings.rules = Map.of("warp", Rule.DISABLED);
+    settings.worlds = Map.of("world", Map.of("warp", CommandPermissions.Override.ALLOW));
+    settings.modeAccess = Map.of("creative", true);
+    settings.worldModeAccess =
+        Map.of("world", Map.of("spectator", CommandPermissions.Override.BLOCK));
+    assertDoesNotThrow(settings::validate);
   }
 
   @Test
-  void worldsAndCommandsDoNotInheritEachOthersOverrides() {
-    settings.worlds.put("first", Map.of("warp", CommandPermissions.Override.ALLOW));
-    assertTrue(denial("first", false).isEmpty());
-    assertFalse(denial("second", false).isEmpty());
-    var give =
-        CommandPermissions.COMMANDS.stream()
-            .filter(c -> c.name().equals("give"))
-            .findFirst()
-            .orElseThrow();
+  void everyCombinationOfWorldMasterCommandMasterRuleAndOverride() {
+    for (boolean cheats : List.of(false, true))
+      for (boolean master : List.of(false, true))
+        for (Rule rule : Rule.values())
+          for (CommandPermissions.Override override : CommandPermissions.Override.values())
+            for (Command command : CommandPermissions.COMMANDS) {
+              settings.enabled = master;
+              settings.rules.put(command.name(), rule);
+              settings.worlds.put("world", Map.of(command.name(), override));
+              boolean expected =
+                  (!command.cheat() || cheats && master)
+                      && (override == CommandPermissions.Override.ALLOW
+                          || override == CommandPermissions.Override.INHERIT
+                              && rule == Rule.ALLOWED);
+              assertEquals(
+                  expected,
+                  CommandPermissions.denial(settings, command, new Context("world", false, cheats))
+                      .isEmpty(),
+                  cheats + "/" + master + "/" + rule + "/" + override + "/" + command.name());
+            }
+  }
+
+  @Test
+  void independentWorldsAndModesWithNoSurvivalLockout() {
+    settings.modeAccess.put("creative", false);
+    settings.worldModeAccess.put("first", Map.of("creative", CommandPermissions.Override.ALLOW));
+    assertTrue(
+        CommandPermissions.modeDenial(settings, "creative", new Context("first", false, true))
+            .isEmpty());
     assertFalse(
-        CommandPermissions.denial(
-                settings, give, new CommandPermissions.Context("first", false, false))
+        CommandPermissions.modeDenial(settings, "creative", new Context("second", false, true))
             .isEmpty());
-  }
-
-  @Test
-  void disablingDoesNotChangeAnyOverridesOrRules() {
-    settings.worlds.put("first", new HashMap<>(Map.of("warp", CommandPermissions.Override.ALLOW)));
-    var before = new com.google.gson.Gson().toJson(settings.worlds);
-    settings.enabled = false;
-    assertFalse(denial("first", true).isEmpty());
-    assertEquals(before, new com.google.gson.Gson().toJson(settings.worlds));
-    settings.enabled = true;
-    assertTrue(denial("first", false).isEmpty());
-  }
-
-  @Test
-  void singleplayerPolicyNeverControlsServerCommands() {
+    assertTrue(
+        CommandPermissions.modeDenial(settings, "spectator", new Context("second", false, true))
+            .isEmpty());
+    assertFalse(
+        CommandPermissions.modeDenial(settings, "creative", new Context("first", false, false))
+            .isEmpty());
     settings.enabled = false;
     assertTrue(
-        CommandPermissions.denial(settings, warp, new CommandPermissions.Context("", false, true))
+        CommandPermissions.modeDenial(settings, "survival", new Context("first", false, false))
+            .isEmpty());
+    assertFalse(
+        CommandPermissions.modeDenial(settings, "creative", new Context("first", false, true))
             .isEmpty());
   }
 
   @Test
-  void aliasesSharePolicyAndModeEntryIsAvailableByDefault() {
+  void disablingKeepsAllSavedRules() {
+    settings.worlds.put("world", Map.of("warp", CommandPermissions.Override.ALLOW));
+    String before = new Gson().toJson(settings);
+    assertFalse(
+        CommandPermissions.denial(settings, command("warp"), new Context("world", false, false))
+            .isEmpty());
+    assertEquals(before, new Gson().toJson(settings));
+    assertTrue(
+        CommandPermissions.denial(settings, command("warp"), new Context("world", false, true))
+            .isEmpty());
+  }
+
+  @Test
+  void legacyCreativeRulesBecomeAllowedAndExplicitBlocksRemain() {
+    Settings old =
+        new Gson()
+            .fromJson(
+                "{\"rules\":{\"warp\":\"CREATIVE_ONLY\",\"give\":\"DISABLED\",\"tp\":\"ANY_MODE\"}}",
+                Settings.class);
+    assertEquals(Rule.ALLOWED, old.rules.get("warp"));
+    assertEquals(Rule.ALLOWED, old.rules.get("tp"));
+    assertEquals(Rule.DISABLED, old.rules.get("give"));
+  }
+
+  @Test
+  void defaultsUnlockAllCommandsOnlyInCheatWorlds() {
+    for (Command command : CommandPermissions.COMMANDS) {
+      assertTrue(
+          CommandPermissions.denial(settings, command, new Context("world", false, true))
+              .isEmpty());
+      assertEquals(
+          !command.cheat(),
+          CommandPermissions.denial(settings, command, new Context("world", false, false))
+              .isEmpty());
+    }
+  }
+
+  @Test
+  void aliasesSharePolicyAndServerCommandsRemainUnaffected() {
     assertEquals("gamemode", CommandPermissions.canonical("gm"));
-    var mode =
-        CommandPermissions.COMMANDS.stream()
-            .filter(c -> c.name().equals("gamemode"))
-            .findFirst()
-            .orElseThrow();
+    assertEquals("tp", CommandPermissions.canonical("teleport"));
+    assertEquals("toggledownfall", CommandPermissions.canonical("weather"));
+    settings.enabled = false;
     assertTrue(
-        CommandPermissions.denial(
-                settings, mode, new CommandPermissions.Context("world", false, false))
+        CommandPermissions.denial(settings, command("warp"), new Context("", true, false))
             .isEmpty());
-    assertFalse(denial("world", false).isEmpty());
   }
 }

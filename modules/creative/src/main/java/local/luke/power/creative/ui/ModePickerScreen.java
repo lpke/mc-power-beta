@@ -28,6 +28,7 @@ public final class ModePickerScreen extends Screen {
       return;
     }
     if (selected == null) selected = ((ModePlayer) minecraft.player).power_previousMode();
+    if (!Modes.denial(selected).isEmpty()) selected = GameMode.SURVIVAL;
   }
 
   @Override
@@ -64,7 +65,10 @@ public final class ModePickerScreen extends Screen {
       minecraft.openScreen(null);
     } else if (code == Keys.PICKER.key && cycleReady && !Keyboard.isRepeatEvent()) {
       int i = java.util.Arrays.asList(MODES).indexOf(selected);
-      selected = MODES[(i + 1) % MODES.length];
+      for (int n = 1; n <= MODES.length; n++) {
+        GameMode candidate = MODES[(i + n) % MODES.length];
+        if (Modes.denial(candidate).isEmpty()) { selected = candidate; break; }
+      }
       hovered = false;
       cycleReady = false;
     }
@@ -80,7 +84,7 @@ public final class ModePickerScreen extends Screen {
     int left = width / 2 - 44, top = height / 2 - 31;
     if (y < top || y >= top + 26) return;
     for (int i = 0; i < 3; i++)
-      if (x >= left + i * 31 && x < left + i * 31 + 26) selected = MODES[i];
+      if (x >= left + i * 31 && x < left + i * 31 + 26 && Modes.denial(MODES[i]).isEmpty()) selected = MODES[i];
   }
 
   @Override
@@ -114,6 +118,10 @@ public final class ModePickerScreen extends Screen {
               MODES[i] == GameMode.CREATIVE ? new ItemStack(Block.GRASS) : new ItemStack(267, 1, 0);
           items.renderStackInGUI(textManager, minecraft.textureManager, icon, sx + 5, top + 5);
           RenderHelper.disableLighting();
+        }
+        if (!Modes.denial(MODES[i]).isEmpty()) {
+          fill(sx + 1, top + 1, sx + 25, top + 25, 0x99000000);
+          drawTextWithShadowCentred(textManager, "x", sx + 13, top + 9, 0xbb7777);
         }
         if (selected == MODES[i])
           Texture.draw(minecraft, "mode_selection", sx, top, 26, 26, 0, 0, 26, 26, 26, 26);

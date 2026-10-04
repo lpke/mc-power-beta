@@ -13,6 +13,12 @@ public final class PowerBeta {
     local.luke.power.light.LightOverlay.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.chat.HelpOutput.scrolling(() -> {
+        try {
+          Object config = Class.forName("local.luke.power.hud.Config").getField("config").get(null);
+          return Boolean.TRUE.equals(config.getClass().getField("enableChatScroll").get(config));
+        } catch (ReflectiveOperationException e) { return false; }
+      });
       local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
       local.luke.power.video.VideoConfig.current();
       try {

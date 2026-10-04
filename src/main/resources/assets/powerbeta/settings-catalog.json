@@ -3292,13 +3292,7 @@
     "page": "World editing",
     "group": "Access",
     "label": "World editing",
-    "description": "Master switch for all editor commands and wand actions."
-  },
-  "worldedit.creativeOnly": {
-    "page": "World editing",
-    "group": "Access",
-    "label": "Require Creative mode",
-    "description": "Require Creative when the creative-mode system is available. A world override can change this rule."
+    "description": "Allow editing commands and the wand when Cheats enabled is on in this world."
   },
   "worldedit.wandEnabled": {
     "page": "World editing",

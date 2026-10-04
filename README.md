@@ -51,18 +51,53 @@ is recovered before configuration and recipe initialization on the next launch.
 
 ## Command access
 
-**Commands** controls cheat-like singleplayer commands. Master Off blocks every
-listed command. A command's **This world** override takes priority over its
-**Global command rules** setting. Use global follows that rule; Allow permits
-any mode in this world; Block prevents use here. Global rules offer Any mode,
-Creative only and Disabled. Defaults require creative, except `/gamemode` and
-its `/gm` alias. The mode picker remains available independently.
+**General > World > Cheats enabled** is the per-world master switch. New worlds
+start in survival with cheats off. The creation screen lets you choose the initial
+flag. Only worlds with cheats on show `[Cheats]` in the world list.
 
-Help and information commands remain accessible. WorldEdit uses its own page's
-access controls. Blocking access never removes saved warps or other command data;
-god-mode damage protection is suspended while its command is blocked.
-Per-world command rules live in the shared configuration, keyed by a world ID
-stored in level metadata. Renaming a world keeps its rules; dimensions share them.
+Cheats unlock mode switching, item spawning, teleportation, healing/invulnerability,
+world-changing commands and WorldEdit. There are no creative-only restrictions:
+these features work in survival when cheats are enabled. Freecam, placement tools,
+container carrying and other QoL features remain independent. Shared freecam/flight
+sprint preferences also remain editable.
+
+**Commands** separates cheat and non-cheat commands. Each has an Enabled/Disabled
+global rule and a Use global/Allow/Block world override. Creative and spectator
+entry have their own global and per-world controls, shared by `/gamemode`, `/gm`
+and the F3+F4 picker. Returning to survival is always allowed. The cheat-command
+switch and WorldEdit's global switch can further restrict access, but neither a
+command nor a world override can bypass Cheats enabled.
+
+Locked settings stay visible with a tooltip explaining the lock. Apply or Done
+commits the world switch; auto-apply also supports it. Disabling cheats returns
+the player to survival. An unsafe spectator exit or carried container prevents
+that transition and leaves cheats on. Access changes preserve inventories, saved
+warps, editor history and per-world rules; god-mode protection is suspended when
+blocked. WorldEdit cancels and rolls back pending edits after access is removed.
+
+The cheats flag lives in world metadata. Existing worlds without the flag inherit
+cheats on only if saved in creative or spectator. Existing creative-only command
+rules migrate to Enabled. The editor's old default-off preference becomes enabled
+behind the new world gate once; later global edits are retained. Per-world command
+rules live in the shared configuration under the world's persistent ID. Renaming
+a world keeps its rules and dimensions share them.
+
+Singleplayer commands support modern target-first `/give`, inventory `/clear`,
+`/tp` and `/teleport` with player names, selectors, relative `~` and local `^`
+coordinates, rotation and facing. Added `/weather`, `/seed`, `/difficulty`,
+`/spawnpoint` and `/setworldspawn`; updated `/time`, `/kill`, `/summon` and `/ride`.
+`/clearchat` clears chat. `/help <command>` documents each supported form.
+
+Selectors cover the local player and loaded entities, with type, name, distance,
+box, sorting and limit filters. Modern NBT/component arguments and newer mobs are
+not implemented. Beta uses one world clock and a shared difficulty option;
+command-set respawn points are limited to the Overworld. Existing saved warps
+remain readable, and duplicate names are rejected instead of overwritten.
+
+Help uses coloured command names and headings. With scrolling chat enabled,
+`/help`, `//help` and other list commands show their full lists. Explicit page
+numbers retain pagination. WorldEdit help lines omit the `[WE]` prefix.
+
 
 ## Light overlay and inventory
 
@@ -105,10 +140,11 @@ The library starts on Active tracks, following the current world/menu, soundtrac
 and enabled-folder settings. Individually excluded tracks stay visible so they
 can be re-enabled. All tracks, Custom tracks and folder filters remain available.
 Playback controls sit on the left of the toolbar; Queue, Library and Reload sit
-on the right. Queue always shows its request count and is disabled when empty.
-Library opens the track list. Back to Settings sits before Play/Pause in either
-music view. These buttons replace separate Tracks/Queue tabs. At narrow widths,
-the toolbar groups wrap onto two lines without shortening Back to Settings.
+on the right. Queue shows its request count when non-empty and is greyed out without a count when empty.
+Library opens the track list. Clicking the active Queue or Library button closes
+that panel. Back, Escape and the Audio sidebar tab return to settings. Back sits
+before Play/Pause in either music view. Prev and Next have skip icons; narrow
+layouts retain compact icons and wrap the two toolbar groups when needed.
 
 Speaker buttons preview individual sounds, built-in music and custom tracks.
 Music previews pause the current song; click the same speaker again to resume it.

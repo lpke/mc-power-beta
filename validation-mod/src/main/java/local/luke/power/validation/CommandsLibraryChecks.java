@@ -28,6 +28,8 @@ public final class CommandsLibraryChecks {
       case "commands" -> {
         failures = 0;
         permissions = CommandPermissions.copy();
+        var cheats = (local.luke.power.permissions.CheatWorld) mc.world.method_262();
+        boolean cheatsBefore = cheats.power$cheatsEnabled(); cheats.power$cheatsEnabled(true);
         var defaults = new CommandPermissions.Settings();
         CommandPermissions.preview(defaults);
         ChatChecks.submit(mc, "/gamemode creative");
@@ -38,12 +40,14 @@ public final class CommandsLibraryChecks {
           String saved = (String) warps.getMethod("spc$getWarpString").invoke(mc.player);
           check(!saved.equals(before), "warp fixture missing");
           ChatChecks.submit(mc, "/gamemode survival");
+          defaults.rules.put("warp", CommandPermissions.Rule.DISABLED);
+          CommandPermissions.preview(defaults);
           test(
-              "creative rule blocks command through the real chat path",
+              "global rule blocks command through the real chat path",
               () -> {
                 var lines = ChatChecks.submit(mc, "/warp set denied-test");
                 check(
-                    lines.size() == 1 && lines.get(0).contains("requires creative"),
+                    lines.size() == 1 && lines.get(0).contains("disabled"),
                     lines.toString());
                 check(
                     warps.getMethod("spc$getWarpString").invoke(mc.player).equals(saved),
@@ -54,11 +58,11 @@ public final class CommandsLibraryChecks {
               world, new LinkedHashMap<>(Map.of("warp", CommandPermissions.Override.ALLOW)));
           CommandPermissions.preview(defaults);
           test(
-              "world allow bypasses creative rule",
+              "world allow bypasses global rule",
               () -> {
                 var lines = ChatChecks.submit(mc, "/warp list");
                 check(
-                    lines.stream().noneMatch(s -> s.contains("requires creative")),
+                    lines.stream().noneMatch(s -> s.contains("disabled")),
                     lines.toString());
                 check(CommandPermissions.allowed("warp"), "override ignored");
               });
@@ -72,7 +76,7 @@ public final class CommandsLibraryChecks {
                     "master bypassed");
                 var lines = ChatChecks.submit(mc, "/gm creative");
                 check(lines.size() == 1 && lines.get(0).contains("disabled"), lines.toString());
-                check(!CommandContext.current(mc).creative(), "denied mode changed player");
+                check(!((Boolean)Class.forName("local.luke.power.creative.inventory.interfaces.CreativePlayer").getMethod("creative_isCreative").invoke(mc.player)), "denied mode changed player");
                 check(
                     warps.getMethod("spc$getWarpString").invoke(mc.player).equals(saved),
                     "master erased warp");
@@ -100,6 +104,7 @@ public final class CommandsLibraryChecks {
           warps.getMethod("spc$setWarpString", String.class).invoke(mc.player, before);
           CommandPermissions.preview(permissions);
           ChatChecks.submit(mc, "/gamemode creative");
+          cheats.power$cheatsEnabled(cheatsBefore);
         }
         options = MenuUpdateChecks.open(mc, "Commands");
         test(

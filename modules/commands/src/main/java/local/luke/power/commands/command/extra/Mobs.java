@@ -1,46 +1,46 @@
 package local.luke.power.commands.command.extra;
 
+import java.util.*;
+import local.luke.power.chat.HelpOutput;
 import local.luke.power.commands.api.Command;
-import local.luke.power.commands.util.SharedCommandSource;
+import local.luke.power.commands.util.*;
 import net.minecraft.entity.EntityRegistry;
 
-import java.util.Map;
-
-
 public class Mobs implements Command {
-    public static Map<String, Class> getMobSet()
-    {
-        return EntityRegistry.idToClass;
-    }
+  public static Map<String, Class> getMobSet() {
+    return EntityRegistry.idToClass;
+  }
 
-    @Override
-    public void command(SharedCommandSource commandSource, String[] parameters) {
-        commandSource.sendFeedback("Mobs that can be spawned, Case-Sensitive usage!");
-        Map<String, Class> map = getMobSet();
-
-        String msg = "";
-        for (Map.Entry<String, Class> entry : map.entrySet()) {
-            msg += "\"" + entry.getKey() + "\", ";
-            if (msg.length() > 50) {
-                commandSource.sendFeedback(msg);
-                msg = "";
-            }
-        }
-        commandSource.sendFeedback(msg.substring(0, msg.length() - 2)); // removes last comma then sends
+  public void command(SharedCommandSource s, String[] args) {
+    if (args.length > 2) {
+      manual(s);
+      return;
     }
+    List<String> lines = new ArrayList<>();
+    for (String id : getMobSet().keySet())
+      if (!Set.of("Item", "Painting", "FallingSand", "FishingHook").contains(id))
+        lines.add("minecraft:" + EntityTargets.modern(id));
+    lines.sort(String::compareTo);
+    int page =
+        args.length == 2 ? CommandNumbers.integer(args[1], 1, (lines.size() + 5) / 6, "Page") : 1;
+    HelpOutput.print(
+        s::sendFeedback,
+        "Beta entities",
+        lines,
+        page,
+        6,
+        args.length == 1 && HelpOutput.scrolling());
+  }
 
-    @Override
-    public String name() {
-        return "mobs";
-    }
+  public String name() {
+    return "mobs";
+  }
 
-    @Override
-    public void manual(SharedCommandSource commandSource) {
-        commandSource.sendFeedback("Usage: /mobs");
-        commandSource.sendFeedback("Info: gives the list of mobs");
-    }
+  public void manual(SharedCommandSource s) {
+    s.sendFeedback("/mobs [page] | List entity names accepted by /summon.");
+  }
 
-    public boolean needsPermissions() {
-        return false;
-    }
+  public boolean needsPermissions() {
+    return false;
+  }
 }

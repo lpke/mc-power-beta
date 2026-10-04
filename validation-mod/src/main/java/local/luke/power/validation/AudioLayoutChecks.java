@@ -142,7 +142,7 @@ public final class AudioLayoutChecks {
           click(options,(int)call(library,"filterX")+3,(int)call(library,"controlsTop")+8);
           check(MusicRequests.tracks().isEmpty(),"Clear queue missed");
           var empty=musicButton(options,AudioToolbar.Action.QUEUE);
-          check(empty.label().equals("Queue (0)") && !empty.enabled(),"empty Queue is not visible and disabled");
+          check(empty.label().equals("Queue") && !empty.enabled(),"empty Queue is not visible and disabled");
         });
         test("direct view navigation preserves filters and positions without hiding empty queue", () -> {
           MusicRequests.edit(q -> {for(int i=0;i<16;i++)q.add(a);});
@@ -170,6 +170,26 @@ public final class AudioLayoutChecks {
           library.searchClick(0,0,1);
           check(library.state().query().equals("Track"),"queue title click erased track search");
           library.showTracks();library.clearQuery();
+        });
+        test("audio views toggle closed through buttons Escape and the Audio tab", () -> {
+          field(options,"libraryOpen",false);call(options,"layout");
+          musicClick(options,AudioToolbar.Action.LIBRARY);
+          library.focus();
+          ((ScreenInput)(Object)options).power$key('\0',org.lwjgl.input.Keyboard.KEY_ESCAPE);
+          check(mc.currentScreen==options && !(boolean)field(options,"libraryOpen"),"Escape closed Options or stayed in library");
+          musicClick(options,AudioToolbar.Action.LIBRARY);musicClick(options,AudioToolbar.Action.LIBRARY);
+          check(!(boolean)field(options,"libraryOpen"),"Library did not toggle closed");
+          MusicRequests.edit(q -> q.add(a));
+          musicClick(options,AudioToolbar.Action.QUEUE);musicClick(options,AudioToolbar.Action.QUEUE);
+          check(!(boolean)field(options,"libraryOpen"),"Queue did not toggle closed");
+          musicClick(options,AudioToolbar.Action.QUEUE);MusicRequests.edit(q -> q.tracks.clear());
+          musicClick(options,AudioToolbar.Action.QUEUE);
+          check(!(boolean)field(options,"libraryOpen"),"empty active Queue could not close");
+          musicClick(options,AudioToolbar.Action.LIBRARY);
+          field(options,"sideScroll",0d);
+          click(options,(int)call(options,"origin")+10,24+2*22+8);
+          check(!(boolean)field(options,"libraryOpen") && field(options,"page").equals("Audio"),"Audio tab did not return to settings");
+          musicClick(options,AudioToolbar.Action.LIBRARY);
         });
         test("audio toolbar queue and folders render at compact and wide sizes", () -> {
           for(int[] size : new int[][]{{320,240},{427,240},{550,380},{854,480}}) {

@@ -94,12 +94,9 @@ public final class WorldEditor {
   }
 
   public static boolean permitted(Minecraft mc) {
-    return AccessPolicy.allows(
-        settings.enabled,
-        worldOverride(mc),
-        settings.creativeOnly,
-        CreativeAccess.installed(),
-        mc != null && CreativeAccess.creative(mc.player));
+    return mc != null && mc.world != null && !mc.world.isRemote
+        && AccessPolicy.allows(((local.luke.power.permissions.CheatWorld) mc.world.method_262()).power$cheatsEnabled(),
+            settings.enabled, worldOverride(mc));
   }
 
   public static boolean available(Minecraft mc) {
@@ -132,6 +129,7 @@ public final class WorldEditor {
       editor =
           new Editor(
               new MinecraftWorld(world), parser, s -> mc.inGameHud.addChatMessage(ChatFormat.info(s)));
+      editor.helpMessage = s -> mc.inGameHud.addChatMessage(s + "§r");
       editor.limit = settings.blockLimit;
       editor.engine.configure(settings.blockLimit, settings.historySize);
     }
@@ -165,16 +163,18 @@ public final class WorldEditor {
       message(mc,"Place your carried container before using editing commands."); return true;
     }
     if (!local.luke.power.worldedit.chat.CommandCatalog.owns(text)) return false;
-    if (!available(mc)) {
+    if (!available(mc) && !(localPlayer(mc) && text.strip().matches("//help(?:\\s+.*)?"))) {
       if (mc.inGameHud != null)
         mc.inGameHud.addChatMessage(
             ChatFormat.error(!localPlayer(mc)
                     ? "World editing requires a live local singleplayer world."
+                    : !((local.luke.power.permissions.CheatWorld) mc.world.method_262()).power$cheatsEnabled()
+                        ? "Cheats are disabled for this world. Enable Cheats in Options > General."
                     : !settings.enabled
                         ? "World editing is disabled in Options."
                         : worldOverride(mc) == WorldOverride.DISABLED
                             ? "WorldEdit is disabled in this world."
-                            : "WorldEdit requires creative mode. Change access in Options."));
+                            : "World editing is unavailable. Check access in Options."));
       return true;
     }
     try {

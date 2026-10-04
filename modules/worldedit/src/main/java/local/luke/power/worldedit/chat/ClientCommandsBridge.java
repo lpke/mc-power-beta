@@ -37,7 +37,7 @@ public final class ClientCommandsBridge implements ModInitializer {
                       case "manual" -> {
                         Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
                         mc.inGameHud.addChatMessage(
-                            ChatFormat.info("Use //help [1-6] for world-editing commands."));
+                            local.luke.power.chat.HelpOutput.line("Use //help [1-6] for world-editing commands."));
                         yield null;
                       }
                       case "suggestion" -> {

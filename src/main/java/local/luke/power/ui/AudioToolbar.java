@@ -14,18 +14,18 @@ public final class AudioToolbar {
   public record Layout(List<Button> buttons, int bottom) {}
 
   public static int bottom(int width, boolean library) {
-    boolean compact = width < (library ? 466 : 366);
-    int left = compact ? (library ? 168 : 70) : (library ? 258 : 158);
+    boolean compact = width < (library ? 410 : 366);
+    int left = compact ? (library ? 106 : 70) : (library ? 202 : 158);
     int right = compact ? 162 : 196;
     return width >= left + right + 12 ? 70 : 92;
   }
 
   public static Layout layout(int left, int width, int queued, boolean playing, boolean library) {
-    boolean compact = width < (library ? 466 : 366);
+    boolean compact = width < (library ? 410 : 366);
     int gap = compact ? 2 : 4;
-    int[] sizes = compact ? new int[]{96,34,16,16,68,48,42} : new int[]{96,50,58,42,74,60,54};
-    String[] labels = {"Back to Settings", playing ? "Pause" : "Play", compact ? "<<" : "Previous",
-        compact ? ">>" : "Next", "Queue (" + Math.max(0, queued) + ")", "Library", "Reload"};
+    int[] sizes = compact ? new int[]{34,34,16,16,68,48,42} : new int[]{40,50,50,50,74,60,54};
+    String[] labels = {"Back", playing ? "Pause" : "Play", compact ? "" : "Prev",
+        compact ? "" : "Next", queued > 0 ? "Queue (" + queued + ")" : "Queue", "Library", "Reload"};
     List<Button> result = new ArrayList<>();
     int x = left;
     for (int i = library ? 0 : 1; i < 4; i++) {

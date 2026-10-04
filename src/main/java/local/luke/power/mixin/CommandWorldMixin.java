@@ -10,7 +10,18 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldProperties.class)
-public abstract class CommandWorldMixin implements CommandWorld {
+public abstract class CommandWorldMixin
+    implements CommandWorld, local.luke.power.permissions.CheatWorld {
+  @Unique private boolean power$cheats;
+
+  public boolean power$cheatsEnabled() {
+    return power$cheats;
+  }
+
+  public void power$cheatsEnabled(boolean enabled) {
+    power$cheats = enabled;
+  }
+
   @Unique private String power$commandId = UUID.randomUUID().toString();
 
   public String power$commandWorldId() {
@@ -19,6 +30,17 @@ public abstract class CommandWorldMixin implements CommandWorld {
 
   @Inject(method = "<init>(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("RETURN"))
   private void power$read(NbtCompound tag, CallbackInfo ci) {
+    NbtCompound player = tag.getCompound("Player");
+    String mode = player.getString("PowerBetaGameMode");
+    if (mode.isEmpty())
+      mode = player.getString(local.luke.power.storage.LegacyKeys.original("PowerBetaGameMode"));
+    power$cheats =
+        tag.contains(TAG)
+            ? tag.getBoolean(TAG)
+            : tag.getBoolean("Creative")
+                || player.getBoolean("Creative")
+                || mode.equals("CREATIVE")
+                || mode.equals("SPECTATOR");
     String value = tag.getString("PowerBetaCommandWorldId");
     try {
       power$commandId = UUID.fromString(value).toString();
@@ -30,10 +52,12 @@ public abstract class CommandWorldMixin implements CommandWorld {
   @Inject(method = "<init>(Lnet/minecraft/world/WorldProperties;)V", at = @At("RETURN"))
   private void power$copy(WorldProperties other, CallbackInfo ci) {
     power$commandId = ((CommandWorld) other).power$commandWorldId();
+    power$cheats = ((local.luke.power.permissions.CheatWorld) other).power$cheatsEnabled();
   }
 
   @Inject(method = "updateProperties", at = @At("RETURN"))
   private void power$write(NbtCompound tag, NbtCompound player, CallbackInfo ci) {
     tag.putString("PowerBetaCommandWorldId", power$commandId);
+    tag.putBoolean(TAG, power$cheats);
   }
 }

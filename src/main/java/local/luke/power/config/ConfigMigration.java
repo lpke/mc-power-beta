@@ -187,6 +187,20 @@ public final class ConfigMigration {
     var pattern=java.util.regex.Pattern.compile(aliases.keySet().stream().map(java.util.regex.Pattern::quote).collect(java.util.stream.Collectors.joining("|")));
     JsonObject next=rename(root,aliases,pattern).getAsJsonObject(); next.addProperty("schemaVersion",3);
     JsonObject all=next.getAsJsonObject("settings");
+    if (!next.has("cheatsAccessVersion")) {
+      // The old pack disabled the editor by default; the saved world master now provides that protection.
+      JsonObject editor = all.getAsJsonObject("editor");
+      if (editor != null) { editor.remove("creativeOnly"); editor.addProperty("enabled", true); }
+      JsonObject commands = all.getAsJsonObject("commandAccess");
+      if (commands != null && commands.has("rules")) {
+        JsonObject rules = commands.getAsJsonObject("rules");
+        for (String key : new ArrayList<>(rules.keySet())) {
+          if (List.of("CREATIVE_ONLY", "ANY_MODE").contains(rules.get(key).getAsString()))
+            rules.addProperty(key, "ALLOWED");
+        }
+      }
+      next.addProperty("cheatsAccessVersion", 1);
+    }
     JsonObject controls=all.getAsJsonObject("power_controls:userinterface");
     if(controls!=null) {
       controls.remove("fovSlider");

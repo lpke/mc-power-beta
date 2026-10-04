@@ -1,123 +1,94 @@
 package local.luke.power.commands.command.vanilla;
 
+import java.util.*;
+import local.luke.power.chat.HelpOutput;
 import local.luke.power.commands.api.Command;
-import local.luke.power.commands.util.ServerUtil;
-import local.luke.power.commands.util.SharedCommandSource;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
-
-import java.util.ArrayList;
-
+import local.luke.power.commands.util.*;
 
 public class Help implements Command {
-    static ArrayList<Page> admin_pages = new ArrayList<>();
-    static ArrayList<Page> regular_pages = new ArrayList<>();
-
-    private static void addHelpTip(ArrayList<Page> pages, String tip, boolean forAdmin, boolean isAdmin) {
-        boolean added = false;
-        for (int i = 0; i < pages.size(); i++) {
-            Page page = pages.get(i);
-            if (page.strings.size() < 6) {
-                if (isAdmin) {
-                    page.strings.add(tip);
-                } else {
-                    if (!forAdmin) {
-                        page.strings.add(tip);
-                    }
-                }
-                added = true;
-                break;
-            }
-        }
-
-        if (!added) {
-            pages.add(new Page());
-
-            if (isAdmin) {
-                pages.get(pages.size() - 1).strings.add(tip);
-            } else {
-                if (!forAdmin) {
-                    pages.get(pages.size() - 1).strings.add(tip);
-                }
-            }
-        }
+  private List<String> lines(SharedCommandSource source) {
+    boolean admin =
+        source.isClient() || source.getPlayer() == null || ServerUtil.isOp(source.getName());
+    Set<String> names = new HashSet<>();
+    for (Command c : RetroChatUtil.commands) if (c.name() != null) names.add(c.name());
+    List<String> result = new ArrayList<>();
+    for (Command c : RetroChatUtil.commands) {
+      String name = c.name();
+      if (name == null
+          || name.startsWith("/")
+          || source.isClient() && c.disableInSingleplayer()
+          || !admin && c.needsPermissions()) continue;
+      if (Set.of("gm", "teleport").contains(name)) continue;
+      if (names.contains("/" + name) && CommandHelp.description(name).isEmpty()) continue;
+      String description = CommandHelp.description(name);
+      result.add("/" + name + (description.isEmpty() ? "" : " §8- §7" + description));
     }
+    result =
+        result.stream()
+            .distinct()
+            .sorted()
+            .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+    if (names.contains("/help")) result.add("//help §8- §7World editing, selections and undo");
+    return result;
+  }
 
-    public static void addHelpTip(String tip, boolean needsPermissions) {
-        addHelpTip(admin_pages, tip, needsPermissions, true);
-        addHelpTip(regular_pages, tip, needsPermissions, false);
+  public void command(SharedCommandSource source, String[] args) {
+    if (args.length > 2) {
+      manual(source);
+      return;
     }
-
-    @Override
-    public void command(SharedCommandSource commandSource, String[] parameters) {
-        int pg = 1;
-        if (parameters.length > 1) {
-            try {
-                pg = Integer.parseInt(parameters[1]);
-                if (pg > admin_pages.size() || pg < 1) {
-                    commandSource.sendFeedback("Page out of bounds");
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                commandSource.sendFeedback(parameters[1] + " is not a number");
-            }
-        }
-        commandSource.sendFeedback("For these commands, use \"/help {command}\" for more info:");
-
-
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-            commandSource.sendFeedback("pg " + (pg) + "/" + admin_pages.size());
-            admin_pages.get(pg - 1).send(commandSource);
-        } else {
-            if (ServerUtil.isOp(commandSource.getName()) || commandSource.getPlayer() == null) {
-                commandSource.sendFeedback("pg " + (pg) + "/" + admin_pages.size());
-                admin_pages.get(pg - 1).send(commandSource);
-            } else {
-                commandSource.sendFeedback("pg " + (pg) + "/" + regular_pages.size());
-                regular_pages.get(pg - 1).send(commandSource);
-            }
-        }
+    if (args.length == 2 && !args[1].matches("[+-]?[0-9]+")) {
+      String wanted = args[1].replaceFirst("^/", "");
+      Command target =
+          RetroChatUtil.commands.stream()
+              .filter(
+                  c ->
+                      wanted.equals(c.name()) && (!source.isClient() || !c.disableInSingleplayer()))
+              .findFirst()
+              .orElse(null);
+      if (target == null) throw new IllegalArgumentException("Unknown command: " + args[1]);
+      source.sendFeedback("§6Command help §8| §b/" + wanted);
+      target.manual(source);
+      return;
     }
+    var lines = lines(source);
+    int page =
+        args.length == 2
+            ? CommandNumbers.integer(args[1], 1, Math.max(1, (lines.size() + 5) / 6), "Help page")
+            : 1;
+    HelpOutput.print(
+        source::sendFeedback,
+        "Commands",
+        lines,
+        page,
+        6,
+        args.length == 1 && source.isClient() && HelpOutput.scrolling());
+  }
 
-    @Override
-    public String name() {
-        return "help";
-    }
+  public String name() {
+    return "help";
+  }
 
-    @Override
-    public void manual(SharedCommandSource commandSource) {
-        commandSource.sendFeedback("Usage: /help {pg}");
-        commandSource.sendFeedback("Info: gives the list of commands available");
-    }
+  public boolean needsPermissions() {
+    return false;
+  }
 
-    private static class Page {
-        public ArrayList<String> strings = new ArrayList<>();
+  public void manual(SharedCommandSource s) {
+    s.sendFeedback("/help [page|command]");
+    s.sendFeedback(
+        "With chat scrolling enabled, /help shows the complete list. A page number always shows one"
+            + " page.");
+  }
 
-        public Page() {
-
-        }
-
-        public void send(SharedCommandSource commandSource) {
-            for (String s : strings)
-                commandSource.sendFeedback(s);
-        }
-    }
-
-    @Override
-    public String[] suggestion(SharedCommandSource source, int parameterNum, String currentInput, String totalInput) {
-        if (parameterNum == 1 && currentInput.isEmpty())
-        {
-            String[] output = new String[admin_pages.size()];
-            for (int i = 1; i < admin_pages.size()+1; i++)
-            {
-                output[i-1] = String.valueOf(i);
-            }
-            return output;
-        }
-        return new String[0];
-    }
-
-    public boolean needsPermissions() {
-        return false;
-    }
+  public String[] suggestion(SharedCommandSource s, int n, String input, String total) {
+    return n == 1
+        ? CommandSuggestions.suffix(
+            input,
+            RetroChatUtil.commands.stream()
+                .filter(c -> !s.isClient() || !c.disableInSingleplayer())
+                .map(Command::name)
+                .filter(Objects::nonNull)
+                .toList())
+        : new String[0];
+  }
 }

@@ -4,31 +4,34 @@ import local.luke.power.commands.api.Command;
 import local.luke.power.commands.util.SharedCommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 
-
 public class Clock implements Command {
-    public void command(SharedCommandSource commandSource, String[] parameters) {
-        PlayerEntity player = commandSource.getPlayer();
-        if (player == null) {
-            return;
-        }
-
-        commandSource.sendFeedback("Time is " + String.valueOf(player.world.getTime()));
-        commandSource.sendFeedback("Days: " + String.valueOf((int) (player.world.getTime() / 24000)));
+  public void command(SharedCommandSource commandSource, String[] parameters) {
+    if (parameters.length != 1) {
+      manual(commandSource);
+      return;
+    }
+    PlayerEntity player = commandSource.getPlayer();
+    if (player == null) {
+      return;
     }
 
-    @Override
-    public String name() {
-        return "clock";
-    }
+    commandSource.sendFeedback("Time is " + String.valueOf(player.world.getTime()));
+    commandSource.sendFeedback("Days: " + String.valueOf((int) (player.world.getTime() / 24000)));
+  }
 
-    @Override
-    public void manual(SharedCommandSource commandSource) {
-        commandSource.sendFeedback("Usage: /clock");
-        commandSource.sendFeedback("Info: tells you the time in-game");
-    }
+  @Override
+  public String name() {
+    return "clock";
+  }
 
-    @Override
-    public boolean needsPermissions() {
-        return false;
-    }
+  @Override
+  public void manual(SharedCommandSource commandSource) {
+    commandSource.sendFeedback("Usage: /clock");
+    commandSource.sendFeedback("Info: tells you the time in-game");
+  }
+
+  @Override
+  public boolean needsPermissions() {
+    return false;
+  }
 }

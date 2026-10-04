@@ -1,67 +1,29 @@
 package local.luke.power.commands.command.extra;
 
 import local.luke.power.commands.api.Command;
-import local.luke.power.commands.util.SharedCommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldProperties;
-
-import java.lang.reflect.Field;
-
+import local.luke.power.commands.util.*;
 
 public class ToggleDownfall implements Command {
-    // Thank you mine_diver for this code, it's beautiful
-
-    private static final Field worldInfoField = getField(World.class, new String[]{"properties", "field_220"});
-
-    // from HMI, blame mine_diver
-    //clean mine_diver code
-    //Used for easy reflection with obfuscated or regular fields
-    public static Field getField(Class<?> target, String[] names) {
-        for (Field field : target.getDeclaredFields()) {
-            for (String name : names) {
-                if (field.getName().equals(name)) {
-                    field.setAccessible(true);
-                    return field;
-                }
-            }
-        }
-        return null;
+  public void command(SharedCommandSource s, String[] args) {
+    if (args.length != 1) {
+      manual(s);
+      return;
     }
+    var info = EntityTargets.player(s).world.getProperties();
+    boolean rain = !info.getRaining();
+    info.setRaining(rain);
+    info.setThundering(false);
+    info.setRainTime(6000);
+    info.setThunderTime(6000);
+    s.sendFeedback("§aWeather set to " + (rain ? "rain" : "clear") + ".");
+  }
 
-    @Override
-    public void command(SharedCommandSource commandSource, String[] parameters) {
-        PlayerEntity player = commandSource.getPlayer();
-        if (player == null) {
-            return;
-        }
+  public String name() {
+    return "toggledownfall";
+  }
 
-        WorldProperties worldInfo = null;
-        try {
-            worldInfo = (WorldProperties) worldInfoField.get(player.world);
-        } catch (Exception ignored) {
-
-        }
-
-        try {
-            assert worldInfo != null;
-            worldInfo.setThundering(!worldInfo.getThundering());
-            worldInfo.setRaining(!worldInfo.getRaining());
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        }
-
-        commandSource.sendFeedback("Toggled downfall");
-    }
-
-    @Override
-    public String name() {
-        return "toggledownfall";
-    }
-
-    @Override
-    public void manual(SharedCommandSource commandSource) {
-        commandSource.sendFeedback("Usage: /toggledownfall");
-        commandSource.sendFeedback("Info: Toggles the weather");
-    }
+  public void manual(SharedCommandSource s) {
+    s.sendFeedback("/toggledownfall | Switch between rain and clear weather.");
+    s.sendFeedback("Use /weather <clear|rain|thunder> [duration] for precise control.");
+  }
 }

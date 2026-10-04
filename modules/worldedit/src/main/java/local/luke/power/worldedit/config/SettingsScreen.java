@@ -41,7 +41,6 @@ public final class SettingsScreen extends Screen {
     left = (width - span) / 2;
     if (page == 0) {
       row(10, 0, "WorldEdit: " + on(draft.enabled));
-      row(11, 1, "Require creative when available: " + on(draft.creativeOnly));
       row(12, 2, "This world: " + (editedWorld == null ? "Open a world first" : override.label));
     }
     if (page == 1) {
@@ -98,7 +97,6 @@ public final class SettingsScreen extends Screen {
       case 9 ->
           draft.historySize = Math.floorMod(draft.historySize / 5 - 1 + direction, 20) * 5 + 5;
       case 10 -> draft.enabled = !draft.enabled;
-      case 11 -> draft.creativeOnly = !draft.creativeOnly;
       case 12 -> {
         if (editedWorld != null && !editedWorld.isRemote)
           override =

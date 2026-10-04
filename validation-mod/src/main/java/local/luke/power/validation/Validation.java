@@ -47,7 +47,10 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("audio-layout-")) AudioLayoutChecks.run(mc,command.substring(13));
+      if (command.equals("cheats-creation")) CheatsChecks.creation(mc);
+      else if (command.equals("cheats")) CheatsChecks.run(mc);
+      else if (command.equals("modern-commands")) ModernCommandChecks.run(mc);
+      else if (command.startsWith("audio-layout-")) AudioLayoutChecks.run(mc,command.substring(13));
       else if (command.equals("fog-array")) FogArrayChecks.run(mc);
       else if (command.startsWith("library-check-")) CommandsLibraryChecks.run(mc,command.substring(14));
       else if (command.equals("menu-persisted")) MenuUpdateChecks.persisted(mc);

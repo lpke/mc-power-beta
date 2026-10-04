@@ -81,7 +81,8 @@ public final class Commands {
     switch (command) {
       case "help", "we", "worldedit" -> {
         arity(a, 0, 1);
-        help(a.isEmpty() ? 1 : integer(a.get(0), 1, 6, "page"));
+        help(a.isEmpty() ? 1 : integer(a.get(0), 1, 6, "page"),
+            a.isEmpty() && local.luke.power.chat.HelpOutput.scrolling());
       }
       case "remove", "rem", "rement", "countentities" -> {
         arity(a, 1, 2);
@@ -461,7 +462,7 @@ public final class Commands {
     return r;
   }
 
-  private void help(int page) {
+  private void help(int page, boolean all) {
     String[][] help = {
       {
         "//wand | //toggleeditwand | //pos1 [x,y,z] | //pos2 [x,y,z]",
@@ -509,7 +510,8 @@ public final class Commands {
         "Single- and double-slash forms work. Loaded chunks only."
       }
     };
-    e.message.accept("§6World editing §8| §7Help " + page + "/" + help.length);
-    for (String line : help[page - 1]) e.message.accept("§7" + line.replaceAll("(/{1,2}[a-z0-9!]+)", "§b$1§7").replace(" | ", " §8| §7"));
+    e.helpMessage.accept("§6World editing" + (all ? "" : " §8| §7Help " + page + "/" + help.length));
+    for (int i = all ? 0 : page - 1; i < (all ? help.length : page); i++)
+      for (String line : help[i]) e.helpMessage.accept(local.luke.power.chat.HelpOutput.line(line));
   }
 }

@@ -27,5 +27,6 @@ public class FlattenedWorldStorageMixin {
 		LevelMetadata meta = (LevelMetadata) worlds.get(worlds.size() - 1);
 		boolean isCreative = data.creative_isCreative();
 		meta.creative_setCreative(isCreative);
+    ((local.luke.power.permissions.CheatWorld) meta).power$cheatsEnabled(((local.luke.power.permissions.CheatWorld) data).power$cheatsEnabled());
 	}
 }

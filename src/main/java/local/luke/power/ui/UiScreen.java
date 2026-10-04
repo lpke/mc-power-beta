@@ -43,6 +43,24 @@ public abstract class UiScreen extends Screen {
         !enabled ? 0xa0a0a0 : hovered ? 0xffffa0 : 0xe0e0e0);
   }
 
+  protected void trackButton(String label, boolean previous, int x, int y, int w, int mx, int my) {
+    button("", x, y, w, 18, mx, my, true);
+    int colour = inside(mx, my, x, y, w, 18) ? 0xffffa0 : 0xe0e0e0;
+    int textWidth = textRenderer.getWidth(label);
+    int start = x + (w - (label.isEmpty() ? 7 : textWidth + 11)) / 2;
+    int iconX = previous || label.isEmpty() ? start : start + textWidth + 4;
+    if (!label.isEmpty()) text(label, previous ? start + 11 : start, y + 5, colour);
+    // Pixel-drawn skip symbol remains legible with any font or texture pack.
+    for (int row = 0; row < 7; row++) {
+      int length = 4 - Math.abs(3 - row);
+      int edge = previous ? iconX + 6 : iconX;
+      fill(previous ? edge - length : edge, y + 5 + row,
+          previous ? edge : edge + length, y + 6 + row, 0xff000000 | colour);
+    }
+    int bar = previous ? iconX : iconX + 6;
+    fill(bar, y + 5, bar + 1, y + 12, 0xff000000 | colour);
+  }
+
   protected void iconButton(String icon, int x, int y, int w, int mx, int my, boolean enabled) {
     iconButton(icon, x, y, w, mx, my, enabled, false);
   }

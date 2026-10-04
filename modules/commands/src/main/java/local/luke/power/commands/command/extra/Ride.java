@@ -1,153 +1,53 @@
 package local.luke.power.commands.command.extra;
 
+import java.util.*;
 import local.luke.power.commands.api.Command;
-import local.luke.power.commands.util.SharedCommandSource;
+import local.luke.power.commands.util.*;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Box;
-
-import java.util.List;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-
 
 public class Ride implements Command {
-
-
-    @Override
-    public void command(SharedCommandSource commandSource, String[] parameters) {
-        PlayerEntity player = commandSource.getPlayer();
-        if (player == null) {
-            return;
-        }
-
-        if (parameters.length < 3) {
-            if (player.vehicle != null) {
-                player.setVehicle(null);
-                return;
-            }
-            manual(commandSource);
-            return;
-        }
-
-        String rider = parameters[1];
-        String vehicle = parameters[2];
-
-        Entity riderEntity = null;
-        Entity vehicleEntity = null;
-
-        for (Object o : player.world.players) {
-            PlayerEntity p = (PlayerEntity) o;
-            if (p.name.equals(rider)) {
-                riderEntity = p;
-            }
-            if (p.name.equals(vehicle)) {
-                vehicleEntity = p;
-            }
-        }
-
-        int riderId = -1;
-        int vehicleId = -1;
-
-        try {
-            if (riderEntity == null) riderId = Integer.parseInt(rider);
-            if (vehicleEntity == null) vehicleId = Integer.parseInt(vehicle);
-        } catch (Exception e) {
-            commandSource.sendFeedback("Invalid entity id");
-        }
-
-        for (Object o : player.world.entities) {
-            Entity e = (Entity) o;
-
-            if (e.id == riderId) {
-                riderEntity = e;
-            }
-            if (e.id == vehicleId) {
-                vehicleEntity = e;
-            }
-        }
-
-        if (riderEntity == null || vehicleEntity == null) {
-            commandSource.sendFeedback("Invalid entity id");
-            return;
-        }
-
-        riderEntity.setVehicle(vehicleEntity);
-        String riderString = riderEntity instanceof PlayerEntity ? ((PlayerEntity) riderEntity).name : "The " + (String) EntityRegistry.classToId.get(riderEntity.getClass());
-        String vehicleString = vehicleEntity instanceof PlayerEntity ? ((PlayerEntity) vehicleEntity).name : "the " + (String) EntityRegistry.classToId.get(vehicleEntity.getClass());
-        commandSource.sendFeedback(riderString + " is now on " + vehicleString);
+  public void command(SharedCommandSource s, String[] args) {
+    if (args.length < 3 || args.length > 4) {
+      manual(s);
+      return;
     }
-
-    @Override
-    public String name() {
-        return "ride";
+    Entity rider = EntityTargets.one(s, args[1]);
+    if (args[2].equals("dismount") && args.length == 3) {
+      rider.setVehicle(null);
+      s.sendFeedback("§aDismounted " + EntityTargets.name(rider) + ".");
+      return;
     }
-
-    @Override
-    public void manual(SharedCommandSource commandSource) {
-        commandSource.sendFeedback("Usage: /ride {rider entity id} {vehicle entity id}");
-        commandSource.sendFeedback("Info: Puts an entity on an entity");
-        commandSource.sendFeedback("You can find entity id in the F3 menu");
-        commandSource.sendFeedback("You can also use player names instead");
+    if (!args[2].equals("mount") || args.length != 4) {
+      manual(s);
+      return;
     }
+    Entity mount = EntityTargets.one(s, args[3]);
+    if (mount == rider) throw new IllegalArgumentException("An entity cannot ride itself.");
+    if (rider.vehicle != null) throw new IllegalArgumentException("Dismount first.");
+    if (mount.passenger != null)
+      throw new IllegalArgumentException("The vehicle already has a passenger.");
+    Set<Entity> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+    for (Entity e = mount; e != null; e = e.vehicle)
+      if (e == rider || !seen.add(e))
+        throw new IllegalArgumentException("This would create a riding loop.");
+    rider.setVehicle(mount);
+    s.sendFeedback(
+        "§aMounted " + EntityTargets.name(rider) + " on " + EntityTargets.name(mount) + ".");
+  }
 
-    @Override
-    public String[] suggestion(SharedCommandSource source, int parameterNum, String currentInput, String totalInput) {
-        if (parameterNum == 1 || parameterNum == 2) {
-            PlayerEntity p = source.getPlayer();
-            List<Entity> entities = p.world.collectEntitiesByClass(Entity.class, Box.create(p.x-20, p.y-20, p.z-20, p.x+20, p.y+20, p.z+20));
+  public String name() {
+    return "ride";
+  }
 
-            // Use TreeMap to keep entries in order based on the distance
-            TreeMap<Double, Entity> distanceMap = new TreeMap<>();
+  public void manual(SharedCommandSource s) {
+    s.sendFeedback("/ride <target> mount <vehicle> | /ride <target> dismount");
+    s.sendFeedback(
+        "Each selector must match one loaded entity. Existing passengers are never replaced.");
+  }
 
-            for (Entity entity : entities) {
-                double distance = p.getDistance(entity);
-                // Handle potential duplicates (unlikely but possible)
-                while (distanceMap.containsKey(distance)) {
-                    distance += 0.0001;  // Small offset to handle entities at almost same distance
-                }
-                distanceMap.put(distance, entity);
-            }
-
-            // Extract entity IDs from sorted entities and convert them to String
-            // If entity is a PlayerBase, use getName() instead
-            List<String> sortedEntityIDs = distanceMap.values().stream()
-                    .map(entity -> {
-                        if (entity instanceof PlayerEntity) {
-                            return ((PlayerEntity) entity).name;
-                        } else {
-                            return Integer.toString(entity.id);
-                        }
-                    })
-                    .collect(Collectors.toList());
-
-            // Filter and modify the suggestions based on currentInput
-            for (int i = sortedEntityIDs.size() - 1; i >= 0; i--) {  // Change loop condition to i >= 0
-                if (!sortedEntityIDs.get(i).startsWith(currentInput)) {
-                    sortedEntityIDs.remove(i);
-                } else {
-                    if (parameterNum == 2)
-                    {
-                        if (sortedEntityIDs.get(i).equals(totalInput.split(" ")[1]))
-                        {
-                            sortedEntityIDs.remove(i);
-                        }
-                        else
-                        {
-                            sortedEntityIDs.set(i, sortedEntityIDs.get(i).substring(currentInput.length()));
-                        }
-                    }
-                    else
-                    {
-                        sortedEntityIDs.set(i, sortedEntityIDs.get(i).substring(currentInput.length()));
-                    }
-                }
-            }
-
-            return sortedEntityIDs.toArray(new String[0]);
-        }
-        return new String[0];
-    }
-
+  public String[] suggestion(SharedCommandSource s, int n, String input, String total) {
+    return n == 2
+        ? CommandSuggestions.suffix(input, List.of("mount", "dismount"))
+        : CommandSuggestions.targets(s, input);
+  }
 }

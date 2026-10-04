@@ -35,7 +35,7 @@ public final class ChatChecks {
     try {
       submit(mc, "/gamemode creative");
       var help = submit(mc, "//help");
-      Validation.test("chat help executes once", () -> Validation.check(help.stream().filter(s -> s.contains("Help 1/6")).count() == 1, help.toString()));
+      Validation.test("chat help executes once", () -> Validation.check(help.stream().filter(s -> s.contains("World editing")).count() == 1, help.toString()));
       submit(mc, "/remove items 5");
       var item = new net.minecraft.class_142(mc.world, mc.player.x + 1,
           mc.player.boundingBox.minY, mc.player.z, new net.minecraft.item.ItemStack(1, 1, 0));

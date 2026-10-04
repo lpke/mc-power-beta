@@ -34,11 +34,27 @@ public final class Modes {
         && (spectator(player) || player.creative_isCreative() && player.creative_isFlying());
   }
 
+  public static String denial(GameMode mode) {
+    return local.luke.power.permissions.CommandPermissions.modeDenial(mode.name().toLowerCase(java.util.Locale.ROOT));
+  }
+
+  public static void disableCheats(Minecraft mc) {
+    if (mc.player != null && ((ModePlayer) mc.player).power_mode() == GameMode.SURVIVAL) return;
+    if (!ClientRuntime.local(mc) || !change(mc, GameMode.SURVIVAL))
+      throw new IllegalArgumentException("Move to a safe location and place any carried container before disabling cheats.");
+  }
+
   public static boolean change(Minecraft mc, GameMode mode) {
     if (!ClientRuntime.local(mc)) return false;
+    String denied = denial(mode);
+    if (!denied.isEmpty()) { mc.overlay.addChatMessage("§c" + denied + "§r"); return false; }
     PlayerEntity player = mc.player;
     ModePlayer state = (ModePlayer) player;
     if (state.power_mode() == mode) return true;
+    if (local.luke.power.input.InteractionState.carryingContainer) {
+      mc.overlay.addChatMessage("§cPlace your carried container before changing game mode.§r");
+      return false;
+    }
     if (spectator(player) && !findExit(player)) {
       mc.overlay.addChatMessage(
           "\u00a7cNo safe exit found. Move out of solid blocks first.");

@@ -40,12 +40,12 @@ class AudioToolbarTest {
           assertEquals(a.x(),b.x());assertEquals(a.y(),b.y());assertEquals(a.width(),b.width());
           if(a.action()==AudioToolbar.Action.QUEUE) {
             assertFalse(a.enabled());assertTrue(b.enabled());
-            assertEquals("Queue (0)",a.label());assertEquals("Queue (256)",b.label());
+            assertEquals("Queue",a.label());assertEquals("Queue (256)",b.label());
           }
         }
         assertEquals(AudioToolbar.Action.QUEUE,empty.get(empty.size()-3).action());
         assertEquals(AudioToolbar.Action.LIBRARY,empty.get(empty.size()-2).action());
-        if(library) assertEquals("Back to Settings",empty.get(0).label());
+        if(library) assertEquals("Back",empty.get(0).label());
       }
     }
   }

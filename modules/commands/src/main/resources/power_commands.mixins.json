@@ -21,7 +21,8 @@
     "client.MinecraftMixinChatEnabler",
     "communicate.ClientPlayNetworkHandlerMixin",
     "intercept.AbstractClientPlayerMixin",
-    "intercept.ClientPlayerMixin"
+    "intercept.ClientPlayerMixin",
+    "client.CommandRespawnMixin"
   ],
   "injectors": {
     "defaultRequire": 1

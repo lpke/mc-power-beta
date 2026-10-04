@@ -1,5 +1,28 @@
 # Changelog
 
+## Cheats access, commands and audio polish, 2026-10-04
+
+- Add the per-world Cheats enabled switch beside Difficulty. New worlds default
+  to survival with cheats off; replace the creation mode button with this switch.
+- Show `[Cheats]` after enabled world names and omit the former mode suffix.
+- Gate commands, mode switching and WorldEdit through the saved world flag.
+  Remove creative-only restrictions; retain global and per-world allow/block
+  rules, including separate creative/spectator entry controls.
+- Keep locked options visible with explanatory tooltips. Separate cheat and
+  non-cheat command groups. Leave freecam and QoL controls independent.
+- Return safely to survival when disabling cheats. Preserve inventories, saved
+  warps and access preferences, and roll back interrupted editor operations.
+- Fix target-first singleplayer teleport; support aliases, selectors, relative
+  and local coordinates, rotation and facing. Modernize give, clear, time,
+  weather, kill, summon and ride, with validation before mutations.
+- Add seed, difficulty, personal respawn and world-spawn commands. Preserve
+  saved warps through respawn; keep chat clearing under `/clearchat`.
+- Colour command help and show complete lists with scrolling chat enabled.
+  Keep explicit pagination and omit WorldEdit help prefixes.
+- Remove the empty Queue count. Toggle Queue/Library closed when clicked again;
+  Back, Escape and Audio return to settings. Add skip icons and the Prev label.
+- Make setting names slightly greyer without changing headings or values.
+
 ## Audio navigation, 2026-10-04
 
 - Keep Queue visible with its live request count; grey out Queue (0).

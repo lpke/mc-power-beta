@@ -1,117 +1,76 @@
 package local.luke.power.commands.command.vanilla;
 
+import java.util.*;
 import local.luke.power.commands.api.Command;
-import local.luke.power.commands.util.SharedCommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-
-import java.util.ArrayList;
-
+import local.luke.power.commands.util.*;
 
 public class Time implements Command {
-    public void command(SharedCommandSource commandSource, String[] parameters) {
-        PlayerEntity player = commandSource.getPlayer();
-        if (player == null) {
-            return;
-        }
+  private static final Map<String, Integer> PRESETS =
+      Map.of(
+          "day",
+          1000,
+          "noon",
+          6000,
+          "night",
+          13000,
+          "midnight",
+          18000,
+          "sunset",
+          12000,
+          "sunrise",
+          23000);
 
-        if (parameters.length > 1) {
-            if (parameters[1].equals("set")) {
-                long additional_time = -1;
-                try {
-                    additional_time = Integer.parseInt(parameters[2]);
-                } catch (NumberFormatException e) {
-                    switch (parameters[2]) {
-                        case "day":
-                            additional_time = 1000;
-                            break;
-                        case "noon":
-                            additional_time = 6000;
-                            break;
-                        case "sunset":
-                            additional_time = 12000;
-                            break;
-                        case "night":
-                            additional_time = 13000;
-                            break;
-                        case "midnight":
-                            additional_time = 18000;
-                            break;
-                        case "sunrise":
-                            additional_time = 23000;
-                            break;
-                        default:
-                            commandSource.sendFeedback("Time is not properly formatted");
-                            return;
-                    }
-                }
-                long time = player.world.getTime();
-                long left_over = time % 24000;
-                player.world.setTime(time + (additional_time - left_over));
-                commandSource.sendFeedback("Time set to " + additional_time);
-                return;
-            }
-            if (parameters[1].equals("get")) {
-                commandSource.sendFeedback("Time is " + String.valueOf(player.world.getTime()));
-                commandSource.sendFeedback("Days: " + String.valueOf(player.world.getTime()));
-                return;
-            }
-            if (parameters[1].equals("add")) {
-                try {
-                    long additional_time = Integer.parseInt(parameters[2]);
-                    player.world.setTime(player.world.getTime() + additional_time);
-                    commandSource.sendFeedback("You added " + additional_time + " to the time");
-                } catch (NumberFormatException e) {
-                    commandSource.sendFeedback("Cannot add a non-number amount of time");
-                }
-                return;
-            }
-        }
-
-        manual(commandSource);
+  public void command(SharedCommandSource source, String[] args) {
+    var world = EntityTargets.player(source).world;
+    if (args.length == 2 && args[1].equals("get")) args = new String[] {"time", "query", "daytime"};
+    if (args.length != 3) {
+      manual(source);
+      return;
     }
-
-    @Override
-    public String name() {
-        return "time";
+    switch (args[1]) {
+      case "set", "add" -> {
+        long ticks =
+            args[1].equals("set") && PRESETS.containsKey(args[2])
+                ? PRESETS.get(args[2])
+                : CommandNumbers.ticks(args[2], 1);
+        long result = args[1].equals("add") ? Math.addExact(world.getTime(), ticks) : ticks;
+        world.setTime(result);
+        source.sendFeedback("§aTime set to " + result + ".");
+      }
+      case "query" -> {
+        long time = world.getTime();
+        long result =
+            switch (args[2]) {
+              case "daytime" -> Math.floorMod(time, 24000);
+              case "day" -> Math.floorDiv(time, 24000);
+              case "gametime" -> time;
+              default -> throw new IllegalArgumentException("Choose daytime, gametime or day.");
+            };
+        source.sendFeedback("§b" + args[2] + "§7: " + result);
+      }
+      default -> manual(source);
     }
+  }
 
-    @Override
-    public void manual(SharedCommandSource commandSource) {
-        commandSource.sendFeedback("Usage: /time set {worldTime}");
-        commandSource.sendFeedback("Usage: /time add {time}");
-        commandSource.sendFeedback("Info: sets the time of day");
-        commandSource.sendFeedback("worldTime can be an integer usually between 0 and 24000 or keyword");
-        commandSource.sendFeedback("preset keywords are day, noon, sunset, night, midnight, sunrise");
-    }
+  public String name() {
+    return "time";
+  }
 
-    @Override
-    public String[] suggestion(SharedCommandSource source, int parameterNum, String currentInput, String totalInput) {
-        if (parameterNum == 1)
-        {
-            String[] options = {"set"};
-            ArrayList<String> output = new ArrayList<>();
-            for (String option : options)
-            {
-                if (option.startsWith(currentInput))
-                {
-                    output.add(option.substring(currentInput.length()));
-                }
-            }
-            return output.toArray(new String[0]);
-        }
-        if (parameterNum == 2 && totalInput.contains("set"))
-        {
-            String[] options = {"day", "noon", "sunset", "night", "midnight", "sunrise"};
-            ArrayList<String> output = new ArrayList<>();
-            for (String option : options)
-            {
-                if (option.startsWith(currentInput))
-                {
-                    output.add(option.substring(currentInput.length()));
-                }
-            }
-            return output.toArray(new String[0]);
-        }
-        return new String[0];
-    }
+  public void manual(SharedCommandSource s) {
+    s.sendFeedback("/time set <day|noon|night|midnight|time> | /time add <time>");
+    s.sendFeedback("/time query <daytime|gametime|day>");
+    s.sendFeedback(
+        "Durations accept t ticks, s seconds and d days. Beta uses one clock for world time and"
+            + " game time.");
+  }
+
+  public String[] suggestion(SharedCommandSource s, int n, String input, String total) {
+    return CommandSuggestions.suffix(
+        input,
+        n == 1
+            ? List.of("set", "add", "query")
+            : n == 2
+                ? total.contains("query") ? List.of("daytime", "gametime", "day") : PRESETS.keySet()
+                : List.of());
+  }
 }

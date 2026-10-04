@@ -4,37 +4,35 @@ import local.luke.power.commands.api.Command;
 import local.luke.power.commands.util.SharedCommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 
-
 public class Heal implements Command {
-    @Override
-    public void command(SharedCommandSource commandSource, String[] parameters) {
+  @Override
+  public void command(SharedCommandSource commandSource, String[] parameters) {
 
-        PlayerEntity player = commandSource.getPlayer();
-        if (player == null) {
-            return;
-        }
-
-        if (parameters.length > 1) {
-            int amount = Integer.parseInt(parameters[1]);
-            commandSource.sendFeedback((amount > 0 ? "Healed" : "Damaged") + " " + Math.abs(amount) / 2.f + " hearts!");
-            player.health += amount;
-            return;
-        }
-
-        commandSource.sendFeedback("Healed fully!");
-
-        player.health = 20;
-
+    PlayerEntity player = commandSource.getPlayer();
+    if (player == null) {
+      return;
     }
 
-    @Override
-    public String name() {
-        return "heal";
+    if (parameters.length > 2) {
+      manual(commandSource);
+      return;
     }
+    int amount =
+        parameters.length == 2
+            ? local.luke.power.commands.util.CommandNumbers.integer(parameters[1], 0, 20, "Health")
+            : 20;
+    player.health = Math.min(20, Math.max(0, player.health) + amount);
+    commandSource.sendFeedback("§aHealth: " + player.health + "/20.");
+  }
 
-    @Override
-    public void manual(SharedCommandSource commandSource) {
-        commandSource.sendFeedback("Usage: /heal {optional: amount}");
-        commandSource.sendFeedback("Info: Restores health");
-    }
+  @Override
+  public String name() {
+    return "heal";
+  }
+
+  @Override
+  public void manual(SharedCommandSource commandSource) {
+    commandSource.sendFeedback("/heal [amount=20]");
+    commandSource.sendFeedback("Restore up to 20 health points. One heart is two points.");
+  }
 }

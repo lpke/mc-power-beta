@@ -6,7 +6,10 @@ import org.spongepowered.asm.mixin.Unique;
 import local.luke.power.creative.inventory.interfaces.CreativeLevel;
 
 @Mixin(LevelMetadata.class)
-public class LevelMetadataMixin implements CreativeLevel {
+public class LevelMetadataMixin implements CreativeLevel, local.luke.power.permissions.CheatWorld {
+  @Unique private boolean power$cheats;
+  public boolean power$cheatsEnabled() { return power$cheats; }
+  public void power$cheatsEnabled(boolean enabled) { power$cheats = enabled; }
 	@Unique private boolean creative_isCreative;
 	
 	@Override

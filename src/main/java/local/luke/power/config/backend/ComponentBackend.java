@@ -96,7 +96,7 @@ public final class ComponentBackend implements Backend {
                 "hotbar.scroll")
             .contains(name)) def = new JsonPrimitive(false);
       }
-      if (id.equals("worldedit") && name.equals("enabled")) def = new JsonPrimitive(false);
+      if (id.equals("worldedit") && name.equals("enabled")) def = new JsonPrimitive(true);
       List<String> choices =
           t.isEnum()
               ? Arrays.stream(t.getEnumConstants()).map(this::enumLabel).toList()

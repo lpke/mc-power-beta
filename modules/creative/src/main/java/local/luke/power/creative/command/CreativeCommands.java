@@ -18,13 +18,11 @@ public final class CreativeCommands {
     Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
     if (mc.level != null && mc.level.isRemote) return false;
     if (!ClientRuntime.local(mc)) return true;
-    String denial = local.luke.power.permissions.CommandPermissions.denial("gamemode");
-    if (!denial.isEmpty()) { mc.overlay.addChatMessage("§c" + denial); return true; }
     try {
       if (args.length < 2 || args.length > 3)
         throw new IllegalArgumentException(
             "Usage: /gamemode <survival|creative|spectator> [target]");
-      if (args.length == 3 && !Set.of("@s", "@p", "@a", mc.player.name).contains(args[2]))
+      if (args.length == 3 && !Set.of("@s", "@p", "@a", "@r", mc.player.name).contains(args[2]))
         throw new IllegalArgumentException("Only the local player can be targeted.");
       if (ClientRuntime.freecam() || mc.viewEntity != mc.player)
         throw new IllegalArgumentException("Exit freecam before changing gamemode.");

@@ -29,10 +29,9 @@ public final class CommandsBackend implements Backend {
             backend.id(),
             "Commands",
             "Access",
-            "Singleplayer commands",
-            "Master switch for cheat commands. Takes priority over every command and world"
-                + " override. Help and information remain available. World editing has separate"
-                + " controls. Saved warps are never deleted.",
+            "Cheat commands",
+            "Allow cheat commands when this world's Cheats enabled setting is on. Individual rules"
+                + " can further restrict access. Saved data is kept when access is disabled.",
             Setting.Kind.BOOLEAN,
             new JsonPrimitive(config.enabled),
             new JsonPrimitive(true),
@@ -47,8 +46,8 @@ public final class CommandsBackend implements Backend {
               "commands.rule." + command.name(),
               backend.id(),
               "Commands",
-              "Global command rules",
-              "/" + command.name(),
+              command.cheat() ? "Cheat commands" : "Non-cheat commands",
+              "/" + (command.name().equals("toggledownfall") ? "weather" : command.name()),
               command.description() + " Global access rule; this world's override takes priority.",
               Setting.Kind.CHOICE,
               new JsonPrimitive(config.rule(command).ordinal()),
@@ -56,7 +55,7 @@ public final class CommandsBackend implements Backend {
               0,
               2,
               1,
-              List.of("Any mode", "Creative only", "Disabled"),
+              List.of("Enabled", "Disabled"),
               false));
       if (!backend.world.isEmpty())
         entries.add(
@@ -64,13 +63,62 @@ public final class CommandsBackend implements Backend {
                 "commands.world." + command.name(),
                 backend.id(),
                 "Commands",
-                "This world",
-                "/" + command.name(),
+                command.cheat()
+                    ? "Cheat commands in this world"
+                    : "Non-cheat commands in this world",
+                "/" + (command.name().equals("toggledownfall") ? "weather" : command.name()),
                 command.description()
                     + " Use global follows its rule above. Allow bypasses that rule; Block prevents"
                     + " use here. The master switch always wins.",
                 Setting.Kind.CHOICE,
                 new JsonPrimitive(config.override(backend.world, command.name()).ordinal()),
+                new JsonPrimitive(0),
+                0,
+                2,
+                1,
+                List.of("Use global", "Allow", "Block"),
+                false));
+    }
+    for (String mode : List.of("creative", "spectator")) {
+      String label = "Enter " + mode;
+      String description =
+          "Allow entering "
+              + mode
+              + " through commands or the mode switcher. Cheats enabled and /gamemode access also"
+              + " apply. Returning to survival is always allowed.";
+      entries.add(
+          new Setting(
+              "commands.mode." + mode,
+              backend.id(),
+              "Commands",
+              "Game mode access",
+              label,
+              description,
+              Setting.Kind.BOOLEAN,
+              new JsonPrimitive(config.modeAccess.getOrDefault(mode, true)),
+              new JsonPrimitive(true),
+              0,
+              1,
+              1,
+              List.of(),
+              false));
+      if (!backend.world.isEmpty())
+        entries.add(
+            new Setting(
+                "commands.worldMode." + mode,
+                backend.id(),
+                "Commands",
+                "Game mode access in this world",
+                label,
+                description
+                    + " Allow overrides the global mode setting; Block prevents entering it here.",
+                Setting.Kind.CHOICE,
+                new JsonPrimitive(
+                    config
+                        .worldModeAccess
+                        .getOrDefault(backend.world, Map.of())
+                        .getOrDefault(mode, CommandPermissions.Override.INHERIT)
+                        .ordinal()),
                 new JsonPrimitive(0),
                 0,
                 2,
@@ -103,6 +151,29 @@ public final class CommandsBackend implements Backend {
             next.enabled = value.getAsBoolean();
             return;
           }
+          if (key.startsWith("commands.mode.") || key.startsWith("commands.worldMode.")) {
+            boolean worldMode = key.startsWith("commands.worldMode.");
+            String mode =
+                key.substring((worldMode ? "commands.worldMode." : "commands.mode.").length());
+            if (!List.of("creative", "spectator").contains(mode))
+              throw new IllegalArgumentException("Unknown game mode");
+            if (worldMode) {
+              if (world.isEmpty() || !world.equals(CommandContext.world(mc)))
+                throw new IllegalArgumentException("The open world changed. Reopen Options.");
+              int ordinal = value.getAsBigDecimal().intValueExact();
+              if (ordinal < 0 || ordinal > 2)
+                throw new IllegalArgumentException("Choose a listed rule");
+              var modes = next.worldModeAccess.computeIfAbsent(world, k -> new LinkedHashMap<>());
+              if (ordinal == 0) modes.remove(mode);
+              else modes.put(mode, CommandPermissions.Override.values()[ordinal]);
+              if (modes.isEmpty()) next.worldModeAccess.remove(world);
+            } else {
+              if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isBoolean())
+                throw new IllegalArgumentException("Choose On or Off");
+              next.modeAccess.put(mode, value.getAsBoolean());
+            }
+            return;
+          }
           boolean local = key.startsWith("commands.world.");
           String prefix = local ? "commands.world." : "commands.rule.";
           if (!key.startsWith(prefix))
@@ -111,7 +182,7 @@ public final class CommandsBackend implements Backend {
           if (CommandPermissions.COMMANDS.stream().noneMatch(c -> c.name().equals(name)))
             throw new IllegalArgumentException("Unknown command");
           int ordinal = value.getAsBigDecimal().intValueExact();
-          if (ordinal < 0 || ordinal > 2)
+          if (ordinal < 0 || ordinal > (local ? 2 : 1))
             throw new IllegalArgumentException("Choose a listed rule");
           if (local) {
             if (world.isEmpty() || !world.equals(CommandContext.world(mc)))
