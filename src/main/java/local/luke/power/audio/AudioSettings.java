@@ -14,6 +14,13 @@ public final class AudioSettings {
   public enum CustomMusic { OFF, ADD, ONLY }
   public enum MenuMusic { WORLD, CUSTOM, MIX }
   public enum DimensionMusic { CONTINUE, STOP_SPECIFIC, STOP_ALL }
+  public enum MenuControlsPosition {
+    MENU_TOP, MENU_BOTTOM, TOP_LEFT, TOP_CENTER, TOP_RIGHT,
+    MIDDLE_LEFT, MIDDLE_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
+  }
+  public boolean menuControls = false;
+  public MenuControlsPosition menuControlsPosition = MenuControlsPosition.MENU_BOTTOM;
+  public int menuControlsOffsetX = 0, menuControlsOffsetY = 0;
   public CustomMusic customMusic = CustomMusic.OFF;
   public MenuMusic menuMusic = MenuMusic.WORLD;
   public DimensionMusic dimensionMusic = DimensionMusic.CONTINUE;
@@ -21,6 +28,7 @@ public final class AudioSettings {
   public int master = 100;
   public Map<String, Integer> categories = new LinkedHashMap<>();
   public Map<String, Integer> sounds = new TreeMap<>();
+  public Map<String, Integer> groupVolumes = new TreeMap<>();
   public Set<String> disabledTracks = new TreeSet<>();
   public Set<String> favourites = new TreeSet<>();
   public List<MusicPreset> presets = new ArrayList<>();
@@ -48,6 +56,10 @@ public final class AudioSettings {
 
   public void validate() {
     MusicPreset.validate(presets, preset);
+    MusicGroups.copy(groupVolumes);
+    if (menuControlsPosition == null || Math.abs((long) menuControlsOffsetX) > 4096
+        || Math.abs((long) menuControlsOffsetY) > 4096)
+      throw new IllegalArgumentException("Menu control offsets must be -4096 to 4096 pixels");
     MusicPreset.validateTracks(favourites);
     volume(master);
     if (gapMinSeconds < 0 || gapMaxSeconds < gapMinSeconds || gapMaxSeconds > 86400)

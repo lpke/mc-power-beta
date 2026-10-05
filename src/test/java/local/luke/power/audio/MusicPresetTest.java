@@ -8,6 +8,46 @@ import local.luke.power.ui.MusicPresetDraft;
 import org.junit.jupiter.api.Test;
 
 class MusicPresetTest {
+  @Test void groupVolumesAreIsolatedPersistedAndOnlyCopiedWhenLoaded() {
+    AudioSettings live = new AudioSettings();
+    live.groupVolumes.put("Alpha", 75);
+    MusicPreset saved = new MusicPreset("id", "Name", Set.of(), Map.of("Alpha", 40));
+    MusicPresetDraft draft = new MusicPresetDraft(saved);
+    draft.volume("Alpha", 20);
+    draft.volume("folder:/music", 0);
+    assertEquals(40, saved.groupVolumes().get("Alpha"));
+    assertEquals(75, live.groupVolumes.get("Alpha"));
+    assertTrue(draft.changed("Name"));
+    live.presets.add(draft.snapshot("Name"));
+    Gson gson = new Gson();
+    live = gson.fromJson(gson.toJson(live), AudioSettings.class);
+    live.validate();
+    MusicPreset.load(live, "id");
+    assertEquals(Map.of("Alpha", 20, "folder:/music", 0), live.groupVolumes);
+    assertEquals(0.2f, MusicGroups.gain(live.groupVolumes, "Alpha"), 0.0001f);
+    assertEquals(1f, MusicGroups.gain(live.groupVolumes, "Unknown"));
+    live.groupVolumes.put("Alpha", 100);
+    assertEquals(20, live.presets.get(0).groupVolumes().get("Alpha"));
+    MusicPreset.load(live, "");
+    assertEquals(100, live.groupVolumes.get("Alpha"));
+    assertThrows(IllegalArgumentException.class, () -> draft.volume("Alpha", -1));
+    assertEquals(20, draft.volume("Alpha"));
+    draft.volume("Alpha", 100);
+    assertFalse(draft.snapshot("Name").groupVolumes().containsKey("Alpha"));
+  }
+
+  @Test void legacyPresetsUseFullGroupVolumeAndInvalidVolumesDoNotPartlyLoad() {
+    Gson gson = new Gson();
+    var legacy = gson.fromJson("{\"id\":\"old\",\"name\":\"Old\",\"excluded\":[]}", MusicPreset.class);
+    AudioSettings live = new AudioSettings(); live.groupVolumes.put("Alpha", 20);
+    live.presets.add(legacy); live.validate(); MusicPreset.load(live, "old");
+    assertTrue(live.groupVolumes.isEmpty());
+    var bad = gson.fromJson("{\"id\":\"bad\",\"name\":\"Bad\",\"excluded\":[\"music:calm1.ogg\"],\"groupVolumes\":{\"Alpha\":101}}", MusicPreset.class);
+    live.presets.add(bad);
+    assertThrows(IllegalArgumentException.class, () -> MusicPreset.load(live, "bad"));
+    assertTrue(live.disabledTracks.isEmpty()); assertEquals("old", live.preset);
+  }
+
   @Test void bulkDraftEditsRetainMissingSelectionsAndDoNotChangeTheSavedPreset() {
     MusicPreset saved=new MusicPreset("id","Name",Set.of("music:missing.ogg"));
     MusicPresetDraft draft=new MusicPresetDraft(saved);

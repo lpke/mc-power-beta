@@ -34,6 +34,17 @@ public final class UiChecks {
     var button=musicButton(screen,action);click(screen,button.x()+3,button.y()+8);
   }
 
+  static int presetRowY(Object panel, int row) throws Exception {
+    Method m=panel.getClass().getDeclaredMethod("actionsY",int.class);m.setAccessible(true);
+    int top=(int)call(panel,"rowTop"),scroll=(int)field(panel,"scroll");
+    int y=(int)m.invoke(panel,top+row*(int)call(panel,"rowHeight")-scroll);
+    int bottom=(int)call(panel,"bottom");
+    if(y+18>bottom) { scroll+=y+18-bottom; y=bottom-18; }
+    if(y<top) { scroll-=top-y; y=top; }
+    field(panel,"scroll",Math.max(0,scroll));
+    return y+8;
+  }
+
   static void run(Minecraft mc) throws Exception {
     ConfigSession before = SettingsRegistry.open(mc);
     int oldScale = find(before, "native.guiScale").value.getAsInt();

@@ -1,5 +1,26 @@
 # Changelog
 
+## Preset management, group volumes and main-menu music
+
+- Merge preset loading and management into one list with Create new preset,
+  Load, Edit and Delete. Remove the separate preset edit icon.
+- Order library filters as Active, Everything, Favourites, Presets, All folders,
+  Folders. Keep narrower folder/preset selectors beside their active tab.
+- Add Hide excluded / Show excluded beside Save. Existing presets initially
+  hide fully excluded groups; new presets show them. Individual excluded songs
+  remain visible in partially included groups.
+- Right-click a group heading to reveal its volume multiplier. The range is
+  0–100%, with 100% as the default. Playback, previews and queued tracks use the
+  same group gain, multiplied by track, music and master volumes.
+- Keep preset group volumes isolated while editing. Saving does not load them;
+  Load replaces live exclusions and group volumes. Older presets use 100%.
+  Cancel restores live edits, and navigation/resize ends active slider drags.
+- Add optional main-menu playback controls, current-track status and seeking
+  under Audio > Main menu music. Choose above/below the menu, corners, top/bottom
+  center or middle edges, with horizontal and vertical offsets. The panel starts
+  off, shares playback state with Options, and opens the same library/queue.
+  Narrow layouts wrap controls and keep the default panel clear of menu buttons.
+
 ## Audio menu refinements
 
 - Restore the music toolbar after leaving any preset view, including loading,

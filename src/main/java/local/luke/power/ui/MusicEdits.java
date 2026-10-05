@@ -11,6 +11,7 @@ import local.luke.power.config.*;
 final class MusicEdits {
   private final PowerOptionsScreen parent;
   private JsonElement cachedFavourites, cachedPresets;
+  private Setting groupVolumeSetting;
   private Set<String> favouriteIds = Set.of();
   private List<MusicPreset> presetValues = List.of();
 
@@ -65,11 +66,13 @@ final class MusicEdits {
 
   void save(MusicPreset preset) {
     List<MusicPreset> values = new ArrayList<>(presets());
-    if (values.stream().anyMatch(p -> !p.id().equals(preset.id()) && p.name().equalsIgnoreCase(preset.name())))
+    if (values.stream()
+        .anyMatch(p -> !p.id().equals(preset.id()) && p.name().equalsIgnoreCase(preset.name())))
       throw new IllegalArgumentException("A preset with this name already exists");
     int index = -1;
     for (int i = 0; i < values.size(); i++) if (values.get(i).id().equals(preset.id())) index = i;
-    if (index < 0) values.add(preset); else values.set(index, preset);
+    if (index < 0) values.add(preset);
+    else values.set(index, preset);
     MusicPreset.validate(values, selected());
     Setting s = setting("presets");
     JsonElement value = Catalog.JSON.toJsonTree(values);
@@ -91,7 +94,12 @@ final class MusicEdits {
     MusicPreset p = presets().stream().filter(v -> v.id().equals(id)).findFirst().orElse(null);
     if (!id.isEmpty() && p == null) throw new IllegalArgumentException("Preset no longer exists");
     List<Setting> changes = new ArrayList<>();
-    if (p != null) changes.addAll(exclusions(p.excluded()));
+    if (p != null) {
+      changes.addAll(exclusions(p.excluded()));
+      Setting volumes = setting("groupVolumes");
+      volumes.value = Catalog.JSON.toJsonTree(MusicGroups.copy(p.groupVolumes()));
+      changes.add(volumes);
+    }
     Setting selected = setting("preset");
     selected.value = new JsonPrimitive(id);
     changes.add(selected);
@@ -110,6 +118,28 @@ final class MusicEdits {
         changes.add(s);
       }
     return changes;
+  }
+
+  private Setting groupVolumes() {
+    if (groupVolumeSetting == null) groupVolumeSetting = setting("groupVolumes");
+    return groupVolumeSetting;
+  }
+
+  int volume(String group) {
+    JsonElement v = groupVolumes().value.getAsJsonObject().get(group);
+    return v == null ? 100 : v.getAsInt();
+  }
+
+  void volume(String group, int volume) {
+    MusicGroups.copy(Map.of(group, volume));
+    if (volume(group) == volume) return;
+    Setting s = groupVolumes();
+    JsonObject values = s.value.getAsJsonObject().deepCopy();
+    if (volume == 100) values.remove(group);
+    else values.addProperty(group, volume);
+    s.validate(values);
+    s.value = values;
+    parent.changed(s, true);
   }
 
   void includeAll() {

@@ -77,7 +77,6 @@ public abstract class UiScreen extends Screen {
     int cx = x + w / 2, cy = y + 9;
     String[] pixels = switch (icon) {
       case "star" -> new String[]{"    #    ", "   ###   ", "#########", " ####### ", "  #####  ", " ##   ## ", " #     # "};
-      case "edit" -> new String[]{"      ## ", "     #++#", "    #++# ", "   #++#  ", "  #++#   ", " #++#    ", " #o#     ", " ##      ", " #       "};
       case "music" -> new String[]{"   ######", "   #    #", "   #    #", "   #    #", " ###  ###", "#### ####", " ##   ## "};
       case "remove" -> new String[]{" #     # ", "  #   #  ", "   # #   ", "    #    ", "   # #   ", "  #   #  ", " #     # "};
       case "play" -> new String[]{"  #      ", "  ###    ", "  #####  ", "  #######", "  #####  ", "  ###    ", "  #      "};

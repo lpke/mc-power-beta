@@ -33,11 +33,13 @@ public final class AudioBackend implements Backend {
           List.of());
     add("preset", "Music library", "World music preset", Setting.Kind.TEXT,
         new JsonPrimitive(s.preset), new JsonPrimitive(""),
-        "Load a saved soundtrack selection. Loading replaces current track exclusions.", List.of());
+        "Load a saved soundtrack selection. Loading replaces current track exclusions and group volumes.", List.of());
     add("presets", "Music data", "Music presets", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.presets), new JsonArray(), "Saved soundtrack selections.", List.of());
     add("exclusions", "Music data", "Excluded tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.disabledTracks), new JsonArray(), "Excluded music identifiers.", List.of());
+    add("groupVolumes", "Music data", "Music group volumes", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.groupVolumes), new JsonObject(), "Volume multipliers for music groups.", List.of());
     add("favourites", "Music data", "Favourite tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.favourites), new JsonArray(), "Starred music tracks.", List.of());
     add(
@@ -119,6 +121,23 @@ public final class AudioBackend implements Backend {
           "A random gap within the minimum and maximum is chosen after each track. Zero allows immediate playback.",
           Setting.Kind.INTEGER, new JsonPrimitive(minimum ? s.gapMinSeconds : s.gapMaxSeconds),
           new JsonPrimitive(minimum ? 600 : 1200), 0, 86400, 1, List.of(), false));
+    }
+    add("menuControls", "Main menu music", "Show music controls", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.menuControls), new JsonPrimitive(false),
+        "Show playback controls, the current track and a scrub bar on the main menu.", List.of());
+    add("menuControlsPosition", "Main menu music", "Position", Setting.Kind.CHOICE,
+        new JsonPrimitive(s.menuControlsPosition.ordinal()), new JsonPrimitive(1),
+        "Anchor the music panel beside the menu or at a screen edge. Offsets adjust its position.",
+        List.of("Above menu", "Below menu", "Top left", "Top center", "Top right",
+            "Middle left", "Middle right", "Bottom left", "Bottom center", "Bottom right"));
+    for (boolean horizontal : new boolean[]{true, false}) {
+      String key = horizontal ? "menuControlsOffsetX" : "menuControlsOffsetY";
+      entries.add(new Setting("audio." + key, id(), "Audio", "Main menu music",
+          horizontal ? "Horizontal offset" : "Vertical offset",
+          horizontal ? "Move right with positive values, left with negative values. Uses scaled GUI pixels."
+              : "Move down with positive values, up with negative values. Uses scaled GUI pixels.",
+          Setting.Kind.INTEGER, new JsonPrimitive(horizontal ? s.menuControlsOffsetX : s.menuControlsOffsetY),
+          new JsonPrimitive(0), -4096, 4096, 1, List.of(), false));
     }
     Set<String> sounds = AudioController.sounds(mc);
 
@@ -220,7 +239,13 @@ public final class AudioBackend implements Backend {
           case "exclusions" -> { }
           case "preset" -> s.preset = v.getAsString();
           case "presets" -> s.presets = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, MusicPreset[].class)));
+          case "groupVolumes" -> s.groupVolumes = Catalog.JSON.fromJson(v,
+              new com.google.gson.reflect.TypeToken<TreeMap<String, Integer>>() {}.getType());
           case "favourites" -> s.favourites = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
+          case "menuControls" -> s.menuControls = v.getAsBoolean();
+          case "menuControlsPosition" -> s.menuControlsPosition = AudioSettings.MenuControlsPosition.values()[v.getAsInt()];
+          case "menuControlsOffsetX" -> s.menuControlsOffsetX = v.getAsInt();
+          case "menuControlsOffsetY" -> s.menuControlsOffsetY = v.getAsInt();
           case "master" -> s.master = v.getAsInt();
           case "musicMode" -> s.musicMode = AudioSettings.MusicMode.values()[v.getAsInt()];
           case "customMusic" -> s.customMusic = AudioSettings.CustomMusic.values()[v.getAsInt()];

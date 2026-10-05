@@ -602,16 +602,20 @@ public final class AudioController {
         : (float) (volume * AudioConfig.current().gain(id, ui) * rules().ambient(id));
   }
 
+  public static String musicGroup(String id) {
+    return MusicGroups.id(id, customById.get(id));
+  }
+
   public static float musicVolume(String id) {
     float base = client == null ? 1 : client.options.musicVolume;
     AudioSettings s = AudioConfig.current();
-    return base * s.master / 100f * trackVolume(id) / 100f;
+    return base * s.master / 100f * trackVolume(id) / 100f * MusicGroups.gain(s.groupVolumes, musicGroup(id));
   }
 
   public static float backgroundVolume(float original) {
     if (MusicPreview.active() || paused) return 0;
     AudioSettings s = AudioConfig.current();
-    return original * s.master / 100f * trackVolume(currentMusic) / 100f;
+    return original * s.master / 100f * trackVolume(currentMusic) / 100f * MusicGroups.gain(s.groupVolumes, musicGroup(currentMusic));
   }
 
   private static SoundSystem system() {

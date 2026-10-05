@@ -31,10 +31,10 @@ final class AudioRefinementChecks {
     click(s,(s.width-width)/2+choice*(width/3)+8,s.height/2+8);
   }
 
-  private static MusicLibraryScreen open(PowerOptionsScreen s, boolean choosing) throws Exception {
+  private static MusicLibraryScreen open(PowerOptionsScreen s) throws Exception {
     field(s,"libraryOpen",true);
     var library=(MusicLibraryScreen)field(s,"library");
-    library.openPresets(choosing);
+    library.openPresets();
     s.render(-1,-1,0);
     check(!(boolean)call(s,"musicControlsVisible"),"toolbar shown over presets");
     return library;
@@ -70,9 +70,9 @@ final class AudioRefinementChecks {
       AudioConfig.preview(config);
       AudioController.pause();
       PowerOptionsScreen s=MenuUpdateChecks.open(mc,"Audio");
-      for(boolean choosing:new boolean[]{false,true}) for(String route:List.of("Back","Escape","Audio","Sidebar"))
-        test("preset "+(choosing?"selector":"list")+" exit via "+route+" restores toolbar",()->{
-          open(s,choosing);
+      for(String route:List.of("Back","Escape","Audio","Sidebar"))
+        test("preset list exit via "+route+" restores toolbar",()->{
+          open(s);
           switch(route) {
             case "Back" -> back(s);
             case "Escape" -> escape(s);
@@ -84,7 +84,7 @@ final class AudioRefinementChecks {
       for(int choice:new int[]{0,1,2}) {
         final int outcome=choice;
         test("new preset navigation handles Save/Discard/Cancel "+choice,()->{
-          var library=open(s,false);
+          var library=open(s);
           var panel=create(s,library);
           ((TextInput)field(panel,"name")).setText("Exit test "+outcome);
           sidebar(s,2);
@@ -99,15 +99,15 @@ final class AudioRefinementChecks {
         });
       }
       test("unchanged editor Back returns through the list with no stale panel state",()->{
-        var library=open(s,false);var panel=field(library,"presets");
-        click(s,(int)call(panel,"right")-85,(int)call(panel,"rowTop")+12);
+        var library=open(s);var panel=field(library,"presets");
+        click(s,(int)call(panel,"right")-85,presetRowY(panel,1));
         check((boolean)call(panel,"editing"),"Edit missed");
         back(s);check(!library.dirtyPreset()&&library.presetVisible(),"editor did not return to list");
         back(s);toolbar(s);
       });
       for(int row:new int[]{0,1}) test("loading preset selector row "+row+" restores toolbar",()->{
-        var library=open(s,true);var panel=field(library,"presets");
-        click(s,(int)call(panel,"right")-20,(int)call(panel,"rowTop")+row*40+12);
+        var library=open(s);var panel=field(library,"presets");
+        click(s,(int)call(panel,"right")-145,presetRowY(panel,row));
         toolbar(s);
       });
       test("library Exclude all covers hidden filter results and preserves volumes and queue",()->{
@@ -139,7 +139,7 @@ final class AudioRefinementChecks {
         mc.setScreen(s);
       });
       test("preset bulk edits stay isolated and headers fit narrow/wide screens",()->{
-        var library=open(s,false);field(library,"trackScroll",100);var panel=create(s,library);
+        var library=open(s);field(library,"trackScroll",100);var panel=create(s,library);
         check(library.state().trackScroll()==0,"editor inherited library scroll");
         for(int[] size:new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
           s.init(mc,size[0],size[1]);s.render(-1,-1,0);
@@ -165,11 +165,11 @@ final class AudioRefinementChecks {
         field(library,"conversionNeeded",true);
         check(library.conversionVisible(),"pending conversion hidden");
         library.showQueue();check(!library.conversionVisible(),"queue shows conversion");
-        library.openPresets(false);check(!library.conversionVisible(),"presets show conversion");
+        library.openPresets();check(!library.conversionVisible(),"presets show conversion");
         sidebar(s,2);toolbar(s);
       });
       test("reopening Options after preset screens cannot restore a hidden toolbar flag",()->{
-        open(s,false);mc.setScreen(null);
+        open(s);mc.setScreen(null);
         PowerOptionsScreen reopened=new PowerOptionsScreen(null);mc.setScreen(reopened);
         sidebar(reopened,2);toolbar(reopened);
       });

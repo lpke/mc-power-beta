@@ -66,7 +66,7 @@ public final class AudioPresetChecks {
         test(
             "preset editor changes are isolated until explicitly loaded",
             () -> {
-              library.openPresets(false);
+              library.openPresets();
               var panel = field(library, "presets");
               click(options, (int) call(panel, "left") + 20, (int) call(panel, "top") + 7);
               options.render(-1, -1, 0);
@@ -83,10 +83,10 @@ public final class AudioPresetChecks {
                   AudioConfig.current().presets.get(0).excluded().size() == 12,
                   "group draft incomplete");
               check(AudioConfig.current().disabledTracks.isEmpty(), "save loaded preset");
-              library.openPresets(true);
+              library.openPresets();
               options.render(-1, -1, 0);
               click(
-                  options, (int) call(panel, "right") - 20, (int) call(panel, "rowTop") + 40 + 12);
+                  options, (int) call(panel, "right") - 145, presetRowY(panel,1));
               check(
                   AudioConfig.current().disabledTracks.size() == 12,
                   "load did not apply exclusions");
@@ -109,9 +109,9 @@ public final class AudioPresetChecks {
             () -> {
               String id = AudioConfig.current().preset;
               field(options, "libraryOpen", true);
-              library.openPresets(false);
+              library.openPresets();
               var panel = field(library, "presets");
-              click(options, (int) call(panel, "right") - 85, (int) call(panel, "rowTop") + 12);
+              click(options, (int) call(panel, "right") - 85, presetRowY(panel,1));
               ((TextInput) field(panel, "name")).setText("Renamed preset");
               click(options, (int) call(panel, "includeX") + 8, (int) call(panel, "bulkY") + 8);
               click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
@@ -185,9 +185,9 @@ public final class AudioPresetChecks {
                   options.render(-1, -1, 0);
                   check(GL11.glGetError() == 0, "GL error " + filter);
                 }
-                library.openPresets(false);
+                library.openPresets();
                 options.render(-1, -1, 0);
-                library.openPresets(true);
+                library.openPresets();
                 options.render(-1, -1, 0);
               }
               mc.setScreen(options);
@@ -275,12 +275,12 @@ public final class AudioPresetChecks {
             MusicRequests.edit(q->{q.tracks.clear();q.add("music:calm1.ogg");q.add("music:creative4.ogg");q.add("music:door.ogg");});
             library.showQueue();
           }
-          case "view-presets" -> library.openPresets(false);
-          case "view-selector" -> library.openPresets(true);
+          case "view-presets" -> library.openPresets();
+          case "view-selector" -> library.openPresets();
           case "view-editor" -> {
-            library.openPresets(false);
+            library.openPresets();
             var panel=field(library,"presets");
-            click(options,(int)call(panel,"right")-85,(int)call(panel,"rowTop")+12);
+            click(options,(int)call(panel,"right")-85,presetRowY(panel,1));
           }
         }
         options.render(-1,-1,0);

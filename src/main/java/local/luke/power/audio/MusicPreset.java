@@ -2,10 +2,18 @@ package local.luke.power.audio;
 
 import java.util.*;
 
-/** Presets are immutable snapshots. Loading copies exclusions into the live settings. */
+/**
+ * Presets are immutable snapshots. Loading copies exclusions and group volumes into live settings.
+ */
 public final class MusicPreset {
   private final String id, name;
   private final Set<String> excluded;
+  private final Map<String, Integer> groupVolumes;
+
+  public Map<String, Integer> groupVolumes() {
+    // Earlier presets have no group-volume field.
+    return groupVolumes == null ? Map.of() : Collections.unmodifiableMap(groupVolumes);
+  }
 
   public String id() {
     return id;
@@ -20,6 +28,11 @@ public final class MusicPreset {
   }
 
   public MusicPreset(String id, String name, Set<String> excluded) {
+    this(id, name, excluded, Map.of());
+  }
+
+  public MusicPreset(
+      String id, String name, Set<String> excluded, Map<String, Integer> groupVolumes) {
     if (id == null || !id.matches("[a-zA-Z0-9_-]{1,64}"))
       throw new IllegalArgumentException("Invalid preset identifier");
     if (name == null
@@ -31,6 +44,7 @@ public final class MusicPreset {
     this.name = name.strip();
     validateTracks(excluded);
     this.excluded = new TreeSet<>(excluded);
+    this.groupVolumes = MusicGroups.copy(groupVolumes);
   }
 
   public static void validateTracks(Set<String> tracks) {
@@ -52,7 +66,7 @@ public final class MusicPreset {
     Set<String> ids = new HashSet<>();
     for (MusicPreset p : presets) {
       if (p == null) throw new IllegalArgumentException("Invalid music preset");
-      new MusicPreset(p.id, p.name, p.excluded);
+      new MusicPreset(p.id, p.name, p.excluded, p.groupVolumes());
       if (!ids.add(p.id)) throw new IllegalArgumentException("Duplicate preset identifier");
     }
     if (!selected.isEmpty() && !ids.contains(selected))
@@ -69,7 +83,10 @@ public final class MusicPreset {
             .filter(p -> p.id.equals(id))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Music preset is missing"));
+    Map<String, Integer> volumes = MusicGroups.copy(selected.groupVolumes());
+    validateTracks(selected.excluded);
     settings.disabledTracks = new TreeSet<>(selected.excluded);
+    settings.groupVolumes = volumes;
     settings.preset = selected.id;
   }
 }

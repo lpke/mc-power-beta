@@ -61,6 +61,9 @@ public final class MusicLibraryScreen extends UiScreen {
 
   private int revision = -1;
   private Setting dragging;
+  private String draggingGroup;
+  private MusicPresetDraft draggingGroupDraft;
+  private final Set<String> volumeGroups = new HashSet<>();
   private List<String> renderedQueue = List.of();
 
   public MusicLibraryScreen(PowerOptionsScreen parent) {
@@ -135,21 +138,23 @@ public final class MusicLibraryScreen extends UiScreen {
   public boolean presetVisible() { return presetsOpen; }
   public boolean modal() { return presetsOpen && presets.modal(); }
   public boolean dirtyPreset() { return presetsOpen && presets.dirty(); }
-  public void guard(Runnable action) { if (presetsOpen) presets.guard(action); else action.run(); }
+  public void guard(Runnable action) { finishDrag(); if (presetsOpen) presets.guard(action); else action.run(); }
   public void dialogClick(int x,int y,int b) { presets.headerClick(x,y,b); }
   public void renderDialog(int x,int y) { if (presetsOpen) presets.renderDialog(x,y); }
-  public void openPresets(boolean choosing) {
-    presetsOpen = true; queue = false; presets.open(choosing); search.setText(""); search.focused=false; rebuild();
+  public void openPresets() {
+    finishDrag();
+    presetsOpen = true; queue = false; presets.open(); search.setText(""); search.focused=false; rebuild();
   }
   public void back(Runnable exit) {
-    if (presetsOpen && presets.editing()) presets.guard(() -> { presets.open(false); refresh(); });
+    finishDrag();
+    if (presetsOpen && presets.editing()) presets.guard(() -> { presets.open(); refresh(); });
     else exit.run();
   }
 
 
   private void closePresets() {
     presetsOpen = false;
-    presets.open(false);
+    presets.open();
     previousDraft = null;
   }
 
@@ -159,9 +164,8 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private void show(boolean queue) {
-    dragging = null;
+    finishDrag();
     scrollbar.release();
-    parent.finishContinuousChange();
     search.focused = false;
     this.queue = queue;
     closePresets();
@@ -193,10 +197,12 @@ public final class MusicLibraryScreen extends UiScreen {
         case "presets" -> "Presets"; default -> "Everything";
       };
       boolean selector = folderSelected() || folder.equals("presets");
-      return new MusicFilters.Layout(List.of(new MusicFilters.Tab("cycle",label,left(),controlsTop(),span())),
-          left(),controlsTop()+44,span(),selector?62:40);
+      int selectorWidth = selector ? Math.min(120, span() / 2) : 0;
+      int tabWidth = span() - (selector ? selectorWidth + 4 : 0);
+      return new MusicFilters.Layout(List.of(new MusicFilters.Tab("cycle",label,left(),controlsTop(),tabWidth)),
+          left()+tabWidth+4,controlsTop(),selectorWidth,40);
     }
-    return MusicFilters.layout(left(), controlsTop(), span() - (span() < 504 ? 0 : 152), folderSelected() || folder.equals("presets"));
+    return MusicFilters.layout(left(), controlsTop(), span() - (span() < 504 ? 0 : 152), folderSelected() ? "folder" : folder.equals("presets") ? "presets" : "");
   }
 
   private void selectFilter(String id) {
@@ -260,13 +266,18 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public void init() {
+    finishDrag();
     presets.init(minecraft,width,height);
     refresh();
   }
 
   public void removed() {
-    dragging = null;
+    finishDrag();
     scrollbar.release();
+  }
+
+  private void finishDrag() {
+    dragging = null; draggingGroup = null; draggingGroupDraft = null;
     parent.finishContinuousChange();
   }
 
@@ -324,10 +335,25 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private String group(String id) {
-    var track = custom.get(id);
-    if (track != null) return "folder:" + Objects.toString(track.path().getParent(), "Custom tracks");
-    var builtin = BuiltinMusic.find(id);
-    return builtin == null ? "Other tracks" : builtin.group();
+    return MusicGroups.id(id, custom.get(id));
+  }
+
+  private int groupVolume(String group) {
+    return presetsOpen && presets.editing() ? presets.draft().volume(group) : edits.volume(group);
+  }
+
+  private int groupVolumeWidth() { return Math.max(54, Math.min(120, span() / 4)); }
+  private int groupVolumeX() { return right() - 24 - groupVolumeWidth(); }
+
+  private void slideGroup(int x) {
+    if (draggingGroup == null) return;
+    double fraction = (x - groupVolumeX() - 4d) / Math.max(1, groupVolumeWidth() - 8);
+    int volume = (int) Math.round(100 * Math.max(0, Math.min(1, fraction)));
+    if (draggingGroupDraft != null) {
+      if (presetsOpen && presets.draft() == draggingGroupDraft) draggingGroupDraft.volume(draggingGroup, volume);
+      else finishDrag();
+    } else if (!presetsOpen) edits.volume(draggingGroup, volume);
+    else finishDrag();
   }
 
   private int groupOrder(String group) {
@@ -375,6 +401,7 @@ public final class MusicLibraryScreen extends UiScreen {
           && (folder.isEmpty() || folder.equals("active") && groups.size() > 1) && initializedFilters.add(folder)) collapsed.addAll(groups.keySet());
       for (var entry : groups.entrySet()) {
         String key = entry.getKey();
+        if (presetsOpen && presets.editing() && presets.hideExcluded() && includedCount(key) == 0) continue;
         String label = key.startsWith("folder:") ? Objects.toString(Path.of(key.substring(7)).getFileName(), key.substring(7)) : key;
         result.add(new Row(key, label, null, -1, y, 24)); y += 24;
         if (collapsed.contains(key) && search.text().isBlank()) continue;
@@ -494,6 +521,7 @@ public final class MusicLibraryScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int b) {
     if (b != 0 && b != 1) return;
+    finishDrag();
     if (presetsOpen && (presets.modal() || !presets.editing() || y < listTop())) {
       search.focused=false;
       presets.headerClick(x,y,b); rebuild(); return;
@@ -519,7 +547,7 @@ public final class MusicLibraryScreen extends UiScreen {
       for (var tab : tabs.tabs()) if (inside(x, y, tab.x(), tab.y(), tab.width(), 18)) {
         click();
         if (tab.id().equals("cycle")) {
-          var choices=List.of("active","","custom","folder","favourites","presets");
+          var choices=List.of("active","","favourites","presets","custom","folder");
           String current=folderSelected()?"folder":folder;
           selectFilter(choices.get(Math.floorMod(choices.indexOf(current)+(b==0?1:-1),choices.size())));
         } else selectFilter(tab.id());
@@ -550,7 +578,16 @@ public final class MusicLibraryScreen extends UiScreen {
     if (clicked.id == null) {
       int rowY = listTop() + clicked.y - scroll();
       if (inside(x, y, right() - 20, rowY + 3, 20, 18)) {
-        click(); toggleGroup(clicked.group); return;
+        click(); toggleGroup(clicked.group); rebuildRows(); scroll(scroll()); return;
+      }
+      if (b == 1) {
+        if (!volumeGroups.remove(clicked.group)) volumeGroups.add(clicked.group);
+        return;
+      }
+      if (volumeGroups.contains(clicked.group) && inside(x,y,groupVolumeX(),rowY+3,groupVolumeWidth(),18)) {
+        draggingGroup = clicked.group;
+        draggingGroupDraft = presetsOpen && presets.editing() ? presets.draft() : null;
+        slideGroup(x); return;
       }
       if (!collapsed.remove(clicked.group)) collapsed.add(clicked.group);
       rebuildRows(); scroll(scroll()); return;
@@ -564,7 +601,7 @@ public final class MusicLibraryScreen extends UiScreen {
     String id = clicked.id;
     int rowY = listTop() + clicked.y - scroll();
     var layout = rowLayout(); int cy = rowY + layout.controlsY(); int bw = layout.buttonWidth();
-    if (!queue && inside(x,y,left(),rowY+3,20,18)) { click(); toggleIncluded(id); return; }
+    if (!queue && inside(x,y,left(),rowY+3,20,18)) { click(); toggleIncluded(id); rebuildRows(); scroll(scroll()); return; }
     Setting volume = settings.get("audio.sound." + id);
     if (!presetsOpen && volume != null && inside(x,y,volumeX(),cy,layout.volumeWidth(),18) && b==0) {
       dragging=volume;slide(x);return;
@@ -601,6 +638,10 @@ public final class MusicLibraryScreen extends UiScreen {
         parent.finishContinuousChange();
       }
     }
+    if (draggingGroup != null) {
+      if (Mouse.isButtonDown(0)) slideGroup(mx);
+      else finishDrag();
+    }
     String tip = "";
     if (presetsOpen) {
       presets.renderHeader(mx,my);
@@ -629,7 +670,7 @@ public final class MusicLibraryScreen extends UiScreen {
             case "custom" -> "All tracks found in your music folders.";
             case "favourites" -> "Tracks you have starred. Favourites do not change automatic rotation.";
             case "presets" -> "Browse a saved preset without loading or changing it.";
-            case "cycle" -> "Choose Active, Everything, All folders, Folders, Favourites or Presets.";
+            case "cycle" -> "Choose Active, Everything, Favourites, Presets, All folders or Folders.";
             default -> "Tracks in the selected folder and its subfolders.";
           };
       }
@@ -650,16 +691,22 @@ public final class MusicLibraryScreen extends UiScreen {
         int total = members(row.group).size(), included = includedCount(row.group);
         String count = included + "/" + total;
         int countWidth = minecraft.textRenderer.getWidth(count);
-        text((closed ? "> " : "v ") + fit(row.label, span() - countWidth - 44), left() + 2, y + 8,
+        boolean volumeShown = volumeGroups.contains(row.group);
+        int countRight = volumeShown ? groupVolumeX() - 6 : right() - 26;
+        if (volumeShown) slider(groupVolume(row.group) + "%", groupVolumeX(), y+3, groupVolumeWidth(), mx, my, groupVolume(row.group)/100d);
+        text((closed ? "> " : "v ") + fit(row.label, countRight - left() - countWidth - 18), left() + 2, y + 8,
             inside(mx,my,right()-20,y+3,20,18) && my>=listTop() && my<bottom() ? 0xffff55 : 0xffffff);
-        text(count, right() - 26 - countWidth, y + 8, included > 0 && included < total ? 0xffdd88 : 0xaaaaaa);
+        text(count, countRight - countWidth, y + 8, included > 0 && included < total ? 0xffdd88 : 0xaaaaaa);
         musicToggle(included > 0, right() - 20, y + 3, mx, my, total > 0);
         fill(left(), y + 21, right(), y + 22, 0x50555555);
         if (inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom())
           tip = inside(mx, my, right() - 20, y + 3, 20, 18)
               ? (included == total ? "Exclude" : "Include") + " every track in this group. Includes hidden search results; volumes and queue stay unchanged."
               : (row.group.startsWith("folder:") ? row.group.substring(7) : row.label + " soundtrack")
-                  + "\n" + included + " of " + total + " tracks included in automatic rotation.";
+                  + "\n" + included + " of " + total + " tracks included. Right-click to show or hide group volume.";
+        if (volumeShown && inside(mx,my,groupVolumeX(),y+3,groupVolumeWidth(),18))
+          tip = presetsOpen ? "Group volume multiplier, saved with this preset. Takes effect when loaded."
+              : "Multiplies every track volume in this group, including previews and queued music.";
         continue;
       }
       String id=row.id; int i=row.index;
@@ -697,8 +744,8 @@ public final class MusicLibraryScreen extends UiScreen {
       }
     }
 
-    if (tracks.isEmpty())
-      text(queue ? "Queue is empty" : "No matching tracks.", left() + 4, listTop() + 12, 0xaaaaaa);
+    if (rows.isEmpty())
+      text(queue ? "Queue is empty" : presetsOpen && presets.hideExcluded() ? "No included groups." : "No matching tracks.", left() + 4, listTop() + 12, 0xaaaaaa);
     unclip();
     scrollbar.render(this, track());
     if (conversionVisible()) {

@@ -30,7 +30,7 @@ final class MusicStatusBar {
 
   void render(UiScreen screen, int left, int y, int width, int mx, int my) {
     double duration = AudioController.duration();
-    available = duration > 0 && width >= 210;
+    available = duration > 0 && width >= 180;
     if (dragging) {
       if (!track.equals(AudioController.currentTrackId()) || !available) dragging = false;
       else if (Mouse.isButtonDown(0)) slide(mx);

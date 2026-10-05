@@ -113,6 +113,21 @@ public final class PowerOptionsScreen extends UiScreen {
     history.addAll(rememberedHistory);
   }
 
+  /** Open music from the title screen without inheriting a stale settings filter. */
+  public static void openMusic(net.minecraft.client.Minecraft mc, Screen parent, boolean queue, String track) {
+    PowerOptionsScreen screen = new PowerOptionsScreen(parent);
+    screen.page = "Audio";
+    screen.search.setText(""); screen.changedOnly = false;
+    screen.conflictIds = List.of(); screen.relatedIds = List.of(); screen.history.clear();
+    screen.libraryState = null; screen.libraryOpen = true;
+    mc.setScreen(screen);
+    if (screen.library == null) return;
+    if (queue) screen.library.showQueue();
+    else if (track != null && !track.isEmpty()) screen.library.showTrack(track);
+    else screen.library.showTracks();
+    screen.layout();
+  }
+
   public void init() {
     Keyboard.enableRepeatEvents(true);
     if (session == null)
@@ -176,7 +191,6 @@ public final class PowerOptionsScreen extends UiScreen {
   }
   private boolean soundPreview(Setting s) { return previewId(s) != null; }
   private boolean hasLink(Setting setting) {
-    if (setting.id.equals("audio.preset")) return true;
     return setting.kind == Setting.Kind.KEY ? ControlLinks.related(session, setting) != null
         : ControlLinks.hasControls(setting);
   }
@@ -317,7 +331,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (audio()) {
       Map<String, List<Setting>> ordered = new LinkedHashMap<>();
-      for (String group : List.of("Volume", "Music library", "Music gaps", "Sound categories", "Extra sounds", "Music and ambience", "Individual sounds", "Individual music tracks"))
+      for (String group : List.of("Volume", "Music library", "Music gaps", "Main menu music", "Sound categories", "Extra sounds", "Music and ambience", "Individual sounds", "Individual music tracks"))
         if (groups.containsKey(group)) ordered.put(group, groups.get(group));
       groups.forEach(ordered::putIfAbsent);
       groups = ordered;
@@ -563,8 +577,7 @@ public final class PowerOptionsScreen extends UiScreen {
         }
         if (x >= controlLeft(r) && x < mainControlLeft(r)) {
           if (soundPreview(s)) local.luke.power.audio.AudioController.previewSound(previewId(s));
-          else { click(); if (s.id.equals("audio.preset")) { libraryOpen = true; library.openPresets(false); layout(); }
-            else if (s.kind == Setting.Kind.KEY) related(s); else linkedControls(s); }
+          else { click(); if (s.kind == Setting.Kind.KEY) related(s); else linkedControls(s); }
           return;
         }
         if (x < mainControlLeft(r)) return;
@@ -630,7 +643,7 @@ public final class PowerOptionsScreen extends UiScreen {
     error = "";
     click();
     if (s.id.equals("audio.preset")) {
-      libraryOpen = true; library.openPresets(true); layout(); return;
+      libraryOpen = true; library.openPresets(); layout(); return;
     }
     if (s.id.equals("native.texturePack")) {
       minecraft.setScreen(new TexturePackScreen(this, s));
@@ -943,7 +956,7 @@ public final class PowerOptionsScreen extends UiScreen {
           controlLeft, cy, valueEnd - controlLeft, 18, mx, my, editable);
       if (numeric) button("...", right() - 60, cy, 22, 18, mx, my, editable);
       button("R", right() - 34, cy, 20, 18, mx, my, editable && !s.value.equals(s.defaultValue));
-      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.id.equals("audio.preset") ? "edit" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
+      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
@@ -952,7 +965,7 @@ public final class PowerOptionsScreen extends UiScreen {
         else if (!conflicts.isEmpty() && inside(mx, my, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
-          tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.id.equals("audio.preset") ? "Create and edit music presets" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
+          tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = s.description + (s.restart ? "\nRestart required." : "");
       }
     }
