@@ -194,7 +194,14 @@ public final class MusicLibraryScreen extends UiScreen {
     rebuild();
     collapsed.remove(group(id));
     rebuildRows();
-    rows.stream().filter(row -> id.equals(row.id)).findFirst().ifPresent(row -> scroll(row.y));
+    rows.stream().filter(row -> id.equals(row.id)).findFirst().ifPresent(row -> {
+      scroll(row.y);
+      StickyHeader sticky = stickyHeader();
+      if (sticky != null) {
+        int covered = sticky.y() + sticky.height() - (listTop() + row.y - scroll());
+        if (covered > 0) scroll(scroll() - covered);
+      }
+    });
   }
 
   private boolean folderSelected() {

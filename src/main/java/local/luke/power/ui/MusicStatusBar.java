@@ -8,11 +8,12 @@ final class MusicStatusBar {
   private boolean dragging;
   private double fraction;
   private String track = "";
-  private int barX, barWidth, top;
+  private int barX, barWidth, top, labelX, labelWidth;
   private boolean available;
 
-  boolean overScrubber(int x, int y) {
-    return available && x >= barX && x < barX + barWidth + 40 && y >= top && y < top + 16;
+  boolean overTrack(int x, int y) {
+    return !AudioController.currentTrackId().isEmpty()
+        && x >= labelX && x < labelX + labelWidth && y >= top && y < top + 15;
   }
 
   boolean press(int x, int y, int button) {
@@ -44,13 +45,15 @@ final class MusicStatusBar {
       }
     }
     int reserved = available ? Math.min(160, width / 2) : 0;
+    top = y;
+    labelX = left;
+    labelWidth = width - reserved;
     screen.text(
         screen.fit(AudioController.status(), Math.max(10, width - reserved - 6)),
         left,
         y + 4,
-        0xaaaaaa);
+        overTrack(mx, my) ? 0xffffa0 : 0xaaaaaa);
     if (!available) return;
-    top = y;
     barWidth = reserved - 40;
     barX = left + width - reserved;
     double position =

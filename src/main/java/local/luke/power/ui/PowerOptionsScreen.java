@@ -539,8 +539,7 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.press(x,y,button)) return;
-    if (musicControlsVisible() && button == 0 && (!libraryVisible() || library.trackStatusVisible()) && inside(x, y, left(), audioContentTop(),
-        musicStatusWidth(), 15) && !musicStatus.overScrubber(x, y)) {
+    if (musicControlsVisible() && button == 0 && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.overTrack(x, y)) {
       String id = local.luke.power.audio.AudioController.currentTrackId();
       if (!id.isEmpty()) { click(); libraryOpen = true; library.showTrack(id); layout(); }
       return;
@@ -1014,8 +1013,7 @@ public final class PowerOptionsScreen extends UiScreen {
         hoverId = "music." + action;
       }
     }
-    if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && !local.luke.power.audio.AudioController.currentTrackId().isEmpty()
-        && inside(mx, my, left(), audioContentTop(), musicStatusWidth(), 15) && !musicStatus.overScrubber(mx, my)) {
+    if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.overTrack(mx, my)) {
       tip = "Show this track in Everything"; hoverId = "music.current";
     }
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);

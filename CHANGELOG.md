@@ -1,5 +1,11 @@
 # Changelog
 
+## Current-track navigation
+
+- Keep a song below its sticky heading when jumping to it from Options or the pause menu.
+- Highlight the current-song text yellow on hover in Options. Share its hit area
+  with the navigation click and tooltip, excluding the scrubber and timestamp.
+
 ## Inline values and music navigation
 
 - Replace numeric precision buttons with right-click inline inputs in settings, track

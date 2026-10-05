@@ -24,6 +24,19 @@ final class StickyGroupChecks {
     throw new AssertionError("No group with eight children");
   }
 
+  private static void visibleTrack(MusicLibraryScreen library, String id) throws Exception {
+    Object target=null;
+    for(Object row:(List<?>)field(library,"rows")) if(id.equals(call(row,"id"))) {target=row;break;}
+    check(target!=null,"missing target track: "+id);
+    int top=(int)call(library,"listTop"),bottom=(int)call(library,"bottom");
+    int y=top+(int)call(target,"y")-(int)call(library,"scroll");
+    var sticky=(StickyHeader)call(library,"stickyHeader");
+    int visibleTop=sticky==null?top:Math.max(top,sticky.y()+sticky.height());
+    check(y>=visibleTop,"target hidden under sticky heading: "+id);
+    int height=(int)call(target,"height");
+    if(bottom-visibleTop>=height)check(y+height<=bottom,"target controls below viewport: "+id);
+  }
+
   static void run(Minecraft mc) throws Exception {
     failures = 0;
     var before = AudioConfig.copy();
@@ -56,6 +69,41 @@ final class StickyGroupChecks {
       });
       field(options,"page","Audio");field(options,"libraryOpen",true);
       var library = (MusicLibraryScreen)field(options,"library");
+      test("jumping to first middle and final tracks clears sticky headings at every layout", () -> {
+        for(int[] size:new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
+          options.init(mc,size[0],size[1]);
+          for(String group:List.of("Alpha","Beta / Creative")) {
+            var tracks=BuiltinMusic.TRACKS.stream().filter(t->t.group().equals(group))
+                .sorted(Comparator.comparing(t->AudioController.musicLabel(t.id()))).toList();
+            for(int index:new int[]{0,tracks.size()/2,tracks.size()-1}) {
+              String id=tracks.get(index).id();library.showTrack(id);visibleTrack(library,id);
+              options.render(-1,-1,0);
+              check(org.lwjgl.opengl.GL11.glGetError()==0,"navigation GL error");
+            }
+          }
+        }
+        options.init(mc,640,420);
+      });
+      test("current song hover and navigation exclude the scrubber and timestamp", () -> {
+        field(options,"libraryOpen",false);
+        AudioController.playNow("music:calm1.ogg");AudioController.pause();
+        // Duration is indexed off-thread; the scrubber appears after that completes.
+        long deadline=System.nanoTime()+3_000_000_000L;
+        while(AudioController.duration()<=0&&System.nanoTime()<deadline)Thread.sleep(10);
+        options.render(-1,-1,0);
+        Object status=field(options,"musicStatus");
+        var hover=status.getClass().getDeclaredMethod("overTrack",int.class,int.class);hover.setAccessible(true);
+        int x=(int)field(status,"labelX"),y=(int)field(status,"top");
+        check((boolean)hover.invoke(status,x+2,y+6),"paused track has no hover target");
+        check((boolean)field(status,"available"),"fixture track has no scrubber");
+        int scrub=(int)field(status,"barX"),width=(int)field(status,"barWidth");
+        check(!(boolean)hover.invoke(status,scrub+2,y+6),"scrubber highlights song");
+        check(!(boolean)hover.invoke(status,scrub+width+8,y+6),"timestamp highlights song");
+        click(options,x+2,y+6);
+        check((boolean)call(options,"libraryVisible"),"current-song click did not open library");
+        visibleTrack(library,"music:calm1.ogg");
+      });
+      field(options,"libraryOpen",true);
       library.restore(new MusicLibraryScreen.State(false,"","",0,0));
       library.showTrack("music:calm1.ogg");
       test("pinned music volume and inclusion target the group, not covered tracks", () -> {
@@ -109,6 +157,7 @@ final class StickyGroupChecks {
       options.session().discard();
     } finally {
       MusicRequests.edit(q -> { q.tracks.clear(); q.tracks.addAll(queueBefore); });
+      AudioController.pause();
       AudioConfig.preview(before);
       MenuPreferences.update(v -> v.autoApply=auto);
       mc.setScreen(null);
