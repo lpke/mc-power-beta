@@ -11,6 +11,10 @@ final class MusicStatusBar {
   private int barX, barWidth, top;
   private boolean available;
 
+  boolean overScrubber(int x, int y) {
+    return available && x >= barX && x < barX + barWidth + 40 && y >= top && y < top + 16;
+  }
+
   boolean press(int x, int y, int button) {
     if (button != 0 || !available || x < barX || x >= barX + barWidth || y < top || y >= top + 16)
       return false;

@@ -29,21 +29,19 @@ class AudioToolbarTest {
     }
   }
 
-  @Test void queueCountNeverMovesActionsAndEmptyQueueIsDisabled() {
+  @Test void emptyQueueIsAbsentAndOtherActionsStayInPlace() {
     for (int width : new int[]{200,244,291,342,365,366,465,466,666}) {
       for(boolean library : new boolean[]{false,true}) {
         var empty = AudioToolbar.layout(0,width,0,false,library).buttons();
         var full = AudioToolbar.layout(0,width,256,false,library).buttons();
-        assertEquals(7,empty.size());
-        for(int i=0;i<empty.size();i++) {
-          var a=empty.get(i);var b=full.get(i);
+        assertEquals(6,empty.size());
+        assertTrue(empty.stream().noneMatch(b -> b.action()==AudioToolbar.Action.QUEUE));
+        for(var a : empty) {
+          var b=full.stream().filter(v -> v.action()==a.action()).findFirst().orElseThrow();
           assertEquals(a.x(),b.x());assertEquals(a.y(),b.y());assertEquals(a.width(),b.width());
-          if(a.action()==AudioToolbar.Action.QUEUE) {
-            assertFalse(a.enabled());assertTrue(b.enabled());
-            assertEquals("Queue",a.label());assertEquals("Queue (256)",b.label());
-          }
+          assertTrue(a.enabled());assertTrue(b.enabled());
         }
-        assertEquals(AudioToolbar.Action.QUEUE,empty.get(empty.size()-3).action());
+        assertEquals("Queue (256)",full.stream().filter(b -> b.action()==AudioToolbar.Action.QUEUE).findFirst().orElseThrow().label());
         assertEquals(AudioToolbar.Action.LIBRARY,empty.get(empty.size()-2).action());
         assertEquals(AudioToolbar.Action.PLAY,empty.get(0).action());
         assertEquals("",empty.get(0).label());

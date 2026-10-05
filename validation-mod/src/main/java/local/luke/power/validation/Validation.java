@@ -52,6 +52,7 @@ public final class Validation {
       else if (command.equals("modern-commands")) ModernCommandChecks.run(mc);
       else if (command.startsWith("audio-presets-")) AudioPresetChecks.run(mc,command.substring(14));
       else if (command.startsWith("audio-groups-")) AudioGroupChecks.run(mc,command.substring(13));
+      else if (command.equals("sticky-groups")) StickyGroupChecks.run(mc);
       else if (command.equals("audio-refinements")) AudioRefinementChecks.run(mc);
       else if (command.startsWith("music-eras-")) MusicErasChecks.run(mc,command.substring(11));
       else if (command.startsWith("audio-polish-")) AudioPolishChecks.run(mc,command.substring(13));

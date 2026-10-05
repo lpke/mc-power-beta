@@ -1,5 +1,18 @@
 # Changelog
 
+## Sticky groups and library visibility
+
+- Pin settings and music group headings while scrolling, including search results
+  and preset editing. Slide each heading away before it can cover the final item.
+  Pinned controls keep their original actions and never click through to covered rows.
+- Add Hide excluded / Show excluded to the library, with excluded groups shown by
+  default. Keep this view choice when reopening Options; hiding never changes playback.
+- Highlight the full music group row when hovering its right-side controls or count,
+  using the same dark background as track rows. Keep group names white.
+- Hide the Queue shortcut when empty. Keep Back and Escape available in an empty queue.
+- Limit the current-track navigation tooltip to the status text, away from the scrubber.
+- Keep conflicting key labels neutral; retain the coloured conflict marker and its details.
+
 ## Audio controls and layout
 
 - Put Edit and Delete before Load, with Load at the far right, including the None row.

@@ -307,6 +307,17 @@ public final class PowerOptionsScreen extends UiScreen {
     return footerY() - 16;
   }
 
+  private StickyHeader stickyHeader() {
+    return StickyHeader.at(rows, row -> row.setting == null, Row::y, Row::height,
+        (int) scroll, top(), bottom());
+  }
+
+  private void groupHeading(Row row, int y) {
+    text((collapsed.contains(page + "/" + row.group) && search.text().isBlank() ? "> " : "v ")
+        + row.group, left(), y + 8, 0xffffff);
+    fill(left(), y + 21, right() - 14, y + 22, 0x50555555);
+  }
+
   private void layout() {
     if (session == null) return;
     String query = search.text().strip().toLowerCase(Locale.ROOT);
@@ -524,7 +535,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.press(x,y,button)) return;
     if (musicControlsVisible() && button == 0 && (!libraryVisible() || library.trackStatusVisible()) && inside(x, y, left(), audioContentTop(),
-        musicStatusWidth(), 15)) {
+        musicStatusWidth(), 15) && !musicStatus.overScrubber(x, y)) {
       String id = local.luke.power.audio.AudioController.currentTrackId();
       if (!id.isEmpty()) { click(); libraryOpen = true; library.showTrack(id); layout(); }
       return;
@@ -533,9 +544,12 @@ public final class PowerOptionsScreen extends UiScreen {
       library.mouseClicked(x, y, button); return;
     }
     if (!libraryVisible() && y >= top() && y < bottom() && x >= left() && x < right() - 10) {
+      StickyHeader sticky = stickyHeader();
+      int pinned = sticky != null && sticky.contains(y, top()) ? sticky.index() : -1;
       for (int i = 0; i < rows.size(); i++) {
+        if (pinned >= 0 && i != pinned) continue;
         Row r = rows.get(i);
-        int ry = top() + r.y - (int) scroll;
+        int ry = pinned == i ? sticky.y() : top() + r.y - (int) scroll;
         if (y < ry || y >= ry + r.height) continue;
         if (r.setting == null) {
           if (button == 0 && (!search.text().isBlank() || changedOnly)) {
@@ -547,6 +561,7 @@ public final class PowerOptionsScreen extends UiScreen {
           } else if (button == 0) {
             String id = page + "/" + r.group;
             if (!collapsed.add(id)) collapsed.remove(id);
+            if (pinned >= 0) scroll = r.y;
             layout();
           }
           return;
@@ -912,24 +927,20 @@ public final class PowerOptionsScreen extends UiScreen {
     String tip = "", hoverId = "";
     if (!libraryVisible()) {
     clip(left() - 2, top(), span() + 8, bottom() - top());
+    StickyHeader sticky = stickyHeader();
+    int listMouseY = sticky != null && sticky.contains(my, top()) ? -1 : my;
     for (int index = 0; index < rows.size(); index++) {
       Row row = rows.get(index);
       int y = top() + row.y - (int) scroll;
       if (y + row.height < top() || y >= bottom()) continue;
       if (row.setting == null) {
-        text(
-            (collapsed.contains(page + "/" + row.group) && search.text().isBlank() ? "> " : "v ")
-                + row.group,
-            left(),
-            y + 8,
-            0xffffff);
-        fill(left(), y + 21, right() - 14, y + 22, 0x50555555);
+        if (sticky == null || index != sticky.index()) groupHeading(row, y);
         continue;
       }
       Setting s = row.setting;
       String lock = SettingAccess.reason(session, s);
       boolean editable = lock.isEmpty();
-      boolean hover = inside(mx, my, left(), y, span(), row.height) && my >= top() && my < bottom();
+      boolean hover = inside(mx, listMouseY, left(), y, span(), row.height) && listMouseY >= top() && listMouseY < bottom();
       if (hover) fill(left() - 2, y, right() - 12, y + row.height, 0x60000000);
       boolean narrow = row.height == 40;
       int cy = y + (narrow ? 16 : 2),
@@ -946,28 +957,32 @@ public final class PowerOptionsScreen extends UiScreen {
       List<Setting> conflicts = conflicts(s);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
       int valueEnd = right() - (numeric ? 62 : 36);
-      if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my,
+      if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
           (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
-      else if (editable && ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, my);
+      else if (editable && ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY);
       else if (s.kind == Setting.Kind.KEY && editable) button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
-          controlLeft, cy, valueEnd - controlLeft, 18, mx, my, true,
-          local.luke.power.input.Chord.decode(s.value.getAsInt()).key() == 0 ? 0x999999 : !conflicts.isEmpty() ? 0xff7777 : -1);
+          controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, true,
+          local.luke.power.input.Chord.decode(s.value.getAsInt()).key() == 0 ? 0x999999 : -1);
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
-          controlLeft, cy, valueEnd - controlLeft, 18, mx, my, editable);
-      if (numeric) button("...", right() - 60, cy, 22, 18, mx, my, editable);
-      button("R", right() - 34, cy, 20, 18, mx, my, editable && !s.value.equals(s.defaultValue));
-      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, my, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
+          controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, editable);
+      if (numeric) button("...", right() - 60, cy, 22, 18, mx, listMouseY, editable);
+      button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !s.value.equals(s.defaultValue));
+      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, listMouseY, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
         if (!editable) tip = lock + (s.description.isEmpty() ? "" : "\n" + s.description);
         else if (mx >= right() - 34) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
-        else if (!conflicts.isEmpty() && inside(mx, my, controlLeft(row) - 12, cy, 12, 18)) {
+        else if (!conflicts.isEmpty() && inside(mx, listMouseY, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
           tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = s.description + (s.restart ? "\nRestart required." : "");
       }
+    }
+    if (sticky != null) {
+      fill(left() - 2, sticky.y(), right() - 12, sticky.y() + sticky.height(), 0xff202020);
+      groupHeading(rows.get(sticky.index()), sticky.y());
     }
     unclip();
     contentBar.render(this, contentTrack());
@@ -989,7 +1004,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
     }
     if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && !local.luke.power.audio.AudioController.currentTrackId().isEmpty()
-        && inside(mx, my, left(), audioContentTop(), musicStatusWidth(), 15)) {
+        && inside(mx, my, left(), audioContentTop(), musicStatusWidth(), 15) && !musicStatus.overScrubber(mx, my)) {
       tip = "Show this track in Everything"; hoverId = "music.current";
     }
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);

@@ -145,8 +145,8 @@ public final class AudioLayoutChecks {
           options.render(-1,-1,0);
           click(options,(int)call(library,"filterX")+3,(int)call(library,"controlsTop")+8);
           check(MusicRequests.tracks().isEmpty(),"Clear queue missed");
-          var empty=musicButton(options,AudioToolbar.Action.QUEUE);
-          check(empty.label().equals("Queue") && !empty.enabled(),"empty Queue is not visible and disabled");
+          check(((List<AudioToolbar.Button>)call(options,"musicButtons")).stream()
+              .noneMatch(v -> v.action()==AudioToolbar.Action.QUEUE),"empty Queue remains visible");
         });
         test("direct view navigation preserves filters and positions without hiding empty queue", () -> {
           MusicRequests.edit(q -> {for(int i=0;i<16;i++)q.add(a);});
@@ -165,8 +165,8 @@ public final class AudioLayoutChecks {
           click(options,(int)call(options,"left")+3,32);
           check(!(boolean)field(options,"libraryOpen"),"Back did not open settings");
           MusicRequests.edit(q -> q.tracks.clear());
-          musicClick(options,AudioToolbar.Action.QUEUE);
-          check(!(boolean)field(options,"libraryOpen"),"disabled Queue button navigated");
+          check(((List<AudioToolbar.Button>)call(options,"musicButtons")).stream()
+              .noneMatch(v -> v.action()==AudioToolbar.Action.QUEUE),"empty Queue remains visible");
           musicClick(options,AudioToolbar.Action.LIBRARY);
           check(!library.queueVisible() && library.state().query().equals("Track"),"Library returned to queue or lost search");
           library.showQueue();
@@ -187,8 +187,8 @@ public final class AudioLayoutChecks {
           musicClick(options,AudioToolbar.Action.QUEUE);musicClick(options,AudioToolbar.Action.QUEUE);
           check(!(boolean)field(options,"libraryOpen"),"Queue did not toggle closed");
           musicClick(options,AudioToolbar.Action.QUEUE);MusicRequests.edit(q -> q.tracks.clear());
-          musicClick(options,AudioToolbar.Action.QUEUE);
-          check(!(boolean)field(options,"libraryOpen"),"empty active Queue could not close");
+          click(options,(int)call(options,"left")+3,32);
+          check(!(boolean)field(options,"libraryOpen"),"empty active Queue could not close via Back");
           musicClick(options,AudioToolbar.Action.LIBRARY);
           field(options,"sideScroll",0d);
           click(options,(int)call(options,"origin")+10,24+2*22+8);

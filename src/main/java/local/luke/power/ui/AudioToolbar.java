@@ -32,7 +32,8 @@ public final class AudioToolbar {
     x = left + width - sizes[4] - sizes[5] - sizes[6] - 2 * gap;
     int y = bottom(width, library) - 18;
     for (int i = 4; i < 7; i++) {
-      result.add(new Button(Action.values()[i], labels[i], x, y, sizes[i], i != 4 || queued > 0));
+      if (i != 4 || queued > 0)
+        result.add(new Button(Action.values()[i], labels[i], x, y, sizes[i], true));
       x += sizes[i] + gap;
     }
     return new Layout(List.copyOf(result), y + 18);

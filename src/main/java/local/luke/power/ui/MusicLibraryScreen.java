@@ -11,7 +11,10 @@ import org.lwjgl.input.Mouse;
 /** Embedded Audio panel. Edits belong to the surrounding Options session. */
 public final class MusicLibraryScreen extends UiScreen {
   public record State(
-      boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed, String presetFilter, Set<String> initialized) {
+      boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed, String presetFilter, Set<String> initialized, boolean hideExcluded) {
+    public State(boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed, String presetFilter, Set<String> initialized) {
+      this(queue, folder, query, trackScroll, queueScroll, lastFolder, collapsed, presetFilter, initialized, false);
+    }
     public State(boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed, String presetFilter) {
       this(queue,folder,query,trackScroll,queueScroll,lastFolder,collapsed,presetFilter,Set.of());
     }
@@ -45,7 +48,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private final Map<String, MusicLibrary.Track> custom = new HashMap<>();
   private final ScrollBar scrollbar = new ScrollBar();
   private int conversionRevision, conversionTicks, trackScroll, queueScroll;
-  private boolean queue, conversionNeeded;
+  private boolean queue, conversionNeeded, hideExcluded;
   private String folder = "active", lastFolder = "", error = "", hoverHelp = "", hoverKey = "";
   private Set<String> activeTracks = Set.of();
 
@@ -75,7 +78,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public State state() {
-    return new State(queue, folder, search.text(), trackScroll, queueScroll, lastFolder, Set.copyOf(collapsed), selectedPreset, Set.copyOf(initializedFilters));
+    return new State(queue, folder, search.text(), trackScroll, queueScroll, lastFolder, Set.copyOf(collapsed), selectedPreset, Set.copyOf(initializedFilters), hideExcluded);
   }
 
   public void restore(State state) {
@@ -84,6 +87,7 @@ public final class MusicLibraryScreen extends UiScreen {
     collapsed.clear(); collapsed.addAll(state.collapsed);
     initializedFilters.clear(); initializedFilters.addAll(state.initialized);
     queue = state.queue;
+    hideExcluded = state.hideExcluded;
     folder = state.folder;
     lastFolder = state.lastFolder;
     selectedPreset = state.presetFilter;
@@ -116,11 +120,14 @@ public final class MusicLibraryScreen extends UiScreen {
 
   private int statusTop() { return parent.audioContentTop(); }
   private int controlsTop() { return statusTop() + 18; }
-  private int bulkTop() {
-    return controlsTop() + (span() < 380 ? 22 : span() < 504 ? filters().height() + 4 : 0);
+  private int hideY() {
+    return span() >= 612 ? controlsTop() : controlsTop() + filters().height() + 4;
   }
-  private int includeX() { return right() - 148; }
-  private int excludeX() { return right() - 72; }
+  private int hideX() { return span() < 254 ? left() : right() - 254; }
+  private int bulkTop() { return hideY(); }
+  private int bulkButtonWidth() { return span() < 254 ? 34 : 72; }
+  private int includeX() { return right() - bulkButtonWidth() * 2 - 4; }
+  private int excludeX() { return right() - bulkButtonWidth(); }
 
   private boolean narrow() {
     return span() < 350;
@@ -180,6 +187,7 @@ public final class MusicLibraryScreen extends UiScreen {
   public void showTracks() { show(false); }
 
   public void showTrack(String id) {
+    hideExcluded = false;
     show(false);
     folder = "";
     search.setText("");
@@ -203,9 +211,9 @@ public final class MusicLibraryScreen extends UiScreen {
       int selectorWidth = selector ? Math.min(120, span() / 2) : 0;
       int tabWidth = span() - (selector ? selectorWidth + 4 : 0);
       return new MusicFilters.Layout(List.of(new MusicFilters.Tab("cycle",label,left(),controlsTop(),tabWidth)),
-          left()+tabWidth+4,controlsTop(),selectorWidth,40);
+          left()+tabWidth+4,controlsTop(),selectorWidth,18);
     }
-    return MusicFilters.layout(left(), controlsTop(), span() - (span() < 504 ? 0 : 152), folderSelected() ? "folder" : folder.equals("presets") ? "presets" : "");
+    return MusicFilters.layout(left(), controlsTop(), span() - (span() < 612 ? 0 : 258), folderSelected() ? "folder" : folder.equals("presets") ? "presets" : "");
   }
 
   private void selectFilter(String id) {
@@ -404,7 +412,7 @@ public final class MusicLibraryScreen extends UiScreen {
           && (folder.isEmpty() || folder.equals("active") && groups.size() > 1) && initializedFilters.add(folder)) collapsed.addAll(groups.keySet());
       for (var entry : groups.entrySet()) {
         String key = entry.getKey();
-        if (presetsOpen && presets.editing() && presets.hideExcluded() && includedCount(key) == 0) continue;
+        if ((presetsOpen ? presets.editing() && presets.hideExcluded() : hideExcluded) && includedCount(key) == 0) continue;
         String label = key.startsWith("folder:") ? Objects.toString(Path.of(key.substring(7)).getFileName(), key.substring(7)) : key;
         result.add(new Row(key, label, null, -1, y, 24)); y += 24;
         if (collapsed.contains(key) && search.text().isBlank()) continue;
@@ -539,10 +547,13 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     if (!queue && !presetsOpen) {
-      if (inside(x,y,includeX(),bulkTop(),72,18)) { click(); edits.includeAll(); return; }
-      if (inside(x,y,excludeX(),bulkTop(),72,18)) {
+      if (inside(x,y,hideX(),hideY(),102,18)) {
+        click(); hideExcluded = !hideExcluded; rebuildRows(); scroll(scroll()); return;
+      }
+      if (inside(x,y,includeX(),bulkTop(),bulkButtonWidth(),18)) { click(); edits.includeAll(); rebuildRows(); scroll(scroll()); return; }
+      if (inside(x,y,excludeX(),bulkTop(),bulkButtonWidth(),18)) {
         click();
-        try { edits.excludeAll(AudioController.music(minecraft)); error = ""; }
+        try { edits.excludeAll(AudioController.music(minecraft)); rebuildRows(); scroll(scroll()); error = ""; }
         catch (IllegalArgumentException e) { error = e.getMessage(); }
         return;
       }
@@ -575,11 +586,13 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     if (y < listTop() || y >= bottom() || x < left() || x >= right()) return;
-    Row clicked = rows.stream().filter(row -> y - listTop() + scroll() >= row.y
+    StickyHeader sticky = stickyHeader();
+    boolean pinned = sticky != null && sticky.contains(y, listTop());
+    Row clicked = pinned ? rows.get(sticky.index()) : rows.stream().filter(row -> y - listTop() + scroll() >= row.y
         && y - listTop() + scroll() < row.y + row.height).findFirst().orElse(null);
     if (clicked == null) return;
     if (clicked.id == null) {
-      int rowY = listTop() + clicked.y - scroll();
+      int rowY = pinned ? sticky.y() : listTop() + clicked.y - scroll();
       if (inside(x, y, right() - 20, rowY + 3, 20, 18)) {
         click(); toggleGroup(clicked.group); rebuildRows(); scroll(scroll()); return;
       }
@@ -590,7 +603,7 @@ public final class MusicLibraryScreen extends UiScreen {
         slideGroup(x); return;
       }
       if (!collapsed.remove(clicked.group)) collapsed.add(clicked.group);
-      rebuildRows(); scroll(scroll()); return;
+      rebuildRows(); scroll(pinned ? clicked.y : scroll()); return;
     }
     int index = clicked.index;
     if (queue && !renderedQueue.equals(MusicRequests.tracks())) {
@@ -599,7 +612,7 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     String id = clicked.id;
-    int rowY = listTop() + clicked.y - scroll();
+    int rowY = pinned ? sticky.y() : listTop() + clicked.y - scroll();
     var layout = rowLayout(); int cy = rowY + layout.controlsY(); int bw = layout.buttonWidth();
     if (!queue && inside(x,y,left(),rowY+3,20,18)) { click(); toggleIncluded(id); rebuildRows(); scroll(scroll()); return; }
     Setting volume = settings.get("audio.sound." + id);
@@ -629,6 +642,41 @@ public final class MusicLibraryScreen extends UiScreen {
     } else input(search, x, y, w, mx, my, "Search tracks or folders...");
   }
 
+  private StickyHeader stickyHeader() {
+    return StickyHeader.at(rows, row -> row.id == null, Row::y, Row::height,
+        scroll(), listTop(), bottom());
+  }
+
+  private record GroupHover(String tip, String key) {}
+
+  private GroupHover groupHeading(Row row, int y, int mx, int my) {
+    String tip = "", key = "";
+    boolean hover = inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom();
+    boolean closed = collapsed.contains(row.group) && search.text().isBlank();
+    int total = members(row.group).size(), included = includedCount(row.group);
+    String count = included + "/" + total;
+    int countWidth = minecraft.textRenderer.getWidth(count), countRight = groupVolumeX() - 6;
+    if (hover && mx >= countRight - countWidth - 4)
+      fill(left() - 2, y, right() + 2, y + row.height - 1, 0x60000000);
+    slider(groupVolume(row.group) + "%", groupVolumeX(), y+3, groupVolumeWidth(), mx, my, groupVolume(row.group)/100d);
+    text((closed ? "> " : "v ") + fit(row.label, countRight - left() - countWidth - 18), left() + 2, y + 8, 0xffffff);
+    text(count, countRight - countWidth, y + 8, included > 0 && included < total ? 0xffdd88 : 0xaaaaaa);
+    musicToggle(included > 0, right() - 20, y + 3, mx, my, total > 0);
+    fill(left(), y + 21, right(), y + 22, 0x50555555);
+    if (hover) {
+      String control = mx >= right() - 20 ? "include" : mx >= groupVolumeX() ? "volume" : "heading";
+      key = "group:" + row.group + ":" + control;
+      tip = inside(mx, my, right() - 20, y + 3, 20, 18)
+          ? (included == total ? "Exclude" : "Include") + " every track in this group. Includes hidden search results; volumes and queue stay unchanged."
+          : (row.group.startsWith("folder:") ? row.group.substring(7) : row.label + " soundtrack")
+              + "\n" + included + " of " + total + " tracks included.";
+      if (inside(mx,my,groupVolumeX(),y+3,groupVolumeWidth(),18))
+        tip = presetsOpen ? "Group volume multiplier, saved with this preset. Takes effect when loaded."
+            : "Multiplies every track volume in this group, including previews and queued music.";
+    }
+    return new GroupHover(tip, key);
+  }
+
   public void render(int mx, int my, float delta) {
     scroll((int) scrollbar.drag(track(), my, Mouse.isButtonDown(0)));
     if (dragging != null) {
@@ -653,10 +701,13 @@ public final class MusicLibraryScreen extends UiScreen {
       if (inside(mx, my, filterX(), controlsTop(), filterWidth(), 18))
         tip = "Remove queued requests. Music files and rotation stay unchanged.";
     } else if (!presetsOpen) {
-      button("Include all",includeX(),bulkTop(),72,18,mx,my,true);
-      button("Exclude all",excludeX(),bulkTop(),72,18,mx,my,true);
-      if (inside(mx,my,includeX(),bulkTop(),148,18))
-        tip = "Change every built-in and custom track, including tracks outside this filter. Volumes and queue stay unchanged.";
+      button(hideExcluded ? "Show excluded" : "Hide excluded",hideX(),hideY(),102,18,mx,my,true);
+      if (inside(mx,my,hideX(),hideY(),102,18))
+        tip = "Show or hide fully excluded groups. Individual exclusions in other groups stay visible; the playlist is unchanged.";
+      button(span() < 254 ? "All" : "Include all",includeX(),bulkTop(),bulkButtonWidth(),18,mx,my,true);
+      button(span() < 254 ? "None" : "Exclude all",excludeX(),bulkTop(),bulkButtonWidth(),18,mx,my,true);
+      if (inside(mx,my,includeX(),bulkTop(),bulkButtonWidth()*2+4,18))
+        tip = (mx < excludeX() ? "Include" : "Exclude") + " every built-in and custom track, including tracks outside this filter. Volumes and queue stay unchanged.";
       var tabs = filters();
       for (var tab : tabs.tabs()) {
         boolean selected = tab.id().equals("cycle") || (tab.id().equals("folder") ? folderSelected() : tab.id().equals(folder));
@@ -683,85 +734,74 @@ public final class MusicLibraryScreen extends UiScreen {
     }
     if (queue) renderedQueue = List.copyOf(tracks);
     clip(left() - 2, listTop(), span() + 4, Math.max(0, bottom() - listTop()));
+    StickyHeader sticky = stickyHeader();
+    int listMouseY = sticky != null && sticky.contains(my, listTop()) ? -1 : my;
     for (Row row : rows) {
       int y = listTop() + row.y - scroll();
       if (y + row.height <= listTop() || y >= bottom()) continue;
       if (row.id == null) {
-        if (inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom()) {
-          String control = mx >= right() - 20 ? "include" : mx >= groupVolumeX() ? "volume" : "heading";
-          key = "group:" + row.group + ":" + control;
+        if (sticky == null || row != rows.get(sticky.index())) {
+          var group = groupHeading(row, y, mx, listMouseY);
+          if (!group.tip.isEmpty()) { tip = group.tip; key = group.key; }
         }
-        boolean closed = collapsed.contains(row.group) && search.text().isBlank();
-        int total = members(row.group).size(), included = includedCount(row.group);
-        String count = included + "/" + total;
-        int countWidth = minecraft.textRenderer.getWidth(count);
-        int countRight = groupVolumeX() - 6;
-        slider(groupVolume(row.group) + "%", groupVolumeX(), y+3, groupVolumeWidth(), mx, my, groupVolume(row.group)/100d);
-        text((closed ? "> " : "v ") + fit(row.label, countRight - left() - countWidth - 18), left() + 2, y + 8,
-            inside(mx,my,right()-20,y+3,20,18) && my>=listTop() && my<bottom() ? 0xffff55 : 0xffffff);
-        text(count, countRight - countWidth, y + 8, included > 0 && included < total ? 0xffdd88 : 0xaaaaaa);
-        musicToggle(included > 0, right() - 20, y + 3, mx, my, total > 0);
-        fill(left(), y + 21, right(), y + 22, 0x50555555);
-        if (inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom())
-          tip = inside(mx, my, right() - 20, y + 3, 20, 18)
-              ? (included == total ? "Exclude" : "Include") + " every track in this group. Includes hidden search results; volumes and queue stay unchanged."
-              : (row.group.startsWith("folder:") ? row.group.substring(7) : row.label + " soundtrack")
-                  + "\n" + included + " of " + total + " tracks included.";
-        if (inside(mx,my,groupVolumeX(),y+3,groupVolumeWidth(),18))
-          tip = presetsOpen ? "Group volume multiplier, saved with this preset. Takes effect when loaded."
-              : "Multiplies every track volume in this group, including previews and queued music.";
         continue;
       }
       String id=row.id; int i=row.index;
       var layout=rowLayout(); int cy=y+layout.controlsY(),bw=layout.buttonWidth();
-      boolean hover=inside(mx,my,left(),y,span(),row.height)&&my>=listTop()&&my<bottom();
+      boolean hover=inside(mx,listMouseY,left(),y,span(),row.height)&&listMouseY>=listTop()&&listMouseY<bottom();
       if (hover) {
         String control = "name";
-        if (!queue && inside(mx,my,left(),y+3,20,18)) control = "include";
-        else if (inside(mx,my,volumeX(),cy,layout.volumeWidth(),18)) control = "volume";
-        else if (inside(mx,my,layout.exactX(),cy,20,18)) control = "exact";
-        else if (inside(mx,my,layout.favouriteX(),cy,bw,18)) control = "favourite";
-        else if (inside(mx,my,layout.playX(),cy,bw,18)) control = "play";
-        else if (!queue && inside(mx,my,layout.previewX(),cy,bw,18)) control = "preview";
-        else if (inside(mx,my,layout.queueX(),cy,bw,18)) control = "queue";
-        else if (queue && inside(mx,my,layout.upX(),cy,bw,18)) control = "up";
-        else if (queue && inside(mx,my,layout.downX(),cy,bw,18)) control = "down";
+        if (!queue && inside(mx,listMouseY,left(),y+3,20,18)) control = "include";
+        else if (inside(mx,listMouseY,volumeX(),cy,layout.volumeWidth(),18)) control = "volume";
+        else if (inside(mx,listMouseY,layout.exactX(),cy,20,18)) control = "exact";
+        else if (inside(mx,listMouseY,layout.favouriteX(),cy,bw,18)) control = "favourite";
+        else if (inside(mx,listMouseY,layout.playX(),cy,bw,18)) control = "play";
+        else if (!queue && inside(mx,listMouseY,layout.previewX(),cy,bw,18)) control = "preview";
+        else if (inside(mx,listMouseY,layout.queueX(),cy,bw,18)) control = "queue";
+        else if (queue && inside(mx,listMouseY,layout.upX(),cy,bw,18)) control = "up";
+        else if (queue && inside(mx,listMouseY,layout.downX(),cy,bw,18)) control = "down";
         key = "track:" + id + ":" + control;
       }
       if(hover)fill(left()-2,y,right()+2,y+row.height-1,0x60000000);
       text(fit((queue?(i+1)+". ":"")+AudioController.musicLabel(id),layout.nameWidth()),layout.nameX(),y+8,playable(id)?0xdddddd:0xffbb77);
       if(hover)tip=path(id)+(playable(id)?"":"\nConvert MP3, or reload if the file has moved.");
-      if(!queue)musicToggle(included(id),left(),y+3,mx,my,true);
+      if(!queue)musicToggle(included(id),left(),y+3,mx,listMouseY,true);
       Setting volume=settings.get("audio.sound."+id);
       if(!presetsOpen){
-        if(volume!=null)slider(volume.display()+"%",volumeX(),cy,layout.volumeWidth(),mx,my,volume.value.getAsDouble()/100);
-        button("...",layout.exactX(),cy,20,18,mx,my,volume!=null);
-        iconButton("star",layout.favouriteX(),cy,bw,mx,my,true,edits.favourites().contains(id));
+        if(volume!=null)slider(volume.display()+"%",volumeX(),cy,layout.volumeWidth(),mx,listMouseY,volume.value.getAsDouble()/100);
+        button("...",layout.exactX(),cy,20,18,mx,listMouseY,volume!=null);
+        iconButton("star",layout.favouriteX(),cy,bw,mx,listMouseY,true,edits.favourites().contains(id));
       }
       if(queue){
-        iconButton("up",layout.upX(),cy,bw,mx,my,i>0);
-        iconButton("down",layout.downX(),cy,bw,mx,my,i+1<tracks.size());
-        iconButton("remove",layout.queueX(),cy,bw,mx,my,true);
+        iconButton("up",layout.upX(),cy,bw,mx,listMouseY,i>0);
+        iconButton("down",layout.downX(),cy,bw,mx,listMouseY,i+1<tracks.size());
+        iconButton("remove",layout.queueX(),cy,bw,mx,listMouseY,true);
       }else{
-        iconButton("speaker",layout.previewX(),cy,bw,mx,my,playable(id),AudioController.previewing(id));
-        if(!presetsOpen)button("+",layout.queueX(),cy,bw,18,mx,my,true);
+        iconButton("speaker",layout.previewX(),cy,bw,mx,listMouseY,playable(id),AudioController.previewing(id));
+        if(!presetsOpen)button("+",layout.queueX(),cy,bw,18,mx,listMouseY,true);
       }
-      iconButton(AudioController.playingTrack(id)?"pause":"play",layout.playX(),cy,bw,mx,my,playable(id));
+      iconButton(AudioController.playingTrack(id)?"pause":"play",layout.playX(),cy,bw,mx,listMouseY,playable(id));
       if(hover){
-        if(!queue&&inside(mx,my,left(),y+3,20,18))tip="Include in automatic rotation. Preview and queue work even when excluded.";
-        else if(!presetsOpen&&inside(mx,my,volumeX(),cy,layout.volumeWidth(),18))tip="Track volume; music and master volumes also apply.";
-        else if(!presetsOpen&&inside(mx,my,layout.exactX(),cy,20,18))tip="Enter an exact volume";
-        else if(!presetsOpen&&inside(mx,my,layout.favouriteX(),cy,bw,18))tip=edits.favourites().contains(id)?"Remove from favourites":"Add to favourites";
-        else if(inside(mx,my,layout.playX(),cy,bw,18))tip="Play or pause this track";
-        else if(!queue&&inside(mx,my,layout.previewX(),cy,bw,18))tip="Preview without changing the current track; click again to stop.";
-        else if(!presetsOpen&&inside(mx,my,layout.queueX(),cy,bw,18))tip=queue?"Remove this request":"Add to the end of the queue";
-        else if(queue&&inside(mx,my,layout.upX(),cy,bw,18))tip="Move up";
-        else if(queue&&inside(mx,my,layout.downX(),cy,bw,18))tip="Move down";
+        if(!queue&&inside(mx,listMouseY,left(),y+3,20,18))tip="Include in automatic rotation. Preview and queue work even when excluded.";
+        else if(!presetsOpen&&inside(mx,listMouseY,volumeX(),cy,layout.volumeWidth(),18))tip="Track volume; music and master volumes also apply.";
+        else if(!presetsOpen&&inside(mx,listMouseY,layout.exactX(),cy,20,18))tip="Enter an exact volume";
+        else if(!presetsOpen&&inside(mx,listMouseY,layout.favouriteX(),cy,bw,18))tip=edits.favourites().contains(id)?"Remove from favourites":"Add to favourites";
+        else if(inside(mx,listMouseY,layout.playX(),cy,bw,18))tip="Play or pause this track";
+        else if(!queue&&inside(mx,listMouseY,layout.previewX(),cy,bw,18))tip="Preview without changing the current track; click again to stop.";
+        else if(!presetsOpen&&inside(mx,listMouseY,layout.queueX(),cy,bw,18))tip=queue?"Remove this request":"Add to the end of the queue";
+        else if(queue&&inside(mx,listMouseY,layout.upX(),cy,bw,18))tip="Move up";
+        else if(queue&&inside(mx,listMouseY,layout.downX(),cy,bw,18))tip="Move down";
       }
     }
 
+    if (sticky != null) {
+      fill(left() - 2, sticky.y(), right() + 2, sticky.y() + sticky.height(), 0xff202020);
+      var group = groupHeading(rows.get(sticky.index()), sticky.y(), mx, my);
+      if (!group.tip.isEmpty()) { tip = group.tip; key = group.key; }
+    }
+
     if (rows.isEmpty())
-      text(queue ? "Queue is empty" : presetsOpen && presets.hideExcluded() ? "No included groups." : "No matching tracks.", left() + 4, listTop() + 12, 0xaaaaaa);
+      text(queue ? "Queue is empty" : (presetsOpen ? presets.hideExcluded() : hideExcluded) ? "No included groups." : "No matching tracks.", left() + 4, listTop() + 12, 0xaaaaaa);
     unclip();
     scrollbar.render(this, track());
     if (conversionVisible()) {
