@@ -34,6 +34,6 @@ class MenuMusicLayoutTest {
     assertEquals(180 - 8, above.y() + above.height());
     var below = MenuMusicLayout.at(854, 480, 180, 320, MenuControlsPosition.MENU_BOTTOM, 13, -7);
     assertEquals(321, below.y());
-    assertEquals(230, below.x());
+    assertEquals(340, below.x());
   }
 }

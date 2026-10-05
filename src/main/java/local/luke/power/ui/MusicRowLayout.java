@@ -16,15 +16,16 @@ public record MusicRowLayout(
     int downX,
     int height,
     int buttonWidth) {
+  public static int sliderWidth(int width) {
+    return Math.max(54, Math.min(120, width / 4));
+  }
+
   public static MusicRowLayout at(int left, int width, boolean queue) {
     boolean inline = width >= (queue ? 320 : 440);
     int button = width < 260 ? 14 : 20, gap = 2;
     int right = left + width, actions = right - (button + gap) * (queue ? 5 : 4) + gap;
     int exact = actions - 22, volumeEnd = exact - gap;
-    int volumeWidth =
-        inline
-            ? Math.min(180, Math.max(100, width / 3))
-            : Math.max(36, volumeEnd - left - (queue ? 0 : 24));
+    int volumeWidth = sliderWidth(width);
     int volumeX = volumeEnd - volumeWidth;
     int nameX = left + (queue ? 2 : 24);
     int nameWidth = inline ? Math.max(12, volumeX - nameX - 6) : width - (queue ? 4 : 26);

@@ -41,6 +41,8 @@ public final class AudioPresetChecks {
         mc.options.musicVolume = .1f;
         AudioController.pause();
         options = MenuUpdateChecks.open(mc, "Audio");
+        ((MusicLibraryScreen) field(options, "library"))
+            .restore(new MusicLibraryScreen.State(false, "active", "", 0, 0));
       }
       case "ui" -> {
         var library = (MusicLibraryScreen) field(options, "library");
@@ -86,7 +88,7 @@ public final class AudioPresetChecks {
               library.openPresets();
               options.render(-1, -1, 0);
               click(
-                  options, (int) call(panel, "right") - 145, presetRowY(panel,1));
+                  options, (int) call(panel, "right") - 25, presetRowY(panel,1));
               check(
                   AudioConfig.current().disabledTracks.size() == 12,
                   "load did not apply exclusions");
@@ -111,7 +113,7 @@ public final class AudioPresetChecks {
               field(options, "libraryOpen", true);
               library.openPresets();
               var panel = field(library, "presets");
-              click(options, (int) call(panel, "right") - 85, presetRowY(panel,1));
+              click(options, (int) call(panel, "right") - 145, presetRowY(panel,1));
               ((TextInput) field(panel, "name")).setText("Renamed preset");
               click(options, (int) call(panel, "includeX") + 8, (int) call(panel, "bulkY") + 8);
               click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
@@ -162,7 +164,11 @@ public final class AudioPresetChecks {
                       - library.state().trackScroll()
                       + geometry.controlsY()
                       + 7;
+              options.render(geometry.favouriteX() + 5, y, 0);
+              field(options, "hoverTicks", 20);
               click(options, geometry.favouriteX() + 5, y);
+              options.render(geometry.favouriteX() + 5, y, 0);
+              check((int) field(options, "hoverTicks") >= 20, "favourite reset the tooltip delay");
               check(AudioConfig.current().favourites.contains("music:calm1.ogg"), "star missed");
               filter(library, "favourites");
               check(((List<?>) field(library, "tracks")).size() == 1, "favourites filter failed");
@@ -280,7 +286,7 @@ public final class AudioPresetChecks {
           case "view-editor" -> {
             library.openPresets();
             var panel=field(library,"presets");
-            click(options,(int)call(panel,"right")-85,presetRowY(panel,1));
+            click(options,(int)call(panel,"right")-145,presetRowY(panel,1));
           }
         }
         options.render(-1,-1,0);

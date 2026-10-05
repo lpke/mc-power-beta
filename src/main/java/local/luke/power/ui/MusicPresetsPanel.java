@@ -236,7 +236,7 @@ final class MusicPresetsPanel extends UiScreen {
     int row = rowTop() + index * rowHeight() - scroll;
     int cy = actionsY(row);
     if (index == 0) {
-      if (inside(x, y, right() - 170, cy, 54, 18)) {
+      if (inside(x, y, right() - 54, cy, 54, 18)) {
         edits.load("");
         parent.closeAudioPanel();
       }
@@ -245,11 +245,11 @@ final class MusicPresetsPanel extends UiScreen {
     var values = edits.presets();
     if (index > values.size()) return true;
     MusicPreset p = values.get(index - 1);
-    if (inside(x, y, right() - 170, cy, 54, 18)) {
+    if (inside(x, y, right() - 54, cy, 54, 18)) {
       edits.load(p.id());
       parent.closeAudioPanel();
-    } else if (inside(x, y, right() - 112, cy, 54, 18)) edit(p);
-    else if (inside(x, y, right() - 54, cy, 54, 18)) deleting = p.id();
+    } else if (inside(x, y, right() - 170, cy, 54, 18)) edit(p);
+    else if (inside(x, y, right() - 112, cy, 54, 18)) deleting = p.id();
     return true;
   }
 
@@ -314,10 +314,10 @@ final class MusicPresetsPanel extends UiScreen {
             left() + 2,
             y + 19,
             0xaaaaaa);
-        button("Load", right() - 170, actionsY(y), 54, 18, mx, my, true);
+        button("Load", right() - 54, actionsY(y), 54, 18, mx, my, true);
         if (p != null) {
-          button("Edit", right() - 112, actionsY(y), 54, 18, mx, my, true);
-          button("Delete", right() - 54, actionsY(y), 54, 18, mx, my, true);
+          button("Edit", right() - 170, actionsY(y), 54, 18, mx, my, true);
+          button("Delete", right() - 112, actionsY(y), 54, 18, mx, my, true);
         }
         fill(left(), y + rowHeight() - 4, right(), y + rowHeight() - 3, 0x40555555);
       }

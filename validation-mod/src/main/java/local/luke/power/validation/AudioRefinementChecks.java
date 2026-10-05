@@ -100,14 +100,14 @@ final class AudioRefinementChecks {
       }
       test("unchanged editor Back returns through the list with no stale panel state",()->{
         var library=open(s);var panel=field(library,"presets");
-        click(s,(int)call(panel,"right")-85,presetRowY(panel,1));
+        click(s,(int)call(panel,"right")-145,presetRowY(panel,1));
         check((boolean)call(panel,"editing"),"Edit missed");
         back(s);check(!library.dirtyPreset()&&library.presetVisible(),"editor did not return to list");
         back(s);toolbar(s);
       });
       for(int row:new int[]{0,1}) test("loading preset selector row "+row+" restores toolbar",()->{
         var library=open(s);var panel=field(library,"presets");
-        click(s,(int)call(panel,"right")-145,presetRowY(panel,row));
+        click(s,(int)call(panel,"right")-25,presetRowY(panel,row));
         toolbar(s);
       });
       test("library Exclude all covers hidden filter results and preserves volumes and queue",()->{

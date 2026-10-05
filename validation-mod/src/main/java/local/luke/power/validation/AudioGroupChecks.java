@@ -8,6 +8,7 @@ import local.luke.power.audio.*;
 import local.luke.power.ui.*;
 import local.luke.power.validation.mixin.ScreenInput;
 import net.minecraft.client.Minecraft;
+import net.minecraft.class_525;
 import net.minecraft.client.gui.screen.TitleScreen;
 import org.lwjgl.opengl.GL11;
 
@@ -34,11 +35,6 @@ final class AudioGroupChecks {
   private static void setGroupVolume(MusicLibraryScreen library, String group, int volume)
       throws Exception {
     int y = groupY(library, group);
-    if (!((Set<?>) field(library, "volumeGroups")).contains(group))
-      ((ScreenInput) (Object) options).power$click((int) call(library, "left") + 10, y, 1);
-    check(
-        ((Set<?>) field(library, "volumeGroups")).contains(group),
-        "right click did not expose slider");
     int x = (int) call(library, "groupVolumeX"), w = (int) call(library, "groupVolumeWidth");
     click(options, x + 4 + (int) Math.round((w - 8) * volume / 100d), y);
     options.render(-1, -1, 0);
@@ -89,7 +85,7 @@ final class AudioGroupChecks {
               library.openPresets();
               var panel = field(library, "presets");
               int y = presetRowY(panel, 1);
-              click(options, (int) call(panel, "right") - 85, y);
+              click(options, (int) call(panel, "right") - 145, y);
               check((boolean) call(panel, "editing"), "Edit missed");
               check((boolean) call(panel, "hideExcluded"), "existing preset exclusions not hidden");
               check(header(library, "Alpha") == null, "fully excluded group visible");
@@ -110,7 +106,7 @@ final class AudioGroupChecks {
               click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
               check(AudioConfig.current().groupVolumes.isEmpty(), "Save applied draft gain");
               int volume = AudioConfig.current().presets.get(0).groupVolumes().get("Alpha");
-              click(options, (int) call(panel, "right") - 145, presetRowY(panel, 1));
+              click(options, (int) call(panel, "right") - 25, presetRowY(panel, 1));
               check(
                   AudioConfig.current().groupVolumes.get("Alpha") == volume,
                   "Load missed group volume");
@@ -150,55 +146,51 @@ final class AudioGroupChecks {
       }
       case "menu" -> {
         test(
-            "title music panel renders every anchor and both orientations at four GUI sizes",
+            "pause music controls render all anchors and keep the title screen unchanged",
             () -> {
               AudioSettings s = AudioConfig.copy();
               s.menuControls = true;
               AudioConfig.preview(s);
-              TitleScreen title = new TitleScreen();
-              mc.setScreen(title);
+              class_525 pause = new class_525();
+              mc.setScreen(pause);
               for (int[] size : new int[][] {{320, 240}, {427, 240}, {640, 420}, {854, 480}})
                 for (var anchor : AudioSettings.MenuControlsPosition.values()) {
                   s.menuControlsPosition = anchor;
                   AudioConfig.preview(s);
-                  title.init(mc, size[0], size[1]);
-                  title.render(-1, -1, 0);
-                  check(GL11.glGetError() == 0, "title GL error " + anchor);
+                  pause.init(mc, size[0], size[1]);
+                  pause.render(-1, -1, 0);
+                  var panel = field(pause, "power$music");
+                  var bounds = (MenuMusicLayout) field(panel, "bounds");
+                  check(bounds.width() <= 200, "panel wider than menu buttons");
+                  var buttons = ((ScreenInput) (Object) pause).power$buttons();
+                  var settings = buttons.stream().filter(b -> b.id == 0).findFirst().orElseThrow();
+                  var stats = buttons.stream().filter(b -> b.id == 6).findFirst().orElseThrow();
+                  check(settings.y == stats.y + 24, "music panel restored the old Options gap");
+                  buttons.stream().filter(b -> b.id == 20).forEach(b ->
+                      check(b.y == settings.y, "photo button detached from Options"));
+                  check(GL11.glGetError() == 0, "pause GL error " + anchor);
                 }
-              mc.setScreen(title);
+              mc.setScreen(pause);
               s.menuControlsPosition = AudioSettings.MenuControlsPosition.MENU_BOTTOM;
               AudioConfig.preview(s);
-              title.render(-1, -1, 0);
-              var panel = field(title, "power$music");
+              pause.render(-1, -1, 0);
+              var panel = (PauseMenuMusic) field(pause, "power$music");
               var bounds = (MenuMusicLayout) field(panel, "bounds");
-              var toolbar = AudioToolbar.layout(bounds.x(), bounds.width(), 0, false, false);
-              var library =
-                  toolbar.buttons().stream()
-                      .filter(b -> b.action() == AudioToolbar.Action.LIBRARY)
-                      .findFirst()
-                      .orElseThrow();
-              ((ScreenInput) (Object) title)
-                  .power$click(library.x() + 8, bounds.y() + library.y() - 52 + 8, 0);
-              check(
-                  mc.currentScreen instanceof PowerOptionsScreen, "title Library click not routed");
-              check(field(mc.currentScreen, "page").equals("Audio"), "title Library missed Audio");
-              check(
-                  (boolean) call(mc.currentScreen, "libraryVisible"),
-                  "title Library stayed closed");
-              mc.setScreen(title);
-              title.render(-1, -1, 0);
-              var play = toolbar.buttons().get(0);
+              int x = (int) call(panel, "controlsX");
               AudioController.pause();
-              ((ScreenInput) (Object) title)
-                  .power$click(play.x() + 8, bounds.y() + play.y() - 52 + 8, 0);
-              check(!AudioController.status().equals("Music paused"), "title Play not routed");
+              ((ScreenInput) (Object) pause).power$click(x + 8, bounds.y() + 8, 0);
+              check(!AudioController.status().equals("Music paused"), "pause Play not routed");
+              check(mc.currentScreen == pause, "transport closed pause menu");
               s.menuControls = false;
               AudioConfig.preview(s);
+              check(!panel.press(x + 8, bounds.y() + 8, 0), "hidden control captured click");
+              s.menuControls = true;
+              AudioConfig.preview(s);
+              TitleScreen title = new TitleScreen();
+              mc.setScreen(title);
               title.render(-1, -1, 0);
-              check(
-                  !((MainMenuMusic) panel)
-                      .press(title, library.x() + 8, bounds.y() + library.y() - 52 + 8, 0),
-                  "hidden music control captured click");
+              check(Arrays.stream(title.getClass().getDeclaredFields())
+                  .noneMatch(f -> f.getName().equals("power$music")), "title still has music panel");
             });
         log("AUDIO GROUP MENU FAILURES " + failures);
       }
@@ -265,9 +257,8 @@ final class AudioGroupChecks {
         if (action.equals("view-editor")) {
           library.openPresets();
           var panel = field(library, "presets");
-          click(options, (int) call(panel, "right") - 85, presetRowY(panel, 1));
-          int y = groupY(library, "Beta / Creative");
-          ((ScreenInput) (Object) options).power$click((int) call(library, "left") + 10, y, 1);
+          click(options, (int) call(panel, "right") - 145, presetRowY(panel, 1));
+          groupY(library, "Beta / Creative");
         } else {
           library.showTrack("music:calm1.ogg");
           if (action.equals("view-tabs")) {
@@ -275,18 +266,17 @@ final class AudioGroupChecks {
             method.setAccessible(true);
             method.invoke(library, "presets");
           } else {
-            int y = groupY(library, "Alpha");
-            ((ScreenInput) (Object) options).power$click((int) call(library, "left") + 10, y, 1);
+            groupY(library, "Alpha");
           }
         }
         options.render(-1, -1, 0);
       }
-      case "title" -> {
+      case "pause" -> {
         var s = AudioConfig.copy();
         s.menuControls = true;
         s.menuControlsPosition = AudioSettings.MenuControlsPosition.MENU_BOTTOM;
         AudioConfig.preview(s);
-        mc.setScreen(new TitleScreen());
+        mc.setScreen(new class_525());
       }
       case "finish" -> {
         AudioController.pause();

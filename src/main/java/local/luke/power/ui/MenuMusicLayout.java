@@ -12,12 +12,12 @@ public record MenuMusicLayout(int x, int y, int width, int height) {
       MenuControlsPosition position,
       int offsetX,
       int offsetY) {
-    int width = Math.max(180, Math.min(420, screenWidth - 16));
+    int width = Math.max(180, Math.min(200, screenWidth - 16));
     boolean side =
         position == MenuControlsPosition.MIDDLE_LEFT
             || position == MenuControlsPosition.MIDDLE_RIGHT;
     if (side) width = Math.max(180, Math.min(width, screenWidth / 2 - 112));
-    int height = AudioToolbar.bottom(width, false) - 52 + 20;
+    int height = 32;
     int x =
         switch (position) {
           case TOP_LEFT, MIDDLE_LEFT, BOTTOM_LEFT -> 8;

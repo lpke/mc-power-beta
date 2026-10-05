@@ -122,17 +122,17 @@ public final class AudioBackend implements Backend {
           Setting.Kind.INTEGER, new JsonPrimitive(minimum ? s.gapMinSeconds : s.gapMaxSeconds),
           new JsonPrimitive(minimum ? 600 : 1200), 0, 86400, 1, List.of(), false));
     }
-    add("menuControls", "Main menu music", "Show music controls", Setting.Kind.BOOLEAN,
+    add("menuControls", "Pause menu music", "Show music controls", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.menuControls), new JsonPrimitive(false),
-        "Show playback controls, the current track and a scrub bar on the main menu.", List.of());
-    add("menuControlsPosition", "Main menu music", "Position", Setting.Kind.CHOICE,
+        "Show play/pause, previous, next, quiet and track information on the pause menu.", List.of());
+    add("menuControlsPosition", "Pause menu music", "Position", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuControlsPosition.ordinal()), new JsonPrimitive(1),
         "Anchor the music panel beside the menu or at a screen edge. Offsets adjust its position.",
         List.of("Above menu", "Below menu", "Top left", "Top center", "Top right",
             "Middle left", "Middle right", "Bottom left", "Bottom center", "Bottom right"));
     for (boolean horizontal : new boolean[]{true, false}) {
       String key = horizontal ? "menuControlsOffsetX" : "menuControlsOffsetY";
-      entries.add(new Setting("audio." + key, id(), "Audio", "Main menu music",
+      entries.add(new Setting("audio." + key, id(), "Audio", "Pause menu music",
           horizontal ? "Horizontal offset" : "Vertical offset",
           horizontal ? "Move right with positive values, left with negative values. Uses scaled GUI pixels."
               : "Move down with positive values, up with negative values. Uses scaled GUI pixels.",

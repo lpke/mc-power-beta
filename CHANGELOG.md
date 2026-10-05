@@ -1,5 +1,17 @@
 # Changelog
 
+## Audio controls and layout
+
+- Put Edit and Delete before Load, with Load at the far right, including the None row.
+- Always show group volume sliders. Track and queue volume sliders use the same width.
+- Move optional music controls from the title screen to the pause menu. Show only
+  play/pause, previous, next, Quiet (Q) and track information. Keep the panel within
+  the normal menu width and retain its position and offset settings.
+- Avoid rebuilding the full library when starring a track outside Favourites.
+  Live updates, saving and the controls inside Audio settings keep their behaviour.
+- Keep music tooltips visible while their values change, instead of briefly hiding
+  them and restarting the hover delay after each favourite/include/volume change.
+
 ## Preset management, group volumes and main-menu music
 
 - Merge preset loading and management into one list with Create new preset,

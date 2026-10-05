@@ -331,7 +331,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (audio()) {
       Map<String, List<Setting>> ordered = new LinkedHashMap<>();
-      for (String group : List.of("Volume", "Music library", "Music gaps", "Main menu music", "Sound categories", "Extra sounds", "Music and ambience", "Individual sounds", "Individual music tracks"))
+      for (String group : List.of("Volume", "Music library", "Music gaps", "Pause menu music", "Sound categories", "Extra sounds", "Music and ambience", "Individual sounds", "Individual music tracks"))
         if (groups.containsKey(group)) ordered.put(group, groups.get(group));
       groups.forEach(ordered::putIfAbsent);
       groups = ordered;
@@ -971,7 +971,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     unclip();
     contentBar.render(this, contentTrack());
-    } else { library.render(mx, my, delta); tip = library.hoverHelp(); hoverId = "library:" + tip; }
+    } else { library.render(mx, my, delta); tip = library.hoverHelp(); hoverId = "library:" + library.hoverKey(); }
     if (musicControlsVisible()) {
       var item = musicButton(mx, my);
       if (item != null) {

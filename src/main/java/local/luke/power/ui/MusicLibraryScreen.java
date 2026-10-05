@@ -46,7 +46,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private final ScrollBar scrollbar = new ScrollBar();
   private int conversionRevision, conversionTicks, trackScroll, queueScroll;
   private boolean queue, conversionNeeded;
-  private String folder = "active", lastFolder = "", error = "", hoverHelp = "";
+  private String folder = "active", lastFolder = "", error = "", hoverHelp = "", hoverKey = "";
   private Set<String> activeTracks = Set.of();
 
   public boolean trackStatusVisible() { return error.isEmpty() && !Mp3Converter.busy() && conversionTicks == 0; }
@@ -59,11 +59,14 @@ public final class MusicLibraryScreen extends UiScreen {
     return hoverHelp;
   }
 
+  public String hoverKey() {
+    return hoverKey;
+  }
+
   private int revision = -1;
   private Setting dragging;
   private String draggingGroup;
   private MusicPresetDraft draggingGroupDraft;
-  private final Set<String> volumeGroups = new HashSet<>();
   private List<String> renderedQueue = List.of();
 
   public MusicLibraryScreen(PowerOptionsScreen parent) {
@@ -342,7 +345,7 @@ public final class MusicLibraryScreen extends UiScreen {
     return presetsOpen && presets.editing() ? presets.draft().volume(group) : edits.volume(group);
   }
 
-  private int groupVolumeWidth() { return Math.max(54, Math.min(120, span() / 4)); }
+  private int groupVolumeWidth() { return MusicRowLayout.sliderWidth(span()); }
   private int groupVolumeX() { return right() - 24 - groupVolumeWidth(); }
 
   private void slideGroup(int x) {
@@ -580,11 +583,8 @@ public final class MusicLibraryScreen extends UiScreen {
       if (inside(x, y, right() - 20, rowY + 3, 20, 18)) {
         click(); toggleGroup(clicked.group); rebuildRows(); scroll(scroll()); return;
       }
-      if (b == 1) {
-        if (!volumeGroups.remove(clicked.group)) volumeGroups.add(clicked.group);
-        return;
-      }
-      if (volumeGroups.contains(clicked.group) && inside(x,y,groupVolumeX(),rowY+3,groupVolumeWidth(),18)) {
+      if (b != 0) return;
+      if (inside(x,y,groupVolumeX(),rowY+3,groupVolumeWidth(),18)) {
         draggingGroup = clicked.group;
         draggingGroupDraft = presetsOpen && presets.editing() ? presets.draft() : null;
         slideGroup(x); return;
@@ -609,7 +609,7 @@ public final class MusicLibraryScreen extends UiScreen {
     if (!presetsOpen && volume != null && inside(x,y,layout.exactX(),cy,20,18)) {
       click();minecraft.setScreen(new ValueScreen(parent,volume));return;
     }
-    if (!presetsOpen && inside(x,y,layout.favouriteX(),cy,bw,18)) { click();edits.favourite(id);rebuild();return; }
+    if (!presetsOpen && inside(x,y,layout.favouriteX(),cy,bw,18)) { click();edits.favourite(id);if (folder.equals("favourites")) rebuild();return; }
     if (queue) {
       if (inside(x,y,layout.queueX(),cy,bw,18)) { click();queueEdit(q -> q.tracks.remove(index)); }
       else if (inside(x,y,layout.playX(),cy,bw,18) && playable(id)) AudioController.toggleTrack(id);
@@ -642,10 +642,10 @@ public final class MusicLibraryScreen extends UiScreen {
       if (Mouse.isButtonDown(0)) slideGroup(mx);
       else finishDrag();
     }
-    String tip = "";
+    String tip = "", key = "";
     if (presetsOpen) {
       presets.renderHeader(mx,my);
-      if (!presets.editing()) { hoverHelp = ""; return; }
+      if (!presets.editing()) { hoverHelp = hoverKey = ""; return; }
     }
     if (queue) {
       text("Up next", left() + 2, controlsTop() + 5, 0xdddddd);
@@ -687,13 +687,16 @@ public final class MusicLibraryScreen extends UiScreen {
       int y = listTop() + row.y - scroll();
       if (y + row.height <= listTop() || y >= bottom()) continue;
       if (row.id == null) {
+        if (inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom()) {
+          String control = mx >= right() - 20 ? "include" : mx >= groupVolumeX() ? "volume" : "heading";
+          key = "group:" + row.group + ":" + control;
+        }
         boolean closed = collapsed.contains(row.group) && search.text().isBlank();
         int total = members(row.group).size(), included = includedCount(row.group);
         String count = included + "/" + total;
         int countWidth = minecraft.textRenderer.getWidth(count);
-        boolean volumeShown = volumeGroups.contains(row.group);
-        int countRight = volumeShown ? groupVolumeX() - 6 : right() - 26;
-        if (volumeShown) slider(groupVolume(row.group) + "%", groupVolumeX(), y+3, groupVolumeWidth(), mx, my, groupVolume(row.group)/100d);
+        int countRight = groupVolumeX() - 6;
+        slider(groupVolume(row.group) + "%", groupVolumeX(), y+3, groupVolumeWidth(), mx, my, groupVolume(row.group)/100d);
         text((closed ? "> " : "v ") + fit(row.label, countRight - left() - countWidth - 18), left() + 2, y + 8,
             inside(mx,my,right()-20,y+3,20,18) && my>=listTop() && my<bottom() ? 0xffff55 : 0xffffff);
         text(count, countRight - countWidth, y + 8, included > 0 && included < total ? 0xffdd88 : 0xaaaaaa);
@@ -703,8 +706,8 @@ public final class MusicLibraryScreen extends UiScreen {
           tip = inside(mx, my, right() - 20, y + 3, 20, 18)
               ? (included == total ? "Exclude" : "Include") + " every track in this group. Includes hidden search results; volumes and queue stay unchanged."
               : (row.group.startsWith("folder:") ? row.group.substring(7) : row.label + " soundtrack")
-                  + "\n" + included + " of " + total + " tracks included. Right-click to show or hide group volume.";
-        if (volumeShown && inside(mx,my,groupVolumeX(),y+3,groupVolumeWidth(),18))
+                  + "\n" + included + " of " + total + " tracks included.";
+        if (inside(mx,my,groupVolumeX(),y+3,groupVolumeWidth(),18))
           tip = presetsOpen ? "Group volume multiplier, saved with this preset. Takes effect when loaded."
               : "Multiplies every track volume in this group, including previews and queued music.";
         continue;
@@ -712,6 +715,19 @@ public final class MusicLibraryScreen extends UiScreen {
       String id=row.id; int i=row.index;
       var layout=rowLayout(); int cy=y+layout.controlsY(),bw=layout.buttonWidth();
       boolean hover=inside(mx,my,left(),y,span(),row.height)&&my>=listTop()&&my<bottom();
+      if (hover) {
+        String control = "name";
+        if (!queue && inside(mx,my,left(),y+3,20,18)) control = "include";
+        else if (inside(mx,my,volumeX(),cy,layout.volumeWidth(),18)) control = "volume";
+        else if (inside(mx,my,layout.exactX(),cy,20,18)) control = "exact";
+        else if (inside(mx,my,layout.favouriteX(),cy,bw,18)) control = "favourite";
+        else if (inside(mx,my,layout.playX(),cy,bw,18)) control = "play";
+        else if (!queue && inside(mx,my,layout.previewX(),cy,bw,18)) control = "preview";
+        else if (inside(mx,my,layout.queueX(),cy,bw,18)) control = "queue";
+        else if (queue && inside(mx,my,layout.upX(),cy,bw,18)) control = "up";
+        else if (queue && inside(mx,my,layout.downX(),cy,bw,18)) control = "down";
+        key = "track:" + id + ":" + control;
+      }
       if(hover)fill(left()-2,y,right()+2,y+row.height-1,0x60000000);
       text(fit((queue?(i+1)+". ":"")+AudioController.musicLabel(id),layout.nameWidth()),layout.nameX(),y+8,playable(id)?0xdddddd:0xffbb77);
       if(hover)tip=path(id)+(playable(id)?"":"\nConvert MP3, or reload if the file has moved.");
@@ -761,5 +777,6 @@ public final class MusicLibraryScreen extends UiScreen {
                 : AudioController.status();
     if (!trackStatusVisible()) text(fit(status, span() - (conversionVisible() ? 92 : 0)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
     hoverHelp = tip;
+    hoverKey = key.isEmpty() ? tip : key;
   }
 }
