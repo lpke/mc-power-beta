@@ -55,8 +55,11 @@ public final class PowerOptionsScreen extends UiScreen {
   int contentLeft() { return left(); }
   int contentRight() { return right() - 14; }
   int contentBottom() { return bottom(); }
-  int audioContentTop() { if (libraryVisible() && library.presetVisible()) return 52; return AudioToolbar.bottom(span(), libraryVisible()) + 3; }
+  int audioContentTop() { if (presetVisible()) return 52; return AudioToolbar.bottom(span(), libraryVisible()) + 3; }
   private boolean libraryVisible() { return libraryOpen && audio(); }
+  private boolean presetVisible() { return libraryVisible() && library.presetVisible(); }
+  private boolean musicControlsVisible() { return audio() && !presetVisible(); }
+  private int musicStatusWidth() { return contentRight() - left() - (libraryVisible() && library.conversionVisible() ? 92 : 0); }
   private int contentHeight() { return rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height + 6; }
   private ScrollBar.Track contentTrack() { return new ScrollBar.Track(right() - 8, top(), bottom() - top(), contentHeight(), scroll); }
   private ScrollBar.Track sidebarTrack() { return new ScrollBar.Track(origin() + sidebar() + 3, 24, bottom() - 24, PAGES.size() * 22, sideScroll); }
@@ -154,7 +157,7 @@ public final class PowerOptionsScreen extends UiScreen {
   void closeAudioPanel() { closeLibrary(); }
   private void closeLibrary() {
     if (library != null && library.dirtyPreset()) { library.guard(this::closeLibrary); return; }
-    if (library != null) library.removed();
+    if (library != null) library.close();
     libraryOpen = false;
     layout();
   }
@@ -283,7 +286,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private int top() {
-    return audio() ? audioContentTop() + 24 : 52;
+    return audio() ? audioContentTop() + 20 : 52;
   }
 
   private int bottom() {
@@ -483,7 +486,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (audio() && !library.presetVisible() && button == 0 && y >= 52 && y < audioContentTop() - 3 && x >= left() && x < contentRight()) {
+    if (musicControlsVisible() && button == 0 && y >= 52 && y < audioContentTop() - 3 && x >= left() && x < contentRight()) {
       var item = musicButton(x, y);
       if (item == null) return;
       if (!item.enabled() && !(item.action() == AudioToolbar.Action.QUEUE
@@ -505,9 +508,9 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (audio() && !library.presetVisible() && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.press(x,y,button)) return;
-    if (audio() && !library.presetVisible() && button == 0 && (!libraryVisible() || library.trackStatusVisible()) && inside(x, y, left(), audioContentTop(),
-        span() - (libraryVisible() && !library.queueVisible() ? 92 : 0), 15)) {
+    if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.press(x,y,button)) return;
+    if (musicControlsVisible() && button == 0 && (!libraryVisible() || library.trackStatusVisible()) && inside(x, y, left(), audioContentTop(),
+        musicStatusWidth(), 15)) {
       String id = local.luke.power.audio.AudioController.currentTrackId();
       if (!id.isEmpty()) { click(); libraryOpen = true; library.showTrack(id); layout(); }
       return;
@@ -876,7 +879,7 @@ public final class PowerOptionsScreen extends UiScreen {
         !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls for \"" + relatedLabel + "\"" : "Related settings"
         : changedOnly ? "Search changed settings..." : "Search all settings...");
     if (canClear()) button("x", right() - 32, 27, 18, 20, mx, my, true);
-    if (audio() && !library.presetVisible()) {
+    if (musicControlsVisible()) {
       for (var item : musicButtons()) {
         if (item.action() == AudioToolbar.Action.PREVIOUS || item.action() == AudioToolbar.Action.NEXT)
           trackButton(item.label(), item.action() == AudioToolbar.Action.PREVIOUS,
@@ -891,7 +894,7 @@ public final class PowerOptionsScreen extends UiScreen {
           fill(item.x() + 2, item.y() + 15, item.x() + item.width() - 2, item.y() + 17, 0xffb0b0b0);
       }
       if (!libraryVisible() || library.trackStatusVisible()) musicStatus.render(this,left(),audioContentTop(),
-          span()-(libraryVisible() && !library.queueVisible() && !library.presetVisible()?92:0),mx,my);
+          musicStatusWidth(),mx,my);
     }
     String tip = "", hoverId = "";
     if (!libraryVisible()) {
@@ -956,7 +959,7 @@ public final class PowerOptionsScreen extends UiScreen {
     unclip();
     contentBar.render(this, contentTrack());
     } else { library.render(mx, my, delta); tip = library.hoverHelp(); hoverId = "library:" + tip; }
-    if (audio() && !library.presetVisible()) {
+    if (musicControlsVisible()) {
       var item = musicButton(mx, my);
       if (item != null) {
         var action = item.action();
@@ -972,8 +975,8 @@ public final class PowerOptionsScreen extends UiScreen {
         hoverId = "music." + action;
       }
     }
-    if (audio() && !library.presetVisible() && (!libraryVisible() || library.trackStatusVisible()) && !local.luke.power.audio.AudioController.currentTrackId().isEmpty()
-        && inside(mx, my, left(), audioContentTop(), span() - (libraryVisible() && !library.queueVisible() ? 92 : 0), 15)) {
+    if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && !local.luke.power.audio.AudioController.currentTrackId().isEmpty()
+        && inside(mx, my, left(), audioContentTop(), musicStatusWidth(), 15)) {
       tip = "Show this track in Everything"; hoverId = "music.current";
     }
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);

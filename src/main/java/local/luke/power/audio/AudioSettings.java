@@ -66,8 +66,7 @@ public final class AudioSettings {
         throw new IllegalArgumentException("Unknown audio category");
       volume(e.getValue());
     }
-    if (disabledTracks == null || disabledTracks.size() > 4096 || disabledTracks.stream().anyMatch(id -> id == null || !id.startsWith("music:") || id.length() > 512))
-      throw new IllegalArgumentException("Invalid excluded tracks");
+    MusicPreset.validateTracks(disabledTracks);
     if (sounds.size() > 4096) throw new IllegalArgumentException("Too many sound overrides");
     for (var e : sounds.entrySet()) {
       String id = e.getKey();

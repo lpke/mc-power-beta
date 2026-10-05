@@ -23,6 +23,8 @@ public final class MusicSeeking {
   private static final Map<String, Double> DURATIONS = new ConcurrentHashMap<>();
   private static final Set<String> READING = ConcurrentHashMap.newKeySet();
   private static CompletableFuture<Prepared> pending;
+  private record Target(String id, String source, double seconds) {}
+  private static Target target;
   private static boolean registered;
 
   private MusicSeeking() {}
@@ -38,6 +40,7 @@ public final class MusicSeeking {
             if (p != null) p.codec.cleanup();
           });
     pending = null;
+    target = null;
     READY.values().forEach(p -> p.codec.cleanup());
     READY.clear();
   }
@@ -50,6 +53,7 @@ public final class MusicSeeking {
       registered = true;
     }
     long generation = GENERATION.get();
+    target = new Target(id, source, seconds);
     pending =
         CompletableFuture.supplyAsync(
             () -> prepare(id, source, url, filename, seconds, generation), WORKER);
@@ -104,11 +108,18 @@ public final class MusicSeeking {
       return null;
     } finally {
       pending = null;
+      target = null;
     }
   }
 
   public static synchronized boolean busy() {
     return pending != null;
+  }
+
+  /** Keep the selected position visible until the prepared stream takes over. */
+  public static synchronized double position(String id, String source, double actual) {
+    return target != null && target.id.equals(id) && target.source.equals(source)
+        ? target.seconds : actual;
   }
 
   public static synchronized URL publish(Prepared prepared) {

@@ -45,11 +45,15 @@ public final class MusicLibraryScreen extends UiScreen {
   private final Map<String, MusicLibrary.Track> custom = new HashMap<>();
   private final ScrollBar scrollbar = new ScrollBar();
   private int conversionRevision, conversionTicks, trackScroll, queueScroll;
-  private boolean queue;
+  private boolean queue, conversionNeeded;
   private String folder = "active", lastFolder = "", error = "", hoverHelp = "";
   private Set<String> activeTracks = Set.of();
 
   public boolean trackStatusVisible() { return error.isEmpty() && !Mp3Converter.busy() && conversionTicks == 0; }
+
+  public boolean conversionVisible() {
+    return !queue && !presetsOpen && (conversionNeeded || Mp3Converter.busy());
+  }
 
   public String hoverHelp() {
     return hoverHelp;
@@ -70,6 +74,7 @@ public final class MusicLibraryScreen extends UiScreen {
 
   public void restore(State state) {
     if (state == null) return;
+    closePresets();
     collapsed.clear(); collapsed.addAll(state.collapsed);
     initializedFilters.clear(); initializedFilters.addAll(state.initialized);
     queue = state.queue;
@@ -99,11 +104,17 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int listTop() {
-    return presetsOpen ? controlsTop() + presets.headerHeight() : controlsTop() + (queue ? 18 : filters().height()) + 6;
+    return presetsOpen ? statusTop() + 4 + presets.headerHeight() : controlsTop()
+        + (queue ? 18 : Math.max(filters().height(), bulkTop() - controlsTop() + 18)) + 6;
   }
 
   private int statusTop() { return parent.audioContentTop(); }
-  private int controlsTop() { return statusTop() + 20; }
+  private int controlsTop() { return statusTop() + 18; }
+  private int bulkTop() {
+    return controlsTop() + (span() < 380 ? 22 : span() < 504 ? filters().height() + 4 : 0);
+  }
+  private int includeX() { return right() - 148; }
+  private int excludeX() { return right() - 72; }
 
   private boolean narrow() {
     return span() < 350;
@@ -136,13 +147,24 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
 
+  private void closePresets() {
+    presetsOpen = false;
+    presets.open(false);
+    previousDraft = null;
+  }
+
+  public void close() {
+    removed();
+    closePresets();
+  }
+
   private void show(boolean queue) {
     dragging = null;
     scrollbar.release();
     parent.finishContinuousChange();
     search.focused = false;
     this.queue = queue;
-    presetsOpen = false;
+    closePresets();
     error = "";
     rebuild();
   }
@@ -171,10 +193,10 @@ public final class MusicLibraryScreen extends UiScreen {
         case "presets" -> "Presets"; default -> "Everything";
       };
       boolean selector = folderSelected() || folder.equals("presets");
-      return new MusicFilters.Layout(List.of(new MusicFilters.Tab("cycle",label,left(),controlsTop(),span()-76)),
-          left(),controlsTop()+22,span(),selector?40:18);
+      return new MusicFilters.Layout(List.of(new MusicFilters.Tab("cycle",label,left(),controlsTop(),span())),
+          left(),controlsTop()+44,span(),selector?62:40);
     }
-    return MusicFilters.layout(left(), controlsTop(), span() - 76, folderSelected() || folder.equals("presets"));
+    return MusicFilters.layout(left(), controlsTop(), span() - (span() < 504 ? 0 : 152), folderSelected() || folder.equals("presets"));
   }
 
   private void selectFilter(String id) {
@@ -256,6 +278,7 @@ public final class MusicLibraryScreen extends UiScreen {
     AudioBackend.discoverMusic(parent.session(), minecraft);
     custom.clear();
     AudioController.customTracks().forEach(t -> custom.put(t.id(), t));
+    conversionNeeded = Mp3Converter.needed(custom.values());
     TreeSet<String> paths = new TreeSet<>(Comparator.comparing((String path) -> path.toLowerCase(Locale.ROOT)).thenComparing(Comparator.naturalOrder()));
     for (List<String> roots : List.of(AudioConfig.current().musicDirectories, AudioConfig.current().menuDirectories)) {
       for (String root : roots) {
@@ -347,6 +370,7 @@ public final class MusicLibraryScreen extends UiScreen {
       for (String id : tracks) groups.computeIfAbsent(group(id), k -> new ArrayList<>()).add(id);
       if (presetsOpen && presets.editing() && previousDraft != presets.draft()) {
         collapsed.clear(); collapsed.addAll(groups.keySet()); previousDraft = presets.draft();
+        trackScroll = 0;
       } else if (!presetsOpen && !groups.isEmpty()
           && (folder.isEmpty() || folder.equals("active") && groups.size() > 1) && initializedFilters.add(folder)) collapsed.addAll(groups.keySet());
       for (var entry : groups.entrySet()) {
@@ -484,7 +508,13 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     if (!queue && !presetsOpen) {
-      if (inside(x,y,right()-72,controlsTop(),72,18)) { click(); edits.includeAll(); return; }
+      if (inside(x,y,includeX(),bulkTop(),72,18)) { click(); edits.includeAll(); return; }
+      if (inside(x,y,excludeX(),bulkTop(),72,18)) {
+        click();
+        try { edits.excludeAll(AudioController.music(minecraft)); error = ""; }
+        catch (IllegalArgumentException e) { error = e.getMessage(); }
+        return;
+      }
       var tabs = filters();
       for (var tab : tabs.tabs()) if (inside(x, y, tab.x(), tab.y(), tab.width(), 18)) {
         click();
@@ -506,7 +536,7 @@ public final class MusicLibraryScreen extends UiScreen {
         return;
       }
     }
-    if (!queue && !presetsOpen && inside(x, y, right() - 88, statusTop(), 88, 14)) {
+    if (conversionVisible() && inside(x, y, right() - 88, statusTop(), 88, 14)) {
       click();
       if (Mp3Converter.busy()) Mp3Converter.cancel();
       else
@@ -582,7 +612,10 @@ public final class MusicLibraryScreen extends UiScreen {
       if (inside(mx, my, filterX(), controlsTop(), filterWidth(), 18))
         tip = "Remove queued requests. Music files and rotation stay unchanged.";
     } else if (!presetsOpen) {
-      button("Include all",right()-72,controlsTop(),72,18,mx,my,true);
+      button("Include all",includeX(),bulkTop(),72,18,mx,my,true);
+      button("Exclude all",excludeX(),bulkTop(),72,18,mx,my,true);
+      if (inside(mx,my,includeX(),bulkTop(),148,18))
+        tip = "Change every built-in and custom track, including tracks outside this filter. Volumes and queue stay unchanged.";
       var tabs = filters();
       for (var tab : tabs.tabs()) {
         boolean selected = tab.id().equals("cycle") || (tab.id().equals("folder") ? folderSelected() : tab.id().equals(folder));
@@ -617,7 +650,8 @@ public final class MusicLibraryScreen extends UiScreen {
         int total = members(row.group).size(), included = includedCount(row.group);
         String count = included + "/" + total;
         int countWidth = minecraft.textRenderer.getWidth(count);
-        text((closed ? "> " : "v ") + fit(row.label, span() - countWidth - 44), left() + 2, y + 8, 0xffffff);
+        text((closed ? "> " : "v ") + fit(row.label, span() - countWidth - 44), left() + 2, y + 8,
+            inside(mx,my,right()-20,y+3,20,18) && my>=listTop() && my<bottom() ? 0xffff55 : 0xffffff);
         text(count, right() - 26 - countWidth, y + 8, included > 0 && included < total ? 0xffdd88 : 0xaaaaaa);
         musicToggle(included > 0, right() - 20, y + 3, mx, my, total > 0);
         fill(left(), y + 21, right(), y + 22, 0x50555555);
@@ -667,7 +701,7 @@ public final class MusicLibraryScreen extends UiScreen {
       text(queue ? "Queue is empty" : "No matching tracks.", left() + 4, listTop() + 12, 0xaaaaaa);
     unclip();
     scrollbar.render(this, track());
-    if (!queue && !presetsOpen) {
+    if (conversionVisible()) {
       button(Mp3Converter.busy() ? "Cancel MP3" : "Convert MP3", right() - 88, statusTop(), 88, 14, mx, my, true);
       if (inside(mx, my, right() - 88, statusTop(), 88, 14))
         tip = "Convert MP3 with FFmpeg to a WAV cache. Original files stay untouched.";
@@ -678,7 +712,7 @@ public final class MusicLibraryScreen extends UiScreen {
             : Mp3Converter.busy() || conversionTicks > 0
                 ? Mp3Converter.status()
                 : AudioController.status();
-    if (!trackStatusVisible()) text(fit(status, span() - (queue || presetsOpen ? 0 : 92)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
+    if (!trackStatusVisible()) text(fit(status, span() - (conversionVisible() ? 92 : 0)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
     hoverHelp = tip;
   }
 }

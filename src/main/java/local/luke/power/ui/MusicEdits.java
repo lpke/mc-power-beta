@@ -115,4 +115,12 @@ final class MusicEdits {
   void includeAll() {
     parent.changed(exclusions(Set.of()), false);
   }
+
+  void excludeAll(Collection<String> tracks) {
+    Set<String> excluded = new TreeSet<>();
+    setting("exclusions").value.getAsJsonArray().forEach(v -> excluded.add(v.getAsString()));
+    excluded.addAll(tracks);
+    MusicPreset.validateTracks(excluded);
+    parent.changed(exclusions(excluded), false);
+  }
 }

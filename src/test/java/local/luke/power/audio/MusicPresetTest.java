@@ -8,6 +8,20 @@ import local.luke.power.ui.MusicPresetDraft;
 import org.junit.jupiter.api.Test;
 
 class MusicPresetTest {
+  @Test void bulkDraftEditsRetainMissingSelectionsAndDoNotChangeTheSavedPreset() {
+    MusicPreset saved=new MusicPreset("id","Name",Set.of("music:missing.ogg"));
+    MusicPresetDraft draft=new MusicPresetDraft(saved);
+    List<String> tracks=new ArrayList<>();
+    for(int i=0;i<4203;i++)tracks.add("music:track"+i+".ogg");
+    draft.excludeAll(tracks);
+    assertEquals(4204,draft.snapshot("Name").excluded().size());
+    assertEquals(Set.of("music:missing.ogg"),saved.excluded());
+    assertThrows(IllegalArgumentException.class,()->draft.excludeAll(List.of("invalid")));
+    assertEquals(4204,draft.snapshot("Name").excluded().size());
+    draft.includeAll();
+    assertTrue(draft.snapshot("Name").excluded().isEmpty());
+  }
+
   @Test void purchasedAlbumExtrasBelongToBothAllModesOnly() {
     var extras = BuiltinMusic.TRACKS.stream().filter(t -> t.usage().equals("Album extras")).toList();
     assertEquals(15, extras.size());

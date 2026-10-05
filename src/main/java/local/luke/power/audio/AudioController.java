@@ -214,7 +214,10 @@ public final class AudioController {
     try { var track=resolveTrack(id); return track==null?0:MusicSeeking.duration(id,track.field_2127,track.field_2126); }
     catch (java.io.IOException e) { return 0; }
   }
-  public static double position() { return MusicPreview.active() ? MusicPreview.position() : progress.seconds(); }
+  public static double position() {
+    return MusicSeeking.position(currentTrackId(), MusicPreview.active() ? MusicPreview.SOURCE : "BgMusic",
+        MusicPreview.active() ? MusicPreview.position() : progress.seconds());
+  }
   public static void seek(double fraction) {
     double length=duration(); if (length<=0 || !Double.isFinite(fraction)) return;
     String id=currentTrackId();

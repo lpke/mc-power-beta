@@ -2,6 +2,7 @@ package local.luke.power.ui;
 
 import java.util.*;
 import local.luke.power.audio.MusicPreset;
+import local.luke.power.audio.AudioController;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -16,6 +17,9 @@ final class MusicPresetsPanel extends UiScreen {
   private String error = "", deleting = "";
   private int scroll;
   private Runnable pending;
+  private List<MusicPreset> countedPresets;
+  private int countedRevision = -1;
+  private Map<String, Integer> includedCounts = Map.of();
 
   MusicPresetsPanel(PowerOptionsScreen parent) {
     this.parent = parent;
@@ -42,6 +46,10 @@ final class MusicPresetsPanel extends UiScreen {
 
   void open(boolean choosing) {
     this.choosing = choosing;
+    pending = null;
+    deleting = "";
+    name.focused = false;
+    scrollbar.release();
     draft = null;
     scroll = 0;
     error = "";
@@ -83,7 +91,7 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   private int top() {
-    return parent.audioContentTop() + 20;
+    return parent.audioContentTop() + 4;
   }
 
   private int bottom() {
@@ -95,20 +103,18 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   int headerHeight() {
-    return editing() && span() < 260 ? 68 : 46;
+    return editing() ? (span() >= 480 ? 26 : span() < 218 ? 70 : 48) : choosing ? 46 : 26;
   }
 
-  private int editButtonY() {
-    return top() + (span() < 260 ? 42 : 20);
-  }
-
-  private int nameWidth() {
-    return span() < 260 ? span() : span() - 144;
-  }
-
-  private int rowTop() {
-    return top() + 46;
-  }
+  private String actionLabel() { return draft.creating() ? "Creating" : "Editing"; }
+  private int nameX() { return left() + textRenderer.getWidth(actionLabel()) + 6; }
+  private int nameWidth() { return right() - nameX() - (span() >= 480 ? 220 : 0); }
+  private int saveX() { return span() >= 480 ? right() - 214 : left(); }
+  private int editButtonY() { return top() + (span() >= 480 ? 0 : 22); }
+  private int includeX() { return right() - 148; }
+  private int excludeX() { return right() - 72; }
+  private int bulkY() { return span() < 218 ? top() + 44 : editButtonY(); }
+  private int rowTop() { return top() + headerHeight(); }
 
   private ScrollBar.Track track() {
     return new ScrollBar.Track(
@@ -140,13 +146,18 @@ final class MusicPresetsPanel extends UiScreen {
       return true;
     }
     if (!editing()) return listClick(x, y, b);
-    name.focused = inside(x, y, left(), top() + 20, nameWidth(), 18);
-    if (b == 0 && inside(x, y, right() - 138, editButtonY(), 62, 18)) {
+    name.focused = inside(x, y, nameX(), top(), nameWidth(), 18);
+    if (b == 0 && inside(x, y, saveX(), editButtonY(), 62, 18)) {
       save();
       return true;
     }
-    if (inside(x, y, right() - 72, editButtonY(), 72, 18)) {
+    if (inside(x, y, includeX(), bulkY(), 72, 18)) {
       draft.includeAll();
+      return true;
+    }
+    if (inside(x, y, excludeX(), bulkY(), 72, 18)) {
+      try { draft.excludeAll(AudioController.music(minecraft)); error = ""; }
+      catch (IllegalArgumentException e) { error = e.getMessage(); }
       return true;
     }
     return y < top() + headerHeight();
@@ -189,16 +200,27 @@ final class MusicPresetsPanel extends UiScreen {
     return true;
   }
 
+  private Map<String, Integer> includedCounts(List<MusicPreset> values) {
+    int revision = AudioController.libraryRevision();
+    if (values != countedPresets || revision != countedRevision) {
+      Set<String> available = AudioController.music(minecraft);
+      Map<String, Integer> counts = new HashMap<>();
+      for (MusicPreset p : values)
+        counts.put(p.id(), available.size() - (int) p.excluded().stream().filter(available::contains).count());
+      includedCounts = Map.copyOf(counts);
+      countedPresets = values;
+      countedRevision = revision;
+    }
+    return includedCounts;
+  }
+
   void renderHeader(int mx, int my) {
     if (editing()) {
-      text(
-          fit((draft.creating() ? "Creating " : "Editing ") + name.text(), span()),
-          left(),
-          top() + 3,
-          0xffffff);
-      input(name, left(), top() + 20, nameWidth(), mx, my, "Preset name");
-      button("Save", right() - 138, editButtonY(), 62, 18, mx, my, true);
-      button("Include all", right() - 72, editButtonY(), 72, 18, mx, my, true);
+      text(actionLabel(), left(), top() + 5, 0xffffff);
+      input(name, nameX(), top(), nameWidth(), mx, my, "Preset name");
+      button("Save", saveX(), editButtonY(), 62, 18, mx, my, true);
+      button("Include all", includeX(), bulkY(), 72, 18, mx, my, true);
+      button("Exclude all", excludeX(), bulkY(), 72, 18, mx, my, true);
     } else {
       if (choosing)
         text(
@@ -207,13 +229,7 @@ final class MusicPresetsPanel extends UiScreen {
             top() + 5,
             0xcccccc);
       else button("Create new preset", left(), top(), Math.min(150, span()), 20, mx, my, true);
-      text(
-          error.isEmpty()
-              ? (choosing ? "Choose a soundtrack selection" : "Saved soundtrack selections")
-              : fit(error, span()),
-          left(),
-          top() + 28,
-          error.isEmpty() ? 0xaaaaaa : 0xff8888);
+      if (choosing) text("Choose a soundtrack selection", left(), top() + 28, 0xaaaaaa);
       scroll =
           (int)
               Math.max(
@@ -221,6 +237,7 @@ final class MusicPresetsPanel extends UiScreen {
                   Math.min(track().maximum(), scrollbar.drag(track(), my, Mouse.isButtonDown(0))));
       clip(left(), rowTop(), span(), Math.max(0, bottom() - rowTop()));
       var presets = edits.presets();
+      var counts = includedCounts(presets);
       for (int i = 0; i < presets.size() + (choosing ? 1 : 0); i++) {
         int y = rowTop() + i * 40 - scroll;
         if (y + 40 <= rowTop() || y >= bottom()) continue;
@@ -234,7 +251,7 @@ final class MusicPresetsPanel extends UiScreen {
             fit(
                 p == null
                     ? "Use World music and custom music settings"
-                    : p.excluded().size() + " excluded tracks",
+                    : counts.get(p.id()) + " included tracks",
                 span() - (choosing ? 64 : 122)),
             left() + 2,
             y + 19,
@@ -246,7 +263,7 @@ final class MusicPresetsPanel extends UiScreen {
       unclip();
       scrollbar.render(this, track());
     }
-    if (editing() && !error.isEmpty()) text(fit(error, span()), left(), bottom() - 10, 0xff8888);
+    if (!error.isEmpty()) text(fit(error, span()), left(), bottom() - 10, 0xff8888);
   }
 
   void renderDialog(int mx, int my) {

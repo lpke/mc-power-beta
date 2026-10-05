@@ -77,7 +77,7 @@ public final class AudioPresetChecks {
                   AudioConfig.current().disabledTracks.isEmpty(),
                   "draft leaked into live selection");
               ((TextInput) field(panel, "name")).setText("Validation preset");
-              click(options, (int) call(panel, "right") - 110, (int) call(panel, "top") + 27);
+              click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
               check(AudioConfig.current().presets.size() == 1, "save failed");
               check(
                   AudioConfig.current().presets.get(0).excluded().size() == 12,
@@ -113,8 +113,8 @@ public final class AudioPresetChecks {
               var panel = field(library, "presets");
               click(options, (int) call(panel, "right") - 85, (int) call(panel, "rowTop") + 12);
               ((TextInput) field(panel, "name")).setText("Renamed preset");
-              click(options, (int) call(panel, "right") - 36, (int) call(panel, "top") + 27);
-              click(options, (int) call(panel, "right") - 110, (int) call(panel, "top") + 27);
+              click(options, (int) call(panel, "includeX") + 8, (int) call(panel, "bulkY") + 8);
+              click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
               check(AudioConfig.current().preset.equals(id), "rename changed identity");
               check(
                   AudioConfig.current().presets.get(0).excluded().isEmpty(),
@@ -228,7 +228,13 @@ public final class AudioPresetChecks {
               });
       case "stop-preview" -> AudioController.previewSound("music:creative4.ogg");
       case "duration" -> check(AudioController.duration() > 0, "duration not loaded");
-      case "seek" -> AudioController.seek(.6);
+      case "seek" -> {
+        AudioController.seek(.2);
+        AudioController.seek(.8);
+        AudioController.seek(.6);
+        check(AudioController.position() > AudioController.duration() * .59,
+            "scrubber fell back to the old position while decoding");
+      }
       case "check-seek" ->
           test(
               "scrub seek streams from requested position",

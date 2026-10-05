@@ -7,6 +7,22 @@ import paulscode.sound.*;
 import paulscode.sound.codecs.CodecJOrbis;
 
 class MusicSeekingTest {
+  @Test void pendingSeekKeepsTheRequestedPositionUntilCommittedOrCancelled() {
+    SoundSystemConfig.setLogger(new SoundSystemLogger());
+    SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);
+    var url=getClass().getResource("/assets/powerbeta/music/calm1.ogg");
+    try {
+      MusicSeeking.request("music:calm1.ogg","BgMusic",url,"calm1.ogg",120);
+      assertEquals(120,MusicSeeking.position("music:calm1.ogg","BgMusic",3));
+      assertEquals(3,MusicSeeking.position("music:calm1.ogg","PowerBetaMusicPreview",3));
+      assertEquals(3,MusicSeeking.position("music:other.ogg","BgMusic",3));
+      MusicSeeking.request("music:calm1.ogg","BgMusic",url,"calm1.ogg",45);
+      assertEquals(45,MusicSeeking.position("music:calm1.ogg","BgMusic",3));
+      MusicSeeking.cancel();
+      assertEquals(3,MusicSeeking.position("music:calm1.ogg","BgMusic",3));
+    } finally { MusicSeeking.cancel(); }
+  }
+
   @Test void repeatedInitializationPreservesTheExactRemainingPcm() throws Exception {
     SoundSystemConfig.setLogger(new SoundSystemLogger());
     SoundSystemConfig.setCodec("ogg",CodecJOrbis.class);

@@ -52,6 +52,10 @@ public final class Mp3Converter {
     return busy;
   }
 
+  public static boolean needed(Collection<MusicLibrary.Track> tracks) {
+    return tracks.stream().anyMatch(t -> t.mp3() && !t.playable());
+  }
+
   public static String status() {
     return status;
   }

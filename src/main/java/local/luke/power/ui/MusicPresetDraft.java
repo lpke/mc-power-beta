@@ -39,6 +39,14 @@ public final class MusicPresetDraft {
     excluded.clear();
   }
 
+  public void excludeAll(Collection<String> tracks) {
+    Set<String> next = new TreeSet<>(excluded);
+    next.addAll(tracks);
+    MusicPreset.validateTracks(next);
+    excluded.clear();
+    excluded.addAll(next);
+  }
+
   public boolean changed(String name) {
     return creating || !originalName.equals(name.strip()) || !original.equals(excluded);
   }

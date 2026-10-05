@@ -35,7 +35,7 @@ public final class MusicPreset {
 
   public static void validateTracks(Set<String> tracks) {
     if (tracks == null
-        || tracks.size() > 4096
+        || tracks.size() > 8192
         || tracks.stream()
             .anyMatch(
                 id ->

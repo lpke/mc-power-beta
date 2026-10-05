@@ -77,7 +77,7 @@ public abstract class UiScreen extends Screen {
     int cx = x + w / 2, cy = y + 9;
     String[] pixels = switch (icon) {
       case "star" -> new String[]{"    #    ", "   ###   ", "#########", " ####### ", "  #####  ", " ##   ## ", " #     # "};
-      case "edit" -> new String[]{"      ## ", "     ### ", "    ###  ", "   ###   ", "  ###    ", " ###     ", "####     "};
+      case "edit" -> new String[]{"      ## ", "     #++#", "    #++# ", "   #++#  ", "  #++#   ", " #++#    ", " #o#     ", " ##      ", " #       "};
       case "music" -> new String[]{"   ######", "   #    #", "   #    #", "   #    #", " ###  ###", "#### ####", " ##   ## "};
       case "remove" -> new String[]{" #     # ", "  #   #  ", "   # #   ", "    #    ", "   # #   ", "  #   #  ", " #     # "};
       case "play" -> new String[]{"  #      ", "  ###    ", "  #####  ", "  #######", "  #####  ", "  ###    ", "  #      "};
@@ -90,8 +90,12 @@ public abstract class UiScreen extends Screen {
       default -> new String[]{" #   #  ", "########", " #   #  ", "   #   #", "########", "   #   #", "        "};
     };
     for (int row = 0; row < pixels.length; row++)
-      for (int col = 0; col < pixels[row].length(); col++) if (pixels[row].charAt(col) == '#')
-        fill(cx - 4 + col, cy - 4 + row, cx - 3 + col, cy - 3 + row, color);
+      for (int col = 0; col < pixels[row].length(); col++) {
+        char pixel = pixels[row].charAt(col);
+        if (pixel == ' ') continue;
+        int shade = enabled && pixel == '+' ? 0xffffcc55 : enabled && pixel == 'o' ? 0xffbbaaaa : color;
+        fill(cx - 4 + col, cy - 4 + row, cx - 3 + col, cy - 3 + row, shade);
+      }
   }
 
   protected void musicToggle(boolean included, int x, int y, int mx, int my, boolean enabled) {

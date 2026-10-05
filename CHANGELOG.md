@@ -1,5 +1,19 @@
 # Changelog
 
+## Audio menu refinements
+
+- Restore the music toolbar after leaving any preset view, including loading,
+  Back/Escape, sidebar navigation and save/discard prompts. Hidden preset state
+  no longer controls the Audio settings toolbar.
+- Hold the scrubber at the selected position while a seek decodes, including
+  repeated seeks, paused playback and previews.
+- Add Exclude all beside Include all in the library and preset editor. Bulk
+  library changes include filtered-out tracks; preset changes stay isolated.
+- Use an outlined pencil icon for preset editing. Put Creating/Editing inline
+  with the name field, remove the preset-list subtitle and count included tracks.
+- Highlight group names in yellow while hovering their inclusion button. Tighten
+  spacing below playback status and hide MP3 conversion when nothing needs it.
+
 ## Audio presets and complete soundtrack library
 
 - Added independent music preset creation, editing, renaming, deletion and explicit loading, with unsaved-change prompts and an Include all action. Active presets override ordinary soundtrack/custom-music choices.
