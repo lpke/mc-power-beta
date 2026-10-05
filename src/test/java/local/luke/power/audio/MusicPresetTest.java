@@ -120,7 +120,43 @@ class MusicPresetTest {
     MusicPreset.load(live, "one");
     assertEquals(2, live.disabledTracks.size());
     MusicPreset.load(live, "");
-    assertEquals(2, live.disabledTracks.size());
+    assertTrue(live.disabledTracks.isEmpty());
+    assertEquals(2, renamed.excluded().size());
+  }
+
+  @Test
+  void loadingNoneClearsAllExclusionsAndPoolWithoutChangingPresetsOrOtherPreferences() {
+    String included = "music:calm1.ogg", excluded = "music:calm2.ogg";
+    MusicPreset saved = new MusicPreset("one", "One",
+        Set.of(excluded, "music:missing.ogg"), Map.of("Alpha", 40), Set.of(included, excluded));
+    AudioSettings live = new AudioSettings();
+    live.presets.add(saved);
+    live.favourites.add(included);
+    live.musicMode = AudioSettings.MusicMode.MINECRAFT_SURVIVAL;
+    MusicPreset.load(live, saved.id());
+
+    MusicPreset.load(live, "");
+    assertTrue(live.preset.isEmpty());
+    assertTrue(live.disabledTracks.isEmpty());
+    assertTrue(live.presetTrackPool.isEmpty());
+    assertEquals(Map.of("Alpha", 40), live.groupVolumes);
+    assertEquals(Set.of(included), live.favourites);
+    assertEquals(AudioSettings.MusicMode.MINECRAFT_SURVIVAL, live.musicMode);
+    assertEquals(Set.of(excluded, "music:missing.ogg"), saved.excluded());
+    assertEquals(Set.of(included, excluded), saved.trackPool());
+
+    // Loading None again also clears exclusions added manually since the last load.
+    live.disabledTracks.add(included);
+    MusicPreset.load(live, "");
+    Gson gson = new Gson();
+    live = gson.fromJson(gson.toJson(live), AudioSettings.class);
+    live.validate();
+    assertTrue(live.preset.isEmpty());
+    assertTrue(live.disabledTracks.isEmpty());
+    assertTrue(live.presetTrackPool.isEmpty());
+    MusicPreset.load(live, saved.id());
+    assertEquals(saved.excluded(), live.disabledTracks);
+    assertEquals(saved.trackPool(), live.presetTrackPool);
   }
 
   @Test

@@ -91,6 +91,8 @@ public final class MusicPreset {
 
   public static void load(AudioSettings settings, String id) {
     if (id.isEmpty()) {
+      settings.disabledTracks = new TreeSet<>();
+      settings.presetTrackPool = new TreeSet<>();
       settings.preset = "";
       return;
     }

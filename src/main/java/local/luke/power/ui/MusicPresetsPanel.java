@@ -308,7 +308,7 @@ final class MusicPresetsPanel extends UiScreen {
         text(
             fit(
                 p == null
-                    ? "Use World music and custom music settings"
+                    ? "Clear exclusions; use soundtrack settings"
                     : counts.get(p.id()) + " included tracks",
                 textWidth()),
             left() + 2,

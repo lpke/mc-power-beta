@@ -118,8 +118,12 @@ final class MusicEdits {
       Setting volumes = setting("groupVolumes");
       volumes.value = Catalog.JSON.toJsonTree(MusicGroups.copy(p.groupVolumes()));
       changes.add(volumes);
-    } else changes.addAll(exclusions(new TreeSet<>(Arrays.asList(
-        Catalog.JSON.fromJson(setting("exclusions").value, String[].class)))));
+    } else {
+      changes.addAll(exclusions(Set.of()));
+      Setting scope = setting("presetTrackPool");
+      scope.value = new JsonArray();
+      changes.add(scope);
+    }
     Setting selected = setting("preset");
     selected.value = new JsonPrimitive(id);
     changes.add(selected);

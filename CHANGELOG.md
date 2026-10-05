@@ -1,5 +1,10 @@
 # Changelog
 
+## Preset reset fix
+
+- Loading None clears all music exclusions and the preset track pool while
+  preserving saved presets, volumes and soundtrack settings.
+
 ## 2026-10-05 maintenance
 
 - License source under AGPL-3.0-only and include LICENSE in the main JAR.

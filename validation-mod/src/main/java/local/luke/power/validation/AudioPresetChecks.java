@@ -24,8 +24,75 @@ public final class AudioPresetChecks {
     method.invoke(library, id);
   }
 
+  private static void loadNone(PowerOptionsScreen screen) throws Exception {
+    field(screen, "libraryOpen", true);
+    var library = (MusicLibraryScreen) field(screen, "library");
+    library.openPresets();
+    screen.render(-1, -1, 0);
+    var panel = field(library, "presets");
+    click(screen, (int) call(panel, "right") - 25, presetRowY(panel, 0));
+    check(AudioConfig.current().preset.isEmpty(), "None did not unload preset");
+    check(AudioConfig.current().disabledTracks.isEmpty(), "None kept exclusions");
+    check(AudioConfig.current().presetTrackPool.isEmpty(), "None kept preset pool");
+    check(screen.session().settings().stream()
+        .filter(s -> s.id.startsWith("audio.trackEnabled."))
+        .allMatch(s -> s.value.getAsBoolean()), "track rows stayed disabled");
+    check(SettingAccess.reason(screen.session(), find(screen.session(), "audio.musicMode")).isEmpty(),
+        "soundtrack settings stayed locked");
+  }
+
+  private static void none(Minecraft mc) throws Exception {
+    failures = 0;
+    AudioSettings original = AudioConfig.copy();
+    boolean automatic = MenuPreferences.current().autoApply;
+    var parent = mc.currentScreen;
+    try {
+      for (boolean apply : new boolean[] {false, true}) {
+        test("None resets selections with auto-apply " + apply + " and preserves saved presets", () -> {
+          MenuPreferences.update(v -> v.autoApply = apply);
+          AudioSettings seed = new AudioSettings();
+          seed.musicMode = AudioSettings.MusicMode.MINECRAFT_SURVIVAL;
+          seed.presets.add(new MusicPreset("reset-test", "Reset test",
+              Set.of("music:calm1.ogg", "music:missing.ogg"), Map.of("Alpha", 40),
+              Set.of("music:calm1.ogg", "music:calm2.ogg")));
+          seed.favourites.add("music:calm2.ogg");
+          MusicPreset.load(seed, "reset-test");
+          AudioConfig.save(seed);
+          var screen = MenuUpdateChecks.open(mc, "Audio");
+          loadNone(screen);
+          if (!apply) {
+            screen.session().discard();
+            check(Catalog.JSON.toJson(AudioConfig.current()).equals(Catalog.JSON.toJson(seed)),
+                "Cancel did not restore the previous selection");
+            loadNone(screen);
+            screen.session().save(java.nio.file.Path.of(".").toAbsolutePath());
+          }
+          AudioSettings persisted = local.luke.power.storage.PowerConfig.read("audio", AudioSettings.class);
+          check(persisted.preset.isEmpty() && persisted.disabledTracks.isEmpty()
+              && persisted.presetTrackPool.isEmpty(), "reset did not persist");
+          check(Catalog.JSON.toJson(persisted.presets).equals(Catalog.JSON.toJson(seed.presets)),
+              "reset changed the saved preset");
+          check(persisted.groupVolumes.equals(seed.groupVolumes)
+              && persisted.favourites.equals(seed.favourites) && persisted.musicMode == seed.musicMode,
+              "reset changed unrelated preferences");
+          var enabled = find(screen.session(), "audio.trackEnabled.music:calm2.ogg");
+          enabled.value = new com.google.gson.JsonPrimitive(false);
+          screen.changed(enabled);
+          check(AudioConfig.current().disabledTracks.contains("music:calm2.ogg"), "manual exclusion failed");
+          loadNone(screen);
+        });
+      }
+    } finally {
+      AudioConfig.save(original);
+      MenuPreferences.update(v -> v.autoApply = automatic);
+      mc.setScreen(parent);
+    }
+    log("AUDIO NONE FAILURES " + failures);
+  }
+
   public static void run(Minecraft mc, String action) throws Exception {
     switch (action) {
+      case "none" -> none(mc);
       case "setup" -> {
         failures = 0;
         before = AudioConfig.copy();
