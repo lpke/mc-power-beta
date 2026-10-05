@@ -7,7 +7,7 @@
   "authors": [
     "DanyGames2014"
   ],
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "icon": "assets/power_window/icon.png",
   "environment": "*",
   "entrypoints": {

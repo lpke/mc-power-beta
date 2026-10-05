@@ -40,8 +40,8 @@ def main():
   classpath=os.pathsep.join(str(p) for p in [ROOT/'build/classes/java/main',ROOT/'build/resources/main',ROOT/'input-api/build/libs/power-beta-input-1.0.0.jar',ROOT/'vendor/libraries/Simple-Yaml-1.8.4.jar',gson])
   subprocess.run([str(Path(os.environ['JAVA_HOME'])/'bin/java'),'-cp',classpath,'local.luke.power.config.ConfigMigration',str(game)],check=True)
   target=stage/'.minecraft/config/power-beta.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(game/'config/power-beta.json',target)
- # Keep notices beside the export, including separate upstream license files.
- licenses=stage/'licenses';licenses.mkdir();shutil.copy2(ROOT/'NOTICE',stage/'NOTICE.txt');shutil.copy2(ROOT/'README.md',stage/'README.md')
+ # Keep licenses beside the export, including separate upstream dependency licenses.
+ licenses=stage/'licenses';licenses.mkdir();shutil.copy2(ROOT/'LICENSE',stage/'LICENSE.txt');shutil.copy2(ROOT/'README.md',stage/'README.md')
  for base in [ROOT/'modules',ROOT/'vendor/licenses']:
   for p in base.rglob('*'):
    if p.is_file() and not any(k in p.parts for k in ['build','.gradle']) and p.name.upper().startswith(('LICENSE','COPYING','NOTICE')):

@@ -11,7 +11,7 @@
   "contact": {
     "sources": "https://github.com/lpke/mc-power-beta"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "icon": "assets/power_recipes/icon.png",
   "environment": "*",
   "entrypoints": {

@@ -85,7 +85,7 @@ def update(instance, configured=False):
         if hashlib.sha256(source.read_bytes()).hexdigest() != entry['sha256']:
             raise RuntimeError('Pack artifact hash differs')
         atomic_copy(source, game / 'mods' / entry['file'])
-    for name in ['PACK-MANIFEST.json', 'README.md', 'UPSTREAMS.md', 'CHANGELOG.md', 'COMPONENTS.json', 'NOTICE.txt']:
+    for name in ['PACK-MANIFEST.json', 'README.md', 'UPSTREAMS.md', 'CHANGELOG.md', 'COMPONENTS.json', 'LICENSE.txt']:
         if (stage / name).exists():
             atomic_copy(stage / name, instance / name)
     print(f'Updated {instance.name}; backup {backup}')

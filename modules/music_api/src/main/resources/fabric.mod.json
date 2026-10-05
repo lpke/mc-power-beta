@@ -10,7 +10,7 @@
   "contact": {
     "sources": "https://github.com/lpke/mc-power-beta"
   },
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "icon": "assets/power_music_api/icon.png",
   "environment": "*",
   "entrypoints": {

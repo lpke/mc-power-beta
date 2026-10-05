@@ -7,7 +7,7 @@
   "authors": [
     "Luke"
   ],
-  "license": "LGPL-3.0-only",
+  "license": "AGPL-3.0-only",
   "environment": "client",
   "icon": "assets/power_building/icon.png",
   "entrypoints": {},

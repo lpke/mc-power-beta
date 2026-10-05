@@ -170,8 +170,7 @@ The Prism profile requires Java 21. Run `python3 tools/build_pack.py` with
 `JAVA_HOME` pointing to Java 21. It builds components sequentially and assembles an importable Prism instance without accounts, worlds,
 logs, private configuration or validation fixtures.
 
-See [NOTICE](NOTICE) for attribution and [docs/upstreams.md](docs/upstreams.md) for update sources.
-The standalone mod repositories and `separate mods final` instance remain frozen.
+See [LICENSE](LICENSE) for terms and [docs/upstreams.md](docs/upstreams.md) for source provenance and update references.
 
 The previously disabled recipe browser, shader module and LAN hosting module are
 retained as disabled optional artifacts. They are not part of the tested enabled

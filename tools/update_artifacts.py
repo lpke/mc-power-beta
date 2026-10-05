@@ -40,7 +40,7 @@ def update(instance):
         raise RuntimeError('Not an existing Power Beta instance')
     protected = protected_files(instance)
     files = ['.minecraft/mods/power-beta-1.0.0.jar', 'PACK-MANIFEST.json', 'README.md',
-             'UPSTREAMS.md', 'CHANGELOG.md', 'COMPONENTS.json', 'NOTICE.txt']
+             'UPSTREAMS.md', 'CHANGELOG.md', 'COMPONENTS.json', 'LICENSE.txt']
     backup = instance / 'power-beta-update-backups' / (
         'before-artifact-update-' + datetime.now().strftime('%Y%m%d-%H%M%S-%f') + '.zip')
     backup.parent.mkdir(exist_ok=True)
