@@ -114,7 +114,7 @@ public final class AudioPolishChecks {
       }
       case "paused" -> {
         test("Pause blocks auto-play even with wait disabled", () -> {
-          check(!system.playing("BgMusic") && AudioController.status().equals("Music paused"),"pause resumed");
+          check(!system.playing("BgMusic") && AudioController.status().matches("Music paused|Paused: .+"),"pause resumed");
         });
         var config=AudioConfig.copy();config.waitBetweenTracks=true;config.delayQueuedTracks=false;AudioConfig.preview(config);
         MusicRequests.edit(q -> q.add(b));AudioController.quiet();sound.power$countdown(2400);

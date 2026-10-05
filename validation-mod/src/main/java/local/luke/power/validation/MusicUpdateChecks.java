@@ -110,7 +110,7 @@ public final class MusicUpdateChecks {
                 check(
                     !system.playing("BgMusic")
                         && playing.equals(state("currentMusic"))
-                        && AudioController.status().equals("Music paused"),
+                        && AudioController.status().matches("Music paused|Paused: .+"),
                     "mode skipped or failed to pause"));
         AudioController.togglePause();
       }

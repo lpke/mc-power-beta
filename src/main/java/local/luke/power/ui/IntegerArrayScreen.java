@@ -16,6 +16,7 @@ public final class IntegerArrayScreen extends UiScreen {
   private final IntegerArrayDraft.Rules rules;
   private final IntegerArrayDraft draft;
   private final String entryLabel, unit;
+  private final InlineValueEditor valueEditor = new InlineValueEditor();
   private final ScrollBar scrollbar = new ScrollBar();
   private int scroll, dragging = -1;
 
@@ -39,12 +40,16 @@ public final class IntegerArrayScreen extends UiScreen {
   private int right() { return left() + span(); }
   private int bottom() { return height - 62; }
   private int sliderX() { return left() + Math.min(100, span() / 4); }
-  private int sliderWidth() { return right() - 92 - sliderX(); }
+  private int sliderWidth() { return right() - 68 - sliderX(); }
   private ScrollBar.Track track() {
     return new ScrollBar.Track(right() - 3, 70, Math.max(0, bottom() - 70), draft.size() * 26, scroll);
   }
 
+  public void init() { valueEditor.cancel(); Keyboard.enableRepeatEvents(true); }
+
   public void removed() {
+    valueEditor.cancel();
+    Keyboard.enableRepeatEvents(false);
     dragging = -1;
     scrollbar.release();
   }
@@ -60,7 +65,9 @@ public final class IntegerArrayScreen extends UiScreen {
     var entry = new Setting(setting.id + ".entry", setting.backend, setting.page, setting.group,
         entryLabel + " " + (index + 1), "Distance in " + unit + ".", Setting.Kind.INTEGER,
         value, value, rules.min(), rules.max(), 1, List.of(), false);
-    minecraft.setScreen(new ValueScreen(entry, this, () -> draft.set(index, entry.value.getAsInt())));
+    dragging = -1;
+    valueEditor.begin(index, entry, () -> draft.set(index, entry.value.getAsInt()),
+        sliderX(), 70 + index * 26 - scroll, sliderWidth(), 70, bottom());
   }
 
   private void save() {
@@ -73,6 +80,7 @@ public final class IntegerArrayScreen extends UiScreen {
   }
 
   protected void keyPressed(char c, int key) {
+    if (valueEditor.key(c, key)) return;
     if (key == Keyboard.KEY_ESCAPE) minecraft.setScreen(parent);
     else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) save();
   }
@@ -80,11 +88,14 @@ public final class IntegerArrayScreen extends UiScreen {
   public void onMouseEvent() {
     super.onMouseEvent();
     int wheel = Mouse.getEventDWheel();
-    if (wheel != 0 && dragging < 0)
+    if (wheel != 0 && dragging < 0) {
+      valueEditor.cancel();
       scroll = (int) Math.max(0, Math.min(track().maximum(), scroll - Math.signum(wheel) * 26));
+    }
   }
 
   protected void mouseClicked(int x, int y, int button) {
+    if (valueEditor.press(x, y, button)) return;
     if (button != 0 && button != 1) return;
     if (button == 0 && scrollbar.press(track(), x, y)) {
       scroll = (int) scrollbar.drag(track(), y, true);
@@ -96,10 +107,9 @@ public final class IntegerArrayScreen extends UiScreen {
       if (index < 0 || index >= draft.size() || y >= rowY + 18) return;
       if (inside(x, y, sliderX(), rowY, sliderWidth(), 18)) {
         if (button == 0) { dragging = index; slide(x); }
-        else draft.set(index, Math.max(rules.min(), draft.get(index) - 1));
+        else exact(index);
       } else if (button == 0) {
-        if (inside(x, y, right() - 88, rowY, 22, 18)) exact(index);
-        else if (inside(x, y, right() - 64, rowY, 16, 18)) draft.move(index, -1);
+        if (inside(x, y, right() - 64, rowY, 16, 18)) draft.move(index, -1);
         else if (inside(x, y, right() - 46, rowY, 16, 18)) draft.move(index, 1);
         else if (inside(x, y, right() - 28, rowY, 18, 18)) draft.remove(index);
       }
@@ -116,6 +126,7 @@ public final class IntegerArrayScreen extends UiScreen {
   }
 
   public void render(int mx, int my, float delta) {
+    valueEditor.beginFrame();
     if (dragging >= 0) {
       if (Mouse.isButtonDown(0)) slide(mx);
       else dragging = -1;
@@ -134,19 +145,21 @@ public final class IntegerArrayScreen extends UiScreen {
       int y = 70 + i * 26 - scroll;
       if (y + 18 <= 70 || y >= bottom()) continue;
       text(entryLabel + " " + (i + 1), left(), y + 5, 0xd0d0d0);
-      slider(draft.get(i) + " " + unit, sliderX(), y, sliderWidth(), mx, my,
+      if (valueEditor.editing(i)) valueEditor.render(this, sliderX(), y, sliderWidth(), mx, my, 70, bottom());
+      else slider(draft.get(i) + " " + unit, sliderX(), y, sliderWidth(), mx, my,
           (draft.get(i) - rules.min()) / (double) Math.max(1, rules.max() - rules.min()));
-      button("...", right() - 88, y, 22, 18, mx, my, true);
       iconButton("up", right() - 64, y, 16, mx, my, i > 0);
       iconButton("down", right() - 46, y, 16, mx, my, i + 1 < draft.size());
       button("-", right() - 28, y, 18, 18, mx, my, draft.size() > 1);
       if (my >= 70 && my < bottom()) {
-        if (inside(mx, my, right() - 88, y, 22, 18)) tip = "Enter an exact distance";
+        if (inside(mx, my, sliderX(), y, sliderWidth(), 18))
+          tip = valueEditor.editing(i) ? valueEditor.help() : "Right-click to enter an exact distance.";
         else if (inside(mx, my, right() - 64, y, 16, 18)) tip = "Move earlier in the cycle";
         else if (inside(mx, my, right() - 46, y, 16, 18)) tip = "Move later in the cycle";
         else if (inside(mx, my, right() - 28, y, 18, 18)) tip = "Remove this distance";
       }
     }
+    valueEditor.endFrame();
     unclip();
     scrollbar.render(this, track());
     button("Add distance", left(), height - 54, 100, 20, mx, my, draft.size() < rules.limit());

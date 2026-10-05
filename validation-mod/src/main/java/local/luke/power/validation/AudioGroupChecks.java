@@ -179,7 +179,7 @@ final class AudioGroupChecks {
               int x = (int) call(panel, "controlsX");
               AudioController.pause();
               ((ScreenInput) (Object) pause).power$click(x + 8, bounds.y() + 8, 0);
-              check(!AudioController.status().equals("Music paused"), "pause Play not routed");
+              check(!AudioController.status().matches("Music paused|Paused: .+"), "pause Play not routed");
               check(mc.currentScreen == pause, "transport closed pause menu");
               s.menuControls = false;
               AudioConfig.preview(s);

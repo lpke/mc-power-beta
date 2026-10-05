@@ -52,6 +52,7 @@ public final class Validation {
       else if (command.equals("modern-commands")) ModernCommandChecks.run(mc);
       else if (command.startsWith("audio-presets-")) AudioPresetChecks.run(mc,command.substring(14));
       else if (command.startsWith("audio-groups-")) AudioGroupChecks.run(mc,command.substring(13));
+      else if (command.equals("inline-values")) InlineValueChecks.run(mc);
       else if (command.equals("sticky-groups")) StickyGroupChecks.run(mc);
       else if (command.equals("audio-refinements")) AudioRefinementChecks.run(mc);
       else if (command.startsWith("music-eras-")) MusicErasChecks.run(mc,command.substring(11));
@@ -360,7 +361,7 @@ public final class Validation {
           "music pause keeps stream stopped",
           () ->
               check(
-                  !system.playing("BgMusic") && AudioController.status().equals("Music paused"),
+                  !system.playing("BgMusic") && AudioController.status().matches("Music paused|Paused: .+"),
                   "Pause ignored"));
       AudioController.togglePause();
     } else if (action.equals("resumed")) {

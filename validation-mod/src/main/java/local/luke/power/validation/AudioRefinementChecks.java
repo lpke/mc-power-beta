@@ -53,7 +53,7 @@ final class AudioRefinementChecks {
     s.render(-1,-1,0);
     AudioController.pause();
     musicClick(s,AudioToolbar.Action.PLAY);
-    check(!AudioController.status().equals("Music paused"),"visible Play button did not respond");
+    check(!AudioController.status().matches("Music paused|Paused: .+"),"visible Play button did not respond");
     AudioController.pause();
   }
 

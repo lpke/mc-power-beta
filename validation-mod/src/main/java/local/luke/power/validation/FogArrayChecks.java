@@ -49,16 +49,14 @@ public final class FogArrayChecks {
         check(draft.get(0) == 32, "slider did not reach maximum");
         check(setting.value.toString().equals("[12,8,4,2]"), "slider published before Done");
       });
-      test("fog exact entry validates range and returns to the list", () -> {
-        click(editor, (int) call(editor, "right") - 78, 78);
-        check(mc.currentScreen instanceof ValueScreen, "exact editor missing");
-        var exact = (ValueScreen) mc.currentScreen;
-        ((TextInput) field(exact, "input")).setText("33");
-        call(exact, "save");
-        check(mc.currentScreen == exact && draft.get(0) == 32, "invalid exact value accepted");
-        ((TextInput) field(exact, "input")).setText("16");
-        call(exact, "save");
-        check(mc.currentScreen == editor && draft.get(0) == 16, "exact edit not retained");
+      test("fog exact entry validates range inline", () -> {
+        ((ScreenInput)(Object)editor).power$click((int)call(editor,"sliderX")+8,78,1);
+        var exact=field(editor,"valueEditor");
+        check((boolean)call(exact,"active"),"exact editor missing");
+        ((TextInput)field(exact,"input")).setText("33");call(exact,"commit");
+        check(mc.currentScreen==editor&&draft.get(0)==32&&(boolean)call(exact,"active"),"invalid exact value accepted");
+        ((TextInput)field(exact,"input")).setText("16");call(exact,"commit");
+        check(mc.currentScreen==editor&&draft.get(0)==16&&!(boolean)call(exact,"active"),"exact edit not retained");
       });
       test("fog duplicate values block Done until fixed", () -> {
         draft.set(0, 8);

@@ -49,6 +49,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private static List<View> rememberedHistory = List.of();
   private boolean hidden, autoSavePending, libraryOpen;
   private MusicLibraryScreen library;
+  final InlineValueEditor valueEditor = new InlineValueEditor();
   private final MusicStatusBar musicStatus = new MusicStatusBar();
   private MusicLibraryScreen.State libraryState;
   private final ScrollBar contentBar = new ScrollBar(), sidebarBar = new ScrollBar();
@@ -113,7 +114,7 @@ public final class PowerOptionsScreen extends UiScreen {
     history.addAll(rememberedHistory);
   }
 
-  /** Open music from the title screen without inheriting a stale settings filter. */
+  /** Open music from another screen without inheriting a stale settings filter. */
   public static void openMusic(net.minecraft.client.Minecraft mc, Screen parent, boolean queue, String track) {
     PowerOptionsScreen screen = new PowerOptionsScreen(parent);
     screen.page = "Audio";
@@ -129,6 +130,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void init() {
+    valueEditor.cancel();
     Keyboard.enableRepeatEvents(true);
     if (session == null)
       try {
@@ -145,6 +147,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void removed() {
+    valueEditor.cancel();
     rememberPosition();
     musicStatus.cancel();
     contentBar.release(); sidebarBar.release();
@@ -430,6 +433,7 @@ public final class PowerOptionsScreen extends UiScreen {
     super.onMouseEvent();
     int wheel = Mouse.getEventDWheel();
     if (hidden || wheel == 0 || capture != null || confirmClose || confirmReset) return;
+    valueEditor.cancel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     if (x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
     else if (libraryVisible()) library.wheel(wheel);
@@ -438,6 +442,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   protected void mouseClicked(int x, int y, int button) {
+    if (valueEditor.press(x, y, button)) return;
     if (hidden) {
       if (button == 0 && inside(x, y, disabledX(), height - 28, 90, 20)) { hidden = false; click(); }
       return;
@@ -577,11 +582,6 @@ public final class PowerOptionsScreen extends UiScreen {
           changed(s);
           return;
         }
-        if ((s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) && x >= right() - 60) {
-          click();
-          minecraft.setScreen(new ValueScreen(this, s));
-          return;
-        }
         if (s.kind == Setting.Kind.KEY && !conflicts(s).isEmpty() && x >= controlLeft(r) - 12 && x < controlLeft(r)) {
           click();
           pushView();
@@ -601,9 +601,13 @@ public final class PowerOptionsScreen extends UiScreen {
             dragging = s;
             double pixels = (double) minecraft.displayWidth / width;
             dragLeft = (mainControlLeft(r) + 4) * pixels;
-            dragSpan = Math.max(1, right() - 62 - mainControlLeft(r) - 8) * pixels;
+            dragSpan = Math.max(1, right() - 36 - mainControlLeft(r) - 8) * pixels;
             drag((int) (x * pixels));
-          } else activate(s, -1);
+          } else {
+            search.focused = false; dragging = null;
+            valueEditor.begin(s, s, () -> changed(s), mainControlLeft(r), controlY,
+                right() - 36 - mainControlLeft(r), top(), bottom());
+          }
         } else activate(s, button == 1 ? -1 : 1);
         return;
       }
@@ -732,6 +736,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   protected void keyPressed(char c, int key) {
+    if (valueEditor.key(c, key)) return;
     if (hidden) { if (key == Keyboard.KEY_ESCAPE || key == Keyboard.KEY_F1) hidden = false; return; }
     if (capture != null) {
       if (key == Keyboard.KEY_ESCAPE) {
@@ -851,6 +856,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void render(int mx, int my, float delta) {
+    valueEditor.beginFrame();
     if (!hidden && !confirmClose && !confirmReset && capture == null) {
       sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
       if (!libraryVisible()) scroll = contentBar.drag(contentTrack(), my, Mouse.isButtonDown(0));
@@ -926,8 +932,9 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     String tip = "", hoverId = "";
     if (!libraryVisible()) {
-    clip(left() - 2, top(), span() + 8, bottom() - top());
     StickyHeader sticky = stickyHeader();
+    int rowsTop = sticky == null ? top() : Math.max(top(), sticky.y() + sticky.height());
+    clip(left() - 2, rowsTop, span() + 8, Math.max(0, bottom() - rowsTop));
     int listMouseY = sticky != null && sticky.contains(my, top()) ? -1 : my;
     for (int index = 0; index < rows.size(); index++) {
       Row row = rows.get(index);
@@ -956,8 +963,10 @@ public final class PowerOptionsScreen extends UiScreen {
           y + (narrow ? 3 : 8), 0xe8a0a0);
       List<Setting> conflicts = conflicts(s);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
-      int valueEnd = right() - (numeric ? 62 : 36);
-      if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
+      int valueEnd = right() - 36;
+      if (numeric && editable && valueEditor.editing(s))
+        valueEditor.render(this, controlLeft, cy, valueEnd - controlLeft, mx, listMouseY, rowsTop, bottom());
+      else if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
           (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
       else if (editable && ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY);
       else if (s.kind == Setting.Kind.KEY && editable) button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
@@ -965,7 +974,6 @@ public final class PowerOptionsScreen extends UiScreen {
           local.luke.power.input.Chord.decode(s.value.getAsInt()).key() == 0 ? 0x999999 : -1);
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, editable);
-      if (numeric) button("...", right() - 60, cy, 22, 18, mx, listMouseY, editable);
       button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !s.value.equals(s.defaultValue));
       if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, listMouseY, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
@@ -977,16 +985,19 @@ public final class PowerOptionsScreen extends UiScreen {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
           tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
-        } else tip = s.description + (s.restart ? "\nRestart required." : "");
+        } else tip = valueEditor.editing(s) ? valueEditor.help()
+            : s.description + (numeric && mx >= controlLeft ? "\nRight-click to enter an exact value." : "")
+                + (s.restart ? "\nRestart required." : "");
       }
     }
     if (sticky != null) {
-      fill(left() - 2, sticky.y(), right() - 12, sticky.y() + sticky.height(), 0xff202020);
+      clip(left() - 2, top(), span() + 8, bottom() - top());
       groupHeading(rows.get(sticky.index()), sticky.y());
     }
     unclip();
     contentBar.render(this, contentTrack());
     } else { library.render(mx, my, delta); tip = library.hoverHelp(); hoverId = "library:" + library.hoverKey(); }
+    valueEditor.endFrame();
     if (musicControlsVisible()) {
       var item = musicButton(mx, my);
       if (item != null) {

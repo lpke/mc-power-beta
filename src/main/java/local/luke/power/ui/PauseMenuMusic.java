@@ -31,6 +31,11 @@ public final class PauseMenuMusic extends UiScreen {
       }
       return true;
     }
+    if (inside(x, y, bounds.x(), bounds.y() + 21, bounds.width(), 16)) {
+      minecraft.soundManager.method_2009("random.click", 1, 1);
+      PowerOptionsScreen.openMusic(minecraft, minecraft.currentScreen, false, AudioController.currentTrackId());
+      return true;
+    }
     return false;
   }
 
@@ -42,6 +47,6 @@ public final class PauseMenuMusic extends UiScreen {
     trackButton("", false, x + BUTTON_STEP * 2, y, BUTTON_WIDTH, mx, my);
     button("Q", x + BUTTON_STEP * 3, y, BUTTON_WIDTH, 18, mx, my, true);
     String status = fit(AudioController.status(), bounds.width());
-    text(status, bounds.x() + (bounds.width() - textRenderer.getWidth(status)) / 2, y + 24, 0xaaaaaa);
+    text(status, bounds.x() + (bounds.width() - textRenderer.getWidth(status)) / 2, y + 24, inside(mx, my, bounds.x(), y + 21, bounds.width(), 16) ? 0xffffa0 : 0xaaaaaa);
   }
 }

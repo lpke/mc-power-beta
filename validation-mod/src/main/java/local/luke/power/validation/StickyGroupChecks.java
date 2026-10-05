@@ -15,6 +15,15 @@ final class StickyGroupChecks {
     return false;
   }
 
+  private static void pinSettings(PowerOptionsScreen options) throws Exception {
+    List<?> rows=(List<?>)field(options,"rows");
+    for(int i=0;i<rows.size();i++) if(call(rows.get(i),"setting")==null) {
+      int end=i+1;while(end<rows.size()&&call(rows.get(end),"setting")!=null)end++;
+      if(end-i-1>=8) {field(options,"scroll",((int)call(rows.get(i),"y"))+30d);return;}
+    }
+    throw new AssertionError("No group with eight children");
+  }
+
   static void run(Minecraft mc) throws Exception {
     failures = 0;
     var before = AudioConfig.copy();
@@ -25,21 +34,21 @@ final class StickyGroupChecks {
       var settings = new AudioSettings();
       settings.musicMode = AudioSettings.MusicMode.ALL_MINECRAFT;
       AudioConfig.preview(settings);
-      var options = MenuUpdateChecks.open(mc,"General");
+      var options = MenuUpdateChecks.open(mc,"Audio");
       options.init(mc,640,420);
       test("pinned settings heading consumes clicks without changing covered settings", () -> {
-        field(options,"scroll",30d);
+        pinSettings(options);
         var sticky = (StickyHeader)call(options,"stickyHeader");
         check(sticky != null,"no settings heading");
         String name = (String)call(((List<?>)field(options,"rows")).get(sticky.index()),"group");
         long changes = options.session().changes();
         click(options,(int)call(options,"right")-80,(int)call(options,"top")+8);
-        check(((Set<?>)field(options,"collapsed")).contains("General/"+name),"pinned collapse missed");
+        check(((Set<?>)field(options,"collapsed")).contains("Audio/"+name),"pinned collapse missed");
         check(options.session().changes()==changes,"heading clicked a covered setting");
       });
       test("search headings keep their section-navigation action when pinned", () -> {
         field(options,"scroll",0d);search(options,"volume");
-        field(options,"scroll",30d);
+        pinSettings(options);
         var sticky=(StickyHeader)call(options,"stickyHeader");
         check(sticky != null,"no search header");
         click(options,(int)call(options,"left")+10,(int)call(options,"top")+8);

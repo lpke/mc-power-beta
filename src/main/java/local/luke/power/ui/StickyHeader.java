@@ -21,7 +21,7 @@ public record StickyHeader(int index, int y, int height) {
     if (candidate < 0) return null;
     int last = candidate;
     while (last + 1 < rows.size() && !heading.test(rows.get(last + 1))) last++;
-    if (last == candidate) return null;
+    if (last - candidate < 8) return null;
     int height = rowHeight.applyAsInt(rows.get(candidate));
     if (bottom - top < height + rowHeight.applyAsInt(rows.get(candidate + 1))) return null;
     int y = Math.min(top, top + rowY.applyAsInt(rows.get(last)) - scroll - height);

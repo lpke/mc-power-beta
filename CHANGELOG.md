@@ -1,5 +1,16 @@
 # Changelog
 
+## Inline values and music navigation
+
+- Replace numeric precision buttons with right-click inline inputs in settings, track
+  volumes, and fog distances. Enter or the check button commits; Escape or clicking
+  elsewhere cancels. Validate before applying and keep the slider width unchanged.
+- Open the music library by clicking the pause-menu status line, jumping to the
+  current or paused track when available. Show paused track names in both menus.
+- Pin accordion headings only for groups with at least eight visible children.
+  Remove their dark backdrop and clip scrolling rows beneath the heading.
+- Rename the library tabs to Preset and Folder.
+
 ## Sticky groups and library visibility
 
 - Pin settings and music group headings while scrolling, including search results

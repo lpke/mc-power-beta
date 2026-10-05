@@ -18,13 +18,14 @@ Each pane scrolls independently; its scrollbar supports dragging. Clicking the a
 position during the game session. Search finds settings across every page. Click a
 search section heading to open that section; Back restores the results.
 Left-click cycles forward; right-click cycles backward. The reset button restores one setting. Bindings use the same R reset button.
-Numeric values use sliders; `...` opens the exact-value editor. Apply saves while
+Numeric values use sliders. Right-click a slider to type an exact value inline;
+Enter or the check button commits it. Escape or clicking elsewhere cancels it. Apply saves while
 keeping the current page, search and scroll. Done saves and exits. The unsaved
 changes counter filters the list to changed settings. Cancel discards the draft,
 including live previews. A `*` marks settings that need a restart.
 
 Fog key distances opens an ordered list of labelled sliders. Add, remove or move
-distances, and use `...` for exact values. Done accepts the list; Cancel discards
+distances, and right-click sliders for exact values. Done accepts the list; Cancel discards
 it. Use 1 to 16 different distances between 2 and 32 chunks.
 
 All Video settings, GUI scale, audio, mouse sensitivity, field of view and camera distance
@@ -122,6 +123,8 @@ track's rotation never deletes its file or queued requests.
 
 Preview speakers turn yellow while active. Click again to stop the preview;
 music previews resume the prior track afterward. Play/Pause reflects playback state.
+Click the pause-menu music status to open the current or paused track in the library.
+When no track is selected, it opens the library instead.
 
 Audio combines master, category, individual sound and track volumes. Custom music
 supports OGG, WAV and MUS, with MP3 conversion available in the library. Dimension and biome tags such as

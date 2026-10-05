@@ -61,7 +61,7 @@ public final class PreviewPickerChecks {
       case "check-paused" -> {
         test("Play/pause during preview pauses the original playlist instead of advancing", () -> {
           check(!system.playing("PowerBetaMusicPreview") && !system.playing("BgMusic"), "preview pause did not stop audio: preview="+system.playing("PowerBetaMusicPreview")+", background="+system.playing("BgMusic")+", status="+AudioController.status());
-          check(AudioController.status().equals("Music paused"), "pause changed playlist state");
+          check(AudioController.status().matches("Music paused|Paused: .+"), "pause changed playlist state");
         });
         AudioController.togglePause();
       }

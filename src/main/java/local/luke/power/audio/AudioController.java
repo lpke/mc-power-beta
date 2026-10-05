@@ -230,7 +230,7 @@ public final class AudioController {
 
   public static String status() {
     if (MusicPreview.active()) return (MusicPreview.paused() ? "Paused: " : "Previewing: ") + musicLabel(MusicPreview.track());
-    if (paused) return "Music paused";
+    if (paused) return currentTrackId().isEmpty() ? "Music paused" : "Paused: " + musicLabel(currentTrackId());
     if (AudioConfig.current().master == 0 || client != null && client.options.musicVolume == 0)
       return "Music muted";
     String playing = nowPlaying();

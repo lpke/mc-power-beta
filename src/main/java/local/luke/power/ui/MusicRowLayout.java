@@ -7,7 +7,6 @@ public record MusicRowLayout(
     int controlsY,
     int volumeX,
     int volumeWidth,
-    int exactX,
     int favouriteX,
     int previewX,
     int playX,
@@ -24,7 +23,7 @@ public record MusicRowLayout(
     boolean inline = width >= (queue ? 320 : 440);
     int button = width < 260 ? 14 : 20, gap = 2;
     int right = left + width, actions = right - (button + gap) * (queue ? 5 : 4) + gap;
-    int exact = actions - 22, volumeEnd = exact - gap;
+    int volumeEnd = actions - gap;
     int volumeWidth = sliderWidth(width);
     int volumeX = volumeEnd - volumeWidth;
     int nameX = left + (queue ? 2 : 24);
@@ -35,7 +34,6 @@ public record MusicRowLayout(
         inline ? 3 : 23,
         volumeX,
         volumeWidth,
-        exact,
         actions,
         queue ? -1 : actions + button + gap,
         actions + (button + gap) * (queue ? 3 : 2),

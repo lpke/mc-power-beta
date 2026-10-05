@@ -6,10 +6,8 @@ import org.junit.jupiter.api.Test;
 
 class StickyHeaderTest {
   private record Row(boolean heading, int y, int height) {}
-  private static final List<Row> ROWS = List.of(
-      new Row(true, 0, 24), new Row(false, 24, 24), new Row(false, 48, 40),
-      new Row(false, 88, 24), new Row(true, 112, 24), new Row(false, 136, 24),
-      new Row(false, 160, 24), new Row(false, 184, 24));
+  private static final List<Row> ROWS = java.util.stream.IntStream.range(0, 18)
+      .mapToObj(i -> new Row(i % 9 == 0, i * 24, 24)).toList();
 
   private StickyHeader at(List<Row> rows, int scroll) {
     return StickyHeader.at(rows, Row::heading, Row::y, Row::height, scroll, 50, 210);
@@ -18,19 +16,26 @@ class StickyHeaderTest {
   @Test void pinsOnlyTheCurrentGroupAndSwitchesWhenTheNextHeadingArrives() {
     assertNull(at(ROWS, 0));
     assertEquals(new StickyHeader(0, 50, 24), at(ROWS, 30));
-    assertNull(at(ROWS, 112));
-    assertEquals(new StickyHeader(4, 50, 24), at(ROWS, 130));
+    assertNull(at(ROWS, 216));
+    assertEquals(new StickyHeader(9, 50, 24), at(ROWS, 230));
   }
 
   @Test void finalItemPushesTheHeadingAwayBeforeItCanCoverThatItem() {
-    var pinned = at(ROWS, 76);
+    var pinned = at(ROWS, 180);
     assertEquals(38, pinned.y());
-    assertEquals(50 + 88 - 76, pinned.y() + pinned.height());
+    assertEquals(50 + 192 - 180, pinned.y() + pinned.height());
     assertFalse(pinned.contains(49, 50));
     assertTrue(pinned.contains(50, 50));
     assertFalse(pinned.contains(62, 50));
-    assertNull(at(ROWS, 88));
-    assertNull(at(ROWS, 200));
+    assertNull(at(ROWS, 192));
+    assertNull(at(ROWS, 410));
+  }
+
+  @Test void groupsNeedAtLeastEightVisibleChildren() {
+    var seven = java.util.stream.IntStream.range(0, 8)
+        .mapToObj(i -> new Row(i == 0, i * 24, 24)).toList();
+    assertNull(at(seven, 30));
+    assertNotNull(at(ROWS, 30));
   }
 
   @Test void singleItemAndCollapsedGroupsNeverCoverContent() {

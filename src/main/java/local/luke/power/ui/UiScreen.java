@@ -4,6 +4,7 @@ import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.opengl.GL11;
 
 public abstract class UiScreen extends Screen {
+  private final java.nio.IntBuffer inputClip = org.lwjgl.BufferUtils.createIntBuffer(16);
   void rectangle(int left,int top,int right,int bottom,int colour) { fill(left,top,right,bottom,colour); }
   protected boolean inside(int x, int y, int left, int top, int width, int height) {
     return x >= left && x < left + width && y >= top && y < top + height;
@@ -76,6 +77,7 @@ public abstract class UiScreen extends Screen {
     int color = !enabled ? 0xff777777 : active ? icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
     int cx = x + w / 2, cy = y + 9;
     String[] pixels = switch (icon) {
+      case "check" -> new String[]{"        #", "       ##", "      ## ", "#    ##  ", "##  ##   ", " ####    ", "  ##     "};
       case "star" -> new String[]{"    #    ", "   ###   ", "#########", " ####### ", "  #####  ", " ##   ## ", " #     # "};
       case "music" -> new String[]{"   ######", "   #    #", "   #    #", "   #    #", " ###  ###", "#### ####", " ##   ## "};
       case "remove" -> new String[]{" #     # ", "  #   #  ", "   # #   ", "    #    ", "   # #   ", "  #   #  ", " #     # "};
@@ -144,7 +146,23 @@ public abstract class UiScreen extends Screen {
       TextInput input, int left, int top, int span, int mx, int my, String placeholder) {
     fill(left - 1, top - 1, left + span + 1, top + 19, input.focused ? 0xffaaaaaa : 0xff555555);
     fill(left, top, left + span, top + 18, 0xff101010);
+    // Inputs also render inside clipped scrolling lists. Preserve their outer clip.
+    GL11.glPushAttrib(GL11.GL_SCISSOR_BIT);
+    boolean clipped = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
+    int clipX = 0, clipY = 0, clipRight = 0, clipTop = 0;
+    if (clipped) {
+      GL11.glGetInteger(GL11.GL_SCISSOR_BOX, inputClip);
+      clipX = inputClip.get(0); clipY = inputClip.get(1);
+      clipRight = clipX + inputClip.get(2); clipTop = clipY + inputClip.get(3);
+    }
     clip(left + 3, top, span - 6, 18);
+    if (clipped) {
+      GL11.glGetInteger(GL11.GL_SCISSOR_BOX, inputClip);
+      int x1 = Math.max(clipX, inputClip.get(0)), y1 = Math.max(clipY, inputClip.get(1));
+      int x2 = Math.min(clipRight, inputClip.get(0) + inputClip.get(2));
+      int y2 = Math.min(clipTop, inputClip.get(1) + inputClip.get(3));
+      GL11.glScissor(x1, y1, Math.max(0, x2 - x1), Math.max(0, y2 - y1));
+    }
     int offset =
         Math.max(0, textRenderer.getWidth(input.text().substring(0, input.cursor())) - (span - 12));
     int x = left + 4 - offset;
@@ -167,7 +185,7 @@ public abstract class UiScreen extends Screen {
           x + textRenderer.getWidth(input.text().substring(0, input.cursor())) + 1,
           top + 14,
           0xffffffff);
-    unclip();
+    GL11.glPopAttrib();
   }
 
   protected void tooltip(String message, int mx, int my) {

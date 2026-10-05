@@ -203,9 +203,9 @@ public final class MusicLibraryScreen extends UiScreen {
 
   private MusicFilters.Layout filters() {
     if (span() < 380) {
-      String label = folderSelected() ? "Folders" : switch (folder) {
+      String label = folderSelected() ? "Folder" : switch (folder) {
         case "active" -> "Active"; case "custom" -> "All folders"; case "favourites" -> "Favourites";
-        case "presets" -> "Presets"; default -> "Everything";
+        case "presets" -> "Preset"; default -> "Everything";
       };
       boolean selector = folderSelected() || folder.equals("presets");
       int selectorWidth = selector ? Math.min(120, span() / 2) : 0;
@@ -616,11 +616,11 @@ public final class MusicLibraryScreen extends UiScreen {
     var layout = rowLayout(); int cy = rowY + layout.controlsY(); int bw = layout.buttonWidth();
     if (!queue && inside(x,y,left(),rowY+3,20,18)) { click(); toggleIncluded(id); rebuildRows(); scroll(scroll()); return; }
     Setting volume = settings.get("audio.sound." + id);
-    if (!presetsOpen && volume != null && inside(x,y,volumeX(),cy,layout.volumeWidth(),18) && b==0) {
-      dragging=volume;slide(x);return;
-    }
-    if (!presetsOpen && volume != null && inside(x,y,layout.exactX(),cy,20,18)) {
-      click();minecraft.setScreen(new ValueScreen(parent,volume));return;
+    if (!presetsOpen && volume != null && inside(x,y,volumeX(),cy,layout.volumeWidth(),18)) {
+      if (b == 0) { dragging=volume; slide(x); }
+      else parent.valueEditor.begin(clicked, volume, () -> parent.changed(volume),
+          volumeX(), cy, layout.volumeWidth(), listTop(), bottom());
+      return;
     }
     if (!presetsOpen && inside(x,y,layout.favouriteX(),cy,bw,18)) { click();edits.favourite(id);if (folder.equals("favourites")) rebuild();return; }
     if (queue) {
@@ -721,7 +721,7 @@ public final class MusicLibraryScreen extends UiScreen {
             case "custom" -> "All tracks found in your music folders.";
             case "favourites" -> "Tracks you have starred. Favourites do not change automatic rotation.";
             case "presets" -> "Browse a saved preset without loading or changing it.";
-            case "cycle" -> "Choose Active, Everything, Favourites, Presets, All folders or Folders.";
+            case "cycle" -> "Choose Active, Everything, Favourites, Preset, All folders or Folder.";
             default -> "Tracks in the selected folder and its subfolders.";
           };
       }
@@ -733,8 +733,9 @@ public final class MusicLibraryScreen extends UiScreen {
       }
     }
     if (queue) renderedQueue = List.copyOf(tracks);
-    clip(left() - 2, listTop(), span() + 4, Math.max(0, bottom() - listTop()));
     StickyHeader sticky = stickyHeader();
+    int rowsTop = sticky == null ? listTop() : Math.max(listTop(), sticky.y() + sticky.height());
+    clip(left() - 2, rowsTop, span() + 4, Math.max(0, bottom() - rowsTop));
     int listMouseY = sticky != null && sticky.contains(my, listTop()) ? -1 : my;
     for (Row row : rows) {
       int y = listTop() + row.y - scroll();
@@ -753,7 +754,6 @@ public final class MusicLibraryScreen extends UiScreen {
         String control = "name";
         if (!queue && inside(mx,listMouseY,left(),y+3,20,18)) control = "include";
         else if (inside(mx,listMouseY,volumeX(),cy,layout.volumeWidth(),18)) control = "volume";
-        else if (inside(mx,listMouseY,layout.exactX(),cy,20,18)) control = "exact";
         else if (inside(mx,listMouseY,layout.favouriteX(),cy,bw,18)) control = "favourite";
         else if (inside(mx,listMouseY,layout.playX(),cy,bw,18)) control = "play";
         else if (!queue && inside(mx,listMouseY,layout.previewX(),cy,bw,18)) control = "preview";
@@ -768,8 +768,9 @@ public final class MusicLibraryScreen extends UiScreen {
       if(!queue)musicToggle(included(id),left(),y+3,mx,listMouseY,true);
       Setting volume=settings.get("audio.sound."+id);
       if(!presetsOpen){
-        if(volume!=null)slider(volume.display()+"%",volumeX(),cy,layout.volumeWidth(),mx,listMouseY,volume.value.getAsDouble()/100);
-        button("...",layout.exactX(),cy,20,18,mx,listMouseY,volume!=null);
+        if (volume != null && parent.valueEditor.editing(row))
+          parent.valueEditor.render(this, volumeX(), cy, layout.volumeWidth(), mx, listMouseY, rowsTop, bottom());
+        else if (volume != null) slider(volume.display()+"%",volumeX(),cy,layout.volumeWidth(),mx,listMouseY,volume.value.getAsDouble()/100);
         iconButton("star",layout.favouriteX(),cy,bw,mx,listMouseY,true,edits.favourites().contains(id));
       }
       if(queue){
@@ -783,8 +784,7 @@ public final class MusicLibraryScreen extends UiScreen {
       iconButton(AudioController.playingTrack(id)?"pause":"play",layout.playX(),cy,bw,mx,listMouseY,playable(id));
       if(hover){
         if(!queue&&inside(mx,listMouseY,left(),y+3,20,18))tip="Include in automatic rotation. Preview and queue work even when excluded.";
-        else if(!presetsOpen&&inside(mx,listMouseY,volumeX(),cy,layout.volumeWidth(),18))tip="Track volume; music and master volumes also apply.";
-        else if(!presetsOpen&&inside(mx,listMouseY,layout.exactX(),cy,20,18))tip="Enter an exact volume";
+        else if(!presetsOpen&&inside(mx,listMouseY,volumeX(),cy,layout.volumeWidth(),18))tip=parent.valueEditor.editing(row) ? parent.valueEditor.help() : "Track volume; music and master volumes also apply. Right-click to enter an exact value.";
         else if(!presetsOpen&&inside(mx,listMouseY,layout.favouriteX(),cy,bw,18))tip=edits.favourites().contains(id)?"Remove from favourites":"Add to favourites";
         else if(inside(mx,listMouseY,layout.playX(),cy,bw,18))tip="Play or pause this track";
         else if(!queue&&inside(mx,listMouseY,layout.previewX(),cy,bw,18))tip="Preview without changing the current track; click again to stop.";
@@ -795,7 +795,7 @@ public final class MusicLibraryScreen extends UiScreen {
     }
 
     if (sticky != null) {
-      fill(left() - 2, sticky.y(), right() + 2, sticky.y() + sticky.height(), 0xff202020);
+      clip(left() - 2, listTop(), span() + 4, Math.max(0, bottom() - listTop()));
       var group = groupHeading(rows.get(sticky.index()), sticky.y(), mx, my);
       if (!group.tip.isEmpty()) { tip = group.tip; key = group.key; }
     }
