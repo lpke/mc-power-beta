@@ -114,7 +114,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int listTop() {
-    return presetsOpen ? statusTop() + 4 + presets.headerHeight() : controlsTop()
+    return presetsOpen ? controlsTop() + 4 + presets.headerHeight() : controlsTop()
         + (queue ? 18 : Math.max(filters().height(), bulkTop() - controlsTop() + 18)) + 6;
   }
 

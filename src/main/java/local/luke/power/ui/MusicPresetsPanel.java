@@ -98,7 +98,7 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   private int top() {
-    return parent.audioContentTop() + 4;
+    return parent.audioContentTop() + 22;
   }
 
   private int bottom() {
@@ -110,7 +110,7 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   int headerHeight() {
-    return editing() ? (span() >= 640 ? 26 : span() < 326 ? 70 : 48) : 50;
+    return editing() ? (span() >= 640 ? 26 : 48) : 50;
   }
 
   private String actionLabel() {
@@ -130,23 +130,27 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   private int hideX() {
-    return saveX() + 66;
+    return saveX() + saveWidth() + 4;
   }
+
+  private int saveWidth() { return span() < 326 ? 40 : 62; }
+  private int bulkWidth() { return span() < 326 ? 34 : 72; }
+  private int hideWidth() { return span() < 326 ? span() - saveWidth() - 2 * bulkWidth() - 12 : 102; }
 
   private int editButtonY() {
     return top() + (span() >= 640 ? 0 : 22);
   }
 
   private int includeX() {
-    return right() - 148;
+    return right() - 2 * bulkWidth() - 4;
   }
 
   private int excludeX() {
-    return right() - 72;
+    return right() - bulkWidth();
   }
 
   private int bulkY() {
-    return span() < 326 ? top() + 44 : editButtonY();
+    return editButtonY();
   }
 
   private int rowTop() {
@@ -197,19 +201,19 @@ final class MusicPresetsPanel extends UiScreen {
     }
     if (!editing()) return listClick(x, y, b);
     name.focused = inside(x, y, nameX(), top(), nameWidth(), 18);
-    if (b == 0 && inside(x, y, saveX(), editButtonY(), 62, 18)) {
+    if (b == 0 && inside(x, y, saveX(), editButtonY(), saveWidth(), 18)) {
       save();
       return true;
     }
-    if (inside(x, y, hideX(), editButtonY(), 102, 18)) {
+    if (inside(x, y, hideX(), editButtonY(), hideWidth(), 18)) {
       hideExcluded = !hideExcluded;
       return true;
     }
-    if (inside(x, y, includeX(), bulkY(), 72, 18)) {
+    if (inside(x, y, includeX(), bulkY(), bulkWidth(), 18)) {
       draft.includeAll();
       return true;
     }
-    if (inside(x, y, excludeX(), bulkY(), 72, 18)) {
+    if (inside(x, y, excludeX(), bulkY(), bulkWidth(), 18)) {
       try {
         draft.excludeAll(AudioController.music(minecraft));
         error = "";
@@ -273,18 +277,18 @@ final class MusicPresetsPanel extends UiScreen {
     if (editing()) {
       text(actionLabel(), left(), top() + 5, 0xffffff);
       input(name, nameX(), top(), nameWidth(), mx, my, "Preset name");
-      button("Save", saveX(), editButtonY(), 62, 18, mx, my, true);
+      button("Save", saveX(), editButtonY(), saveWidth(), 18, mx, my, true);
       button(
-          hideExcluded ? "Show excluded" : "Hide excluded",
+          fit(hideExcluded ? "Show excluded" : "Hide excluded", hideWidth() - 4),
           hideX(),
           editButtonY(),
-          102,
+          hideWidth(),
           18,
           mx,
           my,
           true);
-      button("Include all", includeX(), bulkY(), 72, 18, mx, my, true);
-      button("Exclude all", excludeX(), bulkY(), 72, 18, mx, my, true);
+      button(span() < 326 ? "All" : "Include all", includeX(), bulkY(), bulkWidth(), 18, mx, my, true);
+      button(span() < 326 ? "None" : "Exclude all", excludeX(), bulkY(), bulkWidth(), 18, mx, my, true);
     } else {
       button("Create new preset", left(), top(), Math.min(150, span()), 20, mx, my, true);
       text(

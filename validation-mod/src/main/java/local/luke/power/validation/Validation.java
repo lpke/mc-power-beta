@@ -51,6 +51,7 @@ public final class Validation {
       else if (command.equals("cheats")) CheatsChecks.run(mc);
       else if (command.equals("modern-commands")) ModernCommandChecks.run(mc);
       else if (command.startsWith("audio-presets-")) AudioPresetChecks.run(mc,command.substring(14));
+      else if (command.startsWith("audio-start-")) AudioStartChecks.run(command.substring(12));
       else if (command.startsWith("audio-groups-")) AudioGroupChecks.run(mc,command.substring(13));
       else if (command.equals("audio-maintenance")) AudioMaintenanceChecks.run(mc);
       else if (command.equals("inline-values")) InlineValueChecks.run(mc);

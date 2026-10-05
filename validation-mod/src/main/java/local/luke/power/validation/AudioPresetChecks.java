@@ -93,6 +93,47 @@ public final class AudioPresetChecks {
   public static void run(Minecraft mc, String action) throws Exception {
     switch (action) {
       case "none" -> none(mc);
+      case "editor" -> {
+        var library = (MusicLibraryScreen) field(options, "library");
+        field(options, "libraryOpen", true);
+        library.openPresets();
+        var panel = field(library, "presets");
+        click(options, (int) call(panel, "left") + 20, (int) call(panel, "top") + 7);
+        Object draft = call(panel, "draft");
+        test("preset playback controls and scrubber fit without hiding editable rows", () -> {
+          for (int[] size : new int[][] {{320,240}, {427,240}, {640,420}, {854,480}}) {
+            options.init(mc, size[0], size[1]);
+            options.render(-1,-1,0);
+            check((boolean) call(options, "musicControlsVisible"), "controls hidden");
+            var bar = field(options, "musicStatus");
+            check((boolean) field(bar, "available"), "scrubber hidden");
+            check((int) call(panel, "top") >= (int) field(bar, "top") + 16, "header overlaps scrubber");
+            check((int) call(library, "listTop") == (int) call(panel, "rowTop"), "rows overlap header");
+            check((int) call(library, "bottom") - (int) call(library, "listTop") >= 24,
+                "no room for track groups at " + size[0]);
+            var play = musicButton(options, AudioToolbar.Action.PLAY);
+            check(play.y() + 18 <= (int) field(bar, "top"), "toolbar overlaps scrubber");
+            musicClick(options, AudioToolbar.Action.PLAY);
+            check(AudioController.status().startsWith("Paused: "), "editor Pause missed");
+            musicClick(options, AudioToolbar.Action.PLAY);
+            check(AudioController.currentTrackId().equals("music:calm1.ogg"), "Resume changed track");
+            check(call(panel, "draft") == draft, "playback replaced preset draft");
+            check(GL11.glGetError() == 0, "GL error");
+          }
+        });
+        test("current-track navigation guards an unsaved preset", () -> {
+          var bar = field(options, "musicStatus");
+          click(options, (int) field(bar, "labelX") + 4, (int) field(bar, "top") + 6);
+          check(library.modal(), "track link discarded draft");
+          int w = Math.min(312, options.width - 20), left = (options.width - w) / 2;
+          click(options, left + 2 * (w / 3) + 10, options.height / 2 + 8);
+          check(!library.modal() && call(panel, "draft") == draft, "Cancel lost draft");
+          click(options, (int) field(bar, "labelX") + 4, (int) field(bar, "top") + 6);
+          click(options, left + w / 3 + 10, options.height / 2 + 8);
+          check(!library.presetVisible(), "Discard did not open track in library");
+        });
+        log("AUDIO EDITOR FAILURES " + failures);
+      }
       case "setup" -> {
         failures = 0;
         before = AudioConfig.copy();

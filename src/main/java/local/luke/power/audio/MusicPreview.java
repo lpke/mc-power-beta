@@ -39,12 +39,9 @@ final class MusicPreview {
       }
     }
     MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
-    system.stop(SOURCE);
-    system.removeSource(SOURCE);
     track = id; world = mc.world; playing = false; paused = false; started = System.nanoTime();
-    system.backgroundMusic(SOURCE, selected.field_2127, selected.field_2126, false);
-    system.setVolume(SOURCE, AudioController.musicVolume(track));
-    system.play(SOURCE);
+    MusicStream.start(system, SOURCE, selected.field_2127, selected.field_2126,
+        AudioController.musicVolume(track), false);
   }
 
   static void tick(Minecraft mc, SoundSystem system) {

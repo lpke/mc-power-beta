@@ -110,7 +110,6 @@ public final class AudioController {
     }
     MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
     upcoming = null; nextKey = null;
-    system.stop("BgMusic");
     system.stop("PowerBetaMenu");
     menuMusic = "";
     currentMusic = trackId(track);
@@ -120,9 +119,8 @@ public final class AudioController {
     menuCooldown = 0;
     int dimension = client.player == null ? 0 : client.player.dimensionId;
     LegacyMusic.selected(track.field_2126, client.world != null && TrackRules.dimensionSpecific(track.field_2126, dimension) ? dimension : Integer.MAX_VALUE);
-    system.backgroundMusic("BgMusic", track.field_2127, track.field_2126, false);
-    system.setVolume("BgMusic", musicVolume(currentMusic));
-    system.play("BgMusic");
+    MusicStream.start(system, "BgMusic", track.field_2127, track.field_2126,
+        musicVolume(currentMusic), false);
     musicStarted = System.nanoTime(); trackWasPlaying = false;
     nextDelay((SoundManagerAccessor) client.soundManager);
   }
@@ -443,10 +441,8 @@ public final class AudioController {
     if (seek != null) {
       if (!seek.id().equals(currentTrackId())) seek.codec().cleanup();
       else {
-        system.stop(seek.source());
-        system.backgroundMusic(seek.source(), MusicSeeking.publish(seek), "position.pbseek", false);
-        system.setVolume(seek.source(), (MusicPreview.active() ? MusicPreview.paused() : paused) ? 0 : musicVolume(seek.id()));
-        system.play(seek.source());
+        MusicStream.start(system, seek.source(), MusicSeeking.publish(seek), "position.pbseek",
+            musicVolume(seek.id()), MusicPreview.active() ? MusicPreview.paused() : paused);
         if (MusicPreview.active()) MusicPreview.seeked(seek.seconds());
         else { progress.reset(seek.seconds(),System.nanoTime()); resuming(); }
       }

@@ -5,6 +5,7 @@ import java.util.List;
 
 /** Playback stays on the left; queue, library and reload stay together on the right. */
 public final class AudioToolbar {
+  public static final int PLAYBACK_BOTTOM = 70;
   public enum Action { PLAY, PREVIOUS, NEXT, QUIET, QUEUE, LIBRARY, RELOAD }
   public record Button(Action action, String label, int x, int y, int width, boolean enabled) {
     public boolean contains(int mouseX, int mouseY) {
@@ -12,6 +13,11 @@ public final class AudioToolbar {
     }
   }
   public record Layout(List<Button> buttons, int bottom) {}
+
+  public static Layout playback(int left, int width, boolean playing) {
+    return new Layout(layout(left, width, 0, playing, true).buttons().stream()
+        .filter(button -> button.action().ordinal() < Action.QUEUE.ordinal()).toList(), PLAYBACK_BOTTOM);
+  }
 
   public static int bottom(int width, boolean library) {
     return width >= (width < 380 ? 268 : 380) ? 70 : 92;

@@ -56,10 +56,12 @@ public final class PowerOptionsScreen extends UiScreen {
   int contentLeft() { return left(); }
   int contentRight() { return right() - 14; }
   int contentBottom() { return bottom(); }
-  int audioContentTop() { if (presetVisible()) return 52; return AudioToolbar.bottom(span(), libraryVisible()) + 3; }
+  int audioContentTop() {
+    return (libraryVisible() && library.presetVisible() ? AudioToolbar.PLAYBACK_BOTTOM
+        : AudioToolbar.bottom(span(), libraryVisible())) + 3;
+  }
   private boolean libraryVisible() { return libraryOpen && audio(); }
-  private boolean presetVisible() { return libraryVisible() && library.presetVisible(); }
-  private boolean musicControlsVisible() { return audio() && !presetVisible(); }
+  private boolean musicControlsVisible() { return audio(); }
   private int musicStatusWidth() { return contentRight() - left() - (libraryVisible() && library.conversionVisible() ? 92 : 0); }
   private int contentHeight() { return rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height + 6; }
   private ScrollBar.Track contentTrack() { return new ScrollBar.Track(right() - 8, top(), bottom() - top(), contentHeight(), scroll); }
@@ -541,7 +543,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.press(x,y,button)) return;
     if (musicControlsVisible() && button == 0 && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.overTrack(x, y)) {
       String id = local.luke.power.audio.AudioController.currentTrackId();
-      if (!id.isEmpty()) { click(); libraryOpen = true; library.showTrack(id); layout(); }
+      if (!id.isEmpty()) {
+        click();
+        library.guard(() -> { libraryOpen = true; library.showTrack(id); layout(); });
+      }
       return;
     }
     if (libraryVisible() && x >= left() && y >= audioContentTop() && y < bottom()) {
@@ -845,6 +850,8 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private AudioToolbar.Layout musicLayout() {
+    if (libraryVisible() && library.presetVisible())
+      return AudioToolbar.playback(left(), span(), local.luke.power.audio.AudioController.musicPlaying());
     return AudioToolbar.layout(left(), span(), local.luke.power.audio.MusicRequests.tracks().size(),
         local.luke.power.audio.AudioController.musicPlaying(), libraryVisible());
   }

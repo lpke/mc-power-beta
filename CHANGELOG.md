@@ -1,5 +1,12 @@
 # Changelog
 
+## Music playback fix
+
+- Start music streams once to prevent the opening audio repeating during buffering.
+  Use the same startup for normal playback, previews and seeking.
+- Keep playback controls and the scrub bar available while creating or editing
+  music presets. Leaving a draft through the current-track link prompts to save.
+
 ## Preset reset fix
 
 - Loading None clears all music exclusions and the preset track pool while
