@@ -14,14 +14,27 @@ public final class BuiltinMusic {
     public boolean background() { return usage.equals("Overworld") || creative(); }
     public String group() { return era + (usage.equals("Overworld") ? "" : " / " + usage); }
     public boolean included(AudioSettings.MusicMode mode) {
-      return mode == AudioSettings.MusicMode.ALL_MINECRAFT
-          || mode == AudioSettings.MusicMode.ALPHA_BETA && (era.equals("Alpha") || era.equals("Beta"))
-          || era.equals("Alpha") && usage.equals("Overworld");
+      if (usage.equals("Nether") || usage.equals("End")) return false;
+      boolean early = era.equals("Alpha") || era.equals("Beta");
+      return switch (mode) {
+        case VANILLA -> era.equals("Alpha") && usage.equals("Overworld");
+        case ALPHA_BETA_SURVIVAL -> early && usage.equals("Overworld");
+        case ALPHA_BETA -> early;
+        case MINECRAFT_SURVIVAL -> usage.equals("Overworld");
+        case ALL_MINECRAFT -> true;
+      };
     }
   }
   public static final List<Track> TRACKS = load();
   /** Manifest order is chronological; shared survival/creative tracks appear only once. */
-  public static final List<String> GROUPS = TRACKS.stream().map(Track::group).distinct().toList();
+  public static final List<String> GROUPS = groups();
+  private static List<String> groups() {
+    List<String> eras = List.of("Alpha", "Beta", "Update Aquatic", "Nether Update", "Caves & Cliffs",
+        "The Wild Update", "Trails & Tales", "Tricky Trials", "Chase the Skies", "Chaos Cubed");
+    List<String> uses = List.of("Overworld", "Creative", "Menu", "Records", "Credits", "Album extras", "Nether", "End");
+    return TRACKS.stream().sorted(Comparator.comparingInt((Track t) -> eras.indexOf(t.era()))
+        .thenComparingInt(t -> uses.indexOf(t.usage()))).map(Track::group).distinct().toList();
+  }
   private static List<Track> load() {
     try (var in = BuiltinMusic.class.getResourceAsStream("/assets/powerbeta/music/manifest.json")) {
       if (in == null) throw new IOException("Missing soundtrack manifest");

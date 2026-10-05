@@ -42,7 +42,10 @@ def resolve(sounds, event, stack=()):
 
 def main():
     manifest = json.loads((ROOT / 'src/main/resources/assets/powerbeta/music/manifest.json').read_text())
-    bundled = {t['file']: t for t in manifest['tracks']}
+    bundled = {t['file']: t for t in manifest['tracks'] if t.get('source') != 'owner-purchased-album'}
+    albums = [t for t in manifest['tracks'] if t.get('source') == 'owner-purchased-album']
+    assert len(albums) == 15
+    assert all(t['usage'] == 'Album extras' and len(t['sourceSha256']) == 64 for t in albums)
     union, survival, creative, official, extra = set(), set(), set(), set(), set()
     aliases = manifest['legacyAliases']
     for source in manifest['sources']:
@@ -54,8 +57,9 @@ def main():
         found = set()
         for event in sounds:
             background = event in {'music.game', 'music.creative', 'music.game.creative', 'music.under_water'} or event.startswith('music.overworld.')
+            dimension = event.startswith('music.') and ('nether' in event or event in {'music.end', 'music.dragon', 'music.game.end', 'music.game.end.dragon'})
             additional = event in {'music.menu', 'music.credits', 'music.game.end.credits'} or event.startswith(('music_disc.', 'records.'))
-            if not background and not additional:
+            if not background and not additional and not dimension:
                 continue
             for name in resolve(sounds, event):
                 assert 'minecraft/sounds/' + name + '.ogg' in assets, name
@@ -64,7 +68,7 @@ def main():
                 found.add(file)
                 (creative if 'creative' in event else survival if background else extra).add(file)
         union.update(found)
-        print(source['version'], len(found), 'background/menu/credits/record tracks')
+        print(source['version'], len(found), 'game soundtrack tracks, including dimensions')
     assert union == bundled.keys(), f'Missing: {union - bundled.keys()}; extra: {bundled.keys() - union}'
     assert creative - survival == {t['file'] for t in bundled.values() if t['usage'] == 'Creative'}
     for track in bundled.values():

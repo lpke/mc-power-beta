@@ -1,5 +1,15 @@
 # Changelog
 
+## Audio presets and complete soundtrack library
+
+- Added independent music preset creation, editing, renaming, deletion and explicit loading, with unsaved-change prompts and an Include all action. Active presets override ordinary soundtrack/custom-music choices.
+- Added persistent favourites and preset browsing. Renamed library filters to Active, Everything, All folders, Folders, Favourites and Presets.
+- Added survival/all soundtrack choices. Both all choices include 15 purchased album extras. Added all nine Nether/End tracks for browsing, manual playback and presets only; the complete library has 107 tracks.
+- Added inline track rows, wider volume sliders, responsive compact layouts, initial section collapsing and custom-folder groups first.
+- Added a minimal seek bar, reserved upcoming-track countdowns in minutes, and silent sound-preview buttons.
+- Fixed pause/resume losing the currently playing identity, preserved preview playback through global Pause/Play, and handled Beta's repeated decoder initialization during seeking.
+
+
 ## Complete overworld soundtrack and group controls, 2026-10-05
 
 - Expand All Minecraft from 21 to 56 tracks through Java 26.3, also checked

@@ -1294,6 +1294,367 @@
       "events": [
         "music_disc.bounce"
       ]
+    },
+    {
+      "file": "boss.ogg",
+      "title": "Boss",
+      "era": "Beta",
+      "usage": "End",
+      "asset": "minecraft/sounds/music/game/end/boss.ogg",
+      "sha1": "67e25166bfe3e0ce3ef45ce2680b2413f80ccc5a",
+      "size": 3761170,
+      "events": [
+        "music.dragon"
+      ]
+    },
+    {
+      "file": "the_end.ogg",
+      "title": "The End",
+      "era": "Beta",
+      "usage": "End",
+      "asset": "minecraft/sounds/music/game/end/the_end.ogg",
+      "sha1": "853da2928e9ca37e6d7c9aeaad58d4cbfeca77d4",
+      "size": 11284337,
+      "events": [
+        "music.end"
+      ]
+    },
+    {
+      "file": "ballad_of_the_cats.ogg",
+      "title": "Ballad Of The Cats",
+      "era": "Beta",
+      "usage": "Nether",
+      "asset": "minecraft/sounds/music/game/nether/ballad_of_the_cats.ogg",
+      "sha1": "fa2719bb68297a235f970cf1f7bc105a5acf90c9",
+      "size": 3225721,
+      "events": [
+        "music.nether.basalt_deltas",
+        "music.nether.crimson_forest",
+        "music.nether.nether_wastes",
+        "music.nether.soul_sand_valley"
+      ]
+    },
+    {
+      "file": "concrete_halls.ogg",
+      "title": "Concrete Halls",
+      "era": "Beta",
+      "usage": "Nether",
+      "asset": "minecraft/sounds/music/game/nether/concrete_halls.ogg",
+      "sha1": "bc11027f0c3aabe6da20bf3f4ef734f96c6d9de1",
+      "size": 2968827,
+      "events": [
+        "music.nether.basalt_deltas",
+        "music.nether.crimson_forest",
+        "music.nether.nether_wastes",
+        "music.nether.soul_sand_valley"
+      ]
+    },
+    {
+      "file": "chrysopoeia.ogg",
+      "title": "Chrysopoeia",
+      "era": "Nether Update",
+      "usage": "Nether",
+      "asset": "minecraft/sounds/music/game/nether/crimson_forest/chrysopoeia.ogg",
+      "sha1": "6855f8a8905b601cf5a15094a8ebeab066345cc2",
+      "size": 4217857,
+      "events": [
+        "music.nether.crimson_forest"
+      ]
+    },
+    {
+      "file": "dead_voxel.ogg",
+      "title": "Dead Voxel",
+      "era": "Beta",
+      "usage": "Nether",
+      "asset": "minecraft/sounds/music/game/nether/dead_voxel.ogg",
+      "sha1": "bc83ef53bf163e45854a4e619c2c8f20017be979",
+      "size": 3234589,
+      "events": [
+        "music.nether.basalt_deltas",
+        "music.nether.crimson_forest",
+        "music.nether.nether_wastes",
+        "music.nether.soul_sand_valley"
+      ]
+    },
+    {
+      "file": "rubedo.ogg",
+      "title": "Rubedo",
+      "era": "Nether Update",
+      "usage": "Nether",
+      "asset": "minecraft/sounds/music/game/nether/nether_wastes/rubedo.ogg",
+      "sha1": "54f37a73d613c9e2f9c303f7c3f2180cbf67912b",
+      "size": 4287088,
+      "events": [
+        "music.nether.nether_wastes"
+      ]
+    },
+    {
+      "file": "so_below.ogg",
+      "title": "So Below",
+      "era": "Nether Update",
+      "usage": "Nether",
+      "asset": "minecraft/sounds/music/game/nether/soulsand_valley/so_below.ogg",
+      "sha1": "ce719536d17beda1445931d3ba33d3c23d51e48f",
+      "size": 4068042,
+      "events": [
+        "music.nether.basalt_deltas",
+        "music.nether.soul_sand_valley"
+      ]
+    },
+    {
+      "file": "warmth.ogg",
+      "title": "Warmth",
+      "era": "Beta",
+      "usage": "Nether",
+      "asset": "minecraft/sounds/music/game/nether/warmth.ogg",
+      "sha1": "df444dec6fc366f517bcee5995dfe7148bf0b436",
+      "size": 2797184,
+      "events": [
+        "music.nether.basalt_deltas",
+        "music.nether.crimson_forest",
+        "music.nether.nether_wastes",
+        "music.nether.soul_sand_valley"
+      ]
+    },
+    {
+      "file": "door.ogg",
+      "title": "Door",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-02. Door.mp3",
+      "sourceSha256": "4c11e27714b01401baa037db62db41b63e82bdc992faa5bdacb3acfb1fc4df68",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 239373,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "32033e1d872e0132275714f4be00819103711293",
+      "size": 2937208,
+      "events": []
+    },
+    {
+      "file": "death.ogg",
+      "title": "Death",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-04. Death.mp3",
+      "sourceSha256": "19630d74a956dffa2ebf7e9d76b4279f7ecfbf2590fb56373943192fb966dda3",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 257620,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "5068cd542516e47897ad2950bf78217b9f7501bd",
+      "size": 1409770,
+      "events": []
+    },
+    {
+      "file": "moog_city.ogg",
+      "title": "Moog City",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-06. Moog City.mp3",
+      "sourceSha256": "1296966619ae4b1a973b893476b732ec392983ede1de1c63b774f512fe7b6146",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 240765,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "69779858552710aa73425940a6a26bf8129c3486",
+      "size": 4291575,
+      "events": []
+    },
+    {
+      "file": "equinoxe.ogg",
+      "title": "Équinoxe",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-10. Équinoxe.mp3",
+      "sourceSha256": "bb22e2120b1768e9f8a7c6ca0341e32b808ecefc0cf17ad5c533927a98cc01db",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 237696,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "e23545c60340a6522a6377850e45fde3d66a77fc",
+      "size": 3102032,
+      "events": []
+    },
+    {
+      "file": "chris.ogg",
+      "title": "Chris",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-15. Chris.mp3",
+      "sourceSha256": "65d551af73afa3e69d13f432fb024f68fee0f8c0b6062cde1609040109f18015",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 238317,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "4f72b3f36fc9bbc49d3a787a4af29ed293083be3",
+      "size": 2278148,
+      "events": []
+    },
+    {
+      "file": "excuse.ogg",
+      "title": "Excuse",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-17. Excuse.mp3",
+      "sourceSha256": "bf698e2f3c936307b4e4456a522fdeec4baeb0d995f257ab7e33b0b14407d7fc",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 207073,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "e88712d57d5a9162b1f6ba0628120853dc8bafed",
+      "size": 2505449,
+      "events": []
+    },
+    {
+      "file": "dog.ogg",
+      "title": "Dog",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-20. Dog.mp3",
+      "sourceSha256": "66e1a3e618200c3ffa15d5048440790752986c23b05fc67fd7c4db0d764ec08f",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 219973,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "03b5c7d8eef4e6ff8794b86bae466728f29baefe",
+      "size": 3882460,
+      "events": []
+    },
+    {
+      "file": "beginning.ogg",
+      "title": "Beginning",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-22. Beginning.mp3",
+      "sourceSha256": "01dabf4b059350ddb54d87e7a19f7f3018d18bcec1168345bc5611ba335c2a31",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 221843,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "83cf60f552abb689c8a73dc9365de690b78073d0",
+      "size": 2389520,
+      "events": []
+    },
+    {
+      "file": "droopy_likes_ricochet.ogg",
+      "title": "Droopy Likes Ricochet",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-23. Droopy Likes Ricochet.mp3",
+      "sourceSha256": "5fd7767f242bce80d85af91cb0da4c4d7f9a744898377d0027057b6ffe56863a",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 250812,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "6d22878e1038ec94a022af7389c45d8778895fd1",
+      "size": 2721682,
+      "events": []
+    },
+    {
+      "file": "droopy_likes_your_face.ogg",
+      "title": "Droopy Likes Your Face",
+      "era": "Alpha",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "1-24. Droopy Likes Your Face.mp3",
+      "sourceSha256": "eba004be1e95532adb03250282a1ef83ea3d331b976ab971ca340b6ef1488e5e",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 259634,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "f8b454cd83a35af6fa2d271fe9b87cf8595d0748",
+      "size": 3725954,
+      "events": []
+    },
+    {
+      "file": "ki.ogg",
+      "title": "Ki",
+      "era": "Beta",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "2-01. Ki.mp3",
+      "sourceSha256": "062273aa00f4c80592247ae6264cc88639174d51510d48b2b8c035d88f2592bb",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 250056,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "e9920fc6580ccbac11d103519fc26f7b6c7cf154",
+      "size": 2511599,
+      "events": []
+    },
+    {
+      "file": "flake.ogg",
+      "title": "Flake",
+      "era": "Beta",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "2-05. Flake.mp3",
+      "sourceSha256": "e7746f6bde2d053fdf7e0ce5798457c68b111e0d5f1afb7be669aed1e7dc6cd8",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 246257,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "9766525d70b11c350400803d9bc96fac88c4b4c7",
+      "size": 5119649,
+      "events": []
+    },
+    {
+      "file": "kyoto.ogg",
+      "title": "Kyoto",
+      "era": "Beta",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "2-14. Kyoto.mp3",
+      "sourceSha256": "136e657232560f85ccc9e58f24f03c00f72f355ccf7baced1cbdd41e0d3ed720",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 236619,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "6299e200e561eee2a9a2cc6017eeb4d5e225e7c8",
+      "size": 5548313,
+      "events": []
+    },
+    {
+      "file": "album_eleven.ogg",
+      "title": "Eleven",
+      "era": "Beta",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "2-25. Eleven.mp3",
+      "sourceSha256": "deab6767b7b245709426b097a6791e5952611b4276338f891da1d06b8d5d17cc",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 237651,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "106b26d7a10557cd2ca794ac52d2233db2d92ce9",
+      "size": 1847252,
+      "events": []
+    },
+    {
+      "file": "intro.ogg",
+      "title": "Intro",
+      "era": "Beta",
+      "usage": "Album extras",
+      "source": "owner-purchased-album",
+      "sourceFile": "2-30. Intro.mp3",
+      "sourceSha256": "3705237d03745f3966aa184ded61a9d3cac302175c38032b0c16d4755347f667",
+      "sourceCodec": "mp3",
+      "sourceSampleRate": 44100,
+      "sourceBitRate": 254352,
+      "conversion": "FFmpeg libvorbis quality 8; original channels and sample rate",
+      "sha1": "47604114a4ce584ba2eeb7ef3ef087e497839dd2",
+      "size": 8002270,
+      "events": []
     }
   ],
   "checkedSnapshot": "26.4-snapshot-2",
@@ -1382,6 +1743,11 @@
     "menu2": "moog_city_2",
     "menu3": "beginning_2",
     "menu4": "floating_trees",
-    "credits": "alpha"
+    "credits": "alpha",
+    "end": "the_end",
+    "nether1": "concrete_halls",
+    "nether2": "dead_voxel",
+    "nether3": "warmth",
+    "nether4": "ballad_of_the_cats"
   }
 }

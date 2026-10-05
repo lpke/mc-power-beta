@@ -26,10 +26,15 @@ public final class SettingAccess {
 
   /** The gate changes presentation, never the stored preference beneath it. */
   public static String lockedValue(Setting setting) {
+    if (setting.id.equals("audio.musicMode") || setting.id.equals("audio.customMusic")) return "Using preset";
     return setting.kind == Setting.Kind.BOOLEAN ? "Off" : "Disabled";
   }
 
   public static String reason(ConfigSession session, Setting setting) {
+    if (setting.id.equals("audio.musicMode") || setting.id.equals("audio.customMusic")) {
+      Setting preset = session.settings().stream().filter(s -> s.id.equals("audio.preset")).findFirst().orElse(null);
+      if (preset != null && !preset.value.getAsString().isEmpty()) return "Using the selected World music preset. Choose None to use these settings.";
+    }
     if (!cheat(setting)) return "";
     Setting master =
         session.settings().stream()

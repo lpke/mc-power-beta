@@ -9,8 +9,13 @@ public final class MusicTiming {
   }
 
   public static String status(int ticks) {
+    return status(ticks, "next track");
+  }
+
+  public static String status(int ticks, String track) {
     long seconds = (Math.max(0L, ticks) + 19) / 20;
-    if (seconds == 0) return "Not playing. Next track shortly.";
-    return "Not playing. " + seconds + " sec until next track.";
+    String time = seconds <= 30 ? "<1 minute" : seconds < 90 ? "1 minute"
+        : Math.round(seconds / 60d) + " minutes";
+    return "Not playing. " + time + " until " + track;
   }
 }

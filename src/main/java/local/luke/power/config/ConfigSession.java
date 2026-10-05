@@ -42,6 +42,15 @@ public final class ConfigSession {
   }
 
   public void link(Setting changed) {
+    if (changed.id.startsWith("audio.trackEnabled.")) {
+      String id = changed.id.substring("audio.trackEnabled.".length());
+      settings.stream().filter(s -> s.id.equals("audio.exclusions")).findFirst().ifPresent(s -> {
+        var excluded = new java.util.TreeSet<String>();
+        s.value.getAsJsonArray().forEach(v -> excluded.add(v.getAsString()));
+        if (changed.value.getAsBoolean()) excluded.remove(id); else excluded.add(id);
+        var value = new com.google.gson.JsonArray(); excluded.forEach(value::add); s.value = value;
+      });
+    }
     if (changed.id.equals("tweaks.placement.enabled")) {
       boolean tied =
           settings.stream()

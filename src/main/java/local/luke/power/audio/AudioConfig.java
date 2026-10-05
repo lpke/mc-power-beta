@@ -40,7 +40,7 @@ public final class AudioConfig {
     boolean library = !current.musicDirectories.equals(next.musicDirectories)
         || !current.menuDirectories.equals(next.menuDirectories) || current.recursive != next.recursive;
     boolean mode = current.musicMode != next.musicMode || current.customMusic != next.customMusic
-        || current.menuMusic != next.menuMusic;
+        || current.menuMusic != next.menuMusic || !current.preset.equals(next.preset);
     boolean timing = current.gapMinSeconds != next.gapMinSeconds || current.gapMaxSeconds != next.gapMaxSeconds;
     boolean folders = !current.disabledMusicDirectories.equals(next.disabledMusicDirectories)
         || !current.disabledMenuDirectories.equals(next.disabledMenuDirectories);

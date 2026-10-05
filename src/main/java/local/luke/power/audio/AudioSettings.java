@@ -5,7 +5,9 @@ import java.util.*;
 public final class AudioSettings {
   public enum MusicMode {
     VANILLA,
+    ALPHA_BETA_SURVIVAL,
     ALPHA_BETA,
+    MINECRAFT_SURVIVAL,
     ALL_MINECRAFT
   }
 
@@ -20,6 +22,9 @@ public final class AudioSettings {
   public Map<String, Integer> categories = new LinkedHashMap<>();
   public Map<String, Integer> sounds = new TreeMap<>();
   public Set<String> disabledTracks = new TreeSet<>();
+  public Set<String> favourites = new TreeSet<>();
+  public List<MusicPreset> presets = new ArrayList<>();
+  public String preset = "";
   public MusicMode musicMode = MusicMode.VANILLA;
   public List<String> musicDirectories = new ArrayList<>();
   public List<String> menuDirectories = new ArrayList<>();
@@ -42,6 +47,8 @@ public final class AudioSettings {
   }
 
   public void validate() {
+    MusicPreset.validate(presets, preset);
+    MusicPreset.validateTracks(favourites);
     volume(master);
     if (gapMinSeconds < 0 || gapMaxSeconds < gapMinSeconds || gapMaxSeconds > 86400)
       throw new IllegalArgumentException("Music gaps must be 0 to 86400 seconds, with maximum at least minimum");

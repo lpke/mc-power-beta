@@ -14,6 +14,8 @@ def main():
         path = ASSETS / track['file']
         if path.exists() and hashlib.sha1(path.read_bytes()).hexdigest() == track['sha1']:
             continue
+        if track.get('source') == 'owner-purchased-album':
+            raise ValueError(f'Missing purchased album asset: {path}. Restore from Git or re-run import_album_extras.py with the original album folder.')
         digest = track['sha1']
         with urllib.request.urlopen(f'https://resources.download.minecraft.net/{digest[:2]}/{digest}', timeout=60) as response:
             data = response.read(track['size'] + 1)

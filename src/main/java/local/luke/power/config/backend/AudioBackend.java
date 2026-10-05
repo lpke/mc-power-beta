@@ -31,6 +31,15 @@ public final class AudioBackend implements Backend {
           new JsonPrimitive(100),
           "Volume in percent, multiplied by master and sound-effects volume.",
           List.of());
+    add("preset", "Music library", "World music preset", Setting.Kind.TEXT,
+        new JsonPrimitive(s.preset), new JsonPrimitive(""),
+        "Load a saved soundtrack selection. Loading replaces current track exclusions.", List.of());
+    add("presets", "Music data", "Music presets", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.presets), new JsonArray(), "Saved soundtrack selections.", List.of());
+    add("exclusions", "Music data", "Excluded tracks", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.disabledTracks), new JsonArray(), "Excluded music identifiers.", List.of());
+    add("favourites", "Music data", "Favourite tracks", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.favourites), new JsonArray(), "Starred music tracks.", List.of());
     add(
         "musicMode",
         "Music library",
@@ -38,11 +47,11 @@ public final class AudioBackend implements Backend {
         Setting.Kind.CHOICE,
         new JsonPrimitive(s.musicMode.ordinal()),
         new JsonPrimitive(0),
-        "Vanilla: original 12 tracks. Alpha and Beta: C418's included music. All Minecraft: every bundled soundtrack group through 26.3. Menu, record and credits music have separate library groups; Nether and End background music is excluded.",
-        List.of("Vanilla", "Alpha and Beta", "All Minecraft"));
-    add("customMusic", "Music library", "Custom music", Setting.Kind.CHOICE,
+        "Survival uses in-game survival music. All also includes creative, menu, records and credits. Nether and End music are available only in the library and presets.",
+        List.of("Vanilla", "Alpha and Beta survival", "Alpha and Beta all", "Minecraft survival", "Minecraft all"));
+    add("customMusic", "Music library", "Custom music handling", Setting.Kind.CHOICE,
         new JsonPrimitive(s.customMusic.ordinal()), new JsonPrimitive(0),
-        "Mix folder tracks with World music, or play only folder tracks. An empty custom library falls back to World music.",
+        "Add folder tracks to the world soundtrack, or replace it with folder tracks. Empty folders fall back to World music.",
         List.of("Off", "Add to soundtrack", "Custom only"));
     add("menuMusic", "Music library", "Menu music", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(0),
@@ -193,6 +202,8 @@ public final class AudioBackend implements Backend {
 
   private AudioSettings draft(Map<String, JsonElement> changes) {
     AudioSettings s = AudioConfig.copy();
+    if (changes.containsKey("audio.exclusions")) s.disabledTracks = new TreeSet<>(Arrays.asList(
+        Catalog.JSON.fromJson(changes.get("audio.exclusions"), String[].class)));
     for (var e : changes.entrySet()) {
       String key = e.getKey().substring(6);
       JsonElement v = e.getValue();
@@ -206,6 +217,10 @@ public final class AudioBackend implements Backend {
         else s.sounds.put(sound, v.getAsInt());
       } else
         switch (key) {
+          case "exclusions" -> { }
+          case "preset" -> s.preset = v.getAsString();
+          case "presets" -> s.presets = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, MusicPreset[].class)));
+          case "favourites" -> s.favourites = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
           case "master" -> s.master = v.getAsInt();
           case "musicMode" -> s.musicMode = AudioSettings.MusicMode.values()[v.getAsInt()];
           case "customMusic" -> s.customMusic = AudioSettings.CustomMusic.values()[v.getAsInt()];

@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class BuiltinMusicTest {
   @Test void modesContainThePinnedSoundtrackGroups() {
-    assertEquals(83, BuiltinMusic.TRACKS.size());
+    assertEquals(107, BuiltinMusic.TRACKS.size());
     assertEquals(12, count(AudioSettings.MusicMode.VANILLA));
-    assertEquals(35, count(AudioSettings.MusicMode.ALPHA_BETA));
-    assertEquals(83, count(AudioSettings.MusicMode.ALL_MINECRAFT));
+    assertEquals(12, count(AudioSettings.MusicMode.ALPHA_BETA_SURVIVAL));
+    assertEquals(50, count(AudioSettings.MusicMode.MINECRAFT_SURVIVAL));
+    assertEquals(50, count(AudioSettings.MusicMode.ALPHA_BETA));
+    assertEquals(98, count(AudioSettings.MusicMode.ALL_MINECRAFT));
     assertEquals("creative4.ogg (Aria Math)", BuiltinMusic.label("creative4.ogg"));
     assertEquals("axolotl.ogg", BuiltinMusic.label("axolotl.ogg"));
     assertEquals("dragon_fish.ogg", BuiltinMusic.label("dragon_fish.ogg"));
@@ -25,7 +27,7 @@ class BuiltinMusicTest {
         BuiltinMusic.TRACKS.stream().filter(BuiltinMusic.Track::background).map(BuiltinMusic.Track::group).distinct().toList());
     assertEquals("Chaos Cubed", BuiltinMusic.find("music:shores.ogg").group());
     assertEquals(56, BuiltinMusic.TRACKS.stream().filter(BuiltinMusic.Track::background).count());
-    assertEquals(83, BuiltinMusic.TRACKS.stream().map(BuiltinMusic.Track::id).distinct().count());
+    assertEquals(107, BuiltinMusic.TRACKS.stream().map(BuiltinMusic.Track::id).distinct().count());
     assertEquals("Beta / Menu", BuiltinMusic.find("music:mutation.ogg").group());
     assertEquals("Beta / Credits", BuiltinMusic.find("music:alpha.ogg").group());
     assertEquals("Tricky Trials / Records", BuiltinMusic.find("music:creator.ogg").group());

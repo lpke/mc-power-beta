@@ -27,8 +27,8 @@ public final class MusicErasChecks {
         MusicRequests.edit(q -> q.tracks.clear()); AudioConfig.preview(config); AudioController.pause(); mc.options.musicVolume = .1f;
       }
       case "ui" -> {
-        test("soundtrack pools are exactly 12, 35 and 83 tracks", () -> {
-          int[] counts={12,35,83};
+        test("soundtrack pools separate survival, extras and dimensions", () -> {
+          int[] counts={12,12,50,50,98};
           for(var mode : AudioSettings.MusicMode.values()) {
             var config=AudioConfig.copy();config.musicMode=mode;AudioConfig.preview(config);
             check(AudioController.activeMusic(mc).size()==counts[mode.ordinal()], mode.toString());
@@ -52,38 +52,40 @@ public final class MusicErasChecks {
         test("era accordions collapse, locate playing tracks and remember collapse state", () -> {
           var headings=new ArrayList<String>();
           for(Object row:(List<?>)field(library,"rows")) if(call(row,"id")==null) headings.add((String)call(row,"group"));
-          check(headings.subList(0,BuiltinMusic.GROUPS.size()).equals(BuiltinMusic.GROUPS),headings.toString());
+          check(headings.stream().filter(h -> !h.startsWith("folder:")).toList().equals(BuiltinMusic.GROUPS),headings.toString());
           int count=((List<?>)field(library,"rows")).size();
-          click(options,(int)call(library,"left")+3,(int)call(library,"listTop")+9);
-          check(((List<?>)field(library,"rows")).size()==count-12,"Alpha did not collapse");
-          check(library.state().collapsed().contains("Alpha"),"collapse not remembered");
+          int alphaY=MusicGroupChecks.groupY(library,"Alpha");
+          click(options,(int)call(library,"left")+3,alphaY+9);
+          check(((List<?>)field(library,"rows")).size()==count+12,"Alpha did not expand");
+          check(!library.state().collapsed().contains("Alpha"),"expansion not remembered");
           library.showTrack("music:calm1.ogg");
           check(!library.state().collapsed().contains("Alpha"),"located track still collapsed");
         });
         test("inclusion icon changes rotation without removing the track", () -> {
           options.render(-1,-1,0);
-          Object first=((List<?>)field(library,"rows")).stream().filter(r->{try{return call(r,"id")!=null;}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
+          Object first=((List<?>)field(library,"rows")).stream().filter(r->{try{return "music:calm1.ogg".equals(call(r,"id"));}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
           String id=(String)call(first,"id");
           int y=(int)call(library,"listTop")+(int)call(first,"y")-library.state().trackScroll();
-          click(options,(int)call(library,"left")+8,y+24);
+          click(options,(int)call(library,"left")+8,y+8);
           check(AudioConfig.current().disabledTracks.contains(id),"note icon did not exclude");
           check(AudioController.activeMusic(mc).contains(id),"excluded track disappeared from Active pool");
-          click(options,(int)call(library,"left")+8,y+24);
+          click(options,(int)call(library,"left")+8,y+8);
           check(!AudioConfig.current().disabledTracks.contains(id),"note icon did not reinclude");
         });
         MusicGroupChecks.run(mc, options, library);
-        test("queue controls and volume stay inline at compact and wide sizes", () -> {
+        test("queue controls remain usable at compact and wide sizes", () -> {
           MusicRequests.edit(q->{q.tracks.clear();q.add("music:calm1.ogg");q.add("music:creative4.ogg");});
           library.showQueue();
           for(int[] size:new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
             options.init(mc,size[0],size[1]);options.render(-1,-1,0);
-            check((int)call(library,"rowHeight")==24,"multiline queue");
-            check((int)call(library,"volumeEnd")-(int)call(library,"volumeX")>=44,"volume too narrow");
-            check((int)call(library,"volumeX")-(int)call(library,"left")>=40,"name has no space");
+            check((int)call(library,"rowHeight")==((int)call(library,"span")>=320?24:44),"wrong responsive queue layout");
+            check((int)call(library,"volumeEnd")-(int)call(library,"volumeX")>=36,"volume too narrow");
+            if ((int)call(library,"rowHeight")==24) check((int)call(library,"volumeX")-(int)call(library,"left")>=40,"name has no space");
             check(GL11.glGetError()==0,"GL error");
           }
           mc.setScreen(options);options.render(-1,-1,0);
-          click(options,(int)call(library,"volumeX")+4,(int)call(library,"listTop")+8);
+          var geometry=(MusicRowLayout)call(library,"rowLayout");
+          click(options,(int)call(library,"volumeX")+4,(int)call(library,"listTop")+geometry.controlsY()+5);
           library.removed();
           check(AudioController.trackVolume("music:calm1.ogg")==0,"inline volume missed");
           check(MusicRequests.tracks().equals(List.of("music:calm1.ogg","music:creative4.ogg")),"volume changed queue");

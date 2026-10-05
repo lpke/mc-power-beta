@@ -4,6 +4,7 @@ import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.opengl.GL11;
 
 public abstract class UiScreen extends Screen {
+  void rectangle(int left,int top,int right,int bottom,int colour) { fill(left,top,right,bottom,colour); }
   protected boolean inside(int x, int y, int left, int top, int width, int height) {
     return x >= left && x < left + width && y >= top && y < top + height;
   }
@@ -72,9 +73,11 @@ public abstract class UiScreen extends Screen {
 
   protected void iconButton(String icon, int x, int y, int w, int mx, int my, boolean enabled, boolean active) {
     button("", x, y, w, 18, mx, my, enabled);
-    int color = !enabled ? 0xff777777 : active ? 0xffffff55 : 0xffdddddd;
+    int color = !enabled ? 0xff777777 : active ? icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
     int cx = x + w / 2, cy = y + 9;
     String[] pixels = switch (icon) {
+      case "star" -> new String[]{"    #    ", "   ###   ", "#########", " ####### ", "  #####  ", " ##   ## ", " #     # "};
+      case "edit" -> new String[]{"      ## ", "     ### ", "    ###  ", "   ###   ", "  ###    ", " ###     ", "####     "};
       case "music" -> new String[]{"   ######", "   #    #", "   #    #", "   #    #", " ###  ###", "#### ####", " ##   ## "};
       case "remove" -> new String[]{" #     # ", "  #   #  ", "   # #   ", "    #    ", "   # #   ", "  #   #  ", " #     # "};
       case "play" -> new String[]{"  #      ", "  ###    ", "  #####  ", "  #######", "  #####  ", "  ###    ", "  #      "};

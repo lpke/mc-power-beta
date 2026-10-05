@@ -127,8 +127,12 @@ public final class Setting {
     if (kind == Kind.LIST) {
       if (!next.isJsonArray() && !next.isJsonObject())
         throw new IllegalArgumentException("Enter a list or object");
-      if (next.toString().length() > 16384)
-        throw new IllegalArgumentException("Value exceeds 16 KiB");
+      int limit = switch (id) {
+        case "audio.presets", "audio.favourites", "audio.exclusions" -> 1048576;
+        default -> 16384;
+      };
+      if (next.toString().length() > limit)
+        throw new IllegalArgumentException("Value exceeds " + limit + " characters");
       return;
     }
     if (!next.isJsonPrimitive()) throw new IllegalArgumentException(label + ": invalid value type");

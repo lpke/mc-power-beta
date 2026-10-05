@@ -11,7 +11,13 @@ import org.lwjgl.input.Mouse;
 /** Embedded Audio panel. Edits belong to the surrounding Options session. */
 public final class MusicLibraryScreen extends UiScreen {
   public record State(
-      boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed) {
+      boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed, String presetFilter, Set<String> initialized) {
+    public State(boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed, String presetFilter) {
+      this(queue,folder,query,trackScroll,queueScroll,lastFolder,collapsed,presetFilter,Set.of());
+    }
+    public State(boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed) {
+      this(queue,folder,query,trackScroll,queueScroll,lastFolder,collapsed,"");
+    }
     public State(boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder) {
       this(queue, folder, query, trackScroll, queueScroll, lastFolder, Set.of());
     }
@@ -21,6 +27,12 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private final PowerOptionsScreen parent;
+  private final MusicEdits edits;
+  private final MusicPresetsPanel presets;
+  private boolean presetsOpen;
+  private MusicPresetDraft previousDraft;
+  private String selectedPreset = "";
+  private final Set<String> initializedFilters = new HashSet<>();
   private final TextInput search = new TextInput("", 128);
   private final Map<String, Setting> settings = new HashMap<>();
   private final Map<String, List<Setting>> groupSettings = new HashMap<>();
@@ -49,18 +61,21 @@ public final class MusicLibraryScreen extends UiScreen {
 
   public MusicLibraryScreen(PowerOptionsScreen parent) {
     this.parent = parent;
+    edits = new MusicEdits(parent); presets = new MusicPresetsPanel(parent);
   }
 
   public State state() {
-    return new State(queue, folder, search.text(), trackScroll, queueScroll, lastFolder, Set.copyOf(collapsed));
+    return new State(queue, folder, search.text(), trackScroll, queueScroll, lastFolder, Set.copyOf(collapsed), selectedPreset, Set.copyOf(initializedFilters));
   }
 
   public void restore(State state) {
     if (state == null) return;
     collapsed.clear(); collapsed.addAll(state.collapsed);
+    initializedFilters.clear(); initializedFilters.addAll(state.initialized);
     queue = state.queue;
     folder = state.folder;
     lastFolder = state.lastFolder;
+    selectedPreset = state.presetFilter;
     search.setText(state.query);
     trackScroll = state.trackScroll;
     queueScroll = state.queueScroll;
@@ -84,36 +99,42 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int listTop() {
-    return controlsTop() + (queue ? 18 : filters().height()) + 6;
+    return presetsOpen ? controlsTop() + presets.headerHeight() : controlsTop() + (queue ? 18 : filters().height()) + 6;
   }
 
   private int statusTop() { return parent.audioContentTop(); }
-  private int controlsTop() { return statusTop() + 15; }
+  private int controlsTop() { return statusTop() + 20; }
 
   private boolean narrow() {
     return span() < 350;
   }
 
   private int rowHeight() {
-    return queue ? 24 : 44;
+    return rowLayout().height();
   }
 
-  private int queueWidth(int action) {
-    return narrow() ? 14 : 20;
-  }
-
-  private int queueX(int action) {
-    int x = right();
-    for (int i = 3; i >= action; i--) x -= queueWidth(i) + (i == 3 ? 0 : 2);
-    return x;
-  }
+  private MusicRowLayout rowLayout() { return MusicRowLayout.at(left(), span(), queue); }
 
   private int filterX() {
     return queue ? right() - 82 : left();
   }
 
   private int filterWidth() { return queue ? 82 : Math.min(240, span()); }
-  public boolean queueVisible() { return queue; }
+  public boolean queueVisible() { return queue && !presetsOpen; }
+  public boolean presetVisible() { return presetsOpen; }
+  public boolean modal() { return presetsOpen && presets.modal(); }
+  public boolean dirtyPreset() { return presetsOpen && presets.dirty(); }
+  public void guard(Runnable action) { if (presetsOpen) presets.guard(action); else action.run(); }
+  public void dialogClick(int x,int y,int b) { presets.headerClick(x,y,b); }
+  public void renderDialog(int x,int y) { if (presetsOpen) presets.renderDialog(x,y); }
+  public void openPresets(boolean choosing) {
+    presetsOpen = true; queue = false; presets.open(choosing); search.setText(""); search.focused=false; rebuild();
+  }
+  public void back(Runnable exit) {
+    if (presetsOpen && presets.editing()) presets.guard(() -> { presets.open(false); refresh(); });
+    else exit.run();
+  }
+
 
   private void show(boolean queue) {
     dragging = null;
@@ -121,6 +142,7 @@ public final class MusicLibraryScreen extends UiScreen {
     parent.finishContinuousChange();
     search.focused = false;
     this.queue = queue;
+    presetsOpen = false;
     error = "";
     rebuild();
   }
@@ -139,11 +161,20 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private boolean folderSelected() {
-    return !folder.equals("active") && !folder.isEmpty() && !folder.equals("custom");
+    return !Set.of("active", "", "custom", "favourites", "presets").contains(folder);
   }
 
   private MusicFilters.Layout filters() {
-    return MusicFilters.layout(left(), controlsTop(), span(), folderSelected());
+    if (span() < 380) {
+      String label = folderSelected() ? "Folders" : switch (folder) {
+        case "active" -> "Active"; case "custom" -> "All folders"; case "favourites" -> "Favourites";
+        case "presets" -> "Presets"; default -> "Everything";
+      };
+      boolean selector = folderSelected() || folder.equals("presets");
+      return new MusicFilters.Layout(List.of(new MusicFilters.Tab("cycle",label,left(),controlsTop(),span()-76)),
+          left(),controlsTop()+22,span(),selector?40:18);
+    }
+    return MusicFilters.layout(left(), controlsTop(), span() - 76, folderSelected() || folder.equals("presets"));
   }
 
   private void selectFilter(String id) {
@@ -151,6 +182,8 @@ public final class MusicLibraryScreen extends UiScreen {
         ? folders.contains(lastFolder) ? lastFolder : folders.isEmpty() ? "folder" : folders.get(0)
         : id;
     if (folderSelected()) lastFolder = folder;
+    if (folder.equals("presets") && edits.presets().stream().noneMatch(p -> p.id().equals(selectedPreset)))
+      selectedPreset = edits.presets().isEmpty() ? "" : edits.presets().get(0).id();
     scroll(0);
     rebuild();
   }
@@ -171,17 +204,8 @@ public final class MusicLibraryScreen extends UiScreen {
     scroll(0);
   }
 
-  private int volumeX() {
-    return queue ? volumeEnd() - Math.max(44, Math.min(100, span() / 4)) : left() + 24;
-  }
-
-  private int volumeEnd() {
-    return queue ? queueX(0) - 24 : right() - (narrow() ? 26 : 144);
-  }
-
-  private int actionY(int rowY) {
-    return rowY + (narrow() ? 0 : 19);
-  }
+  private int volumeX() { return rowLayout().volumeX(); }
+  private int volumeEnd() { return volumeX() + rowLayout().volumeWidth(); }
 
   private ScrollBar.Track track() {
     return new ScrollBar.Track(
@@ -189,7 +213,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public boolean hasQuery() {
-    return !queue && !search.text().isEmpty();
+    return !queue && (!presetsOpen || presets.editing()) && !search.text().isEmpty();
   }
 
   public boolean focused() {
@@ -208,11 +232,13 @@ public final class MusicLibraryScreen extends UiScreen {
 
   public void focus() {
     if (queue) showTracks();
+    presets.unfocus();
     search.focused = true;
     search.selectAll();
   }
 
   public void init() {
+    presets.init(minecraft,width,height);
     refresh();
   }
 
@@ -282,6 +308,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int groupOrder(String group) {
+    if (group.startsWith("folder:")) return -1;
     int index = BuiltinMusic.GROUPS.indexOf(group);
     return index < 0 ? BuiltinMusic.GROUPS.size() : index;
   }
@@ -291,13 +318,17 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private int includedCount(String group) {
-    return (int) members(group).stream().filter(s -> s.value.getAsBoolean()).count();
+    return (int) members(group).stream().filter(s -> included(s.id.substring("audio.trackEnabled.".length()))).count();
   }
 
   private void toggleGroup(String group) {
     List<Setting> members = members(group);
     if (members.isEmpty()) return;
     boolean include = includedCount(group) != members.size();
+    if (presetsOpen && presets.editing()) {
+      for (Setting setting : members) presets.draft().include(setting.id.substring("audio.trackEnabled.".length()), include);
+      return;
+    }
     for (Setting setting : members) setting.value = new com.google.gson.JsonPrimitive(include);
     // Operate on the whole group even when search hides some rows. One transaction
     // preserves Cancel/Apply behavior, volumes, queue order and all other groups.
@@ -308,19 +339,23 @@ public final class MusicLibraryScreen extends UiScreen {
     List<Row> result = new ArrayList<>();
     int y = 0;
     if (queue) {
-      for (int i = 0; i < tracks.size(); i++, y += 24)
-        result.add(new Row("", "", tracks.get(i), i, y, 24));
+      for (int i = 0; i < tracks.size(); i++, y += rowHeight())
+        result.add(new Row("", "", tracks.get(i), i, y, rowHeight()));
     } else {
       Map<String, List<String>> groups = new TreeMap<>(Comparator.comparingInt(this::groupOrder)
           .thenComparing(String.CASE_INSENSITIVE_ORDER).thenComparing(Comparator.naturalOrder()));
       for (String id : tracks) groups.computeIfAbsent(group(id), k -> new ArrayList<>()).add(id);
+      if (presetsOpen && presets.editing() && previousDraft != presets.draft()) {
+        collapsed.clear(); collapsed.addAll(groups.keySet()); previousDraft = presets.draft();
+      } else if (!presetsOpen && !groups.isEmpty()
+          && (folder.isEmpty() || folder.equals("active") && groups.size() > 1) && initializedFilters.add(folder)) collapsed.addAll(groups.keySet());
       for (var entry : groups.entrySet()) {
         String key = entry.getKey();
         String label = key.startsWith("folder:") ? Objects.toString(Path.of(key.substring(7)).getFileName(), key.substring(7)) : key;
         result.add(new Row(key, label, null, -1, y, 24)); y += 24;
         if (collapsed.contains(key) && search.text().isBlank()) continue;
         for (String id : entry.getValue()) {
-          result.add(new Row(key, label, id, -1, y, 44)); y += 44;
+          result.add(new Row(key, label, id, -1, y, rowHeight())); y += rowHeight();
         }
       }
     }
@@ -328,7 +363,22 @@ public final class MusicLibraryScreen extends UiScreen {
     contentHeight = y;
   }
 
+  private boolean included(String id) {
+    if (presetsOpen && presets.editing()) return presets.draft().included(id);
+    Setting s = settings.get("audio.trackEnabled." + id);
+    return s != null && s.value.getAsBoolean();
+  }
+  private void toggleIncluded(String id) {
+    if (presetsOpen && presets.editing()) { presets.draft().include(id, !included(id)); return; }
+    Setting s = settings.get("audio.trackEnabled." + id);
+    if (s != null) { s.cycle(1); parent.changed(s); }
+  }
+
   private boolean inFolder(String id) {
+    if (presetsOpen) return true;
+    if (folder.equals("favourites")) return edits.favourites().contains(id);
+    if (folder.equals("presets")) return edits.presets().stream().filter(p -> p.id().equals(selectedPreset))
+        .anyMatch(p -> !p.excluded().contains(id));
     if (folder.equals("active")) return activeTracks.contains(id);
     if (folder.isEmpty()) return true;
     MusicLibrary.Track t = custom.get(id);
@@ -371,6 +421,8 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public void wheel(int amount) {
+    if (modal()) return;
+    if (presetsOpen && !presets.editing()) { presets.wheel(amount); return; }
     if (amount != 0) scroll(scroll() - (int) Math.signum(amount) * rowHeight());
   }
 
@@ -400,12 +452,15 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public void searchClick(int x, int y, int button) {
-    if (queue) return;
+    if (queue || presetsOpen && !presets.editing()) return;
+    presets.unfocus();
     search.focused = true;
     if (button == 1) clearQuery();
   }
 
   protected void keyPressed(char c, int key) {
+    if (presetsOpen && presets.modal()) { presets.key(c,key); return; }
+    if (presetsOpen && !search.focused) presets.key(c,key);
     if (!queue && search.focused) {
       search.key(c, key);
       scroll(0);
@@ -415,26 +470,43 @@ public final class MusicLibraryScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int b) {
     if (b != 0 && b != 1) return;
+    if (presetsOpen && (presets.modal() || !presets.editing() || y < listTop())) {
+      search.focused=false;
+      presets.headerClick(x,y,b); rebuild(); return;
+    }
     if (b == 0 && scrollbar.press(track(), x, y)) {
       scroll((int) scrollbar.drag(track(), y, true));
       return;
     }
-    search.focused = false;
+    search.focused = false; presets.unfocus();
     if (queue && inside(x, y, filterX(), controlsTop(), filterWidth(), 18)) {
       if (!tracks.isEmpty()) { click(); queueEdit(q -> q.tracks.clear()); }
       return;
     }
-    if (!queue) {
+    if (!queue && !presetsOpen) {
+      if (inside(x,y,right()-72,controlsTop(),72,18)) { click(); edits.includeAll(); return; }
       var tabs = filters();
       for (var tab : tabs.tabs()) if (inside(x, y, tab.x(), tab.y(), tab.width(), 18)) {
-        click(); selectFilter(tab.id()); return;
+        click();
+        if (tab.id().equals("cycle")) {
+          var choices=List.of("active","","custom","folder","favourites","presets");
+          String current=folderSelected()?"folder":folder;
+          selectFilter(choices.get(Math.floorMod(choices.indexOf(current)+(b==0?1:-1),choices.size())));
+        } else selectFilter(tab.id());
+        return;
       }
-      if (folderSelected() && inside(x, y, tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18)) {
-        if (!folders.isEmpty()) { click(); cycleFolder(b == 0 ? 1 : -1); }
+      if ((folderSelected() || folder.equals("presets")) && inside(x, y, tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18)) {
+        if (folder.equals("presets")) {
+          var choices = edits.presets();
+          if (!choices.isEmpty()) {
+            int i = -1; for (int n=0;n<choices.size();n++) if (choices.get(n).id().equals(selectedPreset)) i=n;
+            selectedPreset=choices.get(Math.floorMod(i+(b==0?1:-1),choices.size())).id(); rebuild();
+          }
+        } else if (!folders.isEmpty()) { click(); cycleFolder(b == 0 ? 1 : -1); }
         return;
       }
     }
-    if (!queue && inside(x, y, right() - 88, statusTop(), 88, 14)) {
+    if (!queue && !presetsOpen && inside(x, y, right() - 88, statusTop(), 88, 14)) {
       click();
       if (Mp3Converter.busy()) Mp3Converter.cancel();
       else
@@ -461,49 +533,31 @@ public final class MusicLibraryScreen extends UiScreen {
     }
     String id = clicked.id;
     int rowY = listTop() + clicked.y - scroll();
+    var layout = rowLayout(); int cy = rowY + layout.controlsY(); int bw = layout.buttonWidth();
+    if (!queue && inside(x,y,left(),rowY+3,20,18)) { click(); toggleIncluded(id); return; }
     Setting volume = settings.get("audio.sound." + id);
-    int volumeY = rowY + (queue ? 3 : 19);
-    if (volume != null && inside(x, y, volumeX(), volumeY, volumeEnd() - volumeX(), 18) && b == 0) {
-      dragging = volume; slide(x); return;
+    if (!presetsOpen && volume != null && inside(x,y,volumeX(),cy,layout.volumeWidth(),18) && b==0) {
+      dragging=volume;slide(x);return;
     }
-    if (volume != null && inside(x, y, volumeEnd() + 2, volumeY, 20, 18)) {
-      click(); minecraft.setScreen(new ValueScreen(parent, volume)); return;
+    if (!presetsOpen && volume != null && inside(x,y,layout.exactX(),cy,20,18)) {
+      click();minecraft.setScreen(new ValueScreen(parent,volume));return;
     }
+    if (!presetsOpen && inside(x,y,layout.favouriteX(),cy,bw,18)) { click();edits.favourite(id);rebuild();return; }
     if (queue) {
-      if (inside(x, y, queueX(3), rowY + 3, queueWidth(3), 18)) {
-        click();
-        queueEdit(q -> q.tracks.remove(index));
-      } else if (inside(x, y, queueX(2), rowY + 3, queueWidth(2), 18) && playable(id)) {
-        click();
-        AudioController.toggleTrack(id);
-      } else if (inside(x, y, queueX(0), rowY + 3, queueWidth(0), 18) && index > 0) {
-        click();
-        queueEdit(q -> q.move(index, -1));
-      } else if (inside(x, y, queueX(1), rowY + 3, queueWidth(1), 18) && index + 1 < tracks.size()) {
-        click();
-        queueEdit(q -> q.move(index, 1));
-      }
-      return;
-    }
-    Setting enabled = settings.get("audio.trackEnabled." + id);
-    if (inside(x, y, left(), rowY + 19, 20, 18) && enabled != null) {
-      click();
-      enabled.cycle(1);
-      parent.changed(enabled);
-    } else if (inside(x, y, right() - 116, actionY(rowY), 20, 18) && playable(id)) {
-      click();
-      AudioController.previewSound(id);
-    } else if (inside(x, y, right() - 92, actionY(rowY), 42, 18) && playable(id)) {
-      click();
-      AudioController.toggleTrack(id);
-    } else if (inside(x, y, right() - 46, actionY(rowY), 46, 18)) {
-      click();
-      queueEdit(q -> q.add(id));
+      if (inside(x,y,layout.queueX(),cy,bw,18)) { click();queueEdit(q -> q.tracks.remove(index)); }
+      else if (inside(x,y,layout.playX(),cy,bw,18) && playable(id)) AudioController.toggleTrack(id);
+      else if (inside(x,y,layout.upX(),cy,bw,18) && index>0) { click();queueEdit(q -> q.move(index,-1)); }
+      else if (inside(x,y,layout.downX(),cy,bw,18) && index+1<tracks.size()) { click();queueEdit(q -> q.move(index,1)); }
+    } else {
+      if (inside(x,y,layout.previewX(),cy,bw,18) && playable(id)) AudioController.previewSound(id);
+      else if (inside(x,y,layout.playX(),cy,bw,18) && playable(id)) AudioController.toggleTrack(id);
+      else if (!presetsOpen && inside(x,y,layout.queueX(),cy,bw,18)) { click();queueEdit(q -> q.add(id)); }
     }
   }
 
   public void renderSearch(int x, int y, int w, int mx, int my) {
-    if (queue) {
+    if (presetsOpen && !presets.editing()) text("Music presets",x+2,y+5,0xdddddd);
+    else if (queue) {
       text("Music queue", x + 2, y + 5, 0xdddddd);
     } else input(search, x, y, w, mx, my, "Search tracks or folders...");
   }
@@ -518,15 +572,20 @@ public final class MusicLibraryScreen extends UiScreen {
       }
     }
     String tip = "";
+    if (presetsOpen) {
+      presets.renderHeader(mx,my);
+      if (!presets.editing()) { hoverHelp = ""; return; }
+    }
     if (queue) {
       text("Up next", left() + 2, controlsTop() + 5, 0xdddddd);
       button("Clear queue", filterX(), controlsTop(), filterWidth(), 18, mx, my, !tracks.isEmpty());
       if (inside(mx, my, filterX(), controlsTop(), filterWidth(), 18))
         tip = "Remove queued requests. Music files and rotation stay unchanged.";
-    } else {
+    } else if (!presetsOpen) {
+      button("Include all",right()-72,controlsTop(),72,18,mx,my,true);
       var tabs = filters();
       for (var tab : tabs.tabs()) {
-        boolean selected = tab.id().equals("folder") ? folderSelected() : tab.id().equals(folder);
+        boolean selected = tab.id().equals("cycle") || (tab.id().equals("folder") ? folderSelected() : tab.id().equals(folder));
         fill(tab.x(), tab.y(), tab.x() + tab.width(), tab.y() + 18, selected ? 0xb0000000 : 0x40000000);
         text(tab.label(), tab.x() + 4, tab.y() + 5, selected ? 0xffffff : 0xaaaaaa);
         if (selected) fill(tab.x(), tab.y() + 17, tab.x() + tab.width(), tab.y() + 18, 0xffaaaaaa);
@@ -535,13 +594,17 @@ public final class MusicLibraryScreen extends UiScreen {
             case "active" -> "The pool allowed by your soundtrack, folders and world/menu rules. Excluded tracks remain visible.";
             case "" -> "All available built-in and custom music.";
             case "custom" -> "All tracks found in your music folders.";
+            case "favourites" -> "Tracks you have starred. Favourites do not change automatic rotation.";
+            case "presets" -> "Browse a saved preset without loading or changing it.";
+            case "cycle" -> "Choose Active, Everything, All folders, Folders, Favourites or Presets.";
             default -> "Tracks in the selected folder and its subfolders.";
           };
       }
-      if (folderSelected()) {
-        button(fit(folderLabel(), tabs.folderWidth() - 8), tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18, mx, my, !folders.isEmpty());
+      if (folderSelected() || folder.equals("presets")) {
+        boolean presetFilter = folder.equals("presets");
+        button(fit(presetFilter ? edits.name(selectedPreset) : folderLabel(), tabs.folderWidth() - 8), tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18, mx, my, presetFilter ? !edits.presets().isEmpty() : !folders.isEmpty());
         if (inside(mx, my, tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18))
-          tip = folders.isEmpty() ? "Add music folders in Audio settings." : folder;
+          tip = presetFilter ? "Browse another saved preset without loading it." : folders.isEmpty() ? "Add music folders in Audio settings." : folder;
       }
     }
     if (queue) renderedQueue = List.copyOf(tracks);
@@ -565,90 +628,46 @@ public final class MusicLibraryScreen extends UiScreen {
                   + "\n" + included + " of " + total + " tracks included in automatic rotation.";
         continue;
       }
-      int i = row.index;
-      String id = row.id;
-      boolean hover =
-          inside(mx, my, left(), y, span(), rowHeight()) && my >= listTop() && my < bottom();
-      if (hover) fill(left() - 2, y, right() + 2, y + rowHeight() - 1, 0x60000000);
-      text(
-          fit((queue ? (i + 1) + ". " : "") + AudioController.musicLabel(id), queue ? volumeX() - left() - 8 : span() - (narrow() ? 122 : 4)),
-          left() + 2,
-          y + (queue ? 8 : 4),
-          playable(id) ? 0xdddddd : 0xffbb77);
-      if (hover)
-        tip = path(id) + (playable(id) ? "" : "\nConvert MP3, or reload if the file has moved.");
-      if (queue) {
-        iconButton("up", queueX(0), y + 3, queueWidth(0), mx, my, i > 0);
-        iconButton("down", queueX(1), y + 3, queueWidth(1), mx, my, i + 1 < tracks.size());
-        iconButton(AudioController.playingTrack(id) ? "pause" : "play", queueX(2), y + 3,
-            queueWidth(2), mx, my, playable(id));
-        iconButton("remove", queueX(3), y + 3, queueWidth(3), mx, my, true);
-        if (hover && my >= y + 3 && my < y + 21)
-          tip =
-              mx >= queueX(3)
-                  ? "Remove this request"
-                  : mx >= queueX(2)
-                      ? "Play or pause this track"
-                      : mx >= queueX(1) ? "Move down" : mx >= queueX(0) ? "Move up" : tip;
-        Setting volume = settings.get("audio.sound." + id);
-        if (volume != null) slider(volume.display() + "%", volumeX(), y + 3,
-            volumeEnd() - volumeX(), mx, my, volume.value.getAsDouble() / 100);
-        button("...", volumeEnd() + 2, y + 3, 20, 18, mx, my, volume != null);
-        if (hover && mx >= volumeX() && mx < queueX(0)) tip = "Track volume; music and master volumes also apply.";
-      } else {
-        Setting enabled = settings.get("audio.trackEnabled." + id),
-            volume = settings.get("audio.sound." + id);
-        musicToggle(enabled != null && enabled.value.getAsBoolean(), left(), y + 19, mx, my, enabled != null);
-        if (volume != null)
-          slider(
-              volume.display() + "%",
-              volumeX(),
-              y + 19,
-              volumeEnd() - volumeX(),
-              mx,
-              my,
-              volume.value.getAsDouble() / 100);
-        button("...", volumeEnd() + 2, y + 19, 20, 18, mx, my, volume != null);
-        iconButton(
-            "speaker",
-            right() - 116,
-            actionY(y),
-            20,
-            mx,
-            my,
-            playable(id),
-            AudioController.previewing(id));
-        button(
-            AudioController.playingTrack(id) ? "Pause" : "Play",
-            right() - 92,
-            actionY(y),
-            42,
-            18,
-            mx,
-            my,
-            playable(id));
-        button("Queue", right() - 46, actionY(y), 46, 18, mx, my, true);
-        if (hover) {
-          if (inside(mx, my, left(), y + 19, 20, 18))
-            tip = "Include in automatic rotation. Preview and queue work even when excluded.";
-          else if (inside(mx, my, volumeX(), y + 19, volumeEnd() - volumeX(), 18))
-            tip = "Track volume; music and master volumes also apply.";
-          else if (inside(mx, my, volumeEnd() + 2, y + 19, 20, 18)) tip = "Enter an exact volume";
-          else if (my >= actionY(y) && my < actionY(y) + 18 && mx >= right() - 116)
-            tip =
-                mx < right() - 96
-                    ? "Preview without changing the current track; click again to stop."
-                    : mx < right() - 50
-                        ? "Play or pause this track"
-                        : "Add to the end of the queue";
-        }
+      String id=row.id; int i=row.index;
+      var layout=rowLayout(); int cy=y+layout.controlsY(),bw=layout.buttonWidth();
+      boolean hover=inside(mx,my,left(),y,span(),row.height)&&my>=listTop()&&my<bottom();
+      if(hover)fill(left()-2,y,right()+2,y+row.height-1,0x60000000);
+      text(fit((queue?(i+1)+". ":"")+AudioController.musicLabel(id),layout.nameWidth()),layout.nameX(),y+8,playable(id)?0xdddddd:0xffbb77);
+      if(hover)tip=path(id)+(playable(id)?"":"\nConvert MP3, or reload if the file has moved.");
+      if(!queue)musicToggle(included(id),left(),y+3,mx,my,true);
+      Setting volume=settings.get("audio.sound."+id);
+      if(!presetsOpen){
+        if(volume!=null)slider(volume.display()+"%",volumeX(),cy,layout.volumeWidth(),mx,my,volume.value.getAsDouble()/100);
+        button("...",layout.exactX(),cy,20,18,mx,my,volume!=null);
+        iconButton("star",layout.favouriteX(),cy,bw,mx,my,true,edits.favourites().contains(id));
+      }
+      if(queue){
+        iconButton("up",layout.upX(),cy,bw,mx,my,i>0);
+        iconButton("down",layout.downX(),cy,bw,mx,my,i+1<tracks.size());
+        iconButton("remove",layout.queueX(),cy,bw,mx,my,true);
+      }else{
+        iconButton("speaker",layout.previewX(),cy,bw,mx,my,playable(id),AudioController.previewing(id));
+        if(!presetsOpen)button("+",layout.queueX(),cy,bw,18,mx,my,true);
+      }
+      iconButton(AudioController.playingTrack(id)?"pause":"play",layout.playX(),cy,bw,mx,my,playable(id));
+      if(hover){
+        if(!queue&&inside(mx,my,left(),y+3,20,18))tip="Include in automatic rotation. Preview and queue work even when excluded.";
+        else if(!presetsOpen&&inside(mx,my,volumeX(),cy,layout.volumeWidth(),18))tip="Track volume; music and master volumes also apply.";
+        else if(!presetsOpen&&inside(mx,my,layout.exactX(),cy,20,18))tip="Enter an exact volume";
+        else if(!presetsOpen&&inside(mx,my,layout.favouriteX(),cy,bw,18))tip=edits.favourites().contains(id)?"Remove from favourites":"Add to favourites";
+        else if(inside(mx,my,layout.playX(),cy,bw,18))tip="Play or pause this track";
+        else if(!queue&&inside(mx,my,layout.previewX(),cy,bw,18))tip="Preview without changing the current track; click again to stop.";
+        else if(!presetsOpen&&inside(mx,my,layout.queueX(),cy,bw,18))tip=queue?"Remove this request":"Add to the end of the queue";
+        else if(queue&&inside(mx,my,layout.upX(),cy,bw,18))tip="Move up";
+        else if(queue&&inside(mx,my,layout.downX(),cy,bw,18))tip="Move down";
       }
     }
+
     if (tracks.isEmpty())
       text(queue ? "Queue is empty" : "No matching tracks.", left() + 4, listTop() + 12, 0xaaaaaa);
     unclip();
     scrollbar.render(this, track());
-    if (!queue) {
+    if (!queue && !presetsOpen) {
       button(Mp3Converter.busy() ? "Cancel MP3" : "Convert MP3", right() - 88, statusTop(), 88, 14, mx, my, true);
       if (inside(mx, my, right() - 88, statusTop(), 88, 14))
         tip = "Convert MP3 with FFmpeg to a WAV cache. Original files stay untouched.";
@@ -659,7 +678,7 @@ public final class MusicLibraryScreen extends UiScreen {
             : Mp3Converter.busy() || conversionTicks > 0
                 ? Mp3Converter.status()
                 : AudioController.status();
-    text(fit(status, span() - (queue ? 0 : 92)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
+    if (!trackStatusVisible()) text(fit(status, span() - (queue || presetsOpen ? 0 : 92)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
     hoverHelp = tip;
   }
 }
