@@ -8,6 +8,7 @@ import java.util.*;
 public final class MusicPreset {
   private final String id, name;
   private final Set<String> excluded;
+  private final Set<String> trackPool;
   private final Map<String, Integer> groupVolumes;
 
   public Map<String, Integer> groupVolumes() {
@@ -27,12 +28,25 @@ public final class MusicPreset {
     return Collections.unmodifiableSet(excluded);
   }
 
+  public Set<String> trackPool() {
+    return trackPool == null ? null : Collections.unmodifiableSet(trackPool);
+  }
+
+  public boolean includes(String track) {
+    return (trackPool == null || trackPool.contains(track)) && !excluded.contains(track);
+  }
+
   public MusicPreset(String id, String name, Set<String> excluded) {
     this(id, name, excluded, Map.of());
   }
 
   public MusicPreset(
       String id, String name, Set<String> excluded, Map<String, Integer> groupVolumes) {
+    this(id, name, excluded, groupVolumes, null);
+  }
+
+  public MusicPreset(String id, String name, Set<String> excluded,
+      Map<String, Integer> groupVolumes, Set<String> trackPool) {
     if (id == null || !id.matches("[a-zA-Z0-9_-]{1,64}"))
       throw new IllegalArgumentException("Invalid preset identifier");
     if (name == null
@@ -45,6 +59,8 @@ public final class MusicPreset {
     validateTracks(excluded);
     this.excluded = new TreeSet<>(excluded);
     this.groupVolumes = MusicGroups.copy(groupVolumes);
+    if (trackPool != null) validateTracks(trackPool);
+    this.trackPool = trackPool == null ? null : new TreeSet<>(trackPool);
   }
 
   public static void validateTracks(Set<String> tracks) {
@@ -66,7 +82,7 @@ public final class MusicPreset {
     Set<String> ids = new HashSet<>();
     for (MusicPreset p : presets) {
       if (p == null) throw new IllegalArgumentException("Invalid music preset");
-      new MusicPreset(p.id, p.name, p.excluded, p.groupVolumes());
+      new MusicPreset(p.id, p.name, p.excluded, p.groupVolumes(), p.trackPool);
       if (!ids.add(p.id)) throw new IllegalArgumentException("Duplicate preset identifier");
     }
     if (!selected.isEmpty() && !ids.contains(selected))
@@ -85,8 +101,10 @@ public final class MusicPreset {
             .orElseThrow(() -> new IllegalArgumentException("Music preset is missing"));
     Map<String, Integer> volumes = MusicGroups.copy(selected.groupVolumes());
     validateTracks(selected.excluded);
+    if (selected.trackPool != null) validateTracks(selected.trackPool);
     settings.disabledTracks = new TreeSet<>(selected.excluded);
     settings.groupVolumes = volumes;
+    settings.presetTrackPool = selected.trackPool == null ? new TreeSet<>() : new TreeSet<>(selected.trackPool);
     settings.preset = selected.id;
   }
 }

@@ -333,7 +333,8 @@ public final class AudioController {
     Map<String, class_267> unique = new LinkedHashMap<>();
     tracks.forEach(t -> unique.putIfAbsent(trackId(t), t));
     tracks = new ArrayList<>(unique.values());
-    tracks.removeIf(track -> !includeExcluded && s.disabledTracks.contains(trackId(track))
+    tracks.removeIf(track -> !s.preset.isEmpty() && !s.presetTrackPool.contains(trackId(track))
+        || !includeExcluded && s.disabledTracks.contains(trackId(track))
         || s.preset.isEmpty() && !TrackRules.eligible(track.field_2126, context.dimension, context.biome));
     return tracks;
   }

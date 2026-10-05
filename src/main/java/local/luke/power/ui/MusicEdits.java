@@ -19,6 +19,11 @@ final class MusicEdits {
     this.parent = parent;
   }
 
+  private void changedSelection(List<Setting> changes) {
+    // Track rows were synchronized from these sets; do not feed their effective values back.
+    parent.changed(changes.stream().filter(s -> !s.id.startsWith("audio.trackEnabled.")).toList(), false);
+  }
+
   Setting setting(String id) {
     return parent.session().settings().stream()
         .filter(s -> s.id.equals("audio." + id))
@@ -86,8 +91,15 @@ final class MusicEdits {
     values.removeIf(p -> p.id().equals(id));
     Setting list = setting("presets"), selected = setting("preset");
     list.value = Catalog.JSON.toJsonTree(values);
-    if (selected.value.getAsString().equals(id)) selected.value = new JsonPrimitive("");
-    parent.changed(List.of(list, selected), false);
+    List<Setting> changes = new ArrayList<>();
+    changes.add(list);
+    if (selected.value.getAsString().equals(id)) {
+      selected.value = new JsonPrimitive("");
+      changes.add(selected);
+      changes.addAll(exclusions(new TreeSet<>(Arrays.asList(
+          Catalog.JSON.fromJson(setting("exclusions").value, String[].class)))));
+    }
+    changedSelection(changes);
   }
 
   void load(String id) {
@@ -96,14 +108,22 @@ final class MusicEdits {
     List<Setting> changes = new ArrayList<>();
     if (p != null) {
       changes.addAll(exclusions(p.excluded()));
+      Set<String> pool = p.trackPool() == null ? Set.of() : p.trackPool();
+      Setting scope = setting("presetTrackPool");
+      scope.value = Catalog.JSON.toJsonTree(pool);
+      changes.add(scope);
+      for (Setting s : changes)
+        if (s.id.startsWith("audio.trackEnabled."))
+          s.value = new JsonPrimitive(p.includes(s.id.substring("audio.trackEnabled.".length())));
       Setting volumes = setting("groupVolumes");
       volumes.value = Catalog.JSON.toJsonTree(MusicGroups.copy(p.groupVolumes()));
       changes.add(volumes);
-    }
+    } else changes.addAll(exclusions(new TreeSet<>(Arrays.asList(
+        Catalog.JSON.fromJson(setting("exclusions").value, String[].class)))));
     Setting selected = setting("preset");
     selected.value = new JsonPrimitive(id);
     changes.add(selected);
-    parent.changed(changes, false);
+    changedSelection(changes);
   }
 
   private List<Setting> exclusions(Set<String> excluded) {
@@ -143,7 +163,16 @@ final class MusicEdits {
   }
 
   void includeAll() {
-    parent.changed(exclusions(Set.of()), false);
+    List<Setting> changes = exclusions(Set.of());
+    if (!selected().isEmpty()) {
+      Set<String> pool = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(setting("presetTrackPool").value, String[].class)));
+      changes.stream().filter(s -> s.id.startsWith("audio.trackEnabled."))
+          .forEach(s -> pool.add(s.id.substring("audio.trackEnabled.".length())));
+      Setting scope = setting("presetTrackPool");
+      scope.value = Catalog.JSON.toJsonTree(pool);
+      changes.add(scope);
+    }
+    changedSelection(changes);
   }
 
   void excludeAll(Collection<String> tracks) {
@@ -151,6 +180,6 @@ final class MusicEdits {
     setting("exclusions").value.getAsJsonArray().forEach(v -> excluded.add(v.getAsString()));
     excluded.addAll(tracks);
     MusicPreset.validateTracks(excluded);
-    parent.changed(exclusions(excluded), false);
+    changedSelection(exclusions(excluded));
   }
 }

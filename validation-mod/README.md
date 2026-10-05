@@ -1,17 +1,24 @@
-# Runtime validation fixture
+# Runtime checks
 
-Install only in a disposable Power Beta instance. Never package this JAR.
-The separate building-validation fixture creates its own laboratory world and
-checks the creative, building, free-look and inventory features.
+Build after the root JAR with `./gradlew -p validation-mod --no-daemon build`.
+Install the resulting validation JAR only in a disposable Power Beta clone.
+Fixtures can replace settings and edit worlds. They are never part of the export.
 
-Write one command to `power-beta-validation.command` in the game's directory:
+Write a command to `.minecraft/power-beta-validation.command`. Results append to
+`power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
-- `audit`: validate every setting's schema, current value, default and cycle direction.
-- `roundtrip`: save, reread and restore settings across every backend.
-- `screens`: render every settings page at four resolutions and check OpenGL errors.
-- `audio`: verify loaded sound/music resources and runtime volume/mute behavior.
-- `options PAGE`, `pause`, `title`: open screens for physical input/screenshots.
-- `dump`: export the runtime settings catalog.
-- `defaults`: apply the pack defaults in the disposable instance.
+- `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
+- `audio-maintenance`: preset-pool isolation, folder browsing, draft confirmation,
+  duplicate imports, single-group expansion and FFmpeg detection. This fixture
+  expects FFmpeg on PATH; the unit suite covers an unavailable executable.
+- `audio-presets-setup`, `audio-presets-ui`, `audio-presets-finish`: preset editing.
+  Playback steps in `AudioPresetChecks` need separate ticks between commands.
+- `audio-groups-setup`, `audio-groups-ui`, `audio-groups-menu`,
+  `audio-groups-finish`: group gains, layout and pause controls.
+- `new-world`: create an isolated test world; `options PAGE`, `pause`, `title`
+  open screens for inspection. `quit` closes the test client normally.
 
-Results are appended to `power-beta-validation.log`. Tests can change settings.
+See the dispatch in `Validation.java` for focused inventory, commands, navigation
+and input fixtures. Some older checks assume a particular setup; inspect their
+preconditions before running them. Physical input tests require focused game
+input and both modifier release orders.

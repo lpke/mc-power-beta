@@ -3,6 +3,12 @@
 from pathlib import Path
 import argparse,hashlib,json,shutil,subprocess,zipfile,os,tempfile
 ROOT=Path(__file__).resolve().parents[1]
+def export_markdown(source,target):
+ text=(ROOT/source).read_text()
+ base='https://github.com/lpke/mc-power-beta/blob/main/'
+ text=text.replace('(docs/','('+base+'docs/').replace('(AGENTS.md)','('+base+'AGENTS.md)')
+ text=text.replace('(music-assets.md)','('+base+'docs/music-assets.md)').replace('(LICENSE)','(LICENSE.txt)')
+ target.write_text(text)
 def main():
  parser=argparse.ArgumentParser();parser.add_argument('--skip-build',action='store_true');args=parser.parse_args()
  for entry in json.loads((ROOT/'vendor/libraries/manifest.json').read_text()):
@@ -19,15 +25,9 @@ def main():
  shutil.copytree(ROOT/'pack',stage)
  mods=stage/'.minecraft/mods';mods.mkdir(parents=True)
  manifest=json.loads((ROOT/'vendor/manifest.json').read_text());installed=[]
- utilities=json.loads((ROOT/'source-build/modules.json').read_text())
  legacy=json.loads((ROOT/'tools/legacy_modules.json').read_text())
  for entry in manifest:
-  if entry['id']=='gcapi3':continue
-  if entry['id'] in legacy:
-   if utilities[legacy[entry['id']]]['enabled']:continue
-   module=utilities[legacy[entry['id']]]
-   src=ROOT/'source-build/build'/legacy[entry['id']]/'libs'/(legacy[entry['id']]+'-'+module['version']+'+powerbeta.1.jar')
-   shutil.copy2(src,mods/(src.name+'.disabled'));continue
+  if not entry['enabled'] or entry['id']=='gcapi3' or entry['id'] in legacy:continue
   src=ROOT/entry['file'];assert hashlib.sha256(src.read_bytes()).hexdigest()==entry['sha256'],f'Artifact changed: {src.name}'
   shutil.copy2(src,mods/src.name)
  shutil.copy2(ROOT/'build/libs/power-beta-1.0.0.jar',mods/'power-beta-1.0.0.jar')
@@ -41,15 +41,15 @@ def main():
   subprocess.run([str(Path(os.environ['JAVA_HOME'])/'bin/java'),'-cp',classpath,'local.luke.power.config.ConfigMigration',str(game)],check=True)
   target=stage/'.minecraft/config/power-beta.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(game/'config/power-beta.json',target)
  # Keep licenses beside the export, including separate upstream dependency licenses.
- licenses=stage/'licenses';licenses.mkdir();shutil.copy2(ROOT/'LICENSE',stage/'LICENSE.txt');shutil.copy2(ROOT/'README.md',stage/'README.md')
+ licenses=stage/'licenses';licenses.mkdir();shutil.copy2(ROOT/'LICENSE',stage/'LICENSE.txt');export_markdown('README.md',stage/'README.md')
  for base in [ROOT/'modules',ROOT/'vendor/licenses']:
   for p in base.rglob('*'):
    if p.is_file() and not any(k in p.parts for k in ['build','.gradle']) and p.name.upper().startswith(('LICENSE','COPYING','NOTICE')):
     target=licenses/p.relative_to(base);target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(p,target)
  for p in (ROOT/'modules').glob('*/LICENSE'):shutil.copy2(p,licenses/(p.parent.name+'-LICENSE.txt'))
  shutil.copy2(ROOT/'vendor/manifest.json',stage/'COMPONENTS.json')
- shutil.copy2(ROOT/'docs/upstreams.md',stage/'UPSTREAMS.md')
- shutil.copy2(ROOT/'CHANGELOG.md',stage/'CHANGELOG.md')
+ export_markdown('docs/upstreams.md',stage/'UPSTREAMS.md')
+ export_markdown('CHANGELOG.md',stage/'CHANGELOG.md')
  for p in sorted(mods.iterdir()):installed.append({'file':p.name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'enabled':p.suffix=='.jar'})
  (stage/'PACK-MANIFEST.json').write_text(json.dumps({'name':'Power Beta','version':'1.0.0','mods':installed},indent=2)+'\n')
  forbidden={'accounts.json','level.dat','session.lock','servers.dat','power-beta-validation.command'}

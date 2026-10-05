@@ -36,6 +36,8 @@ public final class AudioBackend implements Backend {
         "Load a saved soundtrack selection. Loading replaces current track exclusions and group volumes.", List.of());
     add("presets", "Music data", "Music presets", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.presets), new JsonArray(), "Saved soundtrack selections.", List.of());
+    add("presetTrackPool", "Music data", "Preset track pool", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.presetTrackPool), new JsonArray(), "Tracks admitted by the loaded preset.", List.of());
     add("exclusions", "Music data", "Excluded tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.disabledTracks), new JsonArray(), "Excluded music identifiers.", List.of());
     add("groupVolumes", "Music data", "Music group volumes", Setting.Kind.LIST,
@@ -125,6 +127,9 @@ public final class AudioBackend implements Backend {
     add("menuControls", "Pause menu music", "Show music controls", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.menuControls), new JsonPrimitive(false),
         "Show play/pause, previous, next, quiet and track information on the pause menu.", List.of());
+    add("menuControlsScrub", "Pause menu music", "Show scrub bar", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.menuControlsScrub), new JsonPrimitive(false),
+        "Show playback position and seek within the current song on the pause menu.", List.of());
     add("menuControlsPosition", "Pause menu music", "Position", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuControlsPosition.ordinal()), new JsonPrimitive(1),
         "Anchor the music panel beside the menu or at a screen edge. Offsets adjust its position.",
@@ -169,7 +174,8 @@ public final class AudioBackend implements Backend {
           new JsonPrimitive(100), 0, 100, 5, List.of(), false));
       result.add(new Setting("audio.trackEnabled." + track, "audio", "Audio", "Track rotation", label + " in rotation",
           "Include this track in automatic selection. You can still preview or explicitly queue excluded tracks.",
-          Setting.Kind.BOOLEAN, new JsonPrimitive(!config.disabledTracks.contains(track)),
+          Setting.Kind.BOOLEAN, new JsonPrimitive(!config.disabledTracks.contains(track)
+              && (config.preset.isEmpty() || config.presetTrackPool.contains(track))),
           new JsonPrimitive(true), 0, 1, 1, List.of(), false));
     }
     return result;
@@ -221,28 +227,33 @@ public final class AudioBackend implements Backend {
 
   private AudioSettings draft(Map<String, JsonElement> changes) {
     AudioSettings s = AudioConfig.copy();
+    if (changes.containsKey("audio.preset")) s.preset = changes.get("audio.preset").getAsString();
+    if (changes.containsKey("audio.presetTrackPool")) s.presetTrackPool = new TreeSet<>(Arrays.asList(
+        Catalog.JSON.fromJson(changes.get("audio.presetTrackPool"), String[].class)));
     if (changes.containsKey("audio.exclusions")) s.disabledTracks = new TreeSet<>(Arrays.asList(
         Catalog.JSON.fromJson(changes.get("audio.exclusions"), String[].class)));
     for (var e : changes.entrySet()) {
       String key = e.getKey().substring(6);
       JsonElement v = e.getValue();
       if (key.startsWith("category.")) s.categories.put(key.substring(9), v.getAsInt());
-      else if (key.startsWith("trackEnabled.")) {
-        String track = key.substring("trackEnabled.".length());
-        if (v.getAsBoolean()) s.disabledTracks.remove(track); else s.disabledTracks.add(track);
-      } else if (key.startsWith("sound.")) {
+      // ConfigSession.link keeps these display rows in sync with the authoritative sets.
+      // Replaying them during Load/Discard would wrongly exclude tracks outside a preset pool.
+      else if (key.startsWith("trackEnabled.")) { }
+      else if (key.startsWith("sound.")) {
         String sound = key.substring(6);
         if (v.getAsInt() == 100 && !sound.startsWith("music:custom/")) s.sounds.remove(sound);
         else s.sounds.put(sound, v.getAsInt());
       } else
         switch (key) {
           case "exclusions" -> { }
+          case "presetTrackPool" -> { }
           case "preset" -> s.preset = v.getAsString();
           case "presets" -> s.presets = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, MusicPreset[].class)));
           case "groupVolumes" -> s.groupVolumes = Catalog.JSON.fromJson(v,
               new com.google.gson.reflect.TypeToken<TreeMap<String, Integer>>() {}.getType());
           case "favourites" -> s.favourites = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
           case "menuControls" -> s.menuControls = v.getAsBoolean();
+          case "menuControlsScrub" -> s.menuControlsScrub = v.getAsBoolean();
           case "menuControlsPosition" -> s.menuControlsPosition = AudioSettings.MenuControlsPosition.values()[v.getAsInt()];
           case "menuControlsOffsetX" -> s.menuControlsOffsetX = v.getAsInt();
           case "menuControlsOffsetY" -> s.menuControlsOffsetY = v.getAsInt();

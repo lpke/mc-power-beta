@@ -56,7 +56,8 @@ final class AudioGroupChecks {
             .filter(t -> t.group().equals("Alpha"))
             .forEach(t -> excluded.add(t.id()));
         excluded.add("music:creative1.ogg");
-        s.presets.add(new MusicPreset("draft", "Quiet afternoons", excluded, Map.of("Alpha", 40)));
+        s.presets.add(new MusicPreset("draft", "Quiet afternoons", excluded, Map.of("Alpha", 40),
+            new HashSet<>(AudioController.music(mc))));
         AudioConfig.preview(s);
         mc.options.musicVolume = .1f;
         AudioController.pause();
@@ -153,14 +154,17 @@ final class AudioGroupChecks {
               AudioConfig.preview(s);
               class_525 pause = new class_525();
               mc.setScreen(pause);
+              for (boolean showScrub : new boolean[]{false, true})
               for (int[] size : new int[][] {{320, 240}, {427, 240}, {640, 420}, {854, 480}})
                 for (var anchor : AudioSettings.MenuControlsPosition.values()) {
+                  s.menuControlsScrub = showScrub;
                   s.menuControlsPosition = anchor;
                   AudioConfig.preview(s);
                   pause.init(mc, size[0], size[1]);
                   pause.render(-1, -1, 0);
                   var panel = field(pause, "power$music");
                   var bounds = (MenuMusicLayout) field(panel, "bounds");
+                  check(bounds.height() == (showScrub ? 48 : 32), "scrub layout height incorrect");
                   check(bounds.width() <= 200, "panel wider than menu buttons");
                   var buttons = ((ScreenInput) (Object) pause).power$buttons();
                   var settings = buttons.stream().filter(b -> b.id == 0).findFirst().orElseThrow();

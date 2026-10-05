@@ -11,8 +11,13 @@ public final class MusicPresetDraft {
   private final boolean creating;
   private final Set<String> excluded;
   private final Map<String, Integer> originalVolumes, volumes;
+  private final Set<String> available, originalPool, pool;
 
   public MusicPresetDraft(MusicPreset preset) {
+    this(preset, Set.of());
+  }
+
+  public MusicPresetDraft(MusicPreset preset, Collection<String> available) {
     creating = preset == null;
     id = creating ? UUID.randomUUID().toString() : preset.id();
     originalName = creating ? "New preset" : preset.name();
@@ -20,6 +25,9 @@ public final class MusicPresetDraft {
     excluded = new TreeSet<>(original);
     originalVolumes = creating ? Map.of() : Map.copyOf(preset.groupVolumes());
     volumes = new TreeMap<>(originalVolumes);
+    this.available = Set.copyOf(available);
+    originalPool = preset != null && preset.trackPool() != null ? Set.copyOf(preset.trackPool()) : null;
+    pool = new TreeSet<>(originalPool == null ? available : originalPool);
   }
 
   public String name() {
@@ -31,16 +39,17 @@ public final class MusicPresetDraft {
   }
 
   public boolean included(String id) {
-    return !excluded.contains(id);
+    return (originalPool == null && available.isEmpty() || pool.contains(id)) && !excluded.contains(id);
   }
 
   public void include(String id, boolean value) {
-    if (value) excluded.remove(id);
+    if (value) { excluded.remove(id); pool.add(id); }
     else excluded.add(id);
   }
 
   public void includeAll() {
     excluded.clear();
+    pool.addAll(available);
   }
 
   public void excludeAll(Collection<String> tracks) {
@@ -65,10 +74,12 @@ public final class MusicPresetDraft {
     return creating
         || !originalName.equals(name.strip())
         || !original.equals(excluded)
-        || !originalVolumes.equals(volumes);
+        || !originalVolumes.equals(volumes)
+        || originalPool != null && !originalPool.equals(pool);
   }
 
   public MusicPreset snapshot(String name) {
-    return new MusicPreset(id, name, excluded, volumes);
+    return new MusicPreset(id, name, excluded, volumes,
+        originalPool == null && available.isEmpty() ? null : pool);
   }
 }

@@ -8,6 +8,33 @@ import local.luke.power.ui.MusicPresetDraft;
 import org.junit.jupiter.api.Test;
 
 class MusicPresetTest {
+  @Test void newMusicStaysOutOfSavedAndLoadedPresetsUntilExplicitlyIncluded() {
+    String old = "music:custom/old", added = "music:custom/new";
+    MusicPresetDraft create = new MusicPresetDraft(null, Set.of(old));
+    MusicPreset saved = create.snapshot("My songs");
+    AudioSettings live = new AudioSettings();
+    live.presets.add(saved);
+    MusicPreset.load(live, saved.id());
+    assertFalse(saved.includes(added));
+    assertFalse(live.presetTrackPool.contains(added));
+    MusicPresetDraft editor = new MusicPresetDraft(saved, Set.of(old, added));
+    assertFalse(editor.included(added));
+    assertFalse(editor.changed(saved.name()));
+    editor.include(added, true);
+    assertTrue(editor.snapshot(saved.name()).includes(added));
+    assertFalse(saved.includes(added));
+    assertFalse(live.presetTrackPool.contains(added));
+    live.presetTrackPool.add(added);
+    MusicPreset.load(live, saved.id());
+    assertFalse(live.presetTrackPool.contains(added));
+    Gson gson = new Gson();
+    live = gson.fromJson(gson.toJson(live), AudioSettings.class);
+    live.validate();
+    assertEquals(Set.of(old), live.presetTrackPool);
+    assertFalse(live.presets.get(0).includes(added));
+    editor.includeAll();
+    assertEquals(Set.of(old, added), editor.snapshot(saved.name()).trackPool());
+  }
   @Test void groupVolumesAreIsolatedPersistedAndOnlyCopiedWhenLoaded() {
     AudioSettings live = new AudioSettings();
     live.groupVolumes.put("Alpha", 75);

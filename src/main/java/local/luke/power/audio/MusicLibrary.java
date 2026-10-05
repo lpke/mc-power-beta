@@ -84,6 +84,14 @@ public final class MusicLibrary {
     return (p.isAbsolute() ? p : game.resolve(p)).normalize();
   }
 
+  static boolean audioFile(Path file) throws IOException {
+    if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS) || !Files.isReadable(file)) return false;
+    String name = file.getFileName().toString().toLowerCase(Locale.ROOT);
+    if (!name.endsWith(".ogg") && !name.endsWith(".wav") && !name.endsWith(".mus") && !name.endsWith(".mp3")) return false;
+    long bytes = Files.size(file);
+    return bytes >= 4 && bytes <= 256L * 1024 * 1024 && validHeader(file, name);
+  }
+
   private static boolean validHeader(Path file, String name) throws IOException {
     if (name.endsWith(".mus")) return true;
     try (InputStream in = Files.newInputStream(file)) {

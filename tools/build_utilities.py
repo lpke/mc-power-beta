@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def main():
  parser=argparse.ArgumentParser();parser.add_argument('modules',nargs='*');args=parser.parse_args()
  prepare_platform();catalog=json.loads((ROOT/'source-build/modules.json').read_text());logs=ROOT/'build/utility-logs';logs.mkdir(parents=True,exist_ok=True)
- for name in args.modules or catalog:
+ for name in args.modules or [name for name, spec in catalog.items() if spec['enabled']]:
   assert name in catalog
   print('Building '+name,flush=True)
   with (logs/(name+'.log')).open('w') as log:

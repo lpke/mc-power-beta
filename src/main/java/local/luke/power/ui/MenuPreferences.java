@@ -9,12 +9,15 @@ import local.luke.power.storage.PowerConfig;
 public final class MenuPreferences {
   public static final class Values {
     public boolean autoApply, pauseToOptions;
+    public String musicBrowserDirectory = "";
     public List<String> colours = new ArrayList<>();
 
     public void validate() {
       if (colours == null || colours.size() > 16)
         throw new IllegalArgumentException("Save up to 16 colours");
       colours.forEach(LightSettings::rgb);
+      if (musicBrowserDirectory == null || musicBrowserDirectory.length() > 4096 || musicBrowserDirectory.indexOf('\0') >= 0)
+        throw new IllegalArgumentException("Invalid music browser location");
     }
   }
 

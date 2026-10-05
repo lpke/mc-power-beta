@@ -20,6 +20,34 @@ public final class Mp3Converter {
   private static volatile Process process;
   private static volatile String status = "";
   private static volatile int revision;
+  private static volatile boolean available;
+  private static boolean probed;
+
+  /** One bounded probe off the client thread; conversion never installs system software. */
+  public static synchronized void probe() {
+    if (probed) return;
+    probed = true;
+    WORKER.execute(() -> available = probeExecutable("ffmpeg"));
+  }
+
+  static boolean probeExecutable(String executable) {
+    Process check = null;
+    try {
+      check = new ProcessBuilder(executable, "-version")
+          .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+          .redirectError(ProcessBuilder.Redirect.DISCARD).start();
+      return check.waitFor(3, TimeUnit.SECONDS) && check.exitValue() == 0;
+    } catch (IOException | SecurityException ignored) {
+      return false;
+    } catch (InterruptedException interrupted) {
+      Thread.currentThread().interrupt();
+      return false;
+    } finally {
+      if (check != null && check.isAlive()) check.destroyForcibly();
+    }
+  }
+
+  public static boolean available() { return available; }
 
   public static String hash(String text) {
     try {
@@ -72,6 +100,7 @@ public final class Mp3Converter {
 
   public static synchronized void start(Path game, List<MusicLibrary.Track> tracks) {
     if (busy) return;
+    if (!available) { status = "FFmpeg is unavailable"; return; }
     List<Path> sources =
         tracks.stream()
             .filter(t -> t.mp3() && !t.playable())

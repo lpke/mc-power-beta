@@ -19,6 +19,7 @@ public final class AudioSettings {
     MIDDLE_LEFT, MIDDLE_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
   }
   public boolean menuControls = false;
+  public boolean menuControlsScrub = false;
   public MenuControlsPosition menuControlsPosition = MenuControlsPosition.MENU_BOTTOM;
   public int menuControlsOffsetX = 0, menuControlsOffsetY = 0;
   public CustomMusic customMusic = CustomMusic.OFF;
@@ -33,6 +34,7 @@ public final class AudioSettings {
   public Set<String> favourites = new TreeSet<>();
   public List<MusicPreset> presets = new ArrayList<>();
   public String preset = "";
+  public Set<String> presetTrackPool = new TreeSet<>();
   public MusicMode musicMode = MusicMode.VANILLA;
   public List<String> musicDirectories = new ArrayList<>();
   public List<String> menuDirectories = new ArrayList<>();
@@ -56,6 +58,7 @@ public final class AudioSettings {
 
   public void validate() {
     MusicPreset.validate(presets, preset);
+    MusicPreset.validateTracks(presetTrackPool);
     MusicGroups.copy(groupVolumes);
     if (menuControlsPosition == null || Math.abs((long) menuControlsOffsetX) > 4096
         || Math.abs((long) menuControlsOffsetY) > 4096)

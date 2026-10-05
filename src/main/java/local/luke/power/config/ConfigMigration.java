@@ -18,7 +18,7 @@ public final class ConfigMigration {
     if (Files.exists(PowerConfig.path())) {
       cleanupLegacy(game);
       JsonObject existing=PowerConfig.document();
-      JsonObject upgraded=upgrade(existing);
+      JsonObject upgraded=upgrade(existing, game);
       if (!existing.equals(upgraded)) {
         backup(game,Map.of(PowerConfig.path(),Files.readAllBytes(PowerConfig.path())));
         PowerConfig.write(upgraded);
@@ -101,7 +101,7 @@ public final class ConfigMigration {
       settings.add("cameraPositions",saved);
     }
     backup(game,originals);
-    document=upgrade(document);
+    document=upgrade(document, game);
     if (!originals.isEmpty()) {
       JsonObject pending=new JsonObject(), files=new JsonObject();
       originals.forEach((path,bytes)->files.addProperty(game.relativize(path).toString(),hash(bytes)));
@@ -176,7 +176,7 @@ public final class ConfigMigration {
     try(var channel=java.nio.channels.FileChannel.open(zip,StandardOpenOption.WRITE)) { channel.force(true); }
     try(var channel=java.nio.channels.FileChannel.open(backup,StandardOpenOption.READ)) { channel.force(true); }
   }
-  private static JsonObject upgrade(JsonObject root) throws IOException {
+  private static JsonObject upgrade(JsonObject root, Path game) throws IOException {
     Map<String,String> aliases=new LinkedHashMap<>();
     try(var in=ConfigMigration.class.getResourceAsStream("/assets/powerbeta/legacy-aliases.json")) {
       if(in==null)throw new IOException("Missing legacy import map");
@@ -211,6 +211,7 @@ public final class ConfigMigration {
     if(fixes!=null) for(String key:List.of("enableMojangFixTextOnTitleScreen","enableInventoryChanges","enableBitDepthFix","enableDeathScreenScoreFix","enableCommandKey","enableQuitButton","useResourcesDownloadURL")) fixes.remove(key);
     JsonObject tweaks=all.getAsJsonObject("power_controls:tweaks"); if(tweaks!=null)tweaks.remove("boatsDontBreak");
     local.luke.power.audio.AudioMigration.upgrade(next);
+    local.luke.power.audio.MusicPresetMigration.upgrade(next, game);
     return next;
   }
   private static JsonElement rename(JsonElement value,Map<String,String> aliases,java.util.regex.Pattern pattern) {

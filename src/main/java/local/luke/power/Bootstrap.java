@@ -21,6 +21,7 @@ public final class Bootstrap implements PreLaunchEntrypoint {
     try {
       FileTransaction.recover(game);
       ConfigMigration.prepare(game);
+      local.luke.power.audio.Mp3Converter.probe();
       prepared = true;
     } catch (Exception e) {
       throw new IllegalStateException("Power Beta could not safely prepare its configuration", e);

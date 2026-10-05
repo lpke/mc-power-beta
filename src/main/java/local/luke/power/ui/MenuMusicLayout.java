@@ -12,12 +12,17 @@ public record MenuMusicLayout(int x, int y, int width, int height) {
       MenuControlsPosition position,
       int offsetX,
       int offsetY) {
+    return at(screenWidth, screenHeight, menuTop, menuBottom, position, offsetX, offsetY, false);
+  }
+
+  public static MenuMusicLayout at(int screenWidth, int screenHeight, int menuTop, int menuBottom,
+      MenuControlsPosition position, int offsetX, int offsetY, boolean scrub) {
     int width = Math.max(180, Math.min(200, screenWidth - 16));
     boolean side =
         position == MenuControlsPosition.MIDDLE_LEFT
             || position == MenuControlsPosition.MIDDLE_RIGHT;
     if (side) width = Math.max(180, Math.min(width, screenWidth / 2 - 112));
-    int height = 32;
+    int height = scrub ? 48 : 32;
     int x =
         switch (position) {
           case TOP_LEFT, MIDDLE_LEFT, BOTTOM_LEFT -> 8;

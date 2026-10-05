@@ -6,6 +6,15 @@ import local.luke.power.audio.AudioSettings.MenuControlsPosition;
 import org.junit.jupiter.api.Test;
 
 class MenuMusicLayoutTest {
+  @Test void optionalScrubberFitsEveryAnchorWithoutChangingPanelWidth() {
+    for (int[] size : new int[][] {{320, 240}, {427, 240}, {854, 480}})
+      for (var anchor : MenuControlsPosition.values()) {
+        var box = MenuMusicLayout.at(size[0], size[1], 100, 180, anchor, 0, 0, true);
+        assertEquals(48, box.height());
+        assertTrue(box.width() <= 200);
+        assertTrue(box.y() + box.height() <= size[1] - 4);
+      }
+  }
   @Test
   void everyAnchorRemainsReachableAfterResizeAndLargeOffsets() {
     for (int[] size : new int[][] {{320, 240}, {427, 240}, {640, 420}, {854, 480}, {1920, 480}})

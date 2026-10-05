@@ -34,6 +34,14 @@ final class MusicStatusBar {
   }
 
   void render(UiScreen screen, int left, int y, int width, int mx, int my) {
+    render(screen, left, y, width, mx, my, true);
+  }
+
+  void renderScrubber(UiScreen screen, int left, int y, int width, int mx, int my) {
+    render(screen, left, y, width, mx, my, false);
+  }
+
+  private void render(UiScreen screen, int left, int y, int width, int mx, int my, boolean label) {
     double duration = AudioController.duration();
     available = duration > 0 && width >= 180;
     if (dragging) {
@@ -44,11 +52,11 @@ final class MusicStatusBar {
         AudioController.seek(fraction);
       }
     }
-    int reserved = available ? Math.min(160, width / 2) : 0;
+    int reserved = available ? (label ? Math.min(160, width / 2) : width) : 0;
     top = y;
     labelX = left;
     labelWidth = width - reserved;
-    screen.text(
+    if (label) screen.text(
         screen.fit(AudioController.status(), Math.max(10, width - reserved - 6)),
         left,
         y + 4,

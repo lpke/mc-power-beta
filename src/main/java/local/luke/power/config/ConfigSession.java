@@ -50,6 +50,15 @@ public final class ConfigSession {
         if (changed.value.getAsBoolean()) excluded.remove(id); else excluded.add(id);
         var value = new com.google.gson.JsonArray(); excluded.forEach(value::add); s.value = value;
       });
+      boolean preset = settings.stream().filter(s -> s.id.equals("audio.preset"))
+          .anyMatch(s -> !s.value.getAsString().isEmpty());
+      if (preset && changed.value.getAsBoolean())
+        settings.stream().filter(s -> s.id.equals("audio.presetTrackPool")).findFirst().ifPresent(s -> {
+          var pool = new TreeSet<String>();
+          s.value.getAsJsonArray().forEach(v -> pool.add(v.getAsString()));
+          pool.add(id);
+          var value = new JsonArray(); pool.forEach(value::add); s.value = value;
+        });
     }
     if (changed.id.equals("tweaks.placement.enabled")) {
       boolean tied =

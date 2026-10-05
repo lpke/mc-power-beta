@@ -62,7 +62,7 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   void edit(MusicPreset preset) {
-    draft = new MusicPresetDraft(preset);
+    draft = new MusicPresetDraft(preset, AudioController.music(minecraft));
     hideExcluded = !draft.creating();
     name.setText(draft.name());
     name.focused = false;
@@ -261,7 +261,7 @@ final class MusicPresetsPanel extends UiScreen {
       for (MusicPreset p : values)
         counts.put(
             p.id(),
-            available.size() - (int) p.excluded().stream().filter(available::contains).count());
+            (int) available.stream().filter(p::includes).count());
       includedCounts = Map.copyOf(counts);
       countedPresets = values;
       countedRevision = revision;

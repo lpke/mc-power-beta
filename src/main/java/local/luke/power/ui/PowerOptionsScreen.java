@@ -594,18 +594,18 @@ public final class PowerOptionsScreen extends UiScreen {
           else { click(); if (s.kind == Setting.Kind.KEY) related(s); else linkedControls(s); }
           return;
         }
-        if (x < mainControlLeft(r)) return;
+        if (x < mainControlLeft(r) || x >= right() - 38) return;
         if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0) {
             dragging = s;
             double pixels = (double) minecraft.displayWidth / width;
             dragLeft = (mainControlLeft(r) + 4) * pixels;
-            dragSpan = Math.max(1, right() - 36 - mainControlLeft(r) - 8) * pixels;
+            dragSpan = Math.max(1, right() - 38 - mainControlLeft(r) - 8) * pixels;
             drag((int) (x * pixels));
           } else {
             search.focused = false; dragging = null;
             valueEditor.begin(s, s, () -> changed(s), mainControlLeft(r), controlY,
-                right() - 36 - mainControlLeft(r), top(), bottom());
+                right() - 38 - mainControlLeft(r), top(), bottom());
           }
         } else activate(s, button == 1 ? -1 : 1);
         return;
@@ -962,7 +962,7 @@ public final class PowerOptionsScreen extends UiScreen {
           y + (narrow ? 3 : 8), 0xe8a0a0);
       List<Setting> conflicts = conflicts(s);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
-      int valueEnd = right() - 36;
+      int valueEnd = right() - 38;
       if (numeric && editable && valueEditor.editing(s))
         valueEditor.render(this, controlLeft, cy, valueEnd - controlLeft, mx, listMouseY, rowsTop, bottom());
       else if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,

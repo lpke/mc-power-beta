@@ -55,7 +55,7 @@ public final class MusicLibraryScreen extends UiScreen {
   public boolean trackStatusVisible() { return error.isEmpty() && !Mp3Converter.busy() && conversionTicks == 0; }
 
   public boolean conversionVisible() {
-    return !queue && !presetsOpen && (conversionNeeded || Mp3Converter.busy());
+    return !queue && !presetsOpen && Mp3Converter.available() && (conversionNeeded || Mp3Converter.busy());
   }
 
   public String hoverHelp() {
@@ -412,11 +412,15 @@ public final class MusicLibraryScreen extends UiScreen {
       Map<String, List<String>> groups = new TreeMap<>(Comparator.comparingInt(this::groupOrder)
           .thenComparing(String.CASE_INSENSITIVE_ORDER).thenComparing(Comparator.naturalOrder()));
       for (String id : tracks) groups.computeIfAbsent(group(id), k -> new ArrayList<>()).add(id);
+      List<String> visibleGroups = groups.keySet().stream()
+          .filter(key -> !hideExcluded || includedCount(key) > 0).toList();
       if (presetsOpen && presets.editing() && previousDraft != presets.draft()) {
         collapsed.clear(); collapsed.addAll(groups.keySet()); previousDraft = presets.draft();
         trackScroll = 0;
-      } else if (!presetsOpen && !groups.isEmpty()
-          && (folder.isEmpty() || folder.equals("active") && groups.size() > 1) && initializedFilters.add(folder)) collapsed.addAll(groups.keySet());
+      } else if (!presetsOpen && !visibleGroups.isEmpty() && initializedFilters.add(folder)) {
+        if (visibleGroups.size() == 1) collapsed.removeAll(visibleGroups);
+        else if (folder.isEmpty() || folder.equals("active")) collapsed.addAll(groups.keySet());
+      }
       for (var entry : groups.entrySet()) {
         String key = entry.getKey();
         if ((presetsOpen ? presets.editing() && presets.hideExcluded() : hideExcluded) && includedCount(key) == 0) continue;
@@ -447,7 +451,7 @@ public final class MusicLibraryScreen extends UiScreen {
     if (presetsOpen) return true;
     if (folder.equals("favourites")) return edits.favourites().contains(id);
     if (folder.equals("presets")) return edits.presets().stream().filter(p -> p.id().equals(selectedPreset))
-        .anyMatch(p -> !p.excluded().contains(id));
+        .anyMatch(p -> p.includes(id));
     if (folder.equals("active")) return activeTracks.contains(id);
     if (folder.isEmpty()) return true;
     MusicLibrary.Track t = custom.get(id);

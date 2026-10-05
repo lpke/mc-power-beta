@@ -41,7 +41,7 @@ public class PauseMusicMixin extends Screen {
     if (AudioConfig.current().menuControls
         && (position == MenuControlsPosition.MENU_TOP || narrowSide)) {
       // At small GUI sizes, reserve room below the title instead of covering it.
-      int shift = Math.max(0, Math.min(96 - top, height - 16 - bottom));
+      int shift = Math.max(0, Math.min(96 + (AudioConfig.current().menuControlsScrub ? 16 : 0) - top, height - 16 - bottom));
       for (Object object : buttons) ((ButtonWidget) object).y += shift;
       top += shift;
       bottom += shift;
