@@ -17,6 +17,7 @@ public final class AutoWalk {
   private AutoWalk() {}
 
   public static void tick(Minecraft minecraft) {
+    local.luke.power.building.BuildingIndicators.register(minecraft);
     if (client != minecraft) {
       client = minecraft;
       MovementScreens.register(screen -> screen instanceof net.minecraft.client.gui.screen.Screen s

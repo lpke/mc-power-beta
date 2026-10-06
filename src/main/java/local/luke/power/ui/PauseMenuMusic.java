@@ -3,7 +3,7 @@ package local.luke.power.ui;
 import local.luke.power.audio.AudioConfig;
 import local.luke.power.audio.AudioController;
 
-/** Compact transport for the pause menu, using the same playback state as Audio settings. */
+/** Compact transport for the pause and title menus, using the same playback state as Audio settings. */
 public final class PauseMenuMusic extends UiScreen {
   private MenuMusicLayout bounds;
   private final MusicStatusBar scrub = new MusicStatusBar();
@@ -16,12 +16,16 @@ public final class PauseMenuMusic extends UiScreen {
         s.menuControlsPosition, s.menuControlsOffsetX, s.menuControlsOffsetY, s.menuControlsScrub);
   }
 
+  public boolean visible() {
+    return AudioConfig.current().showMenuControls(minecraft.currentScreen instanceof net.minecraft.client.gui.screen.TitleScreen);
+  }
+
   private int controlsX() {
     return bounds.x() + (bounds.width() - (BUTTON_STEP * 3 + BUTTON_WIDTH)) / 2;
   }
 
   public boolean press(int x, int y, int button) {
-    if (!AudioConfig.current().menuControls || bounds == null || button != 0) return false;
+    if (!visible() || bounds == null || button != 0) return false;
     if (AudioConfig.current().menuControlsScrub && scrub.press(x, y, button)) return true;
     for (int i = 0; i < 4; i++) {
       if (!inside(x, y, controlsX() + i * BUTTON_STEP, bounds.y(), BUTTON_WIDTH, 18)) continue;
@@ -44,7 +48,7 @@ public final class PauseMenuMusic extends UiScreen {
   }
 
   public void render(int mx, int my, float delta) {
-    if (!AudioConfig.current().menuControls || bounds == null) return;
+    if (!visible() || bounds == null) return;
     int x = controlsX(), y = bounds.y();
     iconButton(AudioController.musicPlaying() ? "pause" : "play", x, y, BUTTON_WIDTH, mx, my, true);
     trackButton("", true, x + BUTTON_STEP, y, BUTTON_WIDTH, mx, my);

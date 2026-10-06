@@ -18,6 +18,13 @@ final class MusicPreview {
   private static final List<String> resume = new ArrayList<>();
 
   static boolean active() { return !track.isEmpty(); }
+  static void worldChanged(Minecraft mc, SoundSystem system, boolean keepMusic) {
+    if (!active()) return;
+    if (!keepMusic) { stop(system, false); return; }
+    world = mc.world;
+    // A jukebox belongs to the old world, unlike the background soundtrack.
+    resume.remove("streaming");
+  }
   static String track() { return track; }
   static boolean paused() { return paused; }
   static void resume(SoundSystem system) {

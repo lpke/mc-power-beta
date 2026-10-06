@@ -18,11 +18,11 @@ public final class AudioStartChecks {
   public static void run(String action) throws Exception {
     switch (action) {
       case "reset" -> { background.set(0); preview.set(0); }
-      case "background", "preview" -> test("OpenAL preloads " + action + " only once", () -> {
-        int count = action.equals("background") ? background.get() : preview.get();
-        String source = action.equals("background") ? "BgMusic" : "PowerBetaMusicPreview";
+      case "background", "preview", "resume-background" -> test("OpenAL preload count for " + action, () -> {
+        int count = !action.equals("preview") ? background.get() : preview.get();
+        String source = !action.equals("preview") ? "BgMusic" : "PowerBetaMusicPreview";
         check(SoundManagerAccessor.power$system().playing(source), "source not playing");
-        check(count == 1, "preloaded " + count + " times");
+        check(count == (action.equals("resume-background") ? 0 : 1), "preloaded " + count + " times");
         check(AudioController.position() > 0, "playback clock did not advance");
       });
       case "paused" -> test("paused seek does not play or preload before Resume", () -> {

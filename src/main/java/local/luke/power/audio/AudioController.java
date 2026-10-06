@@ -450,17 +450,24 @@ public final class AudioController {
     MusicDisplay.update(nowPlaying());
     boolean inWorld = mc.world != null;
     if (inWorld != wasWorld) {
-      MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
-      system.stop("PowerBetaMenu");
-      system.stop("BgMusic");
-      currentMusic = "";
-      menuMusic = "";
-      history.clear();
-      historyIndex = -1;
-      paused = false;
-      silenced = true;
-      trackWasPlaying = false;
-      nextDelay((SoundManagerAccessor) mc.soundManager);
+      boolean keepMusic = AudioConfig.current().continuesAcrossMenus();
+      MusicPreview.worldChanged(mc, system, keepMusic);
+      if (!keepMusic) {
+        MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
+        system.stop("PowerBetaMenu");
+        system.stop("BgMusic");
+        currentMusic = "";
+        menuMusic = "";
+        history.clear();
+        historyIndex = -1;
+        paused = false;
+        silenced = true;
+        trackWasPlaying = false;
+        nextDelay((SoundManagerAccessor) mc.soundManager);
+      }
+      // Keep the current stream, pause state, queue and gap. Future choices use the new context.
+      upcoming = null;
+      nextKey = null;
       wasWorld = inWorld;
     }
     tickSoundPreview();

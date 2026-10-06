@@ -58,8 +58,8 @@ public final class AudioBackend implements Backend {
         "Add folder tracks to the world soundtrack, or replace it with folder tracks. Empty folders fall back to World music.",
         List.of("Off", "Add to soundtrack", "Custom only"));
     add("menuMusic", "Music library", "Menu music", Setting.Kind.CHOICE,
-        new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(0),
-        "Use World music in menus, prefer menu folders, or mix both pools. Empty menu folders fall back to World music.",
+        new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(2),
+        "Choose the menu soundtrack. World soundtrack and Mix both keep music playing when entering or leaving a world. Empty menu folders fall back to World music.",
         List.of("World soundtrack", "Menu folders", "Mix both"));
     add("dimensionMusic", "Music library", "On dimension change", Setting.Kind.CHOICE,
         new JsonPrimitive(s.dimensionMusic.ordinal()), new JsonPrimitive(0),
@@ -124,20 +124,23 @@ public final class AudioBackend implements Backend {
           Setting.Kind.INTEGER, new JsonPrimitive(minimum ? s.gapMinSeconds : s.gapMaxSeconds),
           new JsonPrimitive(minimum ? 600 : 1200), 0, 86400, 1, List.of(), false));
     }
-    add("menuControls", "Pause menu music", "Show music controls", Setting.Kind.BOOLEAN,
+    add("menuControls", "Menu music controls", "Show music controls", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.menuControls), new JsonPrimitive(false),
-        "Show play/pause, previous, next, quiet and track information on the pause menu.", List.of());
-    add("menuControlsScrub", "Pause menu music", "Show scrub bar", Setting.Kind.BOOLEAN,
+        "Show play/pause, previous, next, quiet and track information on menus.", List.of());
+    add("menuControlsMainMenu", "Menu music controls", "Show in main menu", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.menuControlsMainMenu), new JsonPrimitive(true),
+        "Also show the controls on the title screen when Show music controls is on.", List.of());
+    add("menuControlsScrub", "Menu music controls", "Show scrub bar", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.menuControlsScrub), new JsonPrimitive(false),
-        "Show playback position and seek within the current song on the pause menu.", List.of());
-    add("menuControlsPosition", "Pause menu music", "Position", Setting.Kind.CHOICE,
+        "Show playback position and seek within the current song on menus.", List.of());
+    add("menuControlsPosition", "Menu music controls", "Position", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuControlsPosition.ordinal()), new JsonPrimitive(1),
         "Anchor the music panel beside the menu or at a screen edge. Offsets adjust its position.",
         List.of("Above menu", "Below menu", "Top left", "Top center", "Top right",
             "Middle left", "Middle right", "Bottom left", "Bottom center", "Bottom right"));
     for (boolean horizontal : new boolean[]{true, false}) {
       String key = horizontal ? "menuControlsOffsetX" : "menuControlsOffsetY";
-      entries.add(new Setting("audio." + key, id(), "Audio", "Pause menu music",
+      entries.add(new Setting("audio." + key, id(), "Audio", "Menu music controls",
           horizontal ? "Horizontal offset" : "Vertical offset",
           horizontal ? "Move right with positive values, left with negative values. Uses scaled GUI pixels."
               : "Move down with positive values, up with negative values. Uses scaled GUI pixels.",
@@ -253,6 +256,7 @@ public final class AudioBackend implements Backend {
               new com.google.gson.reflect.TypeToken<TreeMap<String, Integer>>() {}.getType());
           case "favourites" -> s.favourites = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
           case "menuControls" -> s.menuControls = v.getAsBoolean();
+          case "menuControlsMainMenu" -> s.menuControlsMainMenu = v.getAsBoolean();
           case "menuControlsScrub" -> s.menuControlsScrub = v.getAsBoolean();
           case "menuControlsPosition" -> s.menuControlsPosition = AudioSettings.MenuControlsPosition.values()[v.getAsInt()];
           case "menuControlsOffsetX" -> s.menuControlsOffsetX = v.getAsInt();

@@ -52,6 +52,10 @@ disable seeking, not playback. Pausing any source must preserve its track identi
 temporary previews restore the interrupted song. The countdown reserves the song
 that Next will play.
 
+Menu music defaults to Mix both. WORLD and MIX keep the playing or paused stream
+across world/menu transitions, including previews and their interrupted tracks.
+CUSTOM ends playback on transitions to switch pools. Queues remain intact.
+
 Saved presets contain a track-pool snapshot, exclusions and group volumes.
 Existing presets acquire their pool once during configuration migration, with a
 backup. New folders and new tracks stay outside saved pools until explicitly

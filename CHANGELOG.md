@@ -1,5 +1,19 @@
 # Changelog
 
+## Active tweaks and menu music
+
+- Add an active-tweaks HUD list, on by default, with per-tweak inclusion,
+  nine positions, offsets, colour and opacity. Slab completion is opt-in.
+- Default menu music to Mix both. Mix both and World soundtrack preserve playing
+  and paused music across world/menu transitions, including previews.
+- Rename Pause menu music to Menu music controls and add Show in main menu,
+  on by default when music controls are enabled. Keep controls clear of the
+  bottom menu buttons at small GUI sizes, including with the scrub bar visible.
+- Show eight creative catalogue rows instead of seven, expanding upward while
+  keeping the hotbar, delete slot and survival inventory unchanged.
+- Describe recipe ingredients, arrangements and outputs in tooltips. Remove
+  recipe details from setting names.
+
 ## Inventory movement and keyboard fixes
 
 - Add Inventory while moving, off by default. Movement and auto-walk work in

@@ -1804,16 +1804,16 @@
   "power_environment:config.ENABLE_SOUL_SAND_RECIPE": {
     "page": "Gameplay",
     "group": "World rules",
-    "label": "Soul sand crafting recipe enable",
-    "description": "Restart required for changes to take effect",
+    "label": "Craftable soul sand",
+    "description": "Arrange 2 netherrack and 2 dirt diagonally in a 2-by-2 grid. Output is set by Soul sand per craft.",
     "default": false,
     "restart": true
   },
   "power_environment:config.SOUL_SAND_OUTPUT": {
     "page": "Gameplay",
     "group": "World rules",
-    "label": "Soul sand recipe output: 1-16",
-    "description": "Restart required for changes to take effect",
+    "label": "Soul sand per craft",
+    "description": "Number of soul sand blocks produced from 2 netherrack and 2 dirt. Requires Craftable soul sand.",
     "default": 4,
     "restart": true,
     "min": 1,
@@ -2377,7 +2377,7 @@
     "page": "Crafting",
     "group": "Recipes",
     "label": "Recipe controls",
-    "description": "Acts as a master switch for all recipe tweaks",
+    "description": "Enable the modern, tweaked and obtainable recipes below, plus extra furnace fuels. Tool repair and the soul sand recipe have separate switches.",
     "default": false,
     "restart": true
   },
@@ -2385,7 +2385,7 @@
     "page": "Crafting",
     "group": "Recipes",
     "label": "Make more wooden items burnable",
-    "description": "",
+    "description": "Burn boats for 60 seconds; bows, fishing rods and ladders for 15; wooden tools, signs and doors for 10; wooden slabs for 7.5; bowls for 5.",
     "default": false,
     "restart": true
   },
@@ -2393,7 +2393,7 @@
     "page": "Crafting",
     "group": "Recipes",
     "label": "Allow tool repair in crafting grid",
-    "description": "",
+    "description": "Combine two matching tools, shears, swords or armour pieces anywhere in the grid. Produces one item with their remaining durability plus a 10% bonus, capped at full durability.",
     "default": false,
     "restart": true
   },
@@ -2401,7 +2401,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Shapeless flint and steel",
-    "description": "",
+    "description": "Combine 1 flint and 1 iron ingot anywhere in the grid to make 1 flint and steel.",
     "default": false,
     "restart": true
   },
@@ -2409,7 +2409,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Shapeless mushroom stew",
-    "description": "",
+    "description": "Combine 1 bowl, 1 red mushroom and 1 brown mushroom anywhere in the grid to make 1 mushroom stew.",
     "default": false,
     "restart": true
   },
@@ -2417,7 +2417,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Shapeless chest minecart",
-    "description": "",
+    "description": "Combine 1 chest and 1 minecart anywhere in the grid to make 1 chest minecart.",
     "default": false,
     "restart": true
   },
@@ -2425,7 +2425,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Shapeless furnace minecart",
-    "description": "",
+    "description": "Combine 1 furnace and 1 minecart anywhere in the grid to make 1 furnace minecart.",
     "default": false,
     "restart": true
   },
@@ -2433,7 +2433,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Shapeless sticky pistons",
-    "description": "",
+    "description": "Combine 1 slimeball and 1 piston anywhere in the grid to make 1 sticky piston.",
     "default": false,
     "restart": true
   },
@@ -2441,7 +2441,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Books require leather",
-    "description": "",
+    "description": "Replace the paper-only recipe with 3 paper and 1 leather anywhere in the grid, producing 1 book.",
     "default": false,
     "restart": true
   },
@@ -2449,7 +2449,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Wool redyeing",
-    "description": "",
+    "description": "Combine 1 wool of any colour and 1 dye anywhere in the grid to make 1 wool in that dye colour.",
     "default": false,
     "restart": true
   },
@@ -2457,7 +2457,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "6 slabs per craft",
-    "description": "",
+    "description": "Place 3 stone, sandstone, planks or cobblestone in a row to make 6 matching slabs instead of 3.",
     "default": false,
     "restart": true
   },
@@ -2465,15 +2465,15 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Button requires 1 stone",
-    "description": "",
+    "description": "Craft 1 stone into 1 button instead of using 2 stone.",
     "default": false,
     "restart": true
   },
   "power_controls:recipes.modern.modernFenceRecipe": {
     "page": "Crafting",
     "group": "Modern",
-    "label": "Modern fence recipe (4 planks,2 sticks)",
-    "description": "",
+    "label": "Modern fence recipe",
+    "description": "Place 2 rows of plank, stick, plank to make 3 fences. Uses 4 planks and 2 sticks.",
     "default": false,
     "restart": true
   },
@@ -2481,7 +2481,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Snow layer recipe",
-    "description": "",
+    "description": "Place 3 snow blocks in a row to make 6 snow layers.",
     "default": false,
     "restart": true
   },
@@ -2489,7 +2489,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "3 ladders per craft",
-    "description": "",
+    "description": "Arrange 7 sticks in an H to make 3 ladders instead of 2.",
     "default": false,
     "restart": true
   },
@@ -2497,7 +2497,7 @@
     "page": "Crafting",
     "group": "Tweaked",
     "label": "Shapeless jack o' lantern",
-    "description": "",
+    "description": "Combine 1 pumpkin and 1 torch anywhere in the grid to make 1 jack o' lantern.",
     "default": false,
     "restart": true
   },
@@ -2505,7 +2505,7 @@
     "page": "Crafting",
     "group": "Tweaked",
     "label": "Stairs per craft",
-    "description": "",
+    "description": "Set the number of stairs made from 6 matching planks or cobblestone arranged in a staircase. Beta gives 4.",
     "default": 4,
     "restart": true,
     "min": 1,
@@ -2516,7 +2516,7 @@
     "page": "Crafting",
     "group": "Tweaked",
     "label": "Trapdoors per craft",
-    "description": "",
+    "description": "Set the number of trapdoors made from 6 planks in 2 full rows. Beta gives 2.",
     "default": 2,
     "restart": true,
     "min": 1,
@@ -2527,7 +2527,7 @@
     "page": "Crafting",
     "group": "Obtainable",
     "label": "Craftable grass blocks",
-    "description": "",
+    "description": "Combine 1 dirt and 1 seed anywhere in the grid to make 1 grass block.",
     "default": false,
     "restart": true
   },
@@ -2535,7 +2535,7 @@
     "page": "Crafting",
     "group": "Obtainable",
     "label": "Craftable cobwebs",
-    "description": "",
+    "description": "Arrange 5 string in an X, with one in each corner and one in the centre, to make 1 cobweb.",
     "default": false,
     "restart": true
   },
@@ -2543,47 +2543,47 @@
     "page": "Crafting",
     "group": "Obtainable",
     "label": "Craftable fire",
-    "description": "",
+    "description": "Craft 1 unused flint and steel into 3 fire items. Consumes the flint and steel.",
     "default": false,
     "restart": true
   },
   "power_controls:recipes.obtainable.craftableCoalOre": {
     "page": "Crafting",
     "group": "Obtainable",
-    "label": "Craftable coal ore (8 coal around a stone)",
-    "description": "",
+    "label": "Craftable coal ore",
+    "description": "Surround 1 stone with 8 coal in a crafting table to make 1 coal ore.",
     "default": false,
     "restart": true
   },
   "power_controls:recipes.obtainable.craftableIronOre": {
     "page": "Crafting",
     "group": "Obtainable",
-    "label": "Craftable iron ore (8 iron ingots around a stone)",
-    "description": "",
+    "label": "Craftable iron ore",
+    "description": "Surround 1 stone with 8 iron ingots in a crafting table to make 1 iron ore.",
     "default": false,
     "restart": true
   },
   "power_controls:recipes.obtainable.craftableGoldOre": {
     "page": "Crafting",
     "group": "Obtainable",
-    "label": "Craftable gold ore (8 gold ingots around a stone)",
-    "description": "",
+    "label": "Craftable gold ore",
+    "description": "Surround 1 stone with 8 gold ingots in a crafting table to make 1 gold ore.",
     "default": false,
     "restart": true
   },
   "power_controls:recipes.obtainable.craftableLapisOre": {
     "page": "Crafting",
     "group": "Obtainable",
-    "label": "Craftable lapis lazuli ore (8 lapis lazuli around a stone)",
-    "description": "",
+    "label": "Craftable lapis lazuli ore",
+    "description": "Surround 1 stone with 8 lapis lazuli in a crafting table to make 1 lapis ore.",
     "default": false,
     "restart": true
   },
   "power_controls:recipes.obtainable.craftableDiamondOre": {
     "page": "Crafting",
     "group": "Obtainable",
-    "label": "Craftable diamond ore (8 diamonds around a stone)",
-    "description": "",
+    "label": "Craftable diamond ore",
+    "description": "Surround 1 stone with 8 diamonds in a crafting table to make 1 diamond ore.",
     "default": false,
     "restart": true
   },

@@ -14,6 +14,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class FreecamController {
+    public FreecamController() {
+        local.luke.power.input.TweakIndicators.register(
+            local.luke.power.input.TweakIndicators.Tweak.FREECAM_PLAYER_MOVEMENT,
+            () -> active && local.luke.power.camera.FreecamConfig.config.enabled && allowPlayerMovement ? "" : null);
+    }
     private boolean active;
     private CameraPosition cameraPosition = new CameraPosition();
     private TreeMap<String, CameraPosition> savedCameraPositions = new TreeMap<>();

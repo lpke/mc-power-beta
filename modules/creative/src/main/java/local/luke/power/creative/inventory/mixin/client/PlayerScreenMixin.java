@@ -1,6 +1,7 @@
 package local.luke.power.creative.inventory.mixin.client;
 
 import java.util.List;
+import local.luke.power.creative.inventory.CreativeGrid;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.container.ContainerScreen;
 import net.minecraft.client.gui.screen.container.PlayerScreen;
@@ -159,30 +160,33 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
 
       for (int i = 0; i < creative_maxTabIndex; i++) {
         if (i != creative_tabIndex) {
-          this.blit(posX + 4 + i * 24, posY - 21, 176, 0, 24, 24);
+          this.blit(posX + 4 + i * 24, CreativeGrid.tabTop(posY), 176, 0, 24, CreativeGrid.tabHeight(posY));
         }
       }
 
       this.blit(posX + 173, posY + 138, 176, 32, 25, 24);
-      this.blit(posX, posY, 0, 0, this.containerWidth, this.containerHeight);
+      // Grow the catalogue upward; hotbar, side tabs and destroy slot keep their coordinates.
+      this.blit(posX, posY - CreativeGrid.EXTRA_HEIGHT, 0, 0, this.containerWidth, 122);
+      this.blit(posX, posY + 104, 0, 104, this.containerWidth, CreativeGrid.EXTRA_HEIGHT);
+      this.blit(posX, posY + 122, 0, 122, this.containerWidth, this.containerHeight - 122);
       this.blit(posX + 173, posY + 114, 176, 32, 25, 24);
 
-      this.blit(posX + 150, posY + 4, 208, 0, 9, 8);
+      this.blit(posX + 150, posY - CreativeGrid.EXTRA_HEIGHT + 4, 208, 0, 9, 8);
       if (creative_tabPage == 0) {
-        this.fill(posX + 150, posY + 4, posX + 150 + 9, posY + 4 + 8, CREATIVE_COLOR_FILLER);
+        this.fill(posX + 150, posY - CreativeGrid.EXTRA_HEIGHT + 4, posX + 150 + 9, posY - CreativeGrid.EXTRA_HEIGHT + 4 + 8, CREATIVE_COLOR_FILLER);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       }
-      this.blit(posX + 160, posY + 4, 208, 8, 9, 8);
+      this.blit(posX + 160, posY - CreativeGrid.EXTRA_HEIGHT + 4, 208, 8, 9, 8);
       if (creative_tabPage >= creative_pagesCount - 1) {
-        this.fill(posX + 160, posY + 4, posX + 160 + 9, posY + 4 + 8, CREATIVE_COLOR_FILLER);
+        this.fill(posX + 160, posY - CreativeGrid.EXTRA_HEIGHT + 4, posX + 160 + 9, posY - CreativeGrid.EXTRA_HEIGHT + 4 + 8, CREATIVE_COLOR_FILLER);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       }
 
       int sliderX = posX + 154;
-      int sliderY = posY + 14 + MCMath.floor(creative_slider * 109);
-      this.blit(sliderX, sliderY, 240, 1, 14, 15);
+      int sliderY = posY - CreativeGrid.EXTRA_HEIGHT + 14 + MCMath.floor(creative_slider * CreativeGrid.SCROLL_TRAVEL);
+      if (creative_maxIndex > 0) this.blit(sliderX, sliderY, 240, 1, 14, 15);
 
-      this.blit(posX + 4 + creative_tabIndex * 24, posY - 21, 176, 0, 24, 24);
+      this.blit(posX + 4 + creative_tabIndex * 24, CreativeGrid.tabTop(posY), 176, 0, 24, CreativeGrid.tabHeight(posY));
 
       GL11.glPushMatrix();
       GL11.glRotatef(120.0F, 1.0F, 0.0F, 0.0F);
@@ -199,15 +203,15 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
         if (tab == null) continue;
         ItemStack icon = tab.getIcon();
         if (icon == null) continue;
-        creative_renderItem(icon, posX + 8 + i * 24, posY - 17);
+        creative_renderItem(icon, posX + 8 + i * 24, CreativeGrid.tabTop(posY) + 4);
       }
 
-      for (int i = 0; i < 56; i++) {
+      for (int i = 0; i < CreativeGrid.CAPACITY; i++) {
         int index = creative_rowIndex + i;
         if (index >= 0 && index < creative_items.size()) {
           ItemStack instance = creative_items.get(index);
           int x = posX + (i & 7) * 18 + 8;
-          int y = posY + (i / 8) * 18 + 14;
+          int y = posY - CreativeGrid.EXTRA_HEIGHT + (i / 8) * 18 + 14;
           creative_renderItem(instance, x, y);
         }
       }
@@ -222,14 +226,14 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
       RenderHelper.disableLighting();
       GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
       String translated = creative_translate(creative_tabKey);
-      this.textManager.drawText(translated, posX + 8, posY + 5, 0x373737);
+      this.textManager.drawText(translated, posX + 8, posY - CreativeGrid.EXTRA_HEIGHT + 5, 0x373737);
 
       int slotX = MCMath.floor((mouseX - posX - 8) / 18);
       if (slotX >= 0) {
-        int slotY = MCMath.floor((mouseY - posY - 14) / 18);
-        if (slotX < 8 && slotY >= 0 && slotY < 7) {
+        int slotY = MCMath.floor((mouseY - posY + CreativeGrid.EXTRA_HEIGHT - 14) / 18);
+        if (slotX < 8 && slotY >= 0 && slotY < CreativeGrid.ROWS) {
           int x = slotX * 18 + posX + 8;
-          int y = slotY * 18 + posY + 14;
+          int y = slotY * 18 + posY - CreativeGrid.EXTRA_HEIGHT + 14;
           creative_renderSlotOverlay(x, y);
 
           int index = slotY * 8 + slotX + creative_rowIndex;
@@ -249,9 +253,9 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
         }
       }
 
-      int tabX = ((int) mouseX - posX - 4) / 24;
-      int tabY = (int) mouseY - posY + 21;
-      if (tabX >= 0 && tabX < creative_maxTabIndex && tabY >= 0 && tabY < 24) {
+      int tabX = MCMath.floor((mouseX - posX - 4) / 24F);
+      int tabY = (int) mouseY - CreativeGrid.tabTop(posY);
+      if (tabX >= 0 && tabX < creative_maxTabIndex && tabY >= 0 && tabY < CreativeGrid.tabHeight(posY)) {
         CreativeTab tab = creative_getTab(creative_tabPage, tabX);
         if (tab != null) {
           translated = creative_translate(tab.getTranslationKey());
@@ -483,9 +487,9 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
         return;
       }
 
-      tabX = (mouseX - posX - 4) / 24;
-      tabY = mouseY - posY + 21;
-      if (tabX >= 0 && tabX < 7 && tabY >= 0 && tabY < 24) {
+      tabX = MCMath.floor((mouseX - posX - 4) / 24F);
+      tabY = mouseY - CreativeGrid.tabTop(posY);
+      if (tabX >= 0 && tabX < creative_maxTabIndex && tabY >= 0 && tabY < CreativeGrid.tabHeight(posY)) {
         CreativeTab tab = creative_getTab(creative_tabPage, tabX);
         if (tab == null) return;
 
@@ -501,7 +505,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
         return;
       }
 
-      int buttonY = mouseY - posY - 4;
+      int buttonY = mouseY - posY + CreativeGrid.EXTRA_HEIGHT - 4;
       if (buttonY > 0 && buttonY < 8) {
         int buttonX = mouseX - posX - 150;
         if (creative_tabPage > 0 && buttonX >= 0 && buttonX < 9) {
@@ -545,18 +549,18 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
       }
 
       int sliderX = mouseX - posX - 154;
-      int sliderY = mouseY - posY - 14 - MCMath.floor(creative_slider * 109);
-      if (sliderX > 0 && sliderX < 14 && sliderY > 0 && sliderY < 15) {
-        creative_mouseDelta = posY + 14 + sliderY;
+      int sliderY = mouseY - posY + CreativeGrid.EXTRA_HEIGHT - 14 - MCMath.floor(creative_slider * CreativeGrid.SCROLL_TRAVEL);
+      if (creative_maxIndex > 0 && sliderX > 0 && sliderX < 14 && sliderY > 0 && sliderY < 15) {
+        creative_mouseDelta = posY - CreativeGrid.EXTRA_HEIGHT + 14 + sliderY;
         creative_drag = true;
         return;
       }
 
       int slotX = MCMath.floor((mouseX - posX - 8) / 18F);
-      int slotY = MCMath.floor((mouseY - posY - 14) / 18F);
+      int slotY = MCMath.floor((mouseY - posY + CreativeGrid.EXTRA_HEIGHT - 14) / 18F);
 
       PlayerInventory inventory = this.minecraft.player.inventory;
-      if (slotY >= 0 && slotY < 7 && slotX >= 0 && slotX < 8) {
+      if (slotY >= 0 && slotY < CreativeGrid.ROWS && slotX >= 0 && slotX < 8) {
         int index = slotY * 8 + slotX + creative_rowIndex;
         ItemStack cursor = inventory.getCursorItem();
         if (index < creative_items.size()) {
@@ -589,7 +593,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
         return;
       }
 
-      slotY = (mouseY - posY - 142) / 18;
+      slotY = MCMath.floor((mouseY - posY - 142) / 18F);
       if (slotY == 0 && slotX >= 0 && slotX < 9) {
         if (Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
           inventory.main[slotX] = null;
@@ -616,12 +620,16 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
 
   @Unique
   private void creative_mouseScroll() {
-    if (creative_items.size() < 56) {
+    if (creative_maxIndex == 0) {
+      creative_drag = false;
+      creative_slider = 0;
+      creative_rowIndex = 0;
+      Mouse.getDWheel();
       return;
     }
     if (creative_drag) {
       int mousePos = (int) mouseY - creative_mouseDelta;
-      creative_slider = MathHelper.clamp((float) mousePos / 109F, 0.0F, 1.0F);
+      creative_slider = MathHelper.clamp((float) mousePos / (float) CreativeGrid.SCROLL_TRAVEL, 0.0F, 1.0F);
       creative_rowIndex = (int) ((creative_slider * creative_maxIndex) / 8.0F) << 3;
       if (creative_rowIndex > creative_maxIndex) {
         creative_rowIndex = creative_maxIndex;
@@ -647,7 +655,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
 
   @Unique
   private int creative_getMaxItemIndex() {
-    return (int) Math.ceil(Math.max(creative_items.size() - 56, 0) / 8.0F) << 3;
+    return CreativeGrid.maxScroll(creative_items.size());
   }
 
   @Unique

@@ -13,6 +13,9 @@ public final class PowerBeta {
     local.luke.power.light.LightOverlay.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.input.TweakIndicators.register(
+          local.luke.power.input.TweakIndicators.Tweak.CINEMATIC_CAMERA,
+          () -> mc.options.cinematicMode ? "" : null);
       local.luke.power.chat.HelpOutput.scrolling(() -> {
         try {
           Object config = Class.forName("local.luke.power.hud.Config").getField("config").get(null);

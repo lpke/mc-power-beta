@@ -16,5 +16,6 @@
   "menuDirectories": [],
   "recursive": false,
   "shuffle": true,
-  "avoidRepeats": true
+  "avoidRepeats": true,
+  "menuMusic": "MIX"
 }

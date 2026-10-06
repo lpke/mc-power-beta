@@ -8,6 +8,12 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
 - `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
+- `new-world`, then `indicators-hud` and `indicators-creative`: live HUD states,
+  inclusion/Cancel, eight catalogue rows, hotbar transfers and recipe tooltips.
+  `indicators-menu` checks title controls and layout. `indicators-mix`, `indicators-world`
+  or `indicators-custom` starts a track; wait for playback, then `indicators-exit` and
+  `indicators-playing` or `indicators-stopped`. `indicators-exit-paused` and
+  `indicators-paused` check pause retention. All action names use the prefix.
 - `movement-keys`, then `new-world`, `movement-setup`, `movement-checks`: key mapping,
   container reach and item conservation. `movement-inventory`, `movement-chest` and
   `movement-state` support physical-input checks in the disposable client.

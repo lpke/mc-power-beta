@@ -27,6 +27,7 @@
     "CameraDistanceMixin",
     "CreateWorldMixin",
     "ContainerPreviewMixin",
+    "ActiveTweaksMixin",
     "ChatTextAccessor",
     "NativeStorageMixin",
     "EquipmentSwapMixin",

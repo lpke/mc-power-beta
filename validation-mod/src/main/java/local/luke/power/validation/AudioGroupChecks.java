@@ -147,7 +147,7 @@ final class AudioGroupChecks {
       }
       case "menu" -> {
         test(
-            "pause music controls render all anchors and keep the title screen unchanged",
+            "menu music controls render all anchors and follow title visibility",
             () -> {
               AudioSettings s = AudioConfig.copy();
               s.menuControls = true;
@@ -193,8 +193,8 @@ final class AudioGroupChecks {
               TitleScreen title = new TitleScreen();
               mc.setScreen(title);
               title.render(-1, -1, 0);
-              check(Arrays.stream(title.getClass().getDeclaredFields())
-                  .noneMatch(f -> f.getName().equals("power$music")), "title still has music panel");
+              check(((PauseMenuMusic) field(title, "power$music")).visible() == s.menuControlsMainMenu,
+                  "title control visibility differs from settings");
             });
         log("AUDIO GROUP MENU FAILURES " + failures);
       }

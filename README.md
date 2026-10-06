@@ -39,10 +39,17 @@ page, search and scroll during the session. Apply saves without closing; Cancel
 undoes unsaved edits, including previews. Right-click Apply to enable auto-apply.
 Right-click a slider to enter a precise value. Bindings support Ctrl, Shift and Alt.
 
+**Interface > Active tweaks** shows temporary toggles such as fake sneak and fast
+placement on the HUD. Choose which appear, their position, colour and opacity.
+
 Audio includes bundled Minecraft soundtracks, custom folders, playlists, presets,
 per-track volumes and a queue. Presets capture their available tracks when saved:
 adding folders later does not silently expand them. Include new tracks explicitly
 or use **Include all**.
+
+Menu music defaults to **Mix both**. This and **World soundtrack** keep the current
+song playing when entering or leaving a world. **Menu music controls** can show
+playback controls on the pause and title menus, with an optional scrub bar.
 
 OGG, WAV and MUS play directly. Optional **ffmpeg**, available on PATH when the game
 starts, enables **Convert MP3**. Converted WAVs go into

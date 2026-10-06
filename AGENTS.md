@@ -39,6 +39,8 @@
   reserved LWJGL codes 114–118. Inventory movement only admits known screens without
   text input, excludes mouse/Shift, and uses normal container closure for item cleanup.
 - `AudioController` owns all music sources, pauses, previews and timing.
+  World/menu transitions preserve streams and pause state in WORLD/MIX modes;
+  only CUSTOM resets playback. Preview restoration must not revive old jukeboxes.
   Never scan folders or decode audio from a render loop. Preset drafts and saved
   snapshots must stay separate from live library edits; only Load copies a preset
   into live state. Track pools prevent new folders silently expanding presets.
@@ -50,6 +52,10 @@
   Keep old carry-journal formats recoverable. See `docs/recovery.md`.
 - Compact buttons must retain all four texture borders. Check narrow GUI sizes,
   sticky headings, clipping and click targets, not only a wide screenshot.
+  Creative catalogue rows grow upward; hotbar and survival slots never move.
+- `TweakIndicators` exposes live module state across mappings. HUD inclusion is
+  separate from gameplay settings. Do not infer active auto-walk/free look from
+  feature availability or poll action keys while rendering.
 
 ## Verification and delivery
 

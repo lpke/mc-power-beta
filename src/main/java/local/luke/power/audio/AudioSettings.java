@@ -19,11 +19,12 @@ public final class AudioSettings {
     MIDDLE_LEFT, MIDDLE_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
   }
   public boolean menuControls = false;
+  public boolean menuControlsMainMenu = true;
   public boolean menuControlsScrub = false;
   public MenuControlsPosition menuControlsPosition = MenuControlsPosition.MENU_BOTTOM;
   public int menuControlsOffsetX = 0, menuControlsOffsetY = 0;
   public CustomMusic customMusic = CustomMusic.OFF;
-  public MenuMusic menuMusic = MenuMusic.WORLD;
+  public MenuMusic menuMusic = MenuMusic.MIX;
   public DimensionMusic dimensionMusic = DimensionMusic.CONTINUE;
   public int gapMinSeconds = 600, gapMaxSeconds = 1200;
   public int master = 100;
@@ -42,6 +43,11 @@ public final class AudioSettings {
   public Set<String> disabledMenuDirectories = new LinkedHashSet<>();
   public boolean recursive = false, shuffle = true, avoidRepeats = true;
   public boolean waitBetweenTracks = true, delayQueuedTracks = false;
+
+  public boolean continuesAcrossMenus() { return menuMusic != MenuMusic.CUSTOM; }
+  public boolean showMenuControls(boolean mainMenu) {
+    return menuControls && (!mainMenu || menuControlsMainMenu);
+  }
 
   public AudioSettings() {
     for (String key :
