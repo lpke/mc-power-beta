@@ -5,6 +5,24 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LightCacheTest {
+  @Test void configurableBudgetPreservesDefaultAndFinishesFasterWithoutExtraWorkWhenOff() {
+    assertEquals(2048,new LightSettings().checksPerTick);
+    for (int budget : new int[]{256,2048,16384}) {
+      LightSettings s=new LightSettings();s.enabled=true;s.checksPerTick=budget;s.validate();
+      LightCache cache=new LightCache();Object world=new Object();int ticks=0;
+      while(cache.cells().isEmpty() && ticks<100) {
+        AtomicInteger reads=new AtomicInteger();
+        cache.tick(world,0,64,0,s,(x,y,z)->{reads.incrementAndGet();return y==64?7:-1;});
+        assertTrue(reads.get()<=budget);ticks++;
+      }
+      assertEquals((5733+budget-1)/budget,ticks);
+      s.enabled=false;
+      cache.tick(world,0,64,0,s,(x,y,z)->{fail("Inactive overlay sampled world");return 0;});
+      assertTrue(cache.cells().isEmpty());
+    }
+    LightSettings s=new LightSettings();s.checksPerTick=0;assertThrows(IllegalArgumentException.class,s::validate);
+    s.checksPerTick=Integer.MAX_VALUE;assertThrows(IllegalArgumentException.class,s::validate);
+  }
   @Test void inactiveAndMissingWorldNeverReadBlocksAndDropCachedLabels() {
     LightCache cache = new LightCache();
     LightSettings settings = new LightSettings();

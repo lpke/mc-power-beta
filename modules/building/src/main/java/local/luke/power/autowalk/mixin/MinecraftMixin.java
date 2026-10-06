@@ -12,11 +12,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MinecraftMixin {
   @Inject(method = "tick", at = @At("HEAD"))
   private void updateToggle(CallbackInfo ci) {
-    AutoWalk.tick((Minecraft) (Object) this);
+    AutoWalk.tick((Minecraft)(Object)this);
+  }
+
+  @Inject(method = "tick", at = @At("TAIL"))
+  private void closeDistantContainer(CallbackInfo ci) {
+    local.luke.power.autowalk.InventoryMovement.closeOutOfReach((Minecraft)(Object)this);
   }
 
   @Inject(method = "setScreen", at = @At("HEAD"))
   private void stopForScreen(Screen screen, CallbackInfo ci) {
-    if (screen != null) AutoWalk.stop();
+    if (screen != null && !local.luke.power.autowalk.InventoryMovement.allows((Minecraft)(Object)this, screen)) AutoWalk.stop();
   }
 }

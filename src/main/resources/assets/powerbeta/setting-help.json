@@ -290,5 +290,6 @@
   "power_controls:features.fallingPipe": "Replace enabled tool and armor break sounds with a falling-pipe sound.",
   "power_compat:config.addBlockLightToDebugOverlay": "Exact block-emitted light at your feet, from 0 to 15. Excludes sunlight and screen brightness.",
   "tweaks.autoWalkHoldToWalk": "Tap to toggle walking. Hold beyond the threshold to walk only until you release the key.",
-  "tweaks.autoWalkHoldMillis": "Hold time in milliseconds before releasing the auto-walk key stops walking."
+  "tweaks.autoWalkHoldMillis": "Hold time in milliseconds before releasing the auto-walk key stops walking.",
+  "tweaks.inventoryWhileMoving": "Walk, strafe, jump and auto-walk with inventories open in singleplayer. Sneaking stays off for Shift-clicking. Containers close beyond interaction reach; other menus still stop movement."
 }

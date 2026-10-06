@@ -8,6 +8,9 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
 - `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
+- `movement-keys`, then `new-world`, `movement-setup`, `movement-checks`: key mapping,
+  container reach and item conservation. `movement-inventory`, `movement-chest` and
+  `movement-state` support physical-input checks in the disposable client.
 - `audio-maintenance`: preset-pool isolation, folder browsing, draft confirmation,
   duplicate imports, single-group expansion and FFmpeg detection. This fixture
   expects FFmpeg on PATH; the unit suite covers an unavailable executable.

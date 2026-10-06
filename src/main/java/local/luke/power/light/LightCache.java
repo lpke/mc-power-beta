@@ -47,7 +47,8 @@ public final class LightCache {
     }
     if (cursor == 0) { cx = x; cy = y; cz = z; }
     int height = vertical * 2 + 1, total = columns.size() * height;
-    int stop = Math.min(total, cursor + WORK_PER_TICK);
+    int budget = Math.max(256, Math.min(16384, s.checksPerTick));
+    int stop = Math.min(total, cursor + budget);
     while (cursor < stop && pending.size() < MAX_LABELS) {
       Column c = columns.get(cursor / height);
       int yi = cursor++ % height;

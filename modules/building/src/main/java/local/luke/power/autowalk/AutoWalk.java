@@ -3,7 +3,8 @@ package local.luke.power.autowalk;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.option.KeyBinding;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
+import local.luke.power.input.Bindings;
+import local.luke.power.input.MovementScreens;
 import org.lwjgl.opengl.Display;
 
 public final class AutoWalk {
@@ -16,29 +17,22 @@ public final class AutoWalk {
   private AutoWalk() {}
 
   public static void tick(Minecraft minecraft) {
-    client = minecraft;
+    if (client != minecraft) {
+      client = minecraft;
+      MovementScreens.register(screen -> screen instanceof net.minecraft.client.gui.screen.Screen s
+          && InventoryMovement.allows(minecraft, s));
+    }
     if (world != minecraft.world || player != minecraft.player) {
       TOGGLE.stop();
       world = minecraft.world;
       player = minecraft.player;
     }
     var settings = local.luke.power.building.config.Config.current();
-    TOGGLE.update(local.luke.power.input.Bindings.down(KEY), canWalk(), settings.autoWalkHoldToWalk,
+    boolean inventory = InventoryMovement.allows(minecraft, minecraft.currentScreen);
+    if (inventory && (MovementScreens.keyboardDown(minecraft.options.forwardKey)
+        || MovementScreens.keyboardDown(minecraft.options.backKey))) TOGGLE.stop();
+    TOGGLE.update(inventory ? MovementScreens.keyboardDown(KEY) : Bindings.down(KEY), canWalk(), settings.autoWalkHoldToWalk,
         System.nanoTime(), settings.autoWalkHoldMillis);
-  }
-
-  private static boolean isKeyDown(int code) {
-    if (code < 0) {
-      int button = code + 100;
-      return Mouse.isCreated()
-          && button >= 0
-          && button < Mouse.getButtonCount()
-          && Mouse.isButtonDown(button);
-    }
-    return Keyboard.isCreated()
-        && code > Keyboard.KEY_NONE
-        && code < Keyboard.KEYBOARD_SIZE
-        && Keyboard.isKeyDown(code);
   }
 
   private static boolean canWalk() {
@@ -46,7 +40,8 @@ public final class AutoWalk {
         && client != null
         && client.world != null
         && client.player != null
-        && client.currentScreen == null
+        && client.player.health > 0 && !client.player.dead
+        && (client.currentScreen == null || InventoryMovement.allows(client, client.currentScreen))
         && Display.isActive();
   }
 

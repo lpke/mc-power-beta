@@ -739,10 +739,14 @@ public final class PowerOptionsScreen extends UiScreen {
     }
   }
 
+  public boolean capturingBinding() { return capture != null; }
+
   protected void keyPressed(char c, int key) {
     if (valueEditor.key(c, key)) return;
     if (hidden) { if (key == Keyboard.KEY_ESCAPE || key == Keyboard.KEY_F1) hidden = false; return; }
     if (capture != null) {
+      // Unmapped platform events must not silently clear an existing binding.
+      if (key == Keyboard.KEY_NONE) return;
       if (key == Keyboard.KEY_ESCAPE) {
         capture = null;
         return;

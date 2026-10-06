@@ -87,7 +87,7 @@ public final class LightInventoryChecks {
         ConfigSession session=SettingsRegistry.open(mc);
         Setting key=find(session,"keys.powerbeta.lightOverlay");
         check(ControlLinks.enabled(session,key),"off state hides toggle");
-        check(ControlLinks.settings(session,key).size()==9,"missing linked settings");
+        check(ControlLinks.settings(session,key).size()==10,"missing linked settings");
         check(key.defaultValue.getAsInt()==65,"F7 not default");
         check(find(session,"visual.swapEquipment").defaultValue.getAsBoolean(),"swap not default on");
       });

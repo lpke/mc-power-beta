@@ -11,6 +11,7 @@ public final class Settings {
       new local.luke.power.building.hotbar.HotbarSettings();
   public boolean freeLookFollowThirdPerson = true;
   public boolean autoWalkHoldToWalk = true;
+  public boolean inventoryWhileMoving;
   public int autoWalkHoldMillis = 350;
   public boolean autoWalk = true, freeLook = true, freeLookToggle = false;
   public local.luke.power.building.camera.Perspective freeLookPerspective =
@@ -27,6 +28,7 @@ public final class Settings {
     s.hotbar = hotbar.copy();
     s.freeLookFollowThirdPerson = freeLookFollowThirdPerson;
     s.autoWalk = autoWalk;
+    s.inventoryWhileMoving = inventoryWhileMoving;
     s.autoWalkHoldToWalk = autoWalkHoldToWalk;
     s.autoWalkHoldMillis = autoWalkHoldMillis;
     s.freeLook = freeLook;

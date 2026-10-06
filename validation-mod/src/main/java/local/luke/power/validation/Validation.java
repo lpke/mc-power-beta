@@ -48,6 +48,7 @@ public final class Validation {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
       if (command.equals("cheats-creation")) CheatsChecks.creation(mc);
+      else if (command.startsWith("movement-")) InventoryMovementChecks.run(mc,command.substring(9));
       else if (command.equals("cheats")) CheatsChecks.run(mc);
       else if (command.equals("modern-commands")) ModernCommandChecks.run(mc);
       else if (command.startsWith("audio-presets-")) AudioPresetChecks.run(mc,command.substring(14));

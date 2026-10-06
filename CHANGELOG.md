@@ -1,5 +1,18 @@
 # Changelog
 
+## Inventory movement and keyboard fixes
+
+- Add Inventory while moving, off by default. Movement and auto-walk work in
+  singleplayer inventories without sneaking; containers close beyond reach through
+  their normal item-cleanup path. Other menus and focus loss stop movement.
+- Make the light overlay's scan budget adjustable from 256 to 16384 positions per
+  tick. The default remains 2048; disabled overlays do no scanning.
+- Fix Linux backslash and extend function-key support through F24, including held
+  keys and modifiers. Unknown keys no longer clear an existing binding.
+- Make fullscreen follow its configured binding in menus as well as gameplay.
+  Unbinding F11 disables it; capturing a binding does not toggle fullscreen.
+  Holding the key toggles once, including after Linux recreates the window.
+
 ## Music playback fix
 
 - Start music streams once to prevent the opening audio repeating during buffering.

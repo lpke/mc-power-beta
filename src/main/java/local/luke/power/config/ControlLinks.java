@@ -19,7 +19,7 @@ public final class ControlLinks {
     link("key.inventory", "", "", "Open or close your inventory.");
     link("key.chat", "", "", "Open chat to write a message or command.");
     link("key.fog", "native.renderDistance", "", "Cycle Far, Normal, Short and Tiny terrain distance. Shift reverses the cycle.");
-    link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Forward/back input, menus and focus loss stop it.");
+    link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Manual forward/back input and focus loss stop it. Inventories keep walking when Inventory while moving is on.");
     // These settings are live toggle states, not feature-availability switches.
     // Keep their toggles and placement modifiers visible while the state is off.
     link("Fast place (toggle)", "tweaks.placement.enabled", "", "Toggle repeated block placement while holding Use.");

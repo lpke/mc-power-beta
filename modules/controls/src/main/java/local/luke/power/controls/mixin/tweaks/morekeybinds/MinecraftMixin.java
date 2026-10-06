@@ -51,6 +51,6 @@ public class MinecraftMixin {
     // F11
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 87))
     public int modifyToggleFullscreenKeybind(int constant) {
-        return local.luke.power.input.Bindings.eventCode(KeyBindingListener.toggleFullscreen);
+        return local.luke.power.input.FullscreenKey.eventCode(KeyBindingListener.toggleFullscreen);
     }
 }

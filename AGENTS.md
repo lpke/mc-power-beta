@@ -35,6 +35,9 @@
   modifier ownership when rebuilding rows. Share render and hit-test geometry.
 - Ctrl, Shift and Alt are the only chord modifiers. Gameplay acts on key-down.
   Test both release orders, held movement, focus loss and open menus.
+  Linux key repairs must update native events and polling together. F20–F24 use
+  reserved LWJGL codes 114–118. Inventory movement only admits known screens without
+  text input, excludes mouse/Shift, and uses normal container closure for item cleanup.
 - `AudioController` owns all music sources, pauses, previews and timing.
   Never scan folders or decode audio from a render loop. Preset drafts and saved
   snapshots must stay separate from live library edits; only Load copies a preset

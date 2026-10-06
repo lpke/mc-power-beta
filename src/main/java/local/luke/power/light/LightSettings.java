@@ -2,6 +2,7 @@ package local.luke.power.light;
 
 /** Block light predicts darkness at night; combined light also includes the current sky. */
 public final class LightSettings {
+  public int checksPerTick = LightCache.WORK_PER_TICK;
   public boolean enabled;
   public int radius = 12;
   public int verticalRange = 6;
@@ -13,6 +14,8 @@ public final class LightSettings {
   public double textSize = .6;
 
   public void validate() {
+    if (checksPerTick < 256 || checksPerTick > 16384)
+      throw new IllegalArgumentException("Light checks per tick must be between 256 and 16384");
     if (radius < 2 || radius > 24 || verticalRange < 1 || verticalRange > 16)
       throw new IllegalArgumentException("Overlay range must be 2–24 horizontally and 1–16 vertically");
     if (lightSource < 0 || lightSource > 1 || greenFrom < 0 || greenFrom > 16)

@@ -18,6 +18,8 @@ public final class LightBackend implements Backend {
         "Distance from the camera in blocks. Smaller ranges use less work; unloaded chunks are skipped.");
     add(entries, current, defaults, "verticalRange", "Vertical range", Setting.Kind.INTEGER, 1, 16, 1,
         "Blocks above and below the camera's feet to inspect. Larger ranges take longer to refresh.");
+    add(entries, current, defaults, "checksPerTick", "Light checks per tick", Setting.Kind.INTEGER, 256, 16384, 256,
+        "Maximum block positions checked each game tick. Higher values refresh levels sooner but use more CPU. Default: 2048. Only runs while the overlay is on.");
     add(entries, current, defaults, "lightSource", "Light source", Setting.Kind.CHOICE, 0, 1, 1,
         "Block light ignores daylight, useful for lighting builds. Combined includes current daylight and weather.");
     add(entries, current, defaults, "spawnableOnly", "Spawnable surfaces only", Setting.Kind.BOOLEAN, 0, 1, 1,

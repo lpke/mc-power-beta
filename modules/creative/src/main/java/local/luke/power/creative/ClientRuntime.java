@@ -59,6 +59,11 @@ public final class ClientRuntime {
         && !freecam();
   }
 
+  public static boolean moving(Minecraft mc) {
+    return active(mc) || (local(mc) && Display.isActive() && mc.viewEntity == mc.player
+        && !freecam() && local.luke.power.input.MovementScreens.allows(mc.currentScreen));
+  }
+
   public static void tick(Minecraft mc) {
     minecraft = mc;
     if (world != mc.level) {

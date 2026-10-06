@@ -5,7 +5,10 @@
   "client": [
     "GameOptionsMixin",
     "MinecraftMixin",
-    "KeyboardInputMixin"
+    "KeyboardInputMixin",
+    "SlotInventoryAccessor",
+    "DoubleInventoryAccessor",
+    "CraftingPosition"
   ],
   "injectors": {
     "defaultRequire": 1

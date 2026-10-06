@@ -28,7 +28,7 @@ public final class FlightController {
       owner = mc.player;
       reset();
     }
-    if (!ClientRuntime.active(mc)) {
+    if (!ClientRuntime.moving(mc)) {
       sprinting = false;
       sprint.reset(local.luke.power.input.Bindings.down(Keys.SPRINT));
       lastJump = -100;
@@ -36,7 +36,7 @@ public final class FlightController {
       return;
     }
     ticks++;
-    boolean down = local.luke.power.input.Bindings.down(mc.options.jumpKey);
+    boolean down = movementKey(mc, mc.options.jumpKey);
     if (mc.player.creative_isCreative() && Config.current().flight && down && !jumpDown) {
       if (ticks - lastJump <= Config.current().doubleTapTicks) {
         boolean fly = !mc.player.creative_isFlying();
@@ -53,12 +53,17 @@ public final class FlightController {
       mc.player.creative_setFlying(false);
     sprinting =
         sprint.update(
-            local.luke.power.input.Bindings.down(Keys.SPRINT),
+            movementKey(mc, Keys.SPRINT),
             Modes.flying(mc.player)
                 && Config.current().sprintFlight
-                && local.luke.power.input.Bindings.down(mc.options.forwardKey)
-                && !local.luke.power.input.Bindings.down(mc.options.backKey),
+                && movementKey(mc, mc.options.forwardKey)
+                && !movementKey(mc, mc.options.backKey),
             Config.current().sprintToggle);
+  }
+
+  private static boolean movementKey(Minecraft mc, Object key) {
+    return mc.currentScreen == null ? local.luke.power.input.Bindings.down(key)
+        : local.luke.power.input.MovementScreens.keyboardDown(key);
   }
 
   public static boolean travel(PlayerEntity entity) {
@@ -67,7 +72,7 @@ public final class FlightController {
     AbstractClientPlayer player = mc.player;
     var settings = Config.current();
     boolean spectator = Modes.spectator(player);
-    if (!ClientRuntime.active(mc)) {
+    if (!ClientRuntime.moving(mc)) {
       player.velocityX = player.velocityY = player.velocityZ = 0;
       return true;
     }
