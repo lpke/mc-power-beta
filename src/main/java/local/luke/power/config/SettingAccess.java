@@ -6,7 +6,7 @@ public final class SettingAccess {
   private SettingAccess() {}
 
   public static boolean visible(ConfigSession session, Setting setting) {
-    return !setting.id.equals("world.daylightCycle") && !setting.id.equals("world.weatherCycle")
+    return !cheat(setting)
         || session.settings().stream().anyMatch(s -> s.id.equals("world.cheats") && s.value.getAsBoolean());
   }
 
@@ -26,7 +26,6 @@ public final class SettingAccess {
     }
     return s.kind == Setting.Kind.KEY
         && s.id.contains("power_creative.")
-        && !s.id.endsWith(".modifier")
         && !s.id.endsWith(".sprint");
   }
 

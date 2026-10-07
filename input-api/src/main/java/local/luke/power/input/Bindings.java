@@ -8,6 +8,8 @@ import org.lwjgl.input.Mouse;
 public final class Bindings {
   private static volatile Map<String, Integer> required = Map.of();
   private static final Map<String, java.util.function.IntConsumer> mouseListeners = new LinkedHashMap<>();
+  private static java.util.function.Predicate<String> available = id -> true;
+  public static void availability(java.util.function.Predicate<String> predicate) { available = Objects.requireNonNull(predicate); }
   private static boolean hasMouseBindings;
   private static final PressModifiers presses = new PressModifiers();
   private static Object[] registered = new Object[0];
@@ -20,7 +22,7 @@ public final class Bindings {
     int held = heldModifiers();
     for (Object object : bindings) if (object instanceof Binding b) {
       presses.update(b.power$code(), physical(b.power$code()), held);
-      hasMouseBindings |= b.power$code() < 0;
+      hasMouseBindings |= b.power$code() < 0 && available.test(b.power$id());
     }
   }
   public static boolean hasMouseBindings() { return hasMouseBindings; }
@@ -34,7 +36,7 @@ public final class Bindings {
     if (key >= 0) return false;
     int pressedWith = presses.update(key, physical(key), heldModifiers());
     for (Object object : registered) if (object instanceof Binding b && b.power$code() == key
-        && (pressedWith & modifiers(b.power$id())) == modifiers(b.power$id())) return true;
+        && available.test(b.power$id()) && (pressedWith & modifiers(b.power$id())) == modifiers(b.power$id())) return true;
     return false;
   }
 
@@ -76,13 +78,14 @@ public final class Bindings {
   }
 
   private static boolean active(Binding b) {
+    if (!available.test(b.power$id())) return false;
     int key = b.power$code(), mask = modifiers(b.power$id()), held = heldModifiers();
     int pressedWith = presses.update(key, physical(key), held);
     if (key == 0 || (held & mask) != mask || (pressedWith & mask) != mask) return false;
     // A more specific binding takes precedence over an overlapping plain key.
     // Unrelated movement keys still work while Ctrl/Shift/Alt are held.
     for (Object other : registered) {
-      if (!(other instanceof Binding candidate) || candidate.power$code() != key) continue;
+      if (!(other instanceof Binding candidate) || candidate.power$code() != key || !available.test(candidate.power$id())) continue;
       int otherMask = modifiers(candidate.power$id());
       if (Integer.bitCount(otherMask) > Integer.bitCount(mask) && (pressedWith & otherMask) == otherMask)
         return false;

@@ -38,7 +38,9 @@
     "GameQualityMixin",
     "CommandWorldMixin",
     "WorldCyclesPropertiesMixin",
-    "WorldCyclesMixin"
+    "WorldCyclesMixin",
+    "WorldDifficultyPropertiesMixin",
+    "ClientDifficultyMixin"
   ],
   "injectors": {
     "defaultRequire": 1

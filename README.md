@@ -34,7 +34,12 @@ updating the JARs does not replace worlds or preferences. Extra mods are unteste
 
 ## Settings and music
 
-Settings and key bindings live in `config/power-beta.json`. Options remembers your
+Difficulty, cheats and cycle rules are saved separately in each world. Choose difficulty
+when creating a world or under **General > Game**. Cheat-only settings and tabs
+are hidden while cheats are off; non-cheat commands stay available.
+
+Other settings and key bindings live in `config/power-beta.json`. Tooltips state
+whether each setting is global or saved for the current world. Options remembers your
 page, search and scroll during the session. Apply saves without closing; Cancel
 undoes unsaved edits, including previews. Right-click Apply to enable auto-apply.
 Right-click a slider to enter a precise value. Bindings support Ctrl, Shift and Alt.

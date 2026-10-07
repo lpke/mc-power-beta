@@ -143,4 +143,25 @@ class ConfigSessionTest {
     assertThrows(Exception.class, () -> session.save(game));
     session.discard(); assertEquals(1, a.live); assertEquals(1, b.live);
   }
+
+  @Test void disablingCheatsDiscardsHiddenDraftsAndRestoresTheirPreviewsOnly() throws Exception {
+    var creative = new PreviewFake("creative", game.resolve("creative.txt"));
+    var normal = new PreviewFake("normal", game.resolve("normal.txt"));
+    Setting hidden = new Setting("creative.flightSpeed", "creative", "Creative", "Flight", "Speed", "",
+        Setting.Kind.INTEGER, new JsonPrimitive(1), new JsonPrimitive(1), 0, 10, 1, List.of(), false);
+    Setting qol = setting("normal");
+    Setting cheats = new Setting("world.cheats", "world", "General", "Game", "Cheats", "", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(true), new JsonPrimitive(false), 0, 1, 1, List.of(), false);
+    var session = new ConfigSession();
+    session.add(creative, List.of(hidden)); session.add(normal, List.of(qol));
+    session.add(new Fake("world", game.resolve("world.txt")), List.of(cheats));
+    hidden.value = qol.value = new JsonPrimitive(2); session.preview();
+    assertEquals(2, creative.live); assertEquals(2, normal.live);
+    cheats.value = new JsonPrimitive(false); session.link(cheats); session.preview();
+    assertEquals(1, creative.live); assertEquals(2, normal.live);
+    assertFalse(hidden.changed()); assertTrue(qol.changed());
+    cheats.value = new JsonPrimitive(true); session.link(cheats);
+    assertEquals(1, hidden.value.getAsInt());
+    session.discard(); assertEquals(1, normal.live);
+  }
 }

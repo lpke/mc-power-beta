@@ -52,7 +52,8 @@ public final class ModernCommandChecks {
     double x = mc.player.x, y = mc.player.y, z = mc.player.z;
     float yaw = mc.player.yaw, pitch = mc.player.pitch;
     int health = mc.player.health;
-    int difficulty = mc.options.difficulty;
+    int difficulty = ((local.luke.power.world.WorldDifficulty) mc.world.method_262()).power$difficulty();
+    int globalDifficulty = mc.options.difficulty;
     long time = ((local.luke.power.world.WorldCycles)mc.world.method_262()).power$daylightTime();
     var properties = mc.world.method_262();
     boolean rain = properties.getRaining(), thunder = properties.getThundering();
@@ -225,7 +226,8 @@ public final class ModernCommandChecks {
                     && properties.getRainTime() == 200,
                 "clear wrong");
             run(mc, "/difficulty hard");
-            check(mc.options.difficulty == 3, "difficulty failed");
+            check(mc.world.field_213 == 3 && ((local.luke.power.world.WorldDifficulty) mc.world.method_262()).power$difficulty() == 3, "difficulty failed");
+            check(mc.options.difficulty == globalDifficulty, "command changed global difficulty");
             check(
                 run(mc, "/seed").get(0).contains(Long.toString(mc.world.getSeed())), "seed wrong");
           });
@@ -348,7 +350,8 @@ public final class ModernCommandChecks {
         if (value instanceof Entity e && e != mc.player && !entities.contains(e)) e.markDead();
       ((local.luke.power.world.WorldCycles)mc.world.method_262()).power$daylightTime(time);
       mc.world.setSpawnPos(worldSpawn);
-      mc.options.difficulty = difficulty;
+      ((local.luke.power.world.WorldDifficulty) mc.world.method_262()).power$difficulty(difficulty);
+      mc.world.field_213 = difficulty;
       mc.options.save();
       properties.setRaining(rain);
       properties.setThundering(thunder);

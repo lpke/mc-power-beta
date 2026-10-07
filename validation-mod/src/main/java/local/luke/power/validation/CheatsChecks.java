@@ -155,7 +155,7 @@ public final class CheatsChecks {
                 "editor help locked");
           });
       test(
-          "locked options stay visible and non-cheat controls remain editable",
+          "cheat options stay inaccessible and non-cheat controls remain editable",
           () -> {
             ConfigSession session = SettingsRegistry.open(mc);
             for (String id :

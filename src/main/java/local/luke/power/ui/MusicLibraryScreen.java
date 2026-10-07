@@ -827,6 +827,10 @@ public final class MusicLibraryScreen extends UiScreen {
                 ? Mp3Converter.status()
                 : AudioController.status();
     if (!trackStatusVisible()) text(fit(status, span() - (conversionVisible() ? 92 : 0)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
+    if (!tip.isEmpty() && (key.endsWith(":volume") || key.endsWith(":include") || key.endsWith(":favourite") || key.startsWith("group:")))
+      tip = local.luke.power.config.Tooltips.paragraphs(tip, presetsOpen
+          ? "Saved in this preset. Loading a preset applies it across worlds."
+          : "Global music setting. Shared across worlds and menus.");
     hoverHelp = tip;
     hoverKey = key.isEmpty() ? tip : key;
   }

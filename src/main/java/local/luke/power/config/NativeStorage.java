@@ -29,7 +29,6 @@ public final class NativeStorage {
           case "fpsLimit" -> options.fpsLimit=value.getAsInt();
           case "fancyGraphics" -> options.fancyGraphics=value.getAsBoolean();
           case "ao" -> options.ao=value.getAsBoolean();
-          case "difficulty" -> options.difficulty=value.getAsInt();
           case "skin" -> options.skin=value.getAsString();
           case "lastServer" -> options.lastServer=value.getAsString();
           case "guiScale" -> options.guiScale=value.getAsInt();
@@ -54,7 +53,7 @@ public final class NativeStorage {
       data.addProperty("viewDistance",options.viewDistance); data.addProperty("bobView",options.bobView);
       data.addProperty("anaglyph3d",options.anaglyph3d); data.addProperty("advancedOpengl",options.advancedOpengl);
       data.addProperty("fpsLimit",options.fpsLimit); data.addProperty("fancyGraphics",options.fancyGraphics);
-      data.addProperty("ao",options.ao); data.addProperty("difficulty",options.difficulty);
+      data.addProperty("ao",options.ao);
       data.addProperty("skin",options.skin); data.addProperty("lastServer",options.lastServer);
       data.addProperty("guiScale",options.guiScale);
       data.addProperty("framerate_limit", ModOptions.getFpsLimitValue());

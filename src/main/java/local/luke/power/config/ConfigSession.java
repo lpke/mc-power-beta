@@ -43,7 +43,7 @@ public final class ConfigSession {
 
   public void link(Setting changed) {
     if (changed.id.equals("world.cheats") && !changed.value.getAsBoolean())
-      settings.stream().filter(s -> s.id.equals("world.daylightCycle") || s.id.equals("world.weatherCycle"))
+      settings.stream().filter(SettingAccess::cheat)
           .forEach(s -> s.value = s.original());
     if (changed.id.startsWith("audio.trackEnabled.")) {
       String id = changed.id.substring("audio.trackEnabled.".length());

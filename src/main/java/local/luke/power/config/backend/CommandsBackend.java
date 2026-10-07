@@ -69,7 +69,8 @@ public final class CommandsBackend implements Backend {
                 "/" + (command.name().equals("toggledownfall") ? "weather" : command.name()),
                 command.description()
                     + " Use global follows its rule above. Allow bypasses that rule; Block prevents"
-                    + " use here. The master switch always wins.",
+                    + " use here. " + (command.cheat() ? "Cheats and Cheat commands must both be enabled."
+                        : "Cheats and Cheat commands do not restrict this command."),
                 Setting.Kind.CHOICE,
                 new JsonPrimitive(config.override(backend.world, command.name()).ordinal()),
                 new JsonPrimitive(0),

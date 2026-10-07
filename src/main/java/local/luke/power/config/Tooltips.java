@@ -19,7 +19,7 @@ public final class Tooltips {
   }
   public static String setting(Setting setting, String note) {
     return paragraphs(setting.description, setting.numeric() ? "Range: " + setting.rangeText() + "." : "",
-        note, setting.restart ? "Restart required." : "");
+        SettingScope.note(setting), note, setting.restart ? "Restart required." : "");
   }
   public static String description(String id, String label, String fallback) {
     String text = EXTRA.has(id) ? EXTRA.get(id).getAsString() : fallback;

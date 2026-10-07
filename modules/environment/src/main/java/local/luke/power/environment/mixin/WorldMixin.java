@@ -39,12 +39,6 @@ public abstract class WorldMixin {
 
     @Shadow protected abstract void afterSkipNight();
 
-    @Shadow public abstract boolean isRaining();
-
-    @Shadow public abstract boolean isThundering();
-
-    @Shadow protected abstract void clearWeather();
-
     @Shadow public Random random;
 
     @Shadow protected ChunkSource chunkSource;
@@ -189,14 +183,9 @@ public abstract class WorldMixin {
             )
     )
     protected void powerEnvironment_afterSkipNight(World instance, Operation<Void> original) {
-        if (Config.config.WEATHER_CONFIG.sleepOnlyResetsWeatherWhenRaining) {
-            if (isRaining() || isThundering()) {
-                this.clearWeather();
-            } else {
-                /** - Do nothing */
-            }
-        } else {
-            this.clearWeather();
+        if (!Config.config.WEATHER_CONFIG.sleepOnlyResetsWeatherWhenRaining
+                || this.properties.getRaining() || this.properties.getThundering()) {
+            original.call(instance);
         }
     }
 

@@ -3709,7 +3709,7 @@
     "displayDivisor": 1000,
     "unit": "seconds"
   },
-  "native.difficulty": {
+  "world.difficulty": {
     "order": 10,
     "page": "General",
     "group": "Game"

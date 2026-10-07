@@ -86,6 +86,7 @@ public final class ValueScreen extends UiScreen {
     renderBackground();
     drawCenteredTextWithShadow(textRenderer, setting.label, width / 2, 18, 0xffffff);
     text(fit(setting.description, span()), left(), 40, 0xaaaaaa);
+    text(fit(local.luke.power.config.SettingScope.note(setting), span()), left(), 54, 0xaaaaaa);
     input(input, left(), height / 2 - 9, span(), x, y, "");
     if (System.nanoTime() >= errorUntil) error = "";
     text(fit(error, span()), left(), height / 2 + 18, 0xff7777);

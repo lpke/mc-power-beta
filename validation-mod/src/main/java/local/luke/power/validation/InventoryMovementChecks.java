@@ -45,7 +45,7 @@ public final class InventoryMovementChecks {
       return;
     }
     if(action.equals("setup")) {
-      mc.setScreen(null);mc.options.difficulty=0;
+      mc.setScreen(null);((local.luke.power.world.WorldDifficulty) mc.world.method_262()).power$difficulty(0);mc.world.field_213=0;
       for(int x=-15;x<=15;x++)for(int z=-15;z<=15;z++) {
         mc.world.method_200(x,100,z,1);
         for(int y=101;y<=105;y++)mc.world.method_200(x,y,z,0);

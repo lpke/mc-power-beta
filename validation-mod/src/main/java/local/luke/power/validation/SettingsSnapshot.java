@@ -35,7 +35,7 @@ final class SettingsSnapshot {
     GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPushMatrix();
     GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPushMatrix();
     try {
-      for (String page : PowerOptionsScreen.PAGES) {
+      for (String page : screen.visiblePages()) {
         field(screen, "page", page);
         var record = new LinkedHashMap<String, Object>();
         record.put("page", page);
@@ -100,6 +100,10 @@ final class SettingsSnapshot {
   }
 
   static void render(Minecraft mc, net.minecraft.client.gui.screen.Screen screen, int width, int height, Path file) throws Exception {
+    render(mc, screen, width, height, file, -1, -1);
+  }
+
+  static void render(Minecraft mc, net.minecraft.client.gui.screen.Screen screen, int width, int height, Path file, int mx, int my) throws Exception {
     int pixelsWide = width * 2, pixelsHigh = height * 2;
     Validation.check(org.lwjgl.opengl.Display.getWidth() >= pixelsWide
         && org.lwjgl.opengl.Display.getHeight() >= pixelsHigh, "Resize the disposable client before capture");
@@ -115,7 +119,10 @@ final class SettingsSnapshot {
     GL11.glTranslatef(0, 0, -2000);
     GL11.glColor4f(1,1,1,1);
     GL11.glDisable(GL11.GL_LIGHTING);
-    screen.render(-1, -1, 0);
+    screen.render(mx, my, 0);
+    if (screen instanceof PowerOptionsScreen && mx >= 0) {
+      field(screen,"hoverTicks",1000);screen.render(mx,my,0);
+    }
     GL11.glFinish();
     ByteBuffer pixels = BufferUtils.createByteBuffer(pixelsWide * pixelsHigh * 4);
     GL11.glReadPixels(0, 0, pixelsWide, pixelsHigh, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixels);

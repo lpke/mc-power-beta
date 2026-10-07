@@ -51,6 +51,12 @@
   snapshots must stay separate from live library edits; only Load copies a preset
   into live state. Track pools prevent new folders silently expanding presets.
   Keep missing track IDs, queues and user music files intact.
+- Difficulty is per-world, independent of cheats, including creation, world switches,
+  dimension copies and commands. Never copy it from global GameOptions. Defaults
+  are Normal; menu edits take effect only on Apply. Keep multiplayer server-owned.
+- Hide cheat-only rows and empty tabs when cheats are unavailable. Shared freecam
+  controls and non-cheat commands remain independent. Hidden bindings must not
+  claim input priority or mouse events. Tooltips identify persistence scope.
 - World cycles are per-world cheats. Keep the simulation clock running; daylight
   uses an offset saved in world metadata. Sky rendering, day counters, time commands
   and photo mode use the daylight clock. Sleep must wake players without advancing

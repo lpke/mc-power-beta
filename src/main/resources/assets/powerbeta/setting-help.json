@@ -7,7 +7,7 @@
   "native.anaglyph": "Renders red/cyan stereo for anaglyph glasses.",
   "native.opengl": "Skips hidden geometry using GPU occlusion queries. Benefits depend on your graphics driver.",
   "native.ao": "Softens lighting across block corners instead of flat lighting per face.",
-  "native.difficulty": "Controls hostile mobs and damage. Peaceful removes hostile mobs and restores health.",
+  "world.difficulty": "Controls hostile mobs and damage. Peaceful removes hostile mobs and restores health.",
   "native.fov": "Camera angle in degrees. Higher values show more scenery and make the player look smaller in third person.",
   "native.brightness": "Brighten dark areas. Beta bakes lighting into chunk geometry, so changing this rebuilds nearby chunks.",
   "native.cloudHeight": "Altitude of the cloud layer in blocks.",

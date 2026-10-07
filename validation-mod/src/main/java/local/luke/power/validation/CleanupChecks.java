@@ -94,6 +94,21 @@ final class CleanupChecks {
         }
         session.discard();
       });
+      test("sleep weather rule follows storm state while rain fades in or out", () -> {
+        var session=SettingsRegistry.open(mc);
+        try {
+          find(session,"power_environment:config.WEATHER_CONFIG.sleepOnlyResetsWeatherWhenRaining").value=new JsonPrimitive(true);session.preview(true);
+          cycles.power$weatherCycle(true);
+          for(boolean storm:List.of(false,true)) {
+            properties.setRaining(storm);properties.setThundering(storm);
+            properties.setRainTime(800);properties.getThunderTime(700);
+            field(mc.world,"field_206",storm?0f:1f);field(mc.world,"field_208",storm?0f:1f);
+            call(mc.world,"method_266");
+            check(!properties.getRaining()&&!properties.getThundering(),"sleep retained newly started storm");
+            check(properties.getRainTime()==(storm?0:800)&&properties.getThunderTime()==(storm?0:700),"sleep used visual fade instead of weather state");
+          }
+        } finally {session.discard();}
+      });
       test("weather freeze pauses weather suppression tweaks and resumes them normally", () -> {
         ConfigSession session=SettingsRegistry.open(mc);
         try {
@@ -158,7 +173,7 @@ final class CleanupChecks {
         rule.value=new JsonPrimitive(!rule.value.getAsBoolean());gate.value=new JsonPrimitive(false);s.link(gate);
         check(!SettingAccess.visible(s,rule) && !rule.changed(),"hidden cycle retains edit");
         var ids=SettingsLayout.ordered(s.settings()).stream().filter(v->v.page.equals("General")&&v.group.equals("Game")).map(v->v.id).toList();
-        check(ids.indexOf("native.difficulty")<ids.indexOf("power_controls:general.autosaveInterval"),"autosave order");
+        check(ids.indexOf("world.difficulty")<ids.indexOf("power_controls:general.autosaveInterval"),"autosave order");
         check(ids.indexOf("world.cheats")+1==ids.indexOf("world.daylightCycle") && ids.indexOf("world.daylightCycle")+1==ids.indexOf("world.weatherCycle"),"cycles not below cheats");
       });
       test("failed saves restore world cycles and the original cheats gate", () -> {

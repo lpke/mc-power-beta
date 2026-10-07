@@ -32,6 +32,9 @@ public final class PowerOptionsScreen extends UiScreen {
           "Crafting",
           "Fixes",
           "Advanced");
+  private List<String> pages = PAGES;
+  public List<String> visiblePages() { return pages; }
+
   private static final int[] ICONS = {
     58, 20, 2256, 280, 323, 345, 301, 54, 45, 2, 271, 339, 260, 61, 265, 331
   };
@@ -65,7 +68,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private int musicStatusWidth() { return contentRight() - left() - (libraryVisible() && library.conversionVisible() ? 92 : 0); }
   private int contentHeight() { return rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height + 6; }
   private ScrollBar.Track contentTrack() { return new ScrollBar.Track(right() - 8, top(), bottom() - top(), contentHeight(), scroll); }
-  private ScrollBar.Track sidebarTrack() { return new ScrollBar.Track(origin() + sidebar() + 3, 24, bottom() - 24, PAGES.size() * 22, sideScroll); }
+  private ScrollBar.Track sidebarTrack() { return new ScrollBar.Track(origin() + sidebar() + 3, 24, bottom() - 24, pages.size() * 22, sideScroll); }
 
   private final boolean directPause;
   private static String rememberedPage = "General";
@@ -197,7 +200,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private boolean soundPreview(Setting s) { return previewId(s) != null; }
   private boolean hasLink(Setting setting) {
     return setting.kind == Setting.Kind.KEY ? ControlLinks.related(session, setting) != null
-        : ControlLinks.hasControls(setting);
+        : !ControlLinks.controls(session, setting).isEmpty();
   }
   private int mainControlLeft(Row row) {
     return controlLeft(row) + (soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
@@ -276,7 +279,7 @@ public final class PowerOptionsScreen extends UiScreen {
     List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
     return session.settings().stream()
         .filter(s -> changedOnly ? s.changed() : listed.isEmpty() ? s.page.equals(page) : listed.contains(s.id))
-        .filter(s -> SettingAccess.reason(session, s).isEmpty())
+        .filter(s -> SettingAccess.visible(session, s) && SettingAccess.reason(session, s).isEmpty())
         .toList();
   }
 
@@ -325,6 +328,15 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private void layout() {
     if (session == null) return;
+    pages = PAGES.stream().filter(p -> session.settings().stream()
+        .anyMatch(s -> s.page.equals(p) && SettingAccess.visible(session, s))).toList();
+    if (!pages.contains(page) && !pages.isEmpty()) {
+      positions.put(page, scroll);
+      page = pages.get(0);
+      scroll = positions.getOrDefault(page, 0d);
+    }
+    if (capture != null && !SettingAccess.visible(session, capture)) { capture = null; captureModifier = 0; }
+    if (dragging != null && !SettingAccess.visible(session, dragging)) dragging = null;
     String query = search.text().strip().toLowerCase(Locale.ROOT);
     Map<String, List<Setting>> groups = new LinkedHashMap<>();
     List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
@@ -361,7 +373,7 @@ public final class PowerOptionsScreen extends UiScreen {
     rows = next;
     scroll = Math.max(0, Math.min(scroll, Math.max(0, y - (bottom() - top()))));
     sideScroll =
-        Math.max(0, Math.min(sideScroll, Math.max(0, PAGES.size() * 22 - (bottom() - 24))));
+        Math.max(0, Math.min(sideScroll, Math.max(0, pages.size() * 22 - (bottom() - 24))));
   }
 
   public void tick() {
@@ -479,13 +491,13 @@ public final class PowerOptionsScreen extends UiScreen {
     if (library != null) library.unfocus();
     if (button == 0 && y >= 24 && y < bottom() && x >= origin() && x < origin() + sidebar()) {
       int index = (int) ((y - 24 + sideScroll) / 22);
-      if (index >= 0 && index < PAGES.size()) {
-        boolean same = PAGES.get(index).equals(page);
+      if (index >= 0 && index < pages.size()) {
+        boolean same = pages.get(index).equals(page);
         rememberPosition();
         click();
         history.clear();
         relatedIds = List.of();
-        page = PAGES.get(index);
+        page = pages.get(index);
         conflictIds = List.of();
         changedOnly = false;
         search.setText("");
@@ -825,7 +837,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private List<Setting> conflicts(Setting s) {
     if (s.kind != Setting.Kind.KEY || Chord.decode(s.value.getAsInt()).key() == 0) return List.of();
-    return session.settings().stream().filter(v -> v != s && v.kind == Setting.Kind.KEY
+    return session.settings().stream().filter(v -> v != s && v.kind == Setting.Kind.KEY && SettingAccess.visible(session, v)
         && Chord.decode(v.value.getAsInt()).key() == Chord.decode(s.value.getAsInt()).key()).toList();
   }
 
@@ -835,7 +847,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (text.length() > 0) text.append('\n');
       text.append(v.label).append(": ").append(value(v));
     }
-    text.append("\nThe matching binding with more modifiers takes priority.");
+    text.append("\n\nThe matching binding with more modifiers takes priority.");
     return text.toString();
   }
 
@@ -883,23 +895,23 @@ public final class PowerOptionsScreen extends UiScreen {
     fill(origin() + sidebar() + 4, 24, origin() + sidebar() + 7, bottom(), 0x90404040);
     fill(origin() + sidebar() + 7, 24, origin() + sidebar() + 8, bottom(), 0x90000000);
     clip(origin(), 24, sidebar() + 2, bottom() - 24);
-    for (int i = 0; i < PAGES.size(); i++) {
+    for (int i = 0; i < pages.size(); i++) {
       int y = 24 + i * 22 - (int) sideScroll;
       boolean hover = inside(mx, my, origin(), y, sidebar(), 22);
-      if (PAGES.get(i).equals(page) && search.text().isBlank() && !changedOnly)
+      if (pages.get(i).equals(page) && search.text().isBlank() && !changedOnly)
         fill(origin(), y, origin() + sidebar(), y + 21, 0xc0000000);
       GL11.glPushMatrix();
       GL11.glColor4f(1, 1, 1, 1);
       icons.method_1487(
-          textRenderer, minecraft.textureManager, new ItemStack(ICONS[i], 1, 0), origin() + 7, y + 2);
+          textRenderer, minecraft.textureManager, new ItemStack(ICONS[PAGES.indexOf(pages.get(i))], 1, 0), origin() + 7, y + 2);
       GL11.glPopMatrix();
       GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glDisable(GL11.GL_DEPTH_TEST);
       text(
-          fit(PAGES.get(i), sidebar() - 31),
+          fit(pages.get(i), sidebar() - 31),
           origin() + 28,
           y + 7,
-          hover ? 0xffffa0 : PAGES.get(i).equals(page) ? 0xffffff : 0xaaaaaa);
+          hover ? 0xffffa0 : pages.get(i).equals(page) ? 0xffffff : 0xaaaaaa);
     }
     unclip();
     sidebarBar.render(this, sidebarTrack());

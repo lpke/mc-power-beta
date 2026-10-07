@@ -71,12 +71,12 @@ public final class ControlLinks {
   public static String description(String id) { Link l = LINKS.get(id); return l == null ? "Activate this action using the assigned key or mouse button." : l.help; }
   public static Setting related(ConfigSession session, Setting key) {
     Link l = LINKS.get(key.id);
-    return l == null ? null : session.settings().stream().filter(s -> s.id.equals(l.setting)).findFirst().orElse(null);
+    return l == null ? null : session.settings().stream().filter(s -> s.id.equals(l.setting) && SettingAccess.visible(session, s)).findFirst().orElse(null);
   }
   public static List<Setting> settings(ConfigSession session, Setting key) {
     Link link = LINKS.get(key.id);
     if (link == null) return List.of();
-    return session.settings().stream().filter(s -> relates(link, s))
+    return session.settings().stream().filter(s -> relates(link, s) && SettingAccess.visible(session, s))
         .sorted(Comparator.comparingInt(s -> s.id.equals(link.setting) ? 0 : 1)).toList();
   }
   public static boolean hasControls(Setting setting) {
@@ -85,7 +85,7 @@ public final class ControlLinks {
   public static List<Setting> controls(ConfigSession session, Setting setting) {
     return session.settings().stream().filter(s -> {
       Link link = LINKS.get(s.id);
-      return link != null && relates(link, setting);
+      return link != null && relates(link, setting) && SettingAccess.visible(session, s);
     }).toList();
   }
   private static boolean relates(Link link, Setting setting) {
@@ -118,7 +118,8 @@ public final class ControlLinks {
   public static boolean enabled(ConfigSession session, Setting key) {
     // Flight and freecam share this action; either enabled use keeps it available.
     if (key.id.equals("keys.power_creative.sprint"))
-      return featureEnabled(session, "creative.sprintFlight")
+      return session.settings().stream().anyMatch(s -> s.id.equals("world.cheats") && s.value.getAsBoolean())
+              && featureEnabled(session, "creative.sprintFlight")
           || featureEnabled(session, "power_camera:config.enabled")
               && featureEnabled(session, "power_camera:config.sprint");
     Link l = LINKS.get(key.id);

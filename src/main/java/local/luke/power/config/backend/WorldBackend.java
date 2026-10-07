@@ -26,6 +26,11 @@ public final class WorldBackend implements Backend {
     s.add(
         b,
         List.of(
+            new Setting("world.difficulty", b.id(), "General", "Game", "Difficulty",
+                "Set combat difficulty and hostile mob spawning. Peaceful removes hostile mobs. Apply to confirm.",
+                Setting.Kind.CHOICE, new JsonPrimitive(((local.luke.power.world.WorldDifficulty) b.properties()).power$difficulty()),
+                new JsonPrimitive(local.luke.power.world.WorldDifficulty.DEFAULT), 0, 3, 1,
+                List.of("Peaceful", "Easy", "Normal", "Hard"), false),
             new Setting(
                 "world.cheats",
                 b.id(),
@@ -82,6 +87,7 @@ public final class WorldBackend implements Backend {
 
   public void validate(Map<String, JsonElement> values) {
     checkWorld();
+    if (values.containsKey("world.difficulty")) local.luke.power.world.WorldDifficulty.checked(values.get("world.difficulty").getAsBigDecimal().intValueExact());
     boolean cheats = values.containsKey("world.cheats") ? values.get("world.cheats").getAsBoolean() : properties().power$cheatsEnabled();
     if (!cheats && (values.containsKey("world.daylightCycle") || values.containsKey("world.weatherCycle")))
       throw new IllegalArgumentException("Enable cheats to change world cycles.");
@@ -99,6 +105,11 @@ public final class WorldBackend implements Backend {
 
   public void restore(Map<String, JsonElement> values) throws Exception {
     checkWorld();
+    if (values.containsKey("world.difficulty")) {
+      int difficulty = values.get("world.difficulty").getAsInt();
+      ((local.luke.power.world.WorldDifficulty) properties()).power$difficulty(difficulty);
+      mc.world.field_213 = difficulty;
+    }
     if (values.containsKey("world.cheats")) {
       boolean enabled = values.get("world.cheats").getAsBoolean();
       if (!enabled && properties().power$cheatsEnabled()) {

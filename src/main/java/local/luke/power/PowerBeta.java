@@ -23,6 +23,9 @@ public final class PowerBeta {
         } catch (ReflectiveOperationException e) { return false; }
       });
       local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
+      local.luke.power.input.Bindings.availability(id ->
+          !id.equals("power_creative.picker") && !id.equals("power_creative.modifier")
+              || local.luke.power.permissions.CommandPermissions.cheatsEnabled());
       local.luke.power.video.VideoConfig.current();
       try {
         ConfigAudit.write(mc);

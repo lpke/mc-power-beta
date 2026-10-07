@@ -7,6 +7,10 @@ Fixtures can replace settings and edit worlds. They are never part of the export
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `world-settings-check`: difficulty transactions, scope notes, hidden cheat rows/tabs,
+  command exemptions, input priority and Peaceful behaviour. Run after `new-world`.
+  `world-settings-create` creates four disposable saves through the real creation UI.
+  `world-settings-reload` checks those saves across switching, dimensions and restarts.
 - `cleanup`: current config, world-cycle persistence, simulation and scheduled
   updates, sleep combinations, sign editing, spectator exits, item validation and
   inventory screenshots. Run after `new-world`.

@@ -47,7 +47,7 @@ public final class AudioPolishChecks {
           for (Object row : (List<?>)field(options,"rows")) {
             Setting s = (Setting)call(row,"setting"); actual.add(s == null ? (String)call(row,"group") : s.id);
           }
-          check(actual.equals(List.of("Game","native.difficulty","world.cheats","power_controls:general.autosaveInterval",
+          check(actual.equals(List.of("Game","world.difficulty","world.cheats","power_controls:general.autosaveInterval",
               "Interface","native.guiScale","visual.slashChat","power_controls:general.pauseOnLostFocus","interface.pauseToOptions",
               "Input","native.sensitivity","native.invert","power_controls:general.rawInput","power_controls:general.disableControllerInit")), actual.toString());
         });

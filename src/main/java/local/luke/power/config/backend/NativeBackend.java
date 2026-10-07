@@ -56,15 +56,6 @@ public final class NativeBackend implements Backend {
         false);
     toggle("ao", "Video", "Quality", "Smooth lighting", Option.AMBIENT_OCCLUSION, o.ao, true);
 
-    choice(
-        "difficulty",
-        "General",
-        "Game",
-        "Difficulty",
-        o.difficulty,
-        2,
-        List.of("Peaceful", "Easy", "Normal", "Hard"),
-        v -> o.setInt(Option.DIFFICULTY, v - o.difficulty));
     Class<?> mod = Class.forName("local.luke.power.controls.util.ModOptions");
     for (String[] spec :
         new String[][] {

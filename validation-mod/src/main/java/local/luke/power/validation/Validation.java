@@ -47,7 +47,8 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("cleanup")) CleanupChecks.run(mc);
+      if (command.startsWith("world-settings-")) WorldSettingsChecks.run(mc,command.substring(15));
+      else if (command.equals("cleanup")) CleanupChecks.run(mc);
       else if (command.equals("settings-review")) SettingsReviewChecks.run(mc);
       else if (command.startsWith("settings-snapshot ")) SettingsSnapshot.write(mc, command.substring(18));
       else if (command.equals("cheats-creation")) CheatsChecks.creation(mc);

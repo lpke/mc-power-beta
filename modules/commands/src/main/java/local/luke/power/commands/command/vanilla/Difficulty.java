@@ -3,8 +3,7 @@ package local.luke.power.commands.command.vanilla;
 import java.util.List;
 import local.luke.power.commands.api.Command;
 import local.luke.power.commands.util.*;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
+import local.luke.power.world.WorldDifficulty;
 
 public final class Difficulty implements Command {
   private static final List<String> VALUES = List.of("peaceful", "easy", "normal", "hard");
@@ -26,11 +25,7 @@ public final class Difficulty implements Command {
     }
     int mode = VALUES.indexOf(args[1]);
     if (mode < 0) mode = CommandNumbers.integer(args[1], 0, 3, "Difficulty");
-    if (s.isClient()) {
-      Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
-      mc.options.difficulty = mode;
-      mc.options.save();
-    }
+    if (s.isClient()) ((WorldDifficulty) world.getProperties()).power$difficulty(mode);
     world.difficulty = mode;
     s.sendFeedback("§aDifficulty set to " + VALUES.get(mode) + ".");
   }
@@ -38,8 +33,8 @@ public final class Difficulty implements Command {
   public void manual(SharedCommandSource s) {
     s.sendFeedback("/difficulty [peaceful|easy|normal|hard]");
     s.sendFeedback(
-        "No argument shows the current difficulty. Beta shares this setting between worlds;"
-            + " peaceful removes hostile mobs.");
+        "No argument shows the current difficulty. Saved separately for this world."
+            + " Peaceful removes hostile mobs.");
   }
 
   public String[] suggestion(SharedCommandSource s, int n, String input, String total) {
