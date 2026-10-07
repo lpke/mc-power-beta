@@ -44,10 +44,6 @@ public final class SlabPlacement {
       next.enabled = !next.enabled;
       try {
         apply(next);
-        if (local.luke.power.building.config.Config.current().slabs.announceToggle)
-          mc.inGameHud.addChatMessage(
-              "Slab completion: "
-                  + (local.luke.power.building.config.Config.current().slabs.enabled ? "\u00a7aON\u00a7r" : "\u00a7cOFF\u00a7r"));
       } catch (IOException e) {
         LOG.error("Could not save Slab Placement settings", e);
         mc.inGameHud.addChatMessage("\u00a7cSlab completion settings could not be saved.\u00a7r");

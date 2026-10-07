@@ -81,7 +81,7 @@ public final class ComponentBackend implements Backend {
           group = "Vehicles";
         } else if (name.startsWith("flexible.")) group = "Flexible placement";
         else if (name.startsWith("slabs.")) group = "Slab completion";
-        else if (name.equals("clickMining")) group = "Mining";
+        else if (name.equals("clickMining") || name.equals("obsidianBreakingSpeed")) group = "Mining";
         if (Set.of(
                 "autoWalk",
                 "freeLook",
@@ -164,6 +164,7 @@ public final class ComponentBackend implements Backend {
   private static double[] bounds(String name, String id) {
     String leaf = name.substring(name.lastIndexOf('.') + 1);
     return switch (leaf) {
+      case "obsidianBreakingSpeed" -> new double[] {0, 100, 1};
       case "autoWalkHoldMillis" -> new double[] {100, 3000, 50};
       case "attemptsPerTick" -> new double[] {1, 16, 1};
       case "overlayColor", "color" -> new double[] {0, 3, 1};

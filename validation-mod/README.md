@@ -14,6 +14,19 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 - `cleanup`: current config, world-cycle persistence, simulation and scheduled
   updates, sleep combinations, sign editing, spectator exits, item validation and
   inventory screenshots. Run after `new-world`.
+- `sign-editing`: Escape and Done save/close new and reopened standing/wall signs,
+  retaining all four lines and resetting key repeat. Run after `new-world`, with
+  sign text improvements enabled and again after restarting with them disabled.
+- `obsidian-mining`: slider endpoints, Cancel/Apply, tool and block exclusions,
+  multiplayer guard, airborne penalty, real mining ticks, drops and durability.
+  Run after `new-world`. For restart coverage, use `set tweaks.obsidianBreakingSpeed 61`,
+  restart, and inspect `dump` before resetting to 0.
+- `toggle-messages`: all eight defaults, live providers, HUD independence,
+  duplicate suppression, menu silence and Cancel/Apply. Run after `new-world`.
+  Use `toggle-messages save`, restart, then `toggle-messages reload` to verify
+  persistence and restore every message switch to off.
+- `worldedit-hand`: held variants, command snapshots, masks, inventory preservation,
+  undo/redo, invalid hands and cheats. Run after `new-world`.
 - `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
 - `settings-snapshot NAME`: capture all sixteen tabs, their complete row order,
   catalogue and PNGs under `power-beta-data/reports/settings-review/NAME`. Use a

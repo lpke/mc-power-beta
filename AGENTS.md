@@ -78,6 +78,8 @@
 - `TweakIndicators` exposes live module state across mappings. HUD inclusion is
   separate from gameplay settings. Do not infer active auto-walk/free look from
   feature availability or poll action keys while rendering.
+  Per-feature toggle messages default off and observe transitions on ticks,
+  independently of HUD inclusion. Menus, focus changes and world loading stay silent.
 
 ## Verification and delivery
 

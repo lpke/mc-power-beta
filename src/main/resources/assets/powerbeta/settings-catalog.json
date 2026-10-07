@@ -3302,7 +3302,8 @@
     "page": "Building",
     "group": "Fast placement",
     "label": "Fast placement",
-    "description": "Hold right-click to keep placing blocks."
+    "description": "Hold right-click to keep placing blocks.",
+    "order": 0
   },
   "tweaks.placement.attemptsPerTick": {
     "page": "Building",
@@ -3502,7 +3503,15 @@
     "page": "Building",
     "group": "Mining",
     "label": "Continuous click mining",
-    "description": "Remove the delay between breaking blocks in singleplayer."
+    "description": "Remove the delay between breaking blocks in singleplayer.",
+    "order": 0
+  },
+  "tweaks.obsidianBreakingSpeed": {
+    "page": "Building",
+    "group": "Mining",
+    "label": "Obsidian breaking speed",
+    "description": "Speed up obsidian mining with a diamond pickaxe in singleplayer. 0 is off and keeps vanilla speed. 100 matches a modern Efficiency V netherite pickaxe with Haste II: 1.55 seconds per block on dry ground. Water and airborne penalties still apply. Other blocks and tools keep their normal speed.",
+    "order": 1
   },
   "tweaks.boatSteering": {
     "page": "Movement",
@@ -3522,25 +3531,29 @@
     "page": "Movement",
     "group": "Edge protection",
     "label": "Edge protection",
-    "description": "Prevent walking off ledges without crouching or slowing down."
+    "description": "Prevent walking off ledges without crouching or slowing down.",
+    "order": 0
   },
   "tweaks.sneak.announceToggle": {
     "page": "Movement",
     "group": "Edge protection",
-    "label": "Edge-protection messages",
-    "description": ""
+    "label": "Edge protection messages",
+    "description": "Show a chat message when edge protection turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "order": 1
   },
   "tweaks.slabs.enabled": {
     "page": "Building",
     "group": "Slab completion",
     "label": "Complete slabs through adjacent faces",
-    "description": ""
+    "description": "",
+    "order": 0
   },
   "tweaks.slabs.announceToggle": {
     "page": "Building",
     "group": "Slab completion",
-    "label": "Slab-completion messages",
-    "description": ""
+    "label": "Slab completion messages",
+    "description": "Show a chat message when slab completion turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "order": 1
   },
   "logo.logo.lines": {
     "page": "Interface",
@@ -4272,5 +4285,47 @@
   },
   "lightOverlay.checksPerTick": {
     "control": "number"
+  },
+  "tweaks.placement.announceToggle": {
+    "page": "Building",
+    "group": "Fast placement",
+    "label": "Fast placement messages",
+    "description": "Show a chat message when fast placement turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "order": 1
+  },
+  "tweaks.placement.announceRestrictionToggle": {
+    "page": "Building",
+    "group": "Placement rules",
+    "label": "Placement restriction messages",
+    "description": "Show a chat message when the active placement restriction turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "order": 4
+  },
+  "tweaks.autoWalkAnnounceToggle": {
+    "page": "Movement",
+    "group": "Auto-walk",
+    "label": "Auto-walk messages",
+    "description": "Show a chat message when auto-walk turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "order": 4
+  },
+  "tweaks.freeLookAnnounceToggle": {
+    "page": "Camera",
+    "group": "Free look",
+    "label": "Free look messages",
+    "description": "Show a chat message when free look in Toggle mode turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "order": 4
+  },
+  "activeTweaks.cinematicCameraMessages": {
+    "page": "Camera",
+    "group": "View",
+    "label": "Cinematic camera messages",
+    "description": "Show a chat message when cinematic camera turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "order": 8
+  },
+  "power_camera:config.playerMovementMessages": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Player movement messages",
+    "description": "Show a chat message when freecam player movement turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "order": 8
   }
 }

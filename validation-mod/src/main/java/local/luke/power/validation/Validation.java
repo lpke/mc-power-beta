@@ -49,6 +49,10 @@ public final class Validation {
       Files.delete(COMMAND);
       if (command.startsWith("world-settings-")) WorldSettingsChecks.run(mc,command.substring(15));
       else if (command.equals("cleanup")) CleanupChecks.run(mc);
+      else if (command.equals("sign-editing")) SignEditingChecks.run(mc);
+      else if (command.equals("obsidian-mining")) ObsidianMiningChecks.run(mc);
+      else if (command.equals("worldedit-hand")) WorldEditHandChecks.run(mc);
+      else if (command.startsWith("toggle-messages")) ToggleMessageChecks.run(mc, command.length() > 16 ? command.substring(16) : "check");
       else if (command.equals("settings-review")) SettingsReviewChecks.run(mc);
       else if (command.startsWith("settings-snapshot ")) SettingsSnapshot.write(mc, command.substring(18));
       else if (command.equals("cheats-creation")) CheatsChecks.creation(mc);

@@ -12,6 +12,7 @@ public final class StatusSettings {
   public boolean fakeSneak = true, fastPlacement = true, placementRestriction = true,
       autoWalk = true, freeLook = true, cinematicCamera = true, freecamPlayerMovement = true;
   public boolean slabCompletion;
+  public boolean cinematicCameraMessages;
 
   public boolean includes(Tweak tweak) {
     return switch (tweak) {

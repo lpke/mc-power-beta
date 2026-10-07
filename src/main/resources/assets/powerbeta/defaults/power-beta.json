@@ -24,7 +24,8 @@
       "collision": true,
       "showCamera": true,
       "classicMovement": false,
-      "enabled": false
+      "enabled": false,
+      "playerMovementMessages": false
     },
     "power_gold:config": {
       "enableFishingRodLuckOfTheSea": false,
@@ -155,7 +156,7 @@
     },
     "building": {
       "slabs": {
-        "announceToggle": true,
+        "announceToggle": false,
         "enabled": true
       },
       "hotbar": {
@@ -190,20 +191,25 @@
         "whitelist": [],
         "rememberOrientation": true,
         "restrictionMode": "FACE",
-        "blacklist": []
+        "blacklist": [],
+        "announceToggle": false,
+        "announceRestrictionToggle": false
       },
       "clickMining": false,
+      "obsidianBreakingSpeed": 0,
       "autoWalk": false,
       "freeLookFollowThirdPerson": true,
       "freeLookToggle": false,
       "freeLook": false,
       "boatSteering": false,
       "sneak": {
-        "announceToggle": true,
+        "announceToggle": false,
         "enabled": false
       },
       "boatSpeed": false,
-      "boatProtection": false
+      "boatProtection": false,
+      "autoWalkAnnounceToggle": false,
+      "freeLookAnnounceToggle": false
     },
     "power_mechanics:config": {
       "EQUIPMENT_CONFIG": {
@@ -722,6 +728,9 @@
         4,
         2
       ]
+    },
+    "activeTweaks": {
+      "cinematicCameraMessages": false
     }
   }
 }

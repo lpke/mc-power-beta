@@ -70,9 +70,6 @@ public final class FastPlace {
       next.setEnabled(!next.enabled);
       try {
         apply(next);
-        mc.inGameHud.addChatMessage(
-            "Fast place: "
-                + (local.luke.power.building.config.Config.current().placement.enabled ? "\u00a7aON\u00a7r" : "\u00a7cOFF\u00a7r"));
       } catch (IOException e) {
         LOG.error("Could not save Fast Place settings", e);
         mc.inGameHud.addChatMessage("\u00a7cFast place settings could not be saved.\u00a7r");

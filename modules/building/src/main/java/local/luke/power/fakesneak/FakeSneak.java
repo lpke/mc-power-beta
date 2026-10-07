@@ -46,10 +46,6 @@ public final class FakeSneak {
       next.enabled = !next.enabled;
       try {
         apply(next);
-        if (local.luke.power.building.config.Config.current().sneak.announceToggle)
-          mc.inGameHud.addChatMessage(
-              "Fake sneak: "
-                  + (local.luke.power.building.config.Config.current().sneak.enabled ? "\u00a7aON\u00a7r" : "\u00a7cOFF\u00a7r"));
       } catch (IOException e) {
         LOG.error("Could not save Fake Sneak settings", e);
         mc.inGameHud.addChatMessage("\u00a7cFake sneak settings could not be saved.\u00a7r");

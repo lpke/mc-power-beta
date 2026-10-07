@@ -22,6 +22,9 @@ class ChatTest {
   void doubleSlashNamesAndArgumentsComplete() {
     assertTrue(CommandCatalog.complete("//po").contains("//pos1"));
     assertTrue(CommandCatalog.complete("//set sto").contains("//set stone"));
+    assertTrue(CommandCatalog.complete("//set ha").contains("//set hand"));
+    assertTrue(CommandCatalog.complete("//replace !ha").contains("//replace !hand"));
+    assertTrue(CommandCatalog.complete("//set 50%stone,50%ha").contains("//set 50%stone,50%hand"));
     assertTrue(
         CommandCatalog.complete("//set 50%stone,50%co").contains("//set 50%stone,50%cobblestone"));
     assertTrue(CommandCatalog.complete("//replace !ai").contains("//replace !air"));

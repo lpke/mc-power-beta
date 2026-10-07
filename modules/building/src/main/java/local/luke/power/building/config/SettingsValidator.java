@@ -4,6 +4,8 @@ public final class SettingsValidator {
   private SettingsValidator() {}
 
   public static void validate(Settings s) {
+    if (s.obsidianBreakingSpeed < 0 || s.obsidianBreakingSpeed > 100)
+      throw new IllegalArgumentException("Obsidian breaking speed must be 0 to 100");
     s.hotbar.validate();
     if (s.autoWalkHoldMillis < 100 || s.autoWalkHoldMillis > 3000)
       throw new IllegalArgumentException("Auto-walk hold time must be 100 to 3000 ms");

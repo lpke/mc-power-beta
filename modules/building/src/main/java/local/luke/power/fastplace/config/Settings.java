@@ -34,6 +34,7 @@ public final class Settings {
   }
 
   public boolean enabled = false;
+  public boolean announceToggle, announceRestrictionToggle;
   public int attemptsPerTick = 2;
   public boolean rememberOrientation = true;
   public local.luke.power.fastplace.SlabMode slabMode = local.luke.power.fastplace.SlabMode.DOUBLE;
@@ -48,6 +49,8 @@ public final class Settings {
   public Settings copy() {
     Settings s = new Settings();
     s.enabled = enabled;
+    s.announceToggle = announceToggle;
+    s.announceRestrictionToggle = announceRestrictionToggle;
     s.attemptsPerTick = attemptsPerTick;
     s.slabMode = slabMode;
     s.rememberOrientation = rememberOrientation;

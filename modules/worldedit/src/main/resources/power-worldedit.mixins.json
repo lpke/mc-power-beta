@@ -10,6 +10,7 @@
     "FlattenedChunkMixin",
     "WorldRendererMixin",
     "BlockEntityFactory",
+    "BlockItemAccessor",
     "CommandMixin",
     "WorldPropertiesMixin",
     "EntityAccess",

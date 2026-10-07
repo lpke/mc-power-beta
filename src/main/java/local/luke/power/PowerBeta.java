@@ -15,7 +15,8 @@ public final class PowerBeta {
       ready = true;
       local.luke.power.input.TweakIndicators.register(
           local.luke.power.input.TweakIndicators.Tweak.CINEMATIC_CAMERA,
-          () -> mc.options.cinematicMode ? "" : null);
+          () -> mc.options.cinematicMode ? "" : null,
+          () -> local.luke.power.status.StatusConfig.current().cinematicCameraMessages);
       local.luke.power.chat.HelpOutput.scrolling(() -> {
         try {
           Object config = Class.forName("local.luke.power.hud.Config").getField("config").get(null);
@@ -33,5 +34,6 @@ public final class PowerBeta {
         LOG.error("Settings audit failed", e);
       }
     }
+    local.luke.power.status.TweakMessages.tick(mc);
   }
 }

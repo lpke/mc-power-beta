@@ -9,6 +9,8 @@ public class FreecamConfig {
     public static class ConfigFields {
         @ConfigEntry(name = "Freecam", description = "Allow detached-camera controls.")
         public Boolean enabled = false;
+        @ConfigEntry(name = "Player movement messages", description = "Show a chat message when freecam player movement turns on or off during gameplay. Independent of the Active tweaks HUD.")
+        public Boolean playerMovementMessages = false;
         @ConfigEntry(
                 name = "Enable Freecam Collisions",
                 multiplayerSynced = true

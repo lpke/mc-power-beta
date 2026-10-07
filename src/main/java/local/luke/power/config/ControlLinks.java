@@ -57,7 +57,7 @@ public final class ControlLinks {
       {"take_screenshot", "power_capture:config.addBasicScreenshotsToClipboard", "Save a screenshot of the current view."},
       {"debug_hud", "", "Toggle the debug overlay with coordinates and performance information."},
       {"third_person", "power_controls:userinterface.frontViewThirdPerson", "Cycle between first-person and configured third-person views."},
-      {"cinematic_camera", "", "Toggle smoothed mouse movement for camera pans."},
+      {"cinematic_camera", "activeTweaks.cinematicCameraMessages", "Toggle smoothed mouse movement for camera pans."},
       {"toggle_fullscreen", "", "Switch between windowed and fullscreen display."},
       {"release_mouse", "", "Release the mouse pointer from the game window."},
       {"panorama_screenshot", "", "Capture the six faces of a panorama at your current position."},
@@ -99,6 +99,7 @@ public final class ControlLinks {
       case "tweaks.sneak.enabled" -> "tweaks.sneak.";
       case "tweaks.hotbar.swap", "tweaks.hotbar.scroll" -> "tweaks.hotbar.";
       case "tweaks.freeLook" -> "tweaks.freeLook";
+      case "tweaks.autoWalk" -> "tweaks.autoWalk";
       case "power_camera:config.enabled", "power_camera:config.speed" -> "power_camera:config.";
       case "power_capture:config.customResolutionPhotoWidth" -> "power_capture:config.customResolutionPhoto";
       case "power_capture:config.isometricPhotoScale" -> "power_capture:config.isometricPhoto";

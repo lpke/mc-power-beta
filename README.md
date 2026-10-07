@@ -46,6 +46,11 @@ Right-click a slider to enter a precise value. Bindings support Ctrl, Shift and 
 
 **Interface > Active tweaks** shows temporary toggles such as fake sneak and fast
 placement on the HUD. Choose which appear, their position, colour and opacity.
+Each feature also has an optional chat-message switch beside its own settings.
+These switches start off and work independently of the HUD.
+
+WorldEdit block arguments accept `hand` to use the held block and its variant,
+for example `//set hand` or `//replace stone hand`.
 
 Audio includes bundled Minecraft soundtracks, custom folders, playlists, presets,
 per-track volumes and a queue. Presets capture their available tracks when saved:

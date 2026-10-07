@@ -125,7 +125,8 @@ public final class WorldEditor {
       leaveWorld();
       world = mc.world;
       BlockParser parser =
-          new BlockParser(id -> id < Block.BLOCKS.length && Block.BLOCKS[id] != null);
+          new BlockParser(id -> id < Block.BLOCKS.length && Block.BLOCKS[id] != null,
+              () -> HeldBlock.read(mc.player == null ? null : mc.player.method_502()));
       editor =
           new Editor(
               new MinecraftWorld(world), parser, s -> mc.inGameHud.addChatMessage(ChatFormat.info(s)));

@@ -1,5 +1,18 @@
 # Changelog
 
+## Sign editor, mining, toggle messages and WorldEdit
+
+- Escape saves the current sign text and closes the editor, like Done.
+- Add an Obsidian breaking speed slider under Building > Mining. Off preserves
+  vanilla mining; maximum gives diamond pickaxes the modern Efficiency V netherite
+  and Haste II speed. Applies only to obsidian in singleplayer and defaults to off.
+- Add individual chat-message switches for all eight Active tweaks features,
+  independent of HUD visibility. All default to off, including the existing edge
+  protection and slab completion switches. Previews, focus loss and world loading
+  do not announce state changes.
+- WorldEdit accepts `hand` in block patterns and masks, using the held block and
+  its variant. The held stack is preserved, and the block is fixed when the command starts.
+
 ## Settings usability and world cycles
 
 - Show duration controls in seconds, including weather, leaf decay, double-tap,

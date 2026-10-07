@@ -7,9 +7,15 @@ public final class BlockParser {
   private final Map<String, Integer> names = new HashMap<>();
   private final Map<String, Integer> defaultMeta = new HashMap<>();
   private final IntPredicate registered;
+  private final Supplier<BlockValue> heldBlock;
 
   public BlockParser(IntPredicate registered) {
+    this(registered, () -> null);
+  }
+
+  public BlockParser(IntPredicate registered, Supplier<BlockValue> heldBlock) {
     this.registered = registered;
+    this.heldBlock = Objects.requireNonNull(heldBlock);
     aliases();
     String[] colors = {
       "white",
@@ -41,12 +47,12 @@ public final class BlockParser {
   }
 
   public java.util.List<String> names() {
-    return names.keySet().stream()
+    return java.util.stream.Stream.concat(java.util.stream.Stream.of("hand"), names.keySet().stream()
         .filter(
             n -> {
               int id = names.get(n);
               return id != 34 && id != 36 && id != 95 && (id == 0 || registered.test(id));
-            })
+            }))
         .sorted()
         .toList();
   }
@@ -193,20 +199,27 @@ public final class BlockParser {
     String v = text.toLowerCase(Locale.ROOT).replace("minecraft:", "");
     String[] parts = v.split(":", -1);
     if (parts.length > 2 || parts[0].isBlank())
-      throw new IllegalArgumentException("Use a block name or ID[:metadata].");
+      throw new IllegalArgumentException("Use hand, a block name or ID[:metadata].");
+    BlockValue held = null;
     int id;
-    try {
-      id = Integer.parseInt(parts[0]);
-    } catch (NumberFormatException e) {
-      Integer known = names.get(parts[0]);
-      if (known == null) throw new IllegalArgumentException("Unknown Beta block: " + parts[0]);
-      id = known;
+    if (parts[0].equals("hand")) {
+      held = heldBlock.get();
+      if (held == null || held.id == 0) throw new IllegalArgumentException("Hold a block to use hand.");
+      id = held.id;
+    } else {
+      try {
+        id = Integer.parseInt(parts[0]);
+      } catch (NumberFormatException e) {
+        Integer known = names.get(parts[0]);
+        if (known == null) throw new IllegalArgumentException("Unknown Beta block: " + parts[0]);
+        id = known;
+      }
     }
     int meta =
         parts.length == 2
             ? integer(parts[1], 0, 15, "metadata")
-            : defaultMeta.getOrDefault(parts[0], 0);
-    if (id < 0 || id > 255 || id == 34 || id == 36 || id == 95 || id != 0 && !registered.test(id))
+            : held != null ? held.meta : defaultMeta.getOrDefault(parts[0], 0);
+    if (id < 0 || id > 255 || meta < 0 || meta > 15 || id == 34 || id == 36 || id == 95 || id != 0 && !registered.test(id))
       throw new IllegalArgumentException("Unsupported Beta block: " + text);
     return new BlockValue(id, meta);
   }
@@ -255,9 +268,9 @@ public final class BlockParser {
         continue;
       }
       BlockValue v = block(token);
+      String name = token.toLowerCase(Locale.ROOT).replace("minecraft:", "");
       boolean exact =
-          token.replace("minecraft:", "").contains(":")
-              || defaultMeta.containsKey(token.replace("minecraft:", ""));
+          name.equals("hand") || name.contains(":") || defaultMeta.containsKey(name);
       result = result.or(b -> b.id == v.id && (!exact || b.meta == v.meta));
     }
     return invert ? result.negate() : result;

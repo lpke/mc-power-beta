@@ -18,6 +18,8 @@ public final class Settings {
       local.luke.power.building.camera.Perspective.FIRST_PERSON;
   public boolean boatSpeed = false, boatProtection = false;
   public boolean boatSteering = true, fastMinecarts = true, clickMining = true;
+  public int obsidianBreakingSpeed;
+  public boolean autoWalkAnnounceToggle, freeLookAnnounceToggle;
 
   public Settings copy() {
     Settings s = new Settings();
@@ -39,6 +41,9 @@ public final class Settings {
     s.boatProtection = boatProtection;
     s.fastMinecarts = fastMinecarts;
     s.clickMining = clickMining;
+    s.obsidianBreakingSpeed = obsidianBreakingSpeed;
+    s.autoWalkAnnounceToggle = autoWalkAnnounceToggle;
+    s.freeLookAnnounceToggle = freeLookAnnounceToggle;
     return s;
   }
 }

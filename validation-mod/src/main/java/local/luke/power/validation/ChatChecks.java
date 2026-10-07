@@ -9,6 +9,11 @@ import org.lwjgl.input.Keyboard;
 public final class ChatChecks {
   private static final List<String> messages = new ArrayList<>();
   private static boolean recording;
+  static List<String> record(Validation.Check action) throws Exception {
+    messages.clear(); recording = true;
+    try { action.run(); return List.copyOf(messages); }
+    finally { recording = false; }
+  }
   public static void capture(String text) {
     if (recording) messages.add(text);
     else try { Validation.log("GAME CHAT " + text); } catch (Exception ignored) {}

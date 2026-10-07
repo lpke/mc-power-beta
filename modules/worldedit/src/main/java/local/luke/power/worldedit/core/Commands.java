@@ -491,7 +491,7 @@ public final class Commands {
         "//drain radius | //replacenear radius mask pattern",
         "//removenear mask radius | //removeabove [size] [height]",
         "//removebelow [size] [height]",
-        "Patterns: stone, 44:2, 75%stone,25%cobble. Masks: !air, 44:2"
+        "Patterns: hand, stone, 44:2, 75%hand,25%cobble. Masks: !air, hand, 44:2"
       },
       {
         "/remove type[,type] [radius=32] | //countentities type [radius]",
