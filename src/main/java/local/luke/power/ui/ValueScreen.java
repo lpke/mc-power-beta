@@ -9,6 +9,7 @@ public final class ValueScreen extends UiScreen {
   private final net.minecraft.client.gui.screen.Screen returnTo;
   private final TextInput input;
   private String error = "";
+  private long errorUntil;
 
   public ValueScreen(PowerOptionsScreen parent, Setting setting) {
     this(parent, setting, parent);
@@ -64,6 +65,7 @@ public final class ValueScreen extends UiScreen {
       minecraft.setScreen(returnTo);
     } catch (RuntimeException e) {
       error = e.getMessage() == null ? "Invalid value" : e.getMessage();
+      errorUntil = System.nanoTime() + 4_000_000_000L;
     }
   }
 
@@ -85,13 +87,14 @@ public final class ValueScreen extends UiScreen {
     drawCenteredTextWithShadow(textRenderer, setting.label, width / 2, 18, 0xffffff);
     text(fit(setting.description, span()), left(), 40, 0xaaaaaa);
     input(input, left(), height / 2 - 9, span(), x, y, "");
+    if (System.nanoTime() >= errorUntil) error = "";
     text(fit(error, span()), left(), height / 2 + 18, 0xff7777);
     String hint =
         setting.kind == Setting.Kind.LIST
             ? "Use a JSON list. Ctrl+A selects all; Ctrl+V pastes."
             : setting.kind == Setting.Kind.TEXT
                 ? "Ctrl+A selects all; Ctrl+V pastes."
-                : "Range: " + Setting.number(setting.min) + " to " + Setting.number(setting.max);
+                : "Range: " + setting.rangeText();
     text(fit(hint, span()), left(), height / 2 + 36, 0xaaaaaa);
     button("Done", width / 2 - 102, height - 28, 100, 20, x, y, true);
     button("Cancel", width / 2 + 2, height - 28, 100, 20, x, y, true);

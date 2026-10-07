@@ -376,7 +376,7 @@ public final class AudioPresetChecks {
         var config = AudioConfig.copy();
         config.presets = new ArrayList<>(List.of(new MusicPreset("quiet", "Quiet afternoons",
             new TreeSet<>(BuiltinMusic.TRACKS.stream().filter(t -> !t.usage().equals("Overworld"))
-                .map(BuiltinMusic.Track::id).toList()))));
+                .map(BuiltinMusic.Track::id).toList()), Map.of(), Set.of())));
         config.favourites.add("music:calm1.ogg");
         AudioConfig.preview(config);
         options = MenuUpdateChecks.open(mc,"Audio");

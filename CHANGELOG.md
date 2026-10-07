@@ -1,5 +1,36 @@
 # Changelog
 
+## Settings usability and world cycles
+
+- Show duration controls in seconds, including weather, leaf decay, double-tap,
+  auto-walk hold time and HUD fades. Stored values and timing stay unchanged.
+- Show numeric limits in tooltips and separate notices with a blank line.
+- Use click-to-edit number fields for item IDs, capture dimensions, large counts
+  and long durations. Reject unregistered item and block IDs before accepting edits.
+- Add separate per-world Daylight cycle and Weather cycle switches below Cheats.
+  Move Autosave interval below Difficulty. Hidden cycle drafts reset when cheats
+  are turned off; saved preferences remain available when cheats return.
+- Keep the simulation clock and scheduled updates running while daylight is frozen.
+  Day counters, time commands and photo mode use a separate daylight clock.
+  Frozen weather survives sleep; normal and accelerated sleep respect frozen daylight.
+- Replace feather sign editing with Allow editing signs, off by default.
+  Right-click edits without consuming an item; Shift-right-click does not edit.
+- Fix photo mode preserving the day count when adjusting the time slider.
+
+## Current configuration and inventory spacing
+
+- Seed one current Power Beta JSON document. Remove old config importers, renamed
+  field aliases, migration markers and unused standalone settings writers/screens.
+  Keep atomic saves, interrupted-save recovery and inventory journals.
+- Remove superseded skin/authentication and Controls screen implementations; the
+  bundled account service and unified Options screen continue to provide them.
+- Require explicit music preset pools and group volumes. Remove obsolete music
+  playback bridging and filename-based custom-track gain fallback.
+- Fix nonempty fast-placement filter reloads with the game's Gson 2.8.9.
+- Increase the creative catalogue-to-hotbar gap by two GUI pixels to match survival.
+  Keep the hotbar and survival slots fixed.
+- Leaving spectator keeps the current position, including inside solid blocks.
+
 ## Settings organisation
 
 - Group key bindings by action and make those groups collapsible. Reorder settings

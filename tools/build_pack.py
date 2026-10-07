@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build sequentially and export an account-free Prism instance with pinned dependencies."""
 from pathlib import Path
-import argparse,hashlib,json,shutil,subprocess,zipfile,os,tempfile
+import argparse,hashlib,json,shutil,subprocess,zipfile
 ROOT=Path(__file__).resolve().parents[1]
 def export_markdown(source,target):
  text=(ROOT/source).read_text()
@@ -25,21 +25,16 @@ def main():
  shutil.copytree(ROOT/'pack',stage)
  mods=stage/'.minecraft/mods';mods.mkdir(parents=True)
  manifest=json.loads((ROOT/'vendor/manifest.json').read_text());installed=[]
- legacy=json.loads((ROOT/'tools/legacy_modules.json').read_text())
+ platform={'smoothbeta','stationapi','entityculling','glassnetworking','retroauth','stapi-fast-intro'}
  for entry in manifest:
-  if not entry['enabled'] or entry['id']=='gcapi3' or entry['id'] in legacy:continue
+  if entry['id'] not in platform:continue
+  assert entry['enabled'],f'Platform dependency disabled: {entry["id"]}'
   src=ROOT/entry['file'];assert hashlib.sha256(src.read_bytes()).hexdigest()==entry['sha256'],f'Artifact changed: {src.name}'
   shutil.copy2(src,mods/src.name)
  shutil.copy2(ROOT/'build/libs/power-beta-1.0.0.jar',mods/'power-beta-1.0.0.jar')
- defaults=ROOT/'src/main/resources/assets/powerbeta/defaults'
- with tempfile.TemporaryDirectory(prefix='power-beta-defaults-') as temporary:
-  game=Path(temporary)
-  for name in (defaults/'index.txt').read_text().splitlines():
-   target=game/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(defaults/name,target)
-  gson=next((Path.home()/'.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.13.2').glob('*/*.jar'))
-  classpath=os.pathsep.join(str(p) for p in [ROOT/'build/classes/java/main',ROOT/'build/resources/main',ROOT/'input-api/build/libs/power-beta-input-1.0.0.jar',ROOT/'vendor/libraries/Simple-Yaml-1.8.4.jar',gson])
-  subprocess.run([str(Path(os.environ['JAVA_HOME'])/'bin/java'),'-cp',classpath,'local.luke.power.config.ConfigMigration',str(game)],check=True)
-  target=stage/'.minecraft/config/power-beta.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(game/'config/power-beta.json',target)
+ defaults=ROOT/'src/main/resources/assets/powerbeta/defaults/power-beta.json'
+ target=stage/'.minecraft/config/power-beta.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(defaults,target)
+ assert len(list(mods.glob('*.jar')))==7
  # Keep licenses beside the export, including separate upstream dependency licenses.
  licenses=stage/'licenses';licenses.mkdir();shutil.copy2(ROOT/'LICENSE',stage/'LICENSE.txt');export_markdown('README.md',stage/'README.md')
  for base in [ROOT/'modules',ROOT/'vendor/licenses']:

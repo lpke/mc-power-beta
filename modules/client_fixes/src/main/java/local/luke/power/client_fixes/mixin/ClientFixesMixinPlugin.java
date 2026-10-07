@@ -76,23 +76,10 @@ public class ClientFixesMixinPlugin implements IMixinConfigPlugin {
         Config.config.enableDebugGraphChanges = configObject.getBoolean("enableDebugGraphChanges", true);
         Config.config.enableDebugMenuWorldSeed = configObject.getBoolean("enableDebugMenuWorldSeed", true);
         Config.config.enableMultiplayerServerChanges = configObject.getBoolean("enableMultiplayerServerChanges", true);
-        Config.config.enableSkinChanges = configObject.getBoolean("enableSkinChanges", true);
         Config.config.enableChatChanges = configObject.getBoolean("enableChatChanges", true);
         Config.config.enableWoodenSignChanges = configObject.getBoolean("enableWoodenSignChanges", true);
 
-        if (mixinClassName.startsWith("local.luke.power.client_fixes.mixin.client.auth") || mixinClassName.startsWith("local.luke.power.client_fixes.mixin.server.auth") || mixinClassName.startsWith("local.luke.power.client_fixes.mixin.client.skin")) {
-            if (FabricLoader.getInstance().isModLoaded("retroauth")) {
-                return false;
-            }
-        }
-
-        if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.auth.ClientNetworkHandlerMixin")) {
-            return Config.config.enableAuthenticationChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.auth.SessionMixin")) {
-            return Config.config.enableAuthenticationChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.server.auth.ServerNetworkHandlerMixin")) {
-            return Config.config.enableAuthenticationChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.controls.ControlsOptionsScreenMixin")) {
+        if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.controls.ControlsOptionsScreenMixin")) {
             return Config.config.enableControlsChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.controls.GameOptionsMixin")) {
             return Config.config.enableControlsChanges;
@@ -115,24 +102,6 @@ public class ClientFixesMixinPlugin implements IMixinConfigPlugin {
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.multiplayer.TranslationStorageMixin")) {
             boolean isStationApiLoaded = FabricLoader.getInstance().isModLoaded("stationapi");
             return (Config.config.enableMultiplayerServerChanges && !isStationApiLoaded);
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.BipedEntityModelMixin")) {
-            return Config.config.enableSkinChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.ClientPlayerEntityMixin")) {
-            return Config.config.enableSkinChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.EntityRenderDispatcherMixin")) {
-            return Config.config.enableSkinChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.ModelPartMixin")) {
-            return Config.config.enableSkinChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.OtherPlayerEntityMixin")) {
-            return Config.config.enableSkinChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.PlayerEntityMixin")) {
-            return Config.config.enableSkinChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.PlayerEntityRendererMixin")) {
-            return Config.config.enableSkinChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.SkinImageProcessorMixin")) {
-            return Config.config.enableSkinChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.skin.WorldRendererMixin")) {
-            return Config.config.enableSkinChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.TextFieldWidgetMixin")) {
             return (Config.config.enableMultiplayerServerChanges || Config.config.enableChatChanges || Config.config.enableWoodenSignChanges);
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.chat.ChatScreenMixin")) {

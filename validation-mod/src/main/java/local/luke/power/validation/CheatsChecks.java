@@ -104,17 +104,7 @@ public final class CheatsChecks {
             tag.putBoolean("Creative", true);
             check(
                 !((CheatWorld) new WorldProperties(tag)).power$cheatsEnabled(),
-                "explicit off ignored for legacy creative world");
-            NbtCompound legacy = new NbtCompound();
-            legacy.putBoolean("Creative", true);
-            check(
-                ((CheatWorld) new WorldProperties(legacy)).power$cheatsEnabled(),
-                "legacy creative access lost");
-            NbtCompound oldPlayer = new NbtCompound();
-            oldPlayer.putString(local.luke.power.storage.LegacyKeys.original("PowerBetaGameMode"), "SPECTATOR");
-            NbtCompound oldSpectator = new NbtCompound();
-            oldSpectator.put("Player", oldPlayer);
-            check(((CheatWorld) new WorldProperties(oldSpectator)).power$cheatsEnabled(), "legacy spectator access lost");
+                "explicit cheats flag ignored");
           });
       test(
           "cheats enable commands and editing while still in survival",

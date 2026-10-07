@@ -7,6 +7,9 @@ Fixtures can replace settings and edit worlds. They are never part of the export
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `cleanup`: current config, world-cycle persistence, simulation and scheduled
+  updates, sleep combinations, sign editing, spectator exits, item validation and
+  inventory screenshots. Run after `new-world`.
 - `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
 - `settings-snapshot NAME`: capture all sixteen tabs, their complete row order,
   catalogue and PNGs under `power-beta-data/reports/settings-review/NAME`. Use a

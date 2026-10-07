@@ -15,16 +15,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.io.BufferedReader;
-import java.io.PrintWriter;
 
 @Mixin(GameOptions.class)
 public abstract class GameOptionsMixin {
-    @Shadow
-    protected abstract float parseFloat(String string);
-
     @Shadow
     protected Minecraft minecraft;
 
@@ -199,66 +193,4 @@ public abstract class GameOptionsMixin {
         }
     }
 
-    @Inject(method = "load", at = @At(value = "INVOKE", target = "Ljava/lang/String;split(Ljava/lang/String;)[Ljava/lang/String;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void load(CallbackInfo ci, BufferedReader bufferedReader, String string) {
-        String[] stringArray = string.split(":");
-
-        if (stringArray[0].equals("fov")) {
-            ModOptions.fov = this.parseFloat(stringArray[1]);
-        }
-
-        if (stringArray[0].equals("fog_density")) {
-            ModOptions.fogDensity = this.parseFloat(stringArray[1]);
-        }
-
-        if (stringArray[0].equals("clouds")) {
-            ModOptions.clouds = stringArray[1].equals("true");
-        }
-
-        if (stringArray[0].equals("cloud_height")) {
-            ModOptions.cloudHeight = this.parseFloat(stringArray[1]);
-        }
-
-        if (stringArray[0].equals("framerate_limit")) {
-            ModOptions.fpsLimit = Math.max(0, Math.min(1, (this.parseFloat(stringArray[1]) - 5) / 1000F));
-        }
-        if (stringArray[0].equals("fps_limit")) {
-            float legacy = this.parseFloat(stringArray[1]);
-            int cap = legacy >= 1 ? 1005 : Math.round((5 + legacy * 295F) / 5) * 5;
-            ModOptions.fpsLimit = (cap - 5) / 1000F;
-        }
-
-        if (stringArray[0].equals("render_distance")) {
-            ModOptions.renderDistance = this.parseFloat(stringArray[1]);
-        }
-
-        if (stringArray[0].equals("brightness")) {
-            ModOptions.brightness = this.parseFloat(stringArray[1]);
-            ModOptions.updateWorldLightTable(minecraft);
-        }
-
-        if (stringArray[0].equals("gui_scale")) {
-            ModOptions.guiScale = this.parseFloat(stringArray[1]);
-            ModOptions.realGuiScale = ModOptions.guiScale;
-        }
-    }
-
-    @Inject(method = "save", at = @At(value = "INVOKE", target = "Ljava/io/PrintWriter;close()V"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void saveOptions(CallbackInfo ci, PrintWriter printWriter) {
-        printWriter.println("fov:" + ModOptions.fov);
-
-        printWriter.println("fog_density:" + ModOptions.fogDensity);
-
-        printWriter.println("clouds:" + ModOptions.clouds);
-
-        printWriter.println("cloud_height:" + ModOptions.cloudHeight);
-
-        printWriter.println("framerate_limit: " + ModOptions.getFpsLimitValue());
-
-        printWriter.println("render_distance: " + ModOptions.renderDistance);
-
-        printWriter.println("brightness:" + ModOptions.brightness);
-
-        printWriter.println("gui_scale:" + ModOptions.guiScale);
-    }
 }

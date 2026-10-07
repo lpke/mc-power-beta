@@ -52,14 +52,14 @@ class MusicFoldersTest {
         () -> MusicFolders.additions(game, List.of(), List.of(" "), false));
   }
 
-  @Test void folderStatesRoundTripAndLegacyPathsStayEnabled() {
+  @Test void folderStatesRoundTripAndPlainPathsStayEnabled() {
     var original = JsonParser.parseString("[\"a\",\"b\",\"a\"]");
-    var legacy = MusicFolders.decode(original);
-    assertEquals(List.of("a","b"),legacy.paths());
-    assertTrue(legacy.disabled().isEmpty());
-    var encoded = MusicFolders.encode(legacy.paths(),Set.of("b"));
+    var enabled = MusicFolders.decode(original);
+    assertEquals(List.of("a","b"),enabled.paths());
+    assertTrue(enabled.disabled().isEmpty());
+    var encoded = MusicFolders.encode(enabled.paths(),Set.of("b"));
     var decoded = MusicFolders.decode(encoded);
-    assertEquals(legacy.paths(),decoded.paths());
+    assertEquals(enabled.paths(),decoded.paths());
     assertEquals(Set.of("b"),decoded.disabled());
     assertEquals("[\"a\",\"b\",\"a\"]",original.toString());
   }

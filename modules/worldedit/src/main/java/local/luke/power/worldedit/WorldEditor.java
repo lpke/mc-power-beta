@@ -37,7 +37,7 @@ public final class WorldEditor {
   private static Settings load() {
     try {
       Settings value = local.luke.power.storage.PowerConfig.read("editor", Settings.class);
-      ConfigStore.validate(value);
+      SettingsValidator.validate(value);
       return value;
     } catch (IllegalArgumentException e) {
       LOG.error("Could not load WorldEdit Beta settings; preserving file", e);
@@ -50,7 +50,7 @@ public final class WorldEditor {
   }
 
   public static void apply(Settings next) throws IOException {
-    ConfigStore.validate(next);
+    SettingsValidator.validate(next);
     if (next.wandItem >= Item.ITEMS.length || Item.ITEMS[next.wandItem] == null)
       throw new IllegalArgumentException("Wand item ID is not registered.");
     local.luke.power.storage.PowerConfig.save("editor", next);
@@ -58,7 +58,7 @@ public final class WorldEditor {
   }
 
   public static void preview(Settings next) {
-    ConfigStore.validate(next);
+    SettingsValidator.validate(next);
     if (next.wandItem >= Item.ITEMS.length || Item.ITEMS[next.wandItem] == null)
       throw new IllegalArgumentException("Wand item ID is not registered.");
     settings = next.copy();

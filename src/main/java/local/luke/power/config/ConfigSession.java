@@ -42,6 +42,9 @@ public final class ConfigSession {
   }
 
   public void link(Setting changed) {
+    if (changed.id.equals("world.cheats") && !changed.value.getAsBoolean())
+      settings.stream().filter(s -> s.id.equals("world.daylightCycle") || s.id.equals("world.weatherCycle"))
+          .forEach(s -> s.value = s.original());
     if (changed.id.startsWith("audio.trackEnabled.")) {
       String id = changed.id.substring("audio.trackEnabled.".length());
       settings.stream().filter(s -> s.id.equals("audio.exclusions")).findFirst().ifPresent(s -> {
@@ -140,7 +143,7 @@ public final class ConfigSession {
         Collections.reverse(attempted);
         for (String id : attempted)
           try {
-            backends.get(id).apply(old.get(id));
+            backends.get(id).restore(old.get(id));
           } catch (Exception rollback) {
             failure.addSuppressed(rollback);
           }

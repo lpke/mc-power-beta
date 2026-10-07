@@ -166,9 +166,13 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
 
       this.blit(posX + 173, posY + 138, 176, 32, 25, 24);
       // Grow the catalogue upward; hotbar, side tabs and destroy slot keep their coordinates.
-      this.blit(posX, posY - CreativeGrid.EXTRA_HEIGHT, 0, 0, this.containerWidth, 122);
-      this.blit(posX, posY + 104, 0, 104, this.containerWidth, CreativeGrid.EXTRA_HEIGHT);
-      this.blit(posX, posY + 122, 0, 122, this.containerWidth, this.containerHeight - 122);
+      this.blit(posX, posY - CreativeGrid.EXTRA_HEIGHT, 0, 0, this.containerWidth, 140);
+      this.blit(posX, posY + 140 - CreativeGrid.EXTRA_HEIGHT, 0, 122, this.containerWidth, 18);
+      for (int y = 158 - CreativeGrid.EXTRA_HEIGHT; y < 140; y++)
+        this.blit(posX, posY + y, 0, 140, this.containerWidth, 1);
+      this.blit(posX, posY + 140, 0, 140, this.containerWidth, this.containerHeight - 140);
+      // Extend the scrollbar well without repeating its bottom border between rows.
+      this.blit(posX + 154, posY + 138 - CreativeGrid.EXTRA_HEIGHT, 154, 100, 16, 18);
       this.blit(posX + 173, posY + 114, 176, 32, 25, 24);
 
       this.blit(posX + 150, posY - CreativeGrid.EXTRA_HEIGHT + 4, 208, 0, 9, 8);

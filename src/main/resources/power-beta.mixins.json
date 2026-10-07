@@ -36,7 +36,9 @@
     "SceneQualityMixin",
     "EntityQualityMixin",
     "GameQualityMixin",
-    "CommandWorldMixin"
+    "CommandWorldMixin",
+    "WorldCyclesPropertiesMixin",
+    "WorldCyclesMixin"
   ],
   "injectors": {
     "defaultRequire": 1

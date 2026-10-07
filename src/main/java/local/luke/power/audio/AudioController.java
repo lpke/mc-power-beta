@@ -118,7 +118,6 @@ public final class AudioController {
     status = "";
     menuCooldown = 0;
     int dimension = client.player == null ? 0 : client.player.dimensionId;
-    LegacyMusic.selected(track.field_2126, client.world != null && TrackRules.dimensionSpecific(track.field_2126, dimension) ? dimension : Integer.MAX_VALUE);
     MusicStream.start(system, "BgMusic", track.field_2127, track.field_2126,
         musicVolume(currentMusic), false);
     musicStarted = System.nanoTime(); trackWasPlaying = false;
@@ -265,9 +264,7 @@ public final class AudioController {
 
   public static int trackVolume(String id) {
     AudioSettings settings = AudioConfig.current();
-    MusicLibrary.Track custom = customById.get(id);
-    String legacyId = custom == null ? id : "music:" + custom.name();
-    return settings.sounds.getOrDefault(id, settings.sounds.getOrDefault(legacyId, 100));
+    return settings.sounds.getOrDefault(id, 100);
   }
 
   private static class_267 entry(MusicLibrary.Track track) throws java.io.IOException {
@@ -484,7 +481,6 @@ public final class AudioController {
       system.stop("PowerBetaMenu");
       return;
     }
-    if (LegacyMusic.consumeStop()) quiet();
     automaticMusic(mc, system);
     if (++cleanup >= 100) {
       cleanup = 0;
@@ -552,11 +548,6 @@ public final class AudioController {
       remember(chosen);
       currentMusic = trackId(chosen);
       musicStarted = System.nanoTime(); trackWasPlaying = false;
-      LegacyMusic.selected(
-          chosen.field_2126,
-          TrackRules.dimensionSpecific(chosen.field_2126, context.dimension)
-              ? context.dimension
-              : Integer.MAX_VALUE);
     } else {
       status = "No tracks available for the current music settings.";
     }
@@ -599,7 +590,6 @@ public final class AudioController {
   }
 
   public static float mix(String source, String id, float volume, boolean ui) {
-    if (source.equals("streaming")) LegacyMusic.record(id.replaceFirst("^records\\.", ""));
     float effects = client == null ? 1 : client.options.soundVolume;
     SOURCES.put(source, new Source(id, effects > 0 ? volume / effects : 0, ui));
     return source.equals("streaming") && MusicPreview.active() ? 0

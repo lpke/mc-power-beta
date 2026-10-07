@@ -73,7 +73,7 @@ public class PhotoModeScreen extends Screen {
             this.buttons.add(this.timeSlider);
         }
 
-        this.originalTOD = this.minecraft.world.getTime();
+        this.originalTOD = ((local.luke.power.world.WorldCycles) this.minecraft.world.getProperties()).power$daylightTime();
         if (this.desiredTOD == -1L) {
             this.desiredTOD = this.originalTOD % 24000L;
         } else {
@@ -88,7 +88,7 @@ public class PhotoModeScreen extends Screen {
 
     @Override
     public void removed() {
-        this.minecraft.world.setTime(this.originalTOD);
+        ((local.luke.power.world.WorldCycles) this.minecraft.world.getProperties()).power$daylightTime(this.originalTOD);
         ModOptions.photoModeFogMultiplier = 1.0F;
     }
 
@@ -304,7 +304,7 @@ public class PhotoModeScreen extends Screen {
                 this.desiredTOD = var4;
             }
 
-            this.minecraft.world.setTime(this.desiredDay + this.desiredTOD);
+            ((local.luke.power.world.WorldCycles) this.minecraft.world.getProperties()).power$daylightTime(this.desiredDay * 24000L + this.desiredTOD);
             this.minecraft.world.updateSkyBrightness();
 //            this.minecraft.world.method_232();
             this.minecraft.worldRenderer.notifyAmbientDarknessChanged();

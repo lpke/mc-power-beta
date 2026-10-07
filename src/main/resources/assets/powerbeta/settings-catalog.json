@@ -17,7 +17,8 @@
     "min": 16,
     "max": 16384,
     "step": 1,
-    "order": 1
+    "order": 1,
+    "control": "number"
   },
   "power_capture:config.customResolutionPhotoWidth": {
     "page": "Interface",
@@ -29,7 +30,8 @@
     "min": 16,
     "max": 16384,
     "step": 1,
-    "order": 0
+    "order": 0,
+    "control": "number"
   },
   "power_capture:config.disableRenderingNetherBedrock": {
     "page": "Interface",
@@ -292,18 +294,21 @@
     "restart": false,
     "min": 1,
     "max": 10000,
-    "step": 1
+    "step": 1,
+    "control": "number"
   },
   "power_hud:config.chatFadeTime": {
     "page": "Interface",
     "group": "Chat",
-    "label": "Chat message fade time",
-    "description": "100 = vanilla, 10 = 1 second",
+    "label": "Chat message fade time (seconds)",
+    "description": "Time until a chat message disappears when chat is closed.",
     "default": 100,
     "restart": false,
     "min": 1,
     "max": 12000,
-    "step": 1
+    "step": 1,
+    "displayDivisor": 10,
+    "unit": "seconds"
   },
   "power_hud:config.coordinateDisplay": {
     "page": "Interface",
@@ -356,13 +361,15 @@
   "power_hud:config.hotbarItemSelectionFadeTime": {
     "page": "Interface",
     "group": "HUD",
-    "label": "Hotbar item selection fade time",
-    "description": "40 = default",
+    "label": "Hotbar item selection fade time (seconds)",
+    "description": "Time the selected hotbar item name stays visible.",
     "default": 40,
     "restart": false,
     "min": 1,
     "max": 12000,
-    "step": 1
+    "step": 1,
+    "displayDivisor": 20,
+    "unit": "seconds"
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.enableVisibility": {
     "page": "Interface",
@@ -1030,14 +1037,6 @@
     "default": false,
     "restart": false
   },
-  "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableEditSignsWithFeathers": {
-    "page": "Gameplay",
-    "group": "Blocks",
-    "label": "Allow editing signs with a feather",
-    "description": "Feather will be consumed on use",
-    "default": false,
-    "restart": false
-  },
   "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableGlueTrapdoorsWithSlimeballs": {
     "page": "Gameplay",
     "group": "Blocks",
@@ -1174,15 +1173,6 @@
     "default": true,
     "restart": true
   },
-  "power_client_fixes:config.enableSkinChanges": {
-    "page": "Fixes",
-    "group": "Client fixes",
-    "label": "Skin changes",
-    "description": "Restart required for changes to take effect",
-    "default": false,
-    "restart": true,
-    "hiddenWithMod": "retroauth"
-  },
   "power_client_fixes:config.enableWoodenSignChanges": {
     "page": "Fixes",
     "group": "Client fixes",
@@ -1190,51 +1180,6 @@
     "description": "Restart required for changes to take effect",
     "default": true,
     "restart": true
-  },
-  "power_client_fixes:config.USE_ALTERNATE_RESOURCES_DOWNLOAD_URL": {
-    "page": "Advanced",
-    "group": "Resource and account services",
-    "label": "Minecraft resources use alternate url",
-    "description": "Restart required for changes to take effect",
-    "default": false,
-    "restart": true,
-    "hidden": true
-  },
-  "power_client_fixes:config.RESOURCES_DOWNLOAD_URL": {
-    "page": "Advanced",
-    "group": "Resource and account services",
-    "label": "Minecraft resources download url",
-    "description": "Restart required for changes to take effect",
-    "default": "http://s3.betacraft.uk:11705/MinecraftResources/",
-    "restart": true,
-    "hidden": true
-  },
-  "power_client_fixes:config.ALTERNATE_RESOURCES_DOWNLOAD_URL": {
-    "page": "Advanced",
-    "group": "Resource and account services",
-    "label": "Minecraft resources download url alternate",
-    "description": "Restart required for changes to take effect",
-    "default": "http://mcresources.modification-station.net/MinecraftResources/",
-    "restart": true,
-    "hidden": true
-  },
-  "power_client_fixes:config.renderCape": {
-    "page": "Fixes",
-    "group": "Client fixes",
-    "label": "Render player capes",
-    "description": "",
-    "default": true,
-    "restart": false,
-    "hiddenWithMod": "retroauth"
-  },
-  "power_client_fixes:config.raiseSlimSkinShoulders": {
-    "page": "Fixes",
-    "group": "Client fixes",
-    "label": "Raise slim skin shoulders",
-    "description": "Restart required for changes to take effect",
-    "default": false,
-    "restart": true,
-    "hiddenWithMod": "retroauth"
   },
   "power_environment:config.MISSING_ACHIEVEMENTS_CONFIG.OPEN_INVENTORY": {
     "page": "Advanced",
@@ -1716,98 +1661,122 @@
   "power_environment:config.WEATHER_CONFIG.timeUntilRainRandomLimit": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Rain wait random range, ticks",
-    "description": "Add a random number of ticks from zero up to this limit minus one to the matching minimum. 20 ticks is one second.",
+    "label": "Rain wait random range (seconds)",
+    "description": "Adds a random duration from zero up to this limit, excluding the limit itself, to the matching minimum.",
     "default": 168000,
     "restart": false,
     "min": 1,
     "max": 2400000,
     "step": 1,
-    "order": 7
+    "order": 7,
+    "displayDivisor": 20,
+    "unit": "seconds",
+    "control": "number"
   },
   "power_environment:config.WEATHER_CONFIG.timeUntilRainMinimum": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Rain wait minimum, ticks",
-    "description": "Minimum duration in game ticks. 20 ticks is one second.",
+    "label": "Rain wait minimum (seconds)",
+    "description": "Minimum duration before the next weather change.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
     "step": 1,
-    "order": 6
+    "order": 6,
+    "displayDivisor": 20,
+    "unit": "seconds",
+    "control": "number"
   },
   "power_environment:config.WEATHER_CONFIG.rainDurationRandomLimit": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Rain duration random range, ticks",
-    "description": "Add a random number of ticks from zero up to this limit minus one to the matching minimum. 20 ticks is one second.",
+    "label": "Rain duration random range (seconds)",
+    "description": "Adds a random duration from zero up to this limit, excluding the limit itself, to the matching minimum.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
     "step": 1,
-    "order": 9
+    "order": 9,
+    "displayDivisor": 20,
+    "unit": "seconds",
+    "control": "number"
   },
   "power_environment:config.WEATHER_CONFIG.rainDurationMinimum": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Rain duration minimum, ticks",
-    "description": "Minimum duration in game ticks. 20 ticks is one second.",
+    "label": "Rain duration minimum (seconds)",
+    "description": "Minimum duration before the next weather change.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
     "step": 1,
-    "order": 8
+    "order": 8,
+    "displayDivisor": 20,
+    "unit": "seconds",
+    "control": "number"
   },
   "power_environment:config.WEATHER_CONFIG.timeUntilThunderRandomLimit": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Thunder wait random range, ticks",
-    "description": "Add a random number of ticks from zero up to this limit minus one to the matching minimum. 20 ticks is one second.",
+    "label": "Thunder wait random range (seconds)",
+    "description": "Adds a random duration from zero up to this limit, excluding the limit itself, to the matching minimum.",
     "default": 168000,
     "restart": false,
     "min": 1,
     "max": 2400000,
     "step": 1,
-    "order": 11
+    "order": 11,
+    "displayDivisor": 20,
+    "unit": "seconds",
+    "control": "number"
   },
   "power_environment:config.WEATHER_CONFIG.timeUntilThunderMinimum": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Thunder wait minimum, ticks",
-    "description": "Minimum duration in game ticks. 20 ticks is one second.",
+    "label": "Thunder wait minimum (seconds)",
+    "description": "Minimum duration before the next weather change.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
     "step": 1,
-    "order": 10
+    "order": 10,
+    "displayDivisor": 20,
+    "unit": "seconds",
+    "control": "number"
   },
   "power_environment:config.WEATHER_CONFIG.thunderDurationRandomLimit": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Thunder duration random range, ticks",
-    "description": "Add a random number of ticks from zero up to this limit minus one to the matching minimum. 20 ticks is one second.",
+    "label": "Thunder duration random range (seconds)",
+    "description": "Adds a random duration from zero up to this limit, excluding the limit itself, to the matching minimum.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
     "step": 1,
-    "order": 13
+    "order": 13,
+    "displayDivisor": 20,
+    "unit": "seconds",
+    "control": "number"
   },
   "power_environment:config.WEATHER_CONFIG.thunderDurationMinimum": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Thunder duration minimum, ticks",
-    "description": "Minimum duration in game ticks. 20 ticks is one second.",
+    "label": "Thunder duration minimum (seconds)",
+    "description": "Minimum duration before the next weather change.",
     "default": 3600,
     "restart": false,
     "min": 1,
     "max": 2400000,
     "step": 1,
-    "order": 12
+    "order": 12,
+    "displayDivisor": 20,
+    "unit": "seconds",
+    "control": "number"
   },
   "power_environment:config.SPAWN_PROTECTION_RADIUS": {
     "page": "Advanced",
@@ -2114,24 +2083,28 @@
   "power_controls:features.fastLeafDecay.minimumDecayTime": {
     "page": "Gameplay",
     "group": "Fast leaf decay",
-    "label": "Minimum decay time",
-    "description": "",
+    "label": "Minimum decay time (seconds)",
+    "description": "Shortest scheduled leaf-decay delay. Must be below the maximum.",
     "default": 10,
     "restart": false,
     "min": 0.0,
     "max": 1200.0,
-    "step": 1
+    "step": 1,
+    "displayDivisor": 20,
+    "unit": "seconds"
   },
   "power_controls:features.fastLeafDecay.maximumDecayTime": {
     "page": "Gameplay",
     "group": "Fast leaf decay",
-    "label": "Maximum decay time",
-    "description": "",
+    "label": "Maximum decay time (seconds)",
+    "description": "Upper limit for scheduled leaf decay. Must exceed the minimum.",
     "default": 25,
     "restart": false,
     "min": 0.0,
     "max": 1200.0,
-    "step": 1
+    "step": 1,
+    "displayDivisor": 20,
+    "unit": "seconds"
   },
   "power_controls:features.betterBurning.enableBetterBurning": {
     "page": "Gameplay",
@@ -2245,7 +2218,8 @@
     "description": "Identifiers of blocks that won't have their block action skipped. (Requires extended block identifiers)",
     "default": [],
     "restart": true,
-    "order": 4
+    "order": 4,
+    "valueType": "blockIdentifiers"
   },
   "power_controls:gameplay.rightClickEquipArmor": {
     "page": "Inventory",
@@ -2282,7 +2256,8 @@
     "min": 1,
     "max": 3600,
     "step": 1,
-    "order": 2
+    "order": 20,
+    "control": "number"
   },
   "power_controls:general.tcpNoDelay": {
     "page": "Advanced",
@@ -2762,15 +2737,6 @@
     "default": true,
     "restart": true
   },
-  "power_controls:userinterface.improvedControlsMenu": {
-    "page": "Interface",
-    "group": "Menus",
-    "label": "Improved controls menu",
-    "description": "",
-    "default": true,
-    "restart": false,
-    "hidden": true
-  },
   "power_controls:userinterface.hideAchievementToast": {
     "page": "Interface",
     "group": "Menus",
@@ -3188,9 +3154,11 @@
   "creative.doubleTapTicks": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Double-tap window, ticks",
-    "description": "Maximum interval between Jump presses. 20 ticks is one second.",
-    "order": 1
+    "label": "Double-tap window (seconds)",
+    "description": "Maximum interval between Jump presses.",
+    "order": 1,
+    "displayDivisor": 20,
+    "unit": "seconds"
   },
   "creative.modePicker": {
     "page": "Creative",
@@ -3275,7 +3243,9 @@
     "group": "Selection",
     "label": "Wand item ID",
     "description": "",
-    "order": 3
+    "order": 3,
+    "control": "number",
+    "valueType": "itemId"
   },
   "worldedit.showSelection": {
     "page": "World editing",
@@ -3311,19 +3281,22 @@
     "page": "World editing",
     "group": "Limits and history",
     "label": "Maximum blocks per edit",
-    "description": "Reject edits above this limit before making changes."
+    "description": "Reject edits above this limit before making changes.",
+    "control": "number"
   },
   "worldedit.blocksPerTick": {
     "page": "World editing",
     "group": "Limits and history",
     "label": "Blocks processed per tick",
-    "description": "Lower values keep large edits responsive."
+    "description": "Lower values keep large edits responsive.",
+    "control": "number"
   },
   "worldedit.historySize": {
     "page": "World editing",
     "group": "Limits and history",
     "label": "Undo history",
-    "description": "Maximum number of edit records kept in memory."
+    "description": "Maximum number of edit records kept in memory.",
+    "control": "number"
   },
   "tweaks.placement.enabled": {
     "page": "Building",
@@ -3381,13 +3354,15 @@
     "page": "Building",
     "group": "Item filters",
     "label": "Excluded items",
-    "description": "Item IDs separated by commas, for example 1, 44:2."
+    "description": "Item IDs separated by commas, for example 1, 44:2.",
+    "valueType": "itemFilters"
   },
   "tweaks.placement.whitelist": {
     "page": "Building",
     "group": "Item filters",
     "label": "Allowed items",
-    "description": "Item IDs separated by commas, for example 1, 44:2. An empty allow-list permits nothing."
+    "description": "Item IDs separated by commas, for example 1, 44:2. An empty allow-list permits nothing.",
+    "valueType": "itemFilters"
   },
   "tweaks.flexible.enabled": {
     "page": "Building",
@@ -3727,16 +3702,22 @@
     "order": 1
   },
   "tweaks.autoWalkHoldMillis": {
-    "label": "Auto-walk hold time, ms",
+    "label": "Auto-walk hold time (seconds)",
     "page": "Movement",
     "group": "Auto-walk",
-    "order": 2
+    "order": 2,
+    "displayDivisor": 1000,
+    "unit": "seconds"
   },
   "native.difficulty": {
-    "order": 0
+    "order": 10,
+    "page": "General",
+    "group": "Game"
   },
   "world.cheats": {
-    "order": 1
+    "order": 30,
+    "page": "General",
+    "group": "Game"
   },
   "native.guiScale": {
     "order": 3
@@ -3852,10 +3833,12 @@
     "order": 0
   },
   "audio.gapMinSeconds": {
-    "order": 1
+    "order": 1,
+    "control": "number"
   },
   "audio.gapMaxSeconds": {
-    "order": 2
+    "order": 2,
+    "control": "number"
   },
   "audio.delayQueuedTracks": {
     "order": 3
@@ -4266,5 +4249,28 @@
     "page": "Controls",
     "group": "Interface",
     "label": "Debug graph"
+  },
+  "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.allowEditingSigns": {
+    "page": "Gameplay",
+    "group": "Blocks",
+    "label": "Allow editing signs",
+    "description": "Right-click an existing sign to edit it. Shift-right-click uses the held item instead.",
+    "default": false,
+    "restart": false
+  },
+  "world.daylightCycle": {
+    "page": "General",
+    "group": "Game",
+    "label": "Daylight cycle",
+    "order": 40
+  },
+  "world.weatherCycle": {
+    "page": "General",
+    "group": "Game",
+    "label": "Weather cycle",
+    "order": 50
+  },
+  "lightOverlay.checksPerTick": {
+    "control": "number"
   }
 }

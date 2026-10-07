@@ -18,6 +18,7 @@ public final class SettingsRegistry {
     LogoBackend.register(s);
     WorldBackend.register(s, mc);
     CommandsBackend.register(s, mc);
+    s.settings().forEach(ItemSettings::attach);
     return s;
   }
 }

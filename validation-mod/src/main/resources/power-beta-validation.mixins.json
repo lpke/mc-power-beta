@@ -8,7 +8,8 @@
     "AudioPreloadMixin",
     "ScreenInput",
     "ChatCaptureMixin",
-    "ChatInput"
+    "ChatInput",
+    "PlayerSleepAccess"
   ],
   "injectors": {
     "defaultRequire": 1

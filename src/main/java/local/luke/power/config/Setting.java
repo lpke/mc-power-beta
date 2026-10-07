@@ -22,6 +22,9 @@ public final class Setting {
   public final JsonElement defaultValue;
   public final double min, max, step;
   public final boolean restart;
+  private final double displayDivisor;
+  private final String unit, control;
+  private transient java.util.function.Consumer<JsonElement> checkValue = value -> {};
   public JsonElement value;
   private JsonElement original;
 
@@ -43,6 +46,9 @@ public final class Setting {
     this.id = id;
     this.backend = backend;
     JsonObject metadata = Catalog.metadata(id);
+    this.displayDivisor = Catalog.number(metadata, "displayDivisor", 1);
+    this.unit = Catalog.text(metadata, "unit", "");
+    this.control = Catalog.text(metadata, "control", "slider");
     this.page = Catalog.text(metadata, "page", page);
     this.group = Catalog.text(metadata, "group", group);
     this.label = Catalog.text(metadata, "label", label);
@@ -112,7 +118,7 @@ public final class Setting {
               throw new IllegalArgumentException("Use true or false");
             yield new JsonPrimitive(Boolean.parseBoolean(text));
           }
-          default -> new JsonPrimitive(new BigDecimal(text.trim()));
+          default -> new JsonPrimitive(new BigDecimal(text.trim()).multiply(BigDecimal.valueOf(displayDivisor)));
         };
     validate(next);
     value = next;
@@ -121,6 +127,7 @@ public final class Setting {
   public void validate(JsonElement next) {
     if (next == null || next.isJsonNull())
       throw new IllegalArgumentException(label + ": a value is required");
+    checkValue.accept(next);
     if (kind == Kind.KEY) {
       local.luke.power.input.Chord.decode(next.getAsBigDecimal().intValueExact());
       return;
@@ -155,9 +162,12 @@ public final class Setting {
         throw new IllegalArgumentException("Choose a listed option");
       return;
     }
-    if (kind == Kind.INTEGER || kind == Kind.KEY) next.getAsBigDecimal().intValueExact();
+    if (kind == Kind.INTEGER) {
+      try { next.getAsBigDecimal().intValueExact(); }
+      catch (ArithmeticException e) { throw new IllegalArgumentException(displayDivisor == 1 ? "Enter a whole number" : "Use increments of " + number(1 / displayDivisor) + " seconds"); }
+    }
     if (n < min || n > max)
-      throw new IllegalArgumentException("Use " + number(min) + " to " + number(max));
+      throw new IllegalArgumentException("Use " + rangeText());
   }
 
   public String display() {
@@ -180,13 +190,24 @@ public final class Setting {
           v.isJsonArray()
               ? v.getAsJsonArray().size() + " entries"
               : v.getAsJsonObject().size() + " entries";
-      case INTEGER, DECIMAL -> v.getAsBigDecimal().stripTrailingZeros().toPlainString();
+      case INTEGER, DECIMAL -> numericText(v.getAsBigDecimal());
       default -> v.getAsString();
     };
   }
 
   public String editText() {
-    return kind == Kind.LIST ? value.toString() : value.getAsString();
+    return numeric() ? numericText(value.getAsBigDecimal()) : kind == Kind.LIST ? value.toString() : value.getAsString();
+  }
+
+  public boolean numeric() { return kind == Kind.INTEGER || kind == Kind.DECIMAL; }
+  public boolean slider() { return numeric() && !control.equals("number"); }
+  public void validator(java.util.function.Consumer<JsonElement> validator) { checkValue = Objects.requireNonNull(validator); }
+  private String numericText(BigDecimal value) {
+    return value.divide(BigDecimal.valueOf(displayDivisor)).stripTrailingZeros().toPlainString();
+  }
+  public String rangeText() {
+    String limits = numericText(BigDecimal.valueOf(min)) + " to " + numericText(BigDecimal.valueOf(max));
+    return limits + (unit.isEmpty() ? "" : " " + unit);
   }
 
   public static String number(double v) {

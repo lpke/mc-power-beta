@@ -16,7 +16,8 @@ class CreativeGridTest {
       int base = (height - 166) / 2;
       assertTrue(CreativeGrid.tabTop(base) >= 0);
       assertTrue(CreativeGrid.tabHeight(base) >= 20);
-      assertEquals(base + 140, base - CreativeGrid.EXTRA_HEIGHT + 14 + CreativeGrid.ROWS * 18);
+      int lastRow = base - CreativeGrid.EXTRA_HEIGHT + 14 + (CreativeGrid.ROWS - 1) * 18;
+      assertEquals(22, base + 142 - lastRow, "Match survival row-to-hotbar spacing");
       assertTrue(CreativeGrid.tabTop(base) + CreativeGrid.tabHeight(base) <= base - CreativeGrid.EXTRA_HEIGHT + 3);
     }
   }

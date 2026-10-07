@@ -64,7 +64,7 @@ public class InGameHudMixin extends DrawContext {
 					isSlimeChunk = (chunk.getSlimeRandom(987234911L).nextInt(10) == 0);
 
 					if (null != player.world.getProperties()) {
-						dayCount = (int) Math.floor(player.world.getProperties().getTime() / 24000);
+						dayCount = (int) Math.floor(((local.luke.power.world.WorldCycles) player.world.getProperties()).power$daylightTime() / 24000);
 					}
 
 					if (null != player.world.method_1781()) {

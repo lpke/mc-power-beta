@@ -57,8 +57,7 @@ across world/menu transitions, including previews and their interrupted tracks.
 CUSTOM ends playback on transitions to switch pools. Queues remain intact.
 
 Saved presets contain a track-pool snapshot, exclusions and group volumes.
-Existing presets acquire their pool once during configuration migration, with a
-backup. New folders and new tracks stay outside saved pools until explicitly
+New folders and new tracks stay outside saved pools until explicitly
 included. Editing a preset cannot change the live pool. Loading copies its state;
 library edits then affect that copy. Include all admits every currently known track.
 Missing IDs remain saved so returning files retain their selection.

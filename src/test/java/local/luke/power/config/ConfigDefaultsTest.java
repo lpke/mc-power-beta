@@ -1,0 +1,46 @@
+package local.luke.power.config;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.google.gson.*;
+import java.nio.file.*;
+import java.util.List;
+import local.luke.power.storage.PowerConfig;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+class ConfigDefaultsTest {
+  @TempDir Path game;
+
+  @Test void defaultsAndRecoveryUseOnlyTheCurrentDocument() throws Exception {
+    Path obsolete = game.resolve("config/lpkecreative.properties");
+    Files.createDirectories(obsolete.getParent());
+    Files.writeString(obsolete, "flight=false\n");
+    ConfigDefaults.prepare(game);
+    Path config = PowerConfig.path();
+    String defaults = Files.readString(config);
+    JsonObject root = PowerConfig.document();
+    assertEquals(3, root.get("schemaVersion").getAsInt());
+    assertEquals(2, root.size());
+    assertTrue(root.getAsJsonObject("settings").getAsJsonObject("creative").get("flight").getAsBoolean());
+    assertEquals("flight=false\n", Files.readString(obsolete));
+
+    root.getAsJsonObject("settings").getAsJsonObject("creative").addProperty("flight", false);
+    PowerConfig.write(root);
+    String preferences = Files.readString(config);
+    ConfigDefaults.prepare(game);
+    assertEquals(preferences, Files.readString(config));
+    FileTransaction.begin(game, List.of(config)); // Simulate process exit before commit/close.
+    Files.writeString(config, "interrupted");
+    FileTransaction.recover(game);
+    assertEquals(preferences, Files.readString(config));
+    for (String invalid : List.of("broken", "{\"schemaVersion\":2,\"settings\":{}}")) {
+      Files.writeString(config, invalid);
+      assertThrows(IllegalStateException.class, () -> ConfigDefaults.prepare(game));
+      assertEquals(invalid, Files.readString(config));
+    }
+    Files.delete(config);
+    ConfigDefaults.prepare(game);
+    assertEquals(defaults, Files.readString(config));
+  }
+}

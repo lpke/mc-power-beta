@@ -22,6 +22,7 @@ public class Time implements Command {
 
   public void command(SharedCommandSource source, String[] args) {
     var world = EntityTargets.player(source).world;
+    var cycles = (local.luke.power.world.WorldCycles) world.getProperties();
     if (args.length == 2 && args[1].equals("get")) args = new String[] {"time", "query", "daytime"};
     if (args.length != 3) {
       manual(source);
@@ -33,17 +34,17 @@ public class Time implements Command {
             args[1].equals("set") && PRESETS.containsKey(args[2])
                 ? PRESETS.get(args[2])
                 : CommandNumbers.ticks(args[2], 1);
-        long result = args[1].equals("add") ? Math.addExact(world.getTime(), ticks) : ticks;
-        world.setTime(result);
+        long result = args[1].equals("add") ? Math.addExact(cycles.power$daylightTime(), ticks) : ticks;
+        cycles.power$daylightTime(result);
         source.sendFeedback("§aTime set to " + result + ".");
       }
       case "query" -> {
-        long time = world.getTime();
+        long time = cycles.power$daylightTime();
         long result =
             switch (args[2]) {
               case "daytime" -> Math.floorMod(time, 24000);
               case "day" -> Math.floorDiv(time, 24000);
-              case "gametime" -> time;
+              case "gametime" -> world.getTime();
               default -> throw new IllegalArgumentException("Choose daytime, gametime or day.");
             };
         source.sendFeedback("§b" + args[2] + "§7: " + result);
@@ -60,8 +61,7 @@ public class Time implements Command {
     s.sendFeedback("/time set <day|noon|night|midnight|time> | /time add <time>");
     s.sendFeedback("/time query <daytime|gametime|day>");
     s.sendFeedback(
-        "Durations accept t ticks, s seconds and d days. Beta uses one clock for world time and"
-            + " game time.");
+        "Durations accept t ticks, s seconds and d days. Game time continues while daylight is frozen.");
   }
 
   public String[] suggestion(SharedCommandSource s, int n, String input, String total) {

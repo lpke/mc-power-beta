@@ -12,6 +12,7 @@ final class InlineValueEditor {
   private TextInput input;
   private String error = "";
   private boolean rendered;
+  private long errorUntil;
   private int x, y, width, clipTop, clipBottom;
   private static final int CHECK_WIDTH = 18, GAP = 2;
 
@@ -62,10 +63,12 @@ final class InlineValueEditor {
     try {
       setting.parse(input.text());
     } catch (NumberFormatException | ArithmeticException e) {
-      error = setting.kind == Setting.Kind.INTEGER ? "Enter a whole number" : "Enter a number";
+      error = "Enter a number";
+      errorUntil = System.nanoTime() + 4_000_000_000L;
       return;
     } catch (IllegalArgumentException e) {
       error = Objects.toString(e.getMessage(), "Invalid value");
+      errorUntil = System.nanoTime() + 4_000_000_000L;
       return;
     }
     Runnable callback = accepted;
@@ -74,12 +77,17 @@ final class InlineValueEditor {
   }
 
   void render(UiScreen screen, int x, int y, int width, int mx, int my, int clipTop, int clipBottom) {
+    if (System.nanoTime() >= errorUntil) error = "";
     bounds(x, y, width, clipTop, clipBottom);
     rendered = y + 18 > clipTop && y < clipBottom;
     // UiScreen.input has a one-pixel border. Keep it inside the original slider bounds.
     screen.input(input, x + 1, y, Math.max(8, width - CHECK_WIDTH - GAP - 2), mx, my, "");
     screen.iconButton("check", x + width - CHECK_WIDTH, y, CHECK_WIDTH, mx, my, true);
     if (!error.isEmpty()) screen.rectangle(x, y + 17, x + width - CHECK_WIDTH - GAP, y + 18, 0xffff7777);
+  }
+
+  void renderError(UiScreen screen) {
+    if (active() && !error.isEmpty() && System.nanoTime() < errorUntil) screen.tooltip(error, x, y + 18);
   }
 
   String help() { return error.isEmpty() ? "Enter or check to apply. Escape or click elsewhere to cancel." : error; }

@@ -4,7 +4,6 @@ import local.luke.power.mechanics.Config;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
-import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.TntEntity;
@@ -22,7 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Item.class)
 public class ItemBaseMixin {
 
-    @Shadow public static Item FEATHER;
     @Shadow public static Item SLIMEBALL;
     @Shadow public static ShearsItem SHEARS;
 
@@ -57,27 +55,7 @@ public class ItemBaseMixin {
 
     @Inject(method = "useOnBlock", at = @At("HEAD"), cancellable = true)
     public void powerMechanics_useOnTile(ItemStack stack, PlayerEntity user, World world, int x, int y, int z, int side, CallbackInfoReturnable<Boolean> cir) {
-        if (FEATHER.id == stack.itemId) {
-            if (Config.config.INTERACTIVE_BLOCK_CONFIG.enableEditSignsWithFeathers) {
-                int blockId = world.getBlockId(x, y, z);
-
-                if (  (Block.SIGN.id == blockId)
-                   || (Block.WALL_SIGN.id == blockId)
-                ) {
-                    --stack.count;
-
-                    SignBlockEntity var8 = (SignBlockEntity)world.getBlockEntity(x, y, z);
-                    if (var8 != null) {
-                        if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
-                            var8.setEditable(true);
-                        }
-                        user.openEditSignScreen(var8);
-                    }
-
-                    cir.setReturnValue(true);
-                }
-            }
-        } else if (SLIMEBALL.id == stack.itemId) {
+        if (SLIMEBALL.id == stack.itemId) {
             if (Config.config.INTERACTIVE_BLOCK_CONFIG.enableGlueTrapdoorsWithSlimeballs) {
                 int blockId = world.getBlockId(x, y, z);
 

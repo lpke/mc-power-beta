@@ -1,6 +1,0 @@
-noFoodWastage: false
-pickBlockFromInventory: true
-shiftPlacing: true
-shiftPlacingBlacklist: []
-rightClickEquipArmor: true
-fenceJumping: false

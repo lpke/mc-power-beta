@@ -66,7 +66,7 @@ final class AudioRefinementChecks {
     try {
       var config=new AudioSettings();
       config.musicMode=AudioSettings.MusicMode.ALL_MINECRAFT;
-      config.presets.add(new MusicPreset("test","Test",Set.of("music:calm1.ogg")));
+      config.presets.add(new MusicPreset("test","Test",Set.of("music:calm1.ogg"), Map.of(), Set.of()));
       AudioConfig.preview(config);
       AudioController.pause();
       PowerOptionsScreen s=MenuUpdateChecks.open(mc,"Audio");

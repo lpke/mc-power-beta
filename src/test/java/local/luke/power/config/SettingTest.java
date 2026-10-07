@@ -7,6 +7,31 @@ import java.util.*;
 import org.junit.jupiter.api.*;
 
 class SettingTest {
+  @Test void durationEditorsUseSecondsWithoutChangingStorageOrPrecision() {
+    Setting s = new Setting("creative.doubleTapTicks", "creative", "", "", "", "",
+        Setting.Kind.INTEGER, new JsonPrimitive(7), new JsonPrimitive(7), 2, 20, 1, List.of(), false);
+    assertEquals("0.35", s.display());
+    assertEquals("0.35", s.editText());
+    assertEquals("0.1 to 1 seconds", s.rangeText());
+    s.parse("0.55");
+    assertEquals(11, s.value.getAsInt());
+    assertThrows(IllegalArgumentException.class, () -> s.parse("0.551"));
+    assertEquals(11, s.value.getAsInt());
+    s.reset(); assertEquals(7, s.value.getAsInt());
+    assertTrue(Tooltips.setting(s, "").contains("Range: 0.1 to 1 seconds."));
+  }
+
+  @Test void validationRejectsEditsBeforePublishingAndNoticesHaveBlankLines() {
+    Setting s = new Setting("worldedit.wandItem", "worldedit", "", "", "Wand", "Select a tool.",
+        Setting.Kind.INTEGER, new JsonPrimitive(271), new JsonPrimitive(271), 1, 32767, 1, List.of(), true);
+    s.validator(value -> { if (value.getAsInt() != 271) throw new IllegalArgumentException("Unknown item"); });
+    assertFalse(s.slider());
+    assertThrows(IllegalArgumentException.class, () -> s.parse("999"));
+    assertEquals(271, s.value.getAsInt());
+    assertTrue(Tooltips.setting(s, "Click to edit.").contains("\n\nRestart required."));
+    assertTrue(Tooltips.setting(s, "Click to edit.").contains("\n\nRange: 1 to 32767."));
+  }
+
   @Test
   void largeMusicSelectionsCanBeSavedWithoutRelaxingOtherListLimits() {
     JsonArray tracks = new JsonArray();

@@ -27,6 +27,7 @@
     "PlayerInventoryMixin",
     "PrimedTntMixin",
     "SignBlockEntityMixin",
+    "SignInteractionMixin",
     "SnowballEntityMixin",
     "TallGrassMixin",
     "TrapdoorBlockMixin",

@@ -25,7 +25,7 @@ public abstract class WorldPropertiesMixin implements WorldSettings {
 
   @Inject(method = "<init>(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("RETURN"))
   private void worldedit$read(NbtCompound tag, CallbackInfo ci) {
-    worldedit$access = WorldOverride.decode(tag.getInt(tag.contains("PowerBetaWorldEditAccess") ? "PowerBetaWorldEditAccess" : local.luke.power.storage.LegacyKeys.original("PowerBetaWorldEditAccess")));
+    worldedit$access = WorldOverride.decode(tag.getInt("PowerBetaWorldEditAccess"));
   }
 
   @Inject(method = "<init>(Lnet/minecraft/world/WorldProperties;)V", at = @At("RETURN"))

@@ -30,22 +30,12 @@ public abstract class CommandWorldMixin
 
   @Inject(method = "<init>(Lnet/minecraft/nbt/NbtCompound;)V", at = @At("RETURN"))
   private void power$read(NbtCompound tag, CallbackInfo ci) {
-    NbtCompound player = tag.getCompound("Player");
-    String mode = player.getString("PowerBetaGameMode");
-    if (mode.isEmpty())
-      mode = player.getString(local.luke.power.storage.LegacyKeys.original("PowerBetaGameMode"));
-    power$cheats =
-        tag.contains(TAG)
-            ? tag.getBoolean(TAG)
-            : tag.getBoolean("Creative")
-                || player.getBoolean("Creative")
-                || mode.equals("CREATIVE")
-                || mode.equals("SPECTATOR");
+    power$cheats = tag.getBoolean(TAG);
     String value = tag.getString("PowerBetaCommandWorldId");
     try {
       power$commandId = UUID.fromString(value).toString();
     } catch (IllegalArgumentException ignored) {
-      /* Older worlds acquire an ID on their next save. */
+      /* New worlds receive the generated ID on save. */
     }
   }
 

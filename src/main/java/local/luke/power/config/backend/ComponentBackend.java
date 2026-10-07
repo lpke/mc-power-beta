@@ -9,15 +9,13 @@ import net.fabricmc.loader.api.FabricLoader;
 
 /** Uses validated component APIs; auto-apply previews stay in memory until slider release. */
 public final class ComponentBackend implements Backend {
-  private final String id, apiName, getter, file;
+  private final String id, getter;
   private final Class<?> api, type;
   private final List<Setting> entries = new ArrayList<>();
 
-  public ComponentBackend(String id, String apiName, String getter, String file) throws Exception {
+  public ComponentBackend(String id, String apiName, String getter) throws Exception {
     this.id = id;
-    this.apiName = apiName;
     this.getter = getter;
-    this.file = file;
     api = Class.forName(apiName);
     Object current = api.getMethod(getter).invoke(null);
     type = current.getClass();
@@ -27,16 +25,15 @@ public final class ComponentBackend implements Backend {
   public static void register(ConfigSession session) throws Exception {
     for (String[] spec :
         new String[][] {
-          {"tweaks", "local.luke.power.building.config.Config", "current", "power_building.properties"},
-          {"creative", "local.luke.power.creative.config.Config", "current", "power_creative.properties"},
+          {"tweaks", "local.luke.power.building.config.Config", "current"},
+          {"creative", "local.luke.power.creative.config.Config", "current"},
           {
             "worldedit",
             "local.luke.power.worldedit.WorldEditor",
-            "settings",
-            "power-worldedit.properties"
+            "settings"
           }
         }) {
-      ComponentBackend b = new ComponentBackend(spec[0], spec[1], spec[2], spec[3]);
+      ComponentBackend b = new ComponentBackend(spec[0], spec[1], spec[2]);
       session.add(b, b.entries);
     }
   }
@@ -230,8 +227,8 @@ public final class ComponentBackend implements Backend {
     else
       Class.forName(
               id.equals("tweaks")
-                  ? "local.luke.power.building.config.ConfigStore"
-                  : "local.luke.power.worldedit.config.ConfigStore")
+                  ? "local.luke.power.building.config.SettingsValidator"
+                  : "local.luke.power.worldedit.config.SettingsValidator")
           .getMethod("validate", type)
           .invoke(null, draft);
   }

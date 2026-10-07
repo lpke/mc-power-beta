@@ -89,15 +89,14 @@ class CommandPermissionsTest {
   }
 
   @Test
-  void legacyCreativeRulesBecomeAllowedAndExplicitBlocksRemain() {
-    Settings old =
-        new Gson()
-            .fromJson(
-                "{\"rules\":{\"warp\":\"CREATIVE_ONLY\",\"give\":\"DISABLED\",\"tp\":\"ANY_MODE\"}}",
-                Settings.class);
-    assertEquals(Rule.ALLOWED, old.rules.get("warp"));
-    assertEquals(Rule.ALLOWED, old.rules.get("tp"));
-    assertEquals(Rule.DISABLED, old.rules.get("give"));
+  void permissionsUseCurrentRuleNames() {
+    Settings restored = new Gson().fromJson(
+        "{\"rules\":{\"warp\":\"ALLOWED\",\"give\":\"DISABLED\"}}", Settings.class);
+    restored.validate();
+    assertEquals(Rule.ALLOWED, restored.rules.get("warp"));
+    assertEquals(Rule.DISABLED, restored.rules.get("give"));
+    Settings invalid = new Gson().fromJson("{\"rules\":{\"warp\":\"CREATIVE_ONLY\"}}", Settings.class);
+    assertThrows(IllegalArgumentException.class, invalid::validate);
   }
 
   @Test

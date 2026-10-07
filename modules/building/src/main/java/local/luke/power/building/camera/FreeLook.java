@@ -11,7 +11,7 @@ import org.lwjgl.opengl.Display;
 
 /** Free look's input/camera separation, owned by BuildingFeatures. Never rotates the player. */
 public final class FreeLook {
-  // Keep the old options.txt identifier so existing key assignments survive migration.
+  // Stable identifier shared with Power Beta's binding registry.
   public static final KeyBinding KEY = new KeyBinding("key.powerbeta.free_look", Keyboard.KEY_GRAVE);
   private static final LookAngles angles = new LookAngles();
   private static boolean active, wasDown, waitForRelease, previousThird, wasPerspectiveDown;

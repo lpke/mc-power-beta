@@ -11,7 +11,18 @@ public final class Settings {
     WHITELIST
   }
 
-  public record ItemFilter(int id, int damage) {
+  public static final class ItemFilter {
+    private final int id, damage;
+
+    public ItemFilter(int id, int damage) { this.id = id; this.damage = damage; }
+    public int id() { return id; }
+    public int damage() { return damage; }
+
+    @Override public boolean equals(Object other) {
+      return other instanceof ItemFilter filter && id == filter.id && damage == filter.damage;
+    }
+    @Override public int hashCode() { return java.util.Objects.hash(id, damage); }
+
     public boolean matches(int item, int meta) {
       return id == item && (damage < 0 || damage == meta);
     }

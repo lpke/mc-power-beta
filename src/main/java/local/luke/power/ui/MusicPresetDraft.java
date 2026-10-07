@@ -26,8 +26,8 @@ public final class MusicPresetDraft {
     originalVolumes = creating ? Map.of() : Map.copyOf(preset.groupVolumes());
     volumes = new TreeMap<>(originalVolumes);
     this.available = Set.copyOf(available);
-    originalPool = preset != null && preset.trackPool() != null ? Set.copyOf(preset.trackPool()) : null;
-    pool = new TreeSet<>(originalPool == null ? available : originalPool);
+    originalPool = creating ? Set.of() : Set.copyOf(preset.trackPool());
+    pool = new TreeSet<>(creating ? available : originalPool);
   }
 
   public String name() {
@@ -39,7 +39,7 @@ public final class MusicPresetDraft {
   }
 
   public boolean included(String id) {
-    return (originalPool == null && available.isEmpty() || pool.contains(id)) && !excluded.contains(id);
+    return pool.contains(id) && !excluded.contains(id);
   }
 
   public void include(String id, boolean value) {
@@ -75,11 +75,11 @@ public final class MusicPresetDraft {
         || !originalName.equals(name.strip())
         || !original.equals(excluded)
         || !originalVolumes.equals(volumes)
-        || originalPool != null && !originalPool.equals(pool);
+        || !originalPool.equals(pool);
   }
 
   public MusicPreset snapshot(String name) {
     return new MusicPreset(id, name, excluded, volumes,
-        originalPool == null && available.isEmpty() ? null : pool);
+        pool);
   }
 }

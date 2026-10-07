@@ -13,18 +13,6 @@ public final class VideoConfig {
     if (current == null) {
       try {
         current = PowerConfig.read("video", VideoSettings.class);
-        // Keep existing Fast/Fancy preferences during the first migration.
-        if (PowerConfig.section("video").size() == 0) {
-          Minecraft mc =
-              net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance()
-                      instanceof Minecraft game
-                  ? game
-                  : null;
-          boolean fancy = mc == null || mc.options == null || mc.options.fancyGraphics;
-          current.leaves =
-              current.grass =
-                  current.clouds = current.water = current.weather = current.shadows = fancy;
-        }
         current.validate();
       } catch (Exception e) {
         PowerBeta.LOG.error("Could not load video settings", e);

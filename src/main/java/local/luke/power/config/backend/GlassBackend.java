@@ -44,10 +44,6 @@ public final class GlassBackend implements Backend {
       ConfigEntry m = h.parentField.getAnnotation(ConfigEntry.class);
       String key = id + "." + prefix + h.id;
       if (Catalog.text(Catalog.metadata(key), "group", "").equals("Available controls")) continue;
-      JsonObject metadata = Catalog.metadata(key);
-      if (metadata.has("hidden") && metadata.get("hidden").getAsBoolean()) continue;
-      String supersedingMod = Catalog.text(metadata, "hiddenWithMod", "");
-      if (!supersedingMod.isEmpty() && net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded(supersedingMod)) continue;
       handlers.put(key, h);
       Class<?> type = h.parentField.getType();
       List<String> choices =

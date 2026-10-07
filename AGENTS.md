@@ -26,7 +26,9 @@
 - `PowerConfig` is the only settings writer: `config/power-beta.json`.
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
-  track and preset IDs; migrate renamed fields once, with verified backups.
+  track and preset IDs. Only the current configuration format is supported.
+  Fresh installs copy `defaults/power-beta.json`; do not reintroduce historical importers.
+  Update existing instances explicitly when their stored data needs to change.
   The config API retains its `gcapi3` binary identity for external dependencies.
 - The game uses Gson 2.8.9. Do not rely on record deserialization without an explicit
   adapter. Test persisted data with that version, including rollback and restart.
@@ -36,8 +38,7 @@
 - `settings-layout.json` owns tab/group order; catalogue `order` values arrange
   settings inside groups. Presentation metadata applies to every adapter without
   changing storage IDs. Keep shared flight/freecam sprint controls linked by ID.
-  The focus-loss pause preference is `power_controls:general.pauseOnLostFocus`;
-  migrate the old inverse `forceDisplayActive` flag before module initialization.
+  The focus-loss pause preference is `power_controls:general.pauseOnLostFocus`.
 - Ctrl, Shift and Alt are the only chord modifiers. Gameplay acts on key-down.
   Test both release orders, held movement, focus loss and open menus.
   Linux key repairs must update native events and polling together. F20–F24 use
@@ -50,6 +51,14 @@
   snapshots must stay separate from live library edits; only Load copies a preset
   into live state. Track pools prevent new folders silently expanding presets.
   Keep missing track IDs, queues and user music files intact.
+- World cycles are per-world cheats. Keep the simulation clock running; daylight
+  uses an offset saved in world metadata. Sky rendering, day counters, time commands
+  and photo mode use the daylight clock. Sleep must wake players without advancing
+  frozen daylight or clearing frozen weather. Test normal and accelerated sleep,
+  scheduled updates, pause/resume, save/reload and cheats being disabled.
+- Numeric display units do not change stored values. Duration editors use seconds;
+  processing budgets remain per tick. Validate item/filter IDs before accepting
+  drafts, and keep temporary errors outside row layout.
 - Item transfers are transactions, including full counts, damage and NBT. Preserve
   journal flushes, rollback, ownership checks and failure shutdown. Menu edits must
   never touch inventory slots. WorldEdit and carrying suppress StationAPI block
@@ -58,6 +67,8 @@
 - Compact buttons must retain all four texture borders. Check narrow GUI sizes,
   sticky headings, clipping and click targets, not only a wide screenshot.
   Creative catalogue rows grow upward; hotbar and survival slots never move.
+  The final catalogue row and hotbar use the same 22-pixel origin spacing as survival.
+  Leaving spectator keeps the current position, including inside solid blocks.
 - `TweakIndicators` exposes live module state across mappings. HUD inclusion is
   separate from gameplay settings. Do not infer active auto-walk/free look from
   feature availability or poll action keys while rendering.
@@ -74,7 +85,7 @@
 - For an existing Power Beta instance on matching dependencies, use
   `python3 tools/update_artifacts.py /path/to/instance`. It refuses running clients,
   verifies a backup and checks that settings and worlds remain byte-identical.
-  `update_profiles.py` is for legacy/full-profile migration, not routine updates.
+  Configuration changes are separate, backed-up operations through `PowerConfig`.
 - Verify the final export contains seven enabled JARs and no test fixtures, accounts,
   worlds, logs or disabled mods. Keep README human-facing; add lasting implementation
   constraints here rather than another session diary.

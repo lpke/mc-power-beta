@@ -337,6 +337,7 @@ public final class PowerOptionsScreen extends UiScreen {
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
     }
     for (Setting s : candidates) {
+      if (!SettingAccess.visible(session, s)) continue;
       if (s.group.equals("Music data")) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty() && (s.group.equals("Track rotation") || s.id.startsWith("audio.sound.music:"))) continue;
       if (listed.isEmpty() && s.kind == Setting.Kind.KEY && !showDisabled && !ControlLinks.enabled(session, s)) continue;
@@ -394,7 +395,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (dragging == null && !continuous) save(false, false);
       else autoSavePending = true;
     }
-    if (changedOnly) layout();
+    if (changedOnly || settings.stream().anyMatch(s -> s.id.equals("world.cheats"))) layout();
   }
 
   private int controlLeft(Row row) {
@@ -579,7 +580,7 @@ public final class PowerOptionsScreen extends UiScreen {
         }
         if (x < mainControlLeft(r) || x >= right() - 38) return;
         if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
-          if (button == 0) {
+          if (button == 0 && s.slider()) {
             dragging = s;
             double pixels = (double) minecraft.displayWidth / width;
             dragLeft = (mainControlLeft(r) + 4) * pixels;
@@ -648,6 +649,13 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (s.id.equals("native.texturePack")) {
       minecraft.setScreen(new TexturePackScreen(this, s));
+      return;
+    }
+    if (s.numeric() && !s.slider()) {
+      Row row = rows.stream().filter(r -> r.setting == s).findFirst().orElseThrow();
+      int y = top() + row.y - (int) scroll + (row.height == 40 ? 16 : 2);
+      valueEditor.begin(s, s, () -> changed(s), mainControlLeft(row), y,
+          right() - 38 - mainControlLeft(row), top(), bottom());
       return;
     }
     switch (s.kind) {
@@ -954,7 +962,7 @@ public final class PowerOptionsScreen extends UiScreen {
       int valueEnd = right() - 38;
       if (numeric && editable && valueEditor.editing(s))
         valueEditor.render(this, controlLeft, cy, valueEnd - controlLeft, mx, listMouseY, rowsTop, bottom());
-      else if (numeric && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
+      else if (s.slider() && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
           (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
       else if (editable && ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY);
       else if (s.kind == Setting.Kind.KEY && editable) button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
@@ -967,15 +975,14 @@ public final class PowerOptionsScreen extends UiScreen {
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
-        if (!editable) tip = lock + (s.description.isEmpty() ? "" : "\n" + s.description);
+        if (!editable) tip = Tooltips.setting(s, lock);
         else if (mx >= right() - 34) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
         else if (!conflicts.isEmpty() && inside(mx, listMouseY, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
           tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
-        } else tip = valueEditor.editing(s) ? valueEditor.help()
-            : s.description + (numeric && mx >= controlLeft ? "\nRight-click to enter an exact value." : "")
-                + (s.restart ? "\nRestart required." : "");
+        } else tip = Tooltips.setting(s, valueEditor.editing(s) ? valueEditor.help()
+            : numeric && mx >= controlLeft ? s.slider() ? "Right-click to enter an exact value." : "Click to enter an exact value." : "");
       }
     }
     if (sticky != null) {
@@ -1028,6 +1035,7 @@ public final class PowerOptionsScreen extends UiScreen {
       hoverTicks = 0;
     }
     if (!tip.isEmpty() && hoverTicks > 12 && !confirmClose && !confirmReset) tooltip(tip, mx, my);
+    valueEditor.renderError(this);
     if (capture != null || confirmClose || confirmReset) {
       fill(0, 0, width, height, 0xc0000000);
       String message =

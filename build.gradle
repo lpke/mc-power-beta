@@ -51,7 +51,6 @@ dependencies {
     include 'local.powerbeta:power_creative:1.1.0'
     include 'local.powerbeta:power_building:1.2.1'
     include 'local.powerbeta:power-worldedit:1.2.1'
-    include 'local.powerbeta:MCAuthLib:d9d773e5d50327c33898c65cd545a4f6ef3ba1b5'
     include 'blue.endless:jankson:1.2.1'
     include 'local.powerbeta:Simple-Yaml:1.8.4'
     include 'com.google.guava:guava:33.2.1-jre'

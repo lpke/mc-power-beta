@@ -38,7 +38,7 @@ class MusicPresetTest {
   @Test void groupVolumesAreIsolatedPersistedAndOnlyCopiedWhenLoaded() {
     AudioSettings live = new AudioSettings();
     live.groupVolumes.put("Alpha", 75);
-    MusicPreset saved = new MusicPreset("id", "Name", Set.of(), Map.of("Alpha", 40));
+    MusicPreset saved = new MusicPreset("id", "Name", Set.of(), Map.of("Alpha", 40), Set.of());
     MusicPresetDraft draft = new MusicPresetDraft(saved);
     draft.volume("Alpha", 20);
     draft.volume("folder:/music", 0);
@@ -63,20 +63,24 @@ class MusicPresetTest {
     assertFalse(draft.snapshot("Name").groupVolumes().containsKey("Alpha"));
   }
 
-  @Test void legacyPresetsUseFullGroupVolumeAndInvalidVolumesDoNotPartlyLoad() {
+  @Test void incompleteOrInvalidPresetsCannotPartlyLoad() {
     Gson gson = new Gson();
-    var legacy = gson.fromJson("{\"id\":\"old\",\"name\":\"Old\",\"excluded\":[]}", MusicPreset.class);
-    AudioSettings live = new AudioSettings(); live.groupVolumes.put("Alpha", 20);
-    live.presets.add(legacy); live.validate(); MusicPreset.load(live, "old");
-    assertTrue(live.groupVolumes.isEmpty());
-    var bad = gson.fromJson("{\"id\":\"bad\",\"name\":\"Bad\",\"excluded\":[\"music:calm1.ogg\"],\"groupVolumes\":{\"Alpha\":101}}", MusicPreset.class);
-    live.presets.add(bad);
-    assertThrows(IllegalArgumentException.class, () -> MusicPreset.load(live, "bad"));
-    assertTrue(live.disabledTracks.isEmpty()); assertEquals("old", live.preset);
+    for (String fields : List.of("", ",\"groupVolumes\":{}", ",\"groupVolumes\":{\"Alpha\":101},\"trackPool\":[]")) {
+      var bad = gson.fromJson("{\"id\":\"bad\",\"name\":\"Bad\",\"excluded\":[]" + fields + "}", MusicPreset.class);
+      AudioSettings live = new AudioSettings();
+      live.groupVolumes.put("Alpha", 20);
+      live.disabledTracks.add("music:calm1.ogg");
+      live.presets.add(bad);
+      assertThrows(IllegalArgumentException.class, live::validate);
+      assertThrows(IllegalArgumentException.class, () -> MusicPreset.load(live, "bad"));
+      assertEquals(Map.of("Alpha", 20), live.groupVolumes);
+      assertEquals(Set.of("music:calm1.ogg"), live.disabledTracks);
+      assertEquals("", live.preset);
+    }
   }
 
   @Test void bulkDraftEditsRetainMissingSelectionsAndDoNotChangeTheSavedPreset() {
-    MusicPreset saved=new MusicPreset("id","Name",Set.of("music:missing.ogg"));
+    MusicPreset saved=new MusicPreset("id","Name",Set.of("music:missing.ogg"), Map.of(), Set.of());
     MusicPresetDraft draft=new MusicPresetDraft(saved);
     List<String> tracks=new ArrayList<>();
     for(int i=0;i<4203;i++)tracks.add("music:track"+i+".ogg");
@@ -105,7 +109,7 @@ class MusicPresetTest {
   void editingAndLoadingAreSeparateAndMissingTrackSelectionsSurvive() {
     AudioSettings live = new AudioSettings();
     live.disabledTracks.add("music:calm1.ogg");
-    MusicPreset original = new MusicPreset("one", "One", Set.of("music:missing.ogg"));
+    MusicPreset original = new MusicPreset("one", "One", Set.of("music:missing.ogg"), Map.of(), Set.of());
     live.presets.add(original);
     MusicPresetDraft draft = new MusicPresetDraft(original);
     draft.include("music:creative1.ogg", false);
@@ -162,7 +166,7 @@ class MusicPresetTest {
   @Test
   void persistedDataValidatesWithTheGamesGsonVersion() {
     AudioSettings s = new AudioSettings();
-    s.presets.add(new MusicPreset("id", "Name", Set.of("music:calm1.ogg")));
+    s.presets.add(new MusicPreset("id", "Name", Set.of("music:calm1.ogg"), Map.of(), Set.of()));
     s.preset = "id";
     s.favourites.add("music:calm2.ogg");
     Gson gson = new Gson();
@@ -170,22 +174,22 @@ class MusicPresetTest {
     restored.validate();
     assertEquals("Name", restored.presets.get(0).name());
     assertEquals(s.favourites, restored.favourites);
-    AudioSettings legacy = gson.fromJson("{\"musicMode\":\"ALPHA_BETA\"}", AudioSettings.class);
-    legacy.validate();
-    assertEquals(AudioSettings.MusicMode.ALPHA_BETA, legacy.musicMode);
-    assertTrue(legacy.preset.isEmpty());
+    AudioSettings partial = gson.fromJson("{\"musicMode\":\"ALPHA_BETA\"}", AudioSettings.class);
+    partial.validate();
+    assertEquals(AudioSettings.MusicMode.ALPHA_BETA, partial.musicMode);
+    assertTrue(partial.preset.isEmpty());
   }
 
   @Test
   void malformedDataCannotReplaceASelection() {
-    assertThrows(IllegalArgumentException.class, () -> new MusicPreset("bad/id", "Bad", Set.of()));
-    assertThrows(IllegalArgumentException.class, () -> new MusicPreset("id", " ", Set.of()));
+    assertThrows(IllegalArgumentException.class, () -> new MusicPreset("bad/id", "Bad", Set.of(), Map.of(), Set.of()));
+    assertThrows(IllegalArgumentException.class, () -> new MusicPreset("id", " ", Set.of(), Map.of(), Set.of()));
     AudioSettings s = new AudioSettings();
     s.disabledTracks.add("music:calm1.ogg");
     assertThrows(IllegalArgumentException.class, () -> MusicPreset.load(s, "missing"));
     assertEquals(Set.of("music:calm1.ogg"), s.disabledTracks);
-    s.presets.add(new MusicPreset("id", "One", Set.of()));
-    s.presets.add(new MusicPreset("id", "Two", Set.of()));
+    s.presets.add(new MusicPreset("id", "One", Set.of(), Map.of(), Set.of()));
+    s.presets.add(new MusicPreset("id", "Two", Set.of(), Map.of(), Set.of()));
     assertThrows(IllegalArgumentException.class, s::validate);
   }
 

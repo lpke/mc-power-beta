@@ -13,6 +13,14 @@ public final class Tooltips {
       return JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
     } catch (IOException e) { throw new IllegalStateException(e); }
   }
+  public static String paragraphs(String... parts) {
+    return java.util.Arrays.stream(parts).filter(p -> p != null && !p.isBlank())
+        .map(String::strip).collect(java.util.stream.Collectors.joining("\n\n"));
+  }
+  public static String setting(Setting setting, String note) {
+    return paragraphs(setting.description, setting.numeric() ? "Range: " + setting.rangeText() + "." : "",
+        note, setting.restart ? "Restart required." : "");
+  }
   public static String description(String id, String label, String fallback) {
     String text = EXTRA.has(id) ? EXTRA.get(id).getAsString() : fallback;
     if (text == null) return "";
@@ -21,6 +29,7 @@ public final class Tooltips {
         .replace("Restart required.", "").strip();
     if (text.equalsIgnoreCase(label) || text.equalsIgnoreCase(label + ".")) return "";
     if (text.startsWith(label + "\n")) text = text.substring(label.length()).strip();
+    text = text.replaceAll("(?<!\\n)\\s+(?=(?:Requires |Warning:|WARNING:|Restart after ))", "\n\n");
     return text.replace("Power Beta defaults", "defaults").replace("Power Beta Defaults", "Defaults");
   }
 }

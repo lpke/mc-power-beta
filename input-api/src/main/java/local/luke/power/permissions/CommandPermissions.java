@@ -8,9 +8,6 @@ import local.luke.power.storage.PowerConfig;
 /** Access policy only. Never modifies a command's saved data or player inventory. */
 public final class CommandPermissions {
   public enum Rule {
-    @com.google.gson.annotations.SerializedName(
-        value = "ALLOWED",
-        alternate = {"ANY_MODE", "CREATIVE_ONLY"})
     ALLOWED,
     DISABLED
   }

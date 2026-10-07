@@ -775,7 +775,7 @@ public final class MusicLibraryScreen extends UiScreen {
       }
       if(hover)fill(left()-2,y,right()+2,y+row.height-1,0x60000000);
       text(fit((queue?(i+1)+". ":"")+AudioController.musicLabel(id),layout.nameWidth()),layout.nameX(),y+8,playable(id)?0xdddddd:0xffbb77);
-      if(hover)tip=path(id)+(playable(id)?"":"\nConvert MP3, or reload if the file has moved.");
+      if(hover)tip=path(id)+(playable(id)?"":"\n\nConvert MP3, or reload if the file has moved.");
       if(!queue)musicToggle(included(id),left(),y+3,mx,listMouseY,true);
       Setting volume=settings.get("audio.sound."+id);
       if(!presetsOpen){
@@ -795,7 +795,7 @@ public final class MusicLibraryScreen extends UiScreen {
       iconButton(AudioController.playingTrack(id)?"pause":"play",layout.playX(),cy,bw,mx,listMouseY,playable(id));
       if(hover){
         if(!queue&&inside(mx,listMouseY,left(),y+3,20,18))tip="Include in automatic rotation. Preview and queue work even when excluded.";
-        else if(!presetsOpen&&inside(mx,listMouseY,volumeX(),cy,layout.volumeWidth(),18))tip=parent.valueEditor.editing(row) ? parent.valueEditor.help() : "Track volume; music and master volumes also apply. Right-click to enter an exact value.";
+        else if(!presetsOpen&&inside(mx,listMouseY,volumeX(),cy,layout.volumeWidth(),18))tip=parent.valueEditor.editing(row) ? parent.valueEditor.help() : "Track volume; music and master volumes also apply.\n\nRange: 0 to 100%.\n\nRight-click to enter an exact value.";
         else if(!presetsOpen&&inside(mx,listMouseY,layout.favouriteX(),cy,bw,18))tip=edits.favourites().contains(id)?"Remove from favourites":"Add to favourites";
         else if(inside(mx,listMouseY,layout.playX(),cy,bw,18))tip="Play or pause this track";
         else if(!queue&&inside(mx,listMouseY,layout.previewX(),cy,bw,18))tip="Preview without changing the current track; click again to stop.";

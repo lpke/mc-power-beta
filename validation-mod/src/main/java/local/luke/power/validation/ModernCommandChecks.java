@@ -53,7 +53,7 @@ public final class ModernCommandChecks {
     float yaw = mc.player.yaw, pitch = mc.player.pitch;
     int health = mc.player.health;
     int difficulty = mc.options.difficulty;
-    long time = mc.world.getTime();
+    long time = ((local.luke.power.world.WorldCycles)mc.world.method_262()).power$daylightTime();
     var properties = mc.world.method_262();
     boolean rain = properties.getRaining(), thunder = properties.getThundering();
     int rainTime = properties.getRainTime(), thunderTime = properties.getThunderTime();
@@ -206,12 +206,12 @@ public final class ModernCommandChecks {
           "time weather difficulty and seed follow the documented syntax",
           () -> {
             run(mc, "/time set day");
-            check(mc.world.getTime() == 1000, "day preset wrong");
+            check(((local.luke.power.world.WorldCycles)mc.world.method_262()).power$daylightTime() == 1000, "day preset wrong");
             run(mc, "/time add 1s");
-            check(mc.world.getTime() == 1020, "duration units wrong");
+            check(((local.luke.power.world.WorldCycles)mc.world.method_262()).power$daylightTime() == 1020, "duration units wrong");
             check(run(mc, "/time query daytime").get(0).contains("1020"), "query wrong");
             ChatChecks.submit(mc, "/time set");
-            check(mc.world.getTime() == 1020, "incomplete time changed world");
+            check(((local.luke.power.world.WorldCycles)mc.world.method_262()).power$daylightTime() == 1020, "incomplete time changed world");
             run(mc, "/weather thunder 20t");
             check(
                 properties.getThundering()
@@ -346,7 +346,7 @@ public final class ModernCommandChecks {
       ((PlayerWarps) mc.player).spc$setWarpString(warps);
       for (Object value : new ArrayList<>(mc.world.field_198))
         if (value instanceof Entity e && e != mc.player && !entities.contains(e)) e.markDead();
-      mc.world.setTime(time);
+      ((local.luke.power.world.WorldCycles)mc.world.method_262()).power$daylightTime(time);
       mc.world.setSpawnPos(worldSpawn);
       mc.options.difficulty = difficulty;
       mc.options.save();

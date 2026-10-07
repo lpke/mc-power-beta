@@ -43,6 +43,8 @@ public final class WorldBackend implements Backend {
                 1,
                 List.of(),
                 false),
+            cycle(b, "daylightCycle", "Daylight cycle", "Advance the sun, moon and day counter. Off freezes the current daylight time; gameplay and play time continue. Sleeping still sets your spawn and wakes you without advancing daylight.", ((local.luke.power.world.WorldCycles) b.properties()).power$daylightCycle()),
+            cycle(b, "weatherCycle", "Weather cycle", "Allow weather to change naturally. Off freezes the current weather and pauses its timers. Sleeping cannot clear frozen weather. Turning on resumes the timers.", ((local.luke.power.world.WorldCycles) b.properties()).power$weatherCycle()),
             new Setting(
                 "worldedit.worldOverride",
                 b.id(),
@@ -61,6 +63,11 @@ public final class WorldBackend implements Backend {
                 false)));
   }
 
+  private static Setting cycle(WorldBackend b, String id, String label, String help, boolean value) {
+    return new Setting("world." + id, b.id(), "General", "Game", label, help,
+        Setting.Kind.BOOLEAN, new JsonPrimitive(value), new JsonPrimitive(true), 0, 1, 1, List.of(), false);
+  }
+
   private CheatWorld properties() {
     return (CheatWorld) mc.world.method_262();
   }
@@ -74,12 +81,24 @@ public final class WorldBackend implements Backend {
   }
 
   public void validate(Map<String, JsonElement> values) {
+    checkWorld();
+    boolean cheats = values.containsKey("world.cheats") ? values.get("world.cheats").getAsBoolean() : properties().power$cheatsEnabled();
+    if (!cheats && (values.containsKey("world.daylightCycle") || values.containsKey("world.weatherCycle")))
+      throw new IllegalArgumentException("Enable cheats to change world cycles.");
+  }
+
+  private void checkWorld() {
     if (mc.world != world || mc.world == null || mc.world.isRemote)
       throw new IllegalArgumentException("The open world changed. Reopen Options.");
   }
 
   public void apply(Map<String, JsonElement> values) throws Exception {
     validate(values);
+    restore(values);
+  }
+
+  public void restore(Map<String, JsonElement> values) throws Exception {
+    checkWorld();
     if (values.containsKey("world.cheats")) {
       boolean enabled = values.get("world.cheats").getAsBoolean();
       if (!enabled && properties().power$cheatsEnabled()) {
@@ -89,6 +108,9 @@ public final class WorldBackend implements Backend {
       }
       properties().power$cheatsEnabled(enabled);
     }
+    var cycles = (local.luke.power.world.WorldCycles) properties();
+    if (values.containsKey("world.daylightCycle")) cycles.power$daylightCycle(values.get("world.daylightCycle").getAsBoolean());
+    if (values.containsKey("world.weatherCycle")) cycles.power$weatherCycle(values.get("world.weatherCycle").getAsBoolean());
     if (values.containsKey("worldedit.worldOverride"))
       api.getMethod("worldOverride", Minecraft.class, type)
           .invoke(

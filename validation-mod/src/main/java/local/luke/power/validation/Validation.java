@@ -47,7 +47,8 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("settings-review")) SettingsReviewChecks.run(mc);
+      if (command.equals("cleanup")) CleanupChecks.run(mc);
+      else if (command.equals("settings-review")) SettingsReviewChecks.run(mc);
       else if (command.startsWith("settings-snapshot ")) SettingsSnapshot.write(mc, command.substring(18));
       else if (command.equals("cheats-creation")) CheatsChecks.creation(mc);
       else if (command.startsWith("indicators-")) IndicatorsMenuChecks.run(mc,command.substring(11));
@@ -279,16 +280,6 @@ public final class Validation {
     test(
         "empty playlists are safe",
         () -> check(AudioController.choose(List.of()) == null, "Expected empty playlist"));
-    test(
-        "legacy portal stop requests are consumed",
-        () -> {
-          Field stop =
-              Class.forName("local.luke.power.music_api.MusicState")
-                  .getField("cancelCurrentBGM");
-          stop.setBoolean(null, true);
-          AudioController.tick(mc);
-          check(!stop.getBoolean(null), "Request not consumed");
-        });
     try {
       AudioSettings draft = AudioConfig.copy();
       draft.master = 50;

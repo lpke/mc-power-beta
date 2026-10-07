@@ -14,6 +14,9 @@ public interface Backend {
 
   void apply(Map<String, JsonElement> values) throws Exception;
 
+  /** Restore a previously accepted snapshot after a failed save. */
+  default void restore(Map<String, JsonElement> values) throws Exception { apply(values); }
+
   default boolean previews(Setting setting) { return false; }
   default boolean previewsAutomatically(Setting setting) { return previews(setting); }
 

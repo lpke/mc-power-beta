@@ -26,7 +26,7 @@ public final class PowerConfig {
       if (!Files.exists(path)) { JsonObject root = new JsonObject(); root.addProperty("schemaVersion", 3); root.add("settings", new JsonObject()); return root; }
       if (Files.isSymbolicLink(path) || Files.size(path) > 4 * 1024 * 1024) throw new IOException("Unsafe configuration file");
       JsonObject root = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
-      if ((root.get("schemaVersion").getAsInt() != 2 && root.get("schemaVersion").getAsInt() != 3) || !root.get("settings").isJsonObject()) throw new IOException("Unsupported configuration schema");
+      if (root.get("schemaVersion").getAsInt() != 3 || !root.get("settings").isJsonObject()) throw new IOException("Unsupported configuration schema");
       return root;
     } catch (Exception e) { throw new IllegalStateException("Cannot safely read " + path + "; original file preserved", e); }
   }

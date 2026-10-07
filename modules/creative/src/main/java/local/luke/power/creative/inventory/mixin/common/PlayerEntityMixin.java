@@ -63,7 +63,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
   public void power_applyMode(GameMode mode) {
     GameMode old = power_mode();
     if (old == mode) return;
-    if (power$spectator && !level.isRemote && !Modes.findExit((PlayerEntity) (Object) this)) return;
     power$previous = old;
     power$spectator = mode == GameMode.SPECTATOR;
     dataTracker.setData(CreativeInventory.IS_CREATIVE_ID, CreativeInventory.toByte(mode == GameMode.CREATIVE));
@@ -110,14 +109,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
 
   @Inject(method = "readCustomDataFromTag", at = @At("TAIL"))
   private void power$read(CompoundTag tag, CallbackInfo ci) {
-    for (String key : new String[]{"PowerBetaGameMode","PowerBetaPreviousGameMode"}) {
-      String old = local.luke.power.storage.LegacyKeys.original(key);
-      if (!tag.containsKey(key) && tag.containsKey(old)) tag.put(key,tag.getString(old));
-    }
-    String oldSpeed=local.luke.power.storage.LegacyKeys.original("PowerBetaSpectatorSpeed");
-    if (!tag.containsKey("PowerBetaSpectatorSpeed") && tag.containsKey(oldSpeed))
-      tag.put("PowerBetaSpectatorSpeed",tag.getFloat(oldSpeed));
-    GameMode mode = tag.getBoolean("Creative") ? GameMode.CREATIVE : GameMode.SURVIVAL;
+    GameMode mode = GameMode.SURVIVAL;
     if (tag.containsKey("PowerBetaGameMode")) {
       try {
         mode = GameMode.valueOf(tag.getString("PowerBetaGameMode"));

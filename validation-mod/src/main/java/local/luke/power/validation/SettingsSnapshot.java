@@ -99,7 +99,7 @@ final class SettingsSnapshot {
     Validation.log("SETTINGS SNAPSHOT " + name + " " + screen.session().settings().size() + " settings, " + pages.size() + " tabs");
   }
 
-  private static void render(Minecraft mc, PowerOptionsScreen screen, int width, int height, Path file) throws Exception {
+  static void render(Minecraft mc, net.minecraft.client.gui.screen.Screen screen, int width, int height, Path file) throws Exception {
     int pixelsWide = width * 2, pixelsHigh = height * 2;
     Validation.check(org.lwjgl.opengl.Display.getWidth() >= pixelsWide
         && org.lwjgl.opengl.Display.getHeight() >= pixelsHigh, "Resize the disposable client before capture");
@@ -113,6 +113,8 @@ final class SettingsSnapshot {
     GL11.glOrtho(0, width, height, 0, 1000, 3000);
     GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glLoadIdentity();
     GL11.glTranslatef(0, 0, -2000);
+    GL11.glColor4f(1,1,1,1);
+    GL11.glDisable(GL11.GL_LIGHTING);
     screen.render(-1, -1, 0);
     GL11.glFinish();
     ByteBuffer pixels = BufferUtils.createByteBuffer(pixelsWide * pixelsHigh * 4);

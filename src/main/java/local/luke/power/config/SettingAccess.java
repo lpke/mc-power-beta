@@ -5,7 +5,13 @@ import local.luke.power.permissions.CommandPermissions;
 public final class SettingAccess {
   private SettingAccess() {}
 
+  public static boolean visible(ConfigSession session, Setting setting) {
+    return !setting.id.equals("world.daylightCycle") && !setting.id.equals("world.weatherCycle")
+        || session.settings().stream().anyMatch(s -> s.id.equals("world.cheats") && s.value.getAsBoolean());
+  }
+
   public static boolean cheat(Setting s) {
+    if (s.id.equals("world.daylightCycle") || s.id.equals("world.weatherCycle")) return true;
     // These two preferences also control freecam, which is not cheats-gated.
     if (s.id.equals("creative.sprintToggle") || s.id.equals("creative.sprintMultiplier"))
       return false;

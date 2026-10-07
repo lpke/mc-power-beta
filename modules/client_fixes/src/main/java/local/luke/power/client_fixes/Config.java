@@ -79,11 +79,7 @@ public class Config {
         )
         public Boolean enableMultiplayerServerChanges = true;
 
-        @ConfigEntry(
-                name = "Enable Skin Changes",
-                description = "Restart required for changes to take effect"
-        )
-        public Boolean enableSkinChanges = true;
+
 
         @ConfigEntry(
                 name = "Enable Wooden Sign Changes",
@@ -91,35 +87,14 @@ public class Config {
         )
         public Boolean enableWoodenSignChanges = true;
 
-        @ConfigEntry(
-                name = "Minecraft Resources Use Alternate URL",
-                description = "Restart required for changes to take effect"
-        )
-        public Boolean USE_ALTERNATE_RESOURCES_DOWNLOAD_URL = false;
 
-        @ConfigEntry(
-                name = "Minecraft Resources Download URL",
-                description = "Restart required for changes to take effect",
-                maxLength = 4096
-        )
-        public String RESOURCES_DOWNLOAD_URL = "http://s3.betacraft.uk:11705/MinecraftResources/";
 
-        @ConfigEntry(
-                name = "Minecraft Resources Download URL Alternate",
-                description = "Restart required for changes to take effect",
-                maxLength = 4096
-        )
-        public String ALTERNATE_RESOURCES_DOWNLOAD_URL = "http://mcresources.modification-station.net/MinecraftResources/";
 
-        @ConfigEntry(
-                name = "Render Player Capes"
-        )
-        public Boolean renderCape = true;
 
-        @ConfigEntry(
-                name = "Raise Slim Skin Shoulders",
-                description = "Restart required for changes to take effect"
-        )
-        public Boolean raiseSlimSkinShoulders = false;
+
+
+
+
+
     }
 }

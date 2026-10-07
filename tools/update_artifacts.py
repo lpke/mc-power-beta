@@ -6,8 +6,7 @@ import argparse
 import hashlib
 import json
 import zipfile
-from create_profiles import ROOT
-from update_profiles import assert_idle, atomic_copy
+from instance_files import ROOT, assert_idle, atomic_copy
 
 
 def digest(path):
@@ -34,7 +33,7 @@ def update(instance):
             raise RuntimeError('Pack artifact hash differs')
         if row['file'] != 'power-beta-1.0.0.jar':
             if digest(instance / '.minecraft/mods' / row['file']) != row['sha256']:
-                raise RuntimeError('Platform artifacts differ; use the full profile updater')
+                raise RuntimeError('Platform artifacts differ; create a fresh profile from the export')
     jar = instance / '.minecraft/mods/power-beta-1.0.0.jar'
     if not jar.is_file() or jar.is_symlink():
         raise RuntimeError('Not an existing Power Beta instance')

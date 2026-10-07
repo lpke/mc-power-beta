@@ -101,6 +101,15 @@ public abstract class WorldMixin {
     )
     public boolean powerEnvironment_tickCanSkipNight(World instance, Operation<Boolean> original) {
         boolean skippingNight;
+        var cycles = (local.luke.power.world.WorldCycles) this.properties;
+        if (!this.isRemote && cycles.power$daylightFrozen()) {
+            if (original.call(instance)) {
+                boolean disturbed = this.allowMonsterSpawning && this.difficulty >= 1
+                    && NaturalSpawner.spawnMonstersAndWakePlayers(instance, this.players);
+                if (!disturbed) this.afterSkipNight();
+            }
+            return false;
+        }
 
         if (Config.config.SLEEP_CONFIG.bedsSpeedUpNightRatherThanSkipIt) {
             skippingNight = original.call(instance);
@@ -112,7 +121,7 @@ public abstract class WorldMixin {
                 }
 
                 if (!var1) {
-                    long currentTime = this.properties.getTime();
+                    long currentTime = cycles.power$daylightTime();
                     long desiredTime = (currentTime + 24000L) - currentTime % 24000L;
 
                     for (int chunkSourceTick = 1; chunkSourceTick < Config.config.SLEEP_CONFIG.bedsSpeedUpNightTickRate; chunkSourceTick ++)

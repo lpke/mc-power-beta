@@ -27,13 +27,12 @@ replacing the whole inventory could erase later gameplay.
 
 Carry journals live in the world's `data` directory. They preserve original block
 NBT, removal/placement intent and completed-transfer archives. Never delete a held
-or failed transaction record. Each chest half has its own inventory; older paired
-records remain supported. A replay mismatch must stop and preserve evidence rather
+or failed transaction record. Each chest half has its own inventory. A replay mismatch must stop and preserve evidence rather
 than overwrite a changed block or inventory.
 
 ## Settings
 
-`power-beta-data/settings-backups` stores settings transactions;
-`power-beta-data/config-backups` stores migration backups. Pending recovery runs
-before settings load. Keep pending records and originals when investigating a
-failed save. Neither archive is a world backup.
+`power-beta-data/settings-backups` stores settings transactions. Pending recovery
+runs before settings load. Keep pending records and originals when investigating
+a failed save. This archive is not a world backup. Existing backups from previous
+versions remain on disk for manual recovery.

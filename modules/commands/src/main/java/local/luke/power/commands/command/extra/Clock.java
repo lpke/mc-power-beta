@@ -15,8 +15,8 @@ public class Clock implements Command {
       return;
     }
 
-    commandSource.sendFeedback("Time is " + String.valueOf(player.world.getTime()));
-    commandSource.sendFeedback("Days: " + String.valueOf((int) (player.world.getTime() / 24000)));
+    commandSource.sendFeedback("Time is " + String.valueOf(((local.luke.power.world.WorldCycles) player.world.getProperties()).power$daylightTime()));
+    commandSource.sendFeedback("Days: " + String.valueOf((int) (((local.luke.power.world.WorldCycles) player.world.getProperties()).power$daylightTime() / 24000)));
   }
 
   @Override

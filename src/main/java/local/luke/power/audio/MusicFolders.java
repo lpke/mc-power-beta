@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 
-/** Folder switches preserve paths and track identities. Existing string-list settings still load. */
+/** Enabled folders use path strings; disabled folders include their Off state. */
 public final class MusicFolders {
   public static final int MAX_FOLDERS = 32;
 

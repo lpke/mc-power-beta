@@ -68,7 +68,6 @@ public final class ClientRuntime {
     minecraft = mc;
     if (world != mc.level) {
       world = mc.level;
-      Modes.reset();
       FlightController.reset();
     }
     boolean modifier = local.luke.power.input.Bindings.down(Keys.MODIFIER), picker = local.luke.power.input.Bindings.down(Keys.PICKER);

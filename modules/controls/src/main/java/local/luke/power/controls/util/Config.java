@@ -35,8 +35,7 @@ public class Config {
         @ConfigEntry(name = "Show Quit Button", description = "Shows Quit Button on the Main Menu")
         public Boolean showQuitButton = true;
 
-        @ConfigEntry(name = "Improved Controls Menu")
-        public Boolean improvedControlsMenu = true;
+
 
         @ConfigEntry(name = "Hide Achievement Toast")
         public Boolean hideAchievementToast = false;

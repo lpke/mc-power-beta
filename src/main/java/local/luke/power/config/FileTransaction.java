@@ -62,7 +62,6 @@ public final class FileTransaction implements AutoCloseable {
 
   public static void recover(Path game) throws IOException {
     game = game.toAbsolutePath().normalize();
-    recoverRoot(game, game.resolve("config/power-beta/backups"));
     recoverRoot(game, game.resolve("power-beta-data/settings-backups"));
   }
 

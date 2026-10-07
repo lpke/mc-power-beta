@@ -13,7 +13,7 @@ public final class Config {
   private static Settings load() {
     try {
       Settings value = local.luke.power.storage.PowerConfig.read("building", Settings.class);
-      ConfigStore.validate(value);
+      SettingsValidator.validate(value);
       return value;
     } catch (IllegalArgumentException e) {
       LOG.error("Could not load BuildingFeatures settings; preserving file and using defaults", e);
@@ -27,14 +27,14 @@ public final class Config {
 
   public static void apply(Settings settings) throws IOException {
     Settings next = settings.copy();
-    ConfigStore.validate(next);
+    SettingsValidator.validate(next);
     local.luke.power.storage.PowerConfig.save("building", next);
     preview(next);
   }
 
   public static void preview(Settings settings) {
     Settings next = settings.copy();
-    ConfigStore.validate(next);
+    SettingsValidator.validate(next);
     current = next;
     if (!next.autoWalk) local.luke.power.autowalk.AutoWalk.stop();
   }

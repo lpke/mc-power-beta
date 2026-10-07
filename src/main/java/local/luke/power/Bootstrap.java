@@ -20,7 +20,7 @@ public final class Bootstrap implements PreLaunchEntrypoint {
     Path game = FabricLoader.getInstance().getGameDir().toAbsolutePath().normalize();
     try {
       FileTransaction.recover(game);
-      ConfigMigration.prepare(game);
+      ConfigDefaults.prepare(game);
       local.luke.power.audio.Mp3Converter.probe();
       prepared = true;
     } catch (Exception e) {

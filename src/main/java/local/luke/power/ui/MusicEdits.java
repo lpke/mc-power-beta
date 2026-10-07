@@ -108,7 +108,7 @@ final class MusicEdits {
     List<Setting> changes = new ArrayList<>();
     if (p != null) {
       changes.addAll(exclusions(p.excluded()));
-      Set<String> pool = p.trackPool() == null ? Set.of() : p.trackPool();
+      Set<String> pool = p.trackPool();
       Setting scope = setting("presetTrackPool");
       scope.value = Catalog.JSON.toJsonTree(pool);
       changes.add(scope);

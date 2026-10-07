@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class GameModeTest {
   @Test
-  void modernNamesAndLegacyAliases() {
+  void namesAndCommandShortcuts() {
     assertEquals(GameMode.SURVIVAL, GameMode.parse("survival"));
     assertEquals(GameMode.CREATIVE, GameMode.parse("1"));
     assertEquals(GameMode.SPECTATOR, GameMode.parse("SPECTATOR"));

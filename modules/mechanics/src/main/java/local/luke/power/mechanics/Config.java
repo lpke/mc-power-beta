@@ -204,11 +204,11 @@ public class Config {
         public Boolean enableColorSignsWithDye = false;
 
         @ConfigEntry(
-                name = "Allow Editing Signs With A Feather",
-                description = "Feather will be consumed on use",
+                name = "Allow Editing Signs",
+                description = "Right-click signs to edit. Shift-right-click uses the held item.",
                 multiplayerSynced = true
         )
-        public Boolean enableEditSignsWithFeathers = false;
+        public Boolean allowEditingSigns = false;
 
         @ConfigEntry(
                 name = "Allow Gluing Trapdoors With A Slimeball",
