@@ -1,5 +1,22 @@
 # Changelog
 
+## Settings organisation
+
+- Group key bindings by action and make those groups collapsible. Reorder settings
+  so feature switches precede their details, with explicit tab and group ordering.
+- Collect texture, cloud, debug, inventory, vehicle, sleep, recipe and capture
+  controls in their relevant sections. Put shared flight/freecam sprint settings
+  in Camera and retain their related-key links.
+- Remove the ineffective legacy Controls menu selector and unused resource URL
+  controls. Hide legacy skin controls while the bundled account service replaces
+  them. Their saved values remain intact.
+- Consolidate the inverse focus-loss switches into Pause on lost focus, with a
+  verified backup and migration that preserves whether the game pauses.
+- Clarify inventory gestures, mob-drop item choices, shared sprint settings and hotbar
+  preview help. Rename the cloud fix previously labelled as a hotbar fix.
+- Mark startup-only display, controller, applet and resource-download
+  settings as requiring restart. Link the fog binding to its configurable sequence.
+
 ## Active tweaks and menu music
 
 - Add an active-tweaks HUD list, on by default, with per-tweak inclusion,

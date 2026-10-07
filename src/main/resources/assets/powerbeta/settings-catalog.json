@@ -9,37 +9,39 @@
   },
   "power_capture:config.customResolutionPhotoHeight": {
     "page": "Interface",
-    "group": "Screenshots",
-    "label": "Custom screenshot height in pixels",
+    "group": "Custom screenshots",
+    "label": "Height, pixels",
     "description": "",
     "default": 2240,
     "restart": false,
     "min": 16,
     "max": 16384,
-    "step": 1
+    "step": 1,
+    "order": 1
   },
   "power_capture:config.customResolutionPhotoWidth": {
     "page": "Interface",
-    "group": "Screenshots",
-    "label": "Custom screenshot width in pixels",
+    "group": "Custom screenshots",
+    "label": "Width, pixels",
     "description": "",
     "default": 7680,
     "restart": false,
     "min": 16,
     "max": 16384,
-    "step": 1
+    "step": 1,
+    "order": 0
   },
   "power_capture:config.disableRenderingNetherBedrock": {
     "page": "Interface",
-    "group": "Screenshots",
-    "label": "Disable rendering nether bedrock",
+    "group": "Isometric screenshots",
+    "label": "Hide Nether roof in captures",
     "description": "Reload world for changes to take effect",
     "default": false,
     "restart": false
   },
   "power_capture:config.isometricPhotoScale": {
     "page": "Interface",
-    "group": "Screenshots",
+    "group": "Isometric screenshots",
     "label": "Isometric screenshot resolution",
     "description": "",
     "default": 8,
@@ -50,7 +52,7 @@
   },
   "power_capture:config.isometricPhotoRotation": {
     "page": "Interface",
-    "group": "Screenshots",
+    "group": "Isometric screenshots",
     "label": "Isometric screenshot rotation",
     "description": "",
     "default": 0,
@@ -58,7 +60,7 @@
   },
   "power_capture:config.isometricPhotoRotationOffset": {
     "page": "Interface",
-    "group": "Screenshots",
+    "group": "Isometric screenshots",
     "label": "Isometric screenshot rotation offset",
     "description": "Zero degrees recommended for best angle",
     "default": 0,
@@ -69,7 +71,7 @@
   },
   "power_capture:config.mirrorIsometricScreenshot": {
     "page": "Interface",
-    "group": "Screenshots",
+    "group": "Isometric screenshots",
     "label": "Mirror isometric screenshot",
     "description": "Flips the isometric screenshot horizontally",
     "default": false,
@@ -92,16 +94,16 @@
     "restart": false
   },
   "entityculling:config.showF3Info": {
-    "page": "Video",
-    "group": "Visibility culling",
+    "page": "Interface",
+    "group": "Debug information",
     "label": "Culling statistics",
     "description": "Shows visible and culled object counts in the debug overlay.",
     "default": true,
     "restart": false
   },
   "entityculling:config.f3InfoYOffset": {
-    "page": "Video",
-    "group": "Visibility culling",
+    "page": "Interface",
+    "group": "Debug information",
     "label": "F3 info y offset",
     "description": "",
     "default": 0,
@@ -127,7 +129,8 @@
     "restart": false,
     "min": 0.1,
     "max": 100,
-    "step": 0.1
+    "step": 0.1,
+    "order": 1
   },
   "power_camera:config.drag": {
     "page": "Camera",
@@ -138,7 +141,8 @@
     "restart": false,
     "min": 0.1,
     "max": 100,
-    "step": 0.1
+    "step": 0.1,
+    "order": 2
   },
   "power_camera:config.collision": {
     "page": "Camera",
@@ -146,7 +150,8 @@
     "label": "Freecam collisions",
     "description": "",
     "default": true,
-    "restart": false
+    "restart": false,
+    "order": 5
   },
   "power_camera:config.showCamera": {
     "page": "Camera",
@@ -154,7 +159,8 @@
     "label": "Show freecam",
     "description": "When this option is enabled, a 3D camera is rendered at the position of the freecam",
     "default": true,
-    "restart": false
+    "restart": false,
+    "order": 7
   },
   "power_camera:config.classicMovement": {
     "page": "Camera",
@@ -162,11 +168,12 @@
     "label": "Classic freecam movement",
     "description": "When this option is enabled the freecam will move like in older versions of Freecam",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 3
   },
   "power_gold:config.enableFishingRodLuckOfTheSea": {
     "page": "Gameplay",
-    "group": "Gold equipment abilities",
+    "group": "Equipment",
     "label": "Fishing rod luck of the sea",
     "description": "10% chance to catch a gold ingot with a fish",
     "default": false,
@@ -190,7 +197,7 @@
   },
   "power_gold:config.enableGoldBlockHerobrineSummoner": {
     "page": "Gameplay",
-    "group": "Gold equipment abilities",
+    "group": "Blocks",
     "label": "Gold block herobrine summoner",
     "description": "Converts a gold block into a sponge when lit",
     "default": false,
@@ -262,7 +269,7 @@
   },
   "power_gold:config.enableSpongeSoaksUpWater": {
     "page": "Gameplay",
-    "group": "Gold equipment abilities",
+    "group": "Blocks",
     "label": "Sponge soaking up water",
     "description": "Will soak up a 5x5 water cube when placed",
     "default": false,
@@ -270,7 +277,7 @@
   },
   "power_hud:config.enableChatScroll": {
     "page": "Interface",
-    "group": "HUD and chat",
+    "group": "Chat",
     "label": "Allow chat scroll",
     "description": "",
     "default": true,
@@ -278,7 +285,7 @@
   },
   "power_hud:config.chatHistorySize": {
     "page": "Interface",
-    "group": "HUD and chat",
+    "group": "Chat",
     "label": "Chat history size",
     "description": "50 = vanilla, 100 = default",
     "default": 100,
@@ -289,7 +296,7 @@
   },
   "power_hud:config.chatFadeTime": {
     "page": "Interface",
-    "group": "HUD and chat",
+    "group": "Chat",
     "label": "Chat message fade time",
     "description": "100 = vanilla, 10 = 1 second",
     "default": 100,
@@ -300,7 +307,7 @@
   },
   "power_hud:config.coordinateDisplay": {
     "page": "Interface",
-    "group": "HUD and chat",
+    "group": "Debug information",
     "label": "Coordinate display for debug overlay",
     "description": "",
     "default": 0,
@@ -308,7 +315,7 @@
   },
   "power_hud:config.disableCrosshair": {
     "page": "Interface",
-    "group": "HUD and chat",
+    "group": "HUD",
     "label": "Disable crosshair",
     "description": "",
     "default": false,
@@ -324,15 +331,15 @@
   },
   "power_hud:config.drawXboxXAndYButtons": {
     "page": "Interface",
-    "group": "HUD and chat",
+    "group": "HUD",
     "label": "Draw xbox x and y buttons",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_hud:config.enableHotbarBlockRenderingFix": {
-    "page": "Interface",
-    "group": "HUD and chat",
+    "page": "Fixes",
+    "group": "Rendering",
     "label": "Hotbar block rendering fix",
     "description": "For fixing blocks rendering over messages",
     "default": true,
@@ -340,7 +347,7 @@
   },
   "power_hud:config.enableHotbarItemSelectionTooltips": {
     "page": "Interface",
-    "group": "HUD and chat",
+    "group": "HUD",
     "label": "Hotbar item selection tooltips",
     "description": "",
     "default": false,
@@ -348,7 +355,7 @@
   },
   "power_hud:config.hotbarItemSelectionFadeTime": {
     "page": "Interface",
-    "group": "HUD and chat",
+    "group": "HUD",
     "label": "Hotbar item selection fade time",
     "description": "40 = default",
     "default": 40,
@@ -589,7 +596,7 @@
   },
   "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.enableVisibility": {
     "page": "Interface",
-    "group": "Simple hud position",
+    "group": "Combined HUD position",
     "label": "Visibility",
     "description": "",
     "default": true,
@@ -597,7 +604,7 @@
   },
   "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPosition": {
     "page": "Interface",
-    "group": "Simple hud position",
+    "group": "Combined HUD position",
     "label": "Horizontal position",
     "description": "",
     "default": 1,
@@ -605,7 +612,7 @@
   },
   "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPositionOffset": {
     "page": "Interface",
-    "group": "Simple hud position",
+    "group": "Combined HUD position",
     "label": "Horizontal position offset",
     "description": "",
     "default": 0,
@@ -616,7 +623,7 @@
   },
   "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
-    "group": "Simple hud position",
+    "group": "Combined HUD position",
     "label": "Vertical position",
     "description": "",
     "default": 0,
@@ -624,7 +631,7 @@
   },
   "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPositionOffset": {
     "page": "Interface",
-    "group": "Simple hud position",
+    "group": "Combined HUD position",
     "label": "Vertical position offset",
     "description": "Use position bottom with offset -32 for Xbox",
     "default": 0,
@@ -636,7 +643,7 @@
   "power_hud:hudpositions.hudPositioningSystem": {
     "page": "Interface",
     "group": "HUD layout",
-    "label": "Hud positioning system",
+    "label": "HUD positioning",
     "description": "Which configs or defaults to use for the HUD",
     "default": 1,
     "restart": false
@@ -660,7 +667,7 @@
   "power_inventory:config.CRAFTING_RESULT_CONFIG.EnableCtrlClickCrafting": {
     "page": "Inventory",
     "group": "Crafting result",
-    "label": "[CTRL-click] crafting",
+    "label": "Ctrl-click crafting",
     "description": "Craft a single stack of items into inventory",
     "default": true,
     "restart": false
@@ -668,7 +675,7 @@
   "power_inventory:config.CRAFTING_RESULT_CONFIG.EnableRightClickCrafting": {
     "page": "Inventory",
     "group": "Crafting result",
-    "label": "[right-click] crafting",
+    "label": "Right-click crafting",
     "description": "Craft a single stack of items into cursor",
     "default": true,
     "restart": false
@@ -676,7 +683,7 @@
   "power_inventory:config.CRAFTING_RESULT_CONFIG.EnableShiftClickCrafting": {
     "page": "Inventory",
     "group": "Crafting result",
-    "label": "[shift-click] crafting",
+    "label": "Shift-click crafting",
     "description": "Crafts as many items as it can into inventory",
     "default": true,
     "restart": false
@@ -684,103 +691,103 @@
   "power_inventory:config.CRAFTING_RESULT_CONFIG.StopShiftClickCraftingWhenItemChanges": {
     "page": "Inventory",
     "group": "Crafting result",
-    "label": "Stop [shift-click] crafting when item changes",
+    "label": "Stop bulk crafting if result changes",
     "description": "Shift crafting will craft only one item type",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableShiftClickingItemsIntoArmorSlots": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Allow [shift-clicking] items into armor slots",
+    "group": "Quick transfer",
+    "label": "Shift-click to equip armour",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableShiftClickingItemsIntoFurnaces": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Allow [shift-clicking] items into furnaces",
+    "group": "Quick transfer",
+    "label": "Shift-click into furnaces",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.DoubleLeftClickItemPickup": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Double [left-click] fill cursor stack",
+    "group": "Clicking",
+    "label": "Double-click to gather a stack",
     "description": "Initially empty cursor double click to pickup",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableDragGraphics": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "[click + drag] graphics",
+    "group": "Dragging",
+    "label": "Show stack distribution preview",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableLeftClickDrag": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "[left-click + drag]",
+    "group": "Dragging",
+    "label": "Left-drag to split a stack",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableRightClickDrag": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "[right-click + drag]",
+    "group": "Dragging",
+    "label": "Right-drag to place one per slot",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.MultiplayerShiftClickingItemsIntoDispensers": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Multiplayer [shift-clicking] into dispensers",
+    "group": "Quick transfer",
+    "label": "Shift-click into dispensers online",
     "description": "Must be installed on the server also to work",
     "default": false,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.LMBPreferShiftClick": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Prefer [shift-click] over [left-click + drag]",
+    "group": "Quick transfer",
+    "label": "Prefer quick transfer with Shift + left",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.RMBPreferShiftClick": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Prefer [shift-click] over [right-click + drag]",
+    "group": "Quick transfer",
+    "label": "Prefer quick transfer with Shift + right",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.UseDropKeyInInventory": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Use [drop_key] to drop inventory items",
+    "group": "Dropping",
+    "label": "Drop key works in inventory",
     "description": "Cursor must not be holding any items",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.LCtrlStackDrop": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Use [lctrl + drop_key] to drop entire stack",
+    "group": "Dropping",
+    "label": "Left Ctrl + drop drops the stack",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.NumKeyHotbarSwap": {
     "page": "Inventory",
-    "group": "Modern minecraft",
-    "label": "Use [number_keys] to swap items to hotbar",
+    "group": "Clicking",
+    "label": "Number keys swap with hotbar",
     "description": "Hover over the slot or swap cursor item",
     "default": true,
     "restart": false
@@ -803,32 +810,32 @@
   },
   "power_inventory:config.MOUSE_TWEAKS_CONFIG.LMBTweakShiftClickAny": {
     "page": "Inventory",
-    "group": "Mouse tweaks",
-    "label": "Empty cursor [shift + left-click + drag]",
+    "group": "Quick transfer",
+    "label": "Shift-drag with empty cursor",
     "description": "[Shift-Click] items of any type",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MOUSE_TWEAKS_CONFIG.LMBTweakShiftClick": {
     "page": "Inventory",
-    "group": "Mouse tweaks",
-    "label": "Item in cursor [shift + left-click + drag]",
+    "group": "Quick transfer",
+    "label": "Shift-drag with held item",
     "description": "[Shift-Click] items of the held type",
     "default": true,
     "restart": false
   },
   "power_inventory:config.MOUSE_TWEAKS_CONFIG.RMBTweak": {
     "page": "Inventory",
-    "group": "Mouse tweaks",
-    "label": "[right-click + drag] over existing slots",
+    "group": "Dragging",
+    "label": "Right-drag into occupied slots",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_inventory:config.MOUSE_TWEAKS_CONFIG.LMBTweakPickUp": {
     "page": "Inventory",
-    "group": "Mouse tweaks",
-    "label": "[left-click + drag] to pick up items",
+    "group": "Dragging",
+    "label": "Left-drag to collect matching items",
     "description": "",
     "default": true,
     "restart": false
@@ -950,7 +957,7 @@
   },
   "power_mechanics:config.FLORA_CONFIG.enableRandomStickDropFromDeadBushes": {
     "page": "Gameplay",
-    "group": "Flora",
+    "group": "Plants and harvesting",
     "label": "Allow random stick drop from dead bushes",
     "description": "Chance is the same as seeds from tall grass",
     "default": false,
@@ -958,7 +965,7 @@
   },
   "power_mechanics:config.FLORA_CONFIG.enableShearsCollectDeadBush": {
     "page": "Gameplay",
-    "group": "Flora",
+    "group": "Plants and harvesting",
     "label": "Allow shears to collect dead bushes",
     "description": "Restart required for changes to take effect",
     "default": false,
@@ -966,7 +973,7 @@
   },
   "power_mechanics:config.FLORA_CONFIG.enableShearsCollectFern": {
     "page": "Gameplay",
-    "group": "Flora",
+    "group": "Plants and harvesting",
     "label": "Allow shears to collect ferns",
     "description": "Shears collect ferns as inventory items.",
     "default": false,
@@ -974,7 +981,7 @@
   },
   "power_mechanics:config.FLORA_CONFIG.enableShearsCollectTallGrass": {
     "page": "Gameplay",
-    "group": "Flora",
+    "group": "Plants and harvesting",
     "label": "Allow shears to collect tall grass",
     "description": "Restart required for changes to take effect",
     "default": false,
@@ -982,7 +989,7 @@
   },
   "power_mechanics:config.FLORA_CONFIG.appleDropChance": {
     "page": "Gameplay",
-    "group": "Flora",
+    "group": "Plants and harvesting",
     "label": "Apple drop chance from oak leaves",
     "description": "0 = disabled, 0.5 = modern drop chance (0.5%)",
     "default": 0.0,
@@ -993,7 +1000,7 @@
   },
   "power_mechanics:config.FLORA_CONFIG.enableLogRotation": {
     "page": "Gameplay",
-    "group": "Flora",
+    "group": "Plants and harvesting",
     "label": "Log rotation",
     "description": "Disabling converts rotated logs to weird oak",
     "default": false,
@@ -1001,7 +1008,7 @@
   },
   "power_mechanics:config.FLORA_CONFIG.enablePlayerPlacedLeafPersistence": {
     "page": "Gameplay",
-    "group": "Flora",
+    "group": "Plants and harvesting",
     "label": "Player placed leaf persistence",
     "description": "Disables leaf decay for player placed leaves",
     "default": false,
@@ -1009,7 +1016,7 @@
   },
   "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableChestsOpenWithBlockAbove": {
     "page": "Gameplay",
-    "group": "Interactive block",
+    "group": "Blocks",
     "label": "Allow chests to open even when blocked",
     "description": "Chests can open when a block is above them",
     "default": false,
@@ -1017,7 +1024,7 @@
   },
   "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableColorSignsWithDye": {
     "page": "Gameplay",
-    "group": "Interactive block",
+    "group": "Blocks",
     "label": "Allow coloring signs with dye",
     "description": "Dye will be consumed on use",
     "default": false,
@@ -1025,7 +1032,7 @@
   },
   "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableEditSignsWithFeathers": {
     "page": "Gameplay",
-    "group": "Interactive block",
+    "group": "Blocks",
     "label": "Allow editing signs with a feather",
     "description": "Feather will be consumed on use",
     "default": false,
@@ -1033,7 +1040,7 @@
   },
   "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableGlueTrapdoorsWithSlimeballs": {
     "page": "Gameplay",
-    "group": "Interactive block",
+    "group": "Blocks",
     "label": "Allow gluing trapdoors with a slimeball",
     "description": "Slimeball will be consumed on use",
     "default": false,
@@ -1041,39 +1048,39 @@
   },
   "power_mechanics:config.MOB_CONFIG.enableZombieDropItem": {
     "page": "Gameplay",
-    "group": "Mob",
-    "label": "Chance zombies drop config item",
+    "group": "Mob drops",
+    "label": "Extra zombie drops",
     "description": "Restart required for changes to take effect",
     "default": false,
     "restart": true
   },
   "power_mechanics:config.MOB_CONFIG.enableZombiePigmanDropItem": {
     "page": "Gameplay",
-    "group": "Mob",
-    "label": "Chance zombie pigmen drop config item",
+    "group": "Mob drops",
+    "label": "Extra zombie-pigman drops",
     "description": "Restart required for changes to take effect",
     "default": false,
     "restart": true
   },
   "power_mechanics:config.MOB_CONFIG.zombieDropItem": {
     "page": "Gameplay",
-    "group": "Mob",
-    "label": "Chance zombies drop this item",
+    "group": "Mob drops",
+    "label": "Zombie drop item",
     "description": "Only works if setting is enabled above",
     "default": 0,
     "restart": false
   },
   "power_mechanics:config.MOB_CONFIG.zombiePigmanDropItem": {
     "page": "Gameplay",
-    "group": "Mob",
-    "label": "Chance zombie pigmen drop this item",
+    "group": "Mob drops",
+    "label": "Zombie-pigman drop item",
     "description": "Only works if setting is enabled above",
     "default": 0,
     "restart": false
   },
   "power_mechanics:config.MOB_CONFIG.disableTramplingFarmland": {
     "page": "Gameplay",
-    "group": "Mob",
+    "group": "Farmland",
     "label": "Disable trampling farmland",
     "description": "Player/mobs will no longer trample farmland",
     "default": false,
@@ -1081,7 +1088,7 @@
   },
   "power_mechanics:config.MOB_CONFIG.disableTrampleFarmlandWhenBarefoot": {
     "page": "Gameplay",
-    "group": "Mob",
+    "group": "Farmland",
     "label": "Do not trample farmland when barefoot",
     "description": "Only affects player without boots",
     "default": false,
@@ -1089,16 +1096,16 @@
   },
   "power_mechanics:config.MOB_CONFIG.disableTrampleFarmlandWithLeatherBoots": {
     "page": "Gameplay",
-    "group": "Mob",
+    "group": "Farmland",
     "label": "Do not trample farmland with leather boots",
     "description": "Only affects player with leather boots",
     "default": false,
     "restart": false
   },
   "power_client_fixes:config.disableServerListIpAddresses": {
-    "page": "Fixes",
-    "group": "Client fixes",
-    "label": "Disable server list IP addresses",
+    "page": "Interface",
+    "group": "Menus",
+    "label": "Hide server IP addresses",
     "description": "Hides IP addresses for the server list only",
     "default": false,
     "restart": false
@@ -1113,16 +1120,16 @@
   },
   "power_client_fixes:config.enableAuthenticationChanges": {
     "page": "Advanced",
-    "group": "Resource and account services",
-    "label": "Authentication changes",
-    "description": "Restart required for changes to take effect",
+    "group": "Network and resources",
+    "label": "Legacy session-check fix",
+    "description": "Disable the old session-check thread. The bundled account service supplies authentication; its login behavior is independent of this switch. Restart required.",
     "default": false,
     "restart": true
   },
   "power_client_fixes:config.enableControlsChanges": {
     "page": "Fixes",
     "group": "Client fixes",
-    "label": "Controls changes",
+    "label": "Legacy mouse-binding compatibility",
     "description": "Restart required for changes to take effect",
     "default": false,
     "restart": true
@@ -1136,24 +1143,24 @@
     "restart": true
   },
   "power_client_fixes:config.enableDebugGraphChanges": {
-    "page": "Fixes",
-    "group": "Client fixes",
+    "page": "Interface",
+    "group": "Debug information",
     "label": "Debug graph changes",
     "description": "Restart required for changes to take effect",
     "default": true,
     "restart": true
   },
   "power_client_fixes:config.enableDebugGraphModernToggle": {
-    "page": "Fixes",
-    "group": "Client fixes",
+    "page": "Interface",
+    "group": "Debug information",
     "label": "Debug graph toggle as keybind+F3",
     "description": "False=Toggle debug graph with just KEYBIND",
     "default": true,
     "restart": false
   },
   "power_client_fixes:config.enableDebugMenuWorldSeed": {
-    "page": "Fixes",
-    "group": "Client fixes",
+    "page": "Interface",
+    "group": "Debug information",
     "label": "Debug menu world seed",
     "description": "Restart required for changes to take effect",
     "default": true,
@@ -1173,7 +1180,8 @@
     "label": "Skin changes",
     "description": "Restart required for changes to take effect",
     "default": false,
-    "restart": true
+    "restart": true,
+    "hiddenWithMod": "retroauth"
   },
   "power_client_fixes:config.enableWoodenSignChanges": {
     "page": "Fixes",
@@ -1189,7 +1197,8 @@
     "label": "Minecraft resources use alternate url",
     "description": "Restart required for changes to take effect",
     "default": false,
-    "restart": true
+    "restart": true,
+    "hidden": true
   },
   "power_client_fixes:config.RESOURCES_DOWNLOAD_URL": {
     "page": "Advanced",
@@ -1197,7 +1206,8 @@
     "label": "Minecraft resources download url",
     "description": "Restart required for changes to take effect",
     "default": "http://s3.betacraft.uk:11705/MinecraftResources/",
-    "restart": true
+    "restart": true,
+    "hidden": true
   },
   "power_client_fixes:config.ALTERNATE_RESOURCES_DOWNLOAD_URL": {
     "page": "Advanced",
@@ -1205,7 +1215,8 @@
     "label": "Minecraft resources download url alternate",
     "description": "Restart required for changes to take effect",
     "default": "http://mcresources.modification-station.net/MinecraftResources/",
-    "restart": true
+    "restart": true,
+    "hidden": true
   },
   "power_client_fixes:config.renderCape": {
     "page": "Fixes",
@@ -1213,7 +1224,8 @@
     "label": "Render player capes",
     "description": "",
     "default": true,
-    "restart": false
+    "restart": false,
+    "hiddenWithMod": "retroauth"
   },
   "power_client_fixes:config.raiseSlimSkinShoulders": {
     "page": "Fixes",
@@ -1221,7 +1233,8 @@
     "label": "Raise slim skin shoulders",
     "description": "Restart required for changes to take effect",
     "default": false,
-    "restart": true
+    "restart": true,
+    "hiddenWithMod": "retroauth"
   },
   "power_environment:config.MISSING_ACHIEVEMENTS_CONFIG.OPEN_INVENTORY": {
     "page": "Advanced",
@@ -1266,7 +1279,7 @@
   "power_environment:config.MISSING_ACHIEVEMENTS_CONFIG.AQUIRE_IRON": {
     "page": "Advanced",
     "group": "Achievement recovery",
-    "label": "Mark achieved: aquire iron",
+    "label": "Mark achieved: acquire iron",
     "description": "",
     "default": false,
     "restart": false
@@ -1457,7 +1470,7 @@
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.disableLivingEntitiesDespawning": {
     "page": "Gameplay",
-    "group": "Entity spawn mechanics",
+    "group": "Despawning",
     "label": "Disable living entities despawning",
     "description": "Living entities will no longer despawn",
     "default": false,
@@ -1465,7 +1478,7 @@
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.disableSaddledPigsDespawning": {
     "page": "Gameplay",
-    "group": "Entity spawn mechanics",
+    "group": "Despawning",
     "label": "Disable saddled pigs despawning",
     "description": "Saddled pigs will no longer despawn",
     "default": false,
@@ -1473,7 +1486,7 @@
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.doNotCountSaddledPigs": {
     "page": "Gameplay",
-    "group": "Entity spawn mechanics",
+    "group": "Despawning",
     "label": "Do not count saddled pigs",
     "description": "Saddled pigs are not in passive count",
     "default": false,
@@ -1481,7 +1494,7 @@
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.monstersSpawnAtOrBelowLightLevel": {
     "page": "Gameplay",
-    "group": "Entity spawn mechanics",
+    "group": "Spawning",
     "label": "Monsters spawn at or below light level",
     "description": "4 = Nighttime Light Level",
     "default": 7,
@@ -1492,7 +1505,7 @@
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_GROUP_SIZE": {
     "page": "Gameplay",
-    "group": "Entity spawn mechanics",
+    "group": "Spawning",
     "label": "Spawn group size",
     "description": "Does not effect ghasts, wolves cap at 8",
     "default": 4,
@@ -1503,7 +1516,7 @@
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_MONSTER": {
     "page": "Gameplay",
-    "group": "Entity spawn mechanics",
+    "group": "Spawning",
     "label": "Spawn capacity max: monster",
     "description": "",
     "default": 70,
@@ -1514,7 +1527,7 @@
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_PASSIVE": {
     "page": "Gameplay",
-    "group": "Entity spawn mechanics",
+    "group": "Spawning",
     "label": "Spawn capacity max: passive",
     "description": "",
     "default": 15,
@@ -1525,7 +1538,7 @@
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_SQUID": {
     "page": "Gameplay",
-    "group": "Entity spawn mechanics",
+    "group": "Spawning",
     "label": "Spawn capacity max: squid",
     "description": "",
     "default": 5,
@@ -1649,7 +1662,8 @@
     "label": "Always snow above set y level",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 3
   },
   "power_environment:config.WEATHER_CONFIG.alwaysSnowAboveThisYLevel": {
     "page": "Gameplay",
@@ -1660,7 +1674,8 @@
     "restart": false,
     "min": 0,
     "max": 128,
-    "step": 1
+    "step": 1,
+    "order": 4
   },
   "power_environment:config.WEATHER_CONFIG.disableRain": {
     "page": "Gameplay",
@@ -1668,7 +1683,8 @@
     "label": "Disable rain",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 0
   },
   "power_environment:config.WEATHER_CONFIG.disableThunder": {
     "page": "Gameplay",
@@ -1676,7 +1692,8 @@
     "label": "Disable thunder",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 1
   },
   "power_environment:config.WEATHER_CONFIG.disableRainInSavannaBiomes": {
     "page": "Gameplay",
@@ -1684,7 +1701,8 @@
     "label": "Disable rain in savanna biomes",
     "description": "Restart required for changes to take effect",
     "default": false,
-    "restart": true
+    "restart": true,
+    "order": 2
   },
   "power_environment:config.WEATHER_CONFIG.sleepOnlyResetsWeatherWhenRaining": {
     "page": "Gameplay",
@@ -1692,107 +1710,108 @@
     "label": "Sleep only resets weather when raining",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 5
   },
   "power_environment:config.WEATHER_CONFIG.timeUntilRainRandomLimit": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Time until rain: random limit",
-    "description": "Added to minimum to find rain time",
+    "label": "Rain wait random range, ticks",
+    "description": "Add a random number of ticks from zero up to this limit minus one to the matching minimum. 20 ticks is one second.",
     "default": 168000,
     "restart": false,
     "min": 1,
     "max": 2400000,
-    "step": 1
+    "step": 1,
+    "order": 7
   },
   "power_environment:config.WEATHER_CONFIG.timeUntilRainMinimum": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Time until rain: minimum",
-    "description": "Minimum time in ticks until rain occurs",
+    "label": "Rain wait minimum, ticks",
+    "description": "Minimum duration in game ticks. 20 ticks is one second.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
-    "step": 1
+    "step": 1,
+    "order": 6
   },
   "power_environment:config.WEATHER_CONFIG.rainDurationRandomLimit": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Time rain duration: random limit",
-    "description": "Added to minimum to find rain duration",
+    "label": "Rain duration random range, ticks",
+    "description": "Add a random number of ticks from zero up to this limit minus one to the matching minimum. 20 ticks is one second.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
-    "step": 1
+    "step": 1,
+    "order": 9
   },
   "power_environment:config.WEATHER_CONFIG.rainDurationMinimum": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Time rain duration: minimum",
-    "description": "Minimum time in ticks until rain ends",
+    "label": "Rain duration minimum, ticks",
+    "description": "Minimum duration in game ticks. 20 ticks is one second.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
-    "step": 1
+    "step": 1,
+    "order": 8
   },
   "power_environment:config.WEATHER_CONFIG.timeUntilThunderRandomLimit": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Time until thunder: random limit",
-    "description": "Added to minimum to find thunder time",
+    "label": "Thunder wait random range, ticks",
+    "description": "Add a random number of ticks from zero up to this limit minus one to the matching minimum. 20 ticks is one second.",
     "default": 168000,
     "restart": false,
     "min": 1,
     "max": 2400000,
-    "step": 1
+    "step": 1,
+    "order": 11
   },
   "power_environment:config.WEATHER_CONFIG.timeUntilThunderMinimum": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Time until thunder: minimum",
-    "description": "Minimum time in ticks until thunder occurs",
+    "label": "Thunder wait minimum, ticks",
+    "description": "Minimum duration in game ticks. 20 ticks is one second.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
-    "step": 1
+    "step": 1,
+    "order": 10
   },
   "power_environment:config.WEATHER_CONFIG.thunderDurationRandomLimit": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Time thunder duration: random limit",
-    "description": "Added to minimum to find thunder duration",
+    "label": "Thunder duration random range, ticks",
+    "description": "Add a random number of ticks from zero up to this limit minus one to the matching minimum. 20 ticks is one second.",
     "default": 12000,
     "restart": false,
     "min": 1,
     "max": 2400000,
-    "step": 1
+    "step": 1,
+    "order": 13
   },
   "power_environment:config.WEATHER_CONFIG.thunderDurationMinimum": {
     "page": "Gameplay",
     "group": "Weather",
-    "label": "Time thunder duration: minimum",
-    "description": "Minimum time in ticks until thunder ends",
+    "label": "Thunder duration minimum, ticks",
+    "description": "Minimum duration in game ticks. 20 ticks is one second.",
     "default": 3600,
     "restart": false,
     "min": 1,
     "max": 2400000,
-    "step": 1
-  },
-  "power_environment:config.forceDisplayActive": {
-    "page": "Gameplay",
-    "group": "World rules",
-    "label": "Force display active",
-    "description": "Game will not pause when tabbing away",
-    "default": false,
-    "restart": false
+    "step": 1,
+    "order": 12
   },
   "power_environment:config.SPAWN_PROTECTION_RADIUS": {
-    "page": "Gameplay",
-    "group": "World rules",
+    "page": "Advanced",
+    "group": "Server settings",
     "label": "Spawn protection radius",
     "description": "Restart required; Overridden By the game settings",
     "default": 16,
@@ -1802,16 +1821,16 @@
     "step": 1
   },
   "power_environment:config.ENABLE_SOUL_SAND_RECIPE": {
-    "page": "Gameplay",
-    "group": "World rules",
+    "page": "Crafting",
+    "group": "Soul sand",
     "label": "Craftable soul sand",
     "description": "Arrange 2 netherrack and 2 dirt diagonally in a 2-by-2 grid. Output is set by Soul sand per craft.",
     "default": false,
     "restart": true
   },
   "power_environment:config.SOUL_SAND_OUTPUT": {
-    "page": "Gameplay",
-    "group": "World rules",
+    "page": "Crafting",
+    "group": "Soul sand",
     "label": "Soul sand per craft",
     "description": "Number of soul sand blocks produced from 2 netherrack and 2 dirt. Requires Craftable soul sand.",
     "default": 4,
@@ -1822,7 +1841,7 @@
   },
   "station-api-configuration:config.loadingScreenOption": {
     "page": "Interface",
-    "group": "Loading screen",
+    "group": "Menus",
     "label": "Loading screen style",
     "description": "",
     "default": 0,
@@ -1830,15 +1849,15 @@
   },
   "power_controls:bugfixes.bitDepthFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Bit depth fix",
     "description": "Increases the buffer depth from 8 to 24 to fix graphical issues on AMD graphic cards",
     "default": true,
-    "restart": false
+    "restart": true
   },
   "power_controls:bugfixes.farLandsJitterFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Far lands jitter fix",
     "description": "",
     "default": true,
@@ -1846,7 +1865,7 @@
   },
   "power_controls:bugfixes.enableSlimeSplitFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Entities",
     "label": "Slime split fix",
     "description": "Fixes slimes not splitting when their health is below zero after dying",
     "default": true,
@@ -1854,7 +1873,7 @@
   },
   "power_controls:bugfixes.nightmarePathfindingFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Entities",
     "label": "Nightmare pathfinding fix",
     "description": "Fixes the pathfinding calculation of nightmares",
     "default": true,
@@ -1862,7 +1881,7 @@
   },
   "power_controls:bugfixes.multiplayerEntityJitterFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Entities",
     "label": "Multiplayer entity jitter fix",
     "description": "Fixes entities jittering in multiplayer",
     "default": true,
@@ -1870,7 +1889,7 @@
   },
   "power_controls:bugfixes.boatDismountFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Entities",
     "label": "Boat dismount fix",
     "description": "Fixes sometimes falling through the boat when dismounting it",
     "default": true,
@@ -1878,7 +1897,7 @@
   },
   "power_controls:bugfixes.sleepingCameraRotationFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Sleeping camera rotation fix",
     "description": "Fixes incorrectly rotated camera when sleeping and the ability to erroneously rotate it",
     "default": true,
@@ -1886,7 +1905,7 @@
   },
   "power_controls:bugfixes.stairsDropFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Items and blocks",
     "label": "Stairs drop fix",
     "description": "Stairs will drop themselves instead of the base block",
     "default": true,
@@ -1894,7 +1913,7 @@
   },
   "power_controls:bugfixes.blockEffectivenessFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Items and blocks",
     "label": "Block effectiveness fix",
     "description": "Fixes axes and pickaxes not being effective on various blocks",
     "default": true,
@@ -1902,7 +1921,7 @@
   },
   "power_controls:bugfixes.pigSaddleDropFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Entities",
     "label": "Pig saddle drop fix",
     "description": "Fixes pigs not dropping saddle on death",
     "default": true,
@@ -1910,7 +1929,7 @@
   },
   "power_controls:bugfixes.fenceBoundingBoxFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Items and blocks",
     "label": "Fence bounding box fix",
     "description": "Fixes fence bounding box not reflecting the fence state",
     "default": true,
@@ -1918,7 +1937,7 @@
   },
   "power_controls:bugfixes.pickBlockFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Items and blocks",
     "label": "Pick block fix",
     "description": "Fixes some blocks not being pickable using Pick Block",
     "default": true,
@@ -1926,7 +1945,7 @@
   },
   "power_controls:bugfixes.springPropagationFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "World simulation",
     "label": "Spring propagation fix",
     "description": "Fixes water source blocks not forming when a block below is water",
     "default": true,
@@ -1934,7 +1953,7 @@
   },
   "power_controls:bugfixes.lavaWithoutSourceFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "World simulation",
     "label": "Lava without source fix",
     "description": "Fixes lava not dissapearing without a source block",
     "default": true,
@@ -1942,7 +1961,7 @@
   },
   "power_controls:bugfixes.liquidBlockDropFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "World simulation",
     "label": "Liquid block drop fix",
     "description": "Fixes liquid flowing down from above not dropping items such as torches and rails when broken",
     "default": true,
@@ -1950,7 +1969,7 @@
   },
   "power_controls:bugfixes.bowHeldFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Bow held fix",
     "description": "Skeletons and Players now hold bows properly",
     "default": true,
@@ -1958,7 +1977,7 @@
   },
   "power_controls:bugfixes.leggingsWhenRidingFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Leggings when riding fix",
     "description": "",
     "default": true,
@@ -1966,7 +1985,7 @@
   },
   "power_controls:bugfixes.itemstackRenderingFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Itemstack rendering fix",
     "description": "Fixes itemstacks being render below text in containers",
     "default": true,
@@ -1974,7 +1993,7 @@
   },
   "power_controls:bugfixes.fishVelocityFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Entities",
     "label": "Fish velocity fix",
     "description": "Fixes fish flying above the player head when caught",
     "default": true,
@@ -1982,7 +2001,7 @@
   },
   "power_controls:bugfixes.furnaceConsumeBucketFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Items and blocks",
     "label": "Furnace consume bucket fix",
     "description": "Fixes furnace consuming lava bucket as fuel",
     "default": true,
@@ -1990,7 +2009,7 @@
   },
   "power_controls:bugfixes.armorIconsFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Armor icon fix",
     "description": "",
     "default": true,
@@ -1998,7 +2017,7 @@
   },
   "power_controls:bugfixes.droppedItemSizeFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Dropped item size fix",
     "description": "",
     "default": true,
@@ -2006,7 +2025,7 @@
   },
   "power_controls:bugfixes.breakingAnimationFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Breaking animation fix",
     "description": "Fixes the breaking animation not rendering on bottom face",
     "default": true,
@@ -2014,7 +2033,7 @@
   },
   "power_controls:bugfixes.deathScreenFormattingFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Death screen formatting fix",
     "description": "",
     "default": true,
@@ -2022,15 +2041,15 @@
   },
   "power_controls:bugfixes.hotbarRenderingFix": {
     "page": "Fixes",
-    "group": "Game fixes",
-    "label": "Hotbar rendering fix",
-    "description": "Fixes hotbar turning white when looking at entity with no clouds rendering on Fast graphics",
+    "group": "Rendering",
+    "label": "Fast-cloud rendering fix",
+    "description": "Repair cloud rendering state when fast graphics are used. The separate hotbar block fix affects inventory icons.",
     "default": true,
     "restart": false
   },
   "power_controls:bugfixes.woodenSlabMiningFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Items and blocks",
     "label": "Wooden slab mining fix",
     "description": "Fixes wooden slab not being mineable by hand and axe",
     "default": true,
@@ -2038,7 +2057,7 @@
   },
   "power_controls:bugfixes.grassBlockItemFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Grass block item fix",
     "description": "Fixes grass block top texture being wrong",
     "default": true,
@@ -2046,7 +2065,7 @@
   },
   "power_controls:bugfixes.miningDelayFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Items and blocks",
     "label": "Multiplayer mining delay fix",
     "description": "WARNING: This could be considered a hack on some servers",
     "default": true,
@@ -2054,7 +2073,7 @@
   },
   "power_controls:bugfixes.lastDurabilityFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Items and blocks",
     "label": "Last durability fix",
     "description": "Fixes blocks not dropping on the last durability point of a tool",
     "default": true,
@@ -2062,7 +2081,7 @@
   },
   "power_controls:bugfixes.fenceLightingFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Fence lighting fix",
     "description": "Fixes the bottom face of a fence being dark when placed on block",
     "default": true,
@@ -2070,7 +2089,7 @@
   },
   "power_controls:bugfixes.torchBottomFaceFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "Torch bottom face fix",
     "description": "Fixes torches not having bottom faces rendered",
     "default": true,
@@ -2078,7 +2097,7 @@
   },
   "power_controls:bugfixes.firstPersonRidingHandFix": {
     "page": "Fixes",
-    "group": "Game fixes",
+    "group": "Rendering",
     "label": "First person riding hand fix",
     "description": "Fixes the player's hand being misplaced when riding and using F5",
     "default": true,
@@ -2169,8 +2188,8 @@
     "step": 1
   },
   "power_controls:features.stepAssist": {
-    "page": "Gameplay",
-    "group": "Optional mechanics",
+    "page": "Movement",
+    "group": "Walking",
     "label": "Step assist",
     "description": "Allows you to step up one block",
     "default": false,
@@ -2182,7 +2201,8 @@
     "label": "Chest sound style",
     "description": "Choose the sounds used for opening and closing chests.",
     "default": 2,
-    "restart": false
+    "restart": false,
+    "order": 7
   },
   "power_controls:features.fallingPipe": {
     "page": "Audio",
@@ -2190,7 +2210,8 @@
     "label": "Metallic break sound",
     "description": "Replace enabled tool and armor break sounds with a falling-pipe sound.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 5
   },
   "power_controls:gameplay.noFoodWastage": {
     "page": "Gameplay",
@@ -2201,40 +2222,42 @@
     "restart": false
   },
   "power_controls:gameplay.pickBlockFromInventory": {
-    "page": "Gameplay",
-    "group": "Interaction",
+    "page": "Inventory",
+    "group": "Clicking",
     "label": "Pick block from inventory",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_controls:gameplay.shiftPlacing": {
-    "page": "Gameplay",
-    "group": "Interaction",
+    "page": "Building",
+    "group": "Placement rules",
     "label": "Shift placing",
     "description": "Ignores block actions allowing you to place blocks when crouching",
     "default": true,
-    "restart": false
+    "restart": false,
+    "order": 3
   },
   "power_controls:gameplay.shiftPlacingBlacklist": {
-    "page": "Gameplay",
-    "group": "Interaction",
+    "page": "Building",
+    "group": "Placement rules",
     "label": "Shift placing blacklist",
     "description": "Identifiers of blocks that won't have their block action skipped. (Requires extended block identifiers)",
     "default": [],
-    "restart": true
+    "restart": true,
+    "order": 4
   },
   "power_controls:gameplay.rightClickEquipArmor": {
-    "page": "Gameplay",
-    "group": "Interaction",
+    "page": "Inventory",
+    "group": "Clicking",
     "label": "Equip armor using right-click",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_controls:gameplay.fenceJumping": {
-    "page": "Gameplay",
-    "group": "Interaction",
+    "page": "Movement",
+    "group": "Walking",
     "label": "Fence jump",
     "description": "Only works if fence bounding box fix is enabled",
     "default": false,
@@ -2246,7 +2269,8 @@
     "label": "Pause on lost focus",
     "description": "",
     "default": true,
-    "restart": false
+    "restart": false,
+    "order": 5
   },
   "power_controls:general.autosaveInterval": {
     "page": "General",
@@ -2257,13 +2281,14 @@
     "restart": true,
     "min": 1,
     "max": 3600,
-    "step": 1
+    "step": 1,
+    "order": 2
   },
   "power_controls:general.tcpNoDelay": {
     "page": "Advanced",
     "group": "Network and resources",
-    "label": "Tcp nodelay",
-    "description": "",
+    "label": "TCP no-delay",
+    "description": "Send small network packets without batching. Applies to new connections; reconnect after changing this setting.",
     "default": true,
     "restart": false
   },
@@ -2273,27 +2298,29 @@
     "label": "Raw input",
     "description": "Reads movement directly from a mouse device, bypassing normal cursor processing. Turn off if movement stops or feels uneven.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 9
   },
   "power_controls:general.disableControllerInit": {
     "page": "General",
     "group": "Input",
-    "label": "Disable controller init",
+    "label": "Skip controller initialization",
     "description": "Disables the initialization of LWJGL Controllers as it only causes issues anyway",
     "default": true,
-    "restart": false
+    "restart": true,
+    "order": 10
   },
   "power_controls:general.resourceDownloadUrl": {
     "page": "Advanced",
     "group": "Network and resources",
     "label": "Resource download url",
-    "description": "BetaCraft Resource Proxy by Default",
+    "description": "Server used to download missing legacy sounds and music. An empty URL uses the original game server. Restart after changing it.",
     "default": "http://s3.betacraft.uk:11705/MinecraftResources/",
-    "restart": false
+    "restart": true
   },
   "power_controls:general.disabledDimensions": {
     "page": "Advanced",
-    "group": "Network and resources",
+    "group": "Server settings",
     "label": "Disabled dimensions (server only)",
     "description": "Dimensions which wont be loaded on server boot",
     "default": [
@@ -2303,7 +2330,7 @@
   },
   "power_controls:oldfeatures.disableDeadBushGeneration": {
     "page": "Gameplay",
-    "group": "Older mechanics",
+    "group": "World generation",
     "label": "Disable dead bush generation",
     "description": "",
     "default": false,
@@ -2311,7 +2338,7 @@
   },
   "power_controls:oldfeatures.disableTallGrassGeneration": {
     "page": "Gameplay",
-    "group": "Older mechanics",
+    "group": "World generation",
     "label": "Disable tall grass generation",
     "description": "",
     "default": false,
@@ -2319,7 +2346,7 @@
   },
   "power_controls:oldfeatures.punchSheepForWool": {
     "page": "Gameplay",
-    "group": "Older mechanics",
+    "group": "Mob drops",
     "label": "Punch sheep for wool",
     "description": "",
     "default": false,
@@ -2327,7 +2354,7 @@
   },
   "power_controls:oldfeatures.punchTntToIgnite": {
     "page": "Gameplay",
-    "group": "Older mechanics",
+    "group": "Explosion and fire",
     "label": "Punch TNT to ignite",
     "description": "",
     "default": false,
@@ -2335,7 +2362,7 @@
   },
   "power_controls:oldfeatures.punchTntToDefuse": {
     "page": "Gameplay",
-    "group": "Older mechanics",
+    "group": "Explosion and fire",
     "label": "Punch primed TNT to defuse",
     "description": "",
     "default": false,
@@ -2343,35 +2370,37 @@
   },
   "power_controls:oldfeatures.hoeGrassForSeeds": {
     "page": "Gameplay",
-    "group": "Older mechanics",
+    "group": "Plants and harvesting",
     "label": "Hoe grass for seeds",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_controls:oldfeatures.boatElevators": {
-    "page": "Gameplay",
-    "group": "Older mechanics",
+    "page": "Movement",
+    "group": "Vehicles",
     "label": "Boat elevators",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 4
   },
   "power_controls:oldfeatures.ladderGaps": {
-    "page": "Gameplay",
-    "group": "Older mechanics",
+    "page": "Movement",
+    "group": "Walking",
     "label": "Ladder gaps",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_controls:oldfeatures.minecartBoosters": {
-    "page": "Gameplay",
-    "group": "Older mechanics",
+    "page": "Movement",
+    "group": "Vehicles",
     "label": "Minecart boosters",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 7
   },
   "power_controls:recipes.enableRecipes": {
     "page": "Crafting",
@@ -2589,23 +2618,24 @@
   },
   "power_controls:tweaks.sugarCaneOnSand": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Plants and harvesting",
     "label": "Allow placing sugar cane on sand",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_controls:tweaks.boatsDropThemselves": {
-    "page": "Gameplay",
-    "group": "Blocks and entities",
+    "page": "Movement",
+    "group": "Vehicles",
     "label": "Boats drop themselves when broken by a player",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 3
   },
   "power_controls:tweaks.pumpkinsPlaceableLikeNormal": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Blocks",
     "label": "Pumpkins placeable like normal",
     "description": "",
     "default": false,
@@ -2613,7 +2643,7 @@
   },
   "power_controls:tweaks.fencesPlaceableLikeNormal": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Blocks",
     "label": "Fences placeable like normal",
     "description": "",
     "default": false,
@@ -2621,7 +2651,7 @@
   },
   "power_controls:tweaks.fencesConnectBlocks": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Blocks",
     "label": "Fences connect to blocks",
     "description": "",
     "default": false,
@@ -2629,7 +2659,7 @@
   },
   "power_controls:tweaks.bookshelvesDropBooks": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Blocks",
     "label": "Bookshelves drop 3 books",
     "description": "",
     "default": false,
@@ -2637,7 +2667,7 @@
   },
   "power_controls:tweaks.pressurePlatesOnFences": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Blocks",
     "label": "Pressure plates on fences",
     "description": "",
     "default": false,
@@ -2645,7 +2675,7 @@
   },
   "power_controls:tweaks.shearHarvesting": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Plants and harvesting",
     "label": "Allow shears to harvest cobwebs and tall grass",
     "description": "",
     "default": false,
@@ -2653,7 +2683,7 @@
   },
   "power_controls:tweaks.expandChickenHitbox": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Interaction",
     "label": "Expand chicken hitbox",
     "description": "Expands chicken hitbox to it's modern size",
     "default": false,
@@ -2661,7 +2691,7 @@
   },
   "power_controls:tweaks.stackableChests": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Blocks",
     "label": "Stackable chests",
     "description": "Allows you to stack chests on top of each other",
     "default": false,
@@ -2669,7 +2699,7 @@
   },
   "power_controls:tweaks.modernFlintAndSteel": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Equipment",
     "label": "Don't damage flint and steel on failed ignite",
     "description": "",
     "default": false,
@@ -2677,7 +2707,7 @@
   },
   "power_controls:tweaks.disableSleeping": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Sleep",
     "label": "Disable sleeping but retain respawning",
     "description": "",
     "default": false,
@@ -2685,23 +2715,24 @@
   },
   "power_controls:tweaks.disableSleepSpawning": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Sleep",
     "label": "Disable spawning mobs when you sleep",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_controls:tweaks.preventItemsStoppingMinecarts": {
-    "page": "Gameplay",
-    "group": "Blocks and entities",
+    "page": "Movement",
+    "group": "Vehicles",
     "label": "Prevent items stopping minecarts",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 6
   },
   "power_controls:tweaks.allowIgnitingEntities": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Explosion and fire",
     "label": "Allow igniting entities with flint and steel",
     "description": "",
     "default": false,
@@ -2709,15 +2740,15 @@
   },
   "power_controls:tweaks.allowTrapdoorsWithoutSupport": {
     "page": "Gameplay",
-    "group": "Blocks and entities",
+    "group": "Blocks",
     "label": "Allow placing trapdoors without support",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_controls:tweaks.beta18LeavesRendering": {
-    "page": "Gameplay",
-    "group": "Blocks and entities",
+    "page": "Video",
+    "group": "Quality",
     "label": "Beta 1.8 leaves rendering",
     "description": "",
     "default": false,
@@ -2729,7 +2760,7 @@
     "label": "Show quit button",
     "description": "Shows Quit Button on the Main Menu",
     "default": true,
-    "restart": false
+    "restart": true
   },
   "power_controls:userinterface.improvedControlsMenu": {
     "page": "Interface",
@@ -2737,7 +2768,8 @@
     "label": "Improved controls menu",
     "description": "",
     "default": true,
-    "restart": false
+    "restart": false,
+    "hidden": true
   },
   "power_controls:userinterface.hideAchievementToast": {
     "page": "Interface",
@@ -2757,7 +2789,7 @@
   },
   "power_controls:userinterface.disableDebugEntityIdTags": {
     "page": "Interface",
-    "group": "Menus",
+    "group": "Debug information",
     "label": "Disable F3 entity id tags",
     "description": "",
     "default": true,
@@ -2769,7 +2801,8 @@
     "label": "Third-person front view",
     "description": "Disabled switches between first person and rear view. Normal adds a front view; Hide HUD shows it while the HUD is hidden.",
     "default": 0,
-    "restart": false
+    "restart": false,
+    "order": 0
   },
   "power_controls:userinterface.clearTextFieldWithRightClick": {
     "page": "Interface",
@@ -2779,18 +2812,10 @@
     "default": true,
     "restart": false
   },
-  "power_controls:userinterface.fovSlider": {
-    "page": "Interface",
-    "group": "Menus",
-    "label": "Fov slider",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
   "power_controls:userinterface.versionTextConfig.showVersionTextIngame": {
     "page": "Interface",
     "group": "Version label",
-    "label": "Show version text ingame",
+    "label": "Show version in game",
     "description": "",
     "default": false,
     "restart": false
@@ -2798,7 +2823,7 @@
   "power_controls:userinterface.versionTextConfig.unlicensedCopy": {
     "page": "Interface",
     "group": "Version label",
-    "label": "Unlicensed copy",
+    "label": "Show unlicensed-copy label",
     "description": "",
     "default": false,
     "restart": false
@@ -2806,7 +2831,7 @@
   "power_controls:userinterface.versionTextConfig.enableCustomVersionText": {
     "page": "Interface",
     "group": "Version label",
-    "label": "Custom version text",
+    "label": "Use custom version text",
     "description": "",
     "default": false,
     "restart": false
@@ -2814,7 +2839,7 @@
   "power_controls:userinterface.versionTextConfig.customVersionText": {
     "page": "Interface",
     "group": "Version label",
-    "label": "Custom version text",
+    "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
     "default": "Power Beta | Minecraft Beta 1.7.3",
     "restart": false
@@ -2825,7 +2850,8 @@
     "label": "Panorama",
     "description": "",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 0
   },
   "power_controls:userinterface.panoramaConfig.blurBackground": {
     "page": "Interface",
@@ -2833,7 +2859,8 @@
     "label": "Blur panorama",
     "description": "",
     "default": true,
-    "restart": false
+    "restart": false,
+    "order": 2
   },
   "power_controls:userinterface.panoramaConfig.panoramaFolder": {
     "page": "Interface",
@@ -2841,7 +2868,8 @@
     "label": "Panorama folder to use",
     "description": "Default included : beta18, glacier",
     "default": "glacier",
-    "restart": false
+    "restart": false,
+    "order": 1
   },
   "power_controls:userinterface.photoModeConfig.enablePhotoModeButton": {
     "page": "Interface",
@@ -3005,7 +3033,7 @@
   },
   "power_compat:config.SHOVELS_CONFIG.enableShovelsEffectiveOnSoulSand": {
     "page": "Gameplay",
-    "group": "Shovels",
+    "group": "Plants and harvesting",
     "label": "Effective on soul sand",
     "description": "",
     "default": false,
@@ -3056,7 +3084,7 @@
   },
   "power_compat:config.disableColoredSheepSpawning": {
     "page": "Gameplay",
-    "group": "Optional mechanics",
+    "group": "Spawning",
     "label": "Disable colored sheep spawning",
     "description": "Makes sheep always spawn with white wool",
     "default": false,
@@ -3064,7 +3092,7 @@
   },
   "power_compat:config.milkSquids": {
     "page": "Gameplay",
-    "group": "Optional mechanics",
+    "group": "Interaction",
     "label": "Milk squids",
     "description": "",
     "default": false,
@@ -3072,39 +3100,39 @@
   },
   "power_compat:config.pigsDropBrownMushrooms": {
     "page": "Gameplay",
-    "group": "Optional mechanics",
+    "group": "Mob drops",
     "label": "Pigs drop brown mushrooms",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_compat:config.plantReplacementFixesEnabled": {
-    "page": "Gameplay",
-    "group": "Optional mechanics",
+    "page": "Fixes",
+    "group": "Items and blocks",
     "label": "Plant replacement fixes",
     "description": "",
     "default": true,
     "restart": false
   },
   "power_compat:config.slabPlacementFixesEnabled": {
-    "page": "Gameplay",
-    "group": "Optional mechanics",
+    "page": "Fixes",
+    "group": "Items and blocks",
     "label": "Slab placement fixes",
     "description": "Restart required for changes to take effect",
     "default": false,
     "restart": true
   },
   "power_compat:config.allowCraftingInventorySlots": {
-    "page": "Gameplay",
-    "group": "Optional mechanics",
+    "page": "Inventory",
+    "group": "Inventory management",
     "label": "Use player 2x2 crafting grid as inventory",
     "description": "",
     "default": false,
     "restart": false
   },
   "power_compat:config.vehicleLogoutLoginFixesEnabled": {
-    "page": "Gameplay",
-    "group": "Optional mechanics",
+    "page": "Fixes",
+    "group": "Entities",
     "label": "Vehicle logout/login fix",
     "description": "",
     "default": true,
@@ -3114,79 +3142,89 @@
     "page": "Creative",
     "group": "Flight",
     "label": "Creative flight",
-    "description": "Double-tap Jump to start flying. Jump rises; Sneak descends."
+    "description": "Double-tap Jump to start flying. Jump rises; Sneak descends.",
+    "order": 0
   },
   "creative.landStopsFlight": {
     "page": "Creative",
     "group": "Flight",
     "label": "Stop flying on landing",
-    "description": "Return to walking when you touch the ground."
+    "description": "Return to walking when you touch the ground.",
+    "order": 2
   },
   "creative.sprintFlight": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight sprint",
-    "description": "Use the sprint key to fly faster."
+    "description": "Use the sprint key to fly faster.",
+    "order": 5
   },
   "creative.sprintToggle": {
-    "page": "Creative",
-    "group": "Flight",
+    "page": "Camera",
+    "group": "Flight sprint",
     "label": "Sprint activation",
-    "description": "Toggle keeps sprint flight active after releasing the key. Hold requires the key to stay down."
+    "description": "Shared by creative flight and freecam. Hold requires the sprint key; Toggle stays active until forward movement stops."
   },
   "creative.flightSpeed": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight speed, %",
-    "description": "100% matches the modern creative flight target."
+    "description": "100% matches the modern creative flight target.",
+    "order": 3
   },
   "creative.sprintMultiplier": {
-    "page": "Creative",
-    "group": "Flight",
+    "page": "Camera",
+    "group": "Flight sprint",
     "label": "Sprint speed, %",
-    "description": "Multiplier applied while sprint flight is active."
+    "description": "Speed multiplier while sprinting in creative flight or freecam. 200% doubles normal speed."
   },
   "creative.glide": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight drift",
-    "description": "0 stops immediately when movement keys are released. 5 uses full modern-style drift."
+    "description": "0 stops immediately when movement keys are released. 5 uses full modern-style drift.",
+    "order": 4
   },
   "creative.doubleTapTicks": {
     "page": "Creative",
     "group": "Flight",
     "label": "Double-tap window, ticks",
-    "description": "Maximum interval between Jump presses. 20 ticks is one second."
+    "description": "Maximum interval between Jump presses. 20 ticks is one second.",
+    "order": 1
   },
   "creative.modePicker": {
     "page": "Creative",
-    "group": "Gamemodes",
+    "group": "Game modes",
     "label": "Gamemode picker",
     "description": "Hold F3, press F4 to cycle, then release F3 to select."
   },
   "creative.spectatorScroll": {
     "page": "Creative",
-    "group": "Gamemodes",
+    "group": "Spectator",
     "label": "Scroll to change speed",
-    "description": "Adjust spectator flight speed with the mouse wheel."
+    "description": "Adjust spectator flight speed with the mouse wheel.",
+    "order": 1
   },
   "creative.showSpectatorSpeed": {
     "page": "Creative",
-    "group": "Gamemodes",
+    "group": "Spectator",
     "label": "Show spectator speed",
-    "description": "Display the current speed while it changes."
+    "description": "Display the current speed while it changes.",
+    "order": 3
   },
   "creative.spectatorSpeed": {
     "page": "Creative",
-    "group": "Gamemodes",
+    "group": "Spectator",
     "label": "Spectator speed, %",
-    "description": "Starting spectator movement speed."
+    "description": "Starting spectator movement speed.",
+    "order": 0
   },
   "creative.spectatorScrollStep": {
     "page": "Creative",
-    "group": "Gamemodes",
+    "group": "Spectator",
     "label": "Speed step, %",
-    "description": "Speed change for each wheel step."
+    "description": "Speed change for each wheel step.",
+    "order": 2
   },
   "creative.blockReach": {
     "page": "Creative",
@@ -3222,47 +3260,50 @@
     "page": "World editing",
     "group": "Access",
     "label": "World editing",
-    "description": "Allow editing commands and the wand when Cheats enabled is on in this world."
+    "description": "Allow editing commands and the wand when Cheats enabled is on in this world.",
+    "order": 0
   },
   "worldedit.wandEnabled": {
     "page": "World editing",
     "group": "Selection",
     "label": "Selection wand",
-    "description": ""
+    "description": "",
+    "order": 2
   },
   "worldedit.wandItem": {
     "page": "World editing",
     "group": "Selection",
     "label": "Wand item ID",
-    "description": ""
+    "description": "",
+    "order": 3
   },
   "worldedit.showSelection": {
     "page": "World editing",
-    "group": "Selection",
+    "group": "Selection outline",
     "label": "Selection outline",
     "description": ""
   },
   "worldedit.throughWalls": {
     "page": "World editing",
-    "group": "Selection",
+    "group": "Selection outline",
     "label": "Show through blocks",
     "description": ""
   },
   "worldedit.color": {
     "page": "World editing",
-    "group": "Selection",
+    "group": "Selection outline",
     "label": "Outline color",
     "description": ""
   },
   "worldedit.opacity": {
     "page": "World editing",
-    "group": "Selection",
+    "group": "Selection outline",
     "label": "Outline opacity, %",
     "description": ""
   },
   "worldedit.lineWidth": {
     "page": "World editing",
-    "group": "Selection",
+    "group": "Selection outline",
     "label": "Outline width",
     "description": ""
   },
@@ -3313,35 +3354,38 @@
     "page": "Building",
     "group": "Placement rules",
     "label": "Placement restriction",
-    "description": "Constrain continued placement using the first successful placement."
+    "description": "Constrain continued placement using the first successful placement.",
+    "order": 0
   },
   "tweaks.placement.restrictionTiedToFast": {
     "page": "Building",
     "group": "Placement rules",
     "label": "Tie restriction to fast placement",
-    "description": "Turning fast placement on or off also changes the restriction switch."
+    "description": "Turning fast placement on or off also changes the restriction switch.",
+    "order": 1
   },
   "tweaks.placement.restrictionMode": {
     "page": "Building",
     "group": "Placement rules",
     "label": "Restriction rule",
-    "description": "Face, plane, layer, column, line or diagonal."
+    "description": "Face, plane, layer, column, line or diagonal.",
+    "order": 2
   },
   "tweaks.placement.listMode": {
     "page": "Building",
-    "group": "Placement rules",
+    "group": "Item filters",
     "label": "Item filter",
     "description": "Choose whether to allow all items, exclude listed items, or only allow listed items."
   },
   "tweaks.placement.blacklist": {
     "page": "Building",
-    "group": "Placement rules",
+    "group": "Item filters",
     "label": "Excluded items",
     "description": "Item IDs separated by commas, for example 1, 44:2."
   },
   "tweaks.placement.whitelist": {
     "page": "Building",
-    "group": "Placement rules",
+    "group": "Item filters",
     "label": "Allowed items",
     "description": "Item IDs separated by commas, for example 1, 44:2. An empty allow-list permits nothing."
   },
@@ -3385,85 +3429,99 @@
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Swap hotbar rows",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Allow swapping the hotbar with an inventory row using its key bindings. Existing stacks move between slots.",
+    "order": 0
   },
   "tweaks.hotbar.scroll": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Scroll to choose a row",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Allow the hotbar-scroll binding to cycle through inventory rows.",
+    "order": 1
   },
   "tweaks.hotbar.numberRowKeys": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Modifier + number selects row",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "While holding the row modifier, keys 1, 2 and 3 select the top, middle and bottom inventory rows.",
+    "order": 2
   },
   "tweaks.hotbar.overlay": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Row preview",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Show inventory rows while holding the preview or row modifier.",
+    "order": 6
   },
   "tweaks.hotbar.reverseScroll": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Reverse row scrolling",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Reverse which inventory row is chosen by each scroll direction.",
+    "order": 3
   },
   "tweaks.hotbar.rememberRow": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Remember the selected row",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Keep the selected inventory row between hotbar swaps.",
+    "order": 4
   },
   "tweaks.hotbar.selectedRow": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Starting row",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Inventory row selected before using a row key or scrolling. Remember row can update this selection.",
+    "order": 5
   },
   "tweaks.hotbar.alignment": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Preview alignment",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Anchor the inventory-row preview relative to the screen.",
+    "order": 7
   },
   "tweaks.hotbar.offsetX": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Horizontal offset",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Move the row preview horizontally from its anchor, in scaled GUI pixels.",
+    "order": 8
   },
   "tweaks.hotbar.offsetY": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Vertical offset",
-    "description": "Swaps move existing stacks between slots. Inventory recovery records remain enabled."
+    "description": "Move the row preview vertically from its anchor, in scaled GUI pixels.",
+    "order": 9
   },
   "tweaks.freeLook": {
     "page": "Camera",
     "group": "Free look",
     "label": "Free look",
-    "description": ""
+    "description": "",
+    "order": 0
   },
   "tweaks.freeLookToggle": {
     "page": "Camera",
     "group": "Free look",
     "label": "Free look activation",
-    "description": ""
+    "description": "",
+    "order": 1
   },
   "tweaks.freeLookPerspective": {
     "page": "Camera",
     "group": "Free look",
     "label": "Free look perspective",
-    "description": ""
+    "description": "",
+    "order": 2
   },
   "tweaks.freeLookFollowThirdPerson": {
     "page": "Camera",
     "group": "Free look",
     "label": "Follow current third-person view",
-    "description": ""
+    "description": "",
+    "order": 3
   },
   "tweaks.clickMining": {
     "page": "Building",
@@ -3475,23 +3533,25 @@
     "page": "Movement",
     "group": "Vehicles",
     "label": "Boat steering",
-    "description": "Steer boats directly using movement keys. Speed and collision protection are separate."
+    "description": "Steer boats directly using movement keys. Speed and collision protection are separate.",
+    "order": 0
   },
   "tweaks.fastMinecarts": {
     "page": "Movement",
     "group": "Vehicles",
     "label": "Faster minecarts",
-    "description": ""
+    "description": "",
+    "order": 5
   },
   "tweaks.sneak.enabled": {
     "page": "Movement",
-    "group": "Walking",
+    "group": "Edge protection",
     "label": "Edge protection",
     "description": "Prevent walking off ledges without crouching or slowing down."
   },
   "tweaks.sneak.announceToggle": {
     "page": "Movement",
-    "group": "Walking",
+    "group": "Edge protection",
     "label": "Edge-protection messages",
     "description": ""
   },
@@ -3518,7 +3578,8 @@
       " * * * * * * * **  *   **  *** **   * ",
       " *   * * *  ** *   *   * * * * *    * ",
       " *   * * *   * *** *** * * * * *    * "
-    ]
+    ],
+    "order": 0
   },
   "power_controls:features.eatingSounds": {
     "page": "Audio",
@@ -3526,7 +3587,8 @@
     "label": "Eating sounds",
     "description": "Play chewing when food is consumed.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 0
   },
   "power_controls:features.burpingSounds": {
     "page": "Audio",
@@ -3534,7 +3596,8 @@
     "label": "Burping sounds",
     "description": "Occasionally burp after consuming food.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 1
   },
   "power_controls:features.shearingSounds": {
     "page": "Audio",
@@ -3542,7 +3605,8 @@
     "label": "Shearing sounds",
     "description": "Play a snip when a sheep is successfully sheared.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 2
   },
   "power_controls:features.toolBreakSounds": {
     "page": "Audio",
@@ -3550,7 +3614,8 @@
     "label": "Tool break sounds",
     "description": "Play a sound when a tool reaches zero durability.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 3
   },
   "power_controls:features.armorBreakSounds": {
     "page": "Audio",
@@ -3558,7 +3623,8 @@
     "label": "Armor break sounds",
     "description": "Play a sound when an armor piece breaks.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 4
   },
   "power_controls:features.chestSounds": {
     "page": "Audio",
@@ -3566,7 +3632,8 @@
     "label": "Chest sounds",
     "description": "Play sounds when opening and closing chests.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 6
   },
   "tweaks.boatSpeed": {
     "page": "Movement",
@@ -3574,7 +3641,8 @@
     "label": "Faster boats",
     "description": "Raise the boat speed limit independently of steering.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 1
   },
   "tweaks.boatProtection": {
     "page": "Movement",
@@ -3582,7 +3650,8 @@
     "label": "Boat collision protection",
     "description": "Prevent boats from breaking when they hit blocks.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 2
   },
   "power_camera:config.enabled": {
     "page": "Camera",
@@ -3590,7 +3659,8 @@
     "label": "Freecam",
     "description": "Allow the detached camera and its controls.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 0
   },
   "power_camera:config.doorCollision": {
     "page": "Camera",
@@ -3598,7 +3668,8 @@
     "label": "Freecam door collisions",
     "description": "With camera collisions enabled, also collide with doors and trapdoors. Off passes through them.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 6
   },
   "power_camera:config.sprint": {
     "page": "Camera",
@@ -3606,7 +3677,8 @@
     "label": "Freecam sprint",
     "description": "Boost camera speed with the flight sprint key. Uses the creative sprint multiplier and Hold/Toggle setting.",
     "default": true,
-    "restart": false
+    "restart": false,
+    "order": 4
   },
   "visual.slashChat": {
     "page": "General",
@@ -3614,7 +3686,8 @@
     "label": "Slash opens chat",
     "description": "Open chat with / already entered when pressing the slash key.",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 4
   },
   "visual.containerCarry": {
     "page": "Inventory",
@@ -3648,9 +3721,550 @@
   },
   "tweaks.autoWalkHoldToWalk": {
     "label": "Hold auto-walk key to walk",
-    "description": "Tap to toggle walking. Hold beyond the threshold to stop walking when released."
+    "description": "Tap to toggle walking. Hold beyond the threshold to stop walking when released.",
+    "page": "Movement",
+    "group": "Auto-walk",
+    "order": 1
   },
   "tweaks.autoWalkHoldMillis": {
-    "label": "Auto-walk hold time, ms"
+    "label": "Auto-walk hold time, ms",
+    "page": "Movement",
+    "group": "Auto-walk",
+    "order": 2
+  },
+  "native.difficulty": {
+    "order": 0
+  },
+  "world.cheats": {
+    "order": 1
+  },
+  "native.guiScale": {
+    "order": 3
+  },
+  "interface.pauseToOptions": {
+    "order": 6
+  },
+  "native.sensitivity": {
+    "order": 7
+  },
+  "native.invert": {
+    "order": 8
+  },
+  "visual.softRain": {
+    "page": "Video",
+    "group": "Textures",
+    "order": 1
+  },
+  "visual.softSnow": {
+    "page": "Video",
+    "group": "Textures",
+    "order": 2
+  },
+  "visual.oldCobble": {
+    "page": "Video",
+    "group": "Textures",
+    "order": 3
+  },
+  "visual.oldBricks": {
+    "page": "Video",
+    "group": "Textures",
+    "order": 4
+  },
+  "power_controls:userinterface.videoSettingsConfig.vanillaFarValues": {
+    "page": "Video",
+    "group": "Rendering",
+    "label": "Original far-distance fog",
+    "description": "Use Beta's original far-fog values at exactly 12 chunks. Other distances keep their normal fog.",
+    "order": 4
+  },
+  "video.clouds": {
+    "page": "Video",
+    "group": "Sky",
+    "order": 1
+  },
+  "native.fpsLimit": {
+    "order": 0
+  },
+  "native.renderDistance": {
+    "order": 1
+  },
+  "native.fogDensity": {
+    "order": 2
+  },
+  "video.fogCycle": {
+    "order": 3
+  },
+  "native.opengl": {
+    "order": 5
+  },
+  "native.anaglyph": {
+    "order": 6
+  },
+  "native.clouds": {
+    "order": 0
+  },
+  "native.cloudHeight": {
+    "order": 2
+  },
+  "native.texturePack": {
+    "order": 0
+  },
+  "audio.master": {
+    "order": 0
+  },
+  "native.music": {
+    "order": 1
+  },
+  "native.sound": {
+    "order": 2
+  },
+  "audio.preset": {
+    "order": 0
+  },
+  "audio.musicMode": {
+    "order": 1
+  },
+  "audio.customMusic": {
+    "order": 2
+  },
+  "audio.musicDirectories": {
+    "order": 3
+  },
+  "audio.menuMusic": {
+    "order": 4
+  },
+  "audio.menuDirectories": {
+    "order": 5
+  },
+  "audio.recursive": {
+    "order": 6
+  },
+  "audio.shuffle": {
+    "order": 7
+  },
+  "audio.avoidRepeats": {
+    "order": 8
+  },
+  "audio.dimensionMusic": {
+    "order": 9
+  },
+  "audio.waitBetweenTracks": {
+    "order": 0
+  },
+  "audio.gapMinSeconds": {
+    "order": 1
+  },
+  "audio.gapMaxSeconds": {
+    "order": 2
+  },
+  "audio.delayQueuedTracks": {
+    "order": 3
+  },
+  "keys.key.forward": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 0
+  },
+  "keys.key.back": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 1
+  },
+  "keys.key.left": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 2
+  },
+  "keys.key.right": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 3
+  },
+  "keys.key.jump": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 4
+  },
+  "keys.key.sneak": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 5
+  },
+  "keys.key.power_controls.dismount": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 6,
+    "label": "Dismount"
+  },
+  "keys.Auto-walk (toggle)": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 7
+  },
+  "keys.Fake sneak (toggle)": {
+    "page": "Controls",
+    "group": "Movement",
+    "order": 8,
+    "label": "Edge protection (toggle)"
+  },
+  "keys.key.inventory": {
+    "page": "Controls",
+    "group": "Inventory",
+    "order": 0
+  },
+  "keys.key.drop": {
+    "page": "Controls",
+    "group": "Inventory",
+    "order": 1
+  },
+  "keys.powerbeta.containerPreview": {
+    "page": "Controls",
+    "group": "Inventory",
+    "order": 2
+  },
+  "keys.key.power_controls.hotbar_1": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 0,
+    "label": "Hotbar 1"
+  },
+  "keys.key.power_controls.hotbar_2": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 1,
+    "label": "Hotbar 2"
+  },
+  "keys.key.power_controls.hotbar_3": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 2,
+    "label": "Hotbar 3"
+  },
+  "keys.key.power_controls.hotbar_4": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 3,
+    "label": "Hotbar 4"
+  },
+  "keys.key.power_controls.hotbar_5": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 4,
+    "label": "Hotbar 5"
+  },
+  "keys.key.power_controls.hotbar_6": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 5,
+    "label": "Hotbar 6"
+  },
+  "keys.key.power_controls.hotbar_7": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 6,
+    "label": "Hotbar 7"
+  },
+  "keys.key.power_controls.hotbar_8": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 7,
+    "label": "Hotbar 8"
+  },
+  "keys.key.power_controls.hotbar_9": {
+    "page": "Controls",
+    "group": "Hotbar slots",
+    "order": 8,
+    "label": "Hotbar 9"
+  },
+  "keys.key.power_controls.third_person": {
+    "page": "Controls",
+    "group": "Camera",
+    "order": 0,
+    "label": "Third person"
+  },
+  "keys.key.power_controls.zoom": {
+    "page": "Controls",
+    "group": "Camera",
+    "order": 1,
+    "label": "Zoom"
+  },
+  "keys.key.power_controls.cinematic_camera": {
+    "page": "Controls",
+    "group": "Camera",
+    "order": 2,
+    "label": "Cinematic camera"
+  },
+  "keys.key.powerbeta.free_look": {
+    "page": "Controls",
+    "group": "Camera",
+    "order": 3
+  },
+  "keys.key.fog": {
+    "page": "Controls",
+    "group": "Camera",
+    "order": 4,
+    "label": "Cycle render distance"
+  },
+  "keys.Toggle Freecam": {
+    "page": "Controls",
+    "group": "Free camera",
+    "order": 0
+  },
+  "keys.Toggle Player Movement": {
+    "page": "Controls",
+    "group": "Free camera",
+    "order": 1,
+    "label": "Move player during freecam"
+  },
+  "keys.Change Freecam Speed": {
+    "page": "Controls",
+    "group": "Free camera",
+    "order": 2,
+    "label": "Adjust freecam speed"
+  },
+  "keys.Save Or Load Camera Position": {
+    "page": "Controls",
+    "group": "Free camera",
+    "order": 3,
+    "label": "Save or load camera position"
+  },
+  "keys.Open Camera Position Gui": {
+    "page": "Controls",
+    "group": "Free camera",
+    "order": 4,
+    "label": "Saved camera positions"
+  },
+  "keys.Fast place (toggle)": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 0
+  },
+  "keys.Flexible placement (toggle)": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 1
+  },
+  "keys.Placement offset (hold)": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 2
+  },
+  "keys.Placement adjacent (hold)": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 3
+  },
+  "keys.Placement rotation (hold)": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 4
+  },
+  "keys.Placement reverse (hold)": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 5
+  },
+  "keys.Placement into face (hold)": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 6
+  },
+  "keys.Slab completion (toggle)": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 7
+  },
+  "keys.powerbeta.lightOverlay": {
+    "page": "Controls",
+    "group": "Building",
+    "order": 8
+  },
+  "keys.power_building.hotbar.base": {
+    "page": "Controls",
+    "group": "Hotbar swapping",
+    "order": 0,
+    "label": "Hotbar preview / row modifier"
+  },
+  "keys.power_building.hotbar.scroll": {
+    "page": "Controls",
+    "group": "Hotbar swapping",
+    "order": 1,
+    "label": "Scroll hotbar rows (hold)"
+  },
+  "keys.power_building.hotbar.row1": {
+    "page": "Controls",
+    "group": "Hotbar swapping",
+    "order": 2,
+    "label": "Swap with top row"
+  },
+  "keys.power_building.hotbar.row2": {
+    "page": "Controls",
+    "group": "Hotbar swapping",
+    "order": 3,
+    "label": "Swap with middle row"
+  },
+  "keys.power_building.hotbar.row3": {
+    "page": "Controls",
+    "group": "Hotbar swapping",
+    "order": 4,
+    "label": "Swap with bottom row"
+  },
+  "keys.power_creative.modifier": {
+    "page": "Controls",
+    "group": "Creative",
+    "order": 0,
+    "label": "Game mode modifier"
+  },
+  "keys.power_creative.picker": {
+    "page": "Controls",
+    "group": "Creative",
+    "order": 1,
+    "label": "Cycle game mode"
+  },
+  "keys.power_creative.sprint": {
+    "page": "Controls",
+    "group": "Camera",
+    "order": 2,
+    "label": "Flight / freecam sprint"
+  },
+  "keys.key.chat": {
+    "page": "Controls",
+    "group": "Interface",
+    "order": 0
+  },
+  "keys.playerList": {
+    "page": "Controls",
+    "group": "Interface",
+    "order": 1
+  },
+  "keys.key.power_controls.hide_hud": {
+    "page": "Controls",
+    "group": "Interface",
+    "order": 2,
+    "label": "Hide HUD"
+  },
+  "keys.key.power_controls.debug_hud": {
+    "page": "Controls",
+    "group": "Interface",
+    "order": 3,
+    "label": "Debug HUD"
+  },
+  "keys.key.power_controls.toggle_fullscreen": {
+    "page": "Controls",
+    "group": "Interface",
+    "order": 4,
+    "label": "Toggle fullscreen"
+  },
+  "keys.key.power_controls.take_screenshot": {
+    "page": "Controls",
+    "group": "Screenshots",
+    "order": 0,
+    "label": "Take screenshot"
+  },
+  "keys.key.power_controls.photo_mode": {
+    "page": "Controls",
+    "group": "Screenshots",
+    "order": 1,
+    "label": "Photo mode"
+  },
+  "keys.Custom Photo": {
+    "page": "Controls",
+    "group": "Screenshots",
+    "order": 2,
+    "label": "Custom screenshot"
+  },
+  "keys.Isometric Photo": {
+    "page": "Controls",
+    "group": "Screenshots",
+    "order": 3,
+    "label": "Isometric screenshot"
+  },
+  "keys.key.power_controls.panorama_screenshot": {
+    "page": "Controls",
+    "group": "Screenshots",
+    "order": 4,
+    "label": "Panorama screenshot"
+  },
+  "keys.key.power_controls.release_mouse": {
+    "page": "Controls",
+    "group": "Mouse input",
+    "order": 0,
+    "label": "Release mouse"
+  },
+  "keys.key.power_controls.toggle_raw_input": {
+    "page": "Controls",
+    "group": "Mouse input",
+    "order": 1,
+    "label": "Toggle raw input"
+  },
+  "keys.key.power_controls.rescan": {
+    "page": "Controls",
+    "group": "Mouse input",
+    "order": 2,
+    "label": "Rescan mouse"
+  },
+  "activeTweaks.fakeSneak": {
+    "label": "Edge protection"
+  },
+  "logo.scrollingBackground.enabled": {
+    "page": "Interface",
+    "group": "Title background",
+    "order": 3
+  },
+  "logo.scrollingBackground.speed": {
+    "page": "Interface",
+    "group": "Title background",
+    "order": 4
+  },
+  "logo.scrollingBackground.onlyTitle": {
+    "page": "Interface",
+    "group": "Title background",
+    "order": 5
+  },
+  "logo.blocks.map": {
+    "order": 1
+  },
+  "logo.logo.rotation": {
+    "order": 2
+  },
+  "logo.blocks.inverted": {
+    "order": 3
+  },
+  "logo.logo.shadow": {
+    "order": 4
+  },
+  "logo.logo.animation.enabled": {
+    "order": 5
+  },
+  "logo.logo.animation.speed": {
+    "order": 6
+  },
+  "native.fov": {
+    "order": 0
+  },
+  "native.bobbing": {
+    "order": 1
+  },
+  "visual.thirdPersonDistance": {
+    "order": 1
+  },
+  "tweaks.autoWalk": {
+    "page": "Movement",
+    "group": "Auto-walk",
+    "label": "Auto-walk",
+    "order": 0
+  },
+  "worldedit.worldOverride": {
+    "order": 1
+  },
+  "keys.Command": {
+    "page": "Controls",
+    "group": "Interface",
+    "label": "Open command chat"
+  },
+  "keys.Debug Graph": {
+    "page": "Controls",
+    "group": "Interface",
+    "label": "Debug graph"
   }
 }

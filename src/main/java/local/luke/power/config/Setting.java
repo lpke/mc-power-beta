@@ -42,10 +42,11 @@ public final class Setting {
       boolean restart) {
     this.id = id;
     this.backend = backend;
-    this.page = page;
-    this.group = group;
-    this.label = label;
-    this.description = Tooltips.description(id, label, description);
+    JsonObject metadata = Catalog.metadata(id);
+    this.page = Catalog.text(metadata, "page", page);
+    this.group = Catalog.text(metadata, "group", group);
+    this.label = Catalog.text(metadata, "label", label);
+    this.description = Tooltips.description(id, this.label, Catalog.text(metadata, "description", description));
     this.kind = kind;
     this.value = value.deepCopy();
     this.original = value.deepCopy();

@@ -78,7 +78,7 @@ public final class UiChecks {
     });
     test("soundtrack selection applies without reopening Options", () -> {
       Setting mode = find(s.session(), "audio.musicMode");
-      mode.value = new JsonPrimitive(2); s.changed(mode);
+      mode.value = new JsonPrimitive(local.luke.power.audio.AudioSettings.MusicMode.ALL_MINECRAFT.ordinal()); s.changed(mode);
       check(local.luke.power.audio.AudioConfig.current().musicMode == local.luke.power.audio.AudioSettings.MusicMode.ALL_MINECRAFT,
           "soundtrack mode was not live");
       mode.value = new JsonPrimitive(0); s.changed(mode);

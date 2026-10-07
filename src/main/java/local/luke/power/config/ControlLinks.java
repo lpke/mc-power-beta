@@ -18,7 +18,7 @@ public final class ControlLinks {
     link("key.drop", "", "", "Drop one item from the selected hotbar slot.");
     link("key.inventory", "", "", "Open or close your inventory.");
     link("key.chat", "", "", "Open chat to write a message or command.");
-    link("key.fog", "native.renderDistance", "", "Cycle Far, Normal, Short and Tiny terrain distance. Shift reverses the cycle.");
+    link("key.fog", "video.fogCycle", "", "Cycle the configured render distances. Shift reverses the cycle.");
     link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Manual forward/back input and focus loss stop it. Inventories keep walking when Inventory while moving is on.");
     // These settings are live toggle states, not feature-availability switches.
     // Keep their toggles and placement modifiers visible while the state is off.
@@ -107,7 +107,8 @@ public final class ControlLinks {
     if (!family.isEmpty() && setting.id.startsWith(family)) return true;
     return switch (link.setting) {
       case "creative.sprintToggle" -> setting.page.equals("Creative") && setting.group.equals("Flight")
-          || setting.id.equals("power_camera:config.sprint");
+          || setting.id.equals("creative.sprintMultiplier") || setting.id.equals("power_camera:config.sprint");
+      case "video.fogCycle" -> setting.id.equals("native.renderDistance") || setting.id.equals("native.fogDensity");
       case "power_controls:userinterface.frontViewThirdPerson" -> setting.id.equals("visual.thirdPersonDistance");
       case "power_capture:config.isometricPhotoScale" -> setting.id.equals("power_capture:config.mirrorIsometricScreenshot")
           || setting.id.equals("power_capture:config.disableRenderingNetherBedrock");

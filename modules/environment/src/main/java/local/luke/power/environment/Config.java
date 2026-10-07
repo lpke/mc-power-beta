@@ -35,12 +35,6 @@ public class Config {
         public WeatherConfig WEATHER_CONFIG = new WeatherConfig();
 
         @ConfigEntry(
-                name = "Force Display Active",
-                description = "Game will not pause when tabbing away"
-        )
-        public Boolean forceDisplayActive = false;
-
-        @ConfigEntry(
                 name = "Spawn Protection Radius",
                 description = "Restart required; Overridden By ControlFeatures",
                 multiplayerSynced = true,

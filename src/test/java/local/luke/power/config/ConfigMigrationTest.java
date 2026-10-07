@@ -9,6 +9,38 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigMigrationTest {
   @TempDir static Path game;
+  private void checkFocusMigration() throws Exception {
+    for (boolean pause : new boolean[]{false, true}) for (boolean active : new boolean[]{false, true}) {
+      Path instance = game;
+      java.util.Set<Path> previousBackups;
+      try (var paths = Files.list(instance.resolve("power-beta-data/config-backups"))) {
+        previousBackups = paths.collect(java.util.stream.Collectors.toSet());
+      }
+      ConfigMigration.prepare(instance);
+      JsonObject before = PowerConfig.document();
+      before.getAsJsonObject("settings").getAsJsonObject("power_controls:general").addProperty("pauseOnLostFocus", pause);
+      before.getAsJsonObject("settings").getAsJsonObject("power_environment:config").addProperty("forceDisplayActive", active);
+      before.getAsJsonObject("settings").addProperty("unrelatedSentinel", "preserved");
+      PowerConfig.write(before);
+      byte[] original = Files.readAllBytes(PowerConfig.path());
+      ConfigMigration.prepare(instance);
+      JsonObject expected = before.deepCopy();
+      expected.getAsJsonObject("settings").getAsJsonObject("power_environment:config").remove("forceDisplayActive");
+      expected.getAsJsonObject("settings").getAsJsonObject("power_controls:general").addProperty("pauseOnLostFocus", pause && !active);
+      assertEquals(expected, PowerConfig.document(), "Only the two focus preferences may change");
+      try (var paths = Files.list(instance.resolve("power-beta-data/config-backups"))) {
+        var backups = paths.filter(p -> !previousBackups.contains(p)).toList();
+        assertEquals(1, backups.size());
+        try (var zip = new java.util.zip.ZipFile(backups.get(0).toFile())) {
+          assertArrayEquals(original, zip.getInputStream(zip.getEntry("config/power-beta.json")).readAllBytes());
+        }
+      }
+      byte[] migrated = Files.readAllBytes(PowerConfig.path());
+      ConfigMigration.prepare(instance);
+      assertArrayEquals(migrated, Files.readAllBytes(PowerConfig.path()), "Restart must not repeat migration");
+    }
+  }
+
   @Test void importsLegacyPreferencesOnceWithVerifiedBackup() throws Exception {
     Files.createDirectories(game.resolve("config/unitweaks"));
     Files.writeString(game.resolve("config/unitweaks/general.yml"),"rawInput: false\n");
@@ -33,6 +65,7 @@ class ConfigMigrationTest {
     Path marker=game.resolve("power-beta-data/pending-config-import.json");Files.writeString(marker,new Gson().toJson(pending));
     ConfigMigration.prepare(game);assertFalse(Files.exists(legacy));assertFalse(Files.exists(marker));
     assertEquals(bytes,Files.readString(PowerConfig.path()));
+    checkFocusMigration();
     Files.writeString(PowerConfig.path(),"invalid");
     assertThrows(IllegalStateException.class,()->ConfigMigration.prepare(game));
     assertEquals("invalid",Files.readString(PowerConfig.path()));

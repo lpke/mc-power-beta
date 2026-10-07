@@ -187,6 +187,16 @@ public final class ConfigMigration {
     var pattern=java.util.regex.Pattern.compile(aliases.keySet().stream().map(java.util.regex.Pattern::quote).collect(java.util.stream.Collectors.joining("|")));
     JsonObject next=rename(root,aliases,pattern).getAsJsonObject(); next.addProperty("schemaVersion",3);
     JsonObject all=next.getAsJsonObject("settings");
+    // Both old switches guarded the same focus-loss pause call. Preserve their effective value.
+    JsonObject environment = all.getAsJsonObject("power_environment:config");
+    if (environment != null && environment.has("forceDisplayActive")) {
+      boolean keepRunning = environment.remove("forceDisplayActive").getAsBoolean();
+      if (keepRunning) {
+        JsonObject general = all.getAsJsonObject("power_controls:general");
+        if (general == null) { general = new JsonObject(); all.add("power_controls:general", general); }
+        general.addProperty("pauseOnLostFocus", false);
+      }
+    }
     if (!next.has("cheatsAccessVersion")) {
       // The old pack disabled the editor by default; the saved world master now provides that protection.
       JsonObject editor = all.getAsJsonObject("editor");

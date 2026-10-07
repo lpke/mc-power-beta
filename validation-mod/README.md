@@ -8,6 +8,12 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
 - `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
+- `settings-snapshot NAME`: capture all sixteen tabs, their complete row order,
+  catalogue and PNGs under `power-beta-data/reports/settings-review/NAME`. Use a
+  disposable client window at least 1280 x 840 pixels. Captures include every
+  scroll position at 640 x 420 GUI size and the first view at 320 x 240.
+  Capture `before` in a world before updating the clone, then `settings-review`
+  checks retained IDs, defaults, ranges, row coverage, binding groups and links.
 - `new-world`, then `indicators-hud` and `indicators-creative`: live HUD states,
   inclusion/Cancel, eight catalogue rows, hotbar transfers and recipe tooltips.
   `indicators-menu` checks title controls and layout. `indicators-mix`, `indicators-world`

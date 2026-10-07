@@ -25,19 +25,6 @@ public class GameRendererMixin {
 
     @Shadow private Minecraft client;
 
-    @WrapOperation(
-            method = "onFrameUpdate",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/client/Minecraft;pauseGame()V"
-            )
-    )
-    public void powerEnvironment_method_1844(Minecraft instance, Operation<Void> original) {
-        if (!Config.config.forceDisplayActive) {
-            original.call(instance);
-        }
-    }
-
     @Unique private int currentX = 0;
     @Unique private int currentY = 0;
 

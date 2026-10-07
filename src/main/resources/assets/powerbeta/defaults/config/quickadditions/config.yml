@@ -66,7 +66,6 @@ WEATHER_CONFIG:
   timeUntilThunderMinimum: 12000
   thunderDurationRandomLimit: 12000
   thunderDurationMinimum: 3600
-forceDisplayActive: false
 SPAWN_PROTECTION_RADIUS: 16
 ENABLE_SOUL_SAND_RECIPE: false
 SOUL_SAND_OUTPUT: 4

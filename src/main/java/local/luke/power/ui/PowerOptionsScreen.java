@@ -328,7 +328,7 @@ public final class PowerOptionsScreen extends UiScreen {
     String query = search.text().strip().toLowerCase(Locale.ROOT);
     Map<String, List<Setting>> groups = new LinkedHashMap<>();
     List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
-    List<Setting> candidates = listed.isEmpty() ? session.settings() : listed.stream()
+    List<Setting> candidates = listed.isEmpty() ? SettingsLayout.ordered(session.settings()) : listed.stream()
         .map(id -> session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElse(null))
         .filter(Objects::nonNull).toList();
     Map<String, Integer> scores = new HashMap<>();
@@ -345,32 +345,10 @@ public final class PowerOptionsScreen extends UiScreen {
           : scores.getOrDefault(s.id, FuzzySearch.NONE) < FuzzySearch.NONE)))
         groups.computeIfAbsent(query.isEmpty() && !changedOnly ? s.group : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
     }
-    if (audio()) {
-      Map<String, List<Setting>> ordered = new LinkedHashMap<>();
-      for (String group : List.of("Volume", "Music library", "Music gaps", "Menu music controls", "Sound categories", "Extra sounds", "Music and ambience", "Individual sounds", "Individual music tracks"))
-        if (groups.containsKey(group)) ordered.put(group, groups.get(group));
-      groups.forEach(ordered::putIfAbsent);
-      groups = ordered;
-      if (groups.containsKey("Volume")) groups.get("Volume").sort(Comparator.comparingInt(s -> s.id.equals("audio.master") ? 0 : 1));
-    }
-    if (page.equals("General") && query.isEmpty() && !filtered()) {
-      Map<String, List<Setting>> ordered = new LinkedHashMap<>();
-      for (String group : List.of("Game", "Interface", "Input"))
-        if (groups.containsKey(group)) ordered.put(group, groups.get(group));
-      groups.forEach(ordered::putIfAbsent);
-      groups = ordered;
-      List<String> order = List.of("native.difficulty", "world.cheats", "power_controls:general.autosaveInterval",
-          "native.guiScale", "visual.slashChat", "power_controls:general.pauseOnLostFocus", "interface.pauseToOptions",
-          "native.sensitivity", "native.invert", "power_controls:general.rawInput", "power_controls:general.disableControllerInit");
-      groups.values().forEach(entries -> entries.sort(Comparator.comparingInt(s -> {
-        int index = order.indexOf(s.id); return index < 0 ? Integer.MAX_VALUE : index;
-      })));
-    }
-    if (video() && groups.containsKey("Rendering")) groups.get("Rendering").sort(Comparator.comparingInt(s -> s.id.equals("native.fpsLimit") ? 0 : 1));
     List<Row> next = new ArrayList<>();
     int y = 0, rowHeight = span() < 340 ? 40 : 24;
     for (var group : groups.entrySet()) {
-      boolean flat = controls() && query.isEmpty() && !changedOnly || !listed.isEmpty();
+      boolean flat = !listed.isEmpty();
       if (!flat) { next.add(new Row(group.getKey(), null, y, 24)); y += 24; }
       if (!flat && query.isEmpty() && !changedOnly && collapsed.contains(page + "/" + group.getKey())) continue;
       for (Setting s : group.getValue()) {

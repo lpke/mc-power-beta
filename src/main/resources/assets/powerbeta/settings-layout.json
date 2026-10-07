@@ -1,0 +1,156 @@
+{
+  "General": [
+    "Game",
+    "Interface",
+    "Input"
+  ],
+  "Video": [
+    "Rendering",
+    "Quality",
+    "Lighting",
+    "Sky",
+    "Textures",
+    "Visibility culling",
+    "Particles"
+  ],
+  "Audio": [
+    "Volume",
+    "Music library",
+    "Music gaps",
+    "Menu music controls",
+    "Sound categories",
+    "Extra sounds",
+    "Individual sounds",
+    "Individual music tracks",
+    "Track rotation",
+    "Music data"
+  ],
+  "Controls": [
+    "Movement",
+    "Inventory",
+    "Hotbar slots",
+    "Camera",
+    "Free camera",
+    "Building",
+    "Hotbar swapping",
+    "Creative",
+    "Interface",
+    "Screenshots",
+    "Mouse input",
+    "Key bindings"
+  ],
+  "Interface": [
+    "HUD",
+    "Active tweaks",
+    "Chat",
+    "HUD layout",
+    "Combined HUD position",
+    "Hotbar position",
+    "Hearts position",
+    "Armor position",
+    "Oxygen position",
+    "Overlay message position",
+    "Debug information",
+    "Menus",
+    "Title screen",
+    "Title background",
+    "Version label",
+    "Screenshots",
+    "Custom screenshots",
+    "Isometric screenshots"
+  ],
+  "Camera": [
+    "View",
+    "Third person",
+    "Free look",
+    "Free camera",
+    "Flight sprint"
+  ],
+  "Movement": [
+    "Walking",
+    "Auto-walk",
+    "Edge protection",
+    "Vehicles"
+  ],
+  "Inventory": [
+    "Inventory management",
+    "Containers",
+    "Clicking",
+    "Quick transfer",
+    "Dragging",
+    "Scroll wheel",
+    "Dropping",
+    "Hotbar swapping",
+    "Crafting result",
+    "Stack sizes"
+  ],
+  "Building": [
+    "Fast placement",
+    "Placement rules",
+    "Item filters",
+    "Flexible placement",
+    "Slab completion",
+    "Mining",
+    "Light overlay"
+  ],
+  "Creative": [
+    "Game modes",
+    "Flight",
+    "Spectator",
+    "Interaction",
+    "Inventory"
+  ],
+  "World editing": [
+    "Access",
+    "Selection",
+    "Selection outline",
+    "Limits and history"
+  ],
+  "Commands": [
+    "Access",
+    "Game mode access",
+    "Game mode access in this world",
+    "Cheat commands",
+    "Cheat commands in this world",
+    "Non-cheat commands",
+    "Non-cheat commands in this world"
+  ],
+  "Gameplay": [
+    "Interaction",
+    "Blocks",
+    "Plants and harvesting",
+    "Equipment",
+    "Gold equipment abilities",
+    "Mob drops",
+    "Farmland",
+    "Spawning",
+    "Spawn list",
+    "Despawning",
+    "Sleep",
+    "Weather",
+    "Explosion and fire",
+    "Better burning",
+    "Fast leaf decay",
+    "World generation",
+    "Older mechanics"
+  ],
+  "Crafting": [
+    "Recipes",
+    "Modern",
+    "Tweaked",
+    "Obtainable",
+    "Soul sand"
+  ],
+  "Fixes": [
+    "Rendering",
+    "Items and blocks",
+    "Entities",
+    "World simulation",
+    "Client fixes"
+  ],
+  "Advanced": [
+    "Network and resources",
+    "Server settings",
+    "Achievement recovery"
+  ]
+}

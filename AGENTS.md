@@ -33,6 +33,11 @@
 - Options edits use `ConfigSession`. Apply commits; Cancel restores live previews.
   Update linked values together. Preserve search, scroll, related-view history and
   modifier ownership when rebuilding rows. Share render and hit-test geometry.
+- `settings-layout.json` owns tab/group order; catalogue `order` values arrange
+  settings inside groups. Presentation metadata applies to every adapter without
+  changing storage IDs. Keep shared flight/freecam sprint controls linked by ID.
+  The focus-loss pause preference is `power_controls:general.pauseOnLostFocus`;
+  migrate the old inverse `forceDisplayActive` flag before module initialization.
 - Ctrl, Shift and Alt are the only chord modifiers. Gameplay acts on key-down.
   Test both release orders, held movement, focus loss and open menus.
   Linux key repairs must update native events and polling together. F20–F24 use

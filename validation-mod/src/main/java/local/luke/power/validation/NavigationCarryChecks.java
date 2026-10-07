@@ -44,6 +44,11 @@ public final class NavigationCarryChecks {
     var parent = mc.currentScreen;
     PowerOptionsScreen s = new PowerOptionsScreen(parent);
     mc.setScreen(s);
+    ((TextInput)field(s, "search")).setText("");
+    field(s, "relatedIds", List.of()); field(s, "conflictIds", List.of());
+    field(s, "changedOnly", false);
+    ((Deque<?>)field(s, "history")).clear();
+    ((Set<?>)field(s, "collapsed")).clear();
     try {
       Setting feature = find(s.session(), "power_camera:config.enabled");
       feature.value = new JsonPrimitive(false);
@@ -124,7 +129,8 @@ public final class NavigationCarryChecks {
           check(!listed.isEmpty(), "empty related settings: " + binding.id);
           check(new HashSet<>(listed).equals(new HashSet<>(ControlLinks.settings(s.session(),binding))), "incorrect filtered rows");
           for (Setting setting : listed) check(ControlLinks.controls(s.session(),setting).contains(binding), "asymmetric link");
-          check(new HashSet<>((List<?>)call(s,"resetTargets")).equals(new HashSet<>(listed)), "reset touches hidden settings");
+          var editable = listed.stream().filter(setting -> SettingAccess.reason(s.session(), setting).isEmpty()).toList();
+          check(new HashSet<>((List<?>)call(s,"resetTargets")).equals(new HashSet<>(editable)), "reset differs from editable related settings");
           call(s,"back");
         }
       });
@@ -150,6 +156,10 @@ public final class NavigationCarryChecks {
             for (int[] size : new int[][] {{320, 240}, {427, 240}, {854, 480}, {1280, 360}}) {
               PowerOptionsScreen small = new PowerOptionsScreen(parent);
               small.init(mc, size[0], size[1]);
+              ((TextInput)field(small, "search")).setText("");
+              field(small, "relatedIds", List.of()); field(small, "conflictIds", List.of());
+              field(small, "changedOnly", false);
+              ((Set<?>)field(small, "collapsed")).clear();
               Setting target = find(small.session(), "tweaks.flexible.enabled");
               field(small, "page", target.page);
               call(small, "layout");
