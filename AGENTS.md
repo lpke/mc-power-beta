@@ -120,3 +120,6 @@
   hashes and runtime IDs, especially `gcapi3`.
 - Optional redstone textures use four-pixel wires with shaded edges and six-pixel
   junctions; the power number panel occupies one quarter of a block.
+- Isometric captures use the actual renderer chunk grid and Beta's 128-block
+  height. Centre both horizontal axes on the camera's chunk; never use camera Y
+  for Z or infer capture size from the obsolete four-step distance option.

@@ -77,3 +77,8 @@ input and both modifier release orders.
 - `gallery setup`, then `gallery worldedit`, `chat`, `sign`, `redstone`, `preview`,
   `carry` or `view` stages anonymous feature screenshots in a new disposable world.
   Prefix each action with `gallery `. The setup replaces nearby terrain.
+
+For isometric capture, bind Isometric screenshot in Options, test chunk distances
+2 and 8, and capture again after lighting and chunks finish updating. At scale 4,
+expect 640 × 832 and 2176 × 1600 PNGs. Check negative coordinates, repeated
+captures, and normal gameplay rendering after capture.

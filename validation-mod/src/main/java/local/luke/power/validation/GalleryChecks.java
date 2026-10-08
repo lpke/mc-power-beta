@@ -95,7 +95,7 @@ final class GalleryChecks {
         for (int dx=-7; dx<=7; dx++) block(mc,dx,0,-10,55,0);
         mc.world.method_200(x-8,y,z-10,0);
         mc.world.method_200(x-8,y,z-10,76);
-        camera(mc, -4, 5, -14, 0, 60);
+        camera(mc, -5, 3, -9.5, -90, 60);
       }
       case "preview", "carry" -> {
         setting(mc, "visual.containerPreview", "true");

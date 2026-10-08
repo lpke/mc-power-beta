@@ -95,7 +95,8 @@ def publish(args):
         raise ValueError('Build receipt is stale or came from uncommitted work; rebuild')
     tag = 'v' + version
     repository = config['repository']
-    releases = json.loads(run('gh', 'api', f'repos/{repository}/releases', '--paginate', capture=True))
+    pages = json.loads(run('gh', 'api', f'repos/{repository}/releases', '--paginate', '--slurp', capture=True))
+    releases = [release for page in pages for release in page]
     existing = next((r for r in releases if r['tag_name'] == tag), None)
     if existing and remote_head(repository, 'tags/' + tag) != commit:
         raise ValueError('Release tag points at another commit; use a new version')

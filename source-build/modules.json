@@ -14,7 +14,7 @@
     "source": "modules/controls"
   },
   "power_capture": {
-    "version": "1.6.0",
+    "version": "1.6.1",
     "mapping": "net.glasslauncher:biny:b1.7.3+4cbd9c8:v2",
     "dependencies": [],
     "enabled": true,

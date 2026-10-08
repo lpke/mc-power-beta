@@ -89,3 +89,42 @@ class UpdateTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             updater.update(self.instance, self.stage)
         self.assertEqual(self.original, self.old.read_bytes())
+
+
+class ArchiveTest(unittest.TestCase):
+    def setUp(self):
+        import io
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.path = Path(self.temp.name) / 'pack.zip'
+        jar_bytes = io.BytesIO()
+        with zipfile.ZipFile(jar_bytes, 'w') as jar:
+            jar.writestr('fabric.mod.json', json.dumps({'id': 'power_beta', 'version': '1.0.1'}))
+        self.files = {'power-beta-1.0.1.jar': jar_bytes.getvalue()}
+        self.files.update({f'platform-{i}.jar': bytes([i]) for i in range(6)})
+
+    def write(self, extra=None):
+        import hashlib
+        manifest = {'version': '1.0.1', 'mods': [
+            {'file': name, 'sha256': hashlib.sha256(data).hexdigest(), 'enabled': True}
+            for name, data in self.files.items()]}
+        with zipfile.ZipFile(self.path, 'w') as archive:
+            for name, data in self.files.items():
+                archive.writestr('Power Beta/.minecraft/mods/' + name, data)
+            archive.writestr('Power Beta/PACK-MANIFEST.json', json.dumps(manifest))
+            if extra:
+                archive.writestr(extra, 'private')
+
+    def test_only_verified_clean_seven_jar_archives_pass(self):
+        from release_data import verify_archive
+        self.write()
+        verify_archive(self.path, '1.0.1')
+        for extra in ['Power Beta/accounts.json', 'Power Beta/.minecraft/logs/latest.log',
+                      'Power Beta/.minecraft/saves/World/level.dat', 'Power Beta/.minecraft/mods/test.jar',
+                      'Power Beta/.minecraft/mods/power-beta-validation.jar', '../escape']:
+            self.write(extra)
+            with self.subTest(extra=extra), self.assertRaises(ValueError):
+                verify_archive(self.path, '1.0.1')
+        self.write()
+        with self.assertRaises(ValueError):
+            verify_archive(self.path, '1.0.2')

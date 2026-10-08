@@ -12,7 +12,8 @@
     "MinecraftMixin",
     "ProgressListenerImplMixin",
     "ScreenshotManagerMixin",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "WorldRendererAccess"
   ],
   "injectors": {
     "defaultRequire": 1

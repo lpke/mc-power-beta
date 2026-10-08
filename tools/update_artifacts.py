@@ -4,10 +4,11 @@ from datetime import datetime
 from pathlib import Path
 import argparse
 import json
+import re
 import tempfile
 import zipfile
 from instance_files import ROOT, assert_idle, atomic_copy
-from release_data import sha256
+from release_data import VERSION, sha256
 
 
 def protected_files(instance):
@@ -28,7 +29,11 @@ def update(instance, stage=None):
     assert_idle(instance)
     stage = stage or ROOT / 'dist/Power Beta'
     manifest = json.loads((stage / 'PACK-MANIFEST.json').read_text())
+    if not re.fullmatch(VERSION, manifest['version']):
+        raise RuntimeError('Invalid pack version')
     new_name = f'power-beta-{manifest["version"]}.jar'
+    if not any(row['file'] == new_name for row in manifest['mods']):
+        raise RuntimeError('Manifest does not include the Power Beta artifact')
     if len(manifest['mods']) != 7 or len({row['file'] for row in manifest['mods']}) != 7:
         raise RuntimeError('Pack must contain seven distinct artifacts')
     for row in manifest['mods']:

@@ -4,6 +4,7 @@
 
 ## [1.0.1] - 2026-10-08
 
+- Fix isometric capture bounds and centring with custom render distances.
 - Add versioned releases with matching GitHub notes, verified downloads and website changelogs.
 - Update existing Prism instances across pack versions while preserving settings and worlds.
 - Simplify source licensing and documentation under the top-level AGPL license.
