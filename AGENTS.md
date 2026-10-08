@@ -82,6 +82,13 @@
   Per-feature toggle messages default off and observe transitions on ticks,
   independently of HUD inclusion. Menus, focus changes and world loading stay silent.
 
+- Chat editing shares a buffer across input and completion. History keeps arrow
+  ownership until editing or explicit completion; rendering must not change text.
+- Natural spawning rules are saved with world properties and copied across
+  dimensions. They require cheats, preserve existing mobs and never gate /summon.
+- WorldEdit named states map only to supported Beta metadata. Reject unsupported
+  properties before starting a transaction; commas inside [] are state separators.
+
 ## Verification and delivery
 
 - Test in a disposable clone outside the user's normal instance list. Never launch
@@ -107,7 +114,8 @@
 - `gradle.properties` owns the pack version. Use semantic versions and tags `vX.Y.Z`.
   Module/API versions are independent; preserve them unless that module needs a change.
 - Keep `CHANGELOG.md` newest first, with `## [Unreleased]` followed by dated version
-  headings and plain bullets describing user-visible changes. Move Unreleased entries
+  headings and plain bullets describing modpack features and fixes. Exclude website,
+  release-management and development-process changes. Move Unreleased entries
   into the next version when preparing a release. Never invent past release versions.
 - Follow `docs/releases.md`. Publishing requires explicit user permission in the
   current task. A code push alone does not authorize publishing a release.

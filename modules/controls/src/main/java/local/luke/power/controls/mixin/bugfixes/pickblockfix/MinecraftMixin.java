@@ -87,6 +87,7 @@ public class MinecraftMixin {
         } else if (pickBlockLookupMap.containsKey(blockId)) {
             // Other special cases
             itemId = pickBlockLookupMap.get(blockId);
+            blockMeta = 0;
         } else {
             // If StationAPI is loaded, we need to convert the block id to an block item one
             if (FabricLoader.getInstance().isModLoaded("stationapi")) {

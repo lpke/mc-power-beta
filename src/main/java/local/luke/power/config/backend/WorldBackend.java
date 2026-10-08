@@ -50,6 +50,8 @@ public final class WorldBackend implements Backend {
                 false),
             cycle(b, "daylightCycle", "Daylight cycle", "Advance the sun, moon and day counter. Off freezes the current daylight time; gameplay and play time continue. Sleeping still sets your spawn and wakes you without advancing daylight.", ((local.luke.power.world.WorldCycles) b.properties()).power$daylightCycle()),
             cycle(b, "weatherCycle", "Weather cycle", "Allow weather to change naturally. Off freezes the current weather and pauses its timers. Sleeping cannot clear frozen weather. Turning on resumes the timers.", ((local.luke.power.world.WorldCycles) b.properties()).power$weatherCycle()),
+            cycle(b, "hostileSpawning", "Hostile mob spawning", "Allow new hostile mobs to spawn naturally, including sleep ambushes. Existing mobs and /summon are unaffected. Requires cheats.", ((local.luke.power.world.WorldSpawning) b.properties()).power$hostileSpawning()),
+            cycle(b, "passiveSpawning", "Passive mob spawning", "Allow animals and squid to spawn naturally. Existing mobs and /summon are unaffected. Requires cheats.", ((local.luke.power.world.WorldSpawning) b.properties()).power$passiveSpawning()),
             new Setting(
                 "worldedit.worldOverride",
                 b.id(),
@@ -89,8 +91,8 @@ public final class WorldBackend implements Backend {
     checkWorld();
     if (values.containsKey("world.difficulty")) local.luke.power.world.WorldDifficulty.checked(values.get("world.difficulty").getAsBigDecimal().intValueExact());
     boolean cheats = values.containsKey("world.cheats") ? values.get("world.cheats").getAsBoolean() : properties().power$cheatsEnabled();
-    if (!cheats && (values.containsKey("world.daylightCycle") || values.containsKey("world.weatherCycle")))
-      throw new IllegalArgumentException("Enable cheats to change world cycles.");
+    if (!cheats && (values.containsKey("world.daylightCycle") || values.containsKey("world.weatherCycle") || values.containsKey("world.hostileSpawning") || values.containsKey("world.passiveSpawning")))
+      throw new IllegalArgumentException("Enable cheats to change world rules.");
   }
 
   private void checkWorld() {
@@ -119,6 +121,9 @@ public final class WorldBackend implements Backend {
       }
       properties().power$cheatsEnabled(enabled);
     }
+    var spawning = (local.luke.power.world.WorldSpawning) properties();
+    if (values.containsKey("world.hostileSpawning")) spawning.power$hostileSpawning(values.get("world.hostileSpawning").getAsBoolean());
+    if (values.containsKey("world.passiveSpawning")) spawning.power$passiveSpawning(values.get("world.passiveSpawning").getAsBoolean());
     var cycles = (local.luke.power.world.WorldCycles) properties();
     if (values.containsKey("world.daylightCycle")) cycles.power$daylightCycle(values.get("world.daylightCycle").getAsBoolean());
     if (values.containsKey("world.weatherCycle")) cycles.power$weatherCycle(values.get("world.weatherCycle").getAsBoolean());

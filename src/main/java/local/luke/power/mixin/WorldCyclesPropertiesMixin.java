@@ -9,10 +9,16 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(WorldProperties.class)
-public abstract class WorldCyclesPropertiesMixin implements WorldCycles {
+public abstract class WorldCyclesPropertiesMixin implements WorldCycles, local.luke.power.world.WorldSpawning {
   @Shadow private long time;
   @Unique private boolean power$daylight = true, power$weather = true;
   @Unique private long power$daylightOffset;
+  @Unique private boolean power$hostileSpawning = true, power$passiveSpawning = true;
+
+  public boolean power$hostileSpawning() { return power$hostileSpawning; }
+  public void power$hostileSpawning(boolean enabled) { power$hostileSpawning = enabled; }
+  public boolean power$passiveSpawning() { return power$passiveSpawning; }
+  public void power$passiveSpawning(boolean enabled) { power$passiveSpawning = enabled; }
 
   public boolean power$daylightCycle() { return power$daylight; }
   public void power$daylightCycle(boolean enabled) { power$daylight = enabled; }
@@ -33,6 +39,8 @@ public abstract class WorldCyclesPropertiesMixin implements WorldCycles {
     power$daylight = !tag.contains("PowerBetaDaylightCycle") || tag.getBoolean("PowerBetaDaylightCycle");
     power$weather = !tag.contains("PowerBetaWeatherCycle") || tag.getBoolean("PowerBetaWeatherCycle");
     power$daylightOffset = tag.getLong("PowerBetaDaylightOffset");
+    power$hostileSpawning = !tag.contains("PowerBetaHostileSpawning") || tag.getBoolean("PowerBetaHostileSpawning");
+    power$passiveSpawning = !tag.contains("PowerBetaPassiveSpawning") || tag.getBoolean("PowerBetaPassiveSpawning");
   }
 
   @Inject(method = "<init>(Lnet/minecraft/world/WorldProperties;)V", at = @At("RETURN"))
@@ -41,6 +49,9 @@ public abstract class WorldCyclesPropertiesMixin implements WorldCycles {
     power$daylight = source.power$daylightCycle();
     power$weather = source.power$weatherCycle();
     power$daylightOffset = time - source.power$daylightTime();
+    var spawning = (local.luke.power.world.WorldSpawning) other;
+    power$hostileSpawning = spawning.power$hostileSpawning();
+    power$passiveSpawning = spawning.power$passiveSpawning();
   }
 
   @Inject(method = "updateProperties", at = @At("RETURN"))
@@ -48,5 +59,7 @@ public abstract class WorldCyclesPropertiesMixin implements WorldCycles {
     tag.putBoolean("PowerBetaDaylightCycle", power$daylight);
     tag.putBoolean("PowerBetaWeatherCycle", power$weather);
     tag.putLong("PowerBetaDaylightOffset", power$daylightOffset);
+    tag.putBoolean("PowerBetaHostileSpawning", power$hostileSpawning);
+    tag.putBoolean("PowerBetaPassiveSpawning", power$passiveSpawning);
   }
 }

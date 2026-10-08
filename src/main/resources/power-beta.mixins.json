@@ -42,7 +42,8 @@
     "WorldDifficultyPropertiesMixin",
     "ClientDifficultyMixin",
     "RedstonePowerMixin",
-    "RedstonePlacementSoundMixin"
+    "RedstonePlacementSoundMixin",
+    "WorldSpawningMixin"
   ],
   "injectors": {
     "defaultRequire": 1

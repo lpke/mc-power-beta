@@ -166,7 +166,7 @@ class EditorTest {
     run("//expand 2 1 up");
     assertEquals(63, e.region().min().y());
     assertEquals(68, e.region().max().y());
-    run("//contract 2 1 up");
+    run("//contract 2 1 down");
     assertEquals(64, e.region().min().y());
     assertEquals(66, e.region().max().y());
     run("//shift 2 east");
@@ -282,5 +282,20 @@ class EditorTest {
     feet = new Pos(-1, 64, -17);
     run("//chunk");
     assertEquals(new Pos(-16, 0, -32), e.region().min());
+  }
+  @Test
+  void contractDirectionsAndFaceAliases() {
+    for (String direction : List.of("down", "top", "up", "bottom")) {
+      e.select(new Region(new Pos(0, 64, 0), new Pos(4, 70, 4)));
+      run("//contract 1 " + direction);
+      boolean top = direction.equals("down") || direction.equals("top");
+      assertEquals(top ? 64 : 65, e.region().min().y());
+      assertEquals(top ? 69 : 70, e.region().max().y());
+    }
+    e.select(new Region(new Pos(0, 64, 0), new Pos(4, 70, 4)));
+    run("//contract 1 east"); assertEquals(1, e.region().min().x()); assertEquals(4, e.region().max().x());
+    Region before = e.region();
+    assertThrows(IllegalArgumentException.class, () -> run("//contract 100 down"));
+    assertEquals(before, e.region());
   }
 }

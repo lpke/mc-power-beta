@@ -29,6 +29,11 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   undo/redo, invalid hands and cheats. Run after `new-world`.
 - `creative-vehicles`: one-hit deletion of boats and every minecart type, loaded
   inventories, repeat attacks, survival drops and spectator/multiplayer guards.
+- `release-110`: history/caret/completion, spawning rules and Apply/Cancel, NBT and
+  dimension copies, summon exemption, WorldEdit states/undo/redo, calculator and F3 setting.
+  `release-110-pick` checks redstone in creative and survival. `release-110-flight`,
+  `release-110-freecam` and `release-110-state` support physical movement and clipboard
+  checks. Test both sprint-key release orders, focus loss and menus.
 - `command-completion`: arrow selection, immediate Tab completion and subsequent
   typing for WorldEdit and singleplayer commands.
 - `creative-borders`: compare catalogue row pixels and the destroy-slot junction

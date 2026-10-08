@@ -48,7 +48,7 @@ public final class ClientCommandsBridge implements ModInitializer {
                             .toArray(String[]::new);
                       }
                       case "disableInSingleplayer" -> false;
-                      case "needsPermissions" -> true;
+                      case "needsPermissions" -> !name.equals("/calc");
                       case "toString" -> "WorldEdit Beta command " + name;
                       case "hashCode" -> System.identityHashCode(proxy);
                       case "equals" -> proxy == args[0];

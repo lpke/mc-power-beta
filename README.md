@@ -10,6 +10,14 @@ Built for singleplayer.
 | --- | --- |
 | [![Creative inventory over a snowy Beta landscape](docs/screenshots/creative-inventory.png)](docs/screenshots/creative-inventory.png) | [![Music library with track previews and volume controls](docs/screenshots/music-library.png)](docs/screenshots/music-library.png) |
 
+| WorldEdit | Redstone power levels |
+| --- | --- |
+| [![WorldEdit selection around a workshop](docs/screenshots/worldedit.png)](docs/screenshots/worldedit.png) | [![Signal strength displayed on redstone wire](docs/screenshots/redstone.png)](docs/screenshots/redstone.png) |
+
+| Light levels | Isometric screenshots |
+| --- | --- |
+| [![Light levels on nearby blocks](docs/screenshots/light-levels.png)](docs/screenshots/light-levels.png) | [![Isometric view of a snowy Beta world](docs/screenshots/isometric.png)](docs/screenshots/isometric.png) |
+
 ## What's included
 
 - Vanilla Beta mechanics by default, with optional bug fixes and modern conveniences.
@@ -59,7 +67,8 @@ Back up your worlds before replacing an existing installation.
 
 Development and update instructions are in [AGENTS.md](AGENTS.md). See
 [releases](docs/releases.md) for publishing and [recovery](docs/recovery.md)
-for inventory recovery. Changes are listed in the [changelog](CHANGELOG.md)
+for inventory recovery. [Chat and WorldEdit](docs/commands.md) covers editing,
+completion and block states. Changes are listed in the [changelog](CHANGELOG.md)
 and [GitHub releases](https://github.com/lpke/mc-power-beta/releases).
 
 Power Beta is maintained by its owner and does not accept contributions.

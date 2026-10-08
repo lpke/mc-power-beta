@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatScreenVariables {
+    public static final local.luke.power.chat.ChatBuffer editor = new local.luke.power.chat.ChatBuffer(100);
+    public static java.util.function.BiPredicate<Character, Integer> completion = (character, key) -> false;
+    public static Runnable edited = () -> {};
     public static TextFieldWidget textField;
     public static String initialMessage = "";
     public static int chatHistoryPosition;

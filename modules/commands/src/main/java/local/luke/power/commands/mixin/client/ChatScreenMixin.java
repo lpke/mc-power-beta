@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.CharacterUtils;
+import local.luke.power.chat.ChatBuffer;
 import org.lwjgl.input.Keyboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,6 +31,8 @@ public abstract class ChatScreenMixin extends Screen {
     @Shadow protected String text;
     @Shadow private int focusedTicks;
 
+    @Unique private final ChatBuffer power$fallback = new ChatBuffer(100);
+    @Unique private int power$viewStart;
     @Unique private String suggestionInput = "";
     @Unique private String[] suggestions = new String[0];
     @Unique private int chosen = 0;
@@ -63,39 +65,55 @@ public abstract class ChatScreenMixin extends Screen {
         return result;
     }
 
+    @Unique private ChatBuffer power$editor() {
+        if (chatWidgetsAvailable) return ChatWidgetAccess.editor();
+        power$fallback.sync(text == null ? "" : text); return power$fallback;
+    }
+    @Unique private String power$input() {
+        var editor = power$editor(); return editor.text().substring(0, editor.cursor());
+    }
+    @Inject(method = "init", at = @At("RETURN"))
+    private void power$connect(CallbackInfo ci) {
+        if (chatWidgetsAvailable) {
+            ChatWidgetAccess.onInput(this::power$complete);
+            ChatWidgetAccess.onChange(this::refreshSuggestions);
+        }
+    }
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
-    private void keyPressedInit(char i, int par2, CallbackInfo ci) {
-        if (!getText().equals(suggestionInput)) refreshSuggestions();
-        if (par2 == Keyboard.KEY_TAB && suggestions.length > 0) {
+    private void keyPressedInit(char character, int key, CallbackInfo ci) {
+        if (!chatWidgetsAvailable && power$complete(character, key)) ci.cancel();
+    }
+    @Unique private boolean power$complete(char character, int key) {
+        if (chatWidgetsAvailable) ChatWidgetAccess.onChange(this::refreshSuggestions);
+        if (!power$input().equals(suggestionInput)) refreshSuggestions();
+        var editor = power$editor();
+        if (key == Keyboard.KEY_TAB && suggestions.length > 0 && !editor.selected()) {
             ensureChosenIsInRange();
-            setText(getText() + suggestions[chosen]);
-            resetValues();
-            suggestionInput = getText();
-            ci.cancel();
-            return;
+            if (chatWidgetsAvailable) { ChatWidgetAccess.complete(suggestions[chosen]); text = getText(); }
+            else setText(getText() + suggestions[chosen]);
+            resetValues(); suggestionInput = power$input(); return true;
         }
-        if (suggestions.length > 1 && (par2 == Keyboard.KEY_UP || par2 == Keyboard.KEY_DOWN)) {
-            adjustChosenSuggestion(par2);
-            ci.cancel();
+        boolean ctrl = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
+        if (!ctrl && !editor.browsing() && !editor.selected() && suggestions.length > 1
+                && (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN)) {
+            adjustChosenSuggestion(key); return true;
         }
+        return false;
     }
 
     @Inject(method = "keyPressed", at = @At("TAIL"))
-    private void processInput(char i, int par2, CallbackInfo ci) {
-        // Run after the chat widget updates its text, so the visible list is current.
-        refreshSuggestions();
-    }
+    private void processInput(char character, int key, CallbackInfo ci) { refreshSuggestions(); }
 
     @Unique
     private void refreshSuggestions() {
         resetValues();
-        suggestionInput = getText();
+        suggestionInput = power$input();
 
-        if (getText().isEmpty()) {
+        if (power$input().isEmpty()) {
             return;
         }
 
-        String[] sections = getText().split(" ");
+        String[] sections = power$input().split(" ");
         if (sections.length == 0) {
             return;
         }
@@ -103,7 +121,7 @@ public abstract class ChatScreenMixin extends Screen {
         currentWord = sections[sections.length - 1];
         fetchSuggestionsForCurrentWord(sections);
 
-        if (getText().endsWith(" "))
+        if (power$input().endsWith(" "))
             currentWord = "";
 
         if (suggestions.length > 1) {
@@ -117,7 +135,7 @@ public abstract class ChatScreenMixin extends Screen {
         suggestions = new String[0];
         chosen = 0;
         textWidthPixelsBeforeCurrentWord = 0;
-        textWidthPixels = this.textRenderer.getWidth("> " + getText());
+        textWidthPixels = this.textRenderer.getWidth("> " + power$input());
     }
 
     @Unique
@@ -133,16 +151,16 @@ public abstract class ChatScreenMixin extends Screen {
         try {
             Minecraft mc = ((Minecraft) FabricLoader.getInstance().getGameInstance());
 
-            if (getText().startsWith(" ")) {
+            if (power$input().startsWith(" ")) {
                 return;
             }
 
-            if (sections.length == 1 && currentWord.length() > 1 && getText().charAt(0) == '/' && !getText().endsWith(" ")) {
+            if (sections.length == 1 && currentWord.length() > 1 && power$input().charAt(0) == '/' && !power$input().endsWith(" ")) {
 
                 if (mc.world.isRemote && !ClientCommands.mp_rc) {
                     suggestions = vanillaNoOPCommands.stream()
                             .filter(s -> s.startsWith(currentWord.substring(1)))
-                            .map(s -> s.substring(getText().length() - 1))
+                            .map(s -> s.substring(power$input().length() - 1))
                             .toArray(String[]::new);
                 } else {
                     suggestions = RetroChatUtil.commands.stream()
@@ -151,7 +169,7 @@ public abstract class ChatScreenMixin extends Screen {
                             .filter(c -> (!c.disableInSingleplayer() || mc.world.isRemote))
                         .filter(c -> mc.world.isRemote || local.luke.power.permissions.CommandPermissions.allowed(c.name()))
                             .filter(c -> (ClientCommands.mp_op || !c.needsPermissions() || !mc.world.isRemote))
-                            .map(c -> c.name().substring(getText().length() - 1))
+                            .map(c -> c.name().substring(power$input().length() - 1))
                             .toArray(String[]::new);
                 }
             } else {
@@ -164,11 +182,11 @@ public abstract class ChatScreenMixin extends Screen {
                 if (command != null && (!command.disableInSingleplayer() || mc.world.isRemote)) {
                     PlayerEntity player = mc.player;
                     SharedCommandSource source = new SharedCommandSource(player);
-                    suggestions = getText().endsWith(" ") ? command.suggestion(source, sections.length, "", getText()) : command.suggestion(source, sections.length - 1, currentWord, getText());
+                    suggestions = power$input().endsWith(" ") ? command.suggestion(source, sections.length, "", power$input()) : command.suggestion(source, sections.length - 1, currentWord, power$input());
                 }
             }
 
-            textWidthPixels = this.textRenderer.getWidth("> " + this.getText());
+            textWidthPixels = this.textRenderer.getWidth("> " + power$input());
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -219,87 +237,29 @@ public abstract class ChatScreenMixin extends Screen {
         return false;
     }
 
-    @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     public void replace(int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        this.fill(2, this.height - 14, this.width - 2, this.height - 2, Integer.MIN_VALUE);
-        renderSuggestions(mouseX, mouseY, delta);
-        String textToRender = "> " + this.getText();
-        int textColor = 0xE0E0E0;
-
-        /* Determine cursor position (0 means end of the string) */
-        int cursorPosition = 0;
-        if (chatWidgetsAvailable) {
-            cursorPosition = ChatWidgetAccess.getCursorPosition();
+        var editor = power$editor();
+        if (chatWidgetsAvailable) ChatWidgetAccess.onChange(this::refreshSuggestions);
+        if (!power$input().equals(suggestionInput)) refreshSuggestions();
+        fill(2, height - 14, width - 2, height - 2, Integer.MIN_VALUE);
+        int left = 4 + textRenderer.getWidth("> ");
+        var view = editor.view(Math.max(1, width - left - 4), textRenderer::getWidth);
+        power$viewStart = view.start();
+        String visible = editor.text().substring(view.start(), view.end());
+        int a = Math.max(view.start(), Math.min(view.end(), editor.start()));
+        int b = Math.max(view.start(), Math.min(view.end(), editor.end()));
+        if (a != b) fill(left + textRenderer.getWidth(editor.text().substring(view.start(), a)), height - 13,
+                left + textRenderer.getWidth(editor.text().substring(view.start(), b)), height - 3, 0xFF345C91);
+        drawTextWithShadow(textRenderer, "> ", 4, height - 12, 0xE0E0E0);
+        boolean invalid = editor.text().startsWith("/") && !tryMatch(editor.text().split(" ")[0].substring(1));
+        drawTextWithShadow(textRenderer, visible, left, height - 12, invalid ? 0xFC5454 : 0xE0E0E0);
+        if (!editor.selected()) renderSuggestions(mouseX, mouseY, delta);
+        if (focusedTicks / 6 % 2 == 0) {
+            int x = left + textRenderer.getWidth(editor.text().substring(view.start(), editor.cursor()));
+            fill(x, height - 13, x + 1, height - 3, 0xFFE0E0E0);
         }
-
-        /* Determine if text goes off the screen and if so then determine how many characters need cut for it to fit on screen */
-        int stringWidth = textRenderer.getWidth(textToRender);
-        int shiftBy = -1; // -1 means do not shift
-        if (stringWidth > (this.width - 15)) {
-            int textToRenderFullLength = textToRender.length();
-            int widthToRemove = 0;
-            int textIndex;
-
-            /* Remove characters from the start of the string until the string can fit on the screen */
-            for(textIndex = 0; textIndex < textToRender.length(); ++textIndex) {
-                if (textToRender.charAt(textIndex) == Keyboard.KEY_SECTION) {
-                    ++textIndex;
-                } else {
-                    int charIndex = CharacterUtils.VALID_CHARACTERS.indexOf(textToRender.charAt(textIndex));
-                    if (charIndex >= 0) {
-                        widthToRemove += textRenderer.characterWidths[charIndex + 32];
-                    }
-                }
-
-                if ((stringWidth - widthToRemove) < (this.width - 15)) {
-                    break;
-                }
-            }
-
-            /* Determine what section of the string to render based on cursor position */
-            if (textIndex <= (textToRenderFullLength + (cursorPosition - 2))) {
-                textToRender = textToRender.substring(textIndex);
-            } else {
-                shiftBy = textIndex - (textToRenderFullLength + (cursorPosition - 2));
-                textToRender = textToRender.substring(textIndex - shiftBy, textToRenderFullLength - shiftBy);
-            }
-        }
-
-        /* Determine text color and render prompt text */
-        int widthOffset = 0;
-        int charsRendered = 0;
-        if (textToRender.startsWith("> ")) {
-            String typedText = textToRender.substring(2);
-            if (  typedText.startsWith("/")
-               && !typedText.contains(" ")
-               && !tryMatch(typedText.substring(1))
-            ) {
-                drawTextWithShadow(this.textRenderer, "> /", 4, this.height - 12, textColor);
-                widthOffset = textRenderer.getWidth("> /");
-                textColor = 0xFC5454;
-                charsRendered = 3;
-            } else if (typedText.startsWith("/")){
-                if (!tryMatch(typedText.split(" ")[0].substring(1))) {
-                    drawTextWithShadow(this.textRenderer, "> ", 4, this.height - 12, textColor);
-                    widthOffset = textRenderer.getWidth("> ");
-                    textColor = 0xFC5454;
-                    charsRendered = 2;
-                }
-            }
-        }
-
-        /* Determine where to position cursor */
-        boolean caretVisible = focusedTicks / 6 % 2 == 0;
-        if (0 <= shiftBy) {
-            textToRender = (new StringBuilder(textToRender)).insert(2, (caretVisible) ? "_" : "").toString();
-        } else {
-            textToRender = (new StringBuilder(textToRender)).insert(textToRender.length() + cursorPosition, (caretVisible) ? "_" : "").toString();
-        }
-
-        /* Render text, render screen, and cancel original method */
-        drawTextWithShadow(this.textRenderer,  textToRender.substring(charsRendered), 4 + widthOffset, this.height - 12, textColor);
-        super.render(mouseX, mouseY, delta);
-        ci.cancel();
+        super.render(mouseX, mouseY, delta); ci.cancel();
     }
 
     @Unique
@@ -326,33 +286,31 @@ public abstract class ChatScreenMixin extends Screen {
 
     @Unique
     private void renderChosenSuggestion() {
-        this.drawTextWithShadow(this.textRenderer, suggestions[chosen], 4 + textWidthPixels, this.height - 12, 0xAAAAAA);
+        var editor = power$editor();
+        if (editor.cursor() != editor.text().length()) return;
+        int x = 4 + textRenderer.getWidth("> " + editor.text().substring(power$viewStart));
+        String ghost = suggestions[chosen];
+        while (!ghost.isEmpty() && x + textRenderer.getWidth(ghost) > width - 4) ghost = ghost.substring(0, ghost.length() - 1);
+        drawTextWithShadow(textRenderer, ghost, x, height - 12, 0xAAAAAA);
     }
 
     @Unique
     private void renderMultipleSuggestions() {
-        int textWidthCurrentWord = textRenderer.getWidth(currentWord);
-        textWidthPixelsBeforeCurrentWord = textRenderer.getWidth("> " + getText()) - textWidthCurrentWord;
-        fill(textWidthPixelsBeforeCurrentWord + 4,
-                this.height - 14 - (10 * suggestions.length),
-                textWidthPixelsBeforeCurrentWord + textWidthCurrentWord + getMaxSuggestionWidth() + 4,
-                this.height - 14,
-                0xFF000000);
-
-        for (int i = 0; i < suggestions.length; i++) {
-            this.drawTextWithShadow(this.textRenderer, currentWord + suggestions[i], textWidthPixelsBeforeCurrentWord + 4, this.height - 12 - (10 * (i + 1)), i == chosen ? 0xfcfc00 : 0xFFFFFF);
+        int listWidth = Math.min(width - 8, textRenderer.getWidth(currentWord) + getMaxSuggestionWidth() + 4);
+        int wordStart = Math.max(power$viewStart, power$input().length() - currentWord.length());
+        int x = Math.min(width - 4 - listWidth, 4 + textRenderer.getWidth("> " + power$input().substring(power$viewStart, wordStart)));
+        int count = Math.min(suggestions.length, Math.max(1, Math.min(10, (height - 20) / 10)));
+        int from = Math.max(0, Math.min(chosen - count + 1, suggestions.length - count));
+        fill(x, height - 14 - 10 * count, x + listWidth, height - 14, 0xFF000000);
+        for (int i = from; i < from + count; i++) {
+            String label = currentWord + suggestions[i];
+            while (!label.isEmpty() && textRenderer.getWidth(label) > listWidth) label = label.substring(0, label.length() - 1);
+            drawTextWithShadow(textRenderer, label, x, height - 12 - 10 * (i - from + 1), i == chosen ? 0xFCFC00 : 0xFFFFFF);
         }
     }
-
-    @Unique
-    private int getMaxSuggestionWidth() {
-        int maxWidth = 0;
-        for (String suggestion : suggestions) {
-            int width = textRenderer.getWidth(suggestion);
-            if (maxWidth < width) {
-                maxWidth = width;
-            }
-        }
-        return maxWidth;
+    @Unique private int getMaxSuggestionWidth() {
+        int width = 0;
+        for (String suggestion : suggestions) width = Math.max(width, textRenderer.getWidth(suggestion));
+        return width;
     }
 }

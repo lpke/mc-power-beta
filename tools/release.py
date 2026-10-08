@@ -4,6 +4,8 @@ import argparse
 import hashlib
 import json
 import os
+import re
+import time
 from pathlib import Path
 import shutil
 import subprocess
@@ -26,6 +28,39 @@ def remote_head(repository, ref='heads/main'):
 def releases_for(repository):
     pages = json.loads(run('gh', 'api', f'repos/{repository}/releases', '--paginate', '--slurp', capture=True))
     return [release for page in pages for release in page]
+
+
+def find_release(repository, tag):
+    for attempt in range(6):
+        release = next((r for r in releases_for(repository) if r['tag_name'] == tag), None)
+        if release is not None:
+            return release
+        time.sleep(2)
+    raise ValueError('GitHub has not exposed the new draft yet; rerun to resume')
+
+
+def website_feed(repository, version, commit, artifact, digest, download, prior, releases):
+    history = []
+    old = {r['version']: r for r in prior.get('releases', [])}
+    for release in releases:
+        v = release['tag_name'].removeprefix('v')
+        if release['draft'] or release['prerelease'] or not re.fullmatch(r'(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)', v):
+            continue
+        file = f'Power-Beta-{v}-Prism.zip'
+        asset = next((a for a in release['assets'] if a['name'] == file and a['state'] == 'uploaded'), None)
+        if asset is None:
+            continue
+        changes = [line[2:].strip() for line in release['body'].splitlines() if line.startswith('- ')]
+        entry = {'version': v, 'date': release['published_at'][:10], 'changes': changes,
+                 'github': release['html_url'], 'file': file, 'bytes': asset['size'],
+                 'sha256': asset['digest'].removeprefix('sha256:'),
+                 'download': download + '?download=1' if v == version else old.get(v, {}).get('download', asset['browser_download_url']),
+                 'checksum': '/download.sha256' if v == version else asset['browser_download_url'] + '.sha256'}
+        history.append(entry)
+    history.sort(key=lambda r: tuple(map(int, r['version'].split('.'))), reverse=True)
+    if not history or history[0]['version'] != version:
+        raise ValueError('GitHub release list is stale; rerun to resume website publication')
+    return {'schemaVersion': 1, 'commit': commit, **history[0], 'releases': history}
 
 
 def clean_commit(directory):
@@ -121,7 +156,7 @@ def publish(args):
             run('gh', 'release', 'create', tag, '--repo', repository, '--target', commit,
                 '--title', 'Power Beta ' + version, '--notes-file', note_file, '--draft')
             # GitHub does not create a draft's tag until publication.
-            existing = next(r for r in releases_for(repository) if r['tag_name'] == tag)
+            existing = find_release(repository, tag)
         elif existing['body'].strip() != body.strip():
             raise ValueError('Existing release notes differ; do not rewrite a published release')
         for path in [artifact, checksum]:
@@ -135,18 +170,24 @@ def publish(args):
             else:
                 raise ValueError('Published release is missing an asset; publish a new version')
         download = upload_blob(artifact, config, site, digest)
-        feed = {'schemaVersion': 1, 'version': version, 'date': notes[0]['date'], 'commit': commit,
-                'download': download + '?download=1', 'file': artifact.name,
-                'sha256': digest, 'bytes': artifact.stat().st_size,
-                'github': f'https://github.com/{repository}/releases/tag/{tag}', 'releases': notes}
-        feed_path = Path(directory) / 'release.json'
-        feed_path.write_text(json.dumps(feed, indent=2) + '\n')
-        # Validate and render locally before publishing the draft. Website publication
-        # comes last; rerunning this command safely resumes an interrupted publication.
-        run('python3', 'tools/sync_release.py', feed_path, cwd=site)
-        run('python3', '-m', 'unittest', 'discover', '-s', 'tests', cwd=site)
         if existing['draft']:
             run('gh', 'release', 'edit', tag, '--repo', repository, '--draft=false', '--latest')
+        prior = json.loads((site / 'public/release.json').read_text())
+        feed = None
+        for attempt in range(6):
+            try:
+                feed = website_feed(repository, version, commit, artifact, digest, download, prior, releases_for(repository))
+                break
+            except ValueError:
+                if attempt == 5: raise
+                time.sleep(2)
+        feed_path = Path(directory) / 'release.json'
+        feed_path.write_text(json.dumps(feed, indent=2) + '\n')
+        # The public snapshot uses GitHub release contents, including owner edits.
+        # The website also refreshes these records directly once the repository is public.
+        run('python3', 'tools/sync_release.py', feed_path, cwd=site)
+        run('python3', '-m', 'unittest', 'discover', '-s', 'tests', cwd=site)
+        run('node', '--test', cwd=site)
     if run('git', 'status', '--porcelain', cwd=site, capture=True):
         run('git', 'add', 'public/index.html', 'public/release.json', 'public/download.sha256', 'vercel.json', cwd=site)
         run('git', 'commit', '-m', 'Publish Power Beta ' + version, cwd=site)

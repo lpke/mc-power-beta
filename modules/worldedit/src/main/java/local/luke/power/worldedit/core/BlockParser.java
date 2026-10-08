@@ -38,6 +38,13 @@ public final class BlockParser {
     for (int i = 0; i < colors.length; i++) state(colors[i] + "_wool", 35, i);
     String[] slabs = {"stone_slab", "sandstone_slab", "oak_slab", "cobblestone_slab"};
     for (int i = 0; i < slabs.length; i++) state(slabs[i], 44, i);
+    state("redstone_torch", 76, 5);
+    state("unlit_redstone_torch", 75, 5);
+    state("redstone_wall_torch", 76, 4);
+    state("torch", 50, 5);
+    state("wall_torch", 50, 4);
+    alias("oak_sign", 63);
+    alias("oak_wall_sign", 68);
     state("spruce_log", 17, 1);
     state("birch_log", 17, 2);
     state("spruce_leaves", 18, 1);
@@ -197,6 +204,13 @@ public final class BlockParser {
 
   public BlockValue block(String text) {
     String v = text.toLowerCase(Locale.ROOT).replace("minecraft:", "");
+    Map<String, String> states = Map.of();
+    int bracket = v.indexOf('[');
+    if (bracket >= 0) {
+      if (!v.endsWith("]") || v.indexOf('[', bracket + 1) >= 0) throw new IllegalArgumentException("Use block[property=value].");
+      states = BlockStates.parse(v.substring(bracket + 1, v.length() - 1));
+      v = v.substring(0, bracket);
+    }
     String[] parts = v.split(":", -1);
     if (parts.length > 2 || parts[0].isBlank())
       throw new IllegalArgumentException("Use hand, a block name or ID[:metadata].");
@@ -221,12 +235,12 @@ public final class BlockParser {
             : held != null ? held.meta : defaultMeta.getOrDefault(parts[0], 0);
     if (id < 0 || id > 255 || meta < 0 || meta > 15 || id == 34 || id == 36 || id == 95 || id != 0 && !registered.test(id))
       throw new IllegalArgumentException("Unsupported Beta block: " + text);
-    return new BlockValue(id, meta);
+    return BlockStates.apply(new BlockValue(id, meta), states);
   }
 
   public Function<Pos, BlockValue> pattern(String text) {
-    String[] tokens = text.split(",", -1);
-    if (tokens.length > 128) throw new IllegalArgumentException("Pattern is too long.");
+    List<String> tokens = BlockStates.split(text);
+    if (tokens.size() > 128) throw new IllegalArgumentException("Pattern is too long.");
     List<BlockValue> values = new ArrayList<>();
     List<Double> weights = new ArrayList<>();
     double total = 0;
@@ -258,7 +272,7 @@ public final class BlockParser {
     boolean invert = text.startsWith("!");
     if (invert) text = text.substring(1);
     Predicate<BlockValue> result = b -> false;
-    for (String token : text.split(",", -1)) {
+    for (String token : BlockStates.split(text)) {
       if (token.equals("#existing")) {
         result = result.or(b -> b.id != 0);
         continue;
@@ -269,9 +283,11 @@ public final class BlockParser {
       }
       BlockValue v = block(token);
       String name = token.toLowerCase(Locale.ROOT).replace("minecraft:", "");
-      boolean exact =
-          name.equals("hand") || name.contains(":") || defaultMeta.containsKey(name);
-      result = result.or(b -> b.id == v.id && (!exact || b.meta == v.meta));
+      int bracket = name.indexOf('[');
+      String base = bracket < 0 ? name : name.substring(0, bracket);
+      boolean exact = base.equals("hand") || base.contains(":") || (defaultMeta.containsKey(base) && !base.contains("torch"));
+      int bits = bracket >= 0 ? BlockStates.mask(v.id, BlockStates.parse(name.substring(bracket + 1, name.length() - 1)).keySet()) : exact ? 15 : 0;
+      result = result.or(b -> b.id == v.id && (b.meta & bits) == (v.meta & bits));
     }
     return invert ? result.negate() : result;
   }

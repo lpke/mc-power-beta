@@ -4341,5 +4341,24 @@
     "label": "Redstone placement sound",
     "description": "Play the stone placement sound when placing redstone dust. Uses the Blocks sound volume.",
     "order": 8
+  },
+  "world.hostileSpawning": {
+    "page": "General",
+    "group": "Game",
+    "label": "Hostile mob spawning",
+    "order": 60
+  },
+  "world.passiveSpawning": {
+    "page": "General",
+    "group": "Game",
+    "label": "Passive mob spawning",
+    "order": 70
+  },
+  "power_compat:config.addFacingToDebugOverlay": {
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Facing direction",
+    "description": "Show your facing direction and axis in the F3 debug overlay.",
+    "order": 11
   }
 }

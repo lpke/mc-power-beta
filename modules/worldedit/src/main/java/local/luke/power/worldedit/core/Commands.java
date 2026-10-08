@@ -39,6 +39,10 @@ public final class Commands {
   public void run(String input) {
     String[] split = input.trim().split("\\s+");
     String command = split[0].replaceFirst("^/+", "").toLowerCase(Locale.ROOT);
+    if (command.equals("calc")) {
+      e.message.accept("= " + Calculator.evaluate(input.substring(split[0].length()).trim()));
+      return;
+    }
     List<String> a = new ArrayList<>(Arrays.asList(split).subList(1, split.length));
     if (e.engine.busy() && !Set.of("cancel", "help", "status").contains(command))
       throw new IllegalArgumentException("An edit is running. Use //cancel or wait.");
@@ -376,6 +380,8 @@ public final class Commands {
     }
     if (a.size() == 3) dir = a.get(2);
     Pos d = direction(dir);
+    if (command.equals("contract") && !Set.of("top", "bottom").contains(dir.toLowerCase(Locale.ROOT)))
+      d = new Pos(-d.x(), -d.y(), -d.z());
     if (command.equals("shift")) {
       if (back != 0) throw new IllegalArgumentException("Use //shift amount direction.");
       e.select(r.shift(new Pos(d.x() * n, d.y() * n, d.z() * n)));
@@ -423,8 +429,8 @@ public final class Commands {
 
   public Pos direction(String s) {
     return switch (s.toLowerCase(Locale.ROOT)) {
-      case "up", "u" -> new Pos(0, 1, 0);
-      case "down", "d" -> new Pos(0, -1, 0);
+      case "up", "u", "top" -> new Pos(0, 1, 0);
+      case "down", "d", "bottom" -> new Pos(0, -1, 0);
       case "north", "n" -> new Pos(0, 0, -1);
       case "south", "s" -> new Pos(0, 0, 1);
       case "east", "e" -> new Pos(1, 0, 0);
@@ -468,7 +474,7 @@ public final class Commands {
         "//wand | //toggleeditwand | //pos1 [x,y,z] | //pos2 [x,y,z]",
         "//hpos1 | //hpos2 | //sel | //chunk | //size | //drawsel",
         "//expand amount [reverse] [direction] | //expand vert",
-        "//contract amount [direction] | //shift amount [direction]",
+        "//contract amount [direction|top|bottom] | //shift amount [direction]",
         "//outset [-h|-v] amount | //inset [-h|-v] amount"
       },
       {
@@ -480,7 +486,7 @@ public final class Commands {
       },
       {
         "//copy | //cut | //paste [-aos] | //clearclipboard",
-        "//rotate degrees | //flip [direction]",
+        "//rotate degrees | //flip [direction] | //calc expression",
         "//stack [-as] [count] [direction] | //move [-as] [distance] [direction]",
         "//undo [steps] | //redo [steps] | //clearhistory",
         "//cancel | //status | //toggleplace"

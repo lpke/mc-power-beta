@@ -619,7 +619,8 @@
       "plantReplacementFixesEnabled": true,
       "slabPlacementFixesEnabled": false,
       "allowCraftingInventorySlots": false,
-      "vehicleLogoutLoginFixesEnabled": true
+      "vehicleLogoutLoginFixesEnabled": true,
+      "addFacingToDebugOverlay": false
     },
     "editor": {
       "blockLimit": 65536,

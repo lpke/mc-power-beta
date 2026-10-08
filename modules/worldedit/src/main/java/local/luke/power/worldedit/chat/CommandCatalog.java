@@ -2,11 +2,13 @@ package local.luke.power.worldedit.chat;
 
 import java.util.*;
 import local.luke.power.worldedit.core.BlockParser;
+import local.luke.power.worldedit.core.BlockStates;
 import local.luke.power.worldedit.core.EntityQuery;
 
 public final class CommandCatalog {
   public static final List<String> COMMANDS =
       List.of(
+          "calc",
           "up",
           "ceil",
           "ascend",
@@ -105,7 +107,7 @@ public final class CommandCatalog {
           "rement",
           "butcher");
   private static final List<String> DIRECTIONS =
-      List.of("north", "south", "east", "west", "up", "down", "me");
+      List.of("north", "south", "east", "west", "up", "down", "top", "bottom", "me");
   private static final List<String> BLOCKS = new BlockParser(i -> i <= 96).names();
 
   private CommandCatalog() {}
@@ -163,6 +165,16 @@ public final class CommandCatalog {
         || Set.of("replace", "re").contains(command) && arg <= 2
         || command.equals("replacenear") && arg >= 2 && arg <= 3
         || command.equals("hollow") && arg == 2) choices = BLOCKS;
+    if (choices == BLOCKS && token.lastIndexOf('[') > token.lastIndexOf(']')) {
+      int bracket = token.lastIndexOf('[');
+      int baseStart = Math.max(token.lastIndexOf(',', bracket) + 1, token.lastIndexOf('%', bracket) + 1);
+      if (token.startsWith("!", baseStart)) baseStart++;
+      try {
+        int id = new BlockParser(i -> i <= 96).block(token.substring(baseStart, bracket)).id;
+        String keepStates = input.substring(0, space + 1) + token.substring(0, bracket + 1);
+        return BlockStates.complete(id, token.substring(bracket + 1)).stream().map(v -> keepStates + v).toList();
+      } catch (IllegalArgumentException e) { return List.of(); }
+    }
     int start = Math.max(token.lastIndexOf(',') + 1, token.lastIndexOf('%') + 1);
     if (token.startsWith("!", start)) start++;
     String keep = input.substring(0, space + 1) + token.substring(0, start);

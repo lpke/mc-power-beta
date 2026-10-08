@@ -38,6 +38,7 @@ public class BlockSelectAPI {
 	
 	static {
 		registerConverter(Block.SUGAR_CANES, Item.sugarCanes);
+		registerConverter(Block.REDSTONE_DUST, Item.redstoneDust);
 		registerConverter(Block.WOOD_DOOR, Item.woodDoor);
 		registerConverter(Block.IRON_DOOR, Item.ironDoor);
 		registerConverter(Block.REDSTONE_TORCH, Block.REDSTONE_TORCH_LIT);

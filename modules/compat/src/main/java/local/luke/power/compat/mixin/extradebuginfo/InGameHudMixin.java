@@ -34,6 +34,11 @@ public class InGameHudMixin extends DrawContext {
 		if (!minecraft.options.debugHud || minecraft.player == null || minecraft.world == null) return;
 		TextRenderer var8 = this.minecraft.textRenderer;
 		int yOffset = Config.config.overlayAdditionsYOffset;
+        if (Config.config.addFacingToDebugOverlay) {
+            String[] directions = {"south (+Z)", "west (-X)", "north (-Z)", "east (+X)"};
+            int facing = Math.floorMod((int)Math.floor(minecraft.player.yaw / 90.0 + 0.5), 4);
+            var8.drawWithShadow("Facing: " + directions[facing], 2, 144 + yOffset, 14737632);
+        }
 
 		if (Config.config.addTotalPlayTimeToDebugOverlay) {
 			long realHoursPlayed = Duration.ofSeconds(minecraft.stats.get(Stats.PLAY_ONE_MINUTE) / 20).toHours();

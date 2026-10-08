@@ -23,6 +23,9 @@ public class Config {
         )
         public final ShovelsConfig SHOVELS_CONFIG = new ShovelsConfig();
 
+        @ConfigEntry(name = "Facing direction", description = "Show your facing direction and axis in the F3 debug overlay.")
+        public Boolean addFacingToDebugOverlay = false;
+
         @ConfigEntry(name = "Add Biome To Debug Overlay")
         public Boolean addBiomeToDebugOverlay = true;
 

@@ -160,6 +160,11 @@ public final class WorldEditor {
   }
 
   public static boolean command(Minecraft mc, String text) {
+    if (text.strip().matches("//calc(?:\\s+.*)?")) {
+      try { mc.inGameHud.addChatMessage(ChatFormat.info("= " + Calculator.evaluate(text.strip().substring(6).trim()))); }
+      catch (IllegalArgumentException e) { mc.inGameHud.addChatMessage(ChatFormat.error(e.getMessage())); }
+      return true;
+    }
     if (local.luke.power.input.InteractionState.carryingContainer && local.luke.power.worldedit.chat.CommandCatalog.owns(text)) {
       message(mc,"Place your carried container before using editing commands."); return true;
     }

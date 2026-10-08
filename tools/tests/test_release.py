@@ -128,3 +128,27 @@ class ArchiveTest(unittest.TestCase):
         self.write()
         with self.assertRaises(ValueError):
             verify_archive(self.path, '1.0.2')
+
+
+class GitHubFeedTest(unittest.TestCase):
+    def test_snapshot_uses_github_notes_and_retains_old_downloads(self):
+        from release import website_feed
+        old_url = 'https://example.invalid/verified-old.zip'
+        releases = []
+        for version in ['1.0.0', '1.1.0']:
+            releases.append({'tag_name': 'v' + version, 'draft': False, 'prerelease': False,
+                'published_at': '2026-10-08T12:00:00Z', 'body': '- GitHub notes for ' + version + '\n\nMetadata.',
+                'html_url': 'https://github.com/lpke/mc-power-beta/releases/tag/v' + version,
+                'assets': [{'name': 'Power-Beta-' + version + '-Prism.zip', 'state': 'uploaded',
+                    'size': 123, 'digest': 'sha256:' + 'a' * 64, 'browser_download_url': 'https://github.com/archive'}]})
+        feed = website_feed('lpke/mc-power-beta', '1.1.0', 'b' * 40, None, 'a' * 64,
+                            'https://example.invalid/new.zip', {'releases': [{'version': '1.0.0', 'download': old_url}]}, releases)
+        self.assertEqual(['1.1.0', '1.0.0'], [r['version'] for r in feed['releases']])
+        self.assertEqual(['GitHub notes for 1.1.0'], feed['releases'][0]['changes'])
+        self.assertEqual(old_url, feed['releases'][1]['download'])
+
+    def test_new_draft_lookup_tolerates_github_propagation(self):
+        import release
+        draft = {'tag_name': 'v1.1.0', 'draft': True}
+        with patch.object(release, 'releases_for', side_effect=[[], [], [draft]]), patch.object(release.time, 'sleep'):
+            self.assertEqual(draft, release.find_release('owner/repo', 'v1.1.0'))

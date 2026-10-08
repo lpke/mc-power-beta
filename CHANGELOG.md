@@ -2,13 +2,19 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-08
+
+- Keep command history navigation separate from completion suggestions.
+- Add a chat caret, text selection and copy, cut and paste shortcuts.
+- Add an optional facing direction to the F3 debug overlay.
+- Match WorldEdit contraction directions and add top and bottom aliases.
+- Add //calc and named block states for rails, torches and other directional blocks.
+- Fix redstone pick-block items and allow backwards flight sprinting and freecam sprinting.
+- Add per-world hostile and passive natural spawning controls while preserving existing mobs and /summon.
+
 ## [1.0.1] - 2026-10-08
 
 - Fix isometric capture bounds and centring with custom render distances.
-- Add versioned releases with matching GitHub notes, verified downloads and website changelogs.
-- Update existing Prism instances across pack versions while preserving settings and worlds.
-- Simplify source licensing and documentation under the top-level AGPL license.
-- Refresh the website with shorter descriptions and more feature screenshots.
 
 ## [1.0.0] - 2026-10-08
 

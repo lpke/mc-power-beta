@@ -48,7 +48,7 @@ Never overwrite published ZIPs or move existing release tags. Fixes get a new ve
 
 The two repositories are configured in `tools/publish_config.json`. Public release
 metadata is copied to the website's `public/release.json`; `tools/sync_release.py`
-in that repository renders the page and download redirect. No service token is
+in that repository renders the page and fallback metadata. No service token is
 needed to serve the website. The publish command uses a temporary, private file
 for Blob credentials and removes it when finished.
 
@@ -67,3 +67,9 @@ previous artifacts. Keep the backup until verification finishes.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 versioned modpack notes such as [Fabulously Optimized](https://github.com/Fabulously-Optimized/fabulously-optimized/blob/main/CHANGELOG.md).
+
+The website reads published GitHub release notes and ZIP assets. While the repo
+is private, the publisher saves a verified GitHub snapshot for anonymous visitors.
+Once public, the site checks GitHub automatically, with a five-minute cache.
+Keep changelog bullets limited to modpack features and fixes. Website and release
+process changes belong in commits and development documentation.
