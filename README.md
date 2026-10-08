@@ -4,6 +4,8 @@ Minecraft Beta 1.7.3 with one searchable Options menu for fixes, better controls
 building tools and creative play. Keep Beta's gameplay or tune it to suit you.
 Built for singleplayer.
 
+[Website and download](https://power-beta-gamma.vercel.app/)
+
 | Creative inventory | Music library |
 | --- | --- |
 | [![Creative inventory over a snowy Beta landscape](docs/screenshots/creative-inventory.png)](docs/screenshots/creative-inventory.png) | [![Music library with track previews and volume controls](docs/screenshots/music-library.png)](docs/screenshots/music-library.png) |
@@ -31,7 +33,7 @@ commands and world editing. Other settings are shared unless marked "this world"
 ## Install
 
 1. Install [Prism Launcher](https://prismlauncher.org/) and add your Minecraft account.
-2. Get the ready-to-import `Power-Beta-1.0.0-Prism.zip`. If you have the source code
+2. [Download the Prism ZIP](https://power-beta-gamma.vercel.app/download). If you have the source code
    instead, build that ZIP using the steps below.
 3. In Prism, choose **Add Instance > Import**, then select the ZIP.
 4. Open the instance's **Edit > Settings > Java**, enable the Java installation
