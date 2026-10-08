@@ -92,6 +92,7 @@ public final class Validation {
       else if (command.startsWith("keys-")) InputChecks.run(mc, command.substring(5));
       else if (command.equals("creative-vehicles")) CreativeVehicleChecks.run(mc);
       else if (command.startsWith("release-110-")) Release110InputChecks.run(mc,command.substring(12));
+      else if (command.startsWith("release-111")) Release111Checks.run(mc,command.length()>12 ? command.substring(12) : "check");
       else if (command.equals("release-110")) Release110Checks.run(mc);
       else if (command.equals("command-completion")) CommandCompletionChecks.run(mc);
       else if (command.equals("redstone-sounds")) RedstoneSoundChecks.run(mc);

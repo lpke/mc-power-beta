@@ -34,6 +34,10 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   `release-110-pick` checks redstone in creative and survival. `release-110-flight`,
   `release-110-freecam` and `release-110-state` support physical movement and clipboard
   checks. Test both sprint-key release orders, focus loss and menus.
+- `release-111`: cursor/colour defaults, preview, Cancel/Apply and world override groups.
+  Restart and run `release-111-saved` for persistence. `release-111-debug-on`, then
+  `release-111-debug` checks facing, music and platform rows for overlaps.
+  Include `release-110-spectator` in physical sprint checks for every axis.
 - `command-completion`: arrow selection, immediate Tab completion and subsequent
   typing for WorldEdit and singleplayer commands.
 - `creative-borders`: compare catalogue row pixels and the destroy-slot junction

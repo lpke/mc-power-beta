@@ -3122,14 +3122,14 @@
     "page": "Creative",
     "group": "Flight",
     "label": "Flight sprint",
-    "description": "Use the sprint key to fly faster.",
+    "description": "Use the sprint key to fly faster in any direction in creative and spectator modes.",
     "order": 5
   },
   "creative.sprintToggle": {
     "page": "Camera",
     "group": "Flight sprint",
     "label": "Sprint activation",
-    "description": "Shared by creative flight and freecam. Hold requires the sprint key; Toggle stays active until forward movement stops."
+    "description": "Shared by creative, spectator and freecam flight. Hold requires the sprint key; Toggle stays active until movement stops."
   },
   "creative.flightSpeed": {
     "page": "Creative",
@@ -3142,7 +3142,7 @@
     "page": "Camera",
     "group": "Flight sprint",
     "label": "Sprint speed, %",
-    "description": "Speed multiplier while sprinting in creative flight or freecam. 200% doubles normal speed."
+    "description": "Speed multiplier for flight in any direction, including sideways, up and down. Applies to creative, spectator and freecam. 200% doubles normal speed."
   },
   "creative.glide": {
     "page": "Creative",
@@ -4273,13 +4273,13 @@
   },
   "world.daylightCycle": {
     "page": "General",
-    "group": "Game",
+    "group": "World overrides",
     "label": "Daylight cycle",
     "order": 40
   },
   "world.weatherCycle": {
     "page": "General",
-    "group": "Game",
+    "group": "World overrides",
     "label": "Weather cycle",
     "order": 50
   },
@@ -4344,13 +4344,13 @@
   },
   "world.hostileSpawning": {
     "page": "General",
-    "group": "Game",
+    "group": "World overrides",
     "label": "Hostile mob spawning",
     "order": 60
   },
   "world.passiveSpawning": {
     "page": "General",
-    "group": "Game",
+    "group": "World overrides",
     "label": "Passive mob spawning",
     "order": 70
   },
@@ -4360,5 +4360,19 @@
     "label": "Facing direction",
     "description": "Show your facing direction and axis in the F3 debug overlay.",
     "order": 11
+  },
+  "interface.blinkingChatCursor": {
+    "page": "Interface",
+    "group": "Chat",
+    "label": "Blinking chat cursor",
+    "description": "Blink the chat cursor. Off keeps the beam visible while editing.",
+    "order": 10
+  },
+  "interface.debugTextColor": {
+    "page": "Interface",
+    "group": "Debug information",
+    "label": "Text colour",
+    "description": "Colour of all F3 debug text.",
+    "order": 0
   }
 }

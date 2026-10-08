@@ -35,7 +35,7 @@ public final class FlightPhysics {
       x += (side * cos - forward * sin) * speed * sprint;
       z += (forward * cos + side * sin) * speed * sprint;
     }
-    y += vertical * speed * 3;
+    y += vertical * speed * sprint * 3;
     return new Motion(snap(x), snap(y), snap(z));
   }
 

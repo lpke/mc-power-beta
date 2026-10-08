@@ -38,7 +38,7 @@ public final class ControlLinks {
     link("power_building.hotbar.base", "tweaks.hotbar.swap", "tweaks.hotbar.swap", "Hold to preview inventory rows and switch the active hotbar.");
     link("power_building.hotbar.scroll", "tweaks.hotbar.scroll", "tweaks.hotbar.scroll", "Hold and scroll to cycle inventory rows through the hotbar.");
     for (int i = 1; i <= 3; i++) link("power_building.hotbar.row" + i, "tweaks.hotbar.swap", "tweaks.hotbar.swap", "Swap hotbar contents with inventory row " + i + ".");
-    link("power_creative.sprint", "creative.sprintToggle", "creative.sprintFlight", "Boost flight or freecam speed while moving forward. Toggle ends when forward movement stops.");
+    link("power_creative.sprint", "creative.sprintToggle", "creative.sprintFlight", "Boost creative, spectator or freecam flight in any direction. Toggle ends when movement stops.");
     link("power_creative.picker", "creative.modePicker", "creative.modePicker", "Cycle game modes while holding the mode-picker modifier; release the modifier to select.");
     link("power_creative.modifier", "creative.modePicker", "creative.modePicker", "Hold with the game-mode cycle key to open the mode picker.");
     link("Toggle Freecam", "power_camera:config.enabled", "power_camera:config.enabled", "Detach the camera from your player. Press again to return.");

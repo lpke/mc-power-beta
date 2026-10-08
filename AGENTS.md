@@ -82,6 +82,10 @@
   Per-feature toggle messages default off and observe transitions on ticks,
   independently of HUD inclusion. Menus, focus changes and world loading stay silent.
 
+- F3 providers share the debug text layout and colour. Capture only the F3 block,
+  never chat or other HUD text. World overrides identify scope at group level.
+- Flight sprint covers all three movement axes in creative, spectator and freecam.
+  Opposing inputs cancel; stopping movement resets Toggle sprint.
 - Chat editing shares a buffer across input and completion. History keeps arrow
   ownership until editing or explicit completion; rendering must not change text.
 - Natural spawning rules are saved with world properties and copied across

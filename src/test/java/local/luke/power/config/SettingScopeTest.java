@@ -32,5 +32,7 @@ class SettingScopeTest {
     assertTrue(Tooltips.setting(world, "").contains("Saved separately for each singleplayer world."));
     assertEquals("/give", SettingScope.label("commands.world.give", "commandAccess", "Cheat commands in this world", "/give"));
     assertEquals("This world", SettingScope.label("worldedit.worldOverride", "world", "Access", "This world"));
+    assertEquals("Daylight cycle", SettingScope.label("world.daylightCycle", "world", "World overrides", "Daylight cycle"));
+    assertEquals("Cheats enabled (this world)", SettingScope.label("world.cheats", "world", "Game", "Cheats enabled"));
   }
 }

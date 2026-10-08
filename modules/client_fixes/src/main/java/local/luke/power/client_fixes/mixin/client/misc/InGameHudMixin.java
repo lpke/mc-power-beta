@@ -21,6 +21,6 @@ public class InGameHudMixin extends DrawContext {
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;debugHud:Z"))
     )
     private void onRenderGameOverlay(CallbackInfo ci) {
-        this.drawTextWithShadow(this.minecraft.textRenderer, "Seed: " + this.minecraft.world.getSeed(), 2, 88 + 8 + 8, 0xe0e0e0);
+        local.luke.power.ui.DebugOverlay.add("Seed: " + this.minecraft.world.getSeed(), 2, 104);
     }
 }

@@ -734,6 +734,10 @@
     },
     "activeTweaks": {
       "cinematicCameraMessages": false
+    },
+    "interface": {
+      "blinkingChatCursor": false,
+      "debugTextColor": "#FFFFFF"
     }
   }
 }

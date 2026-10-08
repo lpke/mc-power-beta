@@ -56,7 +56,9 @@ public final class FlightController {
             movementKey(mc, Keys.SPRINT),
             Modes.flying(mc.player)
                 && Config.current().sprintFlight
-                && (movementKey(mc, mc.options.forwardKey) != movementKey(mc, mc.options.backKey)),
+                && ((movementKey(mc, mc.options.forwardKey) != movementKey(mc, mc.options.backKey))
+                    || (movementKey(mc, mc.options.leftKey) != movementKey(mc, mc.options.rightKey))
+                    || (movementKey(mc, mc.options.jumpKey) != movementKey(mc, mc.options.sneakKey))),
             Config.current().sprintToggle);
   }
 

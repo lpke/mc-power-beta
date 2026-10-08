@@ -14,7 +14,7 @@ public final class SettingScope {
   }
 
   public static String label(String id, String backend, String group, String label) {
-    if (!perWorld(id, backend) || group.toLowerCase(java.util.Locale.ROOT).contains("this world")
+    if (!perWorld(id, backend) || group.equals("World overrides") || group.toLowerCase(java.util.Locale.ROOT).contains("this world")
         || label.toLowerCase(java.util.Locale.ROOT).contains("this world")) return label;
     return label + " (this world)";
   }

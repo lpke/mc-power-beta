@@ -14,12 +14,12 @@ final class Release110InputChecks {
       log("CHAT text="+b.text()+" cursor="+b.cursor()+" selection="+b.selection());
       var sprint = Class.forName("local.luke.power.creative.FlightController").getDeclaredField("sprinting");sprint.setAccessible(true);
       Object camera = Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
-      log("FLIGHT sprint="+sprint.getBoolean(null)+" velocity="+Math.hypot(mc.player.velocityX,mc.player.velocityZ)
+      log("FLIGHT sprint="+sprint.getBoolean(null)+" velocity="+Math.hypot(mc.player.velocityX,mc.player.velocityZ)+" vertical="+mc.player.velocityY
           +" camera="+camera.getClass().getMethod("isActive").invoke(camera)+" cameraSpeed="+camera.getClass().getMethod("movementSpeed").invoke(camera));
       return;
     }
-    if (action.equals("flight") || action.equals("freecam")) {
-      mc.setScreen(null);((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
+    if (action.equals("flight") || action.equals("freecam") || action.equals("spectator")) {
+      mc.setScreen(null);((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,action.equals("spectator")?"SPECTATOR":"CREATIVE");
       mc.player.method_1340(mc.player.x,110,mc.player.z);mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,true);
       mc.player.field_1623=false;mc.player.velocityX=mc.player.velocityY=mc.player.velocityZ=0;
       Object camera=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);

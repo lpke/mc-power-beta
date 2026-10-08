@@ -43,7 +43,9 @@
     "ClientDifficultyMixin",
     "RedstonePowerMixin",
     "RedstonePlacementSoundMixin",
-    "WorldSpawningMixin"
+    "WorldSpawningMixin",
+    "DebugHudMixin",
+    "DebugTextMixin"
   ],
   "injectors": {
     "defaultRequire": 1

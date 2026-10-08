@@ -56,7 +56,7 @@ final class Release110Checks {
         spawn.power$hostileSpawning(true); spawn.power$passiveSpawning(true);
         var session = SettingsRegistry.open(mc);
         var h = find(session,"world.hostileSpawning"); var p = find(session,"world.passiveSpawning");
-        check(h.label.contains("this world") && p.label.contains("this world"), "scope labels missing");
+        check(h.group.equals("World overrides") && p.group.equals("World overrides") && !h.label.contains("this world") && !p.label.contains("this world"), "scope labels missing");
         check(SettingAccess.visible(session,h) && h.defaultValue.getAsBoolean(), "default/visibility");
         h.parse("false"); p.parse("false"); session.preview();
         check(spawn.power$hostileSpawning() && spawn.power$passiveSpawning(), "preview changed live world");

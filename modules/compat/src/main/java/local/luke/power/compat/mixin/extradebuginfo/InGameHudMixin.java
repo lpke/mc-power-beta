@@ -3,7 +3,7 @@ package local.luke.power.compat.mixin.extradebuginfo;
 import local.luke.power.compat.Config;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.font.TextRenderer;
+import local.luke.power.ui.DebugOverlay;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,20 +32,19 @@ public class InGameHudMixin extends DrawContext {
 	@Inject(method = "render", at = @At("TAIL"))
 	public void power$debug(float bl, boolean i, int j, int par4, CallbackInfo ci)  {
 		if (!minecraft.options.debugHud || minecraft.player == null || minecraft.world == null) return;
-		TextRenderer var8 = this.minecraft.textRenderer;
 		int yOffset = Config.config.overlayAdditionsYOffset;
         if (Config.config.addFacingToDebugOverlay) {
             String[] directions = {"south (+Z)", "west (-X)", "north (-Z)", "east (+X)"};
             int facing = Math.floorMod((int)Math.floor(minecraft.player.yaw / 90.0 + 0.5), 4);
-            var8.drawWithShadow("Facing: " + directions[facing], 2, 144 + yOffset, 14737632);
+            DebugOverlay.add("Facing: " + directions[facing], 2, 144 + yOffset);
         }
 
 		if (Config.config.addTotalPlayTimeToDebugOverlay) {
 			long realHoursPlayed = Duration.ofSeconds(minecraft.stats.get(Stats.PLAY_ONE_MINUTE) / 20).toHours();
 			if (1 == realHoursPlayed) {
-				var8.drawWithShadow("Play Time: " + realHoursPlayed + " hour", 2, (96 + yOffset), 14737632);
+				DebugOverlay.add("Play Time: " + realHoursPlayed + " hour", 2, (96 + yOffset));
 			} else {
-				var8.drawWithShadow("Play Time: " + realHoursPlayed + " hours", 2, (96 + yOffset), 14737632);
+				DebugOverlay.add("Play Time: " + realHoursPlayed + " hours", 2, (96 + yOffset));
 			}
 		}
 
@@ -82,19 +81,19 @@ public class InGameHudMixin extends DrawContext {
 			}
 
 			if (Config.config.addBlockLightToDebugOverlay) {
-				var8.drawWithShadow("Block light: " + lightLevel, 2, (112 + yOffset), 14737632);
+				DebugOverlay.add("Block light: " + lightLevel, 2, (112 + yOffset));
 			}
 
 			if (Config.config.addBiomeToDebugOverlay) {
-				var8.drawWithShadow("Biome: " + biomeName, 2, (120 + yOffset), 14737632);
+				DebugOverlay.add("Biome: " + biomeName, 2, (120 + yOffset));
 			}
 
 			if (Config.config.addDayCounterToDebugOverlay) {
-				var8.drawWithShadow("Day: " + dayCount, 2, (128 + yOffset), 14737632);
+				DebugOverlay.add("Day: " + dayCount, 2, (128 + yOffset));
 			}
 
 			if (Config.config.addSlimeChunkToDebugOverlay) {
-				var8.drawWithShadow("Slime Chunk: " + isSlimeChunk, 2, (136 + yOffset), 14737632);
+				DebugOverlay.add("Slime Chunk: " + isSlimeChunk, 2, (136 + yOffset));
 			}
 		}
 	}

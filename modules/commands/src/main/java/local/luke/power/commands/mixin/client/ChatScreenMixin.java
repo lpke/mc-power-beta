@@ -255,7 +255,7 @@ public abstract class ChatScreenMixin extends Screen {
         boolean invalid = editor.text().startsWith("/") && !tryMatch(editor.text().split(" ")[0].substring(1));
         drawTextWithShadow(textRenderer, visible, left, height - 12, invalid ? 0xFC5454 : 0xE0E0E0);
         if (!editor.selected()) renderSuggestions(mouseX, mouseY, delta);
-        if (focusedTicks / 6 % 2 == 0) {
+        if (local.luke.power.ui.InterfaceState.cursorVisible(focusedTicks)) {
             int x = left + textRenderer.getWidth(editor.text().substring(view.start(), editor.cursor()));
             fill(x, height - 13, x + 1, height - 3, 0xFFE0E0E0);
         }

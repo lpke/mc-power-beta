@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-09
+
+- Keep the chat cursor visible by default, with optional blinking.
+- Add an F3 text colour setting, defaulting to white, and prevent overlapping debug rows.
+- Group world cycle and spawning switches under World overrides.
+- Apply flight sprint in every direction, including sideways and vertical movement, in creative, spectator and freecam.
+
 ## [1.1.0] - 2026-10-08
 
 - Keep command history navigation separate from completion suggestions.

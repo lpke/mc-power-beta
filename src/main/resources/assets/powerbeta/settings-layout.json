@@ -1,6 +1,7 @@
 {
   "General": [
     "Game",
+    "World overrides",
     "Interface",
     "Input"
   ],

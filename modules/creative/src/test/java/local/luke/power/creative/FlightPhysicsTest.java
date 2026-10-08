@@ -7,6 +7,17 @@ import local.luke.power.creative.flight.FlightPhysics.Motion;
 import org.junit.jupiter.api.Test;
 
 class FlightPhysicsTest {
+  @Test void sprintScalesEveryDirectionIncludingVerticalAndSpectatorSpeed() {
+    for (double speed : new double[]{.05, .15})
+      for (int side=-1;side<=1;side++) for(int forward=-1;forward<=1;forward++) for(int vertical=-1;vertical<=1;vertical++) {
+        Motion zero=new Motion(0,0,0);
+        Motion normal=FlightPhysics.step(zero,side,forward,vertical,30,speed,1,5);
+        Motion fast=FlightPhysics.step(zero,side,forward,vertical,30,speed,3,5);
+        assertEquals(normal.x()*3,fast.x(),1e-10);
+        assertEquals(normal.y()*3,fast.y(),1e-10);
+        assertEquals(normal.z()*3,fast.z(),1e-10);
+      }
+  }
   @Test
   void modernHorizontalAndVerticalTerminalSpeeds() {
     Motion v = new Motion(0, 0, 0), move = v;

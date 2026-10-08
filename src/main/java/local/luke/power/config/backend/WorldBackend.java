@@ -71,7 +71,7 @@ public final class WorldBackend implements Backend {
   }
 
   private static Setting cycle(WorldBackend b, String id, String label, String help, boolean value) {
-    return new Setting("world." + id, b.id(), "General", "Game", label, help,
+    return new Setting("world." + id, b.id(), "General", "World overrides", label, help,
         Setting.Kind.BOOLEAN, new JsonPrimitive(value), new JsonPrimitive(true), 0, 1, 1, List.of(), false);
   }
 
