@@ -23,6 +23,11 @@ def remote_head(repository, ref='heads/main'):
     return run('gh', 'api', f'repos/{repository}/git/ref/{ref}', '--jq', '.object.sha', capture=True)
 
 
+def releases_for(repository):
+    pages = json.loads(run('gh', 'api', f'repos/{repository}/releases', '--paginate', '--slurp', capture=True))
+    return [release for page in pages for release in page]
+
+
 def clean_commit(directory):
     if run('git', 'status', '--porcelain', cwd=directory, capture=True):
         raise ValueError('Commit the work before publishing: ' + str(directory))
@@ -95,10 +100,9 @@ def publish(args):
         raise ValueError('Build receipt is stale or came from uncommitted work; rebuild')
     tag = 'v' + version
     repository = config['repository']
-    pages = json.loads(run('gh', 'api', f'repos/{repository}/releases', '--paginate', '--slurp', capture=True))
-    releases = [release for page in pages for release in page]
+    releases = releases_for(config['repository'])
     existing = next((r for r in releases if r['tag_name'] == tag), None)
-    if existing and remote_head(repository, 'tags/' + tag) != commit:
+    if existing and (existing['target_commitish'] if existing['draft'] else remote_head(repository, 'tags/' + tag)) != commit:
         raise ValueError('Release tag points at another commit; use a new version')
     for release in releases:
         other = release['tag_name'].removeprefix('v').split('.')
@@ -116,7 +120,8 @@ def publish(args):
         if not existing:
             run('gh', 'release', 'create', tag, '--repo', repository, '--target', commit,
                 '--title', 'Power Beta ' + version, '--notes-file', note_file, '--draft')
-            existing = json.loads(run('gh', 'api', f'repos/{repository}/releases/tags/{tag}', capture=True))
+            # GitHub does not create a draft's tag until publication.
+            existing = next(r for r in releases_for(repository) if r['tag_name'] == tag)
         elif existing['body'].strip() != body.strip():
             raise ValueError('Existing release notes differ; do not rewrite a published release')
         for path in [artifact, checksum]:
