@@ -4,14 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Client Fixes",
   "description": "MojangFix with compatibility and customization config options. Fixes skins, authentication, and more.",
-  "authors": [
-    "Telvarost",
-    "js6pak"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_client_fixes/icon.png",
   "environment": "*",
   "entrypoints": {

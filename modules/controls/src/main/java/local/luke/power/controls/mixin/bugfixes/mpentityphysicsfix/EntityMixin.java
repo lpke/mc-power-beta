@@ -11,10 +11,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 
-/**
- * @author calmilamsy
- * Ported from <a href="https://github.com/calmilamsy/MPEntityPhysicsFix/blob/master/src/main/java/net/glasslauncher/mpentityphysicsfix/mixin/MixinEntityBase.java">here</a>
- */
 @Mixin(Entity.class)
 public class EntityMixin {
     @WrapOperation(method = "move", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;x:D", opcode = Opcodes.PUTFIELD))

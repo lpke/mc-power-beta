@@ -9,3 +9,16 @@ dist/
 hs_err_pid*.log
 core.*
 replay_pid*.log
+
+# Disposable validation output and private local files
+/validation/
+**/validation/reports/
+/modules/building/validation/
+*.bundle
+*.log
+.env*
+**/power-beta-update-backups/
+**/accounts.json
+**/servers.dat
+**/session.lock
+**/hs_err_pid*.log

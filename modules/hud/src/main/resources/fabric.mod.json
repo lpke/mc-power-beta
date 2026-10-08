@@ -4,13 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Hud",
   "description": "Adds some HUD tweaks such as chat log scrolling and moving hotbar up/down. Special thanks to cen0b for the suggestions!",
-  "authors": [
-    "Telvarost"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_hud/icon.png",
   "environment": "client",
   "entrypoints": {

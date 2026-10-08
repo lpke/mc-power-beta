@@ -4,13 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Mechanics",
   "description": "Random tweaks like stopping creeper explosions, coloring signs with dye, disabling farmland trampling under certain conditions, and more!",
-  "authors": [
-    "Telvarost"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_mechanics/icon.png",
   "environment": "*",
   "entrypoints": {

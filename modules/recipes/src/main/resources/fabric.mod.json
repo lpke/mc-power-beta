@@ -4,14 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Recipes",
   "description": "AMI is a total conversion mod aiming to revitalize old Minecraft versions by adding QoL changes and new content.",
-  "authors": [
-    "calmilamsy",
-    "danygames2014"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_recipes/icon.png",
   "environment": "*",
   "entrypoints": {

@@ -4,13 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Configuration",
   "description": "Shared settings storage and compatibility API.",
-  "authors": [
-    "calmilamsy"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/gcapi3/icon.png",
   "environment": "*",
   "entrypoints": {

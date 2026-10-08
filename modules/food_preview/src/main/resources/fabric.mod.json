@@ -4,13 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Food Preview",
   "description": "Adds the food health preview from AppleSkin",
-  "authors": [
-    "Yunivers"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_food_preview/icon.png",
   "environment": "*",
   "mixins": [

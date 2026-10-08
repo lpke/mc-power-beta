@@ -4,10 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Window",
   "description": "deAWTs the game and fixes colors being inverted on Apple Silicon chips",
-  "authors": [
-    "DanyGames2014"
-  ],
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_window/icon.png",
   "environment": "*",
   "entrypoints": {
@@ -21,8 +17,5 @@
   ],
   "depends": {
     "minecraft": "1.0.0-beta.7.3"
-  },
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
   }
 }

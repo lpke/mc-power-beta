@@ -4,13 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Commands",
   "description": "Adds commands to singleplayer!",
-  "authors": [
-    "slainlight"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/spc/icon.png",
   "environment": "*",
   "entrypoints": {

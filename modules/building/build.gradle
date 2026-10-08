@@ -49,6 +49,5 @@ tasks.withType(AbstractArchiveTask).configureEach {
     reproducibleFileOrder = true
 }
 
-jar { from('LICENSE'); from('NOTICE'); from('licenses') { into 'META-INF/licenses' } }
 
 configurations.configureEach { resolutionStrategy.eachDependency { if (requested.group == "org.ow2.asm" && requested.name == "asm-all") useVersion "4.1" } }

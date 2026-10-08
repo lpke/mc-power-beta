@@ -3,6 +3,8 @@ plugins {
     id 'fabric-loom' version '1.11.8'
     id 'babric-loom-extension' version '1.11.9'
 }
+def packProperties = new Properties()
+file('../gradle.properties').withInputStream { packProperties.load(it) }
 group = 'local.luke'
 version = project.mod_version
 base.archivesName = 'power-beta-validation'
@@ -19,7 +21,7 @@ dependencies {
     minecraft 'com.mojang:minecraft:b1.7.3'
     mappings 'babric:barn:b1.7.3+build.8:v2'
     modImplementation 'babric:fabric-loader:0.15.6-babric.2'
-    modImplementation files('../build/libs/power-beta-1.0.0.jar')
+    modImplementation files("../build/libs/power-beta-${packProperties.getProperty('mod_version')}.jar")
     modCompileOnly files('../source-build/build/power_commands/libs/power_commands-0.5.10+powerbeta.1.jar')
     modCompileOnly files('../modules/worldedit/build/libs/power-worldedit-1.2.1.jar','../modules/building/build/libs/power_building-1.2.1.jar')
     modCompileOnly files('../vendor/jars/GlassConfigAPI-3.2.5.jar')

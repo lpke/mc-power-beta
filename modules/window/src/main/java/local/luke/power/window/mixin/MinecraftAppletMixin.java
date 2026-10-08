@@ -23,7 +23,6 @@ public abstract class MinecraftAppletMixin extends Applet {
     public abstract void startThread();
 
     /**
-     * @author Proudly overwritten by DanyGames2014
      * @reason because i don't give a shit
      */
     @Overwrite(remap = false)

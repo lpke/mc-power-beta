@@ -73,3 +73,7 @@ See the dispatch in `Validation.java` for focused inventory, commands, navigatio
 and input fixtures. Some older checks assume a particular setup; inspect their
 preconditions before running them. Physical input tests require focused game
 input and both modifier release orders.
+
+- `gallery setup`, then `gallery worldedit`, `chat`, `sign`, `redstone`, `preview`,
+  `carry` or `view` stages anonymous feature screenshots in a new disposable world.
+  Prefix each action with `gallery `. The setup replaces nearby terrain.

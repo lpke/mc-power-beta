@@ -4,13 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Gold",
   "description": "Gives gold tools special properties such as silk touch or looting. Also, gives small advantages to gold armor.",
-  "authors": [
-    "Telvarost"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_gold/icon.png",
   "environment": "*",
   "entrypoints": {

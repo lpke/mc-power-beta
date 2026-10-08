@@ -12,7 +12,7 @@
 - Utility JARs are compiled here and nested inside Power Beta. Six platform,
   authentication and performance JARs remain external. Disabled vendor artifacts
   and the recipe-browser source are retained for reference, not shipped.
-  Review `docs/upstreams.md` and pinned manifests before porting upstream changes.
+  Review pinned dependency manifests before changing platform binaries.
 - Root tests: `./gradlew --no-daemon test`. Utility build:
   `python3 tools/build_utilities.py [MODULE ...]`. For a pack already built,
   `python3 tools/build_pack.py --skip-build` only assembles the export.
@@ -99,3 +99,24 @@
   worlds, logs or disabled mods. Keep README human-facing; add lasting implementation
   constraints here rather than another session diary.
 - Commit and push only when the current user request authorizes it.
+
+## Releases
+
+- `gradle.properties` owns the pack version. Use semantic versions and tags `vX.Y.Z`.
+  Module/API versions are independent; preserve them unless that module needs a change.
+- Keep `CHANGELOG.md` newest first, with `## [Unreleased]` followed by dated version
+  headings and plain bullets describing user-visible changes. Move Unreleased entries
+  into the next version when preparing a release. Never invent past release versions.
+- Follow `docs/releases.md`. Publishing requires explicit user permission in the
+  current task. A code push alone does not authorize publishing a release.
+- `python3 tools/release.py --check` validates release notes and versioning.
+  The publish command builds and tests sequentially, verifies the export, publishes
+  GitHub release assets and notes, and updates/deploys the website from the same data.
+  Do not hand-edit generated website release details or overwrite published artifacts.
+- Never commit runtime reports, logs, instance backups, account files, personal paths,
+  `.env` files or Git bundles. Runtime fixture source stays in `validation-mod/`.
+- Keep the top-level AGPL license and the README Inspired by links. Source modules
+  have no separate license files or attribution metadata. Preserve binary dependency
+  hashes and runtime IDs, especially `gcapi3`.
+- Optional redstone textures use four-pixel wires with shaded edges and six-pixel
+  junctions; the power number panel occupies one quarter of a block.

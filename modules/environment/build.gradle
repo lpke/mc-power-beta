@@ -241,11 +241,6 @@ tasks.withType(Test).configureEach {
 	failOnNoDiscoveredTests = false
 }
 
-jar {
-	from("LICENSE") {
-		rename { "${it}_" + base.archivesName.get() }
-	}
-}
 
 // Maven Publishing
 publishing {

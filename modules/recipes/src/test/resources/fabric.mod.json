@@ -4,14 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Configuration",
   "description": "This is the content part of the total conversion mod known as Always More Items.",
-  "authors": [
-    "calmilamsy",
-    "danygames2014"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_recipestest/icon.png",
   "environment": "*",
   "entrypoints": {

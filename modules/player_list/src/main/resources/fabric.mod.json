@@ -4,14 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Player List",
   "description": "A client-side mod that adds a player list. Only works if the server has the plugin Essentials or the mod ClientCommands. Do you know of a plugin that adds a player list command? Lemme know and I might add it.",
-  "authors": [
-    "Vicisacat",
-    "Telvarost"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/playerlist/icon.png",
   "environment": "client",
   "entrypoints": {

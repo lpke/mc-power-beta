@@ -4,13 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Inventory",
   "description": "Adds the modern Left-Click + Drag and Right-Click + Drag mechanics, MouseTweaks, and more to the game! Special thanks to YaLTeR and js6pak for inspiring a lot of the concepts in this mod.",
-  "authors": [
-    "Telvarost"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_inventory/icon.png",
   "environment": "*",
   "entrypoints": {

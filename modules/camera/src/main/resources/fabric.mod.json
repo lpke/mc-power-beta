@@ -4,13 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Camera",
   "description": "This mod adds a freecam to the game",
-  "authors": [
-    "Ralf2oo2"
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_camera/icon.png",
   "environment": "*",
   "entrypoints": {

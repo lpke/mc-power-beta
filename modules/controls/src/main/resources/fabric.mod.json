@@ -4,25 +4,6 @@
   "version": "${version}",
   "name": "Power Beta Controls",
   "description": "An attempt at an all-in-one fixes and tweaks package for Beta 1.7.3",
-  "authors": [
-    {
-      "name": "DanyGames2014",
-      "contact": {
-        "sources": "https://github.com/danygames2014",
-        "discord": "danygames2014"
-      }
-    },
-    {
-      "name": "Telvarost",
-      "contact": {
-        "sources": "https://github.com/telvarost"
-      }
-    }
-  ],
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
-  },
-  "license": "AGPL-3.0-only",
   "icon": "assets/power_controls/icon.png",
   "environment": "*",
   "entrypoints": {

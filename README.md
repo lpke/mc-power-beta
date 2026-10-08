@@ -55,11 +55,23 @@ Back up your worlds before replacing an existing installation.
    python3 tools/build_pack.py
    ```
 
-4. Import the resulting `dist/Power-Beta-1.0.0-Prism.zip` into Prism as described above.
+4. Import the resulting `dist/Power-Beta-<version>-Prism.zip` into Prism as described above.
 
 Development and update instructions are in [AGENTS.md](AGENTS.md). See
-[upstreams](docs/upstreams.md) for dependencies and [recovery](docs/recovery.md)
-for inventory recovery.
+[releases](docs/releases.md) for publishing and [recovery](docs/recovery.md)
+for inventory recovery. Changes are listed in the [changelog](CHANGELOG.md)
+and [GitHub releases](https://github.com/lpke/mc-power-beta/releases).
 
-Source code uses [AGPL-3.0-only](LICENSE). Bundled assets and dependencies retain
-their own licenses. This is not an official Minecraft product.
+## Inspired by
+
+[BHCreative](https://github.com/paulevsGitch/BHCreative),
+[Tweakeroo](https://github.com/maruohon/tweakeroo),
+[WorldEdit](https://github.com/EngineHub/WorldEdit),
+[Better Than Adventure](https://github.com/Better-than-Adventure),
+[OmniLook](https://github.com/rhysdh540/Omnilook),
+[UniTweaks](https://github.com/danygames2014/UniTweaks),
+[StationAPI utilities](https://github.com/telvarost),
+[Light Overlay](https://github.com/shedaniel/LightOverlay) and
+[Click Mining Forever](https://github.com/snowtyler/click-mining-forever).
+
+[AGPL-3.0-only](LICENSE). This is not an official Minecraft product.

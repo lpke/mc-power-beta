@@ -1,6 +1,5 @@
 package local.luke.power.fastplace;
 
-/** Adapted from Tweakeroo PlacementTweaks, LGPL-3.0-only. */
 public enum RestrictionMode {
   FACE,
   PLANE,

@@ -11,8 +11,5 @@
     "fabricloader": ">=0.15.6",
     "power_building": "*",
     "power_worldedit": "*"
-  },
-  "contact": {
-    "sources": "https://github.com/lpke/mc-power-beta"
   }
 }
