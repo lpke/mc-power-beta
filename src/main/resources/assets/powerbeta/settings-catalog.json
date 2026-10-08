@@ -4334,5 +4334,12 @@
     "label": "Redstone power levels",
     "description": "Use clean redstone wire with a number showing its current power from 0 to 15. Changes appearance only.",
     "order": 5
+  },
+  "audio.redstonePlacementSound": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Redstone placement sound",
+    "description": "Play the stone placement sound when placing redstone dust. Uses the Blocks sound volume.",
+    "order": 8
   }
 }

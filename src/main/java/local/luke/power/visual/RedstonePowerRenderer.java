@@ -14,11 +14,12 @@ import net.modificationstation.stationapi.api.util.Identifier;
 /** Chunk geometry using the normal wire connections; all textures are loaded with the atlas. */
 public final class RedstonePowerRenderer {
   private static final Atlas.Sprite[] LEVELS = new Atlas.Sprite[16];
-  private static Atlas.Sprite wire;
+  private static Atlas.Sprite wire, line;
 
   @EventListener
   public void textures(TextureRegisterEvent event) {
     wire = Atlases.getTerrain().addTexture(Identifier.of("powerbeta:redstone/redstone_dust_dot"));
+    line = Atlases.getTerrain().addTexture(Identifier.of("powerbeta:redstone/redstone_dust_line0"));
     for (int power = 0; power < LEVELS.length; power++) {
       // The supplied pack replaces 9 with a joke image; rotate its 6 glyph instead.
       int texture = power == 9 ? 6 : power;
@@ -43,17 +44,20 @@ public final class RedstonePowerRenderer {
     Tessellator t = Tessellator.INSTANCE;
     t.color(light * (power == 0 ? .3f : strength * .6f + .4f),
         light * Math.max(0, strength * strength * .7f - .5f), 0);
-    Sprite dot = wire.getSprite();
-    double u = dot.getFrameU(7.5), v = dot.getFrameV(7.5), height = y + .015625;
-    flat(t, x + (west ? 0 : .4375), height, z + .4375,
-        x + (east ? 1 : .5625), z + .5625, u, v, u, v);
-    flat(t, x + .4375, height, z + (north ? 0 : .4375),
-        x + .5625, z + (south ? 1 : .5625), u, v, u, v);
+    Sprite dot = wire.getSprite(), strip = line.getSprite();
+    double height = y + .015625;
+    // Keep the reference's shaded edges: four-pixel lines and six-pixel junctions.
+    if ((west || east) && (north || south))
+      flat(t, x, height, z, x + 1, z + 1, dot.getMinU(), dot.getMinV(), dot.getMaxU(), dot.getMaxV());
+    if (west || east) horizontal(t, strip, x, height, z, west ? 0 : .5, east ? 1 : .5);
+    if (north || south)
+      flat(t, x, height, z + (north ? 0 : .5), x + 1, z + (south ? 1 : .5),
+          strip.getMinU(), strip.getFrameV(north ? 0 : 8), strip.getMaxU(), strip.getFrameV(south ? 16 : 8));
     if (openAbove) {
-      if (climbs(world, x - 1, y, z)) side(t, x + .015625, y, z + .4375, x + .015625, z + .5625, u, v);
-      if (climbs(world, x + 1, y, z)) side(t, x + .984375, y, z + .5625, x + .984375, z + .4375, u, v);
-      if (climbs(world, x, y, z - 1)) side(t, x + .5625, y, z + .015625, x + .4375, z + .015625, u, v);
-      if (climbs(world, x, y, z + 1)) side(t, x + .4375, y, z + .984375, x + .5625, z + .984375, u, v);
+      if (climbs(world, x - 1, y, z)) side(t, strip, x + .015625, y, z, x + .015625, z + 1);
+      if (climbs(world, x + 1, y, z)) side(t, strip, x + .984375, y, z + 1, x + .984375, z);
+      if (climbs(world, x, y, z - 1)) side(t, strip, x + 1, y, z + .015625, x, z + .015625);
+      if (climbs(world, x, y, z + 1)) side(t, strip, x, y, z + .984375, x + 1, z + .984375);
     }
     Sprite number = LEVELS[power].getSprite();
     t.color(light, light, light);
@@ -80,8 +84,17 @@ public final class RedstonePowerRenderer {
     t.vertex(x0, y, z0, u0, v0); t.vertex(x0, y, z1, u0, v1);
   }
 
-  private static void side(Tessellator t, double x0, double y, double z0, double x1, double z1, double u, double v) {
-    t.vertex(x0, y + 1.015625, z0, u, v); t.vertex(x1, y + 1.015625, z1, u, v);
-    t.vertex(x1, y, z1, u, v); t.vertex(x0, y, z0, u, v);
+  private static void horizontal(Tessellator t, Sprite s, double x, double y, double z, double from, double to) {
+    t.vertex(x + to, y, z + 1, s.getMaxU(), s.getFrameV(to * 16));
+    t.vertex(x + to, y, z, s.getMinU(), s.getFrameV(to * 16));
+    t.vertex(x + from, y, z, s.getMinU(), s.getFrameV(from * 16));
+    t.vertex(x + from, y, z + 1, s.getMaxU(), s.getFrameV(from * 16));
+  }
+
+  private static void side(Tessellator t, Sprite s, double x0, double y, double z0, double x1, double z1) {
+    t.vertex(x0, y + 1.015625, z0, s.getMinU(), s.getMinV());
+    t.vertex(x1, y + 1.015625, z1, s.getMaxU(), s.getMinV());
+    t.vertex(x1, y, z1, s.getMaxU(), s.getMaxV());
+    t.vertex(x0, y, z0, s.getMinU(), s.getMaxV());
   }
 }

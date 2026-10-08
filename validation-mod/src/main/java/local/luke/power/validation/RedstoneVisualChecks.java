@@ -49,7 +49,9 @@ final class RedstoneVisualChecks {
           checkSprites();
           setting.parse(Boolean.toString(enabled)); session.preview();
           var screen = sheet(mc); screen.init(mc, 640, 420);
-          SettingsSnapshot.render(mc, screen, 640, 420, dir.resolve(selected.field_1137 + "-" + enabled + ".png"));
+          Path file = dir.resolve(selected.field_1137 + "-" + enabled + ".png");
+          SettingsSnapshot.render(mc, screen, 640, 420, file);
+          if (enabled) checkEdges(file);
         });
       }
       test("Apply saves redstone choice and opening a new session retains it", () -> {
@@ -63,6 +65,22 @@ final class RedstoneVisualChecks {
       mc.setScreen(null);
     }
     log("REDSTONE VISUAL FAILURES " + failures);
+  }
+  private static void checkEdges(Path file) throws Exception {
+    var image = javax.imageio.ImageIO.read(file.toFile());
+    // The reference line is two white pixels bordered by one #d0d0d0 pixel on each side.
+    for (boolean horizontal : new boolean[] {false, true}) {
+      int[] colors = new int[6];
+      for (int pixel = 0; pixel < colors.length; pixel++) {
+        double cross = (5.5 + pixel) / 16;
+        double x = horizontal ? 1.25 : cross, z = horizontal ? 1 + cross : 1.25;
+        colors[pixel] = image.getRGB((int)(256 + x * 192), (int)(36 + z * 192)) & 0xffffff;
+      }
+      check(colors[1] == colors[4] && colors[2] == colors[3], "asymmetric wire edges");
+      int edge = colors[1] >> 16, core = colors[2] >> 16;
+      check(Math.abs(edge - core * 208.0 / 255) < 2, "missing reference edge shading: " + Arrays.toString(colors));
+      check(colors[0] != colors[1] && colors[5] != colors[4] && core > edge, "wire width differs from four pixels");
+    }
   }
   private static void checkSprites() throws Exception {
     var f = RedstonePowerRenderer.class.getDeclaredField("LEVELS"); f.setAccessible(true);

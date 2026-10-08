@@ -291,7 +291,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
     fill(left + 1, top, x + 1, bottom, 0xFF000000);
     fill(left, top + 1, x + 4, bottom - 1, 0xFF000000);
     fill(left + 1, top + 1, x + 4, bottom - 1, 0xFFC6C6C6);
-    fill(left + 2, top + 1, x + 4, top + 3, 0xFFFFFFFF);
+    fill(left + 2, top + 1, x + 3, top + 3, 0xFFFFFFFF);
     fill(left + 1, top + 2, left + 3, bottom - 3, 0xFFFFFFFF);
     fill(left + 2, bottom - 3, x + 4, bottom - 1, 0xFF555555);
     local.luke.power.creative.ui.Texture.draw(

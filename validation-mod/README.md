@@ -34,10 +34,15 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 - `creative-borders`: compare catalogue row pixels and the destroy-slot junction
   at narrow and wide GUI sizes; screenshots go under `reports/creative-borders`.
 - `redstone-visuals`: default, preview, Cancel/Apply, world-scope labels and all
-  sixteen power sprites with default and Faithful textures. Inspect the screenshots
+  sixteen power sprites with default and Faithful textures, including four-pixel
+  wire widths and shaded edges. Inspect the screenshots
   under `reports/redstone`. Run these four fixtures after `new-world`.
   For restart coverage, use `set visual.redstonePowerLevels true`, restart, inspect
   `dump`, then reset it to false.
+- `redstone-sounds`: optional stone placement sound, survival/creative placement,
+  failed placements, volume category and Cancel/Apply. Run after `new-world`.
+  For restart coverage, set `audio.redstonePlacementSound` to true, restart and
+  inspect `dump`, then restore false.
 - `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
 - `settings-snapshot NAME`: capture all sixteen tabs, their complete row order,
   catalogue and PNGs under `power-beta-data/reports/settings-review/NAME`. Use a

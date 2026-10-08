@@ -321,7 +321,8 @@
       "menuMusic": "MIX",
       "dimensionMusic": "CONTINUE",
       "gapMinSeconds": 600,
-      "gapMaxSeconds": 1200
+      "gapMaxSeconds": 1200,
+      "redstonePlacementSound": false
     },
     "visual": {
       "softRain": false,

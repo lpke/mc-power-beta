@@ -3,6 +3,7 @@ package local.luke.power.audio;
 import java.util.*;
 
 public final class AudioSettings {
+  public boolean redstonePlacementSound = false;
   public enum MusicMode {
     VANILLA,
     ALPHA_BETA_SURVIVAL,

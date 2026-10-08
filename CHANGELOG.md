@@ -1,5 +1,11 @@
 # Changelog
 
+## Redstone feedback and border refinement
+
+- Restore the reference redstone wire's shaded edges and junction texture.
+- Add Redstone placement sound under Audio > Extra sounds, off by default.
+- Trim the creative destroy-slot highlight to meet the vertical inventory edge.
+
 ## Creative interactions and visual clarity
 
 - Creative attacks remove boats and all minecart types immediately without drops.

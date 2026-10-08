@@ -10,7 +10,8 @@
     "SignPacketCaptureMixin",
     "ChatCaptureMixin",
     "ChatInput",
-    "PlayerSleepAccess"
+    "PlayerSleepAccess",
+    "PlacementSoundCaptureMixin"
   ],
   "injectors": {
     "defaultRequire": 1

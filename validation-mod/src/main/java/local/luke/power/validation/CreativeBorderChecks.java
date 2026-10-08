@@ -32,6 +32,10 @@ final class CreativeBorderChecks {
                 == image.getRGB((x + col) * 2, (y + 119 + row) * 2), "final row differs at " + col + "/" + row);
         for (int col = 1; col < 4; col++)
           check((image.getRGB((x + col) * 2, (y + 137) * 2) & 0xffffff) != 0, "black seam at " + col);
+        for (int row = 138; row < 140; row++) {
+          check((image.getRGB((x + 2) * 2, (y + row) * 2) & 0xffffff) == 0xffffff, "white edge disconnected");
+          check((image.getRGB((x + 3) * 2, (y + row) * 2) & 0xffffff) == 0xc6c6c6, "white edge extends too far");
+        }
       });
     } finally {
       System.arraycopy(inventory, 0, mc.player.inventory.main, 0, inventory.length);

@@ -12,6 +12,9 @@ public final class AudioBackend implements Backend {
 
   public AudioBackend(Minecraft mc) {
     AudioSettings s = AudioConfig.copy();
+    add("redstonePlacementSound", "Extra sounds", "Redstone placement sound", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.redstonePlacementSound), new JsonPrimitive(false),
+        "Play the stone placement sound when placing redstone dust. Uses the Blocks sound volume.", List.of());
     add(
         "master",
         "Volume",
@@ -248,6 +251,7 @@ public final class AudioBackend implements Backend {
         else s.sounds.put(sound, v.getAsInt());
       } else
         switch (key) {
+          case "redstonePlacementSound" -> s.redstonePlacementSound = v.getAsBoolean();
           case "exclusions" -> { }
           case "presetTrackPool" -> { }
           case "preset" -> s.preset = v.getAsString();

@@ -63,6 +63,10 @@
     {
       "type": "single",
       "resource": "powerbeta:redstone/redstone_dust_dot"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/redstone_dust_line0"
     }
   ]
 }
