@@ -144,6 +144,7 @@ public final class Validation {
         mc.method_2120("Power Beta release check", "Power Beta release check", 17320261003L);
         mc.setScreen(null);
       } else if (command.equals("quit")) {
+        mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen());
         mc.setWorld(null);
         mc.scheduleStop();
       } else if (command.startsWith("music-")) music(mc, command.substring(6));
