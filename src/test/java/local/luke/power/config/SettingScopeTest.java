@@ -19,7 +19,18 @@ class SettingScopeTest {
       assertFalse(SettingScope.perWorld(setting(id, "test")), id);
   }
   @Test void rangeScopeAndNoticesAreSeparateParagraphs() {
-    assertEquals("Adjust the value.\n\nRange: 0 to 4.\n\nGlobal setting. Shared across worlds in this instance.\n\nUnavailable here.\n\nRestart required.",
+    assertEquals("Adjust the value.\n\nRange: 0 to 4.\n\nUnavailable here.\n\nRestart required.",
         Tooltips.setting(setting("test", "test"), "Unavailable here."));
+  }
+
+  @Test void onlyWorldSettingsNeedScopeLabelsAndNotes() {
+    var global = setting("audio.preset", "audio");
+    assertEquals("", SettingScope.note(global));
+    assertEquals("audio.preset", global.label);
+    var world = setting("world.difficulty", "world");
+    assertTrue(world.label.endsWith(" (this world)"));
+    assertTrue(Tooltips.setting(world, "").contains("Saved separately for each singleplayer world."));
+    assertEquals("/give", SettingScope.label("commands.world.give", "commandAccess", "Cheat commands in this world", "/give"));
+    assertEquals("This world", SettingScope.label("worldedit.worldOverride", "world", "Access", "This world"));
   }
 }

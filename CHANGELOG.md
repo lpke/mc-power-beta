@@ -1,5 +1,14 @@
 # Changelog
 
+## Creative interactions and visual clarity
+
+- Creative attacks remove boats and all minecart types immediately without drops.
+- Repair the creative inventory border beside the destroy slot and the final catalogue row shadow.
+- Mark world-specific settings in their names and tooltips; remove repetitive global scope notes.
+- Add an optional Redstone power levels texture override, off by default.
+- Complete arrow-selected command suggestions immediately on Tab, including WorldEdit.
+- Simplify the introduction, feature list and installation guide.
+
 ## Sign editor, mining, toggle messages and WorldEdit
 
 - Escape saves the current sign text and closes the editor, like Done.

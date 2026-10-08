@@ -42,6 +42,8 @@ public final class VisualBackend implements Backend {
     VisualSettings before = VisualConfig.copy();
     VisualConfig.preview(draft(values));
     VisualSettings after = VisualConfig.current();
+    if (before.redstonePowerLevels != after.redstonePowerLevels && mc.world != null)
+      mc.worldRenderer.method_1537();
     if (before.softRain != after.softRain || before.softSnow != after.softSnow
         || before.oldCobble != after.oldCobble || before.oldBricks != after.oldBricks) {
       TextureOverrides.clear();

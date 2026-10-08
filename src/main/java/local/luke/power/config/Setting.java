@@ -51,8 +51,9 @@ public final class Setting {
     this.control = Catalog.text(metadata, "control", "slider");
     this.page = Catalog.text(metadata, "page", page);
     this.group = Catalog.text(metadata, "group", group);
-    this.label = Catalog.text(metadata, "label", label);
-    this.description = Tooltips.description(id, this.label, Catalog.text(metadata, "description", description));
+    String title = Catalog.text(metadata, "label", label);
+    this.label = SettingScope.label(id, backend, this.group, title);
+    this.description = Tooltips.description(id, title, Catalog.text(metadata, "description", description));
     this.kind = kind;
     this.value = value.deepCopy();
     this.original = value.deepCopy();

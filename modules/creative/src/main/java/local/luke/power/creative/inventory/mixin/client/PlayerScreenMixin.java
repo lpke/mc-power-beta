@@ -166,9 +166,9 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
 
       this.blit(posX + 173, posY + 138, 176, 32, 25, 24);
       // Grow the catalogue upward; hotbar, side tabs and destroy slot keep their coordinates.
-      this.blit(posX, posY - CreativeGrid.EXTRA_HEIGHT, 0, 0, this.containerWidth, 140);
-      this.blit(posX, posY + 140 - CreativeGrid.EXTRA_HEIGHT, 0, 122, this.containerWidth, 18);
-      for (int y = 158 - CreativeGrid.EXTRA_HEIGHT; y < 140; y++)
+      this.blit(posX, posY - CreativeGrid.EXTRA_HEIGHT, 0, 0, this.containerWidth, 139);
+      this.blit(posX, posY + 139 - CreativeGrid.EXTRA_HEIGHT, 0, 121, this.containerWidth, 18);
+      for (int y = 157 - CreativeGrid.EXTRA_HEIGHT; y < 140; y++)
         this.blit(posX, posY + y, 0, 140, this.containerWidth, 1);
       this.blit(posX, posY + 140, 0, 140, this.containerWidth, this.containerHeight - 140);
       // Extend the scrollbar well without repeating its bottom border between rows.
@@ -288,7 +288,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
     if (!local.luke.power.creative.config.Config.current().destroySlot) return;
     int left = x - 22, top = y + 137, bottom = y + containerHeight;
     // The extension shares the inventory's bottom border, including its two shadow pixels.
-    fill(left + 1, top, x + 4, bottom, 0xFF000000);
+    fill(left + 1, top, x + 1, bottom, 0xFF000000);
     fill(left, top + 1, x + 4, bottom - 1, 0xFF000000);
     fill(left + 1, top + 1, x + 4, bottom - 1, 0xFFC6C6C6);
     fill(left + 2, top + 1, x + 4, top + 3, 0xFFFFFFFF);

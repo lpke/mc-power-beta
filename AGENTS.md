@@ -56,7 +56,8 @@
   are Normal; menu edits take effect only on Apply. Keep multiplayer server-owned.
 - Hide cheat-only rows and empty tabs when cheats are unavailable. Shared freecam
   controls and non-cheat commands remain independent. Hidden bindings must not
-  claim input priority or mouse events. Tooltips identify persistence scope.
+  claim input priority or mouse events. Only world-specific settings need scope
+  notes in tooltips and setting or group names; global settings have no scope boilerplate.
 - World cycles are per-world cheats. Keep the simulation clock running; daylight
   uses an offset saved in world metadata. Sky rendering, day counters, time commands
   and photo mode use the daylight clock. Sleep must wake players without advancing

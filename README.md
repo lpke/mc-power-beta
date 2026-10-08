@@ -1,82 +1,59 @@
 # Power Beta
 
-Minecraft Beta 1.7.3 with one searchable Options menu for building tools, creative
-and spectator modes, WorldEdit, inventory controls, camera tweaks, textures and
-music. Most gameplay changes start off. Fixes, performance improvements and small
-quality-of-life features start on.
+Minecraft Beta 1.7.3 with one searchable Options menu for fixes, better controls,
+building tools and creative play. Keep Beta's gameplay or tune it to suit you.
+Built for singleplayer.
 
-Built for singleplayer. Each world has a **Cheats enabled** switch under
-**General > Game**, with further controls for commands and game modes.
+## What's included
+
+- Vanilla Beta mechanics by default, with optional bug fixes and modern conveniences.
+- Performance improvements and detailed control over graphics and game mechanics.
+- Flexible key bindings, modifier shortcuts and movement while inventories are open.
+- Separate sound controls, custom music, playlists and saved presets.
+- Optional faster boats, minecarts and obsidian mining.
+- Editable signs and useful gold tools, including silk touch.
+- Creative and spectator modes with a modern mode switcher.
+- Backported WorldEdit and singleplayer commands with modern Minecraft syntax.
+- Customizable crafting recipes and container carrying.
+- Building aids including fast placement, light levels, container previews,
+  edge protection and auto-walk.
+- Free camera, free look and isometric screenshots.
+- Texture options for old cobblestone, old bricks and redstone power numbers.
+
+Most gameplay changes start off. Fixes, performance improvements and small
+conveniences start on. Each world has its own Cheats switch for creative modes,
+commands and world editing. Other settings are shared unless marked "this world".
 
 ## Install
 
-1. Import `Power-Beta-1.0.0-Prism.zip` through Prism Launcher's **Add Instance >
-   Import**.
-2. Select **Java 21** for the instance, then launch.
-3. Open **Options** to customize it. Hover settings for explanations.
+1. Install [Prism Launcher](https://prismlauncher.org/) and add your Minecraft account.
+2. Get the ready-to-import `Power-Beta-1.0.0-Prism.zip`. If you have the source code
+   instead, build that ZIP using the steps below.
+3. In Prism, choose **Add Instance > Import**, then select the ZIP.
+4. Open the instance's **Edit > Settings > Java**, enable the Java installation
+   override and select **Java 21**. Download Java through Prism if needed.
+5. Launch the instance. Open **Options** to browse or search settings and hover
+   them for help. **Apply** saves changes; **Cancel** discards them.
 
-For an existing installation, use a **Beta 1.7.3 Babric** instance. Copy **all seven
-JARs** from the export's `.minecraft/mods` directory into its `.minecraft/mods`
-directory. Power Beta contains its utility modules, but is **not a standalone
-JAR**. The tested external dependencies are:
+The pack includes all required mods. Import the whole ZIP into a new instance.
+Back up your worlds before replacing an existing installation.
 
-- StationAPI 2.0.0-alpha.6.4
-- Glass Networking 1.0.7
-- RetroAuth 1.3.1+mcb1.7.3
-- SmoothBeta 1.1.8
-- EntityCulling 1.7.0-candidate.1
-- stapi-fast-intro 2.0.0
+## Build the ZIP from source
 
-The export pins the launcher components and these dependencies. Use its versions;
-do not add separate copies of the utility mods integrated into Power Beta, or Mod
-Menu. Back up an existing instance before replacing its mods. Installing or
-updating the JARs does not replace worlds or preferences. Extra mods are untested.
+1. Install Java 21 and Python 3.
+2. Download this repository with **Code > Download ZIP** and extract it, or clone it.
+3. Open a terminal in the extracted folder. Set `JAVA_HOME` to your Java 21
+   installation, then run:
 
-## Settings and music
+   ```sh
+   python3 tools/build_pack.py
+   ```
 
-Difficulty, cheats and cycle rules are saved separately in each world. Choose difficulty
-when creating a world or under **General > Game**. Cheat-only settings and tabs
-are hidden while cheats are off; non-cheat commands stay available.
+4. Import the resulting `dist/Power-Beta-1.0.0-Prism.zip` into Prism as described above.
 
-Other settings and key bindings live in `config/power-beta.json`. Tooltips state
-whether each setting is global or saved for the current world. Options remembers your
-page, search and scroll during the session. Apply saves without closing; Cancel
-undoes unsaved edits, including previews. Right-click Apply to enable auto-apply.
-Right-click a slider to enter a precise value. Bindings support Ctrl, Shift and Alt.
+Development and update instructions are in [AGENTS.md](AGENTS.md). See
+[upstreams](docs/upstreams.md) for dependencies and [recovery](docs/recovery.md)
+for inventory recovery.
 
-**Interface > Active tweaks** shows temporary toggles such as fake sneak and fast
-placement on the HUD. Choose which appear, their position, colour and opacity.
-Each feature also has an optional chat-message switch beside its own settings.
-These switches start off and work independently of the HUD.
-
-WorldEdit block arguments accept `hand` to use the held block and its variant,
-for example `//set hand` or `//replace stone hand`.
-
-Audio includes bundled Minecraft soundtracks, custom folders, playlists, presets,
-per-track volumes and a queue. Presets capture their available tracks when saved:
-adding folders later does not silently expand them. Include new tracks explicitly
-or use **Include all**.
-
-Menu music defaults to **Mix both**. This and **World soundtrack** keep the current
-song playing when entering or leaving a world. **Menu music controls** can show
-playback controls on the pause and title menus, with an optional scrub bar.
-
-OGG, WAV and MUS play directly. Optional **ffmpeg**, available on PATH when the game
-starts, enables **Convert MP3**. Converted WAVs go into
-`power-beta-data/music-cache`; original files stay untouched.
-
-## Source
-
-Build the importable pack with Java 21, Python 3 and `JAVA_HOME` set:
-
-```sh
-python3 tools/build_pack.py
-```
-
-The output is `dist/Power-Beta-1.0.0-Prism.zip`. See [AGENTS.md](AGENTS.md) for
-development and update instructions, [upstreams](docs/upstreams.md) for dependencies
-and references, and [recovery](docs/recovery.md) for inventory journals.
-
-Source code uses [AGPL-3.0-only](LICENSE). Minecraft music, textures and separately
-licensed dependencies retain their own terms. This is not an official Minecraft
-product.
+Source code uses [AGPL-3.0-only](LICENSE). Bundled assets and dependencies retain
+their own licenses. This is not an official Minecraft product.

@@ -27,6 +27,17 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   persistence and restore every message switch to off.
 - `worldedit-hand`: held variants, command snapshots, masks, inventory preservation,
   undo/redo, invalid hands and cheats. Run after `new-world`.
+- `creative-vehicles`: one-hit deletion of boats and every minecart type, loaded
+  inventories, repeat attacks, survival drops and spectator/multiplayer guards.
+- `command-completion`: arrow selection, immediate Tab completion and subsequent
+  typing for WorldEdit and singleplayer commands.
+- `creative-borders`: compare catalogue row pixels and the destroy-slot junction
+  at narrow and wide GUI sizes; screenshots go under `reports/creative-borders`.
+- `redstone-visuals`: default, preview, Cancel/Apply, world-scope labels and all
+  sixteen power sprites with default and Faithful textures. Inspect the screenshots
+  under `reports/redstone`. Run these four fixtures after `new-world`.
+  For restart coverage, use `set visual.redstonePowerLevels true`, restart, inspect
+  `dump`, then reset it to false.
 - `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
 - `settings-snapshot NAME`: capture all sixteen tabs, their complete row order,
   catalogue and PNGs under `power-beta-data/reports/settings-review/NAME`. Use a

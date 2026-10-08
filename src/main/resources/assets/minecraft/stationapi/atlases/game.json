@@ -1,0 +1,68 @@
+{
+  "sources": [
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel00"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel01"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel02"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel03"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel04"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel05"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel06"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel07"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel08"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel10"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel11"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel12"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel13"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel14"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/powerlevel15"
+    },
+    {
+      "type": "single",
+      "resource": "powerbeta:redstone/redstone_dust_dot"
+    }
+  ]
+}

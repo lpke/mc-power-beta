@@ -35,7 +35,8 @@
       "local.luke.power.Bootstrap"
     ],
     "stationapi:event_bus": [
-      "local.luke.power.input.GameplayKeys"
+      "local.luke.power.input.GameplayKeys",
+      "local.luke.power.visual.RedstonePowerRenderer"
     ]
   },
   "languageAdapters": {

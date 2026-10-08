@@ -31,7 +31,7 @@ public abstract class ChatScreenMixin extends Screen {
     @Shadow protected String text;
     @Shadow private int focusedTicks;
 
-    @Unique private boolean autocomplete = false;
+    @Unique private String suggestionInput = "";
     @Unique private String[] suggestions = new String[0];
     @Unique private int chosen = 0;
     @Unique private int textWidthPixels = 0;
@@ -63,31 +63,33 @@ public abstract class ChatScreenMixin extends Screen {
         return result;
     }
 
-    @Unique
-    void appendText(String s) {
-        setText(text + s);
-    }
-
-    @Inject(method = "init", at = @At("HEAD"))
-    void init(CallbackInfo ci) {
-
-    }
-
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     private void keyPressedInit(char i, int par2, CallbackInfo ci) {
-        if (par2 == 15 && suggestions.length > 0) {
-            autocomplete = true;
+        if (!getText().equals(suggestionInput)) refreshSuggestions();
+        if (par2 == Keyboard.KEY_TAB && suggestions.length > 0) {
+            ensureChosenIsInRange();
+            setText(getText() + suggestions[chosen]);
+            resetValues();
+            suggestionInput = getText();
+            ci.cancel();
+            return;
         }
-
-        if (suggestions.length > 1) {
-            if (adjustChosenSuggestion(par2))
-                ci.cancel();
+        if (suggestions.length > 1 && (par2 == Keyboard.KEY_UP || par2 == Keyboard.KEY_DOWN)) {
+            adjustChosenSuggestion(par2);
+            ci.cancel();
         }
     }
 
     @Inject(method = "keyPressed", at = @At("TAIL"))
     private void processInput(char i, int par2, CallbackInfo ci) {
+        // Run after the chat widget updates its text, so the visible list is current.
+        refreshSuggestions();
+    }
+
+    @Unique
+    private void refreshSuggestions() {
         resetValues();
+        suggestionInput = getText();
 
         if (getText().isEmpty()) {
             return;
@@ -113,6 +115,9 @@ public abstract class ChatScreenMixin extends Screen {
     private void resetValues() {
         currentWord = "";
         suggestions = new String[0];
+        chosen = 0;
+        textWidthPixelsBeforeCurrentWord = 0;
+        textWidthPixels = this.textRenderer.getWidth("> " + getText());
     }
 
     @Unique
@@ -322,11 +327,6 @@ public abstract class ChatScreenMixin extends Screen {
     @Unique
     private void renderChosenSuggestion() {
         this.drawTextWithShadow(this.textRenderer, suggestions[chosen], 4 + textWidthPixels, this.height - 12, 0xAAAAAA);
-        if (autocomplete) {
-            appendText(suggestions[chosen]);
-            autocomplete = false;
-            suggestions = new String[0];
-        }
     }
 
     @Unique

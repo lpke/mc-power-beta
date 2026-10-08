@@ -4327,5 +4327,12 @@
     "label": "Player movement messages",
     "description": "Show a chat message when freecam player movement turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
     "order": 8
+  },
+  "visual.redstonePowerLevels": {
+    "page": "Video",
+    "group": "Textures",
+    "label": "Redstone power levels",
+    "description": "Use clean redstone wire with a number showing its current power from 0 to 15. Changes appearance only.",
+    "order": 5
   }
 }

@@ -48,7 +48,7 @@ public final class CommandsBackend implements Backend {
               "Commands",
               command.cheat() ? "Cheat commands" : "Non-cheat commands",
               "/" + (command.name().equals("toggledownfall") ? "weather" : command.name()),
-              command.description() + " Global access rule; this world's override takes priority.",
+              command.description() + " A world-specific override takes priority.",
               Setting.Kind.CHOICE,
               new JsonPrimitive(config.rule(command).ordinal()),
               new JsonPrimitive(command.defaultRule().ordinal()),

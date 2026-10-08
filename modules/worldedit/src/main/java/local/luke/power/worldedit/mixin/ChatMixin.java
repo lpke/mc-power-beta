@@ -17,18 +17,14 @@ public abstract class ChatMixin extends Screen {
 
   @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
   private void worldedit$input(char c, int key, CallbackInfo ci) {
+    // The shared command UI owns selection and completion when installed.
+    if (FabricLoader.getInstance().isModLoaded("power_commands")) return;
     String input = ChatAccess.text(text);
-    // Leave ambiguous single-slash Tab suggestions to ClientCommands, but avoid its
-    // selection handler swallowing the keystrokes needed to finish our aliases.
     boolean prefix =
         input.startsWith("/")
             && !input.contains(" ")
             && CommandCatalog.SINGLE.stream().anyMatch(n -> n.startsWith(input.substring(1)));
-    if (CommandCatalog.owns(input)
-        || prefix
-            && (key != Keyboard.KEY_TAB
-                || !FabricLoader.getInstance().isModLoaded("power_commands"))) {
-      ChatAccess.clearSuggestions((ChatScreen) (Object) this);
+    if (CommandCatalog.owns(input) || prefix) {
       if (key == Keyboard.KEY_TAB) {
         text =
             worldedit$completion.next(

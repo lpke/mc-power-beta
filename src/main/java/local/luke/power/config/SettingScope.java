@@ -5,13 +5,22 @@ public final class SettingScope {
   private SettingScope() {}
 
   public static boolean perWorld(Setting setting) {
-    return setting.backend.equals("world") || setting.id.startsWith("commands.world.")
-        || setting.id.startsWith("commands.worldMode.");
+    return perWorld(setting.id, setting.backend);
+  }
+
+  private static boolean perWorld(String id, String backend) {
+    return backend.equals("world") || id.startsWith("commands.world.")
+        || id.startsWith("commands.worldMode.");
+  }
+
+  public static String label(String id, String backend, String group, String label) {
+    if (!perWorld(id, backend) || group.toLowerCase(java.util.Locale.ROOT).contains("this world")
+        || label.toLowerCase(java.util.Locale.ROOT).contains("this world")) return label;
+    return label + " (this world)";
   }
 
   public static String note(Setting setting) {
     if (perWorld(setting)) return "Saved separately for each singleplayer world.";
-    if (setting.kind == Setting.Kind.KEY) return "Global binding. Shared across worlds.";
-    return "Global setting. Shared across worlds in this instance.";
+    return "";
   }
 }

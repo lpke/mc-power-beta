@@ -40,7 +40,8 @@
     "WorldCyclesPropertiesMixin",
     "WorldCyclesMixin",
     "WorldDifficultyPropertiesMixin",
-    "ClientDifficultyMixin"
+    "ClientDifficultyMixin",
+    "RedstonePowerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

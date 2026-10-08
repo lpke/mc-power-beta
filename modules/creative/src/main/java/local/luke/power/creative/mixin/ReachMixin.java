@@ -49,4 +49,9 @@ public abstract class ReachMixin {
   private void power$entity(PlayerEntity p, Entity target, CallbackInfo ci) {
     if (Modes.spectator(p)) ci.cancel();
   }
+
+  @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
+  private void power$destroyVehicle(PlayerEntity player, Entity target, CallbackInfo ci) {
+    if (CreativeVehicles.destroy(player, target)) ci.cancel();
+  }
 }

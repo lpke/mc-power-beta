@@ -328,7 +328,8 @@
       "softSnow": false,
       "oldCobble": false,
       "oldBricks": false,
-      "thirdPersonDistance": 4
+      "thirdPersonDistance": 4,
+      "redstonePowerLevels": false
     },
     "power_environment:config": {
       "MISSING_ACHIEVEMENTS_CONFIG": {

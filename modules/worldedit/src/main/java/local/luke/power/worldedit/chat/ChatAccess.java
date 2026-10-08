@@ -8,8 +8,6 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 /** Shared chat widget access across module mapping versions. */
 public final class ChatAccess {
   private static Field widget;
-  private static Field suggestions;
-  private static boolean searched;
 
   static {
     try {
@@ -44,24 +42,4 @@ public final class ChatAccess {
     if (w != null) w.setText(value);
   }
 
-  public static void clearSuggestions(ChatScreen screen) {
-    // ClientCommands 0.5.10 consumes ordinary keys when several suggestions exist.
-    // Only clear its stale selection state for our commands; Tab is handled below.
-    if (!searched) {
-      searched = true;
-      for (Field f : ChatScreen.class.getDeclaredFields())
-        if (f.getType() == String[].class
-            && (f.getName().equals("suggestions") || f.getName().endsWith("$suggestions"))) {
-          suggestions = f;
-          suggestions.setAccessible(true);
-          break;
-        }
-    }
-    try {
-      if (suggestions != null) suggestions.set(screen, new String[0]);
-    } catch (IllegalAccessException e) {
-      suggestions = null;
-      WorldEditor.LOG.warn("Could not reset ClientCommands suggestions", e);
-    }
-  }
 }

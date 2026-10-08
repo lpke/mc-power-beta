@@ -1,7 +1,7 @@
 package local.luke.power.visual;
 
 public final class VisualSettings {
-  public boolean softRain, softSnow, oldCobble, oldBricks;
+  public boolean softRain, softSnow, oldCobble, oldBricks, redstonePowerLevels;
   public boolean slashChat, containerCarry, containerPreview;
   public boolean swapEquipment = true;
   public double thirdPersonDistance = 4;
