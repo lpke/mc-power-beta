@@ -6,6 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def export_markdown(source,target):
  text=(ROOT/source).read_text()
  base='https://github.com/lpke/mc-power-beta/blob/main/'
+ text=text.replace('(docs/screenshots/','(screenshots/')
  text=text.replace('(docs/','('+base+'docs/').replace('(AGENTS.md)','('+base+'AGENTS.md)')
  text=text.replace('(music-assets.md)','('+base+'docs/music-assets.md)').replace('(LICENSE)','(LICENSE.txt)')
  target.write_text(text)
@@ -23,6 +24,7 @@ def main():
  out=ROOT/'dist';out.mkdir(exist_ok=True);stage=out/'Power Beta'
  if stage.exists():shutil.rmtree(stage)
  shutil.copytree(ROOT/'pack',stage)
+ shutil.copytree(ROOT/'docs/screenshots',stage/'screenshots')
  mods=stage/'.minecraft/mods';mods.mkdir(parents=True)
  manifest=json.loads((ROOT/'vendor/manifest.json').read_text());installed=[]
  platform={'smoothbeta','stationapi','entityculling','glassnetworking','retroauth','stapi-fast-intro'}

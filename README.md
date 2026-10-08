@@ -4,6 +4,10 @@ Minecraft Beta 1.7.3 with one searchable Options menu for fixes, better controls
 building tools and creative play. Keep Beta's gameplay or tune it to suit you.
 Built for singleplayer.
 
+| Creative inventory | Music library |
+| --- | --- |
+| [![Creative inventory over a snowy Beta landscape](docs/screenshots/creative-inventory.png)](docs/screenshots/creative-inventory.png) | [![Music library with track previews and volume controls](docs/screenshots/music-library.png)](docs/screenshots/music-library.png) |
+
 ## What's included
 
 - Vanilla Beta mechanics by default, with optional bug fixes and modern conveniences.
