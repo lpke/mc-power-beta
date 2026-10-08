@@ -37,7 +37,8 @@ and creates a draft GitHub release tagged `vX.Y.Z` at the reviewed commit. It
 uploads the ZIP and SHA-256 file, verifies the public download, publishes the
 release notes, then commits and deploys the website's generated release details.
 The website's version, download, checksum and changelog all come from that release.
-The public download works while the GitHub repositories are private.
+Public repositories use GitHub's release downloads directly. Private repositories
+use a verified public Blob mirror so downloads remain available to visitors.
 
 Use `--skip-build` only after `python3 tools/build_pack.py` succeeds on the exact
 clean commit being released. The command verifies a build receipt and archive
@@ -49,8 +50,8 @@ Never overwrite published ZIPs or move existing release tags. Fixes get a new ve
 The two repositories are configured in `tools/publish_config.json`. Public release
 metadata is copied to the website's `public/release.json`; `tools/sync_release.py`
 in that repository renders the page and fallback metadata. No service token is
-needed to serve the website. The publish command uses a temporary, private file
-for Blob credentials and removes it when finished.
+needed to serve the website. When a private repository needs Blob, the publisher
+uses a temporary, private file for its credentials and removes it when finished.
 
 ## Verify and install
 

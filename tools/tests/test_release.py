@@ -131,6 +131,31 @@ class ArchiveTest(unittest.TestCase):
 
 
 class GitHubFeedTest(unittest.TestCase):
+    def test_public_releases_use_verified_github_assets_without_blob(self):
+        import release
+        events = []
+        def run(*args, **kwargs):
+            events.append(args)
+            return 'false' if args[1] == 'api' else None
+        def verify(url, digest):
+            self.assertTrue(any('--draft=false' in call for call in events))
+            self.assertEqual('a' * 64, digest)
+            self.assertEqual('https://github.com/owner/repo/releases/download/v1.1.1/pack.zip', url)
+        with patch.object(release, 'run', side_effect=run), patch.object(release, 'upload_blob') as blob, patch.object(release, 'wait_for_download', side_effect=verify) as download:
+            url, public = release.publish_download('owner/repo', 'v1.1.1', Path('pack.zip'), 'a' * 64, {'draft': True}, {}, None)
+            self.assertTrue(public)
+            blob.assert_not_called()
+            download.assert_called_once_with(url, 'a' * 64)
+
+    def test_private_releases_keep_the_verified_public_mirror(self):
+        import release
+        with patch.object(release, 'run', return_value='true'), patch.object(release, 'upload_blob', return_value='https://example.invalid/pack.zip') as blob, patch.object(release, 'wait_for_download') as download:
+            url, public = release.publish_download('owner/repo', 'v1.1.1', Path('pack.zip'), 'a' * 64, {'draft': True}, {}, None)
+            self.assertFalse(public)
+            self.assertEqual('https://example.invalid/pack.zip?download=1', url)
+            blob.assert_called_once()
+            download.assert_not_called()
+
     def test_uploaded_download_waits_for_visibility_but_rejects_wrong_content(self):
         import release
         with patch.object(release, 'verify_download', side_effect=[False, False, True]) as verify, patch.object(release.time, 'sleep'):

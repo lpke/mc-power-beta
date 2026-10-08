@@ -54,7 +54,7 @@ def website_feed(repository, version, commit, artifact, digest, download, prior,
         entry = {'version': v, 'date': release['published_at'][:10], 'changes': changes,
                  'github': release['html_url'], 'file': file, 'bytes': asset['size'],
                  'sha256': asset['digest'].removeprefix('sha256:'),
-                 'download': download + '?download=1' if v == version else old.get(v, {}).get('download', asset['browser_download_url']),
+                 'download': download if v == version else old.get(v, {}).get('download', asset['browser_download_url']),
                  'checksum': '/download.sha256' if v == version else asset['browser_download_url'] + '.sha256'}
         history.append(entry)
     history.sort(key=lambda r: tuple(map(int, r['version'].split('.'))), reverse=True)
@@ -118,6 +118,19 @@ def upload_blob(artifact, config, site, digest):
     return url
 
 
+def publish_download(repository, tag, artifact, digest, existing, config, site):
+    private = json.loads(run('gh', 'api', f'repos/{repository}', '--jq', '.private', capture=True))
+    if not isinstance(private, bool):
+        raise ValueError('Could not determine repository visibility')
+    download = (upload_blob(artifact, config, site, digest) + '?download=1' if private else
+                f'https://github.com/{repository}/releases/download/{tag}/{artifact.name}')
+    if existing['draft']:
+        run('gh', 'release', 'edit', tag, '--repo', repository, '--draft=false', '--latest')
+    if not private:
+        wait_for_download(download, digest)
+    return download, not private
+
+
 def publish(args):
     config = json.loads((ROOT / 'tools/publish_config.json').read_text())
     site = args.site.resolve()
@@ -177,10 +190,8 @@ def publish(args):
                 run('gh', 'release', 'upload', tag, path, '--repo', repository)
             else:
                 raise ValueError('Published release is missing an asset; publish a new version')
-        download = upload_blob(artifact, config, site, digest)
-        if existing['draft']:
-            run('gh', 'release', 'edit', tag, '--repo', repository, '--draft=false', '--latest')
-        prior = json.loads((site / 'public/release.json').read_text())
+        download, public = publish_download(repository, tag, artifact, digest, existing, config, site)
+        prior = {} if public else json.loads((site / 'public/release.json').read_text())
         feed = None
         for attempt in range(6):
             try:
