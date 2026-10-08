@@ -84,6 +84,15 @@ def verify_download(url, digest):
     return True
 
 
+def wait_for_download(url, digest):
+    for attempt in range(6):
+        if verify_download(url, digest):
+            return
+        if attempt < 5:
+            time.sleep(5)
+    raise ValueError('Uploaded download is not available yet; rerun to resume')
+
+
 def upload_blob(artifact, config, site, digest):
     pathname = f'releases/{pack_version()}/{digest[:12]}/{artifact.name}'
     url = config['blobOrigin'] + '/' + pathname
@@ -105,8 +114,7 @@ def upload_blob(artifact, config, site, digest):
         env_file.write_text(lines[0] + '\n')
         run('vercel', 'blob', 'put', artifact, '--access', 'public', '--multipart', 'true',
             '--pathname', pathname, '--scope', config['vercelScope'], cwd=work)
-    if not verify_download(url, digest):
-        raise ValueError('Uploaded download is not available')
+    wait_for_download(url, digest)
     return url
 
 

@@ -131,6 +131,18 @@ class ArchiveTest(unittest.TestCase):
 
 
 class GitHubFeedTest(unittest.TestCase):
+    def test_uploaded_download_waits_for_visibility_but_rejects_wrong_content(self):
+        import release
+        with patch.object(release, 'verify_download', side_effect=[False, False, True]) as verify, patch.object(release.time, 'sleep'):
+            release.wait_for_download('https://example.invalid/pack.zip', 'a' * 64)
+            self.assertEqual(3, verify.call_count)
+        with patch.object(release, 'verify_download', return_value=False), patch.object(release.time, 'sleep'), self.assertRaises(ValueError):
+            release.wait_for_download('https://example.invalid/pack.zip', 'a' * 64)
+        with patch.object(release, 'verify_download', side_effect=ValueError('checksum differs')) as verify, patch.object(release.time, 'sleep') as sleep, self.assertRaises(ValueError):
+            release.wait_for_download('https://example.invalid/pack.zip', 'a' * 64)
+        self.assertEqual(1, verify.call_count)
+        sleep.assert_not_called()
+
     def test_snapshot_uses_github_notes_and_retains_old_downloads(self):
         from release import website_feed
         old_url = 'https://example.invalid/verified-old.zip'
