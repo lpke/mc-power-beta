@@ -102,6 +102,8 @@
 
 ## Releases
 
+- This project does not accept external contributions. Keep that policy in the
+  README and encourage forks under the AGPL; do not add a contribution guide.
 - `gradle.properties` owns the pack version. Use semantic versions and tags `vX.Y.Z`.
   Module/API versions are independent; preserve them unless that module needs a change.
 - Keep `CHANGELOG.md` newest first, with `## [Unreleased]` followed by dated version

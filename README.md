@@ -62,6 +62,9 @@ Development and update instructions are in [AGENTS.md](AGENTS.md). See
 for inventory recovery. Changes are listed in the [changelog](CHANGELOG.md)
 and [GitHub releases](https://github.com/lpke/mc-power-beta/releases).
 
+Power Beta is maintained by its owner and does not accept contributions.
+You are welcome to fork it and adapt it to your needs under the AGPL license.
+
 ## Inspired by
 
 [BHCreative](https://github.com/paulevsGitch/BHCreative),

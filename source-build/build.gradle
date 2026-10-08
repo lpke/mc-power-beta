@@ -58,6 +58,8 @@ sourceSets.main {
     resources.srcDirs = [new File(sources, 'src/main/resources')]
 }
 processResources {
+    // Copy tasks otherwise retain resources that were removed from the source tree.
+    doFirst { delete destinationDir }
     inputs.property 'version', project.version
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
