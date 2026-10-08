@@ -14,6 +14,8 @@ def export_markdown(source,target):
 def main():
  version=pack_version();release_notes()
  parser=argparse.ArgumentParser();parser.add_argument('--skip-build',action='store_true');args=parser.parse_args()
+ build_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+ build_clean=not subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True).strip()
  for entry in json.loads((ROOT/'vendor/libraries/manifest.json').read_text()):
   source=ROOT/entry['file']
   assert hashlib.sha256(source.read_bytes()).hexdigest()==entry['sha256'],f'Library changed: {source.name}'
@@ -55,8 +57,9 @@ def main():
  verify_archive(archive,version)
  digest=hashlib.sha256(archive.read_bytes()).hexdigest();(out/(archive.name+'.sha256')).write_text(digest+'  '+archive.name+'\n');print(archive,digest)
  if not args.skip_build:
-  receipt={'commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
-           'clean':not subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True).strip(),
+  receipt={'commit':build_commit,
+           'clean':build_clean and build_commit==subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
+                   and not subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True).strip(),
            'version':version,'sha256':digest}
   (out/'build-receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
 if __name__=='__main__':main()
