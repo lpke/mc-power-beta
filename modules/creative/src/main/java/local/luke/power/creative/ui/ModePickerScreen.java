@@ -102,7 +102,8 @@ public final class ModePickerScreen extends Screen {
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       Texture.draw(minecraft, "picker", width / 2 - 62, top - 27, 125, 59, 0, 0, 125, 75, 128, 128);
-      drawTextWithShadowCentred(textManager, selected.label, width / 2, top - 20, 0xFFFFFF);
+      // Centre the eight-pixel text and shadow within the vertically scaled header.
+      drawTextWithShadowCentred(textManager, selected.label, width / 2, top - 22, 0xFFFFFF);
       for (int i = 0; i < 3; i++) {
         int sx = left + i * 31;
         Texture.draw(minecraft, "mode_slot", sx, top, 26, 26, 0, 0, 26, 26, 26, 26);
