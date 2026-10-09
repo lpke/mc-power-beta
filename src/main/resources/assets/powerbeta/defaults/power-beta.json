@@ -209,7 +209,9 @@
       "boatSpeed": false,
       "boatProtection": false,
       "autoWalkAnnounceToggle": false,
-      "freeLookAnnounceToggle": false
+      "freeLookAnnounceToggle": false,
+      "autoMine": true,
+      "autoMineAnnounceToggle": false
     },
     "power_mechanics:config": {
       "EQUIPMENT_CONFIG": {
@@ -330,7 +332,12 @@
       "oldCobble": false,
       "oldBricks": false,
       "thirdPersonDistance": 4,
-      "redstonePowerLevels": false
+      "inventoryInPortals": false,
+      "lowFire": false,
+      "shiftClickIntoCraftingGrid": false,
+      "redstonePowerLevels": false,
+      "damageCameraShake": true,
+      "fireDamageCameraShake": true
     },
     "power_environment:config": {
       "MISSING_ACHIEVEMENTS_CONFIG": {
@@ -716,7 +723,8 @@
       "key_power_building.hotbar.row1": "0",
       "key_power_building.hotbar.row2": "0",
       "key_power_building.hotbar.row3": "0",
-      "framerate_limit": 125
+      "framerate_limit": 125,
+      "key_Auto-mine (toggle)": "0"
     },
     "video": {
       "leaves": true,
@@ -733,7 +741,8 @@
       ]
     },
     "activeTweaks": {
-      "cinematicCameraMessages": false
+      "cinematicCameraMessages": false,
+      "autoMine": true
     },
     "interface": {
       "blinkingChatCursor": false,

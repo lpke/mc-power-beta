@@ -16,10 +16,10 @@ public abstract class GameOptionsMixin {
 
   @Inject(method = "load", at = @At("HEAD"))
   private void registerKey(CallbackInfo ci) {
-    for (KeyBinding key : allKeys) {
-      if (key == AutoWalk.KEY) return;
+    for (KeyBinding added : new KeyBinding[] { AutoWalk.KEY, local.luke.power.building.mining.AutoMine.KEY }) {
+      if (Arrays.asList(allKeys).contains(added)) continue;
+      allKeys = Arrays.copyOf(allKeys, allKeys.length + 1);
+      allKeys[allKeys.length - 1] = added;
     }
-    allKeys = Arrays.copyOf(allKeys, allKeys.length + 1);
-    allKeys[allKeys.length - 1] = AutoWalk.KEY;
   }
 }

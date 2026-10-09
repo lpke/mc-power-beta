@@ -23,6 +23,17 @@ class ConfigDefaultsTest {
     assertEquals(3, root.get("schemaVersion").getAsInt());
     assertEquals(2, root.size());
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("creative").get("flight").getAsBoolean());
+    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("inventoryInPortals").getAsBoolean());
+    assertFalse(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).inventoryInPortals);
+    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("shiftClickIntoCraftingGrid").getAsBoolean());
+    assertFalse(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).shiftClickIntoCraftingGrid);
+    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("lowFire").getAsBoolean());
+    for (String key : List.of("damageCameraShake", "fireDamageCameraShake"))
+      assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get(key).getAsBoolean());
+    var oldVisual = Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class);
+    assertFalse(oldVisual.lowFire);
+    assertTrue(oldVisual.damageCameraShake);
+    assertTrue(oldVisual.fireDamageCameraShake);
     assertEquals("flight=false\n", Files.readString(obsolete));
 
     root.getAsJsonObject("settings").getAsJsonObject("creative").addProperty("flight", false);

@@ -93,11 +93,18 @@ public final class Validation {
       else if (command.equals("creative-vehicles")) CreativeVehicleChecks.run(mc);
       else if (command.startsWith("release-110-")) Release110InputChecks.run(mc,command.substring(12));
       else if (command.startsWith("release-111")) Release111Checks.run(mc,command.length()>12 ? command.substring(12) : "check");
+      else if (command.startsWith("portal-inventory")) PortalInventoryChecks.run(mc,command.length()>17 ? command.substring(17) : "check");
+      else if (command.startsWith("crafting-grid")) CraftingGridChecks.run(mc,command.length()>14 ? command.substring(14) : "check");
+      else if (command.startsWith("freecam-walk")) FreecamWalkChecks.run(mc,command.length()>13 ? command.substring(13) : "check");
+      else if (command.startsWith("low-fire")) LowFireChecks.run(mc,command.length()>9 ? command.substring(9) : "check");
+      else if (command.startsWith("damage-camera")) DamageCameraChecks.run(mc,command.length()>14 ? command.substring(14) : "check");
+      else if (command.startsWith("auto-mine")) AutoMineChecks.run(mc,command.length()>10 ? command.substring(10) : "check");
       else if (command.equals("release-110")) Release110Checks.run(mc);
       else if (command.equals("command-completion")) CommandCompletionChecks.run(mc);
       else if (command.equals("redstone-sounds")) RedstoneSoundChecks.run(mc);
       else if (command.equals("redstone-visuals")) RedstoneVisualChecks.run(mc);
       else if (command.equals("creative-borders")) CreativeBorderChecks.run(mc);
+      else if (command.equals("creative-drops")) CreativeDropChecks.run(mc);
       else if (command.equals("chat-check")) ChatChecks.run(mc);
       else if (command.startsWith("chat ")) ChatChecks.submit(mc, command.substring(5));
       else if (command.equals("audit")) audit(mc);

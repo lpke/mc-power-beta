@@ -37,6 +37,7 @@ public final class Config {
     SettingsValidator.validate(next);
     current = next;
     if (!next.autoWalk) local.luke.power.autowalk.AutoWalk.stop();
+    if (!next.autoMine) local.luke.power.building.mining.AutoMine.stop();
   }
 
   public static void update(Consumer<Settings> edit) throws IOException {

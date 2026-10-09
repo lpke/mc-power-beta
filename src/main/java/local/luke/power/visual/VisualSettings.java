@@ -1,8 +1,11 @@
 package local.luke.power.visual;
 
 public final class VisualSettings {
-  public boolean softRain, softSnow, oldCobble, oldBricks, redstonePowerLevels;
+  public boolean softRain, softSnow, oldCobble, oldBricks, redstonePowerLevels, lowFire;
   public boolean slashChat, containerCarry, containerPreview;
+  public boolean inventoryInPortals;
+  public boolean shiftClickIntoCraftingGrid;
+  public boolean damageCameraShake = true, fireDamageCameraShake = true;
   public boolean swapEquipment = true;
   public double thirdPersonDistance = 4;
 

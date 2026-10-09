@@ -19,8 +19,9 @@ public final class ControlLinks {
     link("key.inventory", "", "", "Open or close your inventory.");
     link("key.chat", "", "", "Open chat to write a message or command.");
     link("key.fog", "video.fogCycle", "", "Cycle the configured render distances. Shift reverses the cycle.");
-    link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Manual forward/back input and focus loss stop it. Inventories keep walking when Inventory while moving is on.");
+    link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Player forward/back input and focus loss stop it. Freecam controls the camera while your player keeps walking. Inventories keep walking when Inventory while moving is on.");
     // These settings are live toggle states, not feature-availability switches.
+    link("Auto-mine (toggle)", "tweaks.autoMine", "tweaks.autoMine", "Toggle holding Attack / Break. Menus, focus loss, world changes and detached-camera control stop it.");
     // Keep their toggles and placement modifiers visible while the state is off.
     link("Fast place (toggle)", "tweaks.placement.enabled", "", "Toggle repeated block placement while holding Use.");
     link("Fake sneak (toggle)", "tweaks.sneak.enabled", "", "Toggle ledge protection without slowing movement.");
@@ -100,6 +101,7 @@ public final class ControlLinks {
       case "tweaks.hotbar.swap", "tweaks.hotbar.scroll" -> "tweaks.hotbar.";
       case "tweaks.freeLook" -> "tweaks.freeLook";
       case "tweaks.autoWalk" -> "tweaks.autoWalk";
+      case "tweaks.autoMine" -> "tweaks.autoMine";
       case "power_camera:config.enabled", "power_camera:config.speed" -> "power_camera:config.";
       case "power_capture:config.customResolutionPhotoWidth" -> "power_capture:config.customResolutionPhoto";
       case "power_capture:config.isometricPhotoScale" -> "power_capture:config.isometricPhoto";

@@ -20,34 +20,39 @@ public class MovementInputFromOptionsMixin extends Input {
         if(!Freecam.freecamController.isActive()){
             return;
         }
+        Freecam.freecamController.clearMovementInput();
         if(!Freecam.freecamController.allowPlayerMovement){
+            net.minecraft.client.Minecraft mc = (net.minecraft.client.Minecraft)
+                net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
+            boolean input = mc.currentScreen == null && org.lwjgl.opengl.Display.isActive();
             float move = 0f;
             float strafe = 0f;
             movementSideways = 0f;
-            movementForward = 0f;
+            // Auto-walk drives the player independently of the camera's manual keys.
+            movementForward = local.luke.power.input.MovementOwnership.autoWalking() ? 1f : 0f;
             jumping = false;
             sneaking = false;
 
-            if(this.keys[0]) {
+            if(input && this.keys[0]) {
                 ++move;
             }
 
-            if(this.keys[1]) {
+            if(input && this.keys[1]) {
                 --move;
             }
 
-            if(this.keys[2]) {
+            if(input && this.keys[2]) {
                 ++strafe;
             }
 
-            if(this.keys[3]) {
+            if(input && this.keys[3]) {
                 --strafe;
             }
 
             Freecam.freecamController.move = move;
             Freecam.freecamController.strafe = strafe;
-            Freecam.freecamController.jumping = keys[4];
-            Freecam.freecamController.sneaking = keys[5];
+            Freecam.freecamController.jumping = input && keys[4];
+            Freecam.freecamController.sneaking = input && keys[5];
         }
         if(!Freecam.freecamController.allowPlayerMovement){
             ci.cancel();

@@ -20,6 +20,7 @@ public final class AutoWalk {
     local.luke.power.building.BuildingIndicators.register(minecraft);
     if (client != minecraft) {
       client = minecraft;
+      local.luke.power.input.MovementOwnership.registerAutoWalk(AutoWalk::isWalking);
       MovementScreens.register(screen -> screen instanceof net.minecraft.client.gui.screen.Screen s
           && InventoryMovement.allows(minecraft, s));
     }
@@ -30,7 +31,8 @@ public final class AutoWalk {
     }
     var settings = local.luke.power.building.config.Config.current();
     boolean inventory = InventoryMovement.allows(minecraft, minecraft.currentScreen);
-    if (inventory && (MovementScreens.keyboardDown(minecraft.options.forwardKey)
+    if (inventory && !local.luke.power.input.MovementOwnership.cameraControlsMovement()
+        && (MovementScreens.keyboardDown(minecraft.options.forwardKey)
         || MovementScreens.keyboardDown(minecraft.options.backKey))) TOGGLE.stop();
     TOGGLE.update(inventory ? MovementScreens.keyboardDown(KEY) : Bindings.down(KEY), canWalk(), settings.autoWalkHoldToWalk,
         System.nanoTime(), settings.autoWalkHoldMillis);

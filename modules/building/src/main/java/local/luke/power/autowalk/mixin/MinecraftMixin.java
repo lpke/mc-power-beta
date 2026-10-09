@@ -13,6 +13,7 @@ public abstract class MinecraftMixin {
   @Inject(method = "tick", at = @At("HEAD"))
   private void updateToggle(CallbackInfo ci) {
     AutoWalk.tick((Minecraft)(Object)this);
+    local.luke.power.building.mining.AutoMine.tick((Minecraft)(Object)this);
   }
 
   @Inject(method = "tick", at = @At("TAIL"))
@@ -22,6 +23,7 @@ public abstract class MinecraftMixin {
 
   @Inject(method = "setScreen", at = @At("HEAD"))
   private void stopForScreen(Screen screen, CallbackInfo ci) {
+    if (screen != null) local.luke.power.building.mining.AutoMine.stop();
     if (screen != null && !local.luke.power.autowalk.InventoryMovement.allows((Minecraft)(Object)this, screen)) AutoWalk.stop();
   }
 }

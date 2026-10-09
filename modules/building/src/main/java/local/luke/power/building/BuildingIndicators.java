@@ -28,6 +28,8 @@ public final class BuildingIndicators {
     }, () -> Config.current().placement.announceRestrictionToggle);
     add(AUTO_WALK, () -> AutoWalk.isWalking() ? "" : null,
         () -> Config.current().autoWalkAnnounceToggle);
+    TweakIndicators.register(AUTO_MINE, () -> local.luke.power.building.mining.AutoMine.active() ? "" : null,
+        () -> Config.current().autoMineAnnounceToggle);
     add(FREE_LOOK, () -> Config.current().freeLookToggle && FreeLook.active() ? "" : null,
         () -> Config.current().freeLookAnnounceToggle);
     add(SLAB_COMPLETION, () -> Config.current().slabs.enabled ? "" : null,

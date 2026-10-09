@@ -31,6 +31,7 @@ public class MouseBindingMixin {
 
   @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Mouse;isButtonDown(I)Z", remap = false))
   private boolean power$heldMouse(int button, Operation<Boolean> original) {
-    return !Bindings.claimsMouse(button - 100) && original.call(button);
+    return button == 0 && AttackInput.held()
+        || !Bindings.claimsMouse(button - 100) && original.call(button);
   }
 }

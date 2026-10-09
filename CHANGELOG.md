@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-10
+
+- Add an optional Inventory in portals setting, off by default, with normal item cleanup before dimension travel.
+- Add optional Shift-click transfers into crafting tables, off by default.
+- Keep auto-walk moving the player while freecam controls the camera.
+- Add an optional Low fire texture setting that lowers on-screen flames, off by default.
+- Add separate camera shake controls for all damage and fire damage, both on by default.
+- Add Auto-mine with an unbound toggle hotkey to hold the normal attack and block-breaking action.
+- Fix dropping carried items outside the creative catalogue, preserving whole-stack and single-item drops.
+
 ## [1.1.1] - 2026-10-09
 
 - Keep the chat cursor visible by default, with optional blinking.

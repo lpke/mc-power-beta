@@ -15,6 +15,7 @@ import java.util.TreeSet;
 
 public class FreecamController {
     public FreecamController() {
+        local.luke.power.input.MovementOwnership.registerCamera(() -> isActive() && !allowPlayerMovement);
         local.luke.power.input.TweakIndicators.register(
             local.luke.power.input.TweakIndicators.Tweak.FREECAM_PLAYER_MOVEMENT,
             () -> active && local.luke.power.camera.FreecamConfig.config.enabled && allowPlayerMovement ? "" : null,
@@ -84,6 +85,12 @@ public class FreecamController {
         sprintLatched = false;
         sprintDown = local.luke.power.input.Bindings.down("power_creative.sprint");
         this.allowPlayerMovement = false;
+        clearMovementInput();
+    }
+
+    public void clearMovementInput() {
+        move = strafe = 0;
+        jumping = sneaking = false;
     }
 
     // Return freecam position

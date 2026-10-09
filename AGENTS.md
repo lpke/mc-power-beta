@@ -98,6 +98,9 @@
 - Test in a disposable clone outside the user's normal instance list. Never launch
   or edit an active instance. Stop only the exact process you started, verified by
   PID and game directory. Preserve worlds, recovery journals and original music.
+- Mute every test instance before launch. Route audio tests to a silent output or
+  capture device so they never play through the user's speakers or headphones.
+  Never mute or change the audio routing of the user's own instances.
 - `validation-mod/` contains runtime fixtures, including `audio-maintenance`.
   Build with `./gradlew -p validation-mod --no-daemon build` after the root JAR.
   Install only in the disposable clone. Its README explains command dispatch.

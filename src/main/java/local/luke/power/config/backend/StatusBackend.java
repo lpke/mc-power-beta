@@ -21,6 +21,7 @@ public final class StatusBackend implements Backend {
         case "textColor" -> "Text colour";
         case "opacity" -> "Text opacity";
         case "autoWalk" -> "Auto-walk";
+        case "autoMine" -> "Auto-mine";
         default -> Catalog.words(name);
       };
       String help = switch (name) {
@@ -34,6 +35,7 @@ public final class StatusBackend implements Backend {
         case "freeLook" -> "Show while free look is latched on in Toggle mode. Hold mode is omitted.";
         case "freecamPlayerMovement" -> "Show while the detached camera allows movement of your actual player.";
         case "autoWalk" -> "Show while auto-walk is running, rather than whenever the feature is available.";
+        case "autoMine" -> "Show while auto-mine is holding the attack and block-breaking action.";
         default -> "Include " + label.toLowerCase(Locale.ROOT) + " while it is enabled.";
       };
       boolean offset = name.startsWith("offset");

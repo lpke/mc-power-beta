@@ -9,7 +9,7 @@ public final class TweakIndicators {
   public enum Tweak {
     FAKE_SNEAK("Fake sneak"), FAST_PLACEMENT("Fast placement"),
     PLACEMENT_RESTRICTION("Placement restriction"), AUTO_WALK("Auto-walk"),
-    FREE_LOOK("Free look"), CINEMATIC_CAMERA("Cinematic camera"),
+    AUTO_MINE("Auto-mine"), FREE_LOOK("Free look"), CINEMATIC_CAMERA("Cinematic camera"),
     FREECAM_PLAYER_MOVEMENT("Freecam player movement"), SLAB_COMPLETION("Slab completion");
 
     public final String label;

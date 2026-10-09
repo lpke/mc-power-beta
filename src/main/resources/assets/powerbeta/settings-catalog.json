@@ -3685,11 +3685,28 @@
     "default": false,
     "restart": false
   },
+  "visual.inventoryInPortals": {
+    "page": "Inventory",
+    "group": "Inventory management",
+    "label": "Inventory in portals",
+    "description": "Open your inventory while standing in a Nether portal. Portal travel keeps its normal timing and closes the inventory before changing dimensions.",
+    "default": false,
+    "restart": false,
+    "order": 1
+  },
   "visual.containerPreview": {
     "page": "Inventory",
     "group": "Containers",
     "label": "Container preview",
     "description": "Hold the container-preview key while aiming at a container to view its contents without opening it.",
+    "default": false,
+    "restart": false
+  },
+  "visual.shiftClickIntoCraftingGrid": {
+    "page": "Inventory",
+    "group": "Quick transfer",
+    "label": "Shift-click into crafting table",
+    "description": "Shift-click inventory stacks into the crafting-table grid in singleplayer. Fills matching stacks first, then empty slots. Returns leftovers to the source slot. Uses the normal transfer when the grid has no room.",
     "default": false,
     "restart": false
   },
@@ -3763,6 +3780,15 @@
     "page": "Video",
     "group": "Textures",
     "order": 4
+  },
+  "visual.lowFire": {
+    "page": "Video",
+    "group": "Textures",
+    "label": "Low fire",
+    "description": "Lowers the on-screen flames when you are on fire, using the current texture pack's fire texture.",
+    "default": false,
+    "restart": false,
+    "order": 5
   },
   "power_controls:userinterface.videoSettingsConfig.vanillaFarValues": {
     "page": "Video",
@@ -4374,5 +4400,58 @@
     "label": "Text colour",
     "description": "Colour of all F3 debug text.",
     "order": 0
+  },
+  "visual.damageCameraShake": {
+    "page": "Camera",
+    "group": "View",
+    "label": "Damage camera shake",
+    "description": "Tilt the camera when taking damage. Turning this off also disables fire damage shake.",
+    "default": true,
+    "restart": false,
+    "order": 5
+  },
+  "visual.fireDamageCameraShake": {
+    "page": "Camera",
+    "group": "View",
+    "label": "Fire damage camera shake",
+    "description": "Tilt the camera for burning and fire contact in singleplayer. Other damage, including lava and attacks while burning, keeps its normal shake. Requires Damage camera shake.",
+    "default": true,
+    "restart": false,
+    "order": 6
+  },
+  "tweaks.autoMine": {
+    "page": "Building",
+    "group": "Mining",
+    "label": "Auto-mine",
+    "description": "Allow the Auto-mine hotkey to toggle holding Attack / Break. Uses normal mining speed and attacks. Stops in menus, on focus loss, when changing worlds or when controlling the detached camera.",
+    "default": true,
+    "restart": false,
+    "order": 2
+  },
+  "tweaks.autoMineAnnounceToggle": {
+    "page": "Building",
+    "group": "Mining",
+    "label": "Auto-mine messages",
+    "description": "Show a message when Auto-mine starts or stops during play.",
+    "default": false,
+    "restart": false,
+    "order": 3
+  },
+  "keys.Auto-mine (toggle)": {
+    "page": "Controls",
+    "group": "Building",
+    "label": "Auto-mine (toggle)",
+    "default": 0,
+    "restart": false,
+    "order": 0
+  },
+  "activeTweaks.autoMine": {
+    "page": "Interface",
+    "group": "Active tweaks",
+    "label": "Auto-mine",
+    "description": "Show while Auto-mine is holding Attack / Break.",
+    "default": true,
+    "restart": false,
+    "order": 16
   }
 }

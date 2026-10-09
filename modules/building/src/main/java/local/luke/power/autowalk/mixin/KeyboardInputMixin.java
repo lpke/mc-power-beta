@@ -46,7 +46,8 @@ public abstract class KeyboardInputMixin extends class_41 {
 
   @Inject(method = "method_1941", at = @At("HEAD"))
   private void cancelOnManualMovement(int keyCode, boolean pressed, CallbackInfo ci) {
-    if (pressed && (keyCode == local.luke.power.input.Bindings.eventCode(field_1662.forwardKey) || keyCode == local.luke.power.input.Bindings.eventCode(field_1662.backKey))) {
+    if (pressed && !local.luke.power.input.MovementOwnership.cameraControlsMovement()
+        && (keyCode == local.luke.power.input.Bindings.eventCode(field_1662.forwardKey) || keyCode == local.luke.power.input.Bindings.eventCode(field_1662.backKey))) {
       AutoWalk.stop();
     }
   }

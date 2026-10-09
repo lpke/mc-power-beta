@@ -286,7 +286,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
   @Unique
   private void creative_destroySlot(int x, int y) {
     if (!local.luke.power.creative.config.Config.current().destroySlot) return;
-    int left = x - 22, top = y + 137, bottom = y + containerHeight;
+    int left = x - CreativeGrid.DESTROY_WIDTH, top = y + CreativeGrid.DESTROY_TOP, bottom = y + containerHeight;
     // The extension shares the inventory's bottom border, including its two shadow pixels.
     fill(left + 1, top, x + 1, bottom, 0xFF000000);
     fill(left, top + 1, x + 4, bottom - 1, 0xFF000000);
@@ -602,6 +602,10 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
         if (Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
           inventory.main[slotX] = null;
         }
+        super.mouseClicked(mouseX, mouseY, button);
+      } else if (CreativeGrid.outsideBody(mouseX, mouseY, posX, posY,
+          containerWidth, containerHeight, local.luke.power.creative.config.Config.current().destroySlot)) {
+        // Use the normal outside-slot click for whole-stack/single-item drops and server sync.
         super.mouseClicked(mouseX, mouseY, button);
       }
     } else {

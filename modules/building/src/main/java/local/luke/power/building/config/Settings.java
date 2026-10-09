@@ -14,6 +14,7 @@ public final class Settings {
   public boolean inventoryWhileMoving;
   public int autoWalkHoldMillis = 350;
   public boolean autoWalk = true, freeLook = true, freeLookToggle = false;
+  public boolean autoMine = true, autoMineAnnounceToggle;
   public local.luke.power.building.camera.Perspective freeLookPerspective =
       local.luke.power.building.camera.Perspective.FIRST_PERSON;
   public boolean boatSpeed = false, boatProtection = false;
@@ -30,6 +31,8 @@ public final class Settings {
     s.hotbar = hotbar.copy();
     s.freeLookFollowThirdPerson = freeLookFollowThirdPerson;
     s.autoWalk = autoWalk;
+    s.autoMine = autoMine;
+    s.autoMineAnnounceToggle = autoMineAnnounceToggle;
     s.inventoryWhileMoving = inventoryWhileMoving;
     s.autoWalkHoldToWalk = autoWalkHoldToWalk;
     s.autoWalkHoldMillis = autoWalkHoldMillis;

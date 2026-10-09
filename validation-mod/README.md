@@ -3,6 +3,7 @@
 Build after the root JAR with `./gradlew -p validation-mod --no-daemon build`.
 Install the resulting validation JAR only in a disposable Power Beta clone.
 Fixtures can replace settings and edit worlds. They are never part of the export.
+Mute the clone before launch and route any audio checks to a silent sink or capture device.
 
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
@@ -38,10 +39,30 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   Restart and run `release-111-saved` for persistence. `release-111-debug-on`, then
   `release-111-debug` checks facing, music and platform rows for overlaps.
   Include `release-110-spectator` in physical sprint checks for every axis.
+- `portal-inventory`: default, Cancel/Apply, warm-up, screen exclusions, item counts,
+  damage/NBT, and survival/creative/spectator travel with source-world cleanup.
+  Run after `new-world`. Restart, load the same save with `new-world`, and run
+  `portal-inventory saved` for preference and carried-item persistence.
+- `crafting-grid`: crafting-table transfers, 2×2 exclusion, NBT/damage, partial/full
+  grids and Cancel/Apply. `crafting-grid rollback` injects one partial-transfer failure
+  and checks restoration/shutdown. Restart and run `crafting-grid saved` for persistence.
+- `freecam-walk`: both activation orders, independent camera controls, opposing keys,
+  player movement mode, exit and menus. `freecam-walk physical`, `state` and `focus`
+  support physical input and focus-loss checks. Run these fixtures after `new-world`.
+- `low-fire`: default, Cancel/Apply and pixel comparison through the actual fire renderer.
+  `damage-camera`: burning, fire contact, other hits while burning, lava, global toggle,
+  unchanged health/timers and death tilt. Restart and run each with `saved` for persistence.
+- `auto-mine`: settings, lifecycle cancellation and live HUD state. `auto-mine setup`
+  assigns M and prepares a stone wall for physical input. Use `state`, `mined`, `off`,
+  `menu` and `focus` to check actual held attacks, tool wear and cancellation. Test both
+  chord release orders and held keys across focus changes in the disposable window.
 - `command-completion`: arrow selection, immediate Tab completion and subsequent
   typing for WorldEdit and singleplayer commands.
 - `creative-borders`: compare catalogue row pixels and the destroy-slot junction
   at narrow and wide GUI sizes; screenshots go under `reports/creative-borders`.
+- `creative-drops`: click outside the diamond tab at narrow and wide GUI sizes;
+  check whole-stack and single-item drops, damage/NBT, hotbar pickup, UI borders,
+  view/category tabs, destroy-slot borders and closure without duplication.
 - `redstone-visuals`: default, preview, Cancel/Apply, world-scope labels and all
   sixteen power sprites with default and Faithful textures, including four-pixel
   wire widths and shaded edges. Inspect the screenshots
