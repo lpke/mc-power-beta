@@ -168,9 +168,8 @@ class GitHubFeedTest(unittest.TestCase):
         self.assertEqual(1, verify.call_count)
         sleep.assert_not_called()
 
-    def test_snapshot_uses_github_notes_and_retains_old_downloads(self):
+    def test_snapshot_keeps_old_github_downloads_only_when_public(self):
         from release import website_feed
-        old_url = 'https://example.invalid/verified-old.zip'
         releases = []
         for version in ['1.0.0', '1.1.0']:
             releases.append({'tag_name': 'v' + version, 'draft': False, 'prerelease': False,
@@ -178,11 +177,17 @@ class GitHubFeedTest(unittest.TestCase):
                 'html_url': 'https://github.com/lpke/mc-power-beta/releases/tag/v' + version,
                 'assets': [{'name': 'Power-Beta-' + version + '-Prism.zip', 'state': 'uploaded',
                     'size': 123, 'digest': 'sha256:' + 'a' * 64, 'browser_download_url': 'https://github.com/archive'}]})
-        feed = website_feed('lpke/mc-power-beta', '1.1.0', 'b' * 40, None, 'a' * 64,
-                            'https://example.invalid/new.zip', {'releases': [{'version': '1.0.0', 'download': old_url}]}, releases)
+        feed = website_feed('lpke/mc-power-beta', '1.1.0', 'b' * 40,
+                            'https://example.invalid/new.zip', releases)
         self.assertEqual(['1.1.0', '1.0.0'], [r['version'] for r in feed['releases']])
         self.assertEqual(['GitHub notes for 1.1.0'], feed['releases'][0]['changes'])
-        self.assertEqual(old_url, feed['releases'][1]['download'])
+        self.assertEqual('https://github.com/archive', feed['releases'][1]['download'])
+        private = website_feed('lpke/mc-power-beta', '1.1.0', 'b' * 40,
+                               'https://example.invalid/new.zip', releases, public=False)
+        self.assertEqual('https://example.invalid/new.zip', private['download'])
+        self.assertIsNone(private['releases'][1]['download'])
+        self.assertIsNone(private['releases'][1]['checksum'])
+        self.assertEqual(feed['releases'][1]['changes'], private['releases'][1]['changes'])
 
     def test_new_draft_lookup_tolerates_github_propagation(self):
         import release

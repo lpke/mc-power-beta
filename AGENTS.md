@@ -127,6 +127,14 @@
   The publish command builds and tests sequentially, verifies the export, publishes
   GitHub release assets and notes, and updates/deploys the website from the same data.
   Do not hand-edit generated website release details or overwrite published artifacts.
+- GitHub hosts every release ZIP and checksum. Public repositories use GitHub
+  downloads and retain no Blob mirrors. Private repositories mirror only the
+  latest ZIP; older website entries keep their notes without a download link.
+  Prune obsolete pack mirrors after verifying the deployed snapshot. Keep the
+  previous live ZIP during deployment and enforce the 900 MB store budget before
+  upload, including that temporary overlap. Never delete unrelated Blob files.
+  After quota cleanup, check the store and account block state; an empty store
+  does not prove that Vercel has lifted a suspension.
 - Never commit runtime reports, logs, instance backups, account files, personal paths,
   `.env` files or Git bundles. Runtime fixture source stays in `validation-mod/`.
 - Keep the top-level AGPL license and the README Inspired by links. Source modules

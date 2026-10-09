@@ -37,8 +37,28 @@ and creates a draft GitHub release tagged `vX.Y.Z` at the reviewed commit. It
 uploads the ZIP and SHA-256 file, verifies the public download, publishes the
 release notes, then commits and deploys the website's generated release details.
 The website's version, download, checksum and changelog all come from that release.
-Public repositories use GitHub's release downloads directly. Private repositories
-use a verified public Blob mirror so downloads remain available to visitors.
+GitHub stores every release ZIP and checksum itself. Public repositories use
+GitHub downloads directly and retain no Blob mirrors. Private repositories use
+a verified public Blob mirror for the latest ZIP only. Older releases keep their
+notes on the website, without a ZIP link; their original assets remain on GitHub.
+
+The publisher prunes obsolete pack mirrors before a private upload, keeping the
+current production ZIP available until the new website snapshot is deployed.
+It checks total store size, including both ZIPs and any unrelated files, against
+a 900 MB budget before uploading. If both ZIPs would exceed that budget, it stops
+instead of risking the Hobby quota. After verifying the deployed snapshot, it
+removes the previous mirror. A failed deployment keeps the previous live ZIP;
+retry the publisher to finish cleanup. Public releases remove all pack mirrors
+after deployment. Cleanup matches only Power Beta release paths in the configured
+store and leaves unrelated files alone.
+
+Blob storage and download traffic have separate quotas. GitHub downloads consume
+neither. Keeping one private-repository mirror limits storage growth, but visitor
+downloads can still exhaust Blob's transfer allowance. Check
+[Vercel's current limits](https://vercel.com/docs/vercel-blob/usage-and-pricing).
+If a quota has already suspended Blob, deleting files does not necessarily lift
+the restriction. Verify both `vercel blob list-stores --all --json` and the account's
+Blob block state; use Vercel's reported expiry or contact support if it persists.
 
 Use `--skip-build` only after `python3 tools/build_pack.py` succeeds on the exact
 clean commit being released. The command verifies a build receipt and archive

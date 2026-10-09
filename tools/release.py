@@ -3,16 +3,15 @@
 import argparse
 import hashlib
 import json
-import os
 import re
 import time
 from pathlib import Path
-import shutil
 import subprocess
 import tempfile
 from urllib.error import HTTPError
 from urllib.request import urlopen
 from release_data import ROOT, pack_version, release_notes, sha256, verify_archive
+from release_blob import blob_store, mirror_url, check_upload_budget
 
 
 def run(*args, cwd=ROOT, capture=False):
@@ -39,9 +38,8 @@ def find_release(repository, tag):
     raise ValueError('GitHub has not exposed the new draft yet; rerun to resume')
 
 
-def website_feed(repository, version, commit, artifact, digest, download, prior, releases):
+def website_feed(repository, version, commit, download, releases, public=True):
     history = []
-    old = {r['version']: r for r in prior.get('releases', [])}
     for release in releases:
         v = release['tag_name'].removeprefix('v')
         if release['draft'] or release['prerelease'] or not re.fullmatch(r'(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)', v):
@@ -54,8 +52,8 @@ def website_feed(repository, version, commit, artifact, digest, download, prior,
         entry = {'version': v, 'date': release['published_at'][:10], 'changes': changes,
                  'github': release['html_url'], 'file': file, 'bytes': asset['size'],
                  'sha256': asset['digest'].removeprefix('sha256:'),
-                 'download': download if v == version else old.get(v, {}).get('download', asset['browser_download_url']),
-                 'checksum': '/download.sha256' if v == version else asset['browser_download_url'] + '.sha256'}
+                 'download': download if v == version else asset['browser_download_url'] if public else None,
+                 'checksum': '/download.sha256' if v == version else asset['browser_download_url'] + '.sha256' if public else None}
         history.append(entry)
     history.sort(key=lambda r: tuple(map(int, r['version'].split('.'))), reverse=True)
     if not history or history[0]['version'] != version:
@@ -96,26 +94,35 @@ def wait_for_download(url, digest):
 def upload_blob(artifact, config, site, digest):
     pathname = f'releases/{pack_version()}/{digest[:12]}/{artifact.name}'
     url = config['blobOrigin'] + '/' + pathname
-    if verify_download(url, digest):
-        return url
-    # The CLI resolves Blob credentials locally. Keep its temporary env file outside
-    # both repositories and discard it even if publication fails.
-    with tempfile.TemporaryDirectory(prefix='power-beta-publish-') as directory:
-        work = Path(directory)
-        (work / '.vercel').mkdir()
-        shutil.copy2(site / '.vercel/project.json', work / '.vercel/project.json')
-        env_file = work / '.env.local'
-        run('vercel', 'env', 'pull', env_file, '--environment', 'production', '--yes',
-            '--scope', config['vercelScope'], cwd=work)
-        os.chmod(env_file, 0o600)
-        lines = [line for line in env_file.read_text().splitlines() if line.startswith('BLOB_READ_WRITE_TOKEN=')]
-        if len(lines) != 1:
-            raise ValueError('The linked project needs a Blob read-write credential')
-        env_file.write_text(lines[0] + '\n')
-        run('vercel', 'blob', 'put', artifact, '--access', 'public', '--multipart', 'true',
-            '--pathname', pathname, '--scope', config['vercelScope'], cwd=work)
+    with blob_store(config, site, run) as store:
+        # Preserve the current production download if the previous deploy failed.
+        # A local snapshot alone may describe a deployment that never went live.
+        with urlopen(config['website'] + '/release.json', timeout=30) as response:
+            current = json.load(response).get('download')
+        blobs = store.list()
+        keep = [current] if mirror_url(current, config['blobOrigin']) else []
+        if any(blob['url'] == url for blob in blobs):
+            keep.append(url)
+        blobs = store.prune(keep)
+        check_upload_budget(blobs, pathname, artifact.stat().st_size)
+        if verify_download(url, digest):
+            return url
+        store.put(artifact, pathname)
     wait_for_download(url, digest)
     return url
+
+
+def prune_release_mirrors(config, site, feed):
+    # Do not remove the old download until the new snapshot is deployed.
+    with urlopen(config['website'] + '/release.json', timeout=30) as response:
+        live = json.load(response)
+    if live != feed:
+        raise ValueError('Live website snapshot differs; keeping existing mirrors until deployment completes')
+    keep = [feed['download']] if mirror_url(feed['download'], config['blobOrigin']) else []
+    with blob_store(config, site, run) as store:
+        remaining = store.prune(keep)
+    print(f'Blob retention checked: {len(keep)} release mirror(s), '
+          f'{sum(blob["size"] for blob in remaining)} total stored bytes')
 
 
 def publish_download(repository, tag, artifact, digest, existing, config, site):
@@ -191,11 +198,11 @@ def publish(args):
             else:
                 raise ValueError('Published release is missing an asset; publish a new version')
         download, public = publish_download(repository, tag, artifact, digest, existing, config, site)
-        prior = {} if public else json.loads((site / 'public/release.json').read_text())
         feed = None
         for attempt in range(6):
             try:
-                feed = website_feed(repository, version, commit, artifact, digest, download, prior, releases_for(repository))
+                feed = website_feed(repository, version, commit, download,
+                                    releases_for(repository), public=public)
                 break
             except ValueError:
                 if attempt == 5: raise
@@ -213,6 +220,7 @@ def publish(args):
         run('git', '-c', 'credential.helper=', '-c', 'credential.helper=!gh auth git-credential',
             'push', 'https://github.com/' + config['websiteRepository'] + '.git', 'main', cwd=site)
     run('vercel', 'deploy', '--prod', '--yes', '--scope', config['vercelScope'], cwd=site)
+    prune_release_mirrors(config, site, feed)
     print('Published ' + feed['github'])
     print(config['website'])
 
