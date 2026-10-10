@@ -32,4 +32,10 @@ public final class LightConfig {
     PowerConfig.save("lightOverlay", settings);
     preview(settings);
   }
+  public static void toggle() {
+    LightSettings settings = copy(); settings.enabled = !settings.enabled;
+    settings.validate();
+    PowerConfig.saveDeferred("lightOverlay", settings);
+    preview(settings);
+  }
 }

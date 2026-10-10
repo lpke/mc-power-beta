@@ -52,6 +52,8 @@ public final class Validation {
       else if (command.equals("cleanup")) CleanupChecks.run(mc);
       else if (command.equals("sign-editing")) SignEditingChecks.run(mc);
       else if (command.equals("obsidian-mining")) ObsidianMiningChecks.run(mc);
+      else if (command.equals("toggle-performance")) TogglePerformanceChecks.run(mc);
+      else if (command.startsWith("toggle-saves")) ToggleSaveChecks.run(mc, command.length() > 13 ? command.substring(13) : "check");
       else if (command.equals("worldedit-hand")) WorldEditHandChecks.run(mc);
       else if (command.startsWith("toggle-messages")) ToggleMessageChecks.run(mc, command.length() > 16 ? command.substring(16) : "check");
       else if (command.equals("settings-review")) SettingsReviewChecks.run(mc);

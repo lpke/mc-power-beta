@@ -41,6 +41,16 @@ class ConfigDefaultsTest {
     String preferences = Files.readString(config);
     ConfigDefaults.prepare(game);
     assertEquals(preferences, Files.readString(config));
+    JsonObject toggle = new JsonObject(); toggle.addProperty("enabled", true);
+    PowerConfig.saveDeferred("queued-toggle", toggle);
+    try (var transaction = FileTransaction.begin(game, List.of(config))) {
+      assertTrue(PowerConfig.section("queued-toggle").get("enabled").getAsBoolean());
+      toggle.addProperty("enabled", false); PowerConfig.put("queued-toggle", toggle);
+      // Closing an uncommitted menu save restores the already-flushed gameplay setting.
+    }
+    assertTrue(PowerConfig.section("queued-toggle").get("enabled").getAsBoolean());
+    root = PowerConfig.document(); root.getAsJsonObject("settings").remove("queued-toggle"); PowerConfig.write(root);
+    assertEquals(preferences, Files.readString(config));
     FileTransaction.begin(game, List.of(config)); // Simulate process exit before commit/close.
     Files.writeString(config, "interrupted");
     FileTransaction.recover(game);

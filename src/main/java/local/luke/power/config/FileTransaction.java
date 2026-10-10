@@ -19,6 +19,7 @@ public final class FileTransaction implements AutoCloseable {
   }
 
   public static FileTransaction begin(Path game, List<Path> files) throws IOException {
+    local.luke.power.storage.PowerConfig.flushPending();
     game = game.toAbsolutePath().normalize();
     Path root = game.resolve("power-beta-data/settings-backups");
     checkPath(game, root);

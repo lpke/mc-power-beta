@@ -23,9 +23,7 @@ public final class GameplayKeys {
   private static void toggleLight(int key) {
     Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
     if (mc.player == null || mc.world == null || mc.currentScreen != null || !Bindings.matches(LIGHT, key)) return;
-    var settings = local.luke.power.light.LightConfig.copy();
-    settings.enabled = !settings.enabled;
-    try { local.luke.power.light.LightConfig.save(settings); }
+    try { local.luke.power.light.LightConfig.toggle(); }
     catch (Exception e) { local.luke.power.PowerBeta.LOG.error("Could not save light overlay toggle", e); }
   }
   @EventListener public void key(KeyStateChangedEvent event) {

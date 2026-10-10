@@ -22,10 +22,17 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   multiplayer guard, airborne penalty, real mining ticks, drops and durability.
   Run after `new-world`. For restart coverage, use `set tweaks.obsidianBreakingSpeed 61`,
   restart, and inspect `dump` before resetting to 0.
-- `toggle-messages`: all eight defaults, live providers, HUD independence,
+- `toggle-messages`: all nine defaults, live providers, HUD independence,
   duplicate suppression, menu silence and Cancel/Apply. Run after `new-world`.
   Use `toggle-messages save`, restart, then `toggle-messages reload` to verify
   persistence and restore every message switch to off.
+- `toggle-performance`: compare toggle and HUD timings with the HUD enabled and disabled.
+  `toggle-saves` checks immediate state while the disk writer is blocked, linked values,
+  held keys and menu Cancel/Apply. Run after `new-world`. `toggle-saves setup` binds
+  K to fast placement and J to edge protection; `setup-chord` adds Ctrl to K and F7
+  for both release-order checks. `toggle-saves state` reports live state.
+  `toggle-saves save` queues settings and closes the client without an explicit flush.
+  Restart, run `new-world`, then `toggle-saves reload` to check and restore those settings.
 - `worldedit-hand`: held variants, command snapshots, masks, inventory preservation,
   undo/redo, invalid hands and cheats. Run after `new-world`.
 - `creative-vehicles`: one-hit deletion of boats and every minecart type, loaded

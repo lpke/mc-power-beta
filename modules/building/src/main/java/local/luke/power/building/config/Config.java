@@ -43,6 +43,8 @@ public final class Config {
   public static void update(Consumer<Settings> edit) throws IOException {
     Settings next = current.copy();
     edit.accept(next);
-    apply(next);
+    SettingsValidator.validate(next);
+    local.luke.power.storage.PowerConfig.saveDeferred("building", next);
+    preview(next);
   }
 }

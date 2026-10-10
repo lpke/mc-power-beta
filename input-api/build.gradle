@@ -4,8 +4,8 @@ version = '1.0.0'
 repositories { mavenCentral() }
 dependencies {
     compileOnly('org.lwjgl.lwjgl:lwjgl:2.9.3') { transitive = false }
-    compileOnly 'com.google.code.gson:gson:2.13.2'
-    testImplementation 'com.google.code.gson:gson:2.13.2'
+    compileOnly 'com.google.code.gson:gson:2.8.9'
+    testImplementation 'com.google.code.gson:gson:2.8.9'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
 }
 java { withSourcesJar() }

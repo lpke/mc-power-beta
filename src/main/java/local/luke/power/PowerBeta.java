@@ -9,6 +9,12 @@ public final class PowerBeta {
   private static boolean ready;
 
   public static void tick(Minecraft mc) {
+    var saveFailure = local.luke.power.storage.PowerConfig.takeSaveFailure();
+    if (saveFailure != null) {
+      LOG.error("Could not save gameplay settings; retaining changes for retry", saveFailure);
+      if (mc.inGameHud != null)
+        mc.inGameHud.addChatMessage("\u00a7cSettings could not be saved. Unsaved changes will be retried.\u00a7r");
+    }
     local.luke.power.audio.AudioController.tick(mc);
     local.luke.power.light.LightOverlay.tick(mc);
     if (!ready && mc.options != null) {

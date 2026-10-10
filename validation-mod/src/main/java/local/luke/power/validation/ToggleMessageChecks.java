@@ -20,6 +20,7 @@ final class ToggleMessageChecks {
       Tweak.FAST_PLACEMENT, "tweaks.placement.announceToggle",
       Tweak.PLACEMENT_RESTRICTION, "tweaks.placement.announceRestrictionToggle",
       Tweak.AUTO_WALK, "tweaks.autoWalkAnnounceToggle",
+      Tweak.AUTO_MINE, "tweaks.autoMineAnnounceToggle",
       Tweak.FREE_LOOK, "tweaks.freeLookAnnounceToggle",
       Tweak.CINEMATIC_CAMERA, "activeTweaks.cinematicCameraMessages",
       Tweak.FREECAM_PLAYER_MOVEMENT, "power_camera:config.playerMovementMessages");
@@ -33,7 +34,7 @@ final class ToggleMessageChecks {
         setting.parse(Boolean.toString(action.equals("save")));
       }
       session.save(Path.of(".").toAbsolutePath());
-      log("TOGGLE MESSAGES " + action + " PASS: all eight preferences"); return;
+      log("TOGGLE MESSAGES " + action + " PASS: all nine preferences"); return;
     }
     failures = 0;
     Map<String, com.google.gson.JsonElement> originalMessages = new HashMap<>();
@@ -51,7 +52,7 @@ final class ToggleMessageChecks {
     try {
       mc.setScreen(null);
       local.luke.power.autowalk.AutoWalk.tick(mc);
-      test("all eight message switches default off and preview/Cancel preserve the file", () -> {
+      test("all nine message switches default off and preview/Cancel preserve the file", () -> {
         check(IDS.size() == Tweak.values().length, "missing toggle");
         byte[] before = Files.readAllBytes(PowerConfig.path());
         for (var entry : IDS.entrySet()) {
@@ -81,6 +82,8 @@ final class ToggleMessageChecks {
         check(messages.update(true).equals(List.of(tweak.label + ": \u00a7cOFF\u00a7r")), "off message missing or duplicated");
       });
       test("tick emits chat once and menu previews are silent", () -> {
+        check(mc.world != null && mc.player != null && mc.player.health > 0 && !mc.paused
+            && org.lwjgl.opengl.Display.isActive(), "message check requires focused, unpaused gameplay");
         mc.options.cinematicMode = false;
         TweakMessages.tick(mc); TweakMessages.tick(mc);
         var chat = ChatChecks.record(() -> {
@@ -95,7 +98,7 @@ final class ToggleMessageChecks {
         });
         check(chat.isEmpty(), "menu preview leaked chat " + chat);
       });
-      test("Apply persists all eight switches and reopening retains them", () -> {
+      test("Apply persists all nine switches and reopening retains them", () -> {
         session.save(Path.of(".").toAbsolutePath());
         var reopened = SettingsRegistry.open(mc);
         for (String id : IDS.values()) check(find(reopened, id).value.getAsBoolean(), "Apply lost " + id);
@@ -132,6 +135,14 @@ final class ToggleMessageChecks {
         s.autoWalk = true; Config.preview(s);
         var field = local.luke.power.autowalk.AutoWalk.class.getDeclaredField("TOGGLE"); field.setAccessible(true);
         var toggle = (local.luke.power.autowalk.WalkToggle) field.get(null);
+        toggle.stop(); toggle.update(false, true);
+        if (active) toggle.update(true, true);
+      }
+      case AUTO_MINE -> {
+        s.autoMine = true; Config.preview(s);
+        local.luke.power.building.mining.AutoMine.tick(mc);
+        var field = local.luke.power.building.mining.AutoMine.class.getDeclaredField("TOGGLE"); field.setAccessible(true);
+        var toggle = (local.luke.power.building.mining.AutoMineToggle) field.get(null);
         toggle.stop(); toggle.update(false, true);
         if (active) toggle.update(true, true);
       }

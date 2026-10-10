@@ -29,6 +29,8 @@
   track and preset IDs. Only the current configuration format is supported.
   Fresh installs copy `defaults/power-beta.json`; do not reintroduce historical importers.
   Update existing instances explicitly when their stored data needs to change.
+  Gameplay hotkeys queue settings snapshots through `PowerConfig`; never flush files
+  on the input or render path. Flush queued saves before menu backups and on shutdown.
   The config API retains its `gcapi3` binary identity for external dependencies.
 - The game uses Gson 2.8.9. Do not rely on record deserialization without an explicit
   adapter. Test persisted data with that version, including rollback and restart.

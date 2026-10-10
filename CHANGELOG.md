@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-10-10
+
+- Remove frame stutters when toggling fast placement, edge protection, slab completion, light overlay and other gameplay settings.
+
 ## [1.2.1] - 2026-10-10
 
 - Preserve chat colours when messages wrap onto another line.
