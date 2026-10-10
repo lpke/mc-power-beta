@@ -19,11 +19,15 @@ public class MinecraftMixin {
             && local.luke.power.input.Bindings.down(local.luke.power.camera.registry.KeyBindingRegistry.changeSpeedKeybinding);
     }
 
+    @Inject(at = @At("HEAD"), method = "setWorld(Lnet/minecraft/world/World;Ljava/lang/String;Lnet/minecraft/entity/player/PlayerEntity;)V")
+    private void power$resetCamera(World world, String message, PlayerEntity player, CallbackInfo ci) {
+        Freecam.freecamController.setActive(false);
+        Freecam.freecamController.cameraPositionSet = false;
+    }
+
     // Load camerapositions from json when entering world
     @Inject(at = @At("TAIL"), method = "setWorld(Lnet/minecraft/world/World;Ljava/lang/String;Lnet/minecraft/entity/player/PlayerEntity;)V")
     private void freecam_savedCameraPositionLoader(World string, String arg2, PlayerEntity par3, CallbackInfo ci){
         Freecam.freecamController.loadSavedCameraPositions(string);
-        Freecam.freecamController.cameraPositionSet = false;
-        Freecam.freecamController.setActive(false);
     }
 }

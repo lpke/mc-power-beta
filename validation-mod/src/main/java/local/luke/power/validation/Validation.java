@@ -106,6 +106,8 @@ public final class Validation {
       else if (command.equals("creative-borders")) CreativeBorderChecks.run(mc);
       else if (command.equals("creative-drops")) CreativeDropChecks.run(mc);
       else if (command.equals("chat-check")) ChatChecks.run(mc);
+      else if (command.equals("chat-wrap")) ChatWrapChecks.run(mc);
+      else if (command.equals("freecam-culling")) FreecamCullingChecks.run(mc);
       else if (command.startsWith("chat ")) ChatChecks.submit(mc, command.substring(5));
       else if (command.equals("audit")) audit(mc);
       else if (command.equals("ui-check")) UiChecks.run(mc);

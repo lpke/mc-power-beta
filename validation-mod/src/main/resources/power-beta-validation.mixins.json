@@ -9,6 +9,7 @@
     "ScreenInput",
     "SignPacketCaptureMixin",
     "ChatCaptureMixin",
+    "ChatLinesAccess",
     "ChatInput",
     "PlayerSleepAccess",
     "PlacementSoundCaptureMixin"

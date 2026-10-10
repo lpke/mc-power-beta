@@ -88,6 +88,9 @@
   Opposing inputs cancel; stopping movement resets Toggle sprint.
 - Chat editing shares a buffer across input and completion. History keeps arrow
   ownership until editing or explicit completion; rendering must not change text.
+  Wrapped chat keeps the last Beta colour code from the preceding line.
+- Freecam bypasses entity and block entity culling independently of player movement.
+  Keep culling results current and preserve preferences so normal culling resumes on exit.
 - Natural spawning rules are saved with world properties and copied across
   dimensions. They require cheats, preserve existing mobs and never gate /summon.
 - WorldEdit named states map only to supported Beta metadata. Reject unsupported

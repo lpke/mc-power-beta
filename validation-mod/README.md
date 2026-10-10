@@ -58,6 +58,10 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   chord release orders and held keys across focus changes in the disposable window.
 - `command-completion`: arrow selection, immediate Tab completion and subsequent
   typing for WorldEdit and singleplayer commands.
+- `chat-wrap`: all chat colours, repeated wraps, colour changes, resets, plain text
+  and the WorldEdit cheats warning. Run after `new-world`.
+- `freecam-culling`: entity/block entity visibility, repeated toggles, player movement,
+  setting disable, preserved culling preferences and world exit. Run after `new-world`.
 - `creative-borders`: compare catalogue row pixels and the destroy-slot junction
   at narrow and wide GUI sizes; screenshots go under `reports/creative-borders`.
 - `creative-drops`: click outside the diamond tab at narrow and wide GUI sizes;

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-10
+
+- Preserve chat colours when messages wrap onto another line.
+- Show entities and block entities during freecam, then resume normal culling when freecam ends.
+
 ## [1.2.0] - 2026-10-10
 
 - Add an optional Inventory in portals setting, off by default, with normal item cleanup before dimension travel.

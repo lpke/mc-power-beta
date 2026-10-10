@@ -35,6 +35,8 @@
     "ContainerPreviewMixin",
     "ActiveTweaksMixin",
     "ChatTextAccessor",
+    "ChatWrapMixin",
+    "FreecamCullingMixin",
     "NativeStorageMixin",
     "EquipmentSwapMixin",
     "LightOverlayMixin",
