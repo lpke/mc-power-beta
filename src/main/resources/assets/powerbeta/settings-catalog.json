@@ -1045,6 +1045,15 @@
     "default": false,
     "restart": false
   },
+  "power_mechanics:config.MOB_CONFIG.waterNegatesFallDamage": {
+    "page": "Gameplay",
+    "group": "Fall damage",
+    "label": "Water negates fall damage",
+    "description": "Touching source or flowing water resets fall damage, including shallow water and bucket clutches. Applies to players and mobs.",
+    "default": false,
+    "restart": false,
+    "order": 0
+  },
   "power_mechanics:config.MOB_CONFIG.enableZombieDropItem": {
     "page": "Gameplay",
     "group": "Mob drops",

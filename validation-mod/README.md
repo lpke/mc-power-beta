@@ -22,6 +22,9 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   multiplayer guard, airborne penalty, real mining ticks, drops and durability.
   Run after `new-world`. For restart coverage, use `set tweaks.obsidianBreakingSpeed 61`,
   restart, and inspect `dump` before resetting to 0.
+- `water-landings`: shallow source/flowing/falling water, actual gravity, bucket
+  clutches, hitbox edges, fast passes, mobs, dry/lava damage, multiplayer authority
+  and Cancel/Apply. Run after `new-world`, then restart and run `water-landings saved`.
 - `toggle-messages`: all nine defaults, live providers, HUD independence,
   duplicate suppression, menu silence and Cancel/Apply. Run after `new-world`.
   Use `toggle-messages save`, restart, then `toggle-messages reload` to verify

@@ -25,6 +25,7 @@ Built for singleplayer.
 - Flexible key bindings, modifier shortcuts and movement while inventories are open.
 - Separate sound controls, custom music, playlists and saved presets.
 - Optional faster boats, minecarts and obsidian mining.
+- Optional modern water landings and water bucket clutches, including flowing water.
 - Editable signs and useful gold tools, including silk touch.
 - Creative and spectator modes with a modern mode switcher.
 - Backported WorldEdit and singleplayer commands with modern Minecraft syntax.

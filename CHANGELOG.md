@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-10-11
+
+- Add Water negates fall damage, off by default, for modern-style shallow and flowing water landings and water bucket clutches.
+
 ## [1.2.2] - 2026-10-10
 
 - Remove frame stutters when toggling fast placement, edge protection, slab completion, light overlay and other gameplay settings.

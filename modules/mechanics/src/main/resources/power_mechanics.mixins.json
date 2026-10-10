@@ -21,6 +21,7 @@
     "LeavesBlockMixin",
     "LeavesItemMixin",
     "WorldMixin",
+    "WaterFallDamageMixin",
     "LightningEntityMixin",
     "LogBlockMixin",
     "LogItemMixin",

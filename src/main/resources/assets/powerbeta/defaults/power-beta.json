@@ -248,6 +248,7 @@
         "enableGlueTrapdoorsWithSlimeballs": false
       },
       "MOB_CONFIG": {
+        "waterNegatesFallDamage": false,
         "enableZombieDropItem": false,
         "enableZombiePigmanDropItem": false,
         "zombieDropItem": 0,

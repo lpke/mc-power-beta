@@ -220,6 +220,13 @@ public class Config {
 
     public static class MobConfig {
         @ConfigEntry(
+                name = "Water Negates Fall Damage",
+                description = "Touching source or flowing water resets fall damage, including shallow water and bucket clutches. Applies to players and mobs.",
+                multiplayerSynced = true
+        )
+        public Boolean waterNegatesFallDamage = false;
+
+        @ConfigEntry(
                 name = "Chance Zombies Drop Config Item",
                 description = "Restart required for changes to take effect",
                 multiplayerSynced = true

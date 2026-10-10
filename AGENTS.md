@@ -95,6 +95,9 @@
   Keep culling results current and preserve preferences so normal culling resumes on exit.
 - Natural spawning rules are saved with world properties and copied across
   dimensions. They require cheats, preserve existing mobs and never gate /summon.
+- Optional modern water landings reset fall distance before landing damage, for
+  source and flowing water. Match fluid height and hitbox contact, including fast
+  movement through water. Keep Beta defaults and multiplayer server authority.
 - WorldEdit named states map only to supported Beta metadata. Reject unsupported
   properties before starting a transaction; commas inside [] are state separators.
 
