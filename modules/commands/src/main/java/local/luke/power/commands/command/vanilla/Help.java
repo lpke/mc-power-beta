@@ -6,21 +6,15 @@ import local.luke.power.commands.api.Command;
 import local.luke.power.commands.util.*;
 
 public class Help implements Command {
-  private List<String> lines(SharedCommandSource source) {
-    boolean admin =
-        source.isClient() || source.getPlayer() == null || ServerUtil.isOp(source.getName());
-    Set<String> names = new HashSet<>();
-    for (Command c : RetroChatUtil.commands) if (c.name() != null) names.add(c.name());
+  public List<String> lines(SharedCommandSource source) {
     List<String> result = new ArrayList<>();
     for (Command c : RetroChatUtil.commands) {
       String name = c.name();
       if (name == null
-          || name.startsWith("/")
-          || source.isClient() && c.disableInSingleplayer()
-          || !admin && c.needsPermissions()) continue;
-      if (Set.of("gm", "teleport").contains(name)) continue;
-      if (names.contains("/" + name) && CommandHelp.description(name).isEmpty()) continue;
+          || !CommandAccess.available(c, source)) continue;
+      if (!c.helpGroup().isEmpty() && !name.equals("/help")) continue;
       String description = CommandHelp.description(name);
+      if (name.equals("/help")) description = "World editing, selections and undo";
       result.add("/" + name + (description.isEmpty() ? "" : " §8- §7" + description));
     }
     result =
@@ -28,7 +22,6 @@ public class Help implements Command {
             .distinct()
             .sorted()
             .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
-    if (names.contains("/help")) result.add("//help §8- §7World editing, selections and undo");
     return result;
   }
 
@@ -43,7 +36,7 @@ public class Help implements Command {
           RetroChatUtil.commands.stream()
               .filter(
                   c ->
-                      wanted.equals(c.name()) && (!source.isClient() || !c.disableInSingleplayer()))
+                      wanted.equals(c.name()) && CommandAccess.available(c, source))
               .findFirst()
               .orElse(null);
       if (target == null) throw new IllegalArgumentException("Unknown command: " + args[1]);
@@ -85,7 +78,7 @@ public class Help implements Command {
         ? CommandSuggestions.suffix(
             input,
             RetroChatUtil.commands.stream()
-                .filter(c -> !s.isClient() || !c.disableInSingleplayer())
+                .filter(c -> CommandAccess.available(c, s))
                 .map(Command::name)
                 .filter(Objects::nonNull)
                 .toList())

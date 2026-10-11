@@ -15,6 +15,7 @@ public class RetroChatUtil {
   public static void addDefaultCommands() {
     commands.add(new Help());
     commands.add(new Mods());
+    commands.add(new Perm());
 
     commands.add(new Kick());
     commands.add(new Ban());
@@ -26,6 +27,8 @@ public class RetroChatUtil {
     commands.add(new Stop());
     commands.add(new Save());
     commands.add(new List());
+    commands.add(new Tell());
+    commands.add(new Me());
     commands.add(new Say());
     commands.add(new Whitelist());
 
@@ -81,7 +84,11 @@ public class RetroChatUtil {
         return true;
       }
       try {
-        command.command(source, args);
+        if (!command.available(source)) {
+          source.sendFeedback("§c/" + name + " is unavailable. Check its setting in Options.");
+        } else if (args.length == 2 && args[1].equalsIgnoreCase("help")) {
+          command.manual(source);
+        } else command.command(source, args);
       } catch (IllegalArgumentException | ArithmeticException e) {
         source.sendFeedback("§c" + e.getMessage());
       } catch (Exception e) {

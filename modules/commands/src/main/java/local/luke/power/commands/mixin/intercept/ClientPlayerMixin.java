@@ -1,6 +1,5 @@
 package local.luke.power.commands.mixin.intercept;
 
-import java.util.Arrays;
 import local.luke.power.commands.ClientCommands;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -18,14 +17,14 @@ public class ClientPlayerMixin {
       ((Minecraft) FabricLoader.getInstance().getGameInstance()).inGameHud.clearChat();
       ci.cancel();
     }
-    if (par1.startsWith("/perm")) {
-      ((Minecraft) FabricLoader.getInstance().getGameInstance())
-          .inGameHud.addChatMessage("mp_op: " + ClientCommands.mp_op);
-      ((Minecraft) FabricLoader.getInstance().getGameInstance())
-          .inGameHud.addChatMessage("mp_rc: " + ClientCommands.mp_rc);
-      ((Minecraft) FabricLoader.getInstance().getGameInstance())
-          .inGameHud.addChatMessage(
-              "player_names: " + Arrays.toString(ClientCommands.player_names));
+    String[] args = par1.trim().split("\\s+");
+    var source = new local.luke.power.commands.util.SharedCommandSource((Object)this);
+    if (local.luke.power.commands.util.CommandAccess.showHelp(source, par1)) {
+      ci.cancel();
+      return;
+    }
+    if (args[0].equalsIgnoreCase("/perm") || args[0].equalsIgnoreCase("/help")) {
+      local.luke.power.commands.util.RetroChatUtil.handleCommand(source, par1.trim().substring(1), ClientCommands.mp_op);
       ci.cancel();
     }
   }

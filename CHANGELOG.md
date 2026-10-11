@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-10-11
+
+- Remove the player-model flicker when entering freecam while walking.
+- Add optional death records with locations, causes, lost items and creative-only recovery, off by default.
+- Show available commands and aliases in /help, group WorldEdit under //help, and add per-command help.
+
 ## [1.3.2] - 2026-10-11
 
 - Middle-click drag a held item in creative inventories and containers to fill compatible slots to their normal stack limits.

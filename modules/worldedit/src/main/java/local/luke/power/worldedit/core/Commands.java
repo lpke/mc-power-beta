@@ -468,6 +468,17 @@ public final class Commands {
     return r;
   }
 
+  public static int helpPage(String command) {
+    return switch (command.toLowerCase(java.util.Locale.ROOT)) {
+      case "up", "ceil", "ascend", "asc", "descend", "desc", "unstuck", "!", "thru", "jumpto", "j" -> 6;
+      case "remove", "rem", "rement", "butcher", "countentities" -> 5;
+      case "sphere", "hsphere", "cyl", "hcyl", "drain", "replacenear", "removenear", "removeabove", "removebelow" -> 4;
+      case "copy", "cut", "paste", "clearclipboard", "rotate", "flip", "calc", "stack", "move", "undo", "redo", "clearhistory", "cancel", "status", "toggleplace" -> 3;
+      case "set", "replace", "re", "walls", "faces", "outline", "center", "overlay", "hollow", "fill", "fillr", "gmask", "count", "distr" -> 2;
+      default -> 1;
+    };
+  }
+
   private void help(int page, boolean all) {
     String[][] help = {
       {

@@ -15,7 +15,7 @@ public class Kill implements Command {
       if (target instanceof LivingEntity living) {
         if (living.health > 0) {
           living.health = 0;
-          living.onKilledBy(null);
+          local.luke.power.world.DeathSources.run(living, "/kill", () -> living.onKilledBy(null));
         }
       } else target.markDead();
     }

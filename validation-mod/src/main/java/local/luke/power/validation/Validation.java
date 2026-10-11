@@ -113,6 +113,8 @@ public final class Validation {
       else if (command.equals("chat-check")) ChatChecks.run(mc);
       else if (command.equals("chat-wrap")) ChatWrapChecks.run(mc);
       else if (command.equals("freecam-culling")) FreecamCullingChecks.run(mc);
+      else if (command.startsWith("death-checks")) DeathChecks.run(mc, command.length() > 12 ? command.substring(12).trim() : "check");
+      else if (command.equals("help-audit")) HelpAuditChecks.run(mc);
       else if (command.equals("freecam-handoff")) FreecamHandoffChecks.run(mc);
       else if (command.startsWith("chat ")) ChatChecks.submit(mc, command.substring(5));
       else if (command.equals("audit")) audit(mc);

@@ -8,6 +8,13 @@ public final class CommandHelp {
 
   private static final Map<String, String> TEXT =
       Map.ofEntries(
+          Map.entry("death", "Show deaths, lost items and creative recovery"),
+          Map.entry("gm", "Alias for /gamemode"),
+          Map.entry("teleport", "Alias for /tp"),
+          Map.entry("/calc", "Evaluate an arithmetic expression"),
+          Map.entry("perm", "Show multiplayer command permissions"),
+          Map.entry("me", "Broadcast an action"),
+          Map.entry("tell", "Whisper to another player"),
           Map.entry("help", "Command list; /help <command> shows syntax"),
           Map.entry("clear", "Remove inventory items; maxCount 0 only counts"),
           Map.entry("clearchat", "Clear chat history"),

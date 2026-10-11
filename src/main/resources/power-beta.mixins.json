@@ -53,7 +53,10 @@
     "RedstonePlacementSoundMixin",
     "WorldSpawningMixin",
     "DebugHudMixin",
-    "DebugTextMixin"
+    "DebugTextMixin",
+    "DeathRecordMixin",
+    "DeathLivingCauseMixin",
+    "DeathEntityCauseMixin"
   ],
   "injectors": {
     "defaultRequire": 1

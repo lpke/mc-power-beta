@@ -66,6 +66,8 @@ public class GameRendererMixin {
 			return;
 		}
 		LivingEntity player = client.camera;
+
+        Freecam.freecamController.updatePlayerVisibility(player, par1);
 		CameraPosition cameraPosition = Freecam.freecamController.updateCameraPosition(player, par1);
 		GL11.glLoadIdentity();
         GL11.glTranslatef(power$eyeOffset, 0, 0);
@@ -235,12 +237,6 @@ public class GameRendererMixin {
 			);
 		}
 
-		if(client.player != null && client.player.getDistance(nextCameraPosition.x, nextCameraPosition.y, nextCameraPosition.z) < 1){
-			Freecam.freecamController.hidePlayer = true;
-		}
-		else {
-			Freecam.freecamController.hidePlayer = false;
-		}
 	}
 
 	// Gets the direction of movement in all axes, range -1 : 1

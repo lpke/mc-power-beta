@@ -160,6 +160,13 @@ public final class WorldEditor {
   }
 
   public static boolean command(Minecraft mc, String text) {
+    String[] help = text.strip().split("\\s+");
+    if (help.length == 2 && !help[0].equalsIgnoreCase("//calc") && help[1].equalsIgnoreCase("help") && local.luke.power.worldedit.chat.CommandCatalog.owns(text))
+      text = "//help " + Commands.helpPage(help[0].replaceFirst("^/+", ""));
+    if (text.strip().equalsIgnoreCase("//calc help")) {
+      mc.inGameHud.addChatMessage("§b//calc <expression> §7Arithmetic, powers, parentheses and functions. Example: //calc sqrt(16) + 2^3.§r");
+      return true;
+    }
     if (text.strip().matches("//calc(?:\\s+.*)?")) {
       try { mc.inGameHud.addChatMessage(ChatFormat.info("= " + Calculator.evaluate(text.strip().substring(6).trim()))); }
       catch (IllegalArgumentException e) { mc.inGameHud.addChatMessage(ChatFormat.error(e.getMessage())); }

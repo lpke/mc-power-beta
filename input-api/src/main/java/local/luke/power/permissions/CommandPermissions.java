@@ -55,6 +55,8 @@ public final class CommandPermissions {
           command(
               "warp",
               "Save, list or travel to named locations. Blocking access keeps all saved warps."),
+          command("deathrecover", "Recover saved death items in creative mode. Saved deaths remain when access is blocked."),
+          info("death", "Show saved death locations and items."),
           info("help", "Show command instructions."),
           info("seed", "Display the world seed."),
           info("clearchat", "Clear the visible chat history."),

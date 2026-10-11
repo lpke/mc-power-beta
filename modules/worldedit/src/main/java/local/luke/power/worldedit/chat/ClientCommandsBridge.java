@@ -36,8 +36,7 @@ public final class ClientCommandsBridge implements ModInitializer {
                       }
                       case "manual" -> {
                         Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
-                        mc.inGameHud.addChatMessage(
-                            local.luke.power.chat.HelpOutput.line("Use //help [1-6] for world-editing commands."));
+                        WorldEditor.command(mc, "/" + name + " help");
                         yield null;
                       }
                       case "suggestion" -> {
@@ -47,6 +46,9 @@ public final class ClientCommandsBridge implements ModInitializer {
                             .map(v -> v.substring(input.length()))
                             .toArray(String[]::new);
                       }
+                      case "available" -> name.equals("/calc") || name.equals("/help") && ((Minecraft) FabricLoader.getInstance().getGameInstance()).world != null && !((Minecraft) FabricLoader.getInstance().getGameInstance()).world.isRemote
+                          || WorldEditor.available((Minecraft) FabricLoader.getInstance().getGameInstance());
+                      case "helpGroup" -> name.equals("/calc") ? "" : "World editing";
                       case "disableInSingleplayer" -> false;
                       case "needsPermissions" -> !name.equals("/calc");
                       case "toString" -> "WorldEdit Beta command " + name;

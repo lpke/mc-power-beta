@@ -19,6 +19,10 @@ public final class CreativeCommands {
     if (mc.level != null && mc.level.isRemote) return false;
     if (!ClientRuntime.local(mc)) return true;
     try {
+      if (args.length == 2 && args[1].equalsIgnoreCase("help")) {
+        mc.overlay.addChatMessage("§b/gamemode <survival|creative|spectator> [target]§r");
+        return true;
+      }
       if (args.length < 2 || args.length > 3)
         throw new IllegalArgumentException(
             "Usage: /gamemode <survival|creative|spectator> [target]");
@@ -78,6 +82,8 @@ public final class CreativeCommands {
                             .map(v -> v.substring(prefix.length()))
                             .toArray(String[]::new);
                       }
+                      case "available" -> true;
+                      case "helpGroup" -> "";
                       case "disableInSingleplayer" -> false;
                       case "needsPermissions" -> true;
                       case "toString" -> "CreativeFeatures " + name;

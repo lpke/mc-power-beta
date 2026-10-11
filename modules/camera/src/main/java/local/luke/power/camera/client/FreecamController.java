@@ -121,6 +121,16 @@ public class FreecamController {
     public boolean firstFramePending() { return firstFramePending; }
     public void frameRendered() { firstFramePending = false; }
 
+    public void updatePlayerVisibility(LivingEntity player, float delta) {
+        // Entity rendering uses the interpolated player position, too. Calculate
+        // this before the first detached frame, even when the camera has not moved.
+        double x = player.prevX + (player.x - player.prevX) * delta;
+        double y = player.prevY + (player.y - player.prevY) * delta;
+        double z = player.prevZ + (player.z - player.prevZ) * delta;
+        double dx = cameraPosition.x - x, dy = cameraPosition.y - y, dz = cameraPosition.z - z;
+        hidePlayer = dx * dx + dy * dy + dz * dz < 1;
+    }
+
     public void clearRenderedPosition() {
         renderedPosition = null;
         renderedEntity = null;

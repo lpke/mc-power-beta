@@ -749,6 +749,11 @@
     "interface": {
       "blinkingChatCursor": false,
       "debugTextColor": "#FFFFFF"
+    },
+    "death": {
+      "enabled": false,
+      "announceLocation": true,
+      "announceItems": true
     }
   }
 }

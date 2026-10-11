@@ -95,6 +95,11 @@
 - Chat editing shares a buffer across input and completion. History keeps arrow
   ownership until editing or explicit completion; rendering must not change text.
   Wrapped chat keeps the last Beta colour code from the preceding line.
+  Help and completion share command availability. Group WorldEdit under //help,
+  retain aliases, and keep per-command help free of gameplay changes.
+  Optional death records are scoped by stable world ID and player. Recovery needs
+  cheats and creative, plans full capacity first and protects native item NBT with
+  a flushed journal. Interrupted claims stay blocked; disabling keeps history.
 - Freecam bypasses entity and block entity culling independently of player movement.
   Keep culling results current and preserve preferences so normal culling resumes on exit.
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.

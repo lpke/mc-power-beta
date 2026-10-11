@@ -32,7 +32,16 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 - `freecam-handoff`: compare the actual rendered world-view matrices before and
   after the hotkey while walking, with bobbing, interpolation, sneaking, third
   person, vertical views and anaglyph eyes. Check first-frame timing, continued
-  auto-walk, normal exit and stale-pose rejection. Run after `new-world`.
+  auto-walk, normal exit, first-frame player visibility and stale-pose rejection.
+  Run after `new-world`.
+- `death-checks`: real death causes and drops, coordinates, inventory/equipment
+  snapshots, NBT/damage/full counts, queries, creative/cheat permissions, ownership,
+  full-inventory cancellation, repeated recovery and multiplayer exclusions.
+  Run after `new-world`; restart and run `death-checks saved` after `new-world`.
+  Run `death-checks rollback` last for partial-write rollback and failure shutdown.
+  Restart, load the same save and run `death-checks retry` to recover through chat once.
+- `help-audit`: index and completion coverage, aliases, optional features, world
+  rules, multiplayer/operator access and safe help for every available command.
 - `toggle-messages`: all nine defaults, live providers, HUD independence,
   duplicate suppression, menu silence and Cancel/Apply. Run after `new-world`.
   Use `toggle-messages save`, restart, then `toggle-messages reload` to verify

@@ -30,6 +30,24 @@ NBT, removal/placement intent and completed-transfer archives. Never delete a he
 or failed transaction record. Each chest half has its own inventory. A replay mismatch must stop and preserve evidence rather
 than overwrite a changed block or inventory.
 
+## Death records
+
+Optional death records live in `.minecraft/power-beta-data/deaths`, separated by
+world ID and player name. Disabling the feature or cheats preserves the journal.
+Records include native item NBT, full counts, damage, location and cause.
+
+`/death recover [id]` copies a saved inventory into the main inventory once,
+without replacing current items or equipment. It requires creative mode and
+cheats, and cancels before changing slots if every saved item cannot fit. Dropped
+items remain in the world.
+
+Each recovery flushes its complete before/after inventory to the checksummed
+journal before changing slots. A detected failure restores the original
+inventory and disables recovery until restart. A crash can leave an interrupted
+claim, which stays blocked to prevent duplicate recovery. Keep both the world
+and journal for inspection; do not remove a claim to force a retry. Restore only
+missing items into a copied save. Completed claims do not replace world backups.
+
 ## Settings
 
 `power-beta-data/settings-backups` stores settings transactions. Pending recovery

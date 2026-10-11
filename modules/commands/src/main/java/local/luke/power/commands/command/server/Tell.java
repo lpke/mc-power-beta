@@ -11,11 +11,12 @@ import java.util.Arrays;
 public class Tell implements Command {
     @Override
     public void command(SharedCommandSource commandSource, String[] parameters) {
-        if (parameters.length > 3) {
+        if (parameters.length < 3) { manual(commandSource); return; }
+        if (parameters.length >= 3) {
             String a = parameters[1];
             String b = "";
             for (int i = 2; i < parameters.length; i++) {
-                b += parameters[i];
+                b += (i == 2 ? "" : " ") + parameters[i];
             }
             String message = "§7" + commandSource.getName() + " whispers " + b;
             System.out.println(message + " to " + a);
@@ -24,6 +25,9 @@ public class Tell implements Command {
             }
         }
     }
+
+    @Override public boolean disableInSingleplayer() { return true; }
+    @Override public boolean needsPermissions() { return false; }
 
     @Override
     public String name() {
@@ -38,10 +42,6 @@ public class Tell implements Command {
 
     @Override
     public String[] suggestion(SharedCommandSource source, int parameterNum, String currentInput, String totalInput) {
-        if (parameterNum == 1) {
-            System.out.println(currentInput);
-            System.out.println(Arrays.toString(ParameterSuggestUtil.suggestPlayerName(currentInput)));
-        }
-        return new String[0];
+        return parameterNum == 1 ? ParameterSuggestUtil.suggestPlayerName(currentInput) : new String[0];
     }
 }

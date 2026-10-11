@@ -19,6 +19,7 @@ public final class PowerBeta {
     local.luke.power.light.LightOverlay.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.death.DeathCommands.register();
       local.luke.power.input.TweakIndicators.register(
           local.luke.power.input.TweakIndicators.Tweak.CINEMATIC_CAMERA,
           () -> mc.options.cinematicMode ? "" : null,

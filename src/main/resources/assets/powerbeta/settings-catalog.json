@@ -4471,5 +4471,20 @@
     "default": true,
     "restart": false,
     "order": 16
+  },
+  "death.enabled": {
+    "page": "Commands",
+    "group": "Death records",
+    "order": 0
+  },
+  "death.announceLocation": {
+    "page": "Commands",
+    "group": "Death records",
+    "order": 1
+  },
+  "death.announceItems": {
+    "page": "Commands",
+    "group": "Death records",
+    "order": 2
   }
 }

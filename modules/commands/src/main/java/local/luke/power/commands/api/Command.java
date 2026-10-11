@@ -7,6 +7,11 @@ public interface Command {
 
     String name();
 
+    default boolean available(SharedCommandSource source) { return true; }
+
+    /** Commands sharing a help index can occupy one entry in /help. */
+    default String helpGroup() { return ""; }
+
     default String[] suggestion(SharedCommandSource source, int parameterNum, String currentInput, String totalInput)
     {
         return new String[0];

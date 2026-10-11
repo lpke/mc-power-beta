@@ -166,18 +166,14 @@ public abstract class ChatScreenMixin extends Screen {
                     suggestions = RetroChatUtil.commands.stream()
                             .filter(c -> c.name().startsWith(currentWord.substring(1)))
                             .filter(c -> !ClientCommands.disabled_commands.contains(c.name()))
-                            .filter(c -> (!c.disableInSingleplayer() || mc.world.isRemote))
-                        .filter(c -> mc.world.isRemote || local.luke.power.permissions.CommandPermissions.allowed(c.name()))
-                            .filter(c -> (ClientCommands.mp_op || !c.needsPermissions() || !mc.world.isRemote))
+                            .filter(c -> local.luke.power.commands.util.CommandAccess.available(c, new SharedCommandSource(mc.player)))
                             .map(c -> c.name().substring(power$input().length() - 1))
                             .toArray(String[]::new);
                 }
             } else {
                 Command command = RetroChatUtil.commands.stream()
                         .filter(c -> c.name().equals(sections[0].substring(1)))
-                        .filter(c -> (!c.disableInSingleplayer() || mc.world.isRemote))
-                        .filter(c -> mc.world.isRemote || local.luke.power.permissions.CommandPermissions.allowed(c.name()))
-                        .filter(c -> (ClientCommands.mp_op || !c.needsPermissions() || !mc.world.isRemote))
+                        .filter(c -> local.luke.power.commands.util.CommandAccess.available(c, new SharedCommandSource(mc.player)))
                         .findFirst().orElse(null);
                 if (command != null && (!command.disableInSingleplayer() || mc.world.isRemote)) {
                     PlayerEntity player = mc.player;
@@ -214,7 +210,7 @@ public abstract class ChatScreenMixin extends Screen {
         try {
             AtomicBoolean valid = new AtomicBoolean(false);
             RetroChatUtil.commands.stream().forEach(a -> {
-                if (a.name().equals(s)) {
+                if (a.name().equals(s) && local.luke.power.commands.util.CommandAccess.available(a, new SharedCommandSource(minecraft.player))) {
                     if (!minecraft.world.isRemote) {
                         valid.set(true);
                     } else {
