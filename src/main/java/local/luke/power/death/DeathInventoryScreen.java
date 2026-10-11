@@ -18,11 +18,14 @@ public final class DeathInventoryScreen extends UiScreen {
   private final DeathJournal journal;
   private final Object world, player;
   private final ItemStack[] items;
+  private final String date;
   private final ItemRenderer renderer = new ItemRenderer();
   private Set<Integer> remaining;
 
   public DeathInventoryScreen(Minecraft mc, DeathRecord record) throws IOException {
     this.record = record; journal = DeathTracker.journal(mc); world = mc.world; player = mc.player;
+    date = java.time.format.DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
+        .withZone(java.time.ZoneId.systemDefault()).format(java.time.Instant.ofEpochMilli(record.date));
     items = new ItemStack[record.items.size()];
     for (int i = 0; i < items.length; i++) items[i] = DeathItems.decode(record.items.get(i));
     remaining = new HashSet<>(journal.remaining(record.id));
@@ -41,8 +44,8 @@ public final class DeathInventoryScreen extends UiScreen {
   private int displayedSlot(int index) {
     return record.slots.get(index);
   }
-  private int slotX(int slot) { return slot < 36 ? 8 + slot % 9 * 18 : slot < 40 ? 8 : 144; }
-  private int slotY(int slot) { return slot < 9 ? 142 : slot < 36 ? 84 + (slot / 9 - 1) * 18 : slot < 40 ? 8 + (39 - slot) * 18 : 36; }
+  private int slotX(int slot) { return slot < 36 ? 8 + slot % 9 * 18 : slot < 40 ? 8 : slot == 40 ? 144 : 88 + (slot - 41) % 2 * 18; }
+  private int slotY(int slot) { return slot < 9 ? 142 : slot < 36 ? 84 + (slot / 9 - 1) * 18 : slot < 40 ? 8 + (39 - slot) * 18 : slot == 40 ? 36 : 26 + (slot - 41) / 2 * 18; }
   private int hit(int mx, int my) {
     for (int i = 0; i < items.length; i++) {
       int slot = displayedSlot(i);
@@ -82,11 +85,15 @@ public final class DeathInventoryScreen extends UiScreen {
       GL11.glColor4f(1, 1, 1, 1);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, minecraft.textureManager.getTextureId("/gui/inventory.png"));
       drawTexture(x, y, 0, 0, 176, 166);
-      fill(x + 28, y + 7, x + 169, y + 79, 0xffc6c6c6);
+      // Cover the model panel, its black border and the recipe output/arrow.
+      fill(x + 26, y + 7, x + 169, y + 79, 0xffc6c6c6);
+      GL11.glBindTexture(GL11.GL_TEXTURE_2D, minecraft.textureManager.getTextureId("/gui/inventory.png"));
+      drawTexture(x + 87, y + 25, 87, 25, 36, 36);
       // Cursor items have no lasting inventory position, so show them separately.
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, minecraft.textureManager.getTextureId("/gui/inventory.png"));
       drawTexture(x + 143, y + 35, 7, 83, 18, 18);
-      text("held", x + 139, y + 23, 0xaaaaaa);
+      drawCenteredTextWithShadow(textRenderer, "Death " + record.id, width / 2, y - 25, 0xffffff);
+      drawCenteredTextWithShadow(textRenderer, date, width / 2, y - 13, 0xaaaaaa);
       GL11.glPushMatrix(); GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); GL11.glPopMatrix();
       GL11.glEnable(32826);
       for (int i = 0; i < items.length; i++) {
@@ -102,8 +109,8 @@ public final class DeathInventoryScreen extends UiScreen {
         if (!remaining.contains(i)) fill(sx, sy, sx + 16, sy + 16, 0xbb777777);
         else if (hovered == i) fill(sx, sy, sx + 16, sy + 16, 0x55ffffff);
       }
-      iconButton("remove", x, y + 170, 80, mx, my, true);
-      iconButton("check", x + 84, y + 170, 92, mx, my, recover);
+      button("Close", x, y + 170, 80, 18, mx, my, true);
+      button("Recover all", x + 84, y + 170, 92, 18, mx, my, recover);
       if (hovered >= 0) {
         ItemStack item = items[hovered];
         String name = TranslationStorage.getInstance().get(item.getTranslationKey() + ".name");

@@ -105,7 +105,12 @@
   start fresh in 1.4.2. Keep inventory is a per-world cheat rule which clears when
   cheats are disabled. Preserve native stacks through death, respawn and dead-player
   saves; kept deaths claim their recorded items without creating drops.
+  Death snapshots include the four player crafting inputs, never the recipe output.
+  Normal deaths drop those inputs once; kept deaths preserve them through respawn.
+  Recovery restores empty original crafting slots and rolls back recipe callback failures.
 - Freecam bypasses entity and block entity culling independently of player movement.
+  Background culling only reads loaded chunks and uses its own vectors and boxes;
+  never run chunk loading or touch Beta's shared geometry pools from that worker.
   Keep culling results current and preserve preferences so normal culling resumes on exit.
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.
   Keep the first detached frame still, reset movement timing and reject old-world poses.

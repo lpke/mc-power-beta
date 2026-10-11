@@ -34,10 +34,10 @@ public final class DeathItems {
     } catch (RuntimeException e) { throw new IOException("Invalid saved item", e); }
   }
 
-  public static void capture(PlayerInventory inventory, DeathRecord record) throws IOException {
+  public static void capture(net.minecraft.entity.player.PlayerEntity player, DeathRecord record) throws IOException {
     record.items = new ArrayList<>(); record.slots = new ArrayList<>();
     IdentityHashMap<ItemStack, Boolean> references = new IdentityHashMap<>();
-    ItemStack[] items = Arrays.copyOf(snapshot(inventory), 41); items[40] = inventory.getCursorStack();
+    ItemStack[] items = snapshot(player.inventory, player.playerContainer);
     for (int slot = 0; slot < items.length; slot++) {
       ItemStack item = items[slot];
       if (item != null) {
@@ -53,6 +53,15 @@ public final class DeathItems {
     System.arraycopy(inventory.armor, 0, result, 36, 4); return result;
   }
 
+  /** Cursor 40, then the player's four crafting inputs 41..44. The recipe output is not owned. */
+  public static ItemStack[] snapshot(PlayerInventory inventory, net.minecraft.inventory.Container container) throws IOException {
+    if (!(container instanceof net.minecraft.class_277)) throw new IOException("Player crafting slots unavailable");
+    ItemStack[] result = Arrays.copyOf(snapshot(inventory), 45);
+    result[40] = inventory.getCursorStack();
+    for (int i = 0; i < 4; i++) result[41 + i] = container.method_2084(i + 1).getStack();
+    return result;
+  }
+
   public static String inventory(ItemStack[] items) throws IOException {
     List<String> result = new ArrayList<>();
     for (ItemStack item : items) result.add(item == null ? null : encode(item));
@@ -61,13 +70,13 @@ public final class DeathItems {
 
   public static ItemStack[] plan(PlayerInventory inventory, net.minecraft.inventory.Container container,
       DeathRecord record, List<Integer> indices) throws IOException {
-    ItemStack[] next = snapshot(inventory);
+    ItemStack[] next = snapshot(inventory, container);
     for (int i = 0; i < next.length; i++) if (next[i] != null) next[i] = decode(encode(next[i]));
     List<ItemStack> items = new ArrayList<>();
     // Any occupied original slot cancels the entire selected recovery, even matching items.
     for (int index : indices) {
       int slot = record.slots.get(index);
-      if (slot < 40 && next[slot] != null)
+      if (slot != 40 && next[slot] != null)
         throw new IllegalArgumentException("Saved inventory slot " + (slot + 1) + " is occupied. Recovery cancelled; no items changed.");
     }
     // Reserve original positions before splitting stacks above the current item limit.
@@ -86,6 +95,10 @@ public final class DeathItems {
           }
         }
         if (!accepted) throw new IllegalArgumentException("Saved equipment no longer fits its original slot. Recovery cancelled; no items changed.");
+      } else if (slot >= 41) {
+        var nativeSlot = container.method_2084(slot - 40);
+        if (!nativeSlot.canInsert(item)) throw new IllegalArgumentException("Saved crafting item no longer fits its original slot. Recovery cancelled; no items changed.");
+        insert(next, slot, item, nativeSlot.getMaxItemCount());
       }
     }
     for (ItemStack item : items) {

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.4.3] - 2026-10-11
+
+- Restore text buttons and show the death number and timestamp in the saved inventory view, without the held label or armour-panel black bar.
+- Save and recover the four player crafting inputs in their original positions, and drop them once on normal deaths.
+- Prevent crashes after long-distance WorldEdit jumps by keeping background culling out of chunk generation and fixing chunk sorting.
+
 ## [1.4.2] - 2026-10-11
 
 - Simplify the saved death inventory view and cancel recovery when original slots are occupied.

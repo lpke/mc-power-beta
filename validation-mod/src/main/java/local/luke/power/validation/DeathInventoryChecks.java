@@ -159,8 +159,8 @@ final class DeathInventoryChecks {
     ((ScreenInput)(Object)screen).power$click((screen.width - 176) / 2 + 110, (screen.height - 210) / 2 + 200, 0);
   }
   static void click(DeathInventoryScreen screen, int slot, int button) throws Exception {
-    int x = (screen.width - 176) / 2 + (slot < 36 ? 8 + slot % 9 * 18 : slot < 40 ? 8 : 144);
-    int y = (screen.height - 210) / 2 + 22 + (slot < 9 ? 142 : slot < 36 ? 84 + (slot / 9 - 1) * 18 : slot < 40 ? 8 + (39 - slot) * 18 : 36);
+    int x = (screen.width - 176) / 2 + (slot < 36 ? 8 + slot % 9 * 18 : slot < 40 ? 8 : slot == 40 ? 144 : 88 + (slot - 41) % 2 * 18);
+    int y = (screen.height - 210) / 2 + 22 + (slot < 9 ? 142 : slot < 36 ? 84 + (slot / 9 - 1) * 18 : slot < 40 ? 8 + (39 - slot) * 18 : slot == 40 ? 36 : 26 + (slot - 41) / 2 * 18);
     ((ScreenInput)(Object)screen).power$click(x + 5, y + 5, button);
   }
 }

@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.opengl.GL11;
 
 public final class Validation {
+  public static final java.util.concurrent.atomic.AtomicInteger backgroundChunkReads = new java.util.concurrent.atomic.AtomicInteger();
   private static final Path COMMAND = Path.of("power-beta-validation.command"),
       REPORT = Path.of("power-beta-validation.log");
   private static int ticks;
@@ -56,6 +57,8 @@ public final class Validation {
       else if (command.startsWith("bucket-stacks")) BucketStackChecks.run(mc, command.length() > 13 ? command.substring(13).trim() : "check");
       else if (command.equals("toggle-performance")) TogglePerformanceChecks.run(mc);
       else if (command.startsWith("toggle-saves")) ToggleSaveChecks.run(mc, command.length() > 13 ? command.substring(13) : "check");
+      else if (command.equals("worldedit-navigation")) WorldEditNavigationChecks.run(mc);
+      else if (command.startsWith("death-crafting")) DeathCraftingChecks.run(mc, command.length() > 14 ? command.substring(14).trim() : "check");
       else if (command.equals("worldedit-hand")) WorldEditHandChecks.run(mc);
       else if (command.startsWith("toggle-messages")) ToggleMessageChecks.run(mc, command.length() > 16 ? command.substring(16) : "check");
       else if (command.equals("settings-review")) SettingsReviewChecks.run(mc);

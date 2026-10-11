@@ -64,6 +64,14 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   Restart, run `new-world`, then `toggle-saves reload` to check and restore those settings.
 - `worldedit-hand`: held variants, command snapshots, masks, inventory preservation,
   undo/redo, invalid hands and cheats. Run after `new-world`.
+- `worldedit-navigation`: repeated jumps across chunk boundaries up to 255 blocks,
+  real world rendering, safe cancellation, chunk comparator contracts and culling
+  reads without chunk generation or cancelled unloads. Run after `new-world`.
+- `death-crafting`: four crafting-input snapshots, normal drops, native data,
+  original-slot GUI recovery, locked views, conflicts, overflow and narrow/wide UI.
+  Restart, run `new-world`, then `death-crafting saved` for partial-claim persistence.
+  Run `death-crafting rollback` last for a failed recipe callback, then restart and
+  run `new-world`, `death-crafting retry` for protected GUI recovery exactly once.
 - `creative-vehicles`: one-hit deletion of boats and every minecart type, loaded
   inventories, repeat attacks, survival drops and spectator/multiplayer guards.
 - `release-110`: history/caret/completion, spawning rules and Apply/Cancel, NBT and

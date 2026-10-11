@@ -60,7 +60,7 @@ final class KeepInventoryChecks {
         check(mc.player.health <= 0 && saved.matches(mc.player), "death changed kept inventory");
         mc.player.markDead(); check(saved.matches(mc.player), "body removal or container closure changed items");
         check(drops(mc) == drops && death.kept && DeathTracker.journal(mc).state(death.id).equals("kept"), "drops created or record unclaimed");
-        check(death.slots.equals(List.of(8, 20, 39, 40)), "kept death snapshot positions changed");
+        check(death.slots.equals(List.of(8, 20, 39, 40, 41)), "kept death snapshot positions changed");
         var old = mc.player; mc.method_2122(false, 0); mc.setScreen(null);
         check(saved.matches(mc.player) && !KeepInventory.kept(mc.player), "real respawn changed stacks or kept stale death state");
         check(Arrays.stream(old.inventory.main).allMatch(Objects::isNull) && Arrays.stream(old.inventory.armor).allMatch(Objects::isNull) && old.inventory.getCursorStack() == null, "old body retained duplicated items");

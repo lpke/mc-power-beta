@@ -107,13 +107,23 @@ class DeathJournalTest {
   }
   @Test void invalidSlotPositionsCannotBeSaved() throws Exception {
     DeathJournal journal = new DeathJournal(temp.resolve("invalid.journal"));
-    for (List<Integer> slots : List.of(List.of(-1), List.of(41), List.of(0, 1))) {
+    for (List<Integer> slots : List.of(List.of(-1), List.of(45), List.of(0, 1))) {
       DeathRecord record = death("1"); record.slots = slots;
       assertThrows(IllegalArgumentException.class, () -> journal.death(record));
     }
     DeathRecord repeated = death("1"); repeated.items = List.of("a", "b"); repeated.slots = List.of(0, 0);
     assertThrows(IllegalArgumentException.class, () -> journal.death(repeated));
     assertTrue(journal.records().isEmpty()); assertFalse(journal.damaged());
+  }
+  @Test void craftingPositionsAndOldInventoryRecordsSurviveRestart() throws Exception {
+    Path path = temp.resolve("crafting.journal"); DeathJournal journal = new DeathJournal(path);
+    journal.death(death("1"));
+    DeathRecord record = death("2"); record.items = List.of("a", "b", "c", "d"); record.slots = List.of(41, 42, 43, 44);
+    journal.death(record); journal.recovery("2", List.of(1), "before", "after"); journal.finish("2", true);
+    DeathJournal restarted = new DeathJournal(path);
+    assertEquals(List.of(0), restarted.records().get(0).slots);
+    assertEquals(record.slots, restarted.records().get(1).slots);
+    assertEquals(List.of(0, 2, 3), restarted.remaining("2"));
   }
   @Test void keptDeathsClaimEveryStackInTheSameDurableDeathRecord() throws Exception {
     Path path = temp.resolve("kept.journal"); DeathJournal journal = new DeathJournal(path);

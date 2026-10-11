@@ -39,7 +39,7 @@ public final class DeathTracker {
       record.world = CommandContext.world(mc); record.player = player.name;
       record.x = (int)Math.floor(player.x); record.y = (int)Math.floor(player.boundingBox.minY); record.z = (int)Math.floor(player.z);
       record.dimension = player.dimensionId; record.date = System.currentTimeMillis();
-      record.cause = DeathCause.describe(player, attacker); DeathItems.capture(player.inventory, record);
+      record.cause = DeathCause.describe(player, attacker); DeathItems.capture(player, record);
       record.kept = KeepInventory.kept(player);
       data.death(record);
       if (DeathConfig.current().announceLocation) DeathCommands.location(mc, record);
@@ -81,7 +81,11 @@ public final class DeathTracker {
     if (!data.remaining(record.id).containsAll(indices) || new HashSet<>(indices).size() != indices.size())
       throw new IllegalArgumentException("These items have already been recovered.");
     var player = mc.player; var world = mc.world; var inventory = player.inventory;
-    var original = inventory.main; var originalArmor = inventory.armor; var before = DeathItems.snapshot(inventory);
+    var container = player.playerContainer;
+    var crafting = ((net.minecraft.class_277)container).field_1124;
+    var grid = ((local.luke.power.mixin.DeathCraftingAccessor)crafting).power$deathStacks();
+    var output = container.method_2084(0).getStack();
+    var original = inventory.main; var originalArmor = inventory.armor; var before = DeathItems.snapshot(inventory, container);
     String beforeData = DeathItems.inventory(before);
     var after = DeathItems.plan(inventory, player.playerContainer, record, indices);
     String afterData = DeathItems.inventory(after);
@@ -89,17 +93,23 @@ public final class DeathTracker {
     try {
       data.recovery(record.id, indices, beforeData, afterData); pending = true;
       if (mc.player != player || mc.world != world || player.inventory != inventory || inventory.main != original
-          || inventory.armor != originalArmor || !beforeData.equals(DeathItems.inventory(DeathItems.snapshot(inventory))) || !recoveryDenial(mc).isEmpty())
+          || inventory.armor != originalArmor || player.playerContainer != container
+          || ((net.minecraft.class_277)container).field_1124 != crafting
+          || !beforeData.equals(DeathItems.inventory(DeathItems.snapshot(inventory, container))) || !recoveryDenial(mc).isEmpty())
         throw new IOException("Inventory ownership changed before recovery");
-      for (int i = 0; i < after.length; i++) inventory.setStack(i, after[i]);
+      for (int i = 0; i < 40; i++) inventory.setStack(i, after[i]);
+      for (int i = 0; i < 4; i++) container.method_2084(i + 1).setStack(after[41 + i]);
       if (inventory.main != original || inventory.armor != originalArmor || mc.player != player || mc.world != world
-          || player.inventory != inventory || !recoveryDenial(mc).isEmpty()
-          || !afterData.equals(DeathItems.inventory(DeathItems.snapshot(inventory))))
+          || player.inventory != inventory || player.playerContainer != container || !recoveryDenial(mc).isEmpty()
+          || ((net.minecraft.class_277)container).field_1124 != crafting
+          || !afterData.equals(DeathItems.inventory(DeathItems.snapshot(inventory, container))))
         throw new IOException("Inventory changed during recovery");
       inventory.markDirty(); data.finish(record.id, true);
     } catch (Exception e) {
       recoveryFailed = true;
       System.arraycopy(before, 0, original, 0, 36); System.arraycopy(before, 36, originalArmor, 0, 4);
+      // Restore the backing grid without repeating a failing recipe callback.
+      System.arraycopy(before, 41, grid, 0, 4); container.method_2084(0).setStack(output);
       inventory.main = original; inventory.armor = originalArmor; inventory.markDirty();
       if (pending) try { data.finish(record.id, false); } catch (IOException failure) { e.addSuppressed(failure); }
       PowerBeta.LOG.error("Death recovery rolled back; disabled until restart. Journal: {}", journalPath, e);

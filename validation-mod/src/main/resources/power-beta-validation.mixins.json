@@ -13,7 +13,8 @@
     "ChatLinesAccess",
     "ChatInput",
     "PlayerSleepAccess",
-    "PlacementSoundCaptureMixin"
+    "PlacementSoundCaptureMixin",
+    "CullingThreadChecks"
   ],
   "injectors": {
     "defaultRequire": 1

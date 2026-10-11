@@ -9,7 +9,7 @@ public final class DeathRecord {
   public long date;
   public boolean kept;
   public List<String> items = new ArrayList<>();
-  /** Main 0..35, armour 36..39, held cursor 40. */
+  /** Main 0..35, armour 36..39, held cursor 40, crafting inputs 41..44. */
   public List<Integer> slots = new ArrayList<>();
 
   void validate() {
@@ -17,7 +17,7 @@ public final class DeathRecord {
         || player == null || player.isBlank() || cause == null || cause.length() > 256
         || items == null || items.size() > 128 || items.stream().anyMatch(Objects::isNull)
         || slots == null || slots.size() != items.size()
-        || (slots.stream().anyMatch(s -> s == null || s < 0 || s > 40)
+        || (slots.stream().anyMatch(s -> s == null || s < 0 || s > 44)
             || new HashSet<>(slots).size() != slots.size()))
       throw new IllegalArgumentException("Invalid death record");
   }

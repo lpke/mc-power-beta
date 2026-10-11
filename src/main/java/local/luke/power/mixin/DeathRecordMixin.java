@@ -17,6 +17,13 @@ public abstract class DeathRecordMixin {
     power$deathRecorded = true;
     KeepInventory.begin((PlayerEntity)(Object)this);
     DeathTracker.died((PlayerEntity)(Object)this, attacker);
+    var player = (PlayerEntity)(Object)this;
+    if (!player.world.isRemote && !KeepInventory.kept(player)) {
+      for (int i = 1; i <= 4; i++) {
+        var slot = player.playerContainer.method_2084(i); var item = slot.getStack();
+        if (item != null) { slot.setStack(null); player.method_509(item, true); }
+      }
+    }
   }
   @Inject(method = "tick", at = @At("HEAD"))
   private void power$newLife(CallbackInfo ci) {
