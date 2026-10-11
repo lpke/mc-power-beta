@@ -11,6 +11,9 @@ public interface ScreenInput {
   @Invoker("mouseClicked")
   void power$click(int x, int y, int button);
 
+  @Invoker("mouseReleased")
+  void power$release(int x, int y, int button);
+
   @Invoker("keyPressed")
   void power$key(char c, int code);
 }

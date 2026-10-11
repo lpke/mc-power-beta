@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-10-11
+
+- Middle-click drag a held item in creative inventories and containers to fill compatible slots to their normal stack limits.
+
 ## [1.3.1] - 2026-10-11
 
 - Add optional empty bucket stacks of 16, off by default, with safe fluid pickup and milking.

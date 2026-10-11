@@ -9,6 +9,8 @@ import net.minecraft.client.render.RenderHelper;
 import net.minecraft.client.render.entity.ItemRenderer;
 import net.minecraft.client.resource.language.TranslationStorage;
 import net.minecraft.container.Container;
+import net.minecraft.container.slot.Slot;
+import local.luke.power.creative.inventory.interfaces.CreativeDragScreen;
 import net.minecraft.entity.living.player.PlayerEntity;
 import net.minecraft.inventory.PlayerInventory;
 import net.minecraft.item.Item;
@@ -34,7 +36,7 @@ import local.luke.power.creative.inventory.util.MHelper;
 import local.luke.power.creative.inventory.util.SlotUpdatePacket;
 
 @Mixin(PlayerScreen.class)
-public abstract class PlayerScreenMixin extends ContainerScreen {
+public abstract class PlayerScreenMixin extends ContainerScreen implements CreativeDragScreen {
   @Unique private static final int CREATIVE_COLOR_FILLER = MHelper.getColor(198, 198, 198, 128);
   @Unique private static final ItemRenderer CREATIVE_ITEM_RENDERER = new ItemRenderer();
 
@@ -221,7 +223,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
       }
 
       for (int i = 0; i < 9; i++) {
-        ItemStack item = inventory.main[i];
+        ItemStack item = power$creativePaintPreview(container.getSlot(36 + i), inventory.main[i]);
         int x = posX + i * 18 + 8;
         int y = posY + 142;
         creative_renderItem(item, x, y);
@@ -454,6 +456,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
       minecraft.player.closeContainer();
       return;
     }
+    if (power$creativePaintClick(mouseX, mouseY, button)) return;
     if (creative_isInCreative()) {
       int posX = (this.width - this.containerWidth) / 2;
       int posY = (this.height - this.containerHeight) / 2;
@@ -611,6 +614,13 @@ public abstract class PlayerScreenMixin extends ContainerScreen {
     } else {
       super.mouseClicked(mouseX, mouseY, button);
     }
+  }
+
+  @Override
+  public Slot power$creativePaintSlot(int mouseX, int mouseY) {
+    Slot slot = power$defaultCreativePaintSlot(mouseX, mouseY);
+    return creative_isInCreative() && !creative_normalGUI
+        && (slot == null || slot.id < 36 || slot.id >= 45) ? null : slot;
   }
 
   @Override

@@ -12,6 +12,8 @@
 		"LevelMetadataMixin",
 		"GameRendererMixin",
 		"PlayerScreenMixin",
+    "ContainerScreenMixin",
+    "ScreenMixin",
 		"MinecraftMixin",
 		"WorldListMixin"
 	],

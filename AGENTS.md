@@ -78,6 +78,10 @@
   Creative catalogue rows grow upward; hotbar and survival slots never move.
   The final catalogue row and hotbar use the same 22-pixel origin spacing as survival.
   Leaving spectator keeps the current position, including inside solid blocks.
+- Creative middle-click dragging previews compatible, writable slots and commits
+  together on release. Use normal item and slot limits; preserve cursor damage/NBT.
+  Never paint hidden catalogue slots, survival, spectator or multiplayer inventories.
+  Cancel on focus loss, screen/container changes, lost cheats or cursor changes.
 - `TweakIndicators` exposes live module state across mappings. HUD inclusion is
   separate from gameplay settings. Do not infer active auto-walk/free look from
   feature availability or poll action keys while rendering.

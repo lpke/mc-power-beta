@@ -85,6 +85,12 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 - `creative-drops`: click outside the diamond tab at narrow and wide GUI sizes;
   check whole-stack and single-item drops, damage/NBT, hotbar pickup, UI borders,
   view/category tabs, destroy-slot borders and closure without duplication.
+- `creative-paint`: middle-button previews and release in catalogue, inventory,
+  armor, chest, crafting table, furnace and dispenser; stack limits, damage/NBT,
+  incompatible/output slots, cancellation and ordinary clicks. Run after `new-world`.
+  Restart, load the same save and run `creative-paint saved`. Run `rollback` last
+  to check partial-write recovery and shutdown until restart. `setup`,
+  `physical-check` and `focus-check` support real middle-button and focus-loss checks.
 - `redstone-visuals`: default, preview, Cancel/Apply, world-scope labels and all
   sixteen power sprites with default and Faithful textures, including four-pixel
   wire widths and shaded edges. Inspect the screenshots

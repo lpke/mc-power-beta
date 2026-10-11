@@ -109,6 +109,7 @@ public final class Validation {
       else if (command.equals("redstone-visuals")) RedstoneVisualChecks.run(mc);
       else if (command.equals("creative-borders")) CreativeBorderChecks.run(mc);
       else if (command.equals("creative-drops")) CreativeDropChecks.run(mc);
+      else if (command.startsWith("creative-paint")) CreativePaintChecks.run(mc, command.length() > 14 ? command.substring(14).trim() : "check");
       else if (command.equals("chat-check")) ChatChecks.run(mc);
       else if (command.equals("chat-wrap")) ChatWrapChecks.run(mc);
       else if (command.equals("freecam-culling")) FreecamCullingChecks.run(mc);

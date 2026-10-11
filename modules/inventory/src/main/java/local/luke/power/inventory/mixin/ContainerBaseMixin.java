@@ -35,7 +35,12 @@ import static java.lang.Math.abs;
 
 @Environment(EnvType.CLIENT)
 @Mixin(HandledScreen.class)
-public abstract class ContainerBaseMixin extends Screen {
+public abstract class ContainerBaseMixin extends Screen implements local.luke.power.input.InventoryDrag {
+
+	@Override public void power$cancelItemDrag() {
+		powerInventory_resetRightClickDragVariables();
+		powerInventory_resetLeftClickDragVariables();
+	}
 
 	@Shadow
 	protected int backgroundWidth;
