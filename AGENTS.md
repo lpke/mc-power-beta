@@ -98,8 +98,9 @@
   Help and completion share command availability. Group WorldEdit under //help,
   retain aliases, and keep per-command help free of gameplay changes.
   Optional death records are scoped by stable world ID and player. Recovery needs
-  cheats and creative, plans full capacity first and protects native item NBT with
-  a flushed journal. Interrupted claims stay blocked; disabling keeps history.
+  cheats, plans full capacity first and protects native item NBT and original slots
+  with a flushed journal. GUI recovery uses per-stack claims; viewing never changes
+  inventory. Interrupted claims stay blocked; disabling keeps history.
 - Freecam bypasses entity and block entity culling independently of player movement.
   Keep culling results current and preserve preferences so normal culling resumes on exit.
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.

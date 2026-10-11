@@ -67,7 +67,7 @@ public final class DeathCommands {
     }
     DeathRecord record = find(mc, id);
     switch (action) {
-      case "items" -> items(mc, record, true);
+      case "items" -> mc.setScreen(new DeathInventoryScreen(mc, record));
       case "recover" -> { DeathTracker.recover(mc, record); chat(mc, "§aRecovered items from death " + record.id + ". Dropped items remain in the world."); }
       default -> location(mc, record);
     }
@@ -92,6 +92,7 @@ public final class DeathCommands {
     try {
       return switch (DeathTracker.journal(mc).state(record.id)) {
         case "recovered" -> " §8| §aRecovered";
+        case "partial" -> " §8| §ePartly recovered";
         case "pending" -> " §8| §cRecovery interrupted";
         default -> "";
       };
@@ -112,10 +113,10 @@ public final class DeathCommands {
   }
   private static void help(Minecraft mc) {
     chat(mc, "§b/death [id] §7Location and cause; latest death by default.");
-    chat(mc, "§b/death items [id] §7Saved inventory and equipment.");
+    chat(mc, "§b/death items [id] §7View saved inventory positions. Cheats allow stack recovery.");
     chat(mc, "§b/death log [page] §7Past deaths and their IDs.");
-    if (DeathTracker.recoveryDenial(mc).isEmpty()) chat(mc, "§b/death recover [id] §7Copy saved items into your inventory once. Cancels if they do not all fit.");
-    else chat(mc, "§7Recovery requires cheats, creative mode and /death recover access.");
+    if (DeathTracker.recoveryDenial(mc).isEmpty()) chat(mc, "§b/death recover [id] §7Recover remaining stacks, preferring their original slots. Cancels if they do not all fit.");
+    else chat(mc, "§7Recovery requires cheats and /death recover access.");
     chat(mc, "§7Records belong to this world and player. Recovery keeps existing items and leaves dropped items in the world.");
   }
   private static void chat(Minecraft mc, String message) { mc.inGameHud.addChatMessage(message + "§r"); }

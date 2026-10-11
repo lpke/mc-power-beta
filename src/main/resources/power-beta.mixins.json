@@ -55,6 +55,7 @@
     "DebugHudMixin",
     "DebugTextMixin",
     "DeathRecordMixin",
+    "DeathSlotAccessor",
     "DeathLivingCauseMixin",
     "DeathEntityCauseMixin"
   ],

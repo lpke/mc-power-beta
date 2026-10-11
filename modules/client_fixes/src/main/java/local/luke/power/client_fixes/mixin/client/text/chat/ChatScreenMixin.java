@@ -57,7 +57,9 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
             }
             if (key == Keyboard.KEY_NUMPADENTER) {
                 if (!message.isEmpty() && !minecraft.isCommand(message)) minecraft.player.sendChatMessage(message);
-                minecraft.setScreen(null); ci.cancel();
+                if (minecraft.currentScreen == (Object)this) minecraft.setScreen(null);
+                else ClientFixesClientMod.cancelSetScreenNull = false;
+                ci.cancel();
             }
             return;
         }
@@ -82,7 +84,10 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     }
     @Redirect(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 1))
     private void onSetScreen(Minecraft instance, Screen screen) {
-        if (ClientFixesClientMod.cancelSetScreenNull) {
+        if (instance.currentScreen != (Object)this) {
+            // Commands may open a screen. Closing the submitted chat must keep it.
+            ClientFixesClientMod.cancelSetScreenNull = false;
+        } else if (ClientFixesClientMod.cancelSetScreenNull) {
             ClientFixesClientMod.cancelSetScreenNull = false;
             editor.reset(""); power$sync();
         } else instance.setScreen(screen);

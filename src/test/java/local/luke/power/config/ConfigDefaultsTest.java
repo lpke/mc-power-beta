@@ -23,6 +23,7 @@ class ConfigDefaultsTest {
     assertEquals(3, root.get("schemaVersion").getAsInt());
     assertEquals(2, root.size());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("death").get("enabled").getAsBoolean());
+    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("death").get("announceItems").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("power_mechanics:config")
         .getAsJsonObject("MOB_CONFIG").get("waterNegatesFallDamage").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("power_compat:config")

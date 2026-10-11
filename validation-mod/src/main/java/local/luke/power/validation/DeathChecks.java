@@ -18,6 +18,7 @@ import net.minecraft.nbt.NbtCompound;
 final class DeathChecks {
   static void run(Minecraft mc, String action) throws Exception {
     failures = 0;
+    if (action.equals("inventory") || action.equals("inventory-saved")) { DeathInventoryChecks.run(mc, action.equals("inventory-saved")); return; }
     if (action.equals("retry")) {
       alive(mc); clear(mc); ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
       CreativeVehicleChecks.mode(mc, "CREATIVE"); var record = latest(mc);
@@ -49,6 +50,7 @@ final class DeathChecks {
     try {
       test("defaults stay off and menu changes wait for Apply", () -> {
         check(!new DeathSettings().enabled, "feature defaults on");
+        check(!new DeathSettings().announceItems, "item notices default on");
         DeathConfig.preview(new DeathSettings()); var session = SettingsRegistry.open(mc);
         var setting = Release110Checks.find(session, "death.enabled"); setting.value = new JsonPrimitive(true); session.preview(true);
         check(!DeathConfig.current().enabled, "draft recorded deaths before Apply"); session.discard();
@@ -91,6 +93,7 @@ final class DeathChecks {
         check(mc.player.health <= 0 && record.cause.equals("Fall"), "fatal fall cause incorrect: " + record.cause);
         check(record.x == -13 && record.y == expectedY && record.z == 8, "death coordinates/body shrink wrong");
         check(record.items.size() == 3 && record.items.contains(mainItem), "main, armor or cursor snapshot lost");
+        check(record.slots.equals(List.of(0, 36, 40)), "main, armor or cursor positions lost");
         check(mc.player.inventory.main[0] == null && mc.player.inventory.armor[0] == null, "normal drops prevented");
         mc.player.method_938(null); check(DeathTracker.journal(mc).records().size() == count + 1, "duplicate death record");
       });
@@ -133,12 +136,13 @@ final class DeathChecks {
         for (String command : List.of("death", "death items", "death log", "death " + death.id, "death items " + death.id, "death help"))
           DeathCommands.execute(mc, command.split(" "));
         check(before.equals(DeathItems.inventory(mc.player.inventory.main)), "query modified inventory");
+        mc.setScreen(null);
       });
-      test("recovery needs cheats, creative and its command permission", () -> {
+      test("recovery needs cheats and its command permission in every game mode", () -> {
         var death = latest(mc); String before = DeathItems.inventory(mc.player.inventory.main);
         for (boolean cheat : new boolean[]{false, true}) for (String mode : new String[]{"SURVIVAL", "SPECTATOR", "CREATIVE"}) {
           ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(cheat); CreativeVehicleChecks.mode(mc, mode);
-          if (cheat && mode.equals("CREATIVE")) continue;
+          if (cheat) { check(DeathTracker.recoveryDenial(mc).isEmpty(), "cheats recovery unavailable in " + mode); continue; }
           check(!DeathTracker.recoveryDenial(mc).isEmpty(), "recovery available in " + mode + " cheats=" + cheat);
           refused(mc, death); check(before.equals(DeathItems.inventory(mc.player.inventory.main)), "denied recovery changed items");
         }
@@ -210,11 +214,11 @@ final class DeathChecks {
       if (failures != 0) DeathConfig.preview(settings);
     }
   }
-  private static NbtCompound tag(ItemStack stack) throws Exception { return (NbtCompound)stack.getClass().getMethod("getStationNbt").invoke(stack); }
-  private static ItemStack tagged(int id, int count, int damage, String label) throws Exception {
+  static NbtCompound tag(ItemStack stack) throws Exception { return (NbtCompound)stack.getClass().getMethod("getStationNbt").invoke(stack); }
+  static ItemStack tagged(int id, int count, int damage, String label) throws Exception {
     var stack = new ItemStack(id, count, damage); tag(stack).putString("DeathFixture", label); return stack;
   }
-  private static void alive(Minecraft mc) throws Exception {
+  static void alive(Minecraft mc) throws Exception {
     if (mc.player.health <= 0 || mc.player.dead) { mc.method_2122(false, 0); mc.setScreen(null); }
     mc.player.health = 20; mc.player.dead = false; mc.player.hurtTime = 0; mc.player.field_1613 = 0; mc.player.field_1041 = 0;
     mc.player.fire = 0; mc.player.air = 300; mc.player.field_1631 = 1.62F;
@@ -222,12 +226,12 @@ final class DeathChecks {
     mc.player.method_1340(5.5, 102, 5.5); mc.player.tick(); CreativeVehicleChecks.mode(mc, "SURVIVAL");
     mc.player.container = mc.player.playerContainer;
   }
-  private static void clear(Minecraft mc) { Arrays.fill(mc.player.inventory.main, null); Arrays.fill(mc.player.inventory.armor, null); mc.player.inventory.setCursorStack(null); }
-  private static void record(Minecraft mc, String cause) {
+  static void clear(Minecraft mc) { Arrays.fill(mc.player.inventory.main, null); Arrays.fill(mc.player.inventory.armor, null); mc.player.inventory.setCursorStack(null); }
+  static void record(Minecraft mc, String cause) {
     local.luke.power.world.DeathSources.run(mc.player, cause, () -> DeathTracker.died(mc.player, null));
   }
-  private static DeathRecord latest(Minecraft mc) throws Exception { var records = DeathTracker.journal(mc).records(); return records.get(records.size() - 1); }
-  private static Path path(Minecraft mc) {
+  static DeathRecord latest(Minecraft mc) throws Exception { var records = DeathTracker.journal(mc).records(); return records.get(records.size() - 1); }
+  static Path path(Minecraft mc) {
     String identity = local.luke.power.commands.CommandContext.world(mc) + "\n" + mc.player.name;
     return Path.of("power-beta-data/deaths", UUID.nameUUIDFromBytes(identity.getBytes(java.nio.charset.StandardCharsets.UTF_8)) + ".journal");
   }
@@ -246,14 +250,15 @@ final class DeathChecks {
     PlayerInventory failing = new PlayerInventory(mc.player) {
       private int writes;
       @Override public void setStack(int slot, ItemStack stack) {
-        super.setStack(slot, stack); if (++writes == 2) throw new IllegalStateException("Injected partial inventory write");
+        super.setStack(slot, stack); if (++writes == 38) throw new IllegalStateException("Injected partial main and armour write");
       }
     };
-    mc.player.inventory = failing; String before = DeathItems.inventory(failing.main);
+    failing.armor[0] = tagged(313, 1, 47, "rollback-boots"); var boots = failing.armor[0];
+    mc.player.inventory = failing; String before = DeathItems.inventory(DeathItems.snapshot(failing));
     try {
       try { DeathTracker.recover(mc, record); throw new AssertionError("failure injection was not reached"); }
       catch (java.io.IOException expected) {}
-      check(before.equals(DeathItems.inventory(failing.main)), "rollback changed inventory");
+      check(before.equals(DeathItems.inventory(DeathItems.snapshot(failing))) && failing.armor[0] == boots, "rollback changed inventory or armour ownership");
       check(DeathTracker.journal(mc).state(record.id).equals("available"), "rollback kept claim");
       check(!DeathTracker.recoveryDenial(mc).isEmpty(), "failure did not stop recovery");
       log("PASS partial recovery rolled back, retained journal and disabled recovery until restart");

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-11
+
+- Default lost-item chat notices to off and allow death recovery in survival with cheats.
+- Save original inventory and armour positions, restore them when available, and show deaths in an inventory view locked without cheats.
+- Allow one-time recovery of individual saved stacks with cheats, sharing recovery claims with /death recover.
+
 ## [1.4.0] - 2026-10-11
 
 - Remove the player-model flicker when entering freecam while walking.

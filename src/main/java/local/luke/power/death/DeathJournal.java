@@ -18,12 +18,15 @@ public final class DeathJournal {
   private final Path path;
   private final List<DeathRecord> records = new ArrayList<>();
   private final Map<String, String> states = new HashMap<>();
+  private final Map<String, Set<Integer>> claimed = new HashMap<>();
+  private final Map<String, List<Integer>> pending = new HashMap<>();
   private boolean damaged;
   private long size, next = 1;
 
   static final class Event {
     String kind, id, before, after;
     DeathRecord death;
+    List<Integer> indices;
   }
 
   public DeathJournal(Path path) throws IOException {
@@ -55,15 +58,26 @@ public final class DeathJournal {
   public String nextId() { return Long.toString(next, 36); }
   public String state(String id) { return states.getOrDefault(id, "available"); }
   public boolean damaged() { return damaged; }
+  public List<Integer> remaining(String id) {
+    DeathRecord record = records.stream().filter(r -> r.id.equals(id)).findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Unknown death ID"));
+    Set<Integer> done = claimed.getOrDefault(id, Set.of());
+    return java.util.stream.IntStream.range(0, record.items.size()).filter(i -> !done.contains(i)).boxed().toList();
+  }
   public void death(DeathRecord death) throws IOException {
     death.validate();
     if (!death.id.equals(nextId())) throw new IOException("Invalid death ID sequence");
     Event event = new Event(); event.kind = "death"; event.death = death; append(event);
   }
   public void recovery(String id, String before, String after) throws IOException {
+    recovery(id, remaining(id), before, after);
+  }
+  public void recovery(String id, List<Integer> indices, String before, String after) throws IOException {
     if (records.stream().noneMatch(r -> r.id.equals(id))) throw new IOException("Unknown death ID");
-    if (!state(id).equals("available")) throw new IOException("This death has already been recovered or has an interrupted recovery");
-    Event event = new Event(); event.kind = "pending"; event.id = id; event.before = before; event.after = after; append(event);
+    Event event = new Event(); event.kind = "pending"; event.id = id; event.before = before; event.after = after;
+    event.indices = List.copyOf(indices);
+    try { intent(event); } catch (IllegalArgumentException e) { throw new IOException(e.getMessage(), e); }
+    append(event);
   }
   public void finish(String id, boolean recovered) throws IOException {
     if (!state(id).equals("pending")) throw new IOException("No pending recovery");
@@ -82,12 +96,27 @@ public final class DeathJournal {
       if (event.id == null || records.stream().noneMatch(r -> r.id.equals(event.id)))
         throw new IllegalArgumentException("Unknown recovery ID");
       if (event.kind.equals("pending")) {
-        if (!state(event.id).equals("available") || event.before == null || event.after == null)
-          throw new IllegalArgumentException("Invalid recovery intent");
-      } else if (!Set.of("recovered", "available").contains(event.kind) || !state(event.id).equals("pending"))
-        throw new IllegalArgumentException("Invalid recovery completion");
-      states.put(event.id, event.kind);
+        pending.put(event.id, intent(event)); states.put(event.id, "pending");
+      } else {
+        if (!Set.of("recovered", "available").contains(event.kind) || !state(event.id).equals("pending"))
+          throw new IllegalArgumentException("Invalid recovery completion");
+        if (event.kind.equals("recovered")) claimed.computeIfAbsent(event.id, k -> new HashSet<>()).addAll(pending.get(event.id));
+        pending.remove(event.id);
+        states.put(event.id, remaining(event.id).isEmpty() && event.kind.equals("recovered") ? "recovered"
+            : claimed.getOrDefault(event.id, Set.of()).isEmpty() ? "available" : "partial");
+      }
     }
+  }
+
+  private List<Integer> intent(Event event) {
+    if (!Set.of("available", "partial").contains(state(event.id)) || event.before == null || event.after == null)
+      throw new IllegalArgumentException("This death has already been recovered or has an interrupted recovery");
+    List<Integer> remaining = remaining(event.id);
+    List<Integer> indices = event.indices == null ? remaining : event.indices; // Version 1 whole-inventory claims.
+    if (indices.stream().anyMatch(Objects::isNull) || new HashSet<>(indices).size() != indices.size()
+        || !remaining.containsAll(indices) || indices.isEmpty() && !remaining.isEmpty())
+      throw new IllegalArgumentException("Invalid or already recovered item selection");
+    return List.copyOf(indices);
   }
 
   private void safePath() throws IOException {

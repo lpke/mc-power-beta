@@ -35,14 +35,26 @@ public final class DeathItems {
   }
 
   public static List<String> lost(PlayerInventory inventory) throws IOException {
-    List<String> result = new ArrayList<>();
+    DeathRecord record = new DeathRecord(); capture(inventory, record); return record.items;
+  }
+
+  public static void capture(PlayerInventory inventory, DeathRecord record) throws IOException {
+    record.items = new ArrayList<>(); record.slots = new ArrayList<>();
     IdentityHashMap<ItemStack, Boolean> references = new IdentityHashMap<>();
-    for (ItemStack[] section : new ItemStack[][]{inventory.main, inventory.armor, {inventory.getCursorStack()}})
-      for (ItemStack item : section) if (item != null) {
+    ItemStack[] items = Arrays.copyOf(snapshot(inventory), 41); items[40] = inventory.getCursorStack();
+    for (int slot = 0; slot < items.length; slot++) {
+      ItemStack item = items[slot];
+      if (item != null) {
         if (references.put(item, true) != null) throw new IOException("Shared inventory stack");
-        String bytes = encode(item); decode(bytes); result.add(bytes);
+        String bytes = encode(item); decode(bytes); record.items.add(bytes); record.slots.add(slot);
       }
-    return result;
+    }
+  }
+
+  public static ItemStack[] snapshot(PlayerInventory inventory) throws IOException {
+    if (inventory.main.length != 36 || inventory.armor.length != 4) throw new IOException("Unsupported inventory layout");
+    ItemStack[] result = Arrays.copyOf(inventory.main, 40);
+    System.arraycopy(inventory.armor, 0, result, 36, 4); return result;
   }
 
   public static String inventory(ItemStack[] items) throws IOException {
@@ -52,24 +64,48 @@ public final class DeathItems {
   }
 
   public static ItemStack[] plan(PlayerInventory inventory, List<String> lost) throws IOException {
-    ItemStack[] next = new ItemStack[inventory.main.length];
-    for (int i = 0; i < next.length; i++) if (inventory.main[i] != null) next[i] = decode(encode(inventory.main[i]));
-    for (String bytes : lost) {
-      ItemStack item = decode(bytes);
-      for (int i = 0; i < next.length && item.count > 0; i++) {
-        ItemStack existing = next[i];
-        if (existing == null || !item.isStackable() || !sameItem(item, existing)) continue;
-        int room = Math.max(0, Math.min(existing.getMaxCount(), inventory.getMaxCountPerStack()) - existing.count);
-        int amount = Math.min(room, item.count); existing.count += amount; item.count -= amount;
+    DeathRecord record = new DeathRecord(); record.items = lost;
+    return Arrays.copyOf(plan(inventory, null, record, java.util.stream.IntStream.range(0, lost.size()).boxed().toList()), 36);
+  }
+
+  public static ItemStack[] plan(PlayerInventory inventory, net.minecraft.inventory.Container container,
+      DeathRecord record, List<Integer> indices) throws IOException {
+    ItemStack[] next = snapshot(inventory);
+    for (int i = 0; i < next.length; i++) if (next[i] != null) next[i] = decode(encode(next[i]));
+    List<ItemStack> items = new ArrayList<>();
+    // Reserve every original position before displaced items can take another item's slot.
+    for (int index : indices) {
+      ItemStack item = decode(record.items.get(index)); items.add(item);
+      int slot = record.slots.isEmpty() ? -1 : record.slots.get(index);
+      if (slot >= 0 && slot < 36) insert(next, slot, item, inventory.getMaxCountPerStack());
+      else if (slot >= 36 && slot < 40 && container != null) {
+        for (Object entry : container.slots) {
+          var nativeSlot = (net.minecraft.screen.slot.Slot)entry;
+          var access = (local.luke.power.mixin.DeathSlotAccessor)nativeSlot;
+          if (access.power$deathInventory() == inventory && access.power$deathIndex() == slot && nativeSlot.canInsert(item)) {
+            insert(next, slot, item, Math.min(1, nativeSlot.getMaxItemCount())); break;
+          }
+        }
       }
-      for (int i = 0; i < next.length && item.count > 0; i++) if (next[i] == null) {
-        int amount = Math.min(item.count, Math.min(item.getMaxCount(), inventory.getMaxCountPerStack()));
-        if (amount <= 0) throw new IOException("Invalid inventory stack limit");
-        next[i] = decode(bytes); next[i].count = amount; item.count -= amount;
-      }
+    }
+    for (ItemStack item : items) {
+      for (int i = 0; i < 36 && item.count > 0; i++) if (next[i] != null) insert(next, i, item, inventory.getMaxCountPerStack());
+      for (int i = 0; i < 36 && item.count > 0; i++) if (next[i] == null) insert(next, i, item, inventory.getMaxCountPerStack());
       if (item.count > 0) throw new IllegalArgumentException("Not enough inventory space. Recovery cancelled; no items changed.");
     }
     return next;
+  }
+
+  private static void insert(ItemStack[] next, int slot, ItemStack item, int limit) throws IOException {
+    if (item.count == 0) return;
+    ItemStack existing = next[slot];
+    if (existing != null && (!item.isStackable() || !sameItem(item, existing))) return;
+    int room = Math.max(0, Math.min(item.getMaxCount(), limit) - (existing == null ? 0 : existing.count));
+    int amount = Math.min(room, item.count);
+    if (amount == 0) return;
+    if (existing == null) { next[slot] = decode(encode(item)); next[slot].count = amount; }
+    else existing.count += amount;
+    item.count -= amount;
   }
 
   private static boolean sameItem(ItemStack first, ItemStack second) throws IOException {

@@ -35,11 +35,15 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   auto-walk, normal exit, first-frame player visibility and stale-pose rejection.
   Run after `new-world`.
 - `death-checks`: real death causes and drops, coordinates, inventory/equipment
-  snapshots, NBT/damage/full counts, queries, creative/cheat permissions, ownership,
+  snapshots, NBT/damage/full counts, queries, cheat permissions in all modes, ownership,
   full-inventory cancellation, repeated recovery and multiplayer exclusions.
   Run after `new-world`; restart and run `death-checks saved` after `new-world`.
   Run `death-checks rollback` last for partial-write rollback and failure shutdown.
   Restart, load the same save and run `death-checks retry` to recover through chat once.
+  `death-checks inventory` checks original slots, armour, overflow, occupied slots,
+  native NBT, locked viewer inputs, individual/bulk claims, live permission changes,
+  legacy records and narrow/wide screenshots. Restart and run
+  `death-checks inventory-saved` after `new-world` for slot and partial-claim persistence.
 - `help-audit`: index and completion coverage, aliases, optional features, world
   rules, multiplayer/operator access and safe help for every available command.
 - `toggle-messages`: all nine defaults, live providers, HUD independence,

@@ -34,12 +34,19 @@ than overwrite a changed block or inventory.
 
 Optional death records live in `.minecraft/power-beta-data/deaths`, separated by
 world ID and player name. Disabling the feature or cheats preserves the journal.
-Records include native item NBT, full counts, damage, location and cause.
+Records include native item NBT, full counts, damage, original slots, location and cause.
 
-`/death recover [id]` copies a saved inventory into the main inventory once,
-without replacing current items or equipment. It requires creative mode and
-cheats, and cancels before changing slots if every saved item cannot fit. Dropped
-items remain in the world.
+`/death items [id]` opens a saved inventory view. Without cheats its items are
+locked. With cheats and recovery permission, clicking a stack recovers it once.
+`/death recover [id]` recovers all remaining stacks in survival or creative with
+cheats. Recovery first uses original inventory and equipment slots, then other
+main inventory space without replacing existing items. It cancels before changing
+slots if every selected item cannot fit. Held cursor items use main inventory
+space. Older records have no original slots and use available main inventory
+space. Dropped items remain in the world.
+
+Individual and bulk recovery share durable per-stack claims, so using one cannot
+recover items already claimed through the other. Lost-item chat notices default off.
 
 Each recovery flushes its complete before/after inventory to the checksummed
 journal before changing slots. A detected failure restores the original

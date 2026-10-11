@@ -19,13 +19,16 @@ public final class ChatChecks {
     else try { Validation.log("GAME CHAT " + text); } catch (Exception ignored) {}
   }
   public static List<String> submit(Minecraft mc, String input) throws Exception {
+    return submit(mc, input, Keyboard.KEY_RETURN);
+  }
+  static List<String> submit(Minecraft mc, String input, int key) throws Exception {
     ChatScreen screen = new ChatScreen();
     mc.setScreen(screen);
     // The installed text widget owns chat history and input. Do not bypass Enter.
     Class.forName("local.luke.power.worldedit.chat.ChatAccess").getMethod("setText", String.class).invoke(null, input);
     ((ChatInput)screen).power$text(input);
     messages.clear(); recording = true;
-    try { ((ChatInput)screen).power$type('\n', Keyboard.KEY_RETURN); }
+    try { ((ChatInput)screen).power$type('\n', key); }
     finally { recording = false; }
     List<String> result = List.copyOf(messages);
     for (String message : result) Validation.log("CHAT " + message);
