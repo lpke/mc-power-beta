@@ -31,7 +31,7 @@ Built for singleplayer.
 - Creative and spectator modes with a modern mode switcher.
 - Middle-click dragging in creative fills inventory and container slots with full stacks.
 - Backported WorldEdit and singleplayer commands with modern Minecraft syntax.
-- Optional death records with locations, causes and lost items. View saved inventory positions and recover items with cheats.
+- Optional death records with locations, causes and lost items. View saved inventory positions and recover items with cheats. Optional Keep inventory on death is a per-world cheat rule.
 - Customizable crafting recipes and container carrying.
 - Building aids including fast placement, light levels, container previews,
   edge protection and auto-walk.

@@ -164,4 +164,16 @@ class ConfigSessionTest {
     assertEquals(1, hidden.value.getAsInt());
     session.discard(); assertEquals(1, normal.live);
   }
+  @Test void disablingCheatsClearsKeepInventoryDraftAndCancelRestoresIt() throws Exception {
+    var session = new ConfigSession();
+    Setting keep = new Setting("world.keepInventory", "world", "General", "World overrides", "Keep inventory", "",
+        Setting.Kind.BOOLEAN, new JsonPrimitive(true), new JsonPrimitive(false), 0, 1, 1, List.of(), false);
+    Setting cheats = new Setting("world.cheats", "world", "General", "Game", "Cheats", "", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(true), new JsonPrimitive(false), 0, 1, 1, List.of(), false);
+    session.add(new Fake("world", game.resolve("world.txt")), List.of(cheats, keep));
+    cheats.value = new JsonPrimitive(false); session.link(cheats);
+    assertFalse(keep.value.getAsBoolean()); assertFalse(SettingAccess.visible(session, keep));
+    cheats.value = new JsonPrimitive(true); session.link(cheats); assertFalse(keep.value.getAsBoolean());
+    session.discard(); assertTrue(keep.value.getAsBoolean());
+  }
 }

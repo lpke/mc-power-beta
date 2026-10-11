@@ -55,6 +55,10 @@
     "DebugHudMixin",
     "DebugTextMixin",
     "DeathRecordMixin",
+    "KeptInventoryMixin",
+    "KeptInventoryDropsMixin",
+    "KeptInventoryContainerMixin",
+    "KeptInventoryRespawnMixin",
     "DeathSlotAccessor",
     "DeathLivingCauseMixin",
     "DeathEntityCauseMixin"

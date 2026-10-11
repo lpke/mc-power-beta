@@ -23,12 +23,11 @@ final class DeathChecks {
       alive(mc); clear(mc); ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
       CreativeVehicleChecks.mode(mc, "CREATIVE"); var record = latest(mc);
       check(DeathTracker.journal(mc).state(record.id).equals("available"), "rollback claim did not survive restart");
-      var output = ChatChecks.submit(mc, "/death recover");
-      check(output.stream().anyMatch(s -> s.contains("Recovered items")), "restart did not allow recovery through chat");
+      var screen = DeathInventoryChecks.open(mc, record, 320, 240); DeathInventoryChecks.bulk(screen);
       String after = DeathItems.inventory(mc.player.inventory.main);
-      output = ChatChecks.submit(mc, "/death recover");
-      check(output.stream().anyMatch(s -> s.contains("already recovered")) && after.equals(DeathItems.inventory(mc.player.inventory.main)), "chat recovery duplicated items");
-      log("PASS restart permits a rolled-back recovery through chat exactly once");
+      DeathInventoryChecks.bulk(screen);
+      check(after.equals(DeathItems.inventory(mc.player.inventory.main)), "GUI recovery duplicated items"); mc.setScreen(null);
+      log("PASS restart permits a rolled-back recovery through the GUI exactly once");
       return;
     }
     if (action.equals("saved")) {
@@ -129,16 +128,16 @@ final class DeathChecks {
         check(options != null, "mechanics settings unavailable");
         mc.player.health = 20; mc.player.damage(null, 1); check(mc.player.health < 20, "damage changed by death recording");
       });
-      test("save queries, short IDs and logs never modify inventory", () -> {
+      test("save queries, numeric IDs and logs never modify inventory", () -> {
         alive(mc); clear(mc); mc.player.inventory.main[0] = tagged(35, 7, 5, "queries");
         record(mc, "Query fixture"); String before = DeathItems.inventory(mc.player.inventory.main);
-        var death = latest(mc); check(death.id.matches("[0-9a-z]{1,6}"), "death ID too long");
+        var death = latest(mc); check(death.id.matches("[1-9][0-9]*"), "death ID too long");
         for (String command : List.of("death", "death items", "death log", "death " + death.id, "death items " + death.id, "death help"))
           DeathCommands.execute(mc, command.split(" "));
         check(before.equals(DeathItems.inventory(mc.player.inventory.main)), "query modified inventory");
         mc.setScreen(null);
       });
-      test("recovery needs cheats and its command permission in every game mode", () -> {
+      test("recovery needs cheats in every game mode", () -> {
         var death = latest(mc); String before = DeathItems.inventory(mc.player.inventory.main);
         for (boolean cheat : new boolean[]{false, true}) for (String mode : new String[]{"SURVIVAL", "SPECTATOR", "CREATIVE"}) {
           ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(cheat); CreativeVehicleChecks.mode(mc, mode);
@@ -147,8 +146,7 @@ final class DeathChecks {
           refused(mc, death); check(before.equals(DeathItems.inventory(mc.player.inventory.main)), "denied recovery changed items");
         }
         ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc, "CREATIVE");
-        var blocked = CommandPermissions.copy(); blocked.rules.put("deathrecover", CommandPermissions.Rule.DISABLED); CommandPermissions.preview(blocked);
-        refused(mc, death); CommandPermissions.preview(rules);
+
       });
       test("full inventory cancels without a claim or partial insertion", () -> {
         clear(mc); recordWithItems(mc); var death = latest(mc);
@@ -158,19 +156,19 @@ final class DeathChecks {
       });
       test("recovery preserves NBT, damage, full counts and existing armor; cannot repeat", () -> {
         clear(mc); recordWithItems(mc); var death = latest(mc); clear(mc);
-        mc.player.inventory.main[0] = tagged(35, 60, 5, "merge"); mc.player.inventory.main[1] = tagged(35, 7, 5, "different");
+        mc.player.inventory.main[5] = tagged(35, 7, 5, "different");
         mc.player.inventory.armor[0] = tagged(313, 1, 47, "existing-armor");
         String armorBefore = DeathItems.inventory(mc.player.inventory.armor);
         DeathTracker.recover(mc, death);
-        check(mc.player.inventory.main[0].count == 64, "compatible stack not merged");
-        check(mc.player.inventory.main[1].count == 7 && tag(mc.player.inventory.main[1]).getString("DeathFixture").equals("different"), "different NBT merged");
+        check(mc.player.inventory.main[0].count == 64, "original stack not restored");
+        check(mc.player.inventory.main[5].count == 7 && tag(mc.player.inventory.main[5]).getString("DeathFixture").equals("different"), "different NBT merged");
         int count = 0; boolean tool = false;
         for (var item : mc.player.inventory.main) if (item != null) {
           if (item.itemId == 35 && tag(item).getString("DeathFixture").equals("merge")) count += item.count;
           if (item.itemId == 267 && item.getDamage() == 83 && tag(item).getString("DeathFixture").equals("tool")) tool = true;
           check(item.count <= item.getMaxCount(), "recovered overstack");
         }
-        check(count == 130 && tool && armorBefore.equals(DeathItems.inventory(mc.player.inventory.armor)), "count/tool/armor changed");
+        check(count == 70 && tool && armorBefore.equals(DeathItems.inventory(mc.player.inventory.armor)), "count/tool/armor changed");
         String after = DeathItems.inventory(mc.player.inventory.main); refused(mc, death);
         check(after.equals(DeathItems.inventory(mc.player.inventory.main)), "second recovery duplicated items");
         var restarted = new DeathJournal(path(mc)); check(restarted.state(death.id).equals("recovered"), "claim did not persist");

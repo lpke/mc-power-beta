@@ -37,16 +37,24 @@ world ID and player name. Disabling the feature or cheats preserves the journal.
 Records include native item NBT, full counts, damage, original slots, location and cause.
 
 `/death items [id]` opens a saved inventory view. Without cheats its items are
-locked. With cheats and recovery permission, clicking a stack recovers it once.
-`/death recover [id]` recovers all remaining stacks in survival or creative with
-cheats. Recovery first uses original inventory and equipment slots, then other
-main inventory space without replacing existing items. It cancels before changing
-slots if every selected item cannot fit. Held cursor items use main inventory
-space. Older records have no original slots and use available main inventory
-space. Dropped items remain in the world.
+locked. With cheats, click a stack or the check-mark button to recover remaining
+items once. Recovery cancels before writing if any selected original slot is
+occupied, including by a matching item. It never replaces or merges current items.
+Held cursor items use available main inventory space. Dropped items remain in the
+world. Individual and bulk GUI recovery share durable per-stack claims.
 
-Individual and bulk recovery share durable per-stack claims, so using one cannot
-recover items already claimed through the other. Lost-item chat notices default off.
+The World overrides rule Keep inventory on death defaults off and requires cheats.
+Turning cheats off clears the rule. The rule is checked at death and keeps main
+inventory, armour, the held cursor and player crafting inputs through respawn.
+Dead-player NBT includes a complete native snapshot for restart safety. Death
+records retain their item snapshots but mark every stack recovered, with the log
+label Recovered (kept). The keep rule works even when death records are disabled.
+
+Death IDs are decimal numbers, starting at 1 for each world and player. Release
+1.4.2 deliberately wipes earlier death logs rather than importing their IDs or
+recovery claims. Instance updates back up the logs before resetting them. A client
+opening a previous-format journal also resets it. Current logs retain normal
+checksum and interrupted-recovery protection. /death log lists old to new.
 
 Each recovery flushes its complete before/after inventory to the checksummed
 journal before changing slots. A detected failure restores the original

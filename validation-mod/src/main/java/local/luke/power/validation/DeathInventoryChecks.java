@@ -45,24 +45,28 @@ final class DeathInventoryChecks {
         stack(mc.player.inventory.armor[3], 310, 1, 27, "helmet"); stack(mc.player.inventory.armor[0], 313, 1, 41, "boots");
         stack(mc.player.inventory.main[0], 264, 3, 0, "cursor"); check(mc.player.inventory.getCursorStack() == null, "cursor restored as a held stack");
       });
-      test("original slots are reserved before overflow and occupied gear never gets overwritten", () -> {
-        clear(mc); mc.player.inventory.main[0] = tagged(35, 70, 5, "overflow"); mc.player.inventory.main[1] = tagged(267, 1, 83, "reserved");
-        mc.player.inventory.armor[3] = tagged(310, 1, 27, "saved-helmet"); record(mc, "Overflow fixture"); var death = latest(mc); clear(mc);
-        mc.player.inventory.armor[3] = tagged(306, 1, 11, "existing-helmet"); DeathTracker.recover(mc, death);
-        stack(mc.player.inventory.main[0], 35, 64, 5, "overflow"); stack(mc.player.inventory.main[1], 267, 1, 83, "reserved");
-        stack(mc.player.inventory.main[2], 35, 6, 5, "overflow"); stack(mc.player.inventory.main[3], 310, 1, 27, "saved-helmet");
-        stack(mc.player.inventory.armor[3], 306, 1, 11, "existing-helmet");
-      });
-      test("invalid equipment falls back to main inventory and full capacity cancels before claiming", () -> {
-        clear(mc); mc.player.inventory.armor[3] = tagged(4, 2, 0, "invalid-gear"); record(mc, "Invalid gear fixture");
-        var death = latest(mc); clear(mc); DeathTracker.recover(mc, death);
-        check(mc.player.inventory.armor[3] == null, "invalid item equipped"); stack(mc.player.inventory.main[0], 4, 2, 0, "invalid-gear");
-        clear(mc); mc.player.inventory.main[8] = tagged(267, 1, 83, "full"); record(mc, "Full GUI fixture"); death = latest(mc);
-        clear(mc); for (int i = 0; i < 36; i++) mc.player.inventory.main[i] = new ItemStack(4, 64, 0);
+      test("conflicting main and armour slots cancel all recovery and print a warning", () -> {
+        clear(mc); mc.player.inventory.main[0] = tagged(35, 7, 5, "saved-main");
+        mc.player.inventory.armor[3] = tagged(310, 1, 27, "saved-helmet"); record(mc, "Conflict fixture"); var death = latest(mc); clear(mc);
+        mc.player.inventory.armor[3] = tagged(306, 1, 11, "existing-helmet");
         var screen = open(mc, death, 320, 240); String before = inventory(mc); byte[] journal = Files.readAllBytes(path(mc));
-        click(screen, 8, 0);
-        check(before.equals(inventory(mc)) && Arrays.equals(journal, Files.readAllBytes(path(mc))), "cancelled GUI recovery changed inventory or claim");
-        SettingsSnapshot.render(mc, screen, 320, 240, reports.resolve("full-warning.png")); mc.setScreen(null);
+        var output = ChatChecks.record(() -> bulk(screen));
+        check(output.stream().anyMatch(t -> t.contains("occupied") && t.contains("cancelled")), "missing conflict warning");
+        check(before.equals(inventory(mc)) && Arrays.equals(journal, Files.readAllBytes(path(mc))), "conflict changed inventory or claim");
+        mc.player.inventory.armor[3] = null; mc.player.inventory.main[0] = tagged(35, 1, 5, "saved-main");
+        before = inventory(mc); click(screen, 0, 0);
+        check(before.equals(inventory(mc)) && Arrays.equals(journal, Files.readAllBytes(path(mc))), "matching occupied slot was merged");
+        mc.setScreen(null);
+      });
+      test("invalid equipment cancels before claiming and empty original slots retain overflow counts", () -> {
+        clear(mc); mc.player.inventory.armor[3] = tagged(4, 2, 0, "invalid-gear"); record(mc, "Invalid gear fixture");
+        var death = latest(mc); clear(mc); String before = inventory(mc);
+        try { DeathTracker.recover(mc, death); throw new AssertionError("invalid gear accepted"); } catch (IllegalArgumentException expected) {}
+        check(before.equals(inventory(mc)) && DeathTracker.journal(mc).state(death.id).equals("available"), "invalid gear changed items or claim");
+        clear(mc); mc.player.inventory.main[0] = tagged(35, 70, 5, "overflow"); mc.player.inventory.main[1] = tagged(267, 1, 83, "reserved");
+        record(mc, "Overflow fixture"); death = latest(mc); clear(mc); DeathTracker.recover(mc, death);
+        stack(mc.player.inventory.main[0], 35, 64, 5, "overflow"); stack(mc.player.inventory.main[1], 267, 1, 83, "reserved");
+        stack(mc.player.inventory.main[2], 35, 6, 5, "overflow");
       });
       for (int[] size : new int[][]{{320, 240}, {640, 420}}) {
         test("locked viewer ignores clicks, drag, shift, drop and hotbar keys; width " + size[0], () -> {
@@ -89,11 +93,9 @@ final class DeathInventoryChecks {
         String after = inventory(mc); click(screen, 8, 0); check(after.equals(inventory(mc)), "repeat GUI click duplicated stack");
         check(DeathTracker.journal(mc).state(death.id).equals("partial"), "partial state missing");
         properties.power$cheatsEnabled(false); click(screen, 20, 0); check(after.equals(inventory(mc)), "cheats disable did not immediately lock viewer");
-        properties.power$cheatsEnabled(true); var blocked = CommandPermissions.copy(); blocked.rules.put("deathrecover", CommandPermissions.Rule.DISABLED);
-        CommandPermissions.preview(blocked); click(screen, 20, 0); check(after.equals(inventory(mc)), "viewer bypassed recovery permission"); CommandPermissions.preview(rules);
+        properties.power$cheatsEnabled(true);
         SettingsSnapshot.render(mc, screen, 320, 240, reports.resolve("partial-320.png"));
-        mc.setScreen(null); var output = ChatChecks.submit(mc, "/death recover " + death.id);
-        check(output.stream().anyMatch(s -> s.contains("Recovered items")), "survival chat recovery failed");
+        bulk(screen);
         stack(mc.player.inventory.main[8], 35, 7, 5, "individual"); stack(mc.player.inventory.main[20], 267, 1, 83, "remaining");
         stack(mc.player.inventory.armor[3], 310, 1, 27, "remaining-helmet");
         screen = open(mc, death, 640, 420); after = inventory(mc); click(screen, 39, 0); check(after.equals(inventory(mc)), "completed viewer allowed recovery"); mc.setScreen(null);
@@ -107,24 +109,21 @@ final class DeathInventoryChecks {
         DeathConfig.preview(enabled); screen = open(mc, death, 320, 240); String name = mc.player.name;
         mc.player.name = "OtherDeathInventoryCheck"; try { screen.tick(); check(mc.currentScreen == null, "player change left viewer open"); } finally { mc.player.name = name; }
       });
-      test("old records remain viewable and use normal inventory placement", () -> {
-        properties.power$cheatsEnabled(true);
-        clear(mc); mc.player.inventory.main[8] = tagged(35, 7, 5, "legacy"); record(mc, "Legacy fixture");
-        var legacy = new DeathRecord(); legacy.id = DeathTracker.journal(mc).nextId(); legacy.world = latest(mc).world; legacy.player = mc.player.name;
-        legacy.cause = "Legacy positions unavailable"; legacy.items = latest(mc).items;
-        DeathTracker.journal(mc).death(legacy); clear(mc);
-        var screen = open(mc, legacy, 320, 240); SettingsSnapshot.render(mc, screen, 320, 240, reports.resolve("legacy-320.png"));
-        click(screen, 0, 0); stack(mc.player.inventory.main[0], 35, 7, 5, "legacy"); mc.setScreen(null);
-      });
-      test("all legacy stacks remain reachable through viewer pages", () -> {
-        var legacy = new DeathRecord(); legacy.id = DeathTracker.journal(mc).nextId(); legacy.world = latest(mc).world;
-        legacy.player = mc.player.name; legacy.cause = "Legacy pages";
-        for (int i = 0; i < 40; i++) legacy.items.add(DeathItems.encode(tagged(35, i + 1, 5, "legacy-" + i)));
-        DeathTracker.journal(mc).death(legacy); clear(mc); var screen = open(mc, legacy, 320, 240);
-        ((ScreenInput)(Object)screen).power$click((screen.width - 176) / 2 + 100, (screen.height - 210) / 2 + 82, 0);
-        SettingsSnapshot.render(mc, screen, 320, 240, reports.resolve("legacy-page-2.png"));
-        click(screen, 0, 0); stack(mc.player.inventory.main[0], 35, 37, 5, "legacy-36");
-        check(!DeathTracker.journal(mc).remaining(legacy.id).contains(36) && DeathTracker.journal(mc).remaining(legacy.id).contains(0), "page recovered wrong stack"); mc.setScreen(null);
+      test("death IDs are decimal, logs are old to new, and recovery has no command or completion", () -> {
+        var records = DeathTracker.journal(mc).records();
+        for (int i = 0; i < records.size(); i++) check(records.get(i).id.equals(Integer.toString(i + 1)), "non-sequential numeric death ID");
+        var output = ChatChecks.submit(mc, "/death log"); int previous = -1;
+        for (var death : records) {
+          int found = -1; for (int i = 0; i < output.size(); i++) if (output.get(i).contains("§e" + death.id + " §7|")) found = i;
+          if (found >= 0) { check(found > previous, "death log is reversed"); previous = found; }
+        }
+        String before = inventory(mc); output = ChatChecks.submit(mc, "/death recover");
+        check(before.equals(inventory(mc)) && output.stream().noneMatch(t -> t.contains("Recovered items")), "removed recovery command executed");
+        output = ChatChecks.submit(mc, "/death help"); check(output.stream().noneMatch(t -> t.contains("/death recover")), "removed command in help");
+        var command = local.luke.power.commands.util.RetroChatUtil.commands.stream().filter(c -> c.name().equals("death")).findFirst().orElseThrow();
+        var source = new local.luke.power.commands.util.SharedCommandSource(mc.player);
+        check(Arrays.stream(command.suggestion(source, 1, "", "/death ")).noneMatch(t -> t.equals("recover")), "removed completion offered");
+        mc.setScreen(null);
       });
       test("Escape and the inventory binding close the viewer without changing items", () -> {
         var death = latest(mc); String before = inventory(mc); var screen = open(mc, death, 320, 240);
@@ -151,12 +150,15 @@ final class DeathInventoryChecks {
     check(item != null && item.itemId == id && item.count == count && item.getDamage() == damage
         && tag(item).getString("DeathFixture").equals(label), "stack data or position changed: " + label);
   }
-  private static DeathInventoryScreen open(Minecraft mc, DeathRecord death, int width, int height) throws Exception {
+  static DeathInventoryScreen open(Minecraft mc, DeathRecord death, int width, int height) throws Exception {
     ChatChecks.submit(mc, "/death items " + death.id);
     check(mc.currentScreen instanceof DeathInventoryScreen, "/death items did not open inventory viewer");
     var screen = (DeathInventoryScreen)mc.currentScreen; screen.init(mc, width, height); return screen;
   }
-  private static void click(DeathInventoryScreen screen, int slot, int button) throws Exception {
+  static void bulk(DeathInventoryScreen screen) {
+    ((ScreenInput)(Object)screen).power$click((screen.width - 176) / 2 + 110, (screen.height - 210) / 2 + 200, 0);
+  }
+  static void click(DeathInventoryScreen screen, int slot, int button) throws Exception {
     int x = (screen.width - 176) / 2 + (slot < 36 ? 8 + slot % 9 * 18 : slot < 40 ? 8 : 144);
     int y = (screen.height - 210) / 2 + 22 + (slot < 9 ? 142 : slot < 36 ? 84 + (slot / 9 - 1) * 18 : slot < 40 ? 8 + (39 - slot) * 18 : 36);
     ((ScreenInput)(Object)screen).power$click(x + 5, y + 5, button);

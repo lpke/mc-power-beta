@@ -11,7 +11,7 @@ class SettingScopeTest {
         new JsonPrimitive(1), new JsonPrimitive(1), 0, 4, 1, List.of(), true);
   }
   @Test void scopeFollowsPersistenceIncludingCommandOverrides() {
-    for (String id : List.of("world.difficulty", "world.cheats", "world.daylightCycle", "world.weatherCycle", "worldedit.worldOverride"))
+    for (String id : List.of("world.difficulty", "world.cheats", "world.daylightCycle", "world.weatherCycle", "world.keepInventory", "worldedit.worldOverride"))
       assertTrue(SettingScope.perWorld(setting(id, "world")), id);
     for (String id : List.of("commands.world.help", "commands.worldMode.creative"))
       assertTrue(SettingScope.perWorld(setting(id, "commandAccess")), id);

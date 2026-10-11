@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-10-11
+
+- Simplify the saved death inventory view and cancel recovery when original slots are occupied.
+- Recover death items through the inventory view only, and list deaths from oldest to newest with numeric IDs. Existing death logs start fresh.
+- Add Keep inventory on death as a per-world cheat rule, off by default, with kept deaths marked recovered and items preserved through respawn.
+
 ## [1.4.1] - 2026-10-11
 
 - Default lost-item chat notices to off and allow death recovery in survival with cheats.

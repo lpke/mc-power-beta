@@ -20,8 +20,6 @@ public final class DeathInventoryScreen extends UiScreen {
   private final ItemStack[] items;
   private final ItemRenderer renderer = new ItemRenderer();
   private Set<Integer> remaining;
-  private int page;
-  private String message = "";
 
   public DeathInventoryScreen(Minecraft mc, DeathRecord record) throws IOException {
     this.record = record; journal = DeathTracker.journal(mc); world = mc.world; player = mc.player;
@@ -41,8 +39,7 @@ public final class DeathInventoryScreen extends UiScreen {
         && DeathTracker.recoveryDenial(minecraft).isEmpty();
   }
   private int displayedSlot(int index) {
-    if (!record.slots.isEmpty()) return record.slots.get(index);
-    return index / 36 == page ? index % 36 : -1;
+    return record.slots.get(index);
   }
   private int slotX(int slot) { return slot < 36 ? 8 + slot % 9 * 18 : slot < 40 ? 8 : 144; }
   private int slotY(int slot) { return slot < 9 ? 142 : slot < 36 ? 84 + (slot / 9 - 1) * 18 : slot < 40 ? 8 + (39 - slot) * 18 : 36; }
@@ -64,10 +61,6 @@ public final class DeathInventoryScreen extends UiScreen {
     if (button != 0) return;
     int x = left(), y = top();
     if (inside(mx, my, x, y + 170, 80, 18)) { minecraft.setScreen(null); return; }
-    if (record.slots.isEmpty() && items.length > 36) {
-      if (inside(mx, my, x + 31, y + 54, 45, 18)) { page = Math.max(0, page - 1); return; }
-      if (inside(mx, my, x + 79, y + 54, 45, 18)) { page = Math.min((items.length - 1) / 36, page + 1); return; }
-    }
     if (!canRecover()) return;
     int index = hit(mx, my);
     boolean all = inside(mx, my, x + 84, y + 170, 92, 18);
@@ -75,8 +68,8 @@ public final class DeathInventoryScreen extends UiScreen {
     try {
       if (all) DeathTracker.recover(minecraft, record); else DeathTracker.recover(minecraft, record, index);
       remaining = new HashSet<>(journal.remaining(record.id));
-      message = "Recovered. Dropped items remain.";
-    } catch (IOException | IllegalArgumentException e) { message = e.getMessage(); }
+      minecraft.inGameHud.addChatMessage("§aRecovered items. Dropped items remain in the world.§r");
+    } catch (IOException | IllegalArgumentException e) { minecraft.inGameHud.addChatMessage("§c" + e.getMessage() + "§r"); }
   }
 
   @Override public void render(int mx, int my, float delta) {
@@ -93,18 +86,7 @@ public final class DeathInventoryScreen extends UiScreen {
       // Cursor items have no lasting inventory position, so show them separately.
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, minecraft.textureManager.getTextureId("/gui/inventory.png"));
       drawTexture(x + 143, y + 35, 7, 83, 18, 18);
-      text("Held", x + 139, y + 23, 0x444444);
-      text("Death " + record.id, x, y - 19, 0xffffff);
-      text(fit(recover ? "Click a stack to recover" : "Locked inventory", 176), x, y - 9, recover ? 0xffffaa : 0xdddddd);
-      text("Saved inventory", x + 31, y + 10, 0x444444);
-      text(recover ? "Recovery available" : "View only", x + 31, y + 23, 0x444444);
-      if (record.slots.isEmpty() && !record.items.isEmpty()) {
-        text("Slots not recorded", x + 31, y + 37, 0x444444);
-        if (items.length > 36) {
-          button("<", x + 31, y + 54, 45, 18, mx, my, page > 0);
-          button(">", x + 79, y + 54, 45, 18, mx, my, page < (items.length - 1) / 36);
-        }
-      } else text("Armour at left", x + 31, y + 37, 0x444444);
+      text("held", x + 139, y + 23, 0xaaaaaa);
       GL11.glPushMatrix(); GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); GL11.glPopMatrix();
       GL11.glEnable(32826);
       for (int i = 0; i < items.length; i++) {
@@ -120,18 +102,17 @@ public final class DeathInventoryScreen extends UiScreen {
         if (!remaining.contains(i)) fill(sx, sy, sx + 16, sy + 16, 0xbb777777);
         else if (hovered == i) fill(sx, sy, sx + 16, sy + 16, 0x55ffffff);
       }
-      button("Close", x, y + 170, 80, 18, mx, my, true);
-      button("Recover all", x + 84, y + 170, 92, 18, mx, my, recover);
-      if (!message.isEmpty()) text(fit(message, width - 12), 6, Math.min(height - 10, y + 193), 0xffffaa);
+      iconButton("remove", x, y + 170, 80, mx, my, true);
+      iconButton("check", x + 84, y + 170, 92, mx, my, recover);
       if (hovered >= 0) {
         ItemStack item = items[hovered];
         String name = TranslationStorage.getInstance().get(item.getTranslationKey() + ".name");
         String status = !remaining.contains(hovered) ? "Already recovered" : recover ? "Click to recover this stack" : "Locked";
         tooltip(item.count + "x " + name + "\n" + status, mx, my);
-      } else if (!message.isEmpty() && my >= y + 190) tooltip(message, mx, my);
-      else if (!recover && inside(mx, my, x, y - 10, 176, 10)) {
+      } else if (inside(mx, my, x, y + 170, 80, 18)) tooltip("Close", mx, my);
+      else if (inside(mx, my, x + 84, y + 170, 92, 18)) {
         String denial = DeathTracker.recoveryDenial(minecraft);
-        tooltip(denial.isEmpty() ? "This recovery is completed or interrupted." : denial, mx, my);
+        tooltip(recover ? "Recover all remaining items" : denial.isEmpty() ? "Already recovered or interrupted" : denial, mx, my);
       }
     } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); }
   }

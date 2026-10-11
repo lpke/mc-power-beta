@@ -11,7 +11,7 @@ import java.util.zip.CRC32;
 
 /** Durable, append-only deaths and recovery intentions. Damaged tails are preserved. */
 public final class DeathJournal {
-  private static final int MAGIC = 0x50424448, VERSION = 1, HEADER = 20;
+  private static final int MAGIC = 0x50424448, VERSION = 2, HEADER = 20;
   public static final int MAX_RECORD = 1024 * 1024;
   private static final long MAX_FILE = 64L * 1024 * 1024;
   private static final Gson JSON = new Gson();
@@ -32,6 +32,7 @@ public final class DeathJournal {
   public DeathJournal(Path path) throws IOException {
     this.path = path;
     safePath();
+    resetPreviousFormat();
     if (!Files.exists(path)) return;
     size = Files.size(path);
     if (size > MAX_FILE) throw new IOException("Death journal exceeds 64 MiB");
@@ -55,7 +56,7 @@ public final class DeathJournal {
   }
 
   public List<DeathRecord> records() { return List.copyOf(records); }
-  public String nextId() { return Long.toString(next, 36); }
+  public String nextId() { return Long.toString(next); }
   public String state(String id) { return states.getOrDefault(id, "available"); }
   public boolean damaged() { return damaged; }
   public List<Integer> remaining(String id) {
@@ -89,9 +90,13 @@ public final class DeathJournal {
     if (event.kind.equals("death")) {
       if (event.death == null) throw new IllegalArgumentException("Missing death");
       event.death.validate();
-      long id = Long.parseLong(event.death.id, 36);
+      long id = Long.parseLong(event.death.id);
       if (id != next || id == Long.MAX_VALUE) throw new IllegalArgumentException("Invalid death ID sequence");
       records.add(event.death); next = id + 1;
+      if (event.death.kept) {
+        claimed.put(event.death.id, new HashSet<>(remaining(event.death.id)));
+        states.put(event.death.id, "kept");
+      }
     } else {
       if (event.id == null || records.stream().noneMatch(r -> r.id.equals(event.id)))
         throw new IllegalArgumentException("Unknown recovery ID");
@@ -122,6 +127,15 @@ public final class DeathJournal {
   private void safePath() throws IOException {
     for (Path part = path; part != null; part = part.getParent())
       if (Files.isSymbolicLink(part)) throw new IOException("Unsafe death journal path");
+  }
+  private void resetPreviousFormat() throws IOException {
+    if (!Files.exists(path) || Files.size(path) < 8) return;
+    try (DataInputStream input = new DataInputStream(Files.newInputStream(path))) {
+      if (input.readInt() != MAGIC || input.readInt() != 1) return;
+    }
+    // 1.4.2 deliberately starts fresh decimal IDs. Never decode or migrate old records.
+    Files.delete(path);
+    try (FileChannel directory = FileChannel.open(path.getParent(), StandardOpenOption.READ)) { directory.force(true); }
   }
   private synchronized void append(Event event) throws IOException {
     if (damaged) throw new IOException("Death journal needs repair; original records preserved");

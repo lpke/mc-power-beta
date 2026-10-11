@@ -4486,5 +4486,11 @@
     "page": "Commands",
     "group": "Death records",
     "order": 2
+  },
+  "world.keepInventory": {
+    "page": "General",
+    "group": "World overrides",
+    "label": "Keep inventory on death",
+    "order": 80
   }
 }

@@ -39,11 +39,16 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   full-inventory cancellation, repeated recovery and multiplayer exclusions.
   Run after `new-world`; restart and run `death-checks saved` after `new-world`.
   Run `death-checks rollback` last for partial-write rollback and failure shutdown.
-  Restart, load the same save and run `death-checks retry` to recover through chat once.
+  Restart, load the same save and run `death-checks retry` to recover through the inventory GUI once.
   `death-checks inventory` checks original slots, armour, overflow, occupied slots,
   native NBT, locked viewer inputs, individual/bulk claims, live permission changes,
-  legacy records and narrow/wide screenshots. Restart and run
+  decimal IDs, chronological logs and narrow/wide screenshots. Restart and run
   `death-checks inventory-saved` after `new-world` for slot and partial-claim persistence.
+- `keep-inventory`: cheat gating, Apply/Cancel, world NBT and dimension copies,
+  real deaths/drops, inventory/cursor/crafting preservation, kept log and locked GUI,
+  native NBT/full counts and death-record independence. Run after `new-world`.
+  Use `keep-inventory save`, quit while dead, restart and run `new-world`, then
+  `keep-inventory reload` for a complete dead-player restart and respawn check.
 - `help-audit`: index and completion coverage, aliases, optional features, world
   rules, multiplayer/operator access and safe help for every available command.
 - `toggle-messages`: all nine defaults, live providers, HUD independence,

@@ -8,6 +8,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class ValidationMixin {
+  @com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method = "run", remap = false, at = @At(value = "INVOKE", target = "Ljava/lang/Throwable;printStackTrace()V"))
+  private void power$crashReport(Throwable error, com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
+    try (var writer = new java.io.PrintWriter(java.nio.file.Files.newBufferedWriter(java.nio.file.Path.of("power-beta-validation-crash.log")))) {
+      error.printStackTrace(writer);
+    } catch (java.io.IOException ignored) {}
+    original.call(error);
+  }
   @Inject(method = "tick", at = @At("TAIL"))
   private void power$validate(CallbackInfo ci) {
     Validation.tick((Minecraft) (Object) this);

@@ -34,10 +34,6 @@ public final class DeathItems {
     } catch (RuntimeException e) { throw new IOException("Invalid saved item", e); }
   }
 
-  public static List<String> lost(PlayerInventory inventory) throws IOException {
-    DeathRecord record = new DeathRecord(); capture(inventory, record); return record.items;
-  }
-
   public static void capture(PlayerInventory inventory, DeathRecord record) throws IOException {
     record.items = new ArrayList<>(); record.slots = new ArrayList<>();
     IdentityHashMap<ItemStack, Boolean> references = new IdentityHashMap<>();
@@ -63,29 +59,33 @@ public final class DeathItems {
     return new com.google.gson.Gson().toJson(result);
   }
 
-  public static ItemStack[] plan(PlayerInventory inventory, List<String> lost) throws IOException {
-    DeathRecord record = new DeathRecord(); record.items = lost;
-    return Arrays.copyOf(plan(inventory, null, record, java.util.stream.IntStream.range(0, lost.size()).boxed().toList()), 36);
-  }
-
   public static ItemStack[] plan(PlayerInventory inventory, net.minecraft.inventory.Container container,
       DeathRecord record, List<Integer> indices) throws IOException {
     ItemStack[] next = snapshot(inventory);
     for (int i = 0; i < next.length; i++) if (next[i] != null) next[i] = decode(encode(next[i]));
     List<ItemStack> items = new ArrayList<>();
-    // Reserve every original position before displaced items can take another item's slot.
+    // Any occupied original slot cancels the entire selected recovery, even matching items.
+    for (int index : indices) {
+      int slot = record.slots.get(index);
+      if (slot < 40 && next[slot] != null)
+        throw new IllegalArgumentException("Saved inventory slot " + (slot + 1) + " is occupied. Recovery cancelled; no items changed.");
+    }
+    // Reserve original positions before splitting stacks above the current item limit.
     for (int index : indices) {
       ItemStack item = decode(record.items.get(index)); items.add(item);
-      int slot = record.slots.isEmpty() ? -1 : record.slots.get(index);
+      int slot = record.slots.get(index);
       if (slot >= 0 && slot < 36) insert(next, slot, item, inventory.getMaxCountPerStack());
-      else if (slot >= 36 && slot < 40 && container != null) {
+      else if (slot >= 36 && slot < 40) {
+        boolean accepted = false;
+        if (container == null) throw new IOException("Equipment slots unavailable");
         for (Object entry : container.slots) {
           var nativeSlot = (net.minecraft.screen.slot.Slot)entry;
           var access = (local.luke.power.mixin.DeathSlotAccessor)nativeSlot;
           if (access.power$deathInventory() == inventory && access.power$deathIndex() == slot && nativeSlot.canInsert(item)) {
-            insert(next, slot, item, Math.min(1, nativeSlot.getMaxItemCount())); break;
+            insert(next, slot, item, Math.min(1, nativeSlot.getMaxItemCount())); accepted = true; break;
           }
         }
+        if (!accepted) throw new IllegalArgumentException("Saved equipment no longer fits its original slot. Recovery cancelled; no items changed.");
       }
     }
     for (ItemStack item : items) {

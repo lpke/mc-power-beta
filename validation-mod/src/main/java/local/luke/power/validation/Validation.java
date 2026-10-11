@@ -114,6 +114,7 @@ public final class Validation {
       else if (command.equals("chat-wrap")) ChatWrapChecks.run(mc);
       else if (command.equals("freecam-culling")) FreecamCullingChecks.run(mc);
       else if (command.startsWith("death-checks")) DeathChecks.run(mc, command.length() > 12 ? command.substring(12).trim() : "check");
+      else if (command.startsWith("keep-inventory")) KeepInventoryChecks.run(mc, command.length() > 14 ? command.substring(14).trim() : "check");
       else if (command.equals("help-audit")) HelpAuditChecks.run(mc);
       else if (command.equals("freecam-handoff")) FreecamHandoffChecks.run(mc);
       else if (command.startsWith("chat ")) ChatChecks.submit(mc, command.substring(5));
@@ -160,6 +161,9 @@ public final class Validation {
         mc.interactionManager = new net.minecraft.SingleplayerInteractionManager(mc);
         mc.method_2120("Power Beta release check", "Power Beta release check", 17320261003L);
         mc.setScreen(null);
+        // Direct fixture loading can render weather entities before the first world frame.
+        net.minecraft.client.render.entity.EntityRenderDispatcher.field_2489.method_1917(
+            mc.world, mc.textureManager, mc.textRenderer, mc.player, mc.options, 0F);
       } else if (command.equals("quit")) {
         mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen());
         mc.setWorld(null);

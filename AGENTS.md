@@ -100,7 +100,11 @@
   Optional death records are scoped by stable world ID and player. Recovery needs
   cheats, plans full capacity first and protects native item NBT and original slots
   with a flushed journal. GUI recovery uses per-stack claims; viewing never changes
-  inventory. Interrupted claims stay blocked; disabling keeps history.
+  inventory. Occupied original slots cancel recovery; GUI is the only recovery entry.
+  Interrupted claims stay blocked; disabling keeps history. Decimal death logs
+  start fresh in 1.4.2. Keep inventory is a per-world cheat rule which clears when
+  cheats are disabled. Preserve native stacks through death, respawn and dead-player
+  saves; kept deaths claim their recorded items without creating drops.
 - Freecam bypasses entity and block entity culling independently of player movement.
   Keep culling results current and preserve preferences so normal culling resumes on exit.
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.

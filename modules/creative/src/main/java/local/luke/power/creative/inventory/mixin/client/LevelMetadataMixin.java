@@ -9,7 +9,10 @@ import local.luke.power.creative.inventory.interfaces.CreativeLevel;
 public class LevelMetadataMixin implements CreativeLevel, local.luke.power.permissions.CheatWorld {
   @Unique private boolean power$cheats;
   public boolean power$cheatsEnabled() { return power$cheats; }
-  public void power$cheatsEnabled(boolean enabled) { power$cheats = enabled; }
+  public void power$cheatsEnabled(boolean enabled) {
+    power$cheats = enabled;
+    if (!enabled && (Object)this instanceof local.luke.power.world.WorldInventory inventory) inventory.power$keepInventory(false);
+  }
 	@Unique private boolean creative_isCreative;
 	
 	@Override

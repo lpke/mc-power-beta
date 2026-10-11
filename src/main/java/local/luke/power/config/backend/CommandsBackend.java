@@ -47,7 +47,7 @@ public final class CommandsBackend implements Backend {
               backend.id(),
               "Commands",
               command.cheat() ? "Cheat commands" : "Non-cheat commands",
-              "/" + (command.name().equals("toggledownfall") ? "weather" : command.name().equals("deathrecover") ? "death recover" : command.name()),
+              "/" + (command.name().equals("toggledownfall") ? "weather" : command.name()),
               command.description() + " A world-specific override takes priority.",
               Setting.Kind.CHOICE,
               new JsonPrimitive(config.rule(command).ordinal()),
@@ -66,7 +66,7 @@ public final class CommandsBackend implements Backend {
                 command.cheat()
                     ? "Cheat commands in this world"
                     : "Non-cheat commands in this world",
-                "/" + (command.name().equals("toggledownfall") ? "weather" : command.name().equals("deathrecover") ? "death recover" : command.name()),
+                "/" + (command.name().equals("toggledownfall") ? "weather" : command.name()),
                 command.description()
                     + " Use global follows its rule above. Allow bypasses that rule; Block prevents"
                     + " use here. " + (command.cheat() ? "Cheats and Cheat commands must both be enabled."

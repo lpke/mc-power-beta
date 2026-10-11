@@ -40,6 +40,7 @@ public final class DeathTracker {
       record.x = (int)Math.floor(player.x); record.y = (int)Math.floor(player.boundingBox.minY); record.z = (int)Math.floor(player.z);
       record.dimension = player.dimensionId; record.date = System.currentTimeMillis();
       record.cause = DeathCause.describe(player, attacker); DeathItems.capture(player.inventory, record);
+      record.kept = KeepInventory.kept(player);
       data.death(record);
       if (DeathConfig.current().announceLocation) DeathCommands.location(mc, record);
       if (DeathConfig.current().announceItems) DeathCommands.items(mc, record, false);
@@ -51,8 +52,7 @@ public final class DeathTracker {
 
   public static String recoveryDenial(Minecraft mc) {
     if (!available(mc)) return "Death records are disabled or no local world is open.";
-    String permission = CommandPermissions.denial("deathrecover");
-    if (!permission.isEmpty()) return permission;
+    if (!CommandPermissions.cheatsEnabled()) return "Cheats are disabled for this world. Enable Cheats in Options > General.";
     if (recoveryFailed) return "Death recovery is disabled after a protection failure. Restart and keep the recovery journal.";
     if (mc.player.dead || mc.player.health <= 0 || mc.player.world != mc.world || mc.field_2807 != mc.player
         || DetachedCamera.isActive() || InteractionState.carryingContainer || mc.player.container != mc.player.playerContainer

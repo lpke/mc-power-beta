@@ -1,6 +1,7 @@
 package local.luke.power.mixin;
 
 import local.luke.power.death.DeathTracker;
+import local.luke.power.death.KeepInventory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.asm.mixin.*;
@@ -14,6 +15,7 @@ public abstract class DeathRecordMixin {
   private void power$recordDeath(Entity attacker, CallbackInfo ci) {
     if (power$deathRecorded) return;
     power$deathRecorded = true;
+    KeepInventory.begin((PlayerEntity)(Object)this);
     DeathTracker.died((PlayerEntity)(Object)this, attacker);
   }
   @Inject(method = "tick", at = @At("HEAD"))

@@ -13,7 +13,7 @@ class DeathJournalTest {
   private DeathRecord death(String id) {
     DeathRecord death = new DeathRecord(); death.id = id; death.world = "world"; death.player = "player";
     death.x = -12; death.y = 64; death.z = 9; death.dimension = -1; death.cause = "Fall";
-    death.items = List.of("native-item-nbt"); return death;
+    death.items = List.of("native-item-nbt"); death.slots = List.of(0); return death;
   }
   @Test void gson289KeepsPlainFieldsAndDefaults() {
     Gson gson = new Gson(); DeathSettings defaults = gson.fromJson("{}", DeathSettings.class);
@@ -21,13 +21,13 @@ class DeathJournalTest {
     DeathRecord saved = gson.fromJson(gson.toJson(death("1")), DeathRecord.class);
     assertEquals(-12, saved.x); assertEquals(-1, saved.dimension); assertEquals(List.of("native-item-nbt"), saved.items);
   }
-  @Test void restartKeepsDeathsShortIdsAndRecoveryClaims() throws Exception {
+  @Test void restartKeepsSequentialDecimalIdsAndRecoveryClaims() throws Exception {
     Path path = temp.resolve("deaths.journal"); DeathJournal journal = new DeathJournal(path);
     for (int i = 1; i <= 37; i++) journal.death(death(journal.nextId()));
-    assertEquals("12", journal.nextId());
+    assertEquals("38", journal.nextId());
     journal.recovery("1", "complete-before", "complete-after"); journal.finish("1", true);
     DeathJournal reloaded = new DeathJournal(path);
-    assertEquals(37, reloaded.records().size()); assertEquals("12", reloaded.nextId());
+    assertEquals(37, reloaded.records().size()); assertEquals("38", reloaded.nextId());
     assertEquals("recovered", reloaded.state("1"));
     assertThrows(IOException.class, () -> reloaded.recovery("1", "before", "after"));
   }
@@ -80,7 +80,7 @@ class DeathJournalTest {
   }
   @Test void partialRollbackKeepsPriorClaimsAndInterruptedSubsetBlocksWholeDeath() throws Exception {
     Path path = temp.resolve("partial.journal"); DeathJournal journal = new DeathJournal(path);
-    DeathRecord record = death("1"); record.items = List.of("a", "b"); journal.death(record);
+    DeathRecord record = death("1"); record.items = List.of("a", "b"); record.slots = List.of(0, 1); journal.death(record);
     journal.recovery("1", List.of(0), "before", "after"); journal.finish("1", true);
     journal.recovery("1", List.of(1), "before", "after"); journal.finish("1", false);
     DeathJournal restarted = new DeathJournal(path);
@@ -90,7 +90,7 @@ class DeathJournalTest {
     assertEquals("pending", interrupted.state("1"));
     assertThrows(IOException.class, () -> interrupted.recovery("1", "before", "after"));
   }
-  @Test void legacyEventsWithoutSlotsOrSelectionsKeepCompletedClaims() throws Exception {
+  @Test void previousFormatIsWipedWithoutImportingRecords() throws Exception {
     Path path = temp.resolve("legacy.journal");
     // Exact version-1 framing and fields produced before slot-aware recovery.
     String death = "{\"kind\":\"death\",\"death\":{\"id\":\"1\",\"world\":\"world\",\"player\":\"player\",\"cause\":\"Fall\",\"items\":[\"native-nbt\"]}}";
@@ -101,9 +101,9 @@ class DeathJournalTest {
       Files.write(path, frame.array(), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
     DeathJournal journal = new DeathJournal(path);
-    assertFalse(journal.damaged()); assertTrue(journal.records().get(0).slots.isEmpty());
-    assertEquals("recovered", journal.state("1")); assertTrue(journal.remaining("1").isEmpty());
-    assertThrows(IOException.class, () -> journal.recovery("1", "before", "after"));
+    assertFalse(journal.damaged()); assertTrue(journal.records().isEmpty()); assertEquals("1", journal.nextId());
+    assertFalse(Files.exists(path)); journal.death(death("1"));
+    assertEquals(1, new DeathJournal(path).records().size());
   }
   @Test void invalidSlotPositionsCannotBeSaved() throws Exception {
     DeathJournal journal = new DeathJournal(temp.resolve("invalid.journal"));
@@ -114,5 +114,13 @@ class DeathJournalTest {
     DeathRecord repeated = death("1"); repeated.items = List.of("a", "b"); repeated.slots = List.of(0, 0);
     assertThrows(IllegalArgumentException.class, () -> journal.death(repeated));
     assertTrue(journal.records().isEmpty()); assertFalse(journal.damaged());
+  }
+  @Test void keptDeathsClaimEveryStackInTheSameDurableDeathRecord() throws Exception {
+    Path path = temp.resolve("kept.journal"); DeathJournal journal = new DeathJournal(path);
+    DeathRecord record = death("1"); record.kept = true; journal.death(record);
+    DeathJournal restarted = new DeathJournal(path);
+    assertTrue(restarted.records().get(0).kept); assertEquals("kept", restarted.state("1"));
+    assertTrue(restarted.remaining("1").isEmpty());
+    assertThrows(IOException.class, () -> restarted.recovery("1", "before", "after"));
   }
 }

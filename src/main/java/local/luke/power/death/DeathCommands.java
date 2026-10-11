@@ -27,7 +27,6 @@ public final class DeathCommands {
             List<String> choices = new ArrayList<>();
             if (index == 1) {
               choices.addAll(List.of("help", "items", "log"));
-              if (DeathTracker.recoveryDenial(mc).isEmpty()) choices.add("recover");
             }
             if (index == 1 || index == 2 && !((String)args[3]).startsWith("/death log"))
               DeathTracker.journal(mc).records().forEach(r -> choices.add(r.id));
@@ -50,17 +49,16 @@ public final class DeathCommands {
     if (action.equals("help")) { help(mc); return; }
     if (action.equals("log")) {
       List<DeathRecord> records = new ArrayList<>(DeathTracker.journal(mc).records());
-      Collections.reverse(records);
       var date = java.time.format.DateTimeFormatter.ofPattern("dd MMM HH:mm").withZone(java.time.ZoneId.systemDefault());
       List<String> lines = records.stream().map(r -> describe(r) + " §8| §7" + date.format(java.time.Instant.ofEpochMilli(r.date)) + state(mc, r)).toList();
       int pages = Math.max(1, (lines.size() + 5) / 6);
-      int page = args.length < 3 ? 1 : page(args[2], pages);
+      int page = args.length < 3 ? pages : page(args[2], pages);
       HelpOutput.print(s -> chat(mc, s), "Deaths", lines, page, 6, args.length < 3 && HelpOutput.scrolling());
       if (lines.isEmpty()) chat(mc, "§7No deaths recorded.");
       return;
     }
     String id;
-    if (Set.of("items", "recover").contains(action)) id = args.length == 3 ? args[2] : "";
+    if (action.equals("items")) id = args.length == 3 ? args[2] : "";
     else {
       if (args.length > 2) { help(mc); return; }
       id = action;
@@ -68,7 +66,6 @@ public final class DeathCommands {
     DeathRecord record = find(mc, id);
     switch (action) {
       case "items" -> mc.setScreen(new DeathInventoryScreen(mc, record));
-      case "recover" -> { DeathTracker.recover(mc, record); chat(mc, "§aRecovered items from death " + record.id + ". Dropped items remain in the world."); }
       default -> location(mc, record);
     }
   }
@@ -92,6 +89,7 @@ public final class DeathCommands {
     try {
       return switch (DeathTracker.journal(mc).state(record.id)) {
         case "recovered" -> " §8| §aRecovered";
+        case "kept" -> " §8| §aRecovered (kept)";
         case "partial" -> " §8| §ePartly recovered";
         case "pending" -> " §8| §cRecovery interrupted";
         default -> "";
@@ -115,8 +113,7 @@ public final class DeathCommands {
     chat(mc, "§b/death [id] §7Location and cause; latest death by default.");
     chat(mc, "§b/death items [id] §7View saved inventory positions. Cheats allow stack recovery.");
     chat(mc, "§b/death log [page] §7Past deaths and their IDs.");
-    if (DeathTracker.recoveryDenial(mc).isEmpty()) chat(mc, "§b/death recover [id] §7Recover remaining stacks, preferring their original slots. Cancels if they do not all fit.");
-    else chat(mc, "§7Recovery requires cheats and /death recover access.");
+    chat(mc, "§7Use the inventory view to recover items with cheats. Occupied saved slots cancel recovery.");
     chat(mc, "§7Records belong to this world and player. Recovery keeps existing items and leaves dropped items in the world.");
   }
   private static void chat(Minecraft mc, String message) { mc.inGameHud.addChatMessage(message + "§r"); }
