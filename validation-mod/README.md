@@ -25,6 +25,14 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 - `water-landings`: shallow source/flowing/falling water, actual gravity, bucket
   clutches, hitbox edges, fast passes, mobs, dry/lava damage, multiplayer authority
   and Cancel/Apply. Run after `new-world`, then restart and run `water-landings saved`.
+- `bucket-stacks`: stack limits, native pickup/clicking/storage, fluid use, cow/squid
+  milking, overflow drops, creative reuse, existing stacks while disabled and
+  Cancel/Apply. Run after `new-world`; restart, run `new-world` to reload the save,
+  then `bucket-stacks saved` to check settings and inventory/storage persistence.
+- `freecam-handoff`: compare the actual rendered world-view matrices before and
+  after the hotkey while walking, with bobbing, interpolation, sneaking, third
+  person, vertical views and anaglyph eyes. Check first-frame timing, continued
+  auto-walk, normal exit and stale-pose rejection. Run after `new-world`.
 - `toggle-messages`: all nine defaults, live providers, HUD independence,
   duplicate suppression, menu silence and Cancel/Apply. Run after `new-world`.
   Use `toggle-messages save`, restart, then `toggle-messages reload` to verify

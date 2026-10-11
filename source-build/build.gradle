@@ -36,7 +36,7 @@ dependencies {
     module.dependencies.each { dep ->
         modImplementation files(file("build/${dep}/libs/${dep}-${modules[dep].version}+powerbeta.1.jar"))
     }
-    if (moduleId == 'power_commands') modCompileOnly files(new File(packRoot, 'modules/creative/build/libs/power_creative-1.1.0.jar'))
+    if (moduleId in ['power_commands', 'power_compat']) modCompileOnly files(new File(packRoot, 'modules/creative/build/libs/power_creative-1.1.0.jar'))
     implementation fileTree(new File(packRoot, 'vendor/libraries')) { include '*.jar' }
     compileOnly 'com.google.code.gson:gson:2.13.2'
     compileOnly 'com.google.guava:guava:33.2.1-jre'
@@ -72,5 +72,5 @@ configurations.configureEach {
     }
 }
 
-if (moduleId in ["power_commands", "power_capture", "power_mechanics"]) sourceSets.test.java.srcDirs = [new File(sources, "src/test/java")]
+if (moduleId in ["power_commands", "power_capture", "power_mechanics", "power_camera"]) sourceSets.test.java.srcDirs = [new File(sources, "src/test/java")]
 test { useJUnitPlatform() }

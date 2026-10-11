@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-10-11
+
+- Add optional empty bucket stacks of 16, off by default, with safe fluid pickup and milking.
+- Start freecam from the current rendered perspective while walking, preserving camera interpolation and view bobbing at entry.
+
 ## [1.3.0] - 2026-10-11
 
 - Add Water negates fall damage, off by default, for modern-style shallow and flowing water landings and water bucket clutches.

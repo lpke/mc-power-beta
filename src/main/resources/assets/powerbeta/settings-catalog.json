@@ -2998,6 +2998,15 @@
     "default": false,
     "restart": true
   },
+  "power_compat:config.STACK_SIZE_CONFIG.stackableEmptyBuckets": {
+    "page": "Inventory",
+    "group": "Stack sizes",
+    "label": "Stackable empty buckets",
+    "description": "Empty buckets stack to 16. Filled buckets stay separate. Existing stacks are preserved when disabled.",
+    "default": false,
+    "restart": false,
+    "order": 0
+  },
   "power_compat:config.STACK_SIZE_CONFIG.enableModernSignStackSize": {
     "page": "Inventory",
     "group": "Stack sizes",

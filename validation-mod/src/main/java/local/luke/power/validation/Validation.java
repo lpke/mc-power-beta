@@ -53,6 +53,7 @@ public final class Validation {
       else if (command.equals("sign-editing")) SignEditingChecks.run(mc);
       else if (command.equals("obsidian-mining")) ObsidianMiningChecks.run(mc);
       else if (command.startsWith("water-landings")) WaterLandingChecks.run(mc, command.length() > 15 ? command.substring(15) : "check");
+      else if (command.startsWith("bucket-stacks")) BucketStackChecks.run(mc, command.length() > 13 ? command.substring(13).trim() : "check");
       else if (command.equals("toggle-performance")) TogglePerformanceChecks.run(mc);
       else if (command.startsWith("toggle-saves")) ToggleSaveChecks.run(mc, command.length() > 13 ? command.substring(13) : "check");
       else if (command.equals("worldedit-hand")) WorldEditHandChecks.run(mc);
@@ -111,6 +112,7 @@ public final class Validation {
       else if (command.equals("chat-check")) ChatChecks.run(mc);
       else if (command.equals("chat-wrap")) ChatWrapChecks.run(mc);
       else if (command.equals("freecam-culling")) FreecamCullingChecks.run(mc);
+      else if (command.equals("freecam-handoff")) FreecamHandoffChecks.run(mc);
       else if (command.startsWith("chat ")) ChatChecks.submit(mc, command.substring(5));
       else if (command.equals("audit")) audit(mc);
       else if (command.equals("ui-check")) UiChecks.run(mc);

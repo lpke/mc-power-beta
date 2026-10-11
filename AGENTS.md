@@ -93,11 +93,17 @@
   Wrapped chat keeps the last Beta colour code from the preceding line.
 - Freecam bypasses entity and block entity culling independently of player movement.
   Keep culling results current and preserve preferences so normal culling resumes on exit.
+  Enter from the rendered camera pose, including interpolation, eye height and bobbing.
+  Keep the first detached frame still, reset movement timing and reject old-world poses.
 - Natural spawning rules are saved with world properties and copied across
   dimensions. They require cheats, preserve existing mobs and never gate /summon.
 - Optional modern water landings reset fall distance before landing damage, for
   source and flowing water. Match fluid height and hitbox contact, including fast
   movement through water. Keep Beta defaults and multiplayer server authority.
+- Optional empty bucket stacks cap at 16; filled buckets remain unstackable.
+  Filling and milking exchange one bucket, with inventory insertion or a normal
+  overflow drop. Preserve existing stacks when disabled and never split inventories
+  while editing settings. Keep creative buckets reusable.
 - WorldEdit named states map only to supported Beta metadata. Reject unsupported
   properties before starting a transaction; commas inside [] are state separators.
 

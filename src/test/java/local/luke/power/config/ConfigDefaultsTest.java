@@ -24,6 +24,8 @@ class ConfigDefaultsTest {
     assertEquals(2, root.size());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("power_mechanics:config")
         .getAsJsonObject("MOB_CONFIG").get("waterNegatesFallDamage").getAsBoolean());
+    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("power_compat:config")
+        .getAsJsonObject("STACK_SIZE_CONFIG").get("stackableEmptyBuckets").getAsBoolean());
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("creative").get("flight").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("inventoryInPortals").getAsBoolean());
     assertFalse(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).inventoryInPortals);

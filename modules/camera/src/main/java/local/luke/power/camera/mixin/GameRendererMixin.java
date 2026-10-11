@@ -18,9 +18,12 @@ import local.luke.power.camera.Freecam;
 import local.luke.power.camera.FreecamConfig;
 import local.luke.power.camera.client.FreecamController;
 import local.luke.power.camera.util.CameraPosition;
+import local.luke.power.camera.util.CameraPose;
 import local.luke.power.camera.util.CollisionResult;
 
 import java.util.ArrayList;
+import java.nio.FloatBuffer;
+import org.lwjgl.BufferUtils;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -32,6 +35,29 @@ public class GameRendererMixin {
 	float LOW_LIMIT = 0.000167f; // Set to unreasonable value making it pretty much useless
 	float HIGH_LIMIT = 0.1f;
 	long lastTime = System.nanoTime();
+    private final FloatBuffer power$viewBuffer = BufferUtils.createFloatBuffer(16);
+    private final float[] power$view = new float[16];
+    private float power$eyeOffset;
+
+    @Inject(method = "renderWorld(FI)V", at = @At("HEAD"))
+    private void power$eyeOffset(float delta, int eye, CallbackInfo ci) {
+        power$eyeOffset = client.options.anaglyph3d ? (eye * 2 - 1) * .1F : 0;
+    }
+
+    @Inject(method = "renderWorld(FI)V", at = @At("RETURN"))
+    private void power$rememberView(float delta, int eye, CallbackInfo ci) {
+        if (Freecam.freecamController.isActive() || client.camera == null || client.world == null) return;
+        power$viewBuffer.clear();
+        GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, power$viewBuffer);
+        power$viewBuffer.get(power$view);
+        power$view[12] -= power$eyeOffset;
+        LivingEntity entity = client.camera;
+        CameraPosition position = CameraPose.fromView(power$view,
+                entity.prevX + (entity.x - entity.prevX) * delta,
+                entity.prevY + (entity.y - entity.prevY) * delta,
+                entity.prevZ + (entity.z - entity.prevZ) * delta, entity.yaw + 180);
+        Freecam.freecamController.recordRenderedPosition(position, entity, client.world);
+    }
 
 	// Translate camera position
 	@Inject(at = @At("HEAD"), method = "applyCameraTransform", cancellable = true)
@@ -41,10 +67,14 @@ public class GameRendererMixin {
 		}
 		LivingEntity player = client.camera;
 		CameraPosition cameraPosition = Freecam.freecamController.updateCameraPosition(player, par1);
+		GL11.glLoadIdentity();
+        GL11.glTranslatef(power$eyeOffset, 0, 0);
+		GL11.glRotatef(-cameraPosition.roll, 0f, 0f, 1f);
 		GL11.glRotatef(cameraPosition.pitch, 1f, 0f, 0f);
 		GL11.glRotatef(cameraPosition.yaw, 0f, 1f, 0f);
-		GL11.glRotatef(-cameraPosition.roll, 0f, 0f, 1f);
 		GL11.glTranslatef(-(float)cameraPosition.x, -(float)cameraPosition.y, -(float)cameraPosition.z);
+        if (Freecam.freecamController.firstFramePending()) lastTime = System.nanoTime();
+        Freecam.freecamController.frameRendered();
 		ci.cancel();
 	}
 
@@ -60,7 +90,8 @@ public class GameRendererMixin {
 	// Move freecam
 	@Inject(at = @At("TAIL"), method = "onFrameUpdate", cancellable = true)
 	private void freecam_updateHandler(CallbackInfo ci){
-		if(!Freecam.freecamController.isActive()){
+		if(!Freecam.freecamController.isActive() || Freecam.freecamController.firstFramePending()){
+            lastTime = System.nanoTime();
 			return;
 		}
 		moveCamera();

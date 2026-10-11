@@ -608,6 +608,7 @@
         "disableHeartParticle": false
       },
       "STACK_SIZE_CONFIG": {
+        "stackableEmptyBuckets": false,
         "enableModernWoodDoorStackSize": false,
         "enableModernIronDoorStackSize": false,
         "enableModernSignStackSize": false

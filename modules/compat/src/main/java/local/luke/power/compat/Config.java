@@ -93,6 +93,14 @@ public class Config {
     }
 
     public static class StackSizeConfig {
+        @DefaultOnVanillaServer
+        @ConfigEntry(
+                name = "Stackable Empty Buckets",
+                description = "Empty buckets stack to 16. Filled buckets stay separate. Existing stacks are preserved when disabled.",
+                multiplayerSynced = true
+        )
+        public Boolean stackableEmptyBuckets = false;
+
         @ConfigEntry(
                 name = "Enable Modern Wood Door Stack Size",
                 multiplayerSynced = true

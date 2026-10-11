@@ -24,6 +24,10 @@ public class FreecamController {
     }
     private boolean active;
     private CameraPosition cameraPosition = new CameraPosition();
+    private CameraPosition renderedPosition;
+    private LivingEntity renderedEntity;
+    private World renderedWorld;
+    private boolean firstFramePending;
     private TreeMap<String, CameraPosition> savedCameraPositions = new TreeMap<>();
     public float move = 0f;
     public float strafe = 0f;
@@ -83,6 +87,9 @@ public class FreecamController {
     // Set the freecam active state
     public void setActive(boolean active){
         this.active = active;
+        firstFramePending = active;
+        velocityX = velocityY = velocityZ = 0;
+        accelerationX = accelerationY = accelerationZ = 0;
         sprintLatched = false;
         sprintDown = local.luke.power.input.Bindings.down("power_creative.sprint");
         this.allowPlayerMovement = false;
@@ -92,6 +99,32 @@ public class FreecamController {
     public void clearMovementInput() {
         move = strafe = 0;
         jumping = sneaking = false;
+    }
+
+    public void recordRenderedPosition(CameraPosition position, LivingEntity entity, World world) {
+        renderedPosition = position;
+        renderedEntity = entity;
+        renderedWorld = world;
+    }
+
+    public void startFromView(Minecraft minecraft) {
+        LivingEntity entity = minecraft.camera;
+        if (renderedPosition != null && renderedEntity == entity && renderedWorld == minecraft.world) {
+            cameraPosition = renderedPosition.clone();
+        } else {
+            setCameraPositionAndRotation(entity.x, entity.y - (entity.standingEyeHeight - 1.62F),
+                    entity.z, entity.pitch, entity.yaw + 180, 0);
+        }
+        cameraPositionSet = true;
+    }
+
+    public boolean firstFramePending() { return firstFramePending; }
+    public void frameRendered() { firstFramePending = false; }
+
+    public void clearRenderedPosition() {
+        renderedPosition = null;
+        renderedEntity = null;
+        renderedWorld = null;
     }
 
     // Return freecam position
@@ -194,10 +227,8 @@ public class FreecamController {
 
     // Get camera position relative from player
     public CameraPosition getRelativeCameraPosition(CameraPosition cameraPosition, LivingEntity player, float f1){
-        float f2 = player.standingEyeHeight - 1.62F;
-
         double d1 = player.prevX + (player.x - player.prevX) * (double)f1;
-        double d2 = player.prevY + (player.y - player.prevY) * (double)f1 - (double)f2;
+        double d2 = player.prevY + (player.y - player.prevY) * (double)f1;
         double d3 = player.prevZ + (player.z - player.prevZ) * (double)f1;
 
 

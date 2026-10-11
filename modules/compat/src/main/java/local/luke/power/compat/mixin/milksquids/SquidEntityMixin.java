@@ -1,6 +1,7 @@
 package local.luke.power.compat.mixin.milksquids;
 
 import local.luke.power.compat.Config;
+import local.luke.power.compat.BucketStacks;
 import net.minecraft.entity.WaterCreatureEntity;
 import net.minecraft.entity.passive.SquidEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -20,7 +21,8 @@ public class SquidEntityMixin extends WaterCreatureEntity {
         if (Config.config.milkSquids) {
             ItemStack var2 = arg.inventory.getSelectedItem();
             if (var2 != null && var2.itemId == Item.BUCKET.id) {
-                arg.inventory.setStack(arg.inventory.selectedSlot, new ItemStack(Item.MILK_BUCKET));
+                arg.inventory.setStack(arg.inventory.selectedSlot,
+                        BucketStacks.fill(var2, arg, new ItemStack(Item.MILK_BUCKET)));
                 return true;
             } else {
                 return false;

@@ -23,6 +23,7 @@ public class MinecraftMixin {
     private void power$resetCamera(World world, String message, PlayerEntity player, CallbackInfo ci) {
         Freecam.freecamController.setActive(false);
         Freecam.freecamController.cameraPositionSet = false;
+        Freecam.freecamController.clearRenderedPosition();
     }
 
     // Load camerapositions from json when entering world

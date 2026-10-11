@@ -26,6 +26,7 @@ Built for singleplayer.
 - Separate sound controls, custom music, playlists and saved presets.
 - Optional faster boats, minecarts and obsidian mining.
 - Optional modern water landings and water bucket clutches, including flowing water.
+- Optional empty bucket stacks of 16, with filled buckets kept separate.
 - Editable signs and useful gold tools, including silk touch.
 - Creative and spectator modes with a modern mode switcher.
 - Backported WorldEdit and singleplayer commands with modern Minecraft syntax.
