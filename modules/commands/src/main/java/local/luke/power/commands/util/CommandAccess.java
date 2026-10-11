@@ -35,7 +35,7 @@ public final class CommandAccess {
           || mc.world.isRemote && ClientCommands.disabled_commands.contains(command.name())) return false;
       if (mc.world.isRemote && !ClientCommands.mp_rc && !java.util.Set.of(
           "help", "perm", "clearchat", "/calc", "tell", "me", "kill", "kick", "ban", "pardon",
-          "ban-ip", "pardon-ip", "op", "deop", "stop", "list", "say", "whitelist", "save", "give", "time", "tp")
+          "ban-ip", "pardon-ip", "op", "deop", "stop", "list", "say", "whitelist", "save-all", "save-on", "save-off", "give", "time", "tp")
           .contains(command.name())) return false;
     }
     // Returning to survival remains available when cheats are off.

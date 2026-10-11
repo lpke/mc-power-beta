@@ -6,8 +6,17 @@ import local.luke.power.commands.util.SharedCommandSource;
 import net.minecraft.server.PlayerManager;
 
 public class Save implements Command {
+    private final String action;
+
+    public Save() { this(""); }
+    public Save(String action) {
+        if (!java.util.Set.of("", "all", "off", "on").contains(action)) throw new IllegalArgumentException("Unknown save action");
+        this.action = action;
+    }
+
     @Override
     public void command(SharedCommandSource commandSource, String[] parameters) {
+        if (!action.isEmpty()) parameters = new String[]{"save", action};
         if (parameters.length < 2) {
             manual(commandSource);
             return;
@@ -49,11 +58,19 @@ public class Save implements Command {
 
     @Override
     public String name() {
-        return "save";
+        return action.isEmpty() ? "save" : "save-" + action;
     }
 
     @Override
     public void manual(SharedCommandSource commandSource) {
+        if (!action.isEmpty()) {
+            commandSource.sendFeedback("/" + name() + " " + switch (action) {
+                case "all" -> "forces a server-wide level save.";
+                case "off" -> "disables terrain saving for server backups.";
+                default -> "re-enables terrain saving.";
+            });
+            return;
+        }
         commandSource.sendFeedback("Usage: /save {all/off/on}");
         commandSource.sendFeedback("Info: save all | forces a server-wide level save");
         commandSource.sendFeedback("      save off | disables terrain saving (useful for backup scripts)");

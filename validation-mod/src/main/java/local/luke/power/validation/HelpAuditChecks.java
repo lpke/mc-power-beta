@@ -80,6 +80,10 @@ final class HelpAuditChecks {
           check(!listed.contains("/give") && !listed.contains("/death") && !listed.contains("/warp") && !listed.contains("//help"), "unavailable multiplayer commands listed");
           ClientCommands.mp_op = true; check(names(help.lines(source)).contains("/give"), "operator commands missing");
           check(CommandAccess.showHelp(source, "/give help"), "operator help was forwarded to native server");
+          listed = names(help.lines(source));
+          check(!listed.contains("/save"), "native server listed unsupported save command");
+          for (String command : List.of("/save-all", "/save-on", "/save-off"))
+            check(listed.contains(command) && CommandAccess.showHelp(source, command + " help"), "native save alias missing: " + command);
           ClientCommands.mp_rc = true; ClientCommands.disabled_commands = List.of("give");
           check(!names(help.lines(source)).contains("/give"), "server disabled command listed");
         } finally { mc.world.isRemote = false; }

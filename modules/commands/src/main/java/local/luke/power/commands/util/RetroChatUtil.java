@@ -26,6 +26,9 @@ public class RetroChatUtil {
     commands.add(new Deop());
     commands.add(new Stop());
     commands.add(new Save());
+    commands.add(new Save("all"));
+    commands.add(new Save("on"));
+    commands.add(new Save("off"));
     commands.add(new List());
     commands.add(new Tell());
     commands.add(new Me());
