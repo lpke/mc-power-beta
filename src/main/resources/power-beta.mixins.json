@@ -37,6 +37,8 @@
     "ChatTextAccessor",
     "ChatWrapMixin",
     "FreecamCullingMixin",
+    "FreecamEntityDistanceMixin",
+    "FreecamBlockEntityDistanceMixin",
     "CullingChunkCacheAccessor",
     "CullingArrayCacheAccessor",
     "CullingWorkerMixin",

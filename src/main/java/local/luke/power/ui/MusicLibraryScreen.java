@@ -411,19 +411,23 @@ public final class MusicLibraryScreen extends UiScreen {
     } else {
       Map<String, List<String>> groups = new TreeMap<>(Comparator.comparingInt(this::groupOrder)
           .thenComparing(String.CASE_INSENSITIVE_ORDER).thenComparing(Comparator.naturalOrder()));
-      for (String id : tracks) groups.computeIfAbsent(group(id), k -> new ArrayList<>()).add(id);
-      List<String> visibleGroups = groups.keySet().stream()
-          .filter(key -> !hideExcluded || includedCount(key) > 0).toList();
+      Set<String> allGroups = new HashSet<>();
+      boolean hide = presetsOpen ? presets.editing() && presets.hideExcluded() : hideExcluded;
+      for (String id : tracks) {
+        String key = group(id);
+        allGroups.add(key);
+        if (!hide || included(id)) groups.computeIfAbsent(key, k -> new ArrayList<>()).add(id);
+      }
+      List<String> visibleGroups = List.copyOf(groups.keySet());
       if (presetsOpen && presets.editing() && previousDraft != presets.draft()) {
-        collapsed.clear(); collapsed.addAll(groups.keySet()); previousDraft = presets.draft();
+        collapsed.clear(); collapsed.addAll(allGroups); previousDraft = presets.draft();
         trackScroll = 0;
       } else if (!presetsOpen && !visibleGroups.isEmpty() && initializedFilters.add(folder)) {
         if (visibleGroups.size() == 1) collapsed.removeAll(visibleGroups);
-        else if (folder.isEmpty() || folder.equals("active")) collapsed.addAll(groups.keySet());
+        else if (folder.isEmpty() || folder.equals("active")) collapsed.addAll(allGroups);
       }
       for (var entry : groups.entrySet()) {
         String key = entry.getKey();
-        if ((presetsOpen ? presets.editing() && presets.hideExcluded() : hideExcluded) && includedCount(key) == 0) continue;
         String label = key.startsWith("folder:") ? Objects.toString(Path.of(key.substring(7)).getFileName(), key.substring(7)) : key;
         result.add(new Row(key, label, null, -1, y, 24)); y += 24;
         if (collapsed.contains(key) && search.text().isBlank()) continue;

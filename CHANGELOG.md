@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.4.4] - 2026-10-12
+
+- Show nearby entities and block entities based on the freecam camera position, including dropped items away from the player.
+- Target pillars accurately with /j and /jumpto, including narrow crossings at the top block, without loading distant terrain.
+- Make Hide excluded hide individual tracks inside mixed music groups in the library and preset editor.
+
 ## [1.4.3] - 2026-10-11
 
 - Restore text buttons and show the death number and timestamp in the saved inventory view, without the held label or armour-panel black bar.

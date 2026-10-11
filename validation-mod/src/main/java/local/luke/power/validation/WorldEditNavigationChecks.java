@@ -40,6 +40,52 @@ final class WorldEditNavigationChecks {
         } finally { if(!alreadyQueued) queued.remove(key); }
       });
       Validation.backgroundChunkReads.set(0);
+      test("through-wall navigation still lands beyond the wall in both directions", () -> {
+        for(int direction:new int[]{1,-1}) {
+          for(int step=0;step<=8;step++) {
+            int x=step*direction;
+            mc.world.method_154(x,99,48,1,0);
+            for(int y=100;y<=105;y++) mc.world.method_154(x,y,48,0,0);
+          }
+          mc.world.method_154(4*direction,100,48,1,0);
+          mc.world.method_154(4*direction,101,48,1,0);
+          mc.player.method_1341(.5,100,48.5,-90*direction,0);
+          var output=ChatChecks.submit(mc,"/thru");
+          check(output.stream().anyMatch(t->t.contains("Moved to")),"through-wall jump failed: "+output);
+          check(Math.abs(mc.player.x-(5*direction+.5))<.001
+              && Math.abs(mc.player.boundingBox.minY-100)<.001,"through-wall jump stopped inside or before wall");
+        }
+      });
+      test("jump reaches the top of pillars from their sides and top faces", () -> {
+        for(int length:new int[]{4,32,96}) for(int height:new int[]{103,108,116}) {
+          for(int x=0;x<=length;x++) for(int y=98;y<=120;y++) mc.world.method_154(x,y,16,0,0);
+          for(int y=98;y<=height;y++) mc.world.method_154(length,y,16,1,0);
+          for(int feet:new int[]{100,119}) {
+            double eye=feet+1.62, target=feet==100?height+.5:height+1;
+            float pitch=(float)-Math.toDegrees(Math.atan2(target-eye,length));
+            mc.player.method_1341(.5,feet,16.5,-90,pitch);
+            var output=ChatChecks.submit(mc,"/j");
+            check(output.stream().anyMatch(t->t.contains("Moved to")),"pillar jump failed: "+output);
+            check(Math.abs(mc.player.x-(length+.5))<.001
+                && Math.abs(mc.player.boundingBox.minY-(height+1))<.001,"jump did not land on pillar top");
+          }
+        }
+      });
+      test("jump catches a top-block corner crossed between quarter-block samples", () -> {
+        for(int x=0;x<=20;x++) for(int y=98;y<=108;y++) mc.world.method_154(x,y,32,0,0);
+        for(int y=98;y<=102;y++) mc.world.method_154(8,y,32,1,0);
+        float pitch=(float)Math.toDegrees(Math.atan(.02));
+        mc.player.method_1341(.5,100,32.5,-90,pitch);
+        var look=mc.player.method_926(1F);
+        mc.player.method_1340(.5,103-look.y/look.x*(8.9999-.5),32.5);
+        var start=mc.player.method_931(1F);
+        var target=mc.world.method_160(start,start.add(look.x*20,look.y*20,look.z*20));
+        check(target!=null&&target.field_1984==8&&target.field_1985==102,"fixture crosshair missed top block");
+        var output=ChatChecks.submit(mc,"/jumpto");
+        check(output.stream().anyMatch(t->t.contains("Moved to"))
+            && Math.abs(mc.player.x-8.5)<.001&&Math.abs(mc.player.boundingBox.minY-103)<.001,
+            "corner jump failed: "+output);
+      });
       test("jump repeatedly crosses chunk boundaries and renders at short and long distances", () -> {
         try {
         for (int view : new int[]{3, 1}) {

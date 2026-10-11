@@ -15,7 +15,8 @@ import java.util.TreeSet;
 
 public class FreecamController {
     public FreecamController() {
-        local.luke.power.input.DetachedCamera.register(this::isActive);
+        local.luke.power.input.DetachedCamera.register(this::isActive,
+                () -> cameraPosition.x, () -> cameraPosition.y, () -> cameraPosition.z);
         local.luke.power.input.MovementOwnership.registerCamera(() -> isActive() && !allowPlayerMovement);
         local.luke.power.input.TweakIndicators.register(
             local.luke.power.input.TweakIndicators.Tweak.FREECAM_PLAYER_MOVEMENT,

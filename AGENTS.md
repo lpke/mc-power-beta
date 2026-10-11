@@ -112,6 +112,7 @@
   Background culling only reads loaded chunks and uses its own vectors and boxes;
   never run chunk loading or touch Beta's shared geometry pools from that worker.
   Keep culling results current and preserve preferences so normal culling resumes on exit.
+  Entity render-distance checks use the detached camera position; simulation stays player-owned.
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.
   Keep the first detached frame still, reset movement timing and reject old-world poses.
 - Natural spawning rules are saved with world properties and copied across

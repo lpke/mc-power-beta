@@ -81,7 +81,7 @@ final class AudioGroupChecks {
               check(AudioConfig.current().groupVolumes.isEmpty(), "Cancel kept group gain");
             });
         test(
-            "existing preset hides only fully excluded groups and draft volumes stay isolated",
+            "existing preset hides excluded groups and songs and draft volumes stay isolated",
             () -> {
               library.openPresets();
               var panel = field(library, "presets");
@@ -97,9 +97,13 @@ final class AudioGroupChecks {
               boolean found = false;
               for (Object row : (List<?>) field(library, "rows"))
                 if ("music:creative1.ogg".equals(call(row, "id"))) found = true;
-              check(found, "individual excluded song hidden");
+              check(!found, "individual excluded song visible");
               click(options, (int) call(panel, "hideX") + 8, (int) call(panel, "editButtonY") + 8);
               check(header(library, "Alpha") != null, "Show excluded missed group");
+              check(((List<?>)field(library,"rows")).stream().anyMatch(row -> {
+                try { return "music:creative1.ogg".equals(call(row,"id")); }
+                catch(Exception e) { throw new RuntimeException(e); }
+              }), "Show excluded missed individual song");
               setGroupVolume(library, "Alpha", 25);
               MusicPresetDraft draft = (MusicPresetDraft) call(panel, "draft");
               check(Math.abs(draft.volume("Alpha") - 25) <= 1, "draft slider missed");
@@ -133,10 +137,11 @@ final class AudioGroupChecks {
                 options.init(mc, size[0], size[1]);
                 options.render(-1, -1, 0);
                 int saveX = (int) call(panel, "saveX"), hideX = (int) call(panel, "hideX");
-                check(hideX == saveX + 66, "hide button not beside Save");
-                check(hideX + 102 <= (int) call(panel, "right"), "hide button clipped");
+                int hideWidth=(int)call(panel,"hideWidth");
+                check(hideX == saveX + (int)call(panel,"saveWidth") + 4, "hide button not beside Save");
+                check(hideX + hideWidth <= (int) call(panel, "right"), "hide button clipped");
                 if ((int) call(panel, "bulkY") == (int) call(panel, "editButtonY"))
-                  check(hideX + 102 < (int) call(panel, "includeX"), "bulk overlaps Hide excluded");
+                  check(hideX + hideWidth < (int) call(panel, "includeX"), "bulk overlaps Hide excluded");
                 check(GL11.glGetError() == 0, "GL error");
               }
               mc.setScreen(options);

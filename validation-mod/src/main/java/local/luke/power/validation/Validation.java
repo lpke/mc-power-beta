@@ -75,6 +75,7 @@ public final class Validation {
       else if (command.equals("inline-values")) InlineValueChecks.run(mc);
       else if (command.equals("sticky-groups")) StickyGroupChecks.run(mc);
       else if (command.equals("audio-refinements")) AudioRefinementChecks.run(mc);
+      else if (command.equals("audio-exclusions")) AudioExclusionChecks.run(mc);
       else if (command.startsWith("music-eras-")) MusicErasChecks.run(mc,command.substring(11));
       else if (command.startsWith("audio-polish-")) AudioPolishChecks.run(mc,command.substring(13));
       else if (command.startsWith("audio-layout-")) AudioLayoutChecks.run(mc,command.substring(13));
@@ -116,6 +117,7 @@ public final class Validation {
       else if (command.equals("chat-check")) ChatChecks.run(mc);
       else if (command.equals("chat-wrap")) ChatWrapChecks.run(mc);
       else if (command.equals("freecam-culling")) FreecamCullingChecks.run(mc);
+      else if (command.equals("freecam-distance")) FreecamDistanceChecks.run(mc);
       else if (command.startsWith("death-checks")) DeathChecks.run(mc, command.length() > 12 ? command.substring(12).trim() : "check");
       else if (command.startsWith("keep-inventory")) KeepInventoryChecks.run(mc, command.length() > 14 ? command.substring(14).trim() : "check");
       else if (command.equals("help-audit")) HelpAuditChecks.run(mc);

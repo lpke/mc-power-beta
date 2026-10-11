@@ -6,6 +6,7 @@ import local.luke.power.worldedit.core.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
 public final class NavigationActions {
   private static final Set<Integer> HAZARDS = Set.of(8, 9, 10, 11, 51, 81);
@@ -84,25 +85,17 @@ public final class NavigationActions {
   }
 
   private Pos trace(boolean through) {
-    double yaw = Math.toRadians(mc.player.yaw), pitch = Math.toRadians(mc.player.pitch);
-    double dx = -Math.sin(yaw) * Math.cos(pitch),
-        dy = -Math.sin(pitch),
-        dz = Math.cos(yaw) * Math.cos(pitch);
+    // Use Beta's crosshair origin and direction, including its float trig rounding.
+    Vec3d start = mc.player.method_931(1F), look = mc.player.method_926(1F);
+    Vec3d end = start.add(look.x * 256, look.y * 256, look.z * 256);
     boolean hit = false;
-    Pos last = null;
-    for (int step = 1; step <= 1024; step++) {
-      double d = step * .25;
-      Pos p =
-          new Pos(
-              (int) Math.floor(mc.player.x + dx * d),
-              (int) Math.floor(mc.player.y + dy * d),
-              (int) Math.floor(mc.player.z + dz * d));
-      if (p.equals(last)) continue;
-      last = p;
+    for (Pos p : BlockRay.cells(start.x, start.y, start.z, look.x, look.y, look.z, 256)) {
+      if (p.y() < 0 || p.y() >= 128) continue;
       if (!p.valid() || !mc.world.method_239(p.x(), p.y(), p.z())) break;
       int id = mc.world.getBlockId(p.x(), p.y(), p.z());
       Block block = id == 0 ? null : Block.BLOCKS[id];
-      boolean solid = block != null && block.method_1624(mc.world, p.x(), p.y(), p.z()) != null;
+      boolean solid = block != null && block.method_1624(mc.world, p.x(), p.y(), p.z()) != null
+          && block.method_1564(mc.world, p.x(), p.y(), p.z(), start, end) != null;
       if (solid) {
         hit = true;
         if (!through) {

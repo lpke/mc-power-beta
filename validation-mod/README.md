@@ -8,6 +8,14 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `freecam-distance`: dropped-item and block-entity render distance follows the
+  detached camera, including player movement mode, exit and disabling the feature.
+  Run after `new-world`. `worldedit-navigation` also checks pillar sides, top faces
+  and a corner crossing that the old quarter-block ray missed.
+- `audio-exclusions`: library and preset filters hide individual excluded songs,
+  preserve live and draft selections, retain queue requests, restore view state and
+  share row geometry across narrow and wide layouts.
+
 - `world-settings-check`: difficulty transactions, scope notes, hidden cheat rows/tabs,
   command exemptions, input priority and Peaceful behaviour. Run after `new-world`.
   `world-settings-create` creates four disposable saves through the real creation UI.

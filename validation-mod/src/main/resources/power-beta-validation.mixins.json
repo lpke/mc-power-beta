@@ -14,7 +14,9 @@
     "ChatInput",
     "PlayerSleepAccess",
     "PlacementSoundCaptureMixin",
-    "CullingThreadChecks"
+    "CullingThreadChecks",
+    "EntityRenderCapture",
+    "BlockEntityRenderCapture"
   ],
   "injectors": {
     "defaultRequire": 1
