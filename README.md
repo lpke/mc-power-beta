@@ -1,24 +1,21 @@
-# Power Beta
+# <img src="docs/logo.svg" width="40" height="40" alt=""> Power Beta
 
-Minecraft Beta 1.7.3 with one searchable Options menu for fixes, better controls,
-building tools and creative play. Keep Beta's gameplay or tune it to suit you.
-Built for singleplayer.
+A configurable modpack for Minecraft Beta 1.7.3 with bug fixes, quality-of-life
+improvements and optional tweaks in one searchable Options menu.
 
-[Website and download](https://power-beta-gamma.vercel.app/)
+[Website and download](https://mc-power-beta.vercel.app/)
 
-| Creative inventory | Music library |
+| Isometric screenshots | WorldEdit |
 | --- | --- |
-| [![Creative catalogue above a snowy mountain valley](docs/screenshots/creative-inventory.png)](docs/screenshots/creative-inventory.png) | [![Music library with track previews and volume controls](docs/screenshots/music-library.png)](docs/screenshots/music-library.png) |
+| [![Isometric view of a lake and forest](docs/screenshots/isometric.png)](docs/screenshots/isometric.png) | [![WorldEdit selection around a castle](docs/screenshots/worldedit.png)](docs/screenshots/worldedit.png) |
 
-| WorldEdit | Redstone power levels |
+| Creative mode | Unified options menu |
 | --- | --- |
-| [![WorldEdit selection around a stone bridge](docs/screenshots/worldedit.png)](docs/screenshots/worldedit.png) | [![Signal strength displayed on redstone wire](docs/screenshots/redstone.png)](docs/screenshots/redstone.png) |
+| [![Creative catalogue above a snowy mountain valley](docs/screenshots/creative-inventory.png)](docs/screenshots/creative-inventory.png) | [![Searchable options with settings grouped by category](docs/screenshots/unified-menu.png)](docs/screenshots/unified-menu.png) |
 
-| Light levels | Isometric screenshots |
+| Music library | Redstone power levels |
 | --- | --- |
-| [![Light levels on nearby blocks](docs/screenshots/light-levels.png)](docs/screenshots/light-levels.png) | [![Isometric view of a lake and forest](docs/screenshots/isometric.png)](docs/screenshots/isometric.png) |
-
-[![Full bright in an unlit underground chamber](docs/screenshots/full-bright.png)](docs/screenshots/full-bright.png)
+| [![Music library with track previews and volume controls](docs/screenshots/music-library.png)](docs/screenshots/music-library.png) | [![Signal strength displayed on redstone wire](docs/screenshots/redstone.png)](docs/screenshots/redstone.png) |
 
 ## What's included
 
@@ -49,7 +46,7 @@ commands and world editing. Other settings are shared unless marked "this world"
 ## Install
 
 1. Install [Prism Launcher](https://prismlauncher.org/) and add your Minecraft account.
-2. [Download the Prism ZIP](https://power-beta-gamma.vercel.app/download). If you have the source code
+2. [Download the Prism ZIP](https://mc-power-beta.vercel.app/download). If you have the source code
    instead, build that ZIP using the steps below.
 3. In Prism, choose **Add Instance > Import**, then select the ZIP.
 4. Open the instance's **Edit > Settings > Java**, enable the Java installation
