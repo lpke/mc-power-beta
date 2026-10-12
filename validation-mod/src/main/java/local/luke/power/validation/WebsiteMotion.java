@@ -46,10 +46,10 @@ final class WebsiteMotion {
       var screen=(PowerOptionsScreen)mc.currentScreen;
       if((boolean)call(screen,"libraryVisible")) {
         target=field(screen,"library");
-        distance=Math.min(500,Math.max(0,(int)field(target,"contentHeight")-((int)call(target,"bottom")-(int)call(target,"listTop"))));
+        distance=Math.min(900,Math.max(0,(int)field(target,"contentHeight")-((int)call(target,"bottom")-(int)call(target,"listTop"))));
         motion="library";
       } else {
-        target=screen;distance=Math.min(500,Math.max(0,(int)call(screen,"contentHeight")-((int)call(screen,"bottom")-(int)call(screen,"top"))));
+        target=screen;distance=Math.min(900,Math.max(0,(int)call(screen,"contentHeight")-((int)call(screen,"bottom")-(int)call(screen,"top"))));
         motion="menu";
       }
       Validation.log("GALLERY SCROLL "+motion+" "+distance);start=System.nanoTime();return;
@@ -80,8 +80,8 @@ final class WebsiteMotion {
         if(seconds>8){mc.player.yaw=mc.player.prevYaw=yaw;mc.player.pitch=mc.player.prevPitch=pitch;motion="";}
       } else if(motion.equals("menu")||motion.equals("library")) {
         if(mc.currentScreen==null){motion="";return;}
-        double t=seconds<1?0:seconds<5?(seconds-1)/4:seconds<6?1:seconds<10?1-(seconds-6)/4:0;
-        int scroll=(int)Math.round(distance*(.5-.5*Math.cos(Math.PI*t)));
+        double t=seconds<2?seconds/2:Math.max(0,1-(seconds-2)/2);
+        int scroll=(int)Math.round(distance*t);
         if(motion.equals("menu"))field(target,"scroll",(double)scroll);
         else {Method m=target.getClass().getDeclaredMethod("scroll",int.class);m.setAccessible(true);m.invoke(target,scroll);}
         if(distance==0 && motion.equals("menu")) {
@@ -89,14 +89,14 @@ final class WebsiteMotion {
           var rows=(List<?>)field(screen,"rows");
           var settings=new ArrayList<Object>();
           for(Object row:rows)if(call(row,"setting")!=null)settings.add(row);
-          if(!settings.isEmpty() && seconds>1 && seconds<9) {
-            Object row=settings.get(Math.min(settings.size()-1,(int)((seconds-1)/2)));
+          if(!settings.isEmpty() && seconds<4) {
+            Object row=settings.get(Math.min(settings.size()-1,(int)(seconds)));
             int py=(int)call(screen,"top")+(int)call(row,"y")+10;
             int px=screen.width/2;
             Mouse.setCursorPosition(px*mc.displayWidth/screen.width,mc.displayHeight-py*mc.displayHeight/screen.height-1);
           } else Mouse.setCursorPosition(0,0);
         }
-        if(seconds>10.5)motion="";
+        if(seconds>4)motion="";
       } else if(motion.equals("freecam")) {
         double t=Math.min(1,seconds/9),u=.5-.5*Math.cos(Math.PI*t);
         // Move the real detached camera out of the gate and above the building.

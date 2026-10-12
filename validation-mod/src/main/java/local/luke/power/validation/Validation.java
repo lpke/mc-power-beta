@@ -50,7 +50,8 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("gallery-action ")) WebsiteActions.run(mc,command.substring(15));
+      if (command.startsWith("gallery-scene ")) WebsiteScenes.run(mc,command.substring(14));
+      else if (command.startsWith("gallery-action ")) WebsiteActions.run(mc,command.substring(15));
       else if (command.startsWith("gallery-motion ")) WebsiteMotion.run(mc,command.substring(15));
       else if (command.startsWith("release-151")) Release151Checks.run(mc, command.substring(11).trim());
       else if (command.equals("interaction-150")) Release150InteractionChecks.run(mc);

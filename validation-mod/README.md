@@ -242,3 +242,12 @@ captures, and normal gameplay rendering after capture.
   Texture captures must wait for the atlas reload to finish before recording.
   Keep a static poster for every animated gallery view and inspect recordings
   before publishing them. Never ship the fixture JAR.
+
+- `gallery-scene ACTION` stages focused native website demonstrations, including
+  the hotbar selector, slab completion, tunnel mining, sleeping, modern stacking,
+  spectator speed, leaf decay and vehicle acceleration. Inspect both gameplay
+  state and framing before publishing. Keep full captures before cropping previews.
+  Camera fixtures include a small positioning margin above native collision surfaces;
+  decimal eye-height rounding must never put a standing player inside the floor.
+- Main menu recordings scroll immediately for four seconds. Capture each complete
+  tab in the `settings-layout.json` order; do not animate settings-only modal extras.

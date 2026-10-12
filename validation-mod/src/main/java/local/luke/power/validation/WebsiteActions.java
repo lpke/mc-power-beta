@@ -70,14 +70,24 @@ final class WebsiteActions {
       }
       case "transfer-stack" -> {for(int i=0;i<9;i++)mc.player.container.onSlotClick(i,0,true,mc.player);}
       case "leaf" -> {
-        WebsiteGallery.run(mc,"building");setting(mc,"power_controls:features.fastLeafDecay.enableFastLeafDecay","true");
-        setting(mc,"power_controls:features.fastLeafDecay.minimumDecayTime","0.2");setting(mc,"power_controls:features.fastLeafDecay.maximumDecayTime","1.0");
-        for(int dx=-3;dx<=3;dx++)for(int dz=-3;dz<=3;dz++)for(int dy=2;dy<=5;dy++)
-          if(Math.abs(dx)+Math.abs(dz)<6)block(mc,dx,dy,dz,18,0);
+        WebsiteGallery.run(mc,"building");setting(mc,"power_controls:features.fastLeafDecay.enableFastLeafDecay","false");
+        x=8496;y=72;z=2304;
+        for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++)mc.world.method_214((x>>4)+dx,(z>>4)+dz);
+        for(int dx=-10;dx<=10;dx++)for(int dz=-10;dz<=10;dz++) {
+          block(mc,dx,-1,dz,2,0);for(int dy=0;dy<15;dy++)block(mc,dx,dy,dz,0,0);
+        }
+        setting(mc,"power_controls:features.fastLeafDecay.minimumDecayTime","0.05");setting(mc,"power_controls:features.fastLeafDecay.maximumDecayTime","0.1");
+        for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++)for(int dy=3;dy<=5;dy++)
+          if(Math.abs(dx)+Math.abs(dz)<4)block(mc,dx,dy,dz,18,0);
         for(int dy=0;dy<5;dy++)block(mc,0,dy,0,17,0);
-        camera(mc,7,3,-8,42,2);mc.options.hideHud=true;
+        camera(mc,-6,3,-7,-40,0);mc.options.hideHud=true;
       }
-      case "leaf-cut" -> {for(int dy=0;dy<5;dy++)mc.world.method_200(x,y+dy,z,0);}
+      case "leaf-cut" -> {
+        setting(mc,"power_controls:features.fastLeafDecay.enableFastLeafDecay","true");
+        for(int dy=0;dy<5;dy++)mc.interactionManager.method_1716(x,y+dy,z,2);
+        // Start one ordinary leaf tick; the installed feature schedules the cascade.
+        mc.world.method_216(x,y+5,z,18,1);
+      }
       case "gold" -> {
         WebsiteGallery.run(mc,"building");CreativeVehicleChecks.mode(mc,"SURVIVAL");
         setting(mc,"power_gold:config.enableGoldPickaxeSilkTouch","true");
@@ -150,12 +160,16 @@ final class WebsiteActions {
   }
   private static void vehicle(Minecraft mc,boolean boat) throws Exception {
     WebsiteGallery.run(mc,"building");x=boat?4608:4864;z=boat?1536:1792;y=104;
+    for(Object value:new ArrayList<>(mc.world.field_198)) {
+      if(value instanceof net.minecraft.entity.Entity entity && (entity instanceof class_113 || entity instanceof class_549))entity.markDead();
+    }
     for(int dx=-2;dx<=2;dx++)for(int dz=-7;dz<=7;dz++)mc.world.method_214((x>>4)+dx,(z>>4)+dz);
     int half=boat?8:3;
     for(int dx=-half;dx<=half;dx++)for(int dz=-90;dz<=90;dz++) {
       block(mc,dx,-1,dz,boat?12:4,0);block(mc,dx,0,dz,boat?9:5,0);
       for(int dy=1;dy<128-y;dy++)block(mc,dx,dy,dz,0,0);
-      if(!boat&&dx==0)block(mc,dx,1,dz,66,0);
+      if(!boat&&dx==0)block(mc,dx,1,dz,27,8);
+      if(!boat&&dx==1&&dz%6==0)block(mc,dx,1,dz,76,5);
       if(Math.abs(dx)==half){block(mc,dx,0,dz,boat?4:5,0);block(mc,dx,1,dz,85,0);
         if(dz%12==0)block(mc,dx,2,dz,50,5);
         if(dz%18==0)for(int dy=-2;dy>=-24;dy--)block(mc,dx,dy,dz,4,0);
@@ -167,7 +181,7 @@ final class WebsiteActions {
     var status=local.luke.power.status.StatusConfig.copy();status.enabled=false;local.luke.power.status.StatusConfig.preview(status);
     camera(mc,.5,3,-65.5,0,8);mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,false);
     net.minecraft.entity.Entity vehicle=boat?new class_113(mc.world,x+.5,y+.5,z-65.5):new class_549(mc.world,x+.5,y+1.5,z-65.5,0);
-    vehicle.yaw=vehicle.prevYaw=90;mc.world.method_210(vehicle);mc.player.method_1376(vehicle);if(!boat)vehicle.velocityZ=.4;
+    vehicle.yaw=vehicle.prevYaw=boat?-90:90;mc.world.method_210(vehicle);mc.player.method_1376(vehicle);
     mc.options.hideHud=false;mc.options.thirdPerson=true;
   }
 }

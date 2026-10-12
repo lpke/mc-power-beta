@@ -33,7 +33,8 @@ final class WebsiteGallery {
   }
   static void camera(Minecraft mc,double dx,double dy,double dz,float yaw,float pitch) throws Exception {
     mc.setScreen(null);mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,true);
-    mc.player.method_1340(x+dx,y+dy,z+dz);
+    // Float eye height is slightly greater than decimal 1.62. Keep feet above floor tops.
+    mc.player.method_1340(x+dx,y+dy+.001,z+dz);
     mc.player.prevX=mc.player.field_1637=mc.player.x;mc.player.prevY=mc.player.field_1638=mc.player.y;mc.player.prevZ=mc.player.field_1639=mc.player.z;
     mc.player.yaw=mc.player.prevYaw=yaw;mc.player.pitch=mc.player.prevPitch=pitch;
     mc.player.velocityX=mc.player.velocityY=mc.player.velocityZ=0;
@@ -108,6 +109,8 @@ final class WebsiteGallery {
       ContainerCarry.click(mc,1);
       check(!ContainerCarry.carrying(),"place gallery chest before travelling");
     }
+    if(mc.player.dead||mc.player.health<=0||mc.player.field_1041>0)mc.method_2122(true,0);
+    if(mc.player.method_943())mc.player.method_497(true,true,false);
     var detached=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     detached.getClass().getMethod("setActive",boolean.class).invoke(detached,false);
     ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");mc.player.health=20;mc.player.fire=0;
