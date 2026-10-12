@@ -48,7 +48,7 @@ final class WebsiteGallery {
   }
   static void run(Minecraft mc,String action) throws Exception {
     if(action.startsWith("menu ")) {menu(mc,action.substring(5),"");return;}
-    if(action.equals("search")) {menu(mc,"General","sprint");return;}
+    if(action.equals("search")) {menu(mc,"General","speed");return;}
     if(action.equals("freecam-view")) {
       var settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
       settings.getClass().getField("enabled").set(settings,Boolean.TRUE);
@@ -110,7 +110,7 @@ final class WebsiteGallery {
     }
     var detached=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     detached.getClass().getMethod("setActive",boolean.class).invoke(detached,false);
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
+    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");mc.player.health=20;mc.player.fire=0;
     mc.setScreen(null);mc.options.hideHud=true;mc.options.thirdPerson=false;
     var visuals=VisualConfig.copy();visuals.hideEntities=false;visuals.spectatorFullBright=false;
     visuals.containerCarry=visuals.containerPreview=false;visuals.oldCobble=visuals.oldBricks=false;visuals.redstonePowerLevels=false;VisualConfig.preview(visuals);
@@ -123,12 +123,14 @@ final class WebsiteGallery {
     x=1536+index*160;z=index%2==0?1216:-1216;
     for(int dx=-4;dx<=4;dx++)for(int dz=-4;dz<=4;dz++)mc.world.method_214((x>>4)+dx,(z>>4)+dz);
     y=110;while(y>64&&mc.world.getBlockId(x,y-1,z)==0)y--;
+    if(action.equals("building"))y=68;
+    if(action.equals("castle"))y=80;
     ChatChecks.submit(mc,"/time set noon");ChatChecks.submit(mc,"/weather clear");
     camera(mc,0,12,0,135,12);
     if(Set.of("preview","carry","sign","building","textures","tnt").contains(action)) {
       for(int dx=-10;dx<=10;dx++)for(int dz=-8;dz<=8;dz++) {
         block(mc,dx,-1,dz,action.equals("tnt")?1:action.equals("preview")?5:2,0);
-        for(int dy=0;dy<9;dy++)block(mc,dx,dy,dz,0,0);
+        for(int dy=0;dy<128-y;dy++)block(mc,dx,dy,dz,0,0);
       }
     }
     if(action.equals("vanilla")) {camera(mc,0,18,0,225,13);ChatChecks.submit(mc,"/time set 10500");}
@@ -164,7 +166,7 @@ final class WebsiteGallery {
     } else if(action.equals("castle")) {
       for(int dx=-19;dx<=19;dx++)for(int dz=-19;dz<=19;dz++) {
         for(int dy=-5;dy<0;dy++)block(mc,dx,dy,dz,dy==-1?2:3,0);
-        for(int dy=0;dy<=22;dy++)block(mc,dx,dy,dz,0,0);
+        for(int dy=0;dy<128-y;dy++)block(mc,dx,dy,dz,0,0);
       }
       for(int dx=-12;dx<=12;dx++)for(int dz=-12;dz<=12;dz++) {
         if(Math.abs(dx)<2||Math.abs(dz)<2)block(mc,dx,-1,dz,13,0);

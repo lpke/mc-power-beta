@@ -5,39 +5,58 @@ improvements and optional tweaks in one searchable Options menu.
 
 [Website and download](https://mc-power-beta.vercel.app/)
 
-| Isometric screenshots | WorldEdit |
+| Unified options menu | Creative mode |
 | --- | --- |
-| [<img src="docs/screenshots/isometric.png" width="480" alt="Isometric view of a lake and forest">](docs/screenshots/isometric.png) | [<img src="docs/screenshots/worldedit.png" width="480" alt="WorldEdit selection around a castle">](docs/screenshots/worldedit.png) |
+| [<img src="docs/screenshots/unified-menu.png" width="480" alt="Searchable options with settings grouped by category">](docs/screenshots/unified-menu.png) | [<img src="docs/screenshots/creative-inventory.png" width="480" alt="Creative catalogue above a snowy mountain valley">](docs/screenshots/creative-inventory.png) |
 
-| Creative mode | Unified options menu |
+| WorldEdit | Isometric screenshots |
 | --- | --- |
-| [<img src="docs/screenshots/creative-inventory.png" width="480" alt="Creative catalogue above a snowy mountain valley">](docs/screenshots/creative-inventory.png) | [<img src="docs/screenshots/unified-menu.png" width="480" alt="Searchable options with settings grouped by category">](docs/screenshots/unified-menu.png) |
+| [<img src="docs/screenshots/worldedit.png" width="480" alt="WorldEdit selection around a castle">](docs/screenshots/worldedit.png) | [<img src="docs/screenshots/isometric.png" width="480" alt="Isometric view of a lake and forest">](docs/screenshots/isometric.png) |
 
-| Music library | Death recovery |
+| Death recovery | Music library |
 | --- | --- |
-| [<img src="docs/screenshots/music-library.png" width="480" alt="Music library with track previews and volume controls">](docs/screenshots/music-library.png) | [<img src="docs/screenshots/death-inventory.png" width="480" alt="Saved death inventory with recovery controls">](docs/screenshots/death-inventory.png) |
+| [<img src="docs/screenshots/death-inventory.png" width="480" alt="Saved death inventory with recovery controls">](docs/screenshots/death-inventory.png) | [<img src="docs/screenshots/music-library.png" width="480" alt="Music library with track previews and volume controls">](docs/screenshots/music-library.png) |
 
-## What's included
+## Features
 
-- Vanilla Beta mechanics by default, with optional bug fixes and modern conveniences.
-- Optional dropped-item merging, explosion-safe items and bounded TNT work for large chains.
-- Entity visibility controls and full bright, with optional automatic spectator lighting.
-- Flexible key bindings, modifier shortcuts and movement while inventories are open.
-- Separate sound controls, custom music, playlists and saved presets.
-- Optional faster boats, minecarts and obsidian mining.
-- Optional modern water landings and water bucket clutches, including flowing water.
-- Optional empty bucket stacks of 16, with filled buckets kept separate.
-- Editable signs and useful gold tools, including silk touch.
-- Creative and spectator modes with a modern mode switcher.
-- Shift-click creative catalogue items for a full stack. Middle-click dragging fills inventory and container slots.
-- Backported WorldEdit and singleplayer commands with modern Minecraft syntax.
-- Optional death records with locations, causes and lost items. View saved inventory positions and recover items with cheats. Optional Keep inventory on death is a per-world cheat rule.
-- Customizable crafting recipes and container carrying.
-- Building aids including fast placement, light levels, container previews,
-  edge protection and auto-walk.
-- Free camera, free look and isometric screenshots.
-- Cheat-gated /spawn returns to the world spawn without changing your respawn point.
-- Texture options for old cobblestone, old bricks and redstone power numbers.
+- One searchable Options menu with categories, linked settings, tooltips, live previews, reset controls, automatic saving and optional Apply/Cancel editing.
+- Configurable keyboard and mouse bindings, Ctrl/Shift/Alt chords, conflict detection and a shared view for resolving overlapping bindings.
+- Creative and spectator modes, a mode picker, configurable reach, flight speed, drift and sprint, and adjustable spectator speed.
+- Creative item categories and a survival inventory view. Shift-click for full stacks, middle-drag to fill slots, and use a destroy slot or clear the inventory.
+- WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
+- Commands with completion, editable history and help, including teleportation, saved warps, world spawn, time, weather, spawning and item commands.
+- Chat selection, copy/paste, cursor navigation, scrolling, configurable history and fade time, and preserved colour across wrapped lines.
+- Death records with locations, causes and original inventory layouts. View lost items and recover them with cheats, including crafting inputs. Optional per-world keep inventory.
+- Free camera with adjustable speed, drag, collisions and separate player movement; free look, cinematic camera, field of view, adjustable third-person distance and front view.
+- Isometric captures with rotation, scale and mirroring, custom-resolution screenshots, clipboard copying and photo mode.
+- Fully lit rendering with a full-bright hotkey and optional automatic spectator lighting. Mob spawning and simulated light remain unchanged.
+- Entity visibility controls for items, mobs, players, vehicles, projectiles and TNT. Entity and block-entity culling skips hidden rendering work.
+- Optional dropped-item merging, explosion protection for dropped items and TNT work limits that can be enabled before loading a struggling world.
+- Music libraries, custom tracks and folders, era selections, favourites, inclusion filters, per-track and per-folder volume, queues and saved presets.
+- Music previews, seeking and playback controls in Options and the pause menu, with separate sound categories, ambience controls and optional extra interaction sounds.
+- Flexible block placement with offset, adjacent, rotation, reverse and into-face modes, target overlays and destination previews.
+- Fast placement with placement restrictions, item filters, orientation retention and slab rules. Complete slabs through adjacent faces.
+- Container previews and carrying that preserves contents, including double chests. Optional inventory access in Nether portals.
+- Quick inventory transfers, bulk crafting, drag distribution, double-click collection, scroll transfers, number-key hotbar swaps and stack dropping.
+- Direct tool and armour swapping, Shift-click and right-click equipping, hotbar row swapping with previews, and optional use of the four crafting inputs as storage.
+- Movement while compatible inventories are open, auto-walk, auto-mine, continuous click mining, step assist, edge protection and fence jumping.
+- Faster boats and minecarts, boat steering and collision protection, boat elevators, minecart boosters and optional faster obsidian mining.
+- Optional water landings and bucket clutches, including flowing water. Empty buckets stack to 16; doors and signs have optional modern stack limits.
+- Individual modern recipes, shapeless recipes, tool repair, wool redyeing, adjusted slab/stair/trapdoor/ladder yields, material recovery, soul sand and otherwise unobtainable blocks.
+- Per-world difficulty and cheat-gated daylight, weather, natural spawning and keep-inventory rules. Time freezing preserves the simulation clock.
+- Natural spawning controls by mob type, spawn limits, light thresholds, group sizes and despawning, including saddled-pig preservation.
+- Sleep controls for night skipping or acceleration, wake-on-click, nightmares and respawn-only beds; configurable rain, thunder, snow height and weather timing.
+- Fast leaf decay, creative sapling drops, persistent placed leaves, leaf apple drops, dead-bush sticks, shears harvesting, log rotation and farmland protection.
+- Sign editing and dye colouring, unsupported and glued trapdoors, blocked-chest opening, stackable chests, fence connections and pressure plates on fences.
+- Optional gold-tool silk touch, hoe fortune, sword looting, fishing luck, gold-armour abilities, fire-curing golden apples and water-absorbing sponges.
+- Explosion block damage and drop controls, TNT ignition and defusing, snowballs that extinguish fire, fire spread between entities and flaming arrows.
+- Optional equipment durability and defence changes, mob drops, sheep punching for wool, grass hoeing for seeds, squid milking and food-waste prevention.
+- Older block textures, softer rain and snow, low fire, redstone power numbers, leaf rendering, particle controls, camera shake and fog options.
+- Light-level overlays, configurable active-tweak indicators and toggle messages, hotbar item names, HUD positioning, crosshair and vignette controls.
+- Expanded F3 information for coordinates, facing, biome, day, play time, slime chunks, light, music and culling, with shared text colour and layout.
+- Title-screen logo and panorama controls, version labels, achievement display options and recovery controls for missing achievements.
+- Configurable autosaving, focus-loss pausing, raw mouse input and network options. Optional tall-grass and dead-bush generation controls for new terrain.
+- Fixes for rendering, lighting, item and block drops, mining, boats, stairs, fences, liquids, mob behaviour, sleeping, multiplayer jitter and legacy client behaviour.
 
 Most gameplay changes start off. Fixes, performance improvements and small
 conveniences start on. Each world has its own Cheats switch for creative modes,

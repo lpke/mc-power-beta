@@ -26,7 +26,8 @@ final class WebsiteDetails {
     if(action.startsWith("iso ")) { isometric(mc,Integer.parseInt(action.substring(4)));return; }
     switch(action) {
       case "textures-on", "textures-off" -> {
-        var s=VisualConfig.copy();s.oldCobble=s.oldBricks=action.endsWith("on");VisualConfig.preview(s);mc.worldRenderer.method_1537();
+        setting(mc,"visual.oldCobble",String.valueOf(action.endsWith("on")));setting(mc,"visual.oldBricks",String.valueOf(action.endsWith("on")));
+        local.luke.power.visual.TextureOverrides.clear();mc.textureManager.method_1096();mc.worldRenderer.method_1537();
       }
       case "placement" -> placement(mc);
       case "placement-check" -> {
@@ -81,7 +82,7 @@ final class WebsiteDetails {
       if(radius>=6.5&&radius<7.5&&!(dx==4&&dz==-6))block(mc,dx,1,dz,5,0);
     }
     var s=local.luke.power.building.config.Config.current().copy();s.flexible.enabled=s.flexible.showOverlay=s.flexible.showPreview=true;
-    local.luke.power.building.config.Config.preview(s);Keys.ALL[1].code=34;
+    local.luke.power.building.config.Config.preview(s);for(int i=1;i<Keys.ALL.length;i++)Keys.ALL[i].code=0;Keys.ALL[1].code=34;
     mc.player.inventory.main[0]=new ItemStack(5,64,0);mc.player.inventory.selectedSlot=0;
     // Aim at the left edge of the north face. Offset places the missing diagonal block.
     double cx=4.3,cy=3.4,cz=-8,tx=5.1,ty=1.65,tz=-5.001;

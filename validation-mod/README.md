@@ -223,3 +223,22 @@ captures, and normal gameplay rendering after capture.
   native isometric renders at successive angles for an orbit animation.
   Use a muted disposable clone and wait for rendering before each capture.
   These fixtures change worlds and settings; use only in a muted disposable clone.
+
+- `gallery-motion section PAGE|GROUP;GROUP` opens a related-settings view for a
+  feature. `scroll` records native scrolling or setting tooltips for short groups.
+  `page N` exposes the remaining settings pages for modal screenshots. `pan` moves
+  the player view; `freecam` flies the detached camera out from the castle. `stop`
+  ends the current motion. `creative N` and `creative survival` open catalogue
+  categories and the survival inventory. `music-all` and `music-presets` open the
+  corresponding native library views.
+- `gallery-action` stages gameplay recordings for the five `placement MODE`
+  previews, `roof` and `roof-row N`, `boat`, `minecart`, inventory transfers and
+  equipment swaps, leaf decay, gold tools, water landings and explosion-protected
+  items. Use physical input to demonstrate placement, mining and vehicle controls.
+  For the mode picker, hold its modifier while recording. Water landings start
+  on a diving ledge; walk off it with edge protection disabled. Prefer recordings
+  that show the actual operation, such as carrying and placing a chest or pasting
+  a copied selection.
+  Texture captures must wait for the atlas reload to finish before recording.
+  Keep a static poster for every animated gallery view and inspect recordings
+  before publishing them. Never ship the fixture JAR.

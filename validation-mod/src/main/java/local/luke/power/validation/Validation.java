@@ -44,6 +44,7 @@ public final class Validation {
   }
 
   public static void tick(Minecraft mc) {
+    WebsiteMotion.tick(mc);
     Release151SphereChecks.observe(mc);
     if (++ticks % 5 != 0 || !Files.exists(COMMAND)) return;
     try {
