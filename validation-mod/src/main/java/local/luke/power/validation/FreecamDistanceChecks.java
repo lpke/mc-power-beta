@@ -17,6 +17,7 @@ public final class FreecamDistanceChecks {
 
   static void run(Minecraft mc) throws Exception {
     failures=0; DeathChecks.alive(mc); mc.setScreen(null); mc.field_2807=mc.player;
+    var visualBefore = local.luke.power.visual.VisualConfig.copy();
     Object camera=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     Object settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
     var enabled=settings.getClass().getField("enabled"); Object before=enabled.get(settings);
@@ -31,6 +32,8 @@ public final class FreecamDistanceChecks {
     var nearSign=new net.minecraft.block.entity.SignBlockEntity();
     var farSign=new net.minecraft.block.entity.SignBlockEntity();
     try {
+      var visible = local.luke.power.visual.VisualConfig.copy(); visible.hideEntities = false;
+      local.luke.power.visual.VisualConfig.preview(visible);
       enabled.set(settings,true);active.invoke(camera,false);
       for(int bx:new int[]{0,96}) mc.world.method_154(bx,99,3,1,0);
       mc.world.method_210(near); mc.world.method_210(far);
@@ -64,6 +67,7 @@ public final class FreecamDistanceChecks {
         check(!DetachedCamera.isActive()&&entities.contains(near)&&!entities.contains(far),"disabled camera retained distance override");
       });
     } finally {
+      local.luke.power.visual.VisualConfig.preview(visualBefore);
       recording=false;active.invoke(camera,false);enabled.set(settings,before);
       near.markDead();far.markDead();list.clear();list.addAll(original);
       mc.player.method_1341(x,y,z,yaw,pitch);entities.clear();blocks.clear();

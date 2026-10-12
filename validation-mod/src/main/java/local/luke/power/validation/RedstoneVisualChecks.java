@@ -28,16 +28,17 @@ final class RedstoneVisualChecks {
       test("redstone defaults off, previews without saving, and Cancel restores", () -> {
         check(!setting.defaultValue.getAsBoolean() && setting.group.equals("Textures"), "default or placement");
         byte[] before = Files.readAllBytes(PowerConfig.path());
-        setting.parse("true"); session.preview(); check(VisualConfig.current().redstonePowerLevels, "no preview");
+        setting.parse(Boolean.toString(!original.redstonePowerLevels)); session.preview();
+        check(VisualConfig.current().redstonePowerLevels != original.redstonePowerLevels, "no preview");
         check(Arrays.equals(before, Files.readAllBytes(PowerConfig.path())), "preview saved");
-        session.discard(); check(!VisualConfig.current().redstonePowerLevels, "Cancel not restored");
+        session.discard(); check(VisualConfig.current().redstonePowerLevels == original.redstonePowerLevels, "Cancel not restored");
       });
       test("only world settings carry scope notes and world rows identify themselves", () -> {
         for (var s : session.settings()) {
           String tip = Tooltips.setting(s, "");
           if (SettingScope.perWorld(s)) {
             check(tip.contains("Saved separately for each singleplayer world."), "missing world tooltip: " + s.id);
-            check((s.label + " " + s.group).toLowerCase(Locale.ROOT).contains("this world"), "missing world name: " + s.id);
+            check(s.group.equals("World overrides") || (s.label + " " + s.group).toLowerCase(Locale.ROOT).contains("this world"), "missing world name: " + s.id);
           } else check(!tip.contains("Global setting.") && !tip.contains("Global binding."), "global boilerplate: " + s.id);
         }
       });

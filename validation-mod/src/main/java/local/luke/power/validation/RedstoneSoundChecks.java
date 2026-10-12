@@ -31,9 +31,10 @@ public final class RedstoneSoundChecks {
       test("placement sound defaults off in Audio > Extra sounds and Cancel restores without saving", () -> {
         check(!setting.defaultValue.getAsBoolean() && setting.page.equals("Audio") && setting.group.equals("Extra sounds"), "default/placement");
         byte[] before = Files.readAllBytes(PowerConfig.path());
-        setting.parse("true"); session.preview(); check(AudioConfig.current().redstonePlacementSound, "preview missing");
+        setting.parse(Boolean.toString(!original.redstonePlacementSound)); session.preview();
+        check(AudioConfig.current().redstonePlacementSound != original.redstonePlacementSound, "preview missing");
         check(Arrays.equals(before, Files.readAllBytes(PowerConfig.path())), "preview saved");
-        session.discard(); check(!AudioConfig.current().redstonePlacementSound, "Cancel did not restore");
+        session.discard(); check(AudioConfig.current().redstonePlacementSound == original.redstonePlacementSound, "Cancel did not restore");
       });
       for (String testMode : new String[] {"SURVIVAL", "CREATIVE"}) test("redstone sound is optional, once per placement in " + testMode, () -> {
         CreativeVehicleChecks.mode(mc, testMode);
