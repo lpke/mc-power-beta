@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-10-12
+
+- Preserve ambient occlusion and smooth corner shading with full bright.
+- Add optional right-click TNT ignition with flint and steel, including reusable ignition in creative. Off by default.
+- Add Fast item and TNT collisions to Fixes, on by default and switchable without restarting. Avoid redundant collision scans in crowded item piles while preserving block and vehicle collisions.
+- Spread item merging across short, resumable sweeps, cover the terrain render distance and reduce idle checks. Preserve item counts, damage and native item data.
+- Smooth the displayed movement of TNT while its simulation is limited, without advancing queued fuses or changing physics.
+
 ## [1.5.0] - 2026-10-12
 
 - Add an unbound entity visibility hotkey, selectable entity types, HUD status and optional toggle messages. Dropped items are selected by default.

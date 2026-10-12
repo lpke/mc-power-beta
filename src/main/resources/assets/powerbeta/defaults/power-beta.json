@@ -778,7 +778,9 @@
       "limitTnt": false,
       "tntPerTick": 4,
       "tntMillis": 8,
-      "leavesDropSaplingsInCreative": true
+      "leavesDropSaplingsInCreative": true,
+      "flintIgnitesTnt": false,
+      "fastItemCollisions": true
     }
   }
 }

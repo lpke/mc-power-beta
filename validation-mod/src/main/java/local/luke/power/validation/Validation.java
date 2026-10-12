@@ -44,11 +44,13 @@ public final class Validation {
   }
 
   public static void tick(Minecraft mc) {
+    Release151SphereChecks.observe(mc);
     if (++ticks % 5 != 0 || !Files.exists(COMMAND)) return;
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("interaction-150")) Release150InteractionChecks.run(mc);
+      if (command.startsWith("release-151")) Release151Checks.run(mc, command.substring(11).trim());
+      else if (command.equals("interaction-150")) Release150InteractionChecks.run(mc);
       else if (command.startsWith("gallery-web ")) WebsiteGallery.run(mc,command.substring(12));
       else if (command.startsWith("gallery-detail ")) WebsiteDetails.run(mc,command.substring(15));
       else if (command.startsWith("gallery-150 ")) Release150Gallery.run(mc,command.substring(12));

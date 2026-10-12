@@ -16,7 +16,9 @@
     "PlacementSoundCaptureMixin",
     "CullingThreadChecks",
     "EntityRenderCapture",
-    "BlockEntityRenderCapture"
+    "BlockEntityRenderCapture",
+    "Performance151Capture",
+    "Render151Capture"
   ],
   "injectors": {
     "defaultRequire": 1

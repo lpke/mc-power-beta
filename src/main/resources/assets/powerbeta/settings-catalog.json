@@ -4497,14 +4497,14 @@
     "page": "Gameplay",
     "group": "Dropped items",
     "label": "Merge dropped items",
-    "description": "Combine nearby matching dropped items when enough are within camera render distance. Keeps normal stack limits, damage and item data. Singleplayer only.",
+    "description": "Combine nearby matching dropped items when enough are within the terrain render distance around the camera. Keeps normal stack limits, damage and item data. Singleplayer only.",
     "order": 0
   },
   "gameplay.mergeThreshold": {
     "page": "Gameplay",
     "group": "Dropped items",
     "label": "Item merging threshold",
-    "description": "Minimum dropped-item entities within camera render distance before merging starts. A stack counts as one entity. Checked twice per second.",
+    "description": "Minimum dropped-item entities within terrain render distance before a merging sweep starts. Large sweeps continue across ticks. Idle checks run twice per second.",
     "order": 1,
     "min": 16,
     "max": 16384,
@@ -4656,5 +4656,21 @@
     "label": "Full bright",
     "description": "Include this tweak while active.",
     "order": 21
+  },
+  "gameplay.flintIgnitesTnt": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Flint and steel primes TNT",
+    "description": "Right-click TNT with flint and steel to prime it. Uses one durability in survival; reusable in creative. Singleplayer only.",
+    "order": 9,
+    "restart": false
+  },
+  "gameplay.fastItemCollisions": {
+    "page": "Fixes",
+    "group": "Performance",
+    "label": "Fast item and TNT collisions",
+    "description": "Skip redundant collision checks between dropped items and primed TNT. Keeps block and vehicle collisions, item pickup and explosion knockback. Singleplayer only.",
+    "order": 0,
+    "restart": false
   }
 }

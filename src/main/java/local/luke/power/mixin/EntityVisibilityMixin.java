@@ -16,6 +16,10 @@ public class EntityVisibilityMixin {
   @Unique private int power$renderedTnt;
   @Inject(method = "method_1544", at = @At("HEAD"))
   private void power$begin(CallbackInfo ci) { power$renderedTnt = 0; }
+  @WrapOperation(method = "method_1544", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;method_1367(Lnet/minecraft/util/math/Vec3d;)Z"))
+  private boolean power$visible(Entity entity, net.minecraft.util.math.Vec3d position, Operation<Boolean> original) {
+    return !EntityVisibility.hidden(entity) && original.call(entity, position);
+  }
   @WrapOperation(method = "method_1544", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;method_1921(Lnet/minecraft/entity/Entity;F)V"))
   private void power$entity(EntityRenderDispatcher dispatcher, Entity entity, float delta, Operation<Void> original) {
     if (EntityVisibility.hidden(entity)) return;

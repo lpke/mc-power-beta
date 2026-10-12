@@ -8,6 +8,20 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-151 check`: TNT ignition modes, collision equivalence and live toggles,
+  custom collision boxes, chunk movement/removal and resumable merging with changing
+  native NBT. Run after `new-world`. `release-151 fast` and `release-151 slow`
+  compare dense-item ticks, explosion work and bounded merging up to 8,192 items.
+  `release-151 text` checks the loaded F3, status and chat colours through actual
+  glyph pixels; run immediately after launch. `release-151 light` checks full-bright
+  occlusion samples and unchanged simulation light. Use `release-151 save`, restart,
+  then `release-151 saved` to verify the two new settings persist.
+- `release-151 sphere setup` builds a ground-level `//sphere tnt 5` scene. Wait for
+  WorldEdit to finish, then run `release-151 sphere hidden` or `visible`. Append
+  `-unmerged`, `-slow`, `-unlimited` or `-unprotected` to compare each setting's off
+  state. Wait for `SPHERE DONE` after 600 ticks before changing the scene; the report
+  includes item/TNT counts and entity tick/render median, p95 and maximum timings.
+
 - `freecam-distance`: dropped-item and block-entity render distance follows the
   detached camera, including player movement mode, exit and disabling the feature.
   Run after `new-world`. `worldedit-navigation` also checks pillar sides, top faces

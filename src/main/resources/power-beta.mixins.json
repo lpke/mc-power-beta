@@ -84,7 +84,13 @@
     "ItemHealthAccessor",
     "SoundStreamLifecycleMixin",
     "SoundStreamLockAccess",
-    "FullBrightCaptureMixin"
+    "FullBrightCaptureMixin",
+    "ItemCollisionMixin",
+    "ChunkCollisionMixin",
+    "TntIgnitionMixin",
+    "TntMotionMixin",
+    "TntMotionRenderMixin",
+    "FlattenedCollisionMixin"
   ],
   "injectors": {
     "defaultRequire": 1

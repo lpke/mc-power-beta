@@ -13,16 +13,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class TntBudgetMixin {
   @Unique private final TntBudget<class_365> power$tnt = new TntBudget<>();
   @Unique private boolean power$draining;
+  @Unique private long power$tick;
   @Inject(method = "method_227", at = @At("HEAD"))
   private void power$begin(CallbackInfo ci) {
+    power$tick++;
     if (GameplayConfig.current().limitTnt && !((World)(Object)this).isRemote) power$tnt.begin();
     else power$tnt.clear();
   }
   @com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod(method = "method_193")
   private void power$tick(Entity entity, boolean loaded, Operation<Void> original) {
-    if (!power$draining && loaded && !entity.world.isRemote && GameplayConfig.current().limitTnt && entity instanceof class_365 tnt)
+    if (!power$draining && loaded && !entity.world.isRemote && GameplayConfig.current().limitTnt && entity instanceof class_365 tnt) {
+      ((local.luke.power.render.TntMotion.Access)tnt).power$tntMotion().begin(power$tick, tnt.x, tnt.y, tnt.z);
       power$tnt.offer(tnt);
-    else original.call(entity, loaded);
+    } else {
+      if (!power$draining && entity instanceof class_365)
+        ((local.luke.power.render.TntMotion.Access)entity).power$tntMotion().clear();
+      original.call(entity, loaded);
+    }
   }
   @Inject(method = "method_227", at = @At("TAIL"))
   private void power$drain(CallbackInfo ci) {
@@ -33,7 +40,10 @@ public class TntBudgetMixin {
     try {
       power$tnt.run(128, settings.tntPerTick, settings.tntMillis * 1_000_000L,
           tnt -> !tnt.dead, tnt -> tnt.field_1390 <= 0,
-          tnt -> world.method_193(tnt, true), System::nanoTime);
+          tnt -> {
+            world.method_193(tnt, true);
+            ((local.luke.power.render.TntMotion.Access)tnt).power$tntMotion().target(tnt.x, tnt.y, tnt.z);
+          }, System::nanoTime);
     } finally { power$draining = false; }
   }
 }

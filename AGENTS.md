@@ -192,3 +192,11 @@
 - Item merging preserves native NBT, damage, normal stack limits and total counts.
   TNT limits retain native entities and saved fuses, bound work each tick and stay
   available from the main menu for recovery. Both leave multiplayer server-owned.
+
+- Item/TNT collision indexing must cover native and StationAPI flattened chunks,
+  including insertion, section changes and removal while the fix is off. Filter
+  only exact native classes with null collision boxes; retain custom subclasses,
+  vehicles and the original multiplayer query. The Fixes toggle takes effect live.
+- Merge sweeps use terrain render distance for their threshold, resume within a
+  tick budget and back off when idle. Revalidate native item data between batches
+  and exclude removed entities. TNT interpolation changes render coordinates only.

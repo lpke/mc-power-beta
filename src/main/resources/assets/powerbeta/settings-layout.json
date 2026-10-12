@@ -152,7 +152,8 @@
     "Items and blocks",
     "Entities",
     "World simulation",
-    "Client fixes"
+    "Client fixes",
+    "Performance"
   ],
   "Advanced": [
     "Network and resources",
