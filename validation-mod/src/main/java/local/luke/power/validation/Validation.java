@@ -49,6 +49,7 @@ public final class Validation {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
       if (command.equals("interaction-150")) Release150InteractionChecks.run(mc);
+      else if (command.startsWith("gallery-web ")) WebsiteGallery.run(mc,command.substring(12));
       else if (command.startsWith("gallery-150 ")) Release150Gallery.run(mc,command.substring(12));
       else if (command.startsWith("render-150 ")) Render150Checks.run(mc,command.substring(11));
       else if (command.startsWith("audio-150 ")) Release150AudioChecks.run(mc,command.substring(10));

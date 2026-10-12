@@ -196,3 +196,8 @@ captures, and normal gameplay rendering after capture.
   `alive` check rapid decoder cancellation. Run phases promptly on a silent output.
 - `gallery-150` prepares separate scenes and captures real renderer screenshots.
   Wait for chunks to render before `gallery-150 capture NAME`.
+
+- `gallery-web SCENE` prepares anonymous website scenes in separate locations.
+  Menu actions include `menu General`, `search`, `modes`, `death`, `chat` and
+  `sign-editor`. Use `gallery-150 capture NAME` after the rendered view settles.
+  These fixtures change worlds and settings; use only in a muted disposable clone.
