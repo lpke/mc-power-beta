@@ -42,6 +42,7 @@ public class RetroChatUtil {
     commands.add(new Seed());
     commands.add(new SpawnPoint());
     commands.add(new SetWorldSpawn());
+    commands.add(new Spawn());
     if (ClientCommands.creativeInventoryAvailable) {
       commands.add(new Gamemode());
     }

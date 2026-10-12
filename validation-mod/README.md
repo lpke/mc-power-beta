@@ -59,7 +59,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   `keep-inventory reload` for a complete dead-player restart and respawn check.
 - `help-audit`: index and completion coverage, aliases, optional features, world
   rules, multiplayer/operator access and safe help for every available command.
-- `toggle-messages`: all nine defaults, live providers, HUD independence,
+- `toggle-messages`: all eleven defaults, live providers, HUD independence,
   duplicate suppression, menu silence and Cancel/Apply. Run after `new-world`.
   Use `toggle-messages save`, restart, then `toggle-messages reload` to verify
   persistence and restore every message switch to off.
@@ -174,3 +174,25 @@ For isometric capture, bind Isometric screenshot in Options, test chunk distance
 2 and 8, and capture again after lighting and chunks finish updating. At scale 4,
 expect 640 × 832 and 2176 × 1600 PNGs. Check negative coordinates, repeated
 captures, and normal gameplay rendering after capture.
+
+## Release 1.5 checks
+
+- `release-150` checks settings, item merging and native item data, explosion
+  protection, TNT breaking, normal/fast leaf decay across modes, catalogue
+  transfer, entity visibility, full bright and `/spawn`.
+- `interaction-150` checks actual catalogue Shift-clicks, stack settings, native
+  item data and 4,096-item merging with conservation and save checks.
+- `release-150 spawn-dimension` checks returning from the Nether.
+- `release-150 save` and `release-150 saved` check settings across a restart.
+- `tnt-performance` measures native detonation and fuse work with limits off/on.
+  `tnt-performance save`, restart, then `tnt-performance reload` checks pending
+  TNT recovery. `save-disabled`, then enabling `gameplay.limitTnt` at the title
+  screen before reopening, tests main-menu recovery. Dispatch the reload check immediately after opening the world.
+- `render-150 setup` binds J to full bright and K to entity visibility for physical
+  input tests. `chord` adds Ctrl; `on`, `off`, `hidden`, `visible`, `spectator`,
+  `creative`, `disable`, `menu` and `close` exercise state transitions.
+- `audio-150 setup`, `preview`, `next`, `check`, `finish` checks preview restoration
+  and song-label destinations. `menus` covers title/pause controls; `stress` and
+  `alive` check rapid decoder cancellation. Run phases promptly on a silent output.
+- `gallery-150` prepares separate scenes and captures real renderer screenshots.
+  Wait for chunks to render before `gallery-150 capture NAME`.

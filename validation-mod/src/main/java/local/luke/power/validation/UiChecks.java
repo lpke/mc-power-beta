@@ -46,6 +46,9 @@ public final class UiChecks {
   }
 
   static void run(Minecraft mc) throws Exception {
+    boolean autoApply = MenuPreferences.current().autoApply;
+    MenuPreferences.update(values -> values.autoApply = false);
+    try {
     ConfigSession before = SettingsRegistry.open(mc);
     int oldScale = find(before, "native.guiScale").value.getAsInt();
     var parent = mc.currentScreen;
@@ -114,5 +117,6 @@ public final class UiChecks {
     restore.save(Path.of(".").toAbsolutePath());
     mc.setScreen(parent);
     log("UI CHECKS COMPLETE");
+    } finally { MenuPreferences.update(values -> values.autoApply = autoApply); }
   }
 }

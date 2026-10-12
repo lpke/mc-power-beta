@@ -43,7 +43,7 @@ public final class DeathCommands {
   }
 
   public static void execute(Minecraft mc, String[] args) throws Exception {
-    if (!DeathTracker.available(mc)) throw new IllegalArgumentException("Enable Death records in Options > Commands.");
+    if (!DeathTracker.available(mc)) throw new IllegalArgumentException("Enable Death records in Options > Gameplay.");
     if (args.length > 3) { help(mc); return; }
     String action = args.length == 1 ? "" : args[1].toLowerCase(Locale.ROOT);
     if (action.equals("help")) { help(mc); return; }

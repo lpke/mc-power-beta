@@ -71,7 +71,20 @@
     "DeathSlotAccessor",
     "DeathCraftingAccessor",
     "DeathLivingCauseMixin",
-    "DeathEntityCauseMixin"
+    "DeathEntityCauseMixin",
+    "RenderKeysMixin",
+    "FullBrightRenderMixin",
+    "FullBrightLightMixin",
+    "TntBudgetMixin",
+    "ExplosionItemsMixin",
+    "ItemMergingMixin",
+    "EntityVisibilityMixin",
+    "CreativeTntMixin",
+    "CreativeSaplingsMixin",
+    "ItemHealthAccessor",
+    "SoundStreamLifecycleMixin",
+    "SoundStreamLockAccess",
+    "FullBrightCaptureMixin"
   ],
   "injectors": {
     "defaultRequire": 1

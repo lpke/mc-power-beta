@@ -17,6 +17,7 @@ public final class PowerBeta {
     }
     local.luke.power.audio.AudioController.tick(mc);
     local.luke.power.light.LightOverlay.tick(mc);
+    local.luke.power.render.RenderControls.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
       local.luke.power.death.DeathCommands.register();
@@ -32,7 +33,7 @@ public final class PowerBeta {
       });
       local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
       local.luke.power.input.Bindings.availability(id ->
-          !id.equals("power_creative.picker") && !id.equals("power_creative.modifier")
+          !id.equals("power_creative.picker") && !id.equals("power_creative.modifier") && !id.equals("power_beta.fullBright")
               || local.luke.power.permissions.CommandPermissions.cheatsEnabled());
       local.luke.power.video.VideoConfig.current();
       try {

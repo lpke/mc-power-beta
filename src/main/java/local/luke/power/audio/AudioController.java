@@ -678,7 +678,10 @@ public final class AudioController {
 
   public static void next() {
     if (client == null || system() == null) return;
-    MusicPreview.stop(system(), false);
+    if (MusicPreview.active()) {
+      MusicPreview.stop(system(), true);
+      return;
+    }
     paused = false;
     if (!MusicRequests.tracks().isEmpty()) { playQueue(); return; }
     if (historyIndex + 1 < history.size()) { play(history.get(++historyIndex)); return; }

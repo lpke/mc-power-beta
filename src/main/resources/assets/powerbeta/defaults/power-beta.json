@@ -338,7 +338,18 @@
       "shiftClickIntoCraftingGrid": false,
       "redstonePowerLevels": false,
       "damageCameraShake": true,
-      "fireDamageCameraShake": true
+      "fireDamageCameraShake": true,
+      "hideEntities": false,
+      "hideItems": true,
+      "hideMobs": false,
+      "hidePlayers": false,
+      "hideVehicles": false,
+      "hideProjectiles": false,
+      "hideTnt": false,
+      "hideOther": false,
+      "entityRenderingMessages": false,
+      "fullBrightMessages": false,
+      "spectatorFullBright": false
     },
     "power_environment:config": {
       "MISSING_ACHIEVEMENTS_CONFIG": {
@@ -726,7 +737,9 @@
       "key_power_building.hotbar.row2": "0",
       "key_power_building.hotbar.row3": "0",
       "framerate_limit": 125,
-      "key_Auto-mine (toggle)": "0"
+      "key_Auto-mine (toggle)": "0",
+      "key_power_beta.entities": 0,
+      "key_power_beta.fullBright": 0
     },
     "video": {
       "leaves": true,
@@ -744,16 +757,28 @@
     },
     "activeTweaks": {
       "cinematicCameraMessages": false,
-      "autoMine": true
+      "autoMine": true,
+      "hiddenEntities": true,
+      "fullBright": true
     },
     "interface": {
       "blinkingChatCursor": false,
-      "debugTextColor": "#FFFFFF"
+      "debugTextColor": "#FFFFFF",
+      "autoApply": true
     },
     "death": {
       "enabled": false,
       "announceLocation": true,
       "announceItems": false
+    },
+    "gameplay": {
+      "mergeItems": false,
+      "mergeThreshold": 256,
+      "explosionProofItems": false,
+      "limitTnt": false,
+      "tntPerTick": 4,
+      "tntMillis": 8,
+      "leavesDropSaplingsInCreative": true
     }
   }
 }

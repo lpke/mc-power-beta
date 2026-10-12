@@ -7,6 +7,8 @@ public final class ControlLinks {
   private record Link(String setting, String featureGate, String help) {}
   private static final Map<String, Link> LINKS = new HashMap<>();
   static {
+    link("power_beta.entities", "visual.hideEntities", "", "Toggle rendering for the selected entity types.");
+    link("power_beta.fullBright", "visual.spectatorFullBright", "", "Toggle full bright. Requires cheats and changes rendering only.");
     link("powerbeta.lightOverlay", "lightOverlay.enabled", "", "Toggle light-level numbers on nearby block tops.");
     link("powerbeta.containerPreview", "visual.containerPreview", "visual.containerPreview", "Hold while aiming at a container to preview its contents without opening it.");
     link("key.forward", "", "", "Move forward.");
@@ -109,6 +111,8 @@ public final class ControlLinks {
     };
     if (!family.isEmpty() && setting.id.startsWith(family)) return true;
     return switch (link.setting) {
+      case "visual.hideEntities" -> setting.group.equals("Entity visibility");
+      case "visual.spectatorFullBright" -> setting.id.equals("visual.fullBrightMessages");
       case "creative.sprintToggle" -> setting.page.equals("Creative") && setting.group.equals("Flight")
           || setting.id.equals("creative.sprintMultiplier") || setting.id.equals("power_camera:config.sprint");
       case "video.fogCycle" -> setting.id.equals("native.renderDistance") || setting.id.equals("native.fogDensity");

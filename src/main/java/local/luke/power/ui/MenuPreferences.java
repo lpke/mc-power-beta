@@ -8,7 +8,8 @@ import local.luke.power.storage.PowerConfig;
 /** Menu preferences share the pack configuration, independent of settings drafts. */
 public final class MenuPreferences {
   public static final class Values {
-    public boolean autoApply, pauseToOptions, blinkingChatCursor;
+    public boolean autoApply = true;
+    public boolean pauseToOptions, blinkingChatCursor;
     public String debugTextColor = "#FFFFFF";
     public String musicBrowserDirectory = "";
     public List<String> colours = new ArrayList<>();

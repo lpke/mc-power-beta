@@ -16,7 +16,7 @@ public final class DeathBackend implements Backend {
         entry("announceItems", "Lost items in chat", "Print the lost inventory and equipment when you die. Use /death items [id] to view saved inventory positions.", value.announceItems, false)));
   }
   private static Setting entry(String key, String label, String help, boolean value, boolean defaults) {
-    return new Setting("death." + key, "death", "Commands", "Death records", label, help,
+    return new Setting("death." + key, "death", "Gameplay", "Death records", label, help,
         Setting.Kind.BOOLEAN, new JsonPrimitive(value), new JsonPrimitive(defaults), 0, 1, 1, List.of(), false);
   }
   public String id() { return "death"; }

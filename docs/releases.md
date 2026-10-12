@@ -29,7 +29,7 @@ Install Java 21, Python 3, GitHub CLI and Vercel CLI. Sign in with `gh auth logi
 and `vercel login`. From this repository run:
 
 ```sh
-python3 tools/release.py --publish --site /path/to/power-beta-website
+python3 tools/release.py --publish --site /path/to/mc-power-beta-website
 ```
 
 The command builds modules sequentially, runs tests, checks the seven-JAR export

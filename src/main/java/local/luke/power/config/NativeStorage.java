@@ -8,11 +8,20 @@ import local.luke.power.controls.util.ModOptions;
 
 /** Native settings and custom bindings share the same transaction as every feature. */
 public final class NativeStorage {
+  private static final ThreadLocal<Integer> previewDepth = ThreadLocal.withInitial(() -> 0);
+  /** Native callbacks may save during first audio initialization; previews stay in memory. */
+  public static void preview(Runnable action) {
+    int depth = previewDepth.get();
+    previewDepth.set(depth + 1);
+    try { action.run(); }
+    finally { if (depth == 0) previewDepth.remove(); else previewDepth.set(depth); }
+  }
   private static final Map<String,String> EXTENDED = Map.ofEntries(
       Map.entry("fov","fov"),Map.entry("brightness","brightness"),Map.entry("cloud_height","cloudHeight"),
       Map.entry("clouds","clouds"),Map.entry("fog_density","fogDensity"),
       Map.entry("render_distance","renderDistance"),Map.entry("gui_scale","guiScale"));
   public static void load(GameOptions options) {
+    local.luke.power.render.RenderControls.register(options);
     JsonObject data = PowerConfig.section("native");
     try {
       for (var e : data.entrySet()) {
@@ -46,6 +55,7 @@ public final class NativeStorage {
     } catch (ReflectiveOperationException e) { throw new IllegalStateException("Cannot load game options",e); }
   }
   public static void save(GameOptions options) {
+    if (previewDepth.get() > 0) return;
     JsonObject data = PowerConfig.section("native");
     try {
       data.addProperty("music",options.musicVolume); data.addProperty("sound",options.soundVolume);

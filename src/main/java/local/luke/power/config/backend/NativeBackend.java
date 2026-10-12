@@ -364,7 +364,7 @@ public final class NativeBackend implements Backend {
   }
 
   public void preview(Map<String, JsonElement> values) {
-    values.forEach((key, value) -> {
+    NativeStorage.preview(() -> values.forEach((key, value) -> {
       switch (key) {
         // Vanilla's setInt also saves options.txt; previews must stay in memory.
         case "native.fancy" -> { mc.options.fancyGraphics = value.getAsBoolean(); if (mc.worldRenderer != null) mc.worldRenderer.method_1537(); }
@@ -376,7 +376,7 @@ public final class NativeBackend implements Backend {
         case "native.clouds" -> local.luke.power.controls.util.ModOptions.clouds = value.getAsBoolean();
         default -> setters.get(key).accept(value);
       }
-    });
+    }));
     local.luke.power.audio.AudioController.refresh();
   }
 

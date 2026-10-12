@@ -39,6 +39,7 @@ public final class CommandPermissions {
               "spawnpoint", "Set a player respawn position without changing inventory or warps."),
           command(
               "setworldspawn", "Set the default world spawn for players without a personal spawn."),
+          command("spawn", "Teleport to the Overworld world spawn."),
           command("give", "Add items to an inventory."),
           command(
               "god", "Toggle immunity to damage. Immunity is suspended while access is blocked."),

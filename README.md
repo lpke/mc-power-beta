@@ -8,20 +8,23 @@ Built for singleplayer.
 
 | Creative inventory | Music library |
 | --- | --- |
-| [![Creative inventory over a snowy Beta landscape](docs/screenshots/creative-inventory.png)](docs/screenshots/creative-inventory.png) | [![Music library with track previews and volume controls](docs/screenshots/music-library.png)](docs/screenshots/music-library.png) |
+| [![Creative catalogue above a snowy mountain valley](docs/screenshots/creative-inventory.png)](docs/screenshots/creative-inventory.png) | [![Music library with track previews and volume controls](docs/screenshots/music-library.png)](docs/screenshots/music-library.png) |
 
 | WorldEdit | Redstone power levels |
 | --- | --- |
-| [![WorldEdit selection around a workshop](docs/screenshots/worldedit.png)](docs/screenshots/worldedit.png) | [![Signal strength displayed on redstone wire](docs/screenshots/redstone.png)](docs/screenshots/redstone.png) |
+| [![WorldEdit selection around a stone bridge](docs/screenshots/worldedit.png)](docs/screenshots/worldedit.png) | [![Signal strength displayed on redstone wire](docs/screenshots/redstone.png)](docs/screenshots/redstone.png) |
 
 | Light levels | Isometric screenshots |
 | --- | --- |
-| [![Light levels on nearby blocks](docs/screenshots/light-levels.png)](docs/screenshots/light-levels.png) | [![Isometric view of a snowy Beta world](docs/screenshots/isometric.png)](docs/screenshots/isometric.png) |
+| [![Light levels on nearby blocks](docs/screenshots/light-levels.png)](docs/screenshots/light-levels.png) | [![Isometric view of a lake and forest](docs/screenshots/isometric.png)](docs/screenshots/isometric.png) |
+
+[![Full bright in an unlit underground chamber](docs/screenshots/full-bright.png)](docs/screenshots/full-bright.png)
 
 ## What's included
 
 - Vanilla Beta mechanics by default, with optional bug fixes and modern conveniences.
-- Performance improvements and detailed control over graphics and game mechanics.
+- Optional dropped-item merging, explosion-safe items and bounded TNT work for large chains.
+- Entity visibility controls and full bright, with optional automatic spectator lighting.
 - Flexible key bindings, modifier shortcuts and movement while inventories are open.
 - Separate sound controls, custom music, playlists and saved presets.
 - Optional faster boats, minecarts and obsidian mining.
@@ -29,13 +32,14 @@ Built for singleplayer.
 - Optional empty bucket stacks of 16, with filled buckets kept separate.
 - Editable signs and useful gold tools, including silk touch.
 - Creative and spectator modes with a modern mode switcher.
-- Middle-click dragging in creative fills inventory and container slots with full stacks.
+- Shift-click creative catalogue items for a full stack. Middle-click dragging fills inventory and container slots.
 - Backported WorldEdit and singleplayer commands with modern Minecraft syntax.
 - Optional death records with locations, causes and lost items. View saved inventory positions and recover items with cheats. Optional Keep inventory on death is a per-world cheat rule.
 - Customizable crafting recipes and container carrying.
 - Building aids including fast placement, light levels, container previews,
   edge protection and auto-walk.
 - Free camera, free look and isometric screenshots.
+- Cheat-gated /spawn returns to the world spawn without changing your respawn point.
 - Texture options for old cobblestone, old bricks and redstone power numbers.
 
 Most gameplay changes start off. Fixes, performance improvements and small
@@ -51,7 +55,7 @@ commands and world editing. Other settings are shared unless marked "this world"
 4. Open the instance's **Edit > Settings > Java**, enable the Java installation
    override and select **Java 21**. Download Java through Prism if needed.
 5. Launch the instance. Open **Options** to browse or search settings and hover
-   them for help. **Apply** saves changes; **Cancel** discards them.
+   them for help. Auto apply is on by default. Turn it off to use **Apply** and **Cancel** for grouped edits.
 
 The pack includes all required mods. Import the whole ZIP into a new instance.
 Back up your worlds before replacing an existing installation.

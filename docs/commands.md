@@ -9,6 +9,12 @@ Chat supports clicking and dragging to select text, **Shift+arrows**, **Home/End
 **Ctrl+A**, **Ctrl+C**, **Ctrl+X** and **Ctrl+V**. Ctrl+arrows move by words.
 Text stays within Beta's 100-character chat limit.
 
+## World spawn
+
+`/spawn` returns to the Overworld's world spawn, including from the Nether.
+It requires cheats and leaves your bed spawn unchanged. Use `/spawn help` for
+its instructions; `/help` lists available commands.
+
 ## Selection size
 
 - `//contract 1 down` moves the top face down one block.

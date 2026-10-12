@@ -1,7 +1,9 @@
 package local.luke.power.creative.api;
 
 /** Local gamemode state. CreativeInventory's CreativePlayer API remains available alongside this. */
-public interface ModePlayer {
+public interface ModePlayer extends local.luke.power.input.PlayerMode {
+  default boolean power$creative() { return power_mode() == GameMode.CREATIVE; }
+  default boolean power$spectator() { return power_isSpectator(); }
   GameMode power_mode();
 
   GameMode power_previousMode();

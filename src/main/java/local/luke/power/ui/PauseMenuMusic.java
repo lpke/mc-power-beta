@@ -25,7 +25,13 @@ public final class PauseMenuMusic extends UiScreen {
   }
 
   public boolean press(int x, int y, int button) {
-    if (!visible() || bounds == null || button != 0) return false;
+    if (!visible() || bounds == null || button != 0 && button != 1) return false;
+    if (button == 1) {
+      if (!inside(x, y, bounds.x(), bounds.y() + 21, bounds.width(), 12)) return false;
+      scrub.cancel();
+      PowerOptionsScreen.openMusicDestination(minecraft, minecraft.currentScreen);
+      return true;
+    }
     if (AudioConfig.current().menuControlsScrub && scrub.press(x, y, button)) return true;
     for (int i = 0; i < 4; i++) {
       if (!inside(x, y, controlsX() + i * BUTTON_STEP, bounds.y(), BUTTON_WIDTH, 18)) continue;

@@ -26,6 +26,7 @@ public final class CommandHelp {
           Map.entry("difficulty", "Read or change peaceful/easy/normal/hard"),
           Map.entry("seed", "Show the world seed"),
           Map.entry("spawnpoint", "Set a player's respawn position"),
+          Map.entry("spawn", "Teleport to the Overworld world spawn"),
           Map.entry("setworldspawn", "Set the world's default spawn"),
           Map.entry("summon", "Spawn a Beta entity"),
           Map.entry("kill", "Kill selected entities, or yourself"),

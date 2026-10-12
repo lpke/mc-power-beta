@@ -48,7 +48,13 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("gallery ")) GalleryChecks.run(mc, command.substring(8));
+      if (command.equals("interaction-150")) Release150InteractionChecks.run(mc);
+      else if (command.startsWith("gallery-150 ")) Release150Gallery.run(mc,command.substring(12));
+      else if (command.startsWith("render-150 ")) Render150Checks.run(mc,command.substring(11));
+      else if (command.startsWith("audio-150 ")) Release150AudioChecks.run(mc,command.substring(10));
+      else if (command.startsWith("tnt-performance")) TntPerformanceChecks.run(mc,command.length()>15 ? command.substring(15).trim() : "check");
+      else if (command.startsWith("release-150")) Release150Checks.run(mc, command.length() > 11 ? command.substring(11).trim() : "check");
+      else if (command.startsWith("gallery ")) GalleryChecks.run(mc, command.substring(8));
       else if (command.startsWith("world-settings-")) WorldSettingsChecks.run(mc,command.substring(15));
       else if (command.equals("cleanup")) CleanupChecks.run(mc);
       else if (command.equals("sign-editing")) SignEditingChecks.run(mc);

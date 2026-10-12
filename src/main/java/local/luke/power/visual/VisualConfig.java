@@ -22,6 +22,10 @@ public final class VisualConfig {
   public static VisualSettings current() { return current; }
   public static VisualSettings copy() { return Catalog.JSON.fromJson(Catalog.JSON.toJson(current), VisualSettings.class); }
   public static void preview(VisualSettings s) { s.validate(); current = Catalog.JSON.fromJson(Catalog.JSON.toJson(s), VisualSettings.class); local.luke.power.input.InteractionState.containerCarryEnabled=current.containerCarry; }
+  public static void queue(VisualSettings s) {
+    preview(s);
+    PowerConfig.saveDeferred("visual", s);
+  }
   public static void save(VisualSettings s) throws Exception {
     s.validate();
     PowerConfig.save("visual", s);

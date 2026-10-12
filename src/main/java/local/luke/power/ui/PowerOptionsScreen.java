@@ -120,6 +120,20 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   /** Open music from another screen without inheriting a stale settings filter. */
+  public static void openMusicDestination(net.minecraft.client.Minecraft mc, Screen parent) {
+    boolean queue = !local.luke.power.audio.MusicRequests.tracks().isEmpty();
+    openMusic(mc, parent, queue, null);
+    if (!queue && mc.currentScreen instanceof PowerOptionsScreen screen) screen.audioTop();
+  }
+
+  private void audioTop() {
+    libraryOpen = false;
+    scroll = 0;
+    positions.put("Audio", 0d);
+    collapsed.removeIf(key -> key.startsWith("Audio"));
+    layout();
+  }
+
   public static void openMusic(net.minecraft.client.Minecraft mc, Screen parent, boolean queue, String track) {
     PowerOptionsScreen screen = new PowerOptionsScreen(parent);
     screen.page = "Audio";
@@ -532,7 +546,15 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.press(x,y,button)) return;
-    if (musicControlsVisible() && button == 0 && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.overTrack(x, y)) {
+    if (musicControlsVisible() && (button == 0 || button == 1) && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.overTrack(x, y)) {
+      if (button == 1) {
+        click();
+        library.guard(() -> {
+          if (local.luke.power.audio.MusicRequests.tracks().isEmpty()) audioTop();
+          else { libraryOpen = true; library.showQueue(); layout(); }
+        });
+        return;
+      }
       String id = local.luke.power.audio.AudioController.currentTrackId();
       if (!id.isEmpty()) {
         click();
@@ -1013,7 +1035,7 @@ public final class PowerOptionsScreen extends UiScreen {
           case QUIET -> "End this track and wait for the next one. Automatic music stays on.";
           case PLAY -> "Play or pause music";
           case PREVIOUS -> "Previous track";
-          case NEXT -> "Next track; queued tracks take priority";
+          case NEXT -> "Next track, or end the preview and resume the previous track. Queued tracks take priority outside previews.";
           case QUEUE -> item.enabled() ? "Open the music queue" : "Queue is empty. Add tracks from the library.";
           case RELOAD -> "Rescan music folders";
           case LIBRARY -> "Browse music tracks and folders";
@@ -1022,7 +1044,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
     }
     if (musicControlsVisible() && (!libraryVisible() || library.trackStatusVisible()) && musicStatus.overTrack(mx, my)) {
-      tip = "Show this track in Everything"; hoverId = "music.current";
+      tip = "Show this track in Everything. Right-click for the queue, or Audio settings when empty."; hoverId = "music.current";
     }
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);
     button(filtered() ? "Reset listed..." : "Reset page...", resetX(), footerY(), 88, 20, mx, my, true);

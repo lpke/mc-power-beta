@@ -179,9 +179,12 @@ final class CreativePaintChecks {
       test("ordinary left/right clicks still pick up, split and place after a creative drag", () -> {
         var screen=player(true,320,240); mc.player.inventory.setCursorStack(new ItemStack(4,1,0));
         start(screen,9);hover(screen,9);finish(screen);mc.player.inventory.setCursorStack(null);
-        click(screen,9,1);check(screen.container.method_2084(9).getStack().count==32 && mc.player.inventory.getCursorStack().count==32,"right pickup changed");
+        check(screen.container.method_2084(9).getStack()!=null,"paint before right pickup missing");
+        click(screen,9,1);check(screen.container.method_2084(9).getStack()!=null && mc.player.inventory.getCursorStack()!=null,
+            "right pickup slot="+screen.container.method_2084(9).getStack()+" cursor="+mc.player.inventory.getCursorStack());
+        check(screen.container.method_2084(9).getStack().count==32 && mc.player.inventory.getCursorStack().count==32,"right pickup counts changed");
         ((ScreenInput)screen).power$release(0,0,1);click(screen,10,0);((ScreenInput)screen).power$release(0,0,0);
-        check(screen.container.method_2084(10).getStack().count==32 && mc.player.inventory.getCursorStack()==null,"left placement changed");
+        check(screen.container.method_2084(10).getStack()!=null && screen.container.method_2084(10).getStack().count==32 && mc.player.inventory.getCursorStack()==null,"left placement changed");
       });
       test("switching from right-drag to middle-drag preserves counts in both release orders", () -> {
         for(boolean middleFirst:new boolean[]{false,true}) {

@@ -11,6 +11,7 @@
     "Lighting",
     "Sky",
     "Textures",
+    "Entity visibility",
     "Visibility culling",
     "Particles"
   ],
@@ -35,6 +36,7 @@
     "Building",
     "Hotbar swapping",
     "Creative",
+    "Rendering",
     "Interface",
     "Screenshots",
     "Mouse input",
@@ -109,7 +111,6 @@
   ],
   "Commands": [
     "Access",
-    "Death records",
     "Game mode access",
     "Game mode access in this world",
     "Cheat commands",
@@ -118,6 +119,7 @@
     "Non-cheat commands in this world"
   ],
   "Gameplay": [
+    "Death records",
     "Interaction",
     "Fall damage",
     "Blocks",
@@ -135,7 +137,8 @@
     "Better burning",
     "Fast leaf decay",
     "World generation",
-    "Older mechanics"
+    "Older mechanics",
+    "Dropped items"
   ],
   "Crafting": [
     "Recipes",

@@ -19,6 +19,7 @@ public final class SettingsRegistry {
     WorldBackend.register(s, mc);
     CommandsBackend.register(s, mc);
     DeathBackend.register(s);
+    GameplayBackend.register(s);
     s.settings().forEach(ItemSettings::attach);
     return s;
   }

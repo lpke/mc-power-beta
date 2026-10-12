@@ -572,6 +572,12 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         ItemStack cursor = inventory.getCursorItem();
         if (index < creative_items.size()) {
           ItemStack item = creative_items.get(index);
+          if (item != null && (button == 0 || button == 1)
+              && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))) {
+            if (local.luke.power.creative.InventoryActions.catalogueStack(minecraft.player, item))
+              creative_updateInventory(inventory);
+            return;
+          }
           boolean isSame = cursor != null && item != null && cursor.isDamageAndIDIdentical(item);
           if (item != null && button == 2) {
             cursor = item.copy();

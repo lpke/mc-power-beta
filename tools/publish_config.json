@@ -1,6 +1,6 @@
 {
   "repository": "lpke/mc-power-beta",
-  "websiteRepository": "lpke/power-beta",
+  "websiteRepository": "lpke/mc-power-beta-website",
   "website": "https://power-beta-gamma.vercel.app",
   "vercelScope": "lpke",
   "vercelProjectId": "prj_WLXeAPmAmILyAsC2ip3bcxM6d3fg",

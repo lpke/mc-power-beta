@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-12
+
+- Add an unbound entity visibility hotkey, selectable entity types, HUD status and optional toggle messages. Dropped items are selected by default.
+- Add optional merging of nearby dropped items above a configurable threshold, preserving stack limits, damage and item data.
+- Add an option to protect dropped items from explosions.
+- Add optional TNT work limits to spread large chains across ticks and help reload struggling worlds. Pending TNT keeps its saved fuse.
+- Stop creative TNT breaking from dropping blocks, and add an option to suppress saplings while leaves decay in creative.
+- Shift-click creative catalogue items to transfer one full stack into the inventory, respecting item and stacking limits.
+- Enable Auto apply by default for new settings profiles, and move death-record settings into Gameplay.
+- Make Next end music previews and resume the previous track without consuming the queue. Right-click the song label to open the queue, or the top of Audio when the queue is empty.
+- Prevent rapid music-preview cancellation from stopping the sound streaming thread, and keep first-time audio previews from saving settings.
+- Add /spawn with cheat gating, shared help and command completion.
+- Add an unbound full-bright hotkey and optional automatic spectator lighting. Both affect rendering only and turn off when cheats are disabled.
+
 ## [1.4.4] - 2026-10-12
 
 - Show nearby entities and block entities based on the freecam camera position, including dropped items away from the player.

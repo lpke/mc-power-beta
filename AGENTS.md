@@ -49,6 +49,7 @@
 - `AudioController` owns all music sources, pauses, previews and timing.
   World/menu transitions preserve streams and pause state in WORLD/MIX modes;
   only CUSTOM resets playback. Preview restoration must not revive old jukeboxes.
+  Synchronize sound-source cleanup with decoder reads on the sound threads.
   Never scan folders or decode audio from a render loop. Preset drafts and saved
   snapshots must stay separate from live library edits; only Load copies a preset
   into live state. Track pools prevent new folders silently expanding presets.
@@ -97,6 +98,8 @@
   Wrapped chat keeps the last Beta colour code from the preceding line.
   Help and completion share command availability. Group WorldEdit under //help,
   retain aliases, and keep per-command help free of gameplay changes.
+  Every new command must appear in /help and completion, with /<command> help
+  describing its syntax and permissions without changing gameplay.
   Optional death records are scoped by stable world ID and player. Recovery needs
   cheats, plans full capacity first and protects native item NBT and original slots
   with a flushed journal. GUI recovery uses per-stack claims; viewing never changes
@@ -182,3 +185,10 @@
 - Isometric captures use the actual renderer chunk grid and Beta's 128-block
   height. Centre both horizontal axes on the camera's chunk; never use camera Y
   for Z or infer capture size from the obsolete four-step distance option.
+
+- Entity visibility changes only rendering. Full bright overrides float shading only
+  on the render thread, never saved or simulated light. Spectator overrides last
+  for one visit; leaving restores manual state, and lost cheats clear it.
+- Item merging preserves native NBT, damage, normal stack limits and total counts.
+  TNT limits retain native entities and saved fuses, bound work each tick and stay
+  available from the main menu for recovery. Both leave multiplayer server-owned.

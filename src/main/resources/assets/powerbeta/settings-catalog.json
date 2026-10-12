@@ -4473,17 +4473,17 @@
     "order": 16
   },
   "death.enabled": {
-    "page": "Commands",
+    "page": "Gameplay",
     "group": "Death records",
     "order": 0
   },
   "death.announceLocation": {
-    "page": "Commands",
+    "page": "Gameplay",
     "group": "Death records",
     "order": 1
   },
   "death.announceItems": {
-    "page": "Commands",
+    "page": "Gameplay",
     "group": "Death records",
     "order": 2
   },
@@ -4492,5 +4492,169 @@
     "group": "World overrides",
     "label": "Keep inventory on death",
     "order": 80
+  },
+  "gameplay.mergeItems": {
+    "page": "Gameplay",
+    "group": "Dropped items",
+    "label": "Merge dropped items",
+    "description": "Combine nearby matching dropped items when enough are within camera render distance. Keeps normal stack limits, damage and item data. Singleplayer only.",
+    "order": 0
+  },
+  "gameplay.mergeThreshold": {
+    "page": "Gameplay",
+    "group": "Dropped items",
+    "label": "Item merging threshold",
+    "description": "Minimum dropped-item entities within camera render distance before merging starts. A stack counts as one entity. Checked twice per second.",
+    "order": 1,
+    "min": 16,
+    "max": 16384,
+    "step": 16
+  },
+  "gameplay.explosionProofItems": {
+    "page": "Gameplay",
+    "group": "Dropped items",
+    "label": "Items survive explosions",
+    "description": "Protect dropped items from TNT, creeper and other explosion damage in singleplayer. Fire, lava, despawning and pickup still work normally.",
+    "order": 2
+  },
+  "gameplay.limitTnt": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "Limit TNT work",
+    "description": "Spread TNT simulation and explosions across ticks, with fewer visible TNT entities and explosion particles. Chains take longer. Enable from the main menu before loading a struggling singleplayer world.",
+    "order": 10
+  },
+  "gameplay.tntPerTick": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "TNT explosions per tick",
+    "description": "Maximum TNT detonations per tick while Limit TNT work is on. Waiting TNT retains its fuse and saves normally.",
+    "order": 11,
+    "min": 1,
+    "max": 64,
+    "step": 1
+  },
+  "gameplay.tntMillis": {
+    "page": "Gameplay",
+    "group": "Explosion and fire",
+    "label": "TNT time budget",
+    "description": "Milliseconds of TNT work allowed per tick. Finishes the current TNT update before yielding, so one explosion can exceed this budget.",
+    "order": 12,
+    "min": 1,
+    "max": 50,
+    "step": 1,
+    "unit": "ms"
+  },
+  "gameplay.leavesDropSaplingsInCreative": {
+    "page": "Creative",
+    "group": "Interaction",
+    "label": "Leaves drop saplings in creative",
+    "description": "Allow saplings from leaves decaying while you are in creative. Applies to normal and fast decay. Survival drops resume immediately when you leave creative.",
+    "order": 8
+  },
+  "visual.hideEntities": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Hide selected entities",
+    "description": "Hide the selected entity types visually. Entities keep ticking and can still be hit or picked up. Use the toggle key to switch.",
+    "order": 0
+  },
+  "visual.hideItems": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Include dropped items",
+    "description": "Include this type when Hide selected entities is on. Changes rendering only.",
+    "order": 1
+  },
+  "visual.hideMobs": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Include mobs",
+    "description": "Include this type when Hide selected entities is on. Changes rendering only.",
+    "order": 2
+  },
+  "visual.hidePlayers": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Include players",
+    "description": "Include this type when Hide selected entities is on. Changes rendering only.",
+    "order": 3
+  },
+  "visual.hideVehicles": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Include boats and minecarts",
+    "description": "Include this type when Hide selected entities is on. Changes rendering only.",
+    "order": 4
+  },
+  "visual.hideProjectiles": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Include projectiles",
+    "description": "Include this type when Hide selected entities is on. Changes rendering only.",
+    "order": 5
+  },
+  "visual.hideTnt": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Include primed TNT",
+    "description": "Include this type when Hide selected entities is on. Changes rendering only.",
+    "order": 6
+  },
+  "visual.hideOther": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Include other entities",
+    "description": "Include this type when Hide selected entities is on. Changes rendering only.",
+    "order": 7
+  },
+  "visual.entityRenderingMessages": {
+    "page": "Video",
+    "group": "Entity visibility",
+    "label": "Entity visibility messages",
+    "description": "Show a chat message when the entity visibility hotkey changes state. Independent of the HUD.",
+    "order": 8
+  },
+  "visual.spectatorFullBright": {
+    "page": "Creative",
+    "group": "Spectator",
+    "label": "Full bright in spectator",
+    "description": "Automatically fully light the view on entering spectator. The full-bright hotkey can override it for that visit. Leaving spectator restores your earlier manual setting. Requires cheats.",
+    "order": 8
+  },
+  "visual.fullBrightMessages": {
+    "page": "Video",
+    "group": "Lighting",
+    "label": "Full bright messages",
+    "description": "Show a chat message when full bright turns on or off during gameplay. Independent of the HUD.",
+    "order": 8
+  },
+  "keys.power_beta.entities": {
+    "page": "Controls",
+    "group": "Rendering",
+    "label": "Entity visibility (toggle)",
+    "description": "Toggle rendering for the selected entity types.",
+    "order": 0
+  },
+  "keys.power_beta.fullBright": {
+    "page": "Controls",
+    "group": "Rendering",
+    "label": "Full bright (toggle)",
+    "description": "Fully light terrain and entities for rendering only. Requires cheats; leaves mob spawning and simulation light unchanged.",
+    "order": 1
+  },
+  "activeTweaks.hiddenEntities": {
+    "page": "Interface",
+    "group": "Active tweaks",
+    "label": "Hidden entities",
+    "description": "Include this tweak while active.",
+    "order": 20
+  },
+  "activeTweaks.fullBright": {
+    "page": "Interface",
+    "group": "Active tweaks",
+    "label": "Full bright",
+    "description": "Include this tweak while active.",
+    "order": 21
   }
 }
