@@ -24,21 +24,21 @@ import org.lwjgl.input.*;
 
 /** Anonymous website scenes. Never install in a personal instance. */
 final class WebsiteGallery {
-  private static int x,y,z;
-  private static void setting(Minecraft mc,String id,String value) throws Exception {
+  static int x,y,z;
+  static void setting(Minecraft mc,String id,String value) throws Exception {
     var session=SettingsRegistry.open(mc);find(session,id).parse(value);session.save(Path.of("."));
   }
-  private static void block(Minecraft mc,int dx,int dy,int dz,int id,int meta) {
+  static void block(Minecraft mc,int dx,int dy,int dz,int id,int meta) {
     new MinecraftWorld(mc.world).set(new Pos(x+dx,y+dy,z+dz),new BlockValue(id,meta));
   }
-  private static void camera(Minecraft mc,double dx,double dy,double dz,float yaw,float pitch) throws Exception {
+  static void camera(Minecraft mc,double dx,double dy,double dz,float yaw,float pitch) throws Exception {
     mc.setScreen(null);mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,true);
     mc.player.method_1340(x+dx,y+dy,z+dz);
     mc.player.prevX=mc.player.field_1637=mc.player.x;mc.player.prevY=mc.player.field_1638=mc.player.y;mc.player.prevZ=mc.player.field_1639=mc.player.z;
     mc.player.yaw=mc.player.prevYaw=yaw;mc.player.pitch=mc.player.prevPitch=pitch;
     mc.player.velocityX=mc.player.velocityY=mc.player.velocityZ=0;
   }
-  private static void menu(Minecraft mc,String page,String query) throws Exception {
+  static void menu(Minecraft mc,String page,String query) throws Exception {
     var screen=new PowerOptionsScreen(null);mc.setScreen(screen);
     field(screen,"page",page);field(screen,"scroll",0d);field(screen,"sideScroll",0d);
     field(screen,"libraryOpen",false);field(screen,"changedOnly",false);

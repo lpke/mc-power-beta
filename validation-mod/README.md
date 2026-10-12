@@ -200,4 +200,12 @@ captures, and normal gameplay rendering after capture.
 - `gallery-web SCENE` prepares anonymous website scenes in separate locations.
   Menu actions include `menu General`, `search`, `modes`, `death`, `chat` and
   `sign-editor`. Use `gallery-150 capture NAME` after the rendered view settles.
+- `gallery-detail ACTION` prepares detailed website views: `placement` and
+  `placement-check`, `fence`, `slabs`, `conflicts`, `conflicts-filter`,
+  `chat-select`, `chat-cursor`, `pause-music`, `music-seek`, `music-queue`,
+  `items`, `items-merge`, `items-hidden`, `items-visible`, `buckets`,
+  `textures-on`, `textures-off`, and related settings views. Hold G for the
+  diagonal placement preview. `iso-scene` followed by `iso ANGLE` captures
+  native isometric renders at successive angles for an orbit animation.
+  Use a muted disposable clone and wait for rendering before each capture.
   These fixtures change worlds and settings; use only in a muted disposable clone.

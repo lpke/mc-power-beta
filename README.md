@@ -7,15 +7,15 @@ improvements and optional tweaks in one searchable Options menu.
 
 | Isometric screenshots | WorldEdit |
 | --- | --- |
-| [![Isometric view of a lake and forest](docs/screenshots/isometric.png)](docs/screenshots/isometric.png) | [![WorldEdit selection around a castle](docs/screenshots/worldedit.png)](docs/screenshots/worldedit.png) |
+| [<img src="docs/screenshots/isometric.png" width="480" alt="Isometric view of a lake and forest">](docs/screenshots/isometric.png) | [<img src="docs/screenshots/worldedit.png" width="480" alt="WorldEdit selection around a castle">](docs/screenshots/worldedit.png) |
 
 | Creative mode | Unified options menu |
 | --- | --- |
-| [![Creative catalogue above a snowy mountain valley](docs/screenshots/creative-inventory.png)](docs/screenshots/creative-inventory.png) | [![Searchable options with settings grouped by category](docs/screenshots/unified-menu.png)](docs/screenshots/unified-menu.png) |
+| [<img src="docs/screenshots/creative-inventory.png" width="480" alt="Creative catalogue above a snowy mountain valley">](docs/screenshots/creative-inventory.png) | [<img src="docs/screenshots/unified-menu.png" width="480" alt="Searchable options with settings grouped by category">](docs/screenshots/unified-menu.png) |
 
-| Music library | Redstone power levels |
+| Music library | Death recovery |
 | --- | --- |
-| [![Music library with track previews and volume controls](docs/screenshots/music-library.png)](docs/screenshots/music-library.png) | [![Signal strength displayed on redstone wire](docs/screenshots/redstone.png)](docs/screenshots/redstone.png) |
+| [<img src="docs/screenshots/music-library.png" width="480" alt="Music library with track previews and volume controls">](docs/screenshots/music-library.png) | [<img src="docs/screenshots/death-inventory.png" width="480" alt="Saved death inventory with recovery controls">](docs/screenshots/death-inventory.png) |
 
 ## What's included
 
