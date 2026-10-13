@@ -15,16 +15,20 @@ public final class InfoHud {
   private InfoHud() {}
 
   public static void tick(Minecraft mc) {
-    if (world != mc.world) { world = mc.world; biomeX = Integer.MIN_VALUE; ticks = 0; time = ""; }
+    if (world != mc.world) {
+      world = mc.world; biomeX = Integer.MIN_VALUE; ticks = 0;
+      coordinates = direction = biome = time = day = chunk = fps = "";
+    }
     var settings = InfoHudConfig.current();
     if (mc.world == null || mc.player == null) return;
+    if (!settings.enabled) ticks = 0;
     if (!settings.enabled && !MenuPreferences.debugTimeOfDay()) return;
     long daylight = ((WorldCycles)mc.world.method_262()).power$daylightTime();
     time = "Time: " + HudText.time(daylight);
     if (!settings.enabled || ticks++ % 4 != 0) return;
     int x = (int)Math.floor(mc.player.x), y = (int)Math.floor(mc.player.boundingBox.minY), z = (int)Math.floor(mc.player.z);
-    coordinates = "XYZ: " + x + " / " + y + " / " + z;
-    direction = "Facing: " + HudText.direction(mc.player.yaw);
+    coordinates = HudText.coordinates(x, y, z);
+    direction = HudText.direction(mc.player.yaw);
     day = "Day: " + Math.floorDiv(daylight, 24000L);
     chunk = "Chunk: " + Math.floorDiv(x, 16) + " / " + Math.floorDiv(z, 16);
     String debug = mc.debugText == null ? "" : mc.debugText;
@@ -42,8 +46,7 @@ public final class InfoHud {
 
   public static List<String> lines(InfoHudSettings.Cluster c) {
     var lines = new ArrayList<String>(7);
-    if (c.coordinates) lines.add(coordinates);
-    if (c.direction) lines.add(direction);
+    if (c.coordinates || c.direction) lines.add(HudText.location(coordinates, direction, c.coordinates, c.direction));
     if (c.biome) lines.add(biome);
     if (c.timeOfDay) lines.add(time);
     if (c.day) lines.add(day);

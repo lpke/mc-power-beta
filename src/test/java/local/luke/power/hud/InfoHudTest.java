@@ -52,10 +52,21 @@ class InfoHudTest {
         }
   }
   @Test void facingWrapsThroughNegativeYaw() {
-    assertEquals("South (+Z)", HudText.direction(0));
-    assertEquals("West (-X)", HudText.direction(90));
-    assertEquals("North (-Z)", HudText.direction(180));
-    assertEquals("East (+X)", HudText.direction(-90));
+    assertEquals("( Z, S)", HudText.direction(0));
+    assertEquals("(-X, W)", HudText.direction(90));
+    assertEquals("(-Z, N)", HudText.direction(180));
+    assertEquals("( X, E)", HudText.direction(-90));
     assertEquals(HudText.direction(45), HudText.direction(405));
+    assertEquals("( Z, S)", HudText.direction(44.99F));
+    assertEquals("(-X, W)", HudText.direction(45));
+  }
+  @Test void coordinatesAndDirectionShareOneLineOnlyWhenBothAreSelected() {
+    String coordinates = HudText.coordinates(-123, 64, 456);
+    assertEquals("-123, 64, 456", coordinates);
+    assertEquals(coordinates, HudText.location(coordinates, HudText.direction(90), true, false));
+    assertEquals("-123, 64, 456 (-X, W)", HudText.location(coordinates, HudText.direction(90), true, true));
+    assertEquals("-123, 64, 456 ( X, E)", HudText.location(coordinates, HudText.direction(-90), true, true));
+    assertEquals("(-Z, N)", HudText.location(coordinates, HudText.direction(180), false, true));
+    assertEquals("", HudText.location(coordinates, HudText.direction(0), false, false));
   }
 }

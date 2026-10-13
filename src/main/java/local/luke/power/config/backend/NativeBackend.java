@@ -157,6 +157,7 @@ public final class NativeBackend implements Backend {
       if (k.translationKey.toLowerCase(Locale.ROOT).contains("free_look")) label = "Free look";
       if (k.translationKey.equals("powerbeta.containerPreview")) label = "Preview container contents";
       if (k.translationKey.equals("powerbeta.lightOverlay")) label = "Light overlay (toggle)";
+      if (k.translationKey.equals("powerbeta.infoHud")) label = "Custom HUD info (toggle)";
       entries.add(
           new Setting(
               key,

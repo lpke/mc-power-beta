@@ -508,7 +508,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (button == 0 && !libraryVisible() && inside(x, y, sectionButtonX(), 27, 18, 18)) {
+    if (button == 0 && !libraryVisible() && inside(x, y, sectionButtonX(), 27, 18, 20)) {
       click(); toggleSections(); return;
     }
     if (canClear() && inside(x, y, clearSearchX(), 27, 18, 20)) {
@@ -967,8 +967,8 @@ public final class PowerOptionsScreen extends UiScreen {
         : changedOnly ? "Search changed settings..." : "Search all settings...");
     if (canClear()) button("x", clearSearchX(), 27, 18, 20, mx, my, true);
     boolean expandSections = SectionCollapse.allCollapsed(sections(), collapsed);
-    iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 18, mx, my,
-        !libraryVisible() && !sections().isEmpty());
+    iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 18, 20, mx, my,
+        !libraryVisible() && !sections().isEmpty(), false);
     if (musicControlsVisible()) {
       for (var item : musicButtons()) {
         if (item.action() == AudioToolbar.Action.PREVIOUS || item.action() == AudioToolbar.Action.NEXT)
@@ -1090,7 +1090,7 @@ public final class PowerOptionsScreen extends UiScreen {
       hoverId = "apply";
     }
     button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
-    if (!libraryVisible() && inside(mx, my, sectionButtonX(), 27, 18, 18)) {
+    if (!libraryVisible() && inside(mx, my, sectionButtonX(), 27, 18, 20)) {
       tip = expandSections ? "Expand all sections" : "Collapse all sections";
       hoverId = "sections";
     }

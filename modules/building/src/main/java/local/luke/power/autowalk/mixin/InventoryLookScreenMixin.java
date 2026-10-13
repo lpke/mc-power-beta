@@ -24,7 +24,7 @@ public abstract class InventoryLookScreenMixin {
     }
     if (!Mouse.getEventButtonState()) {
       boolean looking = InventoryLook.active();
-      InventoryLook.stop();
+      InventoryLook.release(minecraft);
       if (looking) ci.cancel();
       return;
     }

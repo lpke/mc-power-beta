@@ -73,11 +73,15 @@ public abstract class UiScreen extends Screen {
   }
 
   protected void iconButton(String icon, int x, int y, int w, int mx, int my, boolean enabled, boolean active) {
-    button("", x, y, w, 18, mx, my, enabled);
+    iconButton(icon, x, y, w, 18, mx, my, enabled, active);
+  }
+
+  protected void iconButton(String icon, int x, int y, int w, int h, int mx, int my, boolean enabled, boolean active) {
+    button("", x, y, w, h, mx, my, enabled);
     int color = !enabled ? 0xff777777 : active ? icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
-    int cx = x + w / 2, cy = y + 9;
+    int cx = x + w / 2;
     String[] pixels = switch (icon) {
-      case "collapse" -> new String[]{"  #   #  ", "   # #   ", "    #    ", "         ", "    #    ", "   # #   ", "  #   #  "};
+      case "collapse" -> new String[]{"  #   #  ", "   # #   ", "    #    ", "         ", "         ", "    #    ", "   # #   ", "  #   #  "};
       case "expand" -> new String[]{"    #    ", "   # #   ", "  #   #  ", "         ", "  #   #  ", "   # #   ", "    #    "};
       case "check" -> new String[]{"        #", "       ##", "      ## ", "#    ##  ", "##  ##   ", " ####    ", "  ##     "};
       case "star" -> new String[]{"    #    ", "   ###   ", "#########", " ####### ", "  #####  ", " ##   ## ", " #     # "};
@@ -92,12 +96,13 @@ public abstract class UiScreen extends Screen {
       case "controls" -> new String[]{"#########", "# # # # #", "#########", "# # # # #", "#########", "# ##### #", "#########"};
       default -> new String[]{" #   #  ", "########", " #   #  ", "   #   #", "########", "   #   #", "        "};
     };
+    int top = y + (h - pixels.length) / 2;
     for (int row = 0; row < pixels.length; row++)
       for (int col = 0; col < pixels[row].length(); col++) {
         char pixel = pixels[row].charAt(col);
         if (pixel == ' ') continue;
         int shade = enabled && pixel == '+' ? 0xffffcc55 : enabled && pixel == 'o' ? 0xffbbaaaa : color;
-        fill(cx - 4 + col, cy - 4 + row, cx - 3 + col, cy - 3 + row, shade);
+        fill(cx - 4 + col, top + row, cx - 3 + col, top + 1 + row, shade);
       }
   }
 

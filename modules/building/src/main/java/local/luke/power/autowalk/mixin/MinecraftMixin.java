@@ -10,6 +10,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
+  @Inject(method = "run", remap = false, at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/Display;update()V",
+      shift = At.Shift.AFTER, remap = false))
+  private void observeFocusBeforeInput(CallbackInfo ci) {
+    AutoWalk.focusUpdated();
+  }
+
   @Inject(method = "tick", at = @At("HEAD"))
   private void updateToggle(CallbackInfo ci) {
     AutoWalk.tick((Minecraft)(Object)this);

@@ -51,8 +51,56 @@ final class Release160Checks {
       case "check" -> checks(mc);
       case "hud-scene", "placement-water", "placement-lava" -> scene(mc, action);
       case "debug" -> mc.options.debugHud = !mc.options.debugHud;
+      case "background-key" -> {
+        check(!org.lwjgl.opengl.Display.isActive() && AutoWalk.isWalking(), "requires unfocused auto-walk");
+        mc.player.method_136(mc.options.forwardKey.code, true);
+        mc.player.method_136(mc.options.forwardKey.code, false);
+        check(AutoWalk.isWalking(), "a background movement event cancelled auto-walk");
+        log("PASS background movement event preserves auto-walk");
+      }
+      case "hud-key", "hud-chord", "hud-mouse" -> {
+        mc.setScreen(null);
+        var key = local.luke.power.input.GameplayKeys.INFO_HUD;
+        key.code = action.equals("hud-mouse") ? -98 : org.lwjgl.input.Keyboard.KEY_H;
+        var modifiers = new HashMap<>(Bindings.modifiers());
+        modifiers.put(key.translationKey, action.equals("hud-chord") ? Chord.CTRL : 0);
+        Bindings.configure(modifiers); Bindings.register(mc.options.allKeys);
+      }
+      case "hud-state" -> {
+        var state = new com.google.gson.JsonObject();
+        state.add("settings", Catalog.JSON.toJsonTree(InfoHudConfig.current()));
+        state.add("lines", Catalog.JSON.toJsonTree(InfoHud.lines(InfoHudConfig.current().clusters[0])));
+        state.addProperty("debug", mc.options.debugHud);
+        state.addProperty("hidden", mc.options.hideHud);
+        Files.writeString(Path.of("power-beta-160-hud-state.json"), Catalog.JSON.toJson(state));
+      }
+      case "hud-toggle-check" -> hudToggleCheck(mc);
       default -> throw new IllegalArgumentException("Unknown release-160 action");
     }
+  }
+
+  private static void hudToggleCheck(Minecraft mc) throws Exception {
+    var before = InfoHudConfig.copy();
+    try {
+      var edited = InfoHudConfig.copy(); edited.enabled = true;
+      edited.clusters[1].enabled = false; edited.clusters[1].hideWithDebug = false;
+      edited.clusters[1].textColor = "#123456"; edited.clusters[1].offsetX = -17;
+      InfoHudConfig.save(edited);
+      String clusters = Catalog.JSON.toJson(edited.clusters);
+      for (int i = 0; i < 3; i++) InfoHudConfig.toggle();
+      check(!InfoHudConfig.current().enabled, "master toggle lost an edge");
+      check(clusters.equals(Catalog.JSON.toJson(InfoHudConfig.current().clusters)), "toggle changed a cluster");
+      PowerConfig.flushPending();
+      var stored = PowerConfig.read("infoHud", InfoHudSettings.class);
+      check(!stored.enabled && clusters.equals(Catalog.JSON.toJson(stored.clusters)), "toggle save differs");
+      var session = SettingsRegistry.open(mc);
+      var setting = session.settings().stream().filter(s -> s.id.equals("infoHud.enabled")).findFirst().orElseThrow();
+      setting.value = new com.google.gson.JsonPrimitive(true); session.preview();
+      check(InfoHudConfig.current().enabled, "HUD menu preview missing");
+      session.discard();
+      check(!InfoHudConfig.current().enabled, "Cancel did not restore the hotkey state");
+      log("PASS custom HUD toggles preserve cluster settings, save and menu rollback");
+    } finally { InfoHudConfig.save(before); }
   }
 
   private static void scene(Minecraft mc, String action) throws Exception {
@@ -142,7 +190,7 @@ final class Release160Checks {
           if (groups.size() > 1) collapsed.add(groups.get(0));
           call(screen, "layout");
           int x = (int)call(screen, "sectionButtonX");
-          click(screen, x + 8, 35);
+          click(screen, x + 8, 46);
           check(((List<?>)field(screen, "rows")).stream().allMatch(r -> { try { return call(r, "setting") == null; } catch(Exception e) { throw new RuntimeException(e); } }), "tab did not collapse " + page);
           click(screen, x + 8, 35); check(!collapsed.containsAll(groups), "tab did not expand " + page);
           screen.render(-1,-1,0); check(GL11.glGetError() == 0, "options GL state");

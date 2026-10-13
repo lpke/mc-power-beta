@@ -26,4 +26,10 @@ public final class InfoHudConfig {
   public static void save(InfoHudSettings value) throws java.io.IOException {
     value.validate(); PowerConfig.save("infoHud", value); preview(value);
   }
+  public static void toggle() {
+    var next = copy(); next.enabled = !next.enabled;
+    next.validate();
+    PowerConfig.saveDeferred("infoHud", next);
+    preview(next);
+  }
 }

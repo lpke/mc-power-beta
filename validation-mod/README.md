@@ -280,3 +280,9 @@ captures, and normal gameplay rendering after capture.
   Use a muted capture output for every fixture. Physically test right-drag cursor
   restoration with both `release-152 native` and `release-152 raw`, and test
   auto-walk focus loss with each pause and cancel preference.
+  Include complete press/move/release gestures within one tick, and held movement
+  across focus loss and return. `release-160 background-key` checks queued movement
+  while unfocused with auto-walk active. `release-160 hud-key`, `hud-chord` and
+  `hud-mouse` bind the HUD toggle to H, Ctrl+H and middle mouse; `hud-state` records
+  visibility, cluster settings and text. Test both chord release orders, key repeat,
+  menus, focus loss, F1 and F3. `hud-toggle-check` verifies queued saves and Cancel.

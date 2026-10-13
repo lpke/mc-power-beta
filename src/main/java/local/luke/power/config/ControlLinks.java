@@ -21,7 +21,8 @@ public final class ControlLinks {
     link("key.inventory", "", "", "Open or close your inventory.");
     link("key.chat", "", "", "Open chat to write a message or command.");
     link("key.fog", "video.fogCycle", "", "Cycle the configured render distances. Shift reverses the cycle.");
-    link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Player forward/back input and focus loss stop it. Freecam controls the camera while your player keeps walking. Inventories keep walking when Inventory while moving is on.");
+    link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Player forward/back input stops it. Focus loss stops it only when configured. Freecam controls the camera while your player keeps walking. Inventories keep walking when Inventory while moving is on.");
+    link("powerbeta.infoHud", "infoHud.enabled", "", "Toggle all custom HUD clusters together. Each cluster keeps its contents, appearance and F3 visibility preference.");
     // These settings are live toggle states, not feature-availability switches.
     link("Auto-mine (toggle)", "tweaks.autoMine", "tweaks.autoMine", "Toggle holding Attack / Break. Menus, focus loss, world changes and detached-camera control stop it.");
     // Keep their toggles and placement modifiers visible while the state is off.
@@ -96,6 +97,7 @@ public final class ControlLinks {
     if (setting.id.equals(link.setting) || setting.id.equals(link.featureGate)) return true;
     String family = switch (link.setting) {
       case "lightOverlay.enabled" -> "lightOverlay.";
+      case "infoHud.enabled" -> "infoHud.";
       case "tweaks.placement.enabled" -> "tweaks.placement.";
       case "tweaks.flexible.enabled" -> "tweaks.flexible.";
       case "tweaks.slabs.enabled" -> "tweaks.slabs.";

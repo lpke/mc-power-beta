@@ -10,14 +10,25 @@ import net.mine_diver.unsafeevents.listener.EventListener;
 import net.modificationstation.stationapi.api.client.event.keyboard.KeyStateChangedEvent;
 import net.modificationstation.stationapi.api.client.event.option.KeyBindingRegisterEvent;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.Display;
 
 public final class GameplayKeys {
   public static final KeyBinding PREVIEW = new KeyBinding("powerbeta.containerPreview", 0);
   public static final KeyBinding LIGHT = new KeyBinding("powerbeta.lightOverlay", Keyboard.KEY_F7);
+  public static final KeyBinding INFO_HUD = new KeyBinding("powerbeta.infoHud", Keyboard.KEY_NONE);
   @EventListener public void register(KeyBindingRegisterEvent event) {
     event.keyBindings.add(PREVIEW);
     event.keyBindings.add(LIGHT);
+    event.keyBindings.add(INFO_HUD);
     Bindings.onMousePress("powerbeta.lightOverlay", GameplayKeys::toggleLight);
+    Bindings.onMousePress("powerbeta.infoHud", GameplayKeys::toggleInfoHud);
+  }
+
+  private static void toggleInfoHud(int key) {
+    Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
+    if (mc.world == null || mc.player == null || mc.currentScreen != null || mc.paused
+        || mc.player.dead || mc.player.health <= 0 || !Display.isActive() || !Bindings.matches(INFO_HUD, key)) return;
+    local.luke.power.hud.InfoHudConfig.toggle();
   }
 
   private static void toggleLight(int key) {
@@ -29,6 +40,7 @@ public final class GameplayKeys {
   @EventListener public void key(KeyStateChangedEvent event) {
     if (event.environment != KeyStateChangedEvent.Environment.IN_GAME || !Keyboard.getEventKeyState() || Keyboard.isRepeatEvent()) return;
     toggleLight(Keyboard.getEventKey());
+    toggleInfoHud(Keyboard.getEventKey());
     Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
     if (VisualConfig.current().slashChat && Keyboard.getEventKey() == Keyboard.KEY_SLASH && Bindings.heldModifiers() == 0
         && mc.currentScreen == null && mc.player != null) {

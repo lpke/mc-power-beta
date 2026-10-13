@@ -52,6 +52,8 @@
   slots. Capture and hide the pointer for that drag, including GUI hover/cursor
   stacks, until release. Restore it on release, lost focus, screen/world changes
   or lost eligibility; holding the button must not restart a cancelled drag.
+  Dispatch the mouse event batch before grabbing; quick gestures keep their press
+  coordinates and send their final motion through the native camera renderer.
   Right-click looking must not drop cursor items; supported screens and focus rules
   remain shared with inventory movement. Both native and raw mouse helpers must
   supply cursor deltas in GUIs; raw device deltas remain gameplay-only.

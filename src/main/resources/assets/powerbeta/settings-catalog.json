@@ -4208,6 +4208,11 @@
     "order": 4,
     "label": "Toggle fullscreen"
   },
+  "keys.powerbeta.infoHud": {
+    "page": "Controls",
+    "group": "Interface",
+    "order": 5
+  },
   "keys.key.power_controls.take_screenshot": {
     "page": "Controls",
     "group": "Screenshots",

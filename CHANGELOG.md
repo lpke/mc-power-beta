@@ -13,6 +13,11 @@
 - Add an optional 12-hour daylight clock to F3, including frozen daylight. Off by default.
 - Add four custom HUD info clusters in Interface, with independent content, anchors, offsets, text size, colour, opacity and F3 visibility. Choose coordinates, facing, biome, time, day count, chunk coordinates and frame rate.
 - Restore the inventory cursor to its exact starting position after right-click looking, with both native and raw mouse input.
+- Match the section collapse button to the search-clear button and separate its inward chevrons.
+- Preserve quick inventory-look gestures without losing their cursor origin or camera movement.
+- Add an unbound hotkey for toggling all custom HUD clusters together while preserving their individual settings and F3 visibility.
+- Show HUD coordinates as comma-separated values, with the facing axis and compass direction alongside them when enabled.
+- Keep background movement-key events and focus transitions from cancelling auto-walk when focus-loss cancellation is off.
 
 ## [1.5.2] - 2026-10-13
 

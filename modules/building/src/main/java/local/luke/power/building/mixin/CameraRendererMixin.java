@@ -30,7 +30,13 @@ public class CameraRendererMixin {
   @ModifyExpressionValue(method = "method_1844", at = @At(value = "FIELD",
       target = "Lnet/minecraft/client/Minecraft;field_2778:Z"))
   private boolean power$inventoryLook(boolean focused) {
-    return focused || local.luke.power.autowalk.InventoryLook.active();
+    return focused || local.luke.power.autowalk.InventoryLook.active() || local.luke.power.autowalk.InventoryLook.hasMotion();
+  }
+
+  @Inject(method = "method_1844", at = @At(value = "INVOKE",
+      target = "Lnet/minecraft/class_596;method_1972()V", shift = At.Shift.AFTER))
+  private void power$quickInventoryLook(float delta, CallbackInfo ci) {
+    local.luke.power.autowalk.InventoryLook.supplyMotion(field_2349);
   }
 
   @ModifyArgs(method = "method_1844", at = @At(value = "INVOKE",

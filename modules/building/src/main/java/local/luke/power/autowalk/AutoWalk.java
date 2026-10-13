@@ -79,6 +79,13 @@ public final class AutoWalk {
     focusPause = null;
   }
 
+  public static void focusUpdated() {
+    if (Display.isActive()) return;
+    if (local.luke.power.building.config.Config.current().autoWalkCancelOnLostFocus) stop();
+    else TOGGLE.unfocused();
+    forwardWasDown = backWasDown = false;
+  }
+
   public static void focusPause(Minecraft mc, Runnable pause) {
     openingFocusPause = mc.currentScreen == null && !local.luke.power.building.config.Config.current().autoWalkCancelOnLostFocus;
     try { pause.run(); }
@@ -87,8 +94,8 @@ public final class AutoWalk {
 
   public static void screenOpened(Minecraft mc, net.minecraft.client.gui.screen.Screen screen) {
     if (screen == null) { focusPause = null; return; }
-    if (openingFocusPause && TOGGLE.isActive()) { focusPause = screen; return; }
-    if (!InventoryMovement.allows(mc, screen)) stop();
+    if ((openingFocusPause || screen == focusPause) && TOGGLE.isActive()) { focusPause = screen; return; }
+    if (!InventoryMovement.eligible(mc, screen)) stop();
   }
 
   public static boolean suppliesMovement() {
