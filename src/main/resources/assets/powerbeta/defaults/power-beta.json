@@ -198,6 +198,7 @@
       "clickMining": false,
       "obsidianBreakingSpeed": 0,
       "autoWalk": false,
+      "inventoryMouseLook": false,
       "freeLookFollowThirdPerson": true,
       "freeLookToggle": false,
       "freeLook": false,

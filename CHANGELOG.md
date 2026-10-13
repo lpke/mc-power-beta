@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-10-13
+
+- Activate auto-walk while walking backwards to keep walking backwards. Forward and back still cancel it; freecam and free look remain independent.
+- Add optional camera movement in inventories. Hold right-click outside the GUI to look around when Movement in inventory is enabled. Off by default.
+
 ## [1.5.1] - 2026-10-12
 
 - Preserve ambient occlusion and smooth corner shading with full bright.

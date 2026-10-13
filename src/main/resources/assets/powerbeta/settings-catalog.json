@@ -3749,6 +3749,19 @@
     "group": "Auto-walk",
     "order": 1
   },
+  "tweaks.inventoryWhileMoving": {
+    "page": "Inventory",
+    "group": "Inventory management",
+    "label": "Movement in inventory",
+    "order": 0
+  },
+  "tweaks.inventoryMouseLook": {
+    "page": "Inventory",
+    "group": "Inventory management",
+    "label": "Look around in inventory",
+    "default": false,
+    "order": 1
+  },
   "tweaks.autoWalkHoldMillis": {
     "label": "Auto-walk hold time (seconds)",
     "page": "Movement",

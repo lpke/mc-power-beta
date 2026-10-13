@@ -1,7 +1,6 @@
 package local.luke.power.autowalk.mixin;
 
 import local.luke.power.autowalk.AutoWalk;
-import local.luke.power.autowalk.WalkToggle;
 import local.luke.power.autowalk.InventoryMovement;
 import local.luke.power.input.Bindings;
 import local.luke.power.input.MovementScreens;
@@ -54,9 +53,8 @@ public abstract class KeyboardInputMixin extends class_41 {
 
   @Inject(method = "method_1942", at = @At("TAIL"))
   private void applyAutoWalk(PlayerEntity player, CallbackInfo ci) {
-    if (AutoWalk.isWalking()) {
-      // forward input, physical forward key, sneak state; preserve vanilla strafing/jumping.
-      field_2533 = WalkToggle.forwardInput(field_2533, field_1661[0], field_2536);
+    if (AutoWalk.isWalking() && !local.luke.power.input.MovementOwnership.cameraControlsMovement()) {
+      field_2533 = AutoWalk.movementInput(field_2533, field_1661[0], field_1661[1], field_2536);
     }
   }
 }

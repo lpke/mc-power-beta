@@ -29,7 +29,7 @@ public class MovementInputFromOptionsMixin extends Input {
             float strafe = 0f;
             movementSideways = 0f;
             // Auto-walk drives the player independently of the camera's manual keys.
-            movementForward = local.luke.power.input.MovementOwnership.autoWalking() ? 1f : 0f;
+            movementForward = local.luke.power.input.MovementOwnership.autoWalkInput();
             jumping = false;
             sneaking = false;
 

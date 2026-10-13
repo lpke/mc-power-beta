@@ -8,6 +8,11 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-152 check`: forward/backward auto-walk, cancellation, free look,
+  freecam, inventory setting transactions and narrow/wide GUI bounds, including
+  creative tabs and destroy slots. Run after `new-world`. `setup`, `state`,
+  `camera-on`, `camera-off`, `cursor`, `look-off`, `look-on`, `invert`, `chord`, `plain` and `menu`
+  support physical key/mouse checks. Use `save`, restart, then `saved` for persistence.
 - `release-151 check`: TNT ignition modes, collision equivalence and live toggles,
   custom collision boxes, chunk movement/removal and resumable merging with changing
   native NBT. Run after `new-world`. `release-151 fast` and `release-151 slow`

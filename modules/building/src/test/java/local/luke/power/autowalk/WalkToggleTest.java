@@ -5,6 +5,33 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class WalkToggleTest {
+  @Test void backwardsDirectionLatchesUntilStoppedAndPreservesManualAndSneakInput() {
+    WalkToggle t = new WalkToggle();
+    t.update(true, true, false, 0, 350, true);
+    assertEquals(-1F, t.input());
+    assertEquals(-1F, t.movementInput(-1F, false, true, false));
+    t.update(false, true, false, 10, 350, false);
+    assertEquals(-1F, t.movementInput(0, false, false, false));
+    assertEquals(-0.3F, t.movementInput(0, false, false, true));
+    assertEquals(0F, t.movementInput(1F, true, false, false));
+    t.stop();
+    assertEquals(0F, t.input());
+    t.update(true, true, false, 20, 350, false);
+    assertEquals(1F, t.input());
+  }
+
+  @Test void backwardsHoldKeepsItsDirectionAndStopsOnReleaseOrFocusLoss() {
+    WalkToggle t = new WalkToggle();
+    t.update(true, true, true, 0, 350, true);
+    t.update(true, true, true, 400_000_000L, 350, false);
+    assertEquals(-1F, t.input());
+    t.update(false, true, true, 450_000_000L, 350, false);
+    assertEquals(0F, t.input());
+    t.update(true, true, true, 500_000_000L, 350, true);
+    t.update(true, false, true, 900_000_000L, 350, true);
+    t.update(true, true, true, 1_000_000_000L, 350, true);
+    assertEquals(0F, t.input());
+  }
   @Test
   void shortTapTogglesButLongHoldStopsOnRelease() {
     WalkToggle t = new WalkToggle();

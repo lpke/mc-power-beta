@@ -64,7 +64,7 @@ public final class ComponentBackend implements Backend {
               ? "Creative controls"
               : id.equals("worldedit") ? "Editor" : "Placement";
       if (id.equals("tweaks")) {
-        if (name.equals("inventoryWhileMoving")) {
+        if (name.equals("inventoryWhileMoving") || name.equals("inventoryMouseLook")) {
           page = "Inventory";
           group = "Inventory management";
         } else if (name.startsWith("hotbar.")) {

@@ -22,6 +22,7 @@ class ConfigDefaultsTest {
     JsonObject root = PowerConfig.document();
     assertEquals(3, root.get("schemaVersion").getAsInt());
     assertEquals(2, root.size());
+    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("building").get("inventoryMouseLook").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("death").get("enabled").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("death").get("announceItems").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("power_mechanics:config")

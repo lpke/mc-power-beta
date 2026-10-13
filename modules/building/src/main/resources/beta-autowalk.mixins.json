@@ -6,6 +6,9 @@
     "GameOptionsMixin",
     "MinecraftMixin",
     "KeyboardInputMixin",
+    "ContainerGuiMixin",
+    "ButtonGuiAccessor",
+    "InventoryLookScreenMixin",
     "SlotInventoryAccessor",
     "DoubleInventoryAccessor",
     "CraftingPosition"

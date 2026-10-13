@@ -46,6 +46,11 @@
   Linux key repairs must update native events and polling together. F20–F24 use
   reserved LWJGL codes 114–118. Inventory movement only admits known screens without
   text input, excludes mouse/Shift, and uses normal container closure for item cleanup.
+- Auto-walk retains the player's activation direction, independently of freecam's
+  manual keys. Optional inventory looking uses native sensitivity and rotation,
+  keeps the cursor free and excludes all GUI panels, creative tabs and destroy slots.
+  Right-click looking must not drop cursor items; supported screens and focus rules
+  remain shared with inventory movement.
 - `AudioController` owns all music sources, pauses, previews and timing.
   World/menu transitions preserve streams and pause state in WORLD/MIX modes;
   only CUSTOM resets playback. Preview restoration must not revive old jukeboxes.

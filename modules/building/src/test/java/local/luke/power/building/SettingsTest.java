@@ -7,6 +7,13 @@ import local.luke.power.building.config.*;
 import org.junit.jupiter.api.*;
 
 class SettingsTest {
+  @Test void inventoryLookDefaultsOffAndSurvivesCopyAndGson() {
+    var gson = new com.google.gson.Gson();
+    assertFalse(new Settings().inventoryMouseLook);
+    assertFalse(gson.fromJson("{}", Settings.class).inventoryMouseLook);
+    var settings = new Settings(); settings.inventoryMouseLook = true;
+    assertTrue(gson.fromJson(gson.toJson(settings.copy()), Settings.class).inventoryMouseLook);
+  }
   @Test void toggleMessagesDefaultOffAndSurviveCopyAndGson() {
     var settings = new Settings();
     assertFalse(settings.sneak.announceToggle);

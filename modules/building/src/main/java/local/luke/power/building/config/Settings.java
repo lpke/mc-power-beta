@@ -12,6 +12,7 @@ public final class Settings {
   public boolean freeLookFollowThirdPerson = true;
   public boolean autoWalkHoldToWalk = true;
   public boolean inventoryWhileMoving;
+  public boolean inventoryMouseLook;
   public int autoWalkHoldMillis = 350;
   public boolean autoWalk = true, freeLook = true, freeLookToggle = false;
   public boolean autoMine = true, autoMineAnnounceToggle;
@@ -34,6 +35,7 @@ public final class Settings {
     s.autoMine = autoMine;
     s.autoMineAnnounceToggle = autoMineAnnounceToggle;
     s.inventoryWhileMoving = inventoryWhileMoving;
+    s.inventoryMouseLook = inventoryMouseLook;
     s.autoWalkHoldToWalk = autoWalkHoldToWalk;
     s.autoWalkHoldMillis = autoWalkHoldMillis;
     s.freeLook = freeLook;

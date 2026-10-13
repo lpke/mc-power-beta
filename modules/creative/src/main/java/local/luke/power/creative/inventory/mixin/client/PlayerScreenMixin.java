@@ -36,7 +36,20 @@ import local.luke.power.creative.inventory.util.MHelper;
 import local.luke.power.creative.inventory.util.SlotUpdatePacket;
 
 @Mixin(PlayerScreen.class)
-public abstract class PlayerScreenMixin extends ContainerScreen implements CreativeDragScreen {
+public abstract class PlayerScreenMixin extends ContainerScreen implements CreativeDragScreen, local.luke.power.input.InventoryGui {
+  public boolean power$extraGuiSpace(int mouseX, int mouseY) {
+    if (!creative_isInCreative()) return false;
+    int x = (width - containerWidth) / 2, y = (height - containerHeight) / 2;
+    boolean body = !creative_normalGUI && !CreativeGrid.outsideBody(mouseX, mouseY, x, y,
+        containerWidth, containerHeight, local.luke.power.creative.config.Config.current().destroySlot);
+    boolean viewTabs = mouseX >= x + 173 && mouseX < x + 198 && mouseY >= y + 114 && mouseY < y + 162;
+    boolean categories = !creative_normalGUI && mouseX >= x && mouseX < x + containerWidth
+        && mouseY >= CreativeGrid.tabTop(y) && mouseY < CreativeGrid.tabTop(y) + CreativeGrid.tabHeight(y);
+    boolean destroy = local.luke.power.creative.config.Config.current().destroySlot
+        && mouseX >= x - CreativeGrid.DESTROY_WIDTH && mouseX < x
+        && mouseY >= y + CreativeGrid.DESTROY_TOP && mouseY < y + containerHeight;
+    return body || viewTabs || categories || destroy;
+  }
   @Unique private static final int CREATIVE_COLOR_FILLER = MHelper.getColor(198, 198, 198, 128);
   @Unique private static final ItemRenderer CREATIVE_ITEM_RENDERER = new ItemRenderer();
 
