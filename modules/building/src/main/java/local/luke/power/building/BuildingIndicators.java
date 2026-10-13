@@ -33,8 +33,6 @@ public final class BuildingIndicators {
         () -> Config.current().autoMineAnnounceToggle);
     add(FREE_LOOK, () -> Config.current().freeLookToggle && FreeLook.active() ? "" : null,
         () -> Config.current().freeLookAnnounceToggle);
-    add(SLAB_COMPLETION, () -> Config.current().slabs.enabled ? "" : null,
-        () -> Config.current().slabs.announceToggle);
   }
   private static void add(TweakIndicators.Tweak tweak, Supplier<String> value, BooleanSupplier announce) {
     TweakIndicators.register(tweak, () -> client.world != null && !client.world.isRemote

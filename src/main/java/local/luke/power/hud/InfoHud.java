@@ -1,6 +1,7 @@
 package local.luke.power.hud;
 
 import java.util.*;
+import local.luke.power.input.DetachedCamera;
 import local.luke.power.ui.MenuPreferences;
 import local.luke.power.world.WorldCycles;
 import net.minecraft.class_564;
@@ -12,6 +13,7 @@ public final class InfoHud {
   private static Object world;
   private static String coordinates = "", direction = "", biome = "", time = "", day = "", chunk = "", fps = "";
   private static int ticks, biomeX = Integer.MIN_VALUE, biomeZ = Integer.MIN_VALUE;
+  private static boolean detached;
   private InfoHud() {}
 
   public static void tick(Minecraft mc) {
@@ -21,14 +23,20 @@ public final class InfoHud {
     }
     var settings = InfoHudConfig.current();
     if (mc.world == null || mc.player == null) return;
+    boolean camera = DetachedCamera.isActive();
+    if (detached != camera) { detached = camera; ticks = 0; biomeX = Integer.MIN_VALUE; }
     if (!settings.enabled) ticks = 0;
     if (!settings.enabled && !MenuPreferences.debugTimeOfDay()) return;
     long daylight = ((WorldCycles)mc.world.method_262()).power$daylightTime();
     time = "Time: " + HudText.time(daylight);
     if (!settings.enabled || ticks++ % 4 != 0) return;
-    int x = (int)Math.floor(mc.player.x), y = (int)Math.floor(mc.player.boundingBox.minY), z = (int)Math.floor(mc.player.z);
+    double vx = camera ? DetachedCamera.x() : mc.player.x;
+    double vy = camera ? DetachedCamera.y() : mc.player.boundingBox.minY;
+    double vz = camera ? DetachedCamera.z() : mc.player.z;
+    if (!Double.isFinite(vx) || !Double.isFinite(vy) || !Double.isFinite(vz)) return;
+    int x = (int)Math.floor(vx), y = (int)Math.floor(vy), z = (int)Math.floor(vz);
     coordinates = HudText.coordinates(x, y, z);
-    direction = HudText.direction(mc.player.yaw);
+    direction = HudText.direction(camera ? DetachedCamera.facingYaw() : mc.player.yaw);
     day = "Day: " + Math.floorDiv(daylight, 24000L);
     chunk = "Chunk: " + Math.floorDiv(x, 16) + " / " + Math.floorDiv(z, 16);
     String debug = mc.debugText == null ? "" : mc.debugText;

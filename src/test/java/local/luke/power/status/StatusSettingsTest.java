@@ -7,11 +7,18 @@ import local.luke.power.input.TweakIndicators.Tweak;
 import org.junit.jupiter.api.Test;
 
 class StatusSettingsTest {
+  @Test void retiredSlabHudPreferenceDoesNotChangeRemainingChoices() {
+    var gson = new Gson();
+    var settings = gson.fromJson("{\"slabCompletion\":true,\"autoWalk\":false,\"offsetX\":17}", StatusSettings.class);
+    assertFalse(settings.autoWalk);
+    assertEquals(17, settings.offsetX);
+    assertFalse(gson.toJsonTree(settings).getAsJsonObject().has("slabCompletion"));
+  }
   @Test void defaultsAndPersistedChoicesRemainIndependentOfLiveStates() {
     StatusSettings s = new Gson().fromJson("{}", StatusSettings.class);
     assertTrue(s.enabled);
     assertEquals(8, s.position);
-    for (var tweak : Tweak.values()) assertEquals(tweak != Tweak.SLAB_COMPLETION, s.includes(tweak));
+    for (var tweak : Tweak.values()) assertTrue(s.includes(tweak));
     boolean[] state = {false};
     TweakIndicators.register(Tweak.FAST_PLACEMENT, () -> state[0] ? "" : null);
     assertNull(TweakIndicators.label(Tweak.FAST_PLACEMENT));

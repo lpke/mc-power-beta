@@ -67,7 +67,7 @@ final class ToggleSaveChecks {
       test("gameplay toggles and live HUD never wait for stalled settings I/O", () -> {
         var setup = before.copy(); setup.placement.restrictionTiedToFast = true;
         setup.placement.setEnabled(false); setup.sneak.enabled = false; setup.slabs.enabled = true; Config.apply(setup);
-        var hud = StatusConfig.copy(); hud.slabCompletion = true; hud.enabled = true; StatusConfig.preview(hud);
+        var hud = StatusConfig.copy(); hud.enabled = true; StatusConfig.preview(hud);
         var disk = PowerConfig.class.getDeclaredField("DISK"); disk.setAccessible(true);
         var entered = new CountDownLatch(1); var release = new CountDownLatch(1);
         var blocker = Executors.newSingleThreadExecutor();
@@ -89,7 +89,7 @@ final class ToggleSaveChecks {
           check(Config.current().sneak.enabled && Config.current().slabs.enabled, "live state delayed");
           check(LightConfig.current().enabled != light.enabled, "light overlay toggle delayed");
           var lines = ActiveTweaks.lines(StatusConfig.current());
-          check(lines.containsAll(java.util.List.of("Fast placement", "Fake sneak", "Slab completion")), "HUD delayed " + lines);
+          check(lines.containsAll(java.util.List.of("Fast placement", "Fake sneak")), "HUD delayed " + lines);
           FastPlace.beginTick(mc, false, true, true); FakeSneak.beginTick(mc, true, true);
           check(Config.current().placement.enabled && Config.current().sneak.enabled, "held key repeated toggle");
           log("TIMING three toggles including light overlay with disk stalled ms=" + duration / 1_000_000.0);

@@ -15,15 +15,18 @@ import org.lwjgl.opengl.GL11;
 public final class ContainerPreview extends DrawableHelper {
   private static final ContainerPreview INSTANCE = new ContainerPreview();
   private final ItemRenderer renderer = new ItemRenderer();
-  public static void render(Minecraft mc) {
+  public static void render(Minecraft mc, float delta) {
     if (!VisualConfig.current().containerPreview || mc.currentScreen != null || mc.world == null || mc.world.isRemote
         || mc.player == null || !org.lwjgl.opengl.Display.isActive() || !Bindings.down(GameplayKeys.PREVIEW)
         || (mc.options.hideHud && !DetachedCamera.isActive())) return;
-    var stacks = snapshot(mc);
+    var stacks = snapshot(mc, delta);
     if (!stacks.isEmpty()) INSTANCE.draw(mc,stacks);
   }
   static List<ItemStack> snapshot(Minecraft mc) {
-    var hit = ContainerTarget.find(mc);
+    return snapshot(mc, 1);
+  }
+  private static List<ItemStack> snapshot(Minecraft mc, float delta) {
+    var hit = ContainerTarget.find(mc, delta);
     if (hit == null) return List.of();
     List<Inventory> sources = new ArrayList<>();
     if (hit.field_1983 == class_212.TILE) {

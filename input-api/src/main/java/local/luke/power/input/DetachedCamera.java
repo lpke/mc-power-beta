@@ -28,4 +28,6 @@ public final class DetachedCamera {
   public static double z() { return z.getAsDouble(); }
   public static double pitch() { return pitch.getAsDouble(); }
   public static double yaw() { return yaw.getAsDouble(); }
+  /** Convert the renderer's yaw to the player's convention: zero faces positive Z. */
+  public static float facingYaw() { return (float)yaw() - 180F; }
 }

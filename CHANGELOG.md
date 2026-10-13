@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-10-14
+
+- Use configured creative reach for container previews in every game mode, including survival and freecam.
+- Show freecam coordinates, facing, biome and local world information in F3 and custom HUD clusters while detached.
+- Move Complete slabs through adjacent faces into Placement rules beside Shift placing, and remove its toggle messages and Active tweaks entry.
+
 ## [1.6.1] - 2026-10-13
 
 - Preview container contents from the detached freecam, including storage minecarts, without opening or changing inventories.

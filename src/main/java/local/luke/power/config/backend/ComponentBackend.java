@@ -80,7 +80,7 @@ public final class ComponentBackend implements Backend {
           page = "Movement";
           group = "Vehicles";
         } else if (name.startsWith("flexible.")) group = "Flexible placement";
-        else if (name.startsWith("slabs.")) group = "Slab completion";
+        else if (name.startsWith("slabs.")) group = "Placement rules";
         else if (name.equals("clickMining") || name.equals("obsidianBreakingSpeed")) group = "Mining";
         if (Set.of(
                 "autoWalk",

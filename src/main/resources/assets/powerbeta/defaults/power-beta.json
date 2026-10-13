@@ -156,7 +156,6 @@
     },
     "building": {
       "slabs": {
-        "announceToggle": false,
         "enabled": true
       },
       "hotbar": {

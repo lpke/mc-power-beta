@@ -16,7 +16,6 @@ import net.minecraft.client.gui.screen.TitleScreen;
 final class ToggleMessageChecks {
   private static final Map<Tweak, String> IDS = Map.ofEntries(
       Map.entry(Tweak.FAKE_SNEAK, "tweaks.sneak.announceToggle"),
-      Map.entry(Tweak.SLAB_COMPLETION, "tweaks.slabs.announceToggle"),
       Map.entry(Tweak.FAST_PLACEMENT, "tweaks.placement.announceToggle"),
       Map.entry(Tweak.PLACEMENT_RESTRICTION, "tweaks.placement.announceRestrictionToggle"),
       Map.entry(Tweak.AUTO_WALK, "tweaks.autoWalkAnnounceToggle"),
@@ -135,7 +134,6 @@ final class ToggleMessageChecks {
       case FAKE_SNEAK -> s.sneak.enabled = active;
       case FAST_PLACEMENT -> { s.placement.enabled = active; s.placement.restrictionEnabled = false; }
       case PLACEMENT_RESTRICTION -> { s.placement.enabled = true; s.placement.restrictionEnabled = active; }
-      case SLAB_COMPLETION -> s.slabs.enabled = active;
       case FREE_LOOK -> {
         s.freeLook = true; s.freeLookToggle = true;
         if (active) local.luke.power.building.camera.FreeLook.begin(mc);

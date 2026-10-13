@@ -2,6 +2,8 @@ package local.luke.power.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import local.luke.power.input.DetachedCamera;
 import local.luke.power.ui.DebugOverlay;
 import local.luke.power.ui.InterfaceState;
 import local.luke.power.ui.MenuPreferences;
@@ -15,6 +17,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InGameHud.class)
 public abstract class DebugHudMixin {
   @Shadow private Minecraft minecraft;
+
+  @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ClientPlayerEntity;x:D"))
+  private double power$debugX(double value) { return DetachedCamera.isActive() ? DetachedCamera.x() : value; }
+
+  @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ClientPlayerEntity;y:D"))
+  private double power$debugY(double value) { return DetachedCamera.isActive() ? DetachedCamera.y() : value; }
+
+  @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ClientPlayerEntity;z:D"))
+  private double power$debugZ(double value) { return DetachedCamera.isActive() ? DetachedCamera.z() : value; }
+
+  @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ClientPlayerEntity;yaw:F"))
+  private float power$debugFacing(float value) { return DetachedCamera.isActive() ? DetachedCamera.facingYaw() : value; }
 
   @WrapMethod(method = "render")
   private void power$debugFrame(float delta, boolean focused, int mx, int my, Operation<Void> original) {

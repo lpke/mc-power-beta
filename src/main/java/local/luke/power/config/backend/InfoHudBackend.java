@@ -47,12 +47,12 @@ public final class InfoHudBackend implements Backend {
         case "textColor" -> "Choose the text colour. Opacity controls transparency separately.";
         case "opacity" -> "Text visibility from transparent at 0% to solid at 100%.";
         case "hideWithDebug" -> "Hide this cluster while the F3 debug menu is open.";
-        case "coordinates" -> "Show the player's block coordinates, using foot height.";
-        case "direction" -> "Show the direction the player faces and its coordinate axis.";
-        case "biome" -> "Show the biome at the player.";
+        case "coordinates" -> "Show block coordinates at the player's feet, or at the camera in freecam.";
+        case "direction" -> "Show the facing direction and coordinate axis. Follows the camera in freecam.";
+        case "biome" -> "Show the biome at the player, or at the camera in freecam.";
         case "timeOfDay" -> "Show the world's daylight time with AM or PM, including frozen daylight.";
         case "day" -> "Show elapsed daylight days. Day zero is the world's first day.";
-        case "chunk" -> "Show the player's chunk coordinates.";
+        case "chunk" -> "Show chunk coordinates at the player, or at the camera in freecam.";
         default -> "Show frames per second.";
       };
       Setting.Kind kind = field.getType() == boolean.class ? Setting.Kind.BOOLEAN : name.equals("position") ? Setting.Kind.CHOICE

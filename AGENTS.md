@@ -221,7 +221,8 @@
 - Leaving a world or quitting clears active tweaks through `TweakLifecycle`; preserve
   feature preferences, bindings and saved user data. Queue changed toggle snapshots.
   Flexible placement and Complete slabs retain their saved enablement; only temporary
-  placement operations and held modifiers clear. Slab completion has no hotkey.
+  placement operations and held modifiers clear. Slab completion has no hotkey,
+  toggle messages or Active tweaks entry.
   Auto-walk survives focus loss by default, including the automatic pause screen.
   In supported inventories, retain actual auto-walk movement while unfocused;
   only manual movement keys require focus. Test player displacement, not just the toggle.
@@ -238,6 +239,11 @@
 - Custom HUD clusters keep stable IDs and independent content, anchors, offsets,
   colour, size, opacity and F3 visibility. Sample world data on ticks and use the
   daylight clock. Native HUD previews and Cancel update positions immediately.
+  F3 and custom HUD location data follow freecam while detached, including facing,
+  biome, chunk and block light. HUD queries must not load chunks or move the player.
+- Container previews use configured creative block/entity reach in every mode.
+  Keep their ray separate from interaction targeting, retain occlusion and interpolation,
+  and reject unloaded terrain before raycasting.
 
 - Inventory look must leave mouse events and polling to unrelated screens, including
   photo mode. Its hidden hover coordinates must never drive the inventory player model.

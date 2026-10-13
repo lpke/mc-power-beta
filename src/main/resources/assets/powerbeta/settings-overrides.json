@@ -81,7 +81,7 @@
     "page": "Creative",
     "group": "Interaction",
     "label": "Block reach",
-    "description": "Reach in blocks. Only applies in Creative.",
+    "description": "Interaction reach in Creative. Container previews use this distance in every game mode.",
     "min": 3,
     "max": 10,
     "step": 0.5
@@ -90,7 +90,7 @@
     "page": "Creative",
     "group": "Interaction",
     "label": "Entity reach",
-    "description": "Reach in blocks. Only applies in Creative.",
+    "description": "Interaction reach in Creative. Container previews use this distance in every game mode.",
     "min": 3,
     "max": 10,
     "step": 0.5
@@ -385,15 +385,10 @@
   },
   "tweaks.slabs.enabled": {
     "page": "Building",
-    "group": "Slab completion",
+    "group": "Placement rules",
     "label": "Complete slabs through adjacent faces",
-    "description": ""
-  },
-  "tweaks.slabs.announceToggle": {
-    "page": "Building",
-    "group": "Slab completion",
-    "label": "Slab-completion messages",
-    "description": ""
+    "description": "",
+    "order": 5
   },
   "logo.logo.lines": {
     "page": "Interface",

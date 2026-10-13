@@ -8,6 +8,11 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-162`: creative preview reach in survival, creative, spectator and freecam,
+  independent block/entity limits, interpolation and occlusion; slab settings placement;
+  F3/custom HUD camera coordinates, facing, biome, chunk, light and slime-chunk data;
+  unloaded terrain and immediate restoration on exit. Run after `new-world`.
+
 - `freecam-preview check`: detached chest, double-chest, furnace, dispenser and
   minecart targeting, obstruction, reach, unloaded chunks, native NBT and HUD
   entry/exit restoration. Run after `new-world`. `setup` binds C to freecam and

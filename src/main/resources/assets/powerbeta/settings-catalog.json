@@ -3216,7 +3216,7 @@
     "page": "Creative",
     "group": "Interaction",
     "label": "Block reach",
-    "description": "Reach in blocks. Only applies in Creative.",
+    "description": "Interaction reach in Creative. Container previews use this distance in every game mode.",
     "min": 3,
     "max": 10,
     "step": 0.5
@@ -3225,7 +3225,7 @@
     "page": "Creative",
     "group": "Interaction",
     "label": "Entity reach",
-    "description": "Reach in blocks. Only applies in Creative.",
+    "description": "Interaction reach in Creative. Container previews use this distance in every game mode.",
     "min": 3,
     "max": 10,
     "step": 0.5
@@ -3561,17 +3561,10 @@
   },
   "tweaks.slabs.enabled": {
     "page": "Building",
-    "group": "Slab completion",
+    "group": "Placement rules",
     "label": "Complete slabs through adjacent faces",
     "description": "",
-    "order": 0
-  },
-  "tweaks.slabs.announceToggle": {
-    "page": "Building",
-    "group": "Slab completion",
-    "label": "Slab completion messages",
-    "description": "Show a chat message when slab completion turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
-    "order": 1
+    "order": 5
   },
   "logo.logo.lines": {
     "page": "Interface",
@@ -3716,7 +3709,7 @@
     "page": "Inventory",
     "group": "Containers",
     "label": "Container preview",
-    "description": "Hold the container-preview key while aiming at a container to view its contents without opening it. Also works from freecam, including with the HUD hidden.",
+    "description": "Hold the container-preview key to view contents at creative reach without opening containers. Also works from freecam with the HUD hidden.",
     "default": false,
     "restart": false
   },

@@ -38,7 +38,6 @@ final class IndicatorsMenuChecks {
             var lines = ActiveTweaks.lines(display);
             check(lines.containsAll(List.of("Fake sneak", "Fast placement", "Placement restriction: Plane", "Cinematic camera")), "missing live state " + lines);
             check(!lines.contains("Slab completion") && !lines.contains("Auto-walk") && !lines.contains("Free look"), "availability mistaken for active state");
-            display.slabCompletion = true; check(ActiveTweaks.lines(display).contains("Slab completion"), "slab inclusion ignored");
             display.fastPlacement = false; check(!ActiveTweaks.lines(display).contains("Fast placement"), "exclusion ignored");
             check(Config.current().placement.enabled, "display switch changed gameplay");
             settings.placement.enabled = false; Config.preview(settings);

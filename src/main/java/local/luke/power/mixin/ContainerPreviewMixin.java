@@ -11,6 +11,6 @@ public abstract class ContainerPreviewMixin {
   @Shadow private Minecraft field_2349;
   @Inject(method = "method_1844", at = @At("TAIL"))
   private void power$preview(float delta, CallbackInfo ci) {
-    local.luke.power.inventory.ContainerPreview.render(field_2349);
+    local.luke.power.inventory.ContainerPreview.render(field_2349, delta);
   }
 }

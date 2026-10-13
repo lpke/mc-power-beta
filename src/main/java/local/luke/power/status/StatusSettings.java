@@ -11,7 +11,6 @@ public final class StatusSettings {
   public int opacity = 100;
   public boolean fakeSneak = true, fastPlacement = true, placementRestriction = true,
       autoWalk = true, autoMine = true, freeLook = true, cinematicCamera = true, freecamPlayerMovement = true;
-  public boolean slabCompletion;
   public boolean hiddenEntities = true, fullBright = true;
   public boolean cinematicCameraMessages;
 
@@ -25,7 +24,6 @@ public final class StatusSettings {
       case FREE_LOOK -> freeLook;
       case CINEMATIC_CAMERA -> cinematicCamera;
       case FREECAM_PLAYER_MOVEMENT -> freecamPlayerMovement;
-      case SLAB_COMPLETION -> slabCompletion;
       case HIDDEN_ENTITIES -> hiddenEntities;
       case FULL_BRIGHT -> fullBright;
     };

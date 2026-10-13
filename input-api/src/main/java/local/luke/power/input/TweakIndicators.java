@@ -10,7 +10,7 @@ public final class TweakIndicators {
     FAKE_SNEAK("Fake sneak"), FAST_PLACEMENT("Fast placement"),
     PLACEMENT_RESTRICTION("Placement restriction"), AUTO_WALK("Auto-walk"),
     AUTO_MINE("Auto-mine"), FREE_LOOK("Free look"), CINEMATIC_CAMERA("Cinematic camera"),
-    FREECAM_PLAYER_MOVEMENT("Freecam player movement"), SLAB_COMPLETION("Slab completion"), HIDDEN_ENTITIES("Hidden entities"), FULL_BRIGHT("Full bright");
+    FREECAM_PLAYER_MOVEMENT("Freecam player movement"), HIDDEN_ENTITIES("Hidden entities"), FULL_BRIGHT("Full bright");
 
     public final String label;
     Tweak(String label) { this.label = label; }

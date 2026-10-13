@@ -24,23 +24,23 @@ final class FreecamPreviewChecks {
   private static Object camera() throws Exception {
     return Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
   }
-  private static void active(boolean value) throws Exception {
+  static void active(boolean value) throws Exception {
     camera().getClass().getMethod("setActive", boolean.class).invoke(camera(), value);
   }
-  private static void pose(double x, double y, double z, float pitch, float yaw) throws Exception {
+  static void pose(double x, double y, double z, float pitch, float yaw) throws Exception {
     camera().getClass().getMethod("setCameraPositionAndRotation", double.class, double.class,
         double.class, float.class, float.class, float.class).invoke(camera(), x,y,z,pitch,yaw,0F);
   }
-  private static class_27 target(Minecraft mc) throws Exception {
+  static class_27 target(Minecraft mc) throws Exception {
     Method method=Class.forName("local.luke.power.inventory.ContainerTarget").getDeclaredMethod("find", Minecraft.class);
     method.setAccessible(true); return (class_27)method.invoke(null,mc);
   }
   @SuppressWarnings("unchecked")
-  private static List<ItemStack> snapshot(Minecraft mc) throws Exception {
+  static List<ItemStack> snapshot(Minecraft mc) throws Exception {
     Method method=ContainerPreview.class.getDeclaredMethod("snapshot", Minecraft.class);
     method.setAccessible(true); return (List<ItemStack>)method.invoke(null,mc);
   }
-  private static void blockHit(Minecraft mc,int x,int y,int z) throws Exception {
+  static void blockHit(Minecraft mc,int x,int y,int z) throws Exception {
     var hit=target(mc);
     check(hit!=null && hit.field_1983==net.minecraft.class_212.TILE
         && hit.field_1984==x && hit.field_1985==y && hit.field_1986==z,"wrong detached target");
@@ -49,7 +49,7 @@ final class FreecamPreviewChecks {
     mc.world.method_154(x,y,z,id,0);
     return (Inventory)mc.world.method_1777(x,y,z);
   }
-  private static void scene(Minecraft mc) throws Exception {
+  static void scene(Minecraft mc) throws Exception {
     DeathChecks.alive(mc); mc.setScreen(null); active(false);
     Object settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
     settings.getClass().getField("enabled").set(settings,true);
@@ -169,11 +169,11 @@ final class FreecamPreviewChecks {
         check(!mc.world.method_239(x,64,x),"preview loaded terrain");
         pose(Double.NaN,110,32,0,0);check(target(mc)==null,"NaN target accepted");
       });
-      test("preview leaves player, containers and saved preferences untouched; exit restores native targeting",()->{
+      test("preview leaves player, containers and saved preferences untouched; exit preserves native targeting",()->{
         check(mc.player.x==px&&mc.player.y==py&&mc.player.z==pz,"player moved");
         check(mc.player.container==playerContainer,"container opened");
         check(DeathItems.encode(chest.getStack(0)).equals(original),"source changed");
-        active(false);check(target(mc)==nativeHit,"native targeting changed");
+        active(false);check(mc.field_2823==nativeHit,"native targeting changed");
         check(Arrays.equals(before,Files.readAllBytes(PowerConfig.path())),"preview wrote settings");
       });
     } finally {active(false);mc.options.hideHud=hud;pose(32.5,110.5,35.5,0,0);}

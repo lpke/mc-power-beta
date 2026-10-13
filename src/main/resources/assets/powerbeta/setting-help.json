@@ -24,7 +24,6 @@
   "tweaks.flexible.overlayOpacity": "Transparency of the placement preview. Higher values make it more visible.",
   "tweaks.sneak.announceToggle": "Shows a chat message when edge protection is switched on or off.",
   "tweaks.slabs.enabled": "Combines matching half slabs when clicking a neighboring face would place into the existing slab.",
-  "tweaks.slabs.announceToggle": "Shows a chat message when adjacent-face slab completion is switched on or off.",
   "tweaks.freeLookFollowThirdPerson": "Keeps free look in third person when the camera is already in third person, even if First person is selected.",
   "tweaks.autoWalk": "Keeps walking without holding the movement key. Activate while walking backwards to continue backwards. Press forward or back, or use its key binding, to stop.",
   "tweaks.freeLook": "Lets the camera turn independently of the player's movement and placement direction.",

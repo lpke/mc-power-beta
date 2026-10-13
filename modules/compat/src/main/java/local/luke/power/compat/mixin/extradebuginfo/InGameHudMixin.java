@@ -6,12 +6,11 @@ import net.fabricmc.api.Environment;
 import local.luke.power.ui.DebugOverlay;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.entity.player.PlayerEntity;
+import local.luke.power.input.DetachedCamera;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
-import net.modificationstation.stationapi.api.entity.player.PlayerHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,9 +32,14 @@ public class InGameHudMixin extends DrawContext {
 	public void power$debug(float bl, boolean i, int j, int par4, CallbackInfo ci)  {
 		if (!minecraft.options.debugHud || minecraft.player == null || minecraft.world == null) return;
 		int yOffset = Config.config.overlayAdditionsYOffset;
+        boolean detached = DetachedCamera.isActive();
+        double x = detached ? DetachedCamera.x() : minecraft.player.x;
+        double y = detached ? DetachedCamera.y() : minecraft.player.boundingBox.minY;
+        double z = detached ? DetachedCamera.z() : minecraft.player.z;
+        float yaw = detached ? DetachedCamera.facingYaw() : minecraft.player.yaw;
         if (Config.config.addFacingToDebugOverlay) {
             String[] directions = {"south (+Z)", "west (-X)", "north (-Z)", "east (+X)"};
-            int facing = Math.floorMod((int)Math.floor(minecraft.player.yaw / 90.0 + 0.5), 4);
+            int facing = Math.floorMod((int)Math.floor(yaw / 90.0 + 0.5), 4);
             DebugOverlay.add("Facing: " + directions[facing], 2, 144 + yOffset);
         }
 
@@ -53,32 +57,25 @@ public class InGameHudMixin extends DrawContext {
 		   || Config.config.addDayCounterToDebugOverlay
            || Config.config.addSlimeChunkToDebugOverlay
 		) {
-			PlayerEntity player = PlayerHelper.getPlayerFromGame();
-			int lightLevel = 0;
-			String biomeName = "Unknown";
-			long dayCount = 0;
-			boolean isSlimeChunk = false;
-
-			if (null != player) {
-                lightLevel = player.world.getBrightness(net.minecraft.world.LightType.BLOCK,
-                    MathHelper.floor(player.x), MathHelper.floor(player.boundingBox.minY), MathHelper.floor(player.z));
-
-				if (null != player.world) {
-					Chunk chunk = player.world.getChunkFromPos(MathHelper.floor(player.x), MathHelper.floor(player.z));
-					isSlimeChunk = (chunk.getSlimeRandom(987234911L).nextInt(10) == 0);
-
-					if (null != player.world.getProperties()) {
-						dayCount = (int) Math.floor(((local.luke.power.world.WorldCycles) player.world.getProperties()).power$daylightTime() / 24000);
-					}
-
-					if (null != player.world.method_1781()) {
-						Biome biome = player.world.method_1781().getBiome((int)Math.floor(player.x), (int)Math.floor(player.z));
-						if (null != biome) {
-							biomeName = biome.name;
-						}
-					}
-				}
-			}
+            String lightLevel = "Unknown", biomeName = "Unknown", slimeChunk = "Unknown";
+            long dayCount = Math.floorDiv(((local.luke.power.world.WorldCycles)
+                minecraft.world.getProperties()).power$daylightTime(), 24000L);
+            if (Double.isFinite(x) && Double.isFinite(y) && Double.isFinite(z)
+                && Math.abs(x) <= 30_000_000 && Math.abs(z) <= 30_000_000) {
+                int bx = MathHelper.floor(x), by = MathHelper.floor(y), bz = MathHelper.floor(z);
+                // Detached cameras can leave loaded terrain. Never load a chunk for HUD text.
+                if (minecraft.world.isPosLoaded(bx, 64, bz)) {
+                    Chunk chunk = minecraft.world.getChunkFromPos(bx, bz);
+                    if (Config.config.addSlimeChunkToDebugOverlay)
+                        slimeChunk = Boolean.toString(chunk.getSlimeRandom(987234911L).nextInt(10) == 0);
+                    if (Config.config.addBlockLightToDebugOverlay && by >= 0 && by < 128)
+                        lightLevel = Integer.toString(minecraft.world.getBrightness(net.minecraft.world.LightType.BLOCK, bx, by, bz));
+                }
+                if (Config.config.addBiomeToDebugOverlay) {
+                    Biome biome = minecraft.world.method_1781().getBiome(bx, bz);
+                    if (biome != null) biomeName = biome.name;
+                }
+            }
 
 			if (Config.config.addBlockLightToDebugOverlay) {
 				DebugOverlay.add("Block light: " + lightLevel, 2, (112 + yOffset));
@@ -93,7 +90,7 @@ public class InGameHudMixin extends DrawContext {
 			}
 
 			if (Config.config.addSlimeChunkToDebugOverlay) {
-				DebugOverlay.add("Slime Chunk: " + isSlimeChunk, 2, (136 + yOffset));
+				DebugOverlay.add("Slime Chunk: " + slimeChunk, 2, (136 + yOffset));
 			}
 		}
 	}
