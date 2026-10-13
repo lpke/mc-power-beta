@@ -13,6 +13,14 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   creative tabs and destroy slots. Run after `new-world`. `setup`, `state`,
   `camera-on`, `camera-off`, `cursor`, `look-off`, `look-on`, `invert`, `chord`, `plain` and `menu`
   support physical key/mouse checks. Use `save`, restart, then `saved` for persistence.
+  Run the inventory mouse checks with both `raw` and `native` helpers; `raw-delta`
+  injects a device delta to check gameplay and stale input after GUI closure.
+- `audio-previous setup`, `start`, `active`, `second`, `state`, `gap`, `again`,
+  `paused`, `preview`, `gap-preview`, `finish`: actual Previous controls during
+  playback and natural gaps, history, previews and queue preservation. Supply
+  two short silent OGG files named `song_1.ogg` and `song_2.ogg` under
+  `power-beta-data/validation/audio-previous-152`. Wait for a blank track with a
+  positive delay before gap checks. Use a muted null sink before enabling test playback.
 - `release-151 check`: TNT ignition modes, collision equivalence and live toggles,
   custom collision boxes, chunk movement/removal and resumable merging with changing
   native NBT. Run after `new-world`. `release-151 fast` and `release-151 slow`

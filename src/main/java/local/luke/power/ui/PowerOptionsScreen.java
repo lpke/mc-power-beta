@@ -1034,7 +1034,7 @@ public final class PowerOptionsScreen extends UiScreen {
         tip = switch (action) {
           case QUIET -> "End this track and wait for the next one. Automatic music stays on.";
           case PLAY -> "Play or pause music";
-          case PREVIOUS -> "Previous track";
+          case PREVIOUS -> "Previous track, or replay the last track while waiting between tracks.";
           case NEXT -> "Next track, or end the preview and resume the previous track. Queued tracks take priority outside previews.";
           case QUEUE -> item.enabled() ? "Open the music queue" : "Queue is empty. Add tracks from the library.";
           case RELOAD -> "Rescan music folders";

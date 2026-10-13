@@ -36,6 +36,17 @@ final class Release152Checks {
       mc.options.cinematicMode = false; FreeLook.KEY.code = 41;
       Bindings.register(mc.options.allKeys); return;
     }
+    if (action.equals("raw") || action.equals("native")) {
+      mc.field_2767 = action.equals("raw")
+          ? (net.minecraft.class_596) Class.forName("local.luke.power.controls.tweaks.rawinput.RawMouseHelper")
+              .getConstructor(java.awt.Component.class).newInstance(mc.canvas)
+          : new net.minecraft.class_596(mc.canvas);
+      log("Mouse helper " + mc.field_2767.getClass().getName()); return;
+    }
+    if (action.equals("raw-delta")) {
+      Class<?> raw = Class.forName("local.luke.power.controls.tweaks.rawinput.RawInputHandler");
+      raw.getField("dx").setInt(null, 20); raw.getField("dy").setInt(null, -10); return;
+    }
     if (action.equals("state")) {
       JsonObject out = new JsonObject();
       out.addProperty("walking", AutoWalk.isWalking()); out.addProperty("direction", AutoWalk.input());
@@ -44,6 +55,7 @@ final class Release152Checks {
       out.addProperty("yaw", mc.player.yaw); out.addProperty("pitch", mc.player.pitch);
       out.addProperty("focused", org.lwjgl.opengl.Display.isActive());
       out.addProperty("grabbed", org.lwjgl.input.Mouse.isGrabbed());
+      out.addProperty("mouseHelper", mc.field_2767.getClass().getName());
       Object camera = camera(); out.addProperty("camera", MovementOwnership.cameraControlsMovement());
       Object pose = camera.getClass().getMethod("getCameraPosition").invoke(camera);
       out.addProperty("cameraYaw", pose.getClass().getField("yaw").getFloat(pose));
@@ -79,6 +91,27 @@ final class Release152Checks {
     enabled.set(cameraOptions, true);
     Config.preview(settings); mc.setScreen(null); AutoWalk.tick(mc); failures = 0;
     try {
+      test("raw helper retains device gameplay input and clears it in GUIs", () -> {
+        var helper = mc.field_2767;
+        Class<?> raw = Class.forName("local.luke.power.controls.tweaks.rawinput.RawInputHandler");
+        Field dx = raw.getField("dx"), dy = raw.getField("dy");
+        try {
+          run(mc, "raw"); dx.setInt(null, 20); dy.setInt(null, -10);
+          mc.field_2767.method_1972();
+          check(mc.field_2767.field_2586 == 20 && mc.field_2767.field_2587 == 10, "gameplay lost raw device deltas");
+          mc.field_2767.method_1972();
+          check(mc.field_2767.field_2586 == 0 && mc.field_2767.field_2587 == 0, "raw device delta applied twice");
+          mc.setScreen(new class_585(mc.player)); dx.setInt(null, 2000); dy.setInt(null, -1000);
+          org.lwjgl.input.Mouse.getDX(); org.lwjgl.input.Mouse.getDY();
+          mc.field_2767.method_1972();
+          check(mc.field_2767.field_2586 == 0 && mc.field_2767.field_2587 == 0, "GUI used stale raw movement");
+          check(dx.getInt(null) == 0 && dy.getInt(null) == 0, "GUI retained device input");
+          mc.player.closeScreen(); mc.field_2767.method_1972();
+          check(mc.field_2767.field_2586 == 0 && mc.field_2767.field_2587 == 0, "GUI exit revived raw movement");
+        } finally {
+          mc.field_2767 = helper; dx.setInt(null, 0); dy.setInt(null, 0); mc.setScreen(null);
+        }
+      });
       test("inventory look default, shared settings and Cancel/Apply", () -> {
         check(!new local.luke.power.building.config.Settings().inventoryMouseLook, "default enabled");
         ConfigSession session = SettingsRegistry.open(mc);

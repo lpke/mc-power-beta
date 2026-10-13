@@ -127,7 +127,8 @@ public final class AudioController {
   public static void previous() {
     if (system() != null) MusicPreview.stop(system(), true);
     if (history.isEmpty()) { next(); return; }
-    historyIndex = Math.max(0, historyIndex - 1);
+    boolean waiting = currentMusic.isEmpty() && menuMusic.isEmpty();
+    historyIndex = Math.max(0, historyIndex - (waiting ? 0 : 1));
     play(history.get(historyIndex));
   }
 

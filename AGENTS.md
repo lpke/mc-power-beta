@@ -50,7 +50,8 @@
   manual keys. Optional inventory looking uses native sensitivity and rotation,
   keeps the cursor free and excludes all GUI panels, creative tabs and destroy slots.
   Right-click looking must not drop cursor items; supported screens and focus rules
-  remain shared with inventory movement.
+  remain shared with inventory movement. Both native and raw mouse helpers must
+  supply cursor deltas in GUIs; raw device deltas remain gameplay-only.
 - `AudioController` owns all music sources, pauses, previews and timing.
   World/menu transitions preserve streams and pause state in WORLD/MIX modes;
   only CUSTOM resets playback. Preview restoration must not revive old jukeboxes.
@@ -59,6 +60,8 @@
   snapshots must stay separate from live library edits; only Load copies a preset
   into live state. Track pools prevent new folders silently expanding presets.
   Keep missing track IDs, queues and user music files intact.
+  Previous during a between-track gap replays the last played track without
+  moving back in history or consuming queued tracks. Paused tracks remain current.
 - Difficulty is per-world, independent of cheats, including creation, world switches,
   dimension copies and commands. Never copy it from global GameOptions. Defaults
   are Normal; menu edits take effect only on Apply. Keep multiplayer server-owned.
