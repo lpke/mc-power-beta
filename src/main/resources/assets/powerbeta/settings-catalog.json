@@ -4707,6 +4707,22 @@
     "default": false,
     "order": 25
   },
+  "visual.limitCapeRotation": {
+    "page": "Fixes",
+    "group": "Rendering",
+    "label": "Limit cape rotation",
+    "description": "Keep capes from flipping upward or twisting excessively during fast flight or vehicle travel. Changes rendering only.",
+    "default": true,
+    "order": 40
+  },
+  "gameplay.cactusProofItems": {
+    "page": "Gameplay",
+    "group": "Dropped items",
+    "label": "Items survive cacti",
+    "description": "Protect dropped items from cactus damage in singleplayer. Other damage, pickup and normal item despawning stay independent.",
+    "default": false,
+    "order": 26
+  },
   "infoHud.enabled": {
     "order": 0
   },

@@ -30,7 +30,7 @@ final class Release160Checks {
         hud.clusters[1].textSize = 1.7; hud.clusters[1].offsetX = -21; hud.clusters[1].opacity = 43;
         hud.clusters[1].hideWithDebug = false; InfoHudConfig.save(hud);
         MenuPreferences.update(v -> v.debugTimeOfDay = true);
-        var game = GameplayConfig.copy(); game.lavaProofItems = true; GameplayConfig.save(game);
+        var game = GameplayConfig.copy(); game.lavaProofItems = game.cactusProofItems = true; GameplayConfig.save(game);
         var walking = Config.current().copy(); walking.autoWalkCancelOnLostFocus = true; Config.apply(walking);
         log("PASS saved 1.6.0 settings");
       }
@@ -39,7 +39,7 @@ final class Release160Checks {
         check(h.enabled && h.clusters[1].textColor.equals("#12ABEF") && h.clusters[1].textSize == 1.7
             && h.clusters[1].offsetX == -21 && h.clusters[1].opacity == 43 && !h.clusters[1].hideWithDebug,
             "cluster state lost on restart");
-        check(MenuPreferences.debugTimeOfDay() && GameplayConfig.current().lavaProofItems
+        check(MenuPreferences.debugTimeOfDay() && GameplayConfig.current().lavaProofItems && GameplayConfig.current().cactusProofItems
             && Config.current().autoWalkCancelOnLostFocus, "preferences lost on restart");
         inactive(mc);
         log("PASS all new settings survive restart with inactive tweaks");

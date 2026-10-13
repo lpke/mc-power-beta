@@ -84,6 +84,26 @@ public final class FilteredNavigationChecks {
         check(search(s).text().isEmpty()&&field(s,"page").equals(first.page),"did not open section");
         call(s,"back");render(s);check(search(s).text().equals("fast place"),"search lost");
       });
+      test("accepting a search destination clears Back without losing its position",()->{
+        query(s,"fast place");
+        invoke(s,"openGroup",Setting.class,find(s.session(),"tweaks.flexible.enabled"));
+        render(s);
+        double scroll=(double)field(s,"scroll");
+        check(scroll>0,"fixture group must be below the top");
+        String page=(String)field(s,"page");
+        int index=s.visiblePages().indexOf(page);
+        field(s,"sideScroll",Math.max(0d,index*22d-40));
+        double side=(double)field(s,"sideScroll");
+        int x=(int)call(s,"origin")+20,y=24+index*22-(int)side+8;
+        ((ScreenInput)(Object)s).power$click(x,y,0);
+        render(s);
+        check(((Deque<?>)field(s,"history")).isEmpty(),"Back was not dismissed");
+        check((double)field(s,"scroll")==scroll,"accepted destination jumped");
+        check((double)field(s,"sideScroll")==side,"sidebar moved");
+        // Subsequent ordinary same-tab clicks retain the established top shortcut.
+        ((ScreenInput)(Object)s).power$click(x,y,0);
+        check((double)field(s,"scroll")==0,"ordinary tab top shortcut changed");
+      });
       test("changing to unsaved-settings filter clears a typed cursor safely",()->{
         Setting changed=find(s.session(),"tweaks.placement.enabled");var old=changed.value;
         changed.value=new JsonPrimitive(!changed.original().getAsBoolean());

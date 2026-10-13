@@ -53,6 +53,12 @@ final class Release152Checks {
       out.addProperty("forward", mc.player.field_161.field_2533);
       out.addProperty("x", mc.player.x); out.addProperty("y", mc.player.y); out.addProperty("z", mc.player.z);
       out.addProperty("looking", InventoryLook.active()); out.addProperty("freeLook", FreeLook.active());
+      out.addProperty("lookYaw",FreeLook.yaw(mc.player.yaw));out.addProperty("lookPitch",FreeLook.pitch(mc.player.pitch));
+      out.addProperty("thirdPerson",mc.options.thirdPerson);
+      if(mc.currentScreen instanceof local.luke.power.validation.mixin.InventoryModelState model){
+        out.addProperty("modelX",model.power$modelX());out.addProperty("modelY",model.power$modelY());
+        out.addProperty("screenWidth",mc.currentScreen.width);out.addProperty("screenHeight",mc.currentScreen.height);
+      }
       out.addProperty("yaw", mc.player.yaw); out.addProperty("pitch", mc.player.pitch);
       out.addProperty("focused", org.lwjgl.opengl.Display.isActive());
       out.addProperty("grabbed", org.lwjgl.input.Mouse.isGrabbed());

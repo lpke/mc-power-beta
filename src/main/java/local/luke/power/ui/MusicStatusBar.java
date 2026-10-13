@@ -62,8 +62,9 @@ final class MusicStatusBar {
         y + 4,
         overTrack(mx, my) ? 0xffffa0 : 0xaaaaaa);
     if (!available) return;
-    barWidth = reserved - 40;
-    barX = left + width - reserved;
+    var bounds = MusicScrubLayout.at(left, width, label);
+    barWidth = bounds.width();
+    barX = bounds.x();
     double position =
         dragging ? fraction * duration : Math.min(duration, AudioController.position());
     screen.rectangle(barX, y + 7, barX + barWidth, y + 10, 0xff333333);

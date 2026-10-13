@@ -11,6 +11,7 @@ public final class VisualSettings {
   public boolean shiftClickIntoCraftingGrid;
   public boolean damageCameraShake = true, fireDamageCameraShake = true;
   public boolean swapEquipment = true;
+  public boolean limitCapeRotation = true;
   public double thirdPersonDistance = 4;
 
   public void validate() {

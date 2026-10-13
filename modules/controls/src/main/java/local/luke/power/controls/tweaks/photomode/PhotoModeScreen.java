@@ -11,6 +11,7 @@ import net.minecraft.client.util.ScreenScaler;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.Display;
 
 @SuppressWarnings("unchecked")
 public class PhotoModeScreen extends Screen {
@@ -25,6 +26,7 @@ public class PhotoModeScreen extends Screen {
     private ButtonWidget renderPlayerButton;
 
     private long originalTOD;
+    private local.luke.power.world.WorldCycles originalCycles;
     private long desiredTOD = -1L;
     private long desiredDay = -1L;
 
@@ -42,6 +44,7 @@ public class PhotoModeScreen extends Screen {
 
     public Screen previousScreen;
     private long lastTickTime = System.nanoTime();
+    private int dragButton = -1;
 
     public PhotoModeScreen(Screen previousScreen) {
         this.previousScreen = previousScreen;
@@ -55,10 +58,11 @@ public class PhotoModeScreen extends Screen {
         this.exitButton = new ButtonWidget(id++, 0, 0, 20, 20, "X");
         this.tiltSlider = new SliderWidgetWithoutSaving(id++, this.width - 150, 0, "Tilt: Default", 0.33333334f);
         this.timeSlider = new SliderWidgetWithoutSaving(id++, this.width - 150, 20, "Time of Day: Current", 0.0f);
+        int rotationY = this.height - (this.width < 360 ? 44 : 20);
         this.centerButton = new ButtonWidget(id++, 0, this.height - 20, 98, 20, "Center");
-        this.rotateLeftButton = new ButtonWidget(id++, this.width / 2 - 49 - 2 - 20, this.height - 20, 20, 20, "<");
-        this.rotateRightButton = new ButtonWidget(id++, this.width / 2 + 49 + 2, this.height - 20, 20, 20, ">");
-        this.screenshotButton = new ButtonWidget(id++, this.width / 2 - 49, this.height - 20, 98, 20, "Take Screenshot");
+        this.rotateLeftButton = new ButtonWidget(id++, this.width / 2 - 49 - 2 - 20, rotationY, 20, 20, "<");
+        this.rotateRightButton = new ButtonWidget(id++, this.width / 2 + 49 + 2, rotationY, 20, 20, ">");
+        this.screenshotButton = new ButtonWidget(id++, this.width / 2 - 49, rotationY, 98, 20, "Take Screenshot");
         this.renderPlayerButton = new ButtonWidget(id++, this.width - 104, this.height - 20, 105, 20, "Render Player: On");
 
         this.buttons.add(this.exitButton);
@@ -73,7 +77,10 @@ public class PhotoModeScreen extends Screen {
             this.buttons.add(this.timeSlider);
         }
 
-        this.originalTOD = ((local.luke.power.world.WorldCycles) this.minecraft.world.getProperties()).power$daylightTime();
+        if (originalCycles == null) {
+            originalCycles = (local.luke.power.world.WorldCycles)this.minecraft.world.getProperties();
+            this.originalTOD = originalCycles.power$daylightTime();
+        }
         if (this.desiredTOD == -1L) {
             this.desiredTOD = this.originalTOD % 24000L;
         } else {
@@ -82,13 +89,16 @@ public class PhotoModeScreen extends Screen {
         if (this.desiredDay == -1L) {
             this.desiredDay = this.originalTOD / 24000L;
         }
+        this.tiltSlider.value = this.tiltGoal / 90.0f;
+        this.dragButton = -1;
+        this.lastTickTime = System.nanoTime();
         this.updateButtonsText();
         ModOptions.photoModeFogMultiplier = 100F;
     }
 
     @Override
     public void removed() {
-        ((local.luke.power.world.WorldCycles) this.minecraft.world.getProperties()).power$daylightTime(this.originalTOD);
+        if (originalCycles != null) originalCycles.power$daylightTime(this.originalTOD);
         ModOptions.photoModeFogMultiplier = 1.0F;
     }
 
@@ -137,6 +147,7 @@ public class PhotoModeScreen extends Screen {
             this.zoomGoal = 1.0f;
             this.tilt = 30.0f;
             this.tiltGoal = 30.0f;
+            this.tiltSlider.value = 1.0f / 3.0f;
         }
         
         this.cameraX = 0;
@@ -146,7 +157,6 @@ public class PhotoModeScreen extends Screen {
     @Override
     protected void keyPressed(char character, int keyCode) {
         if (keyCode == Keyboard.KEY_ESCAPE) {
-            this.removed();
             this.minecraft.setScreen(null);
             this.minecraft.lockMouse();
         }
@@ -165,20 +175,59 @@ public class PhotoModeScreen extends Screen {
         return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
     }
 
+    @Override
+    public void onMouseEvent() {
+        if (!Display.isActive()) {
+            this.dragButton = -1;
+            return;
+        }
+        int mouseX = Mouse.getEventX() * width / minecraft.displayWidth;
+        moveSlider(tiltSlider, mouseX);
+        moveSlider(timeSlider, mouseX);
+        updateSliders();
+        int dx = Mouse.getEventDX(), dy = Mouse.getEventDY();
+        if (this.dragButton == 0) {
+            float speed = (float) (0.0005f / Math.pow(2, this.zoom));
+            if (shiftHeld()) speed *= 2;
+            this.cameraX += dx * speed;
+            this.cameraY += dy * speed * ((float) width / height);
+        } else if (this.dragButton >= 0) {
+            this.tiltSlider.value = Util.clamp(this.tiltSlider.value - dy * 0.0020f, 0.0f, 1.0f);
+            this.tiltGoal = (int) (this.tiltSlider.value * 90.0f);
+            this.rotationGoal += dx * 0.0020f;
+        }
+        int button = Mouse.getEventButton();
+        if (button >= 0 && button <= 2) {
+            if (!Mouse.getEventButtonState()) {
+                if (this.dragButton == button) this.dragButton = -1;
+            } else if (this.dragButton < 0) {
+                int x = Mouse.getEventX() * width / minecraft.displayWidth;
+                int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+                boolean overButton = buttons.stream().anyMatch(value ->
+                    value instanceof ButtonWidget widget && isMouseInBounds(x, y, widget));
+                if (!overButton) this.dragButton = button;
+            }
+        }
+        int wheel = Mouse.getEventDWheel();
+        if (wheel != 0) this.zoomGoal = Util.clamp(this.zoomGoal + Math.signum(wheel) * 0.25f, 0.01f, 12.0f);
+        super.onMouseEvent();
+        updateSliders();
+    }
+
     public void handleInput(int mouseX, int mouseY, float delta) {
-        // Zoom with Scroll Wheel
-        int mouseWheelDirection = Mouse.getDWheel();
-        if (mouseWheelDirection < 0) {
-            this.zoomGoal -= 0.25f;
-            this.zoomGoal = Math.max(this.zoomGoal, 0.01f);
-        } else if (mouseWheelDirection > 0) {
-            this.zoomGoal += 0.25f;
-            this.zoomGoal = Math.min(this.zoomGoal, 12.0f);
+        // Dispatch newly polled events between ticks too. A whole quick drag can be
+        // queued here, so its motion must be applied before its release is handled.
+        while (minecraft.currentScreen == this && Mouse.next()) onMouseEvent();
+        Mouse.getDX(); Mouse.getDY(); Mouse.getDWheel();
+        if (minecraft.currentScreen != this || !Display.isActive()) {
+            this.dragButton = -1;
+            this.tiltSlider.dragging = this.timeSlider.dragging = false;
+            return;
         }
 
         // Movement via keyboard
         boolean shift = shiftHeld();
-        float deltaTime = (System.nanoTime() - lastTickTime) / 100000000F;
+        float deltaTime = Math.min(1.0f, (System.nanoTime() - lastTickTime) / 100000000F);
         float cameraVelocity = (float) (0.075f / Math.pow(2, this.zoom)) * deltaTime;
         if (shift) cameraVelocity *= 2;
 
@@ -198,44 +247,11 @@ public class PhotoModeScreen extends Screen {
             this.cameraX -= cameraVelocity;
         }
 
-        // Movement via mouse
-        boolean hoveringButton = false;
-        for (Object buttonO : buttons) {
-            if (buttonO instanceof SliderWidget slider) {
-                if (slider.dragging) {
-                    hoveringButton = true;
-                    break;
-                }
-            }
-            
-            if (buttonO instanceof ButtonWidget button) {
-                if (isMouseInBounds(mouseX, mouseY, button)) {
-                    hoveringButton = true;
-                    break;
-                }
-            }
-        }
-        
-        if (!hoveringButton) {
-            if (Mouse.isButtonDown(0)) {
-                float mouseCameraVelocity = (float) (0.0005f / Math.pow(2, this.zoom));
-                if (shift) mouseCameraVelocity *= 2;
-                this.cameraX += Mouse.getDX() * mouseCameraVelocity;
-                this.cameraY += Mouse.getDY() * mouseCameraVelocity * ((float) width / height);
-            } else if (Mouse.isButtonDown(1) || Mouse.isButtonDown(2)) {
-                this.tiltSlider.value -= Mouse.getDY() * 0.0020f;
-                this.tiltGoal = (float) ((int) (this.tiltSlider.value * 90.0F));
-                this.tiltSlider.value = Util.clamp(this.tiltSlider.value, 0.0f, 1.0f);
-                
-                this.rotationGoal += Mouse.getDX() * 0.0020f;
-            }
-        }
-        
         updateButtonsText();
     }
     
     private boolean isMouseInBounds(int mouseX, int mouseY, ButtonWidget button) {
-        return button.active && mouseX >= button.x && mouseY >= button.y && mouseX < button.x + button.width && mouseY < button.y + button.height;
+        return button.visible && button.active && mouseX >= button.x && mouseY >= button.y && mouseX < button.x + button.width && mouseY < button.y + button.height;
     }
 
     // UI
@@ -249,6 +265,8 @@ public class PhotoModeScreen extends Screen {
     // Rendering
     @Override
     public void render(int mouseX, int mouseY, float delta) {
+        this.handleInput(mouseX, mouseY, delta);
+        if (minecraft.currentScreen != this) return;
         ScreenScaler scaledResolution = new ScreenScaler(this.minecraft.options, this.minecraft.displayWidth, this.minecraft.displayHeight);
 
         GL11.glViewport(0, 0, this.minecraft.displayWidth, this.minecraft.displayHeight);
@@ -294,28 +312,30 @@ public class PhotoModeScreen extends Screen {
             Screenshot.take(Minecraft.getRunDirectory(), this.minecraft.displayWidth, this.minecraft.displayHeight);
             this.shouldScreenshot = false;
         }
-        this.handleInput(mouseX, mouseY, delta);
-
-        if (this.timeSlider.dragging) {
-            long var4 = (long) (this.timeSlider.value * 24000.0F);
-            if (this.timeSlider.value == 0.0F) {
-                this.desiredTOD = this.originalTOD % 24000L;
-            } else {
-                this.desiredTOD = var4;
-            }
-
-            ((local.luke.power.world.WorldCycles) this.minecraft.world.getProperties()).power$daylightTime(this.desiredDay * 24000L + this.desiredTOD);
-            this.minecraft.world.updateSkyBrightness();
-//            this.minecraft.world.method_232();
-            this.minecraft.worldRenderer.notifyAmbientDarknessChanged();
-            this.updateButtonsText();
-        }
-
-        if (this.tiltSlider.dragging) {
-            this.tiltGoal = (float) ((int) (this.tiltSlider.value * 90.0F));
-            this.updateButtonsText();
-        }
-
+        updateSliders();
         this.lastTickTime = System.nanoTime();
+    }
+
+    private void moveSlider(SliderWidget slider, int x) {
+        if (slider.dragging) slider.value = Util.clamp((float)(x - slider.x - 4) / (slider.width - 8), 0.0f, 1.0f);
+    }
+
+    private void updateSliders() {
+        if (this.timeSlider.dragging && !this.minecraft.world.isRemote) {
+            this.desiredTOD = this.timeSlider.value == 0.0f ? this.originalTOD % 24000L
+                : (long)(this.timeSlider.value * 24000.0f);
+            var cycles = (local.luke.power.world.WorldCycles)this.minecraft.world.getProperties();
+            long target = this.desiredDay * 24000L + this.desiredTOD;
+            if (cycles.power$daylightTime() != target) {
+                cycles.power$daylightTime(target);
+                this.minecraft.world.updateSkyBrightness();
+                this.minecraft.worldRenderer.notifyAmbientDarknessChanged();
+            }
+            this.updateButtonsText();
+        }
+        if (this.tiltSlider.dragging) {
+            this.tiltGoal = (int)(this.tiltSlider.value * 90.0f);
+            this.updateButtonsText();
+        }
     }
 }

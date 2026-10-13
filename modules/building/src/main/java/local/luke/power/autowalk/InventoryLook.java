@@ -22,6 +22,8 @@ public final class InventoryLook {
   public static boolean active() { return DRAG.active(); }
   public static boolean capturing() { return capturing; }
   public static boolean hasMotion() { return POINTER.hasMotion(); }
+  public static int cursorX(Screen screen, Minecraft mc) { return POINTER.x() * screen.width / mc.displayWidth; }
+  public static int cursorY(Screen screen, Minecraft mc) { return screen.height - POINTER.y() * screen.height / mc.displayHeight - 1; }
   public static int eventX(int nativeX) { return events ? POINTER.x() : nativeX; }
   public static int eventY(int nativeY) { return events ? POINTER.y() : nativeY; }
 
@@ -102,6 +104,6 @@ public final class InventoryLook {
       finishEvents();
     }
     // Discard polling deltas: they include cursor warps and movement outside the drag.
-    if (!mc.field_2778 && screen != null) mc.field_2767.method_1972();
+    if (!mc.field_2778 && eligible) mc.field_2767.method_1972();
   }
 }

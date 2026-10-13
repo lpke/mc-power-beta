@@ -309,3 +309,14 @@ captures, and normal gameplay rendering after capture.
   player. Wait for the download, then `skin check` verifies decoded pixels and
   the uploaded GPU texture. `skin default` checks that a bundled fallback does
   not start an HTTP download. No authentication tokens are needed.
+
+`photo-controls open|state|layout|resize|closed` exposes photo-mode state for physical input
+checks. Run `tools/photo_controls.py GAME_DIR --display :95` on a muted disposable
+Xvfb clone to test native/raw panning, rotation, sliders, zoom, focus, screenshots,
+exits, held free-look perspective changes and the inventory model during looking.
+`menu-scrub` needs an initialized sound engine, such as after `set native.music 1`;
+keep the clone routed to the muted null sink, then restore `set native.music 0`.
+`menu-scrub`, `music-collapse`, `filter-navigation`, `cactus-items` and `cape-checks`
+exercise the corresponding runtime controls. Load a skin with `skin NAME` and verify
+`skin check` before `cape-checks`; it captures actual renderer angles without changing
+saved movement data. `release-160 save|saved` includes cactus-protection persistence.

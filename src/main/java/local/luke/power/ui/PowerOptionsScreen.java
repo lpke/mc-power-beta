@@ -230,7 +230,9 @@ public final class PowerOptionsScreen extends UiScreen {
   private List<String> sections() {
     return sectionKeys;
   }
+  private boolean hasSections() { return libraryVisible() ? library.hasSections() : !sections().isEmpty(); }
   private void toggleSections() {
+    if (libraryVisible()) { library.toggleSections(); return; }
     SectionCollapse.toggleAll(sections(), collapsed);
     selected = -1;
     layout();
@@ -508,7 +510,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (button == 0 && !libraryVisible() && inside(x, y, sectionButtonX(), 27, 18, 20)) {
+    if (button == 0 && hasSections() && inside(x, y, sectionButtonX(), 27, 18, 20)) {
       click(); toggleSections(); return;
     }
     if (canClear() && inside(x, y, clearSearchX(), 27, 18, 20)) {
@@ -529,6 +531,7 @@ public final class PowerOptionsScreen extends UiScreen {
       int index = (int) ((y - 24 + sideScroll) / 22);
       if (index >= 0 && index < pages.size()) {
         boolean same = pages.get(index).equals(page);
+        boolean acceptLocation = same && !history.isEmpty() && !filtered() && search.text().isBlank();
         rememberPosition();
         click();
         history.clear();
@@ -538,7 +541,7 @@ public final class PowerOptionsScreen extends UiScreen {
         changedOnly = false;
         search.setText("");
         search.selectAll();
-        scroll = same ? 0 : positions.getOrDefault(page, 0d);
+        scroll = acceptLocation ? scroll : same ? 0 : positions.getOrDefault(page, 0d);
         if (page.equals("Audio")) closeLibrary();
         selected = -1;
         layout();
@@ -966,9 +969,9 @@ public final class PowerOptionsScreen extends UiScreen {
         !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls for \"" + relatedLabel + "\"" : "Related settings"
         : changedOnly ? "Search changed settings..." : "Search all settings...");
     if (canClear()) button("x", clearSearchX(), 27, 18, 20, mx, my, true);
-    boolean expandSections = SectionCollapse.allCollapsed(sections(), collapsed);
+    boolean expandSections = libraryVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
     iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 18, 20, mx, my,
-        !libraryVisible() && !sections().isEmpty(), false);
+        hasSections(), false);
     if (musicControlsVisible()) {
       for (var item : musicButtons()) {
         if (item.action() == AudioToolbar.Action.PREVIOUS || item.action() == AudioToolbar.Action.NEXT)
@@ -1090,7 +1093,7 @@ public final class PowerOptionsScreen extends UiScreen {
       hoverId = "apply";
     }
     button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
-    if (!libraryVisible() && inside(mx, my, sectionButtonX(), 27, 18, 20)) {
+    if (hasSections() && inside(mx, my, sectionButtonX(), 27, 18, 20)) {
       tip = expandSections ? "Expand all sections" : "Collapse all sections";
       hoverId = "sections";
     }

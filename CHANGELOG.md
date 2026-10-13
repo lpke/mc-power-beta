@@ -21,6 +21,15 @@
 - Keep auto-walk moving while an inventory is open and the game loses focus.
 - Preserve cursor position and camera movement through consecutive fast inventory drags, including movement immediately after release.
 - Restore custom skins when the first skin provider returns an incomplete profile, and prevent bundled fallback skins from crashing the texture downloader.
+- Restore photo-mode mouse panning and rotation, and preserve quick drags, slider changes and time restoration through resizing.
+- Centre the menu music scrub track above and below the menu.
+- Keep the scroll position when accepting a settings search destination by clicking its current tab.
+- Remove padding before positive facing axes in custom HUD coordinates.
+- Add optional cactus protection for dropped items. Off by default.
+- Extend collapse/expand-all to the groups in the current music-library view and search results.
+- Keep the inventory character model steady while right-click looking hides the pointer.
+- Limit excessive cape rotation during fast movement, with a default-on option in Fixes.
+- Preserve free-look direction when switching between first and third person while holding free look.
 
 ## [1.5.2] - 2026-10-13
 

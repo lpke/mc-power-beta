@@ -232,3 +232,16 @@
 - Custom HUD clusters keep stable IDs and independent content, anchors, offsets,
   colour, size, opacity and F3 visibility. Sample world data on ticks and use the
   daylight clock. Native HUD previews and Cancel update positions immediately.
+
+- Inventory look must leave mouse events and polling to unrelated screens, including
+  photo mode. Its hidden hover coordinates must never drive the inventory player model.
+  Preserve free-look offsets through explicit perspective changes and retain the chosen
+  perspective when free look ends.
+- Photo-mode drags own the button from its originating press through release. Widget
+  drags never become camera drags; lost focus cancels them. Clamp tilt before setting its
+  target and preserve the original daylight snapshot through GUI resizing.
+- Cape limits change only rendered cape angles, leaving player interpolation and movement
+  untouched. Item cactus protection applies only to dropped items in singleplayer.
+- Music-library collapse/expand-all acts on groups in the current view, including search,
+  without changing inclusion, volume, presets or queues. Menu scrub tracks reserve equal
+  space on either side so the track itself stays centred with the menu.

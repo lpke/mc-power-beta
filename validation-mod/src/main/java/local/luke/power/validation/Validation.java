@@ -56,6 +56,11 @@ public final class Validation {
       else if (command.startsWith("gallery-motion ")) WebsiteMotion.run(mc,command.substring(15));
       else if (command.startsWith("release-152")) Release152Checks.run(mc, command.substring(11).trim());
       else if (command.startsWith("release-160")) Release160Checks.run(mc, command.substring(11).trim());
+      else if (command.equals("cape-checks")) CapeChecks.run(mc);
+      else if (command.equals("music-collapse")) MusicCollapseChecks.run(mc);
+      else if (command.equals("cactus-items")) CactusChecks.run(mc);
+      else if (command.equals("menu-scrub")) MenuScrubChecks.run(mc);
+      else if (command.startsWith("photo-controls ")) PhotoControlsChecks.run(mc, command.substring(15));
       else if (command.startsWith("skin ")) SkinChecks.run(mc, command.substring(5).trim());
       else if (command.startsWith("release-151")) Release151Checks.run(mc, command.substring(11).trim());
       else if (command.equals("interaction-150")) Release150InteractionChecks.run(mc);

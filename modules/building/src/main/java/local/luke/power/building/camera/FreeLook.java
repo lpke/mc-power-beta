@@ -14,7 +14,7 @@ public final class FreeLook {
   // Stable identifier shared with Power Beta's binding registry.
   public static final KeyBinding KEY = new KeyBinding("key.powerbeta.free_look", Keyboard.KEY_GRAVE);
   private static final LookAngles angles = new LookAngles();
-  private static boolean active, wasDown, waitForRelease, previousThird, wasPerspectiveDown;
+  private static boolean active, wasDown, waitForRelease, previousThird;
   private static Perspective perspective, configuredPerspective;
   private static boolean followedThird;
   private static ClientPlayerEntity owner;
@@ -41,9 +41,6 @@ public final class FreeLook {
     boolean down = local.luke.power.input.Bindings.down(KEY);
     boolean pressed = down && !wasDown;
     wasDown = down;
-    boolean perspectiveDown = local.luke.power.input.Bindings.down("key.power_controls.third_person");
-    boolean perspectivePressed = perspectiveDown && !wasPerspectiveDown;
-    wasPerspectiveDown = perspectiveDown;
     boolean eligible =
         Config.current().freeLook
             && mc.world != null
@@ -64,16 +61,18 @@ public final class FreeLook {
       return;
     }
     if (active
-        && (perspectivePressed
-            || configuredPerspective != Config.current().freeLookPerspective
-            || followedThird != Config.current().freeLookFollowThirdPerson
-            || mc.options.thirdPerson != (perspective == Perspective.THIRD_PERSON))) {
-      // F5 is an explicit perspective choice; do not restore over it or reactivate while held.
+        && (configuredPerspective != Config.current().freeLookPerspective
+            || followedThird != Config.current().freeLookFollowThirdPerson)) {
       active = false;
       angles.clear();
       owner = null;
       waitForRelease = down;
       return;
+    }
+    if (active && mc.options.thirdPerson != (perspective == Perspective.THIRD_PERSON)) {
+      // Keep the same render angles, and honour the explicit view choice on release.
+      perspective = mc.options.thirdPerson ? Perspective.THIRD_PERSON : Perspective.FIRST_PERSON;
+      previousThird = mc.options.thirdPerson;
     }
     if (!down) waitForRelease = false;
     if (waitForRelease) return;

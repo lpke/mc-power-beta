@@ -11,10 +11,10 @@ public final class HudText {
   }
   public static String direction(float yaw) {
     return switch (Math.floorMod((int)Math.floor(yaw / 90.0 + .5), 4)) {
-      case 0 -> "( Z, S)";
+      case 0 -> "(Z, S)";
       case 1 -> "(-X, W)";
       case 2 -> "(-Z, N)";
-      default -> "( X, E)";
+      default -> "(X, E)";
     };
   }
   public static String coordinates(int x, int y, int z) { return x + ", " + y + ", " + z; }

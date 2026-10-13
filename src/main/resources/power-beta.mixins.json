@@ -80,6 +80,8 @@
     "TntBudgetMixin",
     "ExplosionItemsMixin",
     "LavaItemsMixin",
+    "CactusItemsMixin",
+    "CapeRotationMixin",
     "ItemMergingMixin",
     "EntityVisibilityMixin",
     "CreativeTntMixin",

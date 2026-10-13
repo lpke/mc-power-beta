@@ -43,6 +43,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private record Row(String group, String label, String id, int index, int y, int height) {}
   private final Set<String> collapsed = new HashSet<>();
   private List<Row> rows = List.of();
+  private List<String> sectionKeys = List.of();
   private int contentHeight;
 
   private final Map<String, MusicLibrary.Track> custom = new HashMap<>();
@@ -76,6 +77,17 @@ public final class MusicLibraryScreen extends UiScreen {
     this.parent = parent;
     edits = new MusicEdits(parent); presets = new MusicPresetsPanel(parent);
   }
+
+  public boolean hasSections() { return !queue && (!presetsOpen || presets.editing()) && !sectionKeys.isEmpty(); }
+  public boolean sectionsCollapsed() { return SectionCollapse.allCollapsed(sectionKeys, collapsed); }
+  public void toggleSections() {
+    if (!hasSections()) return;
+    finishDrag();
+    SectionCollapse.toggleAll(sectionKeys, collapsed);
+    rebuildRows();
+    scroll(scroll());
+  }
+  private String collapseKey(String group) { return search.text().isBlank() ? group : "filtered/" + group; }
 
   public State state() {
     return new State(queue, folder, search.text(), trackScroll, queueScroll, lastFolder, Set.copyOf(collapsed), selectedPreset, Set.copyOf(initializedFilters), hideExcluded);
@@ -192,7 +204,7 @@ public final class MusicLibraryScreen extends UiScreen {
     folder = "";
     search.setText("");
     rebuild();
-    collapsed.remove(group(id));
+    collapsed.remove(collapseKey(group(id)));
     rebuildRows();
     rows.stream().filter(row -> id.equals(row.id)).findFirst().ifPresent(row -> {
       scroll(row.y);
@@ -430,13 +442,14 @@ public final class MusicLibraryScreen extends UiScreen {
         String key = entry.getKey();
         String label = key.startsWith("folder:") ? Objects.toString(Path.of(key.substring(7)).getFileName(), key.substring(7)) : key;
         result.add(new Row(key, label, null, -1, y, 24)); y += 24;
-        if (collapsed.contains(key) && search.text().isBlank()) continue;
+        if (collapsed.contains(collapseKey(key))) continue;
         for (String id : entry.getValue()) {
           result.add(new Row(key, label, id, -1, y, rowHeight())); y += rowHeight();
         }
       }
     }
     rows = List.copyOf(result);
+    sectionKeys = rows.stream().filter(row -> row.id == null).map(row -> collapseKey(row.group)).toList();
     contentHeight = y;
   }
 
@@ -617,7 +630,7 @@ public final class MusicLibraryScreen extends UiScreen {
         draggingGroupDraft = presetsOpen && presets.editing() ? presets.draft() : null;
         slideGroup(x); return;
       }
-      if (!collapsed.remove(clicked.group)) collapsed.add(clicked.group);
+      if (!collapsed.remove(collapseKey(clicked.group))) collapsed.add(collapseKey(clicked.group));
       rebuildRows(); scroll(pinned ? clicked.y : scroll()); return;
     }
     int index = clicked.index;
@@ -667,7 +680,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private GroupHover groupHeading(Row row, int y, int mx, int my) {
     String tip = "", key = "";
     boolean hover = inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom();
-    boolean closed = collapsed.contains(row.group) && search.text().isBlank();
+    boolean closed = collapsed.contains(collapseKey(row.group));
     int total = members(row.group).size(), included = includedCount(row.group);
     String count = included + "/" + total;
     int countWidth = minecraft.textRenderer.getWidth(count), countRight = groupVolumeX() - 6;
