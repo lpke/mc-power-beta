@@ -20,9 +20,9 @@ public class InGameHudMixin extends DrawContext {
     @Shadow private Minecraft minecraft;
 
     // Render hud text
-    @Inject(at = @At("HEAD"), method = "render", cancellable = true)
+    @Inject(at = @At("TAIL"), method = "render")
     private void freecam_renderGui(float bl, boolean i, int j, int par4, CallbackInfo ci){
-        if(!Freecam.freecamController.isActive()){
+        if(!Freecam.freecamController.isActive() || minecraft.options.hideHud){
             return;
         }
         this.minecraft.gameRenderer.setupHudRender();
@@ -50,6 +50,5 @@ public class InGameHudMixin extends DrawContext {
             textRenderer.drawWithShadow(speedString, scaledResolution.getScaledWidth() / 2 - textRenderer.getWidth(speedString) / 2, scaledResolution.getScaledHeight() - scaledResolution.getScaledHeight() / 8, 0xFFFF55);
             GL11.glPopMatrix();
         }
-        ci.cancel();
     }
 }

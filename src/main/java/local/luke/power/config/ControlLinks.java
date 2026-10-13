@@ -45,7 +45,7 @@ public final class ControlLinks {
     link("power_creative.sprint", "creative.sprintToggle", "creative.sprintFlight", "Boost creative, spectator or freecam flight in any direction. Toggle ends when movement stops.");
     link("power_creative.picker", "creative.modePicker", "creative.modePicker", "Cycle game modes while holding the mode-picker modifier; release the modifier to select.");
     link("power_creative.modifier", "creative.modePicker", "creative.modePicker", "Hold with the game-mode cycle key to open the mode picker.");
-    link("Toggle Freecam", "power_camera:config.enabled", "power_camera:config.enabled", "Detach the camera from your player. Press again to return.");
+    link("Toggle Freecam", "power_camera:config.enabled", "power_camera:config.enabled", "Detach the camera and hide the HUD. F1 can show it during freecam. Press again to return and restore the previous HUD visibility.");
     link("Toggle Player Movement", "power_camera:config.enabled", "power_camera:config.enabled", "Allow or stop player movement while the camera is detached.");
     link("Change Freecam Speed", "power_camera:config.speed", "power_camera:config.enabled", "Hold and scroll to adjust detached-camera movement speed.");
     link("Save Or Load Camera Position", "power_camera:config.enabled", "power_camera:config.enabled", "Enter a saved camera position number; hold Ctrl to save the current position instead.");

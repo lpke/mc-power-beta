@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-10-13
+
+- Preview container contents from the detached freecam, including storage minecarts, without opening or changing inventories.
+- Hide the HUD on entering freecam and restore its previous visibility on exit. F1 can show it during freecam, and held container previews remain visible with the HUD hidden.
+
 ## [1.6.0] - 2026-10-13
 
 - Turn off active movement, building, camera and render tweaks when leaving a world or quitting the game.

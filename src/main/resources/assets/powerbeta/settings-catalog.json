@@ -3716,7 +3716,7 @@
     "page": "Inventory",
     "group": "Containers",
     "label": "Container preview",
-    "description": "Hold the container-preview key while aiming at a container to view its contents without opening it.",
+    "description": "Hold the container-preview key while aiming at a container to view its contents without opening it. Also works from freecam, including with the HUD hidden.",
     "default": false,
     "restart": false
   },

@@ -131,6 +131,10 @@
   Entity render-distance checks use the detached camera position; simulation stays player-owned.
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.
   Keep the first detached frame still, reset movement timing and reject old-world poses.
+  Hide the HUD once on entry, allow manual F1 changes during the visit, and restore
+  its entry state on every exit. Container previews use a separate camera ray and
+  remain available with the HUD hidden. Never change the player's interaction target,
+  open inventories or load chunks for previews; keep multiplayer previews disabled.
 - Natural spawning rules are saved with world properties and copied across
   dimensions. They require cheats, preserve existing mobs and never gate /summon.
 - Optional modern water landings reset fall distance before landing damage, for

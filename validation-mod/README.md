@@ -8,6 +8,15 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `freecam-preview check`: detached chest, double-chest, furnace, dispenser and
+  minecart targeting, obstruction, reach, unloaded chunks, native NBT and HUD
+  entry/exit restoration. Run after `new-world`. `setup` binds C to freecam and
+  P to preview, then enters freecam facing a test chest. Use `state`, `hud-hidden`,
+  `normal`, `off` and `exit` for physical F1, preview-key, focus, menu and world-exit checks.
+  `python3 validation-mod/tools/freecam_preview.py GAME --display :N` runs those
+  physical checks on a muted Xvfb clone and captures the actual rendered HUD/preview.
+  Requires ImageMagick. Inspect the menu/focus captures for unwanted preview panels.
+
 - `release-152 check`: forward/backward auto-walk, cancellation, free look,
   freecam, inventory setting transactions and narrow/wide GUI bounds, including
   creative tabs and destroy slots. Run after `new-world`. `setup`, `state`,

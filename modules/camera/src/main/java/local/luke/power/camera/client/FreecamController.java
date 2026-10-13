@@ -21,7 +21,8 @@ public class FreecamController {
             clearRenderedPosition();
         });
         local.luke.power.input.DetachedCamera.register(this::isActive,
-                () -> cameraPosition.x, () -> cameraPosition.y, () -> cameraPosition.z);
+                () -> cameraPosition.x, () -> cameraPosition.y, () -> cameraPosition.z,
+                () -> cameraPosition.pitch, () -> cameraPosition.yaw);
         local.luke.power.input.MovementOwnership.registerCamera(() -> isActive() && !allowPlayerMovement);
         local.luke.power.input.TweakIndicators.register(
             local.luke.power.input.TweakIndicators.Tweak.FREECAM_PLAYER_MOVEMENT,
@@ -29,6 +30,7 @@ public class FreecamController {
             () -> local.luke.power.camera.FreecamConfig.config.playerMovementMessages);
     }
     private boolean active;
+    private Boolean previousHideHud;
     private CameraPosition cameraPosition = new CameraPosition();
     private CameraPosition renderedPosition;
     private LivingEntity renderedEntity;
@@ -92,6 +94,18 @@ public class FreecamController {
 
     // Set the freecam active state
     public void setActive(boolean active){
+        if (this.active != active) {
+            Minecraft minecraft = (Minecraft)FabricLoader.getInstance().getGameInstance();
+            if (minecraft != null && minecraft.options != null) {
+                if (active) {
+                    previousHideHud = minecraft.options.hideHud;
+                    minecraft.options.hideHud = true;
+                } else if (previousHideHud != null) {
+                    minecraft.options.hideHud = previousHideHud;
+                }
+            }
+            if (!active) previousHideHud = null;
+        }
         this.active = active;
         firstFramePending = active;
         velocityX = velocityY = velocityZ = 0;
