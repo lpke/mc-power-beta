@@ -220,6 +220,8 @@
 
 - Leaving a world or quitting clears active tweaks through `TweakLifecycle`; preserve
   feature preferences, bindings and saved user data. Queue changed toggle snapshots.
+  Flexible placement and Complete slabs retain their saved enablement; only temporary
+  placement operations and held modifiers clear. Slab completion has no hotkey.
   Auto-walk survives focus loss by default, including the automatic pause screen.
   In supported inventories, retain actual auto-walk movement while unfocused;
   only manual movement keys require focus. Test player displacement, not just the toggle.

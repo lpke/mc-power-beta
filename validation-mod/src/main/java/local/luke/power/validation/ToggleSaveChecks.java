@@ -10,7 +10,6 @@ import local.luke.power.config.*;
 import local.luke.power.fastplace.FastPlace;
 import local.luke.power.fakesneak.FakeSneak;
 import local.luke.power.light.LightConfig;
-import local.luke.power.slabplacement.SlabPlacement;
 import local.luke.power.status.*;
 import local.luke.power.storage.PowerConfig;
 import net.minecraft.client.Minecraft;
@@ -67,7 +66,7 @@ final class ToggleSaveChecks {
     try {
       test("gameplay toggles and live HUD never wait for stalled settings I/O", () -> {
         var setup = before.copy(); setup.placement.restrictionTiedToFast = true;
-        setup.placement.setEnabled(false); setup.sneak.enabled = false; setup.slabs.enabled = false; Config.apply(setup);
+        setup.placement.setEnabled(false); setup.sneak.enabled = false; setup.slabs.enabled = true; Config.apply(setup);
         var hud = StatusConfig.copy(); hud.slabCompletion = true; hud.enabled = true; StatusConfig.preview(hud);
         var disk = PowerConfig.class.getDeclaredField("DISK"); disk.setAccessible(true);
         var entered = new CountDownLatch(1); var release = new CountDownLatch(1);
@@ -80,9 +79,9 @@ final class ToggleSaveChecks {
             return null;
           });
           check(entered.await(5, TimeUnit.SECONDS), "fixture did not lock disk");
-          FastPlace.beginTick(mc, false, false, true); FakeSneak.beginTick(mc, false, true); SlabPlacement.beginTick(mc, false, true);
+          FastPlace.beginTick(mc, false, false, true); FakeSneak.beginTick(mc, false, true);
           long start = System.nanoTime();
-          FastPlace.beginTick(mc, false, true, true); FakeSneak.beginTick(mc, true, true); SlabPlacement.beginTick(mc, true, true);
+          FastPlace.beginTick(mc, false, true, true); FakeSneak.beginTick(mc, true, true);
           LightConfig.toggle();
           long duration = System.nanoTime() - start;
           check(duration < 50_000_000, "input waited for disk: " + duration / 1_000_000.0 + "ms");
@@ -91,9 +90,9 @@ final class ToggleSaveChecks {
           check(LightConfig.current().enabled != light.enabled, "light overlay toggle delayed");
           var lines = ActiveTweaks.lines(StatusConfig.current());
           check(lines.containsAll(java.util.List.of("Fast placement", "Fake sneak", "Slab completion")), "HUD delayed " + lines);
-          FastPlace.beginTick(mc, false, true, true); FakeSneak.beginTick(mc, true, true); SlabPlacement.beginTick(mc, true, true);
+          FastPlace.beginTick(mc, false, true, true); FakeSneak.beginTick(mc, true, true);
           check(Config.current().placement.enabled && Config.current().sneak.enabled, "held key repeated toggle");
-          log("TIMING four toggles including light overlay with disk stalled ms=" + duration / 1_000_000.0);
+          log("TIMING three toggles including light overlay with disk stalled ms=" + duration / 1_000_000.0);
           release.countDown(); held.get(5, TimeUnit.SECONDS); PowerConfig.flushPending();
           check(PowerConfig.section("building").equals(Catalog.JSON.toJsonTree(Config.current())), "latest combined snapshot lost");
           check(PowerConfig.section("lightOverlay").equals(Catalog.JSON.toJsonTree(LightConfig.current())), "light overlay snapshot lost");
@@ -112,7 +111,7 @@ final class ToggleSaveChecks {
         check(!PowerConfig.section("building").getAsJsonObject("sneak").get("enabled").getAsBoolean(), "older queued state overwrote Apply");
       });
     } finally {
-      FastPlace.beginTick(mc, false, false, true); FakeSneak.beginTick(mc, false, true); SlabPlacement.beginTick(mc, false, true);
+      FastPlace.beginTick(mc, false, false, true); FakeSneak.beginTick(mc, false, true);
       Config.apply(before); StatusConfig.preview(display); LightConfig.save(light);
     }
   }

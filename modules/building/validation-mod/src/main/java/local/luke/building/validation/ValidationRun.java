@@ -514,7 +514,7 @@ public final class ValidationRun {
         List<?> all = Arrays.asList(mc.options.allKeys);
         for (var k : Keys.ALL) check(all.contains(k), "flexible native key");
         check(all.contains(local.luke.power.fakesneak.Keys.ALL[0]), "fake native key");
-        check(all.contains(local.luke.power.slabplacement.Keys.ALL[0]), "slab native key");
+        check(Arrays.stream(mc.options.allKeys).noneMatch(k -> k.translationKey.equals("Slab completion (toggle)")), "removed slab key registered");
       }
       case 22 -> {
         Screen screen = new local.luke.power.building.config.SettingsScreen(null);

@@ -6,6 +6,8 @@
 
 - Preview container contents from the detached freecam, including storage minecarts, without opening or changing inventories.
 - Hide the HUD on entering freecam and restore its previous visibility on exit. F1 can show it during freecam, and held container previews remain visible with the HUD hidden.
+- Preserve Flexible placement and Complete slabs settings when leaving worlds or quitting, while clearing temporary placement modes.
+- Remove the slab-completion hotkey; change the feature through its setting.
 
 ## [1.6.0] - 2026-10-13
 

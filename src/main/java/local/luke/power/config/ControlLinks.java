@@ -28,7 +28,6 @@ public final class ControlLinks {
     // Keep their toggles and placement modifiers visible while the state is off.
     link("Fast place (toggle)", "tweaks.placement.enabled", "", "Toggle repeated block placement while holding Use.");
     link("Fake sneak (toggle)", "tweaks.sneak.enabled", "", "Toggle ledge protection without slowing movement.");
-    link("Slab completion (toggle)", "tweaks.slabs.enabled", "", "Toggle completing matching half slabs from adjacent faces.");
     link("Flexible placement (toggle)", "tweaks.flexible.enabled", "", "Toggle alternate block positions and facing controls.");
     for (String action : List.of("offset", "adjacent", "rotation", "reverse", "into face"))
       link("Placement " + action + " (hold)", "tweaks.flexible.enabled", "", switch (action) {
@@ -100,7 +99,6 @@ public final class ControlLinks {
       case "infoHud.enabled" -> "infoHud.";
       case "tweaks.placement.enabled" -> "tweaks.placement.";
       case "tweaks.flexible.enabled" -> "tweaks.flexible.";
-      case "tweaks.slabs.enabled" -> "tweaks.slabs.";
       case "tweaks.sneak.enabled" -> "tweaks.sneak.";
       case "tweaks.hotbar.swap", "tweaks.hotbar.scroll" -> "tweaks.hotbar.";
       case "tweaks.freeLook" -> "tweaks.freeLook";

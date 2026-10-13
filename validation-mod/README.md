@@ -283,6 +283,13 @@ captures, and normal gameplay rendering after capture.
   `release-160 save`, `release-160 exit`, `new-world`, `release-160 inactive`,
   then `release-160 stop` exercise world and game exit. Restart and run
   `new-world` followed by `release-160 saved` to verify persistence and resets.
+  Flexible placement and Complete slabs retain their saved enablement on both exits.
+  `placement-lifecycle check` covers all four preference combinations, unchanged
+  unrelated values, held-mode cancellation, removed slab binding and menu Cancel/Apply.
+  `placement-lifecycle exit N` and `placement-lifecycle stop N` queue preferences
+  immediately before world exit or shutdown. After loading another world or restarting,
+  run `placement-lifecycle saved N`. Use N=0..3, bit 1 for flexible placement and
+  bit 2 for slab completion. These commands also verify other temporary tweaks clear.
   `release-160 hud-scene` displays independently styled clusters; `release-160 debug`
   toggles F3. `release-160 placement-water` and `release-160 placement-lava`
   place fluid in front of a target block; hold G to inspect the grid and preview.

@@ -49,10 +49,8 @@ public final class BuildingIndicators {
     local.luke.power.fastplace.FastPlace.interrupt();
     local.luke.power.flexible.FlexiblePlacement.interrupt();
     var next = Config.current().copy();
-    if (!next.sneak.enabled && !next.placement.enabled && !next.placement.restrictionEnabled
-        && !next.slabs.enabled && !next.flexible.enabled) return;
+    if (!next.sneak.enabled && !next.placement.enabled && !next.placement.restrictionEnabled) return;
     next.sneak.enabled = next.placement.enabled = next.placement.restrictionEnabled = false;
-    next.slabs.enabled = next.flexible.enabled = false;
     Config.preview(next);
     local.luke.power.storage.PowerConfig.saveDeferred("building", next);
   }

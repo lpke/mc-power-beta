@@ -42,11 +42,12 @@ final class Release160Checks {
         check(MenuPreferences.debugTimeOfDay() && GameplayConfig.current().lavaProofItems && GameplayConfig.current().cactusProofItems
             && Config.current().autoWalkCancelOnLostFocus, "preferences lost on restart");
         inactive(mc);
+        check(Config.current().slabs.enabled && Config.current().flexible.enabled, "placement preferences lost on restart");
         log("PASS all new settings survive restart with inactive tweaks");
       }
       case "activate" -> activate(mc);
       case "inactive" -> { inactive(mc); log("PASS all active tweaks reset"); }
-      case "exit" -> { activate(mc); mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen()); mc.setWorld(null); inactive(mc); PowerConfig.flushPending(); log("PASS world exit cleared and saved active tweaks"); }
+      case "exit" -> { activate(mc); mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen()); mc.setWorld(null); inactive(mc); PowerConfig.flushPending(); PlacementLifecycleChecks.saved(3); log("PASS world exit cleared active tweaks and preserved placement preferences"); }
       case "stop" -> { activate(mc); mc.scheduleStop(); log("PASS requested shutdown with active tweaks"); }
       case "check" -> checks(mc);
       case "hud-scene", "placement-water", "placement-lava" -> scene(mc, action);
@@ -130,7 +131,7 @@ final class Release160Checks {
     ((WorldCycles)mc.world.method_262()).power$daylightTime(6000);
   }
 
-  private static void activate(Minecraft mc) throws Exception {
+  static void activate(Minecraft mc) throws Exception {
     var settings = Config.current().copy(); settings.sneak.enabled = settings.placement.enabled = true;
     settings.placement.restrictionEnabled = settings.slabs.enabled = settings.flexible.enabled = true;
     Config.apply(settings); mc.options.cinematicMode = true;
@@ -142,9 +143,9 @@ final class Release160Checks {
     camera.getClass().getMethod("setActive", boolean.class).invoke(camera, true);
     camera.getClass().getField("allowPlayerMovement").setBoolean(camera, true);
   }
-  private static void inactive(Minecraft mc) throws Exception {
+  static void inactive(Minecraft mc) throws Exception {
     var s = Config.current();
-    check(!s.sneak.enabled && !s.placement.enabled && !s.placement.restrictionEnabled && !s.slabs.enabled && !s.flexible.enabled,
+    check(!s.sneak.enabled && !s.placement.enabled && !s.placement.restrictionEnabled,
         "persisted gameplay toggle still enabled");
     check(!AutoWalk.isWalking() && !local.luke.power.building.mining.AutoMine.active()
         && !local.luke.power.building.camera.FreeLook.active() && !mc.options.cinematicMode,
