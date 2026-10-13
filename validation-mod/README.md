@@ -15,6 +15,10 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   support physical key/mouse checks. Use `save`, restart, then `saved` for persistence.
   Run the inventory mouse checks with both `raw` and `native` helpers; `raw-delta`
   injects a device delta to check gameplay and stale input after GUI closure.
+  Check that only presses outside the GUI start looking, captured drags continue
+  across the GUI with a hidden cursor, and release restores the cursor position.
+  Check focus/screen changes and feature toggles while held; these cancel until a
+  new press. `creative` and `survival` switch the disposable player for GUI checks.
 - `audio-previous setup`, `start`, `active`, `second`, `state`, `gap`, `again`,
   `paused`, `preview`, `gap-preview`, `finish`: actual Previous controls during
   playback and natural gaps, history, previews and queue preservation. Supply

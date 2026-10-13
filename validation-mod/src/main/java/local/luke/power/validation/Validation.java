@@ -13,6 +13,7 @@ import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.opengl.GL11;
 
 public final class Validation {
+  public static int inventoryMouseX, inventoryMouseY;
   public static final java.util.concurrent.atomic.AtomicInteger backgroundChunkReads = new java.util.concurrent.atomic.AtomicInteger();
   private static final Path COMMAND = Path.of("power-beta-validation.command"),
       REPORT = Path.of("power-beta-validation.log");

@@ -13,11 +13,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class CameraLifecycleMixin {
   private void power$resetCamera() {
     FreeLook.reset((Minecraft) (Object) this);
+    local.luke.power.autowalk.InventoryLook.stop();
   }
 
   @Inject(method = "setScreen", at = @At("HEAD"))
   private void power$screen(Screen screen, CallbackInfo ci) {
     if (screen != null) power$resetCamera();
+    else local.luke.power.autowalk.InventoryLook.stop();
   }
 
   @Inject(method = "method_2115", at = @At("HEAD"))

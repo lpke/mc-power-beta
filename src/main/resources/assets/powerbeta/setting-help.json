@@ -257,7 +257,7 @@
   "tweaks.autoWalkHoldToWalk": "Tap to toggle walking. Hold beyond the threshold to walk only until you release the key.",
   "tweaks.autoWalkHoldMillis": "Hold time before releasing the auto-walk key stops walking.",
   "tweaks.inventoryWhileMoving": "Walk, strafe, jump and auto-walk with inventories open in singleplayer. Sneaking stays off for Shift-clicking. Containers close beyond interaction reach; other menus still stop movement.",
-  "tweaks.inventoryMouseLook": "Hold right-click outside the inventory panels and controls to look around. Requires movement in inventory. Uses your mouse sensitivity and invert setting; right-clicks inside the GUI keep their normal actions.",
+  "tweaks.inventoryMouseLook": "Start holding right-click outside the inventory panels and controls to look around. The cursor stays hidden and looking continues over the GUI until release. Requires movement in inventory. Uses your mouse sensitivity and invert setting; right-clicks starting inside the GUI keep their normal actions.",
   "creative.sprintToggle": "Shared by creative flight and freecam. Hold requires the sprint key; Toggle stays active until forward movement stops.",
   "creative.sprintMultiplier": "Speed multiplier while sprinting in creative flight or freecam. 200% doubles normal speed.",
   "tweaks.hotbar.swap": "Allow swapping the hotbar with an inventory row using its key bindings. Existing stacks move between slots.",

@@ -6,10 +6,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Mouse;
 
-/** Keeps the inventory cursor free; the renderer still owns sensitivity and camera rotation. */
+/** Owns one right-click drag; the renderer still owns sensitivity and camera rotation. */
 public final class InventoryLook {
-  private static Screen owner;
-  private static boolean active;
+  private static final InventoryLookDrag DRAG = new InventoryLookDrag();
+  private static boolean ownsMouse, previouslyGrabbed;
+  private static int cursorX, cursorY;
   private InventoryLook() {}
 
   public static boolean outsideGui(Minecraft mc, Screen screen, int x, int y) {
@@ -17,20 +18,37 @@ public final class InventoryLook {
         && screen instanceof InventoryGui gui && !gui.power$containsGuiSpace(x, y);
   }
 
-  public static boolean active() { return active; }
+  public static boolean active() { return DRAG.active(); }
+
+  public static boolean press(Minecraft mc, Screen screen, int x, int y) {
+    stop();
+    if (!DRAG.press(screen, mc.world, mc.player, mc.currentScreen == screen && outsideGui(mc, screen, x, y)))
+      return false;
+    cursorX = Mouse.getEventX(); cursorY = Mouse.getEventY();
+    previouslyGrabbed = Mouse.isGrabbed();
+    mc.field_2767.method_1972();
+    Mouse.setGrabbed(true);
+    ownsMouse = true;
+    return true;
+  }
+
+  public static void stop() {
+    DRAG.stop();
+    if (!ownsMouse) return;
+    ownsMouse = false;
+    if (!Mouse.isCreated()) return;
+    Mouse.setGrabbed(previouslyGrabbed);
+    if (!previouslyGrabbed && org.lwjgl.opengl.Display.isActive())
+      Mouse.setCursorPosition(cursorX, cursorY);
+    Mouse.getDX(); Mouse.getDY();
+  }
 
   public static void update(Minecraft mc) {
     Screen screen = mc.currentScreen;
-    boolean wanted = false;
-    if (screen != null && mc.displayWidth > 0 && mc.displayHeight > 0) {
-      int x = Mouse.getX() * screen.width / mc.displayWidth;
-      int y = screen.height - Mouse.getY() * screen.height / mc.displayHeight - 1;
-      wanted = Mouse.isButtonDown(1) && outsideGui(mc, screen, x, y);
-    }
-    // Discard idle movement and the first frame after a screen/gesture change.
-    if (!mc.field_2778 && screen != null && (!wanted || !active || owner != screen))
+    if (!DRAG.update(screen, mc.world, mc.player, Mouse.isButtonDown(1),
+        Config.current().inventoryMouseLook && InventoryMovement.allows(mc, screen))) stop();
+    // Idle movement and cursor restoration must not turn into camera movement.
+    if (!mc.field_2778 && screen != null && !active())
       mc.field_2767.method_1972();
-    active = wanted;
-    owner = wanted ? screen : null;
   }
 }

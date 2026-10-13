@@ -5,7 +5,7 @@
 ## [1.5.2] - 2026-10-13
 
 - Activate auto-walk while walking backwards to keep walking backwards. Forward and back still cancel it; freecam and free look remain independent.
-- Add optional camera movement in inventories. Hold right-click outside the GUI to look around when Movement in inventory is enabled. Off by default.
+- Add optional camera movement in inventories. Start holding right-click outside the GUI to look around when Movement in inventory is enabled. Keep looking across the GUI with the cursor hidden until release. Off by default.
 - Keep inventory camera movement working with Raw Input enabled, while preserving raw mouse movement during gameplay.
 - Make Previous replay the last track during a break between songs. During playback, it still goes to the track before the current one.
 

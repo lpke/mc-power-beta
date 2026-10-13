@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.ClientPlayerEntity;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(class_555.class)
@@ -24,6 +25,14 @@ public class CameraRendererMixin {
       target = "Lnet/minecraft/client/Minecraft;field_2778:Z"))
   private boolean power$inventoryLook(boolean focused) {
     return focused || local.luke.power.autowalk.InventoryLook.active();
+  }
+
+  @ModifyArgs(method = "method_1844", at = @At(value = "INVOKE",
+      target = "Lnet/minecraft/client/gui/screen/Screen;render(IIF)V"))
+  private void power$hideInventoryPointer(Args args) {
+    if (local.luke.power.autowalk.InventoryLook.active()) {
+      args.set(0, -10000); args.set(1, -10000);
+    }
   }
 
   @WrapWithCondition(

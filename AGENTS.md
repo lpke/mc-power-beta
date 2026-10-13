@@ -48,7 +48,10 @@
   text input, excludes mouse/Shift, and uses normal container closure for item cleanup.
 - Auto-walk retains the player's activation direction, independently of freecam's
   manual keys. Optional inventory looking uses native sensitivity and rotation,
-  keeps the cursor free and excludes all GUI panels, creative tabs and destroy slots.
+  checks the originating press against all GUI panels, creative tabs and destroy
+  slots. Capture and hide the pointer for that drag, including GUI hover/cursor
+  stacks, until release. Restore it on release, lost focus, screen/world changes
+  or lost eligibility; holding the button must not restart a cancelled drag.
   Right-click looking must not drop cursor items; supported screens and focus rules
   remain shared with inventory movement. Both native and raw mouse helpers must
   supply cursor deltas in GUIs; raw device deltas remain gameplay-only.

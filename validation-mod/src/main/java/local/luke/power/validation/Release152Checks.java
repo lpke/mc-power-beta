@@ -55,6 +55,8 @@ final class Release152Checks {
       out.addProperty("yaw", mc.player.yaw); out.addProperty("pitch", mc.player.pitch);
       out.addProperty("focused", org.lwjgl.opengl.Display.isActive());
       out.addProperty("grabbed", org.lwjgl.input.Mouse.isGrabbed());
+      out.addProperty("mouseX", org.lwjgl.input.Mouse.getX()); out.addProperty("mouseY", org.lwjgl.input.Mouse.getY());
+      out.addProperty("guiMouseX", inventoryMouseX); out.addProperty("guiMouseY", inventoryMouseY);
       out.addProperty("mouseHelper", mc.field_2767.getClass().getName());
       Object camera = camera(); out.addProperty("camera", MovementOwnership.cameraControlsMovement());
       Object pose = camera.getClass().getMethod("getCameraPosition").invoke(camera);
@@ -72,6 +74,9 @@ final class Release152Checks {
     }
     if (action.equals("cursor")) {
       mc.player.inventory.setCursorStack(new net.minecraft.item.ItemStack(264, 17, 0)); return;
+    }
+    if (action.equals("creative") || action.equals("survival")) {
+      CreativeVehicleChecks.mode(mc, action.equals("creative") ? "CREATIVE" : "SURVIVAL"); return;
     }
     if (action.equals("chord") || action.equals("plain")) {
       Bindings.configure(action.equals("chord") ? Map.of(((Binding)(Object)AutoWalk.KEY).power$id(), Chord.CTRL) : Map.of());
