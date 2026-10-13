@@ -30,6 +30,7 @@ extends DrawableHelper {
 
     @Inject(method={"render"}, at={@At(value="INVOKE", target="Lnet/minecraft/entity/player/ClientPlayerEntity;isInFluid(Lnet/minecraft/block/Material;)Z")})
     public void renderFoodPreview(float tickDelta, boolean screenOpen, int mouseX, int mouseY, CallbackInfo ci, @Local class_564 scaler) {
+        if (!local.luke.power.ui.HudElements.heartsVisible) return;
         Item class_1242;
         ClientPlayerEntity player = this.minecraft.player;
         ItemStack heldItem = player.inventory.getSelectedItem();
@@ -47,8 +48,8 @@ extends DrawableHelper {
         GL11.glBlendFunc((int)770, (int)771);
         GL11.glColor4d((double)1.0, (double)1.0, (double)1.0, (double)FoodPreview.pulseValue);
         for (int heart = 0; heart < 10; ++heart) {
-            int drawX = screenWidth / 2 - 91 + heart * 8;
-            int drawY = screenHeight - 32;
+            int drawX = screenWidth / 2 - 91 + heart * 8 + local.luke.power.ui.HudElements.heartsX;
+            int drawY = screenHeight - 32 + local.luke.power.ui.HudElements.heartsY;
             if (hearts <= 4) {
                 drawY += this.random.nextInt(2);
             }

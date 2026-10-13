@@ -268,3 +268,15 @@ captures, and normal gameplay rendering after capture.
   decimal eye-height rounding must never put a standing player inside the floor.
 - Main menu recordings scroll immediately for four seconds. Capture each complete
   tab in the `settings-layout.json` order; do not animate settings-only modal extras.
+
+- `release-160 check` checks tab collapse, cluster drafts and Cancel, HUD offsets,
+  F3 daylight time and dropped-item lava protection. Run on fresh defaults.
+  `release-160 save`, `release-160 exit`, `new-world`, `release-160 inactive`,
+  then `release-160 stop` exercise world and game exit. Restart and run
+  `new-world` followed by `release-160 saved` to verify persistence and resets.
+  `release-160 hud-scene` displays independently styled clusters; `release-160 debug`
+  toggles F3. `release-160 placement-water` and `release-160 placement-lava`
+  place fluid in front of a target block; hold G to inspect the grid and preview.
+  Use a muted capture output for every fixture. Physically test right-drag cursor
+  restoration with both `release-152 native` and `release-152 raw`, and test
+  auto-walk focus loss with each pause and cancel preference.

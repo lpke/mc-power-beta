@@ -24,6 +24,6 @@ public abstract class MinecraftMixin {
   @Inject(method = "setScreen", at = @At("HEAD"))
   private void stopForScreen(Screen screen, CallbackInfo ci) {
     if (screen != null) local.luke.power.building.mining.AutoMine.stop();
-    if (screen != null && !local.luke.power.autowalk.InventoryMovement.allows((Minecraft)(Object)this, screen)) AutoWalk.stop();
+    AutoWalk.screenOpened((Minecraft)(Object)this, screen);
   }
 }

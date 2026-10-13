@@ -37,9 +37,11 @@ public final class InventoryLook {
     if (!ownsMouse) return;
     ownsMouse = false;
     if (!Mouse.isCreated()) return;
+    // While grabbed, this sets LWJGL's ungrab destination. Ungrabbing then warps,
+    // polls and clears the old relative events in one operation. Warping afterwards
+    // races the first warp and can restore the last polled position instead of the press.
+    if (!previouslyGrabbed && Mouse.isGrabbed()) Mouse.setCursorPosition(cursorX, cursorY);
     Mouse.setGrabbed(previouslyGrabbed);
-    if (!previouslyGrabbed && org.lwjgl.opengl.Display.isActive())
-      Mouse.setCursorPosition(cursorX, cursorY);
     Mouse.getDX(); Mouse.getDY();
   }
 

@@ -4685,5 +4685,207 @@
     "description": "Skip redundant collision checks between dropped items and primed TNT. Keeps block and vehicle collisions, item pickup and explosion knockback. Singleplayer only.",
     "order": 0,
     "restart": false
+  },
+  "tweaks.autoWalkCancelOnLostFocus": {
+    "page": "Movement",
+    "group": "Auto-walk",
+    "label": "Cancel auto walk when game not focused",
+    "description": "Stop auto-walk when the game loses focus. Off preserves toggled walking. Pausing still pauses the world.",
+    "default": false,
+    "order": 25
+  },
+  "gameplay.lavaProofItems": {
+    "page": "Gameplay",
+    "group": "Dropped items",
+    "label": "Items don't burn in lava",
+    "description": "Protect dropped items from lava damage in singleplayer. Fire, explosions and normal item despawning stay independent.",
+    "default": false,
+    "order": 25
+  },
+  "infoHud.enabled": {
+    "order": 0
+  },
+  "infoHud.selectedCluster": {
+    "order": 1
+  },
+  "infoHud.clusters.0.enabled": {
+    "order": 10
+  },
+  "infoHud.clusters.0.coordinates": {
+    "order": 11
+  },
+  "infoHud.clusters.0.direction": {
+    "order": 12
+  },
+  "infoHud.clusters.0.biome": {
+    "order": 13
+  },
+  "infoHud.clusters.0.timeOfDay": {
+    "order": 14
+  },
+  "infoHud.clusters.0.day": {
+    "order": 15
+  },
+  "infoHud.clusters.0.chunk": {
+    "order": 16
+  },
+  "infoHud.clusters.0.fps": {
+    "order": 17
+  },
+  "infoHud.clusters.0.position": {
+    "order": 18
+  },
+  "infoHud.clusters.0.offsetX": {
+    "order": 19
+  },
+  "infoHud.clusters.0.offsetY": {
+    "order": 20
+  },
+  "infoHud.clusters.0.hideWithDebug": {
+    "order": 21
+  },
+  "infoHud.clusters.0.textSize": {
+    "order": 22
+  },
+  "infoHud.clusters.0.textColor": {
+    "order": 23
+  },
+  "infoHud.clusters.0.opacity": {
+    "order": 24
+  },
+  "infoHud.clusters.1.enabled": {
+    "order": 110
+  },
+  "infoHud.clusters.1.coordinates": {
+    "order": 111
+  },
+  "infoHud.clusters.1.direction": {
+    "order": 112
+  },
+  "infoHud.clusters.1.biome": {
+    "order": 113
+  },
+  "infoHud.clusters.1.timeOfDay": {
+    "order": 114
+  },
+  "infoHud.clusters.1.day": {
+    "order": 115
+  },
+  "infoHud.clusters.1.chunk": {
+    "order": 116
+  },
+  "infoHud.clusters.1.fps": {
+    "order": 117
+  },
+  "infoHud.clusters.1.position": {
+    "order": 118
+  },
+  "infoHud.clusters.1.offsetX": {
+    "order": 119
+  },
+  "infoHud.clusters.1.offsetY": {
+    "order": 120
+  },
+  "infoHud.clusters.1.hideWithDebug": {
+    "order": 121
+  },
+  "infoHud.clusters.1.textSize": {
+    "order": 122
+  },
+  "infoHud.clusters.1.textColor": {
+    "order": 123
+  },
+  "infoHud.clusters.1.opacity": {
+    "order": 124
+  },
+  "infoHud.clusters.2.enabled": {
+    "order": 210
+  },
+  "infoHud.clusters.2.coordinates": {
+    "order": 211
+  },
+  "infoHud.clusters.2.direction": {
+    "order": 212
+  },
+  "infoHud.clusters.2.biome": {
+    "order": 213
+  },
+  "infoHud.clusters.2.timeOfDay": {
+    "order": 214
+  },
+  "infoHud.clusters.2.day": {
+    "order": 215
+  },
+  "infoHud.clusters.2.chunk": {
+    "order": 216
+  },
+  "infoHud.clusters.2.fps": {
+    "order": 217
+  },
+  "infoHud.clusters.2.position": {
+    "order": 218
+  },
+  "infoHud.clusters.2.offsetX": {
+    "order": 219
+  },
+  "infoHud.clusters.2.offsetY": {
+    "order": 220
+  },
+  "infoHud.clusters.2.hideWithDebug": {
+    "order": 221
+  },
+  "infoHud.clusters.2.textSize": {
+    "order": 222
+  },
+  "infoHud.clusters.2.textColor": {
+    "order": 223
+  },
+  "infoHud.clusters.2.opacity": {
+    "order": 224
+  },
+  "infoHud.clusters.3.enabled": {
+    "order": 310
+  },
+  "infoHud.clusters.3.coordinates": {
+    "order": 311
+  },
+  "infoHud.clusters.3.direction": {
+    "order": 312
+  },
+  "infoHud.clusters.3.biome": {
+    "order": 313
+  },
+  "infoHud.clusters.3.timeOfDay": {
+    "order": 314
+  },
+  "infoHud.clusters.3.day": {
+    "order": 315
+  },
+  "infoHud.clusters.3.chunk": {
+    "order": 316
+  },
+  "infoHud.clusters.3.fps": {
+    "order": 317
+  },
+  "infoHud.clusters.3.position": {
+    "order": 318
+  },
+  "infoHud.clusters.3.offsetX": {
+    "order": 319
+  },
+  "infoHud.clusters.3.offsetY": {
+    "order": 320
+  },
+  "infoHud.clusters.3.hideWithDebug": {
+    "order": 321
+  },
+  "infoHud.clusters.3.textSize": {
+    "order": 322
+  },
+  "infoHud.clusters.3.textColor": {
+    "order": 323
+  },
+  "infoHud.clusters.3.opacity": {
+    "order": 324
   }
 }

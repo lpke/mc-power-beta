@@ -212,7 +212,8 @@
       "autoWalkAnnounceToggle": false,
       "freeLookAnnounceToggle": false,
       "autoMine": true,
-      "autoMineAnnounceToggle": false
+      "autoMineAnnounceToggle": false,
+      "autoWalkCancelOnLostFocus": false
     },
     "power_mechanics:config": {
       "EQUIPMENT_CONFIG": {
@@ -765,7 +766,8 @@
     "interface": {
       "blinkingChatCursor": false,
       "debugTextColor": "#FFFFFF",
-      "autoApply": true
+      "autoApply": true,
+      "debugTimeOfDay": false
     },
     "death": {
       "enabled": false,
@@ -781,7 +783,82 @@
       "tntMillis": 8,
       "leavesDropSaplingsInCreative": true,
       "flintIgnitesTnt": false,
-      "fastItemCollisions": true
+      "fastItemCollisions": true,
+      "lavaProofItems": false
+    },
+    "infoHud": {
+      "enabled": false,
+      "selectedCluster": 0,
+      "clusters": [
+        {
+          "enabled": true,
+          "position": 0,
+          "offsetX": 0,
+          "offsetY": 0,
+          "textSize": 1.0,
+          "textColor": "#FFFFFF",
+          "opacity": 100,
+          "hideWithDebug": true,
+          "coordinates": true,
+          "direction": true,
+          "biome": false,
+          "timeOfDay": false,
+          "day": false,
+          "chunk": false,
+          "fps": false
+        },
+        {
+          "enabled": true,
+          "position": 2,
+          "offsetX": 0,
+          "offsetY": 0,
+          "textSize": 1.0,
+          "textColor": "#FFFFFF",
+          "opacity": 100,
+          "hideWithDebug": true,
+          "coordinates": false,
+          "direction": false,
+          "biome": true,
+          "timeOfDay": true,
+          "day": false,
+          "chunk": false,
+          "fps": false
+        },
+        {
+          "enabled": false,
+          "position": 6,
+          "offsetX": 0,
+          "offsetY": 0,
+          "textSize": 1.0,
+          "textColor": "#FFFFFF",
+          "opacity": 100,
+          "hideWithDebug": true,
+          "coordinates": false,
+          "direction": false,
+          "biome": false,
+          "timeOfDay": false,
+          "day": false,
+          "chunk": true,
+          "fps": false
+        },
+        {
+          "enabled": false,
+          "position": 8,
+          "offsetX": 0,
+          "offsetY": 0,
+          "textSize": 1.0,
+          "textColor": "#FFFFFF",
+          "opacity": 100,
+          "hideWithDebug": true,
+          "coordinates": false,
+          "direction": false,
+          "biome": false,
+          "timeOfDay": false,
+          "day": true,
+          "chunk": false,
+          "fps": true
+        }
+      ]
     }
   }
 }

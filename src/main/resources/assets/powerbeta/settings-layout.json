@@ -45,6 +45,7 @@
   "Interface": [
     "HUD",
     "Active tweaks",
+    "Custom HUD info",
     "Chat",
     "HUD layout",
     "Combined HUD position",

@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-13
+
+- Turn off active movement, building, camera and render tweaks when leaving a world or quitting the game.
+- Add a button beside search to collapse or expand every section in the current settings view.
+- Add optional lava protection for dropped items. Off by default.
+- Draw flexible placement grids and previews clearly through water and lava.
+- Keep auto-walk active when focus is lost, with an optional setting to cancel it instead.
+- Fix HUD positioning previews, screen-edge placement, visibility and food-preview alignment. Show which positioning controls apply to each mode.
+- Add an optional 12-hour daylight clock to F3, including frozen daylight. Off by default.
+- Add four custom HUD info clusters in Interface, with independent content, anchors, offsets, text size, colour, opacity and F3 visibility. Choose coordinates, facing, biome, time, day count, chunk coordinates and frame rate.
+- Restore the inventory cursor to its exact starting position after right-click looking, with both native and raw mouse input.
+
 ## [1.5.2] - 2026-10-13
 
 - Activate auto-walk while walking backwards to keep walking backwards. Forward and back still cancel it; freecam and free look remain independent.

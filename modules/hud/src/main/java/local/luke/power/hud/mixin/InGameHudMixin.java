@@ -68,10 +68,8 @@ public abstract class InGameHudMixin extends DrawContext {
     public void powerHud_render(float tickDelta, boolean screenOpen, int mouseX, int mouseY, CallbackInfo ci) {
         ScreenScaler screenScaler = new ScreenScaler(this.minecraft.options, this.minecraft.displayWidth, this.minecraft.displayHeight);
 
-        if (  (scaledWidth != screenScaler.getScaledWidth())
-           || (scaledHeight != screenScaler.getScaledHeight())
-           || (ModHelper.configUpdated)
-           )
+        // Unified settings preview and rollback change fields without the legacy save event.
+        // This is bounded arithmetic over five elements, with no config reads or allocations.
         {
             scaledWidth = screenScaler.getScaledWidth();
             scaledHeight = screenScaler.getScaledHeight();
@@ -89,9 +87,9 @@ public abstract class InGameHudMixin extends DrawContext {
                     }
 
                     if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition) {
-                        yOffset = 22 - (scaledHeight);
+                        yOffset = 52 - scaledHeight;
                     } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition) {
-                        yOffset = 11 - (scaledHeight / 2) - (scaledHeight % 2);
+                        yOffset = (52 - scaledHeight) / 2;
                     }
 
                     xOffset += Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPositionOffset;
@@ -186,11 +184,11 @@ public abstract class InGameHudMixin extends DrawContext {
                     if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.horizontalPosition) {
                         xOffsetHearts = 91 - (scaledWidth / 2);
                     } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetHearts = -91 + (scaledWidth / 2) + (scaledWidth % 2);
+                        xOffsetHearts = 10 + (scaledWidth / 2) + (scaledWidth % 2);
                     }
 
                     if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPosition) {
-                        yOffsetHearts = 22 - (scaledHeight);
+                        yOffsetHearts = 32 - scaledHeight;
                     } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPosition) {
                         yOffsetHearts = 11 - (scaledHeight / 2) - (scaledHeight % 2);
                     }
@@ -209,13 +207,13 @@ public abstract class InGameHudMixin extends DrawContext {
 
                 if (Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.enableVisibility) {
                     if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetArmor = 91 - (scaledWidth / 2);
+                        xOffsetArmor = -(scaledWidth / 2) - 10;
                     } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.horizontalPosition) {
                         xOffsetArmor = -91 + (scaledWidth / 2) + (scaledWidth % 2);
                     }
 
                     if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.verticalPosition) {
-                        yOffsetArmor = 22 - (scaledHeight);
+                        yOffsetArmor = 32 - scaledHeight;
                     } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.verticalPosition) {
                         yOffsetArmor = 11 - (scaledHeight / 2) - (scaledHeight % 2);
                     }
@@ -236,11 +234,11 @@ public abstract class InGameHudMixin extends DrawContext {
                     if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.horizontalPosition) {
                         xOffsetOxygen = 91 - (scaledWidth / 2);
                     } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetOxygen = -91 + (scaledWidth / 2) + (scaledWidth % 2);
+                        xOffsetOxygen = 10 + (scaledWidth / 2) + (scaledWidth % 2);
                     }
 
                     if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.verticalPosition) {
-                        yOffsetOxygen = 22 - (scaledHeight);
+                        yOffsetOxygen = 41 - scaledHeight;
                     } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.verticalPosition) {
                         yOffsetOxygen = 11 - (scaledHeight / 2) - (scaledHeight % 2);
                     }
@@ -259,13 +257,13 @@ public abstract class InGameHudMixin extends DrawContext {
 
                 if (Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.enableVisibility) {
                     if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetOverlay = 91 - (scaledWidth / 2);
+                        xOffsetOverlay = minecraft.textRenderer.getWidth(overlayMessage) / 2 - scaledWidth / 2;
                     } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetOverlay = -91 + (scaledWidth / 2) + (scaledWidth % 2);
+                        xOffsetOverlay = scaledWidth - (minecraft.textRenderer.getWidth(overlayMessage) + 1) / 2 - scaledWidth / 2;
                     }
 
                     if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.verticalPosition) {
-                        yOffsetOverlay = 22 - (scaledHeight);
+                        yOffsetOverlay = 52 - scaledHeight;
                     } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.verticalPosition) {
                         yOffsetOverlay = 11 - (scaledHeight / 2) - (scaledHeight % 2);
                     }
@@ -303,6 +301,9 @@ public abstract class InGameHudMixin extends DrawContext {
             }
         }
 
+        local.luke.power.ui.HudElements.heartsX = xOffsetHearts;
+        local.luke.power.ui.HudElements.heartsY = yOffsetHearts;
+        local.luke.power.ui.HudElements.heartsVisible = heartsVisibility;
         if (Config.config.enableChatScroll) {
             int chatRangeTop = 20;
 
@@ -672,14 +673,9 @@ public abstract class InGameHudMixin extends DrawContext {
         }
     }
 
-    @WrapOperation(
-            method = "render",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lorg/lwjgl/opengl/GL11;glTranslatef(FFF)V",
-                    ordinal = 1
-            )
-    )
+    @WrapOperation(method = "render", at = @At(value = "INVOKE",
+            target = "Lorg/lwjgl/opengl/GL11;glTranslatef(FFF)V", ordinal = 0),
+            slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/InGameHud;overlayRemaining:I")))
     public void powerHud_overlayMesssagePosition(float x, float y, float z, Operation<Void> original) {
         x += xOffsetOverlay;
         y += yOffsetOverlay;

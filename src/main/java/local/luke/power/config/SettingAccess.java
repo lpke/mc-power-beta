@@ -38,6 +38,16 @@ public final class SettingAccess {
   }
 
   public static String reason(ConfigSession session, Setting setting) {
+    if (setting.id.startsWith("power_hud:hudpositions.")
+        && !setting.id.endsWith("hudPositioningSystem")) {
+      int mode = session.settings().stream().filter(s -> s.id.equals("power_hud:hudpositions.hudPositioningSystem"))
+          .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(1);
+      if (mode == 0) return "Choose Combined or Separate in HUD positioning to customise the HUD.";
+      if (setting.id.contains(".SIMPLE_HUD_POSITION_CONFIG.") && mode != 1)
+        return "Choose Combined in HUD positioning to move the whole HUD together.";
+      if (setting.id.contains(".ADVANCED_HUD_POSITIONS_CONFIG.") && mode != 2)
+        return "Choose Separate in HUD positioning to move this element.";
+    }
     if (setting.id.equals("audio.musicMode") || setting.id.equals("audio.customMusic")) {
       Setting preset = session.settings().stream().filter(s -> s.id.equals("audio.preset")).findFirst().orElse(null);
       if (preset != null && !preset.value.getAsString().isEmpty()) return "Using the selected World music preset. Choose None to use these settings.";

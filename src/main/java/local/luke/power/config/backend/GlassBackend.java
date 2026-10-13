@@ -53,6 +53,8 @@ public final class GlassBackend implements Backend {
                   .map(Catalog::words)
                   .toList()
               : List.of();
+      if (key.equals("power_hud:hudpositions.hudPositioningSystem"))
+        choices = List.of("Vanilla", "Combined", "Separate");
       Setting.Kind kind =
           type.isEnum()
               ? Setting.Kind.CHOICE
@@ -127,7 +129,7 @@ public final class GlassBackend implements Backend {
   public boolean previewsAutomatically(Setting s) { return !s.restart; }
 
   public boolean previews(Setting s) {
-    return !s.restart && (s.page.equals("Audio") || s.page.equals("Video")
+    return !s.restart && (s.page.equals("Audio") || s.page.equals("Video") || s.id.startsWith("power_hud:hudpositions.")
         || s.id.equals("entityculling:config.showF3Info") || s.id.equals("entityculling:config.f3InfoYOffset")
         || s.id.equals("power_controls:userinterface.frontViewThirdPerson"));
   }

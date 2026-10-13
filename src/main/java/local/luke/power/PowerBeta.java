@@ -18,8 +18,14 @@ public final class PowerBeta {
     local.luke.power.audio.AudioController.tick(mc);
     local.luke.power.light.LightOverlay.tick(mc);
     local.luke.power.render.RenderControls.tick(mc);
+    local.luke.power.hud.InfoHud.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.input.TweakLifecycle.register("interface", () -> {
+        mc.options.cinematicMode = false;
+        local.luke.power.render.RenderControls.reset(mc);
+        if (local.luke.power.light.LightConfig.current().enabled) local.luke.power.light.LightConfig.toggle();
+      });
       local.luke.power.death.DeathCommands.register();
       local.luke.power.input.TweakIndicators.register(
           local.luke.power.input.TweakIndicators.Tweak.CINEMATIC_CAMERA,

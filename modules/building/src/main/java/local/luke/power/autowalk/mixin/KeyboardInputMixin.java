@@ -53,7 +53,7 @@ public abstract class KeyboardInputMixin extends class_41 {
 
   @Inject(method = "method_1942", at = @At("TAIL"))
   private void applyAutoWalk(PlayerEntity player, CallbackInfo ci) {
-    if (AutoWalk.isWalking() && !local.luke.power.input.MovementOwnership.cameraControlsMovement()) {
+    if (AutoWalk.suppliesMovement() && !local.luke.power.input.MovementOwnership.cameraControlsMovement()) {
       field_2533 = AutoWalk.movementInput(field_2533, field_1661[0], field_1661[1], field_2536);
     }
   }

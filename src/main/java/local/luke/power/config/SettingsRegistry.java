@@ -13,6 +13,7 @@ public final class SettingsRegistry {
     LightBackend.register(s);
     InterfaceBackend.register(s);
     StatusBackend.register(s);
+    InfoHudBackend.register(s);
     ComponentBackend.register(s);
     GlassBackend.register(s);
     LogoBackend.register(s);

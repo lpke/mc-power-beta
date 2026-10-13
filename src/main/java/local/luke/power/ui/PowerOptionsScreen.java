@@ -104,6 +104,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private int selected = -1, hoverTicks, musicRevision = -1;
   private String lastHover = "";
   private List<Row> rows = List.of();
+  private List<String> sectionKeys = List.of();
 
   public PowerOptionsScreen(Screen parent) { this(parent, false); }
 
@@ -220,7 +221,20 @@ public final class PowerOptionsScreen extends UiScreen {
     return controlLeft(row) + (soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
   }
   private boolean canClear() { return libraryVisible() ? library.hasQuery() : !search.text().isBlank() || filtered(); }
-  private int searchWidth() { return right() - (canClear() ? 36 : 14) - searchLeft(); }
+  private int sectionButtonX() { return right() - 32; }
+  private int clearSearchX() { return sectionButtonX() - 22; }
+  private int searchWidth() { return (canClear() ? clearSearchX() : sectionButtonX()) - 4 - searchLeft(); }
+  private String sectionKey(String group) {
+    return !search.text().isBlank() || changedOnly ? "filtered/" + group.replace(" / ", "/") : page + "/" + group;
+  }
+  private List<String> sections() {
+    return sectionKeys;
+  }
+  private void toggleSections() {
+    SectionCollapse.toggleAll(sections(), collapsed);
+    selected = -1;
+    layout();
+  }
   private int searchLeft() { return left() + (history.isEmpty() && !libraryVisible() ? 0 : 48); }
   private void pushView() {
     if (history.size() == 32) history.removeLast();
@@ -335,7 +349,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void groupHeading(Row row, int y) {
-    text((collapsed.contains(page + "/" + row.group) && search.text().isBlank() ? "> " : "v ")
+    text((collapsed.contains(sectionKey(row.group)) ? "> " : "v ")
         + row.group, left(), y + 8, 0xffffff);
     fill(left(), y + 21, right() - 14, y + 22, 0x50555555);
   }
@@ -352,6 +366,8 @@ public final class PowerOptionsScreen extends UiScreen {
     if (capture != null && !SettingAccess.visible(session, capture)) { capture = null; captureModifier = 0; }
     if (dragging != null && !SettingAccess.visible(session, dragging)) dragging = null;
     String query = search.text().strip().toLowerCase(Locale.ROOT);
+    int cluster = session.settings().stream().filter(s -> s.id.equals("infoHud.selectedCluster"))
+        .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(0);
     Map<String, List<Setting>> groups = new LinkedHashMap<>();
     List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
     List<Setting> candidates = listed.isEmpty() ? SettingsLayout.ordered(session.settings()) : listed.stream()
@@ -364,6 +380,8 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     for (Setting s : candidates) {
       if (!SettingAccess.visible(session, s)) continue;
+      if (query.isEmpty() && !changedOnly && listed.isEmpty()
+          && !local.luke.power.config.backend.InfoHudBackend.selected(s, cluster)) continue;
       if (s.group.equals("Music data")) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty() && (s.group.equals("Track rotation") || s.id.startsWith("audio.sound.music:"))) continue;
       if (listed.isEmpty() && s.kind == Setting.Kind.KEY && !showDisabled && !ControlLinks.enabled(session, s)) continue;
@@ -377,7 +395,7 @@ public final class PowerOptionsScreen extends UiScreen {
     for (var group : groups.entrySet()) {
       boolean flat = !listed.isEmpty();
       if (!flat) { next.add(new Row(group.getKey(), null, y, 24)); y += 24; }
-      if (!flat && query.isEmpty() && !changedOnly && collapsed.contains(page + "/" + group.getKey())) continue;
+      if (!flat && collapsed.contains(sectionKey(group.getKey()))) continue;
       for (Setting s : group.getValue()) {
         next.add(new Row(group.getKey(), s, y, rowHeight));
         y += rowHeight;
@@ -385,6 +403,7 @@ public final class PowerOptionsScreen extends UiScreen {
       y += 6;
     }
     rows = next;
+    sectionKeys = rows.stream().filter(r -> r.setting == null).map(r -> sectionKey(r.group)).toList();
     scroll = Math.max(0, Math.min(scroll, Math.max(0, y - (bottom() - top()))));
     sideScroll =
         Math.max(0, Math.min(sideScroll, Math.max(0, pages.size() * 22 - (bottom() - 24))));
@@ -421,7 +440,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (dragging == null && !continuous) save(false, false);
       else autoSavePending = true;
     }
-    if (changedOnly || settings.stream().anyMatch(s -> s.id.equals("world.cheats"))) layout();
+    if (changedOnly || settings.stream().anyMatch(s -> s.id.equals("world.cheats") || s.id.equals("infoHud.selectedCluster"))) layout();
   }
 
   private int controlLeft(Row row) {
@@ -489,7 +508,10 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (canClear() && inside(x, y, right() - 32, 27, 18, 20)) {
+    if (button == 0 && !libraryVisible() && inside(x, y, sectionButtonX(), 27, 18, 18)) {
+      click(); toggleSections(); return;
+    }
+    if (canClear() && inside(x, y, clearSearchX(), 27, 18, 20)) {
       click();
       if (libraryVisible()) { library.clearQuery(); return; }
       if (!history.isEmpty() && (!conflictIds.isEmpty() || !relatedIds.isEmpty())) { back(); return; }
@@ -575,8 +597,9 @@ public final class PowerOptionsScreen extends UiScreen {
         if (y < ry || y >= ry + r.height) continue;
         if (r.setting == null) {
           if (button == 0 && (!search.text().isBlank() || changedOnly)) {
-            // Every search header is followed by at least one setting in its section.
-            if (i + 1 < rows.size() && rows.get(i + 1).setting != null) {
+            if (collapsed.remove(sectionKey(r.group))) {
+              click(); layout();
+            } else if (i + 1 < rows.size() && rows.get(i + 1).setting != null) {
               click();
               openGroup(rows.get(i + 1).setting);
             }
@@ -942,7 +965,10 @@ public final class PowerOptionsScreen extends UiScreen {
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
         !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls for \"" + relatedLabel + "\"" : "Related settings"
         : changedOnly ? "Search changed settings..." : "Search all settings...");
-    if (canClear()) button("x", right() - 32, 27, 18, 20, mx, my, true);
+    if (canClear()) button("x", clearSearchX(), 27, 18, 20, mx, my, true);
+    boolean expandSections = SectionCollapse.allCollapsed(sections(), collapsed);
+    iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 18, mx, my,
+        !libraryVisible() && !sections().isEmpty());
     if (musicControlsVisible()) {
       for (var item : musicButtons()) {
         if (item.action() == AudioToolbar.Action.PREVIOUS || item.action() == AudioToolbar.Action.NEXT)
@@ -1064,6 +1090,10 @@ public final class PowerOptionsScreen extends UiScreen {
       hoverId = "apply";
     }
     button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
+    if (!libraryVisible() && inside(mx, my, sectionButtonX(), 27, 18, 18)) {
+      tip = expandSections ? "Expand all sections" : "Collapse all sections";
+      hoverId = "sections";
+    }
     if (!hoverId.equals(lastHover)) {
       lastHover = hoverId;
       hoverTicks = 0;

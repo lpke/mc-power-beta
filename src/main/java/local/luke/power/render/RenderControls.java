@@ -57,6 +57,13 @@ public final class RenderControls {
     if (mc.world != null && mc.worldRenderer != null) mc.worldRenderer.method_1537();
   }
   public static boolean fullBright() { return active; }
+  public static void reset(Minecraft mc) {
+    brightness.update(null, false, false, false);
+    refresh(mc);
+    if (VisualConfig.current().hideEntities) {
+      var settings = VisualConfig.copy(); settings.hideEntities = false; VisualConfig.queue(settings);
+    }
+  }
   public static boolean renderingFullBright() { return active && renderDepth > 0 && Thread.currentThread() == renderThread; }
   public static void beginRender() { if (renderDepth == 0) renderThread = Thread.currentThread(); renderDepth++; }
   public static void endRender() { renderDepth--; }

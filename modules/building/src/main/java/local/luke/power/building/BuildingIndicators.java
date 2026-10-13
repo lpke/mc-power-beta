@@ -16,6 +16,7 @@ public final class BuildingIndicators {
   public static void register(Minecraft mc) {
     if (client == mc) return;
     client = mc;
+    local.luke.power.input.TweakLifecycle.register("building", () -> reset(mc));
     add(FAKE_SNEAK, () -> Config.current().sneak.enabled ? "" : null,
         () -> Config.current().sneak.announceToggle);
     add(FAST_PLACEMENT, () -> Config.current().placement.enabled ? "" : null,
@@ -38,5 +39,21 @@ public final class BuildingIndicators {
   private static void add(TweakIndicators.Tweak tweak, Supplier<String> value, BooleanSupplier announce) {
     TweakIndicators.register(tweak, () -> client.world != null && !client.world.isRemote
         ? value.get() : null, announce);
+  }
+
+  private static void reset(Minecraft mc) {
+    AutoWalk.stop();
+    local.luke.power.building.mining.AutoMine.stop();
+    FreeLook.reset(mc);
+    local.luke.power.autowalk.InventoryLook.stop();
+    local.luke.power.fastplace.FastPlace.interrupt();
+    local.luke.power.flexible.FlexiblePlacement.interrupt();
+    var next = Config.current().copy();
+    if (!next.sneak.enabled && !next.placement.enabled && !next.placement.restrictionEnabled
+        && !next.slabs.enabled && !next.flexible.enabled) return;
+    next.sneak.enabled = next.placement.enabled = next.placement.restrictionEnabled = false;
+    next.slabs.enabled = next.flexible.enabled = false;
+    Config.preview(next);
+    local.luke.power.storage.PowerConfig.saveDeferred("building", next);
   }
 }

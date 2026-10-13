@@ -211,3 +211,12 @@
 - Merge sweeps use terrain render distance for their threshold, resume within a
   tick budget and back off when idle. Revalidate native item data between batches
   and exclude removed entities. TNT interpolation changes render coordinates only.
+
+- Leaving a world or quitting clears active tweaks through `TweakLifecycle`; preserve
+  feature preferences, bindings and saved user data. Queue changed toggle snapshots.
+  Auto-walk survives focus loss by default, including the automatic pause screen.
+- Inventory looking restores the originating cursor position inside the native
+  grab transition. Test native and raw input; avoid a second post-release warp.
+- Custom HUD clusters keep stable IDs and independent content, anchors, offsets,
+  colour, size, opacity and F3 visibility. Sample world data on ticks and use the
+  daylight clock. Native HUD previews and Cancel update positions immediately.

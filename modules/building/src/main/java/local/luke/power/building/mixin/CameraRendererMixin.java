@@ -15,6 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class CameraRendererMixin {
   @Shadow private Minecraft field_2349;
 
+  @com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation(method = "method_1844",
+      at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;method_2135()V"))
+  private void power$focusPause(Minecraft mc, com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
+    local.luke.power.autowalk.AutoWalk.focusPause(mc, () -> original.call(mc));
+  }
+
   @Inject(method = "method_1844", at = @At("HEAD"))
   private void power$frame(float delta, CallbackInfo ci) {
     FreeLook.update(field_2349);

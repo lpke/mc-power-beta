@@ -27,9 +27,13 @@ public final class InventoryMovement {
   }
 
   public static boolean allows(Minecraft mc, Screen screen) {
+    return eligible(mc, screen) && Display.isActive();
+  }
+
+  public static boolean eligible(Minecraft mc, Screen screen) {
     return supports(screen) && mc.world != null && !mc.world.isRemote && mc.player != null
         && mc.player.world == mc.world && mc.player.health > 0 && !mc.player.dead
-        && !mc.player.method_943() && Display.isActive();
+        && !mc.player.method_943();
   }
 
   public static void closeOutOfReach(Minecraft mc) {

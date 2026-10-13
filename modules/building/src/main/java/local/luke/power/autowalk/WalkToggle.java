@@ -38,6 +38,12 @@ public final class WalkToggle {
     return active;
   }
 
+  public void unfocused() {
+    holdEligible = false;
+    longHold = false;
+    keyWasDown = true;
+  }
+
   public float input() { return active ? direction : 0; }
 
   public float movementInput(float vanillaInput, boolean forwardHeld, boolean backHeld, boolean sneaking) {

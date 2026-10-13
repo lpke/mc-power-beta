@@ -5,6 +5,17 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class WalkToggleTest {
+  @Test void focusLossPreservesDirectionAndDoesNotTreatReleasedKeysAsHoldCancellation() {
+    WalkToggle t = new WalkToggle();
+    t.update(true, true, true, 0, 350, true);
+    t.unfocused();
+    t.update(true, true, true, 1_000_000_000L, 350, false);
+    assertEquals(-1, t.input());
+    t.update(false, true, true, 2_000_000_000L, 350, false);
+    assertEquals(-1, t.input());
+    t.update(true, true, true, 3_000_000_000L, 350, false);
+    assertFalse(t.isActive());
+  }
   @Test void backwardsDirectionLatchesUntilStoppedAndPreservesManualAndSneakInput() {
     WalkToggle t = new WalkToggle();
     t.update(true, true, false, 0, 350, true);

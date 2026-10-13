@@ -26,7 +26,7 @@ public abstract class CreativeHudMixin extends DrawableHelper {
       int height,
       com.llamalad7.mixinextras.injector.wrapoperation.Operation<Void> original) {
     if (Modes.spectator(minecraft.player)
-        && (height == 22 && (width == 182 || width == 24) || width == 16 && height == 16)) return;
+        && ((height == 22 || height == 24) && (width == 182 || width == 24) || width == 16 && height == 16)) return;
     original.call(hud, x, y, u, v, width, height);
   }
 
