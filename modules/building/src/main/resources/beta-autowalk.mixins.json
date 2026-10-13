@@ -9,6 +9,7 @@
     "ContainerGuiMixin",
     "ButtonGuiAccessor",
     "InventoryLookScreenMixin",
+    "InventoryLookMouseMixin",
     "SlotInventoryAccessor",
     "DoubleInventoryAccessor",
     "CraftingPosition"

@@ -51,11 +51,13 @@ final class Release152Checks {
       JsonObject out = new JsonObject();
       out.addProperty("walking", AutoWalk.isWalking()); out.addProperty("direction", AutoWalk.input());
       out.addProperty("forward", mc.player.field_161.field_2533);
+      out.addProperty("x", mc.player.x); out.addProperty("y", mc.player.y); out.addProperty("z", mc.player.z);
       out.addProperty("looking", InventoryLook.active()); out.addProperty("freeLook", FreeLook.active());
       out.addProperty("yaw", mc.player.yaw); out.addProperty("pitch", mc.player.pitch);
       out.addProperty("focused", org.lwjgl.opengl.Display.isActive());
       out.addProperty("grabbed", org.lwjgl.input.Mouse.isGrabbed());
       out.addProperty("mouseX", org.lwjgl.input.Mouse.getX()); out.addProperty("mouseY", org.lwjgl.input.Mouse.getY());
+      out.addProperty("displayWidth", mc.displayWidth); out.addProperty("displayHeight", mc.displayHeight);
       out.addProperty("guiMouseX", inventoryMouseX); out.addProperty("guiMouseY", inventoryMouseY);
       out.addProperty("mouseHelper", mc.field_2767.getClass().getName());
       Object camera = camera(); out.addProperty("camera", MovementOwnership.cameraControlsMovement());
@@ -74,6 +76,24 @@ final class Release152Checks {
     }
     if (action.equals("cursor")) {
       mc.player.inventory.setCursorStack(new net.minecraft.item.ItemStack(264, 17, 0)); return;
+    }
+    if (action.equals("click-target")) {
+      var stack = new net.minecraft.item.ItemStack(264, 17, 3);
+      mc.player.inventory.main[0] = stack; mc.setScreen(new class_585(mc.player));
+      var screen = (net.minecraft.client.gui.screen.container.ContainerScreen)mc.currentScreen;
+      var slot = (net.minecraft.screen.slot.Slot)screen.container.slots.stream()
+          .filter(s -> ((net.minecraft.screen.slot.Slot)s).getStack() == stack).findFirst().orElseThrow();
+      JsonObject target = new JsonObject();
+      target.addProperty("x", ((screen.width-176)/2 + slot.x+8) * mc.displayWidth / screen.width);
+      target.addProperty("y", ((screen.height-166)/2 + slot.y+8) * mc.displayHeight / screen.height);
+      Files.writeString(Path.of("power-beta-click-target.json"), target.toString());
+      mc.player.inventory.main[0] = null; mc.player.inventory.setCursorStack(stack); return;
+    }
+    if (action.equals("click-check")) {
+      var stack = mc.player.inventory.main[0];
+      check(mc.player.inventory.getCursorStack() == null && stack != null && stack.itemId == 264
+          && stack.count == 17 && stack.getDamage() == 3, "post-drag click missed slot or changed stack");
+      log("PASS post-drag click targets restored coordinates and preserves the stack"); return;
     }
     if (action.equals("creative") || action.equals("survival")) {
       CreativeVehicleChecks.mode(mc, action.equals("creative") ? "CREATIVE" : "SURVIVAL"); return;

@@ -217,8 +217,18 @@
 - Leaving a world or quitting clears active tweaks through `TweakLifecycle`; preserve
   feature preferences, bindings and saved user data. Queue changed toggle snapshots.
   Auto-walk survives focus loss by default, including the automatic pause screen.
+  In supported inventories, retain actual auto-walk movement while unfocused;
+  only manual movement keys require focus. Test player displacement, not just the toggle.
 - Inventory looking restores the originating cursor position inside the native
   grab transition. Test native and raw input; avoid a second post-release warp.
+  Dispatch complete mouse batches before changing capture, preserve every drag's
+  deltas and remap later clicks to the restored cursor. Test consecutive fast drags
+  and movement immediately after release. Linux capture must retain the event
+  baseline, since XQueryPointer can be ahead of queued motion and button events.
+  Complete quick drags also need a hidden native cursor transition on Xwayland;
+  verify another real pointer movement after release, not only LWJGL's cached position.
+- Reject incomplete skin-provider responses so the next provider can supply the
+  texture. Keep bundled fallback skin paths out of the HTTP downloader.
 - Custom HUD clusters keep stable IDs and independent content, anchors, offsets,
   colour, size, opacity and F3 visibility. Sample world data on ticks and use the
   daylight clock. Native HUD previews and Cancel update positions immediately.

@@ -21,6 +21,8 @@ dependencies {
     mappings 'babric:barn:b1.7.3+build.8:v2'
     modImplementation 'babric:fabric-loader:0.15.6-babric.2'
     modCompileOnly files('vendor/jars/GlassConfigAPI-3.2.5.jar', 'source-build/build/power_controls/libs/power_controls-0.31.0+powerbeta.1.jar')
+    // Compatibility mixins only reference its unmapped profile API, not Minecraft types.
+    compileOnly files('vendor/jars/retroauth-1.3.1+mcb1.7.3-babric.jar')
     modCompileOnly fileTree('build/platform-compile') { include '*.jar' }
     compileOnly 'com.google.code.gson:gson:2.8.9'
     compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'

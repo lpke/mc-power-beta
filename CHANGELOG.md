@@ -18,6 +18,9 @@
 - Add an unbound hotkey for toggling all custom HUD clusters together while preserving their individual settings and F3 visibility.
 - Show HUD coordinates as comma-separated values, with the facing axis and compass direction alongside them when enabled.
 - Keep background movement-key events and focus transitions from cancelling auto-walk when focus-loss cancellation is off.
+- Keep auto-walk moving while an inventory is open and the game loses focus.
+- Preserve cursor position and camera movement through consecutive fast inventory drags, including movement immediately after release.
+- Restore custom skins when the first skin provider returns an incomplete profile, and prevent bundled fallback skins from crashing the texture downloader.
 
 ## [1.5.2] - 2026-10-13
 

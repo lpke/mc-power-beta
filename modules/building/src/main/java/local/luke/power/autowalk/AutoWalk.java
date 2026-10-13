@@ -99,7 +99,8 @@ public final class AutoWalk {
   }
 
   public static boolean suppliesMovement() {
-    return isWalking() && (client.currentScreen == null || InventoryMovement.allows(client, client.currentScreen));
+    // Focus gates manual inventory keys, not the direction retained by auto-walk.
+    return isWalking() && (client.currentScreen == null || InventoryMovement.eligible(client, client.currentScreen));
   }
 
   public static float input() { return suppliesMovement() ? TOGGLE.input() : 0; }

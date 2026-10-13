@@ -29,6 +29,8 @@
     "KeyboardNamesMixin",
     "MouseBindingMixin",
     "TextureResourceMixin",
+    "SkinProfileFallbackMixin",
+    "SkinDownloadMixin",
     "PackSelectionMixin",
     "CameraDistanceMixin",
     "CreateWorldMixin",

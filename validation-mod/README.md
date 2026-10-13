@@ -286,3 +286,26 @@ captures, and normal gameplay rendering after capture.
   `hud-mouse` bind the HUD toggle to H, Ctrl+H and middle mouse; `hud-state` records
   visibility, cluster settings and text. Test both chord release orders, key repeat,
   menus, focus loss, F1 and F3. `hud-toggle-check` verifies queued saves and Cancel.
+
+- On an isolated Xvfb display with a muted validation clone and a world open, run
+  `python3 validation-mod/tools/input_regressions.py /path/to/clone/.minecraft --display :95`.
+  It checks 420 consecutive fast drags in native/raw modes, 60 gestures with motion
+  immediately after release, both OS and game cursor positions, camera deltas,
+  and actual auto-walk displacement through inventory focus loss. It changes
+  disposable settings and terrain. The script refuses the desktop display and
+  the normal Prism instance directory.
+- Also test KDE/Xwayland using `tools/wayland_drags.py` and `tools/wayland_input.c`.
+  Generate `fake-input.h` and `fake-input.c` with `wayland-scanner` from Plasma's
+  `fake-input.xml`, then compile the helper with `wayland-client` and `libm`.
+  Start a separate KWin with a private D-Bus session, config/data directories and
+  runtime directory under `/tmp`, a virtual output, and Xwayland. Set
+  `KWIN_WAYLAND_NO_PERMISSION_CHECKS=1` only for that disposable compositor to
+  expose its test input protocol. Never set it in the user's session.
+  Launch the muted clone there and open a disposable world, then pass its game
+  directory, `--runtime-dir`, `--socket` and `--input-helper` to the script.
+  It injects compositor input and checks another pointer movement after release;
+  XTest inside Xwayland and cached LWJGL coordinates alone can miss failed warps.
+- `skin NAME` looks up a public skin profile and assigns it to the disposable
+  player. Wait for the download, then `skin check` verifies decoded pixels and
+  the uploaded GPU texture. `skin default` checks that a bundled fallback does
+  not start an HTTP download. No authentication tokens are needed.
