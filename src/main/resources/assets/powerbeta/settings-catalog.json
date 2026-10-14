@@ -5023,5 +5023,14 @@
     "label": "Block outlines in spectator",
     "description": "Show the target block outline in spectator mode. Does not affect outlines in other game modes.",
     "order": 9
+  },
+  "visual.removeUnderwaterOverlay": {
+    "page": "Video",
+    "group": "Textures",
+    "label": "Remove underwater overlay",
+    "description": "Hide the underwater texture overlay. Full bright also hides it while active, without changing this preference. Water surfaces and fog are unchanged.",
+    "default": false,
+    "restart": false,
+    "order": 6
   }
 }

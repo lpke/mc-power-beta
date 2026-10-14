@@ -107,7 +107,9 @@
     "VeinProgressMixin",
     "VeinDurabilityMixin",
     "LavaIgnitionMixin",
-    "SpectatorOutlineMixin"
+    "SpectatorOutlineMixin",
+    "SpectatorSplashMixin",
+    "UnderwaterOverlayMixin"
   ],
   "injectors": {
     "defaultRequire": 1

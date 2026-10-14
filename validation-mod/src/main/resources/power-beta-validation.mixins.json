@@ -25,7 +25,11 @@
     "EntityRenderCapture",
     "BlockEntityRenderCapture",
     "Performance151Capture",
-    "Render151Capture"
+    "Render151Capture",
+    "Water173Capture",
+    "Overlay173Capture",
+    "Tooltip173Capture",
+    "Item173Capture"
   ],
   "injectors": {
     "defaultRequire": 1

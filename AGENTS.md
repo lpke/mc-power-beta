@@ -289,3 +289,7 @@
 
 - Signs use native editing, rendering and text storage; shared text-input widgets do not
   own sign lines. Preserve Escape/Done saving and optional reopening of existing signs.
+
+- Block-rule and item-picker exits confirm unsaved drafts, including nested tool selections.
+  Modal input must not reach the editor behind it. Underwater overlay overrides affect
+  only rendering; full bright temporarily hides that texture without changing its preference.

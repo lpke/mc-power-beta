@@ -311,13 +311,30 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     fill(left + 2, bottom - 3, x + 4, bottom - 1, 0xFF555555);
     local.luke.power.creative.ui.Texture.draw(
         minecraft, "inventory", x - 18, y + 141, 18, 18, 172, 111, 18, 18, 256, 256);
+  }
+
+  @Inject(method = "render", at = @At("TAIL"))
+  private void power$survivalViewTooltip(int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    if (creative_normalGUI) creative_destroyTooltip();
+  }
+
+  @Unique
+  private void creative_destroyTooltip() {
+    if (!creative_isInCreative() || !local.luke.power.creative.config.Config.current().destroySlot) return;
+    int x = (width - containerWidth) / 2, y = (height - containerHeight) / 2;
     if (local.luke.power.creative.config.Config.current().shiftClearsInventory
         && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
         && mouseX >= x - 18
         && mouseX < x
         && mouseY >= y + 141
         && mouseY < y + 159) {
-      creative_renderString("Clear inventory");
+      // Tooltips draw after native slots and the cursor stack, restoring the caller's GL state.
+      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT);
+      try {
+        GL11.glDisable(GL11.GL_LIGHTING);
+        GL11.glColor4f(1, 1, 1, 1);
+        creative_renderString("Clear inventory");
+      } finally { GL11.glPopAttrib(); }
     }
   }
 
@@ -459,6 +476,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
 
       this.mouseX = (float) mouseX;
       this.mouseY = (float) mouseY;
+      creative_destroyTooltip();
       info.cancel();
     }
   }

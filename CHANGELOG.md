@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.7.3] - 2026-10-15
+
+- Silence water-entry splashes in spectator mode.
+- Add an option to remove the underwater texture overlay, and hide it automatically while full bright is active.
+- Warn before discarding unsaved block rules and item or tool selections.
+- Draw the creative Clear inventory tooltip above inventory items.
+
 ## [1.7.2] - 2026-10-15
 
 - Hide target block outlines in spectator by default, with an option to show them.

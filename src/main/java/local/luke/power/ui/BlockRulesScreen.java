@@ -12,6 +12,8 @@ public final class BlockRulesScreen extends UiScreen {
   private final Setting setting;
   private final boolean vein;
   private JsonObject draft;
+  private final JsonObject original;
+  private final DraftExitPrompt exitPrompt = new DraftExitPrompt();
   private final ScrollBar scrollbar=new ScrollBar();
   private final ItemIcons icons=new ItemIcons();
   private final Map<String,ItemCatalogue.Entry> blocks=new HashMap<>();
@@ -20,7 +22,7 @@ public final class BlockRulesScreen extends UiScreen {
   private String error="";
 
   public BlockRulesScreen(PowerOptionsScreen parent,Setting setting,boolean vein){
-    this.parent=parent;this.setting=setting;this.vein=vein;draft=setting.value.getAsJsonObject().deepCopy();refresh();
+    this.parent=parent;this.setting=setting;this.vein=vein;draft=setting.value.getAsJsonObject().deepCopy();original=draft.deepCopy();refresh();
   }
   private int span(){return Math.min(520,width-24);}
   private int left(){return (width-span())/2;}
@@ -83,12 +85,17 @@ public final class BlockRulesScreen extends UiScreen {
     try{setting.validate(draft);setting.value=draft.deepCopy();parent.changed(setting);minecraft.setScreen(parent);}
     catch(IllegalArgumentException e){error=Objects.toString(e.getMessage(),"Invalid rule");}
   }
+  private void leave(){
+    scrollbar.release();exitPrompt.leave(!draft.equals(original),()->minecraft.setScreen(parent));
+  }
   protected void keyPressed(char c,int key){
-    if(key==Keyboard.KEY_ESCAPE)minecraft.setScreen(parent);
+    if(exitPrompt.key(key))return;
+    if(key==Keyboard.KEY_ESCAPE)leave();
     else if(key==Keyboard.KEY_RETURN || key==Keyboard.KEY_NUMPADENTER)save();
   }
-  public void onMouseEvent(){super.onMouseEvent();int wheel=Mouse.getEventDWheel();if(wheel!=0)scroll=(int)Math.max(0,Math.min(track().maximum(),scroll-Math.signum(wheel)*26));}
+  public void onMouseEvent(){super.onMouseEvent();int wheel=Mouse.getEventDWheel();if(!exitPrompt.active() && wheel!=0)scroll=(int)Math.max(0,Math.min(track().maximum(),scroll-Math.signum(wheel)*26));}
   protected void mouseClicked(int x,int y,int button){
+    if(exitPrompt.click(this,x,y,button,this::save,()->minecraft.setScreen(parent)))return;
     if(button!=0)return;
     if(scrollbar.press(track(),x,y)){scroll=(int)scrollbar.drag(track(),y,true);return;}
     if(inside(x,y,left(),62,span()-10,Math.max(0,bottom()-62))){
@@ -102,10 +109,12 @@ public final class BlockRulesScreen extends UiScreen {
     if(inside(x,y,left(),height-30,86,20))add();
     else if(inside(x,y,left()+90,height-30,58,20)){draft=setting.defaultValue.getAsJsonObject().deepCopy();refresh();scroll=0;}
     else if(inside(x,y,right()-140,height-30,68,20))save();
-    else if(inside(x,y,right()-68,height-30,68,20))minecraft.setScreen(parent);
+    else if(inside(x,y,right()-68,height-30,68,20))leave();
   }
   public void render(int mx,int my,float delta){
-    scroll=(int)Math.max(0,Math.min(track().maximum(),scrollbar.drag(track(),my,Mouse.isButtonDown(0))));
+    int pointerX=mx,pointerY=my;
+    if(exitPrompt.active()){mx=-1;my=-1;}
+    scroll=(int)Math.max(0,Math.min(track().maximum(),scrollbar.drag(track(),my,!exitPrompt.active() && Mouse.isButtonDown(0))));
     renderBackground();drawCenteredTextWithShadow(textRenderer,setting.label,width/2,16,0xffffff);
     text(fit(vein?"Choose blocks, then their required tools.":"Choose a block for each title character.",span()),left(),38,0xaaaaaa);
     clip(left(),62,span()-8,Math.max(0,bottom()-62));String tip="";List<String> keys=keys();
@@ -132,6 +141,7 @@ public final class BlockRulesScreen extends UiScreen {
     button("Defaults",left()+90,height-30,58,20,mx,my,true);
     button("Done",right()-140,height-30,68,20,mx,my,true);
     button("Cancel",right()-68,height-30,68,20,mx,my,true);
-    if(!tip.isEmpty())tooltip(tip,mx,my);
+    if(!exitPrompt.active() && !tip.isEmpty())tooltip(tip,mx,my);
+    exitPrompt.render(this,vein?"Save changes to these rules?":"Save changes to this palette?",pointerX,pointerY);
   }
 }

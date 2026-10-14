@@ -17,6 +17,8 @@ public final class ItemPickerScreen extends UiScreen {
   private final Consumer<List<String>> accepted;
   private final List<ItemCatalogue.Entry> catalogue;
   private final LinkedHashSet<String> selected;
+  private final Set<String> original;
+  private final DraftExitPrompt exitPrompt = new DraftExitPrompt();
   private final TextInput search=new TextInput("",128);
   private final ScrollBar scrollbar=new ScrollBar();
   private final ItemIcons icons=new ItemIcons();
@@ -28,7 +30,7 @@ public final class ItemPickerScreen extends UiScreen {
   public ItemPickerScreen(Screen parent,String title,ItemCatalogue.Domain domain,
       Collection<String> selected,boolean multiple,Consumer<List<String>> accepted) {
     this.parent=parent;this.title=title;this.domain=domain;this.multiple=multiple;this.accepted=accepted;
-    this.selected=new LinkedHashSet<>(selected);catalogue=new ArrayList<>(ItemCatalogue.entries(domain));
+    this.selected=new LinkedHashSet<>(selected);original=Set.copyOf(selected);catalogue=new ArrayList<>(ItemCatalogue.entries(domain));
     for(String value:selected) if(catalogue.stream().noneMatch(e->e.value().equals(value))) {
       try{catalogue.add(ItemCatalogue.resolve(domain,value));}catch(IllegalArgumentException ignored){}
     }
@@ -72,13 +74,18 @@ public final class ItemPickerScreen extends UiScreen {
     try{accepted.accept(List.copyOf(selected));minecraft.setScreen(parent);}
     catch(IllegalArgumentException e){error=Objects.toString(e.getMessage(),"Invalid selection");}
   }
+  private void leave(){
+    scrollbar.release();exitPrompt.leave(!selected.equals(original),()->minecraft.setScreen(parent));
+  }
   protected void keyPressed(char c,int key){
-    if(key==Keyboard.KEY_ESCAPE){minecraft.setScreen(parent);return;}
+    if(exitPrompt.key(key))return;
+    if(key==Keyboard.KEY_ESCAPE){leave();return;}
     if(key==Keyboard.KEY_RETURN || key==Keyboard.KEY_NUMPADENTER){save();return;}
     String before=search.text();search.key(c,key);if(!before.equals(search.text())){scroll=0;filter();}
   }
-  public void onMouseEvent(){super.onMouseEvent();int wheel=Mouse.getEventDWheel();if(wheel!=0)scroll=(int)Math.max(0,Math.min(track().maximum(),scroll-Math.signum(wheel)*24));}
+  public void onMouseEvent(){super.onMouseEvent();int wheel=Mouse.getEventDWheel();if(!exitPrompt.active() && wheel!=0)scroll=(int)Math.max(0,Math.min(track().maximum(),scroll-Math.signum(wheel)*24));}
   protected void mouseClicked(int x,int y,int button){
+    if(exitPrompt.click(this,x,y,button,this::save,()->minecraft.setScreen(parent)))return;
     if(button!=0 && button!=1)return;
     search.focused=inside(x,y,left(),38,span()-96,18);
     if(search.focused){search.click(x,button);return;}
@@ -91,10 +98,12 @@ public final class ItemPickerScreen extends UiScreen {
     if(inside(x,y,left(),height-30,76,20))custom();
     else if(multiple && inside(x,y,left()+80,height-30,44,20)){selected.clear();filter();}
     else if(inside(x,y,right()-156,height-30,76,20))save();
-    else if(inside(x,y,right()-76,height-30,76,20))minecraft.setScreen(parent);
+    else if(inside(x,y,right()-76,height-30,76,20))leave();
   }
   public void render(int mx,int my,float delta){
-    scroll=(int)Math.max(0,Math.min(track().maximum(),scrollbar.drag(track(),my,Mouse.isButtonDown(0))));
+    int pointerX=mx,pointerY=my;
+    if(exitPrompt.active()){mx=-1;my=-1;}
+    scroll=(int)Math.max(0,Math.min(track().maximum(),scrollbar.drag(track(),my,!exitPrompt.active() && Mouse.isButtonDown(0))));
     renderBackground();drawCenteredTextWithShadow(textRenderer,title,width/2,16,0xffffff);
     input(search,left(),38,span()-96,mx,my,"Search name or ID...");
     button(selectedOnly?"Selected":"All",right()-90,37,90,20,mx,my,true);
@@ -116,6 +125,7 @@ public final class ItemPickerScreen extends UiScreen {
     if(multiple)button("Clear",left()+80,height-30,44,20,mx,my,!selected.isEmpty());
     button("Done",right()-156,height-30,76,20,mx,my,multiple || !selected.isEmpty());
     button("Cancel",right()-76,height-30,76,20,mx,my,true);
-    if(!tip.isEmpty())tooltip(tip,mx,my);
+    if(!exitPrompt.active() && !tip.isEmpty())tooltip(tip,mx,my);
+    exitPrompt.render(this,"Save changes to this selection?",pointerX,pointerY);
   }
 }

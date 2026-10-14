@@ -369,3 +369,8 @@ For 1.7.1 frame checks, run `release-171 spectator-scene`, wait for normal frame
 outline preference and Cancel, and removal of the camera/sign UI settings. Run
 `sign-editing` for native sign layout, editing limits, save/reopen and packet roundtrips,
 and `release-171 picker` for ranked fuzzy item searches and all picker draft checks.
+
+`release-173 water`, `overlay`, `editors` and `tooltip` check native splash sounds,
+underwater/fire/block overlay draws, full-bright restoration, unsaved nested drafts,
+and final tooltip ordering over slots/cursor stacks in both creative inventory views.
+Run in a muted disposable world with the test window focused.

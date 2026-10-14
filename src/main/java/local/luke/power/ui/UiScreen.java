@@ -21,6 +21,10 @@ public abstract class UiScreen extends Screen {
     drawStringWithShadow(textRenderer, s, x, y, color);
   }
 
+  void centeredText(String text, int y, int colour) {
+    drawCenteredTextWithShadow(textRenderer, text, width / 2, y, colour);
+  }
+
   protected void button(
       String label, int left, int top, int span, int h, int mx, int my, boolean enabled) {
     button(label, left, top, span, h, mx, my, enabled, -1);
