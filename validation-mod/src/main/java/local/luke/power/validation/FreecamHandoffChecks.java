@@ -85,16 +85,18 @@ final class FreecamHandoffChecks {
         press.invoke(keys,Keyboard.KEY_C); check(!MovementOwnership.cameraControlsMovement() && AutoWalk.isWalking(),"exit changed ownership/walking");
         float[] first=matrix(mc,.5F,0); active.invoke(camera,false); equal(first,matrix(mc,.5F,0));
       });
-      test("first detached frame hides an overlapping body without stale visibility", () -> {
-        mc.options.thirdPerson=false; active.invoke(camera,false); walking(mc,0,0,1.62F); matrix(mc,.5F,0);
-        camera.getClass().getField("hidePlayer").setBoolean(camera,false); press.invoke(keys,Keyboard.KEY_C); matrix(mc,.5F,0);
-        check(camera.getClass().getField("hidePlayer").getBoolean(camera),"first frame rendered body from inside the player");
-        camera.getClass().getMethod("setCameraPosition",double.class,double.class,double.class).invoke(camera,mc.player.x+3,mc.player.y,mc.player.z);
-        matrix(mc,.5F,0); check(!camera.getClass().getField("hidePlayer").getBoolean(camera),"body stayed hidden after camera left");
-        active.invoke(camera,false); walking(mc,0,0,1.62F); matrix(mc,.5F,0); press.invoke(keys,Keyboard.KEY_C); matrix(mc,.5F,0);
-        check(camera.getClass().getField("hidePlayer").getBoolean(camera),"reentry flickered with prior visible state");
-        active.invoke(camera,false); mc.options.thirdPerson=true; matrix(mc,.5F,0); press.invoke(keys,Keyboard.KEY_C); matrix(mc,.5F,0);
-        check(camera.getClass().getField("hidePlayer").getBoolean(camera) && local.luke.power.render.GhostHead.visible(mc),"third-person handoff must replace the overlapping body with a head");
+      test("overlapping freecam body remains visible in both perspectives", () -> {
+        for (boolean thirdPerson : new boolean[]{false,true}) {
+          active.invoke(camera,false); mc.options.thirdPerson=thirdPerson;
+          walking(mc,0,0,1.62F); matrix(mc,.5F,0); press.invoke(keys,Keyboard.KEY_C);
+          for (double distance : new double[]{0,.1,.5,1,3}) {
+            camera.getClass().getMethod("setCameraPosition",double.class,double.class,double.class)
+                .invoke(camera,mc.player.x+distance,mc.player.y,mc.player.z);
+            matrix(mc,.5F,0); FreecamDistanceChecks.render(mc);
+            check(FreecamDistanceChecks.entities.contains(mc.player),"body hidden at distance "+distance);
+          }
+          if (thirdPerson) check(local.luke.power.render.GhostHead.visible(mc),"ghost head missing");
+        }
         active.invoke(camera,false); mc.options.thirdPerson=false;
       });
       test("missing/cleared snapshots use the current entity and settings stay untouched", () -> {

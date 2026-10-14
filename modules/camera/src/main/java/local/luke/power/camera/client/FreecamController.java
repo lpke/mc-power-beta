@@ -50,7 +50,6 @@ public class FreecamController {
     public boolean jumping = false;
     public boolean sneaking = false;
     public boolean allowPlayerMovement = false;
-    public boolean hidePlayer = false;
     public boolean updateSpeed = false;
     public boolean savePosition = false;
     public boolean loadPosition = false;
@@ -100,7 +99,7 @@ public class FreecamController {
             if (minecraft != null && minecraft.options != null) {
                 if (active) {
                     previousHideHud = minecraft.options.hideHud;
-                    minecraft.options.hideHud = true;
+                    if (local.luke.power.camera.FreecamConfig.config.hideHudOnEntry) minecraft.options.hideHud = true;
                 } else if (previousHideHud != null) {
                     minecraft.options.hideHud = previousHideHud;
                 }
@@ -151,16 +150,6 @@ public class FreecamController {
 
     public boolean firstFramePending() { return firstFramePending; }
     public void frameRendered() { firstFramePending = false; }
-
-    public void updatePlayerVisibility(LivingEntity player, float delta) {
-        // Entity rendering uses the interpolated player position, too. Calculate
-        // this before the first detached frame, even when the camera has not moved.
-        double x = player.prevX + (player.x - player.prevX) * delta;
-        double y = player.prevY + (player.y - player.prevY) * delta;
-        double z = player.prevZ + (player.z - player.prevZ) * delta;
-        double dx = cameraPosition.x - x, dy = cameraPosition.y - y, dz = cameraPosition.z - z;
-        hidePlayer = dx * dx + dy * dy + dz * dz < 1;
-    }
 
     public void clearRenderedPosition() {
         renderedPosition = null;

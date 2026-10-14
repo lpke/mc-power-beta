@@ -8,6 +8,15 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-171 hotbar`: blocked journal writes, commit ordering, native NBT, bounded
+  rapid input, selection preservation, inventory edits, menus, focus, world/player
+  changes and submission/commit timings. `failure` injects a full journal and verifies
+  failure shutdown; restart afterward. `camera` checks floor/slab head coordinates,
+  spectator terrain clipping and free look. `fire` checks creative fire priority on
+  every face, held mining and mode permissions. Run after `new-world`.
+  `spectator-scene` and `freecam-floor` prepare actual renderer captures.
+  Include `freecam-handoff` to check close-range player-body rendering.
+
 - `interface-170 check`: shared F3/HUD eye/feet/head-base policy, ghost visibility,
   non-cheat full bright, search chevrons and cluster labels, native/custom text selection,
   and independent UI cursor preview/rollback. Run after `new-world`.
@@ -353,3 +362,5 @@ keep the clone routed to the muted null sink, then restore `set native.music 0`.
 exercise the corresponding runtime controls. Load a skin with `skin NAME` and verify
 `skin check` before `cape-checks`; it captures actual renderer angles without changing
 saved movement data. `release-160 save|saved` includes cactus-protection persistence.
+
+For 1.7.1 frame checks, run `release-171 spectator-scene`, wait for normal frames, then `release-171 perspective-held`. Use `normal-scene` then `normal-perspective` to check Beta still forces first person for an ordinary player inside terrain. Disable `power_camera:config.showCamera` before inspecting the ghost head; the saved-camera marker can obscure it. `release-171 head-probe` captures one native head render, and `release-171 head-result` verifies changed skin pixels and writes `ghost-pass.png` in the disposable game directory.

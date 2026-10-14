@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-10-15
+
+- Keep hotbar recovery writes off the game thread and reuse inventory snapshots to reduce swap stutter.
+- Align freecam floor collisions with the head-base Y coordinate shown by F3 and the custom HUD.
+- Keep spectator third-person cameras and ghost heads visible inside solid blocks.
+- Keep the player's body visible when freecam moves close to it.
+- Add an option to keep the HUD visible when entering freecam.
+- Extinguish fire before breaking the block behind it in creative mode.
+- Edit vein-mining blocks and tools as individual rules, with a shared searchable icon picker for item and block settings, metadata variants, ID tooltips and validated custom IDs.
+
 ## [1.7.0] - 2026-10-14
 
 - Add optional vein mining with configurable blocks, required tools, crouch activation, mining time, durability and bounded search/mining budgets.

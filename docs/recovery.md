@@ -8,6 +8,11 @@ recover data lost with the disk itself.
 Each accepted swap appends native NBT to
 `.minecraft/power-beta-data/hotbar-backups/<world-and-player-id>.journal` before
 publishing the new inventory array. Records are checksummed and never pruned.
+The journal flush runs on a worker. The game continues while it writes, then
+commits the swap on a later tick only if the same player still owns the unchanged
+inventory. Inventory edits, menus, lost focus and world exits cancel pending swaps.
+Rapid requests are processed in order with a bounded queue. A cancelled request
+can leave a recovery record even though its swap was never applied.
 At 64 MiB, swapping stops until the journal is archived and the game restarted.
 
 If protection fails, close the world and copy both the save and journal. Inspect

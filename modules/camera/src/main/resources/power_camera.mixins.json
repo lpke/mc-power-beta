@@ -13,8 +13,7 @@
     "InGameHudMixin",
     "InteractionManagerMixin",
     "WorldAccessor",
-    "MinecraftMixin",
-    "EntityRenderDispatcherMixin"
+    "MinecraftMixin"
   ],
   "injectors": {
     "defaultRequire": 1

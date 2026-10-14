@@ -2224,7 +2224,7 @@
     "page": "Building",
     "group": "Placement rules",
     "label": "Shift placing blacklist",
-    "description": "Identifiers of blocks that won't have their block action skipped. (Requires extended block identifiers)",
+    "description": "Choose blocks whose normal interaction should remain available while crouching.",
     "default": [],
     "restart": true,
     "order": 4,
@@ -3259,8 +3259,8 @@
   "worldedit.wandItem": {
     "page": "World editing",
     "group": "Selection",
-    "label": "Wand item ID",
-    "description": "",
+    "label": "Wand item",
+    "description": "Choose the item used as the selection wand.",
     "order": 3,
     "control": "number",
     "valueType": "itemId"
@@ -3373,14 +3373,14 @@
     "page": "Building",
     "group": "Item filters",
     "label": "Excluded items",
-    "description": "Item IDs separated by commas, for example 1, 44:2.",
+    "description": "Choose items to exclude. Select a specific variant or any metadata.",
     "valueType": "itemFilters"
   },
   "tweaks.placement.whitelist": {
     "page": "Building",
     "group": "Item filters",
     "label": "Allowed items",
-    "description": "Item IDs separated by commas, for example 1, 44:2. An empty allow-list permits nothing.",
+    "description": "Choose items to allow. Select a specific variant or any metadata. An empty allow-list permits nothing.",
     "valueType": "itemFilters"
   },
   "tweaks.flexible.enabled": {
@@ -4268,7 +4268,9 @@
     "order": 5
   },
   "logo.blocks.map": {
-    "order": 1
+    "order": 1,
+    "valueType": "blockPalette",
+    "description": "Choose a block for each character used in the title lettering."
   },
   "logo.logo.rotation": {
     "order": 2
@@ -4951,8 +4953,9 @@
     "page": "Building",
     "group": "Vein mining",
     "label": "Blocks and required tools",
-    "description": "Map block IDs to lists of allowed tool IDs, for example {\"16\":[270,274,257,278,285],\"12\":[277]}. An empty tool list allows any tool. Native harvesting requirements still apply. Redstone ore 73 includes lit ore 74. Blocks must have the same metadata; containers are excluded.",
-    "order": 2
+    "description": "Choose blocks and the items allowed to mine each one. No required tools allows any item; normal harvesting requirements still apply. Redstone ore includes its lit state. Veins match the starting block metadata; containers are excluded.",
+    "order": 2,
+    "valueType": "veinRules"
   },
   "veinMining.durabilityPerBlock": {
     "page": "Building",
@@ -5021,5 +5024,14 @@
     "max": 200,
     "step": 1,
     "unit": "%"
+  },
+  "power_camera:config.hideHudOnEntry": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Hide HUD on entering freecam",
+    "description": "Hide the HUD when freecam starts. F1 can change it during freecam; leaving restores the entry state.",
+    "default": true,
+    "restart": false,
+    "order": 8
   }
 }

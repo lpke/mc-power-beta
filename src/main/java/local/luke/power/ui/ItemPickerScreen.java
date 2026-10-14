@@ -1,0 +1,116 @@
+package local.luke.power.ui;
+
+import com.google.gson.JsonPrimitive;
+import java.util.*;
+import java.util.function.Consumer;
+import local.luke.power.config.Setting;
+import net.minecraft.client.gui.screen.Screen;
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+
+/** Searchable native icons with an isolated selection, shared by every item/block setting. */
+public final class ItemPickerScreen extends UiScreen {
+  private final Screen parent;
+  private final String title;
+  private final ItemCatalogue.Domain domain;
+  private final boolean multiple;
+  private final Consumer<List<String>> accepted;
+  private final List<ItemCatalogue.Entry> catalogue;
+  private final LinkedHashSet<String> selected;
+  private final TextInput search=new TextInput("",128);
+  private final ScrollBar scrollbar=new ScrollBar();
+  private final ItemIcons icons=new ItemIcons();
+  private List<ItemCatalogue.Entry> shown;
+  private boolean selectedOnly;
+  private int scroll;
+  private String error="";
+
+  public ItemPickerScreen(Screen parent,String title,ItemCatalogue.Domain domain,
+      Collection<String> selected,boolean multiple,Consumer<List<String>> accepted) {
+    this.parent=parent;this.title=title;this.domain=domain;this.multiple=multiple;this.accepted=accepted;
+    this.selected=new LinkedHashSet<>(selected);catalogue=new ArrayList<>(ItemCatalogue.entries(domain));
+    for(String value:selected) if(catalogue.stream().noneMatch(e->e.value().equals(value))) {
+      try{catalogue.add(ItemCatalogue.resolve(domain,value));}catch(IllegalArgumentException ignored){}
+    }
+    filter();
+  }
+  private int span(){return Math.min(500,width-24);}
+  private int left(){return (width-span())/2;}
+  private int right(){return left()+span();}
+  private int bottom(){return height-58;}
+  private ScrollBar.Track track(){return new ScrollBar.Track(right()-4,66,Math.max(0,bottom()-66),shown.size()*24,scroll);}
+  public void init(){Keyboard.enableRepeatEvents(true);}
+  public void removed(){Keyboard.enableRepeatEvents(false);scrollbar.release();}
+  private void filter(){
+    String query=search.text().strip().toLowerCase(Locale.ROOT);
+    shown=catalogue.stream().filter(e->(!selectedOnly || selected.contains(e.value())) && e.matches(query)).toList();
+  }
+  private void choose(String value){
+    if(multiple) {if(!selected.remove(value))selected.add(value);}
+    else {selected.clear();selected.add(value);}
+    error="";filter();
+  }
+  private void custom(){
+    var empty=new JsonPrimitive("");
+    Setting entry=new Setting("picker.custom","","","","Custom ID",
+        domain==ItemCatalogue.Domain.FILTER?"Enter an item ID or identifier. Numeric IDs can include metadata, such as 35:4.":"Enter a numeric ID or a registered identifier, such as minecraft:stone.",
+        Setting.Kind.TEXT,empty,empty,0,0,1,List.of(),false);
+    entry.validator(v->ItemCatalogue.resolve(domain,v.getAsString()));
+    minecraft.setScreen(new ValueScreen(entry,this,()->{
+      var chosen=ItemCatalogue.resolve(domain,entry.value.getAsString());
+      if(catalogue.stream().noneMatch(e->e.value().equals(chosen.value())))catalogue.add(chosen);
+      if(!multiple)selected.clear();selected.add(chosen.value());filter();error="";
+    }));
+  }
+  private void save(){
+    if(!multiple && selected.isEmpty())return;
+    try{accepted.accept(List.copyOf(selected));minecraft.setScreen(parent);}
+    catch(IllegalArgumentException e){error=Objects.toString(e.getMessage(),"Invalid selection");}
+  }
+  protected void keyPressed(char c,int key){
+    if(key==Keyboard.KEY_ESCAPE){minecraft.setScreen(parent);return;}
+    if(key==Keyboard.KEY_RETURN || key==Keyboard.KEY_NUMPADENTER){save();return;}
+    String before=search.text();search.key(c,key);if(!before.equals(search.text())){scroll=0;filter();}
+  }
+  public void onMouseEvent(){super.onMouseEvent();int wheel=Mouse.getEventDWheel();if(wheel!=0)scroll=(int)Math.max(0,Math.min(track().maximum(),scroll-Math.signum(wheel)*24));}
+  protected void mouseClicked(int x,int y,int button){
+    if(button!=0 && button!=1)return;
+    search.focused=inside(x,y,left(),38,span()-96,18);
+    if(search.focused){search.click(x,button);return;}
+    if(button!=0)return;
+    if(scrollbar.press(track(),x,y)){scroll=(int)scrollbar.drag(track(),y,true);return;}
+    if(inside(x,y,right()-90,37,90,20)){selectedOnly=!selectedOnly;scroll=0;filter();return;}
+    if(inside(x,y,left(),66,span()-10,Math.max(0,bottom()-66))){
+      int row=(y-66+scroll)/24;if(row<shown.size())choose(shown.get(row).value());return;
+    }
+    if(inside(x,y,left(),height-30,76,20))custom();
+    else if(multiple && inside(x,y,left()+80,height-30,44,20)){selected.clear();filter();}
+    else if(inside(x,y,right()-156,height-30,76,20))save();
+    else if(inside(x,y,right()-76,height-30,76,20))minecraft.setScreen(parent);
+  }
+  public void render(int mx,int my,float delta){
+    scroll=(int)Math.max(0,Math.min(track().maximum(),scrollbar.drag(track(),my,Mouse.isButtonDown(0))));
+    renderBackground();drawCenteredTextWithShadow(textRenderer,title,width/2,16,0xffffff);
+    input(search,left(),38,span()-96,mx,my,"Search name or ID...");
+    button(selectedOnly?"Selected":"All",right()-90,37,90,20,mx,my,true);
+    clip(left(),66,span()-8,Math.max(0,bottom()-66));String tip="";
+    int first=scroll/24,last=Math.min(shown.size(),(scroll+Math.max(0,bottom()-66)+23)/24);
+    for(int i=first;i<last;i++){
+      var entry=shown.get(i);int y=66+i*24-scroll;boolean chosen=selected.contains(entry.value());
+      boolean hover=inside(mx,my,left(),y,span()-10,24) && my>=66 && my<bottom();
+      if(chosen || hover)fill(left(),y,right()-10,y+23,chosen?0x80445566:0x50333333);
+      icons.draw(this,minecraft,entry,left()+5,y+4);
+      text(fit(entry.name(),span()-62),left()+28,y+8,hover?0xffffa0:0xeeeeee);
+      if(chosen)text("+",right()-23,y+8,0xffff88);
+      if(hover)tip=entry.tooltip();
+    }
+    unclip();scrollbar.render(this,track());
+    if(shown.isEmpty())text("No matches.",left()+5,75,0xaaaaaa);
+    text(fit(error.isEmpty()?selected.size()+" selected. Hover for IDs.":error,span()),left(),height-47,error.isEmpty()?0xaaaaaa:0xff8888);
+    button("Custom ID",left(),height-30,76,20,mx,my,true);
+    if(multiple)button("Clear",left()+80,height-30,44,20,mx,my,!selected.isEmpty());
+    button("Done",right()-156,height-30,76,20,mx,my,multiple || !selected.isEmpty());
+    button("Cancel",right()-76,height-30,76,20,mx,my,true);
+    if(!tip.isEmpty())tooltip(tip,mx,my);
+  }
+}

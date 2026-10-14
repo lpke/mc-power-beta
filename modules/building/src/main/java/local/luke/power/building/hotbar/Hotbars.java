@@ -45,7 +45,7 @@ public final class Hotbars {
   }
 
   public static void tick(Minecraft mc) {
-    HotbarTransaction.tick();
+    HotbarTransaction.tick(mc);
     boolean down = local.luke.power.input.Bindings.down(SCROLL);
     boolean eligible = eligible(mc);
     if (!eligible || owner != null && owner != mc.player) {
@@ -104,6 +104,10 @@ public final class Hotbars {
   public static void swap(Minecraft mc, int row) {
     if (!eligible(mc)) return;
     HotbarTransaction.run(mc, row);
+  }
+
+  public static void cancelPending() {
+    HotbarTransaction.cancel();
   }
 
   public static int wheel(Minecraft mc, int delta) {

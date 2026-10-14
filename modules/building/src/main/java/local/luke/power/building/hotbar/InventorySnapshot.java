@@ -32,12 +32,27 @@ final class InventorySnapshot {
     }
   }
 
-  void verify(ItemStack[] live) throws IOException {
-    if (!InventoryRows.identical(live, references))
-      throw new IOException("Inventory references changed");
+  private InventorySnapshot(ItemStack[] references, ItemStack[] rollback, byte[][] data) {
+    this.references = references;
+    this.rollback = rollback;
+    this.data = data;
+  }
+
+  InventorySnapshot swapped(int row) {
+    return new InventorySnapshot(InventoryRows.swapped(references, row),
+        InventoryRows.swapped(rollback, row), InventoryRows.swapped(data, row));
+  }
+
+  boolean matches(ItemStack[] live) throws IOException {
+    if (!InventoryRows.identical(live, references)) return false;
     for (int i = 0; i < live.length; i++)
       if (live[i] != null && !Arrays.equals(data[i], encode(live[i].writeNbt(new NbtCompound()))))
-        throw new IOException("Inventory contents changed");
+        return false;
+    return true;
+  }
+
+  void verify(ItemStack[] live) throws IOException {
+    if (!matches(live)) throw new IOException("Inventory contents changed");
   }
 
   NbtList list() throws IOException {

@@ -25,7 +25,8 @@
       "showCamera": true,
       "classicMovement": false,
       "enabled": false,
-      "playerMovementMessages": false
+      "playerMovementMessages": false,
+      "hideHudOnEntry": true
     },
     "power_gold:config": {
       "enableFishingRodLuckOfTheSea": false,

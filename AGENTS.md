@@ -262,6 +262,12 @@
 - F3 and custom HUD Y coordinates share the eye/feet preference. Freecam and spectator
   always report the native head base. Third-person ghost heads use the current skin's
   texture dimensions, draw only head/hat, and support free look without moving the player.
+  Freecam collision's lower bound shares the reported head base. Spectator third-person
+  cameras bypass terrain clipping, and their head marker remains visible inside blocks.
+  Freecam proximity must never hide the player's body.
+- Hotbar swaps flush immutable recovery bytes on a worker before publishing on a later
+  game tick. Keep native NBT access on the game thread, bound queued requests, and cancel
+  stale plans on inventory/owner, menu, focus or world changes. Never skip the durable flush.
 - Text inputs share editing and pointer selection through the input bridge. UI cursor
   blinking is separate from chat. Cancel selection on focus/screen changes; keep native
   limits, validation and gcapi3 widget methods. Search-only cluster suffixes never change IDs.
@@ -276,3 +282,7 @@
   consumption and lava ignition while retaining native fire aging, extinguishing and damage.
   Multiplayer stays server-owned. Temporary click mining inverts the saved preference with
   separate unsaved state, reports its effective value, and clears through TweakLifecycle.
+
+- Item and block settings use the shared graphical picker. Keep each editor draft local
+  until Done, validate custom IDs against loaded registries, retain metadata variants
+  where the stored format supports them, and never touch gameplay inventories.

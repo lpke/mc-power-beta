@@ -47,8 +47,7 @@ public class WorldRendererMixin {
                 cameraModel.render();
                 GL11.glPopMatrix();
             }
-            if(Freecam.freecamController.isActive() && !Freecam.freecamController.hidePlayer
-                    && !client.options.thirdPerson){
+            if(Freecam.freecamController.isActive() && !client.options.thirdPerson){
                 EntityRenderDispatcher.INSTANCE.render(client.camera, par3);
             }
         }

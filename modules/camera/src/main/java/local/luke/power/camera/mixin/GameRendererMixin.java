@@ -67,7 +67,6 @@ public class GameRendererMixin {
 		}
 		LivingEntity player = client.camera;
 
-        Freecam.freecamController.updatePlayerVisibility(player, par1);
 		CameraPosition cameraPosition = Freecam.freecamController.updateCameraPosition(player, par1);
 		GL11.glLoadIdentity();
         GL11.glTranslatef(power$eyeOffset, 0, 0);

@@ -43,6 +43,7 @@ public final class BuildingIndicators {
   }
 
   private static void reset(Minecraft mc) {
+    local.luke.power.building.hotbar.Hotbars.cancelPending();
     AutoWalk.stop();
     local.luke.power.building.mining.AutoMine.stop();
     FreeLook.reset(mc);

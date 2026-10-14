@@ -385,7 +385,7 @@ public final class FeatureValidation {
           for (int i = 0; i < 36; i++)
             mc.player.inventory.main[i] = new ItemStack(35, i + 1, i % 16);
           ItemStack[] before = mc.player.inventory.main.clone();
-          Hotbars.swap(mc, 1);
+          swapHotbarAndWait(mc, 1);
           for (int i = 0; i < 9; i++)
             check(mc.player.inventory.main[i] == before[18 + i], "row stack reference " + i);
           check(mc.player.inventory.selectedSlot == 0, "selected slot unchanged");
@@ -431,7 +431,7 @@ public final class FeatureValidation {
           ItemStack armor = new ItemStack(301, 1, 8);
           mc.player.inventory.armor[0] = armor;
           long start = System.nanoTime();
-          Hotbars.swap(mc, 1);
+          swapHotbarAndWait(mc, 1);
           check(mc.player.inventory.main[0] == special, "same stack reference after atomic commit");
           NbtCompound after =
               (NbtCompound) special.getClass().getMethod("getStationNbt").invoke(special);
@@ -605,4 +605,15 @@ public final class FeatureValidation {
     }
     return false;
   }
+  private static void swapHotbarAndWait(Minecraft mc, int row) throws Exception {
+    ItemStack[] before = mc.player.inventory.main;
+    Hotbars.swap(mc, row);
+    long deadline = System.nanoTime() + 5_000_000_000L;
+    while (mc.player.inventory.main == before && System.nanoTime() < deadline) {
+      Hotbars.tick(mc);
+      Thread.sleep(1);
+    }
+    check(mc.player.inventory.main != before, "journal completed and swap published");
+  }
+
 }

@@ -2,6 +2,7 @@ package local.luke.power.config;
 
 import com.google.gson.JsonElement;
 import net.minecraft.Item;
+import net.minecraft.block.Block;
 import net.modificationstation.stationapi.api.registry.BlockRegistry;
 import net.modificationstation.stationapi.api.util.Identifier;
 
@@ -12,7 +13,20 @@ final class ItemSettings {
       case "itemId" -> setting.validator(value -> item(value.getAsBigDecimal().intValueExact()));
       case "itemFilters" -> setting.validator(ItemSettings::filters);
       case "blockIdentifiers" -> setting.validator(ItemSettings::blocks);
+      case "blockPalette" -> setting.validator(ItemSettings::palette);
       default -> { }
+    }
+  }
+
+  private static void palette(JsonElement value) {
+    if (!value.isJsonObject() || value.getAsJsonObject().size() > 64)
+      throw new IllegalArgumentException("Use up to 64 title characters");
+    for (var entry : value.getAsJsonObject().entrySet()) {
+      int id;
+      try { id = entry.getValue().getAsBigDecimal().intValueExact(); }
+      catch (RuntimeException e) { throw new IllegalArgumentException("Choose an existing block"); }
+      if (entry.getKey().length() != 1 || id <= 0 || id >= Block.BLOCKS.length || Block.BLOCKS[id] == null)
+        throw new IllegalArgumentException("Choose one character and an existing block");
     }
   }
 

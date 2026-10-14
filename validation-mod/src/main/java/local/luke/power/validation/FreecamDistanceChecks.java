@@ -75,7 +75,7 @@ public final class FreecamDistanceChecks {
     log("FREECAM DISTANCE FAILURES "+failures);
   }
 
-  private static void render(Minecraft mc) throws Exception {
+  static void render(Minecraft mc) throws Exception {
     UiChecks.field(mc.worldRenderer,"field_1783",0);
     entities.clear();blocks.clear();recording=true;
     try {

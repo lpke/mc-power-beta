@@ -715,6 +715,10 @@ public final class PowerOptionsScreen extends UiScreen {
       minecraft.setScreen(new TexturePackScreen(this, s));
       return;
     }
+    if (ItemEditors.accepts(s)) {
+      minecraft.setScreen(ItemEditors.screen(this, s));
+      return;
+    }
     if (s.numeric() && !s.slider()) {
       Row row = rows.stream().filter(r -> r.setting == s).findFirst().orElseThrow();
       int y = top() + row.y - (int) scroll + (row.height == 40 ? 16 : 2);
@@ -871,6 +875,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (s.id.equals("audio.preset")) return new MusicEdits(this).name(s.value.getAsString());
     if (capture == s) return modifierLabel(Bindings.heldModifiers()) + "Press key...";
+    if (ItemEditors.accepts(s)) return ItemEditors.display(s);
     if (s.kind != Setting.Kind.KEY) return s.display();
     Chord chord = Chord.decode(s.value.getAsInt());
     int code = chord.key();
@@ -1049,6 +1054,7 @@ public final class PowerOptionsScreen extends UiScreen {
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
           tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = Tooltips.setting(s, valueEditor.editing(s) ? valueEditor.help()
+            : ItemEditors.accepts(s) ? "Choose from the item or block list."
             : numeric && mx >= controlLeft ? s.slider() ? "Right-click to enter an exact value." : "Click to enter an exact value." : "");
       }
     }
