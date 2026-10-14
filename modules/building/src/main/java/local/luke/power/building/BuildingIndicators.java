@@ -31,6 +31,9 @@ public final class BuildingIndicators {
         () -> Config.current().autoWalkAnnounceToggle);
     TweakIndicators.register(AUTO_MINE, () -> local.luke.power.building.mining.AutoMine.active() ? "" : null,
         () -> Config.current().autoMineAnnounceToggle);
+    TweakIndicators.register(CLICK_MINING, () -> client.world != null && !client.world.isRemote
+        && local.luke.power.input.ClickMining.inverted()
+        ? local.luke.power.input.ClickMining.enabled(Config.current().clickMining) ? "enabled" : "disabled" : null);
     add(FREE_LOOK, () -> Config.current().freeLookToggle && FreeLook.active() ? "" : null,
         () -> Config.current().freeLookAnnounceToggle);
   }

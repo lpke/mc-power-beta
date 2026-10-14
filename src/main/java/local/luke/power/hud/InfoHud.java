@@ -31,7 +31,7 @@ public final class InfoHud {
     time = "Time: " + HudText.time(daylight);
     if (!settings.enabled || ticks++ % 4 != 0) return;
     double vx = camera ? DetachedCamera.x() : mc.player.x;
-    double vy = camera ? DetachedCamera.y() : mc.player.boundingBox.minY;
+    double vy = HudCoordinates.y(mc.player);
     double vz = camera ? DetachedCamera.z() : mc.player.z;
     if (!Double.isFinite(vx) || !Double.isFinite(vy) || !Double.isFinite(vz)) return;
     int x = (int)Math.floor(vx), y = (int)Math.floor(vy), z = (int)Math.floor(vz);

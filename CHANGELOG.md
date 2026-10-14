@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-14
+
+- Add optional vein mining with configurable blocks, required tools, crouch activation, mining time, durability and bounded search/mining budgets.
+- Add optional torch mining for sand and gravel using the most worn diamond shovel in your inventory, including normal tool wear.
+- Add a temporary click-mining toggle hotkey and optional Active tweaks indicator, resetting when leaving a world.
+- Add a global fire-spread setting, enabled by default, covering fire spread and lava ignition.
+- Share eye/feet Y-coordinate selection between F3 and custom HUD clusters. Freecam and spectator report the base of the head.
+- Show a translucent player-skin head in third-person freecam and spectator, including free look.
+- Allow manual full bright without cheats.
+- Standardise text-input cursor movement, selection, clipboard shortcuts and mouse dragging, with a separate UI cursor-blinking preference.
+- Identify HUD clusters in search-result labels and let group chevrons expand or collapse search results silently.
+
 ## [1.6.2] - 2026-10-14
 
 - Use configured creative reach for container previews in every game mode, including survival and freecam.

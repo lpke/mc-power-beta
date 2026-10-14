@@ -201,6 +201,7 @@ final class MusicPresetsPanel extends UiScreen {
     }
     if (!editing()) return listClick(x, y, b);
     name.focused = inside(x, y, nameX(), top(), nameWidth(), 18);
+    if (name.focused) name.click(x, b);
     if (b == 0 && inside(x, y, saveX(), editButtonY(), saveWidth(), 18)) {
       save();
       return true;

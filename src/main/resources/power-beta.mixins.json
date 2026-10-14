@@ -95,7 +95,16 @@
     "TntIgnitionMixin",
     "TntMotionMixin",
     "TntMotionRenderMixin",
-    "FlattenedCollisionMixin"
+    "FlattenedCollisionMixin",
+    "TorchShovelInventoryMixin",
+    "TorchShovelMiningMixin",
+    "FireSpreadMixin",
+    "GhostHeadMixin",
+    "TextSelectionMixin",
+    "VeinMiningMixin",
+    "VeinProgressMixin",
+    "VeinDurabilityMixin",
+    "LavaIgnitionMixin"
   ],
   "injectors": {
     "defaultRequire": 1

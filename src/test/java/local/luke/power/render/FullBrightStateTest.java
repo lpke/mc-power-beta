@@ -14,9 +14,17 @@ class FullBrightStateTest {
       state.update(world, true, true, true); assertFalse(state.active());
       state.update(world, true, false, true); assertEquals(manual, state.active());
       state.update(world, true, true, true); assertTrue(state.active());
-      state.update(world, false, false, true); assertFalse(state.active());
-      state.update(world, true, false, true); assertFalse(state.active());
+      state.update(world, false, false, true); assertEquals(manual, state.active());
+      state.update(world, true, false, true); assertEquals(manual, state.active());
     }
+  }
+  @Test void manualBrightnessWorksWithoutCheatsAndClearsOnWorldExit() {
+    Object world = new Object(); var state = new FullBrightState();
+    state.update(world, false, false, true); state.toggle(); assertTrue(state.active());
+    state.update(world, false, false, true); assertTrue(state.active());
+    state.update(world, true, true, true); state.toggle(); assertFalse(state.active());
+    state.update(world, false, true, true); assertTrue(state.active());
+    state.update(null, false, false, false); assertFalse(state.active());
   }
   @Test void preferenceChangesAndWorldChangesClearVisitOverrides() {
     Object world = new Object(); var state = new FullBrightState();

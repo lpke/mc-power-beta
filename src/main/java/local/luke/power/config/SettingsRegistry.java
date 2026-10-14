@@ -21,6 +21,7 @@ public final class SettingsRegistry {
     CommandsBackend.register(s, mc);
     DeathBackend.register(s);
     GameplayBackend.register(s);
+    VeinBackend.register(s);
     s.settings().forEach(ItemSettings::attach);
     return s;
   }

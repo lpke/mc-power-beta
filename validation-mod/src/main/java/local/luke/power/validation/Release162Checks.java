@@ -99,7 +99,7 @@ final class Release162Checks {
         for (int yaw : new int[]{0, 90, 180, 270}) {
           pose(32.25, 112.75, 32.5, 0, yaw); sample(mc);
           var lines = debug(mc);
-          check(lines.containsAll(List.of("x: 32.25", "y: 112.75", "z: 32.5")), "F3 used body coordinates " + lines);
+          check(lines.containsAll(List.of("x: 32.25", "y: " + local.luke.power.input.HeadGeometry.baseY(112.75), "z: 32.5")), "F3 used body coordinates " + lines);
           int facing = Math.floorMod(yaw / 90 + 2, 4);
           check(lines.contains("f: " + facing), "native F3 facing wrong");
           String[] names = {"south (+Z)", "west (-X)", "north (-Z)", "east (+X)"};
@@ -128,7 +128,7 @@ final class Release162Checks {
         double x = mc.player.x, y = mc.player.y, z = mc.player.z;
         active(false); InfoHud.tick(mc); var lines = debug(mc);
         check(lines.containsAll(List.of("x: " + x, "y: " + y, "z: " + z)), "F3 failed to restore player");
-        String location = HudText.coordinates((int)Math.floor(x),(int)Math.floor(mc.player.boundingBox.minY),(int)Math.floor(z))
+        String location = HudText.coordinates((int)Math.floor(x),(int)Math.floor(local.luke.power.hud.HudCoordinates.y(mc.player)),(int)Math.floor(z))
             + " " + HudText.direction(mc.player.yaw);
         check(InfoHud.lines(cluster).contains(location), "custom HUD kept stale camera data");
         check(mc.player.x == x && mc.player.y == y && mc.player.z == z, "HUD moved player");

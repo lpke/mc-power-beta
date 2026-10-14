@@ -22,7 +22,7 @@ public abstract class DebugHudMixin {
   private double power$debugX(double value) { return DetachedCamera.isActive() ? DetachedCamera.x() : value; }
 
   @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ClientPlayerEntity;y:D"))
-  private double power$debugY(double value) { return DetachedCamera.isActive() ? DetachedCamera.y() : value; }
+  private double power$debugY(double value) { return minecraft.player == null ? value : local.luke.power.hud.HudCoordinates.y(minecraft.player); }
 
   @ModifyExpressionValue(method = "render", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/ClientPlayerEntity;z:D"))
   private double power$debugZ(double value) { return DetachedCamera.isActive() ? DetachedCamera.z() : value; }

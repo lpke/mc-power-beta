@@ -170,28 +170,19 @@ public abstract class UiScreen extends Screen {
       int y2 = Math.min(clipTop, inputClip.get(1) + inputClip.get(3));
       GL11.glScissor(x1, y1, Math.max(0, x2 - x1), Math.max(0, y2 - y1));
     }
-    int offset =
-        Math.max(0, textRenderer.getWidth(input.text().substring(0, input.cursor())) - (span - 12));
-    int x = left + 4 - offset;
-    if (input.focused && input.start() != input.end())
-      fill(
-          x + textRenderer.getWidth(input.text().substring(0, input.start())),
-          top + 3,
-          x + textRenderer.getWidth(input.text().substring(0, input.end())),
-          top + 14,
-          0xff335577);
-    text(
-        input.text().isEmpty() && !input.focused ? placeholder : input.text(),
-        x,
-        top + 5,
-        input.text().isEmpty() && !input.focused ? 0x888888 : 0xffffff);
-    if (input.focused && System.currentTimeMillis() / 500 % 2 == 0)
-      fill(
-          x + textRenderer.getWidth(input.text().substring(0, input.cursor())),
-          top + 3,
-          x + textRenderer.getWidth(input.text().substring(0, input.cursor())) + 1,
-          top + 14,
-          0xffffffff);
+    var view = input.layout(minecraft.currentScreen, left + 4, span - 8, textRenderer::getWidth);
+    String value = input.text();
+    int x = left + 4;
+    int from = Math.max(view.start(), input.start()), to = Math.min(view.end(), input.end());
+    if (input.focused && from < to)
+      fill(x + textRenderer.getWidth(value.substring(view.start(), from)), top + 3,
+          x + textRenderer.getWidth(value.substring(view.start(), to)), top + 14, 0xff335577);
+    text(value.isEmpty() && !input.focused ? placeholder : value.substring(view.start(), view.end()),
+        x, top + 5, value.isEmpty() && !input.focused ? 0x888888 : 0xffffff);
+    if (input.focused && InterfaceState.uiCursorVisible()) {
+      int caret = x + textRenderer.getWidth(value.substring(view.start(), input.cursor()));
+      fill(caret, top + 3, caret + 1, top + 14, 0xffffffff);
+    }
     GL11.glPopAttrib();
   }
 

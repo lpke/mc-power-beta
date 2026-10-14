@@ -71,6 +71,7 @@ public class GameRendererMixin {
 		CameraPosition cameraPosition = Freecam.freecamController.updateCameraPosition(player, par1);
 		GL11.glLoadIdentity();
         GL11.glTranslatef(power$eyeOffset, 0, 0);
+        if (client.options.thirdPerson) GL11.glTranslated(0, 0, -local.luke.power.input.CameraView.distance());
 		GL11.glRotatef(-cameraPosition.roll, 0f, 0f, 1f);
 		GL11.glRotatef(cameraPosition.pitch, 1f, 0f, 0f);
 		GL11.glRotatef(cameraPosition.yaw, 0f, 1f, 0f);

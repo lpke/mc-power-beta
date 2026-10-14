@@ -18,6 +18,8 @@ public final class FreeLook {
   private static Perspective perspective, configuredPerspective;
   private static boolean followedThird;
   private static ClientPlayerEntity owner;
+  private static boolean detachedOwner;
+  static { local.luke.power.input.CameraView.look(value -> yaw((float)value), value -> pitch((float)value)); }
 
   private FreeLook() {}
 
@@ -53,9 +55,8 @@ public final class FreeLook {
             && !mc.player.method_943()
             && mc.field_2807 == mc.player
             && mc.currentScreen == null
-            && Display.isActive()
-            && !Compatibility.freecam();
-    if (!eligible || owner != null && owner != mc.player) {
+            && Display.isActive();
+    if (!eligible || owner != null && (owner != mc.player || detachedOwner != Compatibility.freecam())) {
       reset(mc);
       waitForRelease = down;
       return;
@@ -85,6 +86,7 @@ public final class FreeLook {
     if (active) return;
     angles.clear();
     owner = mc.player;
+    detachedOwner = Compatibility.freecam();
     previousThird = mc.options.thirdPerson;
     configuredPerspective = Config.current().freeLookPerspective;
     followedThird = Config.current().freeLookFollowThirdPerson;
@@ -113,7 +115,7 @@ public final class FreeLook {
 
   public static boolean turn(ClientPlayerEntity player, float dx, float dy) {
     if (!active) return true;
-    angles.rotate(player.pitch, dx, dy);
+    angles.rotate(detachedOwner ? (float)local.luke.power.input.DetachedCamera.pitch() : player.pitch, dx, dy);
     return false;
   }
 }

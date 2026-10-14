@@ -94,7 +94,7 @@ final class FreecamHandoffChecks {
         active.invoke(camera,false); walking(mc,0,0,1.62F); matrix(mc,.5F,0); press.invoke(keys,Keyboard.KEY_C); matrix(mc,.5F,0);
         check(camera.getClass().getField("hidePlayer").getBoolean(camera),"reentry flickered with prior visible state");
         active.invoke(camera,false); mc.options.thirdPerson=true; matrix(mc,.5F,0); press.invoke(keys,Keyboard.KEY_C); matrix(mc,.5F,0);
-        check(!camera.getClass().getField("hidePlayer").getBoolean(camera),"third-person handoff hid distant body");
+        check(camera.getClass().getField("hidePlayer").getBoolean(camera) && local.luke.power.render.GhostHead.visible(mc),"third-person handoff must replace the overlapping body with a head");
         active.invoke(camera,false); mc.options.thirdPerson=false;
       });
       test("missing/cleared snapshots use the current entity and settings stay untouched", () -> {

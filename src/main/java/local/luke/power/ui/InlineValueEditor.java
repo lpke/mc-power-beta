@@ -38,7 +38,7 @@ final class InlineValueEditor {
     this.clipTop = clipTop; this.clipBottom = clipBottom;
   }
 
-  void cancel() { key = null; setting = null; accepted = null; input = null; error = ""; }
+  void cancel() { if (input != null) input.focused = false; key = null; setting = null; accepted = null; input = null; error = ""; }
 
   boolean press(int mx, int my, int button) {
     if (!active()) return false;
@@ -48,6 +48,7 @@ final class InlineValueEditor {
     }
     if (button == 0 && mx >= x + width - CHECK_WIDTH) commit();
     else if (button == 1) input.selectAll();
+    else input.click(mx, button);
     return true;
   }
 

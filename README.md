@@ -108,7 +108,8 @@ You are welcome to fork it and adapt it to your needs under the AGPL license.
 [OmniLook](https://github.com/rhysdh540/Omnilook),
 [UniTweaks](https://github.com/danygames2014/UniTweaks),
 [StationAPI utilities](https://github.com/telvarost),
-[Light Overlay](https://github.com/shedaniel/LightOverlay) and
-[Click Mining Forever](https://github.com/snowtyler/click-mining-forever).
+[Light Overlay](https://github.com/shedaniel/LightOverlay),
+[Click Mining Forever](https://github.com/snowtyler/click-mining-forever) and
+[VeinMiner](https://github.com/MiraculixxT/Veinminer).
 
 [AGPL-3.0-only](LICENSE). This is not an official Minecraft product.

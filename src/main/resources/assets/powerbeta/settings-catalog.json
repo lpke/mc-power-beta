@@ -4646,7 +4646,7 @@
     "page": "Controls",
     "group": "Rendering",
     "label": "Full bright (toggle)",
-    "description": "Fully light terrain and entities for rendering only. Requires cheats; leaves mob spawning and simulation light unchanged.",
+    "description": "Fully light terrain and entities for rendering only. Leaves mob spawning and simulation light unchanged.",
     "order": 1
   },
   "activeTweaks.hiddenEntities": {
@@ -4896,5 +4896,130 @@
   },
   "infoHud.clusters.3.opacity": {
     "order": 324
+  },
+  "interface.useFeetYCoordinates": {
+    "order": 1
+  },
+  "interface.blinkingUiCursor": {
+    "page": "Interface",
+    "group": "Menus",
+    "order": 10
+  },
+  "gameplay.torchShovel": {
+    "page": "Gameplay",
+    "group": "Blocks",
+    "label": "Torch shovel for sand/gravel",
+    "description": "Break sand and gravel with a torch at diamond-shovel speed when a diamond shovel is in your inventory. Uses one normal durability hit from the most worn diamond shovel. Singleplayer survival only.",
+    "order": 30
+  },
+  "gameplay.fireSpread": {
+    "group": "Explosion and fire",
+    "label": "Enable fire spread",
+    "description": "Allow fire to spread and consume nearby blocks, and lava to ignite nearby blocks. Existing fire still ages, extinguishes and causes damage. Singleplayer only.",
+    "order": 31,
+    "page": "Gameplay"
+  },
+  "keys.power_beta.clickMining": {
+    "group": "Building",
+    "label": "Temporary toggle click mining",
+    "description": "Temporarily invert Continuous click mining. Press again to restore the saved preference. Leaving the world clears the temporary state.",
+    "order": 21,
+    "page": "Controls"
+  },
+  "activeTweaks.clickMining": {
+    "group": "Active tweaks",
+    "label": "Temporary click mining",
+    "description": "Show Click mining enabled or Click mining disabled while the temporary override is active.",
+    "order": 28,
+    "page": "Interface"
+  },
+  "veinMining.enabled": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Vein mining",
+    "description": "Mine connected blocks after breaking one. Singleplayer survival only. Stops on tool changes, lost focus, menus or leaving the world.",
+    "order": 0
+  },
+  "veinMining.crouchingOnly": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Crouching only",
+    "description": "Require crouching to start and continue vein mining. Off also allows normal mining.",
+    "order": 1
+  },
+  "veinMining.tools": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Blocks and required tools",
+    "description": "Map block IDs to lists of allowed tool IDs, for example {\"16\":[270,274,257,278,285],\"12\":[277]}. An empty tool list allows any tool. Native harvesting requirements still apply. Redstone ore 73 includes lit ore 74. Blocks must have the same metadata; containers are excluded.",
+    "order": 2
+  },
+  "veinMining.durabilityPerBlock": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Durability per block",
+    "description": "Apply normal tool wear for every mined block. Off charges only the first block. Mining stops when the original tool breaks.",
+    "order": 4
+  },
+  "veinMining.maxBlocks": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Maximum vein size",
+    "description": "Maximum blocks mined per vein, including the first block.",
+    "order": 5,
+    "min": 1,
+    "max": 512,
+    "step": 1
+  },
+  "veinMining.radius": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Maximum search distance",
+    "description": "Maximum distance from the first block along any axis. Touching corners and edges connect blocks; unloaded terrain is never searched.",
+    "order": 6,
+    "min": 1,
+    "max": 32,
+    "step": 1
+  },
+  "veinMining.maxChecks": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Maximum search checks",
+    "description": "Cap the total block positions examined per vein, including positions that do not match.",
+    "order": 7,
+    "min": 1,
+    "max": 16384,
+    "step": 1
+  },
+  "veinMining.checksPerTick": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Search checks per tick",
+    "description": "Maximum positions examined per tick. Searching also yields after one millisecond.",
+    "order": 8,
+    "min": 1,
+    "max": 2048,
+    "step": 1
+  },
+  "veinMining.blocksPerTick": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Blocks mined per tick",
+    "description": "Maximum extra blocks mined per tick. Mining also yields after two milliseconds; an individual native block callback finishes normally.",
+    "order": 9,
+    "min": 1,
+    "max": 32,
+    "step": 1
+  },
+  "veinMining.timePercent": {
+    "page": "Building",
+    "group": "Vein mining",
+    "label": "Vein mining time",
+    "description": "Time to break the first block, as a percentage of the time to mine the whole detected vein normally. At 25%, eight blocks take as long as two normal blocks. Searching finishes before mining progresses. Always takes at least one block's normal mining time.",
+    "order": 3,
+    "min": 1,
+    "max": 200,
+    "step": 1,
+    "unit": "%"
   }
 }

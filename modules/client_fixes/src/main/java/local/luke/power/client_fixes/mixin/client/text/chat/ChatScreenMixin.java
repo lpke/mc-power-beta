@@ -1,14 +1,11 @@
 package local.luke.power.client_fixes.mixin.client.text.chat;
 
-import java.awt.Toolkit;
-import java.awt.datatransfer.StringSelection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.util.CharacterUtils;
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,7 +18,7 @@ import static local.luke.power.client_fixes.client.text.chat.ChatScreenVariables
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     @Shadow protected String text;
-    @Unique private boolean power$dragging;
+    @Unique private final local.luke.power.ui.TextPointer power$pointer = new local.luke.power.ui.TextPointer(editor);
 
     public ChatScreen setInitialMessage(String message) {
         initialMessage = message;
@@ -64,22 +61,9 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
             return;
         }
         if (key == Keyboard.KEY_ESCAPE) return;
-        if (ctrl && key == Keyboard.KEY_A) editor.all();
-        else if (ctrl && (key == Keyboard.KEY_C || key == Keyboard.KEY_X)) {
-            if (editor.selected()) {
-                try {
-                    Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(editor.selection()), null);
-                    if (key == Keyboard.KEY_X) editor.delete(-1, false);
-                } catch (IllegalStateException | java.awt.HeadlessException ignored) { }
-            }
-        } else if (ctrl && key == Keyboard.KEY_V) {
-            String pasted = getClipboard();
-            if (pasted != null) editor.write(pasted, c -> CharacterUtils.VALID_CHARACTERS.indexOf(c) >= 0);
-        } else if (key == Keyboard.KEY_LEFT || key == Keyboard.KEY_RIGHT) editor.move(key == Keyboard.KEY_LEFT ? -1 : 1, shift, ctrl);
-        else if (key == Keyboard.KEY_HOME || key == Keyboard.KEY_END) editor.position(key == Keyboard.KEY_HOME ? 0 : editor.text().length(), shift);
-        else if (key == Keyboard.KEY_BACK || key == Keyboard.KEY_DELETE) editor.delete(key == Keyboard.KEY_BACK ? -1 : 1, ctrl);
-        else if (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN) editor.history(CHAT_HISTORY, key == Keyboard.KEY_UP);
-        else if (!ctrl) editor.write(String.valueOf(character), c -> CharacterUtils.VALID_CHARACTERS.indexOf(c) >= 0);
+        if (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN) editor.history(CHAT_HISTORY, key == Keyboard.KEY_UP);
+        else local.luke.power.ui.TextEditing.key(editor, character, key, ctrl, shift,
+            c -> CharacterUtils.VALID_CHARACTERS.indexOf(c) >= 0);
         power$sync(); ci.cancel();
     }
     @Redirect(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screen/Screen;)V", ordinal = 1))
@@ -96,21 +80,15 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     private void power$click(int x, int y, int button, CallbackInfo ci) {
         if (button == 0 && y >= height - 14 && y < height - 2) {
             editor.sync(textField.getText());
-            power$position(x, Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
-            power$dragging = true; ci.cancel();
+            int left = 4 + textRenderer.getWidth("> ");
+            power$pointer.layout(minecraft.currentScreen, left, Math.max(1, width - left - 4), textRenderer::getWidth);
+            power$pointer.click(x, () -> minecraft.currentScreen == (Object)this);
+            power$sync(); ci.cancel();
         }
     }
     @Override public void onMouseEvent() {
+        int cursor = editor.cursor(), start = editor.start(), end = editor.end();
         super.onMouseEvent();
-        if (power$dragging) {
-            if (!Mouse.isButtonDown(0)) power$dragging = false;
-            else power$position(Mouse.getEventX() * width / minecraft.displayWidth, true);
-        }
-    }
-    @Unique private void power$position(int x, boolean select) {
-        int left = 4 + textRenderer.getWidth("> ");
-        var view = editor.view(Math.max(1, width - left - 4), textRenderer::getWidth);
-        editor.position(view.hit(editor.text(), x - left, textRenderer::getWidth), select);
-        power$sync();
+        if (cursor != editor.cursor() || start != editor.start() || end != editor.end()) power$sync();
     }
 }

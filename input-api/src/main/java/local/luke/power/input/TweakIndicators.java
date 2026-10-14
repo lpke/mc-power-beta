@@ -9,11 +9,13 @@ public final class TweakIndicators {
   public enum Tweak {
     FAKE_SNEAK("Fake sneak"), FAST_PLACEMENT("Fast placement"),
     PLACEMENT_RESTRICTION("Placement restriction"), AUTO_WALK("Auto-walk"),
-    AUTO_MINE("Auto-mine"), FREE_LOOK("Free look"), CINEMATIC_CAMERA("Cinematic camera"),
+    AUTO_MINE("Auto-mine"), CLICK_MINING("Click mining", " "), FREE_LOOK("Free look"), CINEMATIC_CAMERA("Cinematic camera"),
     FREECAM_PLAYER_MOVEMENT("Freecam player movement"), HIDDEN_ENTITIES("Hidden entities"), FULL_BRIGHT("Full bright");
 
     public final String label;
-    Tweak(String label) { this.label = label; }
+    public final String separator;
+    Tweak(String label) { this(label, ": "); }
+    Tweak(String label, String separator) { this.label = label; this.separator = separator; }
   }
 
   private static final EnumMap<Tweak, Supplier<String>> providers = new EnumMap<>(Tweak.class);
@@ -34,6 +36,6 @@ public final class TweakIndicators {
   public static String label(Tweak tweak) {
     Supplier<String> provider = providers.get(tweak);
     String detail = provider == null ? null : provider.get();
-    return detail == null ? null : tweak.label + (detail.isEmpty() ? "" : ": " + detail);
+    return detail == null ? null : tweak.label + (detail.isEmpty() ? "" : tweak.separator + detail);
   }
 }

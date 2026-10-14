@@ -8,6 +8,7 @@ import local.luke.power.camera.Freecam;
 import local.luke.power.camera.mixin.WorldAccessor;
 import local.luke.power.camera.util.CameraPosition;
 import local.luke.power.camera.util.SavedCameraPosition;
+import local.luke.power.input.CameraView;
 
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -131,6 +132,16 @@ public class FreecamController {
         LivingEntity entity = minecraft.camera;
         if (renderedPosition != null && renderedEntity == entity && renderedWorld == minecraft.world) {
             cameraPosition = renderedPosition.clone();
+            if (minecraft.options.thirdPerson) {
+                // The saved transform is the viewpoint. Store its orbit anchor so adding
+                // the third-person offset does not move the first detached frame again.
+                double yaw = Math.toRadians(cameraPosition.yaw), pitch = Math.toRadians(cameraPosition.pitch);
+                double distance = CameraView.distance();
+                cameraPosition.x += Math.sin(yaw) * Math.cos(pitch) * distance;
+                cameraPosition.y -= Math.sin(pitch) * distance;
+                cameraPosition.z -= Math.cos(yaw) * Math.cos(pitch) * distance;
+                if (CameraView.front()) { cameraPosition.yaw -= 180; cameraPosition.pitch = -cameraPosition.pitch; }
+            }
         } else {
             setCameraPositionAndRotation(entity.x, entity.y - (entity.standingEyeHeight - 1.62F),
                     entity.z, entity.pitch, entity.yaw + 180, 0);
@@ -269,6 +280,11 @@ public class FreecamController {
 
     // Update cameraposition
     public CameraPosition updateCameraPosition(LivingEntity player, float f1){
-        return getRelativeCameraPosition(this.cameraPosition, player, f1);
+        CameraPosition view = getRelativeCameraPosition(this.cameraPosition, player, f1);
+        view.yaw = CameraView.yaw(view.yaw);
+        view.pitch = CameraView.pitch(view.pitch);
+        Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
+        if (mc.options.thirdPerson && CameraView.front()) { view.yaw += 180; view.pitch = -view.pitch; }
+        return view;
     }
 }

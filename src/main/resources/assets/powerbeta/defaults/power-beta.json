@@ -740,7 +740,8 @@
       "framerate_limit": 125,
       "key_Auto-mine (toggle)": "0",
       "key_power_beta.entities": 0,
-      "key_power_beta.fullBright": 0
+      "key_power_beta.fullBright": 0,
+      "key_power_beta.clickMining": "0"
     },
     "video": {
       "leaves": true,
@@ -760,13 +761,16 @@
       "cinematicCameraMessages": false,
       "autoMine": true,
       "hiddenEntities": true,
-      "fullBright": true
+      "fullBright": true,
+      "clickMining": true
     },
     "interface": {
       "blinkingChatCursor": false,
       "debugTextColor": "#FFFFFF",
       "autoApply": true,
-      "debugTimeOfDay": false
+      "debugTimeOfDay": false,
+      "useFeetYCoordinates": false,
+      "blinkingUiCursor": true
     },
     "death": {
       "enabled": false,
@@ -784,7 +788,9 @@
       "flintIgnitesTnt": false,
       "fastItemCollisions": true,
       "lavaProofItems": false,
-      "cactusProofItems": false
+      "cactusProofItems": false,
+      "torchShovel": false,
+      "fireSpread": true
     },
     "infoHud": {
       "enabled": false,
@@ -859,6 +865,48 @@
           "fps": true
         }
       ]
+    },
+    "veinMining": {
+      "enabled": false,
+      "crouchingOnly": true,
+      "durabilityPerBlock": true,
+      "maxBlocks": 64,
+      "maxChecks": 4096,
+      "checksPerTick": 512,
+      "blocksPerTick": 8,
+      "radius": 16,
+      "tools": {
+        "16": [
+          270,
+          274,
+          257,
+          278,
+          285
+        ],
+        "15": [
+          274,
+          257,
+          278
+        ],
+        "14": [
+          257,
+          278
+        ],
+        "21": [
+          274,
+          257,
+          278
+        ],
+        "56": [
+          257,
+          278
+        ],
+        "73": [
+          257,
+          278
+        ]
+      },
+      "timePercent": 25
     }
   }
 }

@@ -204,8 +204,9 @@
   for Z or infer capture size from the obsolete four-step distance option.
 
 - Entity visibility changes only rendering. Full bright overrides float shading only
-  on the render thread, never saved or simulated light. Spectator overrides last
-  for one visit; leaving restores manual state, and lost cheats clear it.
+  on the render thread, never saved or simulated light. Manual full bright is independent
+  of cheats. Spectator overrides last for one visit; leaving restores manual state, and
+  lost cheats clear only that override.
 - Item merging preserves native NBT, damage, normal stack limits and total counts.
   TNT limits retain native entities and saved fuses, bound work each tick and stay
   available from the main menu for recovery. Both leave multiplayer server-owned.
@@ -257,3 +258,21 @@
 - Music-library collapse/expand-all acts on groups in the current view, including search,
   without changing inclusion, volume, presets or queues. Menu scrub tracks reserve equal
   space on either side so the track itself stays centred with the menu.
+
+- F3 and custom HUD Y coordinates share the eye/feet preference. Freecam and spectator
+  always report the native head base. Third-person ghost heads use the current skin's
+  texture dimensions, draw only head/hat, and support free look without moving the player.
+- Text inputs share editing and pointer selection through the input bridge. UI cursor
+  blinking is separate from chat. Cancel selection on focus/screen changes; keep native
+  limits, validation and gcapi3 widget methods. Search-only cluster suffixes never change IDs.
+  Search group chevrons toggle silently; collapsed titles expand and expanded titles navigate.
+- Torch shovel uses only owned diamond shovels, most worn first, for sand/gravel in
+  singleplayer survival. Never swap held slots; native successful breaks charge wear once.
+  Vein searches/mining are bounded, tick-owned and loaded-terrain-only. Revalidate blocks,
+  tools, mode and ownership before each native break, stop when the tool breaks, and clear
+  jobs on menus, focus loss and world exit. Compose timing after other mining adjustments;
+  the configured percentage of whole-vein time never beats one block's normal time.
+- Fire spread is a global preference, default on. Disabling it suppresses spread, block
+  consumption and lava ignition while retaining native fire aging, extinguishing and damage.
+  Multiplayer stays server-owned. Temporary click mining inverts the saved preference with
+  separate unsaved state, reports its effective value, and clears through TweakLifecycle.

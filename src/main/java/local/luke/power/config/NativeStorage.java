@@ -22,6 +22,7 @@ public final class NativeStorage {
       Map.entry("render_distance","renderDistance"),Map.entry("gui_scale","guiScale"));
   public static void load(GameOptions options) {
     local.luke.power.render.RenderControls.register(options);
+    local.luke.power.gameplay.MiningControls.register(options);
     JsonObject data = PowerConfig.section("native");
     try {
       for (var e : data.entrySet()) {

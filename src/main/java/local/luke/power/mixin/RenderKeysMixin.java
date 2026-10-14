@@ -11,6 +11,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class RenderKeysMixin {
   @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Keyboard;getEventKeyState()Z", ordinal = 0, remap = false, shift = At.Shift.AFTER))
   private void power$renderKey(CallbackInfo ci) {
-    if (Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) RenderControls.press(Keyboard.getEventKey());
+    if (Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
+      RenderControls.press(Keyboard.getEventKey());
+      local.luke.power.gameplay.MiningControls.press(Keyboard.getEventKey());
+    }
   }
 }

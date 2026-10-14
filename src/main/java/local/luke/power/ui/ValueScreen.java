@@ -47,6 +47,7 @@ public final class ValueScreen extends UiScreen {
     if (b != 0 && b != 1) return;
     if (inside(x, y, left(), height / 2 - 9, span(), 18)) {
       input.focused = true;
+      input.click(x, b);
       if (b == 1) {
         input.selectAll();
         input.key((char) 0, Keyboard.KEY_BACK);

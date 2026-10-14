@@ -8,7 +8,7 @@ public final class ControlLinks {
   private static final Map<String, Link> LINKS = new HashMap<>();
   static {
     link("power_beta.entities", "visual.hideEntities", "", "Toggle rendering for the selected entity types.");
-    link("power_beta.fullBright", "visual.spectatorFullBright", "", "Toggle full bright. Requires cheats and changes rendering only.");
+    link("power_beta.fullBright", "visual.fullBrightMessages", "", "Toggle full bright. Changes rendering only.");
     link("powerbeta.lightOverlay", "lightOverlay.enabled", "", "Toggle light-level numbers on nearby block tops.");
     link("powerbeta.containerPreview", "visual.containerPreview", "visual.containerPreview", "Hold while aiming at a container to preview its contents without opening it.");
     link("key.forward", "", "", "Move forward.");
@@ -24,6 +24,7 @@ public final class ControlLinks {
     link("Auto-walk (toggle)", "tweaks.autoWalk", "tweaks.autoWalk", "Start or stop walking forward. Player forward/back input stops it. Focus loss stops it only when configured. Freecam controls the camera while your player keeps walking. Inventories keep walking when Inventory while moving is on.");
     link("powerbeta.infoHud", "infoHud.enabled", "", "Toggle all custom HUD clusters together. Each cluster keeps its contents, appearance and F3 visibility preference.");
     // These settings are live toggle states, not feature-availability switches.
+    link("power_beta.clickMining", "tweaks.clickMining", "", "Temporarily invert Continuous click mining until the next press or world exit.");
     link("Auto-mine (toggle)", "tweaks.autoMine", "tweaks.autoMine", "Toggle holding Attack / Break. Menus, focus loss, world changes and detached-camera control stop it.");
     // Keep their toggles and placement modifiers visible while the state is off.
     link("Fast place (toggle)", "tweaks.placement.enabled", "", "Toggle repeated block placement while holding Use.");
@@ -112,7 +113,7 @@ public final class ControlLinks {
     if (!family.isEmpty() && setting.id.startsWith(family)) return true;
     return switch (link.setting) {
       case "visual.hideEntities" -> setting.group.equals("Entity visibility");
-      case "visual.spectatorFullBright" -> setting.id.equals("visual.fullBrightMessages");
+      case "visual.fullBrightMessages" -> setting.id.equals("visual.spectatorFullBright");
       case "creative.sprintToggle" -> setting.page.equals("Creative") && setting.group.equals("Flight")
           || setting.id.equals("creative.sprintMultiplier") || setting.id.equals("power_camera:config.sprint");
       case "video.fogCycle" -> setting.id.equals("native.renderDistance") || setting.id.equals("native.fogDensity");

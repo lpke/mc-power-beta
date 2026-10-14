@@ -85,7 +85,7 @@ public final class ColourScreen extends UiScreen {
         return;
       }
     hex.focused = inside(x, y, left(), top() + 92, span() - 108, 18);
-    if (hex.focused) return;
+    if (hex.focused) { hex.click(x, button); return; }
     if (button == 0 && inside(x, y, left() + span() - 104, top() + 91, 50, 20)) {
       try {
         Toolkit.getDefaultToolkit()

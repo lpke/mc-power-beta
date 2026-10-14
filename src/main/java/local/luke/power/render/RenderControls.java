@@ -41,7 +41,7 @@ public final class RenderControls {
       VisualSettings settings = VisualConfig.copy(); settings.hideEntities = !settings.hideEntities;
       VisualConfig.queue(settings);
     }
-    if (CommandContext.current(mc).cheats() && Bindings.matches(FULL_BRIGHT, key)) {
+    if (Bindings.matches(FULL_BRIGHT, key)) {
       tick(mc); brightness.toggle(); refresh(mc);
     }
   }
@@ -51,7 +51,7 @@ public final class RenderControls {
     refresh(mc);
   }
   private static void refresh(Minecraft mc) {
-    boolean next = mc.world != null && CommandContext.current(mc).cheats() && brightness.active();
+    boolean next = mc.world != null && brightness.active();
     if (active == next) return;
     active = next;
     if (mc.world != null && mc.worldRenderer != null) mc.worldRenderer.method_1537();

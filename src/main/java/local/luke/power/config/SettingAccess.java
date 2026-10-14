@@ -11,8 +11,7 @@ public final class SettingAccess {
   }
 
   public static boolean cheat(Setting s) {
-    if (s.id.equals("visual.spectatorFullBright") || s.id.equals("visual.fullBrightMessages")
-        || s.id.equals("gameplay.leavesDropSaplingsInCreative") || s.id.equals("keys.power_beta.fullBright")) return true;
+    if (s.id.equals("visual.spectatorFullBright") || s.id.equals("gameplay.leavesDropSaplingsInCreative")) return true;
     if (s.id.equals("world.keepInventory") || s.id.equals("world.daylightCycle") || s.id.equals("world.weatherCycle") || s.id.equals("world.hostileSpawning") || s.id.equals("world.passiveSpawning")) return true;
     // These two preferences also control freecam, which is not cheats-gated.
     if (s.id.equals("creative.sprintToggle") || s.id.equals("creative.sprintMultiplier"))

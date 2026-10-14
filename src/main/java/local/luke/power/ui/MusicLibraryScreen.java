@@ -545,6 +545,7 @@ public final class MusicLibraryScreen extends UiScreen {
     if (queue || presetsOpen && !presets.editing()) return;
     presets.unfocus();
     search.focused = true;
+    search.click(x, button);
     if (button == 1) clearQuery();
   }
 

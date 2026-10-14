@@ -88,7 +88,7 @@ public class ClientFixesMixinPlugin implements IMixinConfigPlugin {
             boolean isStationApiLoaded = FabricLoader.getInstance().isModLoaded("stationapi");
             return (Config.config.enableMultiplayerServerChanges && !isStationApiLoaded);
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.TextFieldWidgetMixin")) {
-            return (Config.config.enableMultiplayerServerChanges || Config.config.enableChatChanges || Config.config.enableWoodenSignChanges);
+            return true;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.chat.ChatScreenMixin")) {
             return Config.config.enableChatChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.chat.SleepingChatScreenMixin")) {

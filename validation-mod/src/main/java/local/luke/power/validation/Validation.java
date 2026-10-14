@@ -57,6 +57,8 @@ public final class Validation {
       else if (command.startsWith("release-152")) Release152Checks.run(mc, command.substring(11).trim());
       else if (command.startsWith("release-160")) Release160Checks.run(mc, command.substring(11).trim());
       else if (command.startsWith("placement-lifecycle ")) PlacementLifecycleChecks.run(mc, command.substring(20));
+      else if (command.startsWith("interface-170 ")) Interface170Checks.run(mc,command.substring(14));
+      else if (command.equals("mining-170")) Mining170Checks.run(mc);
       else if (command.equals("release-162")) Release162Checks.run(mc);
       else if (command.startsWith("freecam-preview ")) FreecamPreviewChecks.run(mc, command.substring(16));
       else if (command.equals("cape-checks")) CapeChecks.run(mc);

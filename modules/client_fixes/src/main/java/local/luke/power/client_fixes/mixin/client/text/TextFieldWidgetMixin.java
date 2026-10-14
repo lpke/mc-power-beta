@@ -1,95 +1,65 @@
 package local.luke.power.client_fixes.mixin.client.text;
 
+import local.luke.power.chat.ChatBuffer;
+import local.luke.power.ui.*;
+import local.luke.power.client_fixes.mixinterface.TextFieldWidgetAccessor;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import org.lwjgl.input.Keyboard;
-import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import net.minecraft.util.CharacterUtils;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import local.luke.power.client_fixes.ModHelper;
-import local.luke.power.client_fixes.client.text.chat.ChatScreenVariables;
-import local.luke.power.client_fixes.mixinterface.TextFieldWidgetAccessor;
 
 @Mixin(TextFieldWidget.class)
-public class TextFieldWidgetMixin implements TextFieldWidgetAccessor {
-    @Shadow
-    public boolean focused;
+public abstract class TextFieldWidgetMixin extends DrawContext implements TextFieldWidgetAccessor {
+    @Shadow public boolean focused, enabled;
+    @Shadow private String text;
+    @Shadow private int maxLength;
+    @Shadow @Final private int x, y, width, height;
+    @Shadow @Final private TextRenderer textRenderer;
+    @Shadow private Screen parent;
+    @Unique private final ChatBuffer power$editor = new ChatBuffer(Integer.MAX_VALUE);
+    @Unique private final TextPointer power$pointer = new TextPointer(power$editor);
 
-    @Shadow
-    public boolean enabled;
-
-    @Shadow
-    private String text;
-
-    @Shadow
-    private int focusedTicks;
-
-    @Shadow
-    private int maxLength;
-
-    @Unique
-    private int cursorPosition;
-
-    @Redirect(method = "keyPressed", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;text:Ljava/lang/String;", opcode = Opcodes.PUTFIELD))
-    private void onClipboardPaste(TextFieldWidget guiTextField, String value) {
-        this.write(value.substring(this.text.length()));
-        ModHelper.ModHelperFields.setClipboardText = true;
+    @Unique private void power$sync() {
+        power$editor.limit(maxLength == 0 ? Integer.MAX_VALUE : maxLength);
+        power$editor.sync(text);
     }
-
-    @ModifyConstant(method = "keyPressed", constant = @Constant(intValue = 14 /* Keyboard.KEY_BACK */))
-    private int cancelRemoveKey(int def) {
-        return -1;
+    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    private void power$key(char character, int key, CallbackInfo ci) {
+        ci.cancel();
+        if (!enabled || !focused) return;
+        if (character == '\t') { if (parent != null) parent.handleTab(); return; }
+        power$sync();
+        TextEditing.key(power$editor, character, key, value -> CharacterUtils.VALID_CHARACTERS.indexOf(value) >= 0);
+        text = power$editor.text();
     }
-
-    @ModifyConstant(method = "keyPressed", constant = @Constant(intValue = 32))
-    private int getClipboardMaxLength(int def) {
-        return this.maxLength;
+    @Inject(method = "mouseClicked", at = @At("RETURN"))
+    private void power$click(int mouseX, int mouseY, int button, CallbackInfo ci) {
+        if (!enabled || !focused || button != 0) return;
+        power$sync();
+        power$pointer.layout(TextDrag.screen(), x + 4, width - 8, textRenderer::getWidth);
+        power$pointer.click(mouseX, () -> focused && enabled);
     }
-
-    @Inject(method = "keyPressed", at = @At(value = "JUMP", ordinal = 2))
-    private void onKeyTyped(char character, int keyCode, CallbackInfo ci) {
-        if (keyCode == Keyboard.KEY_BACK && this.text.length() > 0 && -this.cursorPosition < this.text.length()) {
-            this.text = (new StringBuilder(this.text)).deleteCharAt(this.text.length() + this.cursorPosition - 1).toString();
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    private void power$render(CallbackInfo ci) {
+        ci.cancel();
+        power$sync();
+        fill(x - 1, y - 1, x + width + 1, y + height + 1, focused ? 0xffaaaaaa : 0xff555555);
+        fill(x, y, x + width, y + height, 0xff000000);
+        var view = power$pointer.layout(TextDrag.screen(), x + 4, width - 8, textRenderer::getWidth);
+        int top = y + (height - 8) / 2;
+        int from = Math.max(view.start(), power$editor.start()), to = Math.min(view.end(), power$editor.end());
+        if (focused && from < to)
+            fill(x + 4 + textRenderer.getWidth(text.substring(view.start(), from)), top - 1,
+                x + 4 + textRenderer.getWidth(text.substring(view.start(), to)), top + 9, 0xff335577);
+        textRenderer.drawWithShadow(text.substring(view.start(), view.end()), x + 4, top, enabled ? 0xe0e0e0 : 0x707070);
+        if (enabled && focused && InterfaceState.uiCursorVisible()) {
+            int caret = x + 4 + textRenderer.getWidth(text.substring(view.start(), power$editor.cursor()));
+            fill(caret, top - 1, caret + 1, top + 9, 0xffffffff);
         }
-
-        if (keyCode == Keyboard.KEY_DELETE && this.text.length() > 0 && this.cursorPosition < 0) {
-            this.text = (new StringBuilder(this.text)).delete(this.text.length() + this.cursorPosition, this.text.length() + this.cursorPosition + 1).toString();
-            ++this.cursorPosition;
-        }
-
-        if (keyCode == Keyboard.KEY_LEFT && -this.cursorPosition < this.text.length()) {
-            --this.cursorPosition;
-        }
-
-        if (keyCode == Keyboard.KEY_RIGHT && this.cursorPosition < 0) {
-            ++this.cursorPosition;
-        }
-
-        if (keyCode == Keyboard.KEY_HOME) {
-            this.cursorPosition = -this.text.length();
-        }
-
-        if (keyCode == Keyboard.KEY_END) {
-            this.cursorPosition = 0;
-        }
-
-        ChatScreenVariables.chatCursorPosition = this.cursorPosition;
     }
-
-    public void write(String text) {
-        this.text = (new StringBuilder(this.text)).insert(this.text.length() + this.cursorPosition, text).toString();
-    }
-
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)V"))
-    private void onDrawTextBox(TextFieldWidget guiTextField, TextRenderer textRenderer, String text, int x, int y, int color) {
-        guiTextField.drawTextWithShadow(textRenderer, this.getDisplayText(), x, y, color);
-    }
-
-    public String getDisplayText() {
-        boolean caretVisible = this.focused && this.focusedTicks / 6 % 2 == 0;
-        return this.enabled ? (new StringBuilder(this.text)).insert(this.text.length() + this.cursorPosition, caretVisible ? "_" : "").toString() : this.text;
-    }
+    public String getDisplayText() { return text; }
 }

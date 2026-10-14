@@ -356,6 +356,8 @@ public final class PowerOptionsScreen extends UiScreen {
     fill(left(), y + 21, right() - 14, y + 22, 0x50555555);
   }
 
+  private int groupChevronWidth() { return Math.max(textRenderer.getWidth("> "), textRenderer.getWidth("v ")); }
+
   private void layout() {
     if (session == null) return;
     pages = PAGES.stream().filter(p -> session.settings().stream()
@@ -502,6 +504,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (inside(x, y, searchLeft(), 27, searchWidth(), 20)) {
       if (libraryVisible()) { library.searchClick(x, y, button); return; }
       search.focused = true;
+      search.click(x, button);
       if (button == 1) {
         search.setText("");
         search.selectAll();
@@ -599,18 +602,19 @@ public final class PowerOptionsScreen extends UiScreen {
         int ry = pinned == i ? sticky.y() : top() + r.y - (int) scroll;
         if (y < ry || y >= ry + r.height) continue;
         if (r.setting == null) {
-          if (button == 0 && (!search.text().isBlank() || changedOnly)) {
-            if (collapsed.remove(sectionKey(r.group))) {
-              click(); layout();
-            } else if (i + 1 < rows.size() && rows.get(i + 1).setting != null) {
-              click();
-              openGroup(rows.get(i + 1).setting);
+          if (button == 0) {
+            String id = sectionKey(r.group);
+            boolean jump = (!search.text().isBlank() || changedOnly)
+                && x >= left() + groupChevronWidth() && !collapsed.contains(id);
+            if (jump) {
+              if (i + 1 < rows.size() && rows.get(i + 1).setting != null) {
+                click(); openGroup(rows.get(i + 1).setting);
+              }
+            } else {
+              if (!collapsed.add(id)) collapsed.remove(id);
+              if (pinned >= 0) scroll = r.y;
+              layout();
             }
-          } else if (button == 0) {
-            String id = page + "/" + r.group;
-            if (!collapsed.add(id)) collapsed.remove(id);
-            if (pinned >= 0) scroll = r.y;
-            layout();
           }
           return;
         }
@@ -1012,7 +1016,7 @@ public final class PowerOptionsScreen extends UiScreen {
       int cy = y + (narrow ? 16 : 2),
           controlLeft = mainControlLeft(row);
       int textWidth = narrow ? span() - 4 : controlLeft(row) - left() - 13;
-      String label = fit(s.label, textWidth - (s.restart ? 9 : 0));
+      String label = fit(SettingLabels.display(s, !search.text().isBlank()), textWidth - (s.restart ? 9 : 0));
       text(
           label,
           left() + 3,

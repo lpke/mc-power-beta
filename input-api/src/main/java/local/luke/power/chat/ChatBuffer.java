@@ -4,14 +4,15 @@ import java.util.List;
 import java.util.function.IntPredicate;
 import java.util.function.ToIntFunction;
 
-/** Chat editing state. Cursor and anchor are offsets between characters. */
+/** Shared single-line editing state. Cursor and anchor are offsets between characters. */
 public final class ChatBuffer {
   private String text = "", draft = "";
   private int cursor, anchor, history, viewStart;
   private boolean browsing;
-  private final int limit;
+  private int limit;
 
   public ChatBuffer(int limit) { this.limit = limit; }
+  public void limit(int value) { limit = Math.max(0, value); }
   public String text() { return text; }
   public int cursor() { return cursor; }
   public int start() { return Math.min(cursor, anchor); }

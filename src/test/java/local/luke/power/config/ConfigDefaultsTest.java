@@ -22,6 +22,14 @@ class ConfigDefaultsTest {
     JsonObject root = PowerConfig.document();
     assertEquals(3, root.get("schemaVersion").getAsInt());
     assertEquals(2, root.size());
+    var settings = root.getAsJsonObject("settings");
+    assertFalse(settings.getAsJsonObject("interface").get("useFeetYCoordinates").getAsBoolean());
+    assertTrue(settings.getAsJsonObject("interface").get("blinkingUiCursor").getAsBoolean());
+    assertFalse(settings.getAsJsonObject("gameplay").get("torchShovel").getAsBoolean());
+    assertTrue(settings.getAsJsonObject("gameplay").get("fireSpread").getAsBoolean());
+    assertTrue(settings.getAsJsonObject("activeTweaks").get("clickMining").getAsBoolean());
+    assertFalse(settings.getAsJsonObject("veinMining").get("enabled").getAsBoolean());
+    assertEquals(25, settings.getAsJsonObject("veinMining").get("timePercent").getAsInt());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("building").get("inventoryMouseLook").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("death").get("enabled").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("death").get("announceItems").getAsBoolean());
@@ -70,5 +78,23 @@ class ConfigDefaultsTest {
     Files.delete(config);
     ConfigDefaults.prepare(game);
     assertEquals(defaults, Files.readString(config));
+
+    var veins = PowerConfig.read("veinMining", local.luke.power.mining.VeinSettings.class);
+    veins.enabled = true; veins.timePercent = 37; veins.tools.put("12", List.of(277));
+    PowerConfig.save("veinMining", veins);
+    byte[] saved = Files.readAllBytes(config);
+    ConfigDefaults.prepare(game);
+    var reloaded = PowerConfig.read("veinMining", local.luke.power.mining.VeinSettings.class);
+    reloaded.validate(); assertTrue(reloaded.enabled && reloaded.accepts(12, 277));
+    assertEquals(37, reloaded.timePercent);
+    try (var transaction = FileTransaction.begin(game, List.of(config))) {
+      veins.timePercent = 99; PowerConfig.save("veinMining", veins);
+    }
+    assertArrayEquals(saved, Files.readAllBytes(config));
+    FileTransaction.begin(game, List.of(config));
+    veins.tools.clear(); PowerConfig.save("veinMining", veins);
+    FileTransaction.recover(game); ConfigDefaults.prepare(game);
+    assertArrayEquals(saved, Files.readAllBytes(config));
+    assertTrue(PowerConfig.read("veinMining", local.luke.power.mining.VeinSettings.class).accepts(12, 277));
   }
 }

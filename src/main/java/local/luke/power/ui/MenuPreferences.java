@@ -10,7 +10,8 @@ public final class MenuPreferences {
   public static final class Values {
     public boolean autoApply = true;
     public boolean pauseToOptions, blinkingChatCursor;
-    public boolean debugTimeOfDay;
+    public boolean blinkingUiCursor = true;
+    public boolean debugTimeOfDay, useFeetYCoordinates;
     public String debugTextColor = "#FFFFFF";
     public String musicBrowserDirectory = "";
     public List<String> colours = new ArrayList<>();
@@ -27,9 +28,10 @@ public final class MenuPreferences {
 
   private static Values current = load();
   private static Boolean pausePreview;
-  private static Boolean blinkPreview;
+  private static Boolean blinkPreview, uiBlinkPreview;
   private static String debugColorPreview;
   private static Boolean debugTimePreview;
+  private static Boolean feetYPreview;
 
   private static Values load() {
     try {
@@ -65,14 +67,19 @@ public final class MenuPreferences {
     pausePreview = enabled;
   }
 
+  public static boolean blinkingUiCursor() { return uiBlinkPreview == null ? current.blinkingUiCursor : uiBlinkPreview; }
+  public static void previewUiBlink(boolean enabled) { uiBlinkPreview = enabled; syncPresentation(); }
   public static boolean blinkingChatCursor() { return blinkPreview == null ? current.blinkingChatCursor : blinkPreview; }
   public static boolean debugTimeOfDay() { return debugTimePreview == null ? current.debugTimeOfDay : debugTimePreview; }
   public static void previewDebugTime(boolean enabled) { debugTimePreview = enabled; }
+  public static boolean useFeetYCoordinates() { return feetYPreview == null ? current.useFeetYCoordinates : feetYPreview; }
+  public static void previewFeetY(boolean enabled) { feetYPreview = enabled; }
   public static String debugTextColor() { return debugColorPreview == null ? current.debugTextColor : debugColorPreview; }
   public static void previewBlink(boolean enabled) { blinkPreview = enabled; syncPresentation(); }
   public static void previewDebugColor(String color) { LightSettings.rgb(color); debugColorPreview = color; syncPresentation(); }
   public static void syncPresentation() {
     InterfaceState.blinkingChatCursor = blinkingChatCursor();
+    InterfaceState.blinkingUiCursor = blinkingUiCursor();
     InterfaceState.debugTextColor = LightSettings.rgb(debugTextColor());
   }
 }

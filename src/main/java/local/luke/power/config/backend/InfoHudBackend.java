@@ -47,7 +47,7 @@ public final class InfoHudBackend implements Backend {
         case "textColor" -> "Choose the text colour. Opacity controls transparency separately.";
         case "opacity" -> "Text visibility from transparent at 0% to solid at 100%.";
         case "hideWithDebug" -> "Hide this cluster while the F3 debug menu is open.";
-        case "coordinates" -> "Show block coordinates at the player's feet, or at the camera in freecam.";
+        case "coordinates" -> "Show block coordinates using Use feet Y coordinates. Freecam and spectator always use the base of the head.";
         case "direction" -> "Show the facing direction and coordinate axis. Follows the camera in freecam.";
         case "biome" -> "Show the biome at the player, or at the camera in freecam.";
         case "timeOfDay" -> "Show the world's daylight time with AM or PM, including frozen daylight.";

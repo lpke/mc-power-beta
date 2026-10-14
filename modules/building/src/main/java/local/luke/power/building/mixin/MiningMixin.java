@@ -14,6 +14,7 @@ public abstract class MiningMixin {
 
   @Inject(method = "method_1721", at = @At("TAIL"))
   private void power$clickMining(int x, int y, int z, int face, CallbackInfo ci) {
-    if (local.luke.power.building.config.Config.current().clickMining && field_2187 > 0) field_2187 = 0;
+    if (local.luke.power.input.ClickMining.enabled(local.luke.power.building.config.Config.current().clickMining)
+        && field_2187 > 0) field_2187 = 0;
   }
 }

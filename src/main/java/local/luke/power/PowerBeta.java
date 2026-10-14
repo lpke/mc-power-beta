@@ -9,6 +9,7 @@ public final class PowerBeta {
   private static boolean ready;
 
   public static void tick(Minecraft mc) {
+    local.luke.power.ui.TextDrag.context(mc.currentScreen, org.lwjgl.opengl.Display.isActive());
     var saveFailure = local.luke.power.storage.PowerConfig.takeSaveFailure();
     if (saveFailure != null) {
       LOG.error("Could not save gameplay settings; retaining changes for retry", saveFailure);
@@ -19,9 +20,14 @@ public final class PowerBeta {
     local.luke.power.light.LightOverlay.tick(mc);
     local.luke.power.render.RenderControls.tick(mc);
     local.luke.power.hud.InfoHud.tick(mc);
+    local.luke.power.mining.VeinMining.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.input.CameraView.configure(
+          () -> local.luke.power.visual.VisualConfig.current().thirdPersonDistance,
+          local.luke.power.controls.util.ModOptions::isFrontViewEnabled);
       local.luke.power.input.TweakLifecycle.register("interface", () -> {
+        local.luke.power.mining.VeinMining.reset();
         mc.options.cinematicMode = false;
         local.luke.power.render.RenderControls.reset(mc);
         if (local.luke.power.light.LightConfig.current().enabled) local.luke.power.light.LightConfig.toggle();
@@ -39,7 +45,7 @@ public final class PowerBeta {
       });
       local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
       local.luke.power.input.Bindings.availability(id ->
-          !id.equals("power_creative.picker") && !id.equals("power_creative.modifier") && !id.equals("power_beta.fullBright")
+          !id.equals("power_creative.picker") && !id.equals("power_creative.modifier")
               || local.luke.power.permissions.CommandPermissions.cheatsEnabled());
       local.luke.power.video.VideoConfig.current();
       try {

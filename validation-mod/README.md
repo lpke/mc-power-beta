@@ -8,6 +8,18 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `interface-170 check`: shared F3/HUD eye/feet/head-base policy, ghost visibility,
+  non-cheat full bright, search chevrons and cluster labels, native/custom text selection,
+  and independent UI cursor preview/rollback. Run after `new-world`.
+  `ghost-freecam`, `ghost-spectator` and their `-look` variants prepare visual head checks.
+  `text`/`state` support real mouse/clipboard checks with native and raw input.
+  `keys`/`key-state` bind F20 to the temporary click-mining override for physical input checks.
+  Use `save`, restart, then `saved` to verify persisted preferences and cleared temporary state.
+- `mining-170`: actual torch/shovel mining, most-worn tool selection, breakage and exclusions;
+  vein time percentage/minimum, obsidian-speed composition, per-block wear, tool breakage,
+  limits, cancellation, torch integration, fire spread, and temporary click-mining lifecycle.
+  Run in a focused disposable client after `new-world`.
+
 - `release-162`: creative preview reach in survival, creative, spectator and freecam,
   independent block/entity limits, interpolation and occlusion; slab settings placement;
   F3/custom HUD camera coordinates, facing, biome, chunk, light and slime-chunk data;
