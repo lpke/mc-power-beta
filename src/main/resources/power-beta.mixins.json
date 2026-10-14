@@ -109,7 +109,8 @@
     "LavaIgnitionMixin",
     "SpectatorOutlineMixin",
     "SpectatorSplashMixin",
-    "UnderwaterOverlayMixin"
+    "UnderwaterOverlayMixin",
+    "FullBrightFogMixin"
   ],
   "injectors": {
     "defaultRequire": 1

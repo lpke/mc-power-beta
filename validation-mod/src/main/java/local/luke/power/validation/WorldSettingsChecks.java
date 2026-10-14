@@ -324,9 +324,21 @@ final class WorldSettingsChecks {
         input.power$key('\0',Keyboard.KEY_RIGHT);String folder=(String)field(screen,"field_634");
         var create=input.power$buttons().stream().filter(b->b.id==0).findFirst().orElseThrow();input.power$click(create.x+5,create.y+5,0);
         expectDifficulty(mc,value);check(((CheatWorld)mc.world.method_262()).power$cheatsEnabled()==(value%2==1),"cheat choice lost");
+        String expectedMode=value%2==1?"CREATIVE":"SURVIVAL";
+        check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals(expectedMode),"creation mode differs from cheat choice");
+        mc.tick();
+        check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals(expectedMode),"first tick changed creation mode");
         mc.world.method_195(true,null);mc.setWorld(null);
         mc.interactionManager=new net.minecraft.SingleplayerInteractionManager(mc);mc.method_2120(folder,name,17320261007L);
         expectDifficulty(mc,value);mc.tick();expectDifficulty(mc,value);
+        check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals(expectedMode),"save/reload lost initial mode");
+        // Enabling cheats later must not change the existing player's mode.
+        CreativeVehicleChecks.mode(mc,"SURVIVAL");
+        var cheatState=(CheatWorld)mc.world.method_262();cheatState.power$cheatsEnabled(false);cheatState.power$cheatsEnabled(true);mc.tick();
+        check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals("SURVIVAL"),"existing-world cheats edit changed mode");
+        // Leave a different mode behind before the next creation to catch leaked state.
+        CreativeVehicleChecks.mode(mc,value%2==0?"SPECTATOR":"CREATIVE");
+        cheatState.power$cheatsEnabled(value%2==1);
         Files.writeString(Path.of("power-beta-difficulty-"+value+".txt"),folder);
         mc.setWorld(null);
       });

@@ -6,6 +6,8 @@
 
 - Silence water-entry splashes in spectator mode.
 - Add an option to remove the underwater texture overlay, and hide it automatically while full bright is active.
+- Let full bright see through underwater fog, using the configured terrain fog distance.
+- Start new worlds in Creative when Cheats is on; keep Survival when it is off.
 - Warn before discarding unsaved block rules and item or tool selections.
 - Draw the creative Clear inventory tooltip above inventory items.
 

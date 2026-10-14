@@ -5028,7 +5028,7 @@
     "page": "Video",
     "group": "Textures",
     "label": "Remove underwater overlay",
-    "description": "Hide the underwater texture overlay. Full bright also hides it while active, without changing this preference. Water surfaces and fog are unchanged.",
+    "description": "Hide the underwater texture overlay without changing water surfaces or fog. Full bright hides this overlay and uses normal distance fog while active, without changing this preference.",
     "default": false,
     "restart": false,
     "order": 6

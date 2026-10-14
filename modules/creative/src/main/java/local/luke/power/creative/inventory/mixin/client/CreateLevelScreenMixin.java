@@ -1,5 +1,7 @@
 package local.luke.power.creative.inventory.mixin.client;
 
+import local.luke.power.creative.Modes;
+import local.luke.power.creative.api.GameMode;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.menu.CreateLevelScreen;
 import net.minecraft.client.gui.widgets.Button;
@@ -30,6 +32,7 @@ public abstract class CreateLevelScreenMixin extends Screen {
 		else if (button.id == 0) {
 			if (minecraft.player != null) {
 				((local.luke.power.permissions.CheatWorld) minecraft.level.getProperties()).power$cheatsEnabled(cheats);
+				Modes.change(minecraft, cheats ? GameMode.CREATIVE : GameMode.SURVIVAL);
 			}
 		}
 	}

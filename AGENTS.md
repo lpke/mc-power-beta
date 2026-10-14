@@ -293,3 +293,10 @@
 - Block-rule and item-picker exits confirm unsaved drafts, including nested tool selections.
   Modal input must not reach the editor behind it. Underwater overlay overrides affect
   only rendering; full bright temporarily hides that texture without changing its preference.
+  Full bright uses normal terrain fog underwater, preserving fog-distance controls and
+  native water physics, lava fog and cloud fog. Disabling it restores native water fog.
+  The water-material override is scoped to fog rendering on its owning thread, including
+  StationAPI's colour hooks; it must not affect other fluid queries.
+
+- The creation-screen cheats choice also selects the initial player mode: Creative when
+  on, Survival when off. Existing-world cheats edits never promote the player to Creative.

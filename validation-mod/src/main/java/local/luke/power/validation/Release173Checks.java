@@ -24,6 +24,7 @@ public final class Release173Checks {
   public static boolean tooltipDepth, tooltipLighting;
 
   static void run(Minecraft mc, String action) throws Exception {
+    if (action.startsWith("fog")) { UnderwaterFogChecks.run(mc,action); return; }
     if (action.equals("editors")) { Draft173Checks.run(mc); return; }
     failures=0;mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);
     FreecamPreviewChecks.active(false);

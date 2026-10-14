@@ -84,7 +84,9 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 
 - `world-settings-check`: difficulty transactions, scope notes, hidden cheat rows/tabs,
   command exemptions, input priority and Peaceful behaviour. Run after `new-world`.
-  `world-settings-create` creates four disposable saves through the real creation UI.
+  `world-settings-create` creates four disposable saves through the real creation UI,
+  checking the initial Creative/Survival mode against the cheats choice, resize, save/reload
+  and isolation from the previous world's mode or later cheats edits.
   `world-settings-reload` checks those saves across switching, dimensions and restarts.
 - `cleanup`: current config, world-cycle persistence, simulation and scheduled
   updates, sleep combinations, sign editing, spectator exits, item validation and
@@ -374,3 +376,8 @@ and `release-171 picker` for ranked fuzzy item searches and all picker draft che
 underwater/fire/block overlay draws, full-bright restoration, unsaved nested drafts,
 and final tooltip ordering over slots/cursor stacks in both creative inventory views.
 Run in a muted disposable world with the test window focused.
+
+`release-173 fog` checks native OpenGL fog colour/distance underwater with full bright,
+fog-density and photo-mode controls, toggle restoration, and unchanged lava/cloud fog.
+Use `fog-scene`, `fog-bright`, `fog-native` and `fog-above` for a submerged/above-water
+comparison with distant markers. These scene commands change the disposable world.
