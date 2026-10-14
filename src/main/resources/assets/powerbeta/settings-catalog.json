@@ -3802,7 +3802,7 @@
     "group": "Rendering",
     "label": "Original far-distance fog",
     "description": "Use Beta's original far-fog values at exactly 12 chunks. Other distances keep their normal fog.",
-    "order": 4
+    "order": 5
   },
   "video.clouds": {
     "page": "Video",
@@ -3819,13 +3819,13 @@
     "order": 2
   },
   "video.fogCycle": {
-    "order": 3
+    "order": 4
   },
   "native.opengl": {
-    "order": 5
+    "order": 6
   },
   "native.anaglyph": {
-    "order": 6
+    "order": 7
   },
   "native.clouds": {
     "order": 0
@@ -5032,5 +5032,18 @@
     "default": false,
     "restart": false,
     "order": 6
+  },
+  "visual.underwaterFogDensity": {
+    "page": "Video",
+    "group": "Rendering",
+    "label": "Underwater fog density",
+    "description": "Underwater fog as a percentage of Beta's normal density. 100% is vanilla; 0% removes water fog while keeping normal lighting and terrain-distance fog. Full bright overrides this to 0% while active.",
+    "order": 3,
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "unit": "%",
+    "default": 100,
+    "restart": false
   }
 }

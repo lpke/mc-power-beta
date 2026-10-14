@@ -299,4 +299,12 @@
   StationAPI's colour hooks; it must not affect other fluid queries.
 
 - The creation-screen cheats choice also selects the initial player mode: Creative when
-  on, Survival when off. Existing-world cheats edits never promote the player to Creative.
+  on, Survival when off. That initial mode selection is silent; later changes keep their
+  normal messages. Existing-world cheats edits never promote the player to Creative.
+
+- Underwater fog density is 0–100 percent, default 100. Zero and full bright use normal
+  terrain fog; other values scale native water fog without changing lighting or other fluids.
+  Preview/Cancel restore it immediately, and full bright never changes the saved percentage.
+- Only plain F3 debug plus plain F3/F4 mode-picker bindings defer the debug toggle until
+  release. Cycling consumes that toggle. Cancel pending input on menus, focus/world loss or
+  binding changes; keep all remapped/chorded bindings immediate and respect input ownership.

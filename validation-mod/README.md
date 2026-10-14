@@ -381,3 +381,11 @@ Run in a muted disposable world with the test window focused.
 fog-density and photo-mode controls, toggle restoration, and unchanged lava/cloud fog.
 Use `fog-scene`, `fog-bright`, `fog-native` and `fog-above` for a submerged/above-water
 comparison with distant markers. These scene commands change the disposable world.
+
+`release-174 fog` also checks the underwater density slider, live percentages, full-bright
+overrides and Cancel. Run `fog-save`, restart, then `fog-saved` for persistence and rollback.
+`world-settings-create` checks silent initial mode selection and normal later mode messages.
+`release-174 keys default|shown|debug-remap|modifier-remap|cycle-remap|chord|disabled|no-cheats`
+prepares physical debug-key checks; `keys-state` writes debug state and rendered-frame counts.
+Run `python3 validation-mod/tools/debug_keys.py /path/to/clone/.minecraft --display :97`
+for press/release, cycling, remaps, focus/menu/world cancellation and held movement.

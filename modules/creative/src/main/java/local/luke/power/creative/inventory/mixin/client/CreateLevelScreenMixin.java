@@ -32,7 +32,7 @@ public abstract class CreateLevelScreenMixin extends Screen {
 		else if (button.id == 0) {
 			if (minecraft.player != null) {
 				((local.luke.power.permissions.CheatWorld) minecraft.level.getProperties()).power$cheatsEnabled(cheats);
-				Modes.change(minecraft, cheats ? GameMode.CREATIVE : GameMode.SURVIVAL);
+				Modes.change(minecraft, cheats ? GameMode.CREATIVE : GameMode.SURVIVAL, false);
 			}
 		}
 	}

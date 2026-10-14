@@ -1,6 +1,11 @@
 package local.luke.power.creative.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.client.options.GameOptions;
+import org.lwjgl.input.Keyboard;
+import org.objectweb.asm.Opcodes;
 import local.luke.power.creative.*;
 import local.luke.power.creative.command.CreativeCommands;
 import net.minecraft.client.Minecraft;
@@ -34,6 +39,18 @@ public abstract class ClientMixin {
   @Inject(method = "tick", at = @At("HEAD"))
   private void power$tick(CallbackInfo ci) {
     ClientRuntime.tick((Minecraft) (Object) this);
+  }
+
+  @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Keyboard;getEventKeyState()Z",
+      ordinal = 0, remap = false, shift = At.Shift.AFTER))
+  private void power$debugEvent(CallbackInfo ci) {
+    DebugKey.event((Minecraft)(Object)this, Keyboard.getEventKey(), Keyboard.getEventKeyState(), Keyboard.isRepeatEvent());
+  }
+
+  @WrapOperation(method = "tick", at = @At(value = "FIELD",
+      target = "Lnet/minecraft/client/options/GameOptions;debugHud:Z", opcode = Opcodes.PUTFIELD))
+  private void power$debugToggle(GameOptions options, boolean shown, Operation<Void> original) {
+    if (!DebugKey.deferred()) original.call(options, shown);
   }
 
   @Inject(method = "init", at = @At("RETURN"))

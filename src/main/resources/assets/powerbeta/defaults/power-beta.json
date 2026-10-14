@@ -352,7 +352,8 @@
       "spectatorFullBright": false,
       "limitCapeRotation": true,
       "spectatorBlockOutlines": false,
-      "removeUnderwaterOverlay": false
+      "removeUnderwaterOverlay": false,
+      "underwaterFogDensity": 100
     },
     "power_environment:config": {
       "MISSING_ACHIEVEMENTS_CONFIG": {

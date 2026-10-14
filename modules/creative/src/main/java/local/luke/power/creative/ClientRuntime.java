@@ -70,9 +70,11 @@ public final class ClientRuntime {
       world = mc.level;
       FlightController.reset();
     }
+    DebugKey.tick(mc);
     boolean modifier = local.luke.power.input.Bindings.down(Keys.MODIFIER), picker = local.luke.power.input.Bindings.down(Keys.PICKER);
     if (modifier && !modifierDown) debugBefore = mc.options.debugHud;
     if (active(mc) && Config.current().modePicker && modifier && picker && !pickerDown) {
+      DebugKey.cancel();
       mc.options.debugHud = debugBefore;
       mc.openScreen(new ModePickerScreen());
     }

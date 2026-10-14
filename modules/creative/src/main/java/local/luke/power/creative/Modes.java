@@ -40,6 +40,10 @@ public final class Modes {
   }
 
   public static boolean change(Minecraft mc, GameMode mode) {
+    return change(mc, mode, true);
+  }
+
+  public static boolean change(Minecraft mc, GameMode mode, boolean announce) {
     if (!ClientRuntime.local(mc)) return false;
     String denied = denial(mode);
     if (!denied.isEmpty()) { mc.overlay.addChatMessage("§c" + denied + "§r"); return false; }
@@ -56,7 +60,7 @@ public final class Modes {
     }
     state.power_applyMode(mode);
     FlightController.reset();
-    mc.overlay.addChatMessage("\u00a77Set own game mode to \u00a7a" + mode.label + "\u00a77 Mode\u00a7r");
+    if (announce) mc.overlay.addChatMessage("\u00a77Set own game mode to \u00a7a" + mode.label + "\u00a77 Mode\u00a7r");
     return true;
   }
 

@@ -69,7 +69,8 @@ public final class RenderControls {
   public static boolean renderingFullBright() { return active && renderDepth > 0 && Thread.currentThread() == renderThread; }
   public static void beginRender() { if (renderDepth == 0) renderThread = Thread.currentThread(); renderDepth++; }
   public static void endRender() { renderDepth--; }
-  public static boolean clearWaterFog() { return active && fogDepth > 0 && Thread.currentThread() == fogThread; }
+  public static float waterFogScale() { return active ? 0 : VisualConfig.current().underwaterFogDensity / 100F; }
+  public static boolean clearWaterFog() { return waterFogScale() == 0 && fogDepth > 0 && Thread.currentThread() == fogThread; }
   public static void beginFog() { if (fogDepth == 0) fogThread = Thread.currentThread(); fogDepth++; }
   public static void endFog() { fogDepth--; }
 }

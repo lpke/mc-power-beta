@@ -322,7 +322,9 @@ final class WorldSettingsChecks {
         ((net.minecraft.client.gui.widget.TextFieldWidget)field(screen,"field_632")).setText(name);
         ((net.minecraft.client.gui.widget.TextFieldWidget)field(screen,"field_633")).setText("17320261007");
         input.power$key('\0',Keyboard.KEY_RIGHT);String folder=(String)field(screen,"field_634");
-        var create=input.power$buttons().stream().filter(b->b.id==0).findFirst().orElseThrow();input.power$click(create.x+5,create.y+5,0);
+        var create=input.power$buttons().stream().filter(b->b.id==0).findFirst().orElseThrow();
+        var creationMessages=ChatChecks.record(()->input.power$click(create.x+5,create.y+5,0));
+        check(creationMessages.stream().noneMatch(t->t.contains("Set own game mode")),"initial mode selection announced in chat");
         expectDifficulty(mc,value);check(((CheatWorld)mc.world.method_262()).power$cheatsEnabled()==(value%2==1),"cheat choice lost");
         String expectedMode=value%2==1?"CREATIVE":"SURVIVAL";
         check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals(expectedMode),"creation mode differs from cheat choice");
@@ -336,6 +338,10 @@ final class WorldSettingsChecks {
         CreativeVehicleChecks.mode(mc,"SURVIVAL");
         var cheatState=(CheatWorld)mc.world.method_262();cheatState.power$cheatsEnabled(false);cheatState.power$cheatsEnabled(true);mc.tick();
         check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals("SURVIVAL"),"existing-world cheats edit changed mode");
+        Class modeType=Class.forName("local.luke.power.creative.api.GameMode");
+        var messages=ChatChecks.record(()->Class.forName("local.luke.power.creative.Modes").getMethod("change",Minecraft.class,modeType)
+            .invoke(null,mc,Enum.valueOf(modeType,"CREATIVE")));
+        check(messages.stream().filter(t->t.contains("Set own game mode")).count()==1,"normal mode change message missing or duplicated");
         // Leave a different mode behind before the next creation to catch leaked state.
         CreativeVehicleChecks.mode(mc,value%2==0?"SPECTATOR":"CREATIVE");
         cheatState.power$cheatsEnabled(value%2==1);

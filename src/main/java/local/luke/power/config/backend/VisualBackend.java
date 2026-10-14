@@ -16,13 +16,14 @@ public final class VisualBackend implements Backend {
     List<Setting> entries = new ArrayList<>();
     for (var f : VisualSettings.class.getFields()) {
       boolean distance = f.getName().equals("thirdPersonDistance");
+      boolean waterFog = f.getName().equals("underwaterFogDensity");
       entries.add(Catalog.setting("visual." + f.getName(), b.id(), distance ? "Camera" : "Video",
           distance ? "Third person" : "Texture overrides", distance ? "Camera distance" : Catalog.words(f.getName()),
           distance ? "Distance behind the player in blocks. Walls can move the camera closer; 4 is vanilla."
               : "Overrides only this texture in the selected pack. Can be combined with the other overrides.",
-          distance ? Setting.Kind.DECIMAL : Setting.Kind.BOOLEAN,
+          distance ? Setting.Kind.DECIMAL : waterFog ? Setting.Kind.INTEGER : Setting.Kind.BOOLEAN,
           Catalog.JSON.toJsonTree(f.get(current)), Catalog.JSON.toJsonTree(f.get(defaults)),
-          distance ? 1 : 0, distance ? 12 : 1, distance ? .25 : 1, List.of(), false));
+          distance ? 1 : 0, distance ? 12 : waterFog ? 100 : 1, distance ? .25 : 1, List.of(), false));
     }
     session.add(b, entries);
   }

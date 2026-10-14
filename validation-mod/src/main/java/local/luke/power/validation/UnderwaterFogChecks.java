@@ -47,6 +47,25 @@ final class UnderwaterFogChecks {
     try {
       cheats.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");RenderControls.reset(mc);
       RenderControls.FULL_BRIGHT.code=114;Bindings.configure(Map.of());field(renderer,"field_2330",false);field(renderer,"field_2350",128F);
+      test("water fog slider previews native percentages without enabling full bright",()->{
+        var setting=find(session,"visual.underwaterFogDensity");
+        check(setting.slider() && setting.defaultValue.getAsInt()==100 && setting.min==0 && setting.max==100,"water fog slider metadata");
+        bright(false);fluid(mc,9);
+        for(int percentage:new int[]{100,75,50,25,1,0}) {
+          setting.parse(Integer.toString(percentage));session.preview(true);colour.invoke(renderer,1F);fog.invoke(renderer,1,1F);
+          check(!RenderControls.fullBright() && !RenderControls.renderingFullBright(),"slider enabled full bright");
+          if(percentage==0)check(GL11.glGetInteger(GL11.GL_FOG_MODE)==GL11.GL_LINEAR,"zero retained water fog");
+          else check(GL11.glGetInteger(GL11.GL_FOG_MODE)==GL11.GL_EXP && Math.abs(GL11.glGetFloat(GL11.GL_FOG_DENSITY)-.1F*percentage/100F)<.000001,"wrong water density "+percentage);
+          check(mc.player.isInFluid(Material.WATER),"slider changed water physics");
+          bright(true);fog.invoke(renderer,1,1F);
+          check(GL11.glGetInteger(GL11.GL_FOG_MODE)==GL11.GL_LINEAR && VisualConfig.current().underwaterFogDensity==percentage,"full bright changed saved percentage");
+          bright(false);
+        }
+        setting.parse("100");session.preview(true);
+        var draft=SettingsRegistry.open(mc);find(draft,"visual.underwaterFogDensity").parse("25");draft.preview(true);
+        check(VisualConfig.current().underwaterFogDensity==25,"preview did not apply");draft.discard();
+        check(VisualConfig.current().underwaterFogDensity==100,"Cancel did not restore fog");
+      });
       test("overlay removal alone retains native water fog",()->{
         find(session,"visual.removeUnderwaterOverlay").parse("true");session.preview(true);fluid(mc,9);bright(false);
         check(mc.player.isInFluid(Material.WATER),"water camera not submerged");fog.invoke(renderer,1,1F);

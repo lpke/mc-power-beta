@@ -29,7 +29,8 @@
     "Water173Capture",
     "Overlay173Capture",
     "Tooltip173Capture",
-    "Item173Capture"
+    "Item173Capture",
+    "Debug174Capture"
   ],
   "injectors": {
     "defaultRequire": 1

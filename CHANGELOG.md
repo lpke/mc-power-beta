@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.7.4] - 2026-10-15
+
+- Add an underwater fog density slider from clear water at 0% to vanilla fog at 100%, with full bright overriding it while active.
+- Start new Creative worlds silently while keeping normal game-mode change messages.
+- Defer the debug toggle until F3 is released for the default F3/F4 game-mode controls, avoiding flicker when switching modes. Remapped controls keep their normal timing.
+
 ## [1.7.3] - 2026-10-15
 
 - Silence water-entry splashes in spectator mode.
