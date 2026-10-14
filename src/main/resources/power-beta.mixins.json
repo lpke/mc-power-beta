@@ -106,7 +106,8 @@
     "VeinMiningMixin",
     "VeinProgressMixin",
     "VeinDurabilityMixin",
-    "LavaIgnitionMixin"
+    "LavaIgnitionMixin",
+    "SpectatorOutlineMixin"
   ],
   "injectors": {
     "defaultRequire": 1

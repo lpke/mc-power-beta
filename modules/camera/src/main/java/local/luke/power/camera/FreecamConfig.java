@@ -39,11 +39,6 @@ public class FreecamConfig {
         public Float drag = 4f;
 
         @ConfigEntry(
-                name = "Show Freecam",
-                description = "When this option is enabled, a 3D camera is rendered at the position of the freecam"
-        )
-        public Boolean showCamera = true;
-        @ConfigEntry(
                 name = "Classic Freecam Movement",
                 description = "When this option is enabled the freecam will move like in older versions of Freecam"
         )

@@ -63,23 +63,5 @@ public class Config {
                 description = "Restart required for changes to take effect"
         )
         public Boolean enableMultiplayerServerChanges = true;
-
-
-
-        @ConfigEntry(
-                name = "Enable Wooden Sign Changes",
-                description = "Restart required for changes to take effect"
-        )
-        public Boolean enableWoodenSignChanges = true;
-
-
-
-
-
-
-
-
-
-
     }
 }

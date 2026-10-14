@@ -43,7 +43,12 @@ public final class ItemPickerScreen extends UiScreen {
   public void removed(){Keyboard.enableRepeatEvents(false);scrollbar.release();}
   private void filter(){
     String query=search.text().strip().toLowerCase(Locale.ROOT);
-    shown=catalogue.stream().filter(e->(!selectedOnly || selected.contains(e.value())) && e.matches(query)).toList();
+    record Match(ItemCatalogue.Entry entry, int score) {}
+    shown=catalogue.stream().filter(e->!selectedOnly || selected.contains(e.value()))
+        .map(e->new Match(e,e.searchScore(query)))
+        .filter(m->m.score()<FuzzySearch.NONE)
+        .sorted(Comparator.comparingInt(Match::score))
+        .map(Match::entry).toList();
   }
   private void choose(String value){
     if(multiple) {if(!selected.remove(value))selected.add(value);}

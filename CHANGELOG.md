@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [1.7.2] - 2026-10-15
+
+- Hide target block outlines in spectator by default, with an option to show them.
+- Remove the saved freecam camera model and its setting.
+- Find items and blocks with fuzzy search, including abbreviations and small typos.
+- Remove clipboard shortcut hints from value editors.
+- Restore the native sign editor and sign text rendering and storage.
+
 ## [1.7.1] - 2026-10-15
 
 - Keep hotbar recovery writes off the game thread and reuse inventory snapshots to reduce swap stutter.

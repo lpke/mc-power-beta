@@ -93,9 +93,9 @@ public final class ValueScreen extends UiScreen {
     text(fit(error, span()), left(), height / 2 + 18, 0xff7777);
     String hint =
         setting.kind == Setting.Kind.LIST
-            ? "Use a JSON list. Ctrl+A selects all; Ctrl+V pastes."
+            ? "Use a JSON list."
             : setting.kind == Setting.Kind.TEXT
-                ? "Ctrl+A selects all; Ctrl+V pastes."
+                ? ""
                 : "Range: " + setting.rangeText();
     text(fit(hint, span()), left(), height / 2 + 36, 0xaaaaaa);
     button("Done", width / 2 - 102, height - 28, 100, 20, x, y, true);

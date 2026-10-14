@@ -50,6 +50,17 @@ final class PickerChecks {
           check(rejected,"invalid custom block accepted: "+invalid);
         }
       });
+      test("item searches rank names, typos, abbreviations and technical IDs",()->{
+        ItemPickerScreen s=new ItemPickerScreen(parent,"Pick items",ItemCatalogue.Domain.FILTER,List.of(),true,v->{});mc.setScreen(s);
+        for(String text:List.of("diamond pickaxe","diamon pikaxe","dp","pickaxe diamond","minecraft:diamond_pickaxe","278")) {
+          query(s,text);var results=(List<ItemCatalogue.Entry>)field(s,"shown");
+          check(!results.isEmpty() && results.get(0).id()==278,"diamond pickaxe not first for "+text);
+        }
+        query(s,"35:4");check(((List<ItemCatalogue.Entry>)field(s,"shown")).get(0).value().equals("35:4"),"metadata ID rank");
+        query(s,"wool potato");check(((List<?>)field(s,"shown")).isEmpty(),"missing word ignored");
+        query(s,"");var results=(List<ItemCatalogue.Entry>)field(s,"shown");
+        check(results.size()==ItemCatalogue.entries(ItemCatalogue.Domain.FILTER).size(),"empty query lost entries");
+      });
       test("every item-ID setting opens the shared editor",()->{
         int count=0;
         for(Setting setting:parent.session().settings())if(ItemEditors.accepts(setting)){

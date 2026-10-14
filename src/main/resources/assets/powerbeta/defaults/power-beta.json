@@ -22,7 +22,6 @@
       "speed": 10.0,
       "drag": 4.0,
       "collision": true,
-      "showCamera": true,
       "classicMovement": false,
       "enabled": false,
       "playerMovementMessages": false,
@@ -269,8 +268,7 @@
       "enableDebugGraphChanges": true,
       "enableDebugGraphModernToggle": true,
       "enableDebugMenuWorldSeed": true,
-      "enableMultiplayerServerChanges": true,
-      "enableWoodenSignChanges": true
+      "enableMultiplayerServerChanges": true
     },
     "title": {
       "logo": {
@@ -352,7 +350,8 @@
       "entityRenderingMessages": false,
       "fullBrightMessages": false,
       "spectatorFullBright": false,
-      "limitCapeRotation": true
+      "limitCapeRotation": true,
+      "spectatorBlockOutlines": false
     },
     "power_environment:config": {
       "MISSING_ACHIEVEMENTS_CONFIG": {

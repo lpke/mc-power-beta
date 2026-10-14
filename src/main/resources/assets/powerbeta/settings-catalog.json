@@ -155,15 +155,6 @@
     "restart": false,
     "order": 5
   },
-  "power_camera:config.showCamera": {
-    "page": "Camera",
-    "group": "Free camera",
-    "label": "Show freecam",
-    "description": "When this option is enabled, a 3D camera is rendered at the position of the freecam",
-    "default": true,
-    "restart": false,
-    "order": 7
-  },
   "power_camera:config.classicMovement": {
     "page": "Camera",
     "group": "Free camera",
@@ -1178,14 +1169,6 @@
     "page": "Fixes",
     "group": "Client fixes",
     "label": "Multiplayer server changes",
-    "description": "Restart required for changes to take effect",
-    "default": true,
-    "restart": true
-  },
-  "power_client_fixes:config.enableWoodenSignChanges": {
-    "page": "Fixes",
-    "group": "Client fixes",
-    "label": "Wooden sign changes",
     "description": "Restart required for changes to take effect",
     "default": true,
     "restart": true
@@ -5033,5 +5016,12 @@
     "default": true,
     "restart": false,
     "order": 8
+  },
+  "visual.spectatorBlockOutlines": {
+    "page": "Creative",
+    "group": "Spectator",
+    "label": "Block outlines in spectator",
+    "description": "Show the target block outline in spectator mode. Does not affect outlines in other game modes.",
+    "order": 9
   }
 }

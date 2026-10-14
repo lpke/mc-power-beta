@@ -73,6 +73,25 @@ public final class SignEditingChecks {
           checkClosedAndSaved(mc, sign, expected);
         });
       }
+      test("native sign layout, append editing, limits and direct text storage", () -> {
+        mc.world.method_200(32, 101, 32, 0);
+        mc.world.method_200(32, 100, 32, 1);mc.world.method_200(32, 101, 32, 63);
+        var sign=(SignBlockEntity)mc.world.method_1777(32,101,32);
+        mc.player.method_489(sign);var input=(ScreenInput)mc.currentScreen;
+        var done=input.power$buttons().get(0);
+        check(done.y==mc.currentScreen.height/4+120,"native Done layout replaced");
+        for(int i=0;i<20;i++)input.power$key('a',Keyboard.KEY_A);
+        check(sign.texts[0].length()==15,"native line limit lost");
+        input.power$key('\0',Keyboard.KEY_LEFT);input.power$key('\0',Keyboard.KEY_BACK);
+        check(sign.texts[0].equals("a".repeat(14)),"native append/backspace editing changed");
+        input.power$key('\0',Keyboard.KEY_UP);input.power$key('z',Keyboard.KEY_Z);
+        check(sign.texts[3].equals("z"),"native row navigation lost");
+        sign.texts[1]="external update";
+        mc.currentScreen.render(-1,-1,1);
+        check(org.lwjgl.opengl.GL11.glGetError()==0,"native sign rendering failed");
+        input.power$key('\0',Keyboard.KEY_ESCAPE);
+        checkClosedAndSaved(mc,sign,new String[]{"a".repeat(14),"external update","","z"});
+      });
       test("Escape and Done each send one multiplayer update with all four lines", () -> {
         var sign = new SignBlockEntity();
         sign.x = 5; sign.y = 102; sign.z = 7;

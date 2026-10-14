@@ -85,7 +85,6 @@
   "power_client_fixes:config.enableDebugGraphChanges": "Makes the debug performance graph accessible through its key binding.",
   "power_client_fixes:config.enableDebugMenuWorldSeed": "Shows the world seed in the debug overlay.",
   "power_client_fixes:config.enableMultiplayerServerChanges": "Adds the saved server list and improved multiplayer connection screens.",
-  "power_client_fixes:config.enableWoodenSignChanges": "Adds improved text editing and character handling to signs.",
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_MONSTER": "Target population cap for naturally spawning hostile mobs. Does not limit existing or command-spawned mobs.",
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_PASSIVE": "Target population cap for naturally spawning land animals.",
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_SQUID": "Target population cap for naturally spawning water creatures.",

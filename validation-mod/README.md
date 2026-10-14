@@ -363,4 +363,9 @@ exercise the corresponding runtime controls. Load a skin with `skin NAME` and ve
 `skin check` before `cape-checks`; it captures actual renderer angles without changing
 saved movement data. `release-160 save|saved` includes cactus-protection persistence.
 
-For 1.7.1 frame checks, run `release-171 spectator-scene`, wait for normal frames, then `release-171 perspective-held`. Use `normal-scene` then `normal-perspective` to check Beta still forces first person for an ordinary player inside terrain. Disable `power_camera:config.showCamera` before inspecting the ghost head; the saved-camera marker can obscure it. `release-171 head-probe` captures one native head render, and `release-171 head-result` verifies changed skin pixels and writes `ghost-pass.png` in the disposable game directory.
+For 1.7.1 frame checks, run `release-171 spectator-scene`, wait for normal frames, then `release-171 perspective-held`. Use `normal-scene` then `normal-perspective` to check Beta still forces first person for an ordinary player inside terrain. `release-171 head-probe` captures one native head render, and `release-171 head-result` verifies changed skin pixels and writes `ghost-pass.png` in the disposable game directory.
+
+`release-172` checks native outline draws in survival, creative and spectator, the live
+outline preference and Cancel, and removal of the camera/sign UI settings. Run
+`sign-editing` for native sign layout, editing limits, save/reopen and packet roundtrips,
+and `release-171 picker` for ranked fuzzy item searches and all picker draft checks.

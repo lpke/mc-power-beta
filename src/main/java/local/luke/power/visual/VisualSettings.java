@@ -5,6 +5,7 @@ public final class VisualSettings {
   public boolean hideItems = true;
   public boolean hideMobs, hidePlayers, hideVehicles, hideProjectiles, hideTnt, hideOther;
   public boolean entityRenderingMessages, fullBrightMessages, spectatorFullBright;
+  public boolean spectatorBlockOutlines;
   public boolean softRain, softSnow, oldCobble, oldBricks, redstonePowerLevels, lowFire;
   public boolean slashChat, containerCarry, containerPreview;
   public boolean inventoryInPortals;

@@ -6,6 +6,7 @@
   "client": [
     "ValidationMixin",
     "GhostHeadCapture",
+    "OutlineCapture",
     "AudioPreloadMixin",
     "ScreenInput",
     "ButtonBounds",

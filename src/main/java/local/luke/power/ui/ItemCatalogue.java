@@ -13,8 +13,9 @@ public final class ItemCatalogue {
   public enum Domain { ITEM, FILTER, BLOCK, BLOCK_IDENTIFIER }
   public record Entry(String value, int id, int damage, String name, String technical, ItemStack icon) {
     public String tooltip() { return name + "\n" + technical; }
-    boolean matches(String query) {
-      return (name + " " + technical).toLowerCase(Locale.ROOT).contains(query);
+    int searchScore(String query) {
+      if (query.equalsIgnoreCase(value)) return 0;
+      return FuzzySearch.score(query, name, technical);
     }
   }
   private ItemCatalogue() {}

@@ -33,7 +33,7 @@ class SettingAccessTest {
     }, List.of(cheats));
     for (boolean enabled : List.of(false, true)) {
       cheats.value = new JsonPrimitive(enabled);
-      for (String id : List.of("creative.flight", "worldedit.enabled", "world.daylightCycle", "world.weatherCycle", "world.keepInventory", "commands.enabled", "commands.mode.creative", "commands.worldMode.spectator", "keys.power_creative.modifier", "keys.power_creative.picker")) {
+      for (String id : List.of("visual.spectatorBlockOutlines", "creative.flight", "worldedit.enabled", "world.daylightCycle", "world.weatherCycle", "world.keepInventory", "commands.enabled", "commands.mode.creative", "commands.worldMode.spectator", "keys.power_creative.modifier", "keys.power_creative.picker")) {
         var setting = entry(id, id.startsWith("creative.") ? "creative" : "test", id.startsWith("keys.") ? Setting.Kind.KEY : Setting.Kind.BOOLEAN);
         assertEquals(enabled, SettingAccess.visible(session, setting), id);
         assertTrue(setting.value.getAsBoolean()); assertFalse(setting.changed());

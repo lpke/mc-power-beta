@@ -62,7 +62,6 @@ public class ClientFixesMixinPlugin implements IMixinConfigPlugin {
         Config.config.enableDebugMenuWorldSeed = configObject.getBoolean("enableDebugMenuWorldSeed", true);
         Config.config.enableMultiplayerServerChanges = configObject.getBoolean("enableMultiplayerServerChanges", true);
         Config.config.enableChatChanges = configObject.getBoolean("enableChatChanges", true);
-        Config.config.enableWoodenSignChanges = configObject.getBoolean("enableWoodenSignChanges", true);
 
         if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.controls.ControlsOptionsScreenMixin")) {
             return Config.config.enableControlsChanges;
@@ -93,14 +92,6 @@ public class ClientFixesMixinPlugin implements IMixinConfigPlugin {
             return Config.config.enableChatChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.chat.SleepingChatScreenMixin")) {
             return Config.config.enableChatChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.sign.ClientNetworkHandlerMixin")) {
-            return Config.config.enableWoodenSignChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.sign.SignBlockEntityMixin")) {
-            return Config.config.enableWoodenSignChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.sign.SignBlockEntityRendererMixin")) {
-            return Config.config.enableWoodenSignChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.text.sign.SignEditScreenMixin")) {
-            return Config.config.enableWoodenSignChanges;
         } else {
             return true;
         }

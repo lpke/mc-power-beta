@@ -286,3 +286,6 @@
 - Item and block settings use the shared graphical picker. Keep each editor draft local
   until Done, validate custom IDs against loaded registries, retain metadata variants
   where the stored format supports them, and never touch gameplay inventories.
+
+- Signs use native editing, rendering and text storage; shared text-input widgets do not
+  own sign lines. Preserve Escape/Done saving and optional reopening of existing signs.

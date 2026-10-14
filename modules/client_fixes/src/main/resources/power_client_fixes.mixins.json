@@ -23,11 +23,7 @@
     "client.multiplayer.TranslationStorageMixin",
     "client.text.TextFieldWidgetMixin",
     "client.text.chat.ChatScreenMixin",
-    "client.text.chat.SleepingChatScreenMixin",
-    "client.text.sign.ClientNetworkHandlerMixin",
-    "client.text.sign.SignBlockEntityMixin",
-    "client.text.sign.SignBlockEntityRendererMixin",
-    "client.text.sign.SignEditScreenMixin"
+    "client.text.chat.SleepingChatScreenMixin"
   ],
   "server": [],
   "mixins": []
