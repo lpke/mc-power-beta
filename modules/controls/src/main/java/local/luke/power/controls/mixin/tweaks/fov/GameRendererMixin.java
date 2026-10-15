@@ -1,6 +1,7 @@
 package local.luke.power.controls.mixin.tweaks.fov;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import local.luke.power.controls.ControlFeatures;
@@ -87,11 +88,31 @@ public abstract class GameRendererMixin {
         return original || local.luke.power.input.Bindings.down(KeyBindingListener.zoom);
     }
 
-    @WrapOperation(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;getFov(F)F"))
-    public float redirectToCustomFov(GameRenderer instance, float value, Operation<Float> originalOperation) {
-        float original = originalOperation.call(instance, value);
-        
-        return getFovMultiplier(value, false, original);
+    @Unique private boolean power$perspectivePending;
+    @Unique private float power$aspect, power$near, power$far;
+
+    // Resolve FOV after the camera transform has supplied its actual world position.
+    // Photo mode's orthographic projection bypasses this call and remains untouched.
+    @WrapOperation(method = "renderWorld(FI)V", at = @At(value = "INVOKE",
+        target = "Lorg/lwjgl/util/glu/GLU;gluPerspective(FFFF)V", remap = false))
+    private void power$deferPerspective(float fov, float aspect, float near, float far, Operation<Void> original) {
+        power$perspectivePending = true;
+        power$aspect = aspect; power$near = near; power$far = far;
+    }
+
+    @WrapMethod(method = "renderWorld(FI)V")
+    private void power$cameraPerspective(float delta, int eye, Operation<Void> original) {
+        power$perspectivePending = false;
+        try {
+            original.call(delta, eye);
+            if (power$perspectivePending) {
+                GL11.glMatrixMode(GL11.GL_PROJECTION);
+                GLU.gluPerspective(getFovMultiplier(delta, false, getFov(delta)), power$aspect, power$near, power$far);
+            }
+        } finally {
+            power$perspectivePending = false;
+            GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        }
     }
 
     @Inject(method = "renderFirstPersonHand", at = @At(value = "HEAD"))

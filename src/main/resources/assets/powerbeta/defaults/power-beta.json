@@ -354,7 +354,9 @@
       "spectatorBlockOutlines": false,
       "removeUnderwaterOverlay": false,
       "underwaterFogDensity": 100,
-      "underwaterDarkness": 100
+      "underwaterDarkness": 100,
+      "underwaterDarknessOutside": 100,
+      "narrowUnderwaterFov": true
     },
     "power_environment:config": {
       "MISSING_ACHIEVEMENTS_CONFIG": {

@@ -315,3 +315,10 @@
 - Underwater darkness adjusts render-only daylight shading with bounded, frame-local column
   samples. Preserve roofs, night lighting, emission and opaque AO. Never change stored light,
   water opacity, physics, or fog preferences; keep loaded-chunk and render-thread guards.
+
+- Water fog and FOV use the current rendered camera pose, including third person, free look
+  and freecam. Resolve perspective after capturing that pose; preserve photo projection,
+  stereo and zoom. Inside/outside water darkness affects rendering only. Queue existing
+  light-sensitive meshes when the effective percentage changes; never rebuild every frame.
+  Detached flight admits auto-walk independently of manual camera keys and keeps animation
+  interpolation current when the player is stationary.

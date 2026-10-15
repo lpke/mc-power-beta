@@ -2,7 +2,6 @@ package local.luke.power.render;
 
 import java.util.HashMap;
 import java.util.Map;
-import local.luke.power.visual.VisualConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.class_43;
@@ -18,7 +17,7 @@ public final class WaterLighting {
   public static void clear() { columns.clear(); owner = null; }
 
   public static float shade(World world, int x, int y, int z, float nativeShade) {
-    int darkness = VisualConfig.current().underwaterDarkness;
+    int darkness = CameraEnvironment.darkness();
     if (darkness == 100 || !RenderControls.rendering() || world == null
         || world.dimension.field_2177 || y < 0 || y >= 128) return nativeShade;
     if (owner != world) { clear(); owner = world; }

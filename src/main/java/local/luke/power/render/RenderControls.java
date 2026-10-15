@@ -16,6 +16,7 @@ public final class RenderControls {
   private static Thread renderThread;
   private static int fogDepth;
   private static Thread fogThread;
+  private static boolean clearFogWater;
   private RenderControls() {}
   public static void register(GameOptions options) {
     if (java.util.Arrays.asList(options.allKeys).contains(ENTITIES)) return;
@@ -69,12 +70,23 @@ public final class RenderControls {
   public static boolean rendering() { return renderDepth > 0 && Thread.currentThread() == renderThread; }
   public static boolean renderingFullBright() { return active && rendering(); }
   public static void beginRender() {
-    if (renderDepth == 0) { renderThread = Thread.currentThread(); WaterLighting.clear(); }
+    beginRender(true);
+  }
+  public static void beginRender(boolean sampleCamera) {
+    if (renderDepth == 0) {
+      renderThread = Thread.currentThread(); WaterLighting.clear();
+      if (sampleCamera) CameraEnvironment.updateLighting(client());
+    }
     renderDepth++;
   }
   public static void endRender() { if (--renderDepth == 0) WaterLighting.clear(); }
   public static float waterFogScale() { return active ? 0 : VisualConfig.current().underwaterFogDensity / 100F; }
-  public static boolean clearWaterFog() { return waterFogScale() == 0 && fogDepth > 0 && Thread.currentThread() == fogThread; }
-  public static void beginFog() { if (fogDepth == 0) fogThread = Thread.currentThread(); fogDepth++; }
+  public static boolean fogging() { return fogDepth > 0 && Thread.currentThread() == fogThread; }
+  public static boolean clearWaterFog() { return fogging() && clearFogWater && waterFogScale() == 0; }
+  public static void beginFog() { beginFog(true); }
+  public static void beginFog(boolean clearWater) {
+    if (fogDepth == 0) { fogThread = Thread.currentThread(); clearFogWater = clearWater; }
+    fogDepth++;
+  }
   public static void endFog() { fogDepth--; }
 }

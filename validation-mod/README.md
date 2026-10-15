@@ -8,6 +8,13 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-176 camera`, `flight`: rendered-camera water fog/FOV, third-person distance,
+  free look, stereo/freecam, separate darkness preview/Cancel and actual auto-flight
+  displacement with manual camera input isolated. `save`, restart, then `saved` checks
+  independent persistence. `scene-above` and `scene-water` prepare visual comparisons.
+  `scene-zoom`, hold F6, then `zoom-check` verifies real zoom input. `scene-walk`,
+  unfocus the test window, then `focus-check` verifies inventory flight displacement.
+
 - `release-175 oxygen`, `lighting`, `flight`: oxygen refills, native Survival drowning,
   bubble suppression, day/night and roof lighting, unchanged simulation light, render-thread
   isolation, live preview/Cancel, and frozen-flight animation continuity. Run after `new-world`.

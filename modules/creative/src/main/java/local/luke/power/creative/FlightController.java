@@ -4,6 +4,7 @@ import local.luke.power.creative.api.ModePlayer;
 import local.luke.power.creative.config.Config;
 import local.luke.power.creative.flight.FlightPhysics;
 import local.luke.power.creative.flight.FlightSprint;
+import local.luke.power.input.MovementOwnership;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.living.player.AbstractClientPlayer;
 import net.minecraft.entity.living.player.PlayerEntity;
@@ -73,19 +74,23 @@ public final class FlightController {
     AbstractClientPlayer player = mc.player;
     var settings = Config.current();
     boolean spectator = Modes.spectator(player);
-    if (!ClientRuntime.moving(mc)) {
+    boolean manual = ClientRuntime.moving(mc);
+    float automatic = ClientRuntime.local(mc) && mc.viewEntity == mc.player
+        ? MovementOwnership.autoWalkInput() : 0;
+    if (!manual && automatic == 0) {
       player.velocityX = player.velocityY = player.velocityZ = 0;
       animate(player, 0);
       return true;
     }
     var input = player.playerKeypressManager;
-    double side = input.perpendicularMovement, forward = input.parallelMovement;
+    double side = manual ? input.perpendicularMovement : 0;
+    double forward = manual ? input.parallelMovement : automatic;
     // Beta scales movement while crouching; flying descends without this slowdown.
-    if (input.sneak) {
+    if (manual && input.sneak) {
       side /= .3;
       forward /= .3;
     }
-    int vertical = (input.jump ? 1 : 0) - (input.sneak ? 1 : 0);
+    int vertical = manual ? (input.jump ? 1 : 0) - (input.sneak ? 1 : 0) : 0;
     double speed =
         spectator ? ((ModePlayer) player).power_spectatorSpeed() : .05 * settings.flightSpeed / 100;
     double sprint = settings.sprintFlight && sprinting ? settings.sprintMultiplier / 100.0 : 1;

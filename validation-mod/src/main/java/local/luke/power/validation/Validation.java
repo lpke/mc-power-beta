@@ -59,6 +59,7 @@ public final class Validation {
       else if (command.startsWith("placement-lifecycle ")) PlacementLifecycleChecks.run(mc, command.substring(20));
       else if (command.startsWith("interface-170 ")) Interface170Checks.run(mc,command.substring(14));
       else if (command.startsWith("release-175 ")) Release175Checks.run(mc,command.substring(12));
+      else if (command.startsWith("release-176 ")) Release176Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-174 ")) Release174Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-173 ")) Release173Checks.run(mc,command.substring(12));
       else if (command.equals("release-172")) Release172Checks.run(mc);

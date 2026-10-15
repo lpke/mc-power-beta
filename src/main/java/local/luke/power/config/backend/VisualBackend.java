@@ -16,14 +16,15 @@ public final class VisualBackend implements Backend {
     List<Setting> entries = new ArrayList<>();
     for (var f : VisualSettings.class.getFields()) {
       boolean distance = f.getName().equals("thirdPersonDistance");
-      boolean waterFog = f.getName().equals("underwaterFogDensity") || f.getName().equals("underwaterDarkness");
+      boolean percentage = f.getName().equals("underwaterFogDensity") || f.getName().equals("underwaterDarkness")
+          || f.getName().equals("underwaterDarknessOutside");
       entries.add(Catalog.setting("visual." + f.getName(), b.id(), distance ? "Camera" : "Video",
           distance ? "Third person" : "Texture overrides", distance ? "Camera distance" : Catalog.words(f.getName()),
           distance ? "Distance behind the player in blocks. Walls can move the camera closer; 4 is vanilla."
               : "Overrides only this texture in the selected pack. Can be combined with the other overrides.",
-          distance ? Setting.Kind.DECIMAL : waterFog ? Setting.Kind.INTEGER : Setting.Kind.BOOLEAN,
+          distance ? Setting.Kind.DECIMAL : percentage ? Setting.Kind.INTEGER : Setting.Kind.BOOLEAN,
           Catalog.JSON.toJsonTree(f.get(current)), Catalog.JSON.toJsonTree(f.get(defaults)),
-          distance ? 1 : 0, distance ? 12 : waterFog ? 100 : 1, distance ? .25 : 1, List.of(), false));
+          distance ? 1 : 0, distance ? 12 : percentage ? 100 : 1, distance ? .25 : 1, List.of(), false));
     }
     session.add(b, entries);
   }
@@ -43,9 +44,11 @@ public final class VisualBackend implements Backend {
     VisualSettings before = VisualConfig.copy();
     VisualConfig.preview(draft(values));
     VisualSettings after = VisualConfig.current();
-    if ((before.redstonePowerLevels != after.redstonePowerLevels
-        || before.underwaterDarkness != after.underwaterDarkness) && mc.world != null)
+    if (before.redstonePowerLevels != after.redstonePowerLevels && mc.world != null)
       mc.worldRenderer.method_1537();
+    if ((before.underwaterDarkness != after.underwaterDarkness
+        || before.underwaterDarknessOutside != after.underwaterDarknessOutside) && mc.world != null)
+      local.luke.power.render.CameraEnvironment.updateLighting(mc);
     if (before.softRain != after.softRain || before.softSnow != after.softSnow
         || before.oldCobble != after.oldCobble || before.oldBricks != after.oldBricks) {
       TextureOverrides.clear();

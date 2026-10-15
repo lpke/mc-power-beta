@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.7.6] - 2026-10-15
+
+- Keep auto-walk moving the player during Creative and Spectator flight in freecam.
+- Base water fog and underwater field of view on the rendered camera, including third person and free look.
+- Add an option to disable Beta's underwater field-of-view narrowing.
+- Add a separate water-darkness slider for viewing water from outside, defaulting to Beta lighting.
+
 ## [1.7.5] - 2026-10-15
 
 - Refill oxygen in Creative and Spectator and prevent drowning bubbles, including when returning to Survival.

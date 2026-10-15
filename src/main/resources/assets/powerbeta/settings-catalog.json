@@ -3802,7 +3802,7 @@
     "group": "Rendering",
     "label": "Original far-distance fog",
     "description": "Use Beta's original far-fog values at exactly 12 chunks. Other distances keep their normal fog.",
-    "order": 6
+    "order": 7
   },
   "video.clouds": {
     "page": "Video",
@@ -3819,13 +3819,13 @@
     "order": 2
   },
   "video.fogCycle": {
-    "order": 5
+    "order": 6
   },
   "native.opengl": {
-    "order": 7
+    "order": 8
   },
   "native.anaglyph": {
-    "order": 8
+    "order": 9
   },
   "native.clouds": {
     "order": 0
@@ -4274,7 +4274,7 @@
     "order": 0
   },
   "native.bobbing": {
-    "order": 1
+    "order": 2
   },
   "visual.thirdPersonDistance": {
     "order": 1
@@ -5050,13 +5050,35 @@
     "page": "Video",
     "group": "Rendering",
     "label": "Underwater darkness",
-    "description": "Water darkness as a percentage of normal. 100% keeps Beta lighting; 0% lets daylight through water, while night, roofs and other shadows remain. Fog density and the underwater texture overlay are separate. Does not change actual light levels.",
+    "description": "Water darkness while the camera is underwater. 100% keeps Beta lighting; 0% lets daylight through water while preserving night, roofs and other shadows. Fog and the water overlay are separate. Does not change actual light levels.",
     "order": 4,
     "min": 0,
     "max": 100,
     "step": 1,
     "unit": "%",
     "default": 100,
+    "restart": false
+  },
+  "visual.underwaterDarknessOutside": {
+    "page": "Video",
+    "group": "Rendering",
+    "label": "Water darkness from outside",
+    "description": "Water darkness when the camera is outside water. 100% keeps Beta lighting; 0% lets daylight through water. Independent of underwater darkness and fog, with no change to actual light levels.",
+    "order": 5,
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "unit": "%",
+    "default": 100,
+    "restart": false
+  },
+  "visual.narrowUnderwaterFov": {
+    "page": "Camera",
+    "group": "View",
+    "label": "Narrow field of view underwater",
+    "description": "Reduce field of view by 10 degrees while the camera is underwater, matching Beta. Disable to keep the same field of view above and below water. Applies in first and third person.",
+    "order": 1,
+    "default": true,
     "restart": false
   }
 }

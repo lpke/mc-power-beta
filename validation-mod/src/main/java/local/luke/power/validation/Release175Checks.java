@@ -95,7 +95,7 @@ public final class Release175Checks {
         float nativeLight=mc.world.method_1782(32,80,32);
         int actualSky=mc.world.method_164(class_56.SKY,32,80,32),actualBlock=mc.world.method_164(class_56.BLOCK,32,80,32);
         for(int value:new int[]{100,75,50,25,0}) {
-          setting.parse(Integer.toString(value));session.preview(true);
+          setting.parse(Integer.toString(value));find(session,"visual.underwaterDarknessOutside").parse(Integer.toString(value));session.preview(true);
           RenderControls.beginRender();
           try {
             float wanted=nativeLight+(1-nativeLight)*(100-value)/100F;
@@ -113,7 +113,7 @@ public final class Release175Checks {
         }
       });
       test("night, new roofs, opaque AO and full bright keep their own lighting",()->{
-        var settings=VisualConfig.copy();settings.underwaterDarkness=0;VisualConfig.preview(settings);
+        var settings=VisualConfig.copy();settings.underwaterDarkness=0;settings.underwaterDarknessOutside=0;VisualConfig.preview(settings);
         mc.world.field_202=11;RenderControls.beginRender();
         try {
           check(mc.world.method_1782(32,80,32)==mc.world.dimension.field_2178[4],"night became full bright");

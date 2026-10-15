@@ -46,12 +46,20 @@ public class GameRendererMixin {
 
     @Inject(method = "renderWorld(FI)V", at = @At("RETURN"))
     private void power$rememberView(float delta, int eye, CallbackInfo ci) {
-        if (Freecam.freecamController.isActive() || client.camera == null || client.world == null) return;
+        if (client.camera == null || client.world == null) {
+            local.luke.power.input.RenderedView.clear();
+            return;
+        }
         power$viewBuffer.clear();
         GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, power$viewBuffer);
         power$viewBuffer.get(power$view);
         power$view[12] -= power$eyeOffset;
         LivingEntity entity = client.camera;
+        local.luke.power.input.RenderedView.capture(client.world, entity, power$view,
+                entity.prevX + (entity.x - entity.prevX) * delta,
+                entity.prevY + (entity.y - entity.prevY) * delta,
+                entity.prevZ + (entity.z - entity.prevZ) * delta);
+        if (Freecam.freecamController.isActive()) return;
         CameraPosition position = CameraPose.fromView(power$view,
                 entity.prevX + (entity.x - entity.prevX) * delta,
                 entity.prevY + (entity.y - entity.prevY) * delta,

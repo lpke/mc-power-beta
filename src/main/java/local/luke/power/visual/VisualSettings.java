@@ -9,6 +9,8 @@ public final class VisualSettings {
   public boolean removeUnderwaterOverlay;
   public int underwaterFogDensity = 100;
   public int underwaterDarkness = 100;
+  public int underwaterDarknessOutside = 100;
+  public boolean narrowUnderwaterFov = true;
   public boolean softRain, softSnow, oldCobble, oldBricks, redstonePowerLevels, lowFire;
   public boolean slashChat, containerCarry, containerPreview;
   public boolean inventoryInPortals;
@@ -19,6 +21,8 @@ public final class VisualSettings {
   public double thirdPersonDistance = 4;
 
   public void validate() {
+    if (underwaterDarknessOutside < 0 || underwaterDarknessOutside > 100)
+      throw new IllegalArgumentException("Water darkness from outside must be between 0 and 100 percent");
     if (underwaterDarkness < 0 || underwaterDarkness > 100)
       throw new IllegalArgumentException("Underwater darkness must be between 0 and 100 percent");
     if (underwaterFogDensity < 0 || underwaterFogDensity > 100)
