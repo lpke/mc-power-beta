@@ -128,7 +128,7 @@ public final class AudioBackend implements Backend {
           new JsonPrimitive(minimum ? 600 : 1200), 0, 86400, 1, List.of(), false));
     }
     add("menuControls", "Menu music controls", "Show music controls", Setting.Kind.BOOLEAN,
-        new JsonPrimitive(s.menuControls), new JsonPrimitive(false),
+        new JsonPrimitive(s.menuControls), new JsonPrimitive(true),
         "Show play/pause, previous, next, quiet and track information on menus.", List.of());
     add("menuControlsMainMenu", "Menu music controls", "Show in main menu", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.menuControlsMainMenu), new JsonPrimitive(true),

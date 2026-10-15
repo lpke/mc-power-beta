@@ -196,14 +196,14 @@ public final class NativeBackend implements Backend {
       case "key.sneak" -> Keyboard.KEY_LSHIFT;
       case "key.inventory" -> Keyboard.KEY_E;
       case "key.drop" -> Keyboard.KEY_Q;
-      case "key.chat" -> Keyboard.KEY_T;
+      case "key.chat" -> Keyboard.KEY_RETURN;
       case "powerbeta.openCommands" -> Keyboard.KEY_SLASH;
       case "powerbeta.debugGraph" -> new Chord(Keyboard.KEY_F3, Chord.CTRL).encoded();
       case "key.fog" -> Keyboard.KEY_F;
       case "key.power_controls.hide_hud" -> Keyboard.KEY_F1;
       case "key.power_controls.take_screenshot" -> Keyboard.KEY_F2;
       case "key.power_controls.debug_hud", "power_creative.modifier" -> Keyboard.KEY_F3;
-      case "power_creative.picker" -> Keyboard.KEY_F4;
+      case "power_creative.picker", "powerbeta.infoHud" -> Keyboard.KEY_F4;
       case "key.power_controls.third_person" -> Keyboard.KEY_F5;
       case "key.power_controls.toggle_fullscreen" -> Keyboard.KEY_F11;
       case "key.power_controls.dismount" -> Keyboard.KEY_LSHIFT;

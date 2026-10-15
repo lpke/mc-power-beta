@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-10-16
+
+- Keep world-creation buttons directly below the name and seed fields. Unavailable game-mode icons now appear in grayscale.
+- Show menu music controls by default, use Enter for chat and F4 for the custom HUD, and start with only coordinates and facing in the top-left HUD cluster. F3+F4 keeps its mode-switching action.
+- Combine chest sounds into one Off, Modern or Door choice, defaulting to Off. Remove burping, Better burning, punch-to-ignite TNT and the Spectator block-outline option.
+- Keep flexible placement available through its hold controls, with every placement key unbound by default. Rename edge protection to Fake sneak.
+- Add separate player and mob crop-trampling rules, both off in new-world presets. Move lava and cactus damage to dropped items into world rules with vanilla defaults.
+- Show explosion block drops as a 0–100% slider, defaulting to 100%, and craft six stairs at a time.
+- Enable flint-and-steel TNT priming, punch-to-defuse TNT, original far-distance fog, larger chicken hitboxes, grass/fire recipes, gold equipment abilities, the gold-block sponge ritual, sponge absorption, trapdoor glue, entity ignition and returned-fireball ghast kills by default.
+- Default lightning fire off, tick the world during accelerated sleep and allow clicking to wake. Default stacked chests, sign dye colours and vignette off.
+- Keep freecam and Spectator out of front view regardless of HUD visibility. Freecam leaves the HUD visible by default.
+- Configuration format 5 converts formats 3 and 4 with verified backups. World-rule format 2 converts format 1 and older world settings, preserving existing rule values and item protection. Conditional footwear protection requires an explicit trampling choice before converting its world.
+
 ## [2.0.0] - 2026-10-15
 
 - Replace the Cheats switch and per-command overrides with 31 explicit world game rules and independent permissions for Creative, Spectator, editing, items, travel and recovery.

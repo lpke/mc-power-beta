@@ -14,6 +14,9 @@ class MenuMusicTest {
   @Test void titleControlsRespectMasterAndTheIndependentTitleSwitch() {
     AudioSettings s = new AudioSettings();
     assertTrue(s.menuControlsMainMenu);
+    assertTrue(s.showMenuControls(false));
+    assertTrue(s.showMenuControls(true));
+    s.menuControls = false;
     assertFalse(s.showMenuControls(false));
     assertFalse(s.showMenuControls(true));
     s.menuControls = true;

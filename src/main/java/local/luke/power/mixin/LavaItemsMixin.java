@@ -1,7 +1,7 @@
 package local.luke.power.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.*;
-import local.luke.power.gameplay.GameplayConfig;
+import local.luke.power.rules.*;
 import net.minecraft.block.Material;
 import net.minecraft.class_142;
 import net.minecraft.entity.Entity;
@@ -17,7 +17,7 @@ public abstract class LavaItemsMixin {
   @Unique private boolean power$protectItem() {
     Entity entity = (Entity)(Object)this;
     return entity instanceof class_142 && entity.world != null && !entity.world.isRemote
-        && GameplayConfig.current().lavaProofItems;
+        && !WorldRules.enabled(entity.world.method_262(), GameRule.LAVA_DESTROYS_ITEMS);
   }
 
   @Inject(method = "method_1332", at = @At("HEAD"), cancellable = true)

@@ -2,7 +2,7 @@ package local.luke.power.controls.tweaks.moresounds;
 
 public enum ChestSoundsEnum {
 
-    NONE("None", "", ""),
+    NONE("Off", "", ""),
     MODERN("Modern", "power_controls:random.chestopen", "power_controls:random.chestclosed"),
     DOOR("Door", "random.door_open", "random.door_close");
 

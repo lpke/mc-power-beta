@@ -86,7 +86,7 @@ public final class FilteredNavigationChecks {
       });
       test("accepting a search destination clears Back without losing its position",()->{
         query(s,"fast place");
-        invoke(s,"openGroup",Setting.class,find(s.session(),"tweaks.flexible.enabled"));
+        invoke(s,"openGroup",Setting.class,find(s.session(),"tweaks.flexible.showOverlay"));
         render(s);
         double scroll=(double)field(s,"scroll");
         check(scroll>0,"fixture group must be below the top");
@@ -114,7 +114,7 @@ public final class FilteredNavigationChecks {
         } finally {changed.value=old;field(s,"changedOnly",false);}
       });
       test("off toggle states never hide their actions or modifiers",()->{
-        for (String id:List.of("tweaks.placement.enabled","tweaks.sneak.enabled","tweaks.slabs.enabled","tweaks.flexible.enabled")) {
+        for (String id:List.of("tweaks.placement.enabled","tweaks.sneak.enabled","tweaks.slabs.enabled","tweaks.flexible.showOverlay")) {
           Setting state=find(s.session(),id);var old=state.value;state.value=new JsonPrimitive(false);
           try {for(Setting key:ControlLinks.controls(s.session(),state)) check(ControlLinks.enabled(s.session(),key),"hidden state action "+key.id);}
           finally{state.value=old;}

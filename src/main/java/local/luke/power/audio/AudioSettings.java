@@ -19,7 +19,7 @@ public final class AudioSettings {
     MENU_TOP, MENU_BOTTOM, TOP_LEFT, TOP_CENTER, TOP_RIGHT,
     MIDDLE_LEFT, MIDDLE_RIGHT, BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT
   }
-  public boolean menuControls = false;
+  public boolean menuControls = true;
   public boolean menuControlsMainMenu = true;
   public boolean menuControlsScrub = false;
   public MenuControlsPosition menuControlsPosition = MenuControlsPosition.MENU_BOTTOM;

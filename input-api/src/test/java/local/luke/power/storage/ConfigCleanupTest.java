@@ -37,4 +37,21 @@ class ConfigCleanupTest {
     assertEquals("0", settings.getAsJsonObject("native").get("key_powerbeta.debugGraph").getAsString());
     assertFalse(settings.getAsJsonObject("bindings").has("powerbeta.debugGraph"));
   }
+  @Test void chestChoiceKeepsThePreviouslyAudibleStyleAndRetiresItsMaster() {
+    for (boolean enabled : new boolean[]{false, true}) for (int style = 0; style < 3; style++) {
+      JsonObject source = JsonParser.parseString("{\"schemaVersion\":4,\"settings\":{\"power_controls:features\":{\"chestSounds\":" + enabled + ",\"moreSoundsChests\":" + style + "}}}").getAsJsonObject();
+      JsonObject features = ConfigVersions.convert(source).getAsJsonObject("settings").getAsJsonObject("power_controls:features");
+      assertFalse(features.has("chestSounds"));
+      assertEquals(enabled ? style : 0, features.get("moreSoundsChests").getAsInt());
+    }
+  }
+  @Test void disabledPlacementDropsOnlyItsInactiveBindings() {
+    JsonObject source = JsonParser.parseString("{\"schemaVersion\":4,\"settings\":{\"building\":{\"flexible\":{\"enabled\":false,\"showPreview\":false}},\"native\":{\"key_Placement rotation (hold)\":\"19\",\"key_key.chat\":\"20\"},\"bindings\":{\"Placement rotation (hold)\":1}}}").getAsJsonObject();
+    JsonObject converted = ConfigVersions.convert(source), settings = converted.getAsJsonObject("settings");
+    assertEquals("0", settings.getAsJsonObject("native").get("key_Placement rotation (hold)").getAsString());
+    assertEquals("20", settings.getAsJsonObject("native").get("key_key.chat").getAsString());
+    assertFalse(settings.getAsJsonObject("building").getAsJsonObject("flexible").get("showPreview").getAsBoolean());
+    assertFalse(settings.getAsJsonObject("building").getAsJsonObject("flexible").has("enabled"));
+    assertFalse(settings.getAsJsonObject("bindings").has("Placement rotation (hold)"));
+  }
 }

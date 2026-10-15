@@ -43,7 +43,7 @@ improvements and optional tweaks in one searchable Options menu.
 - Faster boats and minecarts, boat steering and collision protection, boat elevators, minecart boosters and optional faster obsidian mining.
 - Optional water landings and bucket clutches, including flowing water. Empty buckets stack to 16; doors and signs have optional modern stack limits.
 - Individual modern recipes, shapeless recipes, tool repair, wool redyeing, adjusted slab/stair/trapdoor/ladder yields, material recovery, soul sand and otherwise unobtainable blocks.
-- Per-world difficulty and 31 searchable game rules, editable in Options or with /gamerule. Separate permissions cover game modes, editing, items, travel and recovery. Time freezing preserves the simulation clock.
+- Per-world difficulty and 34 searchable game rules, editable in Options or with /gamerule. Separate permissions cover game modes, editing, items, travel and recovery. Time freezing preserves the simulation clock.
 - Editable Survival and Cheat defaults for new worlds, plus a Custom creation preset with its own searchable rule editor and starting-mode choice. Existing worlds keep their own rules.
 - World rules for monsters, animals, dungeon spawners and sleep ambushes. Global spawn limits, light thresholds, group sizes and despawning preferences, including saddled-pig preservation.
 - Sleep controls for night skipping or acceleration, a per-world sleeping percentage, wake-on-click and respawn-only beds; configurable rain, thunder, snow height and weather timing.
@@ -81,9 +81,10 @@ Settings save automatically by default. Right-click Apply to use manual editing;
 leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
 edits stay in the draft until you create the world.
 
-Version 2.0 supports configuration formats 3 and 4, converting 3 to 4 with a verified
-backup. World rules use format 1 and support conversion from Power Beta's earlier
-world settings. Conflicting old permissions or unsupported formats stop conversion
+Version 2.0.1 supports configuration formats 3, 4 and 5, converting older formats
+to 5 with a verified backup. World rules use format 2 and support format 1 and
+Power Beta's earlier world settings. Existing worlds retain their rules and item
+protection. Old footwear-specific crop protection needs an explicit trampling choice. Conflicting old permissions or unsupported formats stop conversion
 and show recovery guidance. Keep a full instance backup before upgrading; world
 folders alone do not include global preferences, music libraries or recovery history.
 

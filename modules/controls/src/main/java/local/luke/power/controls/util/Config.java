@@ -36,7 +36,6 @@ public class Config {
         public Boolean showQuitButton = true;
 
 
-
         @ConfigEntry(name = "Hide Achievement Toast")
         public Boolean hideAchievementToast = false;
 
@@ -67,7 +66,7 @@ public class Config {
         public static class VideoSettingsConfig {
 
             @ConfigEntry(name = "Vanilla Far Fog Values")
-            public Boolean vanillaFarValues = false;
+            public Boolean vanillaFarValues = true;
         }
 
         public static class PanoramaConfig {
@@ -130,27 +129,20 @@ public class Config {
         @ConfigCategory(name = "Fast Leaf Decay")
         public FastLeafDecayConfig fastLeafDecay = new FastLeafDecayConfig();
 
-        @ConfigCategory(name = "Better Burning")
-        public BetterBurningConfig betterBurning = new BetterBurningConfig();
-
         @ConfigEntry(name = "Step Assist", description = "Allows you to step up one block")
         public Boolean stepAssist = false;
 
         @ConfigEntry(name = "Eating sounds", description = "Play a chewing sound when food is consumed.")
         public Boolean eatingSounds = true;
-        @ConfigEntry(name = "Burping sounds", description = "Occasionally burp after consuming food.")
-        public Boolean burpingSounds = false;
         @ConfigEntry(name = "Shearing sounds", description = "Play a snip when a sheep is successfully sheared.")
         public Boolean shearingSounds = true;
         @ConfigEntry(name = "Tool break sounds", description = "Play a sound when a tool reaches zero durability.")
         public Boolean toolBreakSounds = true;
         @ConfigEntry(name = "Armor break sounds", description = "Play a sound when an armor piece breaks.")
         public Boolean armorBreakSounds = true;
-        @ConfigEntry(name = "Chest sounds", description = "Play sounds when opening and closing a chest.")
-        public Boolean chestSounds = false;
 
-        @ConfigEntry(name = "More Sounds (Chests)", description = "Adds sounds for chests (a few options are available)")
-        public ChestSoundsEnum moreSoundsChests = ChestSoundsEnum.DOOR;
+        @ConfigEntry(name = "Chest sounds", description = "Choose sounds for opening and closing chests.")
+        public ChestSoundsEnum moreSoundsChests = ChestSoundsEnum.NONE;
 
         public static class FastLeafDecayConfig {
             @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
@@ -164,26 +156,6 @@ public class Config {
             public Integer maximumDecayTime = 25;
         }
 
-        public static class BetterBurningConfig {
-            @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
-            @ConfigEntry(name = "Enable Better Burning", description = "Master switch for all features here", multiplayerSynced = true)
-            public Boolean enableBetterBurning = false;
-
-            @ConfigEntry(name = "Skeletons on Fire shoot flaming arrows")
-            public Boolean skeletonsBurningArrows = true;
-
-            @ConfigEntry(name = "Skeletons on Fire flaming arrow chance (0-100)", maxValue = 100, maxLength = 100)
-            public Integer skeletonBurningArrowChance = 70;
-
-            @ConfigEntry(name = "Burning arrows set entities on fire")
-            public Boolean burningArrowsSetOnFire = true;
-
-            @ConfigEntry(name = "Burning entities spread fire to others")
-            public Boolean burningEntitySpread = true;
-
-            @ConfigEntry(name = "Burning entities spread fire chance (0-100)", maxValue = 100, maxLength = 100)
-            public Integer burningEntitySpreadChance = 30;
-        }
     }
 
     public static class TweaksConfig {
@@ -225,7 +197,7 @@ public class Config {
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Stackable Chests", description = "Allows you to stack chests on top of each other", multiplayerSynced = true)
-        public Boolean stackableChests = true;
+        public Boolean stackableChests = false;
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Don't Damage Flint And Steel on failed ignite", multiplayerSynced = true)
@@ -241,7 +213,7 @@ public class Config {
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Allow igniting entities with flint and steel", multiplayerSynced = true)
-        public Boolean allowIgnitingEntities = false;
+        public Boolean allowIgnitingEntities = true;
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Allow placing trapdoors without support", multiplayerSynced = true)
@@ -376,12 +348,8 @@ public class Config {
         public Boolean punchSheepForWool = false;
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
-        @ConfigEntry(name = "Punch TNT to Ignite", multiplayerSynced = true)
-        public Boolean punchTntToIgnite = false;
-
-        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Punch Primed TNT to Defuse", multiplayerSynced = true)
-        public Boolean punchTntToDefuse = false;
+        public Boolean punchTntToDefuse = true;
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Hoe Grass for Seeds", multiplayerSynced = true)
@@ -417,7 +385,6 @@ public class Config {
         @ConfigCategory(name = "Obtainable", description = "Options here require restart to take effect")
         public ObtainableRecipesConfig obtainable = new ObtainableRecipesConfig();
 
-
         public static class ModernRecipesConfig {
             @ConfigEntry(name = "Shapeless Flint and Steel")
             public Boolean shapelessFlintAndSteel = true;
@@ -449,18 +416,18 @@ public class Config {
             @ConfigEntry(name = "Shapeless Jack o' Lantern")
             public Boolean shapelessJackOLantern = true;
             @ConfigEntry(name = "Stairs per Craft")
-            public Integer stairsPerCraft = 4;
+            public Integer stairsPerCraft = 6;
             @ConfigEntry(name = "Trapdoors per Craft")
             public Integer trapdoorsPerCraft = 2;
         }
 
         public static class ObtainableRecipesConfig {
             @ConfigEntry(name = "Craftable Grass Blocks")
-            public Boolean craftableGrassBlocks = false;
+            public Boolean craftableGrassBlocks = true;
             @ConfigEntry(name = "Craftable Cobwebs")
             public Boolean craftableCobwebs = true;
             @ConfigEntry(name = "Craftable Fire")
-            public Boolean craftableFire = false;
+            public Boolean craftableFire = true;
             @ConfigEntry(name = "Craftable Coal Ore (8 Coal around a Stone)")
             public Boolean craftableCoalOre = false;
             @ConfigEntry(name = "Craftable Iron Ore (8 Iron Ingots around a Stone)")

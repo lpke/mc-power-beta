@@ -29,16 +29,18 @@ public abstract class CreateWorldMixin extends Screen {
     if (power$draft == null) power$draft = new CreationRules(RulePresets.survival(), RulePresets.cheats());
     if (power$name != null) { field_632.setText(power$name); field_633.setText(power$seed); method_608(); }
     int left = width / 2 - 132;
+    int actionY = !power$draft.problem().isEmpty() ? 216
+        : power$draft.preset() == CreationRules.Preset.CUSTOM ? 204 : 180;
     for (int i = 0; i < buttons.size(); i++) {
       ButtonWidget button = (ButtonWidget) buttons.get(i);
       if (button.id == 0 || button.id == 1)
-        buttons.set(i, new ButtonWidget(button.id, left + button.id * 134, height - 28, 130, 20, button.text));
+        buttons.set(i, new ButtonWidget(button.id, left + button.id * 134, actionY, 130, 20, button.text));
     }
-    buttons.add(new ButtonWidget(2, left, height - 80, 130, 20, power$rulesLabel()));
-    buttons.add(new ButtonWidget(3, left + 134, height - 80, 130, 20, power$difficultyLabel()));
+    buttons.add(new ButtonWidget(2, left, 156, 130, 20, power$rulesLabel()));
+    buttons.add(new ButtonWidget(3, left + 134, 156, 130, 20, power$difficultyLabel()));
     if (power$draft.preset() == CreationRules.Preset.CUSTOM) {
-      buttons.add(new ButtonWidget(4, left, height - 56, 130, 20, "Edit game rules"));
-      buttons.add(new ButtonWidget(5, left + 134, height - 56, 130, 20, power$modeLabel()));
+      buttons.add(new ButtonWidget(4, left, 180, 130, 20, "Edit game rules"));
+      buttons.add(new ButtonWidget(5, left + 134, 180, 130, 20, power$modeLabel()));
     }
   }
   @Unique private String power$rulesLabel() {
@@ -80,7 +82,7 @@ public abstract class CreateWorldMixin extends Screen {
   }
   @Inject(method = "render", at = @At("TAIL"))
   private void power$problem(int x, int y, float delta, CallbackInfo ci) {
-    if (!power$draft.problem().isEmpty()) drawCenteredTextWithShadow(textRenderer, power$draft.problem(), width / 2, height - 91, 0xff8888);
+    if (!power$draft.problem().isEmpty()) drawCenteredTextWithShadow(textRenderer, power$draft.problem(), width / 2, 204, 0xff8888);
   }
   @WrapOperation(method = "buttonClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;method_2120(Ljava/lang/String;Ljava/lang/String;J)V"))
   private void power$create(Minecraft mc, String folder, String name, long seed, Operation<Void> original) {

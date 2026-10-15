@@ -221,12 +221,6 @@
     "label": "Allowed items",
     "description": "Item IDs separated by commas, for example 1, 44:2. An empty allow-list permits nothing."
   },
-  "tweaks.flexible.enabled": {
-    "page": "Building",
-    "group": "Flexible placement",
-    "label": "Flexible placement",
-    "description": ""
-  },
   "tweaks.flexible.showOverlay": {
     "page": "Building",
     "group": "Flexible placement",
@@ -362,7 +356,7 @@
   "tweaks.sneak.enabled": {
     "page": "Movement",
     "group": "Walking",
-    "label": "Edge protection",
+    "label": "Fake sneak",
     "description": "Prevent walking off ledges without crouching or slowing down."
   },
   "tweaks.sneak.announceToggle": {

@@ -82,7 +82,7 @@ final class WebsiteScenes {
     WebsiteGallery.run(mc,"building");
     local.luke.power.building.camera.FreeLook.reset(mc);
     setting(mc,"native.guiScale","3");
-    setting(mc,"tweaks.placement.enabled","false");setting(mc,"tweaks.flexible.enabled","false");
+    setting(mc,"tweaks.placement.enabled","false");local.luke.power.flexible.FlexiblePlacement.interrupt();
     setting(mc,"tweaks.sneak.enabled","false");
     String[] names={"gold-glass","hotbar","edge","slab","mining","sleep","stacking","roof","plants","blocks","sponge","hud","photo","culling"};
     int index=Arrays.asList(names).indexOf(action);check(index>=0,"unknown website scene "+action);

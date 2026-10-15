@@ -1,7 +1,6 @@
 package local.luke.power.mixin;
 
 import local.luke.power.input.PlayerMode;
-import local.luke.power.visual.VisualConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.render.WorldRenderer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,7 +15,6 @@ public class SpectatorOutlineMixin {
 
   @Inject(method = "method_1554", at = @At("HEAD"), cancellable = true)
   private void power$spectatorOutline(CallbackInfo ci) {
-    if (!VisualConfig.current().spectatorBlockOutlines
-        && field_1814.player instanceof PlayerMode mode && mode.power$spectator()) ci.cancel();
+    if (field_1814.player instanceof PlayerMode mode && mode.power$spectator()) ci.cancel();
   }
 }

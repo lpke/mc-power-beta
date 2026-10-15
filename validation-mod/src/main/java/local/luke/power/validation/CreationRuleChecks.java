@@ -25,7 +25,7 @@ final class CreationRuleChecks {
         var frozen=new CreationRules(survival,cheats);
         var options=new PowerOptionsScreen(null);mc.setScreen(options);
         check(options.visiblePages().contains("Game rules"),"main-menu templates unavailable");
-        check(options.session().settings().stream().filter(s->s.backend.equals("rulePresets")).count()==62,"template rule count");
+        check(options.session().settings().stream().filter(s->s.backend.equals("rulePresets")).count()==68,"template rule count");
         var fire=WorldRulesChecks.find(options.session(),"rules.survival.fire_spread");
         fire.parse(Boolean.toString(!survival.enabled(GameRule.FIRE_SPREAD)));options.changed(fire);
         check(RulePresets.survival().enabled(GameRule.FIRE_SPREAD)!=survival.enabled(GameRule.FIRE_SPREAD),"auto-apply did not persist preset");
@@ -47,7 +47,7 @@ final class CreationRuleChecks {
         check(((TextFieldWidget)field(creation,"field_632")).getText().equals("Custom rules fixture"),"preset cycle lost world name");
         byte[] before=Files.readAllBytes(PowerConfig.path());
         press(creation,4);var editor=(PowerOptionsScreen)mc.currentScreen;
-        check(editor.session().settings().size()==31,"creation editor exposes unrelated settings");
+        check(editor.session().settings().size()==34,"creation editor exposes unrelated settings");
         var fire=WorldRulesChecks.find(editor.session(),"rules.creation.fire_spread");
         fire.parse("false");editor.changed(fire);
         check(!draft.custom().enabled(GameRule.FIRE_SPREAD),"auto-apply missed future-world draft");

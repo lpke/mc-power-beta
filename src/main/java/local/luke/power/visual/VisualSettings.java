@@ -5,7 +5,6 @@ public final class VisualSettings {
   public boolean hideItems = true;
   public boolean hideMobs, hidePlayers, hideVehicles, hideProjectiles, hideTnt, hideOther;
   public boolean entityRenderingMessages, fullBrightMessages, spectatorFullBright;
-  public boolean spectatorBlockOutlines;
   public boolean removeUnderwaterOverlay;
   public int underwaterFogDensity = 100;
   public int underwaterDarkness = 100;

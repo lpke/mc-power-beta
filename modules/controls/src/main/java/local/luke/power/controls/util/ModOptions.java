@@ -23,7 +23,19 @@ public class ModOptions {
     public static boolean frontView = false;
 
     public static boolean isFrontViewEnabled() {
-        return ModOptions.frontView || (ControlFeatures.USER_INTERFACE_CONFIG.frontViewThirdPerson == FrontViewMode.HIDE_HUD && (Minecraft.INSTANCE.options.thirdPerson && Minecraft.INSTANCE.options.hideHud));
+        Minecraft mc = Minecraft.INSTANCE;
+        if (!allowsFrontView() || mc.options == null || !mc.options.thirdPerson) return false;
+        return switch (ControlFeatures.USER_INTERFACE_CONFIG.frontViewThirdPerson) {
+            case NORMAL -> frontView;
+            case HIDE_HUD -> mc.options.hideHud;
+            default -> false;
+        };
+    }
+
+    public static boolean allowsFrontView() {
+        Minecraft mc = Minecraft.INSTANCE;
+        return mc != null && !local.luke.power.input.DetachedCamera.isActive()
+            && !(mc.player instanceof local.luke.power.input.PlayerMode mode && mode.power$spectator());
     }
 
     // GUI Scale

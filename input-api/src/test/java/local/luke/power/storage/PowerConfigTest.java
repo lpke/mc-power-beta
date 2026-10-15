@@ -34,7 +34,7 @@ class PowerConfigTest {
     String original = "{\"schemaVersion\":3,\"settings\":{\"gameplay\":{\"fireSpread\":false,\"mergeItems\":true},\"commandAccess\":{\"enabled\":false}}}";
     Files.writeString(PowerConfig.path(), original);
     JsonObject converted = PowerConfig.document();
-    assertEquals(4, converted.get("schemaVersion").getAsInt());
+    assertEquals(5, converted.get("schemaVersion").getAsInt());
     assertFalse(converted.getAsJsonObject("settings").has("commandAccess"));
     assertFalse(PowerConfig.section("gameplay").has("fireSpread"));
     assertTrue(PowerConfig.section("gameplay").get("mergeItems").getAsBoolean());

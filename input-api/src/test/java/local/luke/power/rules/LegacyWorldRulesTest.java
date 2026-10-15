@@ -9,7 +9,7 @@ class LegacyWorldRulesTest {
   private JsonObject json(String value) { return JsonParser.parseString(value).getAsJsonObject(); }
   @Test void legacySurvivalNeverGainsAccessAndDormantCheatRulesStayInactive() {
     RuleSet rules = LegacyWorldRules.convert(json("{\"cheats\":false,\"daylight\":false,\"keepInventory\":true}"), new JsonObject());
-    assertEquals(new RuleSet(), rules);
+    assertEquals(WorldRuleUpgrade.defaults(new JsonObject()), rules);
   }
   @Test void oldCheatsPreserveKeepInventoryInsteadOfAdoptingNewPreset() {
     RuleSet rules = LegacyWorldRules.convert(json("{\"cheats\":true}"), new JsonObject());
@@ -29,7 +29,7 @@ class LegacyWorldRulesTest {
   @Test void conflictingGroupedAccessNeverSilentlyWidensOrShrinksPermissions() {
     JsonObject globals = json("{\"commandAccess\":{\"rules\":{\"heal\":\"DISABLED\"}}}");
     assertThrows(IllegalArgumentException.class, () -> LegacyWorldRules.convert(json("{\"cheats\":true}"), globals));
-    assertEquals(new RuleSet(), LegacyWorldRules.convert(json("{\"cheats\":false}"), globals));
+    assertEquals(WorldRuleUpgrade.defaults(new JsonObject()), LegacyWorldRules.convert(json("{\"cheats\":false}"), globals));
   }
   @Test void allExplosionItemProtectionMovesToTheWorldAndDoesNotAffectBlocks() {
     RuleSet rules = LegacyWorldRules.convert(new JsonObject(), json("{\"gameplay\":{\"explosionProofItems\":true,\"fireSpread\":false}}"));

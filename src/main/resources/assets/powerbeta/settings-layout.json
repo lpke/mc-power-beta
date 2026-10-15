@@ -72,7 +72,7 @@
   "Movement": [
     "Walking",
     "Auto-walk",
-    "Edge protection",
+    "Fake sneak",
     "Vehicles"
   ],
   "Inventory": [
@@ -126,14 +126,12 @@
     "Equipment",
     "Gold equipment abilities",
     "Mob drops",
-    "Farmland",
     "Spawning",
     "Spawn list",
     "Despawning",
     "Sleep",
     "Weather",
     "Explosion and fire",
-    "Better burning",
     "Fast leaf decay",
     "World generation",
     "Older mechanics",

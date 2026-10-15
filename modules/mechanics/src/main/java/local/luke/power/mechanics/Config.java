@@ -82,7 +82,7 @@ public class Config {
                 description = "Restart required for changes to take effect",
                 multiplayerSynced = true
         )
-        public Boolean enableGhastFireballsToInstaKillGhasts = false;
+        public Boolean enableGhastFireballsToInstaKillGhasts = true;
 
         @ConfigEntry(
                 name = "Allow TNT Defusing With Shears",
@@ -97,7 +97,7 @@ public class Config {
                 multiplayerSynced = true,
                 maxLength = 1
         )
-        public Float chanceBlocksDropWhenExploded = 0.3F;
+        public Float chanceBlocksDropWhenExploded = 1.0F;
 
         @ConfigEntry(
                 name = "Disable Ghast Explosion Causing Fire",
@@ -109,7 +109,7 @@ public class Config {
                 name = "Disable Lightning Strike Causing Fire",
                 multiplayerSynced = true
         )
-        public Boolean disableLightningStrikeCausingFire = false;
+        public Boolean disableLightningStrikeCausingFire = true;
 
     }
 
@@ -178,7 +178,7 @@ public class Config {
                 description = "Dye will be consumed on use",
                 multiplayerSynced = true
         )
-        public Boolean enableColorSignsWithDye = true;
+        public Boolean enableColorSignsWithDye = false;
 
         @ConfigEntry(
                 name = "Allow Editing Signs",
@@ -192,7 +192,7 @@ public class Config {
                 description = "Slimeball will be consumed on use",
                 multiplayerSynced = true
         )
-        public Boolean enableGlueTrapdoorsWithSlimeballs = false;
+        public Boolean enableGlueTrapdoorsWithSlimeballs = true;
     }
 
     public static class MobConfig {
@@ -231,17 +231,6 @@ public class Config {
         )
         public ZombiePigmanDropEnum zombiePigmanDropItem = ZombiePigmanDropEnum.COOKED_PORKCHOP;
 
-        @ConfigEntry(name = "Do Not Trample Farmland When Barefoot",
-                description = "Only affects player without boots",
-                multiplayerSynced = true
-        )
-        public Boolean disableTrampleFarmlandWhenBarefoot = false;
 
-        @ConfigEntry(
-                name = "Do Not Trample Farmland With Leather Boots",
-                description = "Only affects player with leather boots",
-                multiplayerSynced = true
-        )
-        public Boolean disableTrampleFarmlandWithLeatherBoots = false;
     }
 }

@@ -1,6 +1,5 @@
 package local.luke.power.mechanics.mixin;
 
-import local.luke.power.mechanics.Config;
 import local.luke.power.rules.*;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.block.Block;
@@ -8,7 +7,6 @@ import net.minecraft.block.FarmlandBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -30,11 +28,7 @@ public abstract class FarmlandMixin extends Block {
             ci.cancel();
             return;
         }
-        if (arg2 instanceof PlayerEntity player) {
-            var boots = player.inventory.armor[0];
-            if (Config.config.MOB_CONFIG.disableTrampleFarmlandWhenBarefoot && boots == null
-                    || Config.config.MOB_CONFIG.disableTrampleFarmlandWithLeatherBoots
-                    && boots != null && boots.itemId == Item.LEATHER_BOOTS.id) ci.cancel();
-        }
+        if (arg2 instanceof PlayerEntity && !WorldRules.enabled(arg.getProperties(), GameRule.PLAYER_CROP_TRAMPLING))
+            ci.cancel();
     }
 }

@@ -1,6 +1,6 @@
 package local.luke.power.mixin;
 
-import local.luke.power.gameplay.GameplayConfig;
+import local.luke.power.rules.*;
 import net.minecraft.class_142;
 import net.minecraft.class_329;
 import net.minecraft.entity.Entity;
@@ -14,6 +14,6 @@ public class CactusItemsMixin {
   @Inject(method = "method_1615", at = @At("HEAD"), cancellable = true)
   private void power$protectItem(World world, int x, int y, int z, Entity entity, CallbackInfo ci) {
     if (world != null && !world.isRemote && entity instanceof class_142
-        && GameplayConfig.current().cactusProofItems) ci.cancel();
+        && !WorldRules.enabled(world.method_262(), GameRule.CACTUS_DESTROYS_ITEMS)) ci.cancel();
   }
 }

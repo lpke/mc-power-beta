@@ -14,7 +14,7 @@ public final class FlexiblePlacement {
   public static final Logger LOG = LogManager.getLogger("Beta Flexible Placement");
 
   private static Modes modes = Modes.NONE;
-  private static boolean toggleDown, releaseRequired;
+  private static boolean releaseRequired;
 
   private FlexiblePlacement() {}
 
@@ -28,7 +28,7 @@ public final class FlexiblePlacement {
   }
 
   public static boolean modifiersActive() {
-    return local.luke.power.building.config.Config.current().flexible.enabled && modes.active();
+    return modes.active();
   }
 
   public static Modes modes() {
@@ -64,43 +64,27 @@ public final class FlexiblePlacement {
   public static void tick(Minecraft mc) {
     beginTick(
         mc,
-        local.luke.power.input.Bindings.down(Keys.ALL[0]),
         new Modes(
+            local.luke.power.input.Bindings.down(Keys.ALL[0]),
             local.luke.power.input.Bindings.down(Keys.ALL[1]),
             local.luke.power.input.Bindings.down(Keys.ALL[2]),
             local.luke.power.input.Bindings.down(Keys.ALL[3]),
-            local.luke.power.input.Bindings.down(Keys.ALL[4]),
-            local.luke.power.input.Bindings.down(Keys.ALL[5])),
+            local.luke.power.input.Bindings.down(Keys.ALL[4])),
         Display.isCreated() && Display.isActive());
   }
 
-  public static void beginTick(Minecraft mc, boolean toggle, Modes held, boolean focused) {
+  public static void beginTick(Minecraft mc, Modes held, boolean focused) {
     boolean playable = focused && canOperate(mc);
     if (!playable) interrupt();
     if (!held.active()) releaseRequired = false;
-    if (toggle && !toggleDown && playable) {
-      Settings next = local.luke.power.building.config.Config.current().flexible.copy();
-      next.enabled = !next.enabled;
-      try {
-        apply(next);
-        mc.inGameHud.addChatMessage(
-            "Flexible placement: "
-                + (local.luke.power.building.config.Config.current().flexible.enabled ? "\u00a7aON\u00a7r" : "\u00a7cOFF\u00a7r"));
-      } catch (IOException e) {
-        LOG.error("Could not save Flexible Placement settings", e);
-        mc.inGameHud.addChatMessage("\u00a7cFlexible placement settings could not be saved.\u00a7r");
-      }
-    }
-    toggleDown = toggle;
     modes =
-        playable && local.luke.power.building.config.Config.current().flexible.enabled && !releaseRequired
+        playable && !releaseRequired
             ? held
             : Modes.NONE;
   }
 
   public static boolean handles(Minecraft mc, ItemStack stack) {
-    return local.luke.power.building.config.Config.current().flexible.enabled
-        && canOperate(mc)
+    return canOperate(mc)
         && NativePlacement.block(stack) >= 0
         && (modes.active()
             || local.luke.power.building.config.Config.current().flexible.placeAgainstContainers);

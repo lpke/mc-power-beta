@@ -30,10 +30,9 @@ public final class ControlLinks {
     link("Auto-mine (toggle)", "tweaks.autoMineAnnounceToggle", "", "Toggle holding Attack / Break. Menus, focus loss, world changes and detached-camera control stop it.");
     // Keep their toggles and placement modifiers visible while the state is off.
     link("Fast place (toggle)", "tweaks.placement.enabled", "", "Toggle repeated block placement while holding Use.");
-    link("Fake sneak (toggle)", "tweaks.sneak.enabled", "", "Toggle ledge protection without slowing movement.");
-    link("Flexible placement (toggle)", "tweaks.flexible.enabled", "", "Toggle alternate block positions and facing controls.");
+    link("Fake sneak (toggle)", "tweaks.sneak.enabled", "", "Toggle fake sneak to stop at ledges without slowing movement.");
     for (String action : List.of("offset", "adjacent", "rotation", "reverse", "into face"))
-      link("Placement " + action + " (hold)", "tweaks.flexible.enabled", "", switch (action) {
+      link("Placement " + action + " (hold)", "tweaks.flexible.showOverlay", "", switch (action) {
         case "offset" -> "Hold to move placement outward using the targeted face regions.";
         case "adjacent" -> "Hold to place beside the target, including beyond an edge.";
         case "rotation" -> "Hold to choose block facing from the targeted face.";
@@ -47,7 +46,7 @@ public final class ControlLinks {
     link("power_creative.sprint", "creative.sprintToggle", "creative.sprintFlight", "Boost creative, spectator or freecam flight in any direction. Toggle ends when movement stops.");
     link("power_creative.picker", "", "", "Cycle game modes while holding the mode-picker modifier; release the modifier to select.");
     link("power_creative.modifier", "", "", "Hold with the game-mode cycle key to open the mode picker.");
-    link("Toggle Freecam", "power_camera:config.speed", "", "Detach the camera and hide the HUD. F1 can show it during freecam. Press again to return and restore the previous HUD visibility.");
+    link("Toggle Freecam", "power_camera:config.speed", "", "Detach the camera. The HUD follows Hide HUD on entering freecam; F1 can change it during the visit. Press again to return and restore the previous HUD visibility.");
     link("Toggle Player Movement", "power_camera:config.speed", "", "Allow or stop player movement while the camera is detached.");
     link("Change Freecam Speed", "power_camera:config.speed", "", "Hold and scroll to adjust detached-camera movement speed.");
     link("Save Or Load Camera Position", "power_camera:config.speed", "", "Enter a saved camera position number; hold Ctrl to save the current position instead.");
@@ -100,7 +99,7 @@ public final class ControlLinks {
       case "lightOverlay.enabled" -> "lightOverlay.";
       case "infoHud.enabled" -> "infoHud.";
       case "tweaks.placement.enabled" -> "tweaks.placement.";
-      case "tweaks.flexible.enabled" -> "tweaks.flexible.";
+      case "tweaks.flexible.showOverlay" -> "tweaks.flexible.";
       case "tweaks.sneak.enabled" -> "tweaks.sneak.";
       case "tweaks.hotbar.overlay", "tweaks.hotbar.reverseScroll" -> "tweaks.hotbar.";
       case "tweaks.freeLookToggle" -> "tweaks.freeLook";

@@ -88,6 +88,26 @@ final class ConfigCleanup {
     for (String id : RETIRED) remove(settings, id);
   }
 
+  static void upgradeFour(JsonObject settings) {
+    JsonObject features = section(settings, "power_controls:features");
+    if (!enabled(settings, "power_controls:features.chestSounds", false))
+      features.addProperty("moreSoundsChests", 0);
+    else if (!features.has("moreSoundsChests")) features.addProperty("moreSoundsChests", 2);
+    // An inactive placement master must not unexpectedly activate old hold bindings.
+    unbindDisabled(settings, "building.flexible.enabled", false, "Placement offset (hold)",
+        "Placement adjacent (hold)", "Placement rotation (hold)", "Placement reverse (hold)", "Placement into face (hold)");
+    if (!enabled(settings, "building.flexible.enabled", false))
+      section(section(settings, "building"), "flexible").addProperty("placeAgainstContainers", false);
+    section(settings, "native").remove("key_Flexible placement (toggle)");
+    section(settings, "bindings").remove("Flexible placement (toggle)");
+    for (String id : List.of("power_controls:features.betterBurning", "power_controls:features.burpingSounds",
+        "power_controls:features.chestSounds", "power_controls:oldfeatures.punchTntToIgnite",
+        "power_mechanics:config.MOB_CONFIG.disableTrampleFarmlandWhenBarefoot",
+        "power_mechanics:config.MOB_CONFIG.disableTrampleFarmlandWithLeatherBoots",
+        "gameplay.lavaProofItems", "gameplay.cactusProofItems", "visual.spectatorBlockOutlines", "building.flexible.enabled"))
+      remove(settings, id);
+  }
+
   private static void unbindDisabled(JsonObject settings, String id, boolean fallback, String... names) {
     if (enabled(settings, id, fallback)) return;
     JsonObject keys = section(settings, "native"), modifiers = section(settings, "bindings");

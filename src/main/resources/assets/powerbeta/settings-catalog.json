@@ -177,7 +177,7 @@
     "group": "Gold equipment abilities",
     "label": "Gold apple cure fire",
     "description": "Cancels fire effect one time when eaten",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_gold:config.enableGoldAxeSilkTouch": {
@@ -185,7 +185,7 @@
     "group": "Gold equipment abilities",
     "label": "Gold axe silk touch",
     "description": "Tool must be effective on block for effect",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_gold:config.enableGoldBlockHerobrineSummoner": {
@@ -193,7 +193,7 @@
     "group": "Blocks",
     "label": "Gold block herobrine summoner",
     "description": "Converts a gold block into a sponge when lit",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_gold:config.enableGoldBootsSoulSpeed": {
@@ -201,7 +201,7 @@
     "group": "Gold equipment abilities",
     "label": "Gold boots soul speed",
     "description": "Negates the slow-down effect of soul sand",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_gold:config.enableGoldChestplateProjectileProtection": {
@@ -241,7 +241,7 @@
     "group": "Gold equipment abilities",
     "label": "Gold pickaxe silk touch",
     "description": "Tool must be effective on block for effect",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_gold:config.enableGoldShovelSilkTouch": {
@@ -249,7 +249,7 @@
     "group": "Gold equipment abilities",
     "label": "Gold shovel silk touch",
     "description": "Tool must be effective on block for effect",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_gold:config.enableGoldSwordLooting": {
@@ -257,7 +257,7 @@
     "group": "Gold equipment abilities",
     "label": "Gold sword looting",
     "description": "Looting is a simple +1 to mob drops",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_gold:config.enableSpongeSoaksUpWater": {
@@ -265,7 +265,7 @@
     "group": "Blocks",
     "label": "Sponge soaking up water",
     "description": "Will soak up a 5x5 water cube when placed",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_hud:config.enableChatScroll": {
@@ -322,7 +322,7 @@
     "group": "Quality",
     "label": "Vignette",
     "description": "Darken the screen edges in dim areas.",
-    "default": true,
+    "default": false,
     "restart": false
   },
   "power_hud:config.drawXboxXAndYButtons": {
@@ -867,7 +867,7 @@
     "group": "Explosion and fire",
     "label": "Allow ghast fireballs to insta-kill ghasts",
     "description": "Restart required for changes to take effect",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.enableDefusingTnt": {
@@ -881,13 +881,16 @@
   "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.chanceBlocksDropWhenExploded": {
     "page": "Gameplay",
     "group": "Explosion and fire",
-    "label": "Chance blocks drop when exploded",
-    "description": "Float value between 0.0 (0%) and 1.0 (100%)",
-    "default": 0.3,
+    "label": "Explosion block drops, %",
+    "description": "Chance that a block destroyed by an explosion drops its item.",
+    "default": 1.0,
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05
+    "step": 0.01,
+    "displayDivisor": 0.01,
+    "unit": "%",
+    "control": "slider"
   },
   "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionCausingFire": {
     "page": "Gameplay",
@@ -902,7 +905,7 @@
     "group": "Explosion and fire",
     "label": "Disable lightning strike causing fire",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_mechanics:config.FLORA_CONFIG.enableRandomStickDropFromDeadBushes": {
@@ -977,7 +980,7 @@
     "group": "Blocks",
     "label": "Allow coloring signs with dye",
     "description": "Dye will be consumed on use",
-    "default": true,
+    "default": false,
     "restart": false
   },
   "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableGlueTrapdoorsWithSlimeballs": {
@@ -985,7 +988,7 @@
     "group": "Blocks",
     "label": "Allow gluing trapdoors with a slimeball",
     "description": "Slimeball will be consumed on use",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_mechanics:config.MOB_CONFIG.waterNegatesFallDamage": {
@@ -1027,22 +1030,6 @@
     "label": "Zombie-pigman drop item",
     "description": "Only works if setting is enabled above",
     "default": 0,
-    "restart": false
-  },
-  "power_mechanics:config.MOB_CONFIG.disableTrampleFarmlandWhenBarefoot": {
-    "page": "Gameplay",
-    "group": "Farmland",
-    "label": "Do not trample farmland when barefoot",
-    "description": "Only affects player without boots",
-    "default": false,
-    "restart": false
-  },
-  "power_mechanics:config.MOB_CONFIG.disableTrampleFarmlandWithLeatherBoots": {
-    "page": "Gameplay",
-    "group": "Farmland",
-    "label": "Do not trample farmland with leather boots",
-    "description": "Only affects player with leather boots",
-    "default": false,
     "restart": false
   },
   "power_client_fixes:config.disableServerListIpAddresses": {
@@ -1395,7 +1382,7 @@
     "group": "Sleep",
     "label": "Beds speed up night tick world",
     "description": "Night speed up ticks world as well",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_environment:config.SLEEP_CONFIG.handSwingClickToExitBedsEnabled": {
@@ -1403,7 +1390,7 @@
     "group": "Sleep",
     "label": "Click or swing hand to exit beds",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_environment:config.WEATHER_CONFIG.enableAlwaysSnowAboveSetYLevel": {
@@ -1911,60 +1898,6 @@
     "displayDivisor": 20,
     "unit": "seconds"
   },
-  "power_controls:features.betterBurning.enableBetterBurning": {
-    "page": "Gameplay",
-    "group": "Better burning",
-    "label": "Better burning",
-    "description": "Master switch for all features here",
-    "default": false,
-    "restart": false
-  },
-  "power_controls:features.betterBurning.skeletonsBurningArrows": {
-    "page": "Gameplay",
-    "group": "Better burning",
-    "label": "Skeletons on fire shoot flaming arrows",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
-  "power_controls:features.betterBurning.skeletonBurningArrowChance": {
-    "page": "Gameplay",
-    "group": "Better burning",
-    "label": "Skeletons on fire flaming arrow chance (0-100)",
-    "description": "",
-    "default": 70,
-    "restart": false,
-    "min": 0.0,
-    "max": 100.0,
-    "step": 1
-  },
-  "power_controls:features.betterBurning.burningArrowsSetOnFire": {
-    "page": "Gameplay",
-    "group": "Better burning",
-    "label": "Burning arrows set entities on fire",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
-  "power_controls:features.betterBurning.burningEntitySpread": {
-    "page": "Gameplay",
-    "group": "Better burning",
-    "label": "Burning entities spread fire to others",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
-  "power_controls:features.betterBurning.burningEntitySpreadChance": {
-    "page": "Gameplay",
-    "group": "Better burning",
-    "label": "Burning entities spread fire chance (0-100)",
-    "description": "",
-    "default": 30,
-    "restart": false,
-    "min": 0.0,
-    "max": 100.0,
-    "step": 1
-  },
   "power_controls:features.stepAssist": {
     "page": "Movement",
     "group": "Walking",
@@ -1976,9 +1909,9 @@
   "power_controls:features.moreSoundsChests": {
     "page": "Audio",
     "group": "Extra sounds",
-    "label": "Chest sound style",
+    "label": "Chest sounds",
     "description": "Choose the sounds used for opening and closing chests.",
-    "default": 2,
+    "default": 0,
     "restart": false,
     "order": 7
   },
@@ -2123,20 +2056,12 @@
     "default": false,
     "restart": false
   },
-  "power_controls:oldfeatures.punchTntToIgnite": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
-    "label": "Punch TNT to ignite",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
   "power_controls:oldfeatures.punchTntToDefuse": {
     "page": "Gameplay",
     "group": "Explosion and fire",
     "label": "Punch primed TNT to defuse",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:oldfeatures.hoeGrassForSeeds": {
@@ -2298,7 +2223,7 @@
     "group": "Tweaked",
     "label": "Stairs per craft",
     "description": "Set the number of stairs made from 6 matching planks or cobblestone arranged in a staircase. Beta gives 4.",
-    "default": 4,
+    "default": 6,
     "restart": true,
     "min": 1,
     "max": 64,
@@ -2320,7 +2245,7 @@
     "group": "Obtainable",
     "label": "Craftable grass blocks",
     "description": "Combine 1 dirt and 1 seed anywhere in the grid to make 1 grass block.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.obtainable.craftableCobwebs": {
@@ -2336,7 +2261,7 @@
     "group": "Obtainable",
     "label": "Craftable fire",
     "description": "Craft 1 unused flint and steel into 3 fire items. Consumes the flint and steel.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.obtainable.craftableCoalOre": {
@@ -2449,7 +2374,7 @@
     "group": "Interaction",
     "label": "Expand chicken hitbox",
     "description": "Expands chicken hitbox to it's modern size",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.stackableChests": {
@@ -2457,7 +2382,7 @@
     "group": "Blocks",
     "label": "Stackable chests",
     "description": "Allows you to stack chests on top of each other",
-    "default": true,
+    "default": false,
     "restart": false
   },
   "power_controls:tweaks.modernFlintAndSteel": {
@@ -2490,7 +2415,7 @@
     "group": "Explosion and fire",
     "label": "Allow igniting entities with flint and steel",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.allowTrapdoorsWithoutSupport": {
@@ -3134,13 +3059,6 @@
     "description": "Choose items to allow. Select a specific variant or any metadata. An empty allow-list permits nothing.",
     "valueType": "itemFilters"
   },
-  "tweaks.flexible.enabled": {
-    "page": "Building",
-    "group": "Flexible placement",
-    "label": "Flexible placement",
-    "description": "",
-    "default": false
-  },
   "tweaks.flexible.showOverlay": {
     "page": "Building",
     "group": "Flexible placement",
@@ -3282,17 +3200,17 @@
   },
   "tweaks.sneak.enabled": {
     "page": "Movement",
-    "group": "Edge protection",
-    "label": "Edge protection",
+    "group": "Fake sneak",
+    "label": "Fake sneak",
     "description": "Prevent walking off ledges without crouching or slowing down.",
     "order": 0,
     "default": false
   },
   "tweaks.sneak.announceToggle": {
     "page": "Movement",
-    "group": "Edge protection",
-    "label": "Edge protection messages",
-    "description": "Show a chat message when edge protection turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
+    "group": "Fake sneak",
+    "label": "Fake sneak messages",
+    "description": "Show a chat message when fake sneak turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
     "order": 1
   },
   "tweaks.slabs.enabled": {
@@ -3326,15 +3244,6 @@
     "restart": false,
     "order": 0
   },
-  "power_controls:features.burpingSounds": {
-    "page": "Audio",
-    "group": "Extra sounds",
-    "label": "Burping sounds",
-    "description": "Occasionally burp after consuming food.",
-    "default": false,
-    "restart": false,
-    "order": 1
-  },
   "power_controls:features.shearingSounds": {
     "page": "Audio",
     "group": "Extra sounds",
@@ -3361,15 +3270,6 @@
     "default": true,
     "restart": false,
     "order": 4
-  },
-  "power_controls:features.chestSounds": {
-    "page": "Audio",
-    "group": "Extra sounds",
-    "label": "Chest sounds",
-    "description": "Play sounds when opening and closing chests.",
-    "default": false,
-    "restart": false,
-    "order": 6
   },
   "tweaks.boatSpeed": {
     "page": "Movement",
@@ -3527,7 +3427,8 @@
     "group": "Rendering",
     "label": "Original far-distance fog",
     "description": "Use Beta's original far-fog values at exactly 12 chunks. Other distances keep their normal fog.",
-    "order": 7
+    "order": 7,
+    "default": true
   },
   "video.clouds": {
     "page": "Video",
@@ -3659,7 +3560,7 @@
     "page": "Controls",
     "group": "Movement",
     "order": 8,
-    "label": "Edge protection (toggle)"
+    "label": "Fake sneak (toggle)"
   },
   "keys.key.inventory": {
     "page": "Controls",
@@ -3792,11 +3693,6 @@
     "page": "Controls",
     "group": "Building",
     "order": 0
-  },
-  "keys.Flexible placement (toggle)": {
-    "page": "Controls",
-    "group": "Building",
-    "order": 1
   },
   "keys.Placement offset (hold)": {
     "page": "Controls",
@@ -3958,7 +3854,7 @@
     "label": "Rescan mouse"
   },
   "activeTweaks.fakeSneak": {
-    "label": "Edge protection"
+    "label": "Fake sneak"
   },
   "logo.scrollingBackground.enabled": {
     "page": "Interface",
@@ -4333,7 +4229,7 @@
     "description": "Right-click TNT with flint and steel to prime it. Uses one durability in survival; reusable in creative. Singleplayer only.",
     "order": 9,
     "restart": false,
-    "default": false
+    "default": true
   },
   "gameplay.fastItemCollisions": {
     "page": "Fixes",
@@ -4352,14 +4248,6 @@
     "default": false,
     "order": 25
   },
-  "gameplay.lavaProofItems": {
-    "page": "Gameplay",
-    "group": "Dropped items",
-    "label": "Items don't burn in lava",
-    "description": "Protect dropped items from lava damage in singleplayer. Fire, explosions and normal item despawning stay independent.",
-    "default": false,
-    "order": 25
-  },
   "visual.limitCapeRotation": {
     "page": "Fixes",
     "group": "Rendering",
@@ -4367,14 +4255,6 @@
     "description": "Keep capes from flipping upward or twisting excessively during fast flight or vehicle travel. Changes rendering only.",
     "default": true,
     "order": 40
-  },
-  "gameplay.cactusProofItems": {
-    "page": "Gameplay",
-    "group": "Dropped items",
-    "label": "Items survive cacti",
-    "description": "Protect dropped items from cactus damage in singleplayer. Other damage, pickup and normal item despawning stay independent.",
-    "default": false,
-    "order": 26
   },
   "infoHud.enabled": {
     "order": 0
@@ -4689,16 +4569,9 @@
     "group": "Free camera",
     "label": "Hide HUD on entering freecam",
     "description": "Hide the HUD when freecam starts. F1 can change it during freecam; leaving restores the entry state.",
-    "default": true,
+    "default": false,
     "restart": false,
     "order": 8
-  },
-  "visual.spectatorBlockOutlines": {
-    "page": "Creative",
-    "group": "Spectator",
-    "label": "Block outlines in spectator",
-    "description": "Show the target block outline in spectator mode. Does not affect outlines in other game modes.",
-    "order": 9
   },
   "visual.removeUnderwaterOverlay": {
     "page": "Video",

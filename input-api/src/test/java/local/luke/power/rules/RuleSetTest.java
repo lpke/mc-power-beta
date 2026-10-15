@@ -7,7 +7,7 @@ import static local.luke.power.rules.GameRule.*;
 
 class RuleSetTest {
   @Test void aliasesAndDefaultsHaveOneOwner() {
-    assertEquals(31, GameRule.values().length);
+    assertEquals(34, GameRule.values().length);
     assertEquals(11, java.util.Arrays.stream(GameRule.values()).filter(GameRule::access).count());
     RuleSet survival = new RuleSet(), cheats = RuleSet.cheats();
     for (GameRule rule : GameRule.values()) {
@@ -34,7 +34,7 @@ class RuleSetTest {
     assertTrue(rules.enabled(KEEP_INVENTORY)); assertTrue(rules.enabled(EXPLOSIONS_DESTROY_ITEMS));
   }
   @Test void badTypesUnknownNamesAndVersionsAreRejectedWithoutChangingInput() {
-    for (String source : new String[]{"{\"version\":2,\"values\":{}}", "{\"version\":\"1\",\"values\":{}}",
+    for (String source : new String[]{"{\"version\":3,\"values\":{}}", "{\"version\":\"1\",\"values\":{}}",
         "{\"version\":1,\"values\":{\"fire_spread\":\"false\"}}", "{\"version\":1,\"values\":{\"fire_spread\":0}}",
         "{\"version\":1,\"values\":{\"players_sleeping_percentage\":-1}}", "{\"version\":1,\"values\":{\"players_sleeping_percentage\":1.5}}",
         "{\"version\":1,\"values\":{\"players_sleeping_percentage\":2147483648}}", "{\"version\":1,\"values\":{\"doFireTick\":true}}",

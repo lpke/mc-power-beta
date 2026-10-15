@@ -10,11 +10,8 @@ public final class InfoHudSettings {
   public Cluster[] clusters = {new Cluster(0), new Cluster(2), new Cluster(6), new Cluster(8)};
 
   public InfoHudSettings() {
-    clusters[0].enabled = clusters[1].enabled = true;
+    clusters[0].enabled = true;
     clusters[0].coordinates = clusters[0].direction = true;
-    clusters[1].biome = clusters[1].timeOfDay = true;
-    clusters[2].chunk = true;
-    clusters[3].day = clusters[3].fps = true;
   }
 
   public static final class Cluster {

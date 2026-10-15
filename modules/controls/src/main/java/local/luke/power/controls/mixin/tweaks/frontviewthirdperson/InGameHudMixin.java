@@ -19,7 +19,7 @@ public class InGameHudMixin {
     
     @Unique
     public boolean isFrontViewEnabled() {
-        return ModOptions.frontView || (ControlFeatures.USER_INTERFACE_CONFIG.frontViewThirdPerson == FrontViewMode.HIDE_HUD && (minecraft.options.thirdPerson && minecraft.options.hideHud));
+        return ModOptions.isFrontViewEnabled();
     }
     
     @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;drawTexture(IIIIII)V", ordinal = 2))

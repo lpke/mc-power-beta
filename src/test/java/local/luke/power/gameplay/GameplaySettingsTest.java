@@ -8,14 +8,14 @@ class GameplaySettingsTest {
   @Test void defaultsPreserveGameplayAndMissingFieldsUseSafeLimits() {
     var gson = new Gson(); var settings = gson.fromJson("{}", GameplaySettings.class);
     assertTrue(settings.mergeItems); assertFalse(settings.limitTnt);
-    assertFalse(settings.cactusProofItems); assertFalse(settings.lavaProofItems);
+    assertTrue(settings.flintIgnitesTnt);
     assertTrue(settings.leavesDropSaplingsInCreative);
     assertEquals(256, settings.mergeThreshold); assertEquals(4, settings.tntPerTick); assertEquals(8, settings.tntMillis);
     settings.mergeItems = false; settings.limitTnt = true;
-    settings.cactusProofItems = true;
+    settings.flintIgnitesTnt = false;
     var loaded = gson.fromJson(gson.toJson(settings), GameplaySettings.class);
     assertFalse(loaded.mergeItems); assertTrue(loaded.limitTnt); loaded.validate();
-    assertTrue(loaded.cactusProofItems); assertFalse(loaded.lavaProofItems);
+    assertFalse(loaded.flintIgnitesTnt);
     loaded.tntPerTick = 0; assertThrows(IllegalArgumentException.class, loaded::validate);
   }
 }

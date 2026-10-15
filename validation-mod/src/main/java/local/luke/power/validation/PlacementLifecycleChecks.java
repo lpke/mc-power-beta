@@ -28,7 +28,7 @@ final class PlacementLifecycleChecks {
       case "exit", "stop" -> {
         Release160Checks.activate(mc);
         // Queue the user's choice immediately before exit; the cleanup must not replace it.
-        Config.update(s -> { s.flexible.enabled = (flags & 1) != 0; s.slabs.enabled = (flags & 2) != 0; });
+        Config.update(s -> { s.flexible.showOverlay = (flags & 1) != 0; s.slabs.enabled = (flags & 2) != 0; });
         if (parts[0].equals("stop")) {
           mc.scheduleStop();
           log("PASS requested shutdown with placement preferences " + flags);
@@ -44,7 +44,7 @@ final class PlacementLifecycleChecks {
 
   static void saved(int flags) {
     for (Settings s : new Settings[]{Config.current(), PowerConfig.read("building", Settings.class)}) {
-      check(s.flexible.enabled == ((flags & 1) != 0) && s.slabs.enabled == ((flags & 2) != 0),
+      check(s.flexible.showOverlay == ((flags & 1) != 0) && s.slabs.enabled == ((flags & 2) != 0),
           "placement preferences changed: " + flags);
       check(!s.sneak.enabled && !s.placement.enabled && !s.placement.restrictionEnabled,
           "temporary toggle was not cleared");
@@ -56,7 +56,7 @@ final class PlacementLifecycleChecks {
     try {
       test("cleanup preserves all placement preference combinations and unrelated values", () -> {
         for (int flags = 0; flags < 4; flags++) {
-          var s = before.copy(); s.flexible.enabled = (flags & 1) != 0; s.slabs.enabled = (flags & 2) != 0;
+          var s = before.copy(); s.flexible.showOverlay = (flags & 1) != 0; s.slabs.enabled = (flags & 2) != 0;
           s.sneak.enabled = s.placement.enabled = s.placement.restrictionEnabled = true;
           Config.apply(s);
           var expected = s.copy(); expected.sneak.enabled = expected.placement.enabled = expected.placement.restrictionEnabled = false;
@@ -67,17 +67,17 @@ final class PlacementLifecycleChecks {
       });
       test("preserved flexible placement clears held modes and requires release before reuse", () -> {
         mc.setScreen(null); mc.paused = false; mc.field_2778 = true;
-        Config.update(s -> s.flexible.enabled = true);
+        Config.update(s -> s.flexible.showOverlay = true);
         Modes held = new Modes(true, false, true, false, false);
-        FlexiblePlacement.beginTick(mc, false, Modes.NONE, true);
-        FlexiblePlacement.beginTick(mc, false, held, true);
+        FlexiblePlacement.beginTick(mc, Modes.NONE, true);
+        FlexiblePlacement.beginTick(mc, held, true);
         check(FlexiblePlacement.modifiersActive(), "fixture did not start placement modes");
         TweakLifecycle.reset();
-        check(Config.current().flexible.enabled && !FlexiblePlacement.modes().active(), "cleanup lost preference or retained modes");
-        FlexiblePlacement.beginTick(mc, false, held, true);
+        check(!FlexiblePlacement.modes().active(), "cleanup retained held modes");
+        FlexiblePlacement.beginTick(mc, held, true);
         check(!FlexiblePlacement.modifiersActive(), "held modes restarted after cleanup");
-        FlexiblePlacement.beginTick(mc, false, Modes.NONE, true);
-        FlexiblePlacement.beginTick(mc, false, held, true);
+        FlexiblePlacement.beginTick(mc, Modes.NONE, true);
+        FlexiblePlacement.beginTick(mc, held, true);
         check(FlexiblePlacement.modifiersActive(), "fresh modifier press no longer works");
         FlexiblePlacement.interrupt();
       });

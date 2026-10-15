@@ -14,6 +14,7 @@ import local.luke.power.mixin.ItemHealthAccessor;
 import local.luke.power.storage.PowerConfig;
 import local.luke.power.ui.*;
 import local.luke.power.world.WorldCycles;
+import local.luke.power.rules.*;
 import net.minecraft.class_142;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -30,7 +31,7 @@ final class Release160Checks {
         hud.clusters[1].textSize = 1.7; hud.clusters[1].offsetX = -21; hud.clusters[1].opacity = 43;
         hud.clusters[1].hideWithDebug = false; InfoHudConfig.save(hud);
         MenuPreferences.update(v -> v.debugTimeOfDay = true);
-        var game = GameplayConfig.copy(); game.lavaProofItems = game.cactusProofItems = true; GameplayConfig.save(game);
+        AccessRules.set(mc, GameRule.LAVA_DESTROYS_ITEMS, false); AccessRules.set(mc, GameRule.CACTUS_DESTROYS_ITEMS, false); local.luke.power.world.WorldRuleChanges.save(mc);
         var walking = Config.current().copy(); walking.autoWalkCancelOnLostFocus = true; Config.apply(walking);
         log("PASS saved 1.6.0 settings");
       }
@@ -39,10 +40,10 @@ final class Release160Checks {
         check(h.enabled && h.clusters[1].textColor.equals("#12ABEF") && h.clusters[1].textSize == 1.7
             && h.clusters[1].offsetX == -21 && h.clusters[1].opacity == 43 && !h.clusters[1].hideWithDebug,
             "cluster state lost on restart");
-        check(MenuPreferences.debugTimeOfDay() && GameplayConfig.current().lavaProofItems && GameplayConfig.current().cactusProofItems
+        check(MenuPreferences.debugTimeOfDay() && !AccessRules.copy(mc).enabled(GameRule.LAVA_DESTROYS_ITEMS) && !AccessRules.copy(mc).enabled(GameRule.CACTUS_DESTROYS_ITEMS)
             && Config.current().autoWalkCancelOnLostFocus, "preferences lost on restart");
         inactive(mc);
-        check(Config.current().slabs.enabled && Config.current().flexible.enabled, "placement preferences lost on restart");
+        check(Config.current().slabs.enabled, "placement preferences lost on restart");
         log("PASS all new settings survive restart with inactive tweaks");
       }
       case "activate" -> activate(mc);
@@ -120,8 +121,8 @@ final class Release160Checks {
     mc.player.yaw=mc.player.prevYaw=0;mc.player.pitch=mc.player.prevPitch=0;
     mc.player.velocityX=mc.player.velocityY=mc.player.velocityZ=0;
     mc.player.inventory.main[0]=new ItemStack(1,64,0);mc.player.inventory.selectedSlot=0;
-    var settings=Config.current().copy();settings.flexible.enabled=true;Config.preview(settings);
-    local.luke.power.flexible.Keys.ALL[3].code=org.lwjgl.input.Keyboard.KEY_G;
+    var settings=Config.current().copy();Config.preview(settings);
+    local.luke.power.flexible.Keys.ALL[2].code=org.lwjgl.input.Keyboard.KEY_G;
     Bindings.register(mc.options.allKeys);
     var hud=new InfoHudSettings();hud.enabled=action.equals("hud-scene");
     hud.clusters[1].textSize=1.4;hud.clusters[1].textColor="#55FFAA";hud.clusters[1].opacity=70;
@@ -133,7 +134,7 @@ final class Release160Checks {
 
   static void activate(Minecraft mc) throws Exception {
     var settings = Config.current().copy(); settings.sneak.enabled = settings.placement.enabled = true;
-    settings.placement.restrictionEnabled = settings.slabs.enabled = settings.flexible.enabled = true;
+    settings.placement.restrictionEnabled = settings.slabs.enabled = true;
     Config.apply(settings); mc.options.cinematicMode = true;
     var visual = local.luke.power.visual.VisualConfig.copy(); visual.hideEntities = true;
     local.luke.power.visual.VisualConfig.queue(visual);
@@ -268,10 +269,10 @@ final class Release160Checks {
   }
 
   private static void lava(Minecraft mc) throws Exception {
-    var before = GameplayConfig.copy();
+    var before = AccessRules.copy(mc);
     try {
       for (boolean enabled : new boolean[]{false,true}) for (int block : new int[]{10,11}) test("lava item protection="+enabled+" block="+block, () -> {
-        var settings = GameplayConfig.copy(); settings.lavaProofItems=enabled; GameplayConfig.preview(settings);
+        AccessRules.set(mc, GameRule.LAVA_DESTROYS_ITEMS, !enabled);
         mc.world.method_229(4,110,4,block);
         var stack = new ItemStack(267,1,37);
         var item = new class_142(mc.world,4.5,110.3,4.5,stack);
@@ -288,7 +289,7 @@ final class Release160Checks {
         item.markDead(); mc.world.method_229(4,110,4,0);
       });
       test("lava setting preserves ordinary damage and multiplayer authority", () -> {
-        var settings=GameplayConfig.copy(); settings.lavaProofItems=true; GameplayConfig.preview(settings);
+        AccessRules.set(mc, GameRule.LAVA_DESTROYS_ITEMS, false);
         var item=new class_142(mc.world,4,110,4,new ItemStack(1,1,0));
         item.damage(null,2); check(((ItemHealthAccessor)item).power$health()==3,"ordinary damage suppressed");
         var method=Entity.class.getDeclaredMethod("method_1332");method.setAccessible(true);
@@ -297,7 +298,7 @@ final class Release160Checks {
         finally { mc.world.isRemote=remote; item.markDead(); }
       });
       test("lava setting leaves fire blocks dangerous", () -> {
-        var settings=GameplayConfig.copy();settings.lavaProofItems=true;GameplayConfig.preview(settings);
+        AccessRules.set(mc, GameRule.LAVA_DESTROYS_ITEMS, false);
         mc.world.method_229(4,109,4,87);
         mc.world.method_229(4,110,4,51);
         check(mc.world.getBlockId(4,110,4)==51,"fire fixture did not stay placed");
@@ -305,6 +306,6 @@ final class Release160Checks {
         for(int i=0;i<40&&!item.dead;i++) {item.method_1340(4.5,110.3,4.5);item.move(0,0,0);}
         check(item.dead,"fire immunity leaked");
       });
-    } finally { GameplayConfig.preview(before); mc.world.method_229(4,110,4,0); mc.world.method_229(4,109,4,0); }
+    } finally { AccessRules.restore(mc, before); mc.world.method_229(4,110,4,0); mc.world.method_229(4,109,4,0); }
   }
 }

@@ -107,7 +107,14 @@ public final class ModePickerScreen extends Screen {
       for (int i = 0; i < 3; i++) {
         int sx = left + i * 31;
         Texture.draw(minecraft, "mode_slot", sx, top, 26, 26, 0, 0, 26, 26, 26, 26);
-        if (MODES[i] == GameMode.SPECTATOR)
+        GameMode mode = MODES[i];
+        boolean disabled = !Modes.denial(mode).isEmpty();
+        if (disabled) {
+          String icon = mode == GameMode.CREATIVE ? "disabled_creative" : "disabled_spectator";
+          int size = mode == GameMode.CREATIVE ? 64 : 16;
+          int region = mode == GameMode.CREATIVE ? 48 : 16;
+          Texture.draw(minecraft, icon, sx + 5, top + 5, 16, 16, 0, 0, region, region, size, size);
+        } else if (mode == GameMode.SPECTATOR)
           Texture.draw(minecraft, "ender_eye", sx + 5, top + 5, 16, 16, 0, 0, 16, 16, 16, 16);
         else {
           GL11.glPushMatrix();
@@ -116,11 +123,11 @@ public final class ModePickerScreen extends Screen {
           GL11.glEnable(GL12.GL_RESCALE_NORMAL);
           GL11.glPopMatrix();
           ItemStack icon =
-              MODES[i] == GameMode.CREATIVE ? new ItemStack(Block.GRASS) : new ItemStack(267, 1, 0);
+              mode == GameMode.CREATIVE ? new ItemStack(Block.GRASS) : new ItemStack(267, 1, 0);
           items.renderStackInGUI(textManager, minecraft.textureManager, icon, sx + 5, top + 5);
           RenderHelper.disableLighting();
         }
-        if (!Modes.denial(MODES[i]).isEmpty()) {
+        if (disabled) {
           fill(sx + 1, top + 1, sx + 25, top + 25, 0x99000000);
           drawTextWithShadowCentred(textManager, "x", sx + 13, top + 9, 0xbb7777);
         }

@@ -8,6 +8,12 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-201 check`: patch defaults, retired controls, chest choices, percent editing,
+  creation geometry, native player/mob trampling with every footwear class and server
+  ownership, and front-view/freecam HUD combinations. `keys` and `state` support
+  physical F4 and F3+F4 checks. `export-icons` captures the bundled grayscale
+  mode icons with the native renderer; this is an offline asset-generation command. Run after `new-world` in the muted clone.
+
 - `world-rules`, `rule-behavior`, `creation-rules` and `quick-transfer`: rule storage,
   permissions, native gameplay, searchable creation drafts and item/NBT interactions.
   Run after `new-world`. `rules-restart prepare`, restart the clone, then

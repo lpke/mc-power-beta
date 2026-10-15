@@ -55,8 +55,9 @@ public final class LegacyWorldRules {
       throw conflict(TNT_EXPLODES, "old block-only TNT protection has no equivalent. Choose whether TNT should explode before converting");
     rules.set(CREEPER_GRIEFING, !bool(explosions, "disableCreeperExplosionBreakingBlocks", false));
     rules.set(GHAST_GRIEFING, !bool(explosions, "disableGhastExplosionBreakingBlocks", false));
-    if (bool(object(mechanics, "MOB_CONFIG"), "disableTramplingFarmland", false))
-      throw conflict(MOB_CROP_TRAMPLING, "old farmland protection also covered every player. Choose the new mob and player preferences before converting");
+    boolean farmlandProtected = bool(object(mechanics, "MOB_CONFIG"), "disableTramplingFarmland", false);
+    rules.set(MOB_CROP_TRAMPLING, !farmlandProtected);
+    rules.set(PLAYER_CROP_TRAMPLING, !farmlandProtected);
     JsonObject environment = object(globals, "power_environment:config");
     JsonElement sleep = object(environment, "SLEEP_CONFIG").get("asleepPlayerPercentageForSkippingNight");
     if (sleep != null) {

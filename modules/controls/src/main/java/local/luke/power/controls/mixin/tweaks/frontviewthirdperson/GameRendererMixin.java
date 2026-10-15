@@ -34,7 +34,7 @@ public class GameRendererMixin {
     
     @Unique
     public boolean isFrontViewEnabled() {
-        return ModOptions.frontView || (ControlFeatures.USER_INTERFACE_CONFIG.frontViewThirdPerson == FrontViewMode.HIDE_HUD && (client.options.thirdPerson && client.options.hideHud));
+        return ModOptions.isFrontViewEnabled();
     }
 
     @WrapOperation(method = "applyCameraTransform", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;yaw:F", ordinal = 1, opcode = Opcodes.GETFIELD))

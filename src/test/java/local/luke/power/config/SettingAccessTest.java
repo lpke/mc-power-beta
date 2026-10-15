@@ -33,7 +33,7 @@ class SettingAccessTest {
         "worldedit.maxBlocks", GameRule.ALLOW_WORLD_EDITING,
         "creative.spectatorScroll", GameRule.ALLOW_SPECTATOR_MODE,
         "creative.showSpectatorSpeed", GameRule.ALLOW_SPECTATOR_MODE,
-        "visual.spectatorBlockOutlines", GameRule.ALLOW_SPECTATOR_MODE);
+        "visual.spectatorFullBright", GameRule.ALLOW_SPECTATOR_MODE);
     for (var enabled : GameRule.values()) if (enabled.access()) {
       rule(session, enabled, true);
       owners.forEach((id, owner) -> {

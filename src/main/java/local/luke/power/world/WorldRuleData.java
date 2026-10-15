@@ -16,8 +16,8 @@ public final class WorldRuleData {
     NbtCompound tag = world.getCompound(TAG);
     requireType(tag, "version", 3);
     int version = tag.getInt("version");
-    if (version != RuleSet.VERSION)
-      throw new IllegalArgumentException("World game rules version " + version + " is unsupported. Supported version: " + RuleSet.VERSION + ". Open with a compatible release or restore a backup.");
+    if (version != 1 && version != RuleSet.VERSION)
+      throw new IllegalArgumentException("World game rules version " + version + " is unsupported. Supported versions: 1, " + RuleSet.VERSION + ". Open with a compatible release or restore a backup.");
     JsonObject values = new JsonObject();
     for (Object value : tag.values()) {
       NbtElement entry = (NbtElement) value;
@@ -33,7 +33,7 @@ public final class WorldRuleData {
         values.addProperty(id, number == 1);
       }
     }
-    return RuleSet.readValues(values, new RuleSet());
+    return RuleSet.readValues(values, version == 1 ? WorldRuleUpgrade.defaults(upgradeEvidence()) : new RuleSet());
   }
   public static void write(NbtCompound world, RuleSet rules) {
     NbtCompound tag = new NbtCompound(); tag.putInt("version", RuleSet.VERSION);
@@ -42,6 +42,10 @@ public final class WorldRuleData {
       else tag.putBoolean(rule.id(), rules.enabled(rule));
     }
     world.put(TAG, tag);
+  }
+  private static JsonObject upgradeEvidence() {
+    JsonObject config = PowerConfig.document();
+    return config.has("worldRuleUpgrade") ? config.getAsJsonObject("worldRuleUpgrade") : new JsonObject();
   }
   private static void requireType(NbtCompound compound, String key, int type) {
     for (Object value : compound.values()) {
@@ -73,6 +77,14 @@ public final class WorldRuleData {
         "hostile", "PowerBetaHostileSpawning", "passive", "PowerBetaPassiveSpawning").entrySet())
       old.addProperty(mapping.getKey(), !tag.contains(mapping.getValue()) || tag.getBoolean(mapping.getValue()));
     JsonObject config = PowerConfig.document();
-    return LegacyWorldRules.convert(old, config.has("legacyWorldRules") ? config.getAsJsonObject("legacyWorldRules") : new JsonObject());
+    RuleSet converted = LegacyWorldRules.convert(old, config.has("legacyWorldRules") ? config.getAsJsonObject("legacyWorldRules") : new JsonObject());
+    JsonObject evidence = upgradeEvidence();
+    // Pre-rule all-entity farmland protection already has an exact two-rule equivalent.
+    if (!converted.enabled(GameRule.PLAYER_CROP_TRAMPLING) && !evidence.has("playerCropTrampling"))
+      evidence.addProperty("playerCropTrampling", false);
+    RuleSet added = WorldRuleUpgrade.defaults(evidence);
+    for (GameRule rule : new GameRule[]{GameRule.LAVA_DESTROYS_ITEMS, GameRule.CACTUS_DESTROYS_ITEMS, GameRule.PLAYER_CROP_TRAMPLING})
+      converted.set(rule, added.get(rule));
+    return converted;
   }
 }

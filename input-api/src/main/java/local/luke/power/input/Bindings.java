@@ -63,6 +63,12 @@ public final class Bindings {
     return keyBinding instanceof Binding b && b.power$code() == eventKey && active(b);
   }
 
+  public static boolean matches(String id, int eventKey) {
+    for (Object object : registered)
+      if (object instanceof Binding b && b.power$id().equals(id)) return matches(object, eventKey);
+    return false;
+  }
+
   public static int eventCode(Object keyBinding) {
     return keyBinding instanceof Binding b && active(b) ? b.power$code() : -1000;
   }

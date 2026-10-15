@@ -160,7 +160,7 @@ public final class NavigationCarryChecks {
               field(small, "relatedIds", List.of()); field(small, "conflictIds", List.of());
               field(small, "changedOnly", false);
               ((Set<?>)field(small, "collapsed")).clear();
-              Setting target = find(small.session(), "tweaks.flexible.enabled");
+              Setting target = find(small.session(), "tweaks.flexible.showOverlay");
               field(small, "page", target.page);
               call(small, "layout");
               Object row =

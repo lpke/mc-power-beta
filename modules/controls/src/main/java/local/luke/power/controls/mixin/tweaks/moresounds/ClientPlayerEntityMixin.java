@@ -17,7 +17,7 @@ public class ClientPlayerEntityMixin {
     @Inject(method = "openChestScreen", at = @At(value = "TAIL"))
     public void chestOpeningSound(Inventory inventory, CallbackInfo ci) {
 
-        if (ControlFeatures.FEATURES_CONFIG.chestSounds) {
+        if (ControlFeatures.FEATURES_CONFIG.moreSoundsChests != local.luke.power.controls.tweaks.moresounds.ChestSoundsEnum.NONE) {
             PlayerEntity player = (PlayerEntity.class.cast(this));
             player.world.playSound(player, ControlFeatures.FEATURES_CONFIG.moreSoundsChests.getOpenSound(), 0.3F, 1.0F);
         }
@@ -25,7 +25,7 @@ public class ClientPlayerEntityMixin {
 
     @Inject(method = "closeHandledScreen", at = @At(value = "HEAD"))
     public void chestClosingSound(CallbackInfo ci) {
-        if (ControlFeatures.FEATURES_CONFIG.chestSounds) {
+        if (ControlFeatures.FEATURES_CONFIG.moreSoundsChests != local.luke.power.controls.tweaks.moresounds.ChestSoundsEnum.NONE) {
             PlayerEntity player = (PlayerEntity.class.cast(this));
             if (player.currentScreenHandler instanceof GenericContainerScreenHandler) {
                 player.world.playSound(player, ControlFeatures.FEATURES_CONFIG.moreSoundsChests.getCloseSound(), 0.3F, 1.0F);

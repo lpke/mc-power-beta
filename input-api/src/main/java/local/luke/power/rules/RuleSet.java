@@ -5,7 +5,7 @@ import java.util.*;
 
 /** Owned mutable values. Copies never inherit later changes from their source. */
 public final class RuleSet {
-  public static final int VERSION = 1;
+  public static final int VERSION = 2;
   private final EnumMap<GameRule, JsonPrimitive> values = new EnumMap<>(GameRule.class);
 
   public RuleSet() {
@@ -43,8 +43,9 @@ public final class RuleSet {
   public static RuleSet read(JsonObject document, RuleSet defaults) {
     JsonElement version = document.get("version");
     if (version == null || !version.isJsonPrimitive() || !version.getAsJsonPrimitive().isNumber()
-        || !version.getAsBigDecimal().equals(java.math.BigDecimal.valueOf(VERSION)))
-      throw new IllegalArgumentException("Game rules version " + version + " is unsupported. Supported version: " + VERSION + ". Use a compatible release; original data is preserved.");
+        || !(version.getAsBigDecimal().equals(java.math.BigDecimal.ONE)
+            || version.getAsBigDecimal().equals(java.math.BigDecimal.valueOf(VERSION))))
+      throw new IllegalArgumentException("Game rules version " + version + " is unsupported. Supported versions: 1, " + VERSION + ". Use a compatible release; original data is preserved.");
     if (!document.has("values") || !document.get("values").isJsonObject())
       throw new IllegalArgumentException("Game rules values are missing or invalid.");
     return readValues(document.getAsJsonObject("values"), defaults);

@@ -127,9 +127,9 @@ final class WebsiteActions {
   private static void placement(Minecraft mc,String kind) throws Exception {
     if(kind.equals("offset")) {WebsiteDetails.run(mc,"placement");return;}
     WebsiteGallery.run(mc,"building");
-    var settings=local.luke.power.building.config.Config.current().copy();settings.placement.enabled=false;settings.flexible.enabled=settings.flexible.showOverlay=settings.flexible.showPreview=true;local.luke.power.building.config.Config.preview(settings);
-    for(int i=1;i<Keys.ALL.length;i++)Keys.ALL[i].code=0;
-    int index=switch(kind){case "adjacent"->2;case "rotation"->3;case "reverse"->4;case "into"->5;default->throw new IllegalArgumentException(kind);};Keys.ALL[index].code=34;
+    var settings=local.luke.power.building.config.Config.current().copy();settings.placement.enabled=false;settings.flexible.showOverlay=settings.flexible.showPreview=true;local.luke.power.building.config.Config.preview(settings);
+    for(int i=0;i<Keys.ALL.length;i++)Keys.ALL[i].code=0;
+    int index=switch(kind){case "adjacent"->1;case "rotation"->2;case "reverse"->3;case "into"->4;default->throw new IllegalArgumentException(kind);};Keys.ALL[index].code=34;
     if(kind.equals("adjacent")) {
       for(int dx=-3;dx<=3;dx++)for(int dz=0;dz<=5;dz++)if(!(dx==1&&dz==0))block(mc,dx,1,dz,5,0);
       for(int dz=1;dz<=5;dz++){block(mc,-3,2,dz,85,0);block(mc,3,2,dz,85,0);}
@@ -150,7 +150,7 @@ final class WebsiteActions {
       if(dy==0||Math.abs(dx)==4||Math.abs(dz)==4)block(mc,dx,dy,dz,dy==0||dy==4?5:(dy==2||dy==3)&&Math.abs(dx)!=4?20:17,0);
     for(int dz=-3;dz<=3;dz++)block(mc,4,4,dz,0,0);
     setting(mc,"creative.blockReach","10");
-    var s=local.luke.power.building.config.Config.current().copy();s.placement.enabled=true;s.placement.attemptsPerTick=8;s.placement.restrictionEnabled=true;s.placement.restrictionMode=local.luke.power.fastplace.RestrictionMode.LAYER;s.flexible.enabled=false;local.luke.power.building.config.Config.preview(s);
+    var s=local.luke.power.building.config.Config.current().copy();s.placement.enabled=true;s.placement.attemptsPerTick=8;s.placement.restrictionEnabled=true;s.placement.restrictionMode=local.luke.power.fastplace.RestrictionMode.LAYER;local.luke.power.flexible.FlexiblePlacement.interrupt();local.luke.power.building.config.Config.preview(s);
     mc.player.inventory.main[0]=new ItemStack(5,64,0);mc.player.inventory.selectedSlot=0;mc.options.hideHud=false;
     var status=local.luke.power.status.StatusConfig.copy();status.enabled=true;local.luke.power.status.StatusConfig.preview(status);roofRow(mc,0);
   }

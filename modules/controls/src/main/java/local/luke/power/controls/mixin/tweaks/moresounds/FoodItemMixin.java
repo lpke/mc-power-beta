@@ -19,11 +19,9 @@ public class FoodItemMixin {
     private static final Random random = new Random();
 
     @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/item/ItemStack;count:I", opcode = org.objectweb.asm.Opcodes.PUTFIELD, shift = At.Shift.AFTER))
-    public void burpOnEat(ItemStack stack, World world, PlayerEntity user, CallbackInfoReturnable<ItemStack> cir) {
+    public void power$eatingSound(ItemStack stack, World world, PlayerEntity user, CallbackInfoReturnable<ItemStack> cir) {
         // A failed use must remain silent. FoodItem consumes exactly one item on success.
         if (ControlFeatures.FEATURES_CONFIG.eatingSounds)
             world.playSound(user, "power_controls:random.eat", 1.0F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-        if (ControlFeatures.FEATURES_CONFIG.burpingSounds && random.nextInt(10) > 3)
-            world.playSound(user, "power_controls:random.burp", 0.5F, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
     }
 }

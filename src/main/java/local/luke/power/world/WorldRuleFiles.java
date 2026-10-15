@@ -22,7 +22,7 @@ public final class WorldRuleFiles {
     checkPath(source);
     NbtCompound data = read(source).getCompound("Data");
     WorldRuleData.read(data); // Unsupported/ambiguous metadata blocks before session.lock or chunks are touched.
-    if (!data.contains(WorldRuleData.TAG)) {
+    if (!data.contains(WorldRuleData.TAG) || data.getCompound(WorldRuleData.TAG).getInt("version") != RuleSet.VERSION) {
       try (FileTransaction backup = FileTransaction.begin(game, List.of(level, old))) { backup.commit(); }
     }
   }

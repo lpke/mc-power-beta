@@ -32,9 +32,9 @@
   Rule groups identify world scope without repeated row labels.
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
-  track and preset IDs. Global schema 4 supports conversion from schema 3 through
-  `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 1
-  supports pre-rule metadata through `rules/LegacyWorldRules` and `WorldRuleData`.
+  track and preset IDs. Global schema 5 supports conversion from schemas 3 and 4 through
+  `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 2
+  supports format 1 and pre-rule metadata through `rules/LegacyWorldRules` and `WorldRuleData`.
   Preserve frozen legacy evidence for worlds converted later. Use these helpers when
   updating an instance; never widen conflicting permissions or reset unsupported data.
   Validate converted values and verify durable backups before replacing originals.
@@ -171,8 +171,9 @@
   Entity render-distance checks use the detached camera position; simulation stays player-owned.
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.
   Keep the first detached frame still, reset movement timing and reject old-world poses.
-  Hide the HUD once on entry, allow manual F1 changes during the visit, and restore
-  its entry state on every exit. Proximity must never hide the player's body.
+  Hide the HUD on entry only when requested, default off. Allow manual F1 changes
+  during the visit and restore its entry state on every exit. Freecam and Spectator
+  never use front view, regardless of perspective style or HUD visibility. Proximity must never hide the player's body.
   Container previews use a separate interpolated, occluded ray and configured
   Creative block/entity reach in every mode, including with the HUD hidden. Reject
   unloaded terrain before raycasting; never load chunks, open inventories or change
@@ -273,8 +274,9 @@
 
 - Leaving a world or quitting clears active tweaks through `TweakLifecycle`; preserve
   feature preferences, bindings and saved user data. Queue changed toggle snapshots.
-  Flexible placement and Complete slabs retain their saved enablement; only temporary
-  placement operations and held modifiers clear. Slab completion has no hotkey,
+  Flexible placement is always available through its unbound-by-default hold controls.
+  Complete slabs retains its saved enablement; only temporary placement operations
+  and held modifiers clear. Slab completion has no hotkey,
   toggle messages or Active tweaks entry.
 - Reject incomplete skin-provider responses so the next provider can supply the
   texture. Keep bundled fallback skin paths out of the HTTP downloader.
@@ -295,7 +297,9 @@
   drags never become camera drags; lost focus cancels them. Clamp tilt before setting its
   target and preserve the original daylight snapshot through GUI resizing.
 - Cape limits change only rendered cape angles, leaving player interpolation and movement
-  untouched. Item cactus protection applies only to dropped items in singleplayer.
+  untouched. Lava/cactus item rules affect only dropped items in singleplayer.
+  Player and mob trampling use independent world rules, both off in new presets.
+  Convert old item protections from frozen evidence, never from changing live settings.
 - Music-library collapse/expand-all acts on groups in the current view, including search,
   without changing inclusion, volume, presets or queues. Menu scrub tracks reserve equal
   space on either side so the track itself stays centred with the menu.
@@ -370,3 +374,6 @@
   geometry, normals, alpha, native update scheduling and world light arrays.
   Detached flight admits auto-walk independently of manual camera keys and keeps animation
   interpolation current when the player is stationary.
+
+- Plain F4 toggles the custom HUD. A valid mode-picker modifier gesture owns its cycle
+  key instead; test both release orders and remapped/chorded bindings.

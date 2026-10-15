@@ -30,11 +30,7 @@ public class EntityRenderDispatcherMixin {
 
     @Unique
     public boolean isFrontViewEnabled() {
-        if (Minecraft.INSTANCE.options == null) {
-            return false;
-        }
-        
-        return ModOptions.frontView || (ControlFeatures.USER_INTERFACE_CONFIG.frontViewThirdPerson == FrontViewMode.HIDE_HUD && (Minecraft.INSTANCE.options.thirdPerson && Minecraft.INSTANCE.options.hideHud));
+        return ModOptions.isFrontViewEnabled();
     }
     
     @Inject(method = "init", at = @At(value = "TAIL"))

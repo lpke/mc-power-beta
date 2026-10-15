@@ -21,7 +21,7 @@ public final class SettingAccess {
     String id = setting.id;
     if (id.startsWith("rules.")) return null;
     if (id.startsWith("worldedit.")) return local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING;
-    if (id.equals("visual.spectatorFullBright") || id.equals("visual.spectatorBlockOutlines")
+    if (id.equals("visual.spectatorFullBright")
         || id.startsWith("creative.spectator") || id.equals("creative.showSpectatorSpeed")) return local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE;
     // Reach is also used by container previews; sprint controls are shared with freecam.
     if (java.util.Set.of("creative.sprintToggle", "creative.sprintMultiplier", "creative.blockReach", "creative.entityReach", "keys.power_creative.sprint").contains(id)) return null;

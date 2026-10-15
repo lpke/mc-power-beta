@@ -98,6 +98,9 @@ final class FreecamPreviewChecks {
   }
   private static void checks(Minecraft mc) throws Exception {
     failures=0; scene(mc);
+    Object cameraSettings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
+    var hideField=cameraSettings.getClass().getField("hideHudOnEntry");
+    boolean hidePreference=(Boolean) hideField.get(cameraSettings); hideField.set(cameraSettings,true);
     boolean hud=mc.options.hideHud; var before=Files.readAllBytes(PowerConfig.path());
     var playerContainer=mc.player.container;
     double px=mc.player.x,py=mc.player.y,pz=mc.player.z;
@@ -176,7 +179,7 @@ final class FreecamPreviewChecks {
         active(false);check(mc.field_2823==nativeHit,"native targeting changed");
         check(Arrays.equals(before,Files.readAllBytes(PowerConfig.path())),"preview wrote settings");
       });
-    } finally {active(false);mc.options.hideHud=hud;pose(32.5,110.5,35.5,0,0);}
+    } finally {active(false);hideField.set(cameraSettings,hidePreference);mc.options.hideHud=hud;pose(32.5,110.5,35.5,0,0);}
     log("FREECAM PREVIEW FAILURES "+failures);
   }
 }

@@ -14,7 +14,7 @@ import org.lwjgl.opengl.Display;
 public final class GameplayKeys {
   public static final KeyBinding PREVIEW = new KeyBinding("powerbeta.containerPreview", 0);
   public static final KeyBinding LIGHT = new KeyBinding("powerbeta.lightOverlay", Keyboard.KEY_F7);
-  public static final KeyBinding INFO_HUD = new KeyBinding("powerbeta.infoHud", Keyboard.KEY_NONE);
+  public static final KeyBinding INFO_HUD = new KeyBinding("powerbeta.infoHud", Keyboard.KEY_F4);
   public static final KeyBinding COMMANDS = new KeyBinding("powerbeta.openCommands", Keyboard.KEY_SLASH);
   public static final KeyBinding GRAPH = new KeyBinding("powerbeta.debugGraph", Keyboard.KEY_F3);
   private static boolean graph;
@@ -35,6 +35,9 @@ public final class GameplayKeys {
     Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
     if (mc.world == null || mc.player == null || mc.currentScreen != null || mc.paused
         || mc.player.dead || mc.player.health <= 0 || !Display.isActive() || !Bindings.matches(INFO_HUD, key)) return;
+    // The picker owns its modifier gesture, even when its cycle key is also the HUD key.
+    if (!mc.world.isRemote && mc.field_2778 && mc.field_2807 == mc.player && !DetachedCamera.isActive()
+        && Bindings.down("power_creative.modifier") && Bindings.matches("power_creative.picker", key)) return;
     local.luke.power.hud.InfoHudConfig.toggle();
   }
 

@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class GameRendererMixin {
     @WrapOperation(method = "onFrameUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/ClientPlayerEntity;changeLookDirection(FF)V"))
     public void disableTurning(ClientPlayerEntity instance, float cursorDeltaX, float cursorDeltaY, Operation<Void> original) {
+        if (instance == null) return;
         if (!instance.isSleeping() || !ControlFeatures.BUGFIXES_CONFIG.sleepingCameraRotationFix) {
             original.call(instance, cursorDeltaX, cursorDeltaY);
             return;
