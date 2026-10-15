@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "settings": {
     "power_capture:config": {
       "addBasicScreenshotsToClipboard": true,
@@ -23,7 +23,6 @@
       "drag": 4.0,
       "collision": true,
       "classicMovement": false,
-      "enabled": false,
       "playerMovementMessages": false,
       "hideHudOnEntry": true
     },
@@ -107,14 +106,12 @@
       "CRAFTING_RESULT_CONFIG": {
         "EnableCtrlClickCrafting": true,
         "EnableRightClickCrafting": true,
-        "EnableShiftClickCrafting": true,
-        "StopShiftClickCraftingWhenItemChanges": true
+        "EnableShiftClickCrafting": true
       },
       "MODERN_MINECRAFT_CONFIG": {
         "EnableShiftClickingItemsIntoArmorSlots": true,
         "EnableShiftClickingItemsIntoFurnaces": true,
         "DoubleLeftClickItemPickup": true,
-        "EnableDragGraphics": true,
         "EnableLeftClickDrag": true,
         "EnableRightClickDrag": true,
         "MultiplayerShiftClickingItemsIntoDispensers": false,
@@ -122,7 +119,8 @@
         "RMBPreferShiftClick": true,
         "UseDropKeyInInventory": true,
         "LCtrlStackDrop": true,
-        "NumKeyHotbarSwap": true
+        "NumKeyHotbarSwap": true,
+        "ShiftDoubleClickTransfer": true
       },
       "MOUSE_TWEAKS_CONFIG": {
         "SCROLL_WHEEL_CONFIG": {
@@ -139,7 +137,6 @@
       "flight": true,
       "sprintFlight": true,
       "spectatorSpeed": 100,
-      "modePicker": true,
       "shiftClearsInventory": true,
       "spectatorScrollStep": 10,
       "sprintMultiplier": 200,
@@ -161,10 +158,8 @@
       "hotbar": {
         "selectedRow": 2,
         "alignment": "BOTTOM_RIGHT",
-        "swap": false,
         "overlay": true,
         "rememberRow": true,
-        "scroll": false,
         "reverseScroll": false,
         "offsetX": 4,
         "numberRowKeys": true,
@@ -195,12 +190,10 @@
         "announceRestrictionToggle": false
       },
       "clickMining": false,
-      "obsidianBreakingSpeed": 0,
-      "autoWalk": false,
-      "inventoryMouseLook": false,
+      "obsidianBreakingSpeed": 60,
+      "inventoryMouseLook": true,
       "freeLookFollowThirdPerson": true,
       "freeLookToggle": false,
-      "freeLook": false,
       "boatSteering": false,
       "sneak": {
         "announceToggle": false,
@@ -210,9 +203,9 @@
       "boatProtection": false,
       "autoWalkAnnounceToggle": false,
       "freeLookAnnounceToggle": false,
-      "autoMine": true,
       "autoMineAnnounceToggle": false,
-      "autoWalkCancelOnLostFocus": false
+      "autoWalkCancelOnLostFocus": false,
+      "inventoryWhileMoving": true
     },
     "power_mechanics:config": {
       "EQUIPMENT_CONFIG": {
@@ -226,35 +219,30 @@
         "enableGhastFireballsToInstaKillGhasts": false,
         "enableDefusingTnt": false,
         "chanceBlocksDropWhenExploded": 0.3,
-        "disableAllExplosionsBreakingBlocks": false,
-        "disableCreeperExplosionBreakingBlocks": false,
-        "disableGhastExplosionBreakingBlocks": false,
         "disableGhastExplosionCausingFire": false,
-        "disableLightningStrikeCausingFire": false,
-        "disableTntExplosionBreakingBlocks": false
+        "disableLightningStrikeCausingFire": false
       },
       "FLORA_CONFIG": {
-        "enableRandomStickDropFromDeadBushes": false,
-        "enableShearsCollectDeadBush": false,
-        "enableShearsCollectFern": false,
-        "enableShearsCollectTallGrass": false,
-        "appleDropChance": 0.0,
+        "enableRandomStickDropFromDeadBushes": true,
+        "enableShearsCollectDeadBush": true,
+        "enableShearsCollectFern": true,
+        "enableShearsCollectTallGrass": true,
+        "appleDropChance": 0,
         "enableLogRotation": false,
-        "enablePlayerPlacedLeafPersistence": false
+        "enablePlayerPlacedLeafPersistence": true
       },
       "INTERACTIVE_BLOCK_CONFIG": {
         "enableChestsOpenWithBlockAbove": false,
-        "enableColorSignsWithDye": false,
-        "allowEditingSigns": false,
+        "enableColorSignsWithDye": true,
+        "allowEditingSigns": true,
         "enableGlueTrapdoorsWithSlimeballs": false
       },
       "MOB_CONFIG": {
-        "waterNegatesFallDamage": false,
+        "waterNegatesFallDamage": true,
         "enableZombieDropItem": false,
         "enableZombiePigmanDropItem": false,
         "zombieDropItem": 0,
         "zombiePigmanDropItem": 0,
-        "disableTramplingFarmland": false,
         "disableTrampleFarmlandWhenBarefoot": false,
         "disableTrampleFarmlandWithLeatherBoots": false
       }
@@ -265,8 +253,6 @@
       "enableAuthenticationChanges": false,
       "enableControlsChanges": false,
       "enableChatChanges": true,
-      "enableDebugGraphChanges": true,
-      "enableDebugGraphModernToggle": true,
       "enableDebugMenuWorldSeed": true,
       "enableMultiplayerServerChanges": true
     },
@@ -325,7 +311,7 @@
       "dimensionMusic": "CONTINUE",
       "gapMinSeconds": 600,
       "gapMaxSeconds": 1200,
-      "redstonePlacementSound": false
+      "redstonePlacementSound": true
     },
     "visual": {
       "softRain": false,
@@ -333,9 +319,9 @@
       "oldCobble": false,
       "oldBricks": false,
       "thirdPersonDistance": 4,
-      "inventoryInPortals": false,
+      "inventoryInPortals": true,
       "lowFire": false,
-      "shiftClickIntoCraftingGrid": false,
+      "shiftClickIntoCraftingGrid": true,
       "redstonePowerLevels": false,
       "damageCameraShake": true,
       "fireDamageCameraShake": true,
@@ -356,7 +342,9 @@
       "underwaterFogDensity": 100,
       "underwaterDarkness": 100,
       "underwaterDarknessOutside": 100,
-      "narrowUnderwaterFov": true
+      "narrowUnderwaterFov": true,
+      "swapEquipment": true,
+      "containerCarry": true
     },
     "power_environment:config": {
       "MISSING_ACHIEVEMENTS_CONFIG": {
@@ -378,23 +366,9 @@
         "FLY_PIG": false
       },
       "ENTITY_SPAWN_MECHANICS_CONFIG": {
-        "SPAWN_LIST_CONFIG": {
-          "enableChickenEntitySpawning": true,
-          "enableCowEntitySpawning": true,
-          "enableCreeperEntitySpawning": true,
-          "enableGhastEntitySpawning": true,
-          "enablePigEntitySpawning": true,
-          "enableSheepEntitySpawning": true,
-          "enableSkeletonEntitySpawning": true,
-          "enableSlimeEntitySpawning": true,
-          "enableSpiderEntitySpawning": true,
-          "enableSquidEntitySpawning": true,
-          "enableWolfEntitySpawning": true,
-          "enableZombieEntitySpawning": true,
-          "enableZombiePigmanEntitySpawning": true
-        },
+        "SPAWN_LIST_CONFIG": {},
         "disableLivingEntitiesDespawning": false,
-        "disableSaddledPigsDespawning": false,
+        "disableSaddledPigsDespawning": true,
         "doNotCountSaddledPigs": false,
         "monstersSpawnAtOrBelowLightLevel": 7,
         "SPAWN_GROUP_SIZE": 4,
@@ -411,7 +385,6 @@
         "volumeCaveAmbient": 1.0
       },
       "SLEEP_CONFIG": {
-        "asleepPlayerPercentageForSkippingNight": 1.0,
         "bedsSpeedUpNightRatherThanSkipIt": false,
         "bedsSpeedUpNightTickRate": 20,
         "bedsSpeedUpNightTickWorld": false,
@@ -468,7 +441,7 @@
       "hotbarRenderingFix": true,
       "woodenSlabMiningFix": true,
       "grassBlockItemFix": true,
-      "miningDelayFix": true,
+      "miningDelayFix": false,
       "lastDurabilityFix": true,
       "fenceLightingFix": true,
       "torchBottomFaceFix": true,
@@ -476,7 +449,7 @@
     },
     "power_controls:features": {
       "fastLeafDecay": {
-        "enableFastLeafDecay": false,
+        "enableFastLeafDecay": true,
         "minimumDecayTime": 10,
         "maximumDecayTime": 25
       },
@@ -490,16 +463,15 @@
       },
       "stepAssist": false,
       "moreSoundsChests": 2,
-      "fallingPipe": false,
-      "eatingSounds": false,
+      "eatingSounds": true,
       "burpingSounds": false,
-      "shearingSounds": false,
-      "toolBreakSounds": false,
-      "armorBreakSounds": false,
+      "shearingSounds": true,
+      "toolBreakSounds": true,
+      "armorBreakSounds": true,
       "chestSounds": false
     },
     "power_controls:gameplay": {
-      "noFoodWastage": false,
+      "noFoodWastage": true,
       "pickBlockFromInventory": true,
       "shiftPlacing": true,
       "shiftPlacingBlacklist": [],
@@ -529,31 +501,30 @@
       "minecartBoosters": false
     },
     "power_controls:recipes": {
-      "enableRecipes": false,
-      "furnaceFuels": false,
-      "toolRepair": false,
+      "furnaceFuels": true,
+      "toolRepair": true,
       "modern": {
-        "shapelessFlintAndSteel": false,
-        "shapelessMushroomStew": false,
-        "shapelessChestMinecart": false,
-        "shapelessFurnaceMinecart": false,
-        "shapelessStickyPistons": false,
+        "shapelessFlintAndSteel": true,
+        "shapelessMushroomStew": true,
+        "shapelessChestMinecart": true,
+        "shapelessFurnaceMinecart": true,
+        "shapelessStickyPistons": true,
         "booksRequireLeather": false,
-        "woolRedyeing": false,
-        "sixSlabsPerCraft": false,
-        "oneStonePerButton": false,
+        "woolRedyeing": true,
+        "sixSlabsPerCraft": true,
+        "oneStonePerButton": true,
         "modernFenceRecipe": false,
-        "snowLayerRecipe": false,
-        "threeLaddersPerCraft": false
+        "snowLayerRecipe": true,
+        "threeLaddersPerCraft": true
       },
       "tweaked": {
-        "shapelessJackOLantern": false,
+        "shapelessJackOLantern": true,
         "stairsPerCraft": 4,
         "trapdoorsPerCraft": 2
       },
       "obtainable": {
         "craftableGrassBlocks": false,
-        "craftableCobwebs": false,
+        "craftableCobwebs": true,
         "craftableFire": false,
         "craftableCoalOre": false,
         "craftableIronOre": false,
@@ -563,22 +534,21 @@
       }
     },
     "power_controls:tweaks": {
-      "sugarCaneOnSand": false,
-      "boatsDropThemselves": false,
-      "pumpkinsPlaceableLikeNormal": false,
-      "fencesPlaceableLikeNormal": false,
+      "sugarCaneOnSand": true,
+      "boatsDropThemselves": true,
+      "pumpkinsPlaceableLikeNormal": true,
+      "fencesPlaceableLikeNormal": true,
       "fencesConnectBlocks": false,
-      "bookshelvesDropBooks": false,
-      "pressurePlatesOnFences": false,
-      "shearHarvesting": false,
+      "bookshelvesDropBooks": true,
+      "pressurePlatesOnFences": true,
+      "shearHarvesting": true,
       "expandChickenHitbox": false,
-      "stackableChests": false,
-      "modernFlintAndSteel": false,
+      "stackableChests": true,
+      "modernFlintAndSteel": true,
       "disableSleeping": false,
-      "disableSleepSpawning": false,
-      "preventItemsStoppingMinecarts": false,
+      "preventItemsStoppingMinecarts": true,
       "allowIgnitingEntities": false,
-      "allowTrapdoorsWithoutSupport": false,
+      "allowTrapdoorsWithoutSupport": true,
       "beta18LeavesRendering": false
     },
     "power_controls:userinterface": {
@@ -586,8 +556,8 @@
       "hideAchievementToast": false,
       "achievementBackToMenu": true,
       "disableDebugEntityIdTags": true,
-      "frontViewThirdPerson": 0,
-      "clearTextFieldWithRightClick": true,
+      "frontViewThirdPerson": 1,
+      "clearTextFieldWithRightClick": false,
       "videoSettingsConfig": {
         "vanillaFarValues": false
       },
@@ -626,13 +596,13 @@
         "disableHeartParticle": false
       },
       "STACK_SIZE_CONFIG": {
-        "stackableEmptyBuckets": false,
-        "enableModernWoodDoorStackSize": false,
-        "enableModernIronDoorStackSize": false,
-        "enableModernSignStackSize": false
+        "stackableEmptyBuckets": true,
+        "enableModernWoodDoorStackSize": true,
+        "enableModernIronDoorStackSize": true,
+        "enableModernSignStackSize": true
       },
       "SHOVELS_CONFIG": {
-        "enableShovelsEffectiveOnSoulSand": false
+        "enableShovelsEffectiveOnSoulSand": true
       },
       "addBiomeToDebugOverlay": true,
       "addDayCounterToDebugOverlay": true,
@@ -644,10 +614,9 @@
       "milkSquids": false,
       "pigsDropBrownMushrooms": false,
       "plantReplacementFixesEnabled": true,
-      "slabPlacementFixesEnabled": false,
-      "allowCraftingInventorySlots": false,
+      "allowCraftingInventorySlots": true,
       "vehicleLogoutLoginFixesEnabled": true,
-      "addFacingToDebugOverlay": false
+      "addFacingToDebugOverlay": true
     },
     "editor": {
       "blockLimit": 65536,
@@ -658,7 +627,6 @@
       "throughWalls": true,
       "wandEnabled": true,
       "opacity": 80,
-      "enabled": true,
       "lineWidth": 2,
       "historySize": 20
     },
@@ -746,7 +714,9 @@
       "key_Auto-mine (toggle)": "0",
       "key_power_beta.entities": 0,
       "key_power_beta.fullBright": 0,
-      "key_power_beta.clickMining": "0"
+      "key_power_beta.clickMining": "0",
+      "key_powerbeta.debugGraph": "61",
+      "key_powerbeta.openCommands": "53"
     },
     "video": {
       "leaves": true,
@@ -770,22 +740,21 @@
       "clickMining": true
     },
     "interface": {
-      "blinkingChatCursor": false,
+      "blinkingChatCursor": true,
       "debugTextColor": "#FFFFFF",
       "autoApply": true,
       "debugTimeOfDay": false,
-      "useFeetYCoordinates": false,
+      "useFeetYCoordinates": true,
       "blinkingUiCursor": true
     },
     "death": {
-      "enabled": false,
+      "enabled": true,
       "announceLocation": true,
       "announceItems": false
     },
     "gameplay": {
-      "mergeItems": false,
+      "mergeItems": true,
       "mergeThreshold": 256,
-      "explosionProofItems": false,
       "limitTnt": false,
       "tntPerTick": 4,
       "tntMillis": 8,
@@ -794,8 +763,7 @@
       "fastItemCollisions": true,
       "lavaProofItems": false,
       "cactusProofItems": false,
-      "torchShovel": false,
-      "fireSpread": true
+      "torchShovel": false
     },
     "infoHud": {
       "enabled": false,
@@ -912,6 +880,83 @@
         ]
       },
       "timePercent": 25
+    },
+    "gameRules": {
+      "survival": {
+        "version": 1,
+        "values": {
+          "allow_creative_mode": false,
+          "allow_death_recovery": false,
+          "allow_entering_nether_using_portals": true,
+          "allow_entity_control": false,
+          "allow_item_spawning": false,
+          "allow_spawn_editing": false,
+          "allow_spectator_mode": false,
+          "allow_survival_assistance": false,
+          "allow_teleportation": false,
+          "allow_time_editing": false,
+          "allow_weather_editing": false,
+          "allow_world_editing": false,
+          "advance_time": true,
+          "advance_weather": true,
+          "creeper_griefing": true,
+          "drowning_damage": true,
+          "fall_damage": true,
+          "fire_damage": true,
+          "fire_spread": true,
+          "ghast_griefing": true,
+          "keep_inventory": false,
+          "mob_crop_trampling": true,
+          "mob_drops": true,
+          "peaceful_health_regeneration": true,
+          "players_sleeping_percentage": 100,
+          "sleep_ambushes": true,
+          "spawn_animals": true,
+          "spawn_monsters": true,
+          "spawner_blocks_work": true,
+          "tnt_explodes": true,
+          "explosions_destroy_items": true
+        }
+      },
+      "cheats": {
+        "version": 1,
+        "values": {
+          "allow_creative_mode": true,
+          "allow_death_recovery": true,
+          "allow_entering_nether_using_portals": true,
+          "allow_entity_control": true,
+          "allow_item_spawning": true,
+          "allow_spawn_editing": true,
+          "allow_spectator_mode": true,
+          "allow_survival_assistance": true,
+          "allow_teleportation": true,
+          "allow_time_editing": true,
+          "allow_weather_editing": true,
+          "allow_world_editing": true,
+          "advance_time": true,
+          "advance_weather": true,
+          "creeper_griefing": true,
+          "drowning_damage": true,
+          "fall_damage": true,
+          "fire_damage": true,
+          "fire_spread": true,
+          "ghast_griefing": true,
+          "keep_inventory": true,
+          "mob_crop_trampling": true,
+          "mob_drops": true,
+          "peaceful_health_regeneration": true,
+          "players_sleeping_percentage": 100,
+          "sleep_ambushes": true,
+          "spawn_animals": true,
+          "spawn_monsters": true,
+          "spawner_blocks_work": true,
+          "tnt_explodes": true,
+          "explosions_destroy_items": true
+        }
+      }
+    },
+    "bindings": {
+      "powerbeta.debugGraph": 1
     }
   }
 }

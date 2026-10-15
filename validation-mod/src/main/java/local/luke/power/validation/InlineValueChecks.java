@@ -39,7 +39,8 @@ final class InlineValueChecks {
   }
 
   static void run(Minecraft mc) throws Exception {
-    failures=0;
+    failures=0;SilentAudioChecks.ready(mc);
+    var previousRules=AccessRules.copy(mc);AccessRules.of(mc.world.method_262()).allAllowed(true);
     boolean auto=MenuPreferences.current().autoApply;
     var audio=AudioConfig.copy();
     MenuPreferences.update(v->v.autoApply=false);
@@ -59,21 +60,20 @@ final class InlineValueChecks {
         check(s.value.getAsInt()==850,"check did not commit");
         check(!(boolean)call(editor,"active")&&mc.currentScreen==options,"commit navigated");
       });
-      test("item number fields open on either click and reject IDs without shifting rows",()->{
+      test("item fields open the shared picker on either click and keep drafts local",()->{
         for(int[] size:new int[][]{{320,240},{640,420}}) for(int button:List.of(0,1)) {
           options.init(mc,size[0],size[1]);field(options,"libraryOpen",false);field(options,"relatedIds",List.of("worldedit.wandItem"));search(options,"");options.render(-1,-1,0);
           Object row=((List<?>)field(options,"rows")).get(0);
           Method left=options.getClass().getDeclaredMethod("mainControlLeft",row.getClass());left.setAccessible(true);
           int y=(int)call(options,"top")+((int)call(row,"height")==40?16:2);
-          int height=(int)call(row,"height");
-          press(options,(int)left.invoke(options,row)+10,y+8,button);
-          check((boolean)call(editor,"active"),"number field click missed");
           Setting wand=find(options.session(),"worldedit.wandItem");var before=wand.value.deepCopy();
-          text(editor,"32000");commit(options,editor);options.render(-1,-1,0);
-          check(wand.value.equals(before)&&!(String.valueOf(field(editor,"error"))).isEmpty(),"invalid item published or no error");
-          check((int)call(row,"height")==height,"error shifted row");
-          check(!GL11.glIsEnabled(GL11.GL_SCISSOR_TEST),"error leaked clipping");
-          text(editor,"271");commit(options,editor);check(wand.value.getAsInt()==271,"valid item rejected");
+          press(options,(int)left.invoke(options,row)+10,y+8,button);
+          check(mc.currentScreen instanceof ItemPickerScreen,"item field did not open shared picker");
+          mc.currentScreen.init(mc,size[0],size[1]);mc.currentScreen.render(-1,-1,0);
+          check(wand.value.equals(before),"opening picker changed setting");
+          key(mc.currentScreen,Keyboard.KEY_ESCAPE);
+          check(mc.currentScreen==options&&wand.value.equals(before),"cancel changed item selection");
+          check(!GL11.glIsEnabled(GL11.GL_SCISSOR_TEST),"picker leaked clipping");
         }
         options.init(mc,640,420);
       });
@@ -154,6 +154,7 @@ final class InlineValueChecks {
         }
       });
     } finally {
+      AccessRules.restore(mc,previousRules);
       options.session().discard();AudioController.pause();AudioConfig.preview(audio);
       MenuPreferences.update(v->v.autoApply=auto);mc.setScreen(null);
     }

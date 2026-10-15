@@ -33,11 +33,7 @@ public abstract class ItemStackMixin {
         if (ControlFeatures.FEATURES_CONFIG.toolBreakSounds) {
             if (!(entity instanceof PlayerEntity player)) return;
 
-            if (ControlFeatures.FEATURES_CONFIG.fallingPipe) {
-                player.world.playSound(player, "power_controls:random.break_pipe", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-            } else {
-                player.world.playSound(player, "power_controls:random.break", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-            }
+            player.world.playSound(player, "power_controls:random.break", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
         }
     }
 
@@ -50,11 +46,7 @@ public abstract class ItemStackMixin {
                 if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
                     Minecraft minecraft = (Minecraft) FabricLoader.getInstance().getGameInstance();
                     PlayerEntity player = minecraft.player;
-                    if (ControlFeatures.FEATURES_CONFIG.fallingPipe) {
-                        player.world.playSound(player, "power_controls:random.break_pipe", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-                    } else {
-                        player.world.playSound(player, "power_controls:random.break", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-                    }
+                    player.world.playSound(player, "power_controls:random.break", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
                 }
             }
         }

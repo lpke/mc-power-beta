@@ -8,7 +8,7 @@ import local.luke.power.input.MovementScreens;
 import org.lwjgl.opengl.Display;
 
 public final class AutoWalk {
-  public static final KeyBinding KEY = new KeyBinding("Auto-walk (toggle)", Keyboard.KEY_R);
+  public static final KeyBinding KEY = new KeyBinding("Auto-walk (toggle)", Keyboard.KEY_NONE);
   private static final WalkToggle TOGGLE = new WalkToggle();
   private static Minecraft client;
   private static Object world;
@@ -58,8 +58,7 @@ public final class AutoWalk {
   }
 
   private static boolean canWalk() {
-    return local.luke.power.building.config.Config.current().autoWalk
-        && client != null
+    return client != null
         && client.world != null
         && client.player != null
         && client.player.health > 0 && !client.player.dead

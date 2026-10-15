@@ -5,6 +5,7 @@ import java.io.*;
 import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.util.*;
+import static local.luke.power.storage.DurableFiles.syncDirectory;
 
 /** Durable backup before any settings writer runs. A pending save is recovered before mod init. */
 public final class FileTransaction implements AutoCloseable {
@@ -24,6 +25,8 @@ public final class FileTransaction implements AutoCloseable {
     Path root = game.resolve("power-beta-data/settings-backups");
     checkPath(game, root);
     Files.createDirectories(root);
+    syncDirectory(root.getParent());
+    syncDirectory(game);
     Path dir = Files.createTempDirectory(root, "save-");
     JsonObject manifest = new JsonObject();
     int index = 0;
@@ -42,12 +45,14 @@ public final class FileTransaction implements AutoCloseable {
     durableWrite(
         dir.resolve("pending.json"),
         Catalog.JSON.toJson(manifest).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    syncDirectory(root);
     return new FileTransaction(game, dir, manifest);
   }
 
   public void commit() throws IOException {
     Files.move(
         dir.resolve("pending.json"), dir.resolve("complete.json"), StandardCopyOption.ATOMIC_MOVE);
+    syncDirectory(dir);
     committed = true;
   }
 
@@ -58,6 +63,7 @@ public final class FileTransaction implements AutoCloseable {
           dir.resolve("pending.json"),
           dir.resolve("recovered.json"),
           StandardCopyOption.REPLACE_EXISTING);
+      syncDirectory(dir);
     }
   }
 
@@ -77,6 +83,7 @@ public final class FileTransaction implements AutoCloseable {
         JsonObject data = JsonParser.parseString(Files.readString(pending)).getAsJsonObject();
         restore(game.toAbsolutePath().normalize(), dir, data);
         Files.move(pending, dir.resolve("recovered.json"), StandardCopyOption.REPLACE_EXISTING);
+        syncDirectory(dir);
       }
     }
   }
@@ -85,7 +92,9 @@ public final class FileTransaction implements AutoCloseable {
     for (var e : data.entrySet()) {
       Path destination = game.resolve(e.getKey()).normalize();
       checkPath(game, destination);
-      if (e.getValue().isJsonNull()) Files.deleteIfExists(destination);
+      if (e.getValue().isJsonNull()) {
+        if (Files.deleteIfExists(destination)) syncDirectory(destination.getParent());
+      }
       else {
         Path source = dir.resolve(e.getValue().getAsString()).normalize();
         checkPath(dir, source);
@@ -113,6 +122,7 @@ public final class FileTransaction implements AutoCloseable {
       } catch (AtomicMoveNotSupportedException e) {
         Files.move(tmp, path, StandardCopyOption.REPLACE_EXISTING);
       }
+      syncDirectory(path.getParent());
     } finally {
       Files.deleteIfExists(tmp);
     }
@@ -123,5 +133,8 @@ public final class FileTransaction implements AutoCloseable {
     try (var ch = FileChannel.open(path, StandardOpenOption.WRITE)) {
       ch.force(true);
     }
+    if (!Arrays.equals(bytes, Files.readAllBytes(path))) throw new IOException("Backup verification failed");
+    syncDirectory(path.getParent());
   }
+
 }

@@ -6,30 +6,29 @@ public final class SettingAccess {
   private SettingAccess() {}
 
   public static boolean visible(ConfigSession session, Setting setting) {
-    return !cheat(setting)
-        || session.settings().stream().anyMatch(s -> s.id.equals("world.cheats") && s.value.getAsBoolean());
+    var rule = owner(setting);
+    if (rule == null) return true;
+    boolean inWorld = session.settings().stream().anyMatch(s -> s.id.startsWith("rules.world."));
+    if (!inWorld) return !CommandPermissions.context().multiplayer();
+    if (setting.id.equals("creative.sprintFlight") || setting.id.contains("power_creative.picker") || setting.id.contains("power_creative.modifier"))
+      return enabled(session, local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE) || enabled(session, local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE);
+    return enabled(session, rule);
   }
-
-  public static boolean cheat(Setting s) {
-    if (s.id.equals("visual.spectatorFullBright") || s.id.equals("visual.spectatorBlockOutlines") || s.id.equals("gameplay.leavesDropSaplingsInCreative")) return true;
-    if (s.id.equals("world.keepInventory") || s.id.equals("world.daylightCycle") || s.id.equals("world.weatherCycle") || s.id.equals("world.hostileSpawning") || s.id.equals("world.passiveSpawning")) return true;
-    // These two preferences also control freecam, which is not cheats-gated.
-    if (s.id.equals("creative.sprintToggle") || s.id.equals("creative.sprintMultiplier"))
-      return false;
-    if (s.backend.equals("creative") || s.id.startsWith("worldedit.")) return true;
-    if (s.id.startsWith("commands.")) {
-      String name = s.id.substring(s.id.lastIndexOf('.') + 1);
-      return CommandPermissions.COMMANDS.stream()
-          .filter(c -> c.name().equals(name))
-          .findFirst()
-          .map(CommandPermissions.Command::cheat)
-          .orElse(true);
-    }
-    return s.kind == Setting.Kind.KEY
-        && s.id.contains("power_creative.")
-        && !s.id.endsWith(".sprint");
+  private static boolean enabled(ConfigSession session, local.luke.power.rules.GameRule rule) {
+    return session.settings().stream().filter(s -> s.id.equals("rules.world." + rule.id())).anyMatch(s -> s.value.getAsBoolean());
   }
-
+  public static local.luke.power.rules.GameRule owner(Setting setting) {
+    String id = setting.id;
+    if (id.startsWith("rules.")) return null;
+    if (id.startsWith("worldedit.")) return local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING;
+    if (id.equals("visual.spectatorFullBright") || id.equals("visual.spectatorBlockOutlines")
+        || id.startsWith("creative.spectator") || id.equals("creative.showSpectatorSpeed")) return local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE;
+    // Reach is also used by container previews; sprint controls are shared with freecam.
+    if (java.util.Set.of("creative.sprintToggle", "creative.sprintMultiplier", "creative.blockReach", "creative.entityReach", "keys.power_creative.sprint").contains(id)) return null;
+    if (setting.backend.equals("creative") || id.contains("power_creative.") || id.equals("gameplay.leavesDropSaplingsInCreative"))
+      return local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE;
+    return null;
+  }
   /** The gate changes presentation, never the stored preference beneath it. */
   public static String lockedValue(Setting setting) {
     if (setting.id.equals("audio.musicMode") || setting.id.equals("audio.customMusic")) return "Using preset";
@@ -51,15 +50,8 @@ public final class SettingAccess {
       Setting preset = session.settings().stream().filter(s -> s.id.equals("audio.preset")).findFirst().orElse(null);
       if (preset != null && !preset.value.getAsString().isEmpty()) return "Using the selected World music preset. Choose None to use these settings.";
     }
-    if (!cheat(setting)) return "";
-    Setting master =
-        session.settings().stream()
-            .filter(s -> s.id.equals("world.cheats"))
-            .findFirst()
-            .orElse(null);
-    if (master == null) return "Open a singleplayer world to change cheat settings.";
-    return master.value.getAsBoolean()
-        ? ""
-        : "Disabled because Cheats enabled is off. Change it in General > Game.";
+    if (visible(session, setting)) return "";
+    var rule = owner(setting);
+    return rule == null ? "" : "Enable " + rule.label() + " in Game rules.";
   }
 }

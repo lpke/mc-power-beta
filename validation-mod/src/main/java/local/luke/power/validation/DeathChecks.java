@@ -16,11 +16,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 
 final class DeathChecks {
+  static DeathSettings disabled() { var settings = new DeathSettings(); settings.enabled = false; return settings; }
   static void run(Minecraft mc, String action) throws Exception {
     failures = 0;
     if (action.equals("inventory") || action.equals("inventory-saved")) { DeathInventoryChecks.run(mc, action.equals("inventory-saved")); return; }
     if (action.equals("retry")) {
-      alive(mc); clear(mc); ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+      alive(mc); clear(mc); (AccessRules.of(mc.world.method_262())).allAllowed(true);
       CreativeVehicleChecks.mode(mc, "CREATIVE"); var record = latest(mc);
       check(DeathTracker.journal(mc).state(record.id).equals("available"), "rollback claim did not survive restart");
       var screen = DeathInventoryChecks.open(mc, record, 320, 240); DeathInventoryChecks.bulk(screen);
@@ -40,17 +41,20 @@ final class DeathChecks {
       return;
     }
     if (action.equals("rollback")) { rollback(mc); return; }
-    var settings = DeathConfig.copy(); var rules = CommandPermissions.copy();
+    var settings = DeathConfig.copy(); var rules = AccessRules.copy(mc);
+    var difficulty=(local.luke.power.world.WorldDifficulty)mc.world.method_262();
+    int oldDifficulty=difficulty.power$difficulty();
+    difficulty.power$difficulty(2);mc.world.field_213=2;
     var main = mc.player.inventory.main.clone(); var armor = mc.player.inventory.armor.clone();
     var cursor = mc.player.inventory.getCursorStack();
-    boolean cheats = ((CheatWorld)mc.world.method_262()).power$cheatsEnabled();
+    boolean cheats = (AccessRules.of(mc.world.method_262())).allAllowed();
     mc.setScreen(null); mc.player.container = mc.player.playerContainer; mc.field_2807 = mc.player;
     var enabled = new DeathSettings(); enabled.enabled = true; enabled.announceLocation = enabled.announceItems = false;
     try {
-      test("defaults stay off and menu changes wait for Apply", () -> {
-        check(!new DeathSettings().enabled, "feature defaults on");
+      test("records default on and menu changes wait for Apply", () -> {
+        check(new DeathSettings().enabled, "feature defaults off");
         check(!new DeathSettings().announceItems, "item notices default on");
-        DeathConfig.preview(new DeathSettings()); var session = SettingsRegistry.open(mc);
+        DeathConfig.preview(disabled()); var session = SettingsRegistry.open(mc);
         var setting = Release110Checks.find(session, "death.enabled"); setting.value = new JsonPrimitive(true); session.preview(true);
         check(!DeathConfig.current().enabled, "draft recorded deaths before Apply"); session.discard();
         check(!DeathConfig.current().enabled, "Cancel enabled death records");
@@ -58,7 +62,7 @@ final class DeathChecks {
         session.save(Path.of(".")); check(DeathConfig.current().enabled, "Apply did not enable feature");
       });
       test("disabled feature leaves inventory and saved records alone", () -> {
-        DeathConfig.preview(new DeathSettings()); int count = DeathTracker.journal(mc).records().size();
+        DeathConfig.preview(disabled()); int count = DeathTracker.journal(mc).records().size();
         String before = DeathItems.inventory(mc.player.inventory.main); DeathTracker.died(mc.player, null);
         check(DeathTracker.journal(mc).records().size() == count && before.equals(DeathItems.inventory(mc.player.inventory.main)), "disabled feature wrote a record or inventory");
       });
@@ -69,13 +73,14 @@ final class DeathChecks {
           var notices = new DeathSettings(); notices.enabled = true; notices.announceLocation = location; notices.announceItems = items;
           DeathConfig.preview(notices);
           var output = ChatChecks.record(() -> record(mc, "Notice fixture"));
-          check(output.stream().anyMatch(s -> s.contains("Overworld")) == location, "location notice setting ignored");
+          String dimension = mc.player.dimensionId == -1 ? "Nether" : "Overworld";
+          check(output.stream().anyMatch(s -> s.contains(dimension)) == location, "location notice setting ignored");
           check(output.stream().anyMatch(s -> s.contains("Lost items")) == items, "items notice setting ignored");
         }
         DeathConfig.preview(enabled);
         var output = ChatChecks.submit(mc, "/death");
         check(output.stream().anyMatch(s -> s.contains("Notice fixture")), "chat death command did not use saved cause");
-        ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+        (AccessRules.of(mc.world.method_262())).allAllowed(true);
         ChatChecks.submit(mc, "/kill"); check(mc.player.health <= 0 && latest(mc).cause.equals("/kill"), "/kill cause or dispatch missing");
         alive(mc); clear(mc);
       });
@@ -140,12 +145,12 @@ final class DeathChecks {
       test("recovery needs cheats in every game mode", () -> {
         var death = latest(mc); String before = DeathItems.inventory(mc.player.inventory.main);
         for (boolean cheat : new boolean[]{false, true}) for (String mode : new String[]{"SURVIVAL", "SPECTATOR", "CREATIVE"}) {
-          ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(cheat); CreativeVehicleChecks.mode(mc, mode);
+          (AccessRules.of(mc.world.method_262())).allAllowed(cheat); CreativeVehicleChecks.mode(mc, mode);
           if (cheat) { check(DeathTracker.recoveryDenial(mc).isEmpty(), "cheats recovery unavailable in " + mode); continue; }
           check(!DeathTracker.recoveryDenial(mc).isEmpty(), "recovery available in " + mode + " cheats=" + cheat);
           refused(mc, death); check(before.equals(DeathItems.inventory(mc.player.inventory.main)), "denied recovery changed items");
         }
-        ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc, "CREATIVE");
+        (AccessRules.of(mc.world.method_262())).allAllowed(true); CreativeVehicleChecks.mode(mc, "CREATIVE");
 
       });
       test("full inventory cancels without a claim or partial insertion", () -> {
@@ -189,7 +194,7 @@ final class DeathChecks {
         try { DeathTracker.died(mc.player, null); check(!DeathTracker.available(mc), "multiplayer death command available"); }
         finally { mc.world.isRemote = false; }
         check(count == DeathTracker.journal(mc).records().size(), "multiplayer logged death");
-        DeathConfig.preview(new DeathSettings()); check(count == DeathTracker.journal(mc).records().size(), "disable deleted history");
+        DeathConfig.preview(disabled()); check(count == DeathTracker.journal(mc).records().size(), "disable deleted history");
         DeathConfig.preview(enabled);
       });
       test("another player has a separate log and dimensions retain the world ID", () -> {
@@ -208,7 +213,8 @@ final class DeathChecks {
     } finally {
       alive(mc); CreativeVehicleChecks.mode(mc, "SURVIVAL");
       mc.player.inventory.main = main; mc.player.inventory.armor = armor; mc.player.inventory.setCursorStack(cursor);
-      ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(cheats); CommandPermissions.preview(rules);
+      (AccessRules.of(mc.world.method_262())).allAllowed(cheats); AccessRules.restore(mc, rules);
+      difficulty.power$difficulty(oldDifficulty);mc.world.field_213=oldDifficulty;
       if (failures != 0) DeathConfig.preview(settings);
     }
   }
@@ -222,9 +228,16 @@ final class DeathChecks {
     mc.player.fire = 0; mc.player.air = 300; mc.player.field_1631 = 1.62F;
     mc.player.spacingXZ = .6F; mc.player.spacingY = 1.8F;
     mc.player.method_1340(5.5, 102, 5.5); mc.player.tick(); CreativeVehicleChecks.mode(mc, "SURVIVAL");
+    // The setup tick can touch terrain left by another fixture. Start each damage case without its cooldown.
+    mc.player.health = 20; mc.player.dead = false; mc.player.hurtTime = 0; mc.player.field_1613 = 0; mc.player.field_1041 = 0;
+    mc.player.fire = 0; mc.player.air = 300;
     mc.player.container = mc.player.playerContainer;
   }
-  static void clear(Minecraft mc) { Arrays.fill(mc.player.inventory.main, null); Arrays.fill(mc.player.inventory.armor, null); mc.player.inventory.setCursorStack(null); }
+  static void clear(Minecraft mc) {
+    Arrays.fill(mc.player.inventory.main, null); Arrays.fill(mc.player.inventory.armor, null); mc.player.inventory.setCursorStack(null);
+    var inputs = ((net.minecraft.class_277)mc.player.playerContainer).field_1124;
+    for (int i = 0; i < 4; i++) inputs.setStack(i, null);
+  }
   static void record(Minecraft mc, String cause) {
     local.luke.power.world.DeathSources.run(mc.player, cause, () -> DeathTracker.died(mc.player, null));
   }
@@ -242,7 +255,7 @@ final class DeathChecks {
   }
   private static void rollback(Minecraft mc) throws Exception {
     var enabled = DeathConfig.copy(); enabled.enabled = true; DeathConfig.preview(enabled);
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc, "CREATIVE"); clear(mc);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true); CreativeVehicleChecks.mode(mc, "CREATIVE"); clear(mc);
     recordWithItems(mc); var record = latest(mc); clear(mc);
     PlayerInventory original = mc.player.inventory;
     PlayerInventory failing = new PlayerInventory(mc.player) {

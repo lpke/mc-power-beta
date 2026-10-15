@@ -1,6 +1,6 @@
 package local.luke.power.config;
 
-/** Persistence scope, including world overrides stored outside the world backend. */
+/** Explicit world data; all other settings are global. */
 public final class SettingScope {
   private SettingScope() {}
 
@@ -9,12 +9,11 @@ public final class SettingScope {
   }
 
   private static boolean perWorld(String id, String backend) {
-    return backend.equals("world") || id.startsWith("commands.world.")
-        || id.startsWith("commands.worldMode.");
+    return backend.equals("world");
   }
 
   public static String label(String id, String backend, String group, String label) {
-    if (!perWorld(id, backend) || group.equals("World overrides") || group.toLowerCase(java.util.Locale.ROOT).contains("this world")
+    if (id.startsWith("rules.") || !perWorld(id, backend) || group.equals("World overrides") || group.toLowerCase(java.util.Locale.ROOT).contains("this world")
         || label.toLowerCase(java.util.Locale.ROOT).contains("this world")) return label;
     return label + " (this world)";
   }

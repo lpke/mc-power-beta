@@ -18,7 +18,6 @@ public final class SettingsRegistry {
     GlassBackend.register(s);
     LogoBackend.register(s);
     WorldBackend.register(s, mc);
-    CommandsBackend.register(s, mc);
     DeathBackend.register(s);
     GameplayBackend.register(s);
     VeinBackend.register(s);

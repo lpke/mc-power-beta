@@ -7,16 +7,8 @@
   "icon": "assets/power_compat/icon.png",
   "environment": "*",
   "entrypoints": {
-    "stationapi:event_bus": [
-      "local.luke.power.compat.events.RegistryListener"
-    ],
-    "stationapi:event_bus_client": [],
-    "stationapi:event_bus_server": [],
     "gcapi3": [
       "local.luke.power.compat.Config"
-    ],
-    "gcapi3:presave": [
-      "local.luke.power.compat.events.ConfigListener"
     ]
   },
   "mixins": [

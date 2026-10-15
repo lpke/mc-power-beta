@@ -7,8 +7,6 @@ public class FreecamConfig {
     public static ConfigFields config = new ConfigFields();
 
     public static class ConfigFields {
-        @ConfigEntry(name = "Freecam", description = "Allow detached-camera controls.")
-        public Boolean enabled = false;
         @ConfigEntry(name = "Hide HUD on entering freecam", description = "Hide the HUD when freecam starts. F1 can change it during freecam; leaving restores the entry state.")
         public Boolean hideHudOnEntry = true;
         @ConfigEntry(name = "Player movement messages", description = "Show a chat message when freecam player movement turns on or off during gameplay. Independent of the Active tweaks HUD.")

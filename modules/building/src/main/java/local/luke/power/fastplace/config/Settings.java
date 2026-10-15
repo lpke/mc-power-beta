@@ -38,7 +38,7 @@ public final class Settings {
   public int attemptsPerTick = 2;
   public boolean rememberOrientation = true;
   public local.luke.power.fastplace.SlabMode slabMode = local.luke.power.fastplace.SlabMode.DOUBLE;
-  public boolean restrictionEnabled = true;
+  public boolean restrictionEnabled = false;
   public boolean restrictionTiedToFast = true;
   public RestrictionMode restrictionMode = RestrictionMode.FACE;
   public ListMode listMode = ListMode.BLACKLIST;

@@ -26,32 +26,20 @@ class TallGrassMixin extends PlantBlock {
 
     @Override
     public void afterBreak(World world, PlayerEntity playerEntity, int x, int y, int z, int meta) {
-        int dropId = 0;
-
-        if (  (Config.config.FLORA_CONFIG.enableShearsCollectTallGrass)
-           || (Config.config.FLORA_CONFIG.enableShearsCollectFern)
-        ) {
-            if (  (null != playerEntity)
-               && (null != playerEntity.inventory)
-               && (null != playerEntity.inventory.getSelectedItem())
-               && (Item.SHEARS.id == playerEntity.inventory.getSelectedItem().itemId)
-            ) {
-                if (  (Config.config.FLORA_CONFIG.enableShearsCollectFern)
-                   && (FabricLoader.getInstance().isModLoaded("power_creative_inventory"))
-                   && (meta == 2)
-                ) {
-                    playerEntity.inventory.getSelectedItem().damage(1, playerEntity);
-                    dropId = ModHelperStationAPI.identifierToItemId("power_creative_inventory:fern");
-                } else if (Config.config.FLORA_CONFIG.enableShearsCollectTallGrass) {
-                    playerEntity.inventory.getSelectedItem().damage(1, playerEntity);
-                    dropId = id;
-                }
-            }
+        if (world.isRemote) return;
+        int dropId = -1;
+        ItemStack held = playerEntity.inventory.getSelectedItem();
+        if (held != null && held.itemId == Item.SHEARS.id) {
+            if (meta == 2 && Config.config.FLORA_CONFIG.enableShearsCollectFern)
+                dropId = ModHelperStationAPI.identifierToItemId("power_creative_inventory:fern");
+            else if (meta == 1 && Config.config.FLORA_CONFIG.enableShearsCollectTallGrass)
+                dropId = ModHelperStationAPI.identifierToItemId("power_creative_inventory:tall_grass");
+            if (dropId > 0) held.damage(1, playerEntity);
         }
 
         playerEntity.increaseStat(Stats.MINE_BLOCK[this.id], 1);
 
-        if (0 != dropId) {
+        if (dropId > 0) {
             this.dropStack(world, x, y, z, new ItemStack(dropId, 1, 0));
         } else if (FabricLoader.getInstance().isModLoaded("wolves")) {
             this.dropWithChance(world, x, y, z, world.getBlockState(x, y, z), meta, 1.0F);

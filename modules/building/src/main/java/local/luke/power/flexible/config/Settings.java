@@ -1,7 +1,7 @@
 package local.luke.power.flexible.config;
 
 public final class Settings {
-  public boolean enabled = true;
+  public boolean enabled = false;
   public boolean showOverlay = true;
   public boolean showPreview = true;
   public boolean placeAgainstContainers = false;

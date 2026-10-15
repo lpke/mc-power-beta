@@ -14,7 +14,7 @@ public final class DebugKey {
   private DebugKey() {}
 
   private static Binding defaultBinding(Minecraft mc) {
-    if (!Config.current().modePicker || Keys.MODIFIER.key != Keyboard.KEY_F3
+    if (Keys.MODIFIER.key != Keyboard.KEY_F3
         || Keys.PICKER.key != Keyboard.KEY_F4
         || Bindings.modifiers("power_creative.modifier") != 0
         || Bindings.modifiers("power_creative.picker") != 0

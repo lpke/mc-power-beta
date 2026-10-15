@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-15
+
+- Replace the Cheats switch and per-command overrides with 31 explicit world game rules and independent permissions for Creative, Spectator, editing, items, travel and recovery.
+- Add /gamerule with familiar aliases, searchable Game rules settings, editable Survival and Cheat defaults, and a Custom world-creation editor with a starting-mode choice.
+- Add world rules for player fall, fire and drowning damage, Peaceful regeneration, mob drops, sleeping percentage, dungeon spawners, sleep ambushes and Nether portal entry.
+- Separate creeper and ghast block destruction, fire spread and natural spawning. Protect dropped items from every explosion with explosions_destroy_items; disabling TNT pauses existing fuses and prevents new priming.
+- Add /repair for the held item, preserving its count and custom data. Keep read-only command tools available independently of permissions.
+- Add default-on Shift-double-click matching-item transfers while preserving the held stack, native item data, source ownership and destination limits. Keep quick gestures reliable across slow frames, and stop drags safely if their items change.
+- Simplify shortcut settings, remove redundant recipe and tool masters, and replace fixed command/debug-graph switches with configurable bindings. Remove drag highlighting and the falling-pipe sound; bulk crafting always stops when its result changes.
+- Revise defaults for inventory movement and looking, container carrying, crafting storage, modern recipes, tool fixes, slab completion and faster obsidian mining. Keep rendering and performance settings grouped with their related controls.
+- Preserve Spectator's unclipped third-person camera with front-view mode enabled, and keep vanilla servers authoritative over bucket, door and sign stack limits.
+- Preserve custom item data and full counts when saving player crafting inputs. Keep older crafting-grid saves readable.
+- Open numeric item settings in the shared graphical picker, with drafts kept local until Done.
+- Use global configuration format 4 with supported conversion from format 3, and world-rule format 1 with conversion from earlier world settings. Verify backups before conversion and preserve unsupported or conflicting data with recovery guidance.
+
 ## [1.7.6] - 2026-10-15
 
 - Keep auto-walk moving the player during Creative and Spectator flight in freecam.

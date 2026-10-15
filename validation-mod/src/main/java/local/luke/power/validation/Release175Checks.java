@@ -4,7 +4,6 @@ import static local.luke.power.validation.Validation.*;
 import java.nio.file.Path;
 import java.util.concurrent.FutureTask;
 import local.luke.power.config.SettingsRegistry;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.render.RenderControls;
 import local.luke.power.visual.VisualConfig;
 import net.minecraft.class_42;
@@ -29,19 +28,19 @@ public final class Release175Checks {
     }
     failures=0;mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);FreecamPreviewChecks.active(false);
     var session=SettingsRegistry.open(mc);
-    var cheats=(CheatWorld)mc.world.method_262();boolean oldCheats=cheats.power$cheatsEnabled();
+    var cheats=AccessRules.of(mc.world.method_262());boolean oldCheats=cheats.allAllowed();
     String oldMode=mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     try {
-      cheats.power$cheatsEnabled(true);RenderControls.reset(mc);
+      cheats.allAllowed(true);RenderControls.reset(mc);
       if(action.equals("oxygen")) oxygen(mc);
       else if(action.equals("lighting")) lighting(mc);
       else if(action.equals("flight")) {
-        find(session,"power_camera:config.enabled").parse("true");session.preview(true);flight(mc);
+        session.preview(true);flight(mc);
       }
       else throw new IllegalArgumentException(action);
     } finally {
       capture=false;FreecamPreviewChecks.active(false);session.discard();
-      CreativeVehicleChecks.mode(mc,oldMode);cheats.power$cheatsEnabled(oldCheats);
+      CreativeVehicleChecks.mode(mc,oldMode);cheats.allAllowed(oldCheats);
       mc.player.air=300;RenderControls.reset(mc);
     }
     log("RELEASE 175 "+action.toUpperCase()+" FAILURES "+failures);

@@ -100,24 +100,6 @@ public class Config {
         public Float chanceBlocksDropWhenExploded = 0.3F;
 
         @ConfigEntry(
-                name = "Disable All Explosions Breaking Blocks",
-                multiplayerSynced = true
-        )
-        public Boolean disableAllExplosionsBreakingBlocks = false;
-
-        @ConfigEntry(
-                name = "Disable Creeper Explosion Breaking Blocks",
-                multiplayerSynced = true
-        )
-        public Boolean disableCreeperExplosionBreakingBlocks = false;
-
-        @ConfigEntry(
-                name = "Disable Ghast Explosion Breaking Blocks",
-                multiplayerSynced = true
-        )
-        public Boolean disableGhastExplosionBreakingBlocks = false;
-
-        @ConfigEntry(
                 name = "Disable Ghast Explosion Causing Fire",
                 multiplayerSynced = true
         )
@@ -129,11 +111,6 @@ public class Config {
         )
         public Boolean disableLightningStrikeCausingFire = false;
 
-        @ConfigEntry(
-                name = "Disable TNT Explosion Breaking Blocks",
-                multiplayerSynced = true
-        )
-        public Boolean disableTntExplosionBreakingBlocks = false;
     }
 
     public static class FloraConfig {
@@ -142,28 +119,28 @@ public class Config {
                 description = "Chance is the same as seeds from tall grass",
                 multiplayerSynced = true
         )
-        public Boolean enableRandomStickDropFromDeadBushes = false;
+        public Boolean enableRandomStickDropFromDeadBushes = true;
 
         @ConfigEntry(
                 name = "Allow Shears To Collect Dead Bushes",
                 description = "Restart required for changes to take effect",
                 multiplayerSynced = true
         )
-        public Boolean enableShearsCollectDeadBush = false;
+        public Boolean enableShearsCollectDeadBush = true;
 
         @ConfigEntry(
                 name = "Allow Shears To Collect Ferns",
                 description = "Requires CreativeInventory as item is non-vanilla",
                 multiplayerSynced = true
         )
-        public Boolean enableShearsCollectFern = false;
+        public Boolean enableShearsCollectFern = true;
 
         @ConfigEntry(
                 name = "Allow Shears To Collect Tall Grass",
                 description = "Restart required for changes to take effect",
                 multiplayerSynced = true
         )
-        public Boolean enableShearsCollectTallGrass = false;
+        public Boolean enableShearsCollectTallGrass = true;
 
         @ConfigEntry(
                 name = "Apple Drop Chance From Oak Leaves",
@@ -171,7 +148,7 @@ public class Config {
                 multiplayerSynced = true,
                 maxLength = 1
         )
-        public Float appleDropChance = 0.0F;
+        public Float appleDropChance = 0f;
 
         @ConfigEntry(
                 name = "Enable Log Rotation (Restart required)",
@@ -185,7 +162,7 @@ public class Config {
                 description = "Disables leaf decay for player placed leaves",
                 multiplayerSynced = true
         )
-        public Boolean enablePlayerPlacedLeafPersistence = false;
+        public Boolean enablePlayerPlacedLeafPersistence = true;
     }
 
     public static class InteractiveBlockConfig {
@@ -201,14 +178,14 @@ public class Config {
                 description = "Dye will be consumed on use",
                 multiplayerSynced = true
         )
-        public Boolean enableColorSignsWithDye = false;
+        public Boolean enableColorSignsWithDye = true;
 
         @ConfigEntry(
                 name = "Allow Editing Signs",
                 description = "Right-click signs to edit. Shift-right-click uses the held item.",
                 multiplayerSynced = true
         )
-        public Boolean allowEditingSigns = false;
+        public Boolean allowEditingSigns = true;
 
         @ConfigEntry(
                 name = "Allow Gluing Trapdoors With A Slimeball",
@@ -224,7 +201,7 @@ public class Config {
                 description = "Touching source or flowing water resets fall damage, including shallow water and bucket clutches. Applies to players and mobs.",
                 multiplayerSynced = true
         )
-        public Boolean waterNegatesFallDamage = false;
+        public Boolean waterNegatesFallDamage = true;
 
         @ConfigEntry(
                 name = "Chance Zombies Drop Config Item",
@@ -253,13 +230,6 @@ public class Config {
                 multiplayerSynced = true
         )
         public ZombiePigmanDropEnum zombiePigmanDropItem = ZombiePigmanDropEnum.COOKED_PORKCHOP;
-
-        @ConfigEntry(
-                name = "Disable Trampling Farmland",
-                description = "Player/mobs will no longer trample farmland",
-                multiplayerSynced = true
-        )
-        public Boolean disableTramplingFarmland = false;
 
         @ConfigEntry(name = "Do Not Trample Farmland When Barefoot",
                 description = "Only affects player without boots",

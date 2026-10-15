@@ -25,7 +25,7 @@ public final class Spawn implements Command {
   }
   public void manual(SharedCommandSource source) {
     source.sendFeedback("/spawn | /spawn help");
-    source.sendFeedback("Teleport to the Overworld's world spawn. Requires cheats. Your personal respawn point stays unchanged.");
+    source.sendFeedback("Teleport to the Overworld's world spawn. Requires allow_teleportation. Your personal respawn point stays unchanged.");
   }
   public String[] suggestion(SharedCommandSource s, int n, String current, String total) {
     return n == 1 ? CommandSuggestions.suffix(current, java.util.List.of("help")) : new String[0];

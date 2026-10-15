@@ -47,6 +47,7 @@ public final class NavigationActions {
   }
 
   public void run(String command, int amount, boolean forceFlight, boolean forceGlass) {
+    if (!WorldEditor.commandAvailable(mc, command)) throw new IllegalArgumentException("Teleportation is unavailable.");
     if (mc.player.field_1595 != null || mc.player.field_1594 != null)
       throw new IllegalArgumentException("Dismount before teleporting.");
     if (forceFlight && forceGlass) throw new IllegalArgumentException("Use either -f or -g.");
@@ -68,6 +69,7 @@ public final class NavigationActions {
     if (forceFlight && !flight)
       throw new IllegalArgumentException("Creative flight is unavailable.");
     if (platform && !flight && !navigation.safe(to)) {
+      if (!WorldEditor.permitted(mc)) throw new IllegalArgumentException("A glass platform requires allow_world_editing. Use Creative flight or choose a supported destination.");
       Pos below = to.add(new Pos(0, -1, 0));
       BlockValue old = editor.engine.read(below);
       if (old.id != 0) throw new IllegalArgumentException("No empty space for a glass platform.");
@@ -118,7 +120,7 @@ public final class NavigationActions {
   }
 
   private void teleport(Pos to, boolean flight) {
-    if (!WorldEditor.available(mc) || !navigation.clear(to))
+    if (!WorldEditor.commandAvailable(mc, "tp") || !navigation.clear(to))
       throw new IllegalArgumentException(
           "Destination or player state changed; teleport cancelled.");
     if (flight && !CreativeAccess.fly(mc.player))

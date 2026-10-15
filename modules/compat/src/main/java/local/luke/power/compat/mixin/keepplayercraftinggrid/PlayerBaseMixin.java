@@ -1,6 +1,5 @@
 package local.luke.power.compat.mixin.keepplayercraftinggrid;
 
-import local.luke.power.compat.Config;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -24,66 +23,45 @@ public abstract class PlayerBaseMixin extends LivingEntity {
         super(arg);
     }
 
-    @Unique
-    private void powerCompat_clearSlotData(NbtCompound tag, int slotIndex)
-    {
-        tag.putInt("ItemID_Slot" + slotIndex, 0);
-        tag.putInt("ItemAmount_Slot" + slotIndex, 0);
-        tag.putInt("ItemDamage_Slot" + slotIndex, 0);
-    }
+    @Unique private static final String POWER_CRAFTING_INPUTS = "power_crafting_inputs";
 
     @Inject(method = "writeNbt", at = @At("HEAD"))
-    private void powerCompat_writeCustomDataToTag(NbtCompound tag, CallbackInfo info) {
-        if (!Config.config.allowCraftingInventorySlots) {
-            return;
-        }
-
-        PlayerScreenHandler currentCraftingGrid = (PlayerScreenHandler)playerScreenHandler;
-
-        if (null != currentCraftingGrid.craftingInput) {
-            for (int slotIndex = 0; slotIndex < 4; ++slotIndex) {
-                ItemStack itemInSlot = currentCraftingGrid.craftingInput.getStack(slotIndex);
-                if (null == itemInSlot) {
-                    powerCompat_clearSlotData(tag, slotIndex);
-                }
-                else
-                {
-                    tag.putInt("ItemID_Slot" + slotIndex, itemInSlot.itemId);
-                    tag.putInt("ItemAmount_Slot" + slotIndex, itemInSlot.count);
-                    tag.putInt("ItemDamage_Slot" + slotIndex, itemInSlot.getDamage());
-                }
+    private void powerCompat$writeCraftingInputs(NbtCompound tag, CallbackInfo ci) {
+        if (world.isRemote) return;
+        var grid = ((PlayerScreenHandler) playerScreenHandler).craftingInput;
+        var inputs = new NbtCompound();
+        for (int slot = 0; slot < 4; slot++) {
+            ItemStack stack = grid.getStack(slot);
+            if (stack != null) {
+                NbtCompound data = stack.writeNbt(new NbtCompound());
+                data.putInt("FullCount", stack.count);
+                inputs.put("Slot" + slot, data);
             }
         }
-        else
-        {
-            /** - Clear all slots */
-            powerCompat_clearSlotData(tag, 0);
-            powerCompat_clearSlotData(tag, 1);
-            powerCompat_clearSlotData(tag, 2);
-            powerCompat_clearSlotData(tag, 3);
-        }
+        // Saving preserves occupied inputs even if the preference changed while open.
+        // Native closure decides whether to retain or drop them; saving never moves items.
+        tag.put(POWER_CRAFTING_INPUTS, inputs);
     }
 
     @Inject(method = "readNbt", at = @At("HEAD"))
-    private void powerCompat_readCustomDataFromTag(NbtCompound tag, CallbackInfo info) {
-        if (!Config.config.allowCraftingInventorySlots) {
-            return;
-        }
-
-        PlayerScreenHandler currentCraftingGrid = (PlayerScreenHandler)playerScreenHandler;
-
-        if (null != currentCraftingGrid.craftingInput) {
-            for (int slotIndex = 0; slotIndex < 4; ++slotIndex) {
-                int itemAmount = tag.getInt("ItemAmount_Slot" + slotIndex);
-
-                if (0 != itemAmount)
-                {
-                    ItemStack itemToAdd = new ItemStack( tag.getInt("ItemID_Slot" + slotIndex)
-                                                             , itemAmount
-                                                             , tag.getInt("ItemDamage_Slot" + slotIndex));
-                    currentCraftingGrid.craftingInput.setStack(slotIndex, itemToAdd);
+    private void powerCompat$readCraftingInputs(NbtCompound tag, CallbackInfo ci) {
+        if (world.isRemote) return;
+        var grid = ((PlayerScreenHandler) playerScreenHandler).craftingInput;
+        boolean nativeData = tag.contains(POWER_CRAFTING_INPUTS);
+        var inputs = tag.getCompound(POWER_CRAFTING_INPUTS);
+        for (int slot = 0; slot < 4; slot++) {
+            ItemStack stack = null;
+            if (nativeData) {
+                if (inputs.contains("Slot" + slot)) {
+                    NbtCompound data = inputs.getCompound("Slot" + slot);
+                    stack = new ItemStack(data);
+                    stack.count = data.getInt("FullCount");
                 }
+            } else {
+                int count = tag.getInt("ItemAmount_Slot" + slot);
+                if (count > 0) stack = new ItemStack(tag.getInt("ItemID_Slot" + slot), count, tag.getInt("ItemDamage_Slot" + slot));
             }
+            grid.setStack(slot, stack);
         }
     }
 }

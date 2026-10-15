@@ -12,7 +12,6 @@
     "BlockEntityFactory",
     "BlockItemAccessor",
     "CommandMixin",
-    "WorldPropertiesMixin",
     "EntityAccess",
     "CarryWorldAccess",
     "CarryFirstPersonMixin",

@@ -9,8 +9,12 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(Item.class)
 public abstract class ItemMixin {
     @ModifyReturnValue(method = "getMaxCount", at = @At("RETURN"))
-    private int power$emptyBucketLimit(int original) {
-        return (Object) this == Item.BUCKET && Config.config.STACK_SIZE_CONFIG.stackableEmptyBuckets
-                ? 16 : original;
+    private int power$stackLimit(int original) {
+        var settings = Config.config.STACK_SIZE_CONFIG;
+        if ((Object) this == Item.BUCKET && settings.stackableEmptyBuckets) return 16;
+        if ((Object) this == Item.WOODEN_DOOR && settings.enableModernWoodDoorStackSize) return 64;
+        if ((Object) this == Item.IRON_DOOR && settings.enableModernIronDoorStackSize) return 64;
+        if ((Object) this == Item.SIGN && settings.enableModernSignStackSize) return 16;
+        return original;
     }
 }

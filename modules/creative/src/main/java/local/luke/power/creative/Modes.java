@@ -33,10 +33,10 @@ public final class Modes {
     return local.luke.power.permissions.CommandPermissions.modeDenial(mode.name().toLowerCase(java.util.Locale.ROOT));
   }
 
-  public static void disableCheats(Minecraft mc) {
+  public static void returnToSurvival(Minecraft mc) {
     if (mc.player != null && ((ModePlayer) mc.player).power_mode() == GameMode.SURVIVAL) return;
     if (!ClientRuntime.local(mc) || !change(mc, GameMode.SURVIVAL))
-      throw new IllegalArgumentException("Place any carried container before disabling cheats.");
+      throw new IllegalArgumentException("Place any carried container before disabling the active game mode.");
   }
 
   public static boolean change(Minecraft mc, GameMode mode) {

@@ -43,7 +43,7 @@ public final class FeatureChecks {
         });session.discard();
       }
     } else if(action.equals("camera-start")) {
-      settings(mc,Map.of("power_camera:config.enabled",true,"power_camera:config.sprint",true,"keys.Toggle Freecam",67,"keys.power_creative.sprint",29,"creative.sprintToggle",true));mc.setScreen(null);
+      settings(mc,Map.of("power_camera:config.sprint",true,"keys.Toggle Freecam",67,"keys.power_creative.sprint",29,"creative.sprintToggle",true));mc.setScreen(null);
     } else if(action.equals("camera-fast")) {
       test("freecam flight sprint boosts speed",()->check((float)method(camera(),"movementSpeed")>cameraBase()+.1f,"not boosted"));
     } else if(action.equals("camera-slow")) {
@@ -69,7 +69,7 @@ public final class FeatureChecks {
         Inventory chest=(Inventory)mc.world.method_1777(p.x(),p.y(),p.z());check(chest.getStack(0).itemId==264&&chest.getStack(0).count==7,"recovered contents differ");
       });
     } else if(action.equals("preview-setup")) {
-      settings(mc,Map.of("visual.containerPreview",true,"keys.powerbeta.containerPreview",68));
+      settings(mc,Map.of("keys.powerbeta.containerPreview",68));
       Pos p=new Pos((int)Math.floor(mc.player.x)+2,(int)Math.floor(mc.player.y),(int)Math.floor(mc.player.z));
       MinecraftWorld blocks=new MinecraftWorld(mc.world);blocks.set(p,new BlockValue(54,0));
       Inventory chest=(Inventory)mc.world.method_1777(p.x(),p.y(),p.z());chest.setStack(0,new ItemStack(264,7,0));chest.setStack(4,new ItemStack(257,1,37));

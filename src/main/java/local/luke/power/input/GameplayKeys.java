@@ -1,6 +1,5 @@
 package local.luke.power.input;
 
-import local.luke.power.visual.VisualConfig;
 import local.luke.power.mixin.ChatTextAccessor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.option.KeyBinding;
@@ -16,12 +15,20 @@ public final class GameplayKeys {
   public static final KeyBinding PREVIEW = new KeyBinding("powerbeta.containerPreview", 0);
   public static final KeyBinding LIGHT = new KeyBinding("powerbeta.lightOverlay", Keyboard.KEY_F7);
   public static final KeyBinding INFO_HUD = new KeyBinding("powerbeta.infoHud", Keyboard.KEY_NONE);
+  public static final KeyBinding COMMANDS = new KeyBinding("powerbeta.openCommands", Keyboard.KEY_SLASH);
+  public static final KeyBinding GRAPH = new KeyBinding("powerbeta.debugGraph", Keyboard.KEY_F3);
+  private static boolean graph;
+  public static boolean graph() { return graph; }
+  public static void debugText() { graph = false; }
   @EventListener public void register(KeyBindingRegisterEvent event) {
     event.keyBindings.add(PREVIEW);
     event.keyBindings.add(LIGHT);
     event.keyBindings.add(INFO_HUD);
+    event.keyBindings.add(COMMANDS);
+    event.keyBindings.add(GRAPH);
     Bindings.onMousePress("powerbeta.lightOverlay", GameplayKeys::toggleLight);
     Bindings.onMousePress("powerbeta.infoHud", GameplayKeys::toggleInfoHud);
+    Bindings.onMousePress("powerbeta.interface", GameplayKeys::interfaceKey);
   }
 
   private static void toggleInfoHud(int key) {
@@ -41,9 +48,20 @@ public final class GameplayKeys {
     if (event.environment != KeyStateChangedEvent.Environment.IN_GAME || !Keyboard.getEventKeyState() || Keyboard.isRepeatEvent()) return;
     toggleLight(Keyboard.getEventKey());
     toggleInfoHud(Keyboard.getEventKey());
+    interfaceKey(Keyboard.getEventKey());
+  }
+
+  private static void interfaceKey(int code) {
     Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
-    if (VisualConfig.current().slashChat && Keyboard.getEventKey() == Keyboard.KEY_SLASH && Bindings.heldModifiers() == 0
-        && mc.currentScreen == null && mc.player != null) {
+    if (mc.world == null || mc.player == null || mc.currentScreen != null || !Display.isActive()) return;
+    if (Bindings.matches(GRAPH, code)) {
+      graph = !mc.options.debugHud || !graph;
+      mc.options.debugHud = true;
+    } else {
+      for (KeyBinding binding : mc.options.allKeys)
+        if (binding.translationKey.equals("key.power_controls.debug_hud") && Bindings.matches(binding, code)) debugText();
+    }
+    if (Bindings.matches(COMMANDS, code)) {
       ChatScreen chat = new ChatScreen();
       mc.setScreen(chat);
       ((ChatTextAccessor)chat).power$text("/");

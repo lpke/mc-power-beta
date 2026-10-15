@@ -17,41 +17,37 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
 
 final class Interface170Checks {
-  private static void enableCamera() throws Exception {
-    Object config=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-    config.getClass().getField("enabled").set(config,true);
-  }
   static void run(Minecraft mc, String action) throws Exception {
     if (action.equals("save")) {
       var saved=SettingsRegistry.open(mc);
       for(String id:List.of("interface.useFeetYCoordinates","gameplay.torchShovel","veinMining.enabled"))find(saved,id).parse("true");
-      for(String id:List.of("interface.blinkingUiCursor","gameplay.fireSpread"))find(saved,id).parse("false");
+      for(String id:List.of("interface.blinkingUiCursor","rules.world.fire_spread"))find(saved,id).parse("false");
       find(saved,"veinMining.timePercent").parse("37");
       saved.save(Path.of(".").toAbsolutePath());ClickMining.toggle();log("Saved 1.7 preferences for restart");return;
     }
     if (action.equals("saved")) {
       check(MenuPreferences.useFeetYCoordinates() && !MenuPreferences.blinkingUiCursor(),"UI preferences lost");
-      check(local.luke.power.gameplay.GameplayConfig.current().torchShovel && !local.luke.power.gameplay.GameplayConfig.current().fireSpread,"gameplay preferences lost");
+      check(local.luke.power.gameplay.GameplayConfig.current().torchShovel && !local.luke.power.rules.WorldRules.of(mc.world.method_262()).enabled(local.luke.power.rules.GameRule.FIRE_SPREAD),"gameplay preferences lost");
       check(local.luke.power.mining.VeinConfig.current().enabled && local.luke.power.mining.VeinConfig.current().timePercent==37,"vein preferences lost");
       check(!ClickMining.inverted(),"temporary click state survived restart");log("PASS 1.7 preferences survive restart; temporary click state clears");return;
     }
     if (action.equals("keys")) {
       mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);active(false);
-      ((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");
-      ((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(false);
+      (AccessRules.of(mc.world.method_262())).allAllowed(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");
+      (AccessRules.of(mc.world.method_262())).allAllowed(false);
       local.luke.power.gameplay.MiningControls.CLICK_MINING.code=114;ClickMining.reset();
       var building=local.luke.power.building.config.Config.current().copy();building.clickMining=false;local.luke.power.building.config.Config.preview(building);
       Bindings.configure(Map.of());log("KEYS ready F20");return;
     }
     if (action.equals("key-state")) {log("KEYS inverted="+ClickMining.inverted()+" label="+TweakIndicators.label(TweakIndicators.Tweak.CLICK_MINING));return;}
     if (action.startsWith("ghost")) {
-      mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);enableCamera();var cheats=(local.luke.power.permissions.CheatWorld)mc.world.method_262();cheats.power$cheatsEnabled(true);
+      mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);var cheats=AccessRules.of(mc.world.method_262());cheats.allAllowed(true);
       active(false);CreativeVehicleChecks.mode(mc,action.contains("spectator")?"SPECTATOR":"SURVIVAL");
       mc.player.method_1340(32.5,112.62,38.5);mc.player.yaw=mc.player.prevYaw=180;mc.player.pitch=mc.player.prevPitch=0;
       pose(32.5,112.62,38.5,0,0);active(action.contains("freecam"));
       mc.options.thirdPerson=true;mc.options.hideHud=false;mc.options.debugHud=true;
       mc.options.bobView=false;
-      if(action.contains("look")){var building=local.luke.power.building.config.Config.current().copy();building.freeLook=true;building.freeLookToggle=true;building.freeLookPerspective=local.luke.power.building.camera.Perspective.THIRD_PERSON;local.luke.power.building.config.Config.preview(building);local.luke.power.building.camera.FreeLook.begin(mc);local.luke.power.building.camera.FreeLook.turn(mc.player,450,100);}
+      if(action.contains("look")){var building=local.luke.power.building.config.Config.current().copy();building.freeLookToggle=true;building.freeLookPerspective=local.luke.power.building.camera.Perspective.THIRD_PERSON;local.luke.power.building.config.Config.preview(building);local.luke.power.building.camera.FreeLook.begin(mc);local.luke.power.building.camera.FreeLook.turn(mc.player,450,100);}
       log("GHOST visible="+GhostHead.visible(mc)+" y="+HudCoordinates.y(mc.player));return;
     }
     if(action.equals("text")) {
@@ -62,17 +58,17 @@ final class Interface170Checks {
     if(action.equals("state")) {
       if(mc.currentScreen instanceof PowerOptionsScreen screen){var input=(TextInput)field(screen,"search");log("TEXT STATE "+input.text()+" cursor="+input.cursor()+" selection="+input.start()+":"+input.end());}return;
     }
-    failures=0;mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);enableCamera();PowerConfig.flushPending();var document=PowerConfig.document();
+    failures=0;mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);PowerConfig.flushPending();var document=PowerConfig.document();
     var oldHud=InfoHudConfig.copy();var hud=InfoHudConfig.copy();hud.enabled=true;InfoHudConfig.preview(hud);
     var session=SettingsRegistry.open(mc);boolean third=mc.options.thirdPerson,debug=mc.options.debugHud,hidden=mc.options.hideHud;
     double px=mc.player.x,py=mc.player.y,pz=mc.player.z;
-    var cheats=(local.luke.power.permissions.CheatWorld)mc.world.method_262();boolean hadCheats=cheats.power$cheatsEnabled();
+    var cheats=AccessRules.of(mc.world.method_262());boolean hadCheats=cheats.allAllowed();
     String oldMode=mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     try {
-      active(false);cheats.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.power$cheatsEnabled(false);
+      active(false);cheats.allAllowed(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.allAllowed(false);
       mc.player.method_1340(3.5,11.01+mc.player.field_1631,3.5);
       test("normal F3 and HUD share eye/feet policy and Cancel restores it",()->{
-        var feet=find(session,"interface.useFeetYCoordinates");check(!feet.defaultValue.getAsBoolean(),"feet default on");
+        var feet=find(session,"interface.useFeetYCoordinates");check(feet.defaultValue.getAsBoolean(),"feet default off");boolean beforeFeet=feet.value.getAsBoolean();
         for(boolean on:new boolean[]{false,true}) {
           feet.parse(Boolean.toString(on));session.preview();mc.options.debugHud=true;mc.options.hideHud=false;
           mc.inGameHud.render(1,false,0,0);for(int i=0;i<4;i++)InfoHud.tick(mc);
@@ -82,18 +78,18 @@ final class Interface170Checks {
           var cluster=new InfoHudSettings.Cluster();cluster.coordinates=true;cluster.direction=false;
           check(InfoHud.lines(cluster).contains("3, "+(on?11:12)+", 3"),"custom coordinate differs "+InfoHud.lines(cluster));
         }
-        session.discard();InfoHudConfig.preview(hud);check(HudCoordinates.y(mc.player)==mc.player.y,"Cancel failed");
+        session.discard();InfoHudConfig.preview(hud);check(HudCoordinates.y(mc.player)==(beforeFeet?mc.player.boundingBox.minY:mc.player.y),"Cancel failed");
       });
       test("freecam and spectator always use the head base, regardless of preference",()->{
         for(boolean feet:new boolean[]{false,true}) {
           MenuPreferences.previewFeetY(feet);pose(3.5,12.62,3.5,0,0);active(true);
           check(Math.abs(HudCoordinates.y(mc.player)-HeadGeometry.baseY(12.62))<1e-9,"freecam base");
-          active(false);cheats.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"SPECTATOR");
+          active(false);cheats.allAllowed(true);CreativeVehicleChecks.mode(mc,"SPECTATOR");
           check(Math.abs(HudCoordinates.y(mc.player)-(mc.player.y-mc.player.field_1631+HeadGeometry.BASE_ABOVE_FEET))<1e-9,"spectator base");
           mc.options.thirdPerson=true;check(GhostHead.visible(mc),"third-person head absent");
           GhostHead.render(mc,.5F);check(GL11.glGetError()==0,"ghost GL error");
           mc.options.thirdPerson=false;check(!GhostHead.visible(mc),"first-person ghost visible");
-          CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.power$cheatsEnabled(false);
+          CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.allAllowed(false);
         }
         MenuPreferences.previewFeetY(false);
       });
@@ -138,14 +134,14 @@ final class Interface170Checks {
       });
       test("UI blink has an independent default-on preview and rollback",()->{
         var s=SettingsRegistry.open(mc);var ui=find(s,"interface.blinkingUiCursor");var chat=find(s,"interface.blinkingChatCursor");
-        check(ui.defaultValue.getAsBoolean() && !chat.defaultValue.getAsBoolean(),"blink defaults");
+        check(ui.defaultValue.getAsBoolean() && chat.defaultValue.getAsBoolean(),"blink defaults");boolean beforeUi=ui.value.getAsBoolean(),beforeChat=chat.value.getAsBoolean();
         ui.parse("false");s.preview();check(!InterfaceState.blinkingUiCursor && InterfaceState.uiCursorVisible(),"steady UI cursor");
-        check(!InterfaceState.blinkingChatCursor,"UI blink changed chat");s.discard();check(InterfaceState.blinkingUiCursor,"UI rollback failed");
+        check(InterfaceState.blinkingChatCursor==beforeChat,"UI blink changed chat");s.discard();check(InterfaceState.blinkingUiCursor==beforeUi,"UI rollback failed");
       });
     } finally {
       active(false);local.luke.power.building.camera.FreeLook.reset(mc);session.discard();InfoHudConfig.preview(oldHud);PowerConfig.write(document);
       mc.setScreen(null);mc.player.method_1340(px,py,pz);mc.options.thirdPerson=third;mc.options.debugHud=debug;mc.options.hideHud=hidden;
-      cheats.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,oldMode);cheats.power$cheatsEnabled(hadCheats);
+      cheats.allAllowed(true);CreativeVehicleChecks.mode(mc,oldMode);cheats.allAllowed(hadCheats);
     }
     log("INTERFACE 170 FAILURES "+failures);
   }

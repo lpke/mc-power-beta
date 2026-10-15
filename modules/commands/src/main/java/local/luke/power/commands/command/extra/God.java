@@ -10,6 +10,8 @@ public class God implements Command {
 
   public static Map<String, Boolean> isPlayerInvincible = new HashMap<>();
 
+  public static void clear() { isPlayerInvincible.clear(); }
+
   @Override
   public void command(SharedCommandSource commandSource, String[] parameters) {
     if (parameters.length != 1) {

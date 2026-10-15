@@ -52,7 +52,7 @@ public final class DeathTracker {
 
   public static String recoveryDenial(Minecraft mc) {
     if (!available(mc)) return "Death records are disabled or no local world is open.";
-    if (!CommandPermissions.cheatsEnabled()) return "Cheats are disabled for this world. Enable Cheats in Options > General.";
+    if (!CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_DEATH_RECOVERY)) return "Enable Allow death recovery in Options > Game rules.";
     if (recoveryFailed) return "Death recovery is disabled after a protection failure. Restart and keep the recovery journal.";
     if (mc.player.dead || mc.player.health <= 0 || mc.player.world != mc.world || mc.field_2807 != mc.player
         || DetachedCamera.isActive() || InteractionState.carryingContainer || mc.player.container != mc.player.playerContainer

@@ -60,7 +60,7 @@ final class WebsiteMotion {
     if(action.equals("freecam")) {
       WebsiteGallery.run(mc,"castle");camera(mc,0,4,-20,0,0);
       var settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-      settings.getClass().getField("enabled").set(settings,Boolean.TRUE);
+
       var controller=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
       controller.getClass().getMethod("startFromView",Minecraft.class).invoke(controller,mc);
       controller.getClass().getMethod("setActive",boolean.class).invoke(controller,true);

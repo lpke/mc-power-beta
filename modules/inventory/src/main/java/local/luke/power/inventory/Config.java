@@ -39,14 +39,12 @@ public class Config {
         )
         public Boolean EnableShiftClickCrafting = true;
 
-        @ConfigEntry(
-                name = "Stop [Shift-Click] crafting when item changes",
-                description = "Shift crafting will craft only one item type"
-        )
-        public Boolean StopShiftClickCraftingWhenItemChanges = true;
     }
 
     public static class ModernMinecraftConfig {
+
+        @ConfigEntry(name = "Shift-double-click transfer", description = "Hold an item and Shift-double-click a matching stack to transfer all matching items from that inventory. The held stack stays on the cursor.")
+        public Boolean ShiftDoubleClickTransfer = true;
 
         @ConfigEntry(name = "Allow [Shift-Clicking] items into armor slots")
         public Boolean EnableShiftClickingItemsIntoArmorSlots = true;
@@ -59,9 +57,6 @@ public class Config {
                 description = "Initially empty cursor double click to pickup"
         )
         public Boolean DoubleLeftClickItemPickup = true;
-
-        @ConfigEntry(name = "Enable [Click + Drag] graphics")
-        public Boolean EnableDragGraphics = true;
 
         @ConfigEntry(name = "Enable [Left-Click + Drag]")
         public Boolean EnableLeftClickDrag = true;
@@ -139,24 +134,5 @@ public class Config {
         )
         public Boolean invertScrollCursorSlotDirection = false;
 
-//        @ConfigEntry(name = "Invert scroll direction: inventories")
-//        @Comment("For item transfer between inventories")
-//        public static Boolean invertScrollInventoryDirection = false;
-//
-//        @ConfigEntry(name = "Position aware scrolling inventory transfer")
-//        @Comment("Slot position will determine scroll direction")
-//        public static Boolean positionAwareScrolling = false;
-//
-//        @ConfigEntry(name = "Wheel slot search order (see comment)")
-//        @Comment("true = first to last, false = last to first")
-//        public static Boolean wheelSearchOrder = true;
-//
-//        @ConfigEntry(name = "[ScrollWheel] transfer (see comment)")
-//        @Comment("true = cursor/slot, false = inventories")
-//        public static Boolean scrollWheelBehavior = true;
-//
-//        @ConfigEntry(name = "[Shift + ScrollWheel] transfer (see comment)")
-//        @Comment("true = inventories, false = cursor/slot")
-//        public static Boolean shiftScrollWheelBehavior = true;
     }
 }

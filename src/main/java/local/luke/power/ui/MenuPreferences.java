@@ -9,9 +9,9 @@ import local.luke.power.storage.PowerConfig;
 public final class MenuPreferences {
   public static final class Values {
     public boolean autoApply = true;
-    public boolean pauseToOptions, blinkingChatCursor;
+    public boolean pauseToOptions, blinkingChatCursor = true;
     public boolean blinkingUiCursor = true;
-    public boolean debugTimeOfDay, useFeetYCoordinates;
+    public boolean debugTimeOfDay, useFeetYCoordinates = true;
     public String debugTextColor = "#FFFFFF";
     public String musicBrowserDirectory = "";
     public List<String> colours = new ArrayList<>();

@@ -1,10 +1,9 @@
 package local.luke.power.gameplay;
 
 public final class GameplaySettings {
-  public boolean mergeItems, explosionProofItems, limitTnt, flintIgnitesTnt;
-  public boolean lavaProofItems, cactusProofItems;
-  public boolean torchShovel;
-  public boolean fireSpread = true;
+  public boolean mergeItems = true, limitTnt = false, flintIgnitesTnt = false;
+  public boolean lavaProofItems = false, cactusProofItems = false;
+  public boolean torchShovel = false;
   public int mergeThreshold = 256;
   public int tntPerTick = 4;
   public int tntMillis = 8;

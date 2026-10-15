@@ -5,7 +5,6 @@ import static local.luke.power.validation.DeathChecks.*;
 import java.nio.file.*;
 import java.util.*;
 import local.luke.power.death.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.world.WorldInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
@@ -14,8 +13,8 @@ final class DeathCraftingChecks {
   static void run(Minecraft mc, String action) throws Exception {
     boolean saved = action.equals("saved");
     failures = 0; alive(mc); mc.setScreen(null); mc.field_2807 = mc.player;
-    var properties = (CheatWorld)mc.world.method_262(); properties.power$cheatsEnabled(true);
-    ((WorldInventory)properties).power$keepInventory(false);
+    var properties = AccessRules.of(mc.world.method_262()); properties.allAllowed(true);
+    ((WorldInventory)mc.world.method_262()).power$keepInventory(false);
     var settings = DeathConfig.copy(); var enabled = new DeathSettings(); enabled.enabled = true; enabled.announceLocation = false; DeathConfig.preview(enabled);
     Object compat = Class.forName("local.luke.power.compat.Config").getField("config").get(null);
     var allow = compat.getClass().getField("allowCraftingInventorySlots"); boolean old = (Boolean)allow.get(compat);
@@ -70,12 +69,12 @@ final class DeathCraftingChecks {
         grid(mc,1,new ItemStack(1,1,0)); String before=snapshot(mc); byte[] journal=Files.readAllBytes(path(mc));
         var screen=DeathInventoryChecks.open(mc,death,320,240); var output=ChatChecks.record(()->DeathInventoryChecks.bulk(screen));
         check(output.stream().anyMatch(t->t.contains("occupied")) && before.equals(snapshot(mc)) && Arrays.equals(journal,Files.readAllBytes(path(mc))),"conflict touched grid or journal");
-        grid(mc,1,null); properties.power$cheatsEnabled(false); before=snapshot(mc); DeathInventoryChecks.click(screen,41,0);
-        check(before.equals(snapshot(mc)),"locked viewer recovered crafting input"); properties.power$cheatsEnabled(true);
+        grid(mc,1,null); properties.allAllowed(false); before=snapshot(mc); DeathInventoryChecks.click(screen,41,0);
+        check(before.equals(snapshot(mc)),"locked viewer recovered crafting input"); properties.allAllowed(true);
         DeathInventoryChecks.bulk(screen); check(grid(mc,0).count==64 && mc.player.inventory.main[0].count==6 && grid(mc,1).getDamage()==83,"craft overflow lost counts or tool damage");
         mc.setScreen(null);
       });
-      properties.power$cheatsEnabled(true); clearAll(mc);
+      properties.allAllowed(true); clearAll(mc);
       for(int i=0;i<4;i++) grid(mc,i,tagged(35,3+i,i,"craft-restart-"+i));
       record(mc,"Crafting restart fixture"); var death=latest(mc); clearAll(mc); DeathTracker.recover(mc,death,1);
       DeathConfig.save(enabled);

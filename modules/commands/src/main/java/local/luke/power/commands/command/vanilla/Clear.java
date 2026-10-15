@@ -68,11 +68,13 @@ public class Clear implements Command {
     s.sendFeedback(
         "Removes matching inventory items. maxCount 0 only counts them. /clearchat clears chat"
             + " instead.");
+    s.sendFeedback("Removing items requires allow_survival_assistance. Counting remains available.");
   }
 
   public String[] suggestion(SharedCommandSource s, int n, String input, String total) {
     return n == 1
         ? CommandSuggestions.targets(s, input)
-        : n == 2 ? ParameterSuggestUtil.suggestItemIdentifier(input) : new String[0];
+        : n == 2 ? ParameterSuggestUtil.suggestItemIdentifier(input)
+        : n == 3 ? CommandSuggestions.suffix(input, java.util.List.of("0")) : new String[0];
   }
 }

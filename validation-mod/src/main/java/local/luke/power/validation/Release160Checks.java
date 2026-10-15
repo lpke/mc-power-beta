@@ -106,7 +106,7 @@ final class Release160Checks {
 
   private static void scene(Minecraft mc, String action) throws Exception {
     mc.setScreen(null); mc.options.debugHud = mc.options.hideHud = false;
-    ((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc,"CREATIVE");
     mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,true);
     for(int x=-4;x<=4;x++)for(int z=-4;z<=4;z++)for(int y=99;y<=105;y++)

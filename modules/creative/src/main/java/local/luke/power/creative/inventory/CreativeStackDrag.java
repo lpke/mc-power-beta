@@ -3,7 +3,7 @@ package local.luke.power.creative.inventory;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import local.luke.power.creative.ClientRuntime;
-import local.luke.power.permissions.CheatWorld;
+import local.luke.power.rules.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.container.ContainerScreen;
 import net.minecraft.container.Container;
@@ -24,7 +24,7 @@ public final class CreativeStackDrag {
     return !failed && ClientRuntime.local(mc) && Display.isActive()
         && mc.currentScreen == screen && mc.player.container == container
         && mc.player.creative_isCreative()
-        && ((CheatWorld) mc.level.getProperties()).power$cheatsEnabled()
+        && WorldRules.enabled(mc.level.getProperties(), GameRule.ALLOW_CREATIVE_MODE)
         && container.canUse(mc.player);
   }
 

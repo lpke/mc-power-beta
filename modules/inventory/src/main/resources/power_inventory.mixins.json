@@ -4,11 +4,15 @@
   "package": "local.luke.power.inventory.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "DispenserScreenHandlerMixin"
+    "DispenserScreenHandlerMixin",
+    "SlotAccessor",
+    "FurnaceTransferMixin",
+    "QuickInsertMixin"
   ],
   "server": [],
   "client": [
     "ContainerBaseMixin",
+    "MouseClickClockMixin",
     "FurnaceBlockEntityAccessor",
     "FurnaceScreenAccessor",
     "PlayerMixin",

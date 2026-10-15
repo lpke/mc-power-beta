@@ -12,13 +12,13 @@ public final class ConfigDefaults {
 
   public static void prepare(Path game) throws IOException {
     PowerConfig.configure(game.resolve("config/power-beta.json"));
-    if (Files.exists(PowerConfig.path(), LinkOption.NOFOLLOW_LINKS)) {
-      PowerConfig.document();
-      return;
-    }
     try (var input = ConfigDefaults.class.getResourceAsStream("/assets/powerbeta/defaults/power-beta.json")) {
       if (input == null) throw new IOException("Missing Power Beta defaults");
-      PowerConfig.write(JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject());
+      JsonObject defaults = JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject();
+      if (Files.exists(PowerConfig.path(), LinkOption.NOFOLLOW_LINKS)) {
+        try { PowerConfig.document(); }
+        catch (IllegalStateException failure) { PowerConfig.recovery(defaults, failure.getMessage()); }
+      } else PowerConfig.write(defaults);
     }
   }
 }

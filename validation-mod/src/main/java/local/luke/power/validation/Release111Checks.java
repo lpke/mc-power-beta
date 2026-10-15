@@ -38,7 +38,7 @@ final class Release111Checks {
     failures=0;
     test("steady cursor and white debug text defaults",()->{
       var s=SettingsRegistry.open(mc);
-      check(!find(s,"interface.blinkingChatCursor").defaultValue.getAsBoolean(),"blink default");
+      check(find(s,"interface.blinkingChatCursor").defaultValue.getAsBoolean(),"blink default");
       check(find(s,"interface.debugTextColor").defaultValue.getAsString().equals("#FFFFFF"),"colour default");
       for(int t=0;t<24;t++) check(InterfaceState.cursorVisible(t),"default cursor blinks");
     });
@@ -51,14 +51,14 @@ final class Release111Checks {
       boolean rejected=false;try{bad.preview();}catch(IllegalArgumentException expected){rejected=true;}
       check(rejected&&InterfaceState.debugTextColor==0xFFFFFF,"invalid colour accepted");
     });
-    test("world overrides have short labels, scope tooltips and cheat visibility",()->{
-      var s=SettingsRegistry.open(mc);find(s,"world.cheats").parse("true");
-      check(find(s,"world.cheats").group.equals("Game")&&find(s,"world.cheats").label.contains("this world"),"cheats moved or scope lost");
-      for(String id:List.of("daylightCycle","weatherCycle","hostileSpawning","passiveSpawning")) {
-        var row=find(s,"world."+id);
-        check(row.group.equals("World overrides")&&!row.label.contains("this world"),"wrong group/label");
-        check(Tooltips.setting(row,"").contains("each singleplayer world")&&SettingAccess.visible(s,row),"scope/visibility");
-        find(s,"world.cheats").parse("false");check(!SettingAccess.visible(s,row),"row visible without cheats");find(s,"world.cheats").parse("true");
+    test("world rules keep short labels and remain editable independently of permissions",()->{
+      var s=SettingsRegistry.open(mc);
+      check(s.settings().stream().noneMatch(row->row.id.equals("world.cheats")),"obsolete cheats setting");
+      for(String id:List.of("advance_time","advance_weather","spawn_monsters","spawn_animals")) {
+        var row=find(s,"rules.world."+id);
+        check(row.page.equals("Game rules")&&!row.label.contains("this world"),"wrong page/label");
+        check(SettingAccess.visible(s,row),"world rule hidden");
+        find(s,"rules.world.allow_world_editing").parse("false");check(SettingAccess.visible(s,row),"permissions hide game rule");
       }
     });
     test("presentation Apply preserves other interface preferences",()->{

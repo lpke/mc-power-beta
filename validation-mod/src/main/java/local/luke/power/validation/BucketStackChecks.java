@@ -4,7 +4,6 @@ import static local.luke.power.validation.Validation.*;
 import java.nio.file.*;
 import java.util.*;
 import local.luke.power.config.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.storage.PowerConfig;
 import net.glasslauncher.mods.gcapi3.impl.GCCore;
 import net.glasslauncher.mods.gcapi3.impl.object.*;
@@ -30,19 +29,19 @@ final class BucketStackChecks {
     }
     failures = 0;
     mc.setScreen(null); mc.player.closeScreen();
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc, "SURVIVAL");
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(false);
+    (AccessRules.of(mc.world.method_262())).allAllowed(false);
     mc.player.method_1340(.5, 103, .5);
     mc.player.yaw = mc.player.prevYaw = 0; mc.player.pitch = mc.player.prevPitch = 90;
     for (int x=-2;x<=3;x++) for (int z=-2;z<=3;z++) {
       mc.world.method_200(x,100,z,1);
       for (int y=101;y<=106;y++) mc.world.method_200(x,y,z,0);
     }
-    test("default off, Inventory / Stack sizes, no cheats; Cancel changes no stacks or saved data", () -> {
+    test("default on, Inventory / Stack sizes, independent of access permissions; Cancel changes no stacks or saved data", () -> {
       enable(false); clear(); ItemStack held = tagged(8, "preview"); mc.player.inventory.main[0] = held;
       var session = SettingsRegistry.open(mc); var row = Release110Checks.find(session, ID);
-      check(!row.defaultValue.getAsBoolean() && !row.restart && row.page.equals("Inventory")
+      check(row.defaultValue.getAsBoolean() && !row.restart && row.page.equals("Inventory")
           && row.group.equals("Stack sizes") && SettingAccess.visible(session,row), "wrong metadata/access");
       byte[] before=Files.readAllBytes(PowerConfig.path());
       row.parse("true"); session.preview(true); check(limit(325)==16,"preview not immediate");
@@ -130,7 +129,7 @@ final class BucketStackChecks {
       }
     });
     test("creative source pickup and milking preserve the empty stack without duplicate filled items", () -> {
-      ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+      (AccessRules.of(mc.world.method_262())).allAllowed(true);
       try {
         CreativeVehicleChecks.mode(mc,"CREATIVE");
         for(int count:new int[]{1,16}) for(int block:new int[]{9,11}) {
@@ -142,7 +141,7 @@ final class BucketStackChecks {
         clear(); ItemStack held=tagged(16,"creative-milk"); mc.player.inventory.main[0]=held;
         new class_466(mc.world).method_1323(mc.player); new class_466(mc.world).method_1323(mc.player);
         stack(held,16,"creative-milk"); check(total(335)==1,"creative milk duplicated/lost");
-      } finally { CreativeVehicleChecks.mode(mc,"SURVIVAL"); ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(false); }
+      } finally { CreativeVehicleChecks.mode(mc,"SURVIVAL"); (AccessRules.of(mc.world.method_262())).allAllowed(false); }
     });
     test("disabling restores Beta limits without deleting, splitting or breaking saved stacks", () -> {
       clear(); ItemStack held=tagged(16,"disabled"); mc.player.inventory.main[0]=held;

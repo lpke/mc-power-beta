@@ -3,7 +3,6 @@ package local.luke.power.validation;
 import static local.luke.power.validation.Validation.*;
 import java.util.*;
 import local.luke.power.gameplay.*;
-import local.luke.power.permissions.CheatWorld;
 import net.minecraft.class_365;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -19,7 +18,7 @@ final class TntPerformanceChecks {
       check(count(mc)>=count-4,"unbounded TNT after reload");
       log("PASS TNT recovery after restart pending="+count+" tickMs="+(System.nanoTime()-start)/1e6);return;
     }
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
     mc.setScreen(null);mc.player.method_1340(0,115,0);
     for(int x=-3;x<=3;x++)for(int z=-3;z<=3;z++)mc.world.method_214(x,z);
     List<class_365> created=new ArrayList<>();

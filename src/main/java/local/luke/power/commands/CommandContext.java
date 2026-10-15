@@ -1,6 +1,6 @@
 package local.luke.power.commands;
 
-import local.luke.power.permissions.CheatWorld;
+import local.luke.power.rules.*;
 import local.luke.power.permissions.CommandPermissions;
 import net.minecraft.client.Minecraft;
 
@@ -17,8 +17,6 @@ public final class CommandContext {
     return new CommandPermissions.Context(
         world(mc),
         mc.world != null && mc.world.isRemote,
-        mc.world != null
-            && !mc.world.isRemote
-            && ((CheatWorld) mc.world.method_262()).power$cheatsEnabled());
+        mc.world == null || mc.world.isRemote ? new RuleSet() : WorldRules.of(mc.world.method_262()));
   }
 }

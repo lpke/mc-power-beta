@@ -5,10 +5,10 @@ public final class FullBrightState {
   private Object world;
   private boolean manual, spectator, automatic;
   private Boolean override;
-  public void update(Object world, boolean cheats, boolean spectator, boolean automatic) {
+  public void update(Object world, boolean spectatorAllowed, boolean spectator, boolean automatic) {
     if (this.world != world || world == null) { manual = false; override = null; this.spectator = false; }
     this.world = world;
-    spectator &= cheats;
+    spectator &= spectatorAllowed;
     if (this.spectator != spectator || this.automatic != automatic) override = null;
     this.spectator = spectator;
     this.automatic = automatic;

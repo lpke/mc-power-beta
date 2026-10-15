@@ -1,5 +1,7 @@
 package local.luke.power.inventory.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import local.luke.power.inventory.*;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,7 +20,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
@@ -31,7 +32,6 @@ import net.minecraft.screen.FurnaceScreenHandler;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.Slot;
 
-import static java.lang.Math.abs;
 
 @Environment(EnvType.CLIENT)
 @Mixin(HandledScreen.class)
@@ -40,6 +40,9 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	@Override public void power$cancelItemDrag() {
 		powerInventory_resetRightClickDragVariables();
 		powerInventory_resetLeftClickDragVariables();
+		powerInventory$shiftDouble.clear();
+		powerInventory$gatherDouble.clear();
+		powerInventory$dragOwnership.clear();
 	}
 
 	@Shadow
@@ -57,7 +60,80 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	@Shadow
 	protected abstract boolean isPointOverSlot(Slot slot, int x, int Y);
 
-	@Unique long currentTime;
+	@Unique private final DoubleClick powerInventory$shiftDouble = new DoubleClick();
+	@Unique private final DoubleClick powerInventory$gatherDouble = new DoubleClick();
+	@Unique private final DragOwnership powerInventory$dragOwnership = new DragOwnership();
+
+	@WrapMethod(method = {"mouseClicked", "mouseReleased"})
+	private void powerInventory$ownedDrag(int x, int y, int button, Operation<Void> original) {
+		if (minecraft.player != null && !powerInventory$dragOwnership.current(container, minecraft.player.inventory.getCursorStack())) {
+			power$cancelItemDrag();
+			return;
+		}
+		original.call(x, y, button);
+		if (minecraft.player != null && (isLeftClickDragStarted || isRightClickDragStarted || isLeftClickDragMouseTweaksStarted)) {
+			List<Slot> visited = new ArrayList<>(leftClickHoveredSlots);
+			visited.addAll(rightClickHoveredSlots);
+			if (isLeftClickDragStarted || isLeftClickDragMouseTweaksStarted) visited.add(lastLMBSlot);
+			if (isRightClickDragStarted) visited.add(lastRMBSlot);
+			powerInventory$dragOwnership.capture(container, minecraft.player.inventory.getCursorStack(), visited);
+		} else powerInventory$dragOwnership.clear();
+	}
+
+	@Unique private boolean powerInventory$shiftDown() {
+		return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
+	}
+
+	@Unique private boolean powerInventory$eligible() {
+		return minecraft.world != null && minecraft.player != null && !minecraft.player.dead
+				&& minecraft.player.health > 0 && minecraft.currentScreen == (Object) this
+				&& minecraft.player.currentScreenHandler == container && org.lwjgl.opengl.Display.isActive();
+	}
+
+	@Inject(method = "render", at = @At("HEAD"))
+	private void powerInventory$checkGesture(int x, int y, float delta, CallbackInfo ci) {
+		if (!powerInventory$eligible()) { power$cancelItemDrag(); return; }
+		if (!powerInventory$shiftDouble.pending() && !powerInventory$gatherDouble.pending()) return;
+		ItemStack cursor = minecraft.player.inventory.getCursorStack();
+		var contents = InventoryStacks.data(cursor);
+		if (!powerInventory$shiftDown() || !powerInventory$shiftDouble.owns(container, cursor, contents))
+			powerInventory$shiftDouble.clear();
+		if (!powerInventory$gatherDouble.owns(container, cursor, contents)) powerInventory$gatherDouble.clear();
+	}
+
+	@Inject(method = "removed", at = @At("HEAD"))
+	private void powerInventory$close(CallbackInfo ci) { power$cancelItemDrag(); }
+
+	@Unique private boolean powerInventory$shiftDoubleClick(Slot clicked, int button) {
+		ItemStack cursor = minecraft.player.inventory.getCursorStack();
+		if (button != 0 || !powerInventory$shiftDown()
+				|| !Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.ShiftDoubleClickTransfer
+				|| !QuickTransfers.eligible(minecraft, container) || !QuickTransfers.writable(clicked, cursor)) {
+			powerInventory$shiftDouble.clear();
+			return false;
+		}
+		long now = MouseClickClock.now();
+		var contents = InventoryStacks.data(cursor);
+		if (powerInventory$shiftDouble.second(container, clicked, cursor, contents, now)
+				&& (!clicked.hasStack() || InventoryStacks.same(cursor, clicked.getStack()))) {
+			power$cancelItemDrag();
+			QuickTransfers.matching(minecraft, container, clicked, cursor);
+			return true;
+		}
+		powerInventory$shiftDouble.clear();
+		if (!InventoryStacks.same(cursor, clicked.getStack())) return false;
+		powerInventory$gatherDouble.clear();
+		powerInventory_resetRightClickDragVariables();
+		powerInventory_resetLeftClickDragVariables();
+		powerInventory$shiftDouble.start(container, clicked, cursor, contents, now);
+		minecraft.interactionManager.clickSlot(container.syncId, clicked.id, 0, true, minecraft.player);
+		// A held first press still supports the existing matching-item Shift-drag.
+		leftClickMouseTweaksPersistentStack = cursor;
+		isLeftClickDragMouseTweaksStarted = true;
+		lastLMBSlotId = clicked.id;
+		lastLMBSlot = clicked;
+		return true;
+	}
 
 	@Unique private Slot slot;
 
@@ -106,6 +182,9 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	protected void powerInventory_mouseClicked(int mouseX, int mouseY, int button, CallbackInfo ci) {
 		isLeftClickDragMouseTweaksStarted = false;
 		Slot clickedSlot = this.getSlotAt(mouseX, mouseY);
+		if (!powerInventory$eligible()) { power$cancelItemDrag(); ci.cancel(); return; }
+		if (powerInventory$shiftDoubleClick(clickedSlot, button)) { ci.cancel(); return; }
+		if (button != 0 || powerInventory$shiftDown()) powerInventory$gatherDouble.clear();
 
 		/** - Handle crafting slot click */
 		if (clickedSlot instanceof CraftingResultSlot) {
@@ -153,7 +232,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 			}
 		} else if (minecraft.currentScreen instanceof FurnaceScreen) {
 			/** - Handle shift click into furnace */
-			if (Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.EnableShiftClickingItemsIntoFurnaces) {
+			if (minecraft.world.isRemote && minecraft.player.inventory.getCursorStack() == null
+					&& Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.EnableShiftClickingItemsIntoFurnaces) {
 				if (powerInventory_handleShiftClickIntoFurnace(mouseX, mouseY, button, clickedSlot)) {
 					/** - Handle if a button was clicked */
 					super.mouseClicked(mouseX, mouseY, button);
@@ -202,7 +282,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 					/** - Check for double left-click fill cursor stack (checking for second click close to time of first click) */
 					if (Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.DoubleLeftClickItemPickup) {
 						if (null != clickedSlot && false == clickedSlot.hasStack() && null != minecraft.world) {
-							if (5 > (minecraft.world.getTime() - currentTime)) {
+							if (!powerInventory$shiftDown() && powerInventory$gatherDouble.second(container, clickedSlot, cursorStack, InventoryStacks.data(cursorStack), MouseClickClock.now())) {
+								powerInventory$gatherDouble.clear();
 								if (powerInventory_handleDoubleClickEmptyCursor(mouseX, mouseY, button, clickedSlot)) {
 									/** - Handle if a button was clicked */
 									super.mouseClicked(mouseX, mouseY, button);
@@ -217,12 +298,6 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 						exitFunction = powerInventory_handleLeftClickWithItem(cursorStack, clickedSlot, isClientOnServer);
 					}
 				} else {
-					/** - Begin double left-click fill cursor stack (first click registered) */
-					if (Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.DoubleLeftClickItemPickup) {
-						if (null != clickedSlot && clickedSlot.hasStack() && null != minecraft.world) {
-							currentTime = minecraft.world.getTime();
-						}
-					}
 
 					exitFunction = powerInventory_handleLeftClickWithoutItem(clickedSlot);
 				}
@@ -239,16 +314,26 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 		}
 	}
 
+	@Unique private List<Object> powerInventory$craftState() {
+		List<Object> state = new ArrayList<>(container.slots.size() + 1);
+		for (Object entry : container.slots) state.add(InventoryStacks.data(((Slot) entry).getStack()));
+		state.add(InventoryStacks.data(minecraft.player.inventory.getCursorStack()));
+		return state;
+	}
+
 	@Unique private boolean powerInventory_handleCtrlClickCrafting(int mouseX, int mouseY, int button, Slot clickedSlot) {
 		boolean isCtrlKeyDown = (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL));
 		/** - Ctrl-click */
 		if (true == isCtrlKeyDown && clickedSlot.hasStack()) {
+			ItemStack result = InventoryStacks.copy(clickedSlot.getStack(), 1);
 			int maxStackSize = clickedSlot.getStack().getMaxCount();
 			int numCrafted = 0;
 			for (int craftingAttempts = 0; craftingAttempts < 256; craftingAttempts++) {
-				if (clickedSlot.hasStack() && numCrafted < maxStackSize) {
+				var before = powerInventory$craftState();
+				if (clickedSlot.hasStack() && InventoryStacks.same(result, clickedSlot.getStack()) && numCrafted < maxStackSize) {
 					numCrafted += clickedSlot.getStack().count;
 					this.minecraft.interactionManager.clickSlot(this.container.syncId, clickedSlot.id, button, true, this.minecraft.player);
+					if (before.equals(powerInventory$craftState())) break;
 				} else {
 					break;
 				}
@@ -265,12 +350,15 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 			/** - Abort and do normal shift key crafting if shift key is down */
 			boolean isShiftKeyDown = (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
 			if (!isShiftKeyDown) {
+				ItemStack result = InventoryStacks.copy(clickedSlot.getStack(), 1);
 				int maxStackSize = clickedSlot.getStack().getMaxCount();
 				int numCrafted = 0;
 				for (int craftingAttempts = 0; craftingAttempts < 256; craftingAttempts++) {
-					if (clickedSlot.hasStack() && numCrafted < maxStackSize) {
+					var before = powerInventory$craftState();
+					if (clickedSlot.hasStack() && InventoryStacks.same(result, clickedSlot.getStack()) && numCrafted < maxStackSize) {
 						numCrafted += clickedSlot.getStack().count;
 						powerInventory_internalMouseClicked(mouseX, mouseY, button);
+						if (before.equals(powerInventory$craftState())) break;
 					} else {
 						break;
 					}
@@ -285,21 +373,12 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	@Unique private boolean powerInventory_handleShiftClickCrafting(int mouseX, int mouseY, int button, Slot clickedSlot) {
 		boolean isShiftKeyDown = (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
 		if (true == isShiftKeyDown && clickedSlot.hasStack()) {
-			int itemId = clickedSlot.getStack().itemId;
+			ItemStack result = InventoryStacks.copy(clickedSlot.getStack(), 1);
 			for (int craftingAttempts = 0; craftingAttempts < 256; craftingAttempts++) {
-				if (Config.INVENTORY_TWEAKS_CONFIG.CRAFTING_RESULT_CONFIG.StopShiftClickCraftingWhenItemChanges) {
-					if (clickedSlot.hasStack() && itemId == clickedSlot.getStack().itemId) {
-						powerInventory_internalMouseClicked(mouseX, mouseY, button);
-					} else {
-						break;
-					}
-				} else {
-					if (clickedSlot.hasStack()) {
-						powerInventory_internalMouseClicked(mouseX, mouseY, button);
-					} else {
-						break;
-					}
-				}
+				var before = powerInventory$craftState();
+				if (!clickedSlot.hasStack() || !InventoryStacks.same(result, clickedSlot.getStack())) break;
+				powerInventory_internalMouseClicked(mouseX, mouseY, button);
+				if (before.equals(powerInventory$craftState())) break;
 			}
 			return true;
 		}
@@ -463,7 +542,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 			/** - Shift item back into player inventory */
 			for (playerInventorySlotIndex = 0; playerInventorySlotIndex < handledScreen.container.slots.size(); playerInventorySlotIndex++) {
 
-				if (ModHelper.isItemInSlot(slotStack, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)))) {
+				if (QuickTransfers.writable((Slot) handledScreen.container.slots.get(playerInventorySlotIndex), slotStack)
+						&& ModHelper.isItemInSlot(slotStack, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)))) {
 					this.minecraft.interactionManager.clickSlot(this.container.syncId, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)).id, 0, false, this.minecraft.player);
 					this.minecraft.interactionManager.clickSlot(this.container.syncId, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)).id, 0, false, this.minecraft.player);
 
@@ -524,6 +604,10 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	@Inject(method = "mouseReleased", at = @At("RETURN"), cancellable = true)
 	private void powerInventory_mouseReleasedOrSlotChanged(int mouseX, int mouseY, int button, CallbackInfo ci) {
 		slot = this.getSlotAt(mouseX, mouseY);
+		if (!powerInventory$eligible()) { power$cancelItemDrag(); return; }
+		powerInventory$shiftDouble.move(slot);
+		powerInventory$gatherDouble.move(slot);
+		if (button == 0) { powerInventory$shiftDouble.release(); powerInventory$gatherDouble.release(); }
 
 		/** - Do nothing if mouse is not over a slot */
 		if (slot == null)
@@ -536,6 +620,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 						&& (isLeftClickDragStarted == false)
 						&& (isRightClickDragStarted == false)
 				) {
+					powerInventory$shiftDouble.clear();
+					powerInventory$gatherDouble.clear();
 					powerInventory_handleScrollWheel(currentWheelDegrees);
 				}
 			}
@@ -549,11 +635,12 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 		   && ( rightClickPersistentStack != null )
 		) {
 			ItemStack slotItemToExamine = slot.getStack();
+			if (!QuickTransfers.writable(slot, rightClickPersistentStack)) return;
 
 			/** - Do nothing if slot item does not match held item or if the slot is full */
 			if (  (null != slotItemToExamine)
-			   && (  (!slotItemToExamine.isItemEqual(rightClickPersistentStack))
-				  || (slotItemToExamine.count == rightClickPersistentStack.getMaxCount())
+			   && (  (!InventoryStacks.same(slotItemToExamine, rightClickPersistentStack))
+				  || (slotItemToExamine.count >= Math.min(rightClickPersistentStack.getMaxCount(), slot.getMaxItemCount()))
 			      )
 			) {
 				return;
@@ -623,7 +710,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 			   && (null != slotItemToExamine)
 			) {
 				/** - Prevent transfers if items in slots do not match */
-				transferAllowed = cursorStack.isItemEqual(slotItemToExamine);
+				transferAllowed = InventoryStacks.same(cursorStack, slotItemToExamine);
 			}
 
 			/** - Prevent illegal transfers that can cause bugs/dupes */
@@ -644,119 +731,32 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 			if (transferAllowed) {
 				powerInventory_scrollCursorSlotTransfer(numberOfTurns, cursorStackAmount, slotStackAmount, itemBeingTransfered);
 			}
-//			if (isShiftKeyDown) {
-//				if (Config.ScrollWheelConfig.shiftScrollWheelBehavior) {
-//					powerInventory_scrollInventoryTransfer(numberOfTurns, cursorStackAmount, slotStackAmount, itemBeingTransfered);
-//				} else {
-//					powerInventory_scrollCursorSlotTransfer(numberOfTurns, cursorStackAmount, slotStackAmount, itemBeingTransfered);
-//				}
-//			} else {
-//				if (Config.ScrollWheelConfig.scrollWheelBehavior) {
-//					powerInventory_scrollCursorSlotTransfer(numberOfTurns, cursorStackAmount, slotStackAmount, itemBeingTransfered);
-//				} else {
-//					powerInventory_scrollInventoryTransfer(numberOfTurns, cursorStackAmount, slotStackAmount, itemBeingTransfered);
-//				}
-//			}
 		}
 	}
 
-	@Unique private void powerInventory_scrollCursorSlotTransfer(float numTurns, int cursorAmount, int slotAmount, ItemStack transferItem) {
-		if (Config.INVENTORY_TWEAKS_CONFIG.MOUSE_TWEAKS_CONFIG.SCROLL_WHEEL_CONFIG.invertScrollCursorSlotDirection) {
-			numTurns *= -1;
-		}
-
-		if (0 > numTurns) {
-			/** - Transfer items to slot from cursor */
-			if (0 != cursorAmount) {
-				for (int turnIndex = 0; turnIndex < abs(numTurns); turnIndex++) {
-					if (slotAmount != transferItem.getMaxCount()) {
-						if (0 == (cursorAmount - 1)) {
-							minecraft.player.inventory.setCursorStack(null);
-						} else {
-							minecraft.player.inventory.setCursorStack(new ItemStack(transferItem.itemId, (cursorAmount - 1), transferItem.getDamage()));
-						}
-						slot.setStack(new ItemStack(transferItem.itemId, (slotAmount + 1), transferItem.getDamage()));
-					}
-				}
-			}
+	@Unique private void powerInventory_scrollCursorSlotTransfer(float turns, int cursorAmount, int slotAmount, ItemStack item) {
+		if (!QuickTransfers.writable(slot, item)) return;
+		if (Config.INVENTORY_TWEAKS_CONFIG.MOUSE_TWEAKS_CONFIG.SCROLL_WHEEL_CONFIG.invertScrollCursorSlotDirection) turns = -turns;
+		int steps = (int) Math.ceil(Math.abs(turns));
+		int amount;
+		if (turns < 0) {
+			amount = Math.min(steps, Math.min(cursorAmount, Math.max(0, Math.min(item.getMaxCount(), slot.getMaxItemCount()) - slotAmount)));
+			cursorAmount -= amount;
+			slotAmount += amount;
 		} else {
-			/** - Transfer items to cursor from slot */
-			if (0 != slotAmount) {
-				for (int turnIndex = 0; turnIndex < abs(numTurns); turnIndex++) {
-					if (cursorAmount != transferItem.getMaxCount()) {
-						if (0 == (slotAmount - 1)) {
-							slot.setStack(null);
-						} else {
-							slot.setStack(new ItemStack(transferItem.itemId, (slotAmount - 1), transferItem.getDamage()));
-						}
-						minecraft.player.inventory.setCursorStack(new ItemStack(transferItem.itemId, (cursorAmount + 1), transferItem.getDamage()));
-					}
-				}
-			}
+			amount = Math.min(steps, Math.min(slotAmount, Math.max(0, item.getMaxCount() - cursorAmount)));
+			cursorAmount += amount;
+			slotAmount -= amount;
 		}
+		if (amount <= 0) return;
+		ItemStack cursor = InventoryStacks.copy(item, cursorAmount);
+		ItemStack stored = InventoryStacks.copy(item, slotAmount);
+		slot.setStack(stored);
+		minecraft.player.inventory.setCursorStack(cursor);
 	}
-
-//	@Unique private void powerInventory_scrollInventoryTransfer(float numTurns, int cursorAmount, int slotAmount, ItemInstance transferItem) {
-//		int itemsLeftToAdd = 0;
-//
-//		if (Config.ScrollWheelConfig.invertScrollInventoryDirection) {
-//			numTurns *= -1;
-//		}
-//
-//		if (minecraft.player.container == minecraft.player.playerContainer) {
-//			System.out.println("Only one container exists");
-//		}
-//
-//		if (0 > numTurns) {
-//			/** - Transfer items out of slot */
-//			if (0 != slotAmount) {
-//				for (int containerIndex = 0; containerIndex < minecraft.player.container.slots.lastIndexOf(Slot) - 1; containerIndex++) {
-//					Slot curSlot = (Slot)minecraft.player.playerContainer.slots.get(containerIndex);
-////					ItemInstance curSlotItem = curSlot.getItem();
-////					int curSlotAmount = (null != curSlotItem) ? curSlotItem.count : 0;
-////
-////					if (  (null == curSlotItem)
-////					   || (  (curSlotItem.isDamageAndIDIdentical(transferItem))
-////					      && (curSlotAmount != transferItem.getMaxStackSize())
-////					      )
-////					) {
-////						while (  (itemsLeftToAdd < abs(numTurns))
-////						      && (curSlotAmount != transferItem.getMaxStackSize())
-////					    ) {
-////							if (0 == (slotAmount - 1)) {
-////								slot.setStack(null);
-////							} else {
-////								slot.setStack(new ItemInstance(transferItem.itemId, (slotAmount - 1), transferItem.getDamage()));
-////							}
-////
-////							curSlot.setStack(new ItemInstance(transferItem.itemId, (curSlotAmount + 1), transferItem.getDamage()));
-////
-////							curSlotItem = curSlot.getItem();
-////							curSlotAmount = (null != curSlotItem) ? curSlotItem.count : 0;
-////							itemsLeftToAdd++;
-////						}
-////
-////						if (itemsLeftToAdd == numTurns) {
-////							return;
-////						}
-////					}
-//				}
-//			}
-//		} else {
-//			/** - Transfer items into slot */
-//			boolean itemExistsInContainer = true;
-//			if (itemExistsInContainer) {
-////				for (int turnIndex = 0; turnIndex < abs(numTurns); turnIndex++) {
-////				}
-//				System.out.println("Scroll up");
-//				Slot slotToModify = (Slot)minecraft.player.container.slots.get(0);
-//
-//				slotToModify.setStack(new ItemInstance(transferItem.itemId, 7, transferItem.getDamage()));
-//			}
-//		}
-//	}
 
 	@Unique private boolean powerInventory_handleRightClick(int mouseX, int mouseY, Slot clickedSlot) {
+		if (clickedSlot != null && (clickedSlot.getClass() != Slot.class || !clickedSlot.canInsert(minecraft.player.inventory.getCursorStack()))) return false;
 		/** - Get held item */
 		ItemStack cursorStack = minecraft.player.inventory.getCursorStack();
 
@@ -770,7 +770,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 				if (null != clickedSlot.getStack()) {
 
 					/** - Let vanilla minecraft handle right click with an item onto a different item */
-					if ( !cursorStack.isItemEqual(clickedSlot.getStack()) ) {
+					if ( !InventoryStacks.same(cursorStack, clickedSlot.getStack()) ) {
 						return false;
 					}
 
@@ -781,7 +781,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 
 				/** - Begin Right-click + Drag */
 				if (cursorStack != null && rightClickPersistentStack == null && isRightClickDragStarted == false) {
-					rightClickPersistentStack = cursorStack;
+					rightClickPersistentStack = InventoryStacks.copy(cursorStack, cursorStack.count);
 					rightClickItemAmount = rightClickPersistentStack.count;
 					isRightClickDragStarted = true;
 				}
@@ -854,10 +854,10 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 				/** - Slots cannot return to normal on a server */
 				if (!isClientOnServer) {
 					/** - Return all slots to normal */
-					minecraft.player.inventory.setCursorStack(new ItemStack(rightClickPersistentStack.itemId, rightClickItemAmount, rightClickPersistentStack.getDamage()));
+					minecraft.player.inventory.setCursorStack(InventoryStacks.copy(rightClickPersistentStack, rightClickItemAmount));
 					for (int leftClickHoveredSlotsIndex = 0; leftClickHoveredSlotsIndex < rightClickHoveredSlots.size(); leftClickHoveredSlotsIndex++) {
 						if (0 != rightClickExistingAmount.get(leftClickHoveredSlotsIndex)) {
-							rightClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(new ItemStack(rightClickPersistentStack.itemId, rightClickExistingAmount.get(leftClickHoveredSlotsIndex), rightClickPersistentStack.getDamage()));
+							rightClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(InventoryStacks.copy(rightClickPersistentStack, rightClickExistingAmount.get(leftClickHoveredSlotsIndex)));
 						} else {
 							rightClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(null);
 						}
@@ -884,6 +884,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	}
 
 	@Unique private boolean powerInventory_handleLeftClickWithItem(ItemStack cursorStack, Slot clickedSlot, boolean isClientOnServer) {
+		if (clickedSlot != null && (clickedSlot.getClass() != Slot.class || !clickedSlot.canInsert(minecraft.player.inventory.getCursorStack()))) return false;
 		/** - Ensure a slot was clicked */
 		if (null != clickedSlot) {
 
@@ -897,21 +898,23 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 					}
 
 					/** - Let vanilla minecraft handle left click with an item onto a different item */
-					if ( !cursorStack.isItemEqual(clickedSlot.getStack()) ) {
+					if ( !InventoryStacks.same(cursorStack, clickedSlot.getStack()) ) {
 						return false;
 					}
 				}
 
-				leftClickAmountToFillPersistent.add(cursorStack.getMaxCount() - clickedSlot.getStack().count);
+				int capacity = Math.min(cursorStack.getMaxCount(), clickedSlot.getMaxItemCount()) - clickedSlot.getStack().count;
+				if (capacity <= 0) return true;
+				leftClickAmountToFillPersistent.add(capacity);
 				leftClickExistingAmount.add(clickedSlot.getStack().count);
 			} else {
-				leftClickAmountToFillPersistent.add(cursorStack.getMaxCount());
+				leftClickAmountToFillPersistent.add(Math.min(cursorStack.getMaxCount(), clickedSlot.getMaxItemCount()));
 				leftClickExistingAmount.add(0);
 			}
 
 			/** - Begin Left-click + Drag */
 			if (cursorStack != null && leftClickPersistentStack == null && isLeftClickDragStarted == false) {
-				leftClickPersistentStack = cursorStack;
+				leftClickPersistentStack = InventoryStacks.copy(cursorStack, cursorStack.count);
 				leftClickItemAmount = leftClickPersistentStack.count;
 				isLeftClickDragStarted = true;
 			}
@@ -955,6 +958,10 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 			lastLMBSlotId = clickedSlot.id;
 			lastLMBSlot = clickedSlot;
 			this.minecraft.interactionManager.clickSlot(this.container.syncId, clickedSlot.id, 0, isShiftKeyDown, this.minecraft.player);
+			ItemStack picked = minecraft.player.inventory.getCursorStack();
+			if (!isShiftKeyDown && picked != null && clickedSlot.getClass() == Slot.class)
+				powerInventory$gatherDouble.start(container, clickedSlot, picked, InventoryStacks.data(picked), MouseClickClock.now());
+
 
 			return true;
 		} else {
@@ -966,6 +973,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	}
 
 	@Unique private void powerInventory_handleLeftClickDragMouseTweaks() {
+		if (slot.getClass() != Slot.class) return;
 		if (slot.id != lastLMBSlotId) {
 			lastLMBSlotId = slot.id;
 
@@ -974,7 +982,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 			{
 				if (null != leftClickMouseTweaksPersistentStack)
 				{
-					if (slotItemToExamine.isItemEqual(leftClickMouseTweaksPersistentStack))
+					if (InventoryStacks.same(slotItemToExamine, leftClickMouseTweaksPersistentStack))
 					{
 						if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {
 							if (Config.INVENTORY_TWEAKS_CONFIG.MOUSE_TWEAKS_CONFIG.LMBTweakShiftClick)
@@ -997,8 +1005,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 										this.minecraft.interactionManager.clickSlot(this.container.syncId, slot.id, 0, false, this.minecraft.player);
 										this.minecraft.interactionManager.clickSlot(this.container.syncId, slot.id, 0, false, this.minecraft.player);
 									} else if (cursorStack.count == leftClickMouseTweaksPersistentStack.getMaxCount()) {
-										slot.setStack(new ItemStack(leftClickMouseTweaksPersistentStack.itemId, cursorStack.count, leftClickMouseTweaksPersistentStack.getDamage()));
-										minecraft.player.inventory.setCursorStack(new ItemStack(leftClickMouseTweaksPersistentStack.itemId, amountInSlot, leftClickMouseTweaksPersistentStack.getDamage()));
+										slot.setStack(InventoryStacks.copy(leftClickMouseTweaksPersistentStack, cursorStack.count));
+										minecraft.player.inventory.setCursorStack(InventoryStacks.copy(leftClickMouseTweaksPersistentStack, amountInSlot));
 									} else {
 										this.minecraft.interactionManager.clickSlot(this.container.syncId, slot.id, 0, false, this.minecraft.player);
 
@@ -1006,8 +1014,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 										cursorStack = minecraft.player.inventory.getCursorStack();
 										amountInSlot = slotItemToExamine.count;
 
-										slot.setStack(new ItemStack(leftClickMouseTweaksPersistentStack.itemId, cursorStack.count, leftClickMouseTweaksPersistentStack.getDamage()));
-										minecraft.player.inventory.setCursorStack(new ItemStack(leftClickMouseTweaksPersistentStack.itemId, amountInSlot, leftClickMouseTweaksPersistentStack.getDamage()));
+										slot.setStack(InventoryStacks.copy(leftClickMouseTweaksPersistentStack, cursorStack.count));
+										minecraft.player.inventory.setCursorStack(InventoryStacks.copy(leftClickMouseTweaksPersistentStack, amountInSlot));
 									}
 								}
 							}
@@ -1026,6 +1034,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 
 	@Unique private boolean powerInventory_handleLeftClickDrag()
 	{
+		if (!QuickTransfers.writable(slot, leftClickPersistentStack)) return true;
 		/** - Do nothing if slot has already been added to Left-click + Drag logic */
 		if (!leftClickHoveredSlots.contains(slot)) {
 			ItemStack slotItemToExamine = slot.getStack();
@@ -1040,9 +1049,10 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 					return true;
 				}
 
-				if (!slotItemToExamine.isItemEqual(leftClickPersistentStack)) {
+				if (!InventoryStacks.same(slotItemToExamine, leftClickPersistentStack)) {
 					return true;
 				}
+				if (slotItemToExamine.count >= Math.min(leftClickPersistentStack.getMaxCount(), slot.getMaxItemCount())) return true;
 			}
 
 			/** - Do nothing if there are no more items to distribute */
@@ -1063,12 +1073,12 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 
 				/** - Record how many items are in the slot and how many items are needed to fill the slot */
 				if (null != slotItemToExamine) {
-					leftClickAmountToFillPersistent.add(leftClickPersistentStack.getMaxCount() - slotItemToExamine.count);
+					leftClickAmountToFillPersistent.add(Math.min(leftClickPersistentStack.getMaxCount(), slot.getMaxItemCount()) - slotItemToExamine.count);
 					leftClickExistingAmount.add(slotItemToExamine.count);
 				}
 				else
 				{
-					leftClickAmountToFillPersistent.add(leftClickPersistentStack.getMaxCount());
+					leftClickAmountToFillPersistent.add(Math.min(leftClickPersistentStack.getMaxCount(), slot.getMaxItemCount()));
 					leftClickExistingAmount.add(0);
 				}
 
@@ -1076,11 +1086,11 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 				List<Integer> leftClickAmountToFill = new ArrayList<>();
 				if (!isClientOnServer) {
 					/** - Return all slots to normal */
-					minecraft.player.inventory.setCursorStack(new ItemStack(leftClickPersistentStack.itemId, leftClickItemAmount, leftClickPersistentStack.getDamage()));
+					minecraft.player.inventory.setCursorStack(InventoryStacks.copy(leftClickPersistentStack, leftClickItemAmount));
 					for (int leftClickHoveredSlotsIndex = 0; leftClickHoveredSlotsIndex < leftClickHoveredSlots.size(); leftClickHoveredSlotsIndex++) {
 						leftClickAmountToFill.add(leftClickAmountToFillPersistent.get(leftClickHoveredSlotsIndex));
 						if (0 != leftClickExistingAmount.get(leftClickHoveredSlotsIndex)) {
-							leftClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(new ItemStack(leftClickPersistentStack.itemId, leftClickExistingAmount.get(leftClickHoveredSlotsIndex), leftClickPersistentStack.getDamage()));
+							leftClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(InventoryStacks.copy(leftClickPersistentStack, leftClickExistingAmount.get(leftClickHoveredSlotsIndex)));
 						} else {
 							leftClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(null);
 						}
@@ -1164,10 +1174,10 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 				/** - Check if client is running on a server or not */
 				if (!isClientOnServer) {
 					/** - Return all slots to normal */
-					minecraft.player.inventory.setCursorStack(new ItemStack(leftClickPersistentStack.itemId, leftClickItemAmount, leftClickPersistentStack.getDamage()));
+					minecraft.player.inventory.setCursorStack(InventoryStacks.copy(leftClickPersistentStack, leftClickItemAmount));
 					for (int leftClickHoveredSlotsIndex = 0; leftClickHoveredSlotsIndex < leftClickHoveredSlots.size(); leftClickHoveredSlotsIndex++) {
 						if (0 != leftClickExistingAmount.get(leftClickHoveredSlotsIndex)) {
-							leftClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(new ItemStack(leftClickPersistentStack.itemId, leftClickExistingAmount.get(leftClickHoveredSlotsIndex), leftClickPersistentStack.getDamage()));
+							leftClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(InventoryStacks.copy(leftClickPersistentStack, leftClickExistingAmount.get(leftClickHoveredSlotsIndex)));
 						} else {
 							leftClickHoveredSlots.get(leftClickHoveredSlotsIndex).setStack(null);
 						}
@@ -1211,34 +1221,12 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 		isLeftClickDragMouseTweaksStarted = false;
 	}
 
-	@Unique
-	private boolean drawingHoveredSlot;
-
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;isPointOverSlot(Lnet/minecraft/screen/slot/Slot;II)Z"))
-	private boolean powerInventory_isMouseOverSlot(HandledScreen guiContainer, Slot slot, int x, int y) {
-		if (Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.EnableDragGraphics) {
-			return (  (drawingHoveredSlot = rightClickHoveredSlots.contains(slot))
-				   || (drawingHoveredSlot = leftClickHoveredSlots.contains(slot))
-				   || isPointOverSlot(slot, x, y)
-				   );
-		} else {
-			return isPointOverSlot(slot, x, y);
-		}
-	}
-
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;fillGradient(IIIIII)V", ordinal = 0))
-	private void powerInventory_fillGradient(HandledScreen instance, int startX, int startY, int endX, int endY, int colorStart, int colorEnd) {
-		if (Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.EnableDragGraphics) {
-			if (colorStart != colorEnd) throw new AssertionError();
-			int color = drawingHoveredSlot ? 0x20ffffff : colorStart;
-			this.fillGradient(startX, startY, endX, endY, color, color);
-		} else {
-			this.fillGradient(startX, startY, endX, endY, colorStart, colorEnd);
-		}
-	}
-
 	@Inject(method = "keyPressed", at = @At("RETURN"))
 	private void powerInventory_keyPressed(char character, int keyCode, CallbackInfo ci) {
+		// Beta dispatches the mouse batch before queued keyboard events. The Shift press
+		// may therefore arrive here after the matching first click has already started.
+		if (keyCode != Keyboard.KEY_LSHIFT && keyCode != Keyboard.KEY_RSHIFT) powerInventory$shiftDouble.clear();
+		powerInventory$gatherDouble.clear();
 		if (this.slot == null) {
 			return;
 		}

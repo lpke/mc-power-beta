@@ -26,7 +26,6 @@
     "hooks.TranslationStorageMixin",
     "tweaks.autosaveinterval.WorldMixin",
     "tweaks.bedtweaks.BedBlockMixin",
-    "tweaks.bedtweaks.class_567Mixin",
     "tweaks.bedtweaks.PlayerEntityAccessor",
     "tweaks.betterburning.ArrowEntityMixin",
     "tweaks.betterburning.PlayerEntityMixin",

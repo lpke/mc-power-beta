@@ -22,6 +22,7 @@ public final class KeyConfig {
       JsonObject json = PowerConfig.section("bindings");
       Map<String,Integer> values = new HashMap<>();
       for (var entry : json.entrySet()) values.put(entry.getKey(), entry.getValue().getAsBigDecimal().intValueExact());
+      if (!PowerConfig.section("native").has("key_powerbeta.debugGraph")) values.putIfAbsent("powerbeta.debugGraph", Chord.CTRL);
       Bindings.configure(values);
     } catch (Exception e) {
       PowerBeta.LOG.error("Could not load modifier bindings; preserving file and using plain keys", e);

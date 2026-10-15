@@ -5,7 +5,6 @@ import static local.luke.power.validation.UiChecks.*;
 import java.nio.file.*;
 import local.luke.power.config.*;
 import local.luke.power.light.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.visual.*;
 import local.luke.power.worldedit.*;
 import local.luke.power.worldedit.core.*;
@@ -52,7 +51,7 @@ final class Release150Gallery {
       var renderer=type.getConstructor(Minecraft.class,java.io.File.class).newInstance(mc,Path.of(".").toFile());
       type.getMethod("doRender").invoke(renderer);return;
     }
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
     mc.setScreen(null);mc.options.hideHud=false;mc.options.thirdPerson=false;
     var visuals=VisualConfig.copy();visuals.hideEntities=false;visuals.spectatorFullBright=false;visuals.fullBrightMessages=visuals.entityRenderingMessages=false;visuals.redstonePowerLevels=false;VisualConfig.preview(visuals);
     var light=LightConfig.copy();light.enabled=false;LightConfig.preview(light);

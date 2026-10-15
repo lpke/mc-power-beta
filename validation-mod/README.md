@@ -8,6 +8,17 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `world-rules`, `rule-behavior`, `creation-rules` and `quick-transfer`: rule storage,
+  permissions, native gameplay, searchable creation drafts and item/NBT interactions.
+  Run after `new-world`. `rules-restart prepare`, restart the clone, then
+  `rules-restart verify` checks all rules, difficulty, modes, dimensions, presets
+  and crafting inputs with native item data and full counts.
+- `compatibility-defaults`: crafting-input persistence and legacy reads, live
+  door/sign stack limits, and vanilla-server overrides without changing preferences.
+- `python3 validation-mod/tools/quick_transfer.py GAME_DIR --display :98` checks
+  real Shift-double-click gestures with native/raw input, both release orders,
+  cancellation and matching-item conservation. Use the isolated muted Xvfb clone.
+
 - `water-terrain`: inspect GPU colour endpoints, 1000 crossings without queued builds or
   uploads, slider preview/Cancel, shader uniforms, night/roofs and native terrain edits,
   including torch-lit deep water at dawn and roof changes below native light's reach.
@@ -98,11 +109,11 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   preserve live and draft selections, retain queue requests, restore view state and
   share row geometry across narrow and wide layouts.
 
-- `world-settings-check`: difficulty transactions, scope notes, hidden cheat rows/tabs,
+- `world-settings-check`: difficulty transactions, scope notes, permission-gated rows/tabs,
   command exemptions, input priority and Peaceful behaviour. Run after `new-world`.
   `world-settings-create` creates four disposable saves through the real creation UI,
-  checking the initial Creative/Survival mode against the cheats choice, resize, save/reload
-  and isolation from the previous world's mode or later cheats edits.
+  checking the initial Creative/Survival mode against the rules preset, resize, save/reload
+  and isolation from the previous world's mode or later rule edits.
   `world-settings-reload` checks those saves across switching, dimensions and restarts.
 - `cleanup`: current config, world-cycle persistence, simulation and scheduled
   updates, sleep combinations, sign editing, spectator exits, item validation and

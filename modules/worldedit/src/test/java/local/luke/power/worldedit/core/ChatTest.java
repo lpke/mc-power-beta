@@ -6,6 +6,10 @@ import local.luke.power.worldedit.chat.*;
 import org.junit.jupiter.api.Test;
 
 class ChatTest {
+  @org.junit.jupiter.api.BeforeEach void allowCommands() {
+    local.luke.power.permissions.CommandPermissions.context(() -> new local.luke.power.permissions.CommandPermissions.Context("test", false, local.luke.power.rules.RuleSet.cheats()));
+  }
+
   @Test
   void completionCyclesInBothDirectionsAndResetsAfterEditing() {
     var cycle = new CompletionCycle();

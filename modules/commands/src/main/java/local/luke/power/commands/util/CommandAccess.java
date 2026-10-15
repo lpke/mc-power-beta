@@ -38,8 +38,8 @@ public final class CommandAccess {
           "ban-ip", "pardon-ip", "op", "deop", "stop", "list", "say", "whitelist", "save-all", "save-on", "save-off", "give", "time", "tp")
           .contains(command.name())) return false;
     }
-    // Returning to survival remains available when cheats are off.
+    // Mixed commands retain their safe subcommands.
     return CommandPermissions.canonical(command.name()).equals("gamemode")
-        || CommandPermissions.allowed(command.name());
+        || CommandPermissions.available(command.name());
   }
 }

@@ -10,12 +10,10 @@ class SettingScopeTest {
     return new Setting(id, backend, "General", "Test", id, "Adjust the value.", Setting.Kind.INTEGER,
         new JsonPrimitive(1), new JsonPrimitive(1), 0, 4, 1, List.of(), true);
   }
-  @Test void scopeFollowsPersistenceIncludingCommandOverrides() {
-    for (String id : List.of("world.difficulty", "world.cheats", "world.daylightCycle", "world.weatherCycle", "world.keepInventory", "worldedit.worldOverride"))
+  @Test void scopeFollowsExplicitRulesAndGlobalPreferences() {
+    for (String id : List.of("world.difficulty", "rules.world.advance_time", "rules.world.keep_inventory"))
       assertTrue(SettingScope.perWorld(setting(id, "world")), id);
-    for (String id : List.of("commands.world.help", "commands.worldMode.creative"))
-      assertTrue(SettingScope.perWorld(setting(id, "commandAccess")), id);
-    for (String id : List.of("commands.rule.help", "commands.mode.creative", "audio.preset", "worldedit.enabled", "tweaks.autoWalk"))
+    for (String id : List.of("rules.survival.fire_spread", "rules.cheats.fire_spread", "audio.preset", "worldedit.maxBlocks", "tweaks.autoWalkCancelOnLostFocus"))
       assertFalse(SettingScope.perWorld(setting(id, "test")), id);
   }
   @Test void rangeScopeAndNoticesAreSeparateParagraphs() {
@@ -30,9 +28,6 @@ class SettingScopeTest {
     var world = setting("world.difficulty", "world");
     assertTrue(world.label.endsWith(" (this world)"));
     assertTrue(Tooltips.setting(world, "").contains("Saved separately for each singleplayer world."));
-    assertEquals("/give", SettingScope.label("commands.world.give", "commandAccess", "Cheat commands in this world", "/give"));
-    assertEquals("This world", SettingScope.label("worldedit.worldOverride", "world", "Access", "This world"));
-    assertEquals("Daylight cycle", SettingScope.label("world.daylightCycle", "world", "World overrides", "Daylight cycle"));
-    assertEquals("Cheats enabled (this world)", SettingScope.label("world.cheats", "world", "Game", "Cheats enabled"));
+    assertEquals("Daylight cycle", SettingScope.label("rules.world.advance_time", "world", "Time and weather", "Daylight cycle"));
   }
 }

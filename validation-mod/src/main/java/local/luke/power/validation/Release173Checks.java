@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import local.luke.power.config.SettingsRegistry;
 import local.luke.power.input.Bindings;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.render.RenderControls;
 import local.luke.power.visual.VisualConfig;
 import net.minecraft.class_556;
@@ -28,12 +27,12 @@ public final class Release173Checks {
     if (action.equals("editors")) { Draft173Checks.run(mc); return; }
     failures=0;mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);
     FreecamPreviewChecks.active(false);
-    var cheats=(CheatWorld)mc.world.method_262();boolean hadCheats=cheats.power$cheatsEnabled();
+    var cheats=AccessRules.of(mc.world.method_262());boolean hadCheats=cheats.allAllowed();
     String mode=mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     var session=SettingsRegistry.open(mc);
     double px=mc.player.x,py=mc.player.y,pz=mc.player.z;
     try {
-      cheats.power$cheatsEnabled(true);
+      cheats.allAllowed(true);
       if(action.equals("water")) water(mc);
       else if(action.equals("overlay")) {
         CreativeVehicleChecks.mode(mc,"SURVIVAL");RenderControls.reset(mc);
@@ -80,7 +79,7 @@ public final class Release173Checks {
       } else if(action.equals("tooltip")) tooltip(mc);
     } finally {
       capture=false;splashEntity=null;mc.setScreen(null);session.discard();
-      CreativeVehicleChecks.mode(mc,mode);cheats.power$cheatsEnabled(hadCheats);mc.player.method_1340(px,py,pz);
+      CreativeVehicleChecks.mode(mc,mode);cheats.allAllowed(hadCheats);mc.player.method_1340(px,py,pz);
     }
     log("RELEASE 173 "+action.toUpperCase()+" FAILURES "+failures);
   }

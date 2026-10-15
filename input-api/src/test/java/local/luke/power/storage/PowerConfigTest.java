@@ -30,6 +30,29 @@ class PowerConfigTest {
     assertThrows(IllegalStateException.class,()->PowerConfig.put("test",new JsonObject()));
     assertEquals("broken",Files.readString(PowerConfig.path()));
   }
+  @Test void conversionBacksUpExactBytesAndDoesNotReimportAfterRestart() throws Exception {
+    String original = "{\"schemaVersion\":3,\"settings\":{\"gameplay\":{\"fireSpread\":false,\"mergeItems\":true},\"commandAccess\":{\"enabled\":false}}}";
+    Files.writeString(PowerConfig.path(), original);
+    JsonObject converted = PowerConfig.document();
+    assertEquals(4, converted.get("schemaVersion").getAsInt());
+    assertFalse(converted.getAsJsonObject("settings").has("commandAccess"));
+    assertFalse(PowerConfig.section("gameplay").has("fireSpread"));
+    assertTrue(PowerConfig.section("gameplay").get("mergeItems").getAsBoolean());
+    assertFalse(converted.getAsJsonObject("legacyWorldRules").getAsJsonObject("gameplay").get("fireSpread").getAsBoolean());
+    try (var backups = Files.list(dir.resolve("backups"))) {
+      assertTrue(backups.anyMatch(p -> { try { return Files.readString(p).equals(original); } catch (Exception e) { return false; } }));
+    }
+    assertEquals(converted, PowerConfig.document());
+    assertEquals(converted, JsonParser.parseString(Files.readString(PowerConfig.path())).getAsJsonObject());
+  }
+  @Test void futureFormatsBlockEveryWriterAndPreserveExactBytes() throws Exception {
+    String original = "{\"schemaVersion\":99,\"settings\":{}}";
+    Files.writeString(PowerConfig.path(), original);
+    JsonObject fresh = JsonParser.parseString("{\"schemaVersion\":4,\"settings\":{}}").getAsJsonObject();
+    assertThrows(IllegalStateException.class, () -> PowerConfig.write(fresh));
+    assertThrows(IllegalStateException.class, () -> PowerConfig.put("test", new JsonObject()));
+    assertEquals(original, Files.readString(PowerConfig.path()));
+  }
   @Test void rejectsLinksWithoutTouchingTheirTargets() throws Exception {
     Path target=dir.resolve("keep");Files.writeString(target,"keep");
     Files.createSymbolicLink(PowerConfig.path(),target);

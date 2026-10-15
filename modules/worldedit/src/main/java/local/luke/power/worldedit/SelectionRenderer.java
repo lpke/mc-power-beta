@@ -13,7 +13,7 @@ public final class SelectionRenderer {
     if (!s.showSelection
         || e == null
         || e.pos1 == null && e.pos2 == null
-        || !WorldEditor.available(mc)) return;
+        || !WorldEditor.localPlayer(mc)) return;
     var player = mc.field_2807;
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     GL11.glPushMatrix();

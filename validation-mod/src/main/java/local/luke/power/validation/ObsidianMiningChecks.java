@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import local.luke.power.building.config.Config;
 import local.luke.power.config.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.storage.PowerConfig;
 import net.minecraft.SingleplayerInteractionManager;
 import net.minecraft.block.Block;
@@ -28,25 +27,27 @@ final class ObsidianMiningChecks {
     var inventory = mc.player.inventory.main.clone();
     int selected = mc.player.inventory.selectedSlot;
     boolean grounded = mc.player.field_1623;
-    var cheats = (CheatWorld) mc.world.method_262();
-    boolean hadCheats = cheats.power$cheatsEnabled();
+    String mode = Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player).toString();
+    var cheats = AccessRules.of(mc.world.method_262());
+    boolean hadCheats = cheats.allAllowed();
     var manager = mc.interactionManager;
     double x = mc.player.x, y = mc.player.y, z = mc.player.z;
     try {
       mc.setScreen(null);
+      CreativeVehicleChecks.mode(mc,"SURVIVAL");
       mc.player.method_1340(.5, 104, .5);
       mc.player.field_1623 = true;
       mc.player.inventory.selectedSlot = 0;
       mc.player.inventory.main[0] = new ItemStack(278, 1, 0);
-      cheats.power$cheatsEnabled(false);
+      cheats.allAllowed(false);
       speed(0);
       float vanilla = progress(mc, Block.field_1890);
       log("OBSIDIAN VANILLA PROGRESS " + vanilla);
-      test("slider is global, defaults off, and remains available without cheats", () -> {
+      test("slider is global, defaults to 60, and remains available without permissions", () -> {
         var session = SettingsRegistry.open(mc);
         var setting = find(session, ID);
         check(setting.slider() && setting.min == 0 && setting.max == 100, "slider range");
-        check(setting.defaultValue.getAsInt() == 0 && setting.display().equals("Off (vanilla)"), "off default/label");
+        check(setting.defaultValue.getAsInt() == 60 && setting.display().equals("Off (vanilla)"), "off default/label");
         check(setting.page.equals("Building") && setting.group.equals("Mining"), "placement");
         check(SettingAccess.visible(session, setting) && !SettingScope.perWorld(setting), "scope/access");
         setting.slide(1); check(setting.value.getAsInt() == 100, "slider maximum");
@@ -133,7 +134,8 @@ final class ObsidianMiningChecks {
       mc.player.inventory.selectedSlot = selected;
       mc.player.method_1340(x, y, z);
       mc.player.field_1623 = grounded;
-      cheats.power$cheatsEnabled(hadCheats);
+      cheats.allAllowed(hadCheats);
+      CreativeVehicleChecks.mode(mc, mode);
       PowerConfig.write(document);
       Config.preview(saved);
     }

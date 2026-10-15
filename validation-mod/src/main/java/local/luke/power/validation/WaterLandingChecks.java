@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.nio.file.*;
 import java.util.Arrays;
 import local.luke.power.config.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.storage.PowerConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -28,18 +27,18 @@ final class WaterLandingChecks {
     }
     failures = 0;
     mc.setScreen(null); mc.player.closeScreen();
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc, "SURVIVAL");
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(false);
+    (AccessRules.of(mc.world.method_262())).allAllowed(false);
     mc.field_2807 = mc.player;
     for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) {
       mc.world.method_200(x, FLOOR, z, 1);
       for (int y = FLOOR + 1; y <= 125; y++) mc.world.method_200(x, y, z, 0);
     }
-    test("default off, Gameplay / Fall damage, available without cheats; Cancel restores preview", () -> {
+    test("default on, Gameplay / Fall damage, independent of access permissions; Cancel restores preview", () -> {
       configure(false);
       var session = SettingsRegistry.open(mc); var row = find(session, ID);
-      check(!row.defaultValue.getAsBoolean() && !row.restart && row.page.equals("Gameplay")
+      check(row.defaultValue.getAsBoolean() && !row.restart && row.page.equals("Gameplay")
           && row.group.equals("Fall damage") && SettingAccess.visible(session, row), "wrong settings metadata/access");
       byte[] before = Files.readAllBytes(PowerConfig.path()); int health = mc.player.health;
       row.parse("true"); session.preview(true); check(enabled(), "live preview missing");

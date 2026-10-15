@@ -9,10 +9,27 @@ Chat supports clicking and dragging to select text, **Shift+arrows**, **Home/End
 **Ctrl+A**, **Ctrl+C**, **Ctrl+X** and **Ctrl+V**. Ctrl+arrows move by words.
 Text stays within Beta's 100-character chat limit.
 
+## Game rules and permissions
+
+`/gamerule` lists the current world's rules. `/gamerule fire_spread` reads one;
+`/gamerule fire_spread false` changes it. Familiar aliases such as `doFireTick`
+refer to the same value. Use `/gamerule help` or the searchable Game rules tab
+for descriptions. Rule changes save with the world and affect every dimension.
+
+The local owner can always edit rules. Separate permission rules control game
+modes, item spawning, world editing, entity control, survival assistance, travel,
+spawn editing, time, weather and death recovery. `/help`, completion and command
+execution use the same permissions. Read-only tools such as `/time query`, warp
+listing and count-only `/clear` remain available.
+
+`/repair` fully repairs the held damageable item without changing its custom data
+or count. It requires `allow_survival_assistance`, alongside `/heal` and `/god`.
+Use `/repair help` for instructions without changing the item.
+
 ## World spawn
 
 `/spawn` returns to the Overworld's world spawn, including from the Nether.
-It requires cheats and leaves your bed spawn unchanged. Use `/spawn help` for
+It requires `allow_teleportation` and leaves your bed spawn unchanged. Use `/spawn help` for
 its instructions; `/help` lists available commands.
 
 ## Selection size
@@ -55,7 +72,7 @@ The syntax follows [WorldEdit block states](https://worldedit.enginehub.org/en/l
 
 ## Calculator
 
-`//calc` evaluates arithmetic without changing the world or requiring cheats.
+`//calc` evaluates arithmetic without changing the world or requiring editing permission.
 It supports `+`, `-`, `*`, `/`, `%`, `^`, parentheses, `pi`, `e` and common functions
 such as `sqrt`, `abs`, `min`, `max`, `floor`, `ceil`, `round`, `sin`, `cos` and `tan`.
 Angles use radians. For example, `//calc 64 * 27` returns `1728`.

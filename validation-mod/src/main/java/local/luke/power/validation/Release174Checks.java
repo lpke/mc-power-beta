@@ -8,7 +8,6 @@ import local.luke.power.config.Catalog;
 import local.luke.power.config.SettingsRegistry;
 import local.luke.power.input.Bindings;
 import local.luke.power.input.Chord;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.visual.VisualConfig;
 import net.minecraft.client.Minecraft;
 
@@ -44,14 +43,13 @@ public final class Release174Checks {
     if (!action.startsWith("keys ")) throw new IllegalArgumentException(action);
     String kind=action.substring(5);
     capture=false;mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);FreecamPreviewChecks.active(false);
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(!kind.equals("no-cheats"));
+    (AccessRules.of(mc.world.method_262())).allAllowed(!kind.equals("no-cheats"));
     var session=SettingsRegistry.open(mc);
-    find(session,"creative.modePicker").parse(Boolean.toString(!kind.equals("disabled")));
     find(session,"power_controls:general.pauseOnLostFocus").parse("false");session.preview(true);
     for (var key:mc.options.allKeys) switch(key.translationKey) {
       case "key.power_controls.debug_hud" -> key.code=kind.equals("debug-remap")?64:61;
       case "power_creative.modifier" -> key.code=kind.equals("modifier-remap")?64:61;
-      case "power_creative.picker" -> key.code=kind.equals("cycle-remap")?64:62;
+      case "power_creative.picker" -> key.code=kind.equals("disabled")?0:kind.equals("cycle-remap")?64:62;
       default -> {}
     }
     Bindings.configure(kind.equals("chord")?Map.of("key.power_controls.debug_hud",Chord.CTRL):Map.of());

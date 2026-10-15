@@ -55,37 +55,6 @@ public abstract class WorldMixin {
     @Unique private int highestBlockYLocation = 0;
     @Unique private BoatEntity skipObject;
 
-    @Inject(
-            method = "canSkipNight",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    public void powerEnvironment_canSkipNight(CallbackInfoReturnable<Boolean> cir) {
-        if (1.0f > Config.config.SLEEP_CONFIG.asleepPlayerPercentageForSkippingNight) {
-            if (this.allPlayersSleeping && !this.isRemote) {
-                int playersFullySleepingCount = 0;
-
-                for (Object var2 : this.players) {
-                    if (((PlayerEntity)var2).isFullyAsleep()) {
-                        playersFullySleepingCount++;
-                    }
-                }
-
-                if (  ( null != this.players )
-                   && ( !this.players.isEmpty() )
-                   && ( 0 < playersFullySleepingCount )
-                   && ( ((float) playersFullySleepingCount / this.players.size()) >= Config.config.SLEEP_CONFIG.asleepPlayerPercentageForSkippingNight )
-                ) {
-                    cir.setReturnValue(true);
-                } else {
-                    cir.setReturnValue(false);
-                }
-            } else {
-                cir.setReturnValue(false);
-            }
-        }
-    }
-
     @WrapOperation(
             method = "tick",
             at = @At(
@@ -94,6 +63,7 @@ public abstract class WorldMixin {
             )
     )
     public boolean powerEnvironment_tickCanSkipNight(World instance, Operation<Boolean> original) {
+        if (this.isRemote) return original.call(instance);
         boolean skippingNight;
         var cycles = (local.luke.power.world.WorldCycles) this.properties;
         if (!this.isRemote && cycles.power$daylightFrozen()) {
@@ -143,35 +113,6 @@ public abstract class WorldMixin {
             return false;
         } else {
             return original.call(instance);
-        }
-    }
-
-    @Inject(
-            method = "updateSleepingPlayers",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    protected void powerEnvironment_updateSleepingPlayers(CallbackInfo ci) {
-        if (1.0f > Config.config.SLEEP_CONFIG.asleepPlayerPercentageForSkippingNight) {
-            int playersSleepingCount = 0;
-
-            for (Object var2 : this.players) {
-                if (((PlayerEntity)var2).isSleeping()) {
-                    playersSleepingCount++;
-                }
-            }
-
-            if (  ( null != this.players )
-               && ( !this.players.isEmpty() )
-               && ( 0 < playersSleepingCount )
-               && ( ((float) playersSleepingCount / this.players.size()) >= Config.config.SLEEP_CONFIG.asleepPlayerPercentageForSkippingNight)
-            ) {
-                this.allPlayersSleeping = true;
-            } else {
-                this.allPlayersSleeping = false;
-            }
-
-            ci.cancel();
         }
     }
 

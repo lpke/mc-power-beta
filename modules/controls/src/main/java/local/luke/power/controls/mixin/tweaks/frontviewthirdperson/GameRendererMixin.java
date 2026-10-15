@@ -74,6 +74,6 @@ public class GameRendererMixin {
             return original.call(instance, start, end);
         }
         
-        return instance.raycast(start, isFrontViewEnabled() ? flipYAroundArbitraryY(end, Minecraft.INSTANCE.camera.y) : end);
+        return original.call(instance, start, isFrontViewEnabled() ? flipYAroundArbitraryY(end, client.camera.y) : end);
     }
 }

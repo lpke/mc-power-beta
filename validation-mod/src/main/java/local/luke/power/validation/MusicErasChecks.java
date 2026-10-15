@@ -7,7 +7,6 @@ import local.luke.power.audio.*;
 import local.luke.power.config.*;
 import local.luke.power.mixin.SoundManagerAccessor;
 import local.luke.power.ui.*;
-import local.luke.power.permissions.CheatWorld;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
@@ -123,7 +122,7 @@ public final class MusicErasChecks {
       }
       case "portal-survival", "portal-creative", "portal-spectator" -> {
         String mode=action.substring(7);
-        ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+        (AccessRules.of(mc.world.method_262())).allAllowed(true);
         ChatChecks.submit(mc,"/gamemode "+mode);
         Object actual=Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player);
         check(actual.toString().equalsIgnoreCase(mode),"mode not changed");

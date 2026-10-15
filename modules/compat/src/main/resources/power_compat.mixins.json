@@ -3,7 +3,6 @@
   "minVersion": "0.8",
   "package": "local.luke.power.compat.mixin",
   "compatibilityLevel": "JAVA_8",
-  "plugin": "local.luke.power.compat.CompatibilityFeaturesMixinPlugin",
   "mixins": [
     "disablecoloredsheep.SheepEntityMixin",
     "keepplayercraftinggrid.PlayerBaseMixin",
@@ -13,8 +12,6 @@
     "stackablebuckets.BucketItemMixin",
     "stackablebuckets.CowEntityMixin",
     "modernplantreplacement.BlockItemMixin",
-    "modernslabplacement.SlabBlockMixin",
-    "modernslabplacement.SlabBlockItemMixin",
     "pigmushrooms.PigEntityMixin",
     "shoveleffectivity.ShovelItemMixin",
     "vehicleloginlogoutfix.PlayerBaseMixin",

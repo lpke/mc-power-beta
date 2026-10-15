@@ -11,7 +11,7 @@ import java.util.Map;
 public class FurnaceRecipeListener {
     @EventListener
     public void registerRecipes(RecipeRegisterEvent event) {
-        if (ControlFeatures.RECIPES_CONFIG.enableRecipes && ControlFeatures.RECIPES_CONFIG.furnaceFuels) {
+        if (ControlFeatures.RECIPES_CONFIG.furnaceFuels) {
             RecipeRegisterEvent.Vanilla type = RecipeRegisterEvent.Vanilla.fromType(event.recipeId);
 
             if (type == RecipeRegisterEvent.Vanilla.SMELTING) {

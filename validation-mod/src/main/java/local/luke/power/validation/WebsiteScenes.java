@@ -36,7 +36,7 @@ final class WebsiteScenes {
         for(int i=0;i<18;i++)inventory.setStack(i,new ItemStack(side<0?new int[]{1,5,4,20,50,17}[i%6]:new int[]{264,265,266,331,260,345}[i%6],i%6==5?1:32,0));
       }
       setting(mc,"keys.powerbeta.containerPreview","34");setting(mc,"keys.power_building.hotbar.base","0");
-      setting(mc,"tweaks.freeLook","false");setting(mc,"native.guiScale","3");camera(mc,.5,2.2,-3,0,20);return;
+      setting(mc,"native.guiScale","3");camera(mc,.5,2.2,-3,0,20);return;
     }
     if(action.equals("preview-left")||action.equals("preview-right")) {
       aim(mc,.5,2.2,-3,action.endsWith("left")?-1.5:2.5,.5,.5);return;
@@ -80,7 +80,7 @@ final class WebsiteScenes {
     }
     if(action.equals("forest")) {forest(mc);return;}
     WebsiteGallery.run(mc,"building");
-    local.luke.power.building.camera.FreeLook.reset(mc);setting(mc,"tweaks.freeLook","false");
+    local.luke.power.building.camera.FreeLook.reset(mc);
     setting(mc,"native.guiScale","3");
     setting(mc,"tweaks.placement.enabled","false");setting(mc,"tweaks.flexible.enabled","false");
     setting(mc,"tweaks.sneak.enabled","false");
@@ -101,7 +101,7 @@ final class WebsiteScenes {
         aim(mc,.5,1.62,-2.0,.5,.55,0);break;
       }
       case "hotbar" -> {
-        var s=local.luke.power.building.config.Config.current().copy();s.hotbar.swap=s.hotbar.overlay=true;
+        var s=local.luke.power.building.config.Config.current().copy();s.hotbar.overlay=true;
         s.hotbar.alignment=local.luke.power.building.hotbar.HotbarSettings.Alignment.CENTER;
         local.luke.power.building.config.Config.preview(s);
         setting(mc,"keys.power_building.hotbar.base","34");setting(mc,"keys.powerbeta.containerPreview","0");
@@ -157,7 +157,7 @@ final class WebsiteScenes {
           if(dx<=-2)block(mc,dx,5,dz,5,0);
         }
         setting(mc,"creative.blockReach","10");setting(mc,"tweaks.placement.enabled","true");setting(mc,"tweaks.placement.attemptsPerTick","1");
-        setting(mc,"tweaks.freeLook","true");setting(mc,"tweaks.freeLookToggle","false");setting(mc,"keys.key.powerbeta.free_look","34");
+        setting(mc,"tweaks.freeLookToggle","false");setting(mc,"keys.key.powerbeta.free_look","34");
         mc.options.thirdPerson=true;
         var s=local.luke.power.building.config.Config.current().copy();s.freeLookFollowThirdPerson=true;s.placement.restrictionEnabled=true;s.placement.restrictionMode=local.luke.power.fastplace.RestrictionMode.LAYER;local.luke.power.building.config.Config.preview(s);
         mc.player.inventory.main[0]=new ItemStack(5,64,0);mc.player.inventory.selectedSlot=0;
@@ -200,7 +200,7 @@ final class WebsiteScenes {
       for(int dy=0;dy<6;dy++)block(mc,dx,dy,dz,17,0);
       for(int ax=-2;ax<=2;ax++)for(int az=-2;az<=2;az++)for(int dy=4;dy<=7;dy++)if(Math.abs(ax)+Math.abs(az)<4)block(mc,dx+ax,dy,dz+az,18,4);
     }
-    setting(mc,"tweaks.freeLook","true");setting(mc,"tweaks.freeLookToggle","false");setting(mc,"keys.key.powerbeta.free_look","34");
+    setting(mc,"tweaks.freeLookToggle","false");setting(mc,"keys.key.powerbeta.free_look","34");
     setting(mc,"keys.power_building.hotbar.base","0");setting(mc,"keys.powerbeta.containerPreview","0");
     var settings=local.luke.power.building.config.Config.current().copy();settings.freeLookFollowThirdPerson=true;local.luke.power.building.config.Config.preview(settings);
     CreativeVehicleChecks.mode(mc,"SURVIVAL");camera(mc,.5,1.62,-3,0,0);mc.options.thirdPerson=true;mc.options.hideHud=false;

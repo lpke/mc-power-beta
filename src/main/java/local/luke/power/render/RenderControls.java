@@ -49,7 +49,7 @@ public final class RenderControls {
     }
   }
   public static void tick(Minecraft mc) {
-    brightness.update(mc.world, CommandContext.current(mc).cheats(),
+    brightness.update(mc.world, local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE),
         mc.player instanceof PlayerMode mode && mode.power$spectator(), VisualConfig.current().spectatorFullBright);
     refresh(mc);
   }

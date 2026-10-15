@@ -5,7 +5,6 @@ import static local.luke.power.validation.UiChecks.*;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.validation.mixin.ScreenInput;
 import local.luke.power.validation.mixin.ContainerInput;
 import net.minecraft.*;
@@ -32,7 +31,7 @@ final class CreativePaintChecks {
       log("PASS creative-painted counts, damage and NBT survived restart"); return;
     }
     if (action.equals("setup")) {
-      ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+      (AccessRules.of(mc.world.method_262())).allAllowed(true);
       CreativeVehicleChecks.mode(mc, "CREATIVE"); physical = player(true, 320, 225);
       mc.setScreen(physical);
       mc.player.inventory.setCursorStack(tagged(35, 7, 5, "physical"));
@@ -53,14 +52,14 @@ final class CreativePaintChecks {
     java.nio.file.Files.createDirectories(Path.of("power-beta-data/reports/creative-paint"));
     mc.player.closeScreen();
     var inventory = mc.player.inventory.main.clone(); var armor = mc.player.inventory.armor.clone();
-    var properties = (CheatWorld)mc.world.method_262(); boolean cheats = properties.power$cheatsEnabled();
+    var properties = AccessRules.of(mc.world.method_262()); boolean cheats = properties.allAllowed();
     String mode = Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player).toString();
     byte previous = buttons().get(2);
     var settings=local.luke.power.config.SettingsRegistry.open(mc);
     try {
       Release110Checks.find(settings,"power_compat:config.STACK_SIZE_CONFIG.stackableEmptyBuckets").parse("false");
       settings.preview(true);
-      properties.power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc, "CREATIVE");
+      properties.allAllowed(true); CreativeVehicleChecks.mode(mc, "CREATIVE");
       mc.player.method_1340(.5, 103, -2.5);
       for (int x=-4;x<=4;x++) for (int z=-4;z<=4;z++) {
         mc.world.method_200(x,100,z,1); for(int y=101;y<106;y++)mc.world.method_200(x,y,z,0);
@@ -164,15 +163,15 @@ final class CreativePaintChecks {
       });
       test("survival, spectator, cheats, remote and dead-player changes cancel without writes", () -> {
         for(String reason:new String[]{"SURVIVAL","SPECTATOR","cheats","remote","dead"}) {
-          CreativeVehicleChecks.mode(mc,"CREATIVE"); properties.power$cheatsEnabled(true);
+          CreativeVehicleChecks.mode(mc,"CREATIVE"); properties.allAllowed(true);
           var screen=player(true,320,240); mc.player.inventory.setCursorStack(tagged(35,7,5,"guard"));
           start(screen,9); hover(screen,9); int health=mc.player.health;
-          if(reason.equals("cheats"))properties.power$cheatsEnabled(false);
+          if(reason.equals("cheats"))properties.allAllowed(false);
           else if(reason.equals("remote"))mc.world.isRemote=true;
           else if(reason.equals("dead"))mc.player.health=0;
           else CreativeVehicleChecks.mode(mc,reason);
           try {finish(screen);check(screen.container.method_2084(9).getStack()==null,"guard wrote slot: "+reason);}
-          finally {mc.world.isRemote=false;mc.player.health=health;properties.power$cheatsEnabled(true);}
+          finally {mc.world.isRemote=false;mc.player.health=health;properties.allAllowed(true);}
         }
         CreativeVehicleChecks.mode(mc,"CREATIVE");
       });
@@ -210,17 +209,17 @@ final class CreativePaintChecks {
       buttons().put(2,previous); mc.world.isRemote=false; mc.player.inventory.setCursorStack(null); mc.player.closeScreen();
       System.arraycopy(inventory,0,mc.player.inventory.main,0,inventory.length);
       System.arraycopy(armor,0,mc.player.inventory.armor,0,armor.length);
-      CreativeVehicleChecks.mode(mc,mode); properties.power$cheatsEnabled(cheats);
+      CreativeVehicleChecks.mode(mc,mode); properties.allAllowed(cheats);
       settings.discard();
     }
     if(failures==0) {
-      properties.power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc,"CREATIVE");
+      properties.allAllowed(true); CreativeVehicleChecks.mode(mc,"CREATIVE");
       var screen=container(54,3); mc.player.inventory.setCursorStack(tagged(267,1,83,"saved-chest"));
       start(screen,0);hover(screen,0);finish(screen);
       mc.player.inventory.setCursorStack(tagged(35,1,5,"saved-inventory"));
       int saved=screen.container.slots.size()-2;start(screen,saved);hover(screen,saved);finish(screen);
       mc.player.inventory.setCursorStack(null);mc.player.closeScreen();
-      CreativeVehicleChecks.mode(mc,mode); properties.power$cheatsEnabled(cheats);
+      CreativeVehicleChecks.mode(mc,mode); properties.allAllowed(cheats);
     }
     log("CREATIVE PAINT FAILURES " + failures);
   }

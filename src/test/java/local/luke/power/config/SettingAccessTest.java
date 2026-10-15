@@ -1,49 +1,73 @@
 package local.luke.power.config;
 
 import static org.junit.jupiter.api.Assertions.*;
-import com.google.gson.JsonPrimitive;
-import java.util.List;
+import com.google.gson.*;
+import java.util.*;
+import local.luke.power.rules.*;
+import local.luke.power.config.backend.RuleSettings;
 import org.junit.jupiter.api.Test;
 
 class SettingAccessTest {
-  @Test void gatePresentationDoesNotOverwriteEnabledPreferences() {
-    for (var kind : List.of(Setting.Kind.BOOLEAN, Setting.Kind.CHOICE, Setting.Kind.INTEGER, Setting.Kind.KEY)) {
-      var value = kind == Setting.Kind.BOOLEAN ? new JsonPrimitive(true) : new JsonPrimitive(1);
-      var setting = new Setting("worldedit.enabled", "worldedit", "World editing", "Access", "Enabled", "",
-          kind, value, value, 0, 2, 1, List.of("Default", "Enabled", "Disabled"), false);
-      assertEquals(kind == Setting.Kind.BOOLEAN ? "Off" : "Disabled", SettingAccess.lockedValue(setting));
-      assertEquals(value, setting.value);
-      assertFalse(setting.changed());
-    }
+  private Setting entry(String id) {
+    return new Setting(id, id.startsWith("creative.") ? "creative" : "test", "General", "Game", id, "",
+        Setting.Kind.BOOLEAN, new JsonPrimitive(true), new JsonPrimitive(true), 0, 1, 1, List.of(), false);
   }
-
-  private Setting entry(String id, String backend, Setting.Kind kind) {
-    return new Setting(id, backend, "General", "Game", id, "", kind,
-        new JsonPrimitive(true), new JsonPrimitive(true), 0, 1, 1, List.of(), false);
-  }
-
-  @Test void hiddenCheatRowsPreserveValuesAndNonCheatCommands() {
+  private ConfigSession world() {
     ConfigSession session = new ConfigSession();
-    Setting cheats = entry("world.cheats", "world", Setting.Kind.BOOLEAN);
     session.add(new Backend() {
       public String id() { return "world"; }
-      public java.util.List<java.nio.file.Path> files() { return List.of(); }
-      public void validate(java.util.Map<String, com.google.gson.JsonElement> values) {}
-      public void apply(java.util.Map<String, com.google.gson.JsonElement> values) {}
-    }, List.of(cheats));
-    for (boolean enabled : List.of(false, true)) {
-      cheats.value = new JsonPrimitive(enabled);
-      for (String id : List.of("visual.spectatorBlockOutlines", "creative.flight", "worldedit.enabled", "world.daylightCycle", "world.weatherCycle", "world.keepInventory", "commands.enabled", "commands.mode.creative", "commands.worldMode.spectator", "keys.power_creative.modifier", "keys.power_creative.picker")) {
-        var setting = entry(id, id.startsWith("creative.") ? "creative" : "test", id.startsWith("keys.") ? Setting.Kind.KEY : Setting.Kind.BOOLEAN);
-        assertEquals(enabled, SettingAccess.visible(session, setting), id);
+      public List<java.nio.file.Path> files() { return List.of(); }
+      public void validate(Map<String, JsonElement> values) {}
+      public void apply(Map<String, JsonElement> values) {}
+    }, RuleSettings.entries("world", "rules.world.", new RuleSet(), new RuleSet()));
+    return session;
+  }
+  private void rule(ConfigSession session, GameRule rule, boolean value) {
+    session.settings().stream().filter(s -> s.id.equals("rules.world." + rule.id()))
+        .findFirst().orElseThrow().value = new JsonPrimitive(value);
+  }
+
+  @Test void eachPermissionOnlyExposesItsOwnSettingsAndPreservesPreferences() {
+    var session = world();
+    var owners = Map.of("creative.flight", GameRule.ALLOW_CREATIVE_MODE,
+        "worldedit.maxBlocks", GameRule.ALLOW_WORLD_EDITING,
+        "creative.spectatorScroll", GameRule.ALLOW_SPECTATOR_MODE,
+        "creative.showSpectatorSpeed", GameRule.ALLOW_SPECTATOR_MODE,
+        "visual.spectatorBlockOutlines", GameRule.ALLOW_SPECTATOR_MODE);
+    for (var enabled : GameRule.values()) if (enabled.access()) {
+      rule(session, enabled, true);
+      owners.forEach((id, owner) -> {
+        Setting setting = entry(id);
+        assertEquals(owner == enabled, SettingAccess.visible(session, setting), id + " / " + enabled);
         assertTrue(setting.value.getAsBoolean()); assertFalse(setting.changed());
-        assertFalse(SettingAccess.visible(new ConfigSession(), setting), id);
-      }
-      for (var command : local.luke.power.permissions.CommandPermissions.COMMANDS)
-        for (String prefix : List.of("commands.rule.", "commands.world."))
-          assertEquals(enabled || !command.cheat(), SettingAccess.visible(session, entry(prefix + command.name(), "commandAccess", Setting.Kind.CHOICE)));
-      for (String id : List.of("world.cheats", "world.difficulty", "creative.sprintToggle", "creative.sprintMultiplier", "keys.power_creative.sprint", "tweaks.placement.enabled", "power_camera:config.enabled"))
-        assertTrue(SettingAccess.visible(session, entry(id, id.startsWith("creative.") ? "creative" : "test", id.startsWith("keys.") ? Setting.Kind.KEY : Setting.Kind.BOOLEAN)), id);
+      });
+      rule(session, enabled, false);
     }
+  }
+
+  @Test void eitherModeExposesPickerAndFlightSprintWhileFreecamControlsRemainIndependent() {
+    var session = world();
+    for (GameRule rule : List.of(GameRule.ALLOW_CREATIVE_MODE, GameRule.ALLOW_SPECTATOR_MODE)) {
+      for (boolean enabled : List.of(false, true)) {
+        rule(session, rule, enabled);
+        for (String id : List.of("creative.sprintFlight", "keys.power_creative.modifier", "keys.power_creative.picker"))
+          assertEquals(enabled, SettingAccess.visible(session, entry(id)), id);
+        for (String id : List.of("creative.sprintToggle", "creative.sprintMultiplier", "keys.power_creative.sprint",
+            "creative.blockReach", "creative.entityReach", "power_camera:config.speed", "world.difficulty"))
+          assertTrue(SettingAccess.visible(session, entry(id)), id);
+      }
+      rule(session, rule, false);
+    }
+  }
+
+  @Test void allRulesRemainEditableAndMainMenuShowsGlobalToolPreferences() {
+    var session = world();
+    session.settings().forEach(s -> assertTrue(SettingAccess.visible(session, s), s.id));
+    for (String id : List.of("creative.flight", "creative.spectatorSpeed", "worldedit.maxBlocks"))
+      assertTrue(SettingAccess.visible(new ConfigSession(), entry(id)), id);
+    var number = session.settings().stream().filter(s -> s.id.endsWith("players_sleeping_percentage")).findFirst().orElseThrow();
+    assertFalse(number.slider());
+    number.parse("2147483647");
+    assertEquals(Integer.MAX_VALUE, number.value.getAsInt());
   }
 }

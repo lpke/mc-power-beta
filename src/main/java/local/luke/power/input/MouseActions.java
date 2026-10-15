@@ -19,7 +19,7 @@ public final class MouseActions {
       if (!Bindings.matches(key, code)) continue;
       switch (key.translationKey) {
         case "key.power_controls.hide_hud" -> mc.options.hideHud = !mc.options.hideHud;
-        case "key.power_controls.debug_hud" -> mc.options.debugHud = !mc.options.debugHud;
+        case "key.power_controls.debug_hud" -> { GameplayKeys.debugText(); mc.options.debugHud = !mc.options.debugHud; }
         case "key.power_controls.third_person" -> mc.options.thirdPerson = !mc.options.thirdPerson;
         case "key.power_controls.cinematic_camera" -> mc.options.cinematicMode = !mc.options.cinematicMode;
         case "key.power_controls.toggle_fullscreen" -> mc.toggleFullscreen();

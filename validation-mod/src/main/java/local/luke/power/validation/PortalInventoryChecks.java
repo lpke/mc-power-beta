@@ -7,7 +7,6 @@ import local.luke.power.config.*;
 import local.luke.power.storage.PowerConfig;
 import local.luke.power.validation.mixin.ScreenInput;
 import local.luke.power.visual.*;
-import local.luke.power.permissions.CheatWorld;
 import net.minecraft.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -40,7 +39,7 @@ final class PortalInventoryChecks {
     failures = 0;
     enable(false);
     check(mc.world != null, "run new-world first");
-    ((CheatWorld) mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc, "SURVIVAL");
     mc.setScreen(null);
     ((local.luke.power.world.WorldDifficulty) mc.world.method_262()).power$difficulty(0);
@@ -50,12 +49,12 @@ final class PortalInventoryChecks {
       for (int y = 101; y < 106; y++) mc.world.method_200(x, y, z, 0);
     }
     mc.player.method_1340(.5, 103, .5);
-    ((CheatWorld) mc.world.method_262()).power$cheatsEnabled(false);
-    test("default off, visible without cheats, preview Cancel and Apply", () -> {
-      check(!new VisualSettings().inventoryInPortals, "Java default enabled");
+    (AccessRules.of(mc.world.method_262())).allAllowed(false);
+    test("default on, visible without permissions, preview Cancel and Apply", () -> {
+      check(new VisualSettings().inventoryInPortals, "Java default disabled");
       var session = SettingsRegistry.open(mc);
       var row = Release110Checks.find(session, ID);
-      check(!row.defaultValue.getAsBoolean() && row.page.equals("Inventory"), "wrong default/page");
+      check(row.defaultValue.getAsBoolean() && row.page.equals("Inventory"), "wrong default/page");
       check(SettingAccess.visible(session, row) && !row.description.isBlank(), "QoL setting hidden/help missing");
       byte[] before = Files.readAllBytes(PowerConfig.path());
       row.parse("true"); session.preview();
@@ -88,7 +87,7 @@ final class PortalInventoryChecks {
       check(mc.player.inventory.getCursorStack() == cursor && grid(mc).getStack(0) == craft, "items moved");
       assertStack(cursor, 1, 37, "cursor"); assertStack(craft, 11, 0, "craft");
       ((ScreenInput) inventory).power$key('\0', 1);
-      check(mc.currentScreen == null && mc.player.inventory.getCursorStack() == null && grid(mc).getStack(0) == null, "Escape cleanup failed");
+      check(mc.currentScreen == null && mc.player.inventory.getCursorStack() == null && grid(mc).getStack(0) == craft, "Escape cleanup did not retain enabled crafting storage");
       check(count(mc, mc.world, cursor) == 1 && count(mc, mc.world, craft) == 1, "Escape lost/duplicated items");
       pulse(mc);
       check(count(mc, mc.world, cursor) == 1 && count(mc, mc.world, craft) == 1, "later tick duplicated items");
@@ -120,13 +119,20 @@ final class PortalInventoryChecks {
         check(mc.player.dimensionId == dimension && mc.currentScreen == screen, "client initiated remote travel");
       } finally { mc.world.isRemote = remote; mc.player.closeScreen(); mc.player.field_504 = 0; }
     });
-    for (String mode : List.of("survival", "creative", "spectator"))
-      test(mode + " portal transfer cleans items before dimension change", () -> travel(mc, mode));
+    for (boolean keepCrafting : new boolean[]{false, true}) {
+      var preference = SettingsRegistry.open(mc);
+      Release110Checks.find(preference, "power_compat:config.allowCraftingInventorySlots").parse(Boolean.toString(keepCrafting));
+      preference.preview(true);
+      try {
+        for (String mode : List.of("survival", "creative", "spectator"))
+          test(mode + " portal transfer respects crafting storage=" + keepCrafting, () -> travel(mc, mode, keepCrafting));
+      } finally { preference.discard(); }
+    }
     log("PORTAL INVENTORY FAILURES " + failures);
   }
 
-  private static void travel(Minecraft mc, String mode) throws Exception {
-    ((CheatWorld) mc.world.method_262()).power$cheatsEnabled(true);
+  private static void travel(Minecraft mc, String mode, boolean keepCrafting) throws Exception {
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     ChatChecks.submit(mc, "/gamemode " + mode);
     mc.player.closeScreen(); mc.player.field_511 = 0; mc.player.field_504 = 0;
     World source = mc.world; int dimension = mc.player.dimensionId;
@@ -150,14 +156,15 @@ final class PortalInventoryChecks {
     check(mode.equals("survival") ? ticks >= 80 && ticks <= 81 : ticks == 1, "portal delay changed: " + ticks);
     check(mc.player.field_511 > 0, "cooldown removed");
     check(mc.currentScreen == null && mc.player.container == mc.player.playerContainer, "inventory not closed/reset");
-    check(mc.player.inventory.getCursorStack() == null && grid(mc).getStack(0) == null, "temporary items retained");
-    for (ItemStack item : List.of(cursor, craft)) {
+    check(mc.player.inventory.getCursorStack() == null && grid(mc).getStack(0) == (keepCrafting ? craft : null), "incorrect crafting/cursor cleanup");
+    for (ItemStack item : keepCrafting ? List.of(cursor) : List.of(cursor, craft)) {
       check(count(mc, source, item) == 1, "travel lost/duplicated item");
       var drops = source.field_198.stream().filter(e -> e instanceof class_142 drop && !drop.dead && drop.field_564 == item).toList();
       check(drops.size() == 1, "cleanup did not run in source world");
       var drop = (class_142) drops.get(0);
       check(Math.abs(drop.x - oldX) < 2 && Math.abs(drop.z - oldZ) < 2, "dropped at destination coordinates");
     }
+    if (keepCrafting) check(count(mc, source, craft) == 1 && grid(mc).getStack(0) == craft, "stored crafting item lost or duplicated across dimensions");
     check(mc.player.inventory.main[8] == carried, "carried inventory changed");
     assertStack(cursor, 1, 71, cursorTag); assertStack(craft, 13, 0, craftTag);
     assertStack(carried, 1, 83, "travel-carried");
@@ -167,7 +174,7 @@ final class PortalInventoryChecks {
     for (Object e : source.field_198) if (e instanceof class_142 drop
         && (drop.field_564 == cursor || drop.field_564 == craft))
       reloaded.method_199((int) Math.floor(drop.x), (int) Math.floor(drop.z));
-    for (String name : List.of(cursorTag, craftTag)) {
+    for (String name : keepCrafting ? List.of(cursorTag) : List.of(cursorTag, craftTag)) {
       var matches = new ArrayList<ItemStack>();
       for (Object e : reloaded.field_198) if (e instanceof class_142 drop
           && tag(drop.field_564).getString("portal-check").equals(name)) matches.add(drop.field_564);
@@ -194,6 +201,7 @@ final class PortalInventoryChecks {
   }
   private static long count(Minecraft mc, World source, ItemStack item) {
     long n = mc.player.inventory.getCursorStack() == item ? 1 : 0;
+    for (int i = 0; i < 4; i++) if (grid(mc).getStack(i) == item) n++;
     for (ItemStack stack : mc.player.inventory.main) if (stack == item) n++;
     for (Object e : source.field_198) if (e instanceof class_142 drop && !drop.dead && drop.field_564 == item) n++;
     if (source != mc.world) for (Object e : mc.world.field_198) if (e instanceof class_142 drop && !drop.dead && drop.field_564 == item) n++;

@@ -81,29 +81,18 @@ public final class WorldEditor {
     }
   }
 
-  public static WorldOverride worldOverride(Minecraft mc) {
-    return mc != null && mc.world != null && !mc.world.isRemote
-        ? ((WorldSettings) mc.world.method_262()).worldedit$override()
-        : WorldOverride.INHERIT;
-  }
-
-  public static void worldOverride(Minecraft mc, WorldOverride value) {
-    if (mc == null || mc.world == null || mc.world.isRemote)
-      throw new IllegalArgumentException("Open a singleplayer world first.");
-    ((WorldSettings) mc.world.method_262()).worldedit$override(value);
-  }
-
   public static boolean permitted(Minecraft mc) {
     return mc != null && mc.world != null && !mc.world.isRemote
-        && AccessPolicy.allows(((local.luke.power.permissions.CheatWorld) mc.world.method_262()).power$cheatsEnabled(),
-            settings.enabled, worldOverride(mc));
+        && local.luke.power.rules.WorldRules.enabled(mc.world.method_262(), local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING);
   }
-
+  public static boolean commandAvailable(Minecraft mc, String name) {
+    return localPlayer(mc) && local.luke.power.worldedit.chat.CommandAccess.allowed(name);
+  }
   public static boolean available(Minecraft mc) {
     return localPlayer(mc) && permitted(mc);
   }
 
-  private static boolean localPlayer(Minecraft mc) {
+  public static boolean localPlayer(Minecraft mc) {
     return mc != null
         && mc.world != null
         && !mc.world.isRemote
@@ -160,35 +149,26 @@ public final class WorldEditor {
   }
 
   public static boolean command(Minecraft mc, String text) {
-    String[] help = text.strip().split("\\s+");
-    if (help.length == 2 && !help[0].equalsIgnoreCase("//calc") && help[1].equalsIgnoreCase("help") && local.luke.power.worldedit.chat.CommandCatalog.owns(text))
-      text = "//help " + Commands.helpPage(help[0].replaceFirst("^/+", ""));
-    if (text.strip().equalsIgnoreCase("//calc help")) {
-      mc.inGameHud.addChatMessage("§b//calc <expression> §7Arithmetic, powers, parentheses and functions. Example: //calc sqrt(16) + 2^3.§r");
+    if (!local.luke.power.worldedit.chat.CommandCatalog.owns(text)) return false;
+    String[] parts = text.strip().split("\\s+");
+    String name = parts[0].replaceFirst("^/+", "");
+    if (parts.length == 2 && parts[1].equalsIgnoreCase("help")) {
+      local.luke.power.worldedit.chat.CommandHelp.manual(name, line -> mc.inGameHud.addChatMessage(line + "§r"));
       return true;
     }
-    if (text.strip().matches("//calc(?:\\s+.*)?")) {
-      try { mc.inGameHud.addChatMessage(ChatFormat.info("= " + Calculator.evaluate(text.strip().substring(6).trim()))); }
+    if (name.equalsIgnoreCase("calc")) {
+      try { mc.inGameHud.addChatMessage(ChatFormat.info("= " + Calculator.evaluate(text.strip().substring(parts[0].length()).trim()))); }
       catch (IllegalArgumentException e) { mc.inGameHud.addChatMessage(ChatFormat.error(e.getMessage())); }
       return true;
     }
-    if (local.luke.power.input.InteractionState.carryingContainer && local.luke.power.worldedit.chat.CommandCatalog.owns(text)) {
-      message(mc,"Place your carried container before using editing commands."); return true;
-    }
-    if (!local.luke.power.worldedit.chat.CommandCatalog.owns(text)) return false;
-    if (!available(mc) && !(localPlayer(mc) && text.strip().matches("//help(?:\\s+.*)?"))) {
-      if (mc.inGameHud != null)
-        mc.inGameHud.addChatMessage(
-            ChatFormat.error(!localPlayer(mc)
-                    ? "World editing requires a live local singleplayer world."
-                    : !((local.luke.power.permissions.CheatWorld) mc.world.method_262()).power$cheatsEnabled()
-                        ? "Cheats are disabled for this world. Enable Cheats in Options > General."
-                    : !settings.enabled
-                        ? "World editing is disabled in Options."
-                        : worldOverride(mc) == WorldOverride.DISABLED
-                            ? "WorldEdit is disabled in this world."
-                            : "World editing is unavailable. Check access in Options."));
+    if (!commandAvailable(mc, name)) {
+      message(mc, !localPlayer(mc) ? "A live local singleplayer world is required."
+          : local.luke.power.worldedit.chat.CommandAccess.requirement(name) + " Change it in Options > Game rules.");
       return true;
+    }
+    if (local.luke.power.input.InteractionState.carryingContainer
+        && local.luke.power.worldedit.chat.CommandAccess.owner(name) != null) {
+      message(mc, "Place your carried container before changing the world."); return true;
     }
     try {
       new Commands(editor(mc), player(mc)).run(text);
@@ -203,6 +183,7 @@ public final class WorldEditor {
 
   private static Commands.Player player(Minecraft mc) {
     return new Commands.Player() {
+      public boolean allowed(String name) { return commandAvailable(mc, name); }
       public Pos feet() {
         return new Pos(
             (int) Math.floor(mc.player.x),

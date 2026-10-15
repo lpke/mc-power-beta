@@ -46,8 +46,7 @@ public final class ClientCommandsBridge implements ModInitializer {
                             .map(v -> v.substring(input.length()))
                             .toArray(String[]::new);
                       }
-                      case "available" -> name.equals("/calc") || name.equals("/help") && ((Minecraft) FabricLoader.getInstance().getGameInstance()).world != null && !((Minecraft) FabricLoader.getInstance().getGameInstance()).world.isRemote
-                          || WorldEditor.available((Minecraft) FabricLoader.getInstance().getGameInstance());
+                      case "available" -> name.equals("/calc") || WorldEditor.commandAvailable((Minecraft) FabricLoader.getInstance().getGameInstance(), name);
                       case "helpGroup" -> name.equals("/calc") ? "" : "World editing";
                       case "disableInSingleplayer" -> false;
                       case "needsPermissions" -> !name.equals("/calc");

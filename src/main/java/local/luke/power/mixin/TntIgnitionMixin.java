@@ -2,6 +2,7 @@ package local.luke.power.mixin;
 
 import local.luke.power.gameplay.GameplayConfig;
 import local.luke.power.input.PlayerMode;
+import local.luke.power.rules.*;
 import net.minecraft.Item;
 import net.minecraft.block.Block;
 import net.minecraft.class_132;
@@ -16,7 +17,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class TntIgnitionMixin {
   @Inject(method = "method_1608", at = @At("HEAD"), cancellable = true)
   private void power$ignite(World world, int x, int y, int z, PlayerEntity player, CallbackInfoReturnable<Boolean> cir) {
-    if (world.isRemote || !GameplayConfig.current().flintIgnitesTnt
+    if (world.isRemote || !WorldRules.enabled(world.method_262(), GameRule.TNT_EXPLODES)
+        || !GameplayConfig.current().flintIgnitesTnt
         || player instanceof PlayerMode mode && mode.power$spectator()) return;
     ItemStack stack = player.method_502();
     if (stack == null || stack.itemId != Item.field_472.id || world.getBlockId(x, y, z) != Block.field_1887.id) return;

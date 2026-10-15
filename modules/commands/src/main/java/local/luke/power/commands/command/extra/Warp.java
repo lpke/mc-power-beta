@@ -106,14 +106,15 @@ public class Warp implements Command {
 
   public void manual(SharedCommandSource s) {
     s.sendFeedback("/warp set <name> | /warp tp <name> | /warp list [page]");
+    s.sendFeedback("Travel requires allow_teleportation. Saving and listing remain available.");
     s.sendFeedback(
         "Save your current position or return to it. Names are unique; existing warps are never"
             + " overwritten.");
   }
 
   public String[] suggestion(SharedCommandSource s, int n, String input, String total) {
-    if (n == 1) return CommandSuggestions.suffix(input, List.of("set", "tp", "list"));
-    if (n == 2 && total.contains(" tp "))
+    if (n == 1) return CommandSuggestions.suffix(input, local.luke.power.permissions.CommandPermissions.allowed("warp") ? List.of("set", "tp", "list") : List.of("set", "list"));
+    if (n == 2 && total.contains(" tp ") && local.luke.power.permissions.CommandPermissions.allowed("warp"))
       return CommandSuggestions.suffix(
           input, read((PlayerWarps) EntityTargets.player(s)).stream().map(Saved::name).toList());
     return new String[0];

@@ -57,6 +57,8 @@
     "EntityQualityMixin",
     "GameQualityMixin",
     "CommandWorldMixin",
+    "WorldRulesPropertiesMixin",
+    "WorldStorageAccessor",
     "WorldCyclesPropertiesMixin",
     "WorldCyclesMixin",
     "WorldDifficultyPropertiesMixin",
@@ -117,7 +119,19 @@
     "SpectatorOutlineMixin",
     "SpectatorSplashMixin",
     "UnderwaterOverlayMixin",
-    "FullBrightFogMixin"
+    "FullBrightFogMixin",
+    "FireballExplosionMixin",
+    "ExplosionRulesMixin",
+    "PlayerDamageRulesMixin",
+    "PeacefulHealingMixin",
+    "MobDropsMixin",
+    "SleepRulesMixin",
+    "SpawnerRulesMixin",
+    "TntRulesMixin",
+    "TntPauseMixin",
+    "PortalRulesMixin",
+    "PortalContactAccessor",
+    "DebugGraphMixin"
   ],
   "injectors": {
     "defaultRequire": 1

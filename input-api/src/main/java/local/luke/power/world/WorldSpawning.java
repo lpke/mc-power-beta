@@ -1,6 +1,6 @@
 package local.luke.power.world;
 
-/** Saved per-world preferences. The cheat gate is applied only when spawning. */
+/** Saved natural-spawning rules. Existing mobs are unaffected. */
 public interface WorldSpawning {
   boolean power$hostileSpawning();
   void power$hostileSpawning(boolean enabled);

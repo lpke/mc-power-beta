@@ -13,6 +13,13 @@ public final class PowerConfig {
   private static final Object DISK = new Object();
   private static final DeferredSaves DEFERRED = new DeferredSaves(PowerConfig::writeDeferred);
   private static Path file;
+  private static JsonObject recoveryDefaults;
+  private static String problem = "";
+  /** Only bootstrap may enter recovery mode. Defaults remain in memory and writes stay blocked. */
+  public static void recovery(JsonObject defaults, String message) {
+    synchronized (DISK) { recoveryDefaults = ConfigVersions.convert(defaults); problem = message; }
+  }
+  public static String problem() { synchronized (DISK) { return problem; } }
   static {
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       try { flushPending(); }
@@ -34,14 +41,22 @@ public final class PowerConfig {
     synchronized (DISK) { return readDocument(); }
   }
   private static JsonObject readDocument() {
+    if (recoveryDefaults != null) return recoveryDefaults.deepCopy();
     Path path = path();
     try {
-      if (!Files.exists(path)) { JsonObject root = new JsonObject(); root.addProperty("schemaVersion", 3); root.add("settings", new JsonObject()); return root; }
+      for (Path part = path; part != null; part = part.getParent())
+        if (Files.isSymbolicLink(part)) throw new IOException("Unsafe configuration path");
+      if (!Files.exists(path)) { JsonObject root = new JsonObject(); root.addProperty("schemaVersion", ConfigVersions.CURRENT); root.add("settings", new JsonObject()); return root; }
       if (Files.isSymbolicLink(path) || Files.size(path) > 4 * 1024 * 1024) throw new IOException("Unsafe configuration file");
-      JsonObject root = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
-      if (root.get("schemaVersion").getAsInt() != 3 || !root.get("settings").isJsonObject()) throw new IOException("Unsupported configuration schema");
-      return root;
-    } catch (Exception e) { throw new IllegalStateException("Cannot safely read " + path + "; original file preserved", e); }
+      byte[] original = Files.readAllBytes(path);
+      JsonObject root = JsonParser.parseString(new String(original, StandardCharsets.UTF_8)).getAsJsonObject();
+      JsonObject converted = ConfigVersions.convert(root);
+      if (!converted.equals(root)) {
+        backup(original, ConfigVersions.version(root));
+        writeDocument(converted);
+      }
+      return converted;
+    } catch (Exception e) { throw new IllegalStateException("Cannot safely read " + path + ": " + e.getMessage() + "; original file preserved", e); }
   }
   public static JsonObject section(String id) {
     JsonElement value = document().getAsJsonObject("settings").get(id);
@@ -55,9 +70,27 @@ public final class PowerConfig {
   }
   public static void write(JsonObject root) throws IOException {
     flushPending();
-    synchronized (DISK) { writeDocument(root); }
+    synchronized (DISK) {
+      if (Files.exists(path(), LinkOption.NOFOLLOW_LINKS)) readDocument();
+      writeDocument(ConfigVersions.convert(root));
+    }
+  }
+  private static void backup(byte[] original, int version) throws IOException {
+    Path directory = path().getParent().resolve("backups");
+    if (Files.isSymbolicLink(directory)) throw new IOException("Unsafe backup directory");
+    Files.createDirectories(directory);
+    Path backup = Files.createTempFile(directory, "power-beta-v" + version + "-", ".json");
+    try (FileChannel out = FileChannel.open(backup, StandardOpenOption.WRITE)) {
+      ByteBuffer buffer = ByteBuffer.wrap(original);
+      while (buffer.hasRemaining()) out.write(buffer);
+      out.force(true);
+    }
+    if (!java.util.Arrays.equals(original, Files.readAllBytes(backup)))
+      throw new IOException("Configuration backup verification failed");
+    DurableFiles.syncDirectory(directory);
   }
   private static void writeDocument(JsonObject root) throws IOException {
+    if (!problem.isEmpty()) throw new IOException(problem + " Settings are read-only until the file is repaired and the game is restarted.");
     Path path = path();
     for (Path part = path; part != null; part = part.getParent())
       if (Files.isSymbolicLink(part)) throw new IOException("Unsafe configuration path");
@@ -70,7 +103,7 @@ public final class PowerConfig {
         ByteBuffer buffer = ByteBuffer.wrap(bytes); while (buffer.hasRemaining()) out.write(buffer); out.force(true);
       }
       Files.move(temp,path,StandardCopyOption.ATOMIC_MOVE,StandardCopyOption.REPLACE_EXISTING);
-      try (FileChannel directory = FileChannel.open(path.getParent(), StandardOpenOption.READ)) { directory.force(true); }
+      DurableFiles.syncDirectory(path.getParent());
     } finally { Files.deleteIfExists(temp); }
   }
   public static <T> T read(String id, Class<T> type) {

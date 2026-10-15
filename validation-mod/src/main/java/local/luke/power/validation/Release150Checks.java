@@ -18,7 +18,7 @@ import net.minecraft.nbt.NbtCompound;
 final class Release150Checks {
   static void run(Minecraft mc, String action) throws Exception {
     if (action.equals("spawn-dimension")) {
-      ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+      (AccessRules.of(mc.world.method_262())).allAllowed(true);
       CreativeVehicleChecks.mode(mc,"CREATIVE");
       var source=new local.luke.power.commands.util.SharedCommandSource(mc);
       check(local.luke.power.commands.command.vanilla.Teleport.switchDimensions(source,"minecraft:the_nether"),"Nether entry failed");
@@ -30,27 +30,27 @@ final class Release150Checks {
     }
     if (action.equals("saved")) {
       var s = GameplayConfig.current();
-      check(s.limitTnt && s.mergeItems && s.explosionProofItems && s.tntPerTick == 2, "new settings lost at restart");
+      check(s.limitTnt && s.mergeItems && !local.luke.power.rules.WorldRules.of(mc.world.method_262()).enabled(local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS) && s.tntPerTick == 2, "new settings lost at restart");
       log("PASS release 1.5 settings survive restart"); return;
     }
     if (action.equals("save")) {
-      var s = GameplayConfig.copy(); s.limitTnt = s.mergeItems = s.explosionProofItems = true; s.tntPerTick = 2;
+      var s = GameplayConfig.copy(); s.limitTnt = s.mergeItems = true; AccessRules.set(mc, local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS, false); s.tntPerTick = 2;
       GameplayConfig.save(s); return;
     }
     failures = 0;
     var original = GameplayConfig.copy(); var visual = VisualConfig.copy();
-    var world = (CheatWorld)mc.world.method_262(); boolean cheats = world.power$cheatsEnabled();
+    var world = AccessRules.of(mc.world.method_262()); boolean cheats = world.allAllowed();
     String mode = Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player).toString();
     var inventory = Arrays.stream(mc.player.inventory.main).map(s -> ItemStack.clone(s)).toArray(ItemStack[]::new);
     var cursor = ItemStack.clone(mc.player.inventory.getCursorStack());
     double px = mc.player.x, py = mc.player.y, pz = mc.player.z;
     List<Entity> created = new ArrayList<>();
     try {
-      mc.setScreen(null); world.power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc, "CREATIVE");
+      mc.setScreen(null); world.allAllowed(true); CreativeVehicleChecks.mode(mc, "CREATIVE");
       mc.player.method_1340(0, 110, 0); mc.world.method_214(0, 0);
       test("new defaults and settings transactions", () -> {
         var defaults = new GameplaySettings(); defaults.validate();
-        check(!defaults.mergeItems && !defaults.limitTnt && !defaults.explosionProofItems && defaults.leavesDropSaplingsInCreative, "gameplay defaults changed");
+          check(defaults.mergeItems && !defaults.limitTnt && defaults.leavesDropSaplingsInCreative, "gameplay defaults changed");
         var session = SettingsRegistry.open(mc);
         var setting = session.settings().stream().filter(s -> s.id.equals("gameplay.limitTnt")).findFirst().orElseThrow();
         setting.value = new com.google.gson.JsonPrimitive(!original.limitTnt);
@@ -81,13 +81,13 @@ final class Release150Checks {
         created.forEach(Entity::markDead); created.clear();
       });
       test("explosion immunity is scoped and zero-distance impulses remain finite", () -> {
-        var s = GameplayConfig.copy(); s.explosionProofItems = true; GameplayConfig.preview(s);
+        var s = GameplayConfig.copy(); AccessRules.set(mc, local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS, false); GameplayConfig.preview(s);
         var protectedItem = item(mc,4,64,0,20,110,20); created.add(protectedItem);
         mc.world.method_187(null,20,110,20,4);
         check(!protectedItem.dead && protectedItem.field_564.count == 64, "explosion deleted protected stack");
         check(Double.isFinite(protectedItem.velocityX) && Double.isFinite(protectedItem.velocityY), "centre blast generated NaN");
         protectedItem.damage(null,10); check(protectedItem.dead, "ordinary damage was blocked");
-        s.explosionProofItems = false; GameplayConfig.preview(s);
+        AccessRules.set(mc, local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS, true); GameplayConfig.preview(s);
         var normal = item(mc,4,1,0,20.5,110,20); created.add(normal);
         mc.world.method_187(null,20,110,20,4); check(normal.dead,"off state protected item");
       });
@@ -157,8 +157,8 @@ final class Release150Checks {
         RenderControls.beginRender();try { check(mc.world.method_1782(0,20,0)==1,"render darkness remains"); } finally { RenderControls.endRender(); }
         check(mc.world.method_164(class_56.BLOCK,0,20,0)==light,"spawn light changed");
         CreativeVehicleChecks.mode(mc,"CREATIVE");RenderControls.tick(mc);check(!RenderControls.fullBright(),"spectator effect leaked");
-        CreativeVehicleChecks.mode(mc,"SPECTATOR");RenderControls.tick(mc);world.power$cheatsEnabled(false);RenderControls.tick(mc);check(!RenderControls.fullBright(),"cheats disabled kept fullbright");
-        world.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");RenderControls.tick(mc);
+        CreativeVehicleChecks.mode(mc,"SPECTATOR");RenderControls.tick(mc);world.allAllowed(false);RenderControls.tick(mc);check(!RenderControls.fullBright(),"cheats disabled kept fullbright");
+        world.allAllowed(true);CreativeVehicleChecks.mode(mc,"CREATIVE");RenderControls.tick(mc);
       });
       test("spawn command uses world spawn and safe help", () -> {
         var pos=mc.world.getSpawnPos(); var source=new local.luke.power.commands.util.SharedCommandSource(mc);
@@ -166,11 +166,11 @@ final class Release150Checks {
         double x=mc.player.x; command.command(source,new String[]{"spawn","help"});check(mc.player.x==x,"spawn help moved player");
         command.command(source,new String[]{"spawn"});
         check(mc.player.x==pos.x+.5 && mc.player.z==pos.z+.5 && Math.abs(mc.player.boundingBox.minY-pos.y)<.01,"wrong spawn position");
-        world.power$cheatsEnabled(false);check(!CommandPermissions.allowed("spawn"),"spawn not cheat-gated");world.power$cheatsEnabled(true);
+        world.allAllowed(false);check(!CommandPermissions.allowed("spawn"),"spawn not cheat-gated");world.allAllowed(true);
       });
     } finally {
       mc.world.isRemote=false; created.forEach(Entity::markDead);
-      GameplayConfig.preview(original);VisualConfig.preview(visual);world.power$cheatsEnabled(cheats);
+      GameplayConfig.preview(original);VisualConfig.preview(visual);world.allAllowed(cheats);
       CreativeVehicleChecks.mode(mc,mode);RenderControls.tick(mc);
       System.arraycopy(inventory,0,mc.player.inventory.main,0,inventory.length);mc.player.inventory.setCursorStack(cursor);
       mc.player.method_1340(px,py,pz);

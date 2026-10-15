@@ -11,7 +11,7 @@ public final class DeathBackend implements Backend {
   public static void register(ConfigSession session) {
     DeathSettings value = DeathConfig.copy();
     session.add(new DeathBackend(), List.of(
-        entry("enabled", "Death records", "Save your death location, cause and lost items in singleplayer. Use /death for the latest death. Disabling keeps existing records. Recovery requires cheats.", value.enabled, false),
+        entry("enabled", "Death records", "Save your death location, cause and lost items in singleplayer. Use /death for the latest death. Disabling keeps existing records. Recovery requires Allow death recovery in Game rules.", value.enabled, true),
         entry("announceLocation", "Death location in chat", "Print the coordinates, dimension, cause and short death ID when you die. Records are saved even when this notice is off.", value.announceLocation, true),
         entry("announceItems", "Lost items in chat", "Print the lost inventory and equipment when you die. Use /death items [id] to view saved inventory positions.", value.announceItems, false)));
   }

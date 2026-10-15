@@ -88,6 +88,23 @@ class ConfigSessionTest {
     assertFalse(Files.exists(a.file));
   }
 
+  @Test void creationDraftsCommitAndRollBackWithoutCreatingFiles() throws Exception {
+    Fake draft = new Fake("draft", null) {
+      public List<Path> files() { return List.of(); }
+      public void apply(Map<String, JsonElement> values) throws Exception {
+        live = values.values().iterator().next().getAsInt();
+        if (fail && live == 3) throw new java.io.IOException("draft failure");
+      }
+    };
+    var session = new ConfigSession(); var value = setting("draft");
+    session.add(draft, List.of(value)); value.parse("2"); session.save(game);
+    assertEquals(2, draft.live); assertEquals(0, session.changes());
+    value.parse("3"); draft.fail = true;
+    assertThrows(java.io.IOException.class, () -> session.save(game));
+    assertEquals(2, draft.live); session.discard(); assertEquals(2, value.value.getAsInt());
+    try (var files = Files.list(game)) { assertEquals(0, files.count()); }
+  }
+
   static class PreviewFake extends Fake {
     PreviewFake(String id, Path file) { super(id, file); }
     public boolean previews(Setting s) { return true; }
@@ -144,13 +161,13 @@ class ConfigSessionTest {
     session.discard(); assertEquals(1, a.live); assertEquals(1, b.live);
   }
 
-  @Test void disablingCheatsDiscardsHiddenDraftsAndRestoresTheirPreviewsOnly() throws Exception {
+  @Test void revokingAccessPreservesGlobalDraftsAndTheirPreviews() throws Exception {
     var creative = new PreviewFake("creative", game.resolve("creative.txt"));
     var normal = new PreviewFake("normal", game.resolve("normal.txt"));
     Setting hidden = new Setting("creative.flightSpeed", "creative", "Creative", "Flight", "Speed", "",
         Setting.Kind.INTEGER, new JsonPrimitive(1), new JsonPrimitive(1), 0, 10, 1, List.of(), false);
     Setting qol = setting("normal");
-    Setting cheats = new Setting("world.cheats", "world", "General", "Game", "Cheats", "", Setting.Kind.BOOLEAN,
+    Setting cheats = new Setting("rules.world.allow_creative_mode", "world", "General", "Game", "Cheats", "", Setting.Kind.BOOLEAN,
         new JsonPrimitive(true), new JsonPrimitive(false), 0, 1, 1, List.of(), false);
     var session = new ConfigSession();
     session.add(creative, List.of(hidden)); session.add(normal, List.of(qol));
@@ -158,22 +175,22 @@ class ConfigSessionTest {
     hidden.value = qol.value = new JsonPrimitive(2); session.preview();
     assertEquals(2, creative.live); assertEquals(2, normal.live);
     cheats.value = new JsonPrimitive(false); session.link(cheats); session.preview();
-    assertEquals(1, creative.live); assertEquals(2, normal.live);
-    assertFalse(hidden.changed()); assertTrue(qol.changed());
+    assertEquals(2, creative.live); assertEquals(2, normal.live);
+    assertTrue(hidden.changed()); assertTrue(qol.changed());
     cheats.value = new JsonPrimitive(true); session.link(cheats);
-    assertEquals(1, hidden.value.getAsInt());
+    assertEquals(2, hidden.value.getAsInt());
     session.discard(); assertEquals(1, normal.live);
   }
-  @Test void disablingCheatsClearsKeepInventoryDraftAndCancelRestoresIt() throws Exception {
+  @Test void permissionsNeverChangeIndependentBehaviorRules() throws Exception {
     var session = new ConfigSession();
-    Setting keep = new Setting("world.keepInventory", "world", "General", "World overrides", "Keep inventory", "",
+    Setting keep = new Setting("rules.world.keep_inventory", "world", "General", "World overrides", "Keep inventory", "",
         Setting.Kind.BOOLEAN, new JsonPrimitive(true), new JsonPrimitive(false), 0, 1, 1, List.of(), false);
-    Setting cheats = new Setting("world.cheats", "world", "General", "Game", "Cheats", "", Setting.Kind.BOOLEAN,
+    Setting cheats = new Setting("rules.world.allow_creative_mode", "world", "General", "Game", "Cheats", "", Setting.Kind.BOOLEAN,
         new JsonPrimitive(true), new JsonPrimitive(false), 0, 1, 1, List.of(), false);
     session.add(new Fake("world", game.resolve("world.txt")), List.of(cheats, keep));
     cheats.value = new JsonPrimitive(false); session.link(cheats);
-    assertFalse(keep.value.getAsBoolean()); assertFalse(SettingAccess.visible(session, keep));
-    cheats.value = new JsonPrimitive(true); session.link(cheats); assertFalse(keep.value.getAsBoolean());
+    assertTrue(keep.value.getAsBoolean()); assertTrue(SettingAccess.visible(session, keep));
+    cheats.value = new JsonPrimitive(true); session.link(cheats); assertTrue(keep.value.getAsBoolean());
     session.discard(); assertTrue(keep.value.getAsBoolean());
   }
 }

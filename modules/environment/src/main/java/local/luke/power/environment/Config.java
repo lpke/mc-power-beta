@@ -109,12 +109,6 @@ public class Config {
     }
 
     public static class EntitySpawnMechanicsConfig {
-        @ConfigCategory(
-                name = "Entity Spawn List Config",
-                description = "Restart required for changes to take effect"
-        )
-        public SpawnListConfig SPAWN_LIST_CONFIG = new SpawnListConfig();
-
         @ConfigEntry(
                 name = "Disable Living Entities Despawning",
                 description = "Living entities will no longer despawn",
@@ -127,7 +121,7 @@ public class Config {
                 description = "Saddled pigs will no longer despawn",
                 multiplayerSynced = true
         )
-        public Boolean disableSaddledPigsDespawning = false;
+        public Boolean disableSaddledPigsDespawning = true;
 
         @ConfigEntry(
                 name = "Do Not Count Saddled Pigs",
@@ -174,86 +168,6 @@ public class Config {
         public Integer MAX_SPAWN_CAPACITY_SQUID = 5;
     }
 
-    public static class SpawnListConfig {
-        @ConfigEntry(
-                name = "Enable Chicken Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableChickenEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Cow Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableCowEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Creeper Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableCreeperEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Ghast Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableGhastEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Pig Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enablePigEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Sheep Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableSheepEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Skeleton Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableSkeletonEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Slime Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableSlimeEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Spider Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableSpiderEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Squid Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableSquidEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Wolf Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableWolfEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Zombie Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableZombieEntitySpawning = true;
-
-        @ConfigEntry(
-                name = "Enable Zombie Pigman Entity Spawning",
-                multiplayerSynced = true
-        )
-        public Boolean enableZombiePigmanEntitySpawning = true;
-    }
-
     public static class MusicConfig {
         @ConfigEntry(
                 name = "Overlay For Music In Debug Enabled",
@@ -298,13 +212,6 @@ public class Config {
     }
 
     public static class SleepConfig {
-        @ConfigEntry(
-                name = "Asleep Player Percentage For Skipping Night",
-                description = "Float value between 0.0 (0%) and 1.0 (100%)",
-                multiplayerSynced = true
-        )
-        public Float asleepPlayerPercentageForSkippingNight = 1.0f;
-
         @ConfigEntry(
                 name = "Beds Speed Up Night Rather Than Skip It",
                 multiplayerSynced = true

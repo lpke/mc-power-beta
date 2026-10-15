@@ -52,7 +52,7 @@ final class FreecamPreviewChecks {
   static void scene(Minecraft mc) throws Exception {
     DeathChecks.alive(mc); mc.setScreen(null); active(false);
     Object settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-    settings.getClass().getField("enabled").set(settings,true);
+
     for(int x=24;x<=40;x++) for(int z=24;z<=40;z++) for(int y=108;y<=114;y++)
       mc.world.method_154(x,y,z,y==108?1:0,0);
     mc.player.method_1341(24.5,109,24.5,90,0); mc.field_2807=mc.player;
@@ -63,7 +63,7 @@ final class FreecamPreviewChecks {
   }
   static void run(Minecraft mc,String action) throws Exception {
     if(action.equals("setup")) {
-      scene(mc); var visual=VisualConfig.copy(); visual.containerPreview=true; VisualConfig.preview(visual);
+      scene(mc); var visual=VisualConfig.copy();  VisualConfig.preview(visual);
       GameplayKeys.PREVIEW.code=Keyboard.KEY_P;
       ((KeyBinding)Class.forName("local.luke.power.camera.registry.KeyBindingRegistry")
           .getField("freecamKeybinding").get(null)).code=Keyboard.KEY_C;
@@ -115,11 +115,11 @@ final class FreecamPreviewChecks {
           mc.options.hideHud=!initiallyHidden;active(false);
           check(mc.options.hideHud==!initiallyHidden,"duplicate exit restored stale state");
         });
-      test("disabling freecam restores HUD immediately",()->{
+      test("session cleanup restores the freecam HUD immediately",()->{
         Object settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-        mc.options.hideHud=false;active(true);settings.getClass().getField("enabled").set(settings,false);
+        mc.options.hideHud=false;active(true);local.luke.power.input.TweakLifecycle.reset();
         check(!DetachedCamera.isActive()&&!mc.options.hideHud,"feature disable left HUD hidden");
-        settings.getClass().getField("enabled").set(settings,true);
+
       });
       active(true);
       test("preview follows detached camera instead of player, with all horizontal directions",()->{

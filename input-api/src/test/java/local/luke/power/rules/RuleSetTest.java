@@ -1,0 +1,55 @@
+package local.luke.power.rules;
+
+import com.google.gson.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import static local.luke.power.rules.GameRule.*;
+
+class RuleSetTest {
+  @Test void aliasesAndDefaultsHaveOneOwner() {
+    assertEquals(31, GameRule.values().length);
+    assertEquals(11, java.util.Arrays.stream(GameRule.values()).filter(GameRule::access).count());
+    RuleSet survival = new RuleSet(), cheats = RuleSet.cheats();
+    for (GameRule rule : GameRule.values()) {
+      assertSame(rule, GameRule.find(rule.id())); assertSame(rule, GameRule.find(rule.alias()));
+      if (rule.access()) { assertFalse(survival.enabled(rule)); assertTrue(cheats.enabled(rule)); }
+      else if (rule != KEEP_INVENTORY) assertEquals(survival.get(rule), cheats.get(rule));
+    }
+    assertFalse(survival.enabled(KEEP_INVENTORY)); assertTrue(cheats.enabled(KEEP_INVENTORY));
+    assertTrue(survival.enabled(EXPLOSIONS_DESTROY_ITEMS));
+    assertEquals(100, survival.number(PLAYERS_SLEEPING_PERCENTAGE));
+    assertNull(GameRule.find("powerbeta:fire_spread"));
+  }
+  @Test void gson289RoundTripAndCopiesRemainIndependent() {
+    RuleSet rules = RuleSet.cheats(); rules.set(FIRE_SPREAD, false); rules.set(PLAYERS_SLEEPING_PERCENTAGE, 151);
+    JsonObject persisted = new Gson().fromJson(new Gson().toJson(rules.document()), JsonObject.class);
+    RuleSet loaded = RuleSet.read(persisted, new RuleSet()); assertEquals(rules, loaded);
+    RuleSet copied = loaded.copy(); loaded.set(FIRE_SPREAD, true); assertFalse(copied.enabled(FIRE_SPREAD));
+    assertFalse(rules.enabled(FIRE_SPREAD));
+  }
+  @Test void missingFieldsUseDeclaredPresetDefaultsWithoutErasingChoices() {
+    JsonObject doc = JsonParser.parseString("{\"version\":1,\"values\":{\"allow_world_editing\":false}}").getAsJsonObject();
+    RuleSet rules = RuleSet.read(doc, RuleSet.cheats());
+    assertFalse(rules.enabled(ALLOW_WORLD_EDITING)); assertTrue(rules.enabled(ALLOW_CREATIVE_MODE));
+    assertTrue(rules.enabled(KEEP_INVENTORY)); assertTrue(rules.enabled(EXPLOSIONS_DESTROY_ITEMS));
+  }
+  @Test void badTypesUnknownNamesAndVersionsAreRejectedWithoutChangingInput() {
+    for (String source : new String[]{"{\"version\":2,\"values\":{}}", "{\"version\":\"1\",\"values\":{}}",
+        "{\"version\":1,\"values\":{\"fire_spread\":\"false\"}}", "{\"version\":1,\"values\":{\"fire_spread\":0}}",
+        "{\"version\":1,\"values\":{\"players_sleeping_percentage\":-1}}", "{\"version\":1,\"values\":{\"players_sleeping_percentage\":1.5}}",
+        "{\"version\":1,\"values\":{\"players_sleeping_percentage\":2147483648}}", "{\"version\":1,\"values\":{\"doFireTick\":true}}",
+        "{\"version\":1,\"values\":{\"future_rule\":true}}"}) {
+      JsonObject input = JsonParser.parseString(source).getAsJsonObject(), before = input.deepCopy();
+      assertThrows(IllegalArgumentException.class, () -> RuleSet.read(input, new RuleSet()), source);
+      assertEquals(before, input);
+    }
+  }
+  @Test void commandParsingIsStrictAndAllowsSleepAbove100() {
+    assertFalse(FIRE_SPREAD.parse("FALSE").getAsBoolean());
+    assertEquals(0, PLAYERS_SLEEPING_PERCENTAGE.parse("0").getAsInt());
+    assertEquals(101, PLAYERS_SLEEPING_PERCENTAGE.parse("101").getAsInt());
+    for (String value : new String[]{"true", "-1", "1.0", "1e2", "2147483648"})
+      assertThrows(IllegalArgumentException.class, () -> PLAYERS_SLEEPING_PERCENTAGE.parse(value));
+    assertThrows(IllegalArgumentException.class, () -> FIRE_SPREAD.parse("yes"));
+  }
+}

@@ -9,7 +9,6 @@ import local.luke.power.building.config.Config;
 import local.luke.power.config.*;
 import local.luke.power.input.TweakIndicators;
 import local.luke.power.mixin.SoundManagerAccessor;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.status.*;
 import local.luke.power.ui.*;
 import local.luke.power.validation.mixin.ScreenInput;
@@ -45,20 +44,19 @@ final class IndicatorsMenuChecks {
             settings.placement.enabled = true; Config.preview(settings);
             display.opacity = 0; check(ActiveTweaks.lines(display).isEmpty(), "transparent HUD queried states");
             display.opacity = 100; display.enabled = false; check(ActiveTweaks.lines(display).isEmpty(), "disabled HUD visible");
-            settings.freeLookToggle = true; settings.freeLook = true; Config.preview(settings);
+            settings.freeLookToggle = true;  Config.preview(settings);
             local.luke.power.building.camera.FreeLook.begin(mc);
             check(ActiveTweaks.lines(new StatusSettings()).contains("Free look"), "latched look missing");
             local.luke.power.building.camera.FreeLook.reset(mc);
             Object camera = Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
             Object cameraConfig = Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-            var enabled = cameraConfig.getClass().getField("enabled"); Object was = enabled.get(cameraConfig); enabled.set(cameraConfig,true);
             try {
               camera.getClass().getMethod("setActive",boolean.class).invoke(camera,true);
               field(camera,"allowPlayerMovement",true);
               check(ActiveTweaks.lines(new StatusSettings()).contains("Freecam player movement"), "freecam body movement missing");
               camera.getClass().getMethod("setActive",boolean.class).invoke(camera,false);
               check(!ActiveTweaks.lines(new StatusSettings()).contains("Freecam player movement"), "freecam flag stale");
-            } finally { enabled.set(cameraConfig,was); }
+            } finally {  }
             boolean blend = GL11.glIsEnabled(GL11.GL_BLEND), depth = GL11.glIsEnabled(GL11.GL_DEPTH_TEST);
             for (int anchor = 0; anchor < 9; anchor++) {
               display = new StatusSettings(); display.position = anchor; display.opacity = 10;
@@ -80,7 +78,7 @@ final class IndicatorsMenuChecks {
         });
       }
       case "creative" -> test("creative has eight rows, upward growth and unchanged hotbar/tab transfers", () -> {
-        ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+        (AccessRules.of(mc.world.method_262())).allAllowed(true);
         ChatChecks.submit(mc,"/gamemode creative");
         var screen = new class_585(mc.player); mc.setScreen(screen); field(screen,"creative_normalGUI",false);
         List<ItemStack> items = (List<ItemStack>)field(screen,"creative_items");

@@ -111,9 +111,9 @@ public final class DeathCommands {
   }
   private static void help(Minecraft mc) {
     chat(mc, "§b/death [id] §7Location and cause; latest death by default.");
-    chat(mc, "§b/death items [id] §7View saved inventory positions. Cheats allow stack recovery.");
+    chat(mc, "§b/death items [id] §7View saved inventory positions. Allow death recovery permits stack recovery.");
     chat(mc, "§b/death log [page] §7Past deaths and their IDs.");
-    chat(mc, "§7Use the inventory view to recover items with cheats. Occupied saved slots cancel recovery.");
+    chat(mc, "§7Use the inventory view to recover items when Allow death recovery is on. Occupied saved slots cancel recovery.");
     chat(mc, "§7Records belong to this world and player. Recovery keeps existing items and leaves dropped items in the world.");
   }
   private static void chat(Minecraft mc, String message) { mc.inGameHud.addChatMessage(message + "§r"); }

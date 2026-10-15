@@ -14,13 +14,13 @@ import org.lwjgl.input.Keyboard;
 final class DeathInventoryChecks {
   static void run(Minecraft mc, boolean saved) throws Exception {
     failures = 0; alive(mc); mc.setScreen(null); mc.field_2807 = mc.player;
-    var rules = CommandPermissions.copy(); var settings = DeathConfig.copy();
-    var properties = (CheatWorld)mc.world.method_262(); boolean cheats = properties.power$cheatsEnabled();
+    var rules = AccessRules.copy(mc); var settings = DeathConfig.copy();
+    var properties = AccessRules.of(mc.world.method_262()); boolean cheats = properties.allAllowed();
     var main = mc.player.inventory.main.clone(); var armor = mc.player.inventory.armor.clone();
     var cursor = mc.player.inventory.getCursorStack();
     Path reports = Path.of("power-beta-data/reports/death-inventory"); Files.createDirectories(reports);
     var enabled = new DeathSettings(); enabled.enabled = true; enabled.announceLocation = false;
-    DeathConfig.preview(enabled); properties.power$cheatsEnabled(true);
+    DeathConfig.preview(enabled); properties.allAllowed(true);
     try {
       if (saved) {
         var death = latest(mc);
@@ -74,7 +74,7 @@ final class DeathInventoryChecks {
           mc.player.inventory.armor[3] = tagged(310, 1, 27, "locked-helmet");
           mc.player.inventory.setCursorStack(tagged(264, 3, 0, "locked-cursor")); record(mc, "Locked fixture"); var death = latest(mc);
           clear(mc); mc.player.inventory.main[3] = tagged(264, 3, 0, "live");
-          properties.power$cheatsEnabled(false); var screen = open(mc, death, size[0], size[1]);
+          properties.allAllowed(false); var screen = open(mc, death, size[0], size[1]);
           String before = inventory(mc); byte[] journal = Files.readAllBytes(path(mc));
           for (int button : new int[]{0, 1, 2}) for (int slot : new int[]{8, 20, 39, 0, 40}) click(screen, slot, button);
           for (int code : new int[]{Keyboard.KEY_Q, Keyboard.KEY_LSHIFT, Keyboard.KEY_1, Keyboard.KEY_9}) ((ScreenInput)(Object)screen).power$key('\0', code);
@@ -82,18 +82,18 @@ final class DeathInventoryChecks {
           SettingsSnapshot.render(mc, screen, size[0], size[1], reports.resolve("locked-" + size[0] + ".png"));
           check(before.equals(inventory(mc)) && mc.player.inventory.getCursorStack() == null, "locked viewer changed inventory/cursor");
           check(Arrays.equals(journal, Files.readAllBytes(path(mc))), "locked viewer wrote a recovery claim");
-          mc.setScreen(null); check(before.equals(inventory(mc)), "closing viewer changed items"); properties.power$cheatsEnabled(true);
+          mc.setScreen(null); check(before.equals(inventory(mc)), "closing viewer changed items"); properties.allAllowed(true);
         });
       }
       test("individual clicks and bulk recovery share claims and permission changes lock immediately", () -> {
-        properties.power$cheatsEnabled(true);
+        properties.allAllowed(true);
         clear(mc); mc.player.inventory.main[8] = tagged(35, 7, 5, "individual"); mc.player.inventory.main[20] = tagged(267, 1, 83, "remaining");
         mc.player.inventory.armor[3] = tagged(310, 1, 27, "remaining-helmet"); record(mc, "Individual fixture"); var death = latest(mc); clear(mc);
         var screen = open(mc, death, 320, 240); click(screen, 8, 0); stack(mc.player.inventory.main[8], 35, 7, 5, "individual");
         String after = inventory(mc); click(screen, 8, 0); check(after.equals(inventory(mc)), "repeat GUI click duplicated stack");
         check(DeathTracker.journal(mc).state(death.id).equals("partial"), "partial state missing");
-        properties.power$cheatsEnabled(false); click(screen, 20, 0); check(after.equals(inventory(mc)), "cheats disable did not immediately lock viewer");
-        properties.power$cheatsEnabled(true);
+        properties.allAllowed(false); click(screen, 20, 0); check(after.equals(inventory(mc)), "cheats disable did not immediately lock viewer");
+        properties.allAllowed(true);
         SettingsSnapshot.render(mc, screen, 320, 240, reports.resolve("partial-320.png"));
         bulk(screen);
         stack(mc.player.inventory.main[8], 35, 7, 5, "individual"); stack(mc.player.inventory.main[20], 267, 1, 83, "remaining");
@@ -105,7 +105,7 @@ final class DeathInventoryChecks {
         mc.setScreen(null); ChatChecks.submit(mc, "/death items " + death.id, Keyboard.KEY_NUMPADENTER);
         check(mc.currentScreen instanceof DeathInventoryScreen, "numpad Enter closed the viewer opened by its command");
         screen = (DeathInventoryScreen)mc.currentScreen;
-        DeathConfig.preview(new DeathSettings()); screen.tick(); check(mc.currentScreen == null && before.equals(inventory(mc)), "feature disable left stale viewer or changed items");
+        DeathConfig.preview(DeathChecks.disabled()); screen.tick(); check(mc.currentScreen == null && before.equals(inventory(mc)), "feature disable left stale viewer or changed items");
         DeathConfig.preview(enabled); screen = open(mc, death, 320, 240); String name = mc.player.name;
         mc.player.name = "OtherDeathInventoryCheck"; try { screen.tick(); check(mc.currentScreen == null, "player change left viewer open"); } finally { mc.player.name = name; }
       });
@@ -133,14 +133,14 @@ final class DeathInventoryChecks {
         ((ScreenInput)(Object)screen).power$key('\0', mc.options.inventoryKey.code);
         check(mc.currentScreen == null && before.equals(inventory(mc)), "inventory binding changed inventory or did not close");
       });
-      properties.power$cheatsEnabled(true); clear(mc); mc.player.inventory.main[8] = tagged(35, 7, 5, "restart-hotbar"); mc.player.inventory.main[20] = tagged(267, 1, 83, "restart-tool");
+      properties.allAllowed(true); clear(mc); mc.player.inventory.main[8] = tagged(35, 7, 5, "restart-hotbar"); mc.player.inventory.main[20] = tagged(267, 1, 83, "restart-tool");
       mc.player.inventory.armor[3] = tagged(310, 1, 27, "restart-helmet"); record(mc, "Slot restart fixture");
       var death = latest(mc); clear(mc); DeathTracker.recover(mc, death, 1);
       DeathConfig.save(enabled);
       log("DEATH INVENTORY CHECKS FAILURES " + failures);
     } finally {
       mc.setScreen(null); mc.player.inventory.main = main; mc.player.inventory.armor = armor; mc.player.inventory.setCursorStack(cursor);
-      properties.power$cheatsEnabled(cheats); CommandPermissions.preview(rules);
+      properties.allAllowed(cheats); AccessRules.restore(mc, rules);
       if (failures != 0 || saved) DeathConfig.preview(settings);
     }
   }

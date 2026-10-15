@@ -2,7 +2,6 @@ package local.luke.power.validation;
 
 import static local.luke.power.validation.Validation.*;
 import java.nio.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.render.RenderControls;
 import local.luke.power.status.*;
 import local.luke.power.ui.*;
@@ -15,7 +14,7 @@ import org.lwjgl.opengl.GL11;
 final class Release151RenderChecks {
   static void run(Minecraft mc, String action) throws Exception {
     if (action.equals("text")) { text(mc); return; }
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     var s = VisualConfig.copy(); s.spectatorFullBright = true; VisualConfig.preview(s);
     CreativeVehicleChecks.mode(mc, "SPECTATOR"); RenderControls.tick(mc);
     mc.world.method_229(3, 105, 3, Block.STONE.id);

@@ -29,7 +29,7 @@ final class Release152Checks {
     }
     if (action.equals("setup")) {
       InventoryMovementChecks.run(mc, "setup");
-      var s = Config.current().copy(); s.inventoryMouseLook = true; s.freeLook = true;
+      var s = Config.current().copy(); s.inventoryMouseLook = true;
       s.autoWalkHoldToWalk = true; s.autoWalkHoldMillis = 350; Config.preview(s);
       AutoWalk.stop(); mc.player.yaw = 0; mc.player.pitch = 0;
       mc.options.mouseSensitivity = .5F; mc.options.invertYMouse = false;
@@ -77,7 +77,7 @@ final class Release152Checks {
     }
     if (action.equals("camera-on") || action.equals("camera-off")) {
       Object options = Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-      options.getClass().getField("enabled").set(options, true);
+
       camera().getClass().getMethod("setActive", boolean.class).invoke(camera(), action.equals("camera-on")); return;
     }
     if (action.equals("cursor")) {
@@ -116,10 +116,9 @@ final class Release152Checks {
     if (!action.equals("check")) throw new IllegalArgumentException("Unknown release-152 action " + action);
 
     var before = Config.current().copy(); var settings = before.copy();
-    settings.autoWalk = settings.freeLook = settings.inventoryWhileMoving = settings.inventoryMouseLook = true;
+    settings.inventoryWhileMoving = settings.inventoryMouseLook = true;
     Object cameraOptions = Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-    Field enabled = cameraOptions.getClass().getField("enabled"); Object oldEnabled = enabled.get(cameraOptions);
-    enabled.set(cameraOptions, true);
+
     Config.preview(settings); mc.setScreen(null); AutoWalk.tick(mc); failures = 0;
     try {
       test("raw helper retains device gameplay input and clears it in GUIs", () -> {
@@ -144,10 +143,10 @@ final class Release152Checks {
         }
       });
       test("inventory look default, shared settings and Cancel/Apply", () -> {
-        check(!new local.luke.power.building.config.Settings().inventoryMouseLook, "default enabled");
+        check(new local.luke.power.building.config.Settings().inventoryMouseLook, "default disabled");
         ConfigSession session = SettingsRegistry.open(mc);
         Setting option = find(session, "tweaks.inventoryMouseLook");
-        check(option.page.equals("Inventory") && !option.defaultValue.getAsBoolean() && !option.description.isBlank(), "missing metadata");
+        check(option.page.equals("Inventory") && option.defaultValue.getAsBoolean() && !option.description.isBlank(), "missing metadata");
         option.parse("false"); session.preview(true);
         check(!Config.current().inventoryMouseLook, "preview not applied"); session.discard();
         check(Config.current().inventoryMouseLook, "Cancel did not restore");
@@ -232,7 +231,7 @@ final class Release152Checks {
     } finally {
       camera().getClass().getMethod("setActive", boolean.class).invoke(camera(), false);
       AutoWalk.stop(); FreeLook.reset(mc); mc.player.method_140(); mc.setScreen(null); Config.preview(before);
-      enabled.set(cameraOptions, oldEnabled);
+
     }
     log("RELEASE 152 FAILURES " + failures);
   }

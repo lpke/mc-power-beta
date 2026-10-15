@@ -20,28 +20,34 @@ class ConfigDefaultsTest {
     Path config = PowerConfig.path();
     String defaults = Files.readString(config);
     JsonObject root = PowerConfig.document();
-    assertEquals(3, root.get("schemaVersion").getAsInt());
+    assertEquals(4, root.get("schemaVersion").getAsInt());
     assertEquals(2, root.size());
     var settings = root.getAsJsonObject("settings");
-    assertFalse(settings.getAsJsonObject("interface").get("useFeetYCoordinates").getAsBoolean());
+    for (String key : List.of("disableEntityCulling", "disableBlockEntityCulling")) {
+      boolean disabled = settings.getAsJsonObject("entityculling:config").get(key).getAsBoolean();
+      assertFalse(disabled, "fresh installs must enable culling");
+      assertEquals(!disabled, Catalog.metadata("entityculling:config." + key).get("default").getAsBoolean());
+    }
+    assertTrue(settings.getAsJsonObject("interface").get("useFeetYCoordinates").getAsBoolean());
     assertTrue(settings.getAsJsonObject("interface").get("blinkingUiCursor").getAsBoolean());
     assertFalse(settings.getAsJsonObject("gameplay").get("torchShovel").getAsBoolean());
-    assertTrue(settings.getAsJsonObject("gameplay").get("fireSpread").getAsBoolean());
+    assertFalse(settings.getAsJsonObject("gameplay").has("fireSpread"));
+    assertTrue(local.luke.power.rules.RulePresets.survival().enabled(local.luke.power.rules.GameRule.FIRE_SPREAD));
     assertTrue(settings.getAsJsonObject("activeTweaks").get("clickMining").getAsBoolean());
     assertFalse(settings.getAsJsonObject("veinMining").get("enabled").getAsBoolean());
     assertEquals(25, settings.getAsJsonObject("veinMining").get("timePercent").getAsInt());
-    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("building").get("inventoryMouseLook").getAsBoolean());
-    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("death").get("enabled").getAsBoolean());
+    assertTrue(root.getAsJsonObject("settings").getAsJsonObject("building").get("inventoryMouseLook").getAsBoolean());
+    assertTrue(root.getAsJsonObject("settings").getAsJsonObject("death").get("enabled").getAsBoolean());
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("death").get("announceItems").getAsBoolean());
-    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("power_mechanics:config")
+    assertTrue(root.getAsJsonObject("settings").getAsJsonObject("power_mechanics:config")
         .getAsJsonObject("MOB_CONFIG").get("waterNegatesFallDamage").getAsBoolean());
-    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("power_compat:config")
+    assertTrue(root.getAsJsonObject("settings").getAsJsonObject("power_compat:config")
         .getAsJsonObject("STACK_SIZE_CONFIG").get("stackableEmptyBuckets").getAsBoolean());
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("creative").get("flight").getAsBoolean());
-    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("inventoryInPortals").getAsBoolean());
-    assertFalse(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).inventoryInPortals);
-    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("shiftClickIntoCraftingGrid").getAsBoolean());
-    assertFalse(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).shiftClickIntoCraftingGrid);
+    assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get("inventoryInPortals").getAsBoolean());
+    assertTrue(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).inventoryInPortals);
+    assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get("shiftClickIntoCraftingGrid").getAsBoolean());
+    assertTrue(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).shiftClickIntoCraftingGrid);
     assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("lowFire").getAsBoolean());
     for (String key : List.of("damageCameraShake", "fireDamageCameraShake"))
       assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get(key).getAsBoolean());
@@ -70,11 +76,6 @@ class ConfigDefaultsTest {
     Files.writeString(config, "interrupted");
     FileTransaction.recover(game);
     assertEquals(preferences, Files.readString(config));
-    for (String invalid : List.of("broken", "{\"schemaVersion\":2,\"settings\":{}}")) {
-      Files.writeString(config, invalid);
-      assertThrows(IllegalStateException.class, () -> ConfigDefaults.prepare(game));
-      assertEquals(invalid, Files.readString(config));
-    }
     Files.delete(config);
     ConfigDefaults.prepare(game);
     assertEquals(defaults, Files.readString(config));
@@ -96,5 +97,21 @@ class ConfigDefaultsTest {
     FileTransaction.recover(game); ConfigDefaults.prepare(game);
     assertArrayEquals(saved, Files.readAllBytes(config));
     assertTrue(PowerConfig.read("veinMining", local.luke.power.mining.VeinSettings.class).accepts(12, 277));
+    // Bootstrap must let the read-only error UI start without replacing unsupported data.
+    for (String invalid : List.of("broken", "{\"schemaVersion\":2,\"settings\":{}}", "{\"schemaVersion\":99,\"settings\":{}}")) {
+      Files.writeString(config, invalid);
+      try {
+        ConfigDefaults.prepare(game);
+        assertFalse(PowerConfig.problem().isEmpty());
+        assertEquals(4, PowerConfig.document().get("schemaVersion").getAsInt());
+        assertThrows(java.io.IOException.class, () -> PowerConfig.write(rootCopy()));
+        assertEquals(invalid, Files.readString(config));
+      } finally {
+        // Simulate a new process without exposing a production unlock operation.
+        var recovery = PowerConfig.class.getDeclaredField("recoveryDefaults"); recovery.setAccessible(true); recovery.set(null, null);
+        var problem = PowerConfig.class.getDeclaredField("problem"); problem.setAccessible(true); problem.set(null, "");
+      }
+    }
   }
+  private JsonObject rootCopy() { return PowerConfig.document(); }
 }

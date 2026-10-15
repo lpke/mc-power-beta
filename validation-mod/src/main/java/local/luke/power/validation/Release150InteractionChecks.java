@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import local.luke.power.config.SettingsRegistry;
 import local.luke.power.gameplay.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.validation.mixin.ScreenInput;
 import net.minecraft.class_585;
 import net.minecraft.client.Minecraft;
@@ -17,7 +16,7 @@ import org.lwjgl.input.Keyboard;
 final class Release150InteractionChecks {
   static void run(Minecraft mc) throws Exception {
     failures=0;
-    var properties=(CheatWorld)mc.world.method_262();boolean cheats=properties.power$cheatsEnabled();
+    var properties=AccessRules.of(mc.world.method_262());boolean cheats=properties.allAllowed();
     String mode=mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     var inventory=Arrays.stream(mc.player.inventory.main).map(s->ItemStack.clone(s)).toArray(ItemStack[]::new);
     var cursor=ItemStack.clone(mc.player.inventory.getCursorStack());
@@ -25,7 +24,7 @@ final class Release150InteractionChecks {
     var keys=(ByteBuffer)keysField.get(null);byte shift=keys.get(42);
     var gameplay=GameplayConfig.copy();var session=SettingsRegistry.open(mc);List<Entity> created=new ArrayList<>();
     try {
-      properties.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
+      properties.allAllowed(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
       test("actual catalogue Shift-click obeys item and live bucket limits with both mouse buttons",()->{
         keys.put(42,(byte)1);
         for(int width:new int[]{320,640})for(boolean buckets:new boolean[]{false,true}) {
@@ -69,7 +68,7 @@ final class Release150InteractionChecks {
       keys.put(42,shift);created.forEach(Entity::markDead);GameplayConfig.preview(gameplay);session.discard();
       mc.player.inventory.setCursorStack(null);mc.player.closeScreen();
       System.arraycopy(inventory,0,mc.player.inventory.main,0,inventory.length);mc.player.inventory.setCursorStack(cursor);
-      properties.power$cheatsEnabled(cheats);CreativeVehicleChecks.mode(mc,mode);
+      properties.allAllowed(cheats);CreativeVehicleChecks.mode(mc,mode);
     }
     log("RELEASE 150 INTERACTION FAILURES "+failures);
   }

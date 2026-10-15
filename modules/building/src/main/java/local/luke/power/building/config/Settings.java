@@ -12,16 +12,16 @@ public final class Settings {
   public boolean freeLookFollowThirdPerson = true;
   public boolean autoWalkHoldToWalk = true;
   public boolean autoWalkCancelOnLostFocus;
-  public boolean inventoryWhileMoving;
-  public boolean inventoryMouseLook;
+  public boolean inventoryWhileMoving = true;
+  public boolean inventoryMouseLook = true;
   public int autoWalkHoldMillis = 350;
-  public boolean autoWalk = true, freeLook = true, freeLookToggle = false;
-  public boolean autoMine = true, autoMineAnnounceToggle;
+  public boolean freeLookToggle;
+  public boolean autoMineAnnounceToggle;
   public local.luke.power.building.camera.Perspective freeLookPerspective =
       local.luke.power.building.camera.Perspective.FIRST_PERSON;
   public boolean boatSpeed = false, boatProtection = false;
-  public boolean boatSteering = true, fastMinecarts = true, clickMining = true;
-  public int obsidianBreakingSpeed;
+  public boolean boatSteering = false, fastMinecarts = false, clickMining = false;
+  public int obsidianBreakingSpeed = 60;
   public boolean autoWalkAnnounceToggle, freeLookAnnounceToggle;
 
   public Settings copy() {
@@ -32,15 +32,12 @@ public final class Settings {
     s.slabs = slabs.copy();
     s.hotbar = hotbar.copy();
     s.freeLookFollowThirdPerson = freeLookFollowThirdPerson;
-    s.autoWalk = autoWalk;
-    s.autoMine = autoMine;
     s.autoMineAnnounceToggle = autoMineAnnounceToggle;
     s.inventoryWhileMoving = inventoryWhileMoving;
     s.inventoryMouseLook = inventoryMouseLook;
     s.autoWalkHoldToWalk = autoWalkHoldToWalk;
     s.autoWalkCancelOnLostFocus = autoWalkCancelOnLostFocus;
     s.autoWalkHoldMillis = autoWalkHoldMillis;
-    s.freeLook = freeLook;
     s.freeLookToggle = freeLookToggle;
     s.freeLookPerspective = freeLookPerspective;
     s.boatSteering = boatSteering;

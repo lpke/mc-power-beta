@@ -19,22 +19,38 @@
 
 ## Changes that need care
 
-- Keep gameplay labels functional, with no upstream mod branding. Defaults should
-  preserve Beta gameplay. Cheats gate game modes, item spawning, teleportation,
-  world editing and other world-changing commands; QoL tools remain independent.
-  Disabling access must preserve warps, history and inventories.
+- Keep gameplay labels functional, without upstream branding. Use the approved pack
+  defaults. World rules are explicit, unprefixed values in world metadata; global
+  preferences and the two creation presets use PowerConfig. There is no inheritance
+  or Cheats master. Presets copy once at creation; existing worlds keep their own rules.
+  Commands, UI, bindings, help and completion share each capability's rule check.
+  Preserve read-only subcommands and independent shared controls. New actions must
+  choose a permission owner. Creative retains native inventory, flight and protection.
+  Revocation exits safely and preserves warps, history, inventories and recovery records.
+  Never revoke a carried-container mode until the container can be placed safely.
 - `PowerConfig` is the only settings writer: `config/power-beta.json`.
+  Rule groups identify world scope without repeated row labels.
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
-  track and preset IDs. Only the current configuration format is supported.
-  Fresh installs copy `defaults/power-beta.json`; do not reintroduce historical importers.
-  Update existing instances explicitly when their stored data needs to change.
+  track and preset IDs. Global schema 4 supports conversion from schema 3 through
+  `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 1
+  supports pre-rule metadata through `rules/LegacyWorldRules` and `WorldRuleData`.
+  Preserve frozen legacy evidence for worlds converted later. Use these helpers when
+  updating an instance; never widen conflicting permissions or reset unsupported data.
+  Validate converted values and verify durable backups before replacing originals.
+  Unsupported/future formats block writes or world opening with a useful recovery UI.
+  Fresh installs copy `defaults/power-beta.json`; keep unrelated historical importers out.
+  Document current/supported formats in release notes whenever either format changes.
   Gameplay hotkeys queue settings snapshots through `PowerConfig`; never flush files
   on the input or render path. Flush queued saves before menu backups and on shutdown.
   The config API retains its `gcapi3` binary identity for external dependencies.
 - The game uses Gson 2.8.9. Do not rely on record deserialization without an explicit
   adapter. Test persisted data with that version, including rollback and restart.
-- Options edits use `ConfigSession`. Apply commits; Cancel restores live previews.
+- Options edits use `ConfigSession`. Auto-apply defaults on; manual Apply commits and
+  Cancel restores previews. Dirty exits offer Save, Discard and Keep editing. Creation
+  edits affect only the future-world draft. Main-menu templates, creation and loaded
+  world rules share search and editor behavior. Preserve Custom drafts when cycling
+  presets; block creation visibly when its starting mode lacks permission.
   Update linked values together. Preserve search, scroll, related-view history and
   modifier ownership when rebuilding rows. Share render and hit-test geometry.
 - `settings-layout.json` owns tab/group order; catalogue `order` values arrange
@@ -46,17 +62,25 @@
   Linux key repairs must update native events and polling together. F20–F24 use
   reserved LWJGL codes 114–118. Inventory movement only admits known screens without
   text input, excludes mouse/Shift, and uses normal container closure for item cleanup.
-- Auto-walk retains the player's activation direction, independently of freecam's
-  manual keys. Optional inventory looking uses native sensitivity and rotation,
-  checks the originating press against all GUI panels, creative tabs and destroy
-  slots. Capture and hide the pointer for that drag, including GUI hover/cursor
-  stacks, until release. Restore it on release, lost focus, screen/world changes
-  or lost eligibility; holding the button must not restart a cancelled drag.
-  Dispatch the mouse event batch before grabbing; quick gestures keep their press
-  coordinates and send their final motion through the native camera renderer.
-  Right-click looking must not drop cursor items; supported screens and focus rules
-  remain shared with inventory movement. Both native and raw mouse helpers must
-  supply cursor deltas in GUIs; raw device deltas remain gameplay-only.
+- Auto-walk retains the player's activation direction independently of freecam's
+  manual keys. It survives focus loss by default, including the automatic pause
+  screen. Supported inventories retain actual auto-walk movement while unfocused;
+  only manual movement needs focus. Test displacement, not just the toggle.
+- Inventory looking shares eligible screens and focus rules with inventory movement.
+  Check the originating press against every GUI panel, creative tab and destroy slot.
+  Use native sensitivity/rotation. Capture and hide the pointer, GUI hover and cursor
+  stack until release; hidden hover coordinates must never drive the player model.
+  Restore the originating position inside the native grab transition, without a
+  second warp. Restore on release, lost focus, screen/world changes or lost eligibility;
+  holding the button must not restart a cancelled drag. Leave events and polling to
+  unrelated screens, including photo mode. Right-click looking must not drop items.
+  Dispatch complete mouse batches before changing capture. Preserve each drag's
+  press coordinates/deltas, send final motion through the native camera renderer,
+  and remap later clicks to the restored cursor. Both native and raw helpers supply
+  GUI cursor deltas; raw device deltas remain gameplay-only. Linux capture retains
+  the event baseline because XQueryPointer can lead queued events. Complete quick
+  drags need a hidden native cursor transition on Xwayland. Test consecutive fast
+  drags, both helpers and real pointer movement immediately after release.
 - `AudioController` owns all music sources, pauses, previews and timing.
   World/menu transitions preserve streams and pause state in WORLD/MIX modes;
   only CUSTOM resets playback. Preview restoration must not revive old jukeboxes.
@@ -67,21 +91,33 @@
   Keep missing track IDs, queues and user music files intact.
   Previous during a between-track gap replays the last played track without
   moving back in history or consuming queued tracks. Paused tracks remain current.
-- Difficulty is per-world, independent of cheats, including creation, world switches,
+- Difficulty is per-world, independent of access permissions, including creation, world switches,
   dimension copies and commands. Never copy it from global GameOptions. Defaults
-  are Normal; menu edits take effect only on Apply. Keep multiplayer server-owned.
-- Hide cheat-only rows and empty tabs when cheats are unavailable. Shared freecam
-  controls and non-cheat commands remain independent. Hidden bindings must not
-  claim input priority or mouse events. Only world-specific settings need scope
+  are Normal; manual menu edits take effect on Apply and auto-apply commits them.
+  Keep multiplayer server-owned.
+- Hide unavailable capability rows and empty tabs using their individual rules.
+  Game rules remain editable by the local owner. Main-menu rule editors change only
+  creation defaults. Shared freecam controls and safe commands remain independent.
+  Hidden bindings must not claim input priority or mouse events. Only world-specific settings need scope
   notes in tooltips and setting or group names; global settings have no scope boilerplate.
-- World cycles are per-world cheats. Keep the simulation clock running; daylight
+- World cycles are per-world rules, independent of access permissions. Keep the
+  simulation clock running; daylight
   uses an offset saved in world metadata. Sky rendering, day counters, time commands
   and photo mode use the daylight clock. Sleep must wake players without advancing
   frozen daylight or clearing frozen weather. Test normal and accelerated sleep,
-  scheduled updates, pause/resume, save/reload and cheats being disabled.
+  scheduled updates, pause/resume, save/reload and access permissions being disabled.
 - Numeric display units do not change stored values. Duration editors use seconds;
   processing budgets remain per tick. Validate item/filter IDs before accepting
   drafts, and keep temporary errors outside row layout.
+- Shift-double-click transfers matching native item data from the clicked inventory,
+  leaving the held cursor stack untouched. Use normal item/slot limits and native
+  multiplayer transfers. Exclude outputs, hidden catalogue and read-only slots. Cancel
+  pending gestures on cursor/container/focus changes and keep gathering, dragging,
+  wheel transfers and crafting from claiming the same gesture.
+  Measure double-click intervals using native event timestamps, not frame processing
+  time. Mouse batches precede queued keyboard events; Shift key-down must not cancel
+  its own gesture. Ordinary drags must revalidate cursor and visited slot data before
+  redistribution or rollback, and preserve existing oversized stacks.
 - Item transfers are transactions, including full counts, damage and NBT. Preserve
   journal flushes, rollback, ownership checks and failure shutdown. Menu edits must
   never touch inventory slots. WorldEdit and carrying suppress StationAPI block
@@ -95,15 +131,13 @@
 - Creative middle-click dragging previews compatible, writable slots and commits
   together on release. Use normal item and slot limits; preserve cursor damage/NBT.
   Never paint hidden catalogue slots, survival, spectator or multiplayer inventories.
-  Cancel on focus loss, screen/container changes, lost cheats or cursor changes.
+  Cancel on focus loss, screen/container changes, lost Creative access or cursor changes.
 - `TweakIndicators` exposes live module state across mappings. HUD inclusion is
   separate from gameplay settings. Do not infer active auto-walk/free look from
   feature availability or poll action keys while rendering.
   Per-feature toggle messages default off and observe transitions on ticks,
   independently of HUD inclusion. Menus, focus changes and world loading stay silent.
 
-- F3 providers share the debug text layout and colour. Capture only the F3 block,
-  never chat or other HUD text. World overrides identify scope at group level.
 - Flight sprint covers all three movement axes in creative, spectator and freecam.
   Opposing inputs cancel; stopping movement resets Toggle sprint.
 - Chat editing shares a buffer across input and completion. History keeps arrow
@@ -112,18 +146,24 @@
   Help and completion share command availability. Group WorldEdit under //help,
   retain aliases, and keep per-command help free of gameplay changes.
   Every new command must appear in /help and completion, with /<command> help
-  describing its syntax and permissions without changing gameplay.
+  describing its syntax and permissions without changing gameplay. /gamerule uses
+  the same registry, aliases and validation as the UI; confirm writes only after a
+  verified durable metadata save. /repair changes only held-item durability and
+  preserves identity, count and native NBT; empty, undamageable and repaired items
+  receive useful feedback.
   Optional death records are scoped by stable world ID and player. Recovery needs
-  cheats, plans full capacity first and protects native item NBT and original slots
+  allow_death_recovery, plans full capacity first and protects native item NBT and original slots
   with a flushed journal. GUI recovery uses per-stack claims; viewing never changes
   inventory. Occupied original slots cancel recovery; GUI is the only recovery entry.
   Interrupted claims stay blocked; disabling keeps history. Decimal death logs
-  start fresh in 1.4.2. Keep inventory is a per-world cheat rule which clears when
-  cheats are disabled. Preserve native stacks through death, respawn and dead-player
+  start fresh in 1.4.2. Keep inventory is an independent per-world rule; changing
+  access permissions must not reset it. Preserve native stacks through death, respawn and dead-player
   saves; kept deaths claim their recorded items without creating drops.
   Death snapshots include the four player crafting inputs, never the recipe output.
   Normal deaths drop those inputs once; kept deaths preserve them through respawn.
   Recovery restores empty original crafting slots and rolls back recipe callback failures.
+  Ordinary crafting-grid saves also retain full native item data and counts. Keep
+  pre-2.0 grid saves readable; changing the storage preference must not erase inputs.
 - Freecam bypasses entity and block entity culling independently of player movement.
   Background culling only reads loaded chunks and uses its own vectors and boxes;
   never run chunk loading or touch Beta's shared geometry pools from that worker.
@@ -132,14 +172,20 @@
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.
   Keep the first detached frame still, reset movement timing and reject old-world poses.
   Hide the HUD once on entry, allow manual F1 changes during the visit, and restore
-  its entry state on every exit. Container previews use a separate camera ray and
-  remain available with the HUD hidden. Never change the player's interaction target,
-  open inventories or load chunks for previews; keep multiplayer previews disabled.
+  its entry state on every exit. Proximity must never hide the player's body.
+  Container previews use a separate interpolated, occluded ray and configured
+  Creative block/entity reach in every mode, including with the HUD hidden. Reject
+  unloaded terrain before raycasting; never load chunks, open inventories or change
+  the player's interaction target. Keep multiplayer previews disabled.
 - Natural spawning rules are saved with world properties and copied across
-  dimensions. They require cheats, preserve existing mobs and never gate /summon.
+  dimensions. Monsters and animals cover every native species, including squid and
+  wolves. Preserve existing mobs and never gate /summon with natural-spawn rules.
+  Dungeon spawners and sleep ambushes have independent rules. The sleeping percentage
+  applies to instant and accelerated sleep; zero still needs a sleeper, above 100
+  prevents skipping, and dead players and spectators do not count.
 - Optional modern water landings reset fall distance before landing damage, for
   source and flowing water. Match fluid height and hitbox contact, including fast
-  movement through water. Keep Beta defaults and multiplayer server authority.
+  movement through water. Preserve multiplayer server authority.
 - Optional empty bucket stacks cap at 16; filled buckets remain unstackable.
   Filling and milking exchange one bucket, with inventory insertion or a normal
   overflow drop. Preserve existing stacks when disabled and never split inventories
@@ -152,6 +198,12 @@
 - Test in a disposable clone outside the user's normal instance list. Never launch
   or edit an active instance. Stop only the exact process you started, verified by
   PID and game directory. Preserve worlds, recovery journals and original music.
+- Clean up generated files when their task is finished: obsolete build JARs/ZIPs,
+  accumulated Loom remap copies, disposable test clones, temporary exports and captures.
+  Check disk usage during long build/test runs. Before removing anything, verify that
+  no active process or pending check needs it; do not clean shared mapping caches
+  during builds. Keep current artifacts, source, user files, worlds, recovery journals,
+  original music and required backups. Do not delete unrelated application caches.
 - Mute every test instance before launch. Route audio tests to a silent output or
   capture device so they never play through the user's speakers or headphones.
   Never mute or change the audio routing of the user's own instances.
@@ -205,8 +257,8 @@
 
 - Entity visibility changes only rendering. Full bright overrides float shading only
   on the render thread, never saved or simulated light. Manual full bright is independent
-  of cheats. Spectator overrides last for one visit; leaving restores manual state, and
-  lost cheats clear only that override.
+  of permissions. Spectator overrides last for one visit; leaving restores manual state, and
+  lost Spectator access clears only that override.
 - Item merging preserves native NBT, damage, normal stack limits and total counts.
   TNT limits retain native entities and saved fuses, bound work each tick and stay
   available from the main menu for recovery. Both leave multiplayer server-owned.
@@ -224,17 +276,6 @@
   Flexible placement and Complete slabs retain their saved enablement; only temporary
   placement operations and held modifiers clear. Slab completion has no hotkey,
   toggle messages or Active tweaks entry.
-  Auto-walk survives focus loss by default, including the automatic pause screen.
-  In supported inventories, retain actual auto-walk movement while unfocused;
-  only manual movement keys require focus. Test player displacement, not just the toggle.
-- Inventory looking restores the originating cursor position inside the native
-  grab transition. Test native and raw input; avoid a second post-release warp.
-  Dispatch complete mouse batches before changing capture, preserve every drag's
-  deltas and remap later clicks to the restored cursor. Test consecutive fast drags
-  and movement immediately after release. Linux capture must retain the event
-  baseline, since XQueryPointer can be ahead of queued motion and button events.
-  Complete quick drags also need a hidden native cursor transition on Xwayland;
-  verify another real pointer movement after release, not only LWJGL's cached position.
 - Reject incomplete skin-provider responses so the next provider can supply the
   texture. Keep bundled fallback skin paths out of the HTTP downloader.
 - Custom HUD clusters keep stable IDs and independent content, anchors, offsets,
@@ -242,14 +283,14 @@
   daylight clock. Native HUD previews and Cancel update positions immediately.
   F3 and custom HUD location data follow freecam while detached, including facing,
   biome, chunk and block light. HUD queries must not load chunks or move the player.
-- Container previews use configured creative block/entity reach in every mode.
-  Keep their ray separate from interaction targeting, retain occlusion and interpolation,
-  and reject unloaded terrain before raycasting.
-
-- Inventory look must leave mouse events and polling to unrelated screens, including
-  photo mode. Its hidden hover coordinates must never drive the inventory player model.
-  Preserve free-look offsets through explicit perspective changes and retain the chosen
-  perspective when free look ends.
+  F3 providers share debug text layout/colour and capture only that block, never chat
+  or other HUD text. F3 and custom HUD share the eye/feet preference; freecam and
+  Spectator always report the native head base. Freecam collision uses that same
+  lower bound. Third-person ghost heads use the current skin dimensions, draw only
+  head/hat and support free look without moving the player. Spectator third-person
+  cameras bypass terrain clipping; their head marker stays visible inside blocks.
+- Preserve free-look offsets through explicit perspective changes and retain the
+  chosen perspective when free look ends.
 - Photo-mode drags own the button from its originating press through release. Widget
   drags never become camera drags; lost focus cancels them. Clamp tilt before setting its
   target and preserve the original daylight snapshot through GUI resizing.
@@ -259,12 +300,6 @@
   without changing inclusion, volume, presets or queues. Menu scrub tracks reserve equal
   space on either side so the track itself stays centred with the menu.
 
-- F3 and custom HUD Y coordinates share the eye/feet preference. Freecam and spectator
-  always report the native head base. Third-person ghost heads use the current skin's
-  texture dimensions, draw only head/hat, and support free look without moving the player.
-  Freecam collision's lower bound shares the reported head base. Spectator third-person
-  cameras bypass terrain clipping, and their head marker remains visible inside blocks.
-  Freecam proximity must never hide the player's body.
 - Hotbar swaps flush immutable recovery bytes on a worker before publishing on a later
   game tick. Keep native NBT access on the game thread, bound queued requests, and cancel
   stale plans on inventory/owner, menu, focus or world changes. Never skip the durable flush.
@@ -278,10 +313,16 @@
   tools, mode and ownership before each native break, stop when the tool breaks, and clear
   jobs on menus, focus loss and world exit. Compose timing after other mining adjustments;
   the configured percentage of whole-vein time never beats one block's normal time.
-- Fire spread is a global preference, default on. Disabling it suppresses spread, block
+- Fire spread is a per-world rule, default on. Disabling it suppresses spread, block
   consumption and lava ignition while retaining native fire aging, extinguishing and damage.
-  Multiplayer stays server-owned. Temporary click mining inverts the saved preference with
-  separate unsaved state, reports its effective value, and clears through TweakLifecycle.
+  Creeper/ghast griefing affects block destruction only; ghast ignition remains separate.
+  Explosions destroy items covers TNT, creepers and ghasts without changing block drops
+  or other damage. TNT-off prevents new priming and pauses native entities/fuses until
+  re-enabled. Work budgets remain global. Player damage rules leave mobs and unrelated
+  damage sources unchanged; Peaceful regeneration does not gate food healing.
+  Nether portal entry rules must retain return travel. Keep multiplayer server-owned.
+  Temporary click mining inverts its global preference with separate unsaved state,
+  reports the effective value, and clears through TweakLifecycle.
 
 - Item and block settings use the shared graphical picker. Keep each editor draft local
   until Done, validate custom IDs against loaded registries, retain metadata variants
@@ -298,9 +339,9 @@
   The water-material override is scoped to fog rendering on its owning thread, including
   StationAPI's colour hooks; it must not affect other fluid queries.
 
-- The creation-screen cheats choice also selects the initial player mode: Creative when
-  on, Survival when off. That initial mode selection is silent; later changes keep their
-  normal messages. Existing-world cheats edits never promote the player to Creative.
+- Creation starts in Survival for the Survival preset, Creative for Cheats and the
+  selected valid mode for Custom. Initial mode selection is silent; later changes keep
+  normal messages. Editing an existing world's rules never promotes its game mode.
 
 - Underwater fog density is 0–100 percent, default 100. Zero and full bright use normal
   terrain fog; other values scale native water fog without changing lighting or other fluids.

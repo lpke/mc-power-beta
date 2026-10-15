@@ -2,7 +2,6 @@ package local.luke.power.validation;
 
 import static local.luke.power.validation.Validation.*;
 import java.util.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.validation.mixin.ChatLinesAccess;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -12,8 +11,8 @@ final class ChatWrapChecks {
     failures = 0;
     List<ChatHudLine> messages = ((ChatLinesAccess) mc.inGameHud).power$messages();
     var old = List.copyOf(messages);
-    var world = (CheatWorld) mc.world.method_262();
-    boolean cheats = world.power$cheatsEnabled();
+    var world = AccessRules.of(mc.world.method_262());
+    boolean cheats = world.allAllowed();
     try {
       for (char code : "0123456789abcdefABCDEF".toCharArray()) test("chat wraps colour " + code, () -> {
         checkMessage(mc, messages, "§" + code + "Coloured chat continues over several lines. ".repeat(5));
@@ -33,17 +32,17 @@ final class ChatWrapChecks {
         mc.inGameHud.addChatMessage("Short plain message");
         check(messages.get(0).text.equals("Short plain message"), "colour leaked between messages");
       });
-      test("WorldEdit cheats warning retains red on every wrapped line", () -> {
-        world.power$cheatsEnabled(false); messages.clear();
+      test("WorldEdit permission warning retains its colour on every wrapped line", () -> {
+        world.allAllowed(false); messages.clear();
         var result = ChatChecks.submit(mc, "//set stone");
-        check(result.size() == 1 && result.get(0).contains("Cheats are disabled"), result.toString());
+        check(result.size() == 1 && result.get(0).contains("Requires allow_world_editing"), result.toString());
         check(messages.size() >= 2, "warning did not wrap");
         for (int i = 0; i < messages.size() - 1; i++)
-          check(messages.get(i).text.startsWith("§c"), messages.get(i).text);
+          check(messages.get(i).text.startsWith("§7"), messages.get(i).text);
         mc.setScreen(new net.minecraft.client.gui.screen.ChatScreen());
       });
     } finally {
-      world.power$cheatsEnabled(cheats);
+      world.allAllowed(cheats);
       if (failures != 0) { messages.clear(); messages.addAll(old); }
     }
     log("CHAT WRAP FAILURES " + failures);

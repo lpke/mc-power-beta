@@ -9,6 +9,7 @@ public final class PowerBeta {
   private static boolean ready;
 
   public static void tick(Minecraft mc) {
+    if (local.luke.power.world.WorldLoadGuard.tick(mc)) return;
     local.luke.power.ui.TextDrag.context(mc.currentScreen, org.lwjgl.opengl.Display.isActive());
     var saveFailure = local.luke.power.storage.PowerConfig.takeSaveFailure();
     if (saveFailure != null) {
@@ -33,6 +34,7 @@ public final class PowerBeta {
         if (local.luke.power.light.LightConfig.current().enabled) local.luke.power.light.LightConfig.toggle();
       });
       local.luke.power.death.DeathCommands.register();
+      local.luke.power.commands.GameRuleCommand.register();
       local.luke.power.input.TweakIndicators.register(
           local.luke.power.input.TweakIndicators.Tweak.CINEMATIC_CAMERA,
           () -> mc.options.cinematicMode ? "" : null,
@@ -46,7 +48,8 @@ public final class PowerBeta {
       local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
       local.luke.power.input.Bindings.availability(id ->
           !id.equals("power_creative.picker") && !id.equals("power_creative.modifier")
-              || local.luke.power.permissions.CommandPermissions.cheatsEnabled());
+              || (local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE)
+                  || local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE)));
       local.luke.power.video.VideoConfig.current();
       try {
         ConfigAudit.write(mc);

@@ -3,7 +3,6 @@ package local.luke.power.validation;
 import static local.luke.power.validation.Validation.*;
 import java.util.*;
 import local.luke.power.gameplay.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.visual.*;
 import net.minecraft.*;
 import net.minecraft.block.Block;
@@ -38,21 +37,21 @@ public final class Release151SphereChecks {
   }
   static void run(Minecraft mc, String action) throws Exception {
     if (action.equals("setup")) {
-      ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+      (AccessRules.of(mc.world.method_262())).allAllowed(true);
       CreativeVehicleChecks.mode(mc, "CREATIVE"); mc.setScreen(null);
       for (Object e : new ArrayList<>(mc.world.method_291())) if (e instanceof class_142 || e instanceof class_365) ((Entity)e).markDead();
       for (int x = -17; x <= 17; x++) for (int z = -17; z <= 17; z++)
         for (int y = 83; y <= 107; y++) mc.world.method_154(x, y, z, y < 96 ? Block.DIRT.id : 0, 0);
       mc.player.method_1340(.5, 96, .5); mc.player.yaw = 0; mc.player.pitch = 5;
       var s = GameplayConfig.copy(); s.limitTnt = true; s.tntPerTick = 4; s.tntMillis = 8;
-      s.explosionProofItems = true; s.mergeItems = true; s.mergeThreshold = 256; GameplayConfig.preview(s);
+      AccessRules.set(mc, local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS, false); s.mergeItems = true; s.mergeThreshold = 256; GameplayConfig.preview(s);
       ChatChecks.submit(mc, "//sphere tnt 5");
       return;
     }
     scenario = action;
     var s = GameplayConfig.copy(); s.mergeItems = !action.contains("unmerged");
     s.limitTnt = !action.contains("unlimited"); s.fastItemCollisions = !action.contains("slow");
-    s.explosionProofItems = !action.contains("unprotected"); GameplayConfig.preview(s);
+    AccessRules.set(mc, local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS, action.contains("unprotected")); GameplayConfig.preview(s);
     var v = VisualConfig.copy(); v.hideEntities = action.contains("hidden"); v.hideItems = true; VisualConfig.preview(v);
     mc.setScreen(null);
     // Stand next to the sphere at ground level and prime its nearest surface.

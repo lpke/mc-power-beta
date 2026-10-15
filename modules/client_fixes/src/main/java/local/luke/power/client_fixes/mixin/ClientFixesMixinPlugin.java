@@ -58,21 +58,16 @@ public class ClientFixesMixinPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         Config.config.enableAuthenticationChanges = configObject.getBoolean("enableAuthenticationChanges", true);
         Config.config.enableControlsChanges = configObject.getBoolean("enableControlsChanges", true);
-        Config.config.enableDebugGraphChanges = configObject.getBoolean("enableDebugGraphChanges", true);
         Config.config.enableDebugMenuWorldSeed = configObject.getBoolean("enableDebugMenuWorldSeed", true);
         Config.config.enableMultiplayerServerChanges = configObject.getBoolean("enableMultiplayerServerChanges", true);
         Config.config.enableChatChanges = configObject.getBoolean("enableChatChanges", true);
 
         if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.controls.ControlsOptionsScreenMixin")) {
             return Config.config.enableControlsChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.controls.GameOptionsMixin")) {
-            return Config.config.enableControlsChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.controls.KeyBindingMixin")) {
             return Config.config.enableControlsChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.misc.ChatKeyMixin")) {
             return Config.config.enableChatChanges;
-        } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.misc.DebugGraphMixin")) {
-            return Config.config.enableDebugGraphChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.misc.InGameHudMixin")) {
             return Config.config.enableDebugMenuWorldSeed;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.misc.MinecraftMixin")) {

@@ -55,21 +55,21 @@ final class WorldSettingsChecks {
     if(action.equals("create")) { creation(mc); return; }
     if(action.equals("reload")) { reload(mc); return; }
     check(mc.world!=null&&!mc.world.isRemote,"requires singleplayer fixture world");
-    var properties=mc.world.method_262(); var cheat=(CheatWorld)properties;
+    var properties=mc.world.method_262(); var cheat=AccessRules.of(properties);
     int before=difficulty(mc).power$difficulty(), nativeBefore=mc.options.difficulty;
-    boolean enabledBefore=cheat.power$cheatsEnabled(); var parent=mc.currentScreen;
+    boolean enabledBefore=cheat.allAllowed(); var parent=mc.currentScreen;
     try {
       test("all four difficulties survive NBT and dimension copies with other metadata intact",()-> {
         for(int value=0;value<4;value++) {
           var fresh=new WorldProperties(173L,"Difficulty "+value); var rules=(WorldDifficulty)fresh;
           check(rules.power$difficulty()==2,"new save default");
           rules.power$difficulty(value); fresh.setTime(12345); fresh.setRaining(true);
-          ((CheatWorld)fresh).power$cheatsEnabled(value%2==1);
+          (AccessRules.of(fresh)).allAllowed(value%2==1);
           ((WorldCycles)fresh).power$daylightCycle(false);
           var loaded=new WorldProperties(fresh.asNbt()); var copied=new WorldProperties(loaded);
           check(((WorldDifficulty)copied).power$difficulty()==value,"copy/NBT lost value");
           check(copied.getTime()==12345&&copied.getRaining(),"unrelated metadata changed");
-          check(((CheatWorld)copied).power$cheatsEnabled()==(value%2==1),"cheats changed");
+          check((AccessRules.of(copied)).allAllowed()==(value%2==1),"cheats changed");
           check(!((WorldCycles)copied).power$daylightCycle(),"cycle changed");
         }
         check(((WorldDifficulty)new WorldProperties(new NbtCompound())).power$difficulty()==2,"absent difficulty default");
@@ -81,7 +81,7 @@ final class WorldSettingsChecks {
         }
       });
       test("difficulty draft and Cancel never affect gameplay; Apply and native ticks use the world value",()-> {
-        cheat.power$cheatsEnabled(false);
+        cheat.allAllowed(false);
         byte[] config=Files.readAllBytes(local.luke.power.storage.PowerConfig.path());
         for(int value=0;value<4;value++) {
           int old=difficulty(mc).power$difficulty();
@@ -121,65 +121,10 @@ final class WorldSettingsChecks {
         change(mc,1);hostile.tick();check(!hostile.dead,"Easy removed hostile");
         change(mc,0);hostile.tick();check(hostile.dead,"Peaceful retained hostile");
         int health=mc.player.health; mc.player.health=10;
-        try{for(int i=0;i<30;i++)mc.player.tick();check(mc.player.health>10,"Peaceful health regeneration stopped");}
+        try{mc.player.field_1645=0;mc.player.method_937();check(mc.player.health==11,"Peaceful health regeneration stopped: health="+mc.player.health);}
         finally{mc.player.health=health;}
       });
-      test("every setting has accurate explicit scope; command exemptions have correct help",()-> {
-        var session=SettingsRegistry.open(mc);
-        for(Setting s:session.settings()) {
-          String tip=Tooltips.setting(s,"");
-          check(tip.contains(SettingScope.note(s)),"missing scope: "+s.id);
-          if(s.id.startsWith("commands.world.")&&!SettingAccess.cheat(s))
-            check(tip.contains("do not restrict"),"misleading non-cheat command help: "+s.id);
-        }
-        check(SettingScope.perWorld(find(session,"world.difficulty")),"difficulty scope");
-        check(!SettingScope.perWorld(find(session,"power_controls:general.autosaveInterval")),"autosave scope");
-      });
-      test("cheats off hides rows and empty tabs in normal search related conflicts and changes views",()-> {
-        cheat.power$cheatsEnabled(false);
-        var screen=new PowerOptionsScreen(null);mc.setScreen(screen);screen.init(mc,640,420);
-        cleanView(screen,"Creative");
-        check(!screen.visiblePages().contains("Creative")&&!screen.visiblePages().contains("World editing"),"empty cheat tabs visible");
-        check(screen.visiblePages().contains("Commands"),"non-cheat Commands tab hidden");
-        check(field(screen,"page").equals("General"),"hidden remembered page not repaired");
-        for(String tab:screen.visiblePages()) {
-          cleanView(screen,tab);
-          for(Setting row:rows(screen))check(!SettingAccess.cheat(row),"cheat row visible "+row.id);
-        }
-        cleanView(screen,"Commands");
-        for(var command:CommandPermissions.COMMANDS)if(!command.cheat()) {
-          check(rows(screen).stream().anyMatch(s->s.id.equals("commands.rule."+command.name())),"missing non-cheat "+command.name());
-          check(rows(screen).stream().anyMatch(s->s.id.equals("commands.world."+command.name())),"missing world non-cheat "+command.name());
-        }
-        for(String query:List.of("creative","teleport","wand","world editing","game mode")) {
-          search(screen,query);for(Setting row:rows(screen))check(!SettingAccess.cheat(row),"search leak "+row.id);
-        }
-        var hidden=find(screen.session(),"creative.flight");hidden.cycle(1);
-        search(screen,"");field(screen,"changedOnly",true);call(screen,"layout");
-        for(Setting row:rows(screen))check(!SettingAccess.cheat(row),"changed filter leak");
-        field(screen,"changedOnly",false);field(screen,"relatedIds",List.of("creative.flight","keys.power_creative.modifier","creative.sprintMultiplier"));call(screen,"layout");
-        check(rows(screen).size()==1&&rows(screen).get(0).id.equals("creative.sprintMultiplier"),"related filter leak");
-        field(screen,"relatedIds",List.of());field(screen,"conflictIds",List.of("keys.power_creative.picker","keys.key.forward"));call(screen,"layout");
-        check(rows(screen).size()==1&&rows(screen).get(0).id.equals("keys.key.forward"),"conflict filter leak");
-        cleanView(screen,"General");var toggle=find(screen.session(),"world.cheats");toggle.value=new JsonPrimitive(true);screen.session().link(toggle);call(screen,"layout");
-        check(screen.visiblePages().containsAll(List.of("Creative","World editing")),"tabs did not return");
-        check(!cheat.power$cheatsEnabled(),"draft enabled cheats before Apply");
-        for(int width:new int[]{320,640}) {
-          screen.init(mc,width,width==320?240:420);cleanView(screen,"General");
-          field(screen,"sideScroll",0d);call(screen,"layout");
-          int x=(int)call(screen,"origin")+8;
-          ((ScreenInput)(Object)screen).power$click(x,24+22+8,0);
-          check(field(screen,"page").equals("Video"),"tab click mismatch at "+width);
-        }
-        toggle.value=new JsonPrimitive(false);screen.session().link(toggle);screen.session().discard();
-        cleanView(screen,"Controls");field(screen,"showDisabled",true);call(screen,"layout");
-        check(rows(screen).stream().noneMatch(SettingAccess::cheat),"show disabled exposed cheats");
-        check(rows(screen).stream().anyMatch(s->s.id.equals("keys.power_creative.sprint")),"shared freecam binding hidden");
-        Setting a=find(screen.session(),"keys.key.forward"), b=find(screen.session(),"keys.key.back");
-        var method=PowerOptionsScreen.class.getDeclaredMethod("conflictTip",Setting.class,List.class);method.setAccessible(true);
-        check(((String)method.invoke(screen,a,List.of(b))).contains("\n\nThe matching binding"),"conflict notice not separated");
-        mc.setScreen(null);
-      });
+      WorldRulesChecks.ui(mc);
       test("hidden creative bindings release modifier priority and mouse ownership",()-> {
         var keysField=Keyboard.class.getDeclaredField("keyDownBuffer");keysField.setAccessible(true);
         ByteBuffer keys=(ByteBuffer)keysField.get(null);byte k=keys.get(35),ctrl=keys.get(29);
@@ -191,7 +136,7 @@ final class WorldSettingsChecks {
           Bindings.configure(Map.of(hidden.id(),Chord.CTRL));
           keys.put(29,(byte)1);keys.put(35,(byte)1);
           for(boolean enabled:new boolean[]{false,true,false}) {
-            cheat.power$cheatsEnabled(enabled);Bindings.register(new Object[]{normal,hidden,mouse});
+            cheat.allAllowed(enabled);Bindings.register(new Object[]{normal,hidden,mouse});
             check(Bindings.down(normal)!=enabled,"hidden binding steals plain key");
             check(Bindings.down(hidden)==enabled,"cheat binding active gate differs");
             check(Bindings.claimsMouse(-98)==enabled,"mouse ownership differs");
@@ -201,22 +146,22 @@ final class WorldSettingsChecks {
           keys.put(35,(byte)1);check(Bindings.down(normal),"next plain press failed");
         } finally {keys.put(35,k);keys.put(29,ctrl);Bindings.configure(saved);Bindings.register(mc.options.allKeys);}
       });
-      test("difficulty command updates only this world and respects cheat access",()-> {
-        cheat.power$cheatsEnabled(true);var rules=CommandPermissions.copy();
+      test("difficulty command updates only this world without requiring an access permission",()-> {
+        cheat.allAllowed(true);var rules=AccessRules.copy(mc);
         try{
-          CommandPermissions.preview(new CommandPermissions.Settings());
+          AccessRules.restore(mc, local.luke.power.rules.RuleSet.cheats());
           for(String choice:List.of("peaceful","easy","normal","hard")) {
             var feedback=ChatChecks.submit(mc,"/difficulty "+choice);check(feedback.stream().noneMatch(s->s.contains("§c")),"command error "+feedback);
             expectDifficulty(mc,List.of("peaceful","easy","normal","hard").indexOf(choice));mc.tick();
             expectDifficulty(mc,List.of("peaceful","easy","normal","hard").indexOf(choice));
           }
-          cheat.power$cheatsEnabled(false);ChatChecks.submit(mc,"/difficulty peaceful");expectDifficulty(mc,3);
+          cheat.allAllowed(false);ChatChecks.submit(mc,"/difficulty peaceful");expectDifficulty(mc,0);
           change(mc,1);expectDifficulty(mc,1);
-        }finally{CommandPermissions.preview(rules);}
+        }finally{AccessRules.restore(mc, rules);}
       });
     } finally {
       mc.options.difficulty=nativeBefore;difficulty(mc).power$difficulty(before);mc.world.field_213=before;
-      cheat.power$cheatsEnabled(enabledBefore);mc.setScreen(parent);
+      cheat.allAllowed(enabledBefore);mc.setScreen(parent);
     }
     log("WORLD SETTINGS FAILURES "+failures);
   }
@@ -258,7 +203,7 @@ final class WorldSettingsChecks {
     int maximum=0;String longest="";
     for(Setting setting:session.settings()) {
       String help=Tooltips.setting(setting,"");
-      entries.add(Map.of("id",setting.id,"perWorld",SettingScope.perWorld(setting),"cheat",SettingAccess.cheat(setting),"tooltip",help));
+      entries.add(Map.of("id",setting.id,"perWorld",SettingScope.perWorld(setting),"cheat",(SettingAccess.owner(setting) != null),"tooltip",help));
       int lines=0;
       for(String paragraph:help.split("\n")) {
         String line="";
@@ -281,7 +226,7 @@ final class WorldSettingsChecks {
       for(int[] size:new int[][]{{640,420},{320,240}}) {
         var create=new net.minecraft.class_180(null);create.init(mc,size[0],size[1]);
         SettingsSnapshot.render(mc,create,size[0],size[1],dir.resolve("creation-"+size[0]+".png"));
-        for(String id:List.of("world.difficulty","power_controls:general.autosaveInterval","commands.world.seed","keys.key.forward")) {
+        for(String id:List.of("world.difficulty","power_controls:general.autosaveInterval","rules.world.spawn_monsters","keys.key.forward")) {
           var options=new PowerOptionsScreen(null);options.init(mc,size[0],size[1]);
           cleanView(options,find(options.session(),id).page);search(options,find(options.session(),id).label);
           for(Object row:(List<?>)field(options,"rows")) {
@@ -313,6 +258,7 @@ final class WorldSettingsChecks {
         check(button.text.equals("Difficulty: Normal"),"creation inherited another world");
         check(button.x>=cheats.x+88&&button.x+108<=320,"creation choices overlap or clip");
         for(int i=0;i<(value+2)%4;i++)input.power$click(button.x+5,button.y+5,0);
+        button=input.power$buttons().stream().filter(b->b.id==3).findFirst().orElseThrow();
         check(button.text.endsWith(List.of("Peaceful","Easy","Normal","Hard").get(value)),"left click cycle");
         input.power$click(button.x+5,button.y+5,1);input.power$click(button.x+5,button.y+5,0);
         if(value%2==1)input.power$click(cheats.x+5,cheats.y+5,0);
@@ -325,7 +271,7 @@ final class WorldSettingsChecks {
         var create=input.power$buttons().stream().filter(b->b.id==0).findFirst().orElseThrow();
         var creationMessages=ChatChecks.record(()->input.power$click(create.x+5,create.y+5,0));
         check(creationMessages.stream().noneMatch(t->t.contains("Set own game mode")),"initial mode selection announced in chat");
-        expectDifficulty(mc,value);check(((CheatWorld)mc.world.method_262()).power$cheatsEnabled()==(value%2==1),"cheat choice lost");
+        expectDifficulty(mc,value);check((AccessRules.of(mc.world.method_262())).allAllowed()==(value%2==1),"cheat choice lost");
         String expectedMode=value%2==1?"CREATIVE":"SURVIVAL";
         check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals(expectedMode),"creation mode differs from cheat choice");
         mc.tick();
@@ -334,17 +280,17 @@ final class WorldSettingsChecks {
         mc.interactionManager=new net.minecraft.SingleplayerInteractionManager(mc);mc.method_2120(folder,name,17320261007L);
         expectDifficulty(mc,value);mc.tick();expectDifficulty(mc,value);
         check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals(expectedMode),"save/reload lost initial mode");
-        // Enabling cheats later must not change the existing player's mode.
+        // Granting mode permissions later must not change the existing player's mode.
         CreativeVehicleChecks.mode(mc,"SURVIVAL");
-        var cheatState=(CheatWorld)mc.world.method_262();cheatState.power$cheatsEnabled(false);cheatState.power$cheatsEnabled(true);mc.tick();
-        check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals("SURVIVAL"),"existing-world cheats edit changed mode");
+        var cheatState=AccessRules.of(mc.world.method_262());cheatState.allAllowed(false);cheatState.allAllowed(true);mc.tick();
+        check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals("SURVIVAL"),"existing-world permission edit changed mode");
         Class modeType=Class.forName("local.luke.power.creative.api.GameMode");
         var messages=ChatChecks.record(()->Class.forName("local.luke.power.creative.Modes").getMethod("change",Minecraft.class,modeType)
             .invoke(null,mc,Enum.valueOf(modeType,"CREATIVE")));
         check(messages.stream().filter(t->t.contains("Set own game mode")).count()==1,"normal mode change message missing or duplicated");
         // Leave a different mode behind before the next creation to catch leaked state.
         CreativeVehicleChecks.mode(mc,value%2==0?"SPECTATOR":"CREATIVE");
-        cheatState.power$cheatsEnabled(value%2==1);
+        cheatState.allAllowed(value%2==1);
         Files.writeString(Path.of("power-beta-difficulty-"+value+".txt"),folder);
         mc.setWorld(null);
       });

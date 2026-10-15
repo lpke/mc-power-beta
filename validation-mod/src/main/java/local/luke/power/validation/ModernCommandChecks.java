@@ -41,11 +41,9 @@ public final class ModernCommandChecks {
   public static void run(Minecraft mc) throws Exception {
     failures = 0;
     check(mc.world != null && !mc.world.isRemote, "requires disposable singleplayer world");
-    var policy = CommandPermissions.copy();
-    var allowed = new CommandPermissions.Settings();
-    for (var command : CommandPermissions.COMMANDS)
-      allowed.rules.put(command.name(), CommandPermissions.Rule.ALLOWED);
-    CommandPermissions.preview(allowed);
+    var policy = AccessRules.copy(mc);
+    var allowed = local.luke.power.rules.RuleSet.cheats();
+    AccessRules.restore(mc, allowed);
     var main = mc.player.inventory.main.clone();
     var armor = mc.player.inventory.armor.clone();
     var cursor = mc.player.inventory.getCursorStack();
@@ -68,9 +66,9 @@ public final class ModernCommandChecks {
     Object hud = Class.forName("local.luke.power.hud.Config").getField("config").get(null);
     var scrolling = hud.getClass().getField("enableChatScroll");
     boolean scrollBefore = (boolean) scrolling.get(hud);
-    var cheatWorld = (local.luke.power.permissions.CheatWorld) properties;
-    boolean cheatsBefore = cheatWorld.power$cheatsEnabled();
-    cheatWorld.power$cheatsEnabled(true);
+    var cheatWorld = AccessRules.of(properties);
+    boolean cheatsBefore = cheatWorld.allAllowed();
+    cheatWorld.allAllowed(true);
     try {
       run(mc, "/gamemode creative");
       test(
@@ -238,7 +236,7 @@ public final class ModernCommandChecks {
             var all = run(mc, "/help");
             check(all.size() > 20, "help still paginated");
             check(
-                all.stream().filter(s -> s.contains("§b/tp§7")).count() == 1,
+                all.stream().filter(s -> s.startsWith("§7§b/tp§7 ")).count() == 1,
                 "tp help missing or repeated");
             check(all.stream().anyMatch(s -> s.contains("/spawnpoint")), "new command missing");
             var detail = run(mc, "/help give");
@@ -251,8 +249,9 @@ public final class ModernCommandChecks {
                 "WE help repeated");
             scrolling.set(hud, false);
             check(run(mc, "/help").size() == 7, "non-scrolling help not paginated");
-            check(run(mc, "//help").size() == 6, "non-scrolling WE help not paginated");
-            check(run(mc, "//help 6").get(0).contains("6/6"), "explicit help page lost");
+            var firstPage=run(mc,"//help");
+            check(firstPage.size()==9&&firstPage.get(0).contains("1/"),"non-scrolling WE help not paginated");
+            check(run(mc, "//help 2").get(0).contains("2/"), "explicit help page lost");
             var invalid = ChatChecks.submit(mc, "/help -1");
             check(
                 invalid.size() == 1 && invalid.get(0).contains("§c"),
@@ -276,10 +275,10 @@ public final class ModernCommandChecks {
                     "warp")) run(mc, "/help " + command);
           });
       test(
-          "master and aliases fail closed without changing world or inventory",
+          "permission rules and aliases fail closed without changing world or inventory",
           () -> {
-            allowed.enabled = false;
-            CommandPermissions.preview(allowed);
+            for (var rule : local.luke.power.rules.GameRule.values()) if (rule.access()) allowed.set(rule, false);
+            AccessRules.restore(mc, allowed);
             try {
               for (String command :
                   List.of(
@@ -289,18 +288,19 @@ public final class ModernCommandChecks {
                       "/clear",
                       "/give @s 1 2",
                       "/spawnpoint",
-                      "/setworldspawn",
-                      "/difficulty easy")) {
+                      "/setworldspawn")) {
                 var output = ChatChecks.submit(mc, command);
                 check(
-                    output.size() == 1 && output.get(0).contains("disabled"),
+                    output.size() == 1 && output.get(0).contains("Enable"),
                     "permission bypass: " + command + output);
               }
-              run(mc, "/help tp");
+              run(mc, "/tp help");
+              check(ChatChecks.submit(mc, "/help tp").stream().anyMatch(s -> s.contains("Unknown command")),
+                  "unavailable command leaked through help lookup");
               run(mc, "/seed");
             } finally {
-              allowed.enabled = true;
-              CommandPermissions.preview(allowed);
+              for (var rule : local.luke.power.rules.GameRule.values()) if (rule.access()) allowed.set(rule, true);
+              AccessRules.restore(mc, allowed);
             }
           });
       test(
@@ -358,8 +358,8 @@ public final class ModernCommandChecks {
       properties.setRainTime(rainTime);
       properties.getThunderTime(thunderTime);
       scrolling.set(hud, scrollBefore);
-      CommandPermissions.preview(policy);
-      cheatWorld.power$cheatsEnabled(cheatsBefore);
+      AccessRules.restore(mc, policy);
+      cheatWorld.allAllowed(cheatsBefore);
       mc.setScreen(null);
     }
     log("MODERN COMMAND FAILURES " + failures);

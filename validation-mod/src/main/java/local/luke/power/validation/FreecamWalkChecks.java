@@ -25,9 +25,8 @@ final class FreecamWalkChecks {
       log("PASS focus loss stops player auto-walk and camera input"); return;
     }
     var old = Config.current().copy();
-    var s = old.copy(); s.autoWalk = true; s.inventoryWhileMoving = false; Config.preview(s);
+    var s = old.copy();  s.inventoryWhileMoving = false; Config.preview(s);
     Object cameraSettings = Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-    Field enabled = cameraSettings.getClass().getField("enabled"); Object oldEnabled = enabled.get(cameraSettings); enabled.set(cameraSettings, true);
     Bindings.configure(Map.of()); mc.options.forwardKey.code = 17; mc.options.backKey.code = 31;
     mc.options.leftKey.code = 30; mc.options.rightKey.code = 32; mc.options.jumpKey.code = 57; mc.options.sneakKey.code = 42;
     mc.setScreen(null); AutoWalk.tick(mc); mc.player.method_140();
@@ -76,7 +75,7 @@ final class FreecamWalkChecks {
         active(camera, true); mc.setScreen(new ChatScreen()); mc.player.field_161.method_1942(mc.player);
         check(!AutoWalk.isWalking() && mc.player.field_161.field_2533 == 0 && number(camera, "move") == 0, "menu retained movement");
       });
-    } finally { active(camera, false); AutoWalk.stop(); mc.player.method_140(); mc.setScreen(null); enabled.set(cameraSettings, oldEnabled); Config.preview(old); }
+    } finally { active(camera, false); AutoWalk.stop(); mc.player.method_140(); mc.setScreen(null);  Config.preview(old); }
     log("FREECAM WALK FAILURES " + failures);
   }
   private static void active(Object camera, boolean value) throws Exception { camera.getClass().getMethod("setActive", boolean.class).invoke(camera, value); }

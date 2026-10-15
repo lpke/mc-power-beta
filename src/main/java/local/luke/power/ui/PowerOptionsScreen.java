@@ -27,12 +27,14 @@ public final class PowerOptionsScreen extends UiScreen {
           "Building",
           "Creative",
           "World editing",
-          "Commands",
+          "Game rules",
           "Gameplay",
           "Crafting",
           "Fixes",
           "Advanced");
   private List<String> pages = PAGES;
+  private local.luke.power.rules.CreationRules creationRules;
+  private boolean cheatPreset;
   public List<String> visiblePages() { return pages; }
 
   private static final int[] ICONS = {
@@ -120,6 +122,33 @@ public final class PowerOptionsScreen extends UiScreen {
     history.addAll(rememberedHistory);
   }
 
+  public static void openCreationRules(net.minecraft.client.Minecraft mc, Screen parent, local.luke.power.rules.CreationRules draft) {
+    PowerOptionsScreen screen = new PowerOptionsScreen(parent);
+    screen.creationRules = draft;
+    screen.session = local.luke.power.config.backend.CreationRulesBackend.open(draft);
+    screen.page = "Game rules"; screen.search.setText(""); screen.changedOnly = false;
+    screen.conflictIds = List.of(); screen.relatedIds = List.of(); screen.history.clear();
+    screen.collapsed.clear(); screen.scroll = 0; screen.sideScroll = 0; screen.libraryOpen = false;
+    mc.setScreen(screen);
+  }
+
+  private boolean selectedPreset(Setting setting) {
+    return !setting.id.startsWith("rules.survival.") && !setting.id.startsWith("rules.cheats.")
+        || setting.id.startsWith(cheatPreset ? "rules.cheats." : "rules.survival.");
+  }
+  private boolean rulesToolbar() {
+    return page.equals("Game rules") && session != null
+        && (creationRules != null || session.settings().stream().anyMatch(s -> s.backend.equals("rulePresets")));
+  }
+  private int ruleButtonWidth() { return (span() - 4) / 2; }
+  private void chooseRulePreset(boolean cheat) {
+    if (creationRules == null) { cheatPreset = cheat; scroll = 0; layout(); return; }
+    var template = creationRules.template(cheat);
+    List<Setting> entries = session.settings().stream().filter(s -> s.id.startsWith("rules.creation.")).toList();
+    for (Setting setting : entries) setting.value = template.get(local.luke.power.rules.GameRule.find(setting.id.substring("rules.creation.".length())));
+    changed(entries, false); layout();
+  }
+
   /** Open music from another screen without inheriting a stale settings filter. */
   public static void openMusicDestination(net.minecraft.client.Minecraft mc, Screen parent) {
     boolean queue = !local.luke.power.audio.MusicRequests.tracks().isEmpty();
@@ -159,7 +188,7 @@ public final class PowerOptionsScreen extends UiScreen {
         PowerBeta.LOG.error("Could not open settings", e);
         error = "Settings could not be loaded. See the game log.";
       }
-    if (session != null) {
+    if (session != null && creationRules == null) {
       if (library == null) { library = new MusicLibraryScreen(this); library.restore(libraryState); }
       library.init(minecraft, width, height);
     }
@@ -181,6 +210,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void rememberPosition() {
+    if (creationRules != null) return;
     rememberedView = view();
     rememberedHistory = List.copyOf(history);
     if (!changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty() && search.text().isBlank()) {
@@ -309,6 +339,7 @@ public final class PowerOptionsScreen extends UiScreen {
     List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
     return session.settings().stream()
         .filter(s -> changedOnly ? s.changed() : listed.isEmpty() ? s.page.equals(page) : listed.contains(s.id))
+        .filter(this::selectedPreset)
         .filter(s -> SettingAccess.visible(session, s) && SettingAccess.reason(session, s).isEmpty())
         .toList();
   }
@@ -338,7 +369,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private int top() {
-    return audio() ? audioContentTop() + 20 : 52;
+    return audio() ? audioContentTop() + 20 : rulesToolbar() ? 78 : 52;
   }
 
   private int bottom() {
@@ -383,7 +414,7 @@ public final class PowerOptionsScreen extends UiScreen {
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
     }
     for (Setting s : candidates) {
-      if (!SettingAccess.visible(session, s)) continue;
+      if (!SettingAccess.visible(session, s) || !selectedPreset(s)) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
           && !local.luke.power.config.backend.InfoHudBackend.selected(s, cluster)) continue;
       if (s.group.equals("Music data")) continue;
@@ -417,7 +448,7 @@ public final class PowerOptionsScreen extends UiScreen {
     hoverTicks++;
     if (library != null) library.tick();
     int revision = local.luke.power.audio.AudioController.libraryRevision();
-    if (session != null && revision != musicRevision) {
+    if (session != null && creationRules == null && revision != musicRevision) {
       musicRevision = revision;
       if (local.luke.power.config.backend.AudioBackend.discoverMusic(session, minecraft)) layout();
     }
@@ -444,7 +475,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (dragging == null && !continuous) save(false, false);
       else autoSavePending = true;
     }
-    if (changedOnly || settings.stream().anyMatch(s -> s.id.equals("world.cheats") || s.id.equals("infoHud.selectedCluster"))) layout();
+    if (changedOnly || settings.stream().anyMatch(s -> s.id.startsWith("rules.world.") || s.id.equals("infoHud.selectedCluster"))) layout();
   }
 
   private int controlLeft(Row row) {
@@ -496,6 +527,11 @@ public final class PowerOptionsScreen extends UiScreen {
       library.guard(() -> mouseClicked(x,y,button)); return;
     }
     if (button != 0 && button != 1) return;
+    if (button == 0 && rulesToolbar()) {
+      for (int i = 0; i < 2; i++) if (inside(x, y, left() + i * (ruleButtonWidth() + 4), 53, ruleButtonWidth(), 20)) {
+        click(); chooseRulePreset(i == 1); return;
+      }
+    }
     if (button == 0 && sidebarBar.press(sidebarTrack(), x, y)) { sideScroll = sidebarBar.drag(sidebarTrack(), y, true); return; }
     if (!libraryVisible() && button == 0 && contentBar.press(contentTrack(), x, y)) { scroll = contentBar.drag(contentTrack(), y, true); return; }
     if (button == 0 && (libraryVisible() || !history.isEmpty()) && inside(x, y, left(), 27, 44, 20)) {
@@ -643,7 +679,8 @@ public final class PowerOptionsScreen extends UiScreen {
           return;
         }
         if (x < mainControlLeft(r) || x >= right() - 38) return;
-        if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
+        if (ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
+        else if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0 && s.slider()) {
             dragging = s;
             double pixels = (double) minecraft.displayWidth / width;
@@ -943,7 +980,7 @@ public final class PowerOptionsScreen extends UiScreen {
     renderBackground();
     fill(0, 0, width, 22, 0x70000000);
     fill(origin(), footerY() - 10, right(), height, 0x90000000);
-    drawCenteredTextWithShadow(textRenderer, "Options", width / 2, 7, 0xffffff);
+    drawCenteredTextWithShadow(textRenderer, creationRules != null ? "New world game rules" : rulesToolbar() ? "New world defaults" : "Options", width / 2, 7, 0xffffff);
     if (session == null) {
       text(error, 10, 45, 0xff8888);
       button("Back", width / 2 - 50, height - 28, 100, 20, mx, my, true);
@@ -981,6 +1018,14 @@ public final class PowerOptionsScreen extends UiScreen {
     boolean expandSections = libraryVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
     iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 18, 20, mx, my,
         hasSections(), false);
+    if (rulesToolbar()) {
+      button(fit(creationRules == null ? "Survival defaults" : "Copy Survival defaults", ruleButtonWidth() - 8), left(), 53, ruleButtonWidth(), 20, mx, my, true);
+      button(fit(creationRules == null ? "Cheat defaults" : "Copy Cheat defaults", ruleButtonWidth() - 8), left() + ruleButtonWidth() + 4, 53, ruleButtonWidth(), 20, mx, my, true);
+      if (creationRules == null) {
+        int x = left() + (cheatPreset ? ruleButtonWidth() + 4 : 0);
+        fill(x + 2, 70, x + ruleButtonWidth() - 2, 72, 0xffb0b0b0);
+      }
+    }
     if (musicControlsVisible()) {
       for (var item : musicButtons()) {
         if (item.action() == AudioToolbar.Action.PREVIOUS || item.action() == AudioToolbar.Action.NEXT)

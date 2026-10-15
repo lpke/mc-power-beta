@@ -3,7 +3,6 @@ package local.luke.power.validation;
 import static local.luke.power.validation.Validation.*;
 import java.util.*;
 import local.luke.power.gameplay.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.visual.*;
 import net.minecraft.class_142;
 import net.minecraft.block.Block;
@@ -25,7 +24,7 @@ final class Release151Checks {
     if (action.startsWith("sphere ")) { Release151SphereChecks.run(mc, action.substring(7)); return; }
     if (action.equals("text") || action.equals("light")) { Release151RenderChecks.run(mc, action); return; }
     if (action.equals("check")) { Release151GameplayChecks.run(mc); return; }
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc, "CREATIVE");
     mc.player.method_1340(0, 102, -6);
     for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) mc.world.method_214(x, z);
@@ -33,7 +32,7 @@ final class Release151Checks {
     List<Entity> items = new ArrayList<>();
     try {
       for (int n : new int[]{0, 1024, 4096, 8192}) {
-        var s = GameplayConfig.copy(); s.mergeItems = false; s.explosionProofItems = true; s.fastItemCollisions = !action.equals("slow"); GameplayConfig.preview(s);
+        var s = GameplayConfig.copy(); s.mergeItems = false; AccessRules.set(mc, local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS, false); s.fastItemCollisions = !action.equals("slow"); GameplayConfig.preview(s);
         for (int x = -3; x <= 5; x++) for (int z = -3; z <= 5; z++) mc.world.method_229(x, 99, z, Block.STONE.id);
         for (int i = 0; i < n; i++) {
           var item = new class_142(mc.world, 1 + (i % 16) * .04, 100.2, 1 + (i / 16 % 16) * .04,

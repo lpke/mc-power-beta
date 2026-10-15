@@ -3,9 +3,7 @@ package local.luke.power.validation;
 import static local.luke.power.validation.Validation.*;
 import java.lang.reflect.Field;
 import java.util.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.worldedit.WorldEditor;
-import local.luke.power.worldedit.config.WorldOverride;
 import net.minecraft.class_66;
 import net.minecraft.class_345;
 import net.minecraft.class_430;
@@ -14,12 +12,12 @@ import net.minecraft.client.Minecraft;
 final class WorldEditNavigationChecks {
   static void run(Minecraft mc) throws Exception {
     failures = 0; DeathChecks.alive(mc); mc.setScreen(null); mc.field_2807 = mc.player;
-    var rules = (CheatWorld)mc.world.method_262(); boolean cheats = rules.power$cheatsEnabled();
-    var settings = WorldEditor.settings().copy(); var override = WorldEditor.worldOverride(mc);
+    var rules = AccessRules.of(mc.world.method_262()); boolean cheats = rules.allAllowed();
+    var settings = WorldEditor.settings().copy();
     int distance = mc.options.viewDistance;
     try {
-      rules.power$cheatsEnabled(true); WorldEditor.worldOverride(mc, WorldOverride.ENABLED);
-      var enabled = settings.copy(); enabled.enabled = true; WorldEditor.preview(enabled);
+      rules.allAllowed(true);
+      var enabled = settings.copy();  WorldEditor.preview(enabled);
       test("culling reads loaded terrain without generating chunks or cancelling unloads", () -> {
         var cache = (local.luke.power.mixin.CullingChunkCacheAccessor)mc.world.method_259();
         var before = new HashMap<>(cache.power$loadedChunks());
@@ -142,7 +140,7 @@ final class WorldEditNavigationChecks {
       });
     } finally {
       mc.options.viewDistance = distance; mc.worldRenderer.method_1537(); WorldEditor.leaveWorld(); WorldEditor.preview(settings);
-      rules.power$cheatsEnabled(cheats); WorldEditor.worldOverride(mc, override); DeathChecks.alive(mc);
+      rules.allAllowed(cheats);  DeathChecks.alive(mc);
     }
     log("WORLDEDIT NAVIGATION FAILURES " + failures);
   }

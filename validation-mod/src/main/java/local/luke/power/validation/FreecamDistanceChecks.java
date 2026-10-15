@@ -20,7 +20,6 @@ public final class FreecamDistanceChecks {
     var visualBefore = local.luke.power.visual.VisualConfig.copy();
     Object camera=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     Object settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-    var enabled=settings.getClass().getField("enabled"); Object before=enabled.get(settings);
     var active=camera.getClass().getMethod("setActive",boolean.class);
     var position=camera.getClass().getMethod("setCameraPosition",double.class,double.class,double.class);
     double x=mc.player.x,y=mc.player.boundingBox.minY,z=mc.player.z;
@@ -34,7 +33,7 @@ public final class FreecamDistanceChecks {
     try {
       var visible = local.luke.power.visual.VisualConfig.copy(); visible.hideEntities = false;
       local.luke.power.visual.VisualConfig.preview(visible);
-      enabled.set(settings,true);active.invoke(camera,false);
+      active.invoke(camera,false);
       for(int bx:new int[]{0,96}) mc.world.method_154(bx,99,3,1,0);
       mc.world.method_210(near); mc.world.method_210(far);
       nearSign.world=farSign.world=mc.world;
@@ -61,14 +60,14 @@ public final class FreecamDistanceChecks {
         check(mc.player.x==.5&&mc.player.z==.5,"rendering moved the player");
         check(near.field_564.count==1&&far.field_564.count==1&&!near.dead&&!far.dead,"rendering changed dropped items");
       });
-      test("disabling freecam immediately restores player distance",()->{
+      test("session cleanup immediately restores player render distance",()->{
         position.invoke(camera,96.5,101.62,.5);active.invoke(camera,true);
-        enabled.set(settings,false);render(mc);
+        local.luke.power.input.TweakLifecycle.reset();render(mc);
         check(!DetachedCamera.isActive()&&entities.contains(near)&&!entities.contains(far),"disabled camera retained distance override");
       });
     } finally {
       local.luke.power.visual.VisualConfig.preview(visualBefore);
-      recording=false;active.invoke(camera,false);enabled.set(settings,before);
+      recording=false;active.invoke(camera,false);
       near.markDead();far.markDead();list.clear();list.addAll(original);
       mc.player.method_1341(x,y,z,yaw,pitch);entities.clear();blocks.clear();
     }

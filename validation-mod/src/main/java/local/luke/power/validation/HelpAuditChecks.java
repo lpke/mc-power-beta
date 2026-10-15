@@ -12,8 +12,8 @@ import net.minecraft.client.Minecraft;
 final class HelpAuditChecks {
   static void run(Minecraft mc) throws Exception {
     failures = 0;
-    var before = CommandPermissions.copy(); var death = DeathConfig.copy();
-    var world = (CheatWorld)mc.world.method_262(); boolean cheats = world.power$cheatsEnabled();
+    var before = AccessRules.copy(mc); var death = DeathConfig.copy();
+    var world = AccessRules.of(mc.world.method_262()); boolean cheats = world.allAllowed();
     boolean op = ClientCommands.mp_op, server = ClientCommands.mp_rc; var disabled = ClientCommands.disabled_commands;
     List<String> output = new ArrayList<>();
     var source = new SharedCommandSource(mc.player) { @Override public void sendFeedback(String text) { output.add(text); } };
@@ -22,7 +22,7 @@ final class HelpAuditChecks {
     try {
       test("help reflects every non-cheat and cheat command plus aliases", () -> {
         for (boolean allowed : new boolean[]{false, true}) {
-          world.power$cheatsEnabled(allowed); var settings = new DeathSettings(); settings.enabled = allowed; DeathConfig.preview(settings);
+          world.allAllowed(allowed); var settings = new DeathSettings(); settings.enabled = allowed; DeathConfig.preview(settings);
           Set<String> listed = names(help.lines(source));
           for (var command : RetroChatUtil.commands) {
             boolean available = CommandAccess.available(command, source);
@@ -36,23 +36,22 @@ final class HelpAuditChecks {
           check(listed.contains("//calc"), "independent calculator omitted");
         }
       });
-      test("global rules, world overrides and disabled features filter help and completion", () -> {
-        world.power$cheatsEnabled(true);
-        var rules = CommandPermissions.copy(); rules.rules.put("give", CommandPermissions.Rule.DISABLED); rules.rules.put("seed", CommandPermissions.Rule.DISABLED);
-        CommandPermissions.preview(rules); var listed = names(help.lines(source));
-        check(!listed.contains("/give") && !listed.contains("/seed"), "disabled commands listed");
-        var complete = Arrays.asList(help.suggestion(source, 1, "", "")); check(!complete.contains("give") && !complete.contains("seed"), "disabled help completion");
-        String id = local.luke.power.commands.CommandContext.world(mc);
-        rules.worlds.computeIfAbsent(id, k -> new LinkedHashMap<>()).put("give", CommandPermissions.Override.ALLOW);
-        CommandPermissions.preview(rules); check(names(help.lines(source)).contains("/give"), "world allow ignored");
-        rules.worlds.get(id).put("give", CommandPermissions.Override.BLOCK); CommandPermissions.preview(rules);
-        check(!names(help.lines(source)).contains("/give"), "world block ignored");
-        DeathConfig.preview(new DeathSettings()); check(!names(help.lines(source)).contains("/death"), "disabled death listed");
-        CommandPermissions.preview(before);
+      test("individual rules filter help and completion without hiding safe commands", () -> {
+        world.allAllowed(true);
+        AccessRules.set(mc, local.luke.power.rules.GameRule.ALLOW_ITEM_SPAWNING, false);
+        var listed = names(help.lines(source));
+        check(!listed.contains("/give") && listed.contains("/seed"), "permission hid safe commands or allowed give");
+        var complete = Arrays.asList(help.suggestion(source, 1, "", ""));
+        check(!complete.contains("give") && complete.contains("seed"), "help completion disagrees");
+        AccessRules.set(mc, local.luke.power.rules.GameRule.ALLOW_ITEM_SPAWNING, true);
+        check(names(help.lines(source)).contains("/give"), "permission change ignored");
+        var deathOff = new DeathSettings(); deathOff.enabled = false; DeathConfig.preview(deathOff);
+        check(!names(help.lines(source)).contains("/death"), "disabled death listed");
+        AccessRules.restore(mc, before);
       });
       test("every available command supports help without gameplay changes", () -> {
-        world.power$cheatsEnabled(true); var settings = new DeathSettings(); settings.enabled = true; DeathConfig.preview(settings);
-        var rules = CommandPermissions.copy(); rules.enabled = true; rules.rules.clear(); rules.worlds.clear(); CommandPermissions.preview(rules);
+        world.allAllowed(true); var settings = new DeathSettings(); settings.enabled = true; DeathConfig.preview(settings);
+
         String items = DeathItems.inventory(mc.player.inventory.main); long time = mc.world.getTime(); int health = mc.player.health;
         double x = mc.player.x, y = mc.player.y, z = mc.player.z;
         for (var command : RetroChatUtil.commands) if (CommandAccess.available(command, source)) {
@@ -89,7 +88,7 @@ final class HelpAuditChecks {
         } finally { mc.world.isRemote = false; }
       });
     } finally {
-      CommandPermissions.preview(before); DeathConfig.preview(death); world.power$cheatsEnabled(cheats);
+      AccessRules.restore(mc, before); DeathConfig.preview(death); world.allAllowed(cheats);
       ClientCommands.mp_op = op; ClientCommands.mp_rc = server; ClientCommands.disabled_commands = disabled;
     }
     log("HELP AUDIT FAILURES " + failures);

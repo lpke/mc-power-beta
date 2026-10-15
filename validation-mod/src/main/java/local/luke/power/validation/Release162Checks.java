@@ -7,7 +7,6 @@ import java.util.*;
 import local.luke.power.config.*;
 import local.luke.power.hud.*;
 import local.luke.power.input.DetachedCamera;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.storage.PowerConfig;
 import local.luke.power.ui.DebugOverlay;
 import net.minecraft.class_56;
@@ -40,13 +39,13 @@ final class Release162Checks {
     var before = Files.readAllBytes(PowerConfig.path());
     var session = SettingsRegistry.open(mc);
     boolean hidden = mc.options.hideHud, debug = mc.options.debugHud;
-    var rules = (CheatWorld)mc.world.method_262(); boolean cheats = rules.power$cheatsEnabled();
+    var rules = AccessRules.of(mc.world.method_262()); boolean cheats = rules.allAllowed();
     String mode = mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     try {
       for (String name : List.of("SURVIVAL", "CREATIVE", "SPECTATOR"))
         for (boolean detached : new boolean[]{false, true}) test("creative preview reach in " + name + " detached=" + detached, () -> {
-          active(false); rules.power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc, name);
-          if (name.equals("SURVIVAL")) rules.power$cheatsEnabled(false);
+          active(false); rules.allAllowed(true); CreativeVehicleChecks.mode(mc, name);
+          if (name.equals("SURVIVAL")) rules.allAllowed(false);
           for (int range : new int[]{30, 50, 100}) {
             reach(range, range);
             double z = 33 + range / 10.0 - .01;
@@ -87,7 +86,7 @@ final class Release162Checks {
         check(previous.id.equals("power_controls:gameplay.shiftPlacingBlacklist"), "slab setting not adjacent to Shift placing");
         check(!SettingsLayout.groups("Building").contains("Slab completion"), "empty slab group retained");
       });
-      rules.power$cheatsEnabled(true);
+      rules.allAllowed(true);
       for (String name : List.of("addFacingToDebugOverlay", "addBiomeToDebugOverlay", "addBlockLightToDebugOverlay", "addSlimeChunkToDebugOverlay"))
         session.settings().stream().filter(s -> s.id.equals("power_compat:config." + name)).findFirst().orElseThrow().parse("true");
       session.preview(true);
@@ -127,7 +126,7 @@ final class Release162Checks {
       test("freecam exit immediately restores player HUD data and preserves player and settings", () -> {
         double x = mc.player.x, y = mc.player.y, z = mc.player.z;
         active(false); InfoHud.tick(mc); var lines = debug(mc);
-        check(lines.containsAll(List.of("x: " + x, "y: " + y, "z: " + z)), "F3 failed to restore player");
+        check(lines.containsAll(List.of("x: " + x, "y: " + local.luke.power.hud.HudCoordinates.y(mc.player), "z: " + z)), "F3 failed to restore player");
         String location = HudText.coordinates((int)Math.floor(x),(int)Math.floor(local.luke.power.hud.HudCoordinates.y(mc.player)),(int)Math.floor(z))
             + " " + HudText.direction(mc.player.yaw);
         check(InfoHud.lines(cluster).contains(location), "custom HUD kept stale camera data");
@@ -135,7 +134,7 @@ final class Release162Checks {
         check(Arrays.equals(before, Files.readAllBytes(PowerConfig.path())), "preview wrote settings");
       });
     } finally {
-      active(false); session.discard(); CreativeVehicleChecks.mode(mc, mode); rules.power$cheatsEnabled(cheats);
+      active(false); session.discard(); CreativeVehicleChecks.mode(mc, mode); rules.allAllowed(cheats);
       mc.options.hideHud = hidden; mc.options.debugHud = debug;
     }
     log("RELEASE 162 FAILURES " + failures);

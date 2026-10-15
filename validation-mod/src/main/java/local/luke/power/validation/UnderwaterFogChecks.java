@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.Map;
 import local.luke.power.config.SettingsRegistry;
 import local.luke.power.input.Bindings;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.render.RenderControls;
 import local.luke.power.visual.VisualConfig;
 import net.minecraft.class_555;
@@ -35,7 +34,7 @@ final class UnderwaterFogChecks {
   static void run(Minecraft mc,String action)throws Exception {
     if(!action.equals("fog")){scene(mc,action);return;}
     failures=0;mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);FreecamPreviewChecks.active(false);
-    var session=SettingsRegistry.open(mc);var cheats=(CheatWorld)mc.world.method_262();boolean oldCheats=cheats.power$cheatsEnabled();
+    var session=SettingsRegistry.open(mc);var cheats=AccessRules.of(mc.world.method_262());boolean oldCheats=cheats.allAllowed();
     String mode=mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     int key=RenderControls.FULL_BRIGHT.code;double x=mc.player.x,y=mc.player.y,z=mc.player.z;
     var camera=mc.field_2807;mc.field_2807=mc.player;
@@ -45,7 +44,7 @@ final class UnderwaterFogChecks {
     Method colour=class_555.class.getDeclaredMethod("method_1852",float.class);colour.setAccessible(true);
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {
-      cheats.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");RenderControls.reset(mc);
+      cheats.allAllowed(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");RenderControls.reset(mc);
       RenderControls.FULL_BRIGHT.code=114;Bindings.configure(Map.of());field(renderer,"field_2330",false);field(renderer,"field_2350",128F);
       test("water fog slider previews native percentages without enabling full bright",()->{
         var setting=find(session,"visual.underwaterFogDensity");
@@ -126,7 +125,7 @@ final class UnderwaterFogChecks {
     } finally {
       RenderControls.FULL_BRIGHT.code=key;RenderControls.reset(mc);session.discard();photo.setFloat(null,photoBefore);
       field(renderer,"field_2330",cloud);field(renderer,"field_2350",distance);mc.field_2807=camera;
-      CreativeVehicleChecks.mode(mc,mode);cheats.power$cheatsEnabled(oldCheats);mc.player.method_1340(x,y,z);GL11.glPopAttrib();
+      CreativeVehicleChecks.mode(mc,mode);cheats.allAllowed(oldCheats);mc.player.method_1340(x,y,z);GL11.glPopAttrib();
     }
     log("UNDERWATER FOG FAILURES "+failures);
   }
@@ -135,7 +134,7 @@ final class UnderwaterFogChecks {
     if(action.equals("fog-bright")){bright(true);return;}
     if(action.equals("fog-native")){bright(false);return;}
     if(action.equals("fog-above")){mc.player.method_1341(32.5,117,22.5,0,25);return;}
-    DeathChecks.alive(mc);FreecamPreviewChecks.active(false);((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    DeathChecks.alive(mc);FreecamPreviewChecks.active(false);(AccessRules.of(mc.world.method_262())).allAllowed(true);
     var visual=VisualConfig.copy();visual.spectatorFullBright=false;visual.removeUnderwaterOverlay=true;VisualConfig.preview(visual);
     CreativeVehicleChecks.mode(mc,"SPECTATOR");RenderControls.reset(mc);
     for(int x=28;x<=36;x++)for(int z=20;z<=64;z++)for(int y=108;y<=117;y++)

@@ -16,17 +16,6 @@ import java.util.List;
 @Mixin(NaturalSpawner.class)
 public class NaturalSpawnerMixin {
 
-    @Inject(
-            method = "spawnMonstersAndWakePlayers",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    private static void spawnMonstersAndWakePlayers(World world, List players, CallbackInfoReturnable<Boolean> cir) {
-        if (1.0f > Config.config.SLEEP_CONFIG.asleepPlayerPercentageForSkippingNight) {
-            cir.setReturnValue(false);
-        }
-    }
-
     @WrapOperation(
             method = "tick",
             at = @At(

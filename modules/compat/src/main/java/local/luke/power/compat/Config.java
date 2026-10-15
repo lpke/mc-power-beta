@@ -11,10 +11,7 @@ public class Config {
         @ConfigCategory(name = "Particles Config")
         public ParticlesConfig PARTICLES_CONFIG = new ParticlesConfig();
 
-        @ConfigCategory(
-                name = "Stack Size Config",
-                description = "Options here require restart to take effect"
-        )
+        @ConfigCategory(name = "Stack sizes")
         public StackSizeConfig STACK_SIZE_CONFIG = new StackSizeConfig();
 
         @ConfigCategory(
@@ -24,7 +21,7 @@ public class Config {
         public final ShovelsConfig SHOVELS_CONFIG = new ShovelsConfig();
 
         @ConfigEntry(name = "Facing direction", description = "Show your facing direction and axis in the F3 debug overlay.")
-        public Boolean addFacingToDebugOverlay = false;
+        public Boolean addFacingToDebugOverlay = true;
 
         @ConfigEntry(name = "Add Biome To Debug Overlay")
         public Boolean addBiomeToDebugOverlay = true;
@@ -59,65 +56,60 @@ public class Config {
         public Boolean disableColoredSheepSpawning = false;
 
         @ConfigEntry(name = "Milk Squids", multiplayerSynced = true)
-        //@ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         public Boolean milkSquids = false;
 
         @ConfigEntry(name = "Pigs Drop Brown Mushrooms", multiplayerSynced = true)
-        //@ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         public Boolean pigsDropBrownMushrooms = false;
 
         @ConfigEntry(
                 name = "Plant Replacement Fixes Enabled",
                 multiplayerSynced = true
         )
-        //@ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         public Boolean plantReplacementFixesEnabled = true;
-
-        @ConfigEntry(
-                name = "Slab Placement Fixes Enabled",
-                description = "Restart required for changes to take effect",
-                multiplayerSynced = true
-        )
-        //@ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
-        public Boolean slabPlacementFixesEnabled = true;
 
         @ConfigEntry(
                 name = "Use Player 2x2 Crafting Grid As Inventory",
                 multiplayerSynced = true
         )
-        //@ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
-        public Boolean allowCraftingInventorySlots = false;
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
+        public Boolean allowCraftingInventorySlots = true;
 
         @ConfigEntry(name = "Vehicle Logout/Login Fix", multiplayerSynced = true)
         public Boolean vehicleLogoutLoginFixesEnabled = true;
     }
 
     public static class StackSizeConfig {
-        @DefaultOnVanillaServer
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(
                 name = "Stackable Empty Buckets",
                 description = "Empty buckets stack to 16. Filled buckets stay separate. Existing stacks are preserved when disabled.",
                 multiplayerSynced = true
         )
-        public Boolean stackableEmptyBuckets = false;
+        public Boolean stackableEmptyBuckets = true;
 
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(
                 name = "Enable Modern Wood Door Stack Size",
                 multiplayerSynced = true
         )
-        public Boolean enableModernWoodDoorStackSize = false;
+        public Boolean enableModernWoodDoorStackSize = true;
 
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(
                 name = "Enable Modern Iron Door Stack Size",
                 multiplayerSynced = true
         )
-        public Boolean enableModernIronDoorStackSize = false;
+        public Boolean enableModernIronDoorStackSize = true;
 
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(
                 name = "Enable Modern Sign Stack Size",
                 multiplayerSynced = true
         )
-        public Boolean enableModernSignStackSize = false;
+        public Boolean enableModernSignStackSize = true;
     }
 
     public static class ShovelsConfig {
@@ -125,7 +117,7 @@ public class Config {
                 name = "Effective On Soul Sand",
                 multiplayerSynced = true
         )
-        //@ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
+        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         public Boolean enableShovelsEffectiveOnSoulSand = true;
     }
 

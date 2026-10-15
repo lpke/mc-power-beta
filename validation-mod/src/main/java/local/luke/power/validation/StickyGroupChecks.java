@@ -38,6 +38,7 @@ final class StickyGroupChecks {
   }
 
   static void run(Minecraft mc) throws Exception {
+    SilentAudioChecks.ready(mc);
     failures = 0;
     var before = AudioConfig.copy();
     var queueBefore = MusicRequests.tracks();

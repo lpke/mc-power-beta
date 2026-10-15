@@ -2,6 +2,7 @@ package local.luke.power.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.*;
 import local.luke.power.gameplay.*;
+import local.luke.power.rules.*;
 import net.minecraft.class_365;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
@@ -17,12 +18,12 @@ public class TntBudgetMixin {
   @Inject(method = "method_227", at = @At("HEAD"))
   private void power$begin(CallbackInfo ci) {
     power$tick++;
-    if (GameplayConfig.current().limitTnt && !((World)(Object)this).isRemote) power$tnt.begin();
+    if (power$budgetEnabled()) power$tnt.begin();
     else power$tnt.clear();
   }
   @com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod(method = "method_193")
   private void power$tick(Entity entity, boolean loaded, Operation<Void> original) {
-    if (!power$draining && loaded && !entity.world.isRemote && GameplayConfig.current().limitTnt && entity instanceof class_365 tnt) {
+    if (!power$draining && loaded && !entity.world.isRemote && power$budgetEnabled() && entity instanceof class_365 tnt) {
       ((local.luke.power.render.TntMotion.Access)tnt).power$tntMotion().begin(power$tick, tnt.x, tnt.y, tnt.z);
       power$tnt.offer(tnt);
     } else {
@@ -35,7 +36,7 @@ public class TntBudgetMixin {
   private void power$drain(CallbackInfo ci) {
     World world = (World)(Object)this;
     GameplaySettings settings = GameplayConfig.current();
-    if (!settings.limitTnt || world.isRemote) return;
+    if (!power$budgetEnabled()) return;
     power$draining = true;
     try {
       power$tnt.run(128, settings.tntPerTick, settings.tntMillis * 1_000_000L,
@@ -46,4 +47,10 @@ public class TntBudgetMixin {
           }, System::nanoTime);
     } finally { power$draining = false; }
   }
+  @Unique private boolean power$budgetEnabled() {
+    World world = (World)(Object)this;
+    return !world.isRemote && GameplayConfig.current().limitTnt
+        && WorldRules.enabled(world.method_262(), GameRule.TNT_EXPLODES);
+  }
+
 }

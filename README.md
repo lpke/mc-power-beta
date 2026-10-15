@@ -26,30 +26,31 @@ improvements and optional tweaks in one searchable Options menu.
 - WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
 - Commands with completion, editable history and help, including teleportation, saved warps, world spawn, time, weather, spawning and item commands.
 - Chat selection, copy/paste, cursor navigation, scrolling, configurable history and fade time, and preserved colour across wrapped lines.
-- Death records with locations, causes and original inventory layouts. View lost items and recover them with cheats, including crafting inputs. Optional per-world keep inventory.
+- Death records with locations, causes and original inventory layouts. View lost items and recover them when the world allows it, including crafting inputs. Independent keep-inventory rule.
 - Free camera with adjustable speed, drag, collisions and separate player movement; free look, cinematic camera, field of view, adjustable third-person distance and front view.
 - Isometric captures with rotation, scale and mirroring, custom-resolution screenshots, clipboard copying and photo mode.
 - Fully lit rendering with a full-bright hotkey and optional automatic spectator lighting. Mob spawning and simulated light remain unchanged.
 - Entity visibility controls for items, mobs, players, vehicles, projectiles and TNT. Entity and block-entity culling skips hidden rendering work.
-- Optional dropped-item merging, explosion protection for dropped items and TNT work limits that can be enabled before loading a struggling world.
+- Dropped-item merging and global TNT work limits available before loading a struggling world. Separate world rules control TNT and explosion damage to dropped items.
 - Music libraries, custom tracks and folders, era selections, favourites, inclusion filters, per-track and per-folder volume, queues and saved presets.
 - Music previews, seeking and playback controls in Options and the pause menu, with separate sound categories, ambience controls and optional extra interaction sounds.
 - Flexible block placement with offset, adjacent, rotation, reverse and into-face modes, target overlays and destination previews.
 - Fast placement with placement restrictions, item filters, orientation retention and slab rules. Complete slabs through adjacent faces.
 - Container previews and carrying that preserves contents, including double chests. Optional inventory access in Nether portals.
-- Quick inventory transfers, bulk crafting, drag distribution, double-click collection, scroll transfers, number-key hotbar swaps and stack dropping.
+- Quick inventory transfers, bulk crafting, drag distribution, double-click collection, held-stack Shift-double-click transfers, scroll transfers, number-key hotbar swaps and stack dropping.
 - Direct tool and armour swapping, Shift-click and right-click equipping, hotbar row swapping with previews, and optional use of the four crafting inputs as storage.
 - Movement while compatible inventories are open, auto-walk, auto-mine, continuous click mining, step assist, edge protection and fence jumping.
 - Faster boats and minecarts, boat steering and collision protection, boat elevators, minecart boosters and optional faster obsidian mining.
 - Optional water landings and bucket clutches, including flowing water. Empty buckets stack to 16; doors and signs have optional modern stack limits.
 - Individual modern recipes, shapeless recipes, tool repair, wool redyeing, adjusted slab/stair/trapdoor/ladder yields, material recovery, soul sand and otherwise unobtainable blocks.
-- Per-world difficulty and cheat-gated daylight, weather, natural spawning and keep-inventory rules. Time freezing preserves the simulation clock.
-- Natural spawning controls by mob type, spawn limits, light thresholds, group sizes and despawning, including saddled-pig preservation.
-- Sleep controls for night skipping or acceleration, wake-on-click, nightmares and respawn-only beds; configurable rain, thunder, snow height and weather timing.
+- Per-world difficulty and 31 searchable game rules, editable in Options or with /gamerule. Separate permissions cover game modes, editing, items, travel and recovery. Time freezing preserves the simulation clock.
+- Editable Survival and Cheat defaults for new worlds, plus a Custom creation preset with its own searchable rule editor and starting-mode choice. Existing worlds keep their own rules.
+- World rules for monsters, animals, dungeon spawners and sleep ambushes. Global spawn limits, light thresholds, group sizes and despawning preferences, including saddled-pig preservation.
+- Sleep controls for night skipping or acceleration, a per-world sleeping percentage, wake-on-click and respawn-only beds; configurable rain, thunder, snow height and weather timing.
 - Fast leaf decay, creative sapling drops, persistent placed leaves, leaf apple drops, dead-bush sticks, shears harvesting, log rotation and farmland protection.
 - Sign editing and dye colouring, unsupported and glued trapdoors, blocked-chest opening, stackable chests, fence connections and pressure plates on fences.
 - Optional gold-tool silk touch, hoe fortune, sword looting, fishing luck, gold-armour abilities, fire-curing golden apples and water-absorbing sponges.
-- Explosion block damage and drop controls, TNT ignition and defusing, snowballs that extinguish fire, fire spread between entities and flaming arrows.
+- Independent creeper and ghast block-damage rules, global explosion drop chance, TNT ignition and defusing, snowballs that extinguish fire, fire spread between entities and flaming arrows.
 - Optional equipment durability and defence changes, mob drops, sheep punching for wool, grass hoeing for seeds, squid milking and food-waste prevention.
 - Older block textures, softer rain and snow, low fire, redstone power numbers, leaf rendering, particle controls, camera shake and fog options.
 - Light-level overlays, configurable active-tweak indicators and toggle messages, hotbar item names, HUD positioning, crosshair and vignette controls.
@@ -59,9 +60,32 @@ improvements and optional tweaks in one searchable Options menu.
 - Configurable autosaving, focus-loss pausing, raw mouse input and network options. Optional tall-grass and dead-bush generation controls for new terrain.
 - Fixes for rendering, lighting, item and block drops, mining, boats, stairs, fences, liquids, mob behaviour, sleeping, multiplayer jitter and legacy client behaviour.
 
-Most gameplay changes start off. Fixes, performance improvements and small
-conveniences start on. Each world has its own Cheats switch for creative modes,
-commands and world editing. Other settings are shared unless marked "this world".
+Fixes, performance improvements and common inventory conveniences start on.
+Survival worlds start with game-changing command permissions off. New-world
+presets and individual world rules let you choose the permissions you want.
+
+## Settings and worlds
+
+Options changes global preferences. The Game rules tab changes the open singleplayer
+world; from the main menu it edits Survival defaults and Cheat defaults for future
+worlds. Custom world creation lets you adjust those rules before starting. There is
+no shared Cheats switch or layer of world overrides. Turning a permission off hides
+its tools and controls while keeping saved items, warps and history.
+
+Use `/gamerule <rule> [value]` to read or change a world rule. Both `fire_spread`
+and `doFireTick`, for example, refer to the same rule. `/gamerule help` lists the
+rules; Options includes descriptions and reset controls. Multiplayer rules belong
+to the server.
+
+Settings save automatically by default. Right-click Apply to use manual editing;
+leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
+edits stay in the draft until you create the world.
+
+Version 2.0 supports configuration formats 3 and 4, converting 3 to 4 with a verified
+backup. World rules use format 1 and support conversion from Power Beta's earlier
+world settings. Conflicting old permissions or unsupported formats stop conversion
+and show recovery guidance. Keep a full instance backup before upgrading; world
+folders alone do not include global preferences, music libraries or recovery history.
 
 ## Install
 

@@ -72,5 +72,5 @@ configurations.configureEach {
     }
 }
 
-if (moduleId in ["power_commands", "power_capture", "power_mechanics", "power_camera"]) sourceSets.test.java.srcDirs = [new File(sources, "src/test/java")]
+if (moduleId in ["power_commands", "power_capture", "power_mechanics", "power_camera", "power_inventory"]) sourceSets.test.java.srcDirs = [new File(sources, "src/test/java")]
 test { useJUnitPlatform() }

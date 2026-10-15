@@ -1,6 +1,6 @@
 package local.luke.power.mixin;
 
-import local.luke.power.permissions.CheatWorld;
+import local.luke.power.rules.*;
 import local.luke.power.world.WorldSpawning;
 import net.minecraft.class_567;
 import net.minecraft.world.World;
@@ -12,7 +12,7 @@ import java.util.List;
 @Mixin(class_567.class)
 public abstract class WorldSpawningMixin {
   private static boolean allowed(World world, boolean hostile) {
-    if (world.isRemote || !((CheatWorld) world.method_262()).power$cheatsEnabled()) return true;
+    if (world.isRemote) return true;
     WorldSpawning rules = (WorldSpawning) world.method_262();
     return hostile ? rules.power$hostileSpawning() : rules.power$passiveSpawning();
   }
@@ -26,6 +26,11 @@ public abstract class WorldSpawningMixin {
   }
   @Inject(method = "method_1869", at = @At("HEAD"), cancellable = true)
   private static void power$nightmare(World world, List players, CallbackInfoReturnable<Boolean> cir) {
-    if (!allowed(world, true)) cir.setReturnValue(false);
+    if (!world.isRemote && (!allowed(world, true) || !WorldRules.enabled(world.method_262(), GameRule.SLEEP_AMBUSHES))) cir.setReturnValue(false);
+  }
+  @ModifyVariable(method = "method_1869", at = @At("HEAD"), argsOnly = true)
+  private static List power$sleepers(List players, World world, List ignored) {
+    if (world.isRemote) return players;
+    return players.stream().filter(player -> ((net.minecraft.entity.player.PlayerEntity)player).method_943()).toList();
   }
 }

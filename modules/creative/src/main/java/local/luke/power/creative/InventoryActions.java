@@ -10,7 +10,7 @@ public final class InventoryActions {
   /** Insert at most one item-limit stack, merging matching slots before filling empty ones. */
   public static boolean catalogueStack(PlayerEntity player, net.minecraft.item.ItemStack template) {
     if (player == null || player.level.isRemote || !player.creative_isCreative()
-        || Modes.spectator(player) || !local.luke.power.permissions.CommandPermissions.cheatsEnabled() || template == null) return false;
+        || Modes.spectator(player) || !local.luke.power.rules.WorldRules.enabled(player.level.getProperties(), local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE) || template == null) return false;
     var inventory = player.inventory;
     var incoming = template.copy();
     incoming.count = Math.min(incoming.getMaxStackSize(), inventory.getMaxStackSize());

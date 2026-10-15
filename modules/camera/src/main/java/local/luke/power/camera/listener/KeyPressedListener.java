@@ -55,10 +55,11 @@ public class KeyPressedListener {
     }
 
     private void press(int keyCode) {
-            if (!local.luke.power.camera.FreecamConfig.config.enabled) { Freecam.freecamController.setActive(false); return; }
+            Minecraft minecraft = Minecraft.class.cast(FabricLoader.getInstance().getGameInstance());
+            if (minecraft.world == null || minecraft.player == null || minecraft.currentScreen != null
+                    || minecraft.player.health <= 0 || minecraft.player.dead || !org.lwjgl.opengl.Display.isActive()) return;
             // Toggle freecam
             if(local.luke.power.input.Bindings.matches(KeyBindingRegistry.freecamKeybinding, keyCode)) {
-                Minecraft minecraft = Minecraft.class.cast(FabricLoader.getInstance().getGameInstance());
                 if(!Freecam.freecamController.isActive()
                         && (!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || !Freecam.freecamController.cameraPositionSet)){
                     Freecam.freecamController.startFromView(minecraft);

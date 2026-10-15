@@ -3,7 +3,6 @@ package local.luke.power.validation;
 import static local.luke.power.validation.Validation.*;
 import java.nio.file.Path;
 import local.luke.power.config.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.validation.mixin.ChatInput;
 import local.luke.power.worldedit.carry.ContainerCarry;
 import local.luke.power.worldedit.core.*;
@@ -36,7 +35,7 @@ final class GalleryChecks {
   static void run(Minecraft mc, String action) throws Exception {
     switch (action) {
       case "setup" -> {
-        ((CheatWorld) mc.world.method_262()).power$cheatsEnabled(true);
+        (AccessRules.of(mc.world.method_262())).allAllowed(true);
         ChatChecks.submit(mc, "/gamemode creative");
         ChatChecks.submit(mc, "/time set noon");
         ChatChecks.submit(mc, "/weather clear");
@@ -98,7 +97,7 @@ final class GalleryChecks {
         camera(mc, -5, 3, -9.5, -90, 60);
       }
       case "preview", "carry" -> {
-        setting(mc, "visual.containerPreview", "true");
+
         setting(mc, "visual.containerCarry", "true");
         block(mc, 7, 0, -7, 54, 0);
         Inventory chest = (Inventory) mc.world.method_1777(x+7,y,z-7);

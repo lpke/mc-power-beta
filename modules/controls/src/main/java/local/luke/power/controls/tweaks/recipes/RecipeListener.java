@@ -12,23 +12,9 @@ import net.modificationstation.stationapi.api.event.recipe.RecipeRegisterEvent;
 public class RecipeListener {
     @EventListener(priority = ListenerPriority.HIGH)
     public void registerRecipes(RecipeRegisterEvent event) {
-        if (ControlFeatures.RECIPES_CONFIG.enableRecipes) {
-            RecipeRegisterEvent.Vanilla type = RecipeRegisterEvent.Vanilla.fromType(event.recipeId);
-
-            switch (type != null ? type : RecipeRegisterEvent.Vanilla.CRAFTING_SHAPED) {
-                case CRAFTING_SHAPED -> {
-                    registerShapedRecipes();
-                }
-
-                case CRAFTING_SHAPELESS -> {
-                    registerShapelessRecipes();
-                }
-
-                case SMELTING -> {
-
-                }
-            }
-        }
+        RecipeRegisterEvent.Vanilla type = RecipeRegisterEvent.Vanilla.fromType(event.recipeId);
+        if (type == RecipeRegisterEvent.Vanilla.CRAFTING_SHAPED) registerShapedRecipes();
+        else if (type == RecipeRegisterEvent.Vanilla.CRAFTING_SHAPELESS) registerShapelessRecipes();
     }
 
     public static void registerShapedRecipes() {

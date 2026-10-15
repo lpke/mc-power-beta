@@ -52,7 +52,7 @@ final class Release171Checks {
   }
   static void run(Minecraft mc,String action) throws Exception {
     if(action.equals("normal-scene")) {
-      scene(mc);((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+      scene(mc);(AccessRules.of(mc.world.method_262())).allAllowed(true);
       CreativeVehicleChecks.mode(mc,"CREATIVE");mc.player.method_1340(32.5,110.62,32.5);
       for(int y=109;y<=112;y++)mc.world.method_154(32,y,32,1,0);
       mc.options.thirdPerson=true;return;
@@ -93,7 +93,7 @@ final class Release171Checks {
     if(action.equals("camera")) {cameras(mc);return;}
     if(action.equals("fire")) {fire(mc);return;}
     if(action.equals("spectator-scene")) {
-      scene(mc);((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+      scene(mc);(AccessRules.of(mc.world.method_262())).allAllowed(true);
       CreativeVehicleChecks.mode(mc,"SPECTATOR");mc.player.method_1340(32.5,110.62,32.5);
       mc.player.prevX=mc.player.x;mc.player.prevY=mc.player.y;mc.player.prevZ=mc.player.z;
       mc.player.yaw=mc.player.prevYaw=180;mc.player.pitch=mc.player.prevPitch=0;
@@ -101,7 +101,7 @@ final class Release171Checks {
       mc.options.thirdPerson=true;mc.options.hideHud=false;mc.options.debugHud=true;return;
     }
     if(action.equals("freecam-floor")) {
-      scene(mc);((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+      scene(mc);(AccessRules.of(mc.world.method_262())).allAllowed(true);
       CreativeVehicleChecks.mode(mc,"SURVIVAL");pose(32.5,109+HeadGeometry.EYE_ABOVE_BASE,35.5,0,0);active(true);
       mc.options.thirdPerson=true;mc.options.hideHud=false;mc.options.debugHud=true;return;
     }
@@ -136,7 +136,7 @@ final class Release171Checks {
 
   private static void hotbars(Minecraft mc) throws Exception {
     failures=0;active(false);mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);
-    ((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc,"SURVIVAL");mc.field_2807=mc.player;
     var inventory=mc.player.inventory;var oldMain=inventory.main;var oldArmor=inventory.armor;
     int selected=inventory.selectedSlot;inventory.main=new ItemStack[36];inventory.armor=new ItemStack[4];
@@ -244,7 +244,7 @@ final class Release171Checks {
     Object settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
     settings.getClass().getField("collision").set(settings,true);
     settings.getClass().getField("classicMovement").set(settings,false);
-    ((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc,"SURVIVAL");
     test("freecam floor collision reports the same Y as standing feet, including slabs",()->{
       for(int x:new int[]{32,-32})for(int block:new int[]{1,44}) {
@@ -277,7 +277,7 @@ final class Release171Checks {
       check(Math.abs(unclipped[14]-clipped[14])>1,"spectator camera still clipped");
       check(Math.abs(Math.abs(unclipped[14])-CameraView.distance())<.01,"wrong spectator distance "+unclipped[14]);
       check(GhostHead.visible(mc),"head hidden inside terrain");
-      var old=local.luke.power.building.config.Config.current().copy();var config=old.copy();config.freeLook=true;
+      var old=local.luke.power.building.config.Config.current().copy();var config=old.copy();
       config.freeLookPerspective=local.luke.power.building.camera.Perspective.THIRD_PERSON;
       local.luke.power.building.config.Config.preview(config);
       try {local.luke.power.building.camera.FreeLook.begin(mc);local.luke.power.building.camera.FreeLook.turn(mc.player,200,100);
@@ -292,7 +292,7 @@ final class Release171Checks {
 
   private static void fire(Minecraft mc) throws Exception {
     failures=0;active(false);mc.setScreen(null);DeathChecks.alive(mc);
-    ((local.luke.power.permissions.CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     test("creative clicks extinguish every fire face and preserve its support",()->{
       CreativeVehicleChecks.mode(mc,"CREATIVE");
       for(int face=0;face<6;face++) {

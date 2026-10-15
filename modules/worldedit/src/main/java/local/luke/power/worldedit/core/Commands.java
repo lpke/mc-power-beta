@@ -7,6 +7,7 @@ import java.util.*;
 
 public final class Commands {
   public interface Player {
+    default boolean allowed(String command) { return true; }
     Pos feet();
 
     Pos target();
@@ -85,7 +86,7 @@ public final class Commands {
     switch (command) {
       case "help", "we", "worldedit" -> {
         arity(a, 0, 1);
-        help(a.isEmpty() ? 1 : integer(a.get(0), 1, 6, "page"),
+        help(a.isEmpty() ? 1 : integer(a.get(0), 1, Integer.MAX_VALUE, "page"),
             a.isEmpty() && local.luke.power.chat.HelpOutput.scrolling());
       }
       case "remove", "rem", "rement", "countentities" -> {
@@ -325,7 +326,7 @@ public final class Commands {
         e.usePos1 = !e.usePos1;
         e.message.accept(e.usePos1 ? "Placement uses position 1." : "Placement uses your feet.");
       }
-      default -> throw new IllegalArgumentException("Unknown WorldEdit Beta command. Use //help.");
+      default -> throw new IllegalArgumentException("Unknown editing command. Use //help.");
     }
     if (!Set.of(
                 "paste", "stack", "move", "sphere", "hsphere", "cyl", "hcyl", "outset", "inset",
@@ -480,55 +481,6 @@ public final class Commands {
   }
 
   private void help(int page, boolean all) {
-    String[][] help = {
-      {
-        "//wand | //toggleeditwand | //pos1 [x,y,z] | //pos2 [x,y,z]",
-        "//hpos1 | //hpos2 | //sel | //chunk | //size | //drawsel",
-        "//expand amount [reverse] [direction] | //expand vert",
-        "//contract amount [direction|top|bottom] | //shift amount [direction]",
-        "//outset [-h|-v] amount | //inset [-h|-v] amount"
-      },
-      {
-        "//set pattern | //replace [mask] pattern",
-        "//walls pattern | //faces pattern | //center pattern",
-        "//overlay pattern | //hollow [thickness] [pattern]",
-        "//fill pattern radius [depth] | //fillr pattern radius [depth]",
-        "//gmask [mask] | //count mask | //distr"
-      },
-      {
-        "//copy | //cut | //paste [-aos] | //clearclipboard",
-        "//rotate degrees | //flip [direction] | //calc expression",
-        "//stack [-as] [count] [direction] | //move [-as] [distance] [direction]",
-        "//undo [steps] | //redo [steps] | //clearhistory",
-        "//cancel | //status | //toggleplace"
-      },
-      {
-        "//sphere [-r] pattern radius | //hsphere [-r] pattern radius",
-        "//cyl pattern radius [height] | //hcyl pattern radius [height]",
-        "//drain radius | //replacenear radius mask pattern",
-        "//removenear mask radius | //removeabove [size] [height]",
-        "//removebelow [size] [height]",
-        "Patterns: hand, stone, 44:2, 75%hand,25%cobble. Masks: !air, hand, 44:2"
-      },
-      {
-        "/remove type[,type] [radius=32] | //countentities type [radius]",
-        "/butcher [-apwf] [radius=32]: hostile mobs; -a animals, -p pets",
-        "-w water mobs, -f all friendly mobs. Radius: 1 to 256.",
-        "Types: items, mobs, hostile, animals, pets, water, projectiles,",
-        "vehicles, boats, minecarts, tnt, fallingblocks, paintings, all.",
-        "Loaded entities only; players and their mounts are protected.",
-        "Pets need pets/all or -p/-f. Removal has no drops or undo."
-      },
-      {
-        "//up [-fg] distance | /ceil [-fg] [clearance]",
-        "/ascend [levels] | /descend [levels] | /unstuck",
-        "/jumpto or /j: stand above the target | /thru: pass through a wall",
-        "-f uses creative flight; -g adds an undoable glass platform.",
-        "Single- and double-slash forms work. Loaded chunks only."
-      }
-    };
-    e.helpMessage.accept("§6World editing" + (all ? "" : " §8| §7Help " + page + "/" + help.length));
-    for (int i = all ? 0 : page - 1; i < (all ? help.length : page); i++)
-      for (String line : help[i]) e.helpMessage.accept(local.luke.power.chat.HelpOutput.line(line));
+    local.luke.power.worldedit.chat.CommandHelp.index(page, all, player::allowed, e.helpMessage);
   }
 }

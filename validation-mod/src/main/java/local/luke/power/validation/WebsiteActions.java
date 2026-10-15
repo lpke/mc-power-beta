@@ -108,7 +108,7 @@ final class WebsiteActions {
       case "water-drop" -> mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,false);
       case "fire" -> {WebsiteGallery.run(mc,"building");CreativeVehicleChecks.mode(mc,"SURVIVAL");mc.player.health=20;mc.player.fire=400;mc.options.hideHud=false;}
       case "explosion-items" -> {
-        WebsiteDetails.run(mc,"items");var v=local.luke.power.gameplay.GameplayConfig.copy();v.explosionProofItems=true;local.luke.power.gameplay.GameplayConfig.preview(v);
+        WebsiteDetails.run(mc,"items");var v=local.luke.power.gameplay.GameplayConfig.copy();AccessRules.set(mc, local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS, false);local.luke.power.gameplay.GameplayConfig.preview(v);
         camera(mc,1,4,-7,0,30);mc.options.hideHud=true;
       }
       case "explosion-start" -> {var tnt=new class_365(mc.world,x+.5,y+.5,z-1.5);tnt.field_1390=25;mc.world.method_210(tnt);}

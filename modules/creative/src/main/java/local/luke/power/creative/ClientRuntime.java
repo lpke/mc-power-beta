@@ -70,10 +70,12 @@ public final class ClientRuntime {
       world = mc.level;
       FlightController.reset();
     }
+    if (local(mc) && !Modes.denial(((ModePlayer) mc.player).power_mode()).isEmpty()
+        && !local.luke.power.input.InteractionState.carryingContainer) Modes.returnToSurvival(mc);
     DebugKey.tick(mc);
     boolean modifier = local.luke.power.input.Bindings.down(Keys.MODIFIER), picker = local.luke.power.input.Bindings.down(Keys.PICKER);
     if (modifier && !modifierDown) debugBefore = mc.options.debugHud;
-    if (active(mc) && Config.current().modePicker && modifier && picker && !pickerDown) {
+    if (active(mc) && modifier && picker && !pickerDown) {
       DebugKey.cancel();
       mc.options.debugHud = debugBefore;
       mc.openScreen(new ModePickerScreen());

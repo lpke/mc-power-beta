@@ -42,8 +42,8 @@ final class ToggleMessageChecks {
     for (String id : IDS.values()) originalMessages.put(id, find(session, id).value.deepCopy());
     var document = PowerConfig.document();
     var visual = local.luke.power.visual.VisualConfig.copy();
-    var properties = (local.luke.power.permissions.CheatWorld)mc.world.method_262();
-    boolean cheats = properties.power$cheatsEnabled();
+    var properties = AccessRules.of(mc.world.method_262());
+    boolean cheats = properties.allAllowed();
     String mode = mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     var saved = Config.current().copy();
     var hud = StatusConfig.copy();
@@ -51,15 +51,13 @@ final class ToggleMessageChecks {
     var screen = mc.currentScreen;
     Object camera = Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     Object cameraConfig = Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-    var enabled = cameraConfig.getClass().getField("enabled");
-    Object cameraEnabled = enabled.get(cameraConfig);
     Object cameraMessages = cameraConfig.getClass().getField("playerMovementMessages").get(cameraConfig);
     try {
       mc.setScreen(null);
-      properties.power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc,"CREATIVE");
+      properties.allAllowed(true); CreativeVehicleChecks.mode(mc,"CREATIVE");
       local.luke.power.autowalk.AutoWalk.tick(mc);
       test("all message switches default off and preview/Cancel preserve the file", () -> {
-        check(IDS.size() == Tweak.values().length, "missing toggle");
+        check(IDS.size() == Tweak.values().length - 1, "missing toggle");
         byte[] before = Files.readAllBytes(PowerConfig.path());
         for (var entry : IDS.entrySet()) {
           var setting = find(session, entry.getValue());
@@ -76,15 +74,15 @@ final class ToggleMessageChecks {
       });
       for (String id : IDS.values()) find(session, id).parse("true");
       session.preview(true);
-      for (Tweak tweak : Tweak.values()) test("live " + tweak + " sends one on/off message independently of the HUD", () -> {
+      for (Tweak tweak : IDS.keySet()) test("live " + tweak + " sends one on/off message independently of the HUD", () -> {
         var display = StatusConfig.copy(); display.enabled = false; StatusConfig.preview(display);
-        setState(mc, tweak, false, camera, enabled, cameraConfig);
+        setState(mc, tweak, false, camera, cameraConfig);
         var messages = new TweakToggleMessages(); messages.update(false);
-        setState(mc, tweak, true, camera, enabled, cameraConfig);
+        setState(mc, tweak, true, camera, cameraConfig);
         check(messages.update(true).equals(List.of(tweak.label + ": \u00a7aON\u00a7r")), "on message missing or duplicated");
         check(messages.update(true).isEmpty(), "held state repeats");
         check(ActiveTweaks.lines(StatusConfig.current()).isEmpty(), "HUD was enabled by messages");
-        setState(mc, tweak, false, camera, enabled, cameraConfig);
+        setState(mc, tweak, false, camera, cameraConfig);
         check(messages.update(true).equals(List.of(tweak.label + ": \u00a7cOFF\u00a7r")), "off message missing or duplicated");
       });
       test("tick emits chat once and menu previews are silent", () -> {
@@ -116,11 +114,11 @@ final class ToggleMessageChecks {
       var cleanup = SettingsRegistry.open(mc);
       originalMessages.forEach((id, value) -> find(cleanup, id).value = value);
       cleanup.preview(true);
-      enabled.set(cameraConfig, cameraEnabled);
+
       cameraConfig.getClass().getField("playerMovementMessages").set(cameraConfig, cameraMessages);
       Config.preview(saved); StatusConfig.preview(hud); mc.options.cinematicMode = cinematic;
       local.luke.power.visual.VisualConfig.preview(visual);
-      CreativeVehicleChecks.mode(mc,mode); properties.power$cheatsEnabled(cheats);
+      CreativeVehicleChecks.mode(mc,mode); properties.allAllowed(cheats);
       local.luke.power.render.RenderControls.tick(mc);
       PowerConfig.write(document); mc.setScreen(screen);
     }
@@ -128,26 +126,26 @@ final class ToggleMessageChecks {
   }
 
   private static void setState(Minecraft mc, Tweak tweak, boolean active, Object camera,
-      java.lang.reflect.Field cameraEnabled, Object cameraConfig) throws Exception {
+      Object cameraConfig) throws Exception {
     var s = Config.current().copy();
     switch (tweak) {
       case FAKE_SNEAK -> s.sneak.enabled = active;
       case FAST_PLACEMENT -> { s.placement.enabled = active; s.placement.restrictionEnabled = false; }
       case PLACEMENT_RESTRICTION -> { s.placement.enabled = true; s.placement.restrictionEnabled = active; }
       case FREE_LOOK -> {
-        s.freeLook = true; s.freeLookToggle = true;
+         s.freeLookToggle = true;
         if (active) local.luke.power.building.camera.FreeLook.begin(mc);
         else local.luke.power.building.camera.FreeLook.reset(mc);
       }
       case AUTO_WALK -> {
-        s.autoWalk = true; Config.preview(s);
+         Config.preview(s);
         var field = local.luke.power.autowalk.AutoWalk.class.getDeclaredField("TOGGLE"); field.setAccessible(true);
         var toggle = (local.luke.power.autowalk.WalkToggle) field.get(null);
         toggle.stop(); toggle.update(false, true);
         if (active) toggle.update(true, true);
       }
       case AUTO_MINE -> {
-        s.autoMine = true; Config.preview(s);
+         Config.preview(s);
         local.luke.power.building.mining.AutoMine.tick(mc);
         var field = local.luke.power.building.mining.AutoMine.class.getDeclaredField("TOGGLE"); field.setAccessible(true);
         var toggle = (local.luke.power.building.mining.AutoMineToggle) field.get(null);
@@ -161,12 +159,11 @@ final class ToggleMessageChecks {
       case FULL_BRIGHT -> {
         var field = local.luke.power.render.RenderControls.class.getDeclaredField("brightness");field.setAccessible(true);
         var state = (local.luke.power.render.FullBrightState)field.get(null);
-        state.update(mc.world,false,false,false);state.update(mc.world,true,false,false);
+        state.update(null,false,false,false);state.update(mc.world,true,false,false);
         if(active)state.toggle();local.luke.power.render.RenderControls.tick(mc);
       }
       case CINEMATIC_CAMERA -> mc.options.cinematicMode = active;
       case FREECAM_PLAYER_MOVEMENT -> {
-        cameraEnabled.set(cameraConfig, true);
         camera.getClass().getMethod("setActive", boolean.class).invoke(camera, true);
         camera.getClass().getField("allowPlayerMovement").setBoolean(camera, active);
       }

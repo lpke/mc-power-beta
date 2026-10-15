@@ -8,7 +8,6 @@
     "ArmorMixin",
     "BowItemMixin",
     "ChestMixin",
-    "CreeperMixin",
     "DeadBushMixin",
     "DyeMixin",
     "ExplosionMixin",
@@ -16,17 +15,14 @@
     "FireballEntityMixin",
     "FireBlockMixin",
     "GhastDamageMixin",
-    "GhastMixin",
     "ItemBaseMixin",
     "LeavesBlockMixin",
     "LeavesItemMixin",
-    "WorldMixin",
     "WaterFallDamageMixin",
     "LightningEntityMixin",
     "LogBlockMixin",
     "LogItemMixin",
     "PlayerInventoryMixin",
-    "PrimedTntMixin",
     "SignBlockEntityMixin",
     "SignInteractionMixin",
     "SnowballEntityMixin",
@@ -37,7 +33,6 @@
     "server.UpdateSign0x82C2SPacketMixin"
   ],
   "server": [
-    "server.ServerWorldMixin",
     "server.ServerPlayerPacketHandlerMixin"
   ],
   "client": [

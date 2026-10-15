@@ -2,9 +2,7 @@ package local.luke.power.validation;
 
 import static local.luke.power.validation.Validation.*;
 
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.worldedit.WorldEditor;
-import local.luke.power.worldedit.config.WorldOverride;
 import local.luke.power.worldedit.core.Pos;
 import local.luke.power.worldedit.core.Region;
 import net.minecraft.client.Minecraft;
@@ -14,16 +12,16 @@ final class WorldEditHandChecks {
   static void run(Minecraft mc) throws Exception {
     failures = 0;
     check(mc.world != null && !mc.world.isRemote, "requires a disposable singleplayer world");
-    var rules = (CheatWorld) mc.world.method_262();
-    boolean cheats = rules.power$cheatsEnabled();
-    var override = WorldEditor.worldOverride(mc);
+    var rules = AccessRules.of(mc.world.method_262());
+    boolean cheats = rules.allAllowed();
+
     var settings = WorldEditor.settings().copy();
     var inventory = mc.player.inventory.main.clone();
     int slot = mc.player.inventory.selectedSlot;
     try {
-      mc.setScreen(null); rules.power$cheatsEnabled(true);
-      WorldEditor.worldOverride(mc, WorldOverride.ENABLED);
-      var enabled = settings.copy(); enabled.enabled = true; WorldEditor.preview(enabled);
+      mc.setScreen(null); rules.allAllowed(true);
+
+      var enabled = settings.copy();  WorldEditor.preview(enabled);
       mc.player.inventory.selectedSlot = 0;
       var editor = WorldEditor.editor(mc);
       editor.select(Region.between(new Pos(0, 101, 0), new Pos(1, 101, 0)));
@@ -58,15 +56,15 @@ final class WorldEditHandChecks {
           expect(mc, 0, 1, 0); expect(mc, 1, 35, 0);
         }
       });
-      test("hand does not bypass cheats", () -> {
-        mc.player.inventory.main[0] = new ItemStack(1, 64, 0); rules.power$cheatsEnabled(false);
+      test("hand cannot bypass the world-editing permission", () -> {
+        mc.player.inventory.main[0] = new ItemStack(1, 64, 0); rules.allAllowed(false);
         var messages = ChatChecks.submit(mc, "//set hand");
-        check(messages.stream().anyMatch(s -> s.contains("Cheats are disabled")), "cheats gate bypassed");
+        check(messages.stream().anyMatch(s -> s.contains("allow_world_editing")), "world-editing permission bypassed");
         check(!editor.engine.busy(), "disabled cheats queued an edit"); expect(mc, 1, 35, 0);
       });
     } finally {
       WorldEditor.leaveWorld(); WorldEditor.preview(settings);
-      rules.power$cheatsEnabled(cheats); WorldEditor.worldOverride(mc, override);
+      rules.allAllowed(cheats);
       System.arraycopy(inventory, 0, mc.player.inventory.main, 0, inventory.length);
       mc.player.inventory.selectedSlot = slot; mc.setScreen(null);
     }

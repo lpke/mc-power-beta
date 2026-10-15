@@ -102,6 +102,12 @@ public final class Validation {
       else if (command.equals("cheats-creation")) CheatsChecks.creation(mc);
       else if (command.startsWith("indicators-")) IndicatorsMenuChecks.run(mc,command.substring(11));
       else if (command.startsWith("movement-")) InventoryMovementChecks.run(mc,command.substring(9));
+      else if (command.equals("world-rules")) WorldRulesChecks.permissions(mc);
+      else if (command.startsWith("rules-restart ")) RuleRestartChecks.run(mc, command.substring(14));
+      else if (command.equals("rule-behavior")) RuleBehaviorChecks.run(mc);
+      else if (command.startsWith("quick-transfer")) QuickTransferChecks.run(mc, command.substring(14).trim());
+      else if (command.equals("creation-rules")) CreationRuleChecks.run(mc);
+      else if (command.equals("compatibility-defaults")) CompatibilityDefaultsChecks.run(mc);
       else if (command.equals("cheats")) CheatsChecks.run(mc);
       else if (command.equals("modern-commands")) ModernCommandChecks.run(mc);
       else if (command.startsWith("audio-presets-")) AudioPresetChecks.run(mc,command.substring(14));
@@ -201,6 +207,7 @@ public final class Validation {
       } else if (command.equals("new-world")) {
         mc.interactionManager = new net.minecraft.SingleplayerInteractionManager(mc);
         mc.method_2120("Power Beta release check", "Power Beta release check", 17320261003L);
+        if (mc.player.dimensionId == -1) mc.method_2139();
         mc.setScreen(null);
         // Direct fixture loading can render weather entities before the first world frame.
         net.minecraft.client.render.entity.EntityRenderDispatcher.field_2489.method_1917(
@@ -280,7 +287,6 @@ public final class Validation {
     edits.put("native.music", new JsonPrimitive(43));
     edits.put("audio.category.blocks", new JsonPrimitive(35));
     edits.put("creative.glide", new JsonPrimitive(2));
-    edits.put("tweaks.freeLook", new JsonPrimitive(true));
     edits.put("worldedit.opacity", new JsonPrimitive(70));
     edits.put("power_hud:config.chatHistorySize", new JsonPrimitive(101));
     edits.put("logo.logo.animation.enabled", new JsonPrimitive(false));

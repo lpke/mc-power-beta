@@ -3,6 +3,7 @@ package local.luke.power.controls.mixin.tweaks.punchtntignite;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import local.luke.power.controls.ControlFeatures;
+import local.luke.power.rules.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.TntBlock;
 import net.minecraft.block.material.Material;
@@ -20,7 +21,8 @@ public class TntBlockMixin extends Block {
 
     @WrapOperation(method = "onMetadataChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/TntBlock;dropStack(Lnet/minecraft/world/World;IIILnet/minecraft/item/ItemStack;)V"))
     public void cancelTntDrop(TntBlock instance, World world, int x, int y, int z, ItemStack stack, Operation<Void> original) {
-        if (!ControlFeatures.OLD_FEATURES_CONFIG.punchTntToIgnite) {
+        if (world.isRemote || !WorldRules.enabled(world.getProperties(), GameRule.TNT_EXPLODES)
+                || !ControlFeatures.OLD_FEATURES_CONFIG.punchTntToIgnite) {
             original.call(instance, world, x, y, z, stack);
             return;
         }

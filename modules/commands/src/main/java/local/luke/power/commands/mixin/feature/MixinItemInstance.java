@@ -34,9 +34,7 @@ public abstract class MixinItemInstance implements ItemInstanceStr {
 
     @Inject(method = "readNbt", at = @At("HEAD"))
     private void onFromTag(NbtCompound arg, CallbackInfo ci) {
-        if (arg.contains("spcName")) {
-            this.name = arg.getString("spcName");
-        }
+        this.name = arg.contains("spcName") ? arg.getString("spcName") : null;
     }
 
 
@@ -47,14 +45,8 @@ public abstract class MixinItemInstance implements ItemInstanceStr {
     }
 
 
-    /*
-    @Inject(method = "copy()Lnet/minecraft/item/ItemInstance;", at = @At("RETURN"))
-    private void onCopy(CallbackInfoReturnable<ItemInstance> cir) {
-        ItemInstanceStr copyMixin = (ItemInstanceStr) (Object) cir.getReturnValue();
-        if (this.name != null && cir.getReturnValue() != null)
-            copyMixin.spc$setStr(this.name);
-        else
-            System.out.println("didn't work");
+    @Inject(method = "copy", at = @At("RETURN"))
+    private void onCopy(CallbackInfoReturnable<ItemStack> cir) {
+        ((ItemInstanceStr) (Object) cir.getReturnValue()).spc$setStr(this.name);
     }
-*/
 }

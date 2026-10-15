@@ -51,7 +51,7 @@ public final class InventoryMovementChecks {
         for(int y=101;y<=105;y++)mc.world.method_200(x,y,z,0);
       }
       mc.player.method_1340(.5,103,-3.5);mc.player.yaw=0;mc.player.pitch=0;
-      var s=Config.current().copy();s.inventoryWhileMoving=true;s.autoWalk=true;Config.preview(s);
+      var s=Config.current().copy();s.inventoryWhileMoving=true;Config.preview(s);
       Bindings.configure(Map.of());mc.options.forwardKey.code=17;mc.options.backKey.code=31;
       mc.options.leftKey.code=30;mc.options.rightKey.code=32;mc.options.jumpKey.code=57;mc.options.sneakKey.code=42;
       AutoWalk.KEY.code=19;

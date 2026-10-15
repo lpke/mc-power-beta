@@ -38,18 +38,18 @@ than overwrite a changed block or inventory.
 ## Death records
 
 Optional death records live in `.minecraft/power-beta-data/deaths`, separated by
-world ID and player name. Disabling the feature or cheats preserves the journal.
+world ID and player name. Disabling recording or recovery permission preserves the journal.
 Records include native item NBT, full counts, damage, original slots, location and cause.
 
-`/death items [id]` opens a saved inventory view. Without cheats its items are
-locked. With cheats, click a stack or the check-mark button to recover remaining
+`/death items [id]` opens a saved inventory view. Without `allow_death_recovery` its items are
+locked. With that rule enabled, click a stack or the check-mark button to recover remaining
 items once. Recovery cancels before writing if any selected original slot is
 occupied, including by a matching item. It never replaces or merges current items.
 Held cursor items use available main inventory space. Dropped items remain in the
 world. Individual and bulk GUI recovery share durable per-stack claims.
 
-The World overrides rule Keep inventory on death defaults off and requires cheats.
-Turning cheats off clears the rule. The rule is checked at death and keeps main
+The Game rules setting Keep inventory on death defaults off for Survival and on
+for the Cheat preset. It is independent of recovery permissions. The rule keeps main
 inventory, armour, the held cursor and player crafting inputs through respawn.
 Dead-player NBT includes a complete native snapshot for restart safety. Death
 records retain their item snapshots but mark every stack recovered, with the log

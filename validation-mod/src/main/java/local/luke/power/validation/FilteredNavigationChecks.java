@@ -79,7 +79,7 @@ public final class FilteredNavigationChecks {
         Setting first=(Setting)call(((List<?>)field(s,"rows")).get(1),"setting");
         field(s,"scroll",0d);
         check(call(heading,"setting")==null,"heading missing");
-        ((ScreenInput)(Object)s).power$click((int)call(s,"left")+8,(int)call(s,"top")+8,0);
+        ((ScreenInput)(Object)s).power$click((int)call(s,"left")+30,(int)call(s,"top")+8,0);
         render(s);
         check(search(s).text().isEmpty()&&field(s,"page").equals(first.page),"did not open section");
         call(s,"back");render(s);check(search(s).text().equals("fast place"),"search lost");
@@ -121,30 +121,27 @@ public final class FilteredNavigationChecks {
         }
       });
       test("shared sprint control remains available for flight or freecam",()->{
-        Setting flight=find(s.session(),"creative.sprintFlight"),camera=find(s.session(),"power_camera:config.enabled"),
-            sprint=find(s.session(),"power_camera:config.sprint"),key=find(s.session(),"keys.power_creative.sprint");
-        var a=flight.value;var b=camera.value;var c=sprint.value;
+        Setting flight=find(s.session(),"creative.sprintFlight"),sprint=find(s.session(),"power_camera:config.sprint"),key=find(s.session(),"keys.power_creative.sprint");
+        var a=flight.value;var b=sprint.value;
         try {
-          for (int bits=0;bits<8;bits++) {
-            flight.value=new JsonPrimitive((bits&1)!=0);camera.value=new JsonPrimitive((bits&2)!=0);sprint.value=new JsonPrimitive((bits&4)!=0);
-            check(ControlLinks.enabled(s.session(),key)==((bits&1)!=0||(bits&6)==6),"shared action hidden incorrectly");
+          for(int bits=0;bits<4;bits++) {
+            flight.value=new JsonPrimitive((bits&1)!=0);sprint.value=new JsonPrimitive((bits&2)!=0);
+            check(ControlLinks.enabled(s.session(),key)==(bits!=0),"shared action hidden incorrectly");
           }
-        } finally {flight.value=a;camera.value=b;sprint.value=c;}
+        }finally{flight.value=a;sprint.value=b;}
       });
-      test("feature gates hide only their unavailable actions and Show Disabled exposes them",()->{
+      test("masterless actions remain bindable and related settings use retained preferences",()->{
         for(String[] pair:List.of(
-          new String[]{"tweaks.autoWalk","keys.Auto-walk (toggle)"},
-          new String[]{"tweaks.freeLook","keys.key.powerbeta.free_look"},
-          new String[]{"tweaks.hotbar.swap","keys.power_building.hotbar.base"},
-          new String[]{"tweaks.hotbar.scroll","keys.power_building.hotbar.scroll"},
-          new String[]{"creative.modePicker","keys.power_creative.picker"},
-          new String[]{"visual.containerPreview","keys.powerbeta.containerPreview"},
-          new String[]{"power_camera:config.enabled","keys.Toggle Freecam"})) {
-          Setting gate=find(s.session(),pair[0]),key=find(s.session(),pair[1]);var old=gate.value;
-          try {
-            gate.value=new JsonPrimitive(false);check(!ControlLinks.enabled(s.session(),key),"gate ignored "+pair[0]);
-            gate.value=new JsonPrimitive(true);check(ControlLinks.enabled(s.session(),key),"enabled gate hidden");
-          } finally{gate.value=old;}
+          new String[]{"tweaks.autoWalkHoldToWalk","keys.Auto-walk (toggle)"},
+          new String[]{"tweaks.freeLookToggle","keys.key.powerbeta.free_look"},
+          new String[]{"tweaks.hotbar.overlay","keys.power_building.hotbar.base"},
+          new String[]{"tweaks.hotbar.reverseScroll","keys.power_building.hotbar.scroll"},
+          new String[]{"creative.blockReach","keys.powerbeta.containerPreview"},
+          new String[]{"power_camera:config.speed","keys.Toggle Freecam"})) {
+          Setting preference=find(s.session(),pair[0]),key=find(s.session(),pair[1]);
+          check(ControlLinks.enabled(s.session(),key),"missing action "+pair[1]);
+          check(ControlLinks.related(s.session(),key)!=null&&ControlLinks.settings(s.session(),key).contains(preference),"missing related settings "+pair[1]);
+          check(ControlLinks.controls(s.session(),preference).contains(key),"asymmetric control link");
         }
       });
     } finally {field(s,"showDisabled",oldShow);s.session().discard();mc.setScreen(parent);}

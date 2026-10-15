@@ -156,6 +156,8 @@ public final class NativeBackend implements Backend {
       }
       if (k.translationKey.toLowerCase(Locale.ROOT).contains("free_look")) label = "Free look";
       if (k.translationKey.equals("powerbeta.containerPreview")) label = "Preview container contents";
+      if (k.translationKey.equals("powerbeta.openCommands")) label = "Open commands";
+      if (k.translationKey.equals("powerbeta.debugGraph")) label = "Performance graph";
       if (k.translationKey.equals("powerbeta.lightOverlay")) label = "Light overlay (toggle)";
       if (k.translationKey.equals("powerbeta.infoHud")) label = "Custom HUD info (toggle)";
       entries.add(
@@ -195,8 +197,8 @@ public final class NativeBackend implements Backend {
       case "key.inventory" -> Keyboard.KEY_E;
       case "key.drop" -> Keyboard.KEY_Q;
       case "key.chat" -> Keyboard.KEY_T;
-      case "Command" -> Keyboard.KEY_SLASH;
-      case "Debug Graph" -> Keyboard.KEY_LCONTROL;
+      case "powerbeta.openCommands" -> Keyboard.KEY_SLASH;
+      case "powerbeta.debugGraph" -> new Chord(Keyboard.KEY_F3, Chord.CTRL).encoded();
       case "key.fog" -> Keyboard.KEY_F;
       case "key.power_controls.hide_hud" -> Keyboard.KEY_F1;
       case "key.power_controls.take_screenshot" -> Keyboard.KEY_F2;

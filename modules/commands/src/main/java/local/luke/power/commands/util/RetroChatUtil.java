@@ -49,6 +49,7 @@ public class RetroChatUtil {
     commands.add(new Give());
     commands.add(new God());
     commands.add(new Heal());
+    commands.add(new Repair());
     commands.add(new Id());
     commands.add(new Mobs());
     commands.add(new Summon());
@@ -82,7 +83,7 @@ public class RetroChatUtil {
       String denial =
           (name.equals("gamemode") || name.equals("gm"))
               ? ""
-              : local.luke.power.permissions.CommandPermissions.denial(name);
+              : local.luke.power.permissions.CommandPermissions.denial(name, args);
       if (!denial.isEmpty()) {
         source.sendFeedback("§c" + denial);
         return true;

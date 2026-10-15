@@ -1,7 +1,6 @@
 {
   "General": [
     "Game",
-    "World overrides",
     "Interface",
     "Input"
   ],
@@ -110,14 +109,13 @@
     "Selection outline",
     "Limits and history"
   ],
-  "Commands": [
+  "Game rules": [
     "Access",
-    "Game mode access",
-    "Game mode access in this world",
-    "Cheat commands",
-    "Cheat commands in this world",
-    "Non-cheat commands",
-    "Non-cheat commands in this world"
+    "Time and weather",
+    "Spawning",
+    "World interactions",
+    "Drops and death",
+    "Player damage"
   ],
   "Gameplay": [
     "Death records",

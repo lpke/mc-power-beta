@@ -4,7 +4,6 @@ import static local.luke.power.validation.Validation.*;
 import java.util.*;
 import local.luke.power.config.*;
 import local.luke.power.gameplay.*;
-import local.luke.power.permissions.CheatWorld;
 import net.minecraft.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -15,7 +14,7 @@ import net.minecraft.util.math.Box;
 final class Release151GameplayChecks {
   static void run(Minecraft mc) throws Exception {
     var before = GameplayConfig.copy();
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc, "CREATIVE");
     mc.player.method_1340(0, 102, -6);
     for (int x = -3; x <= 3; x++) for (int z = -3; z <= 3; z++) mc.world.method_214(x, z);

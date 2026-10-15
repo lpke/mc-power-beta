@@ -61,14 +61,17 @@ public class Time implements Command {
     s.sendFeedback("/time set <day|noon|night|midnight|time> | /time add <time>");
     s.sendFeedback("/time query <daytime|gametime|day>");
     s.sendFeedback(
-        "Durations accept t ticks, s seconds and d days. Game time continues while daylight is frozen.");
+        "Set/add require allow_time_editing. Queries are always available. Durations accept t ticks, s seconds and d days.");
   }
 
   public String[] suggestion(SharedCommandSource s, int n, String input, String total) {
+    String[] words = total.strip().split("\\s+");
+    if (n > 1 && !local.luke.power.permissions.CommandPermissions.allowed("time")
+        && (words.length < 2 || !words[1].equalsIgnoreCase("query"))) return new String[0];
     return CommandSuggestions.suffix(
         input,
         n == 1
-            ? List.of("set", "add", "query")
+            ? local.luke.power.permissions.CommandPermissions.allowed("time") ? List.of("set", "add", "query") : List.of("query")
             : n == 2
                 ? total.contains("query") ? List.of("daytime", "gametime", "day") : PRESETS.keySet()
                 : List.of());

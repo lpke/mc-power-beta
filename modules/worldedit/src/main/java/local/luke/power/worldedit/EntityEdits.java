@@ -13,7 +13,7 @@ public final class EntityEdits {
   private EntityEdits() {}
 
   public static int apply(Minecraft mc, EntityQuery query, boolean remove) {
-    if (!WorldEditor.available(mc))
+    if (!WorldEditor.commandAvailable(mc, remove ? "remove" : "countentities"))
       throw new IllegalArgumentException("A live local world is required.");
     int count = 0;
     // Snapshot: entities detach from chunks during the next normal world tick.

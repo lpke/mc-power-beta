@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 
 public final class CommandsLibraryChecks {
   private static PowerOptionsScreen options;
-  private static CommandPermissions.Settings permissions;
+  private static local.luke.power.rules.RuleSet permissions;
   private static String preview;
 
   private static void click(PowerOptionsScreen screen, int x, int y, int button) {
@@ -25,137 +25,24 @@ public final class CommandsLibraryChecks {
 
   public static void run(Minecraft mc, String action) throws Exception {
     switch (action) {
-      case "commands" -> {
-        failures = 0;
-        permissions = CommandPermissions.copy();
-        var cheats = (local.luke.power.permissions.CheatWorld) mc.world.method_262();
-        boolean cheatsBefore = cheats.power$cheatsEnabled(); cheats.power$cheatsEnabled(true);
-        var defaults = new CommandPermissions.Settings();
-        CommandPermissions.preview(defaults);
-        ChatChecks.submit(mc, "/gamemode creative");
-        var warps = Class.forName("local.luke.power.commands.api.PlayerWarps");
-        String before = (String) warps.getMethod("spc$getWarpString").invoke(mc.player);
-        try {
-          ChatChecks.submit(mc, "/warp set command-policy-test");
-          String saved = (String) warps.getMethod("spc$getWarpString").invoke(mc.player);
-          check(!saved.equals(before), "warp fixture missing");
-          ChatChecks.submit(mc, "/gamemode survival");
-          defaults.rules.put("warp", CommandPermissions.Rule.DISABLED);
-          CommandPermissions.preview(defaults);
-          test(
-              "global rule blocks command through the real chat path",
-              () -> {
-                var lines = ChatChecks.submit(mc, "/warp set denied-test");
-                check(
-                    lines.size() == 1 && lines.get(0).contains("disabled"),
-                    lines.toString());
-                check(
-                    warps.getMethod("spc$getWarpString").invoke(mc.player).equals(saved),
-                    "blocked command changed warps");
-              });
-          var world = CommandContext.world(mc);
-          defaults.worlds.put(
-              world, new LinkedHashMap<>(Map.of("warp", CommandPermissions.Override.ALLOW)));
-          CommandPermissions.preview(defaults);
-          test(
-              "world allow bypasses global rule",
-              () -> {
-                var lines = ChatChecks.submit(mc, "/warp list");
-                check(
-                    lines.stream().noneMatch(s -> s.contains("disabled")),
-                    lines.toString());
-                check(CommandPermissions.allowed("warp"), "override ignored");
-              });
-          defaults.enabled = false;
-          CommandPermissions.preview(defaults);
-          test(
-              "master blocks world allow and aliases without deleting data",
-              () -> {
-                check(
-                    !CommandPermissions.allowed("warp") && !CommandPermissions.allowed("gm"),
-                    "master bypassed");
-                var lines = ChatChecks.submit(mc, "/gm creative");
-                check(lines.size() == 1 && lines.get(0).contains("disabled"), lines.toString());
-                check(!((Boolean)Class.forName("local.luke.power.creative.inventory.interfaces.CreativePlayer").getMethod("creative_isCreative").invoke(mc.player)), "denied mode changed player");
-                check(
-                    warps.getMethod("spc$getWarpString").invoke(mc.player).equals(saved),
-                    "master erased warp");
-              });
-          test(
-              "permission UI rejects a world change before saving",
-              () -> {
-                ConfigSession session = SettingsRegistry.open(mc);
-                Setting s = find(session, "commands.world.warp");
-                s.value = new JsonPrimitive(2);
-                var worldBefore = mc.world;
-                try {
-                  mc.world = null;
-                  try {
-                    session.save(java.nio.file.Path.of(".").toAbsolutePath());
-                    throw new AssertionError("saved for wrong world");
-                  } catch (IllegalArgumentException expected) {
-                    check(expected.getMessage().contains("world changed"), expected.toString());
-                  }
-                } finally {
-                  mc.world = worldBefore;
-                }
-              });
-        } finally {
-          warps.getMethod("spc$setWarpString", String.class).invoke(mc.player, before);
-          CommandPermissions.preview(permissions);
-          ChatChecks.submit(mc, "/gamemode creative");
-          cheats.power$cheatsEnabled(cheatsBefore);
-        }
-        options = MenuUpdateChecks.open(mc, "Commands");
-        test(
-            "command page includes a separate override for each command",
-            () -> {
-              check(
-                  options.session().settings().stream()
-                          .filter(s -> s.id.startsWith("commands.world."))
-                          .count()
-                      == CommandPermissions.COMMANDS.size(),
-                  "missing world rule");
-              options.render(-1, -1, 0);
-            });
-        log("COMMAND ACCESS FAILURES " + failures);
-      }
+      case "commands" -> WorldRulesChecks.permissions(mc);
       case "persist-start" -> {
-        var original = CommandPermissions.copy();
         var json = new com.google.gson.JsonObject();
         json.addProperty("world", CommandContext.world(mc));
-        json.add("settings", new com.google.gson.Gson().toJsonTree(original));
-        java.nio.file.Files.writeString(
-            java.nio.file.Path.of("permissions-validation.json"), json.toString());
-        original
-            .worlds
-            .computeIfAbsent(CommandContext.world(mc), k -> new LinkedHashMap<>())
-            .put("warp", CommandPermissions.Override.BLOCK);
-        CommandPermissions.save(original);
-        mc.world.method_195(true, null);
+        json.add("rules", AccessRules.copy(mc).document());
+        java.nio.file.Files.writeString(java.nio.file.Path.of("permissions-validation.json"), json.toString());
+        local.luke.power.commands.GameRuleCommand.execute(mc, new String[]{"gamerule", "allow_teleportation", "false"});
       }
       case "persist-finish" -> {
-        var json =
-            com.google.gson.JsonParser.parseString(
-                    java.nio.file.Files.readString(
-                        java.nio.file.Path.of("permissions-validation.json")))
-                .getAsJsonObject();
-        test(
-            "world identity and its command override persist across restart",
-            () -> {
-              check(
-                  json.get("world").getAsString().equals(CommandContext.world(mc)),
-                  "world identity changed");
-              check(
-                  CommandPermissions.current().override(CommandContext.world(mc), "warp")
-                      == CommandPermissions.Override.BLOCK,
-                  "world rule lost");
-              check(!CommandPermissions.allowed("warp"), "persisted rule not enforced");
-            });
-        CommandPermissions.save(
-            new com.google.gson.Gson()
-                .fromJson(json.get("settings"), CommandPermissions.Settings.class));
-        java.nio.file.Files.delete(java.nio.file.Path.of("permissions-validation.json"));
+        var path = java.nio.file.Path.of("permissions-validation.json");
+        var json = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(path)).getAsJsonObject();
+        test("world identity and teleport permission persist across restart", () -> {
+          check(json.get("world").getAsString().equals(CommandContext.world(mc)), "world identity changed");
+          check(!CommandPermissions.allowed("warp"), "teleport permission lost");
+        });
+        AccessRules.restore(mc, local.luke.power.rules.RuleSet.read(json.getAsJsonObject("rules"), new local.luke.power.rules.RuleSet()));
+        local.luke.power.world.WorldRuleChanges.save(mc);
+        java.nio.file.Files.delete(path);
       }
       case "inventory" -> {
         var screen = mc.currentScreen;

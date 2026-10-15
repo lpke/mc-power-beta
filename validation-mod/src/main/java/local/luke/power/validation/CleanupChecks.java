@@ -7,7 +7,6 @@ import com.google.gson.JsonPrimitive;
 import java.nio.file.*;
 import java.util.*;
 import local.luke.power.config.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.ui.PowerOptionsScreen;
 import local.luke.power.world.WorldCycles;
 import net.minecraft.client.Minecraft;
@@ -20,14 +19,14 @@ final class CleanupChecks {
   static void run(Minecraft mc) throws Exception {
     failures = 0;
     var properties = mc.world.method_262();
-    var cheats = (CheatWorld) properties;
+    var cheats = AccessRules.of(properties);
     var cycles = (WorldCycles) properties;
-    boolean beforeCheats = cheats.power$cheatsEnabled();
+    boolean beforeCheats = cheats.allAllowed();
     boolean day = cycles.power$daylightCycle(), weather = cycles.power$weatherCycle();
     long daylight = cycles.power$daylightTime();
     int difficulty = mc.world.field_213;
     try {
-      cheats.power$cheatsEnabled(true);
+      cheats.allAllowed(true);
       mc.world.field_213 = 0;
       test("current world rules survive copies and NBT without altering simulation time", () -> {
         cycles.power$daylightCycle(false); cycles.power$weatherCycle(false);
@@ -38,9 +37,9 @@ final class CleanupChecks {
         long simulation = copied.getTime();
         copied.setTime(simulation + 400);
         check(copied.getTime() == simulation + 400 && ((WorldCycles) copied).power$daylightTime() == daylight, "simulation frozen");
-        ((CheatWorld) copied).power$cheatsEnabled(false);
+        (AccessRules.of(copied)).allAllowed(false);
         copied.setTime(simulation + 401);
-        check(((WorldCycles) copied).power$daylightTime() == daylight + 1, "cheats-off did not suspend freeze");
+        check(((WorldCycles) copied).power$daylightTime() == daylight, "permission changes suspended the daylight rule");
       });
       test("world ticks and scheduled block updates continue with frozen daylight", () -> {
         cycles.power$daylightCycle(false);
@@ -167,17 +166,17 @@ final class CleanupChecks {
         for(Setting setting:s.settings()) if(setting.numeric()) check(Tooltips.setting(setting,"").contains("Range: "),"missing limits "+setting.id);
         Setting duration=find(s,"creative.doubleTapTicks");duration.parse("0.35");check(duration.value.getAsInt()==7,"seconds changed timing");
       });
-      test("General cycle rows follow cheats without leaving hidden unsaved changes", () -> {
-        ConfigSession s=SettingsRegistry.open(mc);Setting gate=find(s,"world.cheats"), rule=find(s,"world.daylightCycle");
-        check(SettingAccess.visible(s,rule),"cycle hidden with cheats on");
+      test("cycle rules remain visible and retain drafts when access permissions change", () -> {
+        ConfigSession s=SettingsRegistry.open(mc);Setting gate=find(s,"rules.world.allow_time_editing"), rule=find(s,"rules.world.advance_time");
+        check(SettingAccess.visible(s,rule),"cycle rule hidden");
         rule.value=new JsonPrimitive(!rule.value.getAsBoolean());gate.value=new JsonPrimitive(false);s.link(gate);
-        check(!SettingAccess.visible(s,rule) && !rule.changed(),"hidden cycle retains edit");
+        check(SettingAccess.visible(s,rule) && rule.changed(),"permission change erased the cycle draft");
         var ids=SettingsLayout.ordered(s.settings()).stream().filter(v->v.page.equals("General")&&v.group.equals("Game")).map(v->v.id).toList();
         check(ids.indexOf("world.difficulty")<ids.indexOf("power_controls:general.autosaveInterval"),"autosave order");
-        check(ids.indexOf("world.cheats")+1==ids.indexOf("world.daylightCycle") && ids.indexOf("world.daylightCycle")+1==ids.indexOf("world.weatherCycle"),"cycles not below cheats");
+        check(rule.page.equals("Game rules") && rule.group.equals("Time and weather"),"cycle rule placement");
       });
-      test("failed saves restore world cycles and the original cheats gate", () -> {
-        cheats.power$cheatsEnabled(false);cycles.power$daylightCycle(true);cycles.power$weatherCycle(true);
+      test("failed saves restore world cycles and independent permissions", () -> {
+        cheats.allAllowed(false);cycles.power$daylightCycle(true);cycles.power$weatherCycle(true);
         ConfigSession session=SettingsRegistry.open(mc);
         session.add(new Backend() {
           public String id(){return "fail-save";}
@@ -185,17 +184,18 @@ final class CleanupChecks {
           public void validate(Map<String,com.google.gson.JsonElement> values){}
           public void apply(Map<String,com.google.gson.JsonElement> values){if(values.get("fail-save").getAsBoolean())throw new IllegalStateException("Deliberate save failure");}
         },List.of(new Setting("fail-save","fail-save","General","Game","Failure","",Setting.Kind.BOOLEAN,new JsonPrimitive(false),new JsonPrimitive(false),0,1,1,List.of(),false)));
-        for(String id:List.of("world.cheats","fail-save"))find(session,id).value=new JsonPrimitive(true);
-        for(String id:List.of("world.daylightCycle","world.weatherCycle"))find(session,id).value=new JsonPrimitive(false);
+        for(String id:List.of("rules.world.allow_time_editing","fail-save"))find(session,id).value=new JsonPrimitive(true);
+        for(String id:List.of("rules.world.advance_time","rules.world.advance_weather"))find(session,id).value=new JsonPrimitive(false);
         try{session.save(Path.of("."));throw new AssertionError("save unexpectedly succeeded");}
         catch(IllegalStateException expected){check(expected.getSuppressed().length==0,"rollback failed");}
-        check(!cheats.power$cheatsEnabled()&&cycles.power$daylightCycle()&&cycles.power$weatherCycle(),"world values not restored");
-        session.discard();cheats.power$cheatsEnabled(true);
+        check(!local.luke.power.rules.WorldRules.enabled(properties,local.luke.power.rules.GameRule.ALLOW_TIME_EDITING)
+            &&cycles.power$daylightCycle()&&cycles.power$weatherCycle(),"world values not restored");
+        session.discard();cheats.allAllowed(true);
       });
       screenshots(mc);
     } finally {
       cycles.power$daylightCycle(day);cycles.power$weatherCycle(weather);cycles.power$daylightTime(daylight);
-      cheats.power$cheatsEnabled(beforeCheats);mc.world.field_213=difficulty;
+      cheats.allAllowed(beforeCheats);mc.world.field_213=difficulty;
     }
     log("CLEANUP FAILURES " + failures);
   }

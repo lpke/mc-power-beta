@@ -17,7 +17,8 @@ final class AudioRefinementChecks {
     ((ScreenInput)(Object)s).power$key('\0',Keyboard.KEY_ESCAPE);
   }
 
-  private static void sidebar(PowerOptionsScreen s, int index) throws Exception {
+  private static void sidebar(PowerOptionsScreen s, String page) throws Exception {
+    int index=s.visiblePages().indexOf(page);check(index>=0,"missing tab "+page);
     field(s,"sideScroll",0d);
     click(s,(int)call(s,"origin")+18,24+index*22+10);
   }
@@ -36,7 +37,7 @@ final class AudioRefinementChecks {
     var library=(MusicLibraryScreen)field(s,"library");
     library.openPresets();
     s.render(-1,-1,0);
-    check(!(boolean)call(s,"musicControlsVisible"),"toolbar shown over presets");
+    check((boolean)call(s,"musicControlsVisible"),"audio toolbar unavailable in presets");
     return library;
   }
 
@@ -58,6 +59,7 @@ final class AudioRefinementChecks {
   }
 
   static void run(Minecraft mc) throws Exception {
+    SilentAudioChecks.ready(mc);
     failures=0;
     AudioSettings before=AudioConfig.copy();
     var queue=MusicRequests.tracks();
@@ -76,8 +78,8 @@ final class AudioRefinementChecks {
           switch(route) {
             case "Back" -> back(s);
             case "Escape" -> escape(s);
-            case "Audio" -> sidebar(s,2);
-            case "Sidebar" -> { sidebar(s,0);sidebar(s,2); }
+            case "Audio" -> sidebar(s,"Audio");
+            case "Sidebar" -> { sidebar(s,"General");sidebar(s,"Audio"); }
           }
           toolbar(s);
         });
@@ -87,12 +89,12 @@ final class AudioRefinementChecks {
           var library=open(s);
           var panel=create(s,library);
           ((TextInput)field(panel,"name")).setText("Exit test "+outcome);
-          sidebar(s,2);
+          sidebar(s,"Audio");
           check(library.modal(),"dirty draft exited without prompt");
           dialog(s,outcome);
           if(outcome==2) {
             check(library.dirtyPreset()&&!library.modal(),"Cancel lost draft");
-            check(!(boolean)call(s,"musicControlsVisible"),"Cancel exposed toolbar behind editor");
+            check(library.presetVisible(),"Cancel closed preset editor");
             escape(s);dialog(s,1);escape(s);
           }
           toolbar(s);
@@ -155,7 +157,7 @@ final class AudioRefinementChecks {
           check(draft.snapshot("Test").excluded().isEmpty(),"preset Include all missed tracks");
           check(GL11.glGetError()==0,"GL error");
         }
-        mc.setScreen(s);sidebar(s,2);dialog(s,1);toolbar(s);
+        mc.setScreen(s);sidebar(s,"Audio");dialog(s,1);toolbar(s);
       });
       test("conversion button is absent without pending MP3 files and hidden in queue/presets",()->{
         musicClick(s,AudioToolbar.Action.LIBRARY);
@@ -166,12 +168,12 @@ final class AudioRefinementChecks {
         check(library.conversionVisible(),"pending conversion hidden");
         library.showQueue();check(!library.conversionVisible(),"queue shows conversion");
         library.openPresets();check(!library.conversionVisible(),"presets show conversion");
-        sidebar(s,2);toolbar(s);
+        sidebar(s,"Audio");toolbar(s);
       });
       test("reopening Options after preset screens cannot restore a hidden toolbar flag",()->{
         open(s);mc.setScreen(null);
         PowerOptionsScreen reopened=new PowerOptionsScreen(null);mc.setScreen(reopened);
-        sidebar(reopened,2);toolbar(reopened);
+        sidebar(reopened,"Audio");toolbar(reopened);
       });
     } finally {
       AudioController.pause();AudioConfig.preview(before);

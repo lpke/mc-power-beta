@@ -24,7 +24,7 @@ class SettingsLayoutTest {
 
   @Test void switchesPrecedeDetailsRegardlessOfBackendOrderAndUnknownEntriesSurvive() {
     Setting follow = setting("tweaks.freeLookFollowThirdPerson", "Camera", "Free look");
-    Setting enabled = setting("tweaks.freeLook", "Camera", "Free look");
+    Setting enabled = setting("tweaks.freeLookToggle", "Camera", "Free look");
     Setting unknown = setting("external.future", "Camera", "Future camera settings");
     Setting second = setting("external.second", "Camera", "Future camera settings");
     var input = List.of(unknown, follow, second, enabled);

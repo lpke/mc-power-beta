@@ -27,7 +27,7 @@ public class FreecamController {
         local.luke.power.input.MovementOwnership.registerCamera(() -> isActive() && !allowPlayerMovement);
         local.luke.power.input.TweakIndicators.register(
             local.luke.power.input.TweakIndicators.Tweak.FREECAM_PLAYER_MOVEMENT,
-            () -> active && local.luke.power.camera.FreecamConfig.config.enabled && allowPlayerMovement ? "" : null,
+            () -> active && allowPlayerMovement ? "" : null,
             () -> local.luke.power.camera.FreecamConfig.config.playerMovementMessages);
     }
     private boolean active;
@@ -88,7 +88,6 @@ public class FreecamController {
 
     // Return if the freecam is active or not
     public boolean isActive(){
-        if (active && !local.luke.power.camera.FreecamConfig.config.enabled) setActive(false);
         return active;
     }
 

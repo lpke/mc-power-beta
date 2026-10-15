@@ -82,21 +82,7 @@ public final class ComponentBackend implements Backend {
         } else if (name.startsWith("flexible.")) group = "Flexible placement";
         else if (name.startsWith("slabs.")) group = "Placement rules";
         else if (name.equals("clickMining") || name.equals("obsidianBreakingSpeed")) group = "Mining";
-        if (Set.of(
-                "autoWalk",
-                "freeLook",
-                "boatSteering",
-                "fastMinecarts",
-                "clickMining",
-                "placement.enabled",
-                "placement.restrictionEnabled",
-                "flexible.enabled",
-                "sneak.enabled",
-                "hotbar.swap",
-                "hotbar.scroll")
-            .contains(name)) def = new JsonPrimitive(false);
       }
-      if (id.equals("worldedit") && name.equals("enabled")) def = new JsonPrimitive(true);
       List<String> choices =
           t.isEnum()
               ? Arrays.stream(t.getEnumConstants()).map(this::enumLabel).toList()

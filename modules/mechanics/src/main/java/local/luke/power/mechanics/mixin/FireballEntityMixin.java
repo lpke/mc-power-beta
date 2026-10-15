@@ -1,7 +1,6 @@
 package local.luke.power.mechanics.mixin;
 
 import local.luke.power.mechanics.Config;
-import local.luke.power.mechanics.ModHelper;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.entity.Entity;
@@ -27,13 +26,7 @@ abstract class FireballEntityMixin extends Entity {
             )
     )
     public Explosion powerMechanics_handleExplosion(World instance, Entity source, double x, double y, double z, float power, boolean fire, Operation<Explosion> original) {
-        if (0 < ModHelper.ModHelperFields.numberOfGhastFireballs)
-        {
-            fire = (fire && !Config.config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionCausingFire);
-            ModHelper.ModHelperFields.cancelDestroyBlocks++;
-            ModHelper.ModHelperFields.cancelDestroyBlocksPacket++;
-            ModHelper.ModHelperFields.numberOfGhastFireballs--;
-        }
+        if (!instance.isRemote) fire &= !Config.config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionCausingFire;
 
         return original.call(instance, source, x, y, z, power, fire);
     }

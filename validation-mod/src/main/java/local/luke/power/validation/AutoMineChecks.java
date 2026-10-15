@@ -8,7 +8,6 @@ import local.luke.power.building.config.Config;
 import local.luke.power.building.mining.*;
 import local.luke.power.config.*;
 import local.luke.power.input.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.storage.PowerConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -21,8 +20,8 @@ final class AutoMineChecks {
       log("AUTO MINE chord=Ctrl+M"); return;
     }
     if (action.equals("setup")) {
-      ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc,"SURVIVAL");
-      ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(false);
+      (AccessRules.of(mc.world.method_262())).allAllowed(true); CreativeVehicleChecks.mode(mc,"SURVIVAL");
+      (AccessRules.of(mc.world.method_262())).allAllowed(false);
       mc.player.closeScreen(); mc.player.health = 20; mc.player.fire = 0;
       for (int x = -3; x <= 3; x++) for (int z = -3; z <= 5; z++) {
         mc.world.method_200(x,100,z,1); for (int y=101; y<108; y++) mc.world.method_200(x,y,z,0);
@@ -31,7 +30,7 @@ final class AutoMineChecks {
       mc.player.method_1340(.5,103,.5); mc.player.yaw = mc.player.prevYaw = 0; mc.player.pitch = mc.player.prevPitch = 0;
       mc.player.inventory.main[0] = new ItemStack(278,1,0); mc.player.inventory.selectedSlot=0;
       AutoMine.KEY.code = 50; Bindings.configure(Map.of()); Bindings.register(mc.options.allKeys);
-      var s=Config.current().copy();s.autoMine=true;Config.preview(s);AutoMine.stop();
+      var s=Config.current().copy();Config.preview(s);AutoMine.stop();
       log("AUTO MINE SETUP key=M blocks=9"); return;
     }
     if (action.equals("state") || action.equals("mined") || action.equals("off") || action.equals("focus")) {
@@ -53,12 +52,12 @@ final class AutoMineChecks {
         check(!Config.current().autoMineAnnounceToggle,"messages default on");
       });
       test("Cancel restores availability without resuming mining or changing inventory",()->{
-        var settings=Config.current().copy();settings.autoMine=true;Config.preview(settings);
+        var settings=Config.current().copy();Config.preview(settings);
         byte[] before=Files.readAllBytes(PowerConfig.path());var stack=mc.player.inventory.getSelectedItem();
         start();check(AutoMine.active()&&AttackInput.held(),"toggle not active");
         var session=SettingsRegistry.open(mc);Release110Checks.find(session,"tweaks.autoMine").parse("false");session.preview(true);
         check(!AutoMine.active()&&!AttackInput.held(),"disabled kept attacking");session.discard();
-        check(Config.current().autoMine&&!AutoMine.active(),"Cancel resumed attack");
+        check(!AutoMine.active(),"Cancel resumed attack");
         check(mc.player.inventory.getSelectedItem()==stack&&Arrays.equals(before,Files.readAllBytes(PowerConfig.path())),"menu edit changed inventory/config");
       });
       test("menus, death, detached camera and world identity changes stop attack",()->{

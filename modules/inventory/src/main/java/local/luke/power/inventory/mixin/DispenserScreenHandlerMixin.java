@@ -18,7 +18,7 @@ public abstract class DispenserScreenHandlerMixin extends ScreenHandler {
 
     @Override
     public ItemStack quickMove(int slot) {
-        if (  (  (null != dispenserBlockEntity.world)
+        if (  (  (null != dispenserBlockEntity.world && !dispenserBlockEntity.world.isRemote)
               && (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT)
               )
            || (Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.MultiplayerShiftClickingItemsIntoDispensers)

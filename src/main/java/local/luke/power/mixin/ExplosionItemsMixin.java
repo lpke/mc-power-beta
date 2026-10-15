@@ -2,6 +2,7 @@ package local.luke.power.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.*;
 import local.luke.power.gameplay.GameplayConfig;
+import local.luke.power.rules.*;
 import net.minecraft.class_60;
 import net.minecraft.class_142;
 import net.minecraft.entity.Entity;
@@ -15,13 +16,13 @@ public class ExplosionItemsMixin {
   @Unique private int power$particles;
   @WrapOperation(method = "method_1195", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/Entity;I)Z"))
   private boolean power$protect(Entity entity, Entity source, int amount, Operation<Boolean> original) {
-    if (!field_1399.isRemote && GameplayConfig.current().explosionProofItems && entity instanceof class_142) return false;
+    if (!field_1399.isRemote && !WorldRules.enabled(field_1399.method_262(), GameRule.EXPLOSIONS_DESTROY_ITEMS) && entity instanceof class_142) return false;
     return original.call(entity, source, amount);
   }
   @WrapOperation(method = "method_1195", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;sqrt(D)F"))
   private float power$finiteImpulse(double squared, Operation<Float> original) {
     float distance = original.call(squared);
-    return distance == 0 && !field_1399.isRemote && (GameplayConfig.current().limitTnt || GameplayConfig.current().explosionProofItems)
+    return distance == 0 && !field_1399.isRemote && (GameplayConfig.current().limitTnt || !WorldRules.enabled(field_1399.method_262(), GameRule.EXPLOSIONS_DESTROY_ITEMS))
         ? Float.MIN_NORMAL : distance;
   }
   @WrapOperation(method = "method_1196", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addParticle(Ljava/lang/String;DDDDDD)V"))

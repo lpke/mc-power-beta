@@ -9,7 +9,7 @@ class InterfacePreferencesTest {
     var values=new Gson().fromJson("{\"pauseToOptions\":true}",MenuPreferences.Values.class);
     values.validate();
     assertTrue(values.pauseToOptions);
-    assertFalse(values.blinkingChatCursor);
+    assertTrue(values.blinkingChatCursor);
     assertEquals("#FFFFFF",values.debugTextColor);
   }
   @Test void coloursAndBlinkingRoundTripAndInvalidColoursFail() {

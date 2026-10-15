@@ -47,12 +47,6 @@
     "label": "Double-tap window, ticks",
     "description": "Maximum interval between Jump presses. 20 ticks is one second."
   },
-  "creative.modePicker": {
-    "page": "Creative",
-    "group": "Gamemodes",
-    "label": "Gamemode picker",
-    "description": "Hold F3, press F4 to cycle, then release F3 to select."
-  },
   "creative.spectatorScroll": {
     "page": "Creative",
     "group": "Gamemodes",
@@ -106,12 +100,6 @@
     "group": "Inventory",
     "label": "Shift-click clears inventory",
     "description": "Shift-click the destroy slot to clear inventory and armor."
-  },
-  "worldedit.enabled": {
-    "page": "World editing",
-    "group": "Access",
-    "label": "World editing",
-    "description": "Allow editing commands and the wand when Cheats enabled is on in this world."
   },
   "worldedit.wandEnabled": {
     "page": "World editing",

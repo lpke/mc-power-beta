@@ -16,7 +16,7 @@ public final class ContainerPreview extends DrawableHelper {
   private static final ContainerPreview INSTANCE = new ContainerPreview();
   private final ItemRenderer renderer = new ItemRenderer();
   public static void render(Minecraft mc, float delta) {
-    if (!VisualConfig.current().containerPreview || mc.currentScreen != null || mc.world == null || mc.world.isRemote
+    if (mc.currentScreen != null || mc.world == null || mc.world.isRemote
         || mc.player == null || !org.lwjgl.opengl.Display.isActive() || !Bindings.down(GameplayKeys.PREVIEW)
         || (mc.options.hideHud && !DetachedCamera.isActive())) return;
     var stacks = snapshot(mc, delta);

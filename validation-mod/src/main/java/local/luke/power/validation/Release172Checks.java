@@ -16,13 +16,13 @@ public final class Release172Checks {
     failures = 0;
     mc.setScreen(null);
     FreecamPreviewChecks.active(false);
-    var cheats = (local.luke.power.permissions.CheatWorld) mc.world.method_262();
-    boolean beforeCheats = cheats.power$cheatsEnabled();
+    var cheats = AccessRules.of(mc.world.method_262());
+    boolean beforeCheats = cheats.allAllowed();
     String beforeMode = mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     var session = SettingsRegistry.open(mc);
     var setting = find(session, "visual.spectatorBlockOutlines");
     try {
-      cheats.power$cheatsEnabled(true);
+      cheats.allAllowed(true);
       test("spectator outlines default off; removed settings are absent", () -> {
         check(!setting.defaultValue.getAsBoolean(), "outlines default on");
         check(setting.page.equals("Creative") && setting.group.equals("Spectator"), "wrong location");
@@ -57,7 +57,7 @@ public final class Release172Checks {
       });
     } finally {
       captureOutline = false; session.discard();
-      CreativeVehicleChecks.mode(mc, beforeMode); cheats.power$cheatsEnabled(beforeCheats);
+      CreativeVehicleChecks.mode(mc, beforeMode); cheats.allAllowed(beforeCheats);
     }
     log("RELEASE 172 FAILURES " + failures);
   }

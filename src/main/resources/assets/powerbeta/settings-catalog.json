@@ -686,14 +686,6 @@
     "default": true,
     "restart": false
   },
-  "power_inventory:config.CRAFTING_RESULT_CONFIG.StopShiftClickCraftingWhenItemChanges": {
-    "page": "Inventory",
-    "group": "Crafting result",
-    "label": "Stop bulk crafting if result changes",
-    "description": "Shift crafting will craft only one item type",
-    "default": true,
-    "restart": false
-  },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableShiftClickingItemsIntoArmorSlots": {
     "page": "Inventory",
     "group": "Quick transfer",
@@ -715,14 +707,6 @@
     "group": "Clicking",
     "label": "Double-click to gather a stack",
     "description": "Initially empty cursor double click to pickup",
-    "default": true,
-    "restart": false
-  },
-  "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableDragGraphics": {
-    "page": "Inventory",
-    "group": "Dragging",
-    "label": "Show stack distribution preview",
-    "description": "",
     "default": true,
     "restart": false
   },
@@ -905,30 +889,6 @@
     "max": 1,
     "step": 0.05
   },
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableAllExplosionsBreakingBlocks": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
-    "label": "Disable all explosions breaking blocks",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableCreeperExplosionBreakingBlocks": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
-    "label": "Disable creeper explosion breaking blocks",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionBreakingBlocks": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
-    "label": "Disable ghast explosion breaking blocks",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
   "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionCausingFire": {
     "page": "Gameplay",
     "group": "Explosion and fire",
@@ -945,20 +905,12 @@
     "default": false,
     "restart": false
   },
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableTntExplosionBreakingBlocks": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
-    "label": "Disable TNT explosion breaking blocks",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
   "power_mechanics:config.FLORA_CONFIG.enableRandomStickDropFromDeadBushes": {
     "page": "Gameplay",
     "group": "Plants and harvesting",
     "label": "Allow random stick drop from dead bushes",
     "description": "Chance is the same as seeds from tall grass",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_mechanics:config.FLORA_CONFIG.enableShearsCollectDeadBush": {
@@ -966,7 +918,7 @@
     "group": "Plants and harvesting",
     "label": "Allow shears to collect dead bushes",
     "description": "Restart required for changes to take effect",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_mechanics:config.FLORA_CONFIG.enableShearsCollectFern": {
@@ -974,7 +926,7 @@
     "group": "Plants and harvesting",
     "label": "Allow shears to collect ferns",
     "description": "Shears collect ferns as inventory items.",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_mechanics:config.FLORA_CONFIG.enableShearsCollectTallGrass": {
@@ -982,7 +934,7 @@
     "group": "Plants and harvesting",
     "label": "Allow shears to collect tall grass",
     "description": "Restart required for changes to take effect",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_mechanics:config.FLORA_CONFIG.appleDropChance": {
@@ -990,7 +942,7 @@
     "group": "Plants and harvesting",
     "label": "Apple drop chance from oak leaves",
     "description": "0 = disabled, 0.5 = modern drop chance (0.5%)",
-    "default": 0.0,
+    "default": 0,
     "restart": false,
     "min": 0,
     "max": 100,
@@ -1009,7 +961,7 @@
     "group": "Plants and harvesting",
     "label": "Player placed leaf persistence",
     "description": "Disables leaf decay for player placed leaves",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableChestsOpenWithBlockAbove": {
@@ -1025,7 +977,7 @@
     "group": "Blocks",
     "label": "Allow coloring signs with dye",
     "description": "Dye will be consumed on use",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_mechanics:config.INTERACTIVE_BLOCK_CONFIG.enableGlueTrapdoorsWithSlimeballs": {
@@ -1041,7 +993,7 @@
     "group": "Fall damage",
     "label": "Water negates fall damage",
     "description": "Touching source or flowing water resets fall damage, including shallow water and bucket clutches. Applies to players and mobs.",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 0
   },
@@ -1075,14 +1027,6 @@
     "label": "Zombie-pigman drop item",
     "description": "Only works if setting is enabled above",
     "default": 0,
-    "restart": false
-  },
-  "power_mechanics:config.MOB_CONFIG.disableTramplingFarmland": {
-    "page": "Gameplay",
-    "group": "Farmland",
-    "label": "Disable trampling farmland",
-    "description": "Player/mobs will no longer trample farmland",
-    "default": false,
     "restart": false
   },
   "power_mechanics:config.MOB_CONFIG.disableTrampleFarmlandWhenBarefoot": {
@@ -1140,22 +1084,6 @@
     "description": "Restart required for changes to take effect",
     "default": true,
     "restart": true
-  },
-  "power_client_fixes:config.enableDebugGraphChanges": {
-    "page": "Interface",
-    "group": "Debug information",
-    "label": "Debug graph changes",
-    "description": "Restart required for changes to take effect",
-    "default": true,
-    "restart": true
-  },
-  "power_client_fixes:config.enableDebugGraphModernToggle": {
-    "page": "Interface",
-    "group": "Debug information",
-    "label": "Debug graph toggle as keybind+F3",
-    "description": "False=Toggle debug graph with just KEYBIND",
-    "default": true,
-    "restart": false
   },
   "power_client_fixes:config.enableDebugMenuWorldSeed": {
     "page": "Interface",
@@ -1301,110 +1229,6 @@
     "default": false,
     "restart": false
   },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableChickenEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Chicken entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableCowEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Cow entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableCreeperEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Creeper entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableGhastEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Ghast entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enablePigEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Pig entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSheepEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Sheep entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSkeletonEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Skeleton entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSlimeEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Slime entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSpiderEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Spider entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableSquidEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Squid entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableWolfEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Wolf entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableZombieEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Zombie entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
-  "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.SPAWN_LIST_CONFIG.enableZombiePigmanEntitySpawning": {
-    "page": "Gameplay",
-    "group": "Spawn list",
-    "label": "Zombie pigman entity spawning",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.disableLivingEntitiesDespawning": {
     "page": "Gameplay",
     "group": "Despawning",
@@ -1418,7 +1242,7 @@
     "group": "Despawning",
     "label": "Disable saddled pigs despawning",
     "description": "Saddled pigs will no longer despawn",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.doNotCountSaddledPigs": {
@@ -1541,17 +1365,6 @@
     "group": "Individual sounds",
     "label": "Cave ambience",
     "description": "Volume multiplier from 0 to 1.",
-    "default": 1.0,
-    "restart": false,
-    "min": 0,
-    "max": 1,
-    "step": 0.05
-  },
-  "power_environment:config.SLEEP_CONFIG.asleepPlayerPercentageForSkippingNight": {
-    "page": "Gameplay",
-    "group": "Sleep",
-    "label": "Asleep player percentage for skipping night",
-    "description": "Float value between 0.0 (0%) and 1.0 (100%)",
     "default": 1.0,
     "restart": false,
     "min": 0,
@@ -2029,7 +1842,7 @@
     "group": "Items and blocks",
     "label": "Multiplayer mining delay fix",
     "description": "WARNING: This could be considered a hack on some servers",
-    "default": true,
+    "default": false,
     "restart": false
   },
   "power_controls:bugfixes.lastDurabilityFix": {
@@ -2069,7 +1882,7 @@
     "group": "Fast leaf decay",
     "label": "Fast leaf decay",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:features.fastLeafDecay.minimumDecayTime": {
@@ -2169,21 +1982,12 @@
     "restart": false,
     "order": 7
   },
-  "power_controls:features.fallingPipe": {
-    "page": "Audio",
-    "group": "Extra sounds",
-    "label": "Metallic break sound",
-    "description": "Replace enabled tool and armor break sounds with a falling-pipe sound.",
-    "default": false,
-    "restart": false,
-    "order": 5
-  },
   "power_controls:gameplay.noFoodWastage": {
     "page": "Gameplay",
     "group": "Interaction",
     "label": "No food wastage",
     "description": "Prevents you from eating when your health is full",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:gameplay.pickBlockFromInventory": {
@@ -2369,20 +2173,12 @@
     "restart": false,
     "order": 7
   },
-  "power_controls:recipes.enableRecipes": {
-    "page": "Crafting",
-    "group": "Recipes",
-    "label": "Recipe controls",
-    "description": "Enable the modern, tweaked and obtainable recipes below, plus extra furnace fuels. Tool repair and the soul sand recipe have separate switches.",
-    "default": false,
-    "restart": true
-  },
   "power_controls:recipes.furnaceFuels": {
     "page": "Crafting",
     "group": "Recipes",
     "label": "Make more wooden items burnable",
     "description": "Burn boats for 60 seconds; bows, fishing rods and ladders for 15; wooden tools, signs and doors for 10; wooden slabs for 7.5; bowls for 5.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.toolRepair": {
@@ -2390,7 +2186,7 @@
     "group": "Recipes",
     "label": "Allow tool repair in crafting grid",
     "description": "Combine two matching tools, shears, swords or armour pieces anywhere in the grid. Produces one item with their remaining durability plus a 10% bonus, capped at full durability.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.shapelessFlintAndSteel": {
@@ -2398,7 +2194,7 @@
     "group": "Modern",
     "label": "Shapeless flint and steel",
     "description": "Combine 1 flint and 1 iron ingot anywhere in the grid to make 1 flint and steel.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.shapelessMushroomStew": {
@@ -2406,7 +2202,7 @@
     "group": "Modern",
     "label": "Shapeless mushroom stew",
     "description": "Combine 1 bowl, 1 red mushroom and 1 brown mushroom anywhere in the grid to make 1 mushroom stew.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.shapelessChestMinecart": {
@@ -2414,7 +2210,7 @@
     "group": "Modern",
     "label": "Shapeless chest minecart",
     "description": "Combine 1 chest and 1 minecart anywhere in the grid to make 1 chest minecart.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.shapelessFurnaceMinecart": {
@@ -2422,7 +2218,7 @@
     "group": "Modern",
     "label": "Shapeless furnace minecart",
     "description": "Combine 1 furnace and 1 minecart anywhere in the grid to make 1 furnace minecart.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.shapelessStickyPistons": {
@@ -2430,7 +2226,7 @@
     "group": "Modern",
     "label": "Shapeless sticky pistons",
     "description": "Combine 1 slimeball and 1 piston anywhere in the grid to make 1 sticky piston.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.booksRequireLeather": {
@@ -2446,7 +2242,7 @@
     "group": "Modern",
     "label": "Wool redyeing",
     "description": "Combine 1 wool of any colour and 1 dye anywhere in the grid to make 1 wool in that dye colour.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.sixSlabsPerCraft": {
@@ -2454,7 +2250,7 @@
     "group": "Modern",
     "label": "6 slabs per craft",
     "description": "Place 3 stone, sandstone, planks or cobblestone in a row to make 6 matching slabs instead of 3.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.oneStonePerButton": {
@@ -2462,7 +2258,7 @@
     "group": "Modern",
     "label": "Button requires 1 stone",
     "description": "Craft 1 stone into 1 button instead of using 2 stone.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.modernFenceRecipe": {
@@ -2478,7 +2274,7 @@
     "group": "Modern",
     "label": "Snow layer recipe",
     "description": "Place 3 snow blocks in a row to make 6 snow layers.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.modern.threeLaddersPerCraft": {
@@ -2486,7 +2282,7 @@
     "group": "Modern",
     "label": "3 ladders per craft",
     "description": "Arrange 7 sticks in an H to make 3 ladders instead of 2.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.tweaked.shapelessJackOLantern": {
@@ -2494,7 +2290,7 @@
     "group": "Tweaked",
     "label": "Shapeless jack o' lantern",
     "description": "Combine 1 pumpkin and 1 torch anywhere in the grid to make 1 jack o' lantern.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.tweaked.stairsPerCraft": {
@@ -2532,7 +2328,7 @@
     "group": "Obtainable",
     "label": "Craftable cobwebs",
     "description": "Arrange 5 string in an X, with one in each corner and one in the centre, to make 1 cobweb.",
-    "default": false,
+    "default": true,
     "restart": true
   },
   "power_controls:recipes.obtainable.craftableFire": {
@@ -2588,7 +2384,7 @@
     "group": "Plants and harvesting",
     "label": "Allow placing sugar cane on sand",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.boatsDropThemselves": {
@@ -2596,7 +2392,7 @@
     "group": "Vehicles",
     "label": "Boats drop themselves when broken by a player",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 3
   },
@@ -2605,7 +2401,7 @@
     "group": "Blocks",
     "label": "Pumpkins placeable like normal",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.fencesPlaceableLikeNormal": {
@@ -2613,7 +2409,7 @@
     "group": "Blocks",
     "label": "Fences placeable like normal",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.fencesConnectBlocks": {
@@ -2629,7 +2425,7 @@
     "group": "Blocks",
     "label": "Bookshelves drop 3 books",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.pressurePlatesOnFences": {
@@ -2637,15 +2433,15 @@
     "group": "Blocks",
     "label": "Pressure plates on fences",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.shearHarvesting": {
     "page": "Gameplay",
     "group": "Plants and harvesting",
-    "label": "Allow shears to harvest cobwebs and tall grass",
-    "description": "",
-    "default": false,
+    "label": "Harvest cobwebs with shears",
+    "description": "Shears collect cobwebs; swords collect string.",
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.expandChickenHitbox": {
@@ -2661,7 +2457,7 @@
     "group": "Blocks",
     "label": "Stackable chests",
     "description": "Allows you to stack chests on top of each other",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.modernFlintAndSteel": {
@@ -2669,7 +2465,7 @@
     "group": "Equipment",
     "label": "Don't damage flint and steel on failed ignite",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.disableSleeping": {
@@ -2680,20 +2476,12 @@
     "default": false,
     "restart": false
   },
-  "power_controls:tweaks.disableSleepSpawning": {
-    "page": "Gameplay",
-    "group": "Sleep",
-    "label": "Disable spawning mobs when you sleep",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
   "power_controls:tweaks.preventItemsStoppingMinecarts": {
     "page": "Movement",
     "group": "Vehicles",
     "label": "Prevent items stopping minecarts",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 6
   },
@@ -2710,7 +2498,7 @@
     "group": "Blocks",
     "label": "Allow placing trapdoors without support",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:tweaks.beta18LeavesRendering": {
@@ -2758,7 +2546,7 @@
     "group": "Third person",
     "label": "Third-person front view",
     "description": "Disabled switches between first person and rear view. Normal adds a front view; Hide HUD shows it while the HUD is hidden.",
-    "default": 0,
+    "default": 1,
     "restart": false,
     "order": 0
   },
@@ -2767,7 +2555,7 @@
     "group": "Menus",
     "label": "Clear text field with right click",
     "description": "Right clicking on a text field will clear it",
-    "default": true,
+    "default": false,
     "restart": false
   },
   "power_controls:userinterface.versionTextConfig.showVersionTextIngame": {
@@ -2968,42 +2756,42 @@
   "power_compat:config.STACK_SIZE_CONFIG.enableModernWoodDoorStackSize": {
     "page": "Inventory",
     "group": "Stack sizes",
-    "label": "Modern wood door stack size",
+    "label": "Stackable wooden doors",
     "description": "",
-    "default": false,
-    "restart": true
+    "default": true,
+    "restart": false
   },
   "power_compat:config.STACK_SIZE_CONFIG.enableModernIronDoorStackSize": {
     "page": "Inventory",
     "group": "Stack sizes",
-    "label": "Modern iron door stack size",
+    "label": "Stackable iron doors",
     "description": "",
-    "default": false,
-    "restart": true
+    "default": true,
+    "restart": false
   },
   "power_compat:config.STACK_SIZE_CONFIG.stackableEmptyBuckets": {
     "page": "Inventory",
     "group": "Stack sizes",
     "label": "Stackable empty buckets",
     "description": "Empty buckets stack to 16. Filled buckets stay separate. Existing stacks are preserved when disabled.",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 0
   },
   "power_compat:config.STACK_SIZE_CONFIG.enableModernSignStackSize": {
     "page": "Inventory",
     "group": "Stack sizes",
-    "label": "Modern sign stack size",
+    "label": "Stackable signs",
     "description": "",
-    "default": false,
-    "restart": true
+    "default": true,
+    "restart": false
   },
   "power_compat:config.SHOVELS_CONFIG.enableShovelsEffectiveOnSoulSand": {
     "page": "Gameplay",
     "group": "Plants and harvesting",
     "label": "Effective on soul sand",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_compat:config.addBiomeToDebugOverlay": {
@@ -3081,20 +2869,12 @@
     "default": true,
     "restart": false
   },
-  "power_compat:config.slabPlacementFixesEnabled": {
-    "page": "Fixes",
-    "group": "Items and blocks",
-    "label": "Slab placement fixes",
-    "description": "Restart required for changes to take effect",
-    "default": false,
-    "restart": true
-  },
   "power_compat:config.allowCraftingInventorySlots": {
     "page": "Inventory",
     "group": "Inventory management",
     "label": "Use player 2x2 crafting grid as inventory",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_compat:config.vehicleLogoutLoginFixesEnabled": {
@@ -3161,12 +2941,6 @@
     "displayDivisor": 20,
     "unit": "seconds"
   },
-  "creative.modePicker": {
-    "page": "Creative",
-    "group": "Game modes",
-    "label": "Gamemode picker",
-    "description": "Hold F3, press F4 to cycle, then release F3 to select."
-  },
   "creative.spectatorScroll": {
     "page": "Creative",
     "group": "Spectator",
@@ -3224,13 +2998,6 @@
     "group": "Inventory",
     "label": "Shift-click clears inventory",
     "description": "Shift-click the destroy slot to clear inventory and armor."
-  },
-  "worldedit.enabled": {
-    "page": "World editing",
-    "group": "Access",
-    "label": "World editing",
-    "description": "Allow editing commands and the wand when Cheats enabled is on in this world.",
-    "order": 0
   },
   "worldedit.wandEnabled": {
     "page": "World editing",
@@ -3304,7 +3071,8 @@
     "group": "Fast placement",
     "label": "Fast placement",
     "description": "Hold right-click to keep placing blocks.",
-    "order": 0
+    "order": 0,
+    "default": false
   },
   "tweaks.placement.attemptsPerTick": {
     "page": "Building",
@@ -3370,7 +3138,8 @@
     "page": "Building",
     "group": "Flexible placement",
     "label": "Flexible placement",
-    "description": ""
+    "description": "",
+    "default": false
   },
   "tweaks.flexible.showOverlay": {
     "page": "Building",
@@ -3402,20 +3171,6 @@
     "label": "Overlay opacity, %",
     "description": ""
   },
-  "tweaks.hotbar.swap": {
-    "page": "Inventory",
-    "group": "Hotbar swapping",
-    "label": "Swap hotbar rows",
-    "description": "Allow swapping the hotbar with an inventory row using its key bindings. Existing stacks move between slots.",
-    "order": 0
-  },
-  "tweaks.hotbar.scroll": {
-    "page": "Inventory",
-    "group": "Hotbar swapping",
-    "label": "Scroll to choose a row",
-    "description": "Allow the hotbar-scroll binding to cycle through inventory rows.",
-    "order": 1
-  },
   "tweaks.hotbar.numberRowKeys": {
     "page": "Inventory",
     "group": "Hotbar swapping",
@@ -3428,7 +3183,8 @@
     "group": "Hotbar swapping",
     "label": "Row preview",
     "description": "Show inventory rows while holding the preview or row modifier.",
-    "order": 6
+    "order": 6,
+    "default": true
   },
   "tweaks.hotbar.reverseScroll": {
     "page": "Inventory",
@@ -3472,13 +3228,6 @@
     "description": "Move the row preview vertically from its anchor, in scaled GUI pixels.",
     "order": 9
   },
-  "tweaks.freeLook": {
-    "page": "Camera",
-    "group": "Free look",
-    "label": "Free look",
-    "description": "",
-    "order": 0
-  },
   "tweaks.freeLookToggle": {
     "page": "Camera",
     "group": "Free look",
@@ -3505,21 +3254,24 @@
     "group": "Mining",
     "label": "Continuous click mining",
     "description": "Remove the delay between breaking blocks in singleplayer.",
-    "order": 0
+    "order": 0,
+    "default": false
   },
   "tweaks.obsidianBreakingSpeed": {
     "page": "Building",
     "group": "Mining",
     "label": "Obsidian breaking speed",
     "description": "Speed up obsidian mining with a diamond pickaxe in singleplayer. 0 is off and keeps vanilla speed. 100 matches a modern Efficiency V netherite pickaxe with Haste II: 1.55 seconds per block on dry ground. Water and airborne penalties still apply. Other blocks and tools keep their normal speed.",
-    "order": 1
+    "order": 1,
+    "default": 60
   },
   "tweaks.boatSteering": {
     "page": "Movement",
     "group": "Vehicles",
     "label": "Boat steering",
     "description": "Steer boats directly using movement keys. Speed and collision protection are separate.",
-    "order": 0
+    "order": 0,
+    "default": false
   },
   "tweaks.fastMinecarts": {
     "page": "Movement",
@@ -3533,7 +3285,8 @@
     "group": "Edge protection",
     "label": "Edge protection",
     "description": "Prevent walking off ledges without crouching or slowing down.",
-    "order": 0
+    "order": 0,
+    "default": false
   },
   "tweaks.sneak.announceToggle": {
     "page": "Movement",
@@ -3547,7 +3300,8 @@
     "group": "Placement rules",
     "label": "Complete slabs through adjacent faces",
     "description": "",
-    "order": 5
+    "order": 5,
+    "default": true
   },
   "logo.logo.lines": {
     "page": "Interface",
@@ -3568,7 +3322,7 @@
     "group": "Extra sounds",
     "label": "Eating sounds",
     "description": "Play chewing when food is consumed.",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 0
   },
@@ -3586,7 +3340,7 @@
     "group": "Extra sounds",
     "label": "Shearing sounds",
     "description": "Play a snip when a sheep is successfully sheared.",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 2
   },
@@ -3595,7 +3349,7 @@
     "group": "Extra sounds",
     "label": "Tool break sounds",
     "description": "Play a sound when a tool reaches zero durability.",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 3
   },
@@ -3604,7 +3358,7 @@
     "group": "Extra sounds",
     "label": "Armor break sounds",
     "description": "Play a sound when an armor piece breaks.",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 4
   },
@@ -3635,15 +3389,6 @@
     "restart": false,
     "order": 2
   },
-  "power_camera:config.enabled": {
-    "page": "Camera",
-    "group": "Free camera",
-    "label": "Freecam",
-    "description": "Allow the detached camera and its controls.",
-    "default": false,
-    "restart": false,
-    "order": 0
-  },
   "power_camera:config.doorCollision": {
     "page": "Camera",
     "group": "Free camera",
@@ -3662,21 +3407,12 @@
     "restart": false,
     "order": 4
   },
-  "visual.slashChat": {
-    "page": "General",
-    "group": "Interface",
-    "label": "Slash opens chat",
-    "description": "Open chat with / already entered when pressing the slash key.",
-    "default": false,
-    "restart": false,
-    "order": 4
-  },
   "visual.containerCarry": {
     "page": "Inventory",
     "group": "Containers",
     "label": "Move containers",
     "description": "Sneak and use an empty hand to carry a chest, furnace or dispenser. Target either half of a double chest to move only that half. Contents are journaled for recovery.",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "visual.inventoryInPortals": {
@@ -3684,24 +3420,16 @@
     "group": "Inventory management",
     "label": "Inventory in portals",
     "description": "Open your inventory while standing in a Nether portal. Portal travel keeps its normal timing and closes the inventory before changing dimensions.",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 1
-  },
-  "visual.containerPreview": {
-    "page": "Inventory",
-    "group": "Containers",
-    "label": "Container preview",
-    "description": "Hold the container-preview key to view contents at creative reach without opening containers. Also works from freecam with the HUD hidden.",
-    "default": false,
-    "restart": false
   },
   "visual.shiftClickIntoCraftingGrid": {
     "page": "Inventory",
     "group": "Quick transfer",
     "label": "Shift-click into crafting table",
     "description": "Shift-click inventory stacks into the crafting-table grid in singleplayer. Fills matching stacks first, then empty slots. Returns leftovers to the source slot. Uses the normal transfer when the grid has no room.",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_compat:config.addBlockLightToDebugOverlay": {
@@ -3716,7 +3444,8 @@
     "page": "Inventory",
     "group": "Clicking",
     "label": "Swap tools and armour",
-    "description": "Click matching tools or armour with different durability to swap them. Singleplayer only; slot restrictions still apply."
+    "description": "Click matching tools or armour with different durability to swap them. Singleplayer only; slot restrictions still apply.",
+    "default": true
   },
   "tweaks.autoWalkHoldToWalk": {
     "label": "Hold auto-walk key to walk",
@@ -3729,13 +3458,14 @@
     "page": "Inventory",
     "group": "Inventory management",
     "label": "Movement in inventory",
-    "order": 0
+    "order": 0,
+    "default": true
   },
   "tweaks.inventoryMouseLook": {
     "page": "Inventory",
     "group": "Inventory management",
     "label": "Look around in inventory",
-    "default": false,
+    "default": true,
     "order": 1
   },
   "tweaks.autoWalkHoldMillis": {
@@ -3748,11 +3478,6 @@
   },
   "world.difficulty": {
     "order": 10,
-    "page": "General",
-    "group": "Game"
-  },
-  "world.cheats": {
-    "order": 30,
     "page": "General",
     "group": "Game"
   },
@@ -4279,15 +4004,6 @@
   "visual.thirdPersonDistance": {
     "order": 1
   },
-  "tweaks.autoWalk": {
-    "page": "Movement",
-    "group": "Auto-walk",
-    "label": "Auto-walk",
-    "order": 0
-  },
-  "worldedit.worldOverride": {
-    "order": 1
-  },
   "keys.Command": {
     "page": "Controls",
     "group": "Interface",
@@ -4303,20 +4019,8 @@
     "group": "Blocks",
     "label": "Allow editing signs",
     "description": "Right-click an existing sign to edit it. Shift-right-click uses the held item instead.",
-    "default": false,
+    "default": true,
     "restart": false
-  },
-  "world.daylightCycle": {
-    "page": "General",
-    "group": "World overrides",
-    "label": "Daylight cycle",
-    "order": 40
-  },
-  "world.weatherCycle": {
-    "page": "General",
-    "group": "World overrides",
-    "label": "Weather cycle",
-    "order": 50
   },
   "lightOverlay.checksPerTick": {
     "control": "number"
@@ -4375,33 +4079,24 @@
     "group": "Extra sounds",
     "label": "Redstone placement sound",
     "description": "Play the stone placement sound when placing redstone dust. Uses the Blocks sound volume.",
-    "order": 8
-  },
-  "world.hostileSpawning": {
-    "page": "General",
-    "group": "World overrides",
-    "label": "Hostile mob spawning",
-    "order": 60
-  },
-  "world.passiveSpawning": {
-    "page": "General",
-    "group": "World overrides",
-    "label": "Passive mob spawning",
-    "order": 70
+    "order": 8,
+    "default": true
   },
   "power_compat:config.addFacingToDebugOverlay": {
     "page": "Interface",
     "group": "Debug information",
     "label": "Facing direction",
     "description": "Show your facing direction and axis in the F3 debug overlay.",
-    "order": 11
+    "order": 11,
+    "default": true
   },
   "interface.blinkingChatCursor": {
     "page": "Interface",
     "group": "Chat",
     "label": "Blinking chat cursor",
     "description": "Blink the chat cursor. Off keeps the beam visible while editing.",
-    "order": 10
+    "order": 10,
+    "default": true
   },
   "interface.debugTextColor": {
     "page": "Interface",
@@ -4427,15 +4122,6 @@
     "default": true,
     "restart": false,
     "order": 6
-  },
-  "tweaks.autoMine": {
-    "page": "Building",
-    "group": "Mining",
-    "label": "Auto-mine",
-    "description": "Allow the Auto-mine hotkey to toggle holding Attack / Break. Uses normal mining speed and attacks. Stops in menus, on focus loss, when changing worlds or when controlling the detached camera.",
-    "default": true,
-    "restart": false,
-    "order": 2
   },
   "tweaks.autoMineAnnounceToggle": {
     "page": "Building",
@@ -4466,30 +4152,28 @@
   "death.enabled": {
     "page": "Gameplay",
     "group": "Death records",
-    "order": 0
+    "order": 0,
+    "default": true
   },
   "death.announceLocation": {
     "page": "Gameplay",
     "group": "Death records",
-    "order": 1
+    "order": 1,
+    "default": true
   },
   "death.announceItems": {
     "page": "Gameplay",
     "group": "Death records",
-    "order": 2
-  },
-  "world.keepInventory": {
-    "page": "General",
-    "group": "World overrides",
-    "label": "Keep inventory on death",
-    "order": 80
+    "order": 2,
+    "default": false
   },
   "gameplay.mergeItems": {
     "page": "Gameplay",
     "group": "Dropped items",
     "label": "Merge dropped items",
     "description": "Combine nearby matching dropped items when enough are within the terrain render distance around the camera. Keeps normal stack limits, damage and item data. Singleplayer only.",
-    "order": 0
+    "order": 0,
+    "default": true
   },
   "gameplay.mergeThreshold": {
     "page": "Gameplay",
@@ -4501,19 +4185,13 @@
     "max": 16384,
     "step": 16
   },
-  "gameplay.explosionProofItems": {
-    "page": "Gameplay",
-    "group": "Dropped items",
-    "label": "Items survive explosions",
-    "description": "Protect dropped items from TNT, creeper and other explosion damage in singleplayer. Fire, lava, despawning and pickup still work normally.",
-    "order": 2
-  },
   "gameplay.limitTnt": {
     "page": "Gameplay",
     "group": "Explosion and fire",
     "label": "Limit TNT work",
     "description": "Spread TNT simulation and explosions across ticks, with fewer visible TNT entities and explosion particles. Chains take longer. Enable from the main menu before loading a struggling singleplayer world.",
-    "order": 10
+    "order": 10,
+    "default": false
   },
   "gameplay.tntPerTick": {
     "page": "Gameplay",
@@ -4610,7 +4288,7 @@
     "page": "Creative",
     "group": "Spectator",
     "label": "Full bright in spectator",
-    "description": "Automatically fully light the view on entering spectator. The full-bright hotkey can override it for that visit. Leaving spectator restores your earlier manual setting. Requires cheats.",
+    "description": "Automatically fully light the view on entering spectator. The full-bright hotkey can override it for that visit. Leaving spectator restores your earlier manual setting. Requires Allow Spectator mode in this world.",
     "order": 8
   },
   "visual.fullBrightMessages": {
@@ -4654,7 +4332,8 @@
     "label": "Flint and steel primes TNT",
     "description": "Right-click TNT with flint and steel to prime it. Uses one durability in survival; reusable in creative. Singleplayer only.",
     "order": 9,
-    "restart": false
+    "restart": false,
+    "default": false
   },
   "gameplay.fastItemCollisions": {
     "page": "Fixes",
@@ -4662,7 +4341,8 @@
     "label": "Fast item and TNT collisions",
     "description": "Skip redundant collision checks between dropped items and primed TNT. Keeps block and vehicle collisions, item pickup and explosion knockback. Singleplayer only.",
     "order": 0,
-    "restart": false
+    "restart": false,
+    "default": true
   },
   "tweaks.autoWalkCancelOnLostFocus": {
     "page": "Movement",
@@ -4883,26 +4563,22 @@
     "order": 324
   },
   "interface.useFeetYCoordinates": {
-    "order": 1
+    "order": 1,
+    "default": true
   },
   "interface.blinkingUiCursor": {
     "page": "Interface",
     "group": "Menus",
-    "order": 10
+    "order": 10,
+    "default": true
   },
   "gameplay.torchShovel": {
     "page": "Gameplay",
     "group": "Blocks",
     "label": "Torch shovel for sand/gravel",
     "description": "Break sand and gravel with a torch at diamond-shovel speed when a diamond shovel is in your inventory. Uses one normal durability hit from the most worn diamond shovel. Singleplayer survival only.",
-    "order": 30
-  },
-  "gameplay.fireSpread": {
-    "group": "Explosion and fire",
-    "label": "Enable fire spread",
-    "description": "Allow fire to spread and consume nearby blocks, and lava to ignite nearby blocks. Existing fire still ages, extinguishes and causes damage. Singleplayer only.",
-    "order": 31,
-    "page": "Gameplay"
+    "order": 30,
+    "default": false
   },
   "keys.power_beta.clickMining": {
     "group": "Building",
@@ -5080,5 +4756,30 @@
     "order": 1,
     "default": true,
     "restart": false
+  },
+  "rules.world.players_sleeping_percentage": {
+    "control": "number",
+    "unit": "%"
+  },
+  "rules.survival.players_sleeping_percentage": {
+    "control": "number",
+    "unit": "%"
+  },
+  "rules.cheats.players_sleeping_percentage": {
+    "control": "number",
+    "unit": "%"
+  },
+  "rules.creation.players_sleeping_percentage": {
+    "control": "number",
+    "unit": "%"
+  },
+  "power_inventory:config.MODERN_MINECRAFT_CONFIG.ShiftDoubleClickTransfer": {
+    "page": "Inventory",
+    "group": "Clicking",
+    "label": "Shift-double-click transfer",
+    "description": "Hold an item and Shift-double-click a matching stack to transfer matching items from that inventory. Leaves the held stack unchanged; multiplayer follows server support.",
+    "default": true,
+    "restart": false,
+    "order": 1
   }
 }

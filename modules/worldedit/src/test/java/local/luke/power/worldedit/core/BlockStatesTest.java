@@ -5,6 +5,10 @@ import local.luke.power.worldedit.chat.CommandCatalog;
 import org.junit.jupiter.api.Test;
 
 class BlockStatesTest {
+  @org.junit.jupiter.api.BeforeEach void allowCommands() {
+    local.luke.power.permissions.CommandPermissions.context(() -> new local.luke.power.permissions.CommandPermissions.Context("test", false, local.luke.power.rules.RuleSet.cheats()));
+  }
+
   final BlockParser parser = new BlockParser(id -> id <= 96);
   void state(String input, int id, int meta) {
     BlockValue b = parser.block(input); assertEquals(id, b.id, input); assertEquals(meta, b.meta, input);

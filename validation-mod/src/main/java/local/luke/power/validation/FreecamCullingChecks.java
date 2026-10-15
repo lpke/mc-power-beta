@@ -13,14 +13,13 @@ final class FreecamCullingChecks {
     failures = 0;
     Object camera = Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     Object settings = Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-    Field enabled = settings.getClass().getField("enabled"); Object oldEnabled = enabled.get(settings);
     Class<?> culling = Class.forName("dev.tr7zw.entityculling.EntityCullingMod");
     Field global = culling.getField("enabled"); boolean oldGlobal = global.getBoolean(null);
     byte[] before = Files.readAllBytes(PowerConfig.path());
     var mob = new net.minecraft.class_443(mc.world);
     var sign = new net.minecraft.block.entity.SignBlockEntity();
     try {
-      enabled.set(settings, true); global.setBoolean(null, true); active(camera, false);
+       global.setBoolean(null, true); active(camera, false);
       for (Object entity : new Object[] {mob, sign}) {
         Class<?> type = entity.getClass();
         Method culled = type.getMethod("setCulled", boolean.class), out = type.getMethod("setOutOfCamera", boolean.class);
@@ -35,9 +34,9 @@ final class FreecamCullingChecks {
             check(flags(entity, false), "worker update hid an entity in freecam");
             active(camera, false); check(!DetachedCamera.isActive() && flags(entity, true), "exit did not immediately restore culling");
           }
-          active(camera, true); enabled.set(settings, false);
+          active(camera, true); local.luke.power.input.TweakLifecycle.reset();
           check(!DetachedCamera.isActive() && flags(entity, true), "disabling freecam did not restore culling");
-          enabled.set(settings, true);
+
           culled.invoke(entity, false); out.invoke(entity, false); active(camera, true); active(camera, false);
           check(flags(entity, false), "visible entity became hidden on exit");
         });
@@ -71,7 +70,7 @@ final class FreecamCullingChecks {
         check(!DetachedCamera.isActive(), "camera survived world exit");
         check((boolean) mob.getClass().getMethod("isCulled").invoke(mob), "culling bypass survived world exit");
       });
-    } finally { active(camera, false); enabled.set(settings, oldEnabled); global.setBoolean(null, oldGlobal); }
+    } finally { active(camera, false);  global.setBoolean(null, oldGlobal); }
     log("FREECAM CULLING FAILURES " + failures);
   }
   private static boolean flags(Object entity, boolean expected) throws Exception {

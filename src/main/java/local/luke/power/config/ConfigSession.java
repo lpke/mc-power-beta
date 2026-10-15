@@ -42,11 +42,6 @@ public final class ConfigSession {
   }
 
   public void link(Setting changed) {
-    if (changed.id.equals("world.cheats") && !changed.value.getAsBoolean()) {
-      settings.stream().filter(SettingAccess::cheat)
-          .forEach(s -> s.value = s.original());
-      settings.stream().filter(s -> s.id.equals("world.keepInventory")).forEach(s -> s.value = new JsonPrimitive(false));
-    }
     if (changed.id.startsWith("audio.trackEnabled.")) {
       String id = changed.id.substring("audio.trackEnabled.".length());
       settings.stream().filter(s -> s.id.equals("audio.exclusions")).findFirst().ifPresent(s -> {
@@ -133,14 +128,14 @@ public final class ConfigSession {
             .flatMap(k -> backends.get(k).files().stream())
             .distinct()
             .toList();
-    try (FileTransaction transaction = FileTransaction.begin(gameDir, files)) {
+    try (FileTransaction transaction = files.isEmpty() ? null : FileTransaction.begin(gameDir, files)) {
       List<String> attempted = new ArrayList<>();
       try {
         for (var e : changes.entrySet()) {
           attempted.add(e.getKey());
           backends.get(e.getKey()).apply(e.getValue());
         }
-        transaction.commit();
+        if (transaction != null) transaction.commit();
       } catch (Exception failure) {
         Collections.reverse(attempted);
         for (String id : attempted)

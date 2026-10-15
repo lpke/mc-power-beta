@@ -44,11 +44,11 @@ final class Mining170Checks {
     failures=0; PowerConfig.flushPending(); var doc=PowerConfig.document();
     var gameplay=GameplayConfig.copy(); var veins=VeinConfig.copy();
     var main=mc.player.inventory.main.clone(); var manager=mc.interactionManager;
-    var cheats=(local.luke.power.permissions.CheatWorld)mc.world.method_262(); boolean allowed=cheats.power$cheatsEnabled();
+    var cheats=AccessRules.of(mc.world.method_262()); boolean allowed=cheats.allAllowed();
     String mode=mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     double x=mc.player.x,y=mc.player.y,z=mc.player.z;
     try {
-      cheats.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.power$cheatsEnabled(false);
+      cheats.allAllowed(true);CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.allAllowed(false);
       mc.player.inventory.selectedSlot=0;Arrays.fill(mc.player.inventory.main,null);
       var options=GameplayConfig.copy();options.torchShovel=true;GameplayConfig.preview(options);
       VeinConfig.save(new VeinSettings());
@@ -76,7 +76,7 @@ final class Mining170Checks {
         mc.player.inventory.main[1]=new ItemStack(277,1,0);
         options.torchShovel=false;GameplayConfig.preview(options);check(TorchShovel.slot(mc.player,Block.SAND)<0,"disabled accepted");options.torchShovel=true;GameplayConfig.preview(options);
         mc.world.isRemote=true;try {check(TorchShovel.slot(mc.player,Block.SAND)<0,"multiplayer override");}finally{mc.world.isRemote=false;}
-        cheats.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");check(TorchShovel.slot(mc.player,Block.SAND)<0,"creative override");CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.power$cheatsEnabled(false);
+        cheats.allAllowed(true);CreativeVehicleChecks.mode(mc,"CREATIVE");check(TorchShovel.slot(mc.player,Block.SAND)<0,"creative override");CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.allAllowed(false);
       });
       test("veins scale first-block time, mine connected ores and wear original tool",()->{
         var v=new VeinSettings();v.enabled=true;v.timePercent=100;v.blocksPerTick=1;VeinConfig.save(v);
@@ -123,15 +123,15 @@ final class Mining170Checks {
         mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen());VeinMining.tick(mc);mc.setScreen(null);
         check(mc.world.getBlockId(X,Y,Z)==16 && !VeinMining.busy(),"menu changed world during search");
       });
-      test("fire rule is global, available without cheats, and stops spread while fire ages",()->{
-        var session=SettingsRegistry.open(mc);var setting=find(session,"gameplay.fireSpread");
-        check(setting.defaultValue.getAsBoolean() && !SettingScope.perWorld(setting) && SettingAccess.visible(session,setting),"fire scope/default/access");
+      test("fire rule is per world, independent of access permissions, and stops spread while fire ages",()->{
+        var session=SettingsRegistry.open(mc);var setting=find(session,"rules.world.fire_spread");
+        check(setting.defaultValue.getAsBoolean() && SettingScope.perWorld(setting) && SettingAccess.visible(session,setting),"fire scope/default/access");
         VeinConfig.save(new VeinSettings());scene(mc,0,0);
         mc.world.method_200(X,Y-1,Z,87);mc.world.method_200(X,Y,Z,51);mc.world.method_200(X+1,Y,Z,5);
-        options.fireSpread=false;GameplayConfig.preview(options);
+        AccessRules.set(mc, local.luke.power.rules.GameRule.FIRE_SPREAD, false);GameplayConfig.preview(options);
         for(int i=0;i<100;i++)Block.BLOCKS[51].method_1602(mc.world,X,Y,Z,new Random(i));
         check(mc.world.getBlockId(X+1,Y,Z)==5,"disabled fire consumed neighbour");check(mc.world.method_1778(X,Y,Z)>0,"fire age stopped");
-        options.fireSpread=true;GameplayConfig.preview(options);
+        AccessRules.set(mc, local.luke.power.rules.GameRule.FIRE_SPREAD, true);GameplayConfig.preview(options);
         for(int i=0;i<500 && mc.world.getBlockId(X+1,Y,Z)==5;i++)Block.BLOCKS[51].method_1602(mc.world,X,Y,Z,new Random(i));
         check(mc.world.getBlockId(X+1,Y,Z)!=5,"enabled fire never consumed neighbour");
       });
@@ -152,7 +152,7 @@ final class Mining170Checks {
       VeinMining.reset();VeinConfig.save(veins);GameplayConfig.preview(gameplay);PowerConfig.write(doc);
       mc.world.isRemote=false;mc.setScreen(null);mc.interactionManager=manager;
       System.arraycopy(main,0,mc.player.inventory.main,0,main.length);mc.player.method_1340(x,y,z);mc.player.field_161.field_2536=false;
-      cheats.power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,mode);cheats.power$cheatsEnabled(allowed);
+      cheats.allAllowed(true);CreativeVehicleChecks.mode(mc,mode);cheats.allAllowed(allowed);
     }
     log("MINING 170 FAILURES "+failures);
   }

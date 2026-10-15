@@ -1,7 +1,7 @@
 package local.luke.power.building.hotbar;
 
 public final class HotbarSettings {
-  public boolean swap = true, scroll = true, numberRowKeys = true, overlay = true;
+  public boolean numberRowKeys = true, overlay = true;
   public boolean reverseScroll = false, rememberRow = true;
   public int selectedRow = 2, offsetX = 4, offsetY = 4;
   public Alignment alignment = Alignment.BOTTOM_RIGHT;
@@ -16,8 +16,6 @@ public final class HotbarSettings {
 
   public HotbarSettings copy() {
     HotbarSettings s = new HotbarSettings();
-    s.swap = swap;
-    s.scroll = scroll;
     s.numberRowKeys = numberRowKeys;
     s.overlay = overlay;
     s.reverseScroll = reverseScroll;

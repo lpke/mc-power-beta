@@ -21,7 +21,7 @@ public class ModHelper implements ModInitializer {
         if (null == slotStack) {
             /** - Slot does not have item */
             return false;
-        } else if (itemStack.isItemEqual(slotStack)) {
+        } else if (InventoryStacks.same(itemStack, slotStack)) {
             return true;
         }
 
@@ -32,11 +32,12 @@ public class ModHelper implements ModInitializer {
     public static int canItemFitInSlot(ItemStack itemStack, Slot slotToCheck) {
         ItemStack slotStack = slotToCheck.getStack();
 
+        if (!slotToCheck.canInsert(itemStack)) return -1;
         if (null == slotStack) {
             /** - Slot is open */
             return 1;
-        } else if (itemStack.isItemEqual(slotStack)) {
-            if (slotStack.count == slotStack.getMaxCount()) {
+        } else if (InventoryStacks.same(itemStack, slotStack)) {
+            if (slotStack.count >= Math.min(slotStack.getMaxCount(), slotToCheck.getMaxItemCount())) {
                 /** - Slot is taken */
                 return -1;
             } else {

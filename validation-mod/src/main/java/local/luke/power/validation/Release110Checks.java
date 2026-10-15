@@ -4,7 +4,6 @@ import static local.luke.power.validation.Validation.*;
 import java.util.*;
 import local.luke.power.chat.ChatBuffer;
 import local.luke.power.config.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.world.WorldSpawning;
 import local.luke.power.worldedit.WorldEditor;
 import local.luke.power.worldedit.core.*;
@@ -18,10 +17,10 @@ import org.lwjgl.input.Keyboard;
 final class Release110Checks {
   static void run(Minecraft mc) throws Exception {
     failures = 0;
-    var props = mc.world.method_262(); var cheats = (CheatWorld) props; var spawn = (WorldSpawning) props;
-    boolean oldCheats = cheats.power$cheatsEnabled(), hostile = spawn.power$hostileSpawning(), passive = spawn.power$passiveSpawning();
+    var props = mc.world.method_262(); var cheats = AccessRules.of(props); var spawn = (WorldSpawning) props;
+    boolean oldCheats = cheats.allAllowed(), hostile = spawn.power$hostileSpawning(), passive = spawn.power$passiveSpawning();
     try {
-      cheats.power$cheatsEnabled(true);
+      cheats.allAllowed(true);
       test("chat history keeps arrows across completable commands and restores draft", () -> {
         Class<?> variables = Class.forName("local.luke.power.client_fixes.client.text.chat.ChatScreenVariables");
         @SuppressWarnings("unchecked") var history = (List<String>) variables.getField("CHAT_HISTORY").get(null);
@@ -52,19 +51,20 @@ final class Release110Checks {
         var copied = (WorldSpawning)new WorldProperties(new WorldProperties(props.asNbt()));
         check(!copied.power$hostileSpawning() && !copied.power$passiveSpawning(), "rules lost in save/copy");
       });
-      test("spawning rows obey cheats and Apply/Cancel without previewing world mutations", () -> {
+      test("spawning rules use Apply/Cancel without previewing world mutations or requiring permissions", () -> {
         spawn.power$hostileSpawning(true); spawn.power$passiveSpawning(true);
         var session = SettingsRegistry.open(mc);
-        var h = find(session,"world.hostileSpawning"); var p = find(session,"world.passiveSpawning");
-        check(h.group.equals("World overrides") && p.group.equals("World overrides") && !h.label.contains("this world") && !p.label.contains("this world"), "scope labels missing");
+        var h = find(session,"rules.world.spawn_monsters"); var p = find(session,"rules.world.spawn_animals");
+        check(h.page.equals("Game rules") && h.group.equals("Spawning") && p.group.equals("Spawning"), "rule placement");
         check(SettingAccess.visible(session,h) && h.defaultValue.getAsBoolean(), "default/visibility");
         h.parse("false"); p.parse("false"); session.preview();
         check(spawn.power$hostileSpawning() && spawn.power$passiveSpawning(), "preview changed live world");
         session.discard(); check(spawn.power$hostileSpawning(), "Cancel changed rule");
         h.parse("false"); p.parse("false"); session.save(java.nio.file.Path.of("."));
         check(!spawn.power$hostileSpawning() && !spawn.power$passiveSpawning(), "Apply lost rules");
-        var hidden = SettingsRegistry.open(mc); find(hidden,"world.cheats").parse("false");
-        check(!SettingAccess.visible(hidden,find(hidden,h.id)), "hidden cheat row visible");
+        cheats.allAllowed(false);var independent = SettingsRegistry.open(mc);
+        check(SettingAccess.visible(independent,find(independent,h.id)), "spawning rule hidden with permissions off");
+        cheats.allAllowed(true);
       });
       test("natural spawning stops without removing entities or blocking summon", () -> {
         spawn.power$hostileSpawning(false); spawn.power$passiveSpawning(false);
@@ -76,14 +76,14 @@ final class Release110Checks {
         for (boolean remote : new boolean[]{false,true}) {
           mc.world.isRemote = remote;
           for (boolean enabled : new boolean[]{false,true}) {
-            cheats.power$cheatsEnabled(enabled);
+            cheats.allAllowed(enabled);
             for (var method : class_567.class.getDeclaredMethods()) if (method.getName().contains("power$hostile") || method.getName().contains("power$passive")) {
               method.setAccessible(true);
-              check((boolean)method.invoke(null,true,mc.world,true,true)==(remote || !enabled),"spawning gate remote/cheats");
+              check((boolean)method.invoke(null,true,mc.world,true,true)==remote,"spawning rule depended on permission or ignored server ownership");
             }
           }
         }
-        mc.world.isRemote=false; cheats.power$cheatsEnabled(true);
+        mc.world.isRemote=false; cheats.allAllowed(true);
       });
       test("WorldEdit rail states survive placement, undo and redo", () -> {
         var e=WorldEditor.editor(mc); e.select(new Region(new Pos(0,110,0),new Pos(2,110,0)));
@@ -97,18 +97,18 @@ final class Release110Checks {
         check(!e.engine.busy()&&history==e.engine.undoSize(),"invalid state changed world/history");
       });
       test("calculator works with cheats off and changes no blocks", () -> {
-        cheats.power$cheatsEnabled(false);
+        cheats.allAllowed(false);
         var messages=ChatChecks.submit(mc,"//calc 2 + 3 * 4");
         check(messages.stream().anyMatch(s->s.contains("14.0")),"calculation failed: "+messages);
       });
-      test("facing setting defaults off and Cancel restores previews", () -> {
+      test("facing setting defaults on and Cancel restores its previous value", () -> {
         var session=SettingsRegistry.open(mc);var facing=find(session,"power_compat:config.addFacingToDebugOverlay");
-        check(!facing.defaultValue.getAsBoolean() && facing.page.equals("Interface") && facing.group.equals("Debug information"),"facing default/group");
-        facing.parse("true");session.preview();session.discard();
-        check(!find(SettingsRegistry.open(mc),facing.id).value.getAsBoolean(),"facing Cancel failed");
+        check(facing.defaultValue.getAsBoolean() && facing.page.equals("Interface") && facing.group.equals("Debug information"),"facing default/group");
+        boolean before=facing.value.getAsBoolean();facing.parse(Boolean.toString(!before));session.preview();session.discard();
+        check(find(SettingsRegistry.open(mc),facing.id).value.getAsBoolean()==before,"facing Cancel failed");
       });
     } finally {
-      mc.world.isRemote=false;cheats.power$cheatsEnabled(oldCheats);spawn.power$hostileSpawning(hostile);spawn.power$passiveSpawning(passive);mc.setScreen(null);
+      mc.world.isRemote=false;cheats.allAllowed(oldCheats);spawn.power$hostileSpawning(hostile);spawn.power$passiveSpawning(passive);mc.setScreen(null);
     }
     log("RELEASE 1.1.0 FAILURES "+failures);
   }

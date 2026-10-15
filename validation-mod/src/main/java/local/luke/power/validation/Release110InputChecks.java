@@ -1,7 +1,6 @@
 package local.luke.power.validation;
 
 import static local.luke.power.validation.Validation.*;
-import local.luke.power.permissions.CheatWorld;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.class_27;
@@ -19,7 +18,7 @@ final class Release110InputChecks {
       return;
     }
     if (action.equals("flight") || action.equals("freecam") || action.equals("spectator")) {
-      mc.setScreen(null);((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,action.equals("spectator")?"SPECTATOR":"CREATIVE");
+      mc.setScreen(null);(AccessRules.of(mc.world.method_262())).allAllowed(true);CreativeVehicleChecks.mode(mc,action.equals("spectator")?"SPECTATOR":"CREATIVE");
       mc.player.method_1340(mc.player.x,110,mc.player.z);mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,true);
       mc.player.field_1623=false;mc.player.velocityX=mc.player.velocityY=mc.player.velocityZ=0;
       Object camera=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
@@ -29,9 +28,9 @@ final class Release110InputChecks {
     if (action.equals("pick")) {
       failures=0;
       var inventory=mc.player.inventory.main.clone();int slot=mc.player.inventory.selectedSlot;var target=mc.field_2823;
-      boolean cheats=((CheatWorld)mc.world.method_262()).power$cheatsEnabled();
+      boolean cheats=(AccessRules.of(mc.world.method_262())).allAllowed();
       try {
-        ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);
+        (AccessRules.of(mc.world.method_262())).allAllowed(true);
         for(String mode:new String[]{"CREATIVE","SURVIVAL"}) test("powered redstone pick returns dust in "+mode,()->{
           CreativeVehicleChecks.mode(mc,mode);java.util.Arrays.fill(mc.player.inventory.main,null);mc.player.inventory.selectedSlot=0;
           if(mode.equals("SURVIVAL"))mc.player.inventory.main[15]=new ItemStack(331,17,0);
@@ -42,7 +41,7 @@ final class Release110InputChecks {
           check(held!=null&&held.itemId==331&&held.getDamage()==0,"picked wrong item");
           check(held.count==(mode.equals("SURVIVAL")?17:1),"wrong count");
         });
-      } finally {System.arraycopy(inventory,0,mc.player.inventory.main,0,inventory.length);mc.player.inventory.selectedSlot=slot;mc.field_2823=target;((CheatWorld)mc.world.method_262()).power$cheatsEnabled(cheats);}
+      } finally {System.arraycopy(inventory,0,mc.player.inventory.main,0,inventory.length);mc.player.inventory.selectedSlot=slot;mc.field_2823=target;(AccessRules.of(mc.world.method_262())).allAllowed(cheats);}
       log("REDSTONE PICK FAILURES "+failures);
     }
   }

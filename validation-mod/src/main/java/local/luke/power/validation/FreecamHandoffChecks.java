@@ -23,8 +23,7 @@ final class FreecamHandoffChecks {
     failures=0;
     Object camera=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     Object options=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-    Field enabled=options.getClass().getField("enabled"); Object oldEnabled=enabled.get(options);
-    var before=Config.current().copy(); var walking=before.copy(); walking.autoWalk=true; Config.preview(walking);
+    var before=Config.current().copy(); var walking=before.copy();  Config.preview(walking);
     boolean bob=mc.options.bobView, third=mc.options.thirdPerson, stereo=mc.options.anaglyph3d;
     byte[] saved=Files.readAllBytes(PowerConfig.path());
     Object keys=Class.forName("local.luke.power.camera.listener.KeyPressedListener").getConstructor().newInstance();
@@ -34,7 +33,7 @@ final class FreecamHandoffChecks {
     Method press=keys.getClass().getDeclaredMethod("press",int.class); press.setAccessible(true);
     Method active=camera.getClass().getMethod("setActive",boolean.class);
     Method start=camera.getClass().getMethod("startFromView",Minecraft.class);
-    mc.setScreen(null); mc.field_2807=mc.player; enabled.set(options,true); AutoWalk.tick(mc);
+    mc.setScreen(null); mc.field_2807=mc.player;  AutoWalk.tick(mc);
     Field toggle=AutoWalk.class.getDeclaredField("TOGGLE"); toggle.setAccessible(true);
     var state=(local.luke.power.autowalk.WalkToggle)toggle.get(null);
     state.stop(); state.update(false,true); state.update(true,true); state.update(false,true);
@@ -107,7 +106,7 @@ final class FreecamHandoffChecks {
         check(GL11.glGetError()==GL11.GL_NO_ERROR,"OpenGL error");
       });
     } finally {
-      active.invoke(camera,false); AutoWalk.stop(); Config.preview(before); enabled.set(options,oldEnabled);
+      active.invoke(camera,false); AutoWalk.stop(); Config.preview(before);
       binding.code=oldCode; Bindings.configure(oldModifiers);
       mc.options.bobView=bob; mc.options.thirdPerson=third; mc.options.anaglyph3d=stereo;
       mc.player.field_1631=1.62F; mc.player.method_140();

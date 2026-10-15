@@ -29,10 +29,10 @@ class ObsidianMiningTest {
     }
   }
 
-  @Test void settingsDefaultOffAndSurviveCopyAndGson289() {
+  @Test void settingsDefaultToSixtyAndSurviveCopyAndGson289() {
     var gson = new Gson();
-    assertEquals(0, new Settings().obsidianBreakingSpeed);
-    assertEquals(0, gson.fromJson("{}", Settings.class).obsidianBreakingSpeed);
+    assertEquals(60, new Settings().obsidianBreakingSpeed);
+    assertEquals(60, gson.fromJson("{}", Settings.class).obsidianBreakingSpeed);
     var settings = new Settings();
     for (int speed : new int[] {0, 1, 50, 100}) {
       settings.obsidianBreakingSpeed = speed;

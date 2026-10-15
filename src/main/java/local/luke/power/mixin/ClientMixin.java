@@ -8,6 +8,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class ClientMixin {
+  @Inject(method = "method_2120", at = @At("HEAD"), cancellable = true)
+  private void power$validateWorld(String folder, String name, long seed, CallbackInfo ci) {
+    if (!local.luke.power.world.WorldLoadGuard.allow(folder)) ci.cancel();
+  }
   @Inject(method = "method_2115", at = @At("HEAD"))
   private void power$leaveWorld(net.minecraft.world.World world, String message,
       net.minecraft.entity.player.PlayerEntity player, CallbackInfo ci) {

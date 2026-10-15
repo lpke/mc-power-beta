@@ -7,7 +7,6 @@ import java.util.*;
 import com.google.gson.JsonPrimitive;
 import local.luke.power.config.*;
 import local.luke.power.death.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.world.WorldInventory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
@@ -27,32 +26,35 @@ final class KeepInventoryChecks {
       ((WorldInventory)mc.world.method_262()).power$keepInventory(false); clear(mc); clearCraft(mc); return;
     }
     alive(mc); clear(mc); clearCraft(mc);
-    var properties = (CheatWorld)mc.world.method_262(); var rule = (WorldInventory)properties;
-    var settings = DeathConfig.copy(); boolean cheats = properties.power$cheatsEnabled();
+    var properties = AccessRules.of(mc.world.method_262()); var rule = (WorldInventory)mc.world.method_262();
+    var settings = DeathConfig.copy(); boolean cheats = properties.allAllowed();
     var enabled = new DeathSettings(); enabled.enabled = true; enabled.announceLocation = false; DeathConfig.preview(enabled);
     try {
-      test("world rule defaults off, hides without cheats, and waits for Apply", () -> {
-        properties.power$cheatsEnabled(false); rule.power$keepInventory(true); check(!rule.power$keepInventory(), "keep rule active without cheats");
-        var session = SettingsRegistry.open(mc); var keep = Release110Checks.find(session, "world.keepInventory");
-        check(!keep.defaultValue.getAsBoolean() && !SettingAccess.visible(session, keep), "default or hidden rule wrong");
-        properties.power$cheatsEnabled(true); session = SettingsRegistry.open(mc); keep = Release110Checks.find(session, "world.keepInventory");
-        check(keep.group.equals("World overrides") && SettingAccess.visible(session, keep), "wrong group or rule still hidden");
-        keep.value = new JsonPrimitive(true); session.preview(true); check(!rule.power$keepInventory(), "draft applied keep rule"); session.discard();
-        session = SettingsRegistry.open(mc); Release110Checks.find(session, "world.keepInventory").value = new JsonPrimitive(true); session.save(Path.of("."));
+      test("keep inventory is independent of permissions and waits for Apply", () -> {
+        properties.allAllowed(false); rule.power$keepInventory(false);
+        var session = SettingsRegistry.open(mc); var keep = Release110Checks.find(session, "rules.world.keep_inventory");
+        check(!keep.defaultValue.getAsBoolean() && SettingAccess.visible(session, keep), "default or visibility wrong");
+        check(keep.group.equals("Drops and death"), "wrong group");
+        keep.value = new JsonPrimitive(true); session.preview(true);
+        check(!rule.power$keepInventory(), "manual draft applied keep rule"); session.discard();
+        session = SettingsRegistry.open(mc); Release110Checks.find(session, "rules.world.keep_inventory").value = new JsonPrimitive(true); session.save(Path.of("."));
         check(rule.power$keepInventory(), "Apply ignored keep rule");
-        session = SettingsRegistry.open(mc); var gate = Release110Checks.find(session, "world.cheats"); gate.value = new JsonPrimitive(false); session.link(gate);
-        check(!Release110Checks.find(session, "world.keepInventory").value.getAsBoolean(), "hidden draft did not reset off"); session.discard(); check(rule.power$keepInventory(), "Cancel changed live rule");
-        session = SettingsRegistry.open(mc); gate = Release110Checks.find(session, "world.cheats"); gate.value = new JsonPrimitive(false); session.link(gate); session.save(Path.of("."));
-        check(!rule.power$keepInventory(), "Apply disabling cheats kept rule on"); properties.power$cheatsEnabled(true); check(!rule.power$keepInventory(), "re-enabling cheats revived rule");
+        properties.allAllowed(true); properties.allAllowed(false);
+        check(rule.power$keepInventory(), "permission change cleared keep rule");
+        properties.allAllowed(true);
       });
-      test("rule is saved per world, copied across dimensions, and resets on direct cheats disable", () -> {
+      test("rule is saved per world, copied across dimensions, and survives permission changes", () -> {
         rule.power$keepInventory(true); NbtCompound tag = mc.world.method_262().asNbt();
         var restored = new net.minecraft.world.WorldProperties(tag);
         check(((WorldInventory)restored).power$keepInventory(), "NBT rule lost");
-        var copy = new net.minecraft.world.WorldProperties(mc.world.method_262()); check(((WorldInventory)copy).power$keepInventory(), "dimension copy lost rule");
-        ((CheatWorld)copy).power$cheatsEnabled(false); ((CheatWorld)copy).power$cheatsEnabled(true); check(!((WorldInventory)copy).power$keepInventory(), "direct disable revived rule");
-        var fresh = new net.minecraft.world.WorldProperties(1L, "Keep inventory fresh"); check(!((WorldInventory)fresh).power$keepInventory(), "fresh world rule on");
-        tag.putBoolean("PowerBetaCheatsEnabled", false); check(!((WorldInventory)new net.minecraft.world.WorldProperties(tag)).power$keepInventory(), "NBT enabled keep without cheats");
+        var copy = new net.minecraft.world.WorldProperties(mc.world.method_262());
+        check(((WorldInventory)copy).power$keepInventory(), "dimension copy lost rule");
+        AccessRules.of(copy).allAllowed(false); AccessRules.of(copy).allAllowed(true);
+        check(((WorldInventory)copy).power$keepInventory(), "permission change cleared rule");
+        var fresh = new net.minecraft.world.WorldProperties(1L, "Keep inventory fresh");
+        check(!((WorldInventory)fresh).power$keepInventory(), "fresh Survival world rule on");
+        tag.putBoolean("PowerBetaCheatsEnabled", false);
+        check(((WorldInventory)new net.minecraft.world.WorldProperties(tag)).power$keepInventory(), "stale legacy flag overrides new rules");
       });
       test("real death retains inventory, equipment, cursor and crafting with no item drops", () -> {
         rule.power$keepInventory(true); setup(mc); var saved = KeptInventory.capture(mc.player); int drops = drops(mc);
@@ -77,17 +79,17 @@ final class KeepInventoryChecks {
         check(saved.matches(mc.player), "native NBT lost full count, damage, tags or position");
         mc.method_2122(false, 0); mc.setScreen(null); check(saved.matches(mc.player), "respawn after NBT load changed stacks");
       });
-      test("disabling cheats after death keeps that death's items; the next death drops normally", () -> {
+      test("disabling keep inventory after death preserves already-kept items; the next death drops normally", () -> {
         alive(mc); setup(mc); rule.power$keepInventory(true); var saved = KeptInventory.capture(mc.player);
-        mc.player.health = 1; mc.player.damage(null, 10); saved = ((KeptPlayer)mc.player).power$keptInventory(); properties.power$cheatsEnabled(false);
-        mc.method_2122(false, 0); mc.setScreen(null); check(saved.matches(mc.player), "cheats disable discarded already kept inventory");
-        properties.power$cheatsEnabled(true); check(!rule.power$keepInventory(), "rule revived after cheats on");
+        mc.player.health = 1; mc.player.damage(null, 10); saved = ((KeptPlayer)mc.player).power$keptInventory(); rule.power$keepInventory(false);
+        mc.method_2122(false, 0); mc.setScreen(null); check(saved.matches(mc.player), "rule disable discarded already kept inventory");
+        properties.allAllowed(true); check(!rule.power$keepInventory(), "permission change revived keep rule");
         clear(mc); clearCraft(mc); mc.player.inventory.main[0] = tagged(264, 7, 0, "normal-drop"); int drops = drops(mc);
         mc.player.health = 1; mc.player.damage(null, 10);
         check(mc.player.inventory.main[0] == null && drops(mc) > drops && !latest(mc).kept, "off rule suppressed normal drops"); alive(mc);
       });
       test("keep rule works independently of death records and excludes multiplayer", () -> {
-        clear(mc); clearCraft(mc); DeathConfig.preview(new DeathSettings()); rule.power$keepInventory(true); setup(mc);
+        clear(mc); clearCraft(mc); DeathConfig.preview(DeathChecks.disabled()); rule.power$keepInventory(true); setup(mc);
         int records = DeathTracker.journal(mc).records().size(); var saved = KeptInventory.capture(mc.player);
         mc.player.health = 1; mc.player.damage(null, 10); saved = ((KeptPlayer)mc.player).power$keptInventory(); mc.method_2122(false, 0); mc.setScreen(null);
         check(saved.matches(mc.player) && DeathTracker.journal(mc).records().size() == records, "disabled death feature changed keep rule or logged death");
@@ -96,13 +98,13 @@ final class KeepInventoryChecks {
         finally { mc.world.isRemote = false; DeathConfig.preview(enabled); }
       });
       if (action.equals("save")) {
-        alive(mc); properties.power$cheatsEnabled(true); rule.power$keepInventory(true); setup(mc); mc.player.inventory.main[8].count = 201;
+        alive(mc); properties.allAllowed(true); rule.power$keepInventory(true); setup(mc); mc.player.inventory.main[8].count = 201;
         DeathConfig.save(enabled); mc.player.health = 1; mc.player.damage(null, 10);
         log("PASS staged dead-player save for restart; run keep-inventory reload after new-world");
       }
       log("KEEP INVENTORY FAILURES " + failures);
     } finally {
-      if (!action.equals("save")) { alive(mc); clear(mc); clearCraft(mc); rule.power$keepInventory(false); properties.power$cheatsEnabled(cheats); DeathConfig.preview(settings); }
+      if (!action.equals("save")) { alive(mc); clear(mc); clearCraft(mc); rule.power$keepInventory(false); properties.allAllowed(cheats); DeathConfig.preview(settings); }
     }
   }
   private static void setup(Minecraft mc) throws Exception {

@@ -26,7 +26,7 @@ public final class AutoMine {
         && client.world == world && client.player == player
         && client.player.health > 0 && !client.player.dead
         && client.currentScreen == null && client.field_2778 && Display.isActive()
-        && Config.current().autoMine && !InteractionState.carryingContainer
+        && !InteractionState.carryingContainer
         && !MovementOwnership.cameraControlsMovement();
   }
   public static boolean active() {

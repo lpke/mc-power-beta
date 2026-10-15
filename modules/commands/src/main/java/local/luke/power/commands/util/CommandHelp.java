@@ -8,7 +8,7 @@ public final class CommandHelp {
 
   private static final Map<String, String> TEXT =
       Map.ofEntries(
-          Map.entry("death", "Show deaths, lost items and creative recovery"),
+          Map.entry("death", "View death records and recover permitted items"),
           Map.entry("gm", "Alias for /gamemode"),
           Map.entry("teleport", "Alias for /tp"),
           Map.entry("/calc", "Evaluate an arithmetic expression"),

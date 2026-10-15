@@ -125,6 +125,7 @@ public final class CommandCatalog {
       String prefix = input.startsWith("//") ? "//" : "/";
       Collection<String> names = prefix.equals("//") ? COMMANDS : SINGLE;
       return names.stream()
+          .filter(CommandAccess::allowed)
           .map(n -> prefix + n)
           .filter(n -> n.startsWith(input.toLowerCase(Locale.ROOT)))
           .sorted()
@@ -132,6 +133,7 @@ public final class CommandCatalog {
     }
     String[] parts = input.substring(0, space).trim().split("\\s+");
     String command = parts[0].replaceFirst("^/+", "").toLowerCase(Locale.ROOT);
+    if (!CommandAccess.allowed(command)) return List.of();
     String token = input.substring(space + 1);
     int arg = (int) Arrays.stream(parts).skip(1).filter(p -> !p.startsWith("-")).count() + 1;
     Collection<String> choices = List.of();

@@ -50,7 +50,7 @@ public class Config {
         public FrontViewMode frontViewThirdPerson = FrontViewMode.NORMAL;
         
         @ConfigEntry(name = "Clear Text Field With Right Click", description = "Right clicking on a text field will clear it")
-        public Boolean clearTextFieldWithRightClick = true;
+        public Boolean clearTextFieldWithRightClick = false;
 
         @ConfigCategory(name = "Video Settings")
         public VideoSettingsConfig videoSettingsConfig = new VideoSettingsConfig();
@@ -137,28 +137,25 @@ public class Config {
         public Boolean stepAssist = false;
 
         @ConfigEntry(name = "Eating sounds", description = "Play a chewing sound when food is consumed.")
-        public Boolean eatingSounds = false;
+        public Boolean eatingSounds = true;
         @ConfigEntry(name = "Burping sounds", description = "Occasionally burp after consuming food.")
         public Boolean burpingSounds = false;
         @ConfigEntry(name = "Shearing sounds", description = "Play a snip when a sheep is successfully sheared.")
-        public Boolean shearingSounds = false;
+        public Boolean shearingSounds = true;
         @ConfigEntry(name = "Tool break sounds", description = "Play a sound when a tool reaches zero durability.")
-        public Boolean toolBreakSounds = false;
+        public Boolean toolBreakSounds = true;
         @ConfigEntry(name = "Armor break sounds", description = "Play a sound when an armor piece breaks.")
-        public Boolean armorBreakSounds = false;
+        public Boolean armorBreakSounds = true;
         @ConfigEntry(name = "Chest sounds", description = "Play sounds when opening and closing a chest.")
         public Boolean chestSounds = false;
 
         @ConfigEntry(name = "More Sounds (Chests)", description = "Adds sounds for chests (a few options are available)")
         public ChestSoundsEnum moreSoundsChests = ChestSoundsEnum.DOOR;
 
-        @ConfigEntry(name = "More Sounds (Falling Pipe)", description = "Makes the tool break sound play a falling pipe sound")
-        public Boolean fallingPipe = false;
-
         public static class FastLeafDecayConfig {
             @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
             @ConfigEntry(name = "Enable Fast Leaf Decay", multiplayerSynced = true)
-            public Boolean enableFastLeafDecay = false;
+            public Boolean enableFastLeafDecay = true;
 
             @ConfigEntry(name = "Minimum Decay Time", maxValue = 1200, maxLength = 1200)
             public Integer minimumDecayTime = 10;
@@ -208,7 +205,7 @@ public class Config {
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Fences Connect to Blocks", multiplayerSynced = true)
-        public Boolean fencesConnectBlocks = true;
+        public Boolean fencesConnectBlocks = false;
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Bookshelves Drop 3 Books", multiplayerSynced = true)
@@ -232,15 +229,11 @@ public class Config {
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Don't Damage Flint And Steel on failed ignite", multiplayerSynced = true)
-        public Boolean modernFlintAndSteel = false;
+        public Boolean modernFlintAndSteel = true;
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Disable sleeping but retain respawning", multiplayerSynced = true)
         public Boolean disableSleeping = false;
-
-        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
-        @ConfigEntry(name = "Disable spawning mobs when you sleep", multiplayerSynced = true)
-        public Boolean disableSleepSpawning = false;
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Prevent Items Stopping Minecarts", multiplayerSynced = true)
@@ -354,7 +347,7 @@ public class Config {
         public Boolean grassBlockItemFix = true;
 
         @ConfigEntry(name = "Multiplayer Mining Delay Fix", description = "WARNING: This could be considered a hack on some servers")
-        public Boolean miningDelayFix = true;
+        public Boolean miningDelayFix = false;
 
         @ConfigEntry(name = "Last Durability Fix", description = "Fixes blocks not dropping on the last durability point of a tool")
         public Boolean lastDurabilityFix = true;
@@ -409,10 +402,6 @@ public class Config {
 
     public static class RecipesConfig {
 
-        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
-        @ConfigEntry(name = "Enable Recipe Tweaks", description = "Acts as a master switch for all recipe tweaks", multiplayerSynced = true)
-        public Boolean enableRecipes = true;
-
         @ConfigEntry(name = "Make more wooden items burnable")
         public Boolean furnaceFuels = true;
 
@@ -445,7 +434,7 @@ public class Config {
             @ConfigEntry(name = "Wool Redyeing")
             public Boolean woolRedyeing = true;
             @ConfigEntry(name = "6 Slabs per Craft")
-            public Boolean sixSlabsPerCraft = false;
+            public Boolean sixSlabsPerCraft = true;
             @ConfigEntry(name = "Button Requires 1 Stone")
             public Boolean oneStonePerButton = true;
             @ConfigEntry(name = "Modern Fence Recipe (4 Planks,2 Sticks)")
@@ -453,7 +442,7 @@ public class Config {
             @ConfigEntry(name = "Snow Layer Recipe")
             public Boolean snowLayerRecipe = true;
             @ConfigEntry(name = "3 Ladders per Craft")
-            public Boolean threeLaddersPerCraft = false;
+            public Boolean threeLaddersPerCraft = true;
         }
 
         public static class TweakedRecipesConfig {
@@ -469,7 +458,7 @@ public class Config {
             @ConfigEntry(name = "Craftable Grass Blocks")
             public Boolean craftableGrassBlocks = false;
             @ConfigEntry(name = "Craftable Cobwebs")
-            public Boolean craftableCobwebs = false;
+            public Boolean craftableCobwebs = true;
             @ConfigEntry(name = "Craftable Fire")
             public Boolean craftableFire = false;
             @ConfigEntry(name = "Craftable Coal Ore (8 Coal around a Stone)")

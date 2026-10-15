@@ -50,7 +50,7 @@ public final class NavigationCarryChecks {
     ((Deque<?>)field(s, "history")).clear();
     ((Set<?>)field(s, "collapsed")).clear();
     try {
-      Setting feature = find(s.session(), "power_camera:config.enabled");
+      Setting feature = find(s.session(), "power_camera:config.collision");
       feature.value = new JsonPrimitive(false);
       Setting key = find(s.session(), "keys.Toggle Freecam");
       field(s, "page", "Camera");
@@ -136,8 +136,8 @@ public final class NavigationCarryChecks {
       });
       test("related reset preserves unrelated drafts and Back restores the filter", () -> {
         invoke(s,"related",Setting.class,key);
-        Setting related = find(s.session(),"power_camera:config.enabled");
-        Setting unrelated = find(s.session(),"tweaks.freeLook");
+        Setting related = find(s.session(),"power_camera:config.collision");
+        Setting unrelated = find(s.session(),"tweaks.freeLookToggle");
         var oldRelated = related.value.deepCopy(); var oldUnrelated = unrelated.value.deepCopy();
         related.value = new JsonPrimitive(!related.defaultValue.getAsBoolean());
         unrelated.value = new JsonPrimitive(!unrelated.defaultValue.getAsBoolean());

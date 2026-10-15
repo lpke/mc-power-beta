@@ -3,7 +3,6 @@ package local.luke.power.validation;
 import static local.luke.power.validation.Validation.*;
 import static local.luke.power.validation.UiChecks.*;
 import java.util.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.validation.mixin.ScreenInput;
 import net.minecraft.class_142;
 import net.minecraft.class_585;
@@ -20,15 +19,15 @@ final class CreativeDropChecks {
     check(mc.world != null && !mc.world.isRemote, "run new-world first");
     mc.player.closeScreen();
     var inventory = mc.player.inventory.main.clone();
-    var properties = (CheatWorld) mc.world.method_262();
-    boolean cheats = properties.power$cheatsEnabled();
+    var properties = AccessRules.of(mc.world.method_262());
+    boolean cheats = properties.allAllowed();
     String mode = Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player).toString();
     Object config = Class.forName("local.luke.power.creative.config.Config").getMethod("current").invoke(null);
     var destroy = config.getClass().getField("destroySlot");
     boolean oldDestroy = destroy.getBoolean(config);
     String run = UUID.randomUUID().toString();
     try {
-      properties.power$cheatsEnabled(true);
+      properties.allAllowed(true);
       CreativeVehicleChecks.mode(mc, "CREATIVE");
       for (int i = 0; i < inventory.length; i++) mc.player.inventory.main[i] = tagged(4, i % 5 + 1, 0, "inventory-" + i);
       var screen = new class_585(mc.player); mc.setScreen(screen);
@@ -114,7 +113,7 @@ final class CreativeDropChecks {
       mc.player.inventory.setCursorStack(null); mc.player.closeScreen();
       System.arraycopy(inventory, 0, mc.player.inventory.main, 0, inventory.length);
       destroy.setBoolean(config, oldDestroy);
-      CreativeVehicleChecks.mode(mc, mode); properties.power$cheatsEnabled(cheats);
+      CreativeVehicleChecks.mode(mc, mode); properties.allAllowed(cheats);
       for (Object entity : mc.world.field_198) if (entity instanceof class_142 drop
           && tag(drop.field_564).getString(TAG).startsWith(run)) drop.dead = true;
     }

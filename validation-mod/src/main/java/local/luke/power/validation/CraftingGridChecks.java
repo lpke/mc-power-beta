@@ -5,7 +5,6 @@ import java.nio.file.*;
 import java.util.*;
 import local.luke.power.config.*;
 import local.luke.power.inventory.CraftingGridTransfer;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.storage.PowerConfig;
 import local.luke.power.visual.*;
 import net.minecraft.*;
@@ -24,7 +23,7 @@ final class CraftingGridChecks {
       log("PASS crafting table preference survived restart"); return;
     }
     failures = 0;
-    ((CheatWorld) mc.world.method_262()).power$cheatsEnabled(true);
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc, "SURVIVAL");
     mc.player.closeScreen(); mc.player.method_1340(.5, 103, -2.5);
     for (int x = -4; x <= 4; x++) for (int z = -4; z <= 4; z++) {
@@ -34,10 +33,10 @@ final class CraftingGridChecks {
     mc.world.method_200(0, 101, 0, 58);
     if (action.equals("rollback")) { rollback(mc); return; }
     enable(false);
-    test("crafting option defaults off and Cancel leaves items/settings intact", () -> {
+    test("crafting option defaults on and Cancel leaves items/settings intact", () -> {
       var c = table(mc); ItemStack source = tagged(5, 17, 0, "source"); c.method_2084(10).setStack(source);
       var session = SettingsRegistry.open(mc); var row = Release110Checks.find(session, ID);
-      check(!row.defaultValue.getAsBoolean() && !new VisualSettings().shiftClickIntoCraftingGrid, "wrong default");
+      check(row.defaultValue.getAsBoolean() && new VisualSettings().shiftClickIntoCraftingGrid, "wrong default");
       byte[] before = Files.readAllBytes(PowerConfig.path());
       row.parse("true"); session.preview(); check(VisualConfig.current().shiftClickIntoCraftingGrid, "preview missing");
       session.discard(); check(!VisualConfig.current().shiftClickIntoCraftingGrid, "Cancel failed");

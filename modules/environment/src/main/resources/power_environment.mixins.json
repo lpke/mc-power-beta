@@ -6,16 +6,12 @@
   "plugin": "local.luke.power.environment.EnvironmentFeaturesMixinPlugin",
   "mixins": [
     "BiomeMixin",
-    "ForestBiomeMixin",
-    "HellBiomeMixin",
     "LivingEntityMixin",
     "MonsterEntityMixin",
     "NaturalSpawnerGroupSizeMixin",
     "NaturalSpawnerMixin",
     "PigEntityMixin",
     "PlayerEntityMixin",
-    "SkyBiomeMixin",
-    "TaigaBiomeMixin",
     "WorldMixin"
   ],
   "server": [

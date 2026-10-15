@@ -12,9 +12,9 @@ public final class VisualSettings {
   public int underwaterDarknessOutside = 100;
   public boolean narrowUnderwaterFov = true;
   public boolean softRain, softSnow, oldCobble, oldBricks, redstonePowerLevels, lowFire;
-  public boolean slashChat, containerCarry, containerPreview;
-  public boolean inventoryInPortals;
-  public boolean shiftClickIntoCraftingGrid;
+  public boolean containerCarry = true;
+  public boolean inventoryInPortals = true;
+  public boolean shiftClickIntoCraftingGrid = true;
   public boolean damageCameraShake = true, fireDamageCameraShake = true;
   public boolean swapEquipment = true;
   public boolean limitCapeRotation = true;

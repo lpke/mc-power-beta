@@ -35,11 +35,9 @@ public final class ChatChecks {
     return result;
   }
   public static void run(Minecraft mc) throws Exception {
-    var session = local.luke.power.config.SettingsRegistry.open(mc);
-    var enabled = Validation.find(session, "worldedit.enabled");
-    var before = enabled.value.deepCopy();
-    enabled.value = new com.google.gson.JsonPrimitive(true);
-    session.save(java.nio.file.Path.of(".").toAbsolutePath());
+    Validation.failures = 0;
+    var before = AccessRules.copy(mc);
+    AccessRules.of(mc.world.method_262()).allAllowed(true);
     try {
       submit(mc, "/gamemode creative");
       var help = submit(mc, "//help");
@@ -51,8 +49,8 @@ public final class ChatChecks {
       var remove = submit(mc, "/remove items 5");
       Validation.test("chat removal has one real side effect", () -> Validation.check(item.dead && remove.stream().anyMatch(m -> m.contains("Removed 1 entities")), remove.toString()));
       Validation.test("chat entity removal executes once", () -> Validation.check(remove.stream().filter(s -> s.contains("Removed ")).count() == 1, remove.toString()));
-      var upper = submit(mc, "//HELP 6");
-      Validation.test("uppercase command executes once", () -> Validation.check(upper.stream().filter(s -> s.contains("Help 6/6")).count() == 1, upper.toString()));
+      var upper = submit(mc, "//HELP 2");
+      Validation.test("uppercase command executes once", () -> Validation.check(upper.stream().filter(s -> s.contains("World editing") && s.contains("2/")).count() == 1, upper.toString()));
       var invalid = submit(mc, "//set");
       Validation.test("command error is coloured", () -> Validation.check(invalid.size() == 1 && invalid.get(0).contains("\u00a7c"), invalid.toString()));
       // Native history must still contain the latest submission.
@@ -65,6 +63,6 @@ public final class ChatChecks {
       ((ChatInput)mc.currentScreen).power$type('\t', Keyboard.KEY_TAB);
       String completion = (String)Class.forName("local.luke.power.worldedit.chat.ChatAccess").getMethod("text", String.class).invoke(null, "");
       Validation.test("double slash completion preserved", () -> Validation.check(completion.equals("//help"), completion));
-    } finally { enabled.value = before; session.save(java.nio.file.Path.of(".").toAbsolutePath()); mc.setScreen(null); }
+    } finally { AccessRules.restore(mc, before); mc.setScreen(null); }
   }
 }

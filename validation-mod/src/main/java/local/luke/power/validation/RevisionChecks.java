@@ -50,7 +50,6 @@ public final class RevisionChecks {
       test("speaker preview starts a separate native sound source",()->check(SoundManagerAccessor.power$system().playing("PowerBetaPreview"),"preview not playing"));
     } else if(action.equals("walk-setup")) {
       ConfigSession session=SettingsRegistry.open(mc);
-      find(session,"tweaks.autoWalk").value=new JsonPrimitive(true);
       find(session,"keys.Auto-walk (toggle)").value=new JsonPrimitive(org.lwjgl.input.Keyboard.KEY_I);
       session.save(Path.of(".").toAbsolutePath());mc.setScreen(null);
       log("Auto-walk configured on I");
@@ -75,10 +74,10 @@ public final class RevisionChecks {
       mc.setScreen(screen);
     });
     test("Controls is flat and hides disabled feature bindings",()->{
-      field(screen,"page","Controls");field(screen,"scroll",0d);field(screen,"showDisabled",false);find(screen.session(),"power_camera:config.enabled").value=new JsonPrimitive(false);call(screen,"layout");
-      check(visible(screen).stream().noneMatch(s->s.id.equals("keys.Toggle Freecam")),"disabled binding visible");
+      field(screen,"page","Controls");field(screen,"scroll",0d);field(screen,"showDisabled",false);find(screen.session(),"creative.sprintFlight").value=new JsonPrimitive(false);find(screen.session(),"power_camera:config.sprint").value=new JsonPrimitive(false);call(screen,"layout");
+      check(visible(screen).stream().noneMatch(s->s.id.equals("keys.power_creative.sprint")),"disabled binding visible");
       for(Object row:(List<?>)field(screen,"rows"))check(call(row,"setting")!=null,"section title remains");
-      field(screen,"showDisabled",true);call(screen,"layout");check(visible(screen).stream().anyMatch(s->s.id.equals("keys.Toggle Freecam")),"show disabled failed");
+      field(screen,"showDisabled",true);call(screen,"layout");check(visible(screen).stream().anyMatch(s->s.id.equals("keys.power_creative.sprint")),"show disabled failed");
     });
     test("conflict filter stays fixed while bindings change",()->{
       Setting first=find(screen.session(),"keys.key.forward"),other=find(screen.session(),"keys.key.back");
@@ -93,7 +92,7 @@ public final class RevisionChecks {
     test("related binding settings link navigates to the setting",()->{
       Setting key=find(screen.session(),"keys.Toggle Freecam");invoke(screen,"related",new Class[]{Setting.class},key);
       check(field(screen,"page").equals("Camera"),"related page wrong");
-      check(visible(screen).stream().anyMatch(s->s.id.equals("power_camera:config.enabled")),"related setting absent");
+      check(visible(screen).stream().anyMatch(s->s.id.equals("power_camera:config.speed")),"related setting absent");
     });
     test("sound controls exclude later-version cached assets",()->{
       check(!AudioController.sounds(mc).stream().anyMatch(s->s.contains("blaze")||s.contains("mob.cat")||s.contains("enderman")),"non-Beta sound shown");

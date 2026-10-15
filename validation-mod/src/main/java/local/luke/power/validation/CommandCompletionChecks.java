@@ -1,7 +1,6 @@
 package local.luke.power.validation;
 
 import static local.luke.power.validation.Validation.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.validation.mixin.ChatInput;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -10,9 +9,9 @@ import org.lwjgl.input.Keyboard;
 final class CommandCompletionChecks {
   static void run(Minecraft mc) throws Exception {
     failures = 0;
-    var rules = (CheatWorld) mc.world.method_262(); boolean cheats = rules.power$cheatsEnabled();
+    var rules = AccessRules.of(mc.world.method_262()); boolean cheats = rules.allAllowed();
     try {
-      rules.power$cheatsEnabled(true);
+      rules.allAllowed(true);
       for (String seed : new String[] {"//set st", "//replace st", "/gamemode "})
         for (int key : new int[] {Keyboard.KEY_UP, Keyboard.KEY_DOWN}) test("arrow selection and immediate Tab: " + seed + "/" + key, () -> {
           ChatScreen screen = new ChatScreen(); mc.setScreen(screen);
@@ -40,7 +39,7 @@ final class CommandCompletionChecks {
         ((ChatInput)s).power$type('\t', Keyboard.KEY_TAB);
         check(text(s).equals("//help"), "single match did not complete");
       });
-    } finally { rules.power$cheatsEnabled(cheats); mc.setScreen(null); }
+    } finally { rules.allAllowed(cheats); mc.setScreen(null); }
     log("COMMAND COMPLETION FAILURES " + failures);
   }
   private static void seed(ChatScreen s, String text) throws Exception {

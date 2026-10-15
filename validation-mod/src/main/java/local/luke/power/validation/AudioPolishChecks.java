@@ -41,25 +41,16 @@ public final class AudioPolishChecks {
       case "ui" -> {
         a = track("One.wav"); b = track("Two.wav");
         options = MenuUpdateChecks.open(mc,"General");
-        test("General uses requested groups and setting order", () -> {
-          field(options,"collapsed",new HashSet<>()); call(options,"layout");
-          List<String> actual = new ArrayList<>();
-          for (Object row : (List<?>)field(options,"rows")) {
-            Setting s = (Setting)call(row,"setting"); actual.add(s == null ? (String)call(row,"group") : s.id);
-          }
-          check(actual.equals(List.of("Game","world.difficulty","world.cheats","power_controls:general.autosaveInterval",
-              "Interface","native.guiScale","visual.slashChat","power_controls:general.pauseOnLostFocus","interface.pauseToOptions",
-              "Input","native.sensitivity","native.invert","power_controls:general.rawInput","power_controls:general.disableControllerInit")), actual.toString());
+        test("General has global preferences and difficulty; rules have their own tab", () -> {
+          check(options.session().settings().stream().noneMatch(v->v.id.equals("world.cheats")),"obsolete Cheats master");
+          check(find(options.session(),"world.difficulty").page.equals("General"),"difficulty missing");
+          check(options.session().settings().stream().filter(v->v.id.startsWith("rules.world.")).allMatch(v->v.page.equals("Game rules")),"rules mixed with globals");
         });
-        test("locked cheat values show outcome and retain stored preferences", () -> {
-          var cheats=find(options.session(),"world.cheats"); var previous=cheats.value; cheats.value=new JsonPrimitive(false);
-          var value=PowerOptionsScreen.class.getDeclaredMethod("value",Setting.class);value.setAccessible(true);
-          for (Setting s : options.session().settings()) if (SettingAccess.cheat(s)) {
-            var stored=s.value.deepCopy();String display=(String)value.invoke(options,s);
-            check(display.equals(s.kind==Setting.Kind.BOOLEAN?"Off":"Disabled"),s.id+" displays "+display);
-            check(stored.equals(s.value),"display altered "+s.id);
-          }
-          cheats.value=previous;
+        test("blocked tool rows stay hidden while preserving stored preferences", () -> {
+          var rule=find(options.session(),"rules.world.allow_world_editing");var previous=rule.value;rule.value=new JsonPrimitive(false);
+          var wand=find(options.session(),"worldedit.wandItem");var stored=wand.value.deepCopy();
+          check(!SettingAccess.visible(options.session(),wand)&&stored.equals(wand.value),"blocked tool lost preference or stayed visible");
+          rule.value=previous;
         });
         field(options,"page","Audio"); search(options,"");
         MusicRequests.edit(q -> {q.tracks.clear();q.add(a);q.add(b);});

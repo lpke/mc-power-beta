@@ -17,7 +17,7 @@ class DeathJournalTest {
   }
   @Test void gson289KeepsPlainFieldsAndDefaults() {
     Gson gson = new Gson(); DeathSettings defaults = gson.fromJson("{}", DeathSettings.class);
-    assertFalse(defaults.enabled); assertTrue(defaults.announceLocation); assertFalse(defaults.announceItems);
+    assertTrue(defaults.enabled); assertTrue(defaults.announceLocation); assertFalse(defaults.announceItems);
     DeathRecord saved = gson.fromJson(gson.toJson(death("1")), DeathRecord.class);
     assertEquals(-12, saved.x); assertEquals(-1, saved.dimension); assertEquals(List.of("native-item-nbt"), saved.items);
   }

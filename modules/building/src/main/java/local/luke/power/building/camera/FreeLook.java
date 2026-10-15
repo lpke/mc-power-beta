@@ -12,7 +12,7 @@ import org.lwjgl.opengl.Display;
 /** Free look's input/camera separation, owned by BuildingFeatures. Never rotates the player. */
 public final class FreeLook {
   // Stable identifier shared with Power Beta's binding registry.
-  public static final KeyBinding KEY = new KeyBinding("key.powerbeta.free_look", Keyboard.KEY_GRAVE);
+  public static final KeyBinding KEY = new KeyBinding("key.powerbeta.free_look", Keyboard.KEY_NONE);
   private static final LookAngles angles = new LookAngles();
   private static boolean active, wasDown, waitForRelease, previousThird;
   private static Perspective perspective, configuredPerspective;
@@ -44,8 +44,7 @@ public final class FreeLook {
     boolean pressed = down && !wasDown;
     wasDown = down;
     boolean eligible =
-        Config.current().freeLook
-            && mc.world != null
+        mc.world != null
             && mc.player != null
             && !mc.player.dead
             && mc.player.health > 0

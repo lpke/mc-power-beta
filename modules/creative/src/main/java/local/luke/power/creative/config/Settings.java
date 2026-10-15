@@ -3,7 +3,7 @@ package local.luke.power.creative.config;
 public final class Settings {
   public boolean flight = true, landStopsFlight = true, sprintFlight = true, sprintToggle = true;
   public int flightSpeed = 100, sprintMultiplier = 200, glide = 5, doubleTapTicks = 7;
-  public boolean modePicker = true, spectatorScroll = true, showSpectatorSpeed = true;
+  public boolean spectatorScroll = true, showSpectatorSpeed = true;
   public int spectatorSpeed = 100, spectatorScrollStep = 10;
   public int blockReach = 50, entityReach = 50;
   public boolean destroySlot = true, shiftClearsInventory = true;

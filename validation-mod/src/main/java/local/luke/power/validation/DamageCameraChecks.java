@@ -5,7 +5,6 @@ import java.nio.FloatBuffer;
 import java.nio.file.*;
 import java.util.Arrays;
 import local.luke.power.config.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.storage.PowerConfig;
 import local.luke.power.visual.*;
 import net.minecraft.class_555;
@@ -21,7 +20,7 @@ final class DamageCameraChecks {
       log("PASS damage camera preferences survived restart"); return;
     }
     failures = 0;
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true); CreativeVehicleChecks.mode(mc, "SURVIVAL");
+    (AccessRules.of(mc.world.method_262())).allAllowed(true); CreativeVehicleChecks.mode(mc, "SURVIVAL");
     mc.player.closeScreen(); mc.player.method_1340(10.5, 110, 10.5); mc.field_2807 = mc.player;
     for (int x = 9; x < 12; x++) for (int z = 9; z < 12; z++) for (int y = 108; y < 114; y++) mc.world.method_200(x,y,z,0);
     test("shake defaults on; Camera / View and Cancel preserve health and settings", () -> {

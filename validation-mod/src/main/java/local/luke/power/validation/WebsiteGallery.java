@@ -6,7 +6,6 @@ import java.nio.file.*;
 import java.util.*;
 import local.luke.power.config.*;
 import local.luke.power.death.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.ui.*;
 import local.luke.power.visual.*;
 import local.luke.power.worldedit.MinecraftWorld;
@@ -52,7 +51,7 @@ final class WebsiteGallery {
     if(action.equals("search")) {menu(mc,"General","speed");return;}
     if(action.equals("freecam-view")) {
       var settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
-      settings.getClass().getField("enabled").set(settings,Boolean.TRUE);
+
       var controller=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
       controller.getClass().getMethod("startFromView",Minecraft.class).invoke(controller,mc);
       controller.getClass().getMethod("setCameraPosition",double.class,double.class,double.class)
@@ -113,10 +112,10 @@ final class WebsiteGallery {
     if(mc.player.method_943())mc.player.method_497(true,true,false);
     var detached=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     detached.getClass().getMethod("setActive",boolean.class).invoke(detached,false);
-    ((CheatWorld)mc.world.method_262()).power$cheatsEnabled(true);CreativeVehicleChecks.mode(mc,"CREATIVE");mc.player.health=20;mc.player.fire=0;
+    (AccessRules.of(mc.world.method_262())).allAllowed(true);CreativeVehicleChecks.mode(mc,"CREATIVE");mc.player.health=20;mc.player.fire=0;
     mc.setScreen(null);mc.options.hideHud=true;mc.options.thirdPerson=false;
     var visuals=VisualConfig.copy();visuals.hideEntities=false;visuals.spectatorFullBright=false;
-    visuals.containerCarry=visuals.containerPreview=false;visuals.oldCobble=visuals.oldBricks=false;visuals.redstonePowerLevels=false;VisualConfig.preview(visuals);
+    visuals.containerCarry=false;visuals.oldCobble=visuals.oldBricks=false;visuals.redstonePowerLevels=false;VisualConfig.preview(visuals);
     var light=local.luke.power.light.LightConfig.copy();light.enabled=false;local.luke.power.light.LightConfig.preview(light);
     var status=local.luke.power.status.StatusConfig.copy();status.enabled=false;local.luke.power.status.StatusConfig.preview(status);
     setting(mc,"native.guiScale","2");setting(mc,"native.renderDistance","12");setting(mc,"native.brightness","55");setting(mc,"native.fov","75");
@@ -148,7 +147,7 @@ final class WebsiteGallery {
       var chest=(Inventory)mc.world.method_1777(x,y,z);
       int[] ids={4,5,20,17,50,264,265,331,35,280,262,260,297,325,263,264,266,345};
       for(int i=0;i<ids.length;i++) { var stack=new ItemStack(ids[i],1,0);stack.count=Math.min(32,stack.getMaxCount());chest.setStack(i,stack); }
-      visuals=VisualConfig.copy();visuals.containerPreview=action.equals("preview");visuals.containerCarry=true;VisualConfig.preview(visuals);
+      visuals=VisualConfig.copy();visuals.containerCarry=true;VisualConfig.preview(visuals);
       camera(mc,.5,2.2,-2.7,0,29);mc.options.hideHud=false;
     } else if(action.equals("sign")) {
       for(int dx=-6;dx<=6;dx+=2){block(mc,dx,0,3,85,0);block(mc,dx,0,2,37,0);}

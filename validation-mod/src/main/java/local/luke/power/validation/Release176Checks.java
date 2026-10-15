@@ -9,7 +9,6 @@ import local.luke.power.autowalk.WalkToggle;
 import local.luke.power.building.config.Config;
 import local.luke.power.config.SettingsRegistry;
 import local.luke.power.input.*;
-import local.luke.power.permissions.CheatWorld;
 import local.luke.power.render.*;
 import local.luke.power.visual.VisualConfig;
 import net.minecraft.block.Material;
@@ -53,11 +52,11 @@ final class Release176Checks {
     }
     failures=0;mc.setScreen(null);mc.paused=false;DeathChecks.alive(mc);FreecamPreviewChecks.active(false);
     var session=SettingsRegistry.open(mc);var original=VisualConfig.copy();var building=Config.current().copy();
-    var cheats=(CheatWorld)mc.world.method_262();boolean oldCheats=cheats.power$cheatsEnabled();
+    var cheats=AccessRules.of(mc.world.method_262());boolean oldCheats=cheats.allAllowed();
     boolean third=mc.options.thirdPerson,bob=mc.options.bobView,stereo=mc.options.anaglyph3d;
     try {
-      cheats.power$cheatsEnabled(true);RenderControls.reset(mc);mc.field_2807=mc.player;
-      find(session,"power_camera:config.enabled").parse("true");find(session,"native.fov").parse("70");session.preview(true);
+      cheats.allAllowed(true);RenderControls.reset(mc);mc.field_2807=mc.player;
+      find(session,"native.fov").parse("70");session.preview(true);
       CreativeVehicleChecks.mode(mc,"CREATIVE");mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,true);
       mc.options.bobView=false;mc.options.anaglyph3d=false;mc.player.hurtTime=0;mc.player.field_504=mc.player.field_505=0;
       if(action.equals("flight")) flight(mc);
@@ -68,7 +67,7 @@ final class Release176Checks {
       if(!action.startsWith("scene")) {
         FreecamPreviewChecks.active(false);AutoWalk.stop();mc.player.method_140();mc.setScreen(null);session.discard();
         Config.preview(building);VisualConfig.preview(original);mc.options.thirdPerson=third;mc.options.bobView=bob;mc.options.anaglyph3d=stereo;
-        CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.power$cheatsEnabled(oldCheats);RenderedView.clear();RenderControls.reset(mc);
+        CreativeVehicleChecks.mode(mc,"SURVIVAL");cheats.allAllowed(oldCheats);RenderedView.clear();RenderControls.reset(mc);
       }
     }
     log("RELEASE 176 "+action.toUpperCase()+" FAILURES "+failures);
@@ -119,7 +118,7 @@ final class Release176Checks {
       FreecamPreviewChecks.active(false);
     });
     test("free look crosses the water surface independently of the player",()->{
-      var old=Config.current().copy();var b=old.copy();b.freeLook=true;Config.preview(b);
+      var old=Config.current().copy();var b=old.copy();Config.preview(b);
       try {
         mc.options.thirdPerson=true;s.thirdPersonDistance=8;VisualConfig.preview(s);mc.player.pitch=mc.player.prevPitch=0;
         local.luke.power.building.camera.FreeLook.begin(mc);
@@ -168,7 +167,7 @@ final class Release176Checks {
   }
 
   private static void flight(Minecraft mc) throws Exception {
-    var settings=Config.current().copy();settings.autoWalk=true;settings.autoWalkCancelOnLostFocus=false;settings.inventoryWhileMoving=true;Config.preview(settings);
+    var settings=Config.current().copy();settings.autoWalkCancelOnLostFocus=false;settings.inventoryWhileMoving=true;Config.preview(settings);
     AutoWalk.tick(mc);var f=AutoWalk.class.getDeclaredField("TOGGLE");f.setAccessible(true);var toggle=(WalkToggle)f.get(null);
     for(String mode:new String[]{"CREATIVE","SPECTATOR"})for(boolean backwards:new boolean[]{false,true})
       test(mode+" auto-flight continues in freecam, backwards="+backwards,()->{
@@ -206,7 +205,7 @@ final class Release176Checks {
       zoomKey=key.code;key.code=64;Bindings.configure(java.util.Map.of());
     }
     if(action.equals("scene-walk")) {
-      var settings=Config.current().copy();settings.autoWalk=true;settings.autoWalkCancelOnLostFocus=false;settings.inventoryWhileMoving=true;Config.preview(settings);
+      var settings=Config.current().copy();settings.autoWalkCancelOnLostFocus=false;settings.inventoryWhileMoving=true;Config.preview(settings);
       mc.player.method_1340(32.5,122,32.5);mc.player.velocityX=mc.player.velocityY=mc.player.velocityZ=0;
       AutoWalk.tick(mc);var f=AutoWalk.class.getDeclaredField("TOGGLE");f.setAccessible(true);var toggle=(WalkToggle)f.get(null);
       toggle.stop();toggle.update(false,true);toggle.update(true,true);toggle.update(false,true);

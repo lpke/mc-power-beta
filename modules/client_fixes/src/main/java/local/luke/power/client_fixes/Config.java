@@ -41,18 +41,6 @@ public class Config {
         public Boolean enableChatChanges = true;
 
         @ConfigEntry(
-                name = "Enable Debug Graph Changes",
-                description = "Restart required for changes to take effect"
-        )
-        public Boolean enableDebugGraphChanges = true;
-
-        @ConfigEntry(
-                name = "Enable Debug Graph Toggle As KEYBIND+F3",
-                description = "False=Toggle debug graph with just KEYBIND"
-        )
-        public Boolean enableDebugGraphModernToggle = true;
-
-        @ConfigEntry(
                 name = "Enable Debug Menu World Seed",
                 description = "Restart required for changes to take effect"
         )
