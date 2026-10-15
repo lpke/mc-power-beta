@@ -8,6 +8,11 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-175 oxygen`, `lighting`, `flight`: oxygen refills, native Survival drowning,
+  bubble suppression, day/night and roof lighting, unchanged simulation light, render-thread
+  isolation, live preview/Cancel, and frozen-flight animation continuity. Run after `new-world`.
+  Use `save`, restart, then `saved` for underwater-darkness persistence.
+
 - `release-171 hotbar`: blocked journal writes, commit ordering, native NBT, bounded
   rapid input, selection preservation, inventory edits, menus, focus, world/player
   changes and submission/commit timings. `failure` injects a full journal and verifies

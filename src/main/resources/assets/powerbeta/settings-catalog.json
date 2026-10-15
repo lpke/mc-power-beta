@@ -3802,7 +3802,7 @@
     "group": "Rendering",
     "label": "Original far-distance fog",
     "description": "Use Beta's original far-fog values at exactly 12 chunks. Other distances keep their normal fog.",
-    "order": 5
+    "order": 6
   },
   "video.clouds": {
     "page": "Video",
@@ -3819,13 +3819,13 @@
     "order": 2
   },
   "video.fogCycle": {
-    "order": 4
+    "order": 5
   },
   "native.opengl": {
-    "order": 6
+    "order": 7
   },
   "native.anaglyph": {
-    "order": 7
+    "order": 8
   },
   "native.clouds": {
     "order": 0
@@ -5039,6 +5039,19 @@
     "label": "Underwater fog density",
     "description": "Underwater fog as a percentage of Beta's normal density. 100% is vanilla; 0% removes water fog while keeping normal lighting and terrain-distance fog. Full bright overrides this to 0% while active.",
     "order": 3,
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "unit": "%",
+    "default": 100,
+    "restart": false
+  },
+  "visual.underwaterDarkness": {
+    "page": "Video",
+    "group": "Rendering",
+    "label": "Underwater darkness",
+    "description": "Water darkness as a percentage of normal. 100% keeps Beta lighting; 0% lets daylight through water, while night, roofs and other shadows remain. Fog density and the underwater texture overlay are separate. Does not change actual light levels.",
+    "order": 4,
     "min": 0,
     "max": 100,
     "step": 1,

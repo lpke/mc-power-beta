@@ -66,9 +66,13 @@ public final class RenderControls {
       var settings = VisualConfig.copy(); settings.hideEntities = false; VisualConfig.queue(settings);
     }
   }
-  public static boolean renderingFullBright() { return active && renderDepth > 0 && Thread.currentThread() == renderThread; }
-  public static void beginRender() { if (renderDepth == 0) renderThread = Thread.currentThread(); renderDepth++; }
-  public static void endRender() { renderDepth--; }
+  public static boolean rendering() { return renderDepth > 0 && Thread.currentThread() == renderThread; }
+  public static boolean renderingFullBright() { return active && rendering(); }
+  public static void beginRender() {
+    if (renderDepth == 0) { renderThread = Thread.currentThread(); WaterLighting.clear(); }
+    renderDepth++;
+  }
+  public static void endRender() { if (--renderDepth == 0) WaterLighting.clear(); }
   public static float waterFogScale() { return active ? 0 : VisualConfig.current().underwaterFogDensity / 100F; }
   public static boolean clearWaterFog() { return waterFogScale() == 0 && fogDepth > 0 && Thread.currentThread() == fogThread; }
   public static void beginFog() { if (fogDepth == 0) fogThread = Thread.currentThread(); fogDepth++; }

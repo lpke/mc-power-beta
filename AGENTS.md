@@ -308,3 +308,10 @@
 - Only plain F3 debug plus plain F3/F4 mode-picker bindings defer the debug toggle until
   release. Cycling consumes that toggle. Cancel pending input on menus, focus/world loss or
   binding changes; keep all remapped/chorded bindings immediate and respect input ownership.
+
+- Creative/Spectator use native water breathing to refill oxygen and skip drowning particles.
+  Mode transitions and protected-player reloads restore a full breath. Flight must advance
+  and settle limb interpolation even while freecam owns movement.
+- Underwater darkness adjusts render-only daylight shading with bounded, frame-local column
+  samples. Preserve roofs, night lighting, emission and opaque AO. Never change stored light,
+  water opacity, physics, or fog preferences; keep loaded-chunk and render-thread guards.

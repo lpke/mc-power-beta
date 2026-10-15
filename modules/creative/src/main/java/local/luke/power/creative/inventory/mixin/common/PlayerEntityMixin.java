@@ -72,6 +72,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     velocityX = velocityY = velocityZ = 0;
     fallDistance = 0;
     fire = 0;
+    air = maxAir;
     if (power$spectator) {
       onGround = false;
       power$spectatorSpeed = .05f * Config.current().spectatorSpeed / 100;
@@ -119,6 +120,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     power$spectator = mode == GameMode.SPECTATOR;
     dataTracker.setData(CreativeInventory.IS_CREATIVE_ID, CreativeInventory.toByte(mode == GameMode.CREATIVE));
     immuneToFire = mode != GameMode.SURVIVAL;
+    if (mode != GameMode.SURVIVAL) air = maxAir;
     updateFromBB = power$spectator;
     creative_setFlying(power$spectator || mode == GameMode.CREATIVE && tag.getBoolean("Flying"));
     try {
@@ -135,7 +137,6 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     if (power$spectator) {
       updateFromBB = true;
       onGround = false;
-      air = 300;
       fire = 0;
     }
     if (creative_isCreative() || power$spectator) {

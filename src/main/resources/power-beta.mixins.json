@@ -78,6 +78,7 @@
     "RenderKeysMixin",
     "FullBrightRenderMixin",
     "FullBrightLightMixin",
+    "RenderBlockViewAccessor",
     "TntBudgetMixin",
     "ExplosionItemsMixin",
     "LavaItemsMixin",

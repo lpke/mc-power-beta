@@ -10,6 +10,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public class LivingEntityMixin {
+  @Inject(method = "canBreatheInWater", at = @At("HEAD"), cancellable = true)
+  private void power$oxygen(CallbackInfoReturnable<Boolean> info) {
+    // Let native breathing refill air and skip the entire drowning/particle branch.
+    if (local.luke.power.creative.Modes.protectedPlayer(this)) info.setReturnValue(true);
+  }
+
   @Inject(method = "noObstaclesTo", at = @At("HEAD"), cancellable = true)
   private void creative_noObstaclesTo(Entity entity, CallbackInfoReturnable<Boolean> info) {
     if (entity instanceof PlayerEntity player

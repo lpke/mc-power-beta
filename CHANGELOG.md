@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.7.5] - 2026-10-15
+
+- Refill oxygen in Creative and Spectator and prevent drowning bubbles, including when returning to Survival.
+- Add an underwater darkness percentage, independent of fog, that restores daylight through water without changing world light levels.
+- Smooth the frozen player body when entering freecam during Creative flight.
+
 ## [1.7.4] - 2026-10-15
 
 - Add an underwater fog density slider from clear water at 0% to vanilla fog at 100%, with full bright overriding it while active.

@@ -16,7 +16,7 @@ public final class VisualBackend implements Backend {
     List<Setting> entries = new ArrayList<>();
     for (var f : VisualSettings.class.getFields()) {
       boolean distance = f.getName().equals("thirdPersonDistance");
-      boolean waterFog = f.getName().equals("underwaterFogDensity");
+      boolean waterFog = f.getName().equals("underwaterFogDensity") || f.getName().equals("underwaterDarkness");
       entries.add(Catalog.setting("visual." + f.getName(), b.id(), distance ? "Camera" : "Video",
           distance ? "Third person" : "Texture overrides", distance ? "Camera distance" : Catalog.words(f.getName()),
           distance ? "Distance behind the player in blocks. Walls can move the camera closer; 4 is vanilla."
@@ -43,7 +43,8 @@ public final class VisualBackend implements Backend {
     VisualSettings before = VisualConfig.copy();
     VisualConfig.preview(draft(values));
     VisualSettings after = VisualConfig.current();
-    if (before.redstonePowerLevels != after.redstonePowerLevels && mc.world != null)
+    if ((before.redstonePowerLevels != after.redstonePowerLevels
+        || before.underwaterDarkness != after.underwaterDarkness) && mc.world != null)
       mc.worldRenderer.method_1537();
     if (before.softRain != after.softRain || before.softSnow != after.softSnow
         || before.oldCobble != after.oldCobble || before.oldBricks != after.oldBricks) {

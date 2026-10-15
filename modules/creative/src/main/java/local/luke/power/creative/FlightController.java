@@ -75,6 +75,7 @@ public final class FlightController {
     boolean spectator = Modes.spectator(player);
     if (!ClientRuntime.moving(mc)) {
       player.velocityX = player.velocityY = player.velocityZ = 0;
+      animate(player, 0);
       return true;
     }
     var input = player.playerKeypressManager;
@@ -104,10 +105,8 @@ public final class FlightController {
     double previousX = player.x, previousZ = player.z;
     player.move(player.velocityX, player.velocityY, player.velocityZ);
     // Native travel normally owns this animation update. Our flight replaces travel.
-    player.prevLimbDistance = player.limbDistance;
     float walking = (float) Math.min(1, Math.hypot(player.x - previousX, player.z - previousZ) * 4);
-    player.limbDistance += (walking - player.limbDistance) * .4f;
-    player.invLimbDistance += player.limbDistance;
+    animate(player, walking);
     // Use collision-adjusted velocities so hitting walls cannot accumulate speed.
     player.velocityX *= .91;
     player.velocityY *= .6;
@@ -115,6 +114,13 @@ public final class FlightController {
     if (!spectator && settings.landStopsFlight && player.onGround && vertical <= 0)
       player.creative_setFlying(false);
     return true;
+  }
+
+  private static void animate(PlayerEntity player, float walking) {
+    // Keep both interpolation endpoints current even when detached input stops flight.
+    player.prevLimbDistance = player.limbDistance;
+    player.limbDistance += (walking - player.limbDistance) * .4f;
+    player.invLimbDistance += player.limbDistance;
   }
 
   public static int scroll(Minecraft mc, int delta) {

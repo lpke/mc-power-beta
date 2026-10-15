@@ -1,6 +1,8 @@
 package local.luke.power.mixin;
 
 import local.luke.power.render.RenderControls;
+import local.luke.power.render.WaterLighting;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -8,6 +10,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Float shading only, inside the renderer. Simulation light levels never change. */
 @Mixin({net.minecraft.world.World.class, net.minecraft.class_42.class})
 public class FullBrightLightMixin {
+  @ModifyReturnValue(method = "method_1782", at = @At("RETURN"))
+  private float power$waterLight(float shade, int x, int y, int z) {
+    return RenderControls.renderingFullBright() ? shade : WaterLighting.shade(power$lightWorld(), x, y, z, shade);
+  }
+  @ModifyReturnValue(method = "method_1784", at = @At("RETURN"))
+  private float power$waterBlockLight(float shade, int x, int y, int z, int emission) {
+    return RenderControls.renderingFullBright() ? shade : WaterLighting.shade(power$lightWorld(), x, y, z, shade);
+  }
+  @org.spongepowered.asm.mixin.Unique
+  private net.minecraft.world.World power$lightWorld() {
+    return (Object)this instanceof net.minecraft.world.World world ? world
+        : ((RenderBlockViewAccessor)this).power$world();
+  }
   @Inject(method = "method_1782", at = @At("HEAD"), cancellable = true)
   private void power$light(int x, int y, int z, CallbackInfoReturnable<Float> cir) {
     if (RenderControls.renderingFullBright()) cir.setReturnValue(1f);
