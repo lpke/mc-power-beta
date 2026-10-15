@@ -62,9 +62,8 @@ final class CreationRuleChecks {
         for(int i=0;i<3;i++)press(creation,2);
         check(draft.preset()==CreationRules.Preset.CUSTOM&&!draft.rules().enabled(GameRule.FIRE_SPREAD),"cycling erased Custom rules");
         check(((TextFieldWidget)field(creation,"field_633")).getText().equals("17320261015"),"resize lost seed");
-        press(creation,5);check(!draft.problem().isEmpty(),"forbidden starting mode accepted");
-        creation.render(-1,-1,0);check(!button(creation,0).active,"Create enabled for forbidden mode");
-        press(creation,0);check(mc.world==null,"invalid draft created a world");
+        check(((ScreenInput)creation).power$buttons().stream().noneMatch(b->b.id==5),"starting mode button remains");
+        check(draft.mode().equals("survival")&&draft.problem().isEmpty(),"Custom must start in Survival");
         for(int width:new int[]{320,640}) {
           creation.init(mc,width,width==320?240:420);
           SettingsSnapshot.render(mc,creation,width,width==320?240:420,Path.of("power-beta-data/reports/create-custom-"+width+".png"));
@@ -75,7 +74,7 @@ final class CreationRuleChecks {
         creation.render(-1,-1,0);check(button(creation,0).active,"Create remained disabled");
         String folder=(String)field(creation,"field_634");RuleSet expected=draft.rules();
         press(creation,0);check(mc.world!=null&&WorldRules.of(mc.world.method_262()).equals(expected),"created rules differ from draft");
-        check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals("CREATIVE"),"Custom starting mode lost");
+        check(mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString().equals("SURVIVAL"),"Custom must start in Survival");
         mc.world.method_195(true,null);WorldRuleFiles.verifySaved(WorldRuleChanges.directory(mc),expected,2);
         mc.setWorld(null);mc.interactionManager=new net.minecraft.SingleplayerInteractionManager(mc);mc.method_2120(folder,folder,17320261015L);
         check(WorldRules.of(mc.world.method_262()).equals(expected),"reloaded rules changed");

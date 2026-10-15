@@ -11,7 +11,10 @@
     "PlayerScreenMixin",
     "ContainerScreenMixin",
     "ScreenMixin",
-    "MinecraftMixin"
+    "MinecraftMixin",
+    "LevelMetadataMixin",
+    "FlattenedWorldStorageMixin",
+    "WorldListMixin"
   ],
   "injectors": {
     "defaultRequire": 1

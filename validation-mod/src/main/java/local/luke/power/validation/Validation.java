@@ -58,6 +58,7 @@ public final class Validation {
       else if (command.startsWith("release-160")) Release160Checks.run(mc, command.substring(11).trim());
       else if (command.startsWith("placement-lifecycle ")) PlacementLifecycleChecks.run(mc, command.substring(20));
       else if (command.startsWith("interface-170 ")) Interface170Checks.run(mc,command.substring(14));
+      else if (command.equals("release-202")) Release202Checks.run(mc);
       else if (command.startsWith("release-201 ")) Release201Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-175 ")) Release175Checks.run(mc,command.substring(12));
       else if (command.equals("water-terrain")) WaterTerrainChecks.run(mc);
@@ -68,6 +69,7 @@ public final class Validation {
       else if (command.startsWith("release-171 ")) Release171Checks.run(mc,command.substring(12));
       else if (command.equals("mining-170")) Mining170Checks.run(mc);
       else if (command.equals("release-162")) Release162Checks.run(mc);
+      else if (command.startsWith("freecam-motion ")) FreecamMotionChecks.run(mc, command.substring(15));
       else if (command.startsWith("freecam-preview ")) FreecamPreviewChecks.run(mc, command.substring(16));
       else if (command.equals("cape-checks")) CapeChecks.run(mc);
       else if (command.equals("music-collapse")) MusicCollapseChecks.run(mc);

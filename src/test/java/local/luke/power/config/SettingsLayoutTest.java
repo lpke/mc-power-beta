@@ -12,6 +12,19 @@ class SettingsLayoutTest {
         new JsonPrimitive(false), new JsonPrimitive(false), 0, 1, 1, List.of(), false);
   }
 
+  @Test void everyRuleEditorKeepsRelatedRulesTogether() {
+    for (String prefix : List.of("rules.world.", "rules.creation.", "rules.survival.", "rules.cheats.")) {
+      var rules = new local.luke.power.rules.RuleSet();
+      var rows = SettingsLayout.ordered(local.luke.power.config.backend.RuleSettings.entries("test", prefix, rules, rules));
+      var ids = rows.stream().map(row -> row.id.substring(prefix.length())).toList();
+      assertEquals(ids.indexOf("allow_creative_mode") + 1, ids.indexOf("allow_spectator_mode"));
+      assertEquals(ids.indexOf("player_crop_trampling") + 1, ids.indexOf("mob_crop_trampling"));
+      assertEquals(ids.indexOf("creeper_griefing") + 1, ids.indexOf("ghast_griefing"));
+      assertEquals(ids.indexOf("explosions_destroy_items") + 1, ids.indexOf("lava_destroys_items"));
+      assertEquals(ids.indexOf("lava_destroys_items") + 1, ids.indexOf("cactus_destroys_items"));
+    }
+  }
+
   @Test void presentationMovesKeepIdentityValueAndDraftState() {
     Setting sprint = setting("creative.sprintMultiplier", "Creative", "Flight");
     assertEquals("Camera", sprint.page);

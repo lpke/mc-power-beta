@@ -29,36 +29,32 @@ public abstract class CreateWorldMixin extends Screen {
     if (power$draft == null) power$draft = new CreationRules(RulePresets.survival(), RulePresets.cheats());
     if (power$name != null) { field_632.setText(power$name); field_633.setText(power$seed); method_608(); }
     int left = width / 2 - 132;
-    int actionY = !power$draft.problem().isEmpty() ? 216
-        : power$draft.preset() == CreationRules.Preset.CUSTOM ? 204 : 180;
+    int actionY = !power$draft.problem().isEmpty() || power$draft.preset() == CreationRules.Preset.CUSTOM ? 212 : 188;
     for (int i = 0; i < buttons.size(); i++) {
       ButtonWidget button = (ButtonWidget) buttons.get(i);
       if (button.id == 0 || button.id == 1)
         buttons.set(i, new ButtonWidget(button.id, left + button.id * 134, actionY, 130, 20, button.text));
     }
-    buttons.add(new ButtonWidget(2, left, 156, 130, 20, power$rulesLabel()));
-    buttons.add(new ButtonWidget(3, left + 134, 156, 130, 20, power$difficultyLabel()));
+    buttons.add(new ButtonWidget(2, left, 164, 130, 20, power$rulesLabel()));
+    buttons.add(new ButtonWidget(3, left + 134, 164, 130, 20, power$difficultyLabel()));
     if (power$draft.preset() == CreationRules.Preset.CUSTOM) {
-      buttons.add(new ButtonWidget(4, left, 180, 130, 20, "Edit game rules"));
-      buttons.add(new ButtonWidget(5, left + 134, 180, 130, 20, power$modeLabel()));
+      buttons.add(new ButtonWidget(4, left, 188, 264, 20, "Edit game rules"));
     }
   }
   @Unique private String power$rulesLabel() {
     return "Game rules: " + switch (power$draft.preset()) { case SURVIVAL -> "Survival"; case CHEATS -> "Cheats"; case CUSTOM -> "Custom"; };
   }
   @Unique private String power$difficultyLabel() { return "Difficulty: " + POWER_DIFFICULTIES[power$difficulty]; }
-  @Unique private String power$modeLabel() { String mode = power$draft.mode(); return "Start: " + Character.toUpperCase(mode.charAt(0)) + mode.substring(1); }
   @Unique private void power$cycle(int id, int direction) {
     if (id == 2) power$draft.cycle(direction);
     if (id == 3) power$difficulty = Math.floorMod(power$difficulty + direction, 4);
-    if (id == 5) power$draft.cycleMode(direction);
     init();
   }
   @Inject(method = "buttonClicked", at = @At("HEAD"), cancellable = true)
   private void power$choose(ButtonWidget button, CallbackInfo ci) {
     if (!button.active) return;
     if (button.id == 0 && !power$draft.problem().isEmpty()) { ci.cancel(); return; }
-    if (button.id == 2 || button.id == 3 || button.id == 5) { power$cycle(button.id, 1); ci.cancel(); }
+    if (button.id == 2 || button.id == 3) { power$cycle(button.id, 1); ci.cancel(); }
     if (button.id == 4) {
       local.luke.power.ui.PowerOptionsScreen.openCreationRules(minecraft, this, power$draft); ci.cancel();
     }
@@ -68,7 +64,7 @@ public abstract class CreateWorldMixin extends Screen {
     if (mouseButton != 1) return;
     for (Object entry : buttons) {
       ButtonWidget button = (ButtonWidget) entry;
-      if ((button.id == 2 || button.id == 3 || button.id == 5) && button.isMouseOver(minecraft, x, y)) {
+      if ((button.id == 2 || button.id == 3) && button.isMouseOver(minecraft, x, y)) {
         power$cycle(button.id, -1); minecraft.soundManager.method_2009("random.click", 1, 1); ci.cancel(); return;
       }
     }
@@ -82,7 +78,7 @@ public abstract class CreateWorldMixin extends Screen {
   }
   @Inject(method = "render", at = @At("TAIL"))
   private void power$problem(int x, int y, float delta, CallbackInfo ci) {
-    if (!power$draft.problem().isEmpty()) drawCenteredTextWithShadow(textRenderer, power$draft.problem(), width / 2, 204, 0xff8888);
+    if (!power$draft.problem().isEmpty()) drawCenteredTextWithShadow(textRenderer, power$draft.problem(), width / 2, 194, 0xff8888);
   }
   @WrapOperation(method = "buttonClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;method_2120(Ljava/lang/String;Ljava/lang/String;J)V"))
   private void power$create(Minecraft mc, String folder, String name, long seed, Operation<Void> original) {

@@ -50,7 +50,8 @@
   Cancel restores previews. Dirty exits offer Save, Discard and Keep editing. Creation
   edits affect only the future-world draft. Main-menu templates, creation and loaded
   world rules share search and editor behavior. Preserve Custom drafts when cycling
-  presets; block creation visibly when its starting mode lacks permission.
+  presets. Custom starts in Survival; block the Cheats preset visibly if its
+  Creative starting mode lacks permission.
   Update linked values together. Preserve search, scroll, related-view history and
   modifier ownership when rebuilding rows. Share render and hit-test geometry.
 - `settings-layout.json` owns tab/group order; catalogue `order` values arrange
@@ -171,6 +172,8 @@
   Entity render-distance checks use the detached camera position; simulation stays player-owned.
   Enter from the rendered camera pose, including interpolation, eye height and bobbing.
   Keep the first detached frame still, reset movement timing and reject old-world poses.
+  Integrate detached motion before each rendered frame, once for both stereo eyes.
+  Damping must give the same displacement across uneven frame intervals.
   Hide the HUD on entry only when requested, default off. Allow manual F1 changes
   during the visit and restore its entry state on every exit. Freecam and Spectator
   never use front view, regardless of perspective style or HUD visibility. Proximity must never hide the player's body.

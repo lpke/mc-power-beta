@@ -16,13 +16,18 @@ class CreationRulesTest {
     custom.set(FIRE_SPREAD, true); assertFalse(draft.custom().enabled(FIRE_SPREAD));
     survival.set(FALL_DAMAGE, false); assertTrue(draft.template(false).enabled(FALL_DAMAGE));
   }
-  @Test void modePermissionMismatchIsVisibleUntilTheDraftIsCorrected() {
+  @Test void customStartsInSurvivalRegardlessOfModePermissions() {
     CreationRules draft = new CreationRules(new RuleSet(), RuleSet.cheats());
-    draft.cycle(-1); draft.cycleMode(1);
+    draft.cycle(-1);
+    for (RuleSet rules : new RuleSet[]{new RuleSet(), RuleSet.cheats()}) {
+      draft.custom(rules);
+      assertEquals("survival", draft.mode());
+      assertTrue(draft.problem().isEmpty());
+    }
+  }
+  @Test void cheatPresetStillRequiresCreativePermission() {
+    RuleSet cheats = RuleSet.cheats(); cheats.set(ALLOW_CREATIVE_MODE, false);
+    CreationRules draft = new CreationRules(new RuleSet(), cheats); draft.cycle(1);
     assertFalse(draft.problem().isEmpty());
-    RuleSet rules = draft.custom(); rules.set(ALLOW_CREATIVE_MODE, true); draft.custom(rules);
-    assertTrue(draft.problem().isEmpty());
-    rules.set(ALLOW_CREATIVE_MODE, false); draft.custom(rules); assertFalse(draft.problem().isEmpty());
-    draft.cycleMode(-1); assertTrue(draft.problem().isEmpty());
   }
 }

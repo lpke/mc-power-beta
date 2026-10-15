@@ -98,12 +98,19 @@ public class GameRendererMixin {
 	}
 
 	// Move freecam
-	@Inject(at = @At("TAIL"), method = "onFrameUpdate", cancellable = true)
-	private void freecam_updateHandler(CallbackInfo ci){
+	@Inject(at = @At("HEAD"), method = "renderFrame")
+	private void freecam_updateHandler(float delta, long deadline, CallbackInfo ci){
 		if(!Freecam.freecamController.isActive() || Freecam.freecamController.firstFramePending()){
             lastTime = System.nanoTime();
 			return;
 		}
+        if (client.currentScreen != null || !org.lwjgl.opengl.Display.isActive()
+                || Freecam.freecamController.allowPlayerMovement) {
+            Freecam.freecamController.clearMovementInput();
+            Freecam.freecamController.velocityX = Freecam.freecamController.velocityY = Freecam.freecamController.velocityZ = 0;
+            lastTime = System.nanoTime();
+            return;
+        }
 		moveCamera();
 	}
 
@@ -133,24 +140,23 @@ public class GameRendererMixin {
 		double[] direction = getDirectionFromInput(currentCameraPosition);
         float movementSpeed = freecamController.movementSpeed();
 
-		if(FreecamConfig.config.classicMovement){
-			freecamController.velocityX = direction[0] != 0 ? direction[0] * movementSpeed : freecamController.velocityX;
-			freecamController.velocityY = direction[1] != 0 ? direction[1] * movementSpeed : freecamController.velocityY;
-			freecamController.velocityZ = direction[2] != 0 ? direction[2] * movementSpeed : freecamController.velocityZ;
-		}
-		else {
-			freecamController.accelerationX = direction[0] * (double)movementSpeed;
-			freecamController.accelerationY = direction[1] * (double)movementSpeed;
-			freecamController.accelerationZ = direction[2] * (double)movementSpeed;
-
-			freecamController.velocityX = freecamController.velocityX + freecamController.accelerationX * FreecamConfig.config.drag * deltaTime;
-			freecamController.velocityY = freecamController.velocityY + freecamController.accelerationY * FreecamConfig.config.drag * deltaTime;
-			freecamController.velocityZ = freecamController.velocityZ + freecamController.accelerationZ * FreecamConfig.config.drag * deltaTime;
-
-			freecamController.accelerationX = 0;
-			freecamController.accelerationY = 0;
-			freecamController.accelerationZ = 0;
-		}
+        // Collision uses this frame's displacement; retain the end velocity for the next frame.
+        double[] endVelocity = new double[3];
+        double[] velocity = {freecamController.velocityX, freecamController.velocityY, freecamController.velocityZ};
+        for (int axis = 0; axis < 3; axis++) {
+            double target = direction[axis] * movementSpeed;
+            if (FreecamConfig.config.classicMovement) {
+                velocity[axis] = target;
+            } else {
+                var step = local.luke.power.camera.util.CameraMotion.step(
+                        velocity[axis], target, FreecamConfig.config.drag, deltaTime);
+                velocity[axis] = step.distance() / deltaTime;
+                endVelocity[axis] = step.velocity();
+            }
+        }
+        freecamController.velocityX = velocity[0];
+        freecamController.velocityY = velocity[1];
+        freecamController.velocityZ = velocity[2];
 
 		if(FreecamConfig.config.collision && client.world != null){
 			Box box = Freecam.cameraBoundingBox;
@@ -205,14 +211,17 @@ public class GameRendererMixin {
 
 				if (normal[0] != 0) {
 					freecamController.velocityX = 0;
+                    endVelocity[0] = 0;
 					nextCameraPosition.x += adjustedVelocityX * entryTime;
 				}
 				if (normal[1] != 0) {
 					freecamController.velocityY = 0;
+                    endVelocity[1] = 0;
 					nextCameraPosition.y += adjustedVelocityY * entryTime;
 				}
 				if (normal[2] != 0) {
 					freecamController.velocityZ = 0;
+                    endVelocity[2] = 0;
 					nextCameraPosition.z += adjustedVelocityZ * entryTime;
 				}
 			}
@@ -223,27 +232,9 @@ public class GameRendererMixin {
 		nextCameraPosition.z += freecamController.velocityZ * deltaTime;
 		freecamController.setCameraPosition(nextCameraPosition.x, nextCameraPosition.y, nextCameraPosition.z);
 
-		if(FreecamConfig.config.classicMovement){
-			freecamController.velocityX = 0;
-			freecamController.velocityY = 0;
-			freecamController.velocityZ = 0;
-		}
-		else {
-			freecamController.velocityX -= Math.signum(freecamController.velocityX) * Math.min(
-					Math.abs(freecamController.velocityX) * FreecamConfig.config.drag * deltaTime,
-					Math.abs(freecamController.velocityX)
-			);
-
-			freecamController.velocityY -= Math.signum(freecamController.velocityY) * Math.min(
-					Math.abs(freecamController.velocityY) * FreecamConfig.config.drag * deltaTime,
-					Math.abs(freecamController.velocityY)
-			);
-
-			freecamController.velocityZ -= Math.signum(freecamController.velocityZ) * Math.min(
-					Math.abs(freecamController.velocityZ) * FreecamConfig.config.drag * deltaTime,
-					Math.abs(freecamController.velocityZ)
-			);
-		}
+        freecamController.velocityX = endVelocity[0];
+        freecamController.velocityY = endVelocity[1];
+        freecamController.velocityZ = endVelocity[2];
 
 	}
 

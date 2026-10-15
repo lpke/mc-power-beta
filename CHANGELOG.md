@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2.0.2] - 2026-10-16
+
+- Smooth freecam movement across uneven frame times, including ascent and descent. Freecam now defaults to speed 12 and drag 10.
+- Enable Beta 1.8 leaf rendering by default.
+- Add space below the world seed field and simplify Custom world creation to start in Survival.
+- Mark saved worlds with [Creative] when their rules allow Creative mode.
+- Put Creative and Spectator permissions together and group related game rules in every editor.
+
 ## [2.0.1] - 2026-10-16
 
 - Keep world-creation buttons directly below the name and seed fields. Unavailable game-mode icons now appear in grayscale.

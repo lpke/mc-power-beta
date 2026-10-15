@@ -8,6 +8,10 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-202`: camera/leaf reset defaults and actual saved-world Creative badges,
+  including old cheats, Spectator-only and unsupported metadata without changing saves.
+  `freecam-motion setup|start|stop` records bounded frame timing, camera movement and
+  rendered origins for physical ascent/descent checks; reports stay in the clone.
 - `release-201 check`: patch defaults, retired controls, chest choices, percent editing,
   creation geometry, native player/mob trampling with every footwear class and server
   ownership, and front-view/freecam HUD combinations. `keys` and `state` support

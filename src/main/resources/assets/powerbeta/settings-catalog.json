@@ -127,7 +127,7 @@
     "group": "Free camera",
     "label": "Freecam speed",
     "description": "Changing this value will change the speed of the freecam",
-    "default": 10.0,
+    "default": 12.0,
     "restart": false,
     "min": 0.1,
     "max": 100,
@@ -139,7 +139,7 @@
     "group": "Free camera",
     "label": "Freecam drag",
     "description": "Changing this value will change the drag of the freecam, The lower the drag, the longer it takes for the camera to stop. This option doesn't do anything for classic movement",
-    "default": 4.0,
+    "default": 10.0,
     "restart": false,
     "min": 0.1,
     "max": 100,
@@ -2431,7 +2431,7 @@
     "group": "Quality",
     "label": "Beta 1.8 leaves rendering",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_controls:userinterface.showQuitButton": {

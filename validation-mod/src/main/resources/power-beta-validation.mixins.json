@@ -30,7 +30,8 @@
     "Overlay173Capture",
     "Tooltip173Capture",
     "Item173Capture",
-    "Debug174Capture"
+    "Debug174Capture",
+    "FreecamMotionCapture"
   ],
   "injectors": {
     "defaultRequire": 1

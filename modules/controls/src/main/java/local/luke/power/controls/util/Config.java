@@ -220,7 +220,7 @@ public class Config {
         public Boolean allowTrapdoorsWithoutSupport = true;
 
         @ConfigEntry(name = "Beta 1.8 Leaves Rendering")
-        public Boolean beta18LeavesRendering = false;
+        public Boolean beta18LeavesRendering = true;
     }
 
     public static class BugfixesConfig {

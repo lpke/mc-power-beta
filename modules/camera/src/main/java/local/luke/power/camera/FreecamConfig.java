@@ -26,7 +26,7 @@ public class FreecamConfig {
                 maxValue = 1000,
                 minValue = 0
         )
-        public Float speed = 10f;
+        public Float speed = 12f;
 
         @ConfigEntry(
                 name = "Freecam Drag",
@@ -34,7 +34,7 @@ public class FreecamConfig {
                 maxValue = 1000,
                 minValue = 0
         )
-        public Float drag = 4f;
+        public Float drag = 10f;
 
         @ConfigEntry(
                 name = "Classic Freecam Movement",
