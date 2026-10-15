@@ -61,6 +61,7 @@ public final class RenderControls {
   }
   public static boolean fullBright() { return active; }
   public static void reset(Minecraft mc) {
+    WaterTerrain.reset();
     brightness.update(null, false, false, false);
     refresh(mc);
     if (VisualConfig.current().hideEntities) {

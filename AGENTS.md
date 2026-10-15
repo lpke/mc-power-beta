@@ -318,7 +318,12 @@
 
 - Water fog and FOV use the current rendered camera pose, including third person, free look
   and freecam. Resolve perspective after capturing that pose; preserve photo projection,
-  stereo and zoom. Inside/outside water darkness affects rendering only. Queue existing
-  light-sensitive meshes when the effective percentage changes; never rebuild every frame.
+  stereo and zoom. Inside/outside water darkness affects rendering only. Terrain retains native
+  and water-clear vertex colours in one 32-byte vertex, with one shader uniform choosing
+  brightness. After the first opt-in prepares existing meshes, surface crossings and
+  slider previews must never queue terrain rebuilds. Day/night updates must also include
+  compensated deep water whose native skylight is zero.
+  Calculate the second colour only for affected sections; bound scratch memory and preserve
+  geometry, normals, alpha, native update scheduling and world light arrays.
   Detached flight admits auto-walk independently of manual camera keys and keeps animation
   interpolation current when the player is stationary.

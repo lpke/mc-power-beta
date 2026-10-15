@@ -8,6 +8,7 @@
 - Base water fog and underwater field of view on the rendered camera, including third person and free look.
 - Add an option to disable Beta's underwater field-of-view narrowing.
 - Add a separate water-darkness slider for viewing water from outside, defaulting to Beta lighting.
+- Switch water darkness instantly when crossing the surface or adjusting its sliders, without rebuilding terrain.
 
 ## [1.7.5] - 2026-10-15
 

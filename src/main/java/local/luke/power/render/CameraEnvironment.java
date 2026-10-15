@@ -11,8 +11,7 @@ import net.minecraft.world.World;
 
 /** Camera-only material queries. Never moves the player or requests terrain. */
 public final class CameraEnvironment {
-  private static World lightingWorld;
-  private static int darkness = 100, previousDarkness = -1;
+  private static int darkness = 100;
   private CameraEnvironment() {}
 
   public static boolean inFluid(Entity camera, Material material) {
@@ -42,10 +41,6 @@ public final class CameraEnvironment {
     var settings=VisualConfig.current();
     int next=inFluid(mc.field_2807, Material.WATER) ? settings.underwaterDarkness : settings.underwaterDarknessOutside;
     if (next != darkness) { darkness=next; WaterLighting.clear(); }
-    int effective=RenderControls.fullBright() ? 100 : next;
-    if (lightingWorld == mc.world && previousDarkness != effective && mc.world != null && mc.worldRenderer != null)
-      // Native skylight invalidation queues existing meshes; it does not recreate them.
-      mc.worldRenderer.method_1148();
-    lightingWorld=mc.world; previousDarkness=effective;
+    WaterTerrain.prepare(mc);
   }
 }

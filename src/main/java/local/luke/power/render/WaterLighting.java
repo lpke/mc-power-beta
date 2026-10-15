@@ -17,8 +17,8 @@ public final class WaterLighting {
   public static void clear() { columns.clear(); owner = null; }
 
   public static float shade(World world, int x, int y, int z, float nativeShade) {
-    int darkness = CameraEnvironment.darkness();
-    if (darkness == 100 || !RenderControls.rendering() || world == null
+    int darkness = WaterTerrain.buildDarkness(CameraEnvironment.darkness());
+    if ((darkness == 100 && !WaterTerrain.detecting()) || !RenderControls.rendering() || world == null
         || world.dimension.field_2177 || y < 0 || y >= 128) return nativeShade;
     if (owner != world) { clear(); owner = world; }
     class_43 chunk = CullingTerrain.chunk(world, x >> 4, z >> 4);
@@ -35,6 +35,7 @@ public final class WaterLighting {
     }
     int level = Math.max(0, sky[y] - world.field_202);
     float clearShade = world.dimension.field_2178[level];
+    if (clearShade > nativeShade) WaterTerrain.affected();
     return nativeShade + Math.max(0, clearShade - nativeShade) * (100 - darkness) / 100F;
   }
 

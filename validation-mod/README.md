@@ -8,6 +8,9 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `water-terrain`: inspect GPU colour endpoints, 1000 crossings without queued builds or
+  uploads, slider preview/Cancel, shader uniforms, night/roofs and native terrain edits.
+
 - `release-176 camera`, `flight`: rendered-camera water fog/FOV, third-person distance,
   free look, stereo/freecam, separate darkness preview/Cancel and actual auto-flight
   displacement with manual camera input isolated. `save`, restart, then `saved` checks

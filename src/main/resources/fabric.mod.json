@@ -19,6 +19,7 @@
     "java": ">=17",
     "gcapi3": ">=3.2.5",
     "mixinextras": ">=0.5.0",
+    "smoothbeta": "1.1.8",
     "power_creative": ">=1.1.0",
     "power_building": ">=1.2.1",
     "power_worldedit": ">=1.2.1",
