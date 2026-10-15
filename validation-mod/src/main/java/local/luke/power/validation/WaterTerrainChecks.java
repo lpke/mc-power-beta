@@ -102,6 +102,19 @@ final class WaterTerrainChecks {
         mc.world.method_154(36,96,36,0,0);build(section);
         check(!roof.equals(read(section,0)),"block edit left stale geometry");
       });
+      test("torch-lit deep water built at night still follows dawn without extra night work",()->{
+        for(int x=31;x<=48;x++)for(int z=31;z<=48;z++)for(int y=78;y<128;y++) {
+          mc.world.method_154(x,y,z,y==80?1:y<=109?9:0,0);
+          mc.world.method_205(class_56.SKY,x,y,z,y>109?15:0);
+          mc.world.method_205(class_56.BLOCK,x,y,z,y<=109?14:0);
+        }
+        section.method_298(32,80,32);mc.world.field_202=11;
+        long passes=WaterTerrain.secondPasses();build(section);
+        check(WaterTerrain.secondPasses()==passes,"torch-lit night section did unnecessary second-pass work");
+        check(section.field_223,"torchlight masked the section's dependency on daylight");
+        mc.world.field_202=0;build(section);
+        check(WaterTerrain.secondPasses()==passes+1,"daylight did not recompute water compensation");
+      });
       test("first opt-in prepares sections without native skylight once",()->{
         s.underwaterDarkness=s.underwaterDarknessOutside=100;VisualConfig.preview(s);
         WaterTerrain.reset();CameraEnvironment.updateLighting(mc);
@@ -113,6 +126,22 @@ final class WaterTerrainChecks {
         check(deep.field_249 && pending.contains(deep),"first opt-in missed an unlit section");
         int count=pending.size();CameraEnvironment.updateLighting(mc);
         check(pending.size()==count,"first opt-in repeated queue entries");deep.field_223=oldSky;
+      });
+      test("roof changes notify water-dependent meshes below zero native skylight",()->{
+        var meshes=(class_66[])field(mc.worldRenderer,"field_1809");
+        var pending=(java.util.List<?>)field(mc.worldRenderer,"field_1807");
+        class_66 deep=java.util.Arrays.stream(meshes).filter(m->m.field_231==32&&m.field_232==80&&m.field_233==32).findFirst().orElseThrow();
+        build(deep);check(((WaterTerrainSection)deep).power$waterColumn(),"missing column dependency");
+        pending.remove(deep);deep.field_249=false;
+        mc.world.method_201(36,120,36,1,0);
+        check(deep.field_249&&pending.contains(deep),"new roof did not invalidate deep water");
+        build(deep);pending.remove(deep);deep.field_249=false;
+        mc.world.method_201(36,120,36,0,0);
+        check(deep.field_249&&pending.contains(deep),"removed roof did not invalidate deep water");
+        int count=pending.size();long start=System.nanoTime();
+        for(int i=0;i<10000;i++)mc.worldRenderer.method_1149(36,120,36);
+        log("WATER 10000 column notifications ms="+(System.nanoTime()-start)/1_000_000.0);
+        check(pending.size()==count,"column invalidation duplicated work");
       });
       check(GL11.glGetError()==0,"OpenGL error after terrain checks");
     } finally {

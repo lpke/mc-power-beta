@@ -323,6 +323,8 @@
   brightness. After the first opt-in prepares existing meshes, surface crossings and
   slider previews must never queue terrain rebuilds. Day/night updates must also include
   compensated deep water whose native skylight is zero.
+  Roof and water-column edits must invalidate dependent meshes below native light's reach,
+  using the existing bounded render grid and update queue without loading terrain.
   Calculate the second colour only for affected sections; bound scratch memory and preserve
   geometry, normals, alpha, native update scheduling and world light arrays.
   Detached flight admits auto-walk independently of manual camera keys and keeps animation

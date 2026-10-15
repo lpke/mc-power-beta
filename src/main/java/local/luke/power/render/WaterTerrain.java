@@ -14,7 +14,7 @@ public final class WaterTerrain {
   private static ByteBuffer packed;
   private static World owner;
   private static Thread thread;
-  private static boolean prepared, building, clearPass, affected, overflow, uploading;
+  private static boolean prepared, building, clearPass, affected, waterColumn, overflow, uploading;
   private static int count;
   private static long sections, secondPasses, mismatches;
   private WaterTerrain() {}
@@ -40,7 +40,7 @@ public final class WaterTerrain {
 
   public static boolean begin() {
     if (building || !prepared || !RenderControls.rendering() || RenderControls.fullBright()) return false;
-    thread = Thread.currentThread(); building = true; clearPass = affected = overflow = false; count = 0;
+    thread = Thread.currentThread(); building = true; clearPass = affected = waterColumn = overflow = false; count = 0;
     sections++;
     return true;
   }
@@ -49,6 +49,9 @@ public final class WaterTerrain {
   public static boolean detecting() { return current() && !clearPass; }
   public static int buildDarkness(int fallback) { return current() ? clearPass ? 0 : 100 : fallback; }
   public static void affected() { if (current()) affected = true; }
+  public static void waterColumn() { if (current()) waterColumn = true; }
+  public static boolean dependsOnWaterColumn() { return waterColumn; }
+  public static boolean prepared() { return prepared; }
   public static boolean secondPass() {
     if (!affected || overflow || count == 0) return false;
     clearPass = true; secondPasses++;

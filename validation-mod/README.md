@@ -9,7 +9,8 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
 - `water-terrain`: inspect GPU colour endpoints, 1000 crossings without queued builds or
-  uploads, slider preview/Cancel, shader uniforms, night/roofs and native terrain edits.
+  uploads, slider preview/Cancel, shader uniforms, night/roofs and native terrain edits,
+  including torch-lit deep water at dawn and roof changes below native light's reach.
 
 - `release-176 camera`, `flight`: rendered-camera water fog/FOV, third-person distance,
   free look, stereo/freecam, separate darkness preview/Cancel and actual auto-flight

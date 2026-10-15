@@ -33,7 +33,11 @@ public final class WaterLighting {
       // Bound transient memory even in very large isometric captures.
       if (columns.size() < 4096) columns.put(key, sky);
     }
-    int level = Math.max(0, sky[y] - world.field_202);
+    // Keep native daylight invalidation even when torchlight currently exceeds the
+    // compensated night light. Dawn must be able to rebuild that section later.
+    if (WaterTerrain.detecting() && (sky[y] & 16) != 0) class_43.field_953 = true;
+    if ((sky[y] & 32) != 0) WaterTerrain.waterColumn();
+    int level = Math.max(0, (sky[y] & 15) - world.field_202);
     float clearShade = world.dimension.field_2178[level];
     if (clearShade > nativeShade) WaterTerrain.affected();
     return nativeShade + Math.max(0, clearShade - nativeShade) * (100 - darkness) / 100F;
@@ -42,7 +46,7 @@ public final class WaterLighting {
   private static byte[] column(class_43 chunk, int x, int z) {
     byte[] result = new byte[128];
     int sky = 15;
-    boolean water = false;
+    boolean water = false, waterAbove = false;
     for (int y = 127; y >= 0; y--) {
       int id = chunk.method_859(x, y, z);
       Block block = Block.BLOCKS[id];
@@ -51,11 +55,14 @@ public final class WaterLighting {
       sky = Math.max(0, sky - opacity);
       if (opacity >= 15) water = false;
       water |= wet;
+      waterAbove |= wet;
       int nativeSky = chunk.method_864(class_56.SKY, x, y, z);
       // Native side lighting and roofs remain authoritative. Only recover light
       // lost along a water column, using the dimension's current day/night table.
       sky = Math.max(sky, nativeSky);
-      result[y] = (byte)(water ? sky : nativeSky);
+      // Track water above roofs too: removing a roof must invalidate the clear colour
+      // even if the water has already reduced native skylight to zero below it.
+      result[y] = (byte)((water ? sky | (sky > nativeSky ? 16 : 0) : nativeSky) | (waterAbove ? 32 : 0));
     }
     return result;
   }
