@@ -53,6 +53,7 @@ public final class ComponentBackend implements Backend {
               ? Setting.Kind.BOOLEAN
               : t == int.class
                   ? Setting.Kind.INTEGER
+                  : t == float.class || t == double.class ? Setting.Kind.DECIMAL
                   : t.isEnum() ? Setting.Kind.CHOICE : Setting.Kind.TEXT;
       JsonElement value = encode(v), def = encode(d);
       String page =

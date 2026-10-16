@@ -146,7 +146,7 @@ public class GameRendererMixin {
         for (int axis = 0; axis < 3; axis++) {
             var step = local.luke.power.input.FlightMotion.frame(velocity[axis], direction[axis],
                     movementSpeed * 100 / local.luke.power.input.FlightMotion.HORIZONTAL_SPEED,
-                    1, FreecamConfig.config.drag, axis == 1,
+                    1, FreecamConfig.config.acceleration, FreecamConfig.config.drag, axis == 1,
                     axis == 1 ? direction[1] != 0 : direction[0] != 0 || direction[2] != 0, deltaTime);
             velocity[axis] = step.distance() / deltaTime;
             endVelocity[axis] = step.velocity();

@@ -21,8 +21,13 @@ public final class FlightPhysics {
       double speed,
       double sprint,
       int glide) {
+    return step(old, side, forward, vertical, yaw, speed, sprint, 5, glide);
+  }
+
+  public static Motion step(Motion old, double side, double forward, int vertical,
+      float yaw, double speed, double sprint, double acceleration, double deceleration) {
     var motion = local.luke.power.input.FlightMotion.tick(old.x, old.y, old.z,
-        side, forward, vertical, yaw, speed, sprint, glide);
+        side, forward, vertical, yaw, speed, sprint, acceleration, deceleration);
     return new Motion(motion.x(), motion.y(), motion.z());
   }
 

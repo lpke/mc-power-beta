@@ -48,11 +48,11 @@ public final class Release220Checks {
       test("flight rows share units, order and defaults without retired switches",()->{
         var session=SettingsRegistry.open(mc);var ordered=SettingsLayout.ordered(session.settings());
         for(String[] ids:new String[][]{
-          {"creative.flightSpeed","creative.sprintMultiplier","creative.glide","creative.sprintToggle"},
-          {"creative.spectatorSpeed","creative.spectatorSprintMultiplier","creative.spectatorGlide","creative.spectatorSprintToggle"},
-          {"power_camera:config.speed","power_camera:config.sprintMultiplier","power_camera:config.drag","power_camera:config.sprintToggle"}}) {
+          {"creative.flightSpeed","creative.sprintMultiplier","creative.acceleration","creative.glide","creative.sprintToggle"},
+          {"creative.spectatorSpeed","creative.spectatorSprintMultiplier","creative.spectatorAcceleration","creative.spectatorGlide","creative.spectatorSprintToggle"},
+          {"power_camera:config.speed","power_camera:config.sprintMultiplier","power_camera:config.acceleration","power_camera:config.drag","power_camera:config.sprintToggle"}}) {
           Setting first=find(session,ids[0]);var group=ordered.stream().filter(v->v.page.equals(first.page)&&v.group.equals(first.group)).toList();
-          check(group.subList(0,4).stream().map(v->v.id).toList().equals(List.of(ids)),"flight order "+group.stream().map(v->v.id).toList());
+          check(group.subList(0,5).stream().map(v->v.id).toList().equals(List.of(ids)),"flight order "+group.stream().map(v->v.id).toList());
           check(first.label.endsWith("speed %"),"speed units");
           check(!first.description.contains("blocks per second"),"tooltip uses another unit");
           check(first.description.contains("40%"),"walking baseline missing");

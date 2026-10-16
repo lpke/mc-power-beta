@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-10-16
+
+- Creative and Survival report consistent feet or eye Y coordinates when walking, falling and flying. Only Spectator and freecam use head-base Y, shared by F3, the custom HUD, commands and WorldEdit.
+- Add independent 0–5 acceleration controls for Creative, Spectator and freecam, including vertical movement and direction changes. Keep modern acceleration at 5 and give freecam a quicker default of 3.5, similar to its earlier response.
+- Rename flight drift to deceleration while preserving saved values. Acceleration and deceleration retain the configured flight speed and freecam frame timing.
+- Keep Spectator and freecam head markers intact inside terrain, with correct depth and rendering after translucent terrain. Preserve the solid player marker and translucent detached-camera marker.
+- Dropped items protected by the lava-destruction rule sink naturally instead of bouncing on lava. Keep native damage and bouncing when the rule is enabled, including multiplayer authority.
+
 ## [2.2.0] - 2026-10-16
 
 - Unify flight speed percentages, sprint controls and drift tuning across Creative, Spectator and freecam. Sprint is always available, and freecam starts at 110% speed with drift 3. Its frame timing remains unchanged.

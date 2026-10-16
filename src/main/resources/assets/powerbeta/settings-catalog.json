@@ -140,14 +140,14 @@
   "power_camera:config.drag": {
     "page": "Camera",
     "group": "Free camera",
-    "label": "Freecam drift",
-    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern flight drift. Lower values stop sooner without changing the configured speed.",
+    "label": "Freecam deceleration",
+    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern Creative and Spectator deceleration. Lower values stop sooner without changing the configured speed. Applies horizontally and vertically.",
     "default": 3,
     "restart": false,
     "min": 0,
     "max": 5,
     "step": 0.1,
-    "order": 2
+    "order": 3
   },
   "power_camera:config.collision": {
     "page": "Camera",
@@ -2776,7 +2776,7 @@
     "group": "Flight",
     "label": "Flight sprint activation",
     "description": "Hold requires the shared flight sprint key. Toggle keeps sprint active until movement stops on all axes.",
-    "order": 3
+    "order": 4
   },
   "creative.flightSpeed": {
     "page": "Creative",
@@ -2795,9 +2795,9 @@
   "creative.glide": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Flight drift",
-    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern flight drift. Lower values stop sooner without changing the configured speed.",
-    "order": 2
+    "label": "Flight deceleration",
+    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern Creative and Spectator deceleration. Lower values stop sooner without changing the configured speed. Applies horizontally and vertically.",
+    "order": 3
   },
   "creative.doubleTapTicks": {
     "page": "Creative",
@@ -4601,18 +4601,18 @@
   "creative.spectatorGlide": {
     "page": "Creative",
     "group": "Spectator",
-    "order": 2,
-    "label": "Flight drift",
+    "order": 3,
+    "label": "Flight deceleration",
     "default": 5,
     "min": 0,
     "max": 5,
     "step": 1,
-    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern flight drift. Lower values stop sooner without changing the configured speed."
+    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern Creative and Spectator deceleration. Lower values stop sooner without changing the configured speed. Applies horizontally and vertically."
   },
   "creative.spectatorSprintToggle": {
     "page": "Creative",
     "group": "Spectator",
-    "order": 3,
+    "order": 4,
     "label": "Flight sprint activation",
     "default": true,
     "min": 0,
@@ -4634,7 +4634,7 @@
   "power_camera:config.sprintToggle": {
     "page": "Camera",
     "group": "Free camera",
-    "order": 3,
+    "order": 4,
     "label": "Freecam sprint activation",
     "default": true,
     "description": "Hold requires the shared flight sprint key. Toggle keeps sprint active until movement stops on all axes."
@@ -4748,5 +4748,38 @@
   },
   "native.brightness": {
     "order": 0
+  },
+  "creative.acceleration": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Flight acceleration",
+    "description": "Response while starting, turning or changing flight speed. 0 reaches the target immediately; 5 matches modern Creative and Spectator acceleration. Lower values respond faster without changing the configured speed. Applies horizontally and vertically.",
+    "default": 5,
+    "min": 0,
+    "max": 5,
+    "step": 0.1,
+    "order": 2
+  },
+  "creative.spectatorAcceleration": {
+    "page": "Creative",
+    "group": "Spectator",
+    "label": "Flight acceleration",
+    "description": "Response while starting, turning or changing flight speed. 0 reaches the target immediately; 5 matches modern Creative and Spectator acceleration. Lower values respond faster without changing the configured speed. Applies horizontally and vertically.",
+    "default": 5,
+    "min": 0,
+    "max": 5,
+    "step": 0.1,
+    "order": 2
+  },
+  "power_camera:config.acceleration": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Freecam acceleration",
+    "description": "Response while starting, turning or changing flight speed. 0 reaches the target immediately; 5 matches modern Creative and Spectator acceleration. Lower values respond faster without changing the configured speed. Applies horizontally and vertically. Default 3.5 gives a quicker response similar to earlier freecam movement.",
+    "default": 3.5,
+    "min": 0,
+    "max": 5,
+    "step": 0.1,
+    "order": 2
   }
 }

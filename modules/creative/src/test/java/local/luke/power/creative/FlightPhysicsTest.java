@@ -7,6 +7,25 @@ import local.luke.power.creative.flight.FlightPhysics.Motion;
 import org.junit.jupiter.api.Test;
 
 class FlightPhysicsTest {
+  @Test void accelerationAndReleaseWorkForAllDirectionsAndRetainTerminalSpeed() {
+    for(double acceleration:new double[]{0,1,3.5,5})
+      for(int side=-1;side<=1;side++)for(int forward=-1;forward<=1;forward++)for(int up=-1;up<=1;up++) {
+        Motion velocity=new Motion(0,0,0),move=velocity;
+        for(int i=0;i<300;i++) {
+          move=FlightPhysics.step(velocity,side,forward,up,71,.055,2,acceleration,5);
+          velocity=move.drag();
+        }
+        Motion instant=FlightPhysics.step(new Motion(0,0,0),side,forward,up,71,.055,2,0,5);
+        assertEquals(instant.x(),move.x(),1e-8);
+        assertEquals(instant.y(),move.y(),1e-8);
+        assertEquals(instant.z(),move.z(),1e-8);
+        assertEquals(new Motion(0,0,0),FlightPhysics.step(velocity,0,0,0,71,.055,2,acceleration,0));
+        Motion opposite=FlightPhysics.step(velocity,-side,-forward,-up,71,.055,2,0,5);
+        assertEquals(-move.x(),opposite.x(),1e-8);
+        assertEquals(-move.y(),opposite.y(),1e-8);
+        assertEquals(-move.z(),opposite.z(),1e-8);
+      }
+  }
   @Test void sprintScalesEveryDirectionIncludingVerticalAndSpectatorSpeed() {
     for (double speed : new double[]{.05, .15})
       for (int side=-1;side<=1;side++) for(int forward=-1;forward<=1;forward++) for(int vertical=-1;vertical<=1;vertical++) {

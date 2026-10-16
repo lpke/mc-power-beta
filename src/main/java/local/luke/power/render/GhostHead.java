@@ -45,7 +45,7 @@ public final class GhostHead {
     var player = mc.player;
     var camera = mc.field_2807;
     GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT
-        | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT | GL11.GL_LIGHTING_BIT);
+        | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT | GL11.GL_LIGHTING_BIT | GL11.GL_VIEWPORT_BIT);
     GL11.glPushMatrix();
     try {
       GL11.glTranslated(x - (camera.prevX + (camera.x - camera.prevX) * delta),
@@ -54,15 +54,17 @@ public final class GhostHead {
       GL11.glRotatef(180 - yaw, 0, 1, 0);
       GL11.glScalef(-HeadGeometry.SCALE, -HeadGeometry.SCALE, HeadGeometry.SCALE);
       GL11.glDisable(GL11.GL_LIGHTING);
+      GL11.glDisable(GL11.GL_FOG);
       GL11.glEnable(GL11.GL_TEXTURE_2D);
-      // A spectator can enter solid terrain. Keep its only position marker visible there.
-      if (throughBlocks) GL11.glDisable(GL11.GL_DEPTH_TEST);
-      else GL11.glEnable(GL11.GL_DEPTH_TEST);
+      // Keep self-occlusion and depth writes while placing spectator markers ahead of terrain.
+      GL11.glEnable(GL11.GL_DEPTH_TEST);
+      GL11.glDepthFunc(GL11.GL_LEQUAL);
+      if (throughBlocks) GL11.glDepthRange(0, .001);
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glEnable(GL11.GL_ALPHA_TEST);
       GL11.glAlphaFunc(GL11.GL_GREATER, .01F);
-      GL11.glDepthMask(opacity == 1);
+      GL11.glDepthMask(true);
       GL11.glColor4f(1, 1, 1, opacity);
       int texture = mc.textureManager.method_1093(player.skinUrl, player.method_1314());
       if (texture < 0) return;

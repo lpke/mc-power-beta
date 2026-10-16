@@ -35,7 +35,7 @@ public final class InterfaceBackend implements Backend {
                 "Blink the chat cursor. Off keeps the beam visible while editing.", Setting.Kind.BOOLEAN,
                 new JsonPrimitive(MenuPreferences.blinkingChatCursor()), new JsonPrimitive(true), 0, 1, 1, List.of(), false),
             new Setting("interface.useFeetYCoordinates", "interface", "Interface", "Debug (F3) info", "Use feet Y coordinates",
-                "Choose feet height or Beta eye height for Survival coordinates and coordinate-based commands. Creative, Spectator and freecam report the base of the head.", Setting.Kind.BOOLEAN,
+                "Choose feet height or Beta eye height for Survival and Creative coordinates and coordinate-based commands, including during flight. Only Spectator and freecam report the base of the head.", Setting.Kind.BOOLEAN,
                 new JsonPrimitive(MenuPreferences.useFeetYCoordinates()), new JsonPrimitive(true), 0, 1, 1, List.of(), false),
             new Setting("interface.debugTimeOfDay", "interface", "Interface", "Debug (F3) info", "Time of day",
                 "Show the world's daylight time in F3, using a 12-hour clock.", Setting.Kind.BOOLEAN,

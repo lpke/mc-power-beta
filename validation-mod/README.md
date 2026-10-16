@@ -430,3 +430,9 @@ overrides and Cancel. Run `fog-save`, restart, then `fog-saved` for persistence 
 prepares physical debug-key checks; `keys-state` writes debug state and rendered-frame counts.
 Run `python3 validation-mod/tools/debug_keys.py /path/to/clone/.minecraft --display :97`
 for press/release, cycling, remaps, focus/menu/world cancellation and held movement.
+
+- `release-221 check` checks acceleration sliders and Cancel, consistent Survival/Creative feet and eye Y through flight, falls and slab/full-block
+  landings, actual native flight and detached displacement in every direction, lava sinking with native item data,
+  water and multiplayer guards, and native head pixels/depth behind terrain.
+  `release-221 save`, restart, then `release-221 saved` verifies acceleration persistence.
+  Run in a focused, muted disposable world.

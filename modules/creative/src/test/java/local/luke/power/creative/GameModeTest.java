@@ -22,10 +22,23 @@ class GameModeTest {
     s.validate();
     Settings copy = s.copy();
     copy.glide = 0;
+    copy.acceleration = 1.5f;
+    copy.spectatorAcceleration = 2.5f;
     assertEquals(5, s.glide);
+    assertEquals(5, s.acceleration);
+    assertEquals(5, s.spectatorAcceleration);
     assertEquals(50, s.blockReach);
     assertEquals(50, s.entityReach);
     copy.flightSpeed = Integer.MAX_VALUE;
     assertThrows(IllegalArgumentException.class, copy::validate);
+  }
+
+  @Test void accelerationRejectsInvalidValuesForEachMode() {
+    for(float invalid:new float[]{Float.NaN,Float.POSITIVE_INFINITY,-.1f,5.1f}) {
+      var settings=new Settings();settings.acceleration=invalid;
+      assertThrows(IllegalArgumentException.class,settings::validate);
+      settings.acceleration=5;settings.spectatorAcceleration=invalid;
+      assertThrows(IllegalArgumentException.class,settings::validate);
+    }
   }
 }

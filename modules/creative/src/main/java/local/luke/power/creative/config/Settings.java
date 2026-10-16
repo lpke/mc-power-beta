@@ -3,6 +3,7 @@ package local.luke.power.creative.config;
 public final class Settings {
   public boolean flight = true, landStopsFlight = true, sprintToggle = true;
   public int flightSpeed = 100, sprintMultiplier = 200, glide = 5, doubleTapTicks = 7;
+  public float acceleration = 5, spectatorAcceleration = 5;
   public boolean spectatorSprintToggle = true;
   public int spectatorSprintMultiplier = 200, spectatorGlide = 5;
   public boolean spectatorScroll = true, showSpectatorSpeed = true;
@@ -22,6 +23,8 @@ public final class Settings {
 
   public void validate() {
     if (flightSpeed < 25
+        || !Float.isFinite(acceleration) || acceleration < 0 || acceleration > 5
+        || !Float.isFinite(spectatorAcceleration) || spectatorAcceleration < 0 || spectatorAcceleration > 5
         || flightSpeed > 400
         || sprintMultiplier < 100
         || sprintMultiplier > 400

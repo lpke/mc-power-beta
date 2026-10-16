@@ -388,3 +388,10 @@
 
 - In-group dividers use catalogue `separatorAfter` on the preceding setting; they share row geometry and never act as headings or input targets.
 - Flight speed percentages share the modern Creative baseline; freecam stores its original speed units and only converts the display. Shared motion maths retain frame-owned freecam timing. Config format 7 converts legacy response rates to 0–5 drift and retires sprint/classic switches.
+
+- Flight acceleration and deceleration use independent 0–5 response controls on all axes.
+  Preserve terminal speeds, native modern response at 5 and freecam frame timing.
+  Render head markers after translucent terrain with self-occlusion and restored GL state.
+- Creative reports the same feet/eye Y as Survival, including while falling or flying.
+  Only Spectator and freecam use head-base Y. Share this
+  through HudCoordinates and ReportedPosition across HUDs, commands and WorldEdit.

@@ -100,6 +100,7 @@ public final class FlightController {
             player.yaw,
             speed,
             sprint,
+            spectator ? settings.spectatorAcceleration : settings.acceleration,
             spectator ? settings.spectatorGlide : settings.glide);
     player.velocityX = velocity.x();
     player.velocityY = velocity.y();

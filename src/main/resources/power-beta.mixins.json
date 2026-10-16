@@ -91,6 +91,7 @@
     "TntBudgetMixin",
     "ExplosionItemsMixin",
     "LavaItemsMixin",
+    "LavaItemMotionMixin",
     "CactusItemsMixin",
     "CapeRotationMixin",
     "ItemMergingMixin",

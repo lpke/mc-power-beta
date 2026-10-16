@@ -31,12 +31,16 @@ public class FreecamConfig {
         public Float speed = (float)(local.luke.power.input.FlightMotion.HORIZONTAL_SPEED * 1.1);
 
         @ConfigEntry(
-                name = "Freecam drift",
+                name = "Freecam deceleration",
                 description = "Coasting when movement is released: 0 stops immediately; 5 uses modern flight drag.",
                 maxValue = 5,
                 minValue = 0
         )
         public Float drag = 3f;
+
+        @ConfigEntry(name = "Freecam acceleration", minValue = 0, maxValue = 5,
+                description = "0 reaches flight speed immediately; 5 uses modern Creative acceleration. Lower values respond faster without changing the flight speed.")
+        public Float acceleration = 3.5f;
 
     }
 }
