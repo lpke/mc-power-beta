@@ -436,3 +436,9 @@ for press/release, cycling, remaps, focus/menu/world cancellation and held movem
   water and multiplayer guards, and native head pixels/depth behind terrain.
   `release-221 save`, restart, then `release-221 saved` verifies acceleration persistence.
   Run in a focused, muted disposable world.
+
+- `release-222 check` compares native and flattened axe mining across all leaf metadata
+  and tool tiers, diamond-shovel timing, per-block wear and tool break cleanup, seeded
+  fist-equivalent drops, mode/server exclusions, mining penalties and precise flight
+  response entry through right-click editors. `save`, restart, then `saved` verify
+  the leaf preference and fractional values in all six flight response settings.

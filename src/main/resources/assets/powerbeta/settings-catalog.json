@@ -146,7 +146,7 @@
     "restart": false,
     "min": 0,
     "max": 5,
-    "step": 0.1,
+    "step": 1,
     "order": 3
   },
   "power_camera:config.collision": {
@@ -2797,7 +2797,8 @@
     "group": "Flight",
     "label": "Flight deceleration",
     "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern Creative and Spectator deceleration. Lower values stop sooner without changing the configured speed. Applies horizontally and vertically.",
-    "order": 3
+    "order": 3,
+    "step": 1
   },
   "creative.doubleTapTicks": {
     "page": "Creative",
@@ -4757,7 +4758,7 @@
     "default": 5,
     "min": 0,
     "max": 5,
-    "step": 0.1,
+    "step": 1,
     "order": 2
   },
   "creative.spectatorAcceleration": {
@@ -4768,7 +4769,7 @@
     "default": 5,
     "min": 0,
     "max": 5,
-    "step": 0.1,
+    "step": 1,
     "order": 2
   },
   "power_camera:config.acceleration": {
@@ -4779,7 +4780,15 @@
     "default": 3.5,
     "min": 0,
     "max": 5,
-    "step": 0.1,
+    "step": 1,
     "order": 2
+  },
+  "gameplay.axesSlashLeaves": {
+    "page": "Gameplay",
+    "group": "Blocks",
+    "label": "Axes slash leaves",
+    "description": "Break all leaf types faster with axes, scaled by tool material. Diamond takes about as long as a diamond shovel on sand. Keeps normal leaf drops and one normal durability hit per block. Singleplayer Survival only.",
+    "default": false,
+    "order": 31
   }
 }

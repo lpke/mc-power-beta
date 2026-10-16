@@ -109,6 +109,7 @@
     "TntMotionRenderMixin",
     "FlattenedCollisionMixin",
     "TorchShovelInventoryMixin",
+    "AxesSlashLeavesInventoryMixin",
     "TorchShovelMiningMixin",
     "FireSpreadMixin",
     "GhostHeadMixin",

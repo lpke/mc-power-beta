@@ -155,7 +155,9 @@ public final class Release220Checks {
       });
     } finally {
       capture=false;active(false);AccessRules.restore(mc,rules);mc.player.read(saved);
-      Object restored=Catalog.JSON.fromJson(originalConfig,config.getClass());Class.forName("local.luke.power.camera.FreecamConfig").getField("config").set(null,restored);
+      Object restored=Catalog.JSON.fromJson(originalConfig,config.getClass());
+      // GCAPI handlers retain the original root object. Restore fields without replacing it.
+      for(Field field:config.getClass().getFields())if(!Modifier.isStatic(field.getModifiers()))field.set(config,field.get(restored));
       mc.options.thirdPerson=third;MenuPreferences.previewFeetY(feet);MenuPreferences.update(v->v.autoApply=auto);mc.setScreen(screen);
     }
     log("RELEASE 220 FAILURES "+failures);

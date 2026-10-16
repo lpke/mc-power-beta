@@ -749,7 +749,8 @@
       "leavesDropSaplingsInCreative": true,
       "flintIgnitesTnt": true,
       "fastItemCollisions": true,
-      "torchShovel": false
+      "torchShovel": false,
+      "axesSlashLeaves": false
     },
     "infoHud": {
       "enabled": false,

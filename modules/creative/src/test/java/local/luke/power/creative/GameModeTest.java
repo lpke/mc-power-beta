@@ -39,6 +39,18 @@ class GameModeTest {
       assertThrows(IllegalArgumentException.class,settings::validate);
       settings.acceleration=5;settings.spectatorAcceleration=invalid;
       assertThrows(IllegalArgumentException.class,settings::validate);
+      settings.spectatorAcceleration=5;settings.glide=invalid;
+      assertThrows(IllegalArgumentException.class,settings::validate);
+      settings.glide=5;settings.spectatorGlide=invalid;
+      assertThrows(IllegalArgumentException.class,settings::validate);
     }
+  }
+
+  @Test void responseSettingsAndCopiesRetainFractionalValues() {
+    var settings=new Settings();settings.acceleration=2.25f;settings.spectatorAcceleration=3.125f;
+    settings.glide=.375f;settings.spectatorGlide=4.625f;settings.validate();
+    var copy=settings.copy();copy.validate();
+    assertEquals(2.25f,copy.acceleration);assertEquals(3.125f,copy.spectatorAcceleration);
+    assertEquals(.375f,copy.glide);assertEquals(4.625f,copy.spectatorGlide);
   }
 }

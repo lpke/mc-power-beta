@@ -7,6 +7,21 @@ import java.util.*;
 import org.junit.jupiter.api.*;
 
 class SettingTest {
+  @Test void flightResponseSlidersUseWholeStepsWithoutQuantizingManualEntry() {
+    for(String id:List.of("creative.acceleration","creative.spectatorAcceleration","power_camera:config.acceleration",
+        "creative.glide","creative.spectatorGlide","power_camera:config.drag")) {
+      var setting=Catalog.setting(id,"test","","","","",Setting.Kind.DECIMAL,
+          new JsonPrimitive(3.5),new JsonPrimitive(3.5),0,5,.1,List.of(),false);
+      assertEquals(1,setting.step);
+      for(int point=0;point<=100;point++) {
+        setting.slide(point/100.0);
+        assertEquals(Math.rint(setting.value.getAsDouble()),setting.value.getAsDouble());
+      }
+      setting.parse("2.375");assertEquals(2.375,setting.value.getAsDouble());
+      setting.reset();assertEquals(setting.defaultValue.getAsDouble(),setting.value.getAsDouble());
+      assertThrows(IllegalArgumentException.class,()->setting.parse("5.01"));
+    }
+  }
   @Test void freecamPercentEditingKeepsStoredSpeedAndAcceptsRoundedBoundaries() {
     double base=local.luke.power.input.FlightMotion.HORIZONTAL_SPEED;
     Setting s=Catalog.setting("power_camera:config.speed","test","Camera","Free camera","Speed","",

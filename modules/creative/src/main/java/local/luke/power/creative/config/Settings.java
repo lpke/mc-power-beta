@@ -2,10 +2,10 @@ package local.luke.power.creative.config;
 
 public final class Settings {
   public boolean flight = true, landStopsFlight = true, sprintToggle = true;
-  public int flightSpeed = 100, sprintMultiplier = 200, glide = 5, doubleTapTicks = 7;
-  public float acceleration = 5, spectatorAcceleration = 5;
+  public int flightSpeed = 100, sprintMultiplier = 200, doubleTapTicks = 7;
+  public float acceleration = 5, spectatorAcceleration = 5, glide = 5, spectatorGlide = 5;
   public boolean spectatorSprintToggle = true;
-  public int spectatorSprintMultiplier = 200, spectatorGlide = 5;
+  public int spectatorSprintMultiplier = 200;
   public boolean spectatorScroll = true, showSpectatorSpeed = true;
   public int spectatorSpeed = 100, spectatorScrollStep = 10;
   public int blockReach = 50, entityReach = 50;
@@ -29,8 +29,8 @@ public final class Settings {
         || sprintMultiplier < 100
         || sprintMultiplier > 400
         || spectatorSprintMultiplier < 100 || spectatorSprintMultiplier > 400
-        || spectatorGlide < 0 || spectatorGlide > 5
-        || glide < 0
+        || !Float.isFinite(spectatorGlide) || spectatorGlide < 0 || spectatorGlide > 5
+        || !Float.isFinite(glide) || glide < 0
         || glide > 5
         || doubleTapTicks < 2
         || doubleTapTicks > 20

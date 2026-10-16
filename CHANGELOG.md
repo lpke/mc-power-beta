@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [2.2.2] - 2026-10-17
+
+- Add Axes slash leaves, off by default. Axes cut all leaf variants quickly according to their material, with diamond taking about the same time as a diamond shovel on sand. Keep vanilla leaf drops and normal tool durability.
+- Flight and freecam acceleration and deceleration sliders move in whole-number steps. Right-click input and saved preferences retain fractional values consistently in every flight mode.
+
 ## [2.2.1] - 2026-10-16
 
 - Creative and Survival report consistent feet or eye Y coordinates when walking, falling and flying. Only Spectator and freecam use head-base Y, shared by F3, the custom HUD, commands and WorldEdit.

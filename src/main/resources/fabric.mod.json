@@ -39,7 +39,8 @@
       "local.luke.power.input.GameplayKeys",
       "local.luke.power.visual.RedstonePowerRenderer",
       "local.luke.power.gameplay.TorchShovelEvents",
-      "local.luke.power.world.SavedWorldMenu"
+      "local.luke.power.world.SavedWorldMenu",
+      "local.luke.power.gameplay.AxesSlashLeavesEvents"
     ]
   },
   "languageAdapters": {

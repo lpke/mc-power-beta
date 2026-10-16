@@ -9,13 +9,16 @@ class GameplaySettingsTest {
     var gson = new Gson(); var settings = gson.fromJson("{}", GameplaySettings.class);
     assertTrue(settings.mergeItems); assertFalse(settings.limitTnt);
     assertTrue(settings.flintIgnitesTnt);
+    assertFalse(settings.axesSlashLeaves);
     assertTrue(settings.leavesDropSaplingsInCreative);
     assertEquals(256, settings.mergeThreshold); assertEquals(4, settings.tntPerTick); assertEquals(8, settings.tntMillis);
     settings.mergeItems = false; settings.limitTnt = true;
     settings.flintIgnitesTnt = false;
+    settings.axesSlashLeaves = true;
     var loaded = gson.fromJson(gson.toJson(settings), GameplaySettings.class);
     assertFalse(loaded.mergeItems); assertTrue(loaded.limitTnt); loaded.validate();
     assertFalse(loaded.flintIgnitesTnt);
+    assertTrue(loaded.axesSlashLeaves);
     loaded.tntPerTick = 0; assertThrows(IllegalArgumentException.class, loaded::validate);
   }
 }

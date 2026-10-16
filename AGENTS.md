@@ -395,3 +395,9 @@
 - Creative reports the same feet/eye Y as Survival, including while falling or flying.
   Only Spectator and freecam use head-base Y. Share this
   through HudCoordinates and ReportedPosition across HUDs, commands and WorldEdit.
+
+- Axes slash leaves changes mining strength only, for leaf material and axes in singleplayer
+  Survival. Preserve native drops, per-block durability, tool break cleanup and mining
+  penalties; compose with StationAPI and vein timing without applying the speed twice.
+- Flight response sliders step by whole numbers; numeric entry and saved values may
+  remain fractional. Keep acceleration/deceleration storage IDs and defaults intact.
