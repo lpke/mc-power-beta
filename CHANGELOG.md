@@ -8,6 +8,9 @@
 - Add Edit game rules to the saved-world Edit menu, with verified metadata backups and checks for changed or unsupported data.
 - Combine panorama controls into one choice with the original dirt background as the default. Show one option per distinct scene while preserving saved selections from older versions.
 - Preview panoramas live in the picker. Apply selections immediately, retain the selection marker and leave with Back or Escape.
+- Use the clean release 1.0 images for the Beta 1.8.1 panorama, removing its purple seam while keeping its name and saved selections. Centre the panorama picker buttons and search field.
+- Adjust panorama blur directly in the picker, sharing the same setting and preview as the main settings list.
+- Return to Select world when pressing Escape in the world Edit menu.
 - Group Active tweaks HUD inclusion switches below its display controls, and move Full bright messages below Brightness.
 
 ## [2.1.0] - 2026-10-16

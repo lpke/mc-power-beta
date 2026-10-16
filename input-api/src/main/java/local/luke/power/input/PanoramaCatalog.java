@@ -30,12 +30,17 @@ public final class PanoramaCatalog {
   }
   private static List<Entry> unique() {
     Map<String, Entry> scenes = new LinkedHashMap<>();
-    for (Entry entry : ALL) scenes.putIfAbsent(entry.scene(), entry);
+    for (Entry entry : ALL) scenes.putIfAbsent(entry.scene(),
+        new Entry(entry.id(), entry.label(), folder(entry.id()), entry.scene()));
     return List.copyOf(scenes.values());
   }
   public static List<Entry> entries() { return ENTRIES; }
   public static String folder(String id) {
-    String key = id.equals("beta18") ? "b1_8_1" : id;
+    // Release 1.0 fixes the classic scene's purple seam. Keep its Beta name and saved aliases.
+    String key = switch (id) {
+      case "beta18", "b1_8_1", "official_b1_8_1" -> "1_0";
+      default -> id;
+    };
     return ALL.stream().filter(e -> e.id().equals(key)).map(Entry::folder).findFirst()
         .orElse(id.matches("[A-Za-z0-9_-]{1,64}") ? id : "glacier");
   }

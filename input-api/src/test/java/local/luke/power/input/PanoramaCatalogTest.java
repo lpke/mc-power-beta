@@ -23,7 +23,12 @@ class PanoramaCatalogTest {
     }
     assertEquals("official_1_0", PanoramaCatalog.folder("1_4_2"));
     assertEquals("official_1_5_1", PanoramaCatalog.folder("1_8"));
-    assertEquals("official_b1_8_1", PanoramaCatalog.folder("beta18"));
+    for (String id : List.of("beta18", "b1_8_1", "official_b1_8_1")) {
+      assertEquals("official_1_0", PanoramaCatalog.folder(id), id);
+      assertEquals("Beta 1.8.1", PanoramaCatalog.label(id), id);
+    }
+    assertEquals("official_1_0", PanoramaCatalog.entries().stream()
+        .filter(e -> e.id().equals("b1_8_1")).findFirst().orElseThrow().folder());
     assertEquals("b1_8_1", PanoramaCatalog.scene("official_1_0"));
     assertEquals("custom_scene", PanoramaCatalog.folder("custom_scene"));
   }

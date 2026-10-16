@@ -12,6 +12,7 @@ import org.lwjgl.input.Mouse;
 public final class PanoramaScreen extends UiScreen {
   private final PowerOptionsScreen parent;
   private final Setting setting;
+  private final Setting blur;
   private final TextInput search = new TextInput("", 64);
   private final ScrollBar bar = new ScrollBar();
   private double scroll;
@@ -20,17 +21,21 @@ public final class PanoramaScreen extends UiScreen {
   public PanoramaScreen(PowerOptionsScreen parent, Setting setting) {
     this.parent = parent;
     this.setting = setting;
+    blur = parent.session().settings().stream()
+        .filter(s -> s.id.equals("power_controls:userinterface.panoramaConfig.blurBackground"))
+        .findFirst().orElse(null);
   }
   public void init() { Keyboard.enableRepeatEvents(true); }
   public void removed() { Keyboard.enableRepeatEvents(false); }
   public void tick() { ticks++; }
-  private int left() { return Math.max(12, (width - 460) / 2); }
-  private int span() { return Math.min(220, width - 2 * left()); }
+  private int left() { return (width - span()) / 2; }
+  private int span() { return Math.min(220, width - 24); }
   private List<PanoramaCatalog.Entry> entries() {
     String query = search.text().strip().toLowerCase(Locale.ROOT);
     return PanoramaCatalog.entries().stream().filter(e -> e.label().toLowerCase(Locale.ROOT).contains(query)).toList();
   }
-  private ScrollBar.Track track() { return new ScrollBar.Track(left() + span() - 6, 72, height - 110, entries().size() * 24, scroll); }
+  private int listBottom() { return height - 62; }
+  private ScrollBar.Track track() { return new ScrollBar.Track(left() + span() + 3, 72, listBottom() - 72, entries().size() * 24, scroll); }
   private void select(String id) {
     setting.value = new JsonPrimitive(id);
     parent.changed(setting);
@@ -40,12 +45,16 @@ public final class PanoramaScreen extends UiScreen {
     search.focused = inside(x, y, left(), 44, span(), 18);
     if (search.focused) { search.click(x, button); return; }
     if (bar.press(track(), x, y)) return;
-    if (inside(x, y, left(), 72, span() - 12, height - 110)) {
+    if (inside(x, y, left(), 72, span(), listBottom() - 72)) {
       int row = (int)((y - 72 + scroll) / 24);
       List<PanoramaCatalog.Entry> choices = entries();
       int rowY = 72 + row * 24 - (int)scroll;
-      if (row >= 0 && row < choices.size() && rowY >= 72 && rowY + 20 <= height - 38 && y < rowY + 20)
+      if (row >= 0 && row < choices.size() && rowY >= 72 && rowY + 20 <= listBottom() && y < rowY + 20)
         select(choices.get(row).id());
+    }
+    if (blur != null && inside(x, y, left(), height - 52, span(), 20)) {
+      blur.value = new JsonPrimitive(!blur.value.getAsBoolean());
+      parent.changed(blur);
     }
     if (inside(x, y, width / 2 - 50, height - 28, 100, 20)) minecraft.setScreen(parent);
   }
@@ -57,10 +66,7 @@ public final class PanoramaScreen extends UiScreen {
   public void render(int x, int y, float delta) {
     if (PanoramaCatalog.folder(setting.value.getAsString()).isEmpty()) renderBackgroundTexture(0);
     else {
-      boolean blur = parent.session().settings().stream()
-          .filter(s -> s.id.equals("power_controls:userinterface.panoramaConfig.blurBackground"))
-          .anyMatch(s -> s.value.getAsBoolean());
-      PanoramaRenderer.render(minecraft.textureManager::getTextureId, setting.value.getAsString(), blur,
+      PanoramaRenderer.render(minecraft.textureManager::getTextureId, setting.value.getAsString(), blur != null && blur.value.getAsBoolean(),
           ticks + delta, minecraft.displayWidth, minecraft.displayHeight);
       fillGradient(0, 0, width, height, -2130706433, 16777215);
       fillGradient(0, 0, width, height, 0, Integer.MIN_VALUE);
@@ -73,12 +79,14 @@ public final class PanoramaScreen extends UiScreen {
     List<PanoramaCatalog.Entry> choices = entries();
     for (int i = 0; i < choices.size(); i++) {
       int rowY = 72 + i * 24 - (int)scroll;
-      if (rowY < 72 || rowY + 20 > height - 38) continue;
+      if (rowY < 72 || rowY + 20 > listBottom()) continue;
       var entry = choices.get(i);
       button((PanoramaCatalog.scene(setting.value.getAsString()).equals(entry.scene()) ? "> " : "")
-          + entry.label(), left(), rowY, span() - 12, 20, x, y, true);
+          + entry.label(), left(), rowY, span(), 20, x, y, true);
     }
     bar.render(this, track());
+    button("Blur panorama: " + (blur != null && blur.value.getAsBoolean() ? "On" : "Off"),
+        left(), height - 52, span(), 20, x, y, blur != null);
     button("Back", width / 2 - 50, height - 28, 100, 20, x, y, true);
   }
 }

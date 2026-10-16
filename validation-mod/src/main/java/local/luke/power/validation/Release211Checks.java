@@ -74,6 +74,7 @@ final class Release211Checks {
             MenuPreferences.update(v->v.autoApply=apply);
             var options=new PowerOptionsScreen(null);mc.setScreen(options);
             Setting choice=find(options.session(),"power_controls:userinterface.panoramaConfig.panoramaFolder");
+            Setting blur=find(options.session(),"power_controls:userinterface.panoramaConfig.blurBackground");
             var picker=new PanoramaScreen(options,choice);mc.setScreen(picker);
             var input=(TextInput)field(picker,"search"); input.setText("26.3");
             ((ScreenInput)(Object)picker).power$click((int)call(picker,"left")+8,80,0);
@@ -86,8 +87,21 @@ final class Release211Checks {
             }
             for(int[] size:new int[][]{{320,240},{640,420}}) {
               picker.init(mc,size[0],size[1]); input.setText("");
+              int left=(int)call(picker,"left"), span=(int)call(picker,"span");
+              check(Math.abs(left*2+span-size[0])<=1,"panorama buttons are not centred");
+              check(PanoramaCatalog.folder("b1_8_1").equals(PanoramaCatalog.folder("1_0")),"classic panorama source");
+              input.setText("Beta 1.8.1");
+              ((ScreenInput)(Object)picker).power$click(left+span-1,80,0);
+              check(choice.value.getAsString().equals("b1_8_1"),"right edge of centred button did not select");
+              SettingsSnapshot.render(mc,picker,size[0],size[1],Path.of("power-beta-data/reports/211/panorama-classic-"+apply+"-"+size[0]+".png"));
+              input.setText("");
               SettingsSnapshot.render(mc,picker,size[0],size[1],Path.of("power-beta-data/reports/211/panorama-"+apply+"-"+size[0]+".png"));
             }
+            boolean previousBlur=blur.value.getAsBoolean();
+            ((ScreenInput)(Object)picker).power$click(picker.width/2,picker.height-42,0);
+            check(blur.value.getAsBoolean()!=previousBlur,"picker blur did not update the shared setting");
+            if(apply) check(PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig").get("blurBackground").getAsBoolean()==!previousBlur,"blur was not saved immediately");
+            SettingsSnapshot.render(mc,picker,640,420,Path.of("power-beta-data/reports/211/panorama-blur-"+apply+".png"));
             input.setText("dirt"); ((ScreenInput)(Object)picker).power$click((int)call(picker,"left")+8,80,0);
             check(choice.value.getAsString().equals(PanoramaCatalog.DIRT),"dirt choice");
             if(apply) check(!PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig").get("enablePanorma").getAsBoolean(),"dirt kept panorama enabled");
@@ -153,6 +167,8 @@ final class Release211Checks {
         check((Boolean)field(options,"confirmClose"),"dirty exit has no confirmation");
         ((ScreenInput)(Object)options).power$click(options.width/2-95,options.height/2+18,0);
         check(mc.currentScreen==menu,"Save did not return to Edit");
+        ((ScreenInput)menu).power$key('\0',Keyboard.KEY_ESCAPE);
+        check(mc.currentScreen==select,"Edit menu Escape did not return to Select world");
         var after=WorldRuleFiles.read(folder.resolve("level.dat")).getCompound("Data");
         check(WorldRuleData.read(after).enabled(GameRule.ALLOW_CREATIVE_MODE),"rule save missing");
         check(Arrays.equals(player,encode(after.getCompound("Player"))),"rule edit changed player data or game mode");
