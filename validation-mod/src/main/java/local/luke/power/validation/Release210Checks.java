@@ -199,6 +199,9 @@ final class Release210Checks {
         CreativeVehicleChecks.mode(mc, "CREATIVE"); AccessRules.set(mc, GameRule.FIRE_SPREAD, true);
         int difficulty = mc.world.field_213; mc.world.field_213 = 3;
         try {
+          // Native lightning requires its entire ten-block neighbourhood to be loaded.
+          for (int x = 2; x <= 3; x++) for (int z = 2; z <= 3; z++) mc.world.method_214(x,z);
+          check(mc.world.method_153(42,110,42,10), "lightning fixture chunks are not loaded");
           for (boolean enabled : new boolean[]{false, true}) {
             for (int x = 38; x <= 46; x++) for (int z = 38; z <= 46; z++) {
               mc.world.method_200(x, 109, z, 1); for (int y = 110; y <= 114; y++) mc.world.method_200(x, y, z, 0);
@@ -273,8 +276,7 @@ final class Release210Checks {
           Setting setting = find(options.session(), "power_controls:userinterface.panoramaConfig.panoramaFolder");
           JsonElement original = setting.value.deepCopy();
           var picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
-          ((TextInput)field(picker, "search")).setText("26.3");
-          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click((int)call(picker, "left") + 8, 80, 0);
+          selectPanorama(picker, "26_3");
           check(mc.currentScreen == picker && setting.value.getAsString().equals("26_3"), "selection closed the picker");
           picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
           ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click(picker.width / 2, picker.height - 20, 0);
@@ -282,8 +284,7 @@ final class Release210Checks {
           options.session().discard(); check(setting.value.equals(original), "discard lost original panorama");
           MenuPreferences.update(v -> v.autoApply = true);
           picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
-          ((TextInput)field(picker, "search")).setText("26.2");
-          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click((int)call(picker, "left") + 8, 80, 0);
+          selectPanorama(picker, "26_2");
           check(mc.currentScreen == picker && !setting.changed(), "auto-apply selection was not committed");
           check(local.luke.power.storage.PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig")
               .get("panoramaFolder").getAsString().equals("26_2"), "panorama not applied on click");

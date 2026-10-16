@@ -6,6 +6,9 @@ import org.lwjgl.opengl.GL11;
 /** Original Mojang title textures, drawn without altering retro lettering preferences. */
 public final class TitleLogos {
     private static final String ROOT = "/assets/power_title/logos/";
+    // The classic atlas has 36 transparent pixels after the lettering; its subtitle has 30.
+    private static final int CLASSIC_VISIBLE_WIDTH = 274;
+    private static final int EDITION_VISIBLE_WIDTH = 98;
 
     private TitleLogos() {}
 
@@ -23,7 +26,7 @@ public final class TitleLogos {
             default -> "modern.png";
         };
         double scale = Math.min(1, Math.max(1, width - 20) / 310.0);
-        double left = (width - 310 * scale) / 2;
+        double left = (width - (style == 4 ? 310 : CLASSIC_VISIBLE_WIDTH) * scale) / 2;
         GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT);
         try {
             GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -41,7 +44,8 @@ public final class TitleLogos {
             if (style > 1) {
                 String edition = style == 4 ? "edition_modern.png" : "edition.png";
                 GL11.glBindTexture(GL11.GL_TEXTURE_2D, minecraft.textureManager.getTextureId(ROOT + edition));
-                quad((width - 128 * scale) / 2, style == 4 ? 20 + 53 * scale : 30 + 37 * scale,
+                quad((width - (style == 4 ? 128 : EDITION_VISIBLE_WIDTH) * scale) / 2,
+                        style == 4 ? 20 + 53 * scale : 30 + 37 * scale,
                         128 * scale, 16 * scale, 0, 0, 1, 1);
             }
         } finally {

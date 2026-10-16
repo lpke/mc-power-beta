@@ -76,8 +76,7 @@ final class Release211Checks {
             Setting choice=find(options.session(),"power_controls:userinterface.panoramaConfig.panoramaFolder");
             Setting blur=find(options.session(),"power_controls:userinterface.panoramaConfig.blurBackground");
             var picker=new PanoramaScreen(options,choice);mc.setScreen(picker);
-            var input=(TextInput)field(picker,"search"); input.setText("26.3");
-            ((ScreenInput)(Object)picker).power$click((int)call(picker,"left")+8,80,0);
+            selectPanorama(picker,"26_3");
             check(mc.currentScreen==picker&&choice.value.getAsString().equals("26_3"),"selection did not stay in picker");
             if(apply) {
               var config=PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig");
@@ -86,15 +85,14 @@ final class Release211Checks {
               SettingsSnapshot.render(mc,picker,320,240,Path.of("power-beta-data/reports/211/panorama-selected.png"));
             }
             for(int[] size:new int[][]{{320,240},{640,420}}) {
-              picker.init(mc,size[0],size[1]); input.setText("");
+              picker.init(mc,size[0],size[1]); field(picker,"scroll",0d);
               int left=(int)call(picker,"left"), span=(int)call(picker,"span");
               check(Math.abs(left*2+span-size[0])<=1,"panorama buttons are not centred");
               check(PanoramaCatalog.folder("b1_8_1").equals(PanoramaCatalog.folder("1_0")),"classic panorama source");
-              input.setText("Beta 1.8.1");
-              ((ScreenInput)(Object)picker).power$click(left+span-1,80,0);
+              selectPanorama(picker,"b1_8_1");
               check(choice.value.getAsString().equals("b1_8_1"),"right edge of centred button did not select");
               SettingsSnapshot.render(mc,picker,size[0],size[1],Path.of("power-beta-data/reports/211/panorama-classic-"+apply+"-"+size[0]+".png"));
-              input.setText("");
+              field(picker,"scroll",0d);
               SettingsSnapshot.render(mc,picker,size[0],size[1],Path.of("power-beta-data/reports/211/panorama-"+apply+"-"+size[0]+".png"));
             }
             boolean previousBlur=blur.value.getAsBoolean();
@@ -102,7 +100,7 @@ final class Release211Checks {
             check(blur.value.getAsBoolean()!=previousBlur,"picker blur did not update the shared setting");
             if(apply) check(PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig").get("blurBackground").getAsBoolean()==!previousBlur,"blur was not saved immediately");
             SettingsSnapshot.render(mc,picker,640,420,Path.of("power-beta-data/reports/211/panorama-blur-"+apply+".png"));
-            input.setText("dirt"); ((ScreenInput)(Object)picker).power$click((int)call(picker,"left")+8,80,0);
+            selectPanorama(picker,PanoramaCatalog.DIRT);
             check(choice.value.getAsString().equals(PanoramaCatalog.DIRT),"dirt choice");
             if(apply) check(!PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig").get("enablePanorma").getAsBoolean(),"dirt kept panorama enabled");
             ((ScreenInput)(Object)picker).power$key('\0',Keyboard.KEY_ESCAPE);

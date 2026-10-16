@@ -11,6 +11,8 @@
 - Use the clean release 1.0 images for the Beta 1.8.1 panorama, removing its purple seam while keeping its name and saved selections. Centre the panorama picker buttons and search field.
 - Adjust panorama blur directly in the picker, sharing the same setting and preview as the main settings list.
 - Return to Select world when pressing Escape in the world Edit menu.
+- Centre Beta, 2017 and 2020 title lettering and their Java Edition subtitles using the visible texture bounds. Keep the already-centred modern style and custom retro title.
+- Remove the panorama picker's search field and give its choices more space.
 - Group Active tweaks HUD inclusion switches below its display controls, and move Full bright messages below Brightness.
 
 ## [2.1.0] - 2026-10-16

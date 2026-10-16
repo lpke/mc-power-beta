@@ -26,6 +26,16 @@ public final class UiChecks {
     ((TextInput)field(s, "search")).setText(value); call(s, "layout");
   }
   static void click(PowerOptionsScreen s, int x, int y) { ((ScreenInput)(Object)s).power$click(x,y,0); }
+  static void selectPanorama(PanoramaScreen picker, String id) throws Exception {
+    var entries = local.luke.power.input.PanoramaCatalog.entries();
+    int index = java.util.stream.IntStream.range(0, entries.size())
+        .filter(i -> entries.get(i).id().equals(id)).findFirst().orElseThrow();
+    int top = (int)call(picker, "listTop"), bottom = (int)call(picker, "listBottom");
+    double scroll = Math.min(index * 24, Math.max(0, entries.size() * 24 - (bottom - top)));
+    field(picker, "scroll", scroll);
+    ((ScreenInput)(Object)picker).power$click((int)call(picker, "left") + (int)call(picker, "span") - 1,
+        top + index * 24 - (int)scroll + 8, 0);
+  }
   static AudioToolbar.Button musicButton(PowerOptionsScreen screen, AudioToolbar.Action action) throws Exception {
     return ((List<AudioToolbar.Button>)call(screen,"musicButtons")).stream()
         .filter(button -> button.action()==action).findFirst().orElseThrow();

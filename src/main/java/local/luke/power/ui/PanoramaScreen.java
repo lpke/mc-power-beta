@@ -8,12 +8,11 @@ import local.luke.power.input.PanoramaRenderer;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-/** Searchable version picker using the parent settings session's apply behaviour. */
+/** Panorama choices use the parent settings session's apply behaviour. */
 public final class PanoramaScreen extends UiScreen {
   private final PowerOptionsScreen parent;
   private final Setting setting;
   private final Setting blur;
-  private final TextInput search = new TextInput("", 64);
   private final ScrollBar bar = new ScrollBar();
   private double scroll;
   private int ticks;
@@ -25,31 +24,27 @@ public final class PanoramaScreen extends UiScreen {
         .filter(s -> s.id.equals("power_controls:userinterface.panoramaConfig.blurBackground"))
         .findFirst().orElse(null);
   }
-  public void init() { Keyboard.enableRepeatEvents(true); }
-  public void removed() { Keyboard.enableRepeatEvents(false); }
   public void tick() { ticks++; }
   private int left() { return (width - span()) / 2; }
   private int span() { return Math.min(220, width - 24); }
   private List<PanoramaCatalog.Entry> entries() {
-    String query = search.text().strip().toLowerCase(Locale.ROOT);
-    return PanoramaCatalog.entries().stream().filter(e -> e.label().toLowerCase(Locale.ROOT).contains(query)).toList();
+    return PanoramaCatalog.entries();
   }
+  private int listTop() { return 44; }
   private int listBottom() { return height - 62; }
-  private ScrollBar.Track track() { return new ScrollBar.Track(left() + span() + 3, 72, listBottom() - 72, entries().size() * 24, scroll); }
+  private ScrollBar.Track track() { return new ScrollBar.Track(left() + span() + 3, listTop(), listBottom() - listTop(), entries().size() * 24, scroll); }
   private void select(String id) {
     setting.value = new JsonPrimitive(id);
     parent.changed(setting);
   }
   protected void mouseClicked(int x, int y, int button) {
     if (button != 0) return;
-    search.focused = inside(x, y, left(), 44, span(), 18);
-    if (search.focused) { search.click(x, button); return; }
     if (bar.press(track(), x, y)) return;
-    if (inside(x, y, left(), 72, span(), listBottom() - 72)) {
-      int row = (int)((y - 72 + scroll) / 24);
+    if (inside(x, y, left(), listTop(), span(), listBottom() - listTop())) {
+      int row = (int)((y - listTop() + scroll) / 24);
       List<PanoramaCatalog.Entry> choices = entries();
-      int rowY = 72 + row * 24 - (int)scroll;
-      if (row >= 0 && row < choices.size() && rowY >= 72 && rowY + 20 <= listBottom() && y < rowY + 20)
+      int rowY = listTop() + row * 24 - (int)scroll;
+      if (row >= 0 && row < choices.size() && rowY >= listTop() && rowY + 20 <= listBottom() && y < rowY + 20)
         select(choices.get(row).id());
     }
     if (blur != null && inside(x, y, left(), height - 52, span(), 20)) {
@@ -60,8 +55,6 @@ public final class PanoramaScreen extends UiScreen {
   }
   protected void keyPressed(char c, int key) {
     if (key == Keyboard.KEY_ESCAPE) { minecraft.setScreen(parent); return; }
-    String before = search.text(); search.key(c, key);
-    if (!before.equals(search.text())) scroll = 0;
   }
   public void render(int x, int y, float delta) {
     if (PanoramaCatalog.folder(setting.value.getAsString()).isEmpty()) renderBackgroundTexture(0);
@@ -72,14 +65,13 @@ public final class PanoramaScreen extends UiScreen {
       fillGradient(0, 0, width, height, 0, Integer.MIN_VALUE);
     }
     drawCenteredTextWithShadow(textRenderer, "Title panorama", width / 2, 18, 0xffffff);
-    input(search, left(), 44, span(), x, y, "Search versions");
     int wheel = Mouse.getDWheel();
     scroll = Math.max(0, Math.min(track().maximum(), scroll - Integer.signum(wheel) * 48));
     scroll = bar.drag(track(), y, Mouse.isButtonDown(0));
     List<PanoramaCatalog.Entry> choices = entries();
     for (int i = 0; i < choices.size(); i++) {
-      int rowY = 72 + i * 24 - (int)scroll;
-      if (rowY < 72 || rowY + 20 > listBottom()) continue;
+      int rowY = listTop() + i * 24 - (int)scroll;
+      if (rowY < listTop() || rowY + 20 > listBottom()) continue;
       var entry = choices.get(i);
       button((PanoramaCatalog.scene(setting.value.getAsString()).equals(entry.scene()) ? "> " : "")
           + entry.label(), left(), rowY, span(), 20, x, y, true);
