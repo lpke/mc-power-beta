@@ -1,6 +1,6 @@
 {
   "native.music": "Volume of background music and records, before master and per-track volume.",
-  "native.sound": "Volume of game sounds, before master and category volume.",
+  "native.sound": "Volume for all game sounds. Multiplied by Master volume and the category and individual-sound sliders below. Music uses its own volume.",
   "native.sensitivity": "Mouse turning speed. 100 is Minecraft's standard sensitivity.",
   "native.invert": "Reverses vertical mouse movement when looking around.",
   "native.bobbing": "Moves the first-person camera as you walk.",
@@ -65,8 +65,6 @@
   "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.enableSnowballsExtinguishFire": "Thrown snowballs put out fire where they land.",
   "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.enableFireTurnsGrassIntoDirt": "Burning removes the grass surface from affected grass blocks.",
   "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.enableGhastFireballsToInstaKillGhasts": "A reflected fireball kills the ghast it hits immediately.",
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionCausingFire": "Stops ghast explosions from starting fires.",
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableLightningStrikeCausingFire": "Stops lightning from igniting blocks.",
   "power_mechanics:config.FLORA_CONFIG.enableShearsCollectDeadBush": "Breaking a dead bush with shears drops the plant itself.",
   "power_mechanics:config.FLORA_CONFIG.enableShearsCollectTallGrass": "Breaking tall grass with shears drops the plant itself.",
   "power_mechanics:config.MOB_CONFIG.enableZombieDropItem": "Enables the configured extra zombie loot roll; item and chance are controlled separately.",
@@ -84,7 +82,6 @@
   "power_environment:config.SLEEP_CONFIG.handSwingClickToExitBedsEnabled": "A mouse click wakes you without needing the Leave Bed button.",
   "power_environment:config.WEATHER_CONFIG.enableAlwaysSnowAboveSetYLevel": "Makes precipitation fall as snow above the configured altitude, regardless of biome temperature.",
   "power_environment:config.WEATHER_CONFIG.alwaysSnowAboveThisYLevel": "Altitude in blocks above which the snow override applies.",
-  "power_environment:config.WEATHER_CONFIG.disableRain": "Prevents rain weather from starting.",
   "power_environment:config.WEATHER_CONFIG.disableThunder": "Prevents thunderstorms while leaving ordinary rain available.",
   "power_environment:config.WEATHER_CONFIG.disableRainInSavannaBiomes": "Keeps savanna biomes dry during rainy weather.",
   "power_environment:config.WEATHER_CONFIG.sleepOnlyResetsWeatherWhenRaining": "Sleeping preserves the clear-weather timer unless it is currently raining.",
@@ -120,7 +117,6 @@
   "power_controls:tweaks.pressurePlatesOnFences": "Allows pressure plates to be supported by fence posts.",
   "power_controls:tweaks.shearHarvesting": "Shears collect cobwebs; swords collect string. Tall grass, ferns and dead bushes have separate harvesting settings.",
   "power_controls:tweaks.modernFlintAndSteel": "Only consumes durability when flint and steel successfully lights a fire.",
-  "power_controls:tweaks.disableSleeping": "Beds still set a respawn point, but cannot skip the night.",
   "power_controls:tweaks.preventItemsStoppingMinecarts": "Dropped items no longer obstruct moving minecarts.",
   "power_controls:tweaks.allowIgnitingEntities": "Using flint and steel on an entity sets it on fire.",
   "power_controls:tweaks.allowTrapdoorsWithoutSupport": "Keeps trapdoors valid without an adjacent supporting block.",
@@ -249,5 +245,9 @@
   "power_hud:config.chatFadeTime": "Time until a chat message disappears when chat is closed.",
   "power_hud:config.hotbarItemSelectionFadeTime": "Time the selected hotbar item name stays visible.",
   "power_environment:config.SPAWN_PROTECTION_RADIUS": "Server spawn protection radius in blocks.\n\nThe server's spawn-protection property takes precedence.",
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.chanceBlocksDropWhenExploded": "Chance that a block destroyed by an explosion drops its item. Does not control damage to items already on the ground."
+  "tweaks.placement.listMode": "Choose which held items can use fast placement. Off allows every item; Exclude blocks the excluded list; Allow only admits the allowed list. Ordinary placement is unchanged.",
+  "tweaks.placement.blacklist": "Items that cannot use fast placement when the filter is set to Exclude.",
+  "tweaks.placement.whitelist": "Only these items can use fast placement when the filter is set to Allow only. An empty list permits nothing.",
+  "power_camera:config.sprint": "Boost camera speed with the flight sprint key using the activation and speed settings below.",
+  "creative.flight": "Enable Creative flight. Double-tap Jump to start or stop flying. /fly changes this same preference; Survival flight uses its world permission."
 }

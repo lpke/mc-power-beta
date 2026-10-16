@@ -5,7 +5,7 @@ import local.luke.power.rules.*;
 
 /** Explicit supported conversions, independent of the release version. */
 public final class ConfigVersions {
-  public static final int CURRENT = 5;
+  public static final int CURRENT = 6;
   private ConfigVersions() {}
 
   public static int version(JsonObject root) {
@@ -13,22 +13,23 @@ public final class ConfigVersions {
       JsonPrimitive version = root.getAsJsonPrimitive("schemaVersion");
       if (!version.isNumber()) throw new IllegalArgumentException();
       return version.getAsBigDecimal().intValueExact();
-    } catch (RuntimeException e) { throw new IllegalArgumentException("Missing or invalid schemaVersion. Supported configuration versions: 3, 4, 5.", e); }
+    } catch (RuntimeException e) { throw new IllegalArgumentException("Missing or invalid schemaVersion. Supported configuration versions: 3, 4, 5, 6.", e); }
   }
   public static JsonObject convert(JsonObject source) {
     int version = version(source);
-    if (version != 3 && version != 4 && version != CURRENT)
-      throw new IllegalArgumentException("Configuration version " + version + " is unsupported. Supported versions: 3, 4, 5. Use a compatible release or restore a supported backup; original file is preserved.");
+    if (version < 3 || version > CURRENT)
+      throw new IllegalArgumentException("Configuration version " + version + " is unsupported. Supported versions: 3, 4, 5, 6. Use a compatible release or restore a supported backup; original file is preserved.");
     if (!source.has("settings") || !source.get("settings").isJsonObject())
       throw new IllegalArgumentException("Configuration settings must be an object.");
     JsonObject root = source.deepCopy();
     JsonObject settings = root.getAsJsonObject("settings");
-    if (version < CURRENT) {
+    if (version < 5) {
       JsonObject frozen = new JsonObject();
       for (String id : new String[]{"gameplay", "power_mechanics:config"})
         if (settings.has(id)) frozen.add(id, settings.get(id).deepCopy());
       root.add("worldRuleUpgrade", frozen);
     }
+    boolean createPresets = version == 3 && !settings.has("gameRules");
     if (version == 3) {
       // Frozen conversion evidence, never a live setting or an inheritance layer.
       // Unconverted worlds can be loaded much later, after global preferences change.
@@ -40,20 +41,38 @@ public final class ConfigVersions {
       settings.remove("commandAccess");
       remove(settings, "editor", "enabled");
       remove(settings, "gameplay", "fireSpread", "explosionProofItems");
-      JsonObject presets = new JsonObject();
-      presets.add("survival", new RuleSet().document());
-      presets.add("cheats", RuleSet.cheats().document());
-      if (!settings.has("gameRules")) settings.add("gameRules", presets);
       root.addProperty("schemaVersion", CURRENT);
     }
-    if (version < CURRENT) {
+    if (version < 5) {
       ConfigCleanup.upgradeFour(settings);
       root.addProperty("schemaVersion", CURRENT);
     }
-    if (settings.has("gameRules")) {
+    if (version < 6) {
+      JsonObject frozen = new JsonObject();
+      for (String id : new String[]{"power_controls:tweaks", "power_mechanics:config", "power_environment:config"})
+        if (settings.has(id)) frozen.add(id, settings.get(id).deepCopy());
+      WorldRuleUpgrade210.defaults(frozen, new RuleSet()); // Validate before retiring preferences.
+      root.add("worldRuleUpgrade210", frozen);
+      ConfigCleanup.upgradeFive(settings);
+      root.addProperty("schemaVersion", CURRENT);
+    }
+    JsonObject evidence210 = root.has("worldRuleUpgrade210") ? root.getAsJsonObject("worldRuleUpgrade210") : new JsonObject();
+    if (createPresets) {
+      JsonObject presets = new JsonObject();
+      presets.add("survival", WorldRuleUpgrade210.defaults(evidence210, new RuleSet()).document());
+      presets.add("cheats", WorldRuleUpgrade210.defaults(evidence210, RuleSet.cheats()).document());
+      settings.add("gameRules", presets);
+    } else if (settings.has("gameRules")) {
       JsonObject presets = settings.getAsJsonObject("gameRules");
-      if (presets.has("survival")) presets.add("survival", RuleSet.read(presets.getAsJsonObject("survival"), new RuleSet()).document());
-      if (presets.has("cheats")) presets.add("cheats", RuleSet.read(presets.getAsJsonObject("cheats"), RuleSet.cheats()).document());
+      for (String name : new String[]{"survival", "cheats"}) if (presets.has(name)) {
+        JsonObject document = presets.getAsJsonObject(name);
+        int ruleVersion = RuleSet.version(document);
+        RuleSet defaults = name.equals("cheats") ? RuleSet.cheats() : new RuleSet();
+        if (ruleVersion < 3) defaults = WorldRuleUpgrade210.defaults(evidence210, defaults);
+        RuleSet.read(document, defaults); // Validate structure and unknown fields before conversion.
+        JsonObject values = WorldRuleUpgrade210.values(document.getAsJsonObject("values"), ruleVersion, evidence210);
+        presets.add(name, RuleSet.readValues(values, defaults).document());
+      }
     }
     return root;
   }

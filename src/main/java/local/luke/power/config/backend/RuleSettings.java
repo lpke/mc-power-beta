@@ -11,7 +11,7 @@ public final class RuleSettings {
     List<Setting> entries = new ArrayList<>();
     for (GameRule rule : GameRule.values()) entries.add(new Setting(prefix + rule.id(), backend, "Game rules", rule.group(), rule.label(), rule.help(),
         rule.integer() ? Setting.Kind.INTEGER : Setting.Kind.BOOLEAN, current.get(rule), defaults.get(rule),
-        0, rule.integer() ? Integer.MAX_VALUE : 1, 1, List.of(), false));
+        0, rule.maximum(), 1, List.of(), false));
     return entries;
   }
   public static RuleSet edited(RuleSet source, String prefix, Map<String, JsonElement> edits) {

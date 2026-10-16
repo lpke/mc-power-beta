@@ -74,3 +74,15 @@ jar {
     from(zipTree(file('input-api/build/libs/power-beta-input-1.0.0.jar'))) { exclude 'META-INF/MANIFEST.MF' }
 }
 test { classpath += files('input-api/build/libs/power-beta-input-1.0.0.jar') }
+
+// Offline maintenance deliberately shares native NBT and the in-game conversion boundary.
+tasks.register('upgradeInstance', JavaExec) {
+    dependsOn classes
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'local.luke.power.world.InstanceUpgrade'
+    doFirst {
+        if (!project.hasProperty('instanceGame')) throw new GradleException('Supply -PinstanceGame=/path/to/.minecraft')
+        args project.property('instanceGame')
+        if (project.hasProperty('instanceDefaults')) args '--defaults'
+    }
+}

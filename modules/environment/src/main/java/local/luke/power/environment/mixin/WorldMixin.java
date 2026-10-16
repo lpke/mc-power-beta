@@ -152,24 +152,6 @@ public abstract class WorldMixin {
             method = "updateWeatherCycles",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/WorldProperties;getRainTime()I"
-            )
-    )
-    protected int powerEnvironment_disableRain(WorldProperties instance, Operation<Integer> original) {
-        if (Config.config.WEATHER_CONFIG.disableRain) {
-            if (this.properties.getRaining()) {
-                this.properties.setRaining(false);
-            }
-            return 12000;
-        } else {
-            return original.call(instance);
-        }
-    }
-
-    @WrapOperation(
-            method = "updateWeatherCycles",
-            at = @At(
-                    value = "INVOKE",
                     target = "Lnet/minecraft/world/WorldProperties;setThunderTime(I)V",
                     ordinal = 0
             )

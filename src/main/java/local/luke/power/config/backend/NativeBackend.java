@@ -40,7 +40,7 @@ public final class NativeBackend implements Backend {
       throw new IllegalArgumentException("Texture pack unavailable: " + value.getAsString());
     });
     slider("music", "Audio", "Volume", "Music", Option.MUSIC, 0, 100, 1, 100);
-    slider("sound", "Audio", "Volume", "Sound effects", Option.SOUND, 0, 100, 1, 100);
+    slider("sound", "Audio", "Volume", "Game sounds", Option.SOUND, 0, 100, 1, 100);
     slider("sensitivity", "General", "Input", "Mouse sensitivity", Option.SENSITIVITY, 0, 200, 1, 100);
     toggle(
         "invert", "General", "Input", "Invert mouse", Option.INVERT_MOUSE, o.invertYMouse, false);
@@ -59,7 +59,7 @@ public final class NativeBackend implements Backend {
     Class<?> mod = Class.forName("local.luke.power.controls.util.ModOptions");
     for (String[] spec :
         new String[][] {
-          {"fov", "fovOption", "Camera", "View", "Field of view", "70", "110", "70"},
+          {"fov", "fovOption", "General", "Game", "Field of view", "70", "110", "70"},
           {"brightness", "brightnessOption", "Video", "Lighting", "Brightness", "0", "100", "0"},
           {"cloudHeight", "cloudHeightOption", "Video", "Sky", "Cloud height", "108", "256", "108"},
           {

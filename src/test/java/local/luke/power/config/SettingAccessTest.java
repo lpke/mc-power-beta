@@ -38,25 +38,47 @@ class SettingAccessTest {
       rule(session, enabled, true);
       owners.forEach((id, owner) -> {
         Setting setting = entry(id);
-        assertEquals(owner == enabled, SettingAccess.visible(session, setting), id + " / " + enabled);
+        assertEquals(owner == enabled || id.equals("creative.flight") && enabled == GameRule.ALLOW_FLIGHT, SettingAccess.visible(session, setting), id + " / " + enabled);
         assertTrue(setting.value.getAsBoolean()); assertFalse(setting.changed());
       });
       rule(session, enabled, false);
     }
   }
 
-  @Test void eitherModeExposesPickerAndFlightSprintWhileFreecamControlsRemainIndependent() {
+  @Test void modeFlightPreferencesHaveIndependentPermissions() {
     var session = world();
-    for (GameRule rule : List.of(GameRule.ALLOW_CREATIVE_MODE, GameRule.ALLOW_SPECTATOR_MODE)) {
-      for (boolean enabled : List.of(false, true)) {
-        rule(session, rule, enabled);
-        for (String id : List.of("creative.sprintFlight", "keys.power_creative.modifier", "keys.power_creative.picker"))
-          assertEquals(enabled, SettingAccess.visible(session, entry(id)), id);
-        for (String id : List.of("creative.sprintToggle", "creative.sprintMultiplier", "keys.power_creative.sprint",
-            "creative.blockReach", "creative.entityReach", "power_camera:config.speed", "world.difficulty"))
-          assertTrue(SettingAccess.visible(session, entry(id)), id);
-      }
-      rule(session, rule, false);
+    for (GameRule permission : List.of(GameRule.ALLOW_CREATIVE_MODE, GameRule.ALLOW_SPECTATOR_MODE, GameRule.ALLOW_FLIGHT)) {
+      rule(session, permission, true);
+      for (String id : List.of("creative.sprintFlight", "creative.sprintToggle", "creative.sprintMultiplier"))
+        assertEquals(permission != GameRule.ALLOW_SPECTATOR_MODE, SettingAccess.visible(session, entry(id)), id);
+      assertEquals(permission == GameRule.ALLOW_SPECTATOR_MODE, SettingAccess.visible(session, entry("creative.spectatorSprintToggle")));
+      for (String id : List.of("keys.power_creative.modifier", "keys.power_creative.picker"))
+        assertEquals(permission != GameRule.ALLOW_FLIGHT, SettingAccess.visible(session, entry(id)));
+      for (String id : List.of("keys.power_creative.sprint", "creative.blockReach", "creative.entityReach", "power_camera:config.speed", "world.difficulty"))
+        assertTrue(SettingAccess.visible(session, entry(id)), id);
+      rule(session, permission, false);
+    }
+  }
+
+  @Test void hudPositionModesHideInactiveGroupsWithoutChangingDrafts() {
+    var session = world();
+    Backend backend = new Backend() {
+      public String id() { return "test"; }
+      public List<java.nio.file.Path> files() { return List.of(); }
+      public void validate(Map<String, JsonElement> values) {}
+      public void apply(Map<String, JsonElement> values) {}
+    };
+    Setting mode = new Setting("power_hud:hudpositions.hudPositioningSystem", "test", "Interface", "HUD layout", "HUD positioning", "",
+        Setting.Kind.CHOICE, new JsonPrimitive(1), new JsonPrimitive(1), 0, 2, 1, List.of("Vanilla", "Combined", "Separate"), false);
+    Setting combined = entry("power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.enableVisibility");
+    Setting separate = entry("power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.enableVisibility");
+    session.add(backend, List.of(mode, combined, separate));
+    for (int n : new int[]{1, 2, 0, 1}) {
+      mode.value = new JsonPrimitive(n);
+      assertEquals(n == 1, SettingAccess.visible(session, combined));
+      assertEquals(n == 2, SettingAccess.visible(session, separate));
+      assertTrue(combined.value.getAsBoolean()); assertTrue(separate.value.getAsBoolean());
+      assertFalse(combined.changed()); assertFalse(separate.changed());
     }
   }
 
@@ -66,8 +88,9 @@ class SettingAccessTest {
     for (String id : List.of("creative.flight", "creative.spectatorSpeed", "worldedit.maxBlocks"))
       assertTrue(SettingAccess.visible(new ConfigSession(), entry(id)), id);
     var number = session.settings().stream().filter(s -> s.id.endsWith("players_sleeping_percentage")).findFirst().orElseThrow();
-    assertFalse(number.slider());
-    number.parse("2147483647");
-    assertEquals(Integer.MAX_VALUE, number.value.getAsInt());
+    assertTrue(number.slider());
+    number.parse("100");
+    assertEquals(100, number.value.getAsInt());
+    assertThrows(IllegalArgumentException.class, () -> number.parse("101"));
   }
 }

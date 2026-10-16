@@ -7,8 +7,8 @@ import static local.luke.power.rules.GameRule.*;
 
 class RuleSetTest {
   @Test void aliasesAndDefaultsHaveOneOwner() {
-    assertEquals(34, GameRule.values().length);
-    assertEquals(11, java.util.Arrays.stream(GameRule.values()).filter(GameRule::access).count());
+    assertEquals(39, GameRule.values().length);
+    assertEquals(12, java.util.Arrays.stream(GameRule.values()).filter(GameRule::access).count());
     RuleSet survival = new RuleSet(), cheats = RuleSet.cheats();
     for (GameRule rule : GameRule.values()) {
       assertSame(rule, GameRule.find(rule.id())); assertSame(rule, GameRule.find(rule.alias()));
@@ -21,7 +21,7 @@ class RuleSetTest {
     assertNull(GameRule.find("powerbeta:fire_spread"));
   }
   @Test void gson289RoundTripAndCopiesRemainIndependent() {
-    RuleSet rules = RuleSet.cheats(); rules.set(FIRE_SPREAD, false); rules.set(PLAYERS_SLEEPING_PERCENTAGE, 151);
+    RuleSet rules = RuleSet.cheats(); rules.set(FIRE_SPREAD, false); rules.set(PLAYERS_SLEEPING_PERCENTAGE, 75);
     JsonObject persisted = new Gson().fromJson(new Gson().toJson(rules.document()), JsonObject.class);
     RuleSet loaded = RuleSet.read(persisted, new RuleSet()); assertEquals(rules, loaded);
     RuleSet copied = loaded.copy(); loaded.set(FIRE_SPREAD, true); assertFalse(copied.enabled(FIRE_SPREAD));
@@ -34,7 +34,7 @@ class RuleSetTest {
     assertTrue(rules.enabled(KEEP_INVENTORY)); assertTrue(rules.enabled(EXPLOSIONS_DESTROY_ITEMS));
   }
   @Test void badTypesUnknownNamesAndVersionsAreRejectedWithoutChangingInput() {
-    for (String source : new String[]{"{\"version\":3,\"values\":{}}", "{\"version\":\"1\",\"values\":{}}",
+    for (String source : new String[]{"{\"version\":4,\"values\":{}}", "{\"version\":\"1\",\"values\":{}}",
         "{\"version\":1,\"values\":{\"fire_spread\":\"false\"}}", "{\"version\":1,\"values\":{\"fire_spread\":0}}",
         "{\"version\":1,\"values\":{\"players_sleeping_percentage\":-1}}", "{\"version\":1,\"values\":{\"players_sleeping_percentage\":1.5}}",
         "{\"version\":1,\"values\":{\"players_sleeping_percentage\":2147483648}}", "{\"version\":1,\"values\":{\"doFireTick\":true}}",
@@ -44,10 +44,10 @@ class RuleSetTest {
       assertEquals(before, input);
     }
   }
-  @Test void commandParsingIsStrictAndAllowsSleepAbove100() {
+  @Test void commandParsingEnforcesPercentages() {
     assertFalse(FIRE_SPREAD.parse("FALSE").getAsBoolean());
     assertEquals(0, PLAYERS_SLEEPING_PERCENTAGE.parse("0").getAsInt());
-    assertEquals(101, PLAYERS_SLEEPING_PERCENTAGE.parse("101").getAsInt());
+    assertThrows(IllegalArgumentException.class, () -> PLAYERS_SLEEPING_PERCENTAGE.parse("101"));
     for (String value : new String[]{"true", "-1", "1.0", "1e2", "2147483648"})
       assertThrows(IllegalArgumentException.class, () -> PLAYERS_SLEEPING_PERCENTAGE.parse(value));
     assertThrows(IllegalArgumentException.class, () -> FIRE_SPREAD.parse("yes"));

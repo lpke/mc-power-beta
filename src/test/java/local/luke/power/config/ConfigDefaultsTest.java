@@ -20,7 +20,7 @@ class ConfigDefaultsTest {
     Path config = PowerConfig.path();
     String defaults = Files.readString(config);
     JsonObject root = PowerConfig.document();
-    assertEquals(5, root.get("schemaVersion").getAsInt());
+    assertEquals(6, root.get("schemaVersion").getAsInt());
     assertEquals(2, root.size());
     var settings = root.getAsJsonObject("settings");
     for (String key : List.of("disableEntityCulling", "disableBlockEntityCulling")) {
@@ -103,7 +103,7 @@ class ConfigDefaultsTest {
       try {
         ConfigDefaults.prepare(game);
         assertFalse(PowerConfig.problem().isEmpty());
-        assertEquals(5, PowerConfig.document().get("schemaVersion").getAsInt());
+        assertEquals(6, PowerConfig.document().get("schemaVersion").getAsInt());
         assertThrows(java.io.IOException.class, () -> PowerConfig.write(rootCopy()));
         assertEquals(invalid, Files.readString(config));
       } finally {

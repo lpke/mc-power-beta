@@ -48,7 +48,7 @@ public final class LegacyWorldRules {
     JsonObject gameplay = object(globals, "gameplay");
     rules.set(FIRE_SPREAD, bool(gameplay, "fireSpread", true));
     rules.set(EXPLOSIONS_DESTROY_ITEMS, !bool(gameplay, "explosionProofItems", false));
-    rules.set(SLEEP_AMBUSHES, !bool(object(globals, "power_controls:tweaks"), "disableSleepSpawning", false));
+    rules.set(SLEEP_NIGHTMARES, !bool(object(globals, "power_controls:tweaks"), "disableSleepSpawning", false));
     JsonObject mechanics = object(globals, "power_mechanics:config");
     JsonObject explosions = object(mechanics, "EXPLOSION_AND_FIRE_CONFIG");
     if (bool(explosions, "disableAllExplosionsBreakingBlocks", false) || bool(explosions, "disableTntExplosionBreakingBlocks", false))
@@ -64,8 +64,9 @@ public final class LegacyWorldRules {
       try {
         if (!sleep.isJsonPrimitive() || !sleep.getAsJsonPrimitive().isNumber()) throw new ArithmeticException();
         int percent = sleep.getAsBigDecimal().multiply(java.math.BigDecimal.valueOf(100)).intValueExact();
+        if (percent > 100) { rules.set(ALLOW_SLEEP, false); percent = 100; }
         rules.set(PLAYERS_SLEEPING_PERCENTAGE, percent);
-        if (percent < 100) rules.set(SLEEP_AMBUSHES, false);
+        if (percent < 100) rules.set(SLEEP_NIGHTMARES, false);
       } catch (RuntimeException e) { throw conflict(PLAYERS_SLEEPING_PERCENTAGE, "old sleeping fraction is not an exact non-negative whole percentage"); }
     }
     JsonObject species = object(object(environment, "ENTITY_SPAWN_MECHANICS_CONFIG"), "SPAWN_LIST_CONFIG");

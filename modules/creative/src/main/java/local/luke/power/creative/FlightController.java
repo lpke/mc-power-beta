@@ -38,7 +38,7 @@ public final class FlightController {
     }
     ticks++;
     boolean down = movementKey(mc, mc.options.jumpKey);
-    if (mc.player.creative_isCreative() && Config.current().flight && down && !jumpDown) {
+    if (Modes.canEnableFlight(mc.player) && down && !jumpDown) {
       if (ticks - lastJump <= Config.current().doubleTapTicks) {
         boolean fly = !mc.player.creative_isFlying();
         mc.player.creative_setFlying(fly);
@@ -50,17 +50,17 @@ public final class FlightController {
       } else lastJump = ticks;
     }
     jumpDown = down;
-    if (mc.player.creative_isCreative() && !Config.current().flight)
+    if (!Modes.spectator(mc.player) && !Modes.flightAvailable(mc.player))
       mc.player.creative_setFlying(false);
     sprinting =
         sprint.update(
             movementKey(mc, Keys.SPRINT),
             Modes.flying(mc.player)
-                && Config.current().sprintFlight
+                && (Modes.spectator(mc.player) ? Config.current().spectatorSprintFlight : Config.current().sprintFlight)
                 && ((movementKey(mc, mc.options.forwardKey) != movementKey(mc, mc.options.backKey))
                     || (movementKey(mc, mc.options.leftKey) != movementKey(mc, mc.options.rightKey))
                     || (movementKey(mc, mc.options.jumpKey) != movementKey(mc, mc.options.sneakKey))),
-            Config.current().sprintToggle);
+            Modes.spectator(mc.player) ? Config.current().spectatorSprintToggle : Config.current().sprintToggle);
   }
 
   private static boolean movementKey(Minecraft mc, Object key) {
@@ -93,7 +93,7 @@ public final class FlightController {
     int vertical = manual ? (input.jump ? 1 : 0) - (input.sneak ? 1 : 0) : 0;
     double speed =
         spectator ? ((ModePlayer) player).power_spectatorSpeed() : .05 * settings.flightSpeed / 100;
-    double sprint = settings.sprintFlight && sprinting ? settings.sprintMultiplier / 100.0 : 1;
+    double sprint = sprinting ? (spectator ? settings.spectatorSprintMultiplier : settings.sprintMultiplier) / 100.0 : 1;
     var velocity =
         FlightPhysics.step(
             new FlightPhysics.Motion(player.velocityX, player.velocityY, player.velocityZ),
@@ -103,7 +103,7 @@ public final class FlightController {
             player.yaw,
             speed,
             sprint,
-            spectator ? 5 : settings.glide);
+            spectator ? settings.spectatorGlide : settings.glide);
     player.velocityX = velocity.x();
     player.velocityY = velocity.y();
     player.velocityZ = velocity.z();

@@ -13,7 +13,7 @@ class LegacyWorldRulesTest {
   }
   @Test void oldCheatsPreserveKeepInventoryInsteadOfAdoptingNewPreset() {
     RuleSet rules = LegacyWorldRules.convert(json("{\"cheats\":true}"), new JsonObject());
-    for (GameRule rule : GameRule.values()) if (rule.access()) assertTrue(rules.enabled(rule));
+    for (GameRule rule : GameRule.values()) if (rule.access() && rule != ALLOW_FLIGHT) assertTrue(rules.enabled(rule));
     assertFalse(rules.enabled(KEEP_INVENTORY));
   }
   @Test void worldOverridesAndGlobalMasterAreAppliedBeforeMerging() {

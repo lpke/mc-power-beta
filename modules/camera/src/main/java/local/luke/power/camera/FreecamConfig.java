@@ -20,6 +20,10 @@ public class FreecamConfig {
         public Boolean doorCollision = false;
         @ConfigEntry(name = "Freecam sprint", description = "Use the flight sprint key, multiplier and Hold/Toggle setting to boost camera speed.")
         public Boolean sprint = true;
+        @ConfigEntry(name = "Sprint activation", description = "Hold requires the sprint key; Toggle stays active until movement stops.")
+        public Boolean sprintToggle = true;
+        @ConfigEntry(name = "Sprint speed, %", minValue = 100, maxValue = 400)
+        public Integer sprintMultiplier = 200;
         @ConfigEntry(
                 name = "Freecam Speed",
                 description = "Changing this value will change the speed of the freecam",

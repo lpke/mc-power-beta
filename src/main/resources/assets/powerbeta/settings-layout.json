@@ -6,22 +6,21 @@
   ],
   "Video": [
     "Rendering",
-    "Quality",
     "Lighting",
-    "Sky",
     "Textures",
+    "Quality",
+    "Sky",
+    "Performance",
     "Entity visibility",
-    "Visibility culling",
     "Particles"
   ],
   "Audio": [
     "Volume",
+    "Individual sounds",
+    "Extra sounds",
     "Music library",
     "Music gaps",
     "Menu music controls",
-    "Sound categories",
-    "Extra sounds",
-    "Individual sounds",
     "Individual music tracks",
     "Track rotation",
     "Music data"
@@ -42,10 +41,11 @@
     "Key bindings"
   ],
   "Interface": [
-    "HUD",
-    "Active tweaks",
-    "Custom HUD info",
+    "General HUD",
     "Chat",
+    "Debug (F3) info",
+    "Custom HUD info",
+    "Active tweaks HUD",
     "HUD layout",
     "Combined HUD position",
     "Hotbar position",
@@ -53,11 +53,10 @@
     "Armor position",
     "Oxygen position",
     "Overlay message position",
-    "Debug information",
+    "Version label",
     "Menus",
     "Title screen",
     "Title background",
-    "Version label",
     "Screenshots",
     "Custom screenshots",
     "Isometric screenshots"
@@ -66,8 +65,7 @@
     "View",
     "Third person",
     "Free look",
-    "Free camera",
-    "Flight sprint"
+    "Free camera"
   ],
   "Movement": [
     "Walking",
@@ -134,8 +132,7 @@
     "Explosion and fire",
     "Fast leaf decay",
     "World generation",
-    "Older mechanics",
-    "Dropped items"
+    "Older mechanics"
   ],
   "Crafting": [
     "Recipes",
@@ -149,8 +146,7 @@
     "Items and blocks",
     "Entities",
     "World simulation",
-    "Client fixes",
-    "Performance"
+    "Client fixes"
   ],
   "Advanced": [
     "Network and resources",

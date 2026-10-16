@@ -75,7 +75,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private final boolean directPause;
   private static String rememberedPage = "General";
   private static final Map<String, Double> positions = new HashMap<>();
-  private static final Set<String> rememberedCollapsed = new HashSet<>();
+  private static final Set<String> rememberedCollapsed = new HashSet<>(SettingsLayout.initiallyCollapsed());
   private static double rememberedSideScroll;
   private static boolean showDisabled;
   private List<String> conflictIds = List.of();
@@ -748,6 +748,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (s.id.equals("audio.preset")) {
       libraryOpen = true; library.openPresets(); layout(); return;
     }
+    if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) {
+      minecraft.setScreen(new PanoramaScreen(this, s));
+      return;
+    }
     if (s.id.equals("native.texturePack")) {
       minecraft.setScreen(new TexturePackScreen(this, s));
       return;
@@ -910,6 +914,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private String value(Setting s) {
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
+    if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) return local.luke.power.input.PanoramaCatalog.label(s.value.getAsString());
     if (s.id.equals("audio.preset")) return new MusicEdits(this).name(s.value.getAsString());
     if (capture == s) return modifierLabel(Bindings.heldModifiers()) + "Press key...";
     if (ItemEditors.accepts(s)) return ItemEditors.display(s);

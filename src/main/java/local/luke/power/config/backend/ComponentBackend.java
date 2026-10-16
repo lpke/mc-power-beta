@@ -87,7 +87,7 @@ public final class ComponentBackend implements Backend {
           t.isEnum()
               ? Arrays.stream(t.getEnumConstants()).map(this::enumLabel).toList()
               : List.of();
-      if (name.equals("sprintToggle") || name.equals("freeLookToggle"))
+      if ((name.equals("sprintToggle") || name.equals("spectatorSprintToggle")) || name.equals("freeLookToggle"))
         choices = List.of("Hold", "Toggle");
       if (name.equals("flexible.overlayColor")) {
         kind = Setting.Kind.CHOICE;

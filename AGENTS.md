@@ -32,9 +32,9 @@
   Rule groups identify world scope without repeated row labels.
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
-  track and preset IDs. Global schema 5 supports conversion from schemas 3 and 4 through
-  `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 2
-  supports format 1 and pre-rule metadata through `rules/LegacyWorldRules` and `WorldRuleData`.
+  track and preset IDs. Global schema 6 supports conversion from schemas 3, 4 and 5 through
+  `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 3
+  supports formats 1 and 2 and pre-rule metadata through `rules/LegacyWorldRules`, `WorldRuleUpgrade210` and `WorldRuleData`.
   Preserve frozen legacy evidence for worlds converted later. Use these helpers when
   updating an instance; never widen conflicting permissions or reset unsupported data.
   Validate converted values and verify durable backups before replacing originals.
@@ -56,7 +56,7 @@
   modifier ownership when rebuilding rows. Share render and hit-test geometry.
 - `settings-layout.json` owns tab/group order; catalogue `order` values arrange
   settings inside groups. Presentation metadata applies to every adapter without
-  changing storage IDs. Keep shared flight/freecam sprint controls linked by ID.
+  changing storage IDs. Keep the flight sprint binding shared; Creative, Spectator and freecam own separate sprint preferences.
   The focus-loss pause preference is `power_controls:general.pauseOnLostFocus`.
 - Ctrl, Shift and Alt are the only chord modifiers. Gameplay acts on key-down.
   Test both release orders, held movement, focus loss and open menus.
@@ -184,9 +184,8 @@
 - Natural spawning rules are saved with world properties and copied across
   dimensions. Monsters and animals cover every native species, including squid and
   wolves. Preserve existing mobs and never gate /summon with natural-spawn rules.
-  Dungeon spawners and sleep ambushes have independent rules. The sleeping percentage
-  applies to instant and accelerated sleep; zero still needs a sleeper, above 100
-  prevents skipping, and dead players and spectators do not count.
+  Dungeon spawners and sleep nightmares have independent rules. The sleeping percentage
+  applies to instant and accelerated sleep; zero still needs a sleeper, allow_sleep disables sleeping while retaining bed respawn points, and dead players and spectators do not count.
 - Optional modern water landings reset fall distance before landing damage, for
   source and flowing water. Match fluid height and hitbox contact, including fast
   movement through water. Preserve multiplayer server authority.
@@ -380,3 +379,6 @@
 
 - Plain F4 toggles the custom HUD. A valid mode-picker modifier gesture owns its cycle
   key instead; test both release orders and remapped/chorded bindings.
+
+- Official title backgrounds use verified Mojang client and resource-index assets. Resource-index panoramas override fallback client textures. Keep version IDs stable, deduplicate identical scenes, and render unblurred panoramas at window resolution.
+- /fly changes only flight ability. Survival requires allow_flight; Creative retains its own permission and protection; Spectator flight stays independent. Revocation cancels survival flight safely.

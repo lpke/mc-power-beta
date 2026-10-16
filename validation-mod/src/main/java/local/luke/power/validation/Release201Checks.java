@@ -118,14 +118,14 @@ final class Release201Checks {
       var chest = find(session, "power_controls:features.moreSoundsChests");
       check(chest.label.equals("Chest sounds") && chest.choices.equals(List.of("Off", "Modern", "Door")), "chest choices " + chest.choices);
       check(chest.defaultValue.getAsInt() == 0, "chests default on");
-      var drops = find(session, "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.chanceBlocksDropWhenExploded");
-      check(drops.slider() && drops.defaultValue.getAsDouble() == 1, "drop defaults/control");
+      var drops = find(session, "rules.world.explosion_drop_chance");
+      check(drops.slider() && drops.defaultValue.getAsDouble() == 100, "drop defaults/control");
       for (int percent : new int[]{0, 1, 37, 99, 100}) {
         drops.parse(Integer.toString(percent));
-        check(Math.abs(drops.value.getAsDouble() - percent / 100d) < 1e-8, "percent changed storage units");
+        check(Math.abs(drops.value.getAsDouble() - percent) < 1e-8, "percent changed storage units");
         check(drops.display().equals(Integer.toString(percent)) && drops.rangeText().equals("0 to 100 %"), "percent display " + drops.display());
       }
-      drops.slide(.37); check(Math.abs(drops.value.getAsDouble() - .37) < 1e-8, "percent slider step");
+      drops.slide(.37); check(Math.abs(drops.value.getAsDouble() - 37) < 1e-8, "percent slider step");
       try { drops.parse("101"); throw new AssertionError("accepted >100%"); } catch (IllegalArgumentException expected) {}
     });
     test("chat, custom HUD and placement keys reset to approved defaults", () -> {

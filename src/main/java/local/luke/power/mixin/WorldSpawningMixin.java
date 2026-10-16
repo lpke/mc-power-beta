@@ -26,7 +26,7 @@ public abstract class WorldSpawningMixin {
   }
   @Inject(method = "method_1869", at = @At("HEAD"), cancellable = true)
   private static void power$nightmare(World world, List players, CallbackInfoReturnable<Boolean> cir) {
-    if (!world.isRemote && (!allowed(world, true) || !WorldRules.enabled(world.method_262(), GameRule.SLEEP_AMBUSHES))) cir.setReturnValue(false);
+    if (!world.isRemote && (!allowed(world, true) || !WorldRules.enabled(world.method_262(), GameRule.SLEEP_NIGHTMARES))) cir.setReturnValue(false);
   }
   @ModifyVariable(method = "method_1869", at = @At("HEAD"), argsOnly = true)
   private static List power$sleepers(List players, World world, List ignored) {

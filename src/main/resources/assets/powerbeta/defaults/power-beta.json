@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "settings": {
     "power_capture:config": {
       "addBasicScreenshotsToClipboard": true,
@@ -24,7 +24,9 @@
       "collision": true,
       "classicMovement": false,
       "playerMovementMessages": false,
-      "hideHudOnEntry": false
+      "hideHudOnEntry": false,
+      "sprintToggle": true,
+      "sprintMultiplier": 200
     },
     "power_gold:config": {
       "enableFishingRodLuckOfTheSea": false,
@@ -149,7 +151,11 @@
       "glide": 5,
       "doubleTapTicks": 7,
       "landStopsFlight": true,
-      "showSpectatorSpeed": true
+      "showSpectatorSpeed": true,
+      "spectatorSprintFlight": true,
+      "spectatorSprintToggle": true,
+      "spectatorSprintMultiplier": 200,
+      "spectatorGlide": 5
     },
     "building": {
       "slabs": {
@@ -216,10 +222,7 @@
         "enableSnowballsExtinguishFire": false,
         "enableFireTurnsGrassIntoDirt": false,
         "enableGhastFireballsToInstaKillGhasts": true,
-        "enableDefusingTnt": false,
-        "chanceBlocksDropWhenExploded": 1.0,
-        "disableGhastExplosionCausingFire": false,
-        "disableLightningStrikeCausingFire": true
+        "enableDefusingTnt": false
       },
       "FLORA_CONFIG": {
         "enableRandomStickDropFromDeadBushes": true,
@@ -390,7 +393,6 @@
       "WEATHER_CONFIG": {
         "enableAlwaysSnowAboveSetYLevel": false,
         "alwaysSnowAboveThisYLevel": 100,
-        "disableRain": false,
         "disableThunder": false,
         "disableRainInSavannaBiomes": false,
         "sleepOnlyResetsWeatherWhenRaining": false,
@@ -531,7 +533,6 @@
       "expandChickenHitbox": true,
       "stackableChests": false,
       "modernFlintAndSteel": true,
-      "disableSleeping": false,
       "preventItemsStoppingMinecarts": true,
       "allowIgnitingEntities": true,
       "allowTrapdoorsWithoutSupport": true,
@@ -555,8 +556,8 @@
       },
       "panoramaConfig": {
         "enablePanorma": false,
-        "blurBackground": true,
-        "panoramaFolder": "glacier"
+        "blurBackground": false,
+        "panoramaFolder": "b1_8_1"
       },
       "photoModeConfig": {
         "enablePhotoModeButton": true
@@ -867,7 +868,7 @@
     },
     "gameRules": {
       "survival": {
-        "version": 2,
+        "version": 3,
         "values": {
           "allow_creative_mode": false,
           "allow_death_recovery": false,
@@ -894,7 +895,6 @@
           "mob_drops": true,
           "peaceful_health_regeneration": true,
           "players_sleeping_percentage": 100,
-          "sleep_ambushes": true,
           "spawn_animals": true,
           "spawn_monsters": true,
           "spawner_blocks_work": true,
@@ -902,11 +902,17 @@
           "explosions_destroy_items": true,
           "player_crop_trampling": false,
           "lava_destroys_items": true,
-          "cactus_destroys_items": true
+          "cactus_destroys_items": true,
+          "sleep_nightmares": true,
+          "allow_sleep": true,
+          "allow_flight": false,
+          "ghast_explosion_fire": true,
+          "lightning_strike_fire": false,
+          "explosion_drop_chance": 100
         }
       },
       "cheats": {
-        "version": 2,
+        "version": 3,
         "values": {
           "allow_creative_mode": true,
           "allow_death_recovery": true,
@@ -933,7 +939,6 @@
           "mob_drops": true,
           "peaceful_health_regeneration": true,
           "players_sleeping_percentage": 100,
-          "sleep_ambushes": true,
           "spawn_animals": true,
           "spawn_monsters": true,
           "spawner_blocks_work": true,
@@ -941,7 +946,13 @@
           "explosions_destroy_items": true,
           "player_crop_trampling": false,
           "lava_destroys_items": true,
-          "cactus_destroys_items": true
+          "cactus_destroys_items": true,
+          "sleep_nightmares": true,
+          "allow_sleep": true,
+          "allow_flight": true,
+          "ghast_explosion_fire": true,
+          "lightning_strike_fire": false,
+          "explosion_drop_chance": 100
         }
       }
     },

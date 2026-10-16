@@ -1,6 +1,5 @@
 package local.luke.power.mechanics.mixin;
 
-import local.luke.power.mechanics.Config;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.block.FireBlock;
@@ -20,7 +19,7 @@ public class LightningEntityMixin {
             )
     )
     public boolean powerMechanics_lightningEntityInit(FireBlock instance, World world, int x, int y, int z, Operation<Boolean> original) {
-        if (Config.config.EXPLOSION_AND_FIRE_CONFIG.disableLightningStrikeCausingFire) {
+        if (!world.isRemote && !local.luke.power.rules.WorldRules.enabled(world.getProperties(), local.luke.power.rules.GameRule.LIGHTNING_STRIKE_FIRE)) {
             return false;
         } else {
             return original.call(instance, world, x, y, z);
@@ -35,7 +34,7 @@ public class LightningEntityMixin {
             )
     )
     public boolean powerMechanics_tick(FireBlock instance, World world, int x, int y, int z, Operation<Boolean> original) {
-        if (Config.config.EXPLOSION_AND_FIRE_CONFIG.disableLightningStrikeCausingFire) {
+        if (!world.isRemote && !local.luke.power.rules.WorldRules.enabled(world.getProperties(), local.luke.power.rules.GameRule.LIGHTNING_STRIKE_FIRE)) {
             return false;
         } else {
             return original.call(instance, world, x, y, z);

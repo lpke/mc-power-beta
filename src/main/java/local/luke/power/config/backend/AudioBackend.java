@@ -27,7 +27,7 @@ public final class AudioBackend implements Backend {
     for (var e : s.categories.entrySet())
       add(
           "category." + e.getKey(),
-          "Sound categories",
+          "Volume",
           Catalog.words(e.getKey()),
           Setting.Kind.INTEGER,
           new JsonPrimitive(e.getValue()),

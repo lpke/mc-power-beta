@@ -115,8 +115,8 @@ public final class ControlLinks {
       case "creative.blockReach" -> setting.id.equals("creative.entityReach");
       case "visual.hideEntities" -> setting.group.equals("Entity visibility");
       case "visual.fullBrightMessages" -> setting.id.equals("visual.spectatorFullBright");
-      case "creative.sprintToggle" -> setting.page.equals("Creative") && setting.group.equals("Flight")
-          || setting.id.equals("creative.sprintMultiplier") || setting.id.equals("power_camera:config.sprint");
+      case "creative.sprintToggle" -> setting.page.equals("Creative") && Set.of("Flight", "Spectator").contains(setting.group)
+          || setting.id.startsWith("power_camera:config.sprint");
       case "video.fogCycle" -> setting.id.equals("native.renderDistance") || setting.id.equals("native.fogDensity");
       case "power_controls:userinterface.frontViewThirdPerson" -> setting.id.equals("visual.thirdPersonDistance");
       case "power_capture:config.isometricPhotoScale" -> setting.id.equals("power_capture:config.mirrorIsometricScreenshot")
@@ -127,7 +127,8 @@ public final class ControlLinks {
   public static boolean enabled(ConfigSession session, Setting key) {
     // Flight and freecam share this action; either enabled use keeps it available.
     if (key.id.equals("keys.power_creative.sprint"))
-      return featureEnabled(session, "creative.sprintFlight") || featureEnabled(session, "power_camera:config.sprint");
+      return session.settings().stream().anyMatch(s -> Set.of("creative.sprintFlight", "creative.spectatorSprintFlight", "power_camera:config.sprint").contains(s.id)
+          && SettingAccess.visible(session, s) && s.value.getAsBoolean());
     Link l = LINKS.get(key.id);
     return l == null || l.featureGate.isEmpty() || featureEnabled(session, l.featureGate);
   }

@@ -111,13 +111,13 @@ final class CleanupChecks {
       test("weather freeze pauses weather suppression tweaks and resumes them normally", () -> {
         ConfigSession session=SettingsRegistry.open(mc);
         try {
-          for(String name:List.of("disableRain","disableThunder"))find(session,"power_environment:config.WEATHER_CONFIG."+name).value=new JsonPrimitive(true);
+          for(String name:List.of("disableThunder"))find(session,"power_environment:config.WEATHER_CONFIG."+name).value=new JsonPrimitive(true);
           session.preview(true);properties.setRaining(true);properties.setThundering(true);
           properties.setRainTime(800);properties.getThunderTime(700);cycles.power$weatherCycle(false);
           call(mc.world,"method_245");
           check(properties.getRaining()&&properties.getThundering()&&properties.getRainTime()==800&&properties.getThunderTime()==700,"suppression changed frozen weather");
           cycles.power$weatherCycle(true);call(mc.world,"method_245");
-          check(!properties.getRaining()&&!properties.getThundering(),"suppression failed to resume");
+          check(properties.getRaining()&&!properties.getThundering(),"thunder suppression changed rain or failed to resume");
         } finally {session.discard();}
       });
       test("right-click edits standing and wall signs without consuming items; Shift and Off do not", () -> {

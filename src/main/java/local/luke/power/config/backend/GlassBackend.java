@@ -55,6 +55,7 @@ public final class GlassBackend implements Backend {
               : List.of();
       if (key.equals("power_hud:hudpositions.hudPositioningSystem"))
         choices = List.of("Vanilla", "Combined", "Separate");
+      if (key.equals("power_camera:config.sprintToggle")) choices = List.of("Hold", "Toggle");
       Setting.Kind kind =
           type.isEnum()
               ? Setting.Kind.CHOICE

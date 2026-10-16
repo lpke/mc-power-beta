@@ -25,7 +25,7 @@ class WorldRuleUpgradeTest {
     JsonObject source = json("{\"schemaVersion\":4,\"settings\":{\"gameplay\":{\"lavaProofItems\":true,\"cactusProofItems\":false}}}");
     JsonObject before = source.deepCopy(), converted = ConfigVersions.convert(source);
     assertEquals(before, source);
-    assertEquals(5, converted.get("schemaVersion").getAsInt());
+    assertEquals(6, converted.get("schemaVersion").getAsInt());
     assertFalse(converted.getAsJsonObject("settings").getAsJsonObject("gameplay").has("lavaProofItems"));
     RuleSet rules = WorldRuleUpgrade.defaults(converted.getAsJsonObject("worldRuleUpgrade"));
     assertFalse(rules.enabled(LAVA_DESTROYS_ITEMS));
@@ -59,7 +59,7 @@ class WorldRuleUpgradeTest {
     JsonObject source = json("{\"schemaVersion\":4,\"settings\":{\"gameRules\":{\"survival\":{\"version\":1,\"values\":{\"mob_crop_trampling\":true}}}}}");
     JsonObject preset = ConfigVersions.convert(source).getAsJsonObject("settings").getAsJsonObject("gameRules").getAsJsonObject("survival");
     RuleSet rules = RuleSet.read(preset, new RuleSet());
-    assertEquals(2, preset.get("version").getAsInt());
+    assertEquals(3, preset.get("version").getAsInt());
     assertTrue(rules.enabled(MOB_CROP_TRAMPLING));
     assertFalse(rules.enabled(PLAYER_CROP_TRAMPLING));
     assertTrue(rules.enabled(LAVA_DESTROYS_ITEMS));

@@ -27,8 +27,8 @@ class SettingsLayoutTest {
 
   @Test void presentationMovesKeepIdentityValueAndDraftState() {
     Setting sprint = setting("creative.sprintMultiplier", "Creative", "Flight");
-    assertEquals("Camera", sprint.page);
-    assertEquals("Flight sprint", sprint.group);
+    assertEquals("Creative", sprint.page);
+    assertEquals("Flight", sprint.group);
     assertEquals("creative.sprintMultiplier", sprint.id);
     assertEquals("test", sprint.backend);
     assertFalse(sprint.value.getAsBoolean());
@@ -62,5 +62,26 @@ class SettingsLayoutTest {
     assertTrue(ControlLinks.controls(session, multiplier).contains(sprint));
     assertEquals(distances, ControlLinks.related(session, fog));
     assertTrue(ControlLinks.settings(session, fog).contains(distance));
+  }
+  @Test void initialCollapsesAreIndependentCopiesAndFollowTheRequestedGroups() {
+    var initial = SettingsLayout.initiallyCollapsed();
+    assertFalse(initial.contains("Interface/General HUD"));
+    assertFalse(initial.contains("Interface/Chat"));
+    for (String page : List.of("Gameplay", "Fixes")) for (String group : SettingsLayout.groups(page))
+      assertTrue(initial.contains(page + "/" + group));
+    for (String group : SettingsLayout.groups("Interface"))
+      assertEquals(!Set.of("General HUD", "Chat").contains(group), initial.contains("Interface/" + group));
+    assertTrue(initial.containsAll(Set.of("Video/Entity visibility", "Video/Particles", "Audio/Individual sounds", "Advanced/Achievement recovery")));
+    initial.clear(); assertFalse(SettingsLayout.initiallyCollapsed().isEmpty());
+  }
+
+  @Test void everySleepingEditorUsesTheSameBoundedSlider() {
+    for (String prefix : List.of("rules.world.", "rules.creation.", "rules.survival.", "rules.cheats.")) {
+      var rules = new local.luke.power.rules.RuleSet();
+      var entries = local.luke.power.config.backend.RuleSettings.entries("test", prefix, rules, rules);
+      Setting sleep = entries.stream().filter(s -> s.id.equals(prefix + "players_sleeping_percentage")).findFirst().orElseThrow();
+      assertTrue(sleep.slider()); assertEquals(0, sleep.min); assertEquals(100, sleep.max);
+      assertEquals(entries.indexOf(sleep) - 1, entries.indexOf(entries.stream().filter(s -> s.id.equals(prefix + "allow_sleep")).findFirst().orElseThrow()));
+    }
   }
 }

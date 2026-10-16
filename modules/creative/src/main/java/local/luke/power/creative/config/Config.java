@@ -12,6 +12,10 @@ public final class Config {
   }
   public static Settings current() { return settings; }
   public static void preview(Settings next) { next.validate(); settings = next.copy(); }
+  public static void flight(boolean enabled) {
+    Settings next = settings.copy(); next.flight = enabled;
+    preview(next); PowerConfig.saveDeferred("creative", next);
+  }
   public static void apply(Settings next) throws IOException {
     next.validate(); PowerConfig.save("creative", next); preview(next);
   }

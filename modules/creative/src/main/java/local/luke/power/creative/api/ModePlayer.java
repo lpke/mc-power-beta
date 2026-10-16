@@ -4,6 +4,10 @@ package local.luke.power.creative.api;
 public interface ModePlayer extends local.luke.power.input.PlayerMode {
   default boolean power$creative() { return power_mode() == GameMode.CREATIVE; }
   default boolean power$spectator() { return power_isSpectator(); }
+  int power_flightOverride();
+
+  void power_flightOverride(int value);
+
   GameMode power_mode();
 
   GameMode power_previousMode();

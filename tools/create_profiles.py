@@ -34,7 +34,7 @@ def create(output, reference, java=None):
         if configured:
             source = reference / 'config/power-beta.json'
             document = json.loads(source.read_text())
-            if document.get('schemaVersion') != 4 or not isinstance(document.get('settings'), dict):
+            if document.get('schemaVersion') not in (3, 4, 5, 6) or not isinstance(document.get('settings'), dict):
                 raise ValueError('Reference must use the current Power Beta configuration')
             shutil.copy2(source, game / 'config/power-beta.json')
             selected = document['settings'].get('native', {}).get('skin', 'Default')

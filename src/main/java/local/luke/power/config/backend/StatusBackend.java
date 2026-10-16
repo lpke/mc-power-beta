@@ -38,10 +38,11 @@ public final class StatusBackend implements Backend {
         case "autoMine" -> "Show while auto-mine is holding the attack and block-breaking action.";
         default -> "Include " + label.toLowerCase(Locale.ROOT) + " while it is enabled.";
       };
+      if (toggle && !name.equals("enabled") && !name.endsWith("Messages")) label = "Include " + label;
       boolean offset = name.startsWith("offset");
       Setting.Kind kind = toggle ? Setting.Kind.BOOLEAN : name.equals("position") ? Setting.Kind.CHOICE
           : field.getType() == String.class ? Setting.Kind.TEXT : Setting.Kind.INTEGER;
-      entries.add(new Setting("activeTweaks." + name, "activeTweaks", "Interface", "Active tweaks",
+      entries.add(new Setting("activeTweaks." + name, "activeTweaks", "Interface", "Active tweaks HUD",
           label, help, kind, Catalog.JSON.toJsonTree(field.get(current)), Catalog.JSON.toJsonTree(field.get(defaults)),
           offset ? -4096 : 0, offset ? 4096 : name.equals("opacity") ? 100 : name.equals("position") ? 8 : 1,
           1, name.equals("position") ? List.of("Top left", "Top centre", "Top right", "Middle left",

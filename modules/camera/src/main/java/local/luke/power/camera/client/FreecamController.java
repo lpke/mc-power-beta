@@ -57,29 +57,13 @@ public class FreecamController {
 
 
     private boolean sprintDown, sprintLatched;
-    private static java.lang.reflect.Method flightSettings;
-    private static java.lang.reflect.Field sprintToggle, sprintMultiplier;
-    static {
-        try {
-            Class<?> api = Class.forName("local.luke.power.creative.config.Config");
-            flightSettings = api.getMethod("current");
-            Class<?> settings = flightSettings.getReturnType();
-            sprintToggle = settings.getField("sprintToggle");
-            sprintMultiplier = settings.getField("sprintMultiplier");
-        } catch (ReflectiveOperationException e) { throw new ExceptionInInitializerError(e); }
-    }
     public float movementSpeed() {
         Minecraft minecraft = (Minecraft)FabricLoader.getInstance().getGameInstance();
         boolean pressed = local.luke.power.input.Bindings.down("power_creative.sprint");
         boolean eligible = minecraft != null && active && (move != 0 || strafe != 0 || jumping != sneaking) && minecraft.currentScreen == null && org.lwjgl.opengl.Display.isActive()
             && local.luke.power.camera.FreecamConfig.config.sprint;
-        boolean toggle = true;
-        double multiplier = 3;
-        try {
-            Object settings = flightSettings.invoke(null);
-            toggle = sprintToggle.getBoolean(settings);
-            multiplier = sprintMultiplier.getInt(settings) / 100.0;
-        } catch (ReflectiveOperationException ignored) { }
+        boolean toggle = local.luke.power.camera.FreecamConfig.config.sprintToggle;
+        double multiplier = local.luke.power.camera.FreecamConfig.config.sprintMultiplier / 100.0;
         if (!eligible) sprintLatched = false;
         else if (toggle && pressed && !sprintDown) sprintLatched = !sprintLatched;
         sprintDown = pressed;

@@ -34,13 +34,13 @@ public final class InterfaceBackend implements Backend {
             new Setting("interface.blinkingChatCursor", "interface", "Interface", "Chat", "Blinking chat cursor",
                 "Blink the chat cursor. Off keeps the beam visible while editing.", Setting.Kind.BOOLEAN,
                 new JsonPrimitive(MenuPreferences.blinkingChatCursor()), new JsonPrimitive(true), 0, 1, 1, List.of(), false),
-            new Setting("interface.useFeetYCoordinates", "interface", "Interface", "Debug information", "Use feet Y coordinates",
+            new Setting("interface.useFeetYCoordinates", "interface", "Interface", "Debug (F3) info", "Use feet Y coordinates",
                 "Use feet height in F3 and custom HUD coordinates, as in modern Minecraft. Off uses Beta's eye height. Freecam and spectator always report the base of the head.", Setting.Kind.BOOLEAN,
                 new JsonPrimitive(MenuPreferences.useFeetYCoordinates()), new JsonPrimitive(true), 0, 1, 1, List.of(), false),
-            new Setting("interface.debugTimeOfDay", "interface", "Interface", "Debug information", "Time of day",
+            new Setting("interface.debugTimeOfDay", "interface", "Interface", "Debug (F3) info", "Time of day",
                 "Show the world's daylight time in F3, using a 12-hour clock.", Setting.Kind.BOOLEAN,
                 new JsonPrimitive(MenuPreferences.debugTimeOfDay()), new JsonPrimitive(false), 0, 1, 1, List.of(), false),
-            new Setting("interface.debugTextColor", "interface", "Interface", "Debug information", "Text colour",
+            new Setting("interface.debugTextColor", "interface", "Interface", "Debug (F3) info", "Text colour",
                 "Colour of all F3 debug text.", Setting.Kind.TEXT,
                 new JsonPrimitive(MenuPreferences.debugTextColor()), new JsonPrimitive("#FFFFFF"), 0, 0, 1, List.of(), false)));
   }

@@ -35,7 +35,6 @@ public class Config {
         @ConfigEntry(name = "Show Quit Button", description = "Shows Quit Button on the Main Menu")
         public Boolean showQuitButton = true;
 
-
         @ConfigEntry(name = "Hide Achievement Toast")
         public Boolean hideAchievementToast = false;
 
@@ -75,10 +74,10 @@ public class Config {
             public Boolean enablePanorma = true;
 
             @ConfigEntry(name = "Blur Panorama")
-            public Boolean blurBackground = true;
+            public Boolean blurBackground = false;
 
-            @ConfigEntry(name = "Panorama folder to use", description = "Default included : beta18, glacier")
-            public String panoramaFolder = "glacier";
+            @ConfigEntry(name = "Panorama folder to use", description = "Choose an original Minecraft title background.")
+            public String panoramaFolder = "b1_8_1";
         }
 
         public static class VersionTextConfig {
@@ -202,10 +201,6 @@ public class Config {
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Don't Damage Flint And Steel on failed ignite", multiplayerSynced = true)
         public Boolean modernFlintAndSteel = true;
-
-        @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
-        @ConfigEntry(name = "Disable sleeping but retain respawning", multiplayerSynced = true)
-        public Boolean disableSleeping = false;
 
         @ValueOnVanillaServer(booleanValue = TriBoolean.FALSE)
         @ConfigEntry(name = "Prevent Items Stopping Minecarts", multiplayerSynced = true)

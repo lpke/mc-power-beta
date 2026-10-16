@@ -140,10 +140,10 @@ final class RuleBehaviorChecks {
           drop=mc.player.method_1327(new ItemStack(4,1,0),0);check(!drop.dead,"player drop blocked");drop.markDead();
         }
       });
-      test("sleep threshold uses actual sleepers, rejects over 100 and requires one sleeper at zero", () -> {
+      test("sleep threshold uses actual sleepers, uses allow_sleep and requires one sleeper at zero", () -> {
         var sleep=(local.luke.power.validation.mixin.PlayerSleepAccess)mc.player;
         try {
-          for(int percentage:new int[]{0,1,50,100,101,Integer.MAX_VALUE}) {
+          for(int percentage:new int[]{0,1,50,100}) {
             WorldRules.of(mc.world.method_262()).set(GameRule.PLAYERS_SLEEPING_PERCENTAGE,new JsonPrimitive(percentage));
             sleep.power$sleeping(false);sleep.power$sleepTimer(0);
             check(!mc.world.method_268(),"night skipped without sleepers");

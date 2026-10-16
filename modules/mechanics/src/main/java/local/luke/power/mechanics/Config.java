@@ -91,26 +91,6 @@ public class Config {
         )
         public Boolean enableDefusingTnt = false;
 
-        @ConfigEntry(
-                name = "Chance Blocks Drop When Exploded",
-                description = "Float value between 0.0 (0%) and 1.0 (100%)",
-                multiplayerSynced = true,
-                maxLength = 1
-        )
-        public Float chanceBlocksDropWhenExploded = 1.0F;
-
-        @ConfigEntry(
-                name = "Disable Ghast Explosion Causing Fire",
-                multiplayerSynced = true
-        )
-        public Boolean disableGhastExplosionCausingFire = false;
-
-        @ConfigEntry(
-                name = "Disable Lightning Strike Causing Fire",
-                multiplayerSynced = true
-        )
-        public Boolean disableLightningStrikeCausingFire = true;
-
     }
 
     public static class FloraConfig {
@@ -230,7 +210,6 @@ public class Config {
                 multiplayerSynced = true
         )
         public ZombiePigmanDropEnum zombiePigmanDropItem = ZombiePigmanDropEnum.COOKED_PORKCHOP;
-
 
     }
 }

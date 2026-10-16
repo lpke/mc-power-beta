@@ -6,12 +6,21 @@ public final class SettingAccess {
   private SettingAccess() {}
 
   public static boolean visible(ConfigSession session, Setting setting) {
+    if (setting.id.startsWith("power_hud:hudpositions.")) {
+      int mode = session.settings().stream().filter(s -> s.id.equals("power_hud:hudpositions.hudPositioningSystem"))
+          .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(1);
+      if (setting.id.contains(".SIMPLE_HUD_POSITION_CONFIG.")) return mode == 1;
+      if (setting.id.contains(".ADVANCED_HUD_POSITIONS_CONFIG.")) return mode == 2;
+    }
     var rule = owner(setting);
     if (rule == null) return true;
     boolean inWorld = session.settings().stream().anyMatch(s -> s.id.startsWith("rules.world."));
     if (!inWorld) return !CommandPermissions.context().multiplayer();
-    if (setting.id.equals("creative.sprintFlight") || setting.id.contains("power_creative.picker") || setting.id.contains("power_creative.modifier"))
+    if (setting.id.contains("power_creative.picker") || setting.id.contains("power_creative.modifier"))
       return enabled(session, local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE) || enabled(session, local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE);
+    if (setting.backend.equals("creative") && setting.group.equals("Flight"))
+      return enabled(session, local.luke.power.rules.GameRule.ALLOW_FLIGHT)
+          || enabled(session, local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE);
     return enabled(session, rule);
   }
   private static boolean enabled(ConfigSession session, local.luke.power.rules.GameRule rule) {
@@ -23,8 +32,8 @@ public final class SettingAccess {
     if (id.startsWith("worldedit.")) return local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING;
     if (id.equals("visual.spectatorFullBright")
         || id.startsWith("creative.spectator") || id.equals("creative.showSpectatorSpeed")) return local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE;
-    // Reach is also used by container previews; sprint controls are shared with freecam.
-    if (java.util.Set.of("creative.sprintToggle", "creative.sprintMultiplier", "creative.blockReach", "creative.entityReach", "keys.power_creative.sprint").contains(id)) return null;
+    // Reach is also used by container previews; the sprint binding is shared across modes.
+    if (java.util.Set.of("creative.blockReach", "creative.entityReach", "keys.power_creative.sprint").contains(id)) return null;
     if (setting.backend.equals("creative") || id.contains("power_creative.") || id.equals("gameplay.leavesDropSaplingsInCreative"))
       return local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE;
     return null;

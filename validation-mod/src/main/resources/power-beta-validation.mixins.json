@@ -31,7 +31,8 @@
     "Tooltip173Capture",
     "Item173Capture",
     "Debug174Capture",
-    "FreecamMotionCapture"
+    "FreecamMotionCapture",
+    "Explosion210Capture"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -28,12 +28,12 @@ final class WorldRulesChecks {
     String mode = mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     try {
       mc.setScreen(null); DeathChecks.alive(mc); CreativeVehicleChecks.mode(mc, "SURVIVAL");
-      test("all 34 rules retain types, aliases, defaults, dimension copies and native NBT", () -> {
-        check(GameRule.values().length == 34, "rule inventory differs from the decision record");
+      test("all 39 rules retain types, aliases, defaults, dimension copies and native NBT", () -> {
+        check(GameRule.values().length == 39, "rule inventory differs from the decision record");
         RuleSet values = new RuleSet();
         for (GameRule rule : GameRule.values()) {
           check(GameRule.find(rule.id()) == rule && GameRule.find(rule.alias()) == rule, "alias mismatch " + rule);
-          if (rule.integer()) values.set(rule, new com.google.gson.JsonPrimitive(Integer.MAX_VALUE));
+          if (rule.integer()) values.set(rule, new com.google.gson.JsonPrimitive(73));
           else values.set(rule, !values.enabled(rule));
         }
         var properties = new WorldProperties(173L, "Rules fixture");
@@ -125,7 +125,7 @@ final class WorldRulesChecks {
           try { GameRuleCommand.execute(mc, new String[]{"gamerule", rule.id(), "invalid"}); throw new AssertionError("invalid value accepted " + rule); }
           catch (IllegalArgumentException expected) {}
           check(Arrays.equals(saved, Files.readAllBytes(metadata)), "invalid command wrote world metadata");
-          GameRuleCommand.execute(mc, new String[]{"gamerule", rule.alias(), rule.integer() ? "101" : "false"});
+          GameRuleCommand.execute(mc, new String[]{"gamerule", rule.alias(), rule.integer() ? "73" : "false"});
           var persisted = WorldRuleData.read(WorldRuleFiles.read(metadata).getCompound("Data"));
           check(persisted.equals(AccessRules.copy(mc)), "persisted rule differs " + rule);
         }
@@ -141,13 +141,13 @@ final class WorldRulesChecks {
   }
 
   static void ui(Minecraft mc) throws Exception {
-    test("rule editor exposes 34 searchable rules and independently hides unavailable tools", () -> {
+    test("rule editor exposes 39 searchable rules and independently hides unavailable tools", () -> {
       AccessRules.restore(mc, new RuleSet());
       var screen = new PowerOptionsScreen(null); mc.setScreen(screen);
       check(screen.visiblePages().contains("Game rules"), "missing rules tab");
       check(!screen.visiblePages().contains("World editing"), "unavailable editing tab visible");
       var session = screen.session();
-      check(session.settings().stream().filter(s -> s.id.startsWith("rules.world.")).count() == 34, "missing rules");
+      check(session.settings().stream().filter(s -> s.id.startsWith("rules.world.")).count() == 39, "missing rules");
       check(session.settings().stream().noneMatch(s -> s.id.equals("world.cheats") || s.backend.equals("commandAccess")), "obsolete access controls");
       for (var rule : GameRule.values()) check(SettingAccess.visible(session, find(session, "rules.world." + rule.id())), "rule hidden " + rule);
       find(session, "rules.world.allow_spectator_mode").parse("true"); call(screen, "layout");

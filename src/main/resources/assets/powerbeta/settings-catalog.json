@@ -81,7 +81,7 @@
   },
   "entityculling:config.disableEntityCulling": {
     "page": "Video",
-    "group": "Visibility culling",
+    "group": "Performance",
     "label": "Enable entity culling",
     "description": "Skips drawing mobs, dropped items and other entities fully hidden behind solid blocks.",
     "default": true,
@@ -89,7 +89,7 @@
   },
   "entityculling:config.disableBlockEntityCulling": {
     "page": "Video",
-    "group": "Visibility culling",
+    "group": "Performance",
     "label": "Enable block entity culling",
     "description": "Skips drawing signs and other block entities fully hidden behind solid blocks.",
     "default": true,
@@ -97,7 +97,7 @@
   },
   "entityculling:config.showF3Info": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Culling statistics",
     "description": "Shows visible and culled object counts in the debug overlay.",
     "default": true,
@@ -105,7 +105,7 @@
   },
   "entityculling:config.f3InfoYOffset": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "F3 info y offset",
     "description": "",
     "default": 0,
@@ -116,7 +116,7 @@
   },
   "entityculling:config.glassCulls": {
     "page": "Video",
-    "group": "Visibility culling",
+    "group": "Performance",
     "label": "Treat glass as opaque",
     "description": "Uses glass as an opaque blocker for visibility checks. This can hide objects that should be visible through glass.",
     "default": false,
@@ -132,7 +132,7 @@
     "min": 0.1,
     "max": 100,
     "step": 0.1,
-    "order": 1
+    "order": 0
   },
   "power_camera:config.drag": {
     "page": "Camera",
@@ -144,7 +144,7 @@
     "min": 0.1,
     "max": 100,
     "step": 0.1,
-    "order": 2
+    "order": 1
   },
   "power_camera:config.collision": {
     "page": "Camera",
@@ -153,7 +153,7 @@
     "description": "",
     "default": true,
     "restart": false,
-    "order": 5
+    "order": 6
   },
   "power_camera:config.classicMovement": {
     "page": "Camera",
@@ -162,7 +162,7 @@
     "description": "When this option is enabled the freecam will move like in older versions of Freecam",
     "default": false,
     "restart": false,
-    "order": 3
+    "order": 5
   },
   "power_gold:config.enableFishingRodLuckOfTheSea": {
     "page": "Gameplay",
@@ -303,7 +303,7 @@
   },
   "power_hud:config.coordinateDisplay": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Coordinate display for debug overlay",
     "description": "",
     "default": 0,
@@ -311,7 +311,7 @@
   },
   "power_hud:config.disableCrosshair": {
     "page": "Interface",
-    "group": "HUD",
+    "group": "General HUD",
     "label": "Disable crosshair",
     "description": "",
     "default": false,
@@ -327,7 +327,7 @@
   },
   "power_hud:config.drawXboxXAndYButtons": {
     "page": "Interface",
-    "group": "HUD",
+    "group": "General HUD",
     "label": "Draw xbox x and y buttons",
     "description": "",
     "default": false,
@@ -343,7 +343,7 @@
   },
   "power_hud:config.enableHotbarItemSelectionTooltips": {
     "page": "Interface",
-    "group": "HUD",
+    "group": "General HUD",
     "label": "Hotbar item selection tooltips",
     "description": "",
     "default": false,
@@ -351,7 +351,7 @@
   },
   "power_hud:config.hotbarItemSelectionFadeTime": {
     "page": "Interface",
-    "group": "HUD",
+    "group": "General HUD",
     "label": "Hotbar item selection fade time (seconds)",
     "description": "Time the selected hotbar item name stays visible.",
     "default": 40,
@@ -878,36 +878,6 @@
     "default": false,
     "restart": false
   },
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.chanceBlocksDropWhenExploded": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
-    "label": "Explosion block drops, %",
-    "description": "Chance that a block destroyed by an explosion drops its item.",
-    "default": 1.0,
-    "restart": false,
-    "min": 0,
-    "max": 1,
-    "step": 0.01,
-    "displayDivisor": 0.01,
-    "unit": "%",
-    "control": "slider"
-  },
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionCausingFire": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
-    "label": "Disable ghast explosion causing fire",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
-  "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableLightningStrikeCausingFire": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
-    "label": "Disable lightning strike causing fire",
-    "description": "",
-    "default": true,
-    "restart": false
-  },
   "power_mechanics:config.FLORA_CONFIG.enableRandomStickDropFromDeadBushes": {
     "page": "Gameplay",
     "group": "Plants and harvesting",
@@ -1074,7 +1044,7 @@
   },
   "power_client_fixes:config.enableDebugMenuWorldSeed": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Debug menu world seed",
     "description": "Restart required for changes to take effect",
     "default": true,
@@ -1297,7 +1267,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebug": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Show music in debug",
     "description": "Show the current track in the F3 debug overlay.",
     "default": false,
@@ -1305,7 +1275,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Music debug offset",
     "description": "",
     "default": 0,
@@ -1413,15 +1383,6 @@
     "max": 128,
     "step": 1,
     "order": 4
-  },
-  "power_environment:config.WEATHER_CONFIG.disableRain": {
-    "page": "Gameplay",
-    "group": "Weather",
-    "label": "Disable rain",
-    "description": "",
-    "default": false,
-    "restart": false,
-    "order": 0
   },
   "power_environment:config.WEATHER_CONFIG.disableThunder": {
     "page": "Gameplay",
@@ -2393,14 +2354,6 @@
     "default": true,
     "restart": false
   },
-  "power_controls:tweaks.disableSleeping": {
-    "page": "Gameplay",
-    "group": "Sleep",
-    "label": "Disable sleeping but retain respawning",
-    "description": "",
-    "default": false,
-    "restart": false
-  },
   "power_controls:tweaks.preventItemsStoppingMinecarts": {
     "page": "Movement",
     "group": "Vehicles",
@@ -2460,7 +2413,7 @@
   },
   "power_controls:userinterface.disableDebugEntityIdTags": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Disable F3 entity id tags",
     "description": "",
     "default": true,
@@ -2529,16 +2482,16 @@
     "group": "Title background",
     "label": "Blur panorama",
     "description": "",
-    "default": true,
+    "default": false,
     "restart": false,
     "order": 2
   },
   "power_controls:userinterface.panoramaConfig.panoramaFolder": {
     "page": "Interface",
     "group": "Title background",
-    "label": "Panorama folder to use",
-    "description": "Default included : beta18, glacier",
-    "default": "glacier",
+    "label": "Panorama",
+    "description": "Choose an original Minecraft title background.",
+    "default": "b1_8_1",
     "restart": false,
     "order": 1
   },
@@ -2721,7 +2674,7 @@
   },
   "power_compat:config.addBiomeToDebugOverlay": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Add biome to debug overlay",
     "description": "",
     "default": true,
@@ -2729,7 +2682,7 @@
   },
   "power_compat:config.addDayCounterToDebugOverlay": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Add day counter to debug overlay",
     "description": "",
     "default": true,
@@ -2737,7 +2690,7 @@
   },
   "power_compat:config.addTotalPlayTimeToDebugOverlay": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Add hours played to debug overlay",
     "description": "",
     "default": true,
@@ -2745,7 +2698,7 @@
   },
   "power_compat:config.addSlimeChunkToDebugOverlay": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Add slime chunk to debug overlay",
     "description": "",
     "default": true,
@@ -2753,7 +2706,7 @@
   },
   "power_compat:config.overlayAdditionsYOffset": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Additions to debug overlay y offset",
     "description": "",
     "default": 0,
@@ -2814,7 +2767,7 @@
     "page": "Creative",
     "group": "Flight",
     "label": "Creative flight",
-    "description": "Double-tap Jump to start flying. Jump rises; Sneak descends.",
+    "description": "Enable Creative flight. Double-tap Jump to start or stop flying. /fly changes this same preference; Survival flight uses its world permission.",
     "order": 0
   },
   "creative.landStopsFlight": {
@@ -2822,47 +2775,49 @@
     "group": "Flight",
     "label": "Stop flying on landing",
     "description": "Return to walking when you touch the ground.",
-    "order": 2
+    "order": 7
   },
   "creative.sprintFlight": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight sprint",
     "description": "Use the sprint key to fly faster in any direction in creative and spectator modes.",
-    "order": 5
+    "order": 3
   },
   "creative.sprintToggle": {
-    "page": "Camera",
-    "group": "Flight sprint",
+    "page": "Creative",
+    "group": "Flight",
     "label": "Sprint activation",
-    "description": "Shared by creative, spectator and freecam flight. Hold requires the sprint key; Toggle stays active until movement stops."
+    "description": "Shared by creative, spectator and freecam flight. Hold requires the sprint key; Toggle stays active until movement stops.",
+    "order": 4
   },
   "creative.flightSpeed": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight speed, %",
     "description": "100% matches the modern creative flight target.",
-    "order": 3
+    "order": 1
   },
   "creative.sprintMultiplier": {
-    "page": "Camera",
-    "group": "Flight sprint",
+    "page": "Creative",
+    "group": "Flight",
     "label": "Sprint speed, %",
-    "description": "Speed multiplier for flight in any direction, including sideways, up and down. Applies to creative, spectator and freecam. 200% doubles normal speed."
+    "description": "Speed multiplier for flight in any direction, including sideways, up and down. Applies to creative, spectator and freecam. 200% doubles normal speed.",
+    "order": 5
   },
   "creative.glide": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight drift",
     "description": "0 stops immediately when movement keys are released. 5 uses full modern-style drift.",
-    "order": 4
+    "order": 2
   },
   "creative.doubleTapTicks": {
     "page": "Creative",
     "group": "Flight",
     "label": "Double-tap window (seconds)",
     "description": "Maximum interval between Jump presses.",
-    "order": 1,
+    "order": 6,
     "displayDivisor": 20,
     "unit": "seconds"
   },
@@ -2871,14 +2826,14 @@
     "group": "Spectator",
     "label": "Scroll to change speed",
     "description": "Adjust spectator flight speed with the mouse wheel.",
-    "order": 1
+    "order": 5
   },
   "creative.showSpectatorSpeed": {
     "page": "Creative",
     "group": "Spectator",
     "label": "Show spectator speed",
     "description": "Display the current speed while it changes.",
-    "order": 3
+    "order": 7
   },
   "creative.spectatorSpeed": {
     "page": "Creative",
@@ -2892,7 +2847,7 @@
     "group": "Spectator",
     "label": "Speed step, %",
     "description": "Speed change for each wheel step.",
-    "order": 2
+    "order": 6
   },
   "creative.blockReach": {
     "page": "Creative",
@@ -2901,7 +2856,8 @@
     "description": "Interaction reach in Creative. Container previews use this distance in every game mode.",
     "min": 3,
     "max": 10,
-    "step": 0.5
+    "step": 0.5,
+    "order": 0
   },
   "creative.entityReach": {
     "page": "Creative",
@@ -2910,7 +2866,8 @@
     "description": "Interaction reach in Creative. Container previews use this distance in every game mode.",
     "min": 3,
     "max": 10,
-    "step": 0.5
+    "step": 0.5,
+    "order": 1
   },
   "creative.destroySlot": {
     "page": "Creative",
@@ -3042,21 +2999,21 @@
   "tweaks.placement.listMode": {
     "page": "Building",
     "group": "Item filters",
-    "label": "Item filter",
-    "description": "Choose whether to allow all items, exclude listed items, or only allow listed items."
+    "label": "Fast placement item filter",
+    "description": "Choose which held items can use fast placement. Off allows every item; Exclude blocks the excluded list; Allow only admits the allowed list. Ordinary placement is unchanged."
   },
   "tweaks.placement.blacklist": {
     "page": "Building",
     "group": "Item filters",
-    "label": "Excluded items",
-    "description": "Choose items to exclude. Select a specific variant or any metadata.",
+    "label": "Exclude from fast placement",
+    "description": "Items that cannot use fast placement when the filter is set to Exclude.",
     "valueType": "itemFilters"
   },
   "tweaks.placement.whitelist": {
     "page": "Building",
     "group": "Item filters",
-    "label": "Allowed items",
-    "description": "Choose items to allow. Select a specific variant or any metadata. An empty allow-list permits nothing.",
+    "label": "Allow for fast placement",
+    "description": "Only these items can use fast placement when the filter is set to Allow only. An empty list permits nothing.",
     "valueType": "itemFilters"
   },
   "tweaks.flexible.showOverlay": {
@@ -3296,16 +3253,16 @@
     "description": "With camera collisions enabled, also collide with doors and trapdoors. Off passes through them.",
     "default": false,
     "restart": false,
-    "order": 6
+    "order": 7
   },
   "power_camera:config.sprint": {
     "page": "Camera",
     "group": "Free camera",
     "label": "Freecam sprint",
-    "description": "Boost camera speed with the flight sprint key. Uses the creative sprint multiplier and Hold/Toggle setting.",
+    "description": "Boost camera speed with the flight sprint key using the activation and speed settings below.",
     "default": true,
     "restart": false,
-    "order": 4
+    "order": 2
   },
   "visual.containerCarry": {
     "page": "Inventory",
@@ -3334,7 +3291,7 @@
   },
   "power_compat:config.addBlockLightToDebugOverlay": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Block light",
     "description": "Exact block-emitted light at your feet, from 0 to 15. Excludes sunlight and screen brightness.",
     "default": true,
@@ -3854,7 +3811,7 @@
     "label": "Rescan mouse"
   },
   "activeTweaks.fakeSneak": {
-    "label": "Fake sneak"
+    "label": "Include Fake sneak"
   },
   "logo.scrollingBackground.enabled": {
     "page": "Interface",
@@ -3892,7 +3849,9 @@
     "order": 6
   },
   "native.fov": {
-    "order": 0
+    "order": 15,
+    "page": "General",
+    "group": "Game"
   },
   "native.bobbing": {
     "order": 2
@@ -3980,7 +3939,7 @@
   },
   "power_compat:config.addFacingToDebugOverlay": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Facing direction",
     "description": "Show your facing direction and axis in the F3 debug overlay.",
     "order": 11,
@@ -3996,7 +3955,7 @@
   },
   "interface.debugTextColor": {
     "page": "Interface",
-    "group": "Debug information",
+    "group": "Debug (F3) info",
     "label": "Text colour",
     "description": "Colour of all F3 debug text.",
     "order": 0
@@ -4038,8 +3997,8 @@
   },
   "activeTweaks.autoMine": {
     "page": "Interface",
-    "group": "Active tweaks",
-    "label": "Auto-mine",
+    "group": "Active tweaks HUD",
+    "label": "Include Auto-mine",
     "description": "Show while Auto-mine is holding Attack / Break.",
     "default": true,
     "restart": false,
@@ -4064,47 +4023,47 @@
     "default": false
   },
   "gameplay.mergeItems": {
-    "page": "Gameplay",
-    "group": "Dropped items",
+    "page": "Video",
+    "group": "Performance",
     "label": "Merge dropped items",
     "description": "Combine nearby matching dropped items when enough are within the terrain render distance around the camera. Keeps normal stack limits, damage and item data. Singleplayer only.",
-    "order": 0,
+    "order": 11,
     "default": true
   },
   "gameplay.mergeThreshold": {
-    "page": "Gameplay",
-    "group": "Dropped items",
+    "page": "Video",
+    "group": "Performance",
     "label": "Item merging threshold",
     "description": "Minimum dropped-item entities within terrain render distance before a merging sweep starts. Large sweeps continue across ticks. Idle checks run twice per second.",
-    "order": 1,
+    "order": 12,
     "min": 16,
     "max": 16384,
     "step": 16
   },
   "gameplay.limitTnt": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
+    "page": "Video",
+    "group": "Performance",
     "label": "Limit TNT work",
     "description": "Spread TNT simulation and explosions across ticks, with fewer visible TNT entities and explosion particles. Chains take longer. Enable from the main menu before loading a struggling singleplayer world.",
-    "order": 10,
+    "order": 13,
     "default": false
   },
   "gameplay.tntPerTick": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
+    "page": "Video",
+    "group": "Performance",
     "label": "TNT explosions per tick",
     "description": "Maximum TNT detonations per tick while Limit TNT work is on. Waiting TNT retains its fuse and saves normally.",
-    "order": 11,
+    "order": 14,
     "min": 1,
     "max": 64,
     "step": 1
   },
   "gameplay.tntMillis": {
-    "page": "Gameplay",
-    "group": "Explosion and fire",
+    "page": "Video",
+    "group": "Performance",
     "label": "TNT time budget",
     "description": "Milliseconds of TNT work allowed per tick. Finishes the current TNT update before yielding, so one explosion can exceed this budget.",
-    "order": 12,
+    "order": 15,
     "min": 1,
     "max": 50,
     "step": 1,
@@ -4115,7 +4074,7 @@
     "group": "Interaction",
     "label": "Leaves drop saplings in creative",
     "description": "Allow saplings from leaves decaying while you are in creative. Applies to normal and fast decay. Survival drops resume immediately when you leave creative.",
-    "order": 8
+    "order": 2
   },
   "visual.hideEntities": {
     "page": "Video",
@@ -4210,15 +4169,15 @@
   },
   "activeTweaks.hiddenEntities": {
     "page": "Interface",
-    "group": "Active tweaks",
-    "label": "Hidden entities",
+    "group": "Active tweaks HUD",
+    "label": "Include Hidden entities",
     "description": "Include this tweak while active.",
     "order": 20
   },
   "activeTweaks.fullBright": {
     "page": "Interface",
-    "group": "Active tweaks",
-    "label": "Full bright",
+    "group": "Active tweaks HUD",
+    "label": "Include Full bright",
     "description": "Include this tweak while active.",
     "order": 21
   },
@@ -4232,11 +4191,11 @@
     "default": true
   },
   "gameplay.fastItemCollisions": {
-    "page": "Fixes",
+    "page": "Video",
     "group": "Performance",
     "label": "Fast item and TNT collisions",
     "description": "Skip redundant collision checks between dropped items and primed TNT. Keeps block and vehicle collisions, item pickup and explosion knockback. Singleplayer only.",
-    "order": 0,
+    "order": 10,
     "restart": false,
     "default": true
   },
@@ -4468,8 +4427,8 @@
     "page": "Controls"
   },
   "activeTweaks.clickMining": {
-    "group": "Active tweaks",
-    "label": "Temporary click mining",
+    "group": "Active tweaks HUD",
+    "label": "Include Temporary click mining",
     "description": "Show Click mining enabled or Click mining disabled while the temporary override is active.",
     "order": 28,
     "page": "Interface"
@@ -4631,19 +4590,19 @@
     "restart": false
   },
   "rules.world.players_sleeping_percentage": {
-    "control": "number",
+    "control": "slider",
     "unit": "%"
   },
   "rules.survival.players_sleeping_percentage": {
-    "control": "number",
+    "control": "slider",
     "unit": "%"
   },
   "rules.cheats.players_sleeping_percentage": {
-    "control": "number",
+    "control": "slider",
     "unit": "%"
   },
   "rules.creation.players_sleeping_percentage": {
-    "control": "number",
+    "control": "slider",
     "unit": "%"
   },
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.ShiftDoubleClickTransfer": {
@@ -4654,5 +4613,114 @@
     "default": true,
     "restart": false,
     "order": 1
+  },
+  "creative.spectatorGlide": {
+    "page": "Creative",
+    "group": "Spectator",
+    "order": 1,
+    "label": "Flight drift",
+    "default": 5,
+    "min": 0,
+    "max": 5,
+    "step": 1
+  },
+  "creative.spectatorSprintFlight": {
+    "page": "Creative",
+    "group": "Spectator",
+    "order": 2,
+    "label": "Flight sprint",
+    "default": true,
+    "min": 0,
+    "max": 1,
+    "step": 1
+  },
+  "creative.spectatorSprintToggle": {
+    "page": "Creative",
+    "group": "Spectator",
+    "order": 3,
+    "label": "Sprint activation",
+    "default": true,
+    "min": 0,
+    "max": 1,
+    "step": 1
+  },
+  "creative.spectatorSprintMultiplier": {
+    "page": "Creative",
+    "group": "Spectator",
+    "order": 4,
+    "label": "Sprint speed, %",
+    "default": 200,
+    "min": 100,
+    "max": 400,
+    "step": 1
+  },
+  "power_camera:config.sprintToggle": {
+    "page": "Camera",
+    "group": "Free camera",
+    "order": 3,
+    "label": "Sprint activation",
+    "default": true
+  },
+  "power_camera:config.sprintMultiplier": {
+    "page": "Camera",
+    "group": "Free camera",
+    "order": 4,
+    "label": "Sprint speed, %",
+    "default": 200,
+    "min": 100,
+    "max": 400,
+    "step": 1
+  },
+  "rules.world.explosion_drop_chance": {
+    "unit": "%"
+  },
+  "rules.creation.explosion_drop_chance": {
+    "unit": "%"
+  },
+  "rules.survival.explosion_drop_chance": {
+    "unit": "%"
+  },
+  "rules.cheats.explosion_drop_chance": {
+    "unit": "%"
+  },
+  "audio.category.ambient": {
+    "page": "Audio",
+    "group": "Volume",
+    "order": 100
+  },
+  "audio.category.blocks": {
+    "page": "Audio",
+    "group": "Volume",
+    "order": 100
+  },
+  "audio.category.hostile": {
+    "page": "Audio",
+    "group": "Volume",
+    "order": 100
+  },
+  "audio.category.players": {
+    "page": "Audio",
+    "group": "Volume",
+    "order": 100
+  },
+  "audio.category.records": {
+    "page": "Audio",
+    "group": "Volume",
+    "order": 100
+  },
+  "audio.category.weather": {
+    "page": "Audio",
+    "group": "Volume",
+    "order": 100
+  },
+  "audio.category.passive": {
+    "page": "Audio",
+    "group": "Volume",
+    "order": 100
+  },
+  "audio.category.interface": {
+    "page": "Audio",
+    "group": "Volume",
+    "order": 100
   }
 }

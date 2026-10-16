@@ -14,6 +14,7 @@ public class SleepRulesMixin {
   private void power$sleep(CallbackInfoReturnable<Boolean> cir) {
     World world = (World)(Object)this;
     if (world.isRemote) return;
+    if (!WorldRules.enabled(world.method_262(), GameRule.ALLOW_SLEEP)) { cir.setReturnValue(false); return; }
     int eligible = 0, sleeping = 0;
     for (Object entry : world.field_200) {
       PlayerEntity player = (PlayerEntity)entry;

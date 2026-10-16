@@ -17,16 +17,23 @@ public final class Modes {
 
   public static boolean canEnableFlight(Object player) {
     return player instanceof PlayerEntity p
-        && p.creative_isCreative()
-        && local.luke.power.creative.config.Config.current().flight
+        && flightAvailable(p)
         && p.vehicle == null;
+  }
+
+  public static boolean flightAvailable(Object player) {
+    if (!(player instanceof PlayerEntity p) || spectator(p) || p.level.isRemote) return false;
+    int override = ((ModePlayer)p).power_flightOverride();
+    return local.luke.power.rules.FlightAccess.allowed(false, p.creative_isCreative(),
+        local.luke.power.rules.WorldRules.enabled(p.level.getProperties(), local.luke.power.rules.GameRule.ALLOW_FLIGHT),
+        local.luke.power.creative.config.Config.current().flight, override);
   }
 
   public static boolean flying(PlayerEntity player) {
     return player != null
         && !player.level.isRemote
         && player.vehicle == null
-        && (spectator(player) || player.creative_isCreative() && player.creative_isFlying());
+        && (spectator(player) || flightAvailable(player) && player.creative_isFlying());
   }
 
   public static String denial(GameMode mode) {

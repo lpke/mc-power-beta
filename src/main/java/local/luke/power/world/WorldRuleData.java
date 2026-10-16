@@ -16,15 +16,15 @@ public final class WorldRuleData {
     NbtCompound tag = world.getCompound(TAG);
     requireType(tag, "version", 3);
     int version = tag.getInt("version");
-    if (version != 1 && version != RuleSet.VERSION)
-      throw new IllegalArgumentException("World game rules version " + version + " is unsupported. Supported versions: 1, " + RuleSet.VERSION + ". Open with a compatible release or restore a backup.");
+    if (version < 1 || version > RuleSet.VERSION)
+      throw new IllegalArgumentException("World game rules version " + version + " is unsupported. Supported versions: 1, 2, " + RuleSet.VERSION + ". Open with a compatible release or restore a backup.");
     JsonObject values = new JsonObject();
     for (Object value : tag.values()) {
       NbtElement entry = (NbtElement) value;
       String id = entry.getKey();
       if (id.equals("version")) continue;
       GameRule rule = GameRule.find(id);
-      if (rule == null || !rule.id().equals(id)) throw new IllegalArgumentException("Unknown saved game rule: " + id + ". Open with a compatible release.");
+      if (rule == null || !rule.id().equals(id) && !(version < 3 && id.equals("sleep_ambushes"))) throw new IllegalArgumentException("Unknown saved game rule: " + id + ". Open with a compatible release.");
       requireType(tag, id, rule.integer() ? 3 : 1);
       if (rule.integer()) values.addProperty(id, tag.getInt(id));
       else {
@@ -33,7 +33,9 @@ public final class WorldRuleData {
         values.addProperty(id, number == 1);
       }
     }
-    return RuleSet.readValues(values, version == 1 ? WorldRuleUpgrade.defaults(upgradeEvidence()) : new RuleSet());
+    RuleSet defaults = version == 1 ? WorldRuleUpgrade.defaults(upgradeEvidence()) : new RuleSet();
+    if (version < 3) defaults = WorldRuleUpgrade210.defaults(upgradeEvidence210(), defaults);
+    return RuleSet.readValues(WorldRuleUpgrade210.values(values, version, upgradeEvidence210()), defaults);
   }
   public static void write(NbtCompound world, RuleSet rules) {
     NbtCompound tag = new NbtCompound(); tag.putInt("version", RuleSet.VERSION);
@@ -42,6 +44,10 @@ public final class WorldRuleData {
       else tag.putBoolean(rule.id(), rules.enabled(rule));
     }
     world.put(TAG, tag);
+  }
+  private static JsonObject upgradeEvidence210() {
+    JsonObject config = PowerConfig.document();
+    return config.has("worldRuleUpgrade210") ? config.getAsJsonObject("worldRuleUpgrade210") : new JsonObject();
   }
   private static JsonObject upgradeEvidence() {
     JsonObject config = PowerConfig.document();
@@ -85,6 +91,11 @@ public final class WorldRuleData {
     RuleSet added = WorldRuleUpgrade.defaults(evidence);
     for (GameRule rule : new GameRule[]{GameRule.LAVA_DESTROYS_ITEMS, GameRule.CACTUS_DESTROYS_ITEMS, GameRule.PLAYER_CROP_TRAMPLING})
       converted.set(rule, added.get(rule));
+    RuleSet additions = WorldRuleUpgrade210.defaults(upgradeEvidence210(), converted);
+    for (GameRule rule : new GameRule[]{GameRule.GHAST_EXPLOSION_FIRE,
+        GameRule.LIGHTNING_STRIKE_FIRE, GameRule.EXPLOSION_DROP_CHANCE}) converted.set(rule, additions.get(rule));
+    if (!additions.enabled(GameRule.ADVANCE_WEATHER)) converted.set(GameRule.ADVANCE_WEATHER, false);
+    converted.set(GameRule.ALLOW_SLEEP, converted.enabled(GameRule.ALLOW_SLEEP) && additions.enabled(GameRule.ALLOW_SLEEP));
     return converted;
   }
 }

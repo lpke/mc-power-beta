@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-16
+
+- Add allow_sleep while retaining bed respawn points when sleeping is disabled. Use a 0–100% sleeping slider and rename sleep_ambushes to sleep_nightmares, retaining the old command aliases.
+- Add world rules for ghast explosion fire, lightning strike fire and explosion block drop chance. Default ghast fire on, lightning fire off and block drops to 100%. Remove the global rain-disabling setting; weather uses its world cycle rule.
+- Add /fly and allow_flight for flight outside Creative. Creative can toggle its flight ability independently of its inventory and protection; Spectator keeps its own flight.
+- Give Creative, Spectator and freecam separate flight sprint activation and speed preferences. Group each mode's flight controls together.
+- Render title panoramas at window resolution with optional blur, and add a searchable picker for original backgrounds from Beta through Minecraft 26.3.
+- Reorder Interface, Video and Audio settings, group item and TNT performance controls together, and clarify Game sounds, fast-placement filters and Active tweaks HUD inclusion labels.
+- Hide inactive combined or separate HUD position groups. Start secondary Interface groups, Gameplay, Fixes and selected detailed groups collapsed, preserving later manual expansion.
+- Move field of view into General, place Creative sapling drops below reach controls, and enable fast leaf decay by default.
+- Configuration format 6 converts formats 3, 4 and 5 with verified backups. World-rule format 3 converts formats 1 and 2 and older world metadata, preserving existing sleep, fire, drops and rule choices. Renamed nightmare rules retain their values; old sleeping percentages above 100 disable sleeping explicitly, and old rain suppression freezes the weather cycle.
+
 ## [2.0.2] - 2026-10-16
 
 - Smooth freecam movement across uneven frame times, including ascent and descent. Freecam now defaults to speed 12 and drag 10.

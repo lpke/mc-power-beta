@@ -13,12 +13,29 @@ public final class CreativeCommands {
 
   public static boolean execute(String input) {
     String[] args = input.trim().split("\\s+");
-    if (args.length == 0 || !Set.of("/gamemode", "/gm").contains(args[0].toLowerCase(Locale.ROOT)))
+    if (args.length == 0 || !Set.of("/gamemode", "/gm", "/fly").contains(args[0].toLowerCase(Locale.ROOT)))
       return false;
     Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
     if (mc.level != null && mc.level.isRemote) return false;
     if (!ClientRuntime.local(mc)) return true;
     try {
+      if (args[0].equalsIgnoreCase("/fly")) {
+        if (args.length == 2 && args[1].equalsIgnoreCase("help")) { flyHelp(mc); return true; }
+        if (args.length != 1) throw new IllegalArgumentException("Usage: /fly");
+        if (Modes.spectator(mc.player)) throw new IllegalArgumentException("Spectator always flies. Change game mode to use /fly.");
+        String denied = local.luke.power.permissions.CommandPermissions.denial("fly");
+        if (!denied.isEmpty()) throw new IllegalArgumentException(denied);
+        var state = (local.luke.power.creative.api.ModePlayer) mc.player;
+        boolean enabled = !Modes.flightAvailable(mc.player);
+        if (mc.player.creative_isCreative()) {
+          state.power_flightOverride(-1);
+          Config.flight(enabled);
+        } else state.power_flightOverride(enabled ? 1 : 0);
+        mc.player.creative_setFlying(enabled && mc.player.vehicle == null);
+        FlightController.reset();
+        mc.overlay.addChatMessage("§7Flight " + (enabled ? "enabled" : "disabled") + ".§r");
+        return true;
+      }
       if (args.length == 2 && args[1].equalsIgnoreCase("help")) {
         mc.overlay.addChatMessage("§b/gamemode <survival|creative|spectator> [target]§r");
         return true;
@@ -37,7 +54,15 @@ public final class CreativeCommands {
     return true;
   }
 
+  private static void flyHelp(Minecraft mc) {
+    mc.overlay.addChatMessage("§b/fly §7Toggle flight ability without changing game mode. Requires allow_flight outside Creative; unavailable in Spectator.§r");
+  }
+
   public static void register() {
+    local.luke.power.permissions.CommandPermissions.creativePlayer(() -> {
+      Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
+      return ClientRuntime.local(mc) && mc.player.creative_isCreative();
+    });
     if (!FabricLoader.getInstance().isModLoaded("power_commands")) return;
     try {
       Class<?> api = Class.forName("local.luke.power.commands.api.Command");
@@ -50,9 +75,9 @@ public final class CreativeCommands {
       // Replace the survival/creative-only command using the command registry.
       for (Iterator<Object> it = commands.iterator(); it.hasNext(); ) {
         String name = (String) nameMethod.invoke(it.next());
-        if (name.equals("gamemode") || name.equals("gm")) it.remove();
+        if (name.equals("gamemode") || name.equals("gm") || name.equals("fly")) it.remove();
       }
-      for (String name : List.of("gamemode", "gm"))
+      for (String name : List.of("gamemode", "gm", "fly"))
         commands.add(
             Proxy.newProxyInstance(
                 api.getClassLoader(),
@@ -66,7 +91,8 @@ public final class CreativeCommands {
                       }
                       case "manual" -> {
                         Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
-                        mc.overlay.addChatMessage(
+                        if (name.equals("fly")) flyHelp(mc);
+                        else mc.overlay.addChatMessage(
                             "\u00a7b/gamemode <survival|creative|spectator> [target]\u00a7r");
                         yield null;
                       }
@@ -74,7 +100,7 @@ public final class CreativeCommands {
                         int index = (Integer) args[1];
                         String prefix = (String) args[2];
                         List<String> choices =
-                            index == 1
+                            index == 1 && name.equals("fly") ? List.of("help") : index == 1
                                 ? List.of("survival", "creative", "spectator")
                                 : index == 2 ? List.of("@s", "@p", "@a") : List.of();
                         yield choices.stream()
@@ -82,7 +108,7 @@ public final class CreativeCommands {
                             .map(v -> v.substring(prefix.length()))
                             .toArray(String[]::new);
                       }
-                      case "available" -> true;
+                      case "available" -> !name.equals("fly") || local.luke.power.permissions.CommandPermissions.allowed("fly");
                       case "helpGroup" -> "";
                       case "disableInSingleplayer" -> false;
                       case "needsPermissions" -> true;

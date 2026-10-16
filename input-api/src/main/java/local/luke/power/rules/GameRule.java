@@ -8,6 +8,7 @@ import java.util.*;
 public enum GameRule {
   ALLOW_CREATIVE_MODE("allow_creative_mode", "Allow Creative mode", "allowCreativeMode", false, "Access", "Allow entering Creative. Returning to Survival is always available. Turning off returns an active Creative player safely to Survival."),
   ALLOW_SPECTATOR_MODE("allow_spectator_mode", "Allow Spectator mode", "allowSpectatorMode", false, "Access", "Allow entering Spectator. Turning off returns an active Spectator player safely to Survival. Freecam remains available."),
+  ALLOW_FLIGHT("allow_flight", "Allow flight", "allowFlight", false, "Access", "Allow /fly outside Creative. Creative can always toggle its flight ability. Spectator flight is unchanged."),
   ALLOW_ITEM_SPAWNING("allow_item_spawning", "Allow item spawning", "allowItemSpawning", false, "Access", "Allow /give and item-spawning tools. Creative inventory actions remain available in Creative."),
   ALLOW_WORLD_EDITING("allow_world_editing", "Allow world editing", "allowWorldEditing", false, "Access", "Allow block editing in any game mode. Selection, inspection and clipboard tools remain available. Entity removal and teleport helpers use their own rules."),
   ALLOW_ENTITY_CONTROL("allow_entity_control", "Allow entity control", "allowEntityControl", false, "Access", "Allow summoning, killing, removing and riding entities, including editing helpers that remove entities."),
@@ -19,13 +20,16 @@ public enum GameRule {
   ALLOW_DEATH_RECOVERY("allow_death_recovery", "Allow death recovery", "allowDeathRecovery", false, "Access", "Allow recovering recorded death items from the recovery screen. Viewing records remains available. Turning off preserves all records."),
   ADVANCE_TIME("advance_time", "Daylight cycle", "doDaylightCycle", true, "Time and weather", "Advance the sun and daylight counter. When off, simulation and scheduled updates continue. Sleep and daylight displays use the same rule."),
   ADVANCE_WEATHER("advance_weather", "Weather cycle", "doWeatherCycle", true, "Time and weather", "Allow weather and its timers to advance naturally. When off, sleep must not clear frozen weather. Explicit weather editing uses its own permission."),
-  PLAYERS_SLEEPING_PERCENTAGE("players_sleeping_percentage", "Players needed to skip night", "playersSleepingPercentage", 100, "Time and weather", "Percentage of players needed to skip the night, for instant and accelerated sleep. Values above 100 prevent skipping. Frozen daylight and weather stay frozen."),
+  ALLOW_SLEEP("allow_sleep", "Allow sleeping", "allowSleep", true, "Time and weather", "Allow sleeping in beds. When off, beds still set a respawn point without sleeping or skipping the night."),
+  PLAYERS_SLEEPING_PERCENTAGE("players_sleeping_percentage", "Players needed to skip night", "playersSleepingPercentage", 100, "Time and weather", "Percentage of players needed to skip the night, for instant and accelerated sleep. Zero still requires a sleeper. Frozen daylight and weather stay frozen."),
   SPAWN_MONSTERS("spawn_monsters", "Monster spawning", "spawnMonsters", true, "Spawning", "Allow natural monster spawning. Peaceful still prevents monsters. Does not remove existing mobs or block /summon."),
   SPAWN_ANIMALS("spawn_animals", "Animal spawning", "spawnAnimals", true, "Spawning", "Allow natural animal spawning, including wolves and squid. Does not remove existing mobs or block /summon."),
   SPAWNER_BLOCKS_WORK("spawner_blocks_work", "Dungeon spawners", "spawnerBlocksEnabled", true, "Spawning", "Allow dungeon spawners to create mobs independently of natural spawning. Difficulty and local spawn conditions still apply."),
-  SLEEP_AMBUSHES("sleep_ambushes", "Sleep ambushes", "sleepAmbushes", true, "Spawning", "Allow Beta sleep attacks when difficulty and Monster spawning permit them."),
+  SLEEP_NIGHTMARES("sleep_nightmares", "Sleep nightmares", "sleepNightmares", true, "Spawning", "Allow Beta sleep attacks when difficulty and Monster spawning permit them."),
   ALLOW_ENTERING_NETHER_USING_PORTALS("allow_entering_nether_using_portals", "Nether portal entry", "allowEnteringNetherUsingPortals", true, "World interactions", "Allow portal travel into the Nether. Return portals remain available. Commands use Allow teleportation."),
   FIRE_SPREAD("fire_spread", "Fire spread", "doFireTick", true, "World interactions", "Allow fire to spread, consume blocks and ignite from lava. Turning off preserves fire aging, extinguishing and damage."),
+  GHAST_EXPLOSION_FIRE("ghast_explosion_fire", "Ghast explosion fire", "ghastExplosionFire", true, "World interactions", "Allow ghast explosions to start fires, independently of block damage and fire spread."),
+  LIGHTNING_STRIKE_FIRE("lightning_strike_fire", "Lightning strike fire", "lightningStrikeFire", false, "World interactions", "Allow lightning strikes to start fires. Does not change lightning damage."),
   TNT_EXPLODES("tnt_explodes", "TNT explosions", "tntExplodes", true, "World interactions", "Prevent new priming and pause existing primed TNT while off; preserve entities and fuses, then resume when enabled. Global TNT work limits remain independent."),
   CREEPER_GRIEFING("creeper_griefing", "Creeper block damage", "creeperGriefing", true, "World interactions", "Control blocks broken by creeper explosions. Entity damage remains unchanged."),
   GHAST_GRIEFING("ghast_griefing", "Ghast block damage", "ghastGriefing", true, "World interactions", "Control blocks broken by ghast explosions. Entity damage remains unchanged; ignition stays separate from block destruction."),
@@ -33,6 +37,7 @@ public enum GameRule {
   MOB_CROP_TRAMPLING("mob_crop_trampling", "Mob crop trampling", "mobCropTrampling", false, "World interactions", "Allow mobs to trample farmland. Player crop trampling is separate."),
   KEEP_INVENTORY("keep_inventory", "Keep inventory on death", "keepInventory", false, "Drops and death", "Keep inventory, armour and player crafting inputs through death. Does not recover items from earlier deaths."),
   MOB_DROPS("mob_drops", "Mob loot", "doMobLoot", true, "Drops and death", "Allow mobs to drop loot, including extra loot from enabled mechanics. Player death inventories are separate."),
+  EXPLOSION_DROP_CHANCE("explosion_drop_chance", "Explosion block drops %", "explosionDropChance", 100, "Drops and death", "Percentage chance that each block destroyed by an explosion drops its item. Dropped-item damage is separate."),
   EXPLOSIONS_DESTROY_ITEMS("explosions_destroy_items", "Explosions destroy dropped items", "explosionsDestroyItems", true, "Drops and death", "Allow explosions to damage and destroy dropped items. Applies to TNT, creepers and ghasts. Does not change block drops, player or mob damage, fire or lava."),
   LAVA_DESTROYS_ITEMS("lava_destroys_items", "Lava destroys dropped items", "lavaDestroysItems", true, "Drops and death", "Allow lava to burn dropped items. Fire, explosions, despawning and damage to players or mobs remain separate."),
   CACTUS_DESTROYS_ITEMS("cactus_destroys_items", "Cactus destroys dropped items", "cactusDestroysItems", true, "Drops and death", "Allow cactus contact to destroy dropped items. Does not change damage to players or mobs."),
@@ -62,10 +67,13 @@ public enum GameRule {
   public boolean access() { return group.equals("Access"); }
   public boolean integer() { return defaultValue.isNumber(); }
   public JsonPrimitive defaultValue() { return defaultValue; }
+  public int maximum() { return integer() ? 100 : 1; }
   public String help() { return description + "\n/gamerule " + id + "\nAlias: " + alias; }
 
   private static final Map<String, GameRule> NAMES = new HashMap<>();
   static {
+    NAMES.put("sleep_ambushes", SLEEP_NIGHTMARES);
+    NAMES.put("sleepambushes", SLEEP_NIGHTMARES);
     for (GameRule rule : values()) {
       if (NAMES.put(rule.id.toLowerCase(Locale.ROOT), rule) != null
           || NAMES.put(rule.alias.toLowerCase(Locale.ROOT), rule) != null)
@@ -83,7 +91,7 @@ public enum GameRule {
       if (!text.matches("[0-9]+")) throw new NumberFormatException();
       return checked(new JsonPrimitive(Integer.parseInt(text)));
     } catch (NumberFormatException e) {
-      throw new IllegalArgumentException(id + " needs a whole number from 0 to " + Integer.MAX_VALUE + ".");
+      throw new IllegalArgumentException(id + " needs a whole number from 0 to " + maximum() + ".");
     }
   }
   public JsonPrimitive checked(JsonElement value) {
@@ -93,11 +101,11 @@ public enum GameRule {
     try {
       if (!primitive.isNumber()) throw invalid();
       int n = primitive.getAsBigDecimal().intValueExact();
-      if (n < 0) throw invalid();
+      if (n < 0 || n > maximum()) throw invalid();
       return new JsonPrimitive(n);
     } catch (ArithmeticException | NumberFormatException e) { throw invalid(); }
   }
   private IllegalArgumentException invalid() {
-    return new IllegalArgumentException("Invalid " + id + ": expected " + (integer() ? "a nonnegative whole number" : "true or false") + ".");
+    return new IllegalArgumentException("Invalid " + id + ": expected " + (integer() ? "a whole number from 0 to " + maximum() : "true or false") + ".");
   }
 }

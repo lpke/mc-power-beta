@@ -75,14 +75,15 @@ its tools and controls while keeping saved items, warps and history.
 Use `/gamerule <rule> [value]` to read or change a world rule. Both `fire_spread`
 and `doFireTick`, for example, refer to the same rule. `/gamerule help` lists the
 rules; Options includes descriptions and reset controls. Multiplayer rules belong
-to the server.
+to the server. `/fly` toggles flight without changing game mode. Outside Creative,
+it requires `allow_flight`; Spectator keeps its own flight.
 
 Settings save automatically by default. Right-click Apply to use manual editing;
 leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
 edits stay in the draft until you create the world.
 
-Version 2.0.1 supports configuration formats 3, 4 and 5, converting older formats
-to 5 with a verified backup. World rules use format 2 and support format 1 and
+Version 2.1.0 supports configuration formats 3, 4, 5 and 6, converting older formats
+to 6 with a verified backup. World rules use format 3 and support formats 1, 2 and
 Power Beta's earlier world settings. Existing worlds retain their rules and item
 protection. Old footwear-specific crop protection needs an explicit trampling choice. Conflicting old permissions or unsupported formats stop conversion
 and show recovery guidance. Keep a full instance backup before upgrading; world

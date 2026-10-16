@@ -29,6 +29,21 @@ public final class SettingsLayout {
     }
   }
 
+  public static Set<String> initiallyCollapsed() {
+    Set<String> result = new HashSet<>();
+    GROUPS.forEach((page, groups) -> {
+      for (String group : groups) {
+        boolean closed = page.equals("Interface") && !Set.of("General HUD", "Chat").contains(group)
+            || page.equals("Gameplay") || page.equals("Fixes")
+            || page.equals("Video") && Set.of("Entity visibility", "Particles").contains(group)
+            || page.equals("Audio") && group.equals("Individual sounds")
+            || page.equals("Advanced") && group.equals("Achievement recovery");
+        if (closed) result.add(page + "/" + group);
+      }
+    });
+    return result;
+  }
+
   public static List<String> groups(String page) { return GROUPS.getOrDefault(page, List.of()); }
 
   public static List<Setting> ordered(List<Setting> settings) {

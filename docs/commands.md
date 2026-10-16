@@ -76,3 +76,5 @@ The syntax follows [WorldEdit block states](https://worldedit.enginehub.org/en/l
 It supports `+`, `-`, `*`, `/`, `%`, `^`, parentheses, `pi`, `e` and common functions
 such as `sqrt`, `abs`, `min`, `max`, `floor`, `ceil`, `round`, `sin`, `cos` and `tan`.
 Angles use radians. For example, `//calc 64 * 27` returns `1728`.
+
+`/fly` toggles flight without changing game mode. It requires `allow_flight` outside Creative and does not change Spectator flight. `/fly help` describes the permission and controls.

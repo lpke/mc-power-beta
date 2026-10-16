@@ -94,3 +94,15 @@ is private, the publisher saves a verified GitHub snapshot for anonymous visitor
 Once public, the site checks GitHub automatically, with a five-minute cache.
 Keep changelog bullets limited to modpack features and fixes. Website and release
 process changes belong in commits and development documentation.
+
+After replacing artifacts, migrate idle instances with the same backed-up converters used
+by the client, including every `level.dat` and `level.dat_old` under `saves`:
+
+```sh
+./gradlew --no-daemon upgradeInstance -PinstanceGame=/path/to/instance/.minecraft
+```
+
+Add `-PinstanceDefaults` only when resetting preferences to pack defaults. It retains
+FOV, GUI scale and the frame limit, and migrates existing worlds using their original
+conversion evidence. This command refuses running clients, validates every metadata
+file before writing worlds, and restores its transaction if any conversion fails.

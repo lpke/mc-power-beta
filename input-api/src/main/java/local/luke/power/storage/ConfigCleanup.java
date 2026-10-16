@@ -108,6 +108,23 @@ final class ConfigCleanup {
       remove(settings, id);
   }
 
+  static void upgradeFive(JsonObject settings) {
+    for (String id : List.of("power_controls:tweaks.disableSleeping",
+        "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.chanceBlocksDropWhenExploded",
+        "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableGhastExplosionCausingFire",
+        "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.disableLightningStrikeCausingFire",
+        "power_environment:config.WEATHER_CONFIG.disableRain")) remove(settings, id);
+    JsonObject creative = section(settings, "creative");
+    for (String key : List.of("sprintFlight", "sprintToggle", "sprintMultiplier")) {
+      if (creative.has(key)) {
+        String suffix = Character.toUpperCase(key.charAt(0)) + key.substring(1);
+        if (!creative.has("spectator" + suffix)) creative.add("spectator" + suffix, creative.get(key).deepCopy());
+        JsonObject camera = section(settings, "power_camera:config");
+        if (!key.equals("sprintFlight") && !camera.has(key)) camera.add(key, creative.get(key).deepCopy());
+      }
+    }
+  }
+
   private static void unbindDisabled(JsonObject settings, String id, boolean fallback, String... names) {
     if (enabled(settings, id, fallback)) return;
     JsonObject keys = section(settings, "native"), modifiers = section(settings, "bindings");

@@ -17,6 +17,13 @@ import local.luke.power.creative.inventory.interfaces.CreativePlayer;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements CreativePlayer, ModePlayer {
   @Unique private boolean power$spectator;
+  @Unique private int power$flightOverride = -1;
+
+  public int power_flightOverride() { return power$flightOverride; }
+  public void power_flightOverride(int value) {
+    if (value < -1 || value > 1) throw new IllegalArgumentException("Invalid flight override");
+    power$flightOverride = value;
+  }
   @Unique private GameMode power$previous = GameMode.CREATIVE;
   @Unique private float power$spectatorSpeed = .05f;
 
@@ -41,7 +48,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
 
   @Override
   public void creative_setFlying(boolean flying) {
-    boolean next = power$spectator || flying && creative_isCreative();
+    boolean next = power$spectator || flying && Modes.flightAvailable(this);
     dataTracker.setData(CreativeInventory.IS_FLYING_ID, CreativeInventory.toByte(next));
     if (!next) velocityY = 0;
     fallDistance = 0;
@@ -64,6 +71,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     GameMode old = power_mode();
     if (old == mode) return;
     power$previous = old;
+    power$flightOverride = -1;
     power$spectator = mode == GameMode.SPECTATOR;
     dataTracker.setData(CreativeInventory.IS_CREATIVE_ID, CreativeInventory.toByte(mode == GameMode.CREATIVE));
     immuneToFire = mode != GameMode.SURVIVAL;
@@ -102,6 +110,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
   @Inject(method = "writeCustomDataToTag", at = @At("TAIL"))
   private void power$write(CompoundTag tag, CallbackInfo ci) {
     tag.put("Creative", creative_isCreative());
+    tag.put("PowerBetaFlightOverride", power$flightOverride);
     tag.put("Flying", creative_isFlying());
     tag.put("PowerBetaGameMode", power_mode().name());
     tag.put("PowerBetaPreviousGameMode", power$previous.name());
@@ -122,7 +131,9 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     immuneToFire = mode != GameMode.SURVIVAL;
     if (mode != GameMode.SURVIVAL) air = maxAir;
     updateFromBB = power$spectator;
-    creative_setFlying(power$spectator || mode == GameMode.CREATIVE && tag.getBoolean("Flying"));
+    int flightOverride = tag.containsKey("PowerBetaFlightOverride") ? tag.getInt("PowerBetaFlightOverride") : -1;
+    power$flightOverride = flightOverride >= -1 && flightOverride <= 1 ? flightOverride : -1;
+    creative_setFlying(power$spectator || tag.getBoolean("Flying") && Modes.flightAvailable(this));
     try {
       power$previous = GameMode.valueOf(tag.getString("PowerBetaPreviousGameMode"));
     } catch (IllegalArgumentException ignored) {
@@ -143,7 +154,12 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
       immuneToFire = true;
       fallDistance = 0;
     }
-    if (creative_isFlying() && !power$spectator && (isSleeping() || vehicle != null))
+    if (!power$spectator && !creative_isCreative() && power$flightOverride == 1
+        && !local.luke.power.rules.WorldRules.enabled(level.getProperties(), local.luke.power.rules.GameRule.ALLOW_FLIGHT)) {
+      power$flightOverride = -1;
+      creative_setFlying(false);
+    }
+    if (creative_isFlying() && !power$spectator && (!Modes.flightAvailable(this) || isSleeping() || vehicle != null))
       creative_setFlying(false);
   }
 

@@ -9,6 +9,8 @@ import static local.luke.power.rules.GameRule.*;
 public final class CommandPermissions {
   public record Context(String world, boolean multiplayer, RuleSet rules) {}
   private static Supplier<Context> context = () -> new Context("", false, new RuleSet());
+  private static java.util.function.BooleanSupplier creativePlayer = () -> false;
+  public static void creativePlayer(java.util.function.BooleanSupplier source) { creativePlayer = Objects.requireNonNull(source); }
   private CommandPermissions() {}
   public static void context(Supplier<Context> source) { context = Objects.requireNonNull(source); }
   public static Context context() { return context.get(); }
@@ -24,6 +26,7 @@ public final class CommandPermissions {
   }
   public static GameRule owner(String name) {
     return switch (canonical(name)) {
+      case "fly" -> ALLOW_FLIGHT;
       case "give" -> ALLOW_ITEM_SPAWNING;
       case "summon", "kill", "killall", "ride", "remove", "rem", "rement", "butcher" -> ALLOW_ENTITY_CONTROL;
       case "heal", "god", "clear", "repair" -> ALLOW_SURVIVAL_ASSISTANCE;
@@ -51,7 +54,10 @@ public final class CommandPermissions {
     };
     return rule == null ? "Unknown game mode." : denial(rule, context());
   }
-  public static String denial(String name) { return denial(owner(name), context()); }
+  public static String denial(String name) {
+    if (canonical(name).equals("fly") && !context().multiplayer && creativePlayer.getAsBoolean()) return "";
+    return denial(owner(name), context());
+  }
   public static String denial(String name, String[] args) {
     if (readOnly(name, args)) return "";
     return denial(name);
