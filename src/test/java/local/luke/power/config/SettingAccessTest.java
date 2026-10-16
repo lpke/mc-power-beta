@@ -49,7 +49,7 @@ class SettingAccessTest {
     var session = world();
     for (GameRule permission : List.of(GameRule.ALLOW_CREATIVE_MODE, GameRule.ALLOW_SPECTATOR_MODE, GameRule.ALLOW_FLIGHT)) {
       rule(session, permission, true);
-      for (String id : List.of("creative.sprintFlight", "creative.sprintToggle", "creative.sprintMultiplier"))
+      for (String id : List.of("creative.flightSpeed", "creative.sprintToggle", "creative.sprintMultiplier"))
         assertEquals(permission != GameRule.ALLOW_SPECTATOR_MODE, SettingAccess.visible(session, entry(id)), id);
       assertEquals(permission == GameRule.ALLOW_SPECTATOR_MODE, SettingAccess.visible(session, entry("creative.spectatorSprintToggle")));
       for (String id : List.of("keys.power_creative.modifier", "keys.power_creative.picker"))

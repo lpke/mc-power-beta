@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-10-16
+
+- Unify flight speed percentages, sprint controls and drift tuning across Creative, Spectator and freecam. Sprint is always available, and freecam starts at 110% speed with drift 3. Its frame timing remains unchanged.
+- Freecam ignores collisions in Creative and Spectator while retaining the Survival collision preference. Spectator shows a solid head at the player's position alongside the translucent detached-camera marker.
+- WorldEdit selection and coordinate-based commands follow the reported location, including the feet-coordinate preference and detached camera.
+- Move Advanced OpenGL to Video performance and 3D anaglyph to the initially collapsed Advanced miscellaneous group. Clean up percentage labels and keep music tracks in library search only.
+- Separate game-sound volume from its category sliders with an in-group divider.
+- Configuration format 7 supports formats 3 through 6, preserves saved freecam speed, converts its old drag value once and retires the flight-sprint switches and classic freecam movement. World-rule format remains 3, with formats 1 and 2 still supported.
+
 ## [2.1.1] - 2026-10-16
 
 - Set bed respawn points during the day with sleeping enabled, while retaining native sleeping and multiplayer behaviour.

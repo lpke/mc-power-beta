@@ -42,7 +42,10 @@ public final class PowerOptionsScreen extends UiScreen {
     58, 20, 2256, 280, 323, 345, 301, 54, 45, 2, 271, 339, 260, 61, 265, 331
   };
 
-  private record Row(String group, Setting setting, int y, int height) {}
+  private record Row(String group, Setting setting, int y, int height, boolean separator) {
+    Row(String group, Setting setting, int y, int height) { this(group, setting, y, height, false); }
+    boolean heading() { return setting == null && !separator; }
+  }
 
   private record View(String page, double scroll, double sideScroll, String query,
       boolean changedOnly, List<String> conflicts, List<String> related, String relatedLabel, Set<String> collapsed,
@@ -391,7 +394,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private StickyHeader stickyHeader() {
-    return StickyHeader.at(rows, row -> row.setting == null, Row::y, Row::height,
+    return StickyHeader.at(rows, Row::heading, row -> row.setting != null, Row::y, Row::height,
         (int) scroll, top(), bottom());
   }
 
@@ -423,6 +426,9 @@ public final class PowerOptionsScreen extends UiScreen {
         .map(id -> session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElse(null))
         .filter(Objects::nonNull).toList();
     Map<String, Integer> scores = new HashMap<>();
+    if (!query.isEmpty()) candidates = candidates.stream().filter(s ->
+        !s.group.equals("Individual music tracks") && !s.group.equals("Track rotation")
+            && !s.id.startsWith("audio.sound.music:")).toList();
     if (!query.isEmpty() && listed.isEmpty()) {
       for (Setting s : candidates) scores.put(s.id, FuzzySearch.score(query, s.label, s.description + " " + s.group + " " + s.page));
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
@@ -448,11 +454,16 @@ public final class PowerOptionsScreen extends UiScreen {
       for (Setting s : group.getValue()) {
         next.add(new Row(group.getKey(), s, y, rowHeight));
         y += rowHeight;
+        if (!flat && query.isEmpty() && !changedOnly
+            && s != group.getValue().get(group.getValue().size() - 1)
+            && Catalog.metadata(s.id).has("separatorAfter") && Catalog.metadata(s.id).get("separatorAfter").getAsBoolean()) {
+          next.add(new Row(group.getKey(), null, y, 13, true)); y += 13;
+        }
       }
       y += 6;
     }
     rows = next;
-    sectionKeys = rows.stream().filter(r -> r.setting == null).map(r -> sectionKey(r.group)).toList();
+    sectionKeys = rows.stream().filter(Row::heading).map(r -> sectionKey(r.group)).toList();
     scroll = Math.max(0, Math.min(scroll, Math.max(0, y - (bottom() - top()))));
     sideScroll =
         Math.max(0, Math.min(sideScroll, Math.max(0, pages.size() * 22 - (bottom() - 24))));
@@ -651,7 +662,8 @@ public final class PowerOptionsScreen extends UiScreen {
         Row r = rows.get(i);
         int ry = pinned == i ? sticky.y() : top() + r.y - (int) scroll;
         if (y < ry || y >= ry + r.height) continue;
-        if (r.setting == null) {
+        if (r.separator) return;
+        if (r.heading()) {
           if (button == 0) {
             String id = sectionKey(r.group);
             boolean jump = (!search.text().isBlank() || changedOnly)
@@ -910,7 +922,10 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (key == Keyboard.KEY_DOWN || key == Keyboard.KEY_UP || key == Keyboard.KEY_TAB) {
       int dir = key == Keyboard.KEY_UP ? -1 : 1;
-      selected = Math.floorMod(selected + dir, Math.max(1, rows.size()));
+      for (int attempt = 0; attempt < Math.max(1, rows.size()); attempt++) {
+        selected = Math.floorMod(selected + dir, Math.max(1, rows.size()));
+        if (rows.isEmpty() || !rows.get(selected).separator) break;
+      }
       if (!rows.isEmpty()) {
         Row r = rows.get(selected);
         scroll = Math.max(0, r.y - 20);
@@ -1073,7 +1088,11 @@ public final class PowerOptionsScreen extends UiScreen {
       Row row = rows.get(index);
       int y = top() + row.y - (int) scroll;
       if (y + row.height < top() || y >= bottom()) continue;
-      if (row.setting == null) {
+      if (row.separator) {
+        fill(left(), y + row.height / 2, right() - 14, y + row.height / 2 + 1, 0x50555555);
+        continue;
+      }
+      if (row.heading()) {
         if (sticky == null || index != sticky.index()) groupHeading(row, y);
         continue;
       }

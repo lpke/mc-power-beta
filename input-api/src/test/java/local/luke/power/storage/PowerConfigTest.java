@@ -34,7 +34,7 @@ class PowerConfigTest {
     String original = "{\"schemaVersion\":3,\"settings\":{\"gameplay\":{\"fireSpread\":false,\"mergeItems\":true},\"commandAccess\":{\"enabled\":false}}}";
     Files.writeString(PowerConfig.path(), original);
     JsonObject converted = PowerConfig.document();
-    assertEquals(6, converted.get("schemaVersion").getAsInt());
+    assertEquals(local.luke.power.storage.ConfigVersions.CURRENT, converted.get("schemaVersion").getAsInt());
     assertFalse(converted.getAsJsonObject("settings").has("commandAccess"));
     assertFalse(PowerConfig.section("gameplay").has("fireSpread"));
     assertTrue(PowerConfig.section("gameplay").get("mergeItems").getAsBoolean());
@@ -108,5 +108,29 @@ class PowerConfigTest {
       assertTrue(JsonParser.parseString(Files.readString(persisted)).getAsJsonObject().getAsJsonObject("settings")
           .getAsJsonObject("shutdown").get("enabled").getAsBoolean());
     } finally { if (child.isAlive()) child.destroyForcibly(); }
+  }
+  @Test void persistedConversionHasAnExactBackupAndDoesNotRepeatAfterRestart() throws Exception {
+    Path config = PowerConfig.path();
+    String original = new GsonBuilder().setPrettyPrinting().create().toJson(FlightConfigUpgradeTest.legacy());
+    Files.writeString(config,original);
+    JsonObject converted = PowerConfig.document();
+    assertEquals(converted,JsonParser.parseString(Files.readString(config)));
+    try(var backups=Files.list(dir.resolve("backups"))) {
+      assertTrue(backups.anyMatch(p->{try{return Files.readString(p).equals(original);}catch(Exception e){return false;}}));
+    }
+    PowerConfig.configure(config);
+    assertEquals(converted,PowerConfig.document());
+  }
+  @Test void malformedTuningBlocksConversionBeforeAnyWrite() throws Exception {
+    Path config = PowerConfig.path();
+    for(String bad:new String[]{"-1","1001","\"10\"","null","{}"}) {
+      var old=FlightConfigUpgradeTest.legacy();old.getAsJsonObject("settings").getAsJsonObject("power_camera:config").add("drag",JsonParser.parseString(bad));
+      String original=old.toString();Files.writeString(config,original);
+      assertThrows(IllegalStateException.class,PowerConfig::document,bad);
+      assertEquals(original,Files.readString(config));
+    }
+    var future=FlightConfigUpgradeTest.legacy();future.addProperty("schemaVersion",99);String original=future.toString();Files.writeString(config,original);
+    assertThrows(IllegalStateException.class,PowerConfig::document);
+    assertEquals(original,Files.readString(config));
   }
 }

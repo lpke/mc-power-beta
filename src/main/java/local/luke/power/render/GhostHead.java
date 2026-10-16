@@ -15,22 +15,35 @@ public final class GhostHead {
   private GhostHead() {}
 
   public static boolean visible(Minecraft mc) {
-    return mc.world != null && mc.player != null && mc.field_2807 != null && mc.options.thirdPerson
-        && (DetachedCamera.isActive() || mc.player instanceof PlayerMode mode && mode.power$spectator());
+    return mc.world != null && mc.player != null && mc.field_2807 != null
+        && (mc.options.thirdPerson && DetachedCamera.isActive()
+            || mc.player instanceof PlayerMode mode && mode.power$spectator()
+                && (mc.options.thirdPerson || DetachedCamera.isActive()));
   }
 
   public static void render(Minecraft mc, float delta) {
     if (!visible(mc)) return;
     var player = mc.player;
-    var camera = mc.field_2807;
     boolean detached = DetachedCamera.isActive();
-    double x = detached ? DetachedCamera.x() : player.prevX + (player.x - player.prevX) * delta;
-    double y = detached ? HeadGeometry.baseY(DetachedCamera.y())
-        : player.prevY + (player.y - player.prevY) * delta - player.field_1631 + HeadGeometry.BASE_ABOVE_FEET;
-    double z = detached ? DetachedCamera.z() : player.prevZ + (player.z - player.prevZ) * delta;
-    float yaw = detached ? DetachedCamera.facingYaw() : player.prevYaw + (player.yaw - player.prevYaw) * delta;
-    float pitch = detached ? (float)DetachedCamera.pitch() : player.prevPitch + (player.pitch - player.prevPitch) * delta;
+    boolean spectator = player instanceof PlayerMode mode && mode.power$spectator();
+    if (spectator && (detached || mc.options.thirdPerson)) {
+      draw(mc, delta, player.prevX + (player.x - player.prevX) * delta,
+          player.prevY + (player.y - player.prevY) * delta - player.field_1631 + HeadGeometry.BASE_ABOVE_FEET,
+          player.prevZ + (player.z - player.prevZ) * delta,
+          player.prevYaw + (player.yaw - player.prevYaw) * delta,
+          player.prevPitch + (player.pitch - player.prevPitch) * delta, 1, true);
+    }
+    if (detached && mc.options.thirdPerson) {
+      draw(mc, delta, DetachedCamera.x(), HeadGeometry.baseY(DetachedCamera.y()), DetachedCamera.z(),
+          DetachedCamera.facingYaw(), (float)DetachedCamera.pitch(), .65F, spectator);
+    }
+  }
+
+  private static void draw(Minecraft mc, float delta, double x, double y, double z,
+      float yaw, float pitch, float opacity, boolean throughBlocks) {
     if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z) || !Float.isFinite(yaw) || !Float.isFinite(pitch)) return;
+    var player = mc.player;
+    var camera = mc.field_2807;
     GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT
         | GL11.GL_CURRENT_BIT | GL11.GL_TEXTURE_BIT | GL11.GL_LIGHTING_BIT);
     GL11.glPushMatrix();
@@ -43,14 +56,14 @@ public final class GhostHead {
       GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glEnable(GL11.GL_TEXTURE_2D);
       // A spectator can enter solid terrain. Keep its only position marker visible there.
-      if (player instanceof PlayerMode mode && mode.power$spectator()) GL11.glDisable(GL11.GL_DEPTH_TEST);
+      if (throughBlocks) GL11.glDisable(GL11.GL_DEPTH_TEST);
       else GL11.glEnable(GL11.GL_DEPTH_TEST);
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glEnable(GL11.GL_ALPHA_TEST);
       GL11.glAlphaFunc(GL11.GL_GREATER, .01F);
-      GL11.glDepthMask(false);
-      GL11.glColor4f(1, 1, 1, .65F);
+      GL11.glDepthMask(opacity == 1);
+      GL11.glColor4f(1, 1, 1, opacity);
       int texture = mc.textureManager.method_1093(player.skinUrl, player.method_1314());
       if (texture < 0) return;
       mc.textureManager.bindTexture(texture);

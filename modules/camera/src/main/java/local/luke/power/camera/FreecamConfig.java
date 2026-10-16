@@ -18,8 +18,6 @@ public class FreecamConfig {
         public Boolean collision = true;
         @ConfigEntry(name = "Freecam door collisions", description = "Collide with doors and trapdoors when camera collisions are enabled.")
         public Boolean doorCollision = false;
-        @ConfigEntry(name = "Freecam sprint", description = "Use the flight sprint key, multiplier and Hold/Toggle setting to boost camera speed.")
-        public Boolean sprint = true;
         @ConfigEntry(name = "Sprint activation", description = "Hold requires the sprint key; Toggle stays active until movement stops.")
         public Boolean sprintToggle = true;
         @ConfigEntry(name = "Sprint speed, %", minValue = 100, maxValue = 400)
@@ -30,20 +28,15 @@ public class FreecamConfig {
                 maxValue = 1000,
                 minValue = 0
         )
-        public Float speed = 12f;
+        public Float speed = (float)(local.luke.power.input.FlightMotion.HORIZONTAL_SPEED * 1.1);
 
         @ConfigEntry(
-                name = "Freecam Drag",
-                description = "Changing this value will change the drag of the freecam, The lower the drag, the longer it takes for the camera to stop. This option doesn't do anything for classic movement",
-                maxValue = 1000,
+                name = "Freecam drift",
+                description = "Coasting when movement is released: 0 stops immediately; 5 uses modern flight drag.",
+                maxValue = 5,
                 minValue = 0
         )
-        public Float drag = 10f;
+        public Float drag = 3f;
 
-        @ConfigEntry(
-                name = "Classic Freecam Movement",
-                description = "When this option is enabled the freecam will move like in older versions of Freecam"
-        )
-        public Boolean classicMovement = false;
     }
 }

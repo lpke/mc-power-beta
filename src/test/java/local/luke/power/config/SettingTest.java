@@ -7,6 +7,19 @@ import java.util.*;
 import org.junit.jupiter.api.*;
 
 class SettingTest {
+  @Test void freecamPercentEditingKeepsStoredSpeedAndAcceptsRoundedBoundaries() {
+    double base=local.luke.power.input.FlightMotion.HORIZONTAL_SPEED;
+    Setting s=Catalog.setting("power_camera:config.speed","test","Camera","Free camera","Speed","",
+        Setting.Kind.DECIMAL,new JsonPrimitive(base*1.1),new JsonPrimitive(12),0,1000,.1,List.of(),false);
+    assertEquals("110",s.editText());
+    assertEquals(110,s.defaultValue.getAsDouble()*100/base,1e-7);
+    s.parse("100");assertEquals(base,s.value.getAsDouble(),1e-9);
+    s.parse("40");assertEquals(base*.4,s.value.getAsDouble(),1e-9);
+    s.slide(1);String boundary=s.editText();s.parse(boundary);assertEquals(s.max,s.value.getAsDouble());
+    s.parse("0");assertEquals(0,s.value.getAsDouble());
+    assertThrows(IllegalArgumentException.class,()->s.parse("100000"));
+  }
+
   @Test void durationEditorsUseSecondsWithoutChangingStorageOrPrecision() {
     Setting s = new Setting("creative.doubleTapTicks", "creative", "", "", "", "",
         Setting.Kind.INTEGER, new JsonPrimitive(7), new JsonPrimitive(7), 2, 20, 1, List.of(), false);

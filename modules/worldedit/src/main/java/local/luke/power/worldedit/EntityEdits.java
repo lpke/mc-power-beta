@@ -15,12 +15,14 @@ public final class EntityEdits {
   public static int apply(Minecraft mc, EntityQuery query, boolean remove) {
     if (!WorldEditor.commandAvailable(mc, remove ? "remove" : "countentities"))
       throw new IllegalArgumentException("A live local world is required.");
+    var origin = local.luke.power.input.ReportedPosition.current(mc.player, mc.player.x,
+        mc.player.boundingBox.minY, mc.player.z, mc.player.yaw, mc.player.pitch);
     int count = 0;
     // Snapshot: entities detach from chunks during the next normal world tick.
     for (Object value : new ArrayList<>(mc.world.field_198)) {
       if (!(value instanceof Entity e) || e.dead || e.world != mc.world || protectedEntity(e))
         continue;
-      if (!query.contains(e.x - mc.player.x, e.y - mc.player.boundingBox.minY, e.z - mc.player.z))
+      if (!query.contains(e.x - origin.x(), e.y - origin.y(), e.z - origin.z()))
         continue;
       String name = class_206.method_734(e);
       // Beta omits two projectile classes from the save registry.

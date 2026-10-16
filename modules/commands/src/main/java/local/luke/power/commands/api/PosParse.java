@@ -10,13 +10,16 @@ public class PosParse {
   public boolean valid = true;
 
   public PosParse(PlayerEntity player) {
-    x = player.x;
-    y = player.y;
-    z = player.z;
+    var pose = local.luke.power.commands.util.CommandPosition.of(player);
+    x = pose.x(); y = pose.y(); z = pose.z();
   }
 
   public PosParse(PlayerEntity player, int start, String[] segments) {
-    this(player.x, player.y, player.z, start, segments);
+    this(local.luke.power.commands.util.CommandPosition.of(player), start, segments);
+  }
+
+  private PosParse(local.luke.power.input.ReportedPosition.Pose pose, int start, String[] segments) {
+    this(pose.x(), pose.y(), pose.z(), start, segments);
   }
 
   public PosParse(double x, double y, double z, int start, String[] segments) {

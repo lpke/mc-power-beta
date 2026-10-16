@@ -73,11 +73,10 @@ public final class RevisionChecks {
       check(field(reopened,"page").equals("Gameplay") && field(reopened,"scroll").equals(position),"position lost");
       mc.setScreen(screen);
     });
-    test("Controls is flat and hides disabled feature bindings",()->{
-      field(screen,"page","Controls");field(screen,"scroll",0d);field(screen,"showDisabled",false);find(screen.session(),"creative.sprintFlight").value=new JsonPrimitive(false);find(screen.session(),"power_camera:config.sprint").value=new JsonPrimitive(false);call(screen,"layout");
-      check(visible(screen).stream().noneMatch(s->s.id.equals("keys.power_creative.sprint")),"disabled binding visible");
+    test("Controls is flat and flight sprint remains available",()->{
+      field(screen,"page","Controls");field(screen,"scroll",0d);field(screen,"showDisabled",false);call(screen,"layout");
+      check(visible(screen).stream().anyMatch(s->s.id.equals("keys.power_creative.sprint")),"sprint binding hidden");
       for(Object row:(List<?>)field(screen,"rows"))check(call(row,"setting")!=null,"section title remains");
-      field(screen,"showDisabled",true);call(screen,"layout");check(visible(screen).stream().anyMatch(s->s.id.equals("keys.power_creative.sprint")),"show disabled failed");
     });
     test("conflict filter stays fixed while bindings change",()->{
       Setting first=find(screen.session(),"keys.key.forward"),other=find(screen.session(),"keys.key.back");

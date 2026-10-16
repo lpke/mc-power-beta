@@ -43,7 +43,7 @@ public final class FeatureChecks {
         });session.discard();
       }
     } else if(action.equals("camera-start")) {
-      settings(mc,Map.of("power_camera:config.sprint",true,"keys.Toggle Freecam",67,"keys.power_creative.sprint",29,"creative.sprintToggle",true));mc.setScreen(null);
+      settings(mc,Map.of("keys.Toggle Freecam",67,"keys.power_creative.sprint",29,"creative.sprintToggle",true));mc.setScreen(null);
     } else if(action.equals("camera-fast")) {
       test("freecam flight sprint boosts speed",()->check((float)method(camera(),"movementSpeed")>cameraBase()+.1f,"not boosted"));
     } else if(action.equals("camera-slow")) {

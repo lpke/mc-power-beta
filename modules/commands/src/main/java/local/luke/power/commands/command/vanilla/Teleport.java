@@ -10,7 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class Teleport implements Command {
-  /** Legacy callers use Beta entity Y. Modern command parsing below uses feet Y. */
+  /** Legacy callers use Beta entity Y. Coordinate commands use the reported origin below. */
   public static void teleport(PlayerEntity player, double x, double y, double z) {
     if (!Double.isFinite(x) || !Double.isFinite(y) || !Double.isFinite(z))
       throw new IllegalArgumentException("Invalid destination.");
@@ -31,6 +31,7 @@ public class Teleport implements Command {
 
   public void command(SharedCommandSource source, String[] args) {
     PlayerEntity self = EntityTargets.player(source);
+    var pose = CommandPosition.of(self);
     if (args.length < 2) {
       manual(source);
       return;
@@ -59,12 +60,12 @@ public class Teleport implements Command {
     } else {
       double[] pos =
           CommandNumbers.position(
-              self.x, self.boundingBox.minY, self.z, self.yaw, self.pitch, args, start);
+              pose.x(), pose.y(), pose.z(), pose.yaw(), pose.pitch(), args, start);
       int rest = start + 3;
       Float yaw = null, pitch = null;
       if (args.length == rest + 2) {
-        yaw = (float) CommandNumbers.relative(args[rest], self.yaw);
-        pitch = (float) CommandNumbers.relative(args[rest + 1], self.pitch);
+        yaw = (float) CommandNumbers.relative(args[rest], pose.yaw());
+        pitch = (float) CommandNumbers.relative(args[rest + 1], pose.pitch());
         if (!Float.isFinite(yaw) || !Float.isFinite(pitch))
           throw new IllegalArgumentException("Invalid rotation.");
         yaw = wrap(yaw);
@@ -74,7 +75,7 @@ public class Teleport implements Command {
         if (args.length == rest + 4 && !args[rest + 1].equals("entity"))
           face =
               CommandNumbers.position(
-                  self.x, self.boundingBox.minY, self.z, self.yaw, self.pitch, args, rest + 1);
+                  pose.x(), pose.y(), pose.z(), pose.yaw(), pose.pitch(), args, rest + 1);
         else if ((args.length == rest + 3 || args.length == rest + 4)
             && args[rest + 1].equals("entity")) {
           Entity dest = EntityTargets.one(source, args[rest + 2]);

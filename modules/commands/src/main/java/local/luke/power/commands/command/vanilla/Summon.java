@@ -17,11 +17,12 @@ public class Summon implements Command {
     }
     var player = EntityTargets.player(s);
     String id = EntityTargets.registryName(args[1]);
+    var pose = CommandPosition.of(player);
     double[] p =
         args.length == 2
-            ? new double[] {player.x, player.boundingBox.minY, player.z}
+            ? new double[] {pose.x(), pose.y(), pose.z()}
             : CommandNumbers.position(
-                player.x, player.boundingBox.minY, player.z, player.yaw, player.pitch, args, 2);
+                pose.x(), pose.y(), pose.z(), pose.yaw(), pose.pitch(), args, 2);
     Entity entity = EntityRegistry.create(id, player.world);
     if (entity == null) throw new IllegalArgumentException("Cannot create this entity.");
     // Entity types whose constructor requires payloads need dedicated game actions.

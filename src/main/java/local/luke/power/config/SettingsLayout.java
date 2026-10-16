@@ -37,7 +37,7 @@ public final class SettingsLayout {
             || page.equals("Gameplay") || page.equals("Fixes")
             || page.equals("Video") && Set.of("Entity visibility", "Particles").contains(group)
             || page.equals("Audio") && group.equals("Individual sounds")
-            || page.equals("Advanced") && group.equals("Achievement recovery");
+            || page.equals("Advanced") && Set.of("Achievement recovery", "Miscellaneous").contains(group);
         if (closed) result.add(page + "/" + group);
       }
     });

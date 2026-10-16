@@ -34,12 +34,8 @@ class ControlLinksTest {
       assertTrue(ControlLinks.enabled(session,key));
     }
   }
-  @Test void sharedSprintRemainsAvailableWhenEitherUseIsEnabled() {
-    var flight=setting("creative.sprintFlight");var camera=setting("power_camera:config.sprint");var key=setting("keys.power_creative.sprint");
-    var session=session(List.of(flight,camera,key));
-    for(boolean flying:List.of(false,true))for(boolean detached:List.of(false,true)) {
-      flight.value=new JsonPrimitive(flying);camera.value=new JsonPrimitive(detached);
-      assertEquals(flying||detached,ControlLinks.enabled(session,key));
-    }
+  @Test void sharedSprintRemainsAvailableWithoutRetiredFeatureSwitches() {
+    var key=setting("keys.power_creative.sprint");
+    assertTrue(ControlLinks.enabled(session(List.of(key)),key));
   }
 }

@@ -144,21 +144,19 @@ public class GameRendererMixin {
         double[] endVelocity = new double[3];
         double[] velocity = {freecamController.velocityX, freecamController.velocityY, freecamController.velocityZ};
         for (int axis = 0; axis < 3; axis++) {
-            double target = direction[axis] * movementSpeed;
-            if (FreecamConfig.config.classicMovement) {
-                velocity[axis] = target;
-            } else {
-                var step = local.luke.power.camera.util.CameraMotion.step(
-                        velocity[axis], target, FreecamConfig.config.drag, deltaTime);
-                velocity[axis] = step.distance() / deltaTime;
-                endVelocity[axis] = step.velocity();
-            }
+            var step = local.luke.power.input.FlightMotion.frame(velocity[axis], direction[axis],
+                    movementSpeed * 100 / local.luke.power.input.FlightMotion.HORIZONTAL_SPEED,
+                    1, FreecamConfig.config.drag, axis == 1,
+                    axis == 1 ? direction[1] != 0 : direction[0] != 0 || direction[2] != 0, deltaTime);
+            velocity[axis] = step.distance() / deltaTime;
+            endVelocity[axis] = step.velocity();
         }
         freecamController.velocityX = velocity[0];
         freecamController.velocityY = velocity[1];
         freecamController.velocityZ = velocity[2];
 
-		if(FreecamConfig.config.collision && client.world != null){
+		if(FreecamConfig.config.collision && client.world != null
+                && !(client.player instanceof local.luke.power.input.PlayerMode mode && (mode.power$creative() || mode.power$spectator()))){
 			Box box = Freecam.cameraBoundingBox;
 			for(int iteration = 0; iteration < 3; iteration++){
 				double adjustedVelocityX = freecamController.velocityX * deltaTime;

@@ -38,6 +38,17 @@ class StickyHeaderTest {
     assertNotNull(at(ROWS, 30));
   }
 
+  @Test void inGroupDividersDoNotCountAsSettingsOrHeadings() {
+    record Line(boolean heading,boolean setting,int y,int height) {}
+    var rows=new java.util.ArrayList<Line>();
+    rows.add(new Line(true,false,0,24));
+    for(int i=0;i<7;i++)rows.add(new Line(false,true,24+i*24,24));
+    rows.add(new Line(false,false,192,13));
+    assertNull(StickyHeader.at(rows,Line::heading,Line::setting,Line::y,Line::height,30,50,210));
+    rows.add(new Line(false,true,205,24));
+    assertNotNull(StickyHeader.at(rows,Line::heading,Line::setting,Line::y,Line::height,30,50,210));
+  }
+
   @Test void singleItemAndCollapsedGroupsNeverCoverContent() {
     var rows = List.of(new Row(true, 0, 24), new Row(false, 24, 40));
     assertNull(at(rows, 8));

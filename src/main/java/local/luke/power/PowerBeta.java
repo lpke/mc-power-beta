@@ -24,6 +24,16 @@ public final class PowerBeta {
     local.luke.power.mining.VeinMining.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.input.ReportedPosition.register(() -> mc.player, () -> {
+        if (mc.player == null || mc.world == null) return null;
+        boolean detached = local.luke.power.input.DetachedCamera.isActive();
+        return new local.luke.power.input.ReportedPosition.Pose(
+            detached ? local.luke.power.input.DetachedCamera.x() : mc.player.x,
+            local.luke.power.hud.HudCoordinates.y(mc.player),
+            detached ? local.luke.power.input.DetachedCamera.z() : mc.player.z,
+            detached ? local.luke.power.input.DetachedCamera.facingYaw() : mc.player.yaw,
+            detached ? (float)local.luke.power.input.DetachedCamera.pitch() : mc.player.pitch);
+      });
       local.luke.power.input.CameraView.configure(
           () -> local.luke.power.visual.VisualConfig.current().thirdPersonDistance,
           local.luke.power.controls.util.ModOptions::isFrontViewEnabled);

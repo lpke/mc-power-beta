@@ -60,8 +60,7 @@ public class FreecamController {
     public float movementSpeed() {
         Minecraft minecraft = (Minecraft)FabricLoader.getInstance().getGameInstance();
         boolean pressed = local.luke.power.input.Bindings.down("power_creative.sprint");
-        boolean eligible = minecraft != null && active && (move != 0 || strafe != 0 || jumping != sneaking) && minecraft.currentScreen == null && org.lwjgl.opengl.Display.isActive()
-            && local.luke.power.camera.FreecamConfig.config.sprint;
+        boolean eligible = minecraft != null && active && (move != 0 || strafe != 0 || jumping != sneaking) && minecraft.currentScreen == null && org.lwjgl.opengl.Display.isActive();
         boolean toggle = local.luke.power.camera.FreecamConfig.config.sprintToggle;
         double multiplier = local.luke.power.camera.FreecamConfig.config.sprintMultiplier / 100.0;
         if (!eligible) sprintLatched = false;

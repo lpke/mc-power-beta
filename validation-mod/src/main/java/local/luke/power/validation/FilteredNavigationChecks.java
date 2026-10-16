@@ -120,15 +120,8 @@ public final class FilteredNavigationChecks {
           finally{state.value=old;}
         }
       });
-      test("shared sprint control remains available for flight or freecam",()->{
-        Setting flight=find(s.session(),"creative.sprintFlight"),sprint=find(s.session(),"power_camera:config.sprint"),key=find(s.session(),"keys.power_creative.sprint");
-        var a=flight.value;var b=sprint.value;
-        try {
-          for(int bits=0;bits<4;bits++) {
-            flight.value=new JsonPrimitive((bits&1)!=0);sprint.value=new JsonPrimitive((bits&2)!=0);
-            check(ControlLinks.enabled(s.session(),key)==(bits!=0),"shared action hidden incorrectly");
-          }
-        }finally{flight.value=a;sprint.value=b;}
+      test("shared sprint control is always available",()->{
+        check(ControlLinks.enabled(s.session(),find(s.session(),"keys.power_creative.sprint")),"shared sprint action hidden");
       });
       test("masterless actions remain bindable and related settings use retained preferences",()->{
         for(String[] pair:List.of(

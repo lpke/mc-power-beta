@@ -4,7 +4,9 @@ package local.luke.power.creative.flight;
 public final class FlightPhysics {
   public record Motion(double x, double y, double z) {
     public Motion drag() {
-      return new Motion(x * .91, y * .6, z * .91);
+      return new Motion(x * local.luke.power.input.FlightMotion.HORIZONTAL_DRAG,
+          y * local.luke.power.input.FlightMotion.VERTICAL_DRAG,
+          z * local.luke.power.input.FlightMotion.HORIZONTAL_DRAG);
     }
   }
 
@@ -19,28 +21,9 @@ public final class FlightPhysics {
       double speed,
       double sprint,
       int glide) {
-    double factor = Math.max(0, Math.min(5, glide)) / 5.0;
-    double x = old.x, y = old.y, z = old.z;
-    if (side == 0 && forward == 0) {
-      x *= factor;
-      z *= factor;
-    }
-    if (vertical == 0) y *= factor;
-    double length = Math.hypot(side, forward);
-    if (length > 0) {
-      double scale = .98 / Math.max(1, length);
-      side *= scale;
-      forward *= scale;
-      double angle = Math.toRadians(yaw), sin = Math.sin(angle), cos = Math.cos(angle);
-      x += (side * cos - forward * sin) * speed * sprint;
-      z += (forward * cos + side * sin) * speed * sprint;
-    }
-    y += vertical * speed * sprint * 3;
-    return new Motion(snap(x), snap(y), snap(z));
-  }
-
-  private static double snap(double n) {
-    return Math.abs(n) < .003 ? 0 : n;
+    var motion = local.luke.power.input.FlightMotion.tick(old.x, old.y, old.z,
+        side, forward, vertical, yaw, speed, sprint, glide);
+    return new Motion(motion.x(), motion.y(), motion.z());
   }
 
   public static float scroll(float speed, int wheel) {

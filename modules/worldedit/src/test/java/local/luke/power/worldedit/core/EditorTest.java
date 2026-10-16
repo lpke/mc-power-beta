@@ -43,7 +43,7 @@ class EditorTest {
         new Commands(
             e,
             new Commands.Player() {
-              public Pos feet() {
+              public Pos position() {
                 return feet;
               }
 

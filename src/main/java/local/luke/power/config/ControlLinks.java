@@ -43,7 +43,7 @@ public final class ControlLinks {
     link("power_building.hotbar.base", "tweaks.hotbar.overlay", "", "Hold to preview inventory rows and switch the active hotbar.");
     link("power_building.hotbar.scroll", "tweaks.hotbar.reverseScroll", "", "Hold and scroll to cycle inventory rows through the hotbar.");
     for (int i = 1; i <= 3; i++) link("power_building.hotbar.row" + i, "tweaks.hotbar.overlay", "", "Swap hotbar contents with inventory row " + i + ".");
-    link("power_creative.sprint", "creative.sprintToggle", "creative.sprintFlight", "Boost creative, spectator or freecam flight in any direction. Toggle ends when movement stops.");
+    link("power_creative.sprint", "creative.sprintToggle", "", "Boost creative, spectator or freecam flight in any direction. Toggle ends when movement stops.");
     link("power_creative.picker", "", "", "Cycle game modes while holding the mode-picker modifier; release the modifier to select.");
     link("power_creative.modifier", "", "", "Hold with the game-mode cycle key to open the mode picker.");
     link("Toggle Freecam", "power_camera:config.speed", "", "Detach the camera. The HUD follows Hide HUD on entering freecam; F1 can change it during the visit. Press again to return and restore the previous HUD visibility.");
@@ -125,10 +125,6 @@ public final class ControlLinks {
     };
   }
   public static boolean enabled(ConfigSession session, Setting key) {
-    // Flight and freecam share this action; either enabled use keeps it available.
-    if (key.id.equals("keys.power_creative.sprint"))
-      return session.settings().stream().anyMatch(s -> Set.of("creative.sprintFlight", "creative.spectatorSprintFlight", "power_camera:config.sprint").contains(s.id)
-          && SettingAccess.visible(session, s) && s.value.getAsBoolean());
     Link l = LINKS.get(key.id);
     return l == null || l.featureGate.isEmpty() || featureEnabled(session, l.featureGate);
   }

@@ -25,7 +25,7 @@ class WorldRuleUpgradeTest {
     JsonObject source = json("{\"schemaVersion\":4,\"settings\":{\"gameplay\":{\"lavaProofItems\":true,\"cactusProofItems\":false}}}");
     JsonObject before = source.deepCopy(), converted = ConfigVersions.convert(source);
     assertEquals(before, source);
-    assertEquals(6, converted.get("schemaVersion").getAsInt());
+    assertEquals(local.luke.power.storage.ConfigVersions.CURRENT, converted.get("schemaVersion").getAsInt());
     assertFalse(converted.getAsJsonObject("settings").getAsJsonObject("gameplay").has("lavaProofItems"));
     RuleSet rules = WorldRuleUpgrade.defaults(converted.getAsJsonObject("worldRuleUpgrade"));
     assertFalse(rules.enabled(LAVA_DESTROYS_ITEMS));

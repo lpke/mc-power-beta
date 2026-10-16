@@ -1,9 +1,9 @@
 package local.luke.power.creative.config;
 
 public final class Settings {
-  public boolean flight = true, landStopsFlight = true, sprintFlight = true, sprintToggle = true;
+  public boolean flight = true, landStopsFlight = true, sprintToggle = true;
   public int flightSpeed = 100, sprintMultiplier = 200, glide = 5, doubleTapTicks = 7;
-  public boolean spectatorSprintFlight = true, spectatorSprintToggle = true;
+  public boolean spectatorSprintToggle = true;
   public int spectatorSprintMultiplier = 200, spectatorGlide = 5;
   public boolean spectatorScroll = true, showSpectatorSpeed = true;
   public int spectatorSpeed = 100, spectatorScrollStep = 10;

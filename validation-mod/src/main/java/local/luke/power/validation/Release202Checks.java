@@ -17,7 +17,7 @@ final class Release202Checks {
     failures = 0;
     test("camera and leaf defaults agree with their reset values", () -> {
       var session = SettingsRegistry.open(mc);
-      for (var entry : Map.of("power_camera:config.speed", "12.0", "power_camera:config.drag", "10.0",
+      for (var entry : Map.of("power_camera:config.speed", Double.toString(local.luke.power.input.FlightMotion.HORIZONTAL_SPEED*1.1), "power_camera:config.drag", "3.0",
           "power_controls:tweaks.beta18LeavesRendering", "true").entrySet()) {
         var row = WorldRulesChecks.find(session, entry.getKey());
         check(row.defaultValue.equals(com.google.gson.JsonParser.parseString(entry.getValue())), "wrong reset default " + entry.getKey());

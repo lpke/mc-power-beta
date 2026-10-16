@@ -125,6 +125,34 @@ final class ConfigCleanup {
     }
   }
 
+  static void upgradeSix(JsonObject settings) {
+    for (String path : List.of("creative.sprintFlight", "creative.spectatorSprintFlight",
+        "power_camera:config.sprint", "power_camera:config.classicMovement")) {
+      enabled(settings, path, true); // Validate known values before retiring them.
+    }
+    if (settings.has("power_camera:config")) {
+      JsonObject camera = settings.getAsJsonObject("power_camera:config");
+      if (camera.has("speed")) numeric(camera.get("speed"), "Freecam speed", 0, 1000);
+      if (camera.has("drag")) {
+        double drag = numeric(camera.get("drag"), "Freecam drag", 0, 1000);
+        double drift = local.luke.power.input.FlightMotion.legacyDrift(drag);
+        camera.addProperty("drag", Math.round(drift * 1000000) / 1000000d);
+      }
+      if (enabled(settings, "power_camera:config.classicMovement", false)) camera.addProperty("drag", 0);
+    }
+    for (String path : List.of("creative.sprintFlight", "creative.spectatorSprintFlight",
+        "power_camera:config.sprint", "power_camera:config.classicMovement")) remove(settings, path);
+  }
+
+  private static double numeric(JsonElement value, String name, double min, double max) {
+    if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isNumber())
+      throw new IllegalArgumentException(name + " must be a number.");
+    double number = value.getAsDouble();
+    if (!Double.isFinite(number) || number < min || number > max)
+      throw new IllegalArgumentException(name + " must be from " + min + " to " + max + ".");
+    return number;
+  }
+
   private static void unbindDisabled(JsonObject settings, String id, boolean fallback, String... names) {
     if (enabled(settings, id, fallback)) return;
     JsonObject keys = section(settings, "native"), modifiers = section(settings, "bindings");

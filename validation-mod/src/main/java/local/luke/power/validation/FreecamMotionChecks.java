@@ -36,7 +36,7 @@ public final class FreecamMotionChecks {
       mc.options.thirdPerson = false;
       Object config = Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
       config.getClass().getField("speed").set(config, 12F);
-      config.getClass().getField("drag").set(config, 10F);
+      config.getClass().getField("drag").set(config, 3F);
       config.getClass().getField("collision").set(config, false);
       mc.options.jumpKey.code = 57; mc.options.sneakKey.code = 42;
       return;

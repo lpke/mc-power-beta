@@ -30,7 +30,7 @@ public class InGameHudMixin extends DrawContext {
             GL11.glPushMatrix();
             ScreenScaler scaledResolution = new ScreenScaler(this.minecraft.options, this.minecraft.displayWidth, this.minecraft.displayHeight);
             TextRenderer textRenderer = minecraft.textRenderer;
-            String speedString = "Speed: " + FreecamConfig.config.speed;
+            String speedString = "Speed: " + (Math.round(FreecamConfig.config.speed * 1000 / local.luke.power.input.FlightMotion.HORIZONTAL_SPEED) / 10f) + "%";
             textRenderer.drawWithShadow(speedString, scaledResolution.getScaledWidth() / 2 - textRenderer.getWidth(speedString) / 2, scaledResolution.getScaledHeight() - scaledResolution.getScaledHeight() / 8, 0xFFFF55);
             GL11.glPopMatrix();
         }

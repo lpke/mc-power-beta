@@ -13,8 +13,6 @@ import local.luke.power.camera.Freecam;
 import local.luke.power.camera.FreecamConfig;
 import local.luke.power.camera.util.CameraPosition;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Mixin(Entity.class)
 public class EntityMixin {
@@ -51,14 +49,10 @@ public class EntityMixin {
 
         // Update freecam speed
         if(Freecam.freecamController.updateSpeed){
-            FreecamConfig.config.speed += yaw / 10;
-            FreecamConfig.config.speed = (float)(new BigDecimal(FreecamConfig.config.speed).setScale(1, RoundingMode.HALF_UP).doubleValue());
-            if(FreecamConfig.config.speed < 0){
-                FreecamConfig.config.speed = (float)0;
-            }
-            if(FreecamConfig.config.speed > 1000){
-                FreecamConfig.config.speed = (float)1000;
-            }
+            double percent = FreecamConfig.config.speed * 100 / local.luke.power.input.FlightMotion.HORIZONTAL_SPEED + yaw / 10;
+            percent = Math.round(percent * 10) / 10d;
+            FreecamConfig.config.speed = (float)Math.max(0, Math.min(1000,
+                    percent * local.luke.power.input.FlightMotion.HORIZONTAL_SPEED / 100));
             GlassYamlFile modConfigFile = new GlassYamlFile();
             modConfigFile.set ("speed", FreecamConfig.config.speed);
             GCAPI.reloadConfig(Identifier.of("power_camera:config").toString(), modConfigFile);

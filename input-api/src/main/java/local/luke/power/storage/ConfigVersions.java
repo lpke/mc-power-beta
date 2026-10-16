@@ -5,7 +5,7 @@ import local.luke.power.rules.*;
 
 /** Explicit supported conversions, independent of the release version. */
 public final class ConfigVersions {
-  public static final int CURRENT = 6;
+  public static final int CURRENT = 7;
   private ConfigVersions() {}
 
   public static int version(JsonObject root) {
@@ -13,12 +13,12 @@ public final class ConfigVersions {
       JsonPrimitive version = root.getAsJsonPrimitive("schemaVersion");
       if (!version.isNumber()) throw new IllegalArgumentException();
       return version.getAsBigDecimal().intValueExact();
-    } catch (RuntimeException e) { throw new IllegalArgumentException("Missing or invalid schemaVersion. Supported configuration versions: 3, 4, 5, 6.", e); }
+    } catch (RuntimeException e) { throw new IllegalArgumentException("Missing or invalid schemaVersion. Supported configuration versions: 3, 4, 5, 6, 7.", e); }
   }
   public static JsonObject convert(JsonObject source) {
     int version = version(source);
     if (version < 3 || version > CURRENT)
-      throw new IllegalArgumentException("Configuration version " + version + " is unsupported. Supported versions: 3, 4, 5, 6. Use a compatible release or restore a supported backup; original file is preserved.");
+      throw new IllegalArgumentException("Configuration version " + version + " is unsupported. Supported versions: 3, 4, 5, 6, 7. Use a compatible release or restore a supported backup; original file is preserved.");
     if (!source.has("settings") || !source.get("settings").isJsonObject())
       throw new IllegalArgumentException("Configuration settings must be an object.");
     JsonObject root = source.deepCopy();
@@ -54,6 +54,10 @@ public final class ConfigVersions {
       WorldRuleUpgrade210.defaults(frozen, new RuleSet()); // Validate before retiring preferences.
       root.add("worldRuleUpgrade210", frozen);
       ConfigCleanup.upgradeFive(settings);
+      root.addProperty("schemaVersion", CURRENT);
+    }
+    if (version < 7) {
+      ConfigCleanup.upgradeSix(settings);
       root.addProperty("schemaVersion", CURRENT);
     }
     JsonObject evidence210 = root.has("worldRuleUpgrade210") ? root.getAsJsonObject("worldRuleUpgrade210") : new JsonObject();

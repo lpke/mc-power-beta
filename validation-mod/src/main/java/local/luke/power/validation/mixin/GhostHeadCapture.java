@@ -12,6 +12,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value=GhostHead.class,remap=false)
 public class GhostHeadCapture {
+  @Inject(method="draw",at=@At("HEAD"))
+  private static void draw(Minecraft mc,float delta,double x,double y,double z,float yaw,float pitch,
+      float opacity,boolean throughBlocks,CallbackInfo ci) {
+    local.luke.power.validation.Release220Checks.head(x,y,z,opacity);
+  }
   @Inject(method="render",at=@At("HEAD"))
   private static void before(Minecraft mc,float delta,CallbackInfo ci){local.luke.power.validation.GhostProbe.before();}
   @Inject(method="render",at=@At("RETURN"))

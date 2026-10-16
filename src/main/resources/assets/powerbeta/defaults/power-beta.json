@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "settings": {
     "power_capture:config": {
       "addBasicScreenshotsToClipboard": true,
@@ -19,10 +19,9 @@
       "glassCulls": false
     },
     "power_camera:config": {
-      "speed": 12.0,
-      "drag": 10.0,
+      "speed": 11.977777777777783,
+      "drag": 3,
       "collision": true,
-      "classicMovement": false,
       "playerMovementMessages": false,
       "hideHudOnEntry": false,
       "sprintToggle": true,
@@ -137,7 +136,6 @@
     },
     "creative": {
       "flight": true,
-      "sprintFlight": true,
       "spectatorSpeed": 100,
       "shiftClearsInventory": true,
       "spectatorScrollStep": 10,
@@ -152,7 +150,6 @@
       "doubleTapTicks": 7,
       "landStopsFlight": true,
       "showSpectatorSpeed": true,
-      "spectatorSprintFlight": true,
       "spectatorSprintToggle": true,
       "spectatorSprintMultiplier": 200,
       "spectatorGlide": 5

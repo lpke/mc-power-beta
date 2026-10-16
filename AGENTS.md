@@ -32,7 +32,7 @@
   Rule groups identify world scope without repeated row labels.
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
-  track and preset IDs. Global schema 6 supports conversion from schemas 3, 4 and 5 through
+  track and preset IDs. Global schema 7 supports conversion from schemas 3, 4, 5 and 6 through
   `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 3
   supports formats 1 and 2 and pre-rule metadata through `rules/LegacyWorldRules`, `WorldRuleUpgrade210` and `WorldRuleData`.
   Preserve frozen legacy evidence for worlds converted later. Use these helpers when
@@ -385,3 +385,6 @@
 - /fly changes only flight ability. Survival requires allow_flight; Creative retains its own permission and protection; Spectator flight stays independent. Revocation cancels survival flight safely.
 
 - The panorama picker groups variants of the same captured scene. Preserve legacy version IDs and texture paths. Its single selection also updates the retained enable flag, and its live preview shares the title renderer.
+
+- In-group dividers use catalogue `separatorAfter` on the preceding setting; they share row geometry and never act as headings or input targets.
+- Flight speed percentages share the modern Creative baseline; freecam stores its original speed units and only converts the display. Shared motion maths retain frame-owned freecam timing. Config format 7 converts legacy response rates to 0–5 drift and retires sprint/classic switches.

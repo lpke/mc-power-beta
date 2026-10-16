@@ -23,6 +23,7 @@ public final class Setting {
   public final double min, max, step;
   public final boolean restart;
   private final double displayDivisor;
+  private final int displayPrecision;
   private final String unit, control;
   private transient java.util.function.Consumer<JsonElement> checkValue = value -> {};
   public JsonElement value;
@@ -47,11 +48,12 @@ public final class Setting {
     this.backend = backend;
     JsonObject metadata = Catalog.metadata(id);
     this.displayDivisor = Catalog.number(metadata, "displayDivisor", 1);
+    this.displayPrecision = (int)Catalog.number(metadata, "displayPrecision", -1);
     this.unit = Catalog.text(metadata, "unit", "");
     this.control = Catalog.text(metadata, "control", "slider");
     this.page = Catalog.text(metadata, "page", page);
     this.group = Catalog.text(metadata, "group", group);
-    String title = Catalog.text(metadata, "label", label);
+    String title = Catalog.text(metadata, "label", label).replace(", %", " %");
     this.label = SettingScope.label(id, backend, this.group, title);
     this.description = Tooltips.description(id, title, Catalog.text(metadata, "description", description));
     this.kind = kind;
@@ -104,7 +106,8 @@ public final class Setting {
   public void slide(double fraction) {
     if (kind != Kind.INTEGER && kind != Kind.DECIMAL) return;
     double raw = min + Math.max(0, Math.min(1, fraction)) * (max - min);
-    double next = Math.max(min, Math.min(max, min + Math.round((raw - min) / step) * step));
+    double next = fraction <= 0 ? min : fraction >= 1 ? max
+        : Math.max(min, Math.min(max, min + Math.round((raw - min) / step) * step));
     value = kind == Kind.INTEGER ? new JsonPrimitive((int) Math.round(next))
         : new JsonPrimitive(BigDecimal.valueOf(next).setScale(6, java.math.RoundingMode.HALF_UP).stripTrailingZeros());
   }
@@ -121,6 +124,14 @@ public final class Setting {
           }
           default -> new JsonPrimitive(new BigDecimal(text.trim()).multiply(BigDecimal.valueOf(displayDivisor)));
         };
+    // A displayed boundary may be rounded. Entering that exact boundary must remain valid.
+    if (numeric() && displayPrecision >= 0) {
+      BigDecimal entered = new BigDecimal(text.trim());
+      if (entered.compareTo(new BigDecimal(numericText(BigDecimal.valueOf(max)))) == 0)
+        next = new JsonPrimitive(max);
+      else if (entered.compareTo(new BigDecimal(numericText(BigDecimal.valueOf(min)))) == 0)
+        next = new JsonPrimitive(min);
+    }
     validate(next);
     value = next;
   }
@@ -206,7 +217,9 @@ public final class Setting {
   public boolean slider() { return numeric() && !control.equals("number"); }
   public void validator(java.util.function.Consumer<JsonElement> validator) { checkValue = Objects.requireNonNull(validator); }
   private String numericText(BigDecimal value) {
-    return value.divide(BigDecimal.valueOf(displayDivisor)).stripTrailingZeros().toPlainString();
+    return (displayPrecision < 0 ? value.divide(BigDecimal.valueOf(displayDivisor))
+        : value.divide(BigDecimal.valueOf(displayDivisor), displayPrecision, java.math.RoundingMode.HALF_UP))
+        .stripTrailingZeros().toPlainString();
   }
   public String rangeText() {
     String limits = numericText(BigDecimal.valueOf(min)) + " to " + numericText(BigDecimal.valueOf(max));

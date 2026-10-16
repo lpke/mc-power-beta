@@ -184,11 +184,10 @@ public final class WorldEditor {
   private static Commands.Player player(Minecraft mc) {
     return new Commands.Player() {
       public boolean allowed(String name) { return commandAvailable(mc, name); }
-      public Pos feet() {
-        return new Pos(
-            (int) Math.floor(mc.player.x),
-            (int) Math.floor(mc.player.boundingBox.minY + .00001),
-            (int) Math.floor(mc.player.z));
+      public Pos position() {
+        var pose = local.luke.power.input.ReportedPosition.current(mc.player, mc.player.x, mc.player.y,
+            mc.player.z, mc.player.yaw, mc.player.pitch);
+        return new Pos((int)Math.floor(pose.x()), (int)Math.floor(pose.y()), (int)Math.floor(pose.z()));
       }
 
       public Pos target() {
@@ -199,9 +198,11 @@ public final class WorldEditor {
       }
 
       public Pos facing() {
-        if (mc.player.pitch > 60) return new Pos(0, -1, 0);
-        if (mc.player.pitch < -60) return new Pos(0, 1, 0);
-        int d = Math.floorMod((int) Math.floor(mc.player.yaw / 90 + .5), 4);
+        var pose = local.luke.power.input.ReportedPosition.current(mc.player, mc.player.x, mc.player.y,
+            mc.player.z, mc.player.yaw, mc.player.pitch);
+        if (pose.pitch() > 60) return new Pos(0, -1, 0);
+        if (pose.pitch() < -60) return new Pos(0, 1, 0);
+        int d = Math.floorMod((int) Math.floor(pose.yaw() / 90 + .5), 4);
         return switch (d) {
           case 0 -> new Pos(0, 0, 1);
           case 1 -> new Pos(-1, 0, 0);

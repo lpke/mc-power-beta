@@ -12,6 +12,11 @@ public record StickyHeader(int index, int y, int height) {
 
   public static <T> StickyHeader at(List<T> rows, Predicate<T> heading,
       ToIntFunction<T> rowY, ToIntFunction<T> rowHeight, int scroll, int top, int bottom) {
+    return at(rows, heading, row -> true, rowY, rowHeight, scroll, top, bottom);
+  }
+
+  public static <T> StickyHeader at(List<T> rows, Predicate<T> heading, Predicate<T> content,
+      ToIntFunction<T> rowY, ToIntFunction<T> rowHeight, int scroll, int top, int bottom) {
     int candidate = -1;
     for (int i = 0; i < rows.size(); i++) {
       T row = rows.get(i);
@@ -21,7 +26,9 @@ public record StickyHeader(int index, int y, int height) {
     if (candidate < 0) return null;
     int last = candidate;
     while (last + 1 < rows.size() && !heading.test(rows.get(last + 1))) last++;
-    if (last - candidate < 8) return null;
+    int count = 0;
+    for (int i = candidate + 1; i <= last; i++) if (content.test(rows.get(i))) count++;
+    if (count < 8) return null;
     int height = rowHeight.applyAsInt(rows.get(candidate));
     if (bottom - top < height + rowHeight.applyAsInt(rows.get(candidate + 1))) return null;
     int y = Math.min(top, top + rowY.applyAsInt(rows.get(last)) - scroll - height);

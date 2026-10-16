@@ -243,7 +243,6 @@ final class Release171Checks {
     Object camera=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     Object settings=Class.forName("local.luke.power.camera.FreecamConfig").getField("config").get(null);
     settings.getClass().getField("collision").set(settings,true);
-    settings.getClass().getField("classicMovement").set(settings,false);
     (AccessRules.of(mc.world.method_262())).allAllowed(true);
     CreativeVehicleChecks.mode(mc,"SURVIVAL");
     test("freecam floor collision reports the same Y as standing feet, including slabs",()->{

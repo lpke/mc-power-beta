@@ -88,10 +88,11 @@ public final class EntityTargets {
           throw new IllegalArgumentException("Unsupported Beta selector option: " + pair[0]);
       }
     }
-    double x = options.containsKey("x") ? CommandNumbers.number(options.get("x")) : self.x;
+    var pose = CommandPosition.of(self);
+    double x = options.containsKey("x") ? CommandNumbers.number(options.get("x")) : pose.x();
     double y =
-        options.containsKey("y") ? CommandNumbers.number(options.get("y")) : self.boundingBox.minY;
-    double z = options.containsKey("z") ? CommandNumbers.number(options.get("z")) : self.z;
+        options.containsKey("y") ? CommandNumbers.number(options.get("y")) : pose.y();
+    double z = options.containsKey("z") ? CommandNumbers.number(options.get("z")) : pose.z();
     if (Math.abs(x) >= 30000000 || Math.abs(z) >= 30000000 || Math.abs(y) > 4096)
       throw new IllegalArgumentException("Selector origin is outside safe Beta bounds.");
     double[] distance = range(options.getOrDefault("distance", "0.."));

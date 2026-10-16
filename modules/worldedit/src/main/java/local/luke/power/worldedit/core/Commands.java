@@ -8,7 +8,7 @@ import java.util.*;
 public final class Commands {
   public interface Player {
     default boolean allowed(String command) { return true; }
-    Pos feet();
+    Pos position();
 
     Pos target();
 
@@ -81,8 +81,8 @@ public final class Commands {
                     "removeabove",
                     "removebelow")
                 .contains(command)
-            ? e.placement(player.feet())
-            : player.feet();
+            ? e.placement(player.position())
+            : player.position();
     switch (command) {
       case "help", "we", "worldedit" -> {
         arity(a, 0, 1);
@@ -149,7 +149,7 @@ public final class Commands {
         player.drawSelection();
       }
       case "pos1", "pos2" -> {
-        e.position(command.equals("pos1") ? 1 : 2, coordinates(a, player.feet()));
+        e.position(command.equals("pos1") ? 1 : 2, coordinates(a, player.position()));
       }
       case "hpos1", "hpos2" -> {
         arity(a, 0, 0);
@@ -166,7 +166,7 @@ public final class Commands {
       }
       case "chunk" -> {
         arity(a, 0, 0);
-        Pos p = player.feet();
+        Pos p = player.position();
         e.select(
             new Region(
                 new Pos((p.x() >> 4) << 4, 0, (p.z() >> 4) << 4),
@@ -200,12 +200,12 @@ public final class Commands {
       }
       case "copy", "cut" -> {
         arity(a, 0, 0);
-        e.copy(player.feet(), command.equals("cut"));
+        e.copy(player.position(), command.equals("cut"));
       }
       case "paste" -> {
         arity(a, 0, 0);
         validFlags(flags, "aos");
-        e.paste(player.feet(), flags.contains('a'), flags.contains('o'), flags.contains('s'));
+        e.paste(player.position(), flags.contains('a'), flags.contains('o'), flags.contains('s'));
       }
       case "rotate" -> {
         arity(a, 1, 1);
@@ -324,7 +324,7 @@ public final class Commands {
       case "toggleplace" -> {
         arity(a, 0, 0);
         e.usePos1 = !e.usePos1;
-        e.message.accept(e.usePos1 ? "Placement uses position 1." : "Placement uses your feet.");
+        e.message.accept(e.usePos1 ? "Placement uses position 1." : "Placement uses your reported coordinates.");
       }
       default -> throw new IllegalArgumentException("Unknown editing command. Use //help.");
     }

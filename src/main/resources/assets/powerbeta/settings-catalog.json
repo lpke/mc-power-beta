@@ -125,44 +125,38 @@
   "power_camera:config.speed": {
     "page": "Camera",
     "group": "Free camera",
-    "label": "Freecam speed",
-    "description": "Camera speed in blocks per second before sprint. Beta walking is about 4.3; modern Creative flight is about 10.9 horizontally without sprint. 12 is slightly faster. Drag controls how quickly the camera reaches this speed.",
-    "default": 12.0,
+    "label": "Freecam speed %",
+    "description": "100% matches standard modern Creative flight. Around 40% matches Beta walking horizontally; 200% doubles the 100% speed. Applies before the sprint multiplier.",
+    "default": 11.977777777777783,
     "restart": false,
-    "min": 0.1,
+    "min": 0,
     "max": 100,
-    "step": 0.1,
-    "order": 0
+    "step": 0.10888888888888892,
+    "order": 0,
+    "displayDivisor": 0.10888888888888892,
+    "displayPrecision": 1,
+    "unit": "%"
   },
   "power_camera:config.drag": {
     "page": "Camera",
     "group": "Free camera",
-    "label": "Freecam drag",
-    "description": "How quickly freecam approaches its target speed or stops, per second. 10 removes about 63% of the speed difference in 0.1 seconds; larger values respond faster. Classic movement ignores drag.",
-    "default": 10.0,
+    "label": "Freecam drift",
+    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern flight drift. Lower values stop sooner without changing the configured speed.",
+    "default": 3,
     "restart": false,
-    "min": 0.1,
-    "max": 100,
+    "min": 0,
+    "max": 5,
     "step": 0.1,
-    "order": 1
+    "order": 2
   },
   "power_camera:config.collision": {
     "page": "Camera",
     "group": "Free camera",
     "label": "Freecam collisions",
-    "description": "",
+    "description": "Collide with loaded terrain in Survival. Creative and Spectator always bypass freecam collisions; this preference is retained.",
     "default": true,
     "restart": false,
-    "order": 6
-  },
-  "power_camera:config.classicMovement": {
-    "page": "Camera",
-    "group": "Free camera",
-    "label": "Classic freecam movement",
-    "description": "Reach the configured camera speed immediately and stop immediately when movement keys are released. Otherwise use Freecam drag for acceleration and stopping.",
-    "default": false,
-    "restart": false,
-    "order": 5
+    "order": 16
   },
   "power_gold:config.enableFishingRodLuckOfTheSea": {
     "page": "Gameplay",
@@ -2768,48 +2762,41 @@
     "group": "Flight",
     "label": "Creative flight",
     "description": "Enable Creative flight. Double-tap Jump to start or stop flying. /fly changes this same preference; Survival flight uses its world permission.",
-    "order": 0
+    "order": 10
   },
   "creative.landStopsFlight": {
     "page": "Creative",
     "group": "Flight",
     "label": "Stop flying on landing",
     "description": "Return to walking when you touch the ground.",
-    "order": 7
-  },
-  "creative.sprintFlight": {
-    "page": "Creative",
-    "group": "Flight",
-    "label": "Flight sprint",
-    "description": "Use the sprint key to fly faster in any direction in creative and spectator modes.",
-    "order": 3
+    "order": 17
   },
   "creative.sprintToggle": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Sprint activation",
-    "description": "Hold requires the sprint key. Toggle keeps sprint flight active until movement stops on all axes. Applies to Creative and Survival /fly.",
-    "order": 4
+    "label": "Flight sprint activation",
+    "description": "Hold requires the shared flight sprint key. Toggle keeps sprint active until movement stops on all axes.",
+    "order": 3
   },
   "creative.flightSpeed": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Flight speed, %",
-    "description": "100% uses modern Creative flight acceleration and drag, reaching about 10.9 blocks per second horizontally without sprint. 200% doubles that speed. Beta walking is about 4.3 blocks per second. Also applies to Survival /fly.",
-    "order": 1
+    "label": "Flight speed %",
+    "description": "100% matches standard modern Creative flight. Around 40% matches Beta walking horizontally; 200% doubles the 100% speed. Applies before the sprint multiplier.",
+    "order": 0
   },
   "creative.sprintMultiplier": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Sprint speed, %",
-    "description": "Multiplier of the configured Creative or Survival /fly speed, on every axis. 100% keeps normal flight speed; 200% doubles it. This does not change Spectator or freecam.",
-    "order": 5
+    "label": "Flight sprint speed %",
+    "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first.",
+    "order": 1
   },
   "creative.glide": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight drift",
-    "description": "Drift after releasing movement keys. 0 stops immediately; 5 retains modern Creative flight inertia. Intermediate values stop sooner without changing held-key speed.",
+    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern flight drift. Lower values stop sooner without changing the configured speed.",
     "order": 2
   },
   "creative.doubleTapTicks": {
@@ -2817,7 +2804,7 @@
     "group": "Flight",
     "label": "Double-tap window (seconds)",
     "description": "Maximum interval between Jump presses.",
-    "order": 6,
+    "order": 16,
     "displayDivisor": 20,
     "unit": "seconds"
   },
@@ -2826,28 +2813,28 @@
     "group": "Spectator",
     "label": "Scroll to change speed",
     "description": "Adjust spectator flight speed with the mouse wheel.",
-    "order": 5
+    "order": 15
   },
   "creative.showSpectatorSpeed": {
     "page": "Creative",
     "group": "Spectator",
     "label": "Show spectator speed",
     "description": "Display the current speed while it changes.",
-    "order": 7
+    "order": 17
   },
   "creative.spectatorSpeed": {
     "page": "Creative",
     "group": "Spectator",
-    "label": "Spectator speed, %",
-    "description": "Starting Spectator speed. 100% uses the same acceleration as modern Creative flight, reaching about 10.9 blocks per second horizontally without sprint. Beta walking is about 4.3 blocks per second. The wheel adjusts this during a visit.",
+    "label": "Flight speed %",
+    "description": "100% matches standard modern Creative flight. Around 40% matches Beta walking horizontally; 200% doubles the 100% speed. The wheel adjusts the speed during the visit.",
     "order": 0
   },
   "creative.spectatorScrollStep": {
     "page": "Creative",
     "group": "Spectator",
-    "label": "Speed step, %",
+    "label": "Speed step %",
     "description": "Percentage points added or removed per wheel notch, relative to the 100% modern Creative flight baseline. 10 changes 100% to 110%, rather than multiplying the current speed.",
-    "order": 6
+    "order": 16
   },
   "creative.blockReach": {
     "page": "Creative",
@@ -2918,7 +2905,7 @@
   "worldedit.opacity": {
     "page": "World editing",
     "group": "Selection outline",
-    "label": "Outline opacity, %",
+    "label": "Outline opacity %",
     "description": ""
   },
   "worldedit.lineWidth": {
@@ -3043,7 +3030,7 @@
   "tweaks.flexible.overlayOpacity": {
     "page": "Building",
     "group": "Flexible placement",
-    "label": "Overlay opacity, %",
+    "label": "Overlay opacity %",
     "description": ""
   },
   "tweaks.hotbar.numberRowKeys": {
@@ -3253,16 +3240,7 @@
     "description": "With camera collisions enabled, also collide with doors and trapdoors. Off passes through them.",
     "default": false,
     "restart": false,
-    "order": 7
-  },
-  "power_camera:config.sprint": {
-    "page": "Camera",
-    "group": "Free camera",
-    "label": "Freecam sprint",
-    "description": "Boost camera speed with the flight sprint key using the activation and speed settings below.",
-    "default": true,
-    "restart": false,
-    "order": 2
+    "order": 17
   },
   "visual.containerCarry": {
     "page": "Inventory",
@@ -3405,10 +3383,14 @@
     "order": 6
   },
   "native.opengl": {
-    "order": 8
+    "order": -100,
+    "page": "Video",
+    "group": "Performance"
   },
   "native.anaglyph": {
-    "order": 9
+    "order": 9,
+    "page": "Advanced",
+    "group": "Miscellaneous"
   },
   "native.clouds": {
     "order": 0
@@ -3426,7 +3408,8 @@
     "order": 1
   },
   "native.sound": {
-    "order": 2
+    "order": 2,
+    "separatorAfter": true
   },
   "audio.preset": {
     "order": 0
@@ -3921,7 +3904,7 @@
     "group": "Free camera",
     "label": "Player movement messages",
     "description": "Show a chat message when freecam player movement turns on or off during gameplay. Independent of the Active tweaks HUD. Menu previews and world loading are silent.",
-    "order": 8
+    "order": 18
   },
   "visual.redstonePowerLevels": {
     "page": "Video",
@@ -4145,7 +4128,7 @@
     "group": "Spectator",
     "label": "Full bright in spectator",
     "description": "Automatically fully light the view on entering spectator. The full-bright hotkey can override it for that visit. Leaving spectator restores your earlier manual setting. Requires Allow Spectator mode in this world.",
-    "order": 8
+    "order": 18
   },
   "visual.fullBrightMessages": {
     "page": "Video",
@@ -4531,7 +4514,7 @@
     "description": "Hide the HUD when freecam starts. F1 can change it during freecam; leaving restores the entry state.",
     "default": false,
     "restart": false,
-    "order": 8
+    "order": 18
   },
   "visual.removeUnderwaterOverlay": {
     "page": "Video",
@@ -4618,62 +4601,54 @@
   "creative.spectatorGlide": {
     "page": "Creative",
     "group": "Spectator",
-    "order": 1,
+    "order": 2,
     "label": "Flight drift",
     "default": 5,
     "min": 0,
     "max": 5,
     "step": 1,
-    "description": "Drift after releasing movement keys. 0 stops immediately; 5 retains modern Spectator flight inertia. Intermediate values stop sooner without changing held-key speed."
-  },
-  "creative.spectatorSprintFlight": {
-    "page": "Creative",
-    "group": "Spectator",
-    "order": 2,
-    "label": "Flight sprint",
-    "default": true,
-    "min": 0,
-    "max": 1,
-    "step": 1
+    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern flight drift. Lower values stop sooner without changing the configured speed."
   },
   "creative.spectatorSprintToggle": {
     "page": "Creative",
     "group": "Spectator",
     "order": 3,
-    "label": "Sprint activation",
+    "label": "Flight sprint activation",
     "default": true,
     "min": 0,
     "max": 1,
-    "step": 1
+    "step": 1,
+    "description": "Hold requires the shared flight sprint key. Toggle keeps sprint active until movement stops on all axes."
   },
   "creative.spectatorSprintMultiplier": {
     "page": "Creative",
     "group": "Spectator",
-    "order": 4,
-    "label": "Sprint speed, %",
+    "order": 1,
+    "label": "Flight sprint speed %",
     "default": 200,
     "min": 100,
     "max": 400,
     "step": 1,
-    "description": "Multiplier of the current Spectator speed, including wheel adjustments, on every axis. 100% keeps normal speed; 200% doubles it. Independent of Creative and freecam."
+    "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first."
   },
   "power_camera:config.sprintToggle": {
     "page": "Camera",
     "group": "Free camera",
     "order": 3,
-    "label": "Sprint activation",
-    "default": true
+    "label": "Freecam sprint activation",
+    "default": true,
+    "description": "Hold requires the shared flight sprint key. Toggle keeps sprint active until movement stops on all axes."
   },
   "power_camera:config.sprintMultiplier": {
     "page": "Camera",
     "group": "Free camera",
-    "order": 4,
-    "label": "Sprint speed, %",
+    "order": 1,
+    "label": "Freecam sprint speed %",
     "default": 200,
     "min": 100,
     "max": 400,
     "step": 1,
-    "description": "Multiplier of the configured freecam speed, on every axis. 100% keeps normal camera speed; 200% doubles it. Independent of Creative and Spectator."
+    "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first."
   },
   "rules.world.explosion_drop_chance": {
     "unit": "%"

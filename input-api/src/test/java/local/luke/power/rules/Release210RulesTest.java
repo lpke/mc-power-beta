@@ -40,7 +40,7 @@ class Release210RulesTest {
     JsonObject source = json("{\"schemaVersion\":5,\"worldRuleUpgrade\":{\"playerCropTrampling\":false},\"settings\":{\"power_controls:tweaks\":{\"disableSleeping\":true},\"power_mechanics:config\":{\"EXPLOSION_AND_FIRE_CONFIG\":{\"chanceBlocksDropWhenExploded\":0.37,\"disableGhastExplosionCausingFire\":true,\"disableLightningStrikeCausingFire\":false}},\"creative\":{\"sprintToggle\":false,\"sprintMultiplier\":173},\"gameRules\":{\"survival\":{\"version\":2,\"values\":{\"advance_weather\":false}}}}}");
     JsonObject before = source.deepCopy(), converted = ConfigVersions.convert(source);
     assertEquals(before, source);
-    assertEquals(6, converted.get("schemaVersion").getAsInt());
+    assertEquals(local.luke.power.storage.ConfigVersions.CURRENT, converted.get("schemaVersion").getAsInt());
     assertEquals(source.get("worldRuleUpgrade"), converted.get("worldRuleUpgrade"));
     JsonObject settings = converted.getAsJsonObject("settings");
     assertFalse(settings.getAsJsonObject("power_controls:tweaks").has("disableSleeping"));

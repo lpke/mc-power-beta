@@ -54,7 +54,6 @@ public final class FlightController {
         sprint.update(
             movementKey(mc, Keys.SPRINT),
             Modes.flying(mc.player)
-                && (Modes.spectator(mc.player) ? Config.current().spectatorSprintFlight : Config.current().sprintFlight)
                 && ((movementKey(mc, mc.options.forwardKey) != movementKey(mc, mc.options.backKey))
                     || (movementKey(mc, mc.options.leftKey) != movementKey(mc, mc.options.rightKey))
                     || (movementKey(mc, mc.options.jumpKey) != movementKey(mc, mc.options.sneakKey))),
@@ -111,9 +110,9 @@ public final class FlightController {
     float walking = (float) Math.min(1, Math.hypot(player.x - previousX, player.z - previousZ) * 4);
     animate(player, walking);
     // Use collision-adjusted velocities so hitting walls cannot accumulate speed.
-    player.velocityX *= .91;
-    player.velocityY *= .6;
-    player.velocityZ *= .91;
+    player.velocityX *= local.luke.power.input.FlightMotion.HORIZONTAL_DRAG;
+    player.velocityY *= local.luke.power.input.FlightMotion.VERTICAL_DRAG;
+    player.velocityZ *= local.luke.power.input.FlightMotion.HORIZONTAL_DRAG;
     if (!spectator && settings.landStopsFlight && player.onGround && vertical <= 0)
       player.creative_setFlying(false);
     return true;

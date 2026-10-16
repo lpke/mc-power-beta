@@ -3,7 +3,7 @@
     "page": "Creative",
     "group": "Flight",
     "label": "Creative flight",
-    "description": "Double-tap Jump to start flying. Jump rises; Sneak descends."
+    "description": "Enable Creative flight. Double-tap Jump to start or stop flying. /fly changes this same preference; Survival flight uses its world permission."
   },
   "creative.landStopsFlight": {
     "page": "Creative",
@@ -11,41 +11,35 @@
     "label": "Stop flying on landing",
     "description": "Return to walking when you touch the ground."
   },
-  "creative.sprintFlight": {
-    "page": "Creative",
-    "group": "Flight",
-    "label": "Flight sprint",
-    "description": "Use the sprint key to fly faster."
-  },
   "creative.sprintToggle": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Sprint activation",
-    "description": "Hold requires the sprint key. Toggle keeps sprint flight active until movement stops on all axes. Applies to Creative and Survival /fly."
+    "label": "Flight sprint activation",
+    "description": "Hold requires the shared flight sprint key. Toggle keeps sprint active until movement stops on all axes."
   },
   "creative.flightSpeed": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Flight speed, %",
-    "description": "100% uses modern Creative flight acceleration and drag, reaching about 10.9 blocks per second horizontally without sprint. 200% doubles that speed. Beta walking is about 4.3 blocks per second. Also applies to Survival /fly."
+    "label": "Flight speed %",
+    "description": "100% matches standard modern Creative flight. Around 40% matches Beta walking horizontally; 200% doubles the 100% speed. Applies before the sprint multiplier."
   },
   "creative.sprintMultiplier": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Sprint speed, %",
-    "description": "Multiplier of the configured Creative or Survival /fly speed, on every axis. 100% keeps normal flight speed; 200% doubles it. This does not change Spectator or freecam."
+    "label": "Flight sprint speed %",
+    "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first."
   },
   "creative.glide": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight drift",
-    "description": "Drift after releasing movement keys. 0 stops immediately; 5 retains modern Creative flight inertia. Intermediate values stop sooner without changing held-key speed."
+    "description": "Coasting after releasing movement. 0 stops immediately; 5 matches modern flight drift. Lower values stop sooner without changing the configured speed."
   },
   "creative.doubleTapTicks": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Double-tap window, ticks",
-    "description": "Maximum interval between Jump presses. 20 ticks is one second."
+    "label": "Double-tap window (seconds)",
+    "description": "Maximum interval between Jump presses."
   },
   "creative.spectatorScroll": {
     "page": "Creative",
@@ -62,13 +56,13 @@
   "creative.spectatorSpeed": {
     "page": "Creative",
     "group": "Gamemodes",
-    "label": "Spectator speed, %",
-    "description": "Starting Spectator speed. 100% uses the same acceleration as modern Creative flight, reaching about 10.9 blocks per second horizontally without sprint. Beta walking is about 4.3 blocks per second. The wheel adjusts this during a visit."
+    "label": "Flight speed %",
+    "description": "100% matches standard modern Creative flight. Around 40% matches Beta walking horizontally; 200% doubles the 100% speed. The wheel adjusts the speed during the visit."
   },
   "creative.spectatorScrollStep": {
     "page": "Creative",
     "group": "Gamemodes",
-    "label": "Speed step, %",
+    "label": "Speed step %",
     "description": "Percentage points added or removed per wheel notch, relative to the 100% modern Creative flight baseline. 10 changes 100% to 110%, rather than multiplying the current speed."
   },
   "creative.blockReach": {
@@ -134,7 +128,7 @@
   "worldedit.opacity": {
     "page": "World editing",
     "group": "Selection",
-    "label": "Outline opacity, %",
+    "label": "Outline opacity %",
     "description": ""
   },
   "worldedit.lineWidth": {
@@ -248,7 +242,7 @@
   "tweaks.flexible.overlayOpacity": {
     "page": "Building",
     "group": "Flexible placement",
-    "label": "Overlay opacity, %",
+    "label": "Overlay opacity %",
     "description": ""
   },
   "tweaks.hotbar.swap": {
