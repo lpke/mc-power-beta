@@ -10,5 +10,8 @@ dependencies {
 }
 java { withSourcesJar() }
 test { useJUnitPlatform() }
+processTestResources {
+    from('../modules/controls/src/main/resources') { include 'assets/power_controls/panoramas.json' }
+}
 tasks.withType(JavaCompile).configureEach { options.release = 17 }
 tasks.withType(AbstractArchiveTask).configureEach { preserveFileTimestamps = false; reproducibleFileOrder = true }

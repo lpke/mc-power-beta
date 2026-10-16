@@ -243,7 +243,7 @@ final class Release210Checks {
         }
       });
       test("official panorama faces decode and load through the native texture manager", () -> {
-        check(PanoramaCatalog.entries().size() >= 27, "missing version choices");
+        check(PanoramaCatalog.entries().size() == 15, "unique panorama choices");
         check(PanoramaCatalog.folder("b1_7_3").isEmpty(), "Beta background");
         for (var entry : PanoramaCatalog.entries()) if (!entry.folder().isEmpty()) for (int face = 0; face < 6; face++) {
           String path = "/assets/power_controls/textures/" + entry.folder() + "/panorama" + face + ".png";
@@ -265,7 +265,7 @@ final class Release210Checks {
           options.session().discard();
         }
       });
-      test("panorama clicks return immediately to the settings draft; Cancel keeps it", () -> {
+      test("panorama clicks keep the picker open; Back keeps the immediate selection", () -> {
         boolean auto = MenuPreferences.current().autoApply;
         MenuPreferences.update(v -> v.autoApply = false);
         try {
@@ -274,17 +274,17 @@ final class Release210Checks {
           JsonElement original = setting.value.deepCopy();
           var picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
           ((TextInput)field(picker, "search")).setText("26.3");
-          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click(picker.width / 2, 80, 0);
-          check(mc.currentScreen == options && setting.value.getAsString().equals("26_3"), "selection needs another click");
+          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click((int)call(picker, "left") + 8, 80, 0);
+          check(mc.currentScreen == picker && setting.value.getAsString().equals("26_3"), "selection closed the picker");
           picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
           ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click(picker.width / 2, picker.height - 20, 0);
-          check(mc.currentScreen == options && setting.value.getAsString().equals("26_3"), "Cancel changed selection");
+          check(mc.currentScreen == options && setting.value.getAsString().equals("26_3"), "Back changed selection");
           options.session().discard(); check(setting.value.equals(original), "discard lost original panorama");
           MenuPreferences.update(v -> v.autoApply = true);
           picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
           ((TextInput)field(picker, "search")).setText("26.2");
-          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click(picker.width / 2, 80, 0);
-          check(mc.currentScreen == options && !setting.changed(), "auto-apply selection was not committed");
+          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click((int)call(picker, "left") + 8, 80, 0);
+          check(mc.currentScreen == picker && !setting.changed(), "auto-apply selection was not committed");
           check(local.luke.power.storage.PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig")
               .get("panoramaFolder").getAsString().equals("26_2"), "panorama not applied on click");
           setting.value = original; options.changed(setting);

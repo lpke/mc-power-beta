@@ -8,6 +8,7 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-211`: daytime and nighttime bed respawn, native sleeping and bed occupancy, HUD order, merged panorama settings, live preview, immediate selection and manual Back/Escape. Run after `new-world`. Then use `title` and `release-211-editor` for the native Select world > Edit route, dirty-exit confirmation, durable saves, preserved world name/player data and future-format recovery UI.
 - `release-210`: world-rule sliders/defaults, retired globals, HUD group visibility, Creative/Survival/Spectator `/fly`, native non-flight gravity/jumping/walking, permission revocation, saved native flight data, sleep thresholds, immediate panorama selection, official texture uploads, all title styles and narrow/wide picker screenshots. Run after `new-world`.
 - `release-202`: camera/leaf reset defaults and actual saved-world Creative badges,
   including old cheats, Spectator-only and unsupported metadata without changing saves.

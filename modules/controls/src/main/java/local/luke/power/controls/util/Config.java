@@ -71,13 +71,13 @@ public class Config {
         public static class PanoramaConfig {
 
             @ConfigEntry(name = "Enable Panorama")
-            public Boolean enablePanorma = true;
+            public Boolean enablePanorma = false;
 
             @ConfigEntry(name = "Blur Panorama")
             public Boolean blurBackground = false;
 
             @ConfigEntry(name = "Panorama folder to use", description = "Choose an original Minecraft title background.")
-            public String panoramaFolder = "b1_8_1";
+            public String panoramaFolder = "b1_7_3";
         }
 
         public static class VersionTextConfig {

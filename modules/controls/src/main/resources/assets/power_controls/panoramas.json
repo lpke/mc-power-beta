@@ -1,7 +1,7 @@
 [
   {
     "id": "b1_7_3",
-    "label": "Beta 1.7.3 - original dirt background",
+    "label": "Original dirt background",
     "version": "b1.7.3",
     "metadata": "https://piston-meta.mojang.com/v1/packages/44f6969326bd45aa00dcd3c4ca3a7c05ebb24c04/b1.7.3.json",
     "client": {
@@ -9,7 +9,8 @@
       "size": 1465375,
       "url": "https://launcher.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar"
     },
-    "folder": ""
+    "folder": "",
+    "scene": "b1_7_3"
   },
   {
     "id": "b1_8_1",
@@ -55,7 +56,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_0",
@@ -101,7 +103,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_1",
@@ -147,7 +150,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_2_1",
@@ -193,7 +197,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_3_1",
@@ -239,7 +244,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_4_2",
@@ -285,7 +291,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_5_1",
@@ -331,7 +338,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_6_1",
@@ -377,7 +385,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_7_2",
@@ -423,7 +432,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_8",
@@ -469,7 +479,8 @@
         "file": "panorama5.png",
         "sha256": "a07235d9a173e5634bc46835aaf4d73b70f078d66a26dc84a4b9076b65aa00c1"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_9",
@@ -515,7 +526,8 @@
         "file": "panorama5.png",
         "sha256": "b01dc2ae93c5b870fe3c10a961f41a0a5b3c4dca567edf4c99d15d72527dbd6a"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_10",
@@ -561,7 +573,8 @@
         "file": "panorama5.png",
         "sha256": "b01dc2ae93c5b870fe3c10a961f41a0a5b3c4dca567edf4c99d15d72527dbd6a"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_11",
@@ -607,7 +620,8 @@
         "file": "panorama5.png",
         "sha256": "b01dc2ae93c5b870fe3c10a961f41a0a5b3c4dca567edf4c99d15d72527dbd6a"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_12",
@@ -653,7 +667,8 @@
         "file": "panorama5.png",
         "sha256": "b01dc2ae93c5b870fe3c10a961f41a0a5b3c4dca567edf4c99d15d72527dbd6a"
       }
-    ]
+    ],
+    "scene": "b1_8_1"
   },
   {
     "id": "1_13",
@@ -699,7 +714,8 @@
         "file": "panorama5.png",
         "sha256": "9fc3c645ceeea763cfb00fb2286612e453c18ef199962458c2186fb9a1c7fb76"
       }
-    ]
+    ],
+    "scene": "1_13"
   },
   {
     "id": "1_14",
@@ -782,7 +798,8 @@
         "file": "panorama5.png",
         "sha256": "c7321a92a6dbdec76845ddf739cae6cf6092b6e0619ce3f0578e428391f24e7b"
       }
-    ]
+    ],
+    "scene": "1_14"
   },
   {
     "id": "1_15",
@@ -865,7 +882,8 @@
         "file": "panorama5.png",
         "sha256": "5a4a2e5403b72ad58c3470c9598389f5de8d4713165ebf8eda146289d50ff129"
       }
-    ]
+    ],
+    "scene": "1_15"
   },
   {
     "id": "1_16",
@@ -948,7 +966,8 @@
         "file": "panorama5.png",
         "sha256": "0336243404eacdc4022edc457a76650095b03d6779fff01a86d8e476a890bc4e"
       }
-    ]
+    ],
+    "scene": "1_16"
   },
   {
     "id": "1_17",
@@ -1031,7 +1050,8 @@
         "file": "panorama5.png",
         "sha256": "34da9d93a33453414bb175e9f982702f6e1dfb2ac365b21e5e967b000338dedc"
       }
-    ]
+    ],
+    "scene": "1_17"
   },
   {
     "id": "1_18",
@@ -1114,7 +1134,8 @@
         "file": "panorama5.png",
         "sha256": "7888ab245c81f35c2e6c16d10872512e4c6fa7ab47a8f76063ef688213802007"
       }
-    ]
+    ],
+    "scene": "1_18"
   },
   {
     "id": "1_19",
@@ -1197,7 +1218,8 @@
         "file": "panorama5.png",
         "sha256": "be827f41a28a3b29f365a2508be39fd4e5a6700d8ea07ba2156bbff48547d1a4"
       }
-    ]
+    ],
+    "scene": "1_19"
   },
   {
     "id": "1_20",
@@ -1280,7 +1302,8 @@
         "file": "panorama5.png",
         "sha256": "a2b2834327d690642a09605c5ce51b513b3ea8969da938acaa8348c4f4f66150"
       }
-    ]
+    ],
+    "scene": "1_20"
   },
   {
     "id": "1_21",
@@ -1363,7 +1386,8 @@
         "file": "panorama5.png",
         "sha256": "5a91390b0ed32f85526bde2faa15c758cc3bd53c48efe4fd5ca4efa3b13b0656"
       }
-    ]
+    ],
+    "scene": "1_21"
   },
   {
     "id": "26_1",
@@ -1446,7 +1470,8 @@
         "file": "panorama5.png",
         "sha256": "706243e7ceb857690adfb23e210939ab589164210b45ead721be9b1382cd91f0"
       }
-    ]
+    ],
+    "scene": "26_1"
   },
   {
     "id": "26_2",
@@ -1529,7 +1554,8 @@
         "file": "panorama5.png",
         "sha256": "9e4911fb640ff3d7bd55eff42f473b722c636b5e25fe8951ad78d1f4c5540ed8"
       }
-    ]
+    ],
+    "scene": "26_2"
   },
   {
     "id": "26_3",
@@ -1612,6 +1638,7 @@
         "file": "panorama5.png",
         "sha256": "65120e8bd0420394b71926b005fd80e67358db9c9e3696ed1ad6d73b3b630917"
       }
-    ]
+    ],
+    "scene": "26_3"
   }
 ]

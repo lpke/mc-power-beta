@@ -38,7 +38,8 @@
     "stationapi:event_bus": [
       "local.luke.power.input.GameplayKeys",
       "local.luke.power.visual.RedstonePowerRenderer",
-      "local.luke.power.gameplay.TorchShovelEvents"
+      "local.luke.power.gameplay.TorchShovelEvents",
+      "local.luke.power.world.SavedWorldMenu"
     ]
   },
   "languageAdapters": {

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-10-16
+
+- Set bed respawn points during the day with sleeping enabled, while retaining native sleeping and multiplayer behaviour.
+- Add Edit game rules to the saved-world Edit menu, with verified metadata backups and checks for changed or unsupported data.
+- Combine panorama controls into one choice with the original dirt background as the default. Show one option per distinct scene while preserving saved selections from older versions.
+- Preview panoramas live in the picker. Apply selections immediately, retain the selection marker and leave with Back or Escape.
+- Group Active tweaks HUD inclusion switches below its display controls, and move Full bright messages below Brightness.
+
 ## [2.1.0] - 2026-10-16
 
 - Restore native walking, jumping, falling and bobbing whenever flight is off. Entering Creative silently restores its flight ability, and flight tooltips explain their speed and drift baselines.

@@ -58,6 +58,8 @@ public final class Validation {
       else if (command.startsWith("release-160")) Release160Checks.run(mc, command.substring(11).trim());
       else if (command.startsWith("placement-lifecycle ")) PlacementLifecycleChecks.run(mc, command.substring(20));
       else if (command.startsWith("interface-170 ")) Interface170Checks.run(mc,command.substring(14));
+      else if (command.equals("release-211")) Release211Checks.run(mc);
+      else if (command.equals("release-211-editor")) Release211Checks.editor(mc);
       else if (command.equals("release-210")) Release210Checks.run(mc);
       else if (command.equals("release-202")) Release202Checks.run(mc);
       else if (command.startsWith("release-201 ")) Release201Checks.run(mc,command.substring(12));

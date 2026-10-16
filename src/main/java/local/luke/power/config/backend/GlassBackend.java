@@ -10,6 +10,7 @@ import net.glasslauncher.mods.gcapi3.impl.object.*;
 import net.minecraft.client.resource.language.TranslationStorage;
 
 public final class GlassBackend implements Backend {
+  private static final String PANORAMA = "power_controls:userinterface.panoramaConfig.";
   private final String id;
   private final ConfigRootEntry root;
   private final Map<String, ConfigEntryHandler<?>> handlers = new LinkedHashMap<>();
@@ -19,6 +20,13 @@ public final class GlassBackend implements Backend {
     this.id = id;
     this.root = root;
     visit("", root.configCategoryHandler());
+    var enabled = handlers.get(PANORAMA + "enablePanorma");
+    if (enabled != null && !Boolean.TRUE.equals(enabled.value)) {
+      for (Setting setting : entries) if (setting.id.equals(PANORAMA + "panoramaFolder")) {
+        setting.value = new JsonPrimitive(local.luke.power.input.PanoramaCatalog.DIRT);
+        setting.accept();
+      }
+    }
   }
 
   public static void register(ConfigSession session) {
@@ -45,6 +53,7 @@ public final class GlassBackend implements Backend {
       String key = id + "." + prefix + h.id;
       if (Catalog.text(Catalog.metadata(key), "group", "").equals("Available controls")) continue;
       handlers.put(key, h);
+      if (key.equals(PANORAMA + "enablePanorma")) continue;
       Class<?> type = h.parentField.getType();
       List<String> choices =
           type.isEnum()
@@ -137,7 +146,7 @@ public final class GlassBackend implements Backend {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void preview(Map<String, JsonElement> values) throws Exception {
-    for (var e : values.entrySet()) {
+    for (var e : panoramaValues(values).entrySet()) {
       ConfigEntryHandler h = handlers.get(e.getKey());
       Class<?> type = h.parentField.getType();
       h.value = inverted(e.getKey()) ? !e.getValue().getAsBoolean() : Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
@@ -148,7 +157,7 @@ public final class GlassBackend implements Backend {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   public void apply(Map<String, JsonElement> values) {
-    for (var e : values.entrySet()) {
+    for (var e : panoramaValues(values).entrySet()) {
       ConfigEntryHandler h = handlers.get(e.getKey());
       Class<?> type = h.parentField.getType();
       h.value = inverted(e.getKey()) ? !e.getValue().getAsBoolean() : Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
@@ -156,5 +165,14 @@ public final class GlassBackend implements Backend {
     GCCore.saveConfig(
         root.modContainer(), root.configCategoryHandler(), EventStorage.EventSource.USER_SAVE);
     local.luke.power.audio.AudioController.rulesChanged();
+  }
+
+  private Map<String, JsonElement> panoramaValues(Map<String, JsonElement> values) {
+    JsonElement choice = values.get(PANORAMA + "panoramaFolder");
+    if (choice == null) return values;
+    Map<String, JsonElement> linked = new LinkedHashMap<>(values);
+    linked.put(PANORAMA + "enablePanorma", new JsonPrimitive(
+        !local.luke.power.input.PanoramaCatalog.folder(choice.getAsString()).isEmpty()));
+    return linked;
   }
 }

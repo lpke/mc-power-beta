@@ -2484,16 +2484,16 @@
     "description": "",
     "default": false,
     "restart": false,
-    "order": 2
+    "order": 1
   },
   "power_controls:userinterface.panoramaConfig.panoramaFolder": {
     "page": "Interface",
     "group": "Title background",
     "label": "Panorama",
-    "description": "Choose an original Minecraft title background.",
-    "default": "b1_8_1",
+    "description": "Choose an original Minecraft panorama, or Original dirt background to use the classic menu background. Preview each scene before going Back.",
+    "default": "b1_7_3",
     "restart": false,
-    "order": 1
+    "order": 0
   },
   "power_controls:userinterface.photoModeConfig.enablePhotoModeButton": {
     "page": "Interface",
@@ -3811,7 +3811,8 @@
     "label": "Rescan mouse"
   },
   "activeTweaks.fakeSneak": {
-    "label": "Include Fake sneak"
+    "label": "Include Fake sneak",
+    "order": 103
   },
   "logo.scrollingBackground.enabled": {
     "page": "Interface",
@@ -4002,7 +4003,7 @@
     "description": "Show while Auto-mine is holding Attack / Break.",
     "default": true,
     "restart": false,
-    "order": 16
+    "order": 101
   },
   "death.enabled": {
     "page": "Gameplay",
@@ -4151,7 +4152,7 @@
     "group": "Lighting",
     "label": "Full bright messages",
     "description": "Show a chat message when full bright turns on or off during gameplay. Independent of the HUD.",
-    "order": 8
+    "order": 1
   },
   "keys.power_beta.entities": {
     "page": "Controls",
@@ -4172,14 +4173,14 @@
     "group": "Active tweaks HUD",
     "label": "Include Hidden entities",
     "description": "Include this tweak while active.",
-    "order": 20
+    "order": 109
   },
   "activeTweaks.fullBright": {
     "page": "Interface",
     "group": "Active tweaks HUD",
     "label": "Include Full bright",
     "description": "Include this tweak while active.",
-    "order": 21
+    "order": 110
   },
   "gameplay.flintIgnitesTnt": {
     "page": "Gameplay",
@@ -4430,7 +4431,7 @@
     "group": "Active tweaks HUD",
     "label": "Include Temporary click mining",
     "description": "Show Click mining enabled or Click mining disabled while the temporary override is active.",
-    "order": 28,
+    "order": 102,
     "page": "Interface"
   },
   "veinMining.enabled": {
@@ -4733,5 +4734,44 @@
     "description": "Choose customisable retro block lettering or an original Beta, Java Edition or modern Minecraft logo. Your retro customisation is retained.",
     "default": 0,
     "order": -1
+  },
+  "activeTweaks.enabled": {
+    "order": 0
+  },
+  "activeTweaks.position": {
+    "order": 1
+  },
+  "activeTweaks.offsetX": {
+    "order": 2
+  },
+  "activeTweaks.offsetY": {
+    "order": 3
+  },
+  "activeTweaks.textColor": {
+    "order": 4
+  },
+  "activeTweaks.opacity": {
+    "order": 5
+  },
+  "activeTweaks.autoWalk": {
+    "order": 100
+  },
+  "activeTweaks.fastPlacement": {
+    "order": 104
+  },
+  "activeTweaks.placementRestriction": {
+    "order": 105
+  },
+  "activeTweaks.freeLook": {
+    "order": 106
+  },
+  "activeTweaks.cinematicCamera": {
+    "order": 107
+  },
+  "activeTweaks.freecamPlayerMovement": {
+    "order": 108
+  },
+  "native.brightness": {
+    "order": 0
   }
 }

@@ -4,6 +4,7 @@ import com.google.gson.JsonPrimitive;
 import java.util.*;
 import local.luke.power.config.Setting;
 import local.luke.power.input.PanoramaCatalog;
+import local.luke.power.input.PanoramaRenderer;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
@@ -14,6 +15,7 @@ public final class PanoramaScreen extends UiScreen {
   private final TextInput search = new TextInput("", 64);
   private final ScrollBar bar = new ScrollBar();
   private double scroll;
+  private int ticks;
 
   public PanoramaScreen(PowerOptionsScreen parent, Setting setting) {
     this.parent = parent;
@@ -21,17 +23,17 @@ public final class PanoramaScreen extends UiScreen {
   }
   public void init() { Keyboard.enableRepeatEvents(true); }
   public void removed() { Keyboard.enableRepeatEvents(false); }
+  public void tick() { ticks++; }
   private int left() { return Math.max(12, (width - 460) / 2); }
-  private int span() { return width - 2 * left(); }
+  private int span() { return Math.min(220, width - 2 * left()); }
   private List<PanoramaCatalog.Entry> entries() {
     String query = search.text().strip().toLowerCase(Locale.ROOT);
     return PanoramaCatalog.entries().stream().filter(e -> e.label().toLowerCase(Locale.ROOT).contains(query)).toList();
   }
-  private ScrollBar.Track track() { return new ScrollBar.Track(width - left() - 6, 72, height - 110, entries().size() * 24, scroll); }
+  private ScrollBar.Track track() { return new ScrollBar.Track(left() + span() - 6, 72, height - 110, entries().size() * 24, scroll); }
   private void select(String id) {
     setting.value = new JsonPrimitive(id);
     parent.changed(setting);
-    minecraft.setScreen(parent);
   }
   protected void mouseClicked(int x, int y, int button) {
     if (button != 0) return;
@@ -53,7 +55,16 @@ public final class PanoramaScreen extends UiScreen {
     if (!before.equals(search.text())) scroll = 0;
   }
   public void render(int x, int y, float delta) {
-    renderBackground();
+    if (PanoramaCatalog.folder(setting.value.getAsString()).isEmpty()) renderBackgroundTexture(0);
+    else {
+      boolean blur = parent.session().settings().stream()
+          .filter(s -> s.id.equals("power_controls:userinterface.panoramaConfig.blurBackground"))
+          .anyMatch(s -> s.value.getAsBoolean());
+      PanoramaRenderer.render(minecraft.textureManager::getTextureId, setting.value.getAsString(), blur,
+          ticks + delta, minecraft.displayWidth, minecraft.displayHeight);
+      fillGradient(0, 0, width, height, -2130706433, 16777215);
+      fillGradient(0, 0, width, height, 0, Integer.MIN_VALUE);
+    }
     drawCenteredTextWithShadow(textRenderer, "Title panorama", width / 2, 18, 0xffffff);
     input(search, left(), 44, span(), x, y, "Search versions");
     int wheel = Mouse.getDWheel();
@@ -64,9 +75,10 @@ public final class PanoramaScreen extends UiScreen {
       int rowY = 72 + i * 24 - (int)scroll;
       if (rowY < 72 || rowY + 20 > height - 38) continue;
       var entry = choices.get(i);
-      button(entry.label(), left(), rowY, span() - 12, 20, x, y, true);
+      button((PanoramaCatalog.scene(setting.value.getAsString()).equals(entry.scene()) ? "> " : "")
+          + entry.label(), left(), rowY, span() - 12, 20, x, y, true);
     }
     bar.render(this, track());
-    button("Cancel", width / 2 - 50, height - 28, 100, 20, x, y, true);
+    button("Back", width / 2 - 50, height - 28, 100, 20, x, y, true);
   }
 }

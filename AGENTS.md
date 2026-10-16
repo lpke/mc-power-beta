@@ -44,6 +44,7 @@
   Gameplay hotkeys queue settings snapshots through `PowerConfig`; never flush files
   on the input or render path. Flush queued saves before menu backups and on shutdown.
   The config API retains its `gcapi3` binary identity for external dependencies.
+- Saved-world rule edits use the shared registry and editor without loading a world. Back up and verify metadata, reject concurrent changes and unsupported data, and preserve player data, game mode, the previous metadata file.
 - The game uses Gson 2.8.9. Do not rely on record deserialization without an explicit
   adapter. Test persisted data with that version, including rollback and restart.
 - Options edits use `ConfigSession`. Auto-apply defaults on; manual Apply commits and
@@ -382,3 +383,5 @@
 
 - Official title backgrounds use verified Mojang client and resource-index assets. Resource-index panoramas override fallback client textures. Keep version IDs stable, deduplicate identical scenes, and render unblurred panoramas at window resolution.
 - /fly changes only flight ability. Survival requires allow_flight; Creative retains its own permission and protection; Spectator flight stays independent. Revocation cancels survival flight safely.
+
+- The panorama picker groups variants of the same captured scene. Preserve legacy version IDs and texture paths. Its single selection also updates the retained enable flag, and its live preview shares the title renderer.

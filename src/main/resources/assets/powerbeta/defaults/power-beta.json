@@ -558,7 +558,7 @@
       "panoramaConfig": {
         "enablePanorma": false,
         "blurBackground": false,
-        "panoramaFolder": "b1_8_1"
+        "panoramaFolder": "b1_7_3"
       },
       "photoModeConfig": {
         "enablePhotoModeButton": true

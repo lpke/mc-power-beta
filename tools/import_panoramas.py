@@ -40,13 +40,14 @@ def main():
                            if p.format(0) in jar.namelist()), None)
             row = {'id': version.replace('.', '_'), 'label': 'Minecraft ' + version,
                    'version': version, 'metadata': indexed[version]['url'], 'client': client}
+            row['scene'] = 'b1_8_1' if version.startswith('1.') and int(version.split('.')[1]) <= 12 else row['id']
             if version.startswith('b'):
                 row['label'] = 'Beta ' + version[1:]
             if pattern is None:
                 if version != 'b1.7.3':
                     raise RuntimeError('Missing official panorama: ' + version)
                 row['folder'] = ''
-                row['label'] += ' - original dirt background'
+                row['label'] = 'Original dirt background'
             else:
                 faces = [jar.read(pattern.format(i)) for i in range(6)]
                 # Modern launchers overlay these resource-index files on the client JAR.

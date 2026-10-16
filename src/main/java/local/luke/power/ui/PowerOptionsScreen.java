@@ -34,6 +34,7 @@ public final class PowerOptionsScreen extends UiScreen {
           "Advanced");
   private List<String> pages = PAGES;
   private local.luke.power.rules.CreationRules creationRules;
+  private String savedWorldName;
   private boolean cheatPreset;
   public List<String> visiblePages() { return pages; }
 
@@ -132,6 +133,19 @@ public final class PowerOptionsScreen extends UiScreen {
     mc.setScreen(screen);
   }
 
+  public static void openSavedWorldRules(net.minecraft.client.Minecraft mc, Screen parent, String folder) throws Exception {
+    var world = new local.luke.power.world.SavedWorldRules(FabricLoader.getInstance().getGameDir(), folder, () -> mc.world == null);
+    PowerOptionsScreen screen = new PowerOptionsScreen(parent);
+    screen.savedWorldName = world.name();
+    screen.session = local.luke.power.config.backend.SavedWorldBackend.open(world);
+    screen.page = "Game rules"; screen.search.setText(""); screen.changedOnly = false;
+    screen.conflictIds = List.of(); screen.relatedIds = List.of(); screen.history.clear();
+    screen.collapsed.clear(); screen.scroll = 0; screen.sideScroll = 0; screen.libraryOpen = false;
+    mc.setScreen(screen);
+  }
+
+  private boolean isolatedRules() { return creationRules != null || savedWorldName != null; }
+
   private boolean selectedPreset(Setting setting) {
     return !setting.id.startsWith("rules.survival.") && !setting.id.startsWith("rules.cheats.")
         || setting.id.startsWith(cheatPreset ? "rules.cheats." : "rules.survival.");
@@ -188,7 +202,7 @@ public final class PowerOptionsScreen extends UiScreen {
         PowerBeta.LOG.error("Could not open settings", e);
         error = "Settings could not be loaded. See the game log.";
       }
-    if (session != null && creationRules == null) {
+    if (session != null && !isolatedRules()) {
       if (library == null) { library = new MusicLibraryScreen(this); library.restore(libraryState); }
       library.init(minecraft, width, height);
     }
@@ -210,7 +224,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void rememberPosition() {
-    if (creationRules != null) return;
+    if (isolatedRules()) return;
     rememberedView = view();
     rememberedHistory = List.copyOf(history);
     if (!changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty() && search.text().isBlank()) {
@@ -448,7 +462,7 @@ public final class PowerOptionsScreen extends UiScreen {
     hoverTicks++;
     if (library != null) library.tick();
     int revision = local.luke.power.audio.AudioController.libraryRevision();
-    if (session != null && creationRules == null && revision != musicRevision) {
+    if (session != null && !isolatedRules() && revision != musicRevision) {
       musicRevision = revision;
       if (local.luke.power.config.backend.AudioBackend.discoverMusic(session, minecraft)) layout();
     }
@@ -985,7 +999,8 @@ public final class PowerOptionsScreen extends UiScreen {
     renderBackground();
     fill(0, 0, width, 22, 0x70000000);
     fill(origin(), footerY() - 10, right(), height, 0x90000000);
-    drawCenteredTextWithShadow(textRenderer, creationRules != null ? "New world game rules" : rulesToolbar() ? "New world defaults" : "Options", width / 2, 7, 0xffffff);
+    drawCenteredTextWithShadow(textRenderer, fit(savedWorldName != null ? "Game rules: " + savedWorldName
+        : creationRules != null ? "New world game rules" : rulesToolbar() ? "New world defaults" : "Options", width - 24), width / 2, 7, 0xffffff);
     if (session == null) {
       text(error, 10, 45, 0xff8888);
       button("Back", width / 2 - 50, height - 28, 100, 20, mx, my, true);
