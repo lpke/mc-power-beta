@@ -14,6 +14,10 @@ public class TitleFeatures implements ModInitializer {
 
     public static boolean isLogoRendering = false;
 
+    public static final List<String> TITLE_STYLES = List.of(
+            "Retro (customisable)", "Beta", "Java Edition (2017)", "Java Edition (2020)", "Modern");
+    public static ConfigKey<Integer> style = ConfigKey.integer("style", 0);
+
     public static ConfigKey<String[]> logo = ConfigKey.stringArray("logo.lines", new String[]{
             " *   * * *   * *** *** *** *** *** ***",
             " ** ** * **  * *   *   * * * * *    * ",

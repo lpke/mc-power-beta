@@ -221,8 +221,8 @@
   "tweaks.autoWalkHoldMillis": "Hold time before releasing the auto-walk key stops walking.",
   "tweaks.inventoryWhileMoving": "Walk, strafe, jump and auto-walk with inventories open in singleplayer. Sneaking stays off for Shift-clicking. Containers close beyond interaction reach; other menus still stop movement.",
   "tweaks.inventoryMouseLook": "Start holding right-click outside the inventory panels and controls to look around. The cursor stays hidden and looking continues over the GUI until release. Requires movement in inventory. Uses your mouse sensitivity and invert setting; right-clicks starting inside the GUI keep their normal actions.",
-  "creative.sprintToggle": "Shared by creative flight and freecam. Hold requires the sprint key; Toggle stays active until forward movement stops.",
-  "creative.sprintMultiplier": "Speed multiplier while sprinting in creative flight or freecam. 200% doubles normal speed.",
+  "creative.sprintToggle": "Hold requires the sprint key. Toggle keeps sprint flight active until movement stops on all axes. Applies to Creative and Survival /fly.",
+  "creative.sprintMultiplier": "Multiplier of the configured Creative or Survival /fly speed, on every axis. 100% keeps normal flight speed; 200% doubles it. This does not change Spectator or freecam.",
   "tweaks.hotbar.numberRowKeys": "While holding the row modifier, keys 1, 2 and 3 select the top, middle and bottom inventory rows.",
   "tweaks.hotbar.overlay": "Show inventory rows while holding the preview or row modifier.",
   "tweaks.hotbar.reverseScroll": "Reverse which inventory row is chosen by each scroll direction.",
@@ -249,5 +249,15 @@
   "tweaks.placement.blacklist": "Items that cannot use fast placement when the filter is set to Exclude.",
   "tweaks.placement.whitelist": "Only these items can use fast placement when the filter is set to Allow only. An empty list permits nothing.",
   "power_camera:config.sprint": "Boost camera speed with the flight sprint key using the activation and speed settings below.",
-  "creative.flight": "Enable Creative flight. Double-tap Jump to start or stop flying. /fly changes this same preference; Survival flight uses its world permission."
+  "creative.flight": "Enable Creative flight. Double-tap Jump to start or stop flying. /fly changes this same preference; Survival flight uses its world permission.",
+  "creative.flightSpeed": "100% uses modern Creative flight acceleration and drag, reaching about 10.9 blocks per second horizontally without sprint. 200% doubles that speed. Beta walking is about 4.3 blocks per second. Also applies to Survival /fly.",
+  "creative.glide": "Drift after releasing movement keys. 0 stops immediately; 5 retains modern Creative flight inertia. Intermediate values stop sooner without changing held-key speed.",
+  "creative.spectatorSpeed": "Starting Spectator speed. 100% uses the same acceleration as modern Creative flight, reaching about 10.9 blocks per second horizontally without sprint. Beta walking is about 4.3 blocks per second. The wheel adjusts this during a visit.",
+  "creative.spectatorScrollStep": "Percentage points added or removed per wheel notch, relative to the 100% modern Creative flight baseline. 10 changes 100% to 110%, rather than multiplying the current speed.",
+  "creative.spectatorGlide": "Drift after releasing movement keys. 0 stops immediately; 5 retains modern Spectator flight inertia. Intermediate values stop sooner without changing held-key speed.",
+  "creative.spectatorSprintMultiplier": "Multiplier of the current Spectator speed, including wheel adjustments, on every axis. 100% keeps normal speed; 200% doubles it. Independent of Creative and freecam.",
+  "power_camera:config.speed": "Camera speed in blocks per second before sprint. Beta walking is about 4.3; modern Creative flight is about 10.9 horizontally without sprint. 12 is slightly faster. Drag controls how quickly the camera reaches this speed.",
+  "power_camera:config.drag": "How quickly freecam approaches its target speed or stops, per second. 10 removes about 63% of the speed difference in 0.1 seconds; larger values respond faster. Classic movement ignores drag.",
+  "power_camera:config.sprintMultiplier": "Multiplier of the configured freecam speed, on every axis. 100% keeps normal camera speed; 200% doubles it. Independent of Creative and Spectator.",
+  "power_camera:config.classicMovement": "Reach the configured camera speed immediately and stop immediately when movement keys are released. Otherwise use Freecam drag for acceleration and stopping."
 }

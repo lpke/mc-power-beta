@@ -60,6 +60,10 @@ public class ConfigKey<T> {
         return new ConfigKey<>(key, def, JsonElement::getAsDouble, JsonPrimitive::new);
     }
 
+    public static ConfigKey<Integer> integer(String key, int def) {
+        return new ConfigKey<>(key, def, e -> e.getAsBigDecimal().intValueExact(), JsonPrimitive::new);
+    }
+
     public static ConfigKey<String> string(String key, String def) {
         return new ConfigKey<>(key, def, JsonElement::getAsString, JsonPrimitive::new);
     }

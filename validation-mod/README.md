@@ -8,7 +8,7 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
-- `release-210`: world-rule sliders/defaults, retired globals, HUD group visibility, Creative/Survival/Spectator `/fly`, permission revocation, saved native flight data, sleep thresholds, official panorama decoding/GPU uploads and narrow/wide picker screenshots. Run after `new-world`.
+- `release-210`: world-rule sliders/defaults, retired globals, HUD group visibility, Creative/Survival/Spectator `/fly`, native non-flight gravity/jumping/walking, permission revocation, saved native flight data, sleep thresholds, immediate panorama selection, official texture uploads, all title styles and narrow/wide picker screenshots. Run after `new-world`.
 - `release-202`: camera/leaf reset defaults and actual saved-world Creative badges,
   including old cheats, Spectator-only and unsupported metadata without changing saves.
   `freecam-motion setup|start|stop` records bounded frame timing, camera movement and

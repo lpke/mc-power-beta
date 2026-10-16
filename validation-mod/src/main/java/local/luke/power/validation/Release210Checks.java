@@ -107,6 +107,66 @@ final class Release210Checks {
           check(Math.hypot(mc.player.x - startX, mc.player.z - startZ) > 1, "flight did not displace player");
         } finally { MovementOwnership.registerAutoWalkInput(previous); mc.player.method_1340(x, y, z); mc.setScreen(screen); }
       });
+      test("non-flight uses native gravity, jumping, walking and limb animation", () -> {
+        CreativeVehicleChecks.mode(mc, "SURVIVAL");
+        var controller = Class.forName("local.luke.power.creative.FlightController");
+        var tick = controller.getMethod("tick", Minecraft.class);
+        check((Boolean)Class.forName("local.luke.power.creative.ClientRuntime").getMethod("moving", Minecraft.class)
+            .invoke(null, mc), "focus the disposable client before testing native movement");
+        var flying = mc.player.getClass().getMethod("creative_setFlying", boolean.class);
+        var jump = net.minecraft.entity.LivingEntity.class.getDeclaredMethod("method_944"); jump.setAccessible(true);
+        for (String path : List.of("unavailable", "command off", "revoked", "creative off")) {
+          CreativeVehicleChecks.mode(mc, "SURVIVAL");
+          AccessRules.set(mc, GameRule.ALLOW_FLIGHT, false);
+          if (!path.equals("unavailable")) {
+            AccessRules.set(mc, GameRule.ALLOW_FLIGHT, true); fly("/fly");
+            if (path.equals("command off")) fly("/fly");
+            else if (path.equals("revoked")) { AccessRules.set(mc, GameRule.ALLOW_FLIGHT, false); mc.player.tick(); }
+            else {
+              CreativeVehicleChecks.mode(mc, "CREATIVE");
+              if ((Boolean)creative("flightAvailable", mc.player)) fly("/fly");
+            }
+          }
+          // Native player ticks apply permission revocation before measuring travel.
+          mc.player.tick();
+          check(!(Boolean)mc.player.getClass().getMethod("creative_isFlying").invoke(mc.player), path + " retained flight state");
+          check(!(Boolean)Class.forName("local.luke.power.creative.Modes")
+              .getMethod("flying", net.minecraft.entity.player.PlayerEntity.class).invoke(null, mc.player), path + " still flying");
+          mc.player.method_1340(42.5, 120, 42.5); mc.player.field_1623 = false;
+          mc.player.velocityX = mc.player.velocityY = mc.player.velocityZ = 0;
+          double startY = mc.player.y;
+          for (int i = 0; i < 8; i++) { tick.invoke(null, mc); mc.player.method_945(0, 0); }
+          check(mc.player.velocityY < -.5 && startY - mc.player.y > 2, path + " native falling suppressed");
+          double falling = mc.player.velocityY;
+          flying.invoke(mc.player, false);
+          check(mc.player.velocityY == falling, path + " redundant flight reset changed gravity");
+          if (path.equals("command off")) {
+            var fallingData = new NbtCompound(); mc.player.write(fallingData);
+            check(fallingData.getFloat("FallDistance") > 2, "native fall distance suppressed");
+            mc.player.read(fallingData);
+            var reloaded = new NbtCompound(); mc.player.write(reloaded);
+            check(reloaded.getFloat("FallDistance") == fallingData.getFloat("FallDistance"), "reload cleared fall distance");
+          }
+          mc.player.method_1340(42.5, 120, 42.5); mc.player.field_1623 = true;
+          mc.player.velocityX = mc.player.velocityY = mc.player.velocityZ = 0;
+          jump.invoke(mc.player); startY = mc.player.y;
+          for (int i = 0; i < 5; i++) { tick.invoke(null, mc); mc.player.method_945(0, 0); }
+          check(mc.player.y - startY > 1, path + " native jump suppressed");
+          for (int x = 39; x < 48; x++) for (int z = 39; z < 60; z++) {
+            mc.world.method_200(x, 109, z, 1);
+            for (int y = 110; y < 124; y++) mc.world.method_200(x, y, z, 0);
+          }
+          mc.player.method_1340(42.5, 110 + mc.player.field_1631, 42.5);
+          mc.player.field_1623 = true; mc.player.velocityX = mc.player.velocityY = mc.player.velocityZ = 0;
+          double startZ = mc.player.z; float limb = mc.player.field_1050;
+          for (int i = 0; i < 20; i++) { tick.invoke(null, mc); mc.player.method_945(0, 1); }
+          check(Math.hypot(mc.player.x - 42.5, mc.player.z - startZ) > 2, path + " walking did not displace player");
+          check(mc.player.field_1050 > limb, path + " native limb animation stopped");
+        }
+        CreativeVehicleChecks.mode(mc, "SURVIVAL");
+        CreativeVehicleChecks.mode(mc, "CREATIVE");
+        check((Boolean)creative("flightAvailable", mc.player), "Creative entry did not restore flight ability");
+      });
       test("Spectator ignores /fly and help has no side effects", () -> {
         CreativeVehicleChecks.mode(mc, "SPECTATOR");
         fly("/fly"); fly("/fly help");
@@ -204,6 +264,46 @@ final class Release210Checks {
           SettingsSnapshot.render(mc, picker, size[0], size[1], Path.of("power-beta-data/reports/210/panoramas-" + size[0] + ".png"));
           options.session().discard();
         }
+      });
+      test("panorama clicks return immediately to the settings draft; Cancel keeps it", () -> {
+        boolean auto = MenuPreferences.current().autoApply;
+        MenuPreferences.update(v -> v.autoApply = false);
+        try {
+          var options = new PowerOptionsScreen(null); mc.setScreen(options);
+          Setting setting = find(options.session(), "power_controls:userinterface.panoramaConfig.panoramaFolder");
+          JsonElement original = setting.value.deepCopy();
+          var picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
+          ((TextInput)field(picker, "search")).setText("26.3");
+          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click(picker.width / 2, 80, 0);
+          check(mc.currentScreen == options && setting.value.getAsString().equals("26_3"), "selection needs another click");
+          picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
+          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click(picker.width / 2, picker.height - 20, 0);
+          check(mc.currentScreen == options && setting.value.getAsString().equals("26_3"), "Cancel changed selection");
+          options.session().discard(); check(setting.value.equals(original), "discard lost original panorama");
+          MenuPreferences.update(v -> v.autoApply = true);
+          picker = new PanoramaScreen(options, setting); mc.setScreen(picker);
+          ((TextInput)field(picker, "search")).setText("26.2");
+          ((local.luke.power.validation.mixin.ScreenInput)(Object)picker).power$click(picker.width / 2, 80, 0);
+          check(mc.currentScreen == options && !setting.changed(), "auto-apply selection was not committed");
+          check(local.luke.power.storage.PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig")
+              .get("panoramaFolder").getAsString().equals("26_2"), "panorama not applied on click");
+          setting.value = original; options.changed(setting);
+        } finally { MenuPreferences.update(v -> v.autoApply = auto); }
+      });
+      test("title styles render official logos and retain retro customisation", () -> {
+        ConfigSession session = SettingsRegistry.open(mc);
+        Setting style = find(session, "logo.style");
+        check(style.kind == Setting.Kind.CHOICE && style.choices.size() == 5 && style.defaultValue.getAsInt() == 0, "style choices/default");
+        var retro = local.luke.power.storage.PowerConfig.section("title");
+        for (int selected = 0; selected < 5; selected++) {
+          style.value = new JsonPrimitive(selected); session.save(Path.of("."));
+          var title = new net.minecraft.client.gui.screen.TitleScreen();
+          title.init(mc, 320, 240);
+          SettingsSnapshot.render(mc, title, 320, 240, Path.of("power-beta-data/reports/210/title-" + selected + ".png"));
+        }
+        style.value = new JsonPrimitive(0); session.save(Path.of("."));
+        var after = local.luke.power.storage.PowerConfig.section("title"); after.remove("style"); retro.remove("style");
+        check(after.equals(retro), "title style changed custom lettering");
       });
     } finally {
       AccessRules.restore(mc, rules); mc.player.read(playerData); CreativeVehicleChecks.mode(mc, mode); mc.setScreen(previousScreen);

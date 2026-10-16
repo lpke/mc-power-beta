@@ -93,4 +93,27 @@ class SettingAccessTest {
     assertEquals(100, number.value.getAsInt());
     assertThrows(IllegalArgumentException.class, () -> number.parse("101"));
   }
+
+  @Test void titleStylesRetainRetroDraftsWhileHidingTheirEditors() {
+    var session = world();
+    Setting style = new Setting("logo.style", "test", "Interface", "Title screen", "Title style", "",
+        Setting.Kind.CHOICE, new JsonPrimitive(0), new JsonPrimitive(0), 0, 4, 1,
+        List.of("Retro", "Beta", "2017", "2020", "Modern"), false);
+    session.add(new Backend() {
+      public String id() { return "test"; }
+      public List<java.nio.file.Path> files() { return List.of(); }
+      public void validate(Map<String, JsonElement> values) {}
+      public void apply(Map<String, JsonElement> values) {}
+    }, List.of(style));
+    for (int n : new int[]{0, 1, 2, 3, 4, 0}) {
+      style.value = new JsonPrimitive(n);
+      for (String id : List.of("logo.logo.lines", "logo.blocks.map", "logo.logo.animation.enabled")) {
+        Setting setting = entry(id);
+        assertEquals(n == 0, SettingAccess.visible(session, setting));
+        assertTrue(setting.value.getAsBoolean());
+      }
+      assertTrue(SettingAccess.visible(session, entry("logo.scrollingBackground.enabled")));
+      assertTrue(SettingAccess.visible(session, style));
+    }
+  }
 }

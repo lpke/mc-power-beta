@@ -50,8 +50,6 @@ public final class FlightController {
       } else lastJump = ticks;
     }
     jumpDown = down;
-    if (!Modes.spectator(mc.player) && !Modes.flightAvailable(mc.player))
-      mc.player.creative_setFlying(false);
     sprinting =
         sprint.update(
             movementKey(mc, Keys.SPRINT),

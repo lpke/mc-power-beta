@@ -2,6 +2,7 @@ package local.luke.power.title.mixin;
 
 import local.luke.power.title.LogoEffectRandomizer;
 import local.luke.power.title.TitleFeatures;
+import local.luke.power.title.TitleLogos;
 import net.minecraft.block.Block;
 import net.minecraft.class_564;
 import net.minecraft.class_13;
@@ -21,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Random;
 
 @Mixin(value = TitleScreen.class, priority = 56676)
-public class TitleScreenMixin {
+public class TitleScreenMixin extends net.minecraft.client.gui.screen.Screen {
     @Shadow @Final private static Random RANDOM;
 
     @Unique
@@ -36,7 +37,7 @@ public class TitleScreenMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void power_title$tick(CallbackInfo ci) {
-        if (logoEffects == null || !TitleFeatures.animation.get()) return;
+        if (TitleLogos.textured() || logoEffects == null || !TitleFeatures.animation.get()) return;
 
         for (LogoEffectRandomizer[] logoEffect : logoEffects) {
             for (LogoEffectRandomizer logoEffectRandomizer : logoEffect) logoEffectRandomizer.tick();
@@ -46,6 +47,11 @@ public class TitleScreenMixin {
     @Inject(method = "render(IIF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/TitleScreen;renderBackground()V", shift = At.Shift.AFTER))
     private void power_title$render(int mouseX, int mouseY, float delta, CallbackInfo ci) {
         Minecraft minecraft = TitleFeatures.minecraft;
+
+        if (TitleLogos.textured()) {
+            TitleLogos.render(minecraft, width);
+            return;
+        }
 
         String[] logo = TitleFeatures.logo.get();
         if (logo == null || logo.length == 0) return;

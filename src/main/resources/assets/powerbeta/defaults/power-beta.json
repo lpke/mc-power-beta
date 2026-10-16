@@ -286,7 +286,8 @@
         "enabled": false,
         "speed": 0.1,
         "onlyTitle": false
-      }
+      },
+      "style": 0
     },
     "audio": {
       "master": 100,

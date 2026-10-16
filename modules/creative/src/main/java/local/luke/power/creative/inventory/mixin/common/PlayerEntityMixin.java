@@ -49,6 +49,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
   @Override
   public void creative_setFlying(boolean flying) {
     boolean next = power$spectator || flying && Modes.flightAvailable(this);
+    // Repeated checks and loading a grounded player must leave native movement untouched.
+    if (next == creative_isFlying()) return;
     dataTracker.setData(CreativeInventory.IS_FLYING_ID, CreativeInventory.toByte(next));
     if (!next) velocityY = 0;
     fallDistance = 0;
@@ -73,6 +75,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     power$previous = old;
     power$flightOverride = -1;
     power$spectator = mode == GameMode.SPECTATOR;
+    // Entering Creative restores its flight ability without a toggle announcement.
+    if (mode == GameMode.CREATIVE && !Config.current().flight) Config.flight(true);
     dataTracker.setData(CreativeInventory.IS_CREATIVE_ID, CreativeInventory.toByte(mode == GameMode.CREATIVE));
     immuneToFire = mode != GameMode.SURVIVAL;
     updateFromBB = power$spectator;

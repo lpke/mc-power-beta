@@ -27,11 +27,12 @@ public final class LogoBackend implements Backend {
           defaults = key.getClass().getField("defaultValue").get(key);
       keys.put(id, key);
       Setting.Kind kind =
-          value instanceof Boolean
+          name.equals("style") ? Setting.Kind.CHOICE : value instanceof Boolean
               ? Setting.Kind.BOOLEAN
               : value instanceof Number ? Setting.Kind.DECIMAL : Setting.Kind.LIST;
       String label =
           switch (f.getName()) {
+            case "style" -> "Title style";
             case "logo" -> "Title lettering";
             case "logoRotation" -> "Title rotation";
             case "blockMap" -> "Letter block palette";
@@ -66,7 +67,7 @@ public final class LogoBackend implements Backend {
               0,
               10,
               .1,
-              List.of(),
+              name.equals("style") ? (List<String>) logo.getField("TITLE_STYLES").get(null) : List.of(),
               false));
     }
   }

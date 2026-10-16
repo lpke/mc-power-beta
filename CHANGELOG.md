@@ -4,6 +4,9 @@
 
 ## [2.1.0] - 2026-10-16
 
+- Restore native walking, jumping, falling and bobbing whenever flight is off. Entering Creative silently restores its flight ability, and flight tooltips explain their speed and drift baselines.
+- Apply title panorama choices immediately when clicked, with a single Cancel button.
+- Add Title style choices for the official Beta, 2017 Java Edition, 2020 Java Edition and modern logos. Keep customisable retro lettering as the default and preserve its customisation between styles.
 - Add allow_sleep while retaining bed respawn points when sleeping is disabled. Use a 0–100% sleeping slider and rename sleep_ambushes to sleep_nightmares, retaining the old command aliases.
 - Add world rules for ghast explosion fire, lightning strike fire and explosion block drop chance. Default ghast fire on, lightning fire off and block drops to 100%. Remove the global rain-disabling setting; weather uses its world cycle rule.
 - Add /fly and allow_flight for flight outside Creative. Creative can toggle its flight ability independently of its inventory and protection; Spectator keeps its own flight.

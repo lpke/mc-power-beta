@@ -21,25 +21,25 @@
     "page": "Creative",
     "group": "Flight",
     "label": "Sprint activation",
-    "description": "Toggle keeps sprint flight active after releasing the key. Hold requires the key to stay down."
+    "description": "Hold requires the sprint key. Toggle keeps sprint flight active until movement stops on all axes. Applies to Creative and Survival /fly."
   },
   "creative.flightSpeed": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight speed, %",
-    "description": "100% matches the modern creative flight target."
+    "description": "100% uses modern Creative flight acceleration and drag, reaching about 10.9 blocks per second horizontally without sprint. 200% doubles that speed. Beta walking is about 4.3 blocks per second. Also applies to Survival /fly."
   },
   "creative.sprintMultiplier": {
     "page": "Creative",
     "group": "Flight",
     "label": "Sprint speed, %",
-    "description": "Multiplier applied while sprint flight is active."
+    "description": "Multiplier of the configured Creative or Survival /fly speed, on every axis. 100% keeps normal flight speed; 200% doubles it. This does not change Spectator or freecam."
   },
   "creative.glide": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight drift",
-    "description": "0 stops immediately when movement keys are released. 5 uses full modern-style drift."
+    "description": "Drift after releasing movement keys. 0 stops immediately; 5 retains modern Creative flight inertia. Intermediate values stop sooner without changing held-key speed."
   },
   "creative.doubleTapTicks": {
     "page": "Creative",
@@ -63,13 +63,13 @@
     "page": "Creative",
     "group": "Gamemodes",
     "label": "Spectator speed, %",
-    "description": "Starting spectator movement speed."
+    "description": "Starting Spectator speed. 100% uses the same acceleration as modern Creative flight, reaching about 10.9 blocks per second horizontally without sprint. Beta walking is about 4.3 blocks per second. The wheel adjusts this during a visit."
   },
   "creative.spectatorScrollStep": {
     "page": "Creative",
     "group": "Gamemodes",
     "label": "Speed step, %",
-    "description": "Speed change for each wheel step."
+    "description": "Percentage points added or removed per wheel notch, relative to the 100% modern Creative flight baseline. 10 changes 100% to 110%, rather than multiplying the current speed."
   },
   "creative.blockReach": {
     "page": "Creative",

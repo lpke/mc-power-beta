@@ -126,7 +126,7 @@
     "page": "Camera",
     "group": "Free camera",
     "label": "Freecam speed",
-    "description": "Changing this value will change the speed of the freecam",
+    "description": "Camera speed in blocks per second before sprint. Beta walking is about 4.3; modern Creative flight is about 10.9 horizontally without sprint. 12 is slightly faster. Drag controls how quickly the camera reaches this speed.",
     "default": 12.0,
     "restart": false,
     "min": 0.1,
@@ -138,7 +138,7 @@
     "page": "Camera",
     "group": "Free camera",
     "label": "Freecam drag",
-    "description": "Changing this value will change the drag of the freecam, The lower the drag, the longer it takes for the camera to stop. This option doesn't do anything for classic movement",
+    "description": "How quickly freecam approaches its target speed or stops, per second. 10 removes about 63% of the speed difference in 0.1 seconds; larger values respond faster. Classic movement ignores drag.",
     "default": 10.0,
     "restart": false,
     "min": 0.1,
@@ -159,7 +159,7 @@
     "page": "Camera",
     "group": "Free camera",
     "label": "Classic freecam movement",
-    "description": "When this option is enabled the freecam will move like in older versions of Freecam",
+    "description": "Reach the configured camera speed immediately and stop immediately when movement keys are released. Otherwise use Freecam drag for acceleration and stopping.",
     "default": false,
     "restart": false,
     "order": 5
@@ -2788,28 +2788,28 @@
     "page": "Creative",
     "group": "Flight",
     "label": "Sprint activation",
-    "description": "Shared by creative, spectator and freecam flight. Hold requires the sprint key; Toggle stays active until movement stops.",
+    "description": "Hold requires the sprint key. Toggle keeps sprint flight active until movement stops on all axes. Applies to Creative and Survival /fly.",
     "order": 4
   },
   "creative.flightSpeed": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight speed, %",
-    "description": "100% matches the modern creative flight target.",
+    "description": "100% uses modern Creative flight acceleration and drag, reaching about 10.9 blocks per second horizontally without sprint. 200% doubles that speed. Beta walking is about 4.3 blocks per second. Also applies to Survival /fly.",
     "order": 1
   },
   "creative.sprintMultiplier": {
     "page": "Creative",
     "group": "Flight",
     "label": "Sprint speed, %",
-    "description": "Speed multiplier for flight in any direction, including sideways, up and down. Applies to creative, spectator and freecam. 200% doubles normal speed.",
+    "description": "Multiplier of the configured Creative or Survival /fly speed, on every axis. 100% keeps normal flight speed; 200% doubles it. This does not change Spectator or freecam.",
     "order": 5
   },
   "creative.glide": {
     "page": "Creative",
     "group": "Flight",
     "label": "Flight drift",
-    "description": "0 stops immediately when movement keys are released. 5 uses full modern-style drift.",
+    "description": "Drift after releasing movement keys. 0 stops immediately; 5 retains modern Creative flight inertia. Intermediate values stop sooner without changing held-key speed.",
     "order": 2
   },
   "creative.doubleTapTicks": {
@@ -2839,14 +2839,14 @@
     "page": "Creative",
     "group": "Spectator",
     "label": "Spectator speed, %",
-    "description": "Starting spectator movement speed.",
+    "description": "Starting Spectator speed. 100% uses the same acceleration as modern Creative flight, reaching about 10.9 blocks per second horizontally without sprint. Beta walking is about 4.3 blocks per second. The wheel adjusts this during a visit.",
     "order": 0
   },
   "creative.spectatorScrollStep": {
     "page": "Creative",
     "group": "Spectator",
     "label": "Speed step, %",
-    "description": "Speed change for each wheel step.",
+    "description": "Percentage points added or removed per wheel notch, relative to the 100% modern Creative flight baseline. 10 changes 100% to 110%, rather than multiplying the current speed.",
     "order": 6
   },
   "creative.blockReach": {
@@ -4622,7 +4622,8 @@
     "default": 5,
     "min": 0,
     "max": 5,
-    "step": 1
+    "step": 1,
+    "description": "Drift after releasing movement keys. 0 stops immediately; 5 retains modern Spectator flight inertia. Intermediate values stop sooner without changing held-key speed."
   },
   "creative.spectatorSprintFlight": {
     "page": "Creative",
@@ -4652,7 +4653,8 @@
     "default": 200,
     "min": 100,
     "max": 400,
-    "step": 1
+    "step": 1,
+    "description": "Multiplier of the current Spectator speed, including wheel adjustments, on every axis. 100% keeps normal speed; 200% doubles it. Independent of Creative and freecam."
   },
   "power_camera:config.sprintToggle": {
     "page": "Camera",
@@ -4669,7 +4671,8 @@
     "default": 200,
     "min": 100,
     "max": 400,
-    "step": 1
+    "step": 1,
+    "description": "Multiplier of the configured freecam speed, on every axis. 100% keeps normal camera speed; 200% doubles it. Independent of Creative and Spectator."
   },
   "rules.world.explosion_drop_chance": {
     "unit": "%"
@@ -4722,5 +4725,13 @@
     "page": "Audio",
     "group": "Volume",
     "order": 100
+  },
+  "logo.style": {
+    "page": "Interface",
+    "group": "Title screen",
+    "label": "Title style",
+    "description": "Choose customisable retro block lettering or an original Beta, Java Edition or modern Minecraft logo. Your retro customisation is retained.",
+    "default": 0,
+    "order": -1
   }
 }

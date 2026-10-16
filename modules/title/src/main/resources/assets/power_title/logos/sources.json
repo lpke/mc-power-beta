@@ -1,0 +1,74 @@
+[
+  {
+    "file": "beta.png",
+    "version": "b1.7.3",
+    "source": "title/mclogo.png",
+    "metadata": "https://piston-meta.mojang.com/v1/packages/44f6969326bd45aa00dcd3c4ca3a7c05ebb24c04/b1.7.3.json",
+    "client": {
+      "sha1": "43db9b498cb67058d2e12d394e6507722e71bb45",
+      "size": 1465375,
+      "url": "https://launcher.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar"
+    },
+    "sha256": "1ec37872aa65aa3f73b327db488472f6a301269b1a458e0d93108b652a487a82"
+  },
+  {
+    "file": "java_2017.png",
+    "version": "1.12.2",
+    "source": "assets/minecraft/textures/gui/title/minecraft.png",
+    "metadata": "https://piston-meta.mojang.com/v1/packages/832d95b9f40699d4961394dcf6cf549e65f15dc5/1.12.2.json",
+    "client": {
+      "sha1": "0f275bc1547d01fa5f56ba34bdc87d981ee12daf",
+      "size": 10180113,
+      "url": "https://piston-data.mojang.com/v1/objects/0f275bc1547d01fa5f56ba34bdc87d981ee12daf/client.jar"
+    },
+    "sha256": "6efe1c29e346316e31d5b2b26942824de7e90073938f39a4b55e12b0f6ef53ed"
+  },
+  {
+    "file": "edition.png",
+    "version": "1.12.2",
+    "source": "assets/minecraft/textures/gui/title/edition.png",
+    "metadata": "https://piston-meta.mojang.com/v1/packages/832d95b9f40699d4961394dcf6cf549e65f15dc5/1.12.2.json",
+    "client": {
+      "sha1": "0f275bc1547d01fa5f56ba34bdc87d981ee12daf",
+      "size": 10180113,
+      "url": "https://piston-data.mojang.com/v1/objects/0f275bc1547d01fa5f56ba34bdc87d981ee12daf/client.jar"
+    },
+    "sha256": "45fdd2be5a983af2ad250923ca159c55231e2dfd314eab83ffec834cc2cecd50"
+  },
+  {
+    "file": "java_2020.png",
+    "version": "1.16",
+    "source": "assets/minecraft/textures/gui/title/minecraft.png",
+    "metadata": "https://piston-meta.mojang.com/v1/packages/e9d21d375f9c961f0e9731d4e463306d76e77c48/1.16.json",
+    "client": {
+      "sha1": "228fdf45541c4c2fe8aec4f20e880cb8fcd46621",
+      "size": 17492200,
+      "url": "https://piston-data.mojang.com/v1/objects/228fdf45541c4c2fe8aec4f20e880cb8fcd46621/client.jar"
+    },
+    "sha256": "255131a8f0bedb65836257c054c974dfbaecb38ed392661968e493ef93365660"
+  },
+  {
+    "file": "modern.png",
+    "version": "26.3",
+    "source": "assets/minecraft/textures/gui/title/minecraft.png",
+    "metadata": "https://piston-meta.mojang.com/v1/packages/11f1aefe473eefba0af62e3286c33b692807b2eb/26.3.json",
+    "client": {
+      "sha1": "e877b6a07acd633fb3bb475002175cec036e7b87",
+      "size": 41483720,
+      "url": "https://piston-data.mojang.com/v1/objects/e877b6a07acd633fb3bb475002175cec036e7b87/client.jar"
+    },
+    "sha256": "48cdff280471c0847e9eb695946f1d1d53c5163a609737138f2839efe0d6723b"
+  },
+  {
+    "file": "edition_modern.png",
+    "version": "26.3",
+    "source": "assets/minecraft/textures/gui/title/edition.png",
+    "metadata": "https://piston-meta.mojang.com/v1/packages/11f1aefe473eefba0af62e3286c33b692807b2eb/26.3.json",
+    "client": {
+      "sha1": "e877b6a07acd633fb3bb475002175cec036e7b87",
+      "size": 41483720,
+      "url": "https://piston-data.mojang.com/v1/objects/e877b6a07acd633fb3bb475002175cec036e7b87/client.jar"
+    },
+    "sha256": "c3ae995bb9fab322cfe1a3432ce9085a931ae25ddb4fd3475ea3840f75909c98"
+  }
+]

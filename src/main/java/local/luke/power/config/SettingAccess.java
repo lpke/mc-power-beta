@@ -6,6 +6,11 @@ public final class SettingAccess {
   private SettingAccess() {}
 
   public static boolean visible(ConfigSession session, Setting setting) {
+    if (setting.id.startsWith("logo.logo.") || setting.id.startsWith("logo.blocks.")) {
+      int style = session.settings().stream().filter(s -> s.id.equals("logo.style"))
+          .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(0);
+      if (style != 0) return false;
+    }
     if (setting.id.startsWith("power_hud:hudpositions.")) {
       int mode = session.settings().stream().filter(s -> s.id.equals("power_hud:hudpositions.hudPositioningSystem"))
           .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(1);
