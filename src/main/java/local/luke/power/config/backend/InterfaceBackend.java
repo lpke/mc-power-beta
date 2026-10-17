@@ -12,6 +12,8 @@ public final class InterfaceBackend implements Backend {
     session.add(
         new InterfaceBackend(),
         List.of(
+            new Setting("interface.colours", "interface", "Interface", "General HUD", "Saved colours", "", Setting.Kind.LIST,
+                Catalog.JSON.toJsonTree(MenuPreferences.current().colours), new JsonArray(), 0, 16, 1, List.of(), false),
             new Setting(
                 "interface.pauseToOptions",
                 "interface",
@@ -55,7 +57,13 @@ public final class InterfaceBackend implements Backend {
 
   public void validate(Map<String, JsonElement> values) {
     for (var e : values.entrySet()) {
-      if (e.getKey().equals("interface.debugTextColor")) {
+      if (e.getKey().equals("interface.colours")) {
+        if (!e.getValue().isJsonArray() || e.getValue().getAsJsonArray().size() > 16) throw new IllegalArgumentException("Save up to 16 colours");
+        for (JsonElement value : e.getValue().getAsJsonArray()) {
+          if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString()) throw new IllegalArgumentException("Invalid saved colour");
+          local.luke.power.light.LightSettings.rgb(value.getAsString());
+        }
+      } else if (e.getKey().equals("interface.debugTextColor")) {
         local.luke.power.light.LightSettings.rgb(e.getValue().getAsString());
       } else if ((!e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
           || !e.getValue().isJsonPrimitive() || !e.getValue().getAsJsonPrimitive().isBoolean())
@@ -86,6 +94,9 @@ public final class InterfaceBackend implements Backend {
   public void apply(Map<String, JsonElement> values) throws Exception {
     validate(values);
     MenuPreferences.update(v -> {
+      if (values.containsKey("interface.colours")) {
+        v.colours = new ArrayList<>(); values.get("interface.colours").getAsJsonArray().forEach(c -> v.colours.add(c.getAsString()));
+      }
       if (values.containsKey("interface.pauseToOptions")) v.pauseToOptions = values.get("interface.pauseToOptions").getAsBoolean();
       if (values.containsKey("interface.blinkingUiCursor")) v.blinkingUiCursor = values.get("interface.blinkingUiCursor").getAsBoolean();
       if (values.containsKey("interface.blinkingChatCursor")) v.blinkingChatCursor = values.get("interface.blinkingChatCursor").getAsBoolean();

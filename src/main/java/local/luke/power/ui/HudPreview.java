@@ -10,7 +10,10 @@ import org.lwjgl.opengl.GL11;
 /** Texture-pack-aware sample HUD. Its data never reaches inventories or gameplay toggles. */
 final class HudPreview {
   record Element(String id, String label, double x, double y, double width, double height,
-      String offsetX, String offsetY) {
+      String offsetX, String offsetY, boolean hidden) {
+    Element(String id, String label, double x, double y, double width, double height, String offsetX, String offsetY) {
+      this(id, label, x, y, width, height, offsetX, offsetY, false);
+    }
     boolean contains(double mx, double my) { return mx >= x && mx < x + width && my >= y && my < y + height; }
   }
   static final String NATIVE = "power_hud:hudpositions.";
@@ -56,7 +59,6 @@ final class HudPreview {
     }
     GL11.glEnable(GL11.GL_BLEND); GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
     for (int i = 0; i < 5; i++) {
-      if (i == 3 && scenario != 1) continue;
       if (i == 4 && !bool(HudEditorSettings.ITEM_NAMES)) continue;
       String prefix = mode() == 1 ? SIMPLE : nativePrefix(i);
       if (mode() != 0 && !bool(prefix + "enableVisibility")) continue;
@@ -94,22 +96,22 @@ final class HudPreview {
       GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
       texture(screen, mc, "/gui/icons.png", width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-      elements.add(new Element("crosshair", "Crosshair", width / 2 - 7, height / 2 - 7, 16, 16, null, null));
+      elements.add(new Element("layout", "Crosshair", width / 2 - 7, height / 2 - 7, 16, 16, null, null));
     }
     if (bool(HudEditorSettings.HUD + "drawXboxXAndYButtons")) {
       texture(screen, mc, "/assets/power_hud/button_icons.png", 10, height - 30, 40, 0, 20, 20);
       screen.text("Crafting", 31, height - 24, 0xffffff);
       texture(screen, mc, "/assets/power_hud/button_icons.png", 78, height - 30, 60, 0, 20, 20);
       screen.text("Inventory", 99, height - 24, 0xffffff);
-      elements.add(new Element("prompts", "Controller prompts", 10, height - 30, 145, 20, null, null));
+      elements.add(new Element("layout", "Controller prompts", 10, height - 30, 145, 20, null, null));
     }
-    if (selected.equals("toast") && !bool(HudEditorSettings.TOAST)) {
+    if (selected.equals("layout") && !bool(HudEditorSettings.TOAST)) {
       int x = width - 160;
       texture(screen, mc, "/achievement/bg.png", x, 0, 96, 202, 160, 32);
       screen.text("Achievement get!", x + 30, 7, 0xffff00);
       screen.text("Getting Wood", x + 30, 18, 0xffffff);
       icons.draw(screen, mc, samples.get(2), x + 8, 8);
-      elements.add(new Element("toast", "Achievement toast", x, 0, 160, 32, null, null));
+      elements.add(new Element("layout", "Achievement toast", x, 0, 160, 32, null, null));
     }
     if (selected.equals("chat")) {
       String[] messages = {"<Player> Hello!", "<Player> Welcome back."};
@@ -127,7 +129,6 @@ final class HudPreview {
     for (int cluster = 0; cluster < 4; cluster++) {
       String prefix = "infoHud.clusters." + cluster + ".";
       InfoHudSettings.Cluster state = cluster(cluster);
-      if (!bool("infoHud.enabled") || !state.enabled || state.opacity == 0 || state.hideWithDebug && scenario == 2) continue;
       List<String> lines = new ArrayList<>();
       if (state.coordinates || state.direction) lines.add(HudText.location("XYZ: 128 / 64 / -32", "South (+Z)", state.coordinates, state.direction));
       if (state.biome) lines.add("Biome: Forest");
@@ -135,16 +136,20 @@ final class HudPreview {
       if (state.day) lines.add("Day: 12");
       if (state.chunk) lines.add("Chunk: 8 / -2");
       if (state.fps) lines.add("FPS: 120");
-      if (lines.isEmpty()) continue;
-      int textWidth = lines.stream().mapToInt(mc.textRenderer::getWidth).max().orElse(1);
-      var layout = InfoHudLayout.at(width, height, textWidth, lines.size(), state);
-      GL11.glPushMatrix();
-      try {
-        GL11.glTranslated(layout.x(), layout.y(), 0); GL11.glScaled(state.textSize, state.textSize, 1);
-        for (int row = 0; row < lines.size(); row++) screen.text(lines.get(row), layout.lineX(textWidth, mc.textRenderer.getWidth(lines.get(row))), row * 10, state.argb());
-      } finally { GL11.glPopMatrix(); }
+      boolean visible = bool("infoHud.enabled") && state.enabled && state.opacity > 0
+          && (!state.hideWithDebug || scenario != 2) && !lines.isEmpty();
+      int textWidth = lines.stream().mapToInt(mc.textRenderer::getWidth).max().orElse(mc.textRenderer.getWidth("Info cluster " + (cluster + 1)));
+      int rows = Math.max(1, lines.size());
+      var layout = InfoHudLayout.at(width, height, textWidth, rows, state);
+      if (visible) {
+        GL11.glPushMatrix();
+        try {
+          GL11.glTranslated(layout.x(), layout.y(), 0); GL11.glScaled(state.textSize, state.textSize, 1);
+          for (int row = 0; row < lines.size(); row++) screen.text(lines.get(row), layout.lineX(textWidth, mc.textRenderer.getWidth(lines.get(row))), row * 10, state.argb());
+        } finally { GL11.glPopMatrix(); }
+      }
       elements.add(new Element("cluster." + cluster, "Info cluster " + (cluster + 1), layout.x(), layout.y(),
-          textWidth * state.textSize, lines.size() * 10 * state.textSize, prefix + "offsetX", prefix + "offsetY"));
+          textWidth * state.textSize, rows * 10 * state.textSize, prefix + "offsetX", prefix + "offsetY", !visible));
     }
     StatusSettings status = status();
     if (status.enabled && status.opacity > 0) {
@@ -167,7 +172,7 @@ final class HudPreview {
       elements.add(new Element("version", "Version label", 2, 2, Math.max(8, mc.textRenderer.getWidth(version)), bool(versionPrefix + "unlicensedCopy") ? 20 : 10, null, null));
     }
     if (scenario == 2) debug(screen, mc, width);
-    for (Element element : elements) if (element.id.equals(selected)) {
+    for (Element element : elements) if (element.id.equals(selected) && !element.hidden) {
       int x = (int)element.x - 2, y = (int)element.y - 2, r = (int)Math.ceil(element.x + element.width) + 2, b = (int)Math.ceil(element.y + element.height) + 2;
       screen.rectangle(x, y, r, y + 1, 0xffffff66); screen.rectangle(x, b - 1, r, b, 0xffffff66);
       screen.rectangle(x, y, x + 1, b, 0xffffff66); screen.rectangle(r - 1, y, r, b, 0xffffff66);

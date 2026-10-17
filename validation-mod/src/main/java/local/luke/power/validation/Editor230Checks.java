@@ -94,7 +94,7 @@ final class Editor230Checks {
         var hud = new HudEditorScreen(options, HudEditorSettings.ENTRY); open(mc, hud, 640, 420);
         for (int mode = 0; mode < 3; mode++) {
           draft(hud).get(HudEditorSettings.ENTRY).value = new JsonPrimitive(mode); refresh(hud);
-          for (int scenario = 0; scenario < 3; scenario++) {
+          for (int scenario : new int[]{0,2}) {
             UiChecks.field(hud, "scenario", scenario);
             screenshot(mc, hud, "hud-mode-" + mode + "-" + scenario, 640, 420);
           }

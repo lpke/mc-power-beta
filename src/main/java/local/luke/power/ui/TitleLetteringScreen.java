@@ -140,6 +140,7 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
   }
   protected void stopGesture() { painting = false; lastCell = -1; }
   public void tick() {
+    super.tick();
     if (renderer != null && (replaying || draft.get("logo.logo.animation.enabled").value.getAsBoolean())) { renderer.tick(); if (renderer.settled()) replaying = false; }
   }
   protected String resetLabel() { return "Reset logo"; }

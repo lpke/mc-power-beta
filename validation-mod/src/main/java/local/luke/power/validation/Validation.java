@@ -60,6 +60,7 @@ public final class Validation {
       else if (command.startsWith("interface-170 ")) Interface170Checks.run(mc,command.substring(14));
       else if (command.equals("light-performance-230")) LightPerformance230.run(mc);
       else if (command.startsWith("release-230 ")) Editor230Checks.run(mc,command.substring(12));
+      else if (command.startsWith("hud-responsive-230 ")) HudResponsive230Checks.run(mc,command.substring(19));
       else if (command.startsWith("release-222 ")) Release222Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-221 ")) Release221Checks.run(mc,command.substring(12));
       else if (command.equals("release-220")) Release220Checks.run(mc);

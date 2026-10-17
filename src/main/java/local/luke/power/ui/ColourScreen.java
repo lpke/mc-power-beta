@@ -16,6 +16,8 @@ public final class ColourScreen extends UiScreen {
   private final TextInput hex;
   private int colour, dragging = -1;
   private String error = "";
+  private Setting draftColours;
+  private java.util.List<String> localColours;
 
   public ColourScreen(PowerOptionsScreen parent, Setting setting) {
     this(parent, setting, () -> parent.changed(setting));
@@ -27,6 +29,16 @@ public final class ColourScreen extends UiScreen {
     this.setting = setting;
     colour = LightSettings.rgb(setting.value.getAsString());
     hex = new TextInput(format(colour), 7);
+  }
+  ColourScreen(net.minecraft.client.gui.screen.Screen parent, Setting setting, Runnable accepted, Setting colours) {
+    this(parent, setting, accepted);
+    draftColours = colours; localColours = new java.util.ArrayList<>();
+    colours.value.getAsJsonArray().forEach(value -> localColours.add(value.getAsString()));
+  }
+  private java.util.List<String> colours() { return localColours == null ? MenuPreferences.current().colours : localColours; }
+  private void changeColours(java.util.function.Consumer<java.util.List<String>> change) throws Exception {
+    if (localColours != null) change.accept(localColours);
+    else MenuPreferences.update(v -> change.accept(v.colours));
   }
 
   public static boolean accepts(Setting setting) {
@@ -110,18 +122,18 @@ public final class ColourScreen extends UiScreen {
       try {
         parse();
         if (!error.isEmpty()) return;
-        MenuPreferences.update(
-            v -> {
+        changeColours(
+            colours -> {
               String value = format(colour);
-              v.colours.removeIf(s -> s.equalsIgnoreCase(value));
-              if (v.colours.size() == 16) v.colours.remove(0);
-              v.colours.add(value);
+              colours.removeIf(s -> s.equalsIgnoreCase(value));
+              if (colours.size() == 16) colours.remove(0);
+              colours.add(value);
             });
       } catch (Exception e) {
         error = "Could not save colour";
       }
     }
-    var saved = MenuPreferences.current().colours;
+    var saved = colours();
     for (int i = 0; i < saved.size(); i++) {
       if (inside(x, y, left() + i % 8 * 25, top() + 140 + i / 8 * 22, 22, 20)) {
         String value = saved.get(i);
@@ -131,7 +143,7 @@ public final class ColourScreen extends UiScreen {
           error = "";
         } else
           try {
-            MenuPreferences.update(v -> v.colours.remove(value));
+            changeColours(colours -> colours.remove(value));
           } catch (Exception e) {
             error = "Could not remove colour";
           }
@@ -147,6 +159,7 @@ public final class ColourScreen extends UiScreen {
     parse();
     if (!error.isEmpty()) return;
     setting.parse(format(colour));
+    if (draftColours != null) draftColours.value = local.luke.power.config.Catalog.JSON.toJsonTree(localColours);
     accepted.run();
     minecraft.setScreen(parent);
   }
@@ -192,7 +205,7 @@ public final class ColourScreen extends UiScreen {
     button("Paste", left() + span() - 50, top() + 91, 50, 20, mx, my, true);
     button("Save colour", left(), top() + 116, 96, 20, mx, my, true);
     text(fit("Right-click removes a swatch", span() - 102), left() + 102, top() + 122, 0xaaaaaa);
-    var saved = MenuPreferences.current().colours;
+    var saved = colours();
     for (int i = 0; i < saved.size(); i++) {
       int x = left() + i % 8 * 25, y = top() + 140 + i / 8 * 22;
       fill(x, y, x + 22, y + 20, 0xff000000);

@@ -427,3 +427,9 @@
   geometry. Reset scopes cover all editor-owned fields or the selected view, and
   remain undoable as one edit. Preserve the selected info-cluster ID during global
   resets. Item-name previews use the shared native message position only when enabled.
+
+- HUD editor layout shares one geometry model for controls, scrollbars, dividers and
+  preview input. Preview coordinates retain the window aspect ratio in both split
+  orientations. Hidden info clusters stay selectable without enabling them. Preview
+  backgrounds are cached captures, never a second live world. Nested colour swatches
+  stay in the HUD draft and share its Undo, Done and Discard boundary.

@@ -18,11 +18,17 @@ abstract class DraftEditorScreen extends UiScreen {
   private Setting slider;
   private boolean resetPrompt;
   private final Set<String> collapsed = new HashSet<>();
+  private final HoverDelay hover = new HoverDelay();
 
   DraftEditorScreen(PowerOptionsScreen parent, SettingsDraft draft) { this.parent = parent; this.draft = draft; }
   protected int left() { return (width - span()) / 2; }
   protected int span() { return Math.min(760, width - 20); }
   protected int right() { return left() + span(); }
+  protected int controlsLeft() { return left(); }
+  protected int controlsSpan() { return span(); }
+  protected int controlsRight() { return controlsLeft() + controlsSpan(); }
+  protected int previewLeft() { return left(); }
+  protected int previewSpan() { return span(); }
   protected int controlsTop() { return 55; }
   protected int controlsBottom() { return Math.min(178, Math.max(controlsTop() + 23, height * 43 / 100)); }
   protected int previewTop() { return controlsBottom() + 12; }
@@ -32,6 +38,7 @@ abstract class DraftEditorScreen extends UiScreen {
   protected abstract void renderToolbar(int x, int y);
   protected abstract void renderPreview(int x, int y, float delta);
   protected void beforeRender(int x, int y) {}
+  protected String hoverHelp(int x, int y) { return ""; }
   protected boolean toolbarClick(int x, int y, int button) { return false; }
   protected void previewClick(int x, int y, int button) {}
   protected void stopGesture() {}
@@ -56,10 +63,10 @@ abstract class DraftEditorScreen extends UiScreen {
   protected String resetQuestion() { return "Reset to defaults?"; }
   protected String extraFooterLabel() { return ""; }
   protected void extraFooterAction() {}
-  protected void controlsChanged() { scroll = 0; bar.release(); slider = null; inline.cancel(); }
+  protected void controlsChanged() { scroll = 0; bar.release(); slider = null; inline.cancel(); hover.clear(); }
   protected boolean modal() { return exit.active() || resetPrompt; }
-  protected int controlX() { return left() + span() / 2; }
-  protected int controlWidth() { return span() / 2 - 10; }
+  protected int controlX() { return controlsLeft() + controlsSpan() / 2; }
+  protected int controlWidth() { return controlsSpan() / 2 - 10; }
   protected int controlWidth(Setting s) { return controlWidth() - (resettable(s) ? 24 : 0); }
   private int resetX() { return controlX() + controlWidth() - 20; }
   private record ControlRow(Setting setting, String heading, int y, int height) {}
@@ -80,7 +87,7 @@ abstract class DraftEditorScreen extends UiScreen {
         ControlRow::y, ControlRow::height, (int)scroll, controlsTop(), controlsBottom());
   }
   private void groupHeading(ControlRow row, int y) {
-    SettingsGroup.draw(this, fit(row.heading, span() - 24), collapsed.contains(groupKey(row.heading)), left() + 4, right() - 10, y);
+    SettingsGroup.draw(this, fit(row.heading, controlsSpan() - 24), collapsed.contains(groupKey(row.heading)), controlsLeft() + 4, controlsRight() - 10, y);
   }
   protected int controlY(Setting setting) {
     return controlRows().stream().filter(row -> row.setting == setting).findFirst()
@@ -89,9 +96,10 @@ abstract class DraftEditorScreen extends UiScreen {
   private ScrollBar.Track track() {
     List<ControlRow> rows = controlRows();
     int content = rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height;
-    return new ScrollBar.Track(right() - 4, controlsTop(), Math.max(0, controlsBottom() - controlsTop()), content, scroll);
+    return new ScrollBar.Track(controlsRight() - 4, controlsTop(), Math.max(0, controlsBottom() - controlsTop()), content, scroll);
   }
-  public void init() { Keyboard.enableRepeatEvents(true); inline.cancel(); stopGesture(); }
+  public void init() { Keyboard.enableRepeatEvents(true); inline.cancel(); stopGesture(); hover.clear(); }
+  public void tick() { hover.tick(); }
   public void removed() { Keyboard.enableRepeatEvents(false); stopGesture(); slider = null; bar.release(); inline.cancel(); TextDrag.cancel(); }
   protected void save() {
     stopGesture(); slider = null; bar.release(); inline.cancel();
@@ -107,7 +115,11 @@ abstract class DraftEditorScreen extends UiScreen {
   protected void edit(Setting s, int direction, int y) {
     draft.checkpoint(); error = "";
     if (s.kind == Setting.Kind.BOOLEAN || s.kind == Setting.Kind.CHOICE) { s.cycle(direction); valueChanged(s); }
-    else if (ColourScreen.accepts(s)) minecraft.setScreen(new ColourScreen(this, s, () -> valueChanged(s)));
+    else if (ColourScreen.accepts(s)) {
+      Setting colours = draft.settings().stream().filter(value -> value.id.equals(HudEditorSettings.COLOURS)).findFirst().orElse(null);
+      minecraft.setScreen(colours == null ? new ColourScreen(this, s, () -> valueChanged(s))
+          : new ColourScreen(this, s, () -> valueChanged(s), colours));
+    }
     else if (s.numeric() || s.kind == Setting.Kind.TEXT)
       openInline(s, () -> valueChanged(s), controlX(), y, controlWidth(s));
     else minecraft.setScreen(new ValueScreen(s, this, () -> valueChanged(s)));
@@ -131,7 +143,7 @@ abstract class DraftEditorScreen extends UiScreen {
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
     int wheel = Mouse.getEventDWheel();
-    if (!modal() && wheel != 0 && inside(x, y, left(), controlsTop(), span(), controlsBottom() - controlsTop()))
+    if (!modal() && wheel != 0 && inside(x, y, controlsLeft(), controlsTop(), controlsSpan(), controlsBottom() - controlsTop()))
       scroll = Math.max(0, Math.min(track().maximum(), scroll - Math.signum(wheel) * 46));
   }
   private record Footer(String label, int x, int width, Runnable action, boolean enabled) {}
@@ -196,7 +208,7 @@ abstract class DraftEditorScreen extends UiScreen {
     slider = null; bar.release();
     if (toolbarClick(x, y, button)) return;
     if (button == 0 && bar.press(track(), x, y)) return;
-    if ((button == 0 || button == 1) && inside(x, y, left(), controlsTop(), span() - 9, controlsBottom() - controlsTop())) {
+    if ((button == 0 || button == 1) && inside(x, y, controlsLeft(), controlsTop(), controlsSpan() - 9, controlsBottom() - controlsTop())) {
       List<ControlRow> rows = controlRows(); StickyHeader sticky = stickyHeader(rows);
       int pinned = sticky != null && sticky.contains(y, controlsTop()) ? sticky.index() : -1;
       for (int i = 0; i < rows.size(); i++) {
@@ -260,12 +272,12 @@ abstract class DraftEditorScreen extends UiScreen {
     if (slider != null) { if (Mouse.isButtonDown(0)) slide(mx); else slider = null; }
     scroll = Math.max(0, Math.min(track().maximum(), bar.drag(track(), my, !modal() && Mouse.isButtonDown(0))));
     renderBackground(); drawCenteredTextWithShadow(textRenderer, title(), width / 2, 13, 0xffffff); renderToolbar(mx, my);
-    fill(left(), controlsTop() - 2, right(), controlsBottom(), 0x80000000);
+    fill(controlsLeft(), controlsTop() - 2, controlsRight(), controlsBottom(), 0x80000000);
     List<ControlRow> rows = controlRows(); StickyHeader sticky = stickyHeader(rows);
     int rowsTop = sticky == null ? controlsTop() : Math.max(controlsTop(), sticky.y() + sticky.height());
-    clip(left(), rowsTop, span() - 8, Math.max(0, controlsBottom() - rowsTop));
+    clip(controlsLeft(), rowsTop, controlsSpan() - 8, Math.max(0, controlsBottom() - rowsTop));
     int listMouseY = sticky != null && sticky.contains(my, controlsTop()) ? -1000 : my;
-    String tip = "";
+    String tip = "", hoverId = "";
     for (int index = 0; index < rows.size(); index++) {
       ControlRow row = rows.get(index);
       int y = controlsTop() + row.y - (int)scroll;
@@ -276,20 +288,25 @@ abstract class DraftEditorScreen extends UiScreen {
         continue;
       }
       Setting s = row.setting;
-      text(fit(label(s) + (s.restart ? " *" : ""), span() / 2 - 12), left() + 4, y + 6, s.changed() ? 0xffdd88 : 0xdddddd);
+      text(fit(label(s) + (s.restart ? " *" : ""), controlsSpan() / 2 - 12), controlsLeft() + 4, y + 6, s.changed() ? 0xffdd88 : 0xdddddd);
       renderControl(s, y, mx, listMouseY);
-      if (inside(mx, listMouseY, left(), y, span() - 9, 23)) tip = inline.editing(s) ? inline.help()
-          : s.description + (s.numeric() ? "\nRight-click to enter an exact value." : "") + (s.restart ? "\nRestart required." : "");
-      if (resettable(s) && inside(mx, listMouseY, resetX(), y, 20, 18)) tip = "Reset to " + s.display(s.defaultValue);
+      if (inside(mx, listMouseY, controlsLeft(), y, controlsSpan() - 9, 23)) {
+        hoverId = s.id;
+        tip = inline.editing(s) ? inline.help() : local.luke.power.config.Tooltips.paragraphs(label(s),
+            local.luke.power.config.Tooltips.setting(s, s.numeric() ? "Right-click to enter an exact value." : ""));
+      }
+      if (resettable(s) && inside(mx, listMouseY, resetX(), y, 20, 18)) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
     }
     if (sticky != null) {
-      clip(left(), controlsTop(), span() - 8, controlsBottom() - controlsTop());
+      clip(controlsLeft(), controlsTop(), controlsSpan() - 8, controlsBottom() - controlsTop());
       groupHeading(rows.get(sticky.index()), sticky.y());
     }
     unclip(); bar.render(this, track()); renderPreview(mx, my, delta); inline.endFrame();
     text(fit(error.isEmpty() ? hint() : error, span()), left(), height - 43, error.isEmpty() ? 0xaaaaaa : 0xff8888);
     for (Footer f : footer()) button(fit(f.label, f.width - 8), f.x, height - 29, f.width, 20, mx, my, f.enabled);
-    if (!modal() && !tip.isBlank()) tooltip(tip, mx, my);
+    String help = hoverHelp(mx, my);
+    if (!help.isBlank()) { tip = help; hoverId = "editor:" + help; }
+    if (hover.ready(!modal() && Display.isActive() ? hoverId : "") && !tip.isBlank()) tooltip(tip, mx, my);
     inline.renderError(this);
     if (resetPrompt) {
       fill(0, 0, width, height, 0xc0000000);

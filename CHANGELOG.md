@@ -4,6 +4,9 @@
 
 ## [2.3.0] - 2026-10-17
 
+- Adapt the HUD editor to wide and portrait screens, combine normal and underwater previews, and keep crosshair, achievement and controller options under General.
+- Add a forest preview background, outlines for hidden info clusters, individual resets and delayed tooltips. Keep nested colour swatches in the editor draft until Done or Save.
+
 - Share collapsible Options groups with the HUD editor. Reset all HUD settings, all positions or only the selected element, with Undo for every reset.
 - Preview selected item names only when enabled, using their shared message position. Bring item-name controls, crosshair, chat, controller prompts and achievement toasts into the HUD editor.
 

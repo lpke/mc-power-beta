@@ -135,7 +135,7 @@ final class HudMenu230Checks {
             }
           }
         }
-        for(Setting s:local.settings())if(!s.id.equals("infoHud.selectedCluster"))check(seen.contains(s.id),"HUD setting became unreachable: "+s.id);
+        for(Setting s:local.settings())if(!Set.of("infoHud.selectedCluster","interface.colours").contains(s.id))check(seen.contains(s.id),"HUD setting became unreachable: "+s.id);
         select(hud,"cluster.0");set(hud,"scroll",46d);
         SettingsSnapshot.render(mc,hud,640,420,REPORT.resolve("scrolled-cluster.png"));Object scroll=get(hud,"scroll");
         click(hud,number(hud,"left")+8,38,0);((ScreenInput)(Object)hud).power$key((char)0,Keyboard.KEY_RETURN);
@@ -145,11 +145,11 @@ final class HudMenu230Checks {
         for(int[] size:new int[][]{{320,240},{640,420}}){
           var options=new PowerOptionsScreen(null);open(mc,options,size[0],size[1]);
           byte[] bytes=Files.readAllBytes(PowerConfig.path());
-          for(String id:List.of("layout","combined","native.4","cluster.1","tweaks","version","debug","crosshair","chat","prompts","toast"))
+          for(String id:List.of("layout","combined","native.4","cluster.1","tweaks","version","debug","chat"))
             for(int choice=0;choice<4;choice++){
               var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);open(mc,hud,size[0],size[1]);var local=draft(hud);
               for(Setting s:local.settings()){
-                if(s.id.equals("infoHud.selectedCluster"))continue;
+                if(Set.of("infoHud.selectedCluster","interface.colours").contains(s.id))continue;
                 if(s.kind==Setting.Kind.TEXT)s.value=new JsonPrimitive(s.id.endsWith("Color")?"#224466":"Custom version");else s.cycle(1);
               }
               local.get(HudEditorSettings.ENTRY).value=new JsonPrimitive(id.startsWith("native.")?2:1);select(hud,id);refresh(hud);
@@ -184,10 +184,10 @@ final class HudMenu230Checks {
         String[] fields={"power_hud:config.disableCrosshair","power_hud:config.drawXboxXAndYButtons","power_controls:userinterface.hideAchievementToast","power_hud:config.enableHotbarItemSelectionTooltips"};
         for(int i=0;i<ids.length;i++)for(boolean visible:new boolean[]{true,false}){
           String id=ids[i];boolean negative=i==0||i==2;
-          local.get(fields[i]).value=new JsonPrimitive(visible!=negative);select(hud,i==3?"combined":id);refresh(hud);
+          local.get(fields[i]).value=new JsonPrimitive(visible!=negative);select(hud,i==3?"combined":"layout");refresh(hud);
           SettingsSnapshot.render(mc,hud,640,420,REPORT.resolve("preview-"+id+"-"+visible+".png"));
           List<?> elements=(List<?>)call(get(hud,"preview"),"elements");
-          if(i<3)check(elements.stream().anyMatch(e->{try{return call(e,"id").equals(id);}catch(Exception ex){throw new RuntimeException(ex);}})==visible,"preview ignores "+fields[i]);
+          if(i<3){boolean found=false;String name=new String[]{"Crosshair","Controller prompts","Achievement toast"}[i];for(Object e:elements)if(call(e,"label").equals(name))found=true;check(found==visible,"preview ignores "+fields[i]);}
           if(i==3){
             local.get(HudEditorSettings.ENTRY).value=new JsonPrimitive(2);select(hud,id);refresh(hud);hud.render(-1,-1,0);
             elements=(List<?>)call(get(hud,"preview"),"elements");

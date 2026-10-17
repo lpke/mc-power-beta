@@ -107,8 +107,8 @@ public final class PowerOptionsScreen extends UiScreen {
   private int actionWidth() { return uiWidth() < 470 ? 54 : 66; }
   private int actionX(int i) { return right() - 8 - (3 - i) * (actionWidth() + 4); }
 
-  private int selected = -1, hoverTicks, musicRevision = -1;
-  private String lastHover = "";
+  private int selected = -1, musicRevision = -1;
+  private final HoverDelay hoverDelay = new HoverDelay();
   private List<Row> rows = List.of();
   private List<String> sectionKeys = List.of();
 
@@ -473,7 +473,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void tick() {
-    hoverTicks++;
+    hoverDelay.tick();
     if (library != null) library.tick();
     int revision = local.luke.power.audio.AudioController.libraryRevision();
     if (session != null && !isolatedRules() && revision != musicRevision) {
@@ -1227,11 +1227,7 @@ public final class PowerOptionsScreen extends UiScreen {
       tip = expandSections ? "Expand all sections" : "Collapse all sections";
       hoverId = "sections";
     }
-    if (!hoverId.equals(lastHover)) {
-      lastHover = hoverId;
-      hoverTicks = 0;
-    }
-    if (!tip.isEmpty() && hoverTicks > 12 && !confirmClose && !confirmReset) tooltip(tip, mx, my);
+    if (hoverDelay.ready(!confirmClose && !confirmReset ? hoverId : "") && !tip.isEmpty()) tooltip(tip, mx, my);
     valueEditor.renderError(this);
     if (capture != null || confirmClose || confirmReset) {
       fill(0, 0, width, height, 0xc0000000);
