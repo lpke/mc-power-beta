@@ -39,6 +39,7 @@ abstract class DraftEditorScreen extends UiScreen {
   protected String label(Setting s) { return s.label; }
   protected String display(Setting s) { return s.display(); }
   protected boolean usesSlider(Setting s) { return s.slider(); }
+  protected boolean resettable(Setting s) { return false; }
   protected void reset() { controls().forEach(Setting::reset); }
   protected void resetFinished() {}
   protected void afterEdit() {}
@@ -52,6 +53,8 @@ abstract class DraftEditorScreen extends UiScreen {
   protected boolean modal() { return exit.active() || resetPrompt; }
   protected int controlX() { return left() + span() / 2; }
   protected int controlWidth() { return span() / 2 - 10; }
+  protected int controlWidth(Setting s) { return controlWidth() - (resettable(s) ? 24 : 0); }
+  private int resetX() { return controlX() + controlWidth() - 20; }
   private ScrollBar.Track track() {
     return new ScrollBar.Track(right() - 4, controlsTop(), Math.max(0, controlsBottom() - controlsTop()), controls().size() * 23, scroll);
   }
@@ -73,12 +76,12 @@ abstract class DraftEditorScreen extends UiScreen {
     if (s.kind == Setting.Kind.BOOLEAN || s.kind == Setting.Kind.CHOICE) { s.cycle(direction); valueChanged(s); }
     else if (ColourScreen.accepts(s)) minecraft.setScreen(new ColourScreen(this, s, () -> valueChanged(s)));
     else if (s.numeric() || s.kind == Setting.Kind.TEXT)
-      openInline(s, () -> valueChanged(s), controlX(), y, controlWidth());
+      openInline(s, () -> valueChanged(s), controlX(), y, controlWidth(s));
     else minecraft.setScreen(new ValueScreen(s, this, () -> valueChanged(s)));
   }
   private void slide(int x) {
     if (slider == null) return;
-    slider.slide((x - controlX() - 4d) / Math.max(1, controlWidth() - 8)); valueChanged(slider);
+    slider.slide((x - controlX() - 4d) / Math.max(1, controlWidth(slider) - 8)); valueChanged(slider);
   }
   protected void keyPressed(char c, int key) {
     if (exit.key(key)) return;
@@ -139,6 +142,13 @@ abstract class DraftEditorScreen extends UiScreen {
       List<Setting> values = controls(); int rowY = controlsTop() + row * 23 - (int)scroll;
       if (row < values.size() && rowY >= controlsTop() && rowY + 18 <= controlsBottom() && y < rowY + 18 && x >= controlX()) {
         Setting s = values.get(row);
+        if (resettable(s) && x >= resetX()) {
+          if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !s.value.equals(s.defaultValue)) {
+            draft.checkpoint(); error = ""; s.reset(); valueChanged(s);
+          }
+          return;
+        }
+        if (x >= controlX() + controlWidth(s)) return;
         if (button == 0 && usesSlider(s)) { draft.checkpoint(); slider = s; slide(x); }
         else edit(s, button == 1 ? -1 : 1, rowY);
       }
@@ -161,10 +171,12 @@ abstract class DraftEditorScreen extends UiScreen {
     super.mouseReleased(x, y, button);
   }
   protected void renderControl(Setting s, int y, int mx, int my) {
-    if (inline.editing(s)) inline.render(this, controlX(), y, controlWidth(), mx, my, controlsTop(), controlsBottom());
-    else if (ColourScreen.accepts(s)) colourButton(s.value.getAsString(), controlX(), y, controlWidth(), mx, my);
-    else if (usesSlider(s)) slider(fit(display(s), controlWidth() - 8), controlX(), y, controlWidth(), mx, my, (s.value.getAsDouble() - s.min) / Math.max(.0001, s.max - s.min));
-    else button(fit(display(s), controlWidth() - 8), controlX(), y, controlWidth(), 18, mx, my, true);
+    int w = controlWidth(s);
+    if (inline.editing(s)) inline.render(this, controlX(), y, w, mx, my, controlsTop(), controlsBottom());
+    else if (ColourScreen.accepts(s)) colourButton(s.value.getAsString(), controlX(), y, w, mx, my);
+    else if (usesSlider(s)) slider(fit(display(s), w - 8), controlX(), y, w, mx, my, (s.value.getAsDouble() - s.min) / Math.max(.0001, s.max - s.min));
+    else button(fit(display(s), w - 8), controlX(), y, w, 18, mx, my, true);
+    if (resettable(s)) button("R", resetX(), y, 20, 18, mx, my, !s.value.equals(s.defaultValue));
   }
   public void render(int mx, int my, float delta) {
     int pointerX = mx, pointerY = my;
@@ -186,6 +198,7 @@ abstract class DraftEditorScreen extends UiScreen {
       renderControl(s, y, mx, my);
       if (inside(mx, my, left(), y, span() - 9, 23)) tip = inline.editing(s) ? inline.help()
           : s.description + (s.numeric() ? "\nRight-click to enter an exact value." : "") + (s.restart ? "\nRestart required." : "");
+      if (resettable(s) && inside(mx, my, resetX(), y, 20, 18)) tip = "Reset to " + s.display(s.defaultValue);
     }
     unclip(); bar.render(this, track()); renderPreview(mx, my, delta); inline.endFrame();
     text(fit(error.isEmpty() ? hint() : error, span()), left(), height - 43, error.isEmpty() ? 0xaaaaaa : 0xff8888);

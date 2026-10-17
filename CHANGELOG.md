@@ -4,6 +4,7 @@
 
 ## [2.3.0] - 2026-10-17
 
+- Use greyscale colours in the HUD element dropdown and add individual default-reset buttons for title rotation and appearance controls.
 - Keep panorama motion continuous across title and main-menu screens, and restore native dirt headers and footers on scrolling lists.
 - Refine title painting with left-click paint, right-click erase, filtered one-click brush selection, block previews and saved swatches. Add live rotation sliders, inline editing, animation replay and taller controls when space allows.
 - Click the title logo to cycle retro lettering, saved presets and official styles; right-click cycles backwards while preserving the custom retro draft.

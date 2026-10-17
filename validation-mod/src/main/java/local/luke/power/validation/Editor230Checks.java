@@ -28,6 +28,12 @@ final class Editor230Checks {
     } catch (NoSuchMethodException ignored) {}
     throw new NoSuchMethodException(name);
   }
+  private static void set(Object target, String name, Object value) throws Exception {
+    for (Class<?> type = target.getClass(); type != null; type = type.getSuperclass()) try {
+      Field field = type.getDeclaredField(name); field.setAccessible(true); field.set(target, value); return;
+    } catch (NoSuchFieldException ignored) {}
+    throw new NoSuchFieldException(name);
+  }
   private static int number(Object o, String method) throws Exception { return ((Number)invoke(o, method, new Class<?>[0])).intValue(); }
   private static void click(Screen screen, int x, int y, int button) { ((ScreenInput)(Object)screen).power$click(x, y, button); }
   private static void key(Screen screen, int key) { ((ScreenInput)(Object)screen).power$key((char)0, key); }
@@ -116,6 +122,12 @@ final class Editor230Checks {
         var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);open(mc,hud,320,240);
         click(hud,number(hud,"left")+10,63,0);
         check((boolean)get(hud,"selecting"),"element menu did not open");screenshot(mc,hud,"hud-element-menu",320,240);
+        var menu=javax.imageio.ImageIO.read(REPORT.resolve("hud-element-menu.png").toFile());
+        int menuRows=number(hud,"selectorRows");
+        for(int py=76*2;py<(76+menuRows*20)*2;py++)for(int px=number(hud,"left")*2;px<number(hud,"right")*2;px++) {
+          int pixel=menu.getRGB(px,py),r=(pixel>>16)&255,g=(pixel>>8)&255,b=pixel&255;
+          check(Math.abs(r-g)<=1&&Math.abs(g-b)<=1,"HUD dropdown contains coloured pixels");
+        }
         key(hud,Keyboard.KEY_ESCAPE);check(!(boolean)get(hud,"selecting"),"Escape did not close element menu");
         int before=number(hud,"controlsBottom"),x=number(hud,"left")+10;
         click(hud,x,before+5,0);Object divider=get(hud,"divider");
@@ -125,6 +137,47 @@ final class Editor230Checks {
         check(!(boolean)invoke(divider,"dragging",new Class<?>[0]),"divider retained released button");
         screenshot(mc,hud,"hud-divider-narrow",320,240);
         check(number(hud,"previewBottom")-number(hud,"previewTop")>=48,"preview disappeared");
+      });
+      test("title appearance resets use individual defaults, preserve other values, support Undo and stay local until Done",()->{
+        for(int[] size:new int[][]{{640,420},{320,240}}) {
+          var ownOptions=new PowerOptionsScreen(null);open(mc,ownOptions,size[0],size[1]);
+          var title=new TitleLetteringScreen(ownOptions);open(mc,title,size[0],size[1]);UiChecks.field(title,"tab",1);
+          var local=draft(title);List<Setting> controls=(List<Setting>)invoke(title,"controls",new Class<?>[0]);
+          int top=number(title,"controlsTop"),bottom=number(title,"controlsBottom");
+          for(int index=0;index<controls.size();index++) {
+            Setting s=controls.get(index);s.reset();s.cycle(1);
+            invoke(title,"valueChanged",new Class<?>[]{Setting.class},s);
+            check(!s.value.equals(s.defaultValue),"reset fixture did not change "+s.id);
+            int scroll=Math.min(index*23,Math.max(0,controls.size()*23-(bottom-top)));
+            set(title,"scroll",(double)scroll);
+            int y=top+index*23-scroll,x=number(title,"controlX")+number(title,"controlWidth")-10;
+            var before=local.snapshot();
+            click(title,x-12,y+8,0);check(local.snapshot().equals(before),"gap next to reset changed a value");
+            click(title,x,y+8,1);check(local.snapshot().equals(before),"right-click reset changed a value");
+            click(title,x,y+8,0);check(s.value.equals(s.defaultValue),"reset missed "+s.id);
+            String target=s.id.startsWith("titleEditor.rotation")?"logo.logo.rotation":s.id;
+            for(var entry:before.entrySet())if(!Set.of(target,"logo.selectedPreset","logo.retroBase").contains(entry.getKey()))
+              check(local.get(entry.getKey()).value.equals(entry.getValue()),"reset changed unrelated "+entry.getKey());
+            if(s.id.startsWith("titleEditor.rotation")) {
+              int axis=Integer.parseInt(s.id.substring("titleEditor.rotation".length()));
+              check(local.get(target).value.getAsJsonArray().get(axis).equals(local.get(target).defaultValue.getAsJsonArray().get(axis)),"rotation preview did not reset");
+            }
+            var reset=local.snapshot();click(title,x,y+8,0);
+            check(local.snapshot().equals(reset),"disabled reset changed settings");
+            local.undo();refresh(title);check(local.snapshot().equals(before),"Undo lost reset state "+s.id);
+            check(ownOptions.session().changes()==0,"reset leaked into parent before Done");
+          }
+          set(title,"scroll",0d);screenshot(mc,title,"title-default-buttons-"+size[0],size[0],size[1]);
+          int x=number(title,"controlX")+number(title,"controlWidth")-10;
+          click(title,number(title,"controlX")+8,top+8,1);
+          ((TextInput)get(get(title,"inline"),"input")).setText("invalid");
+          click(title,x,top+8,0);
+          check(!(boolean)invoke(get(title,"inline"),"active",new Class<?>[0]),"reset kept stale inline input");
+          check(local.get("logo.logo.rotation").value.getAsJsonArray().get(0).equals(local.get("logo.logo.rotation").defaultValue.getAsJsonArray().get(0)),"reset after inline input failed");
+          done(title);check(mc.currentScreen==ownOptions,"reset draft Done failed");
+          ownOptions.session().discard();
+          check(Arrays.equals(original,Files.readAllBytes(PowerConfig.path())),"individual reset wrote config before Apply");
+        }
       });
       test("drag uses GUI coordinates; Escape opens an input-blocking draft prompt and Discard leaves parent untouched", () -> {
         var hud = new HudEditorScreen(options, HudEditorSettings.ENTRY); open(mc, hud, 640, 420);

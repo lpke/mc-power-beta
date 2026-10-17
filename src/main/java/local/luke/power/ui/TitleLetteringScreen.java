@@ -25,8 +25,11 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
     super(parent, new SettingsDraft(parent.session().settings(), HudEditorSettings::lettering));
     renderer = TitlePreview.factory == null ? null : TitlePreview.factory.get();
     for (var entry : ItemCatalogue.entries(ItemCatalogue.Domain.BLOCK)) if (TitlePreview.renderableBlock.test(entry.id())) blocks.put(entry.id(), entry);
-    for (int axis = 0; axis < 3; axis++) rotation.add(temporary("rotation" + axis,
-        "Rotate " + "XYZ".charAt(axis), Setting.Kind.DECIMAL, axis == 0 ? 15 : 0, -360, 360));
+    for (int axis = 0; axis < 3; axis++) {
+      JsonElement angle = draft.get("logo.logo.rotation").defaultValue.getAsJsonArray().get(axis);
+      rotation.add(new Setting("titleEditor.rotation" + axis, "", "", "", "Rotate " + "XYZ".charAt(axis), "",
+          Setting.Kind.DECIMAL, angle, angle, -360, 360, 1, List.of(), false));
+    }
     columns.validator(v -> TitleTiles.resize(lines(), v.getAsInt(), lines().size()));
     rows.validator(v -> TitleTiles.resize(lines(), TitleTiles.width(lines()), v.getAsInt()));
     presetName.validator(v -> { if (v.getAsString().isBlank() || v.getAsString().length() > 48
@@ -56,6 +59,7 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
     return Math.max(controlsTop() + (tab == 2 ? 42 : 23), Math.min(controlsTop() + desired, previewBottom() - minimumPreview - 12));
   }
   protected boolean usesSlider(Setting s) { return rotation.contains(s) || !s.id.startsWith("titleEditor.") && super.usesSlider(s); }
+  protected boolean resettable(Setting s) { return rotation.contains(s) || !s.id.startsWith("titleEditor."); }
   protected String display(Setting s) {
     if (s == brush) { var block = blocks.get(s.value.getAsInt()); return block == null ? "Choose..." : block.name(); }
     return super.display(s);

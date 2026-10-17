@@ -180,16 +180,16 @@ public final class HudEditorScreen extends DraftEditorScreen {
     int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows, cellWidth = span() / columns;
     int top = 76; List<String> ids = selectionIds();
     fill(left() - 2, top - 2, right() + 2, top + rows * 20 + 2, 0xff777777);
-    fill(left() - 1, top - 1, right() + 1, top + rows * 20 + 1, 0xff181d23);
+    fill(left() - 1, top - 1, right() + 1, top + rows * 20 + 1, 0xff181818);
     for (int i = 0; i < ids.size(); i++) {
       String id = ids.get(i), label = id.startsWith("cluster.") ? "Cluster " + (Integer.parseInt(id.substring(8)) + 1)
           : id.startsWith("native.") ? HudPreview.NAMES[Integer.parseInt(id.substring(7))]
           : id.equals("combined") ? "Combined HUD" : id.equals("tweaks") ? "Active tweaks" : id.equals("version") ? "Version label" : "F3 information";
       int px = left() + i / rows * cellWidth, py = top + i % rows * 20;
       boolean hover = inside(x, y, px, py, cellWidth, 20);
-      if (hover || i == popupIndex) fill(px, py, px + cellWidth - 1, py + 19, 0xff344452);
-      if (id.equals(selected)) fill(px + 2, py + 3, px + 4, py + 16, 0xff88ccee);
-      text(fit(label, cellWidth - 17), px + 9, py + 6, hover ? 0xffffaa : id.equals(selected) ? 0xffffff : 0xcccccc);
+      if (hover || i == popupIndex) fill(px, py, px + cellWidth - 1, py + 19, 0xff3c3c3c);
+      if (id.equals(selected)) fill(px + 2, py + 3, px + 4, py + 16, 0xffcccccc);
+      text(fit(label, cellWidth - 17), px + 9, py + 6, hover || id.equals(selected) ? 0xffffff : 0xcccccc);
     }
   }
 
