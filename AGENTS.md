@@ -410,3 +410,10 @@
 - Plain double-click gathering consumes player inventory before container sources, partial
   stacks before full stacks within each inventory. Use native clicks, preserve oversized
   stacks and full native data, and revalidate callback results without overwriting changes.
+
+- Title, panorama picker and other main-menu backgrounds share one animation clock.
+  Native scrolling lists keep dirt header/footer textures over the panorama. Title clicks
+  cycle a retained retro draft, stable preset IDs and official styles through ConfigSession.
+  Brush pickers may opt into filtered instant selection; other pickers retain draft exits.
+  HUD/title inline edits and underline tabs use shared controls. HUD divider drags are
+  visit-local, cancel on focus loss and always retain controls and preview space.

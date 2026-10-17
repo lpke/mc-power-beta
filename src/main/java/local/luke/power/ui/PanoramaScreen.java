@@ -15,7 +15,6 @@ public final class PanoramaScreen extends UiScreen {
   private final Setting blur;
   private final ScrollBar bar = new ScrollBar();
   private double scroll;
-  private int ticks;
 
   public PanoramaScreen(PowerOptionsScreen parent, Setting setting) {
     this.parent = parent;
@@ -24,7 +23,6 @@ public final class PanoramaScreen extends UiScreen {
         .filter(s -> s.id.equals("power_controls:userinterface.panoramaConfig.blurBackground"))
         .findFirst().orElse(null);
   }
-  public void tick() { ticks++; }
   private int left() { return (width - span()) / 2; }
   private int span() { return Math.min(220, width - 24); }
   private List<PanoramaCatalog.Entry> entries() {
@@ -60,7 +58,7 @@ public final class PanoramaScreen extends UiScreen {
     if (PanoramaCatalog.folder(setting.value.getAsString()).isEmpty()) renderBackgroundTexture(0);
     else {
       PanoramaRenderer.render(minecraft.textureManager::getTextureId, setting.value.getAsString(), blur != null && blur.value.getAsBoolean(),
-          ticks + delta, minecraft.displayWidth, minecraft.displayHeight);
+          PanoramaRenderer.animationTicks(), minecraft.displayWidth, minecraft.displayHeight);
       fillGradient(0, 0, width, height, -2130706433, 16777215);
       fillGradient(0, 0, width, height, 0, Integer.MIN_VALUE);
     }

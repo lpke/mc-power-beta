@@ -4,13 +4,18 @@
 
 ## [2.3.0] - 2026-10-17
 
+- Keep panorama motion continuous across title and main-menu screens, and restore native dirt headers and footers on scrolling lists.
+- Refine title painting with left-click paint, right-click erase, filtered one-click brush selection, block previews and saved swatches. Add live rotation sliders, inline editing, animation replay and taller controls when space allows.
+- Click the title logo to cycle retro lettering, saved presets and official styles; right-click cycles backwards while preserving the custom retro draft.
+- Share clearer underline tabs between music views and the HUD/title editors. Move HUD element selection above settings, improve its menu and replace Expand with a draggable divider.
+- Remove the game-sounds divider while retaining indented category controls.
 - Add an interactive HUD editor with draggable previews, screen anchors, precise offsets, snapping and undo. Bring native HUD positioning, four custom info clusters, active tweaks, version labels and F3 settings into one editor using the active texture pack.
 - Paint retro title lettering on a tile grid, choose blocks per tile and preview the actual 3D logo. Keep rotation, shadow and animation controls together, with saved presets, undo and a default Minecraft logo reset. Done accepts edits; unsaved exits offer Save, Discard or Cancel.
 - Add Panorama only on the title screen, enabled by default. Turn it off to show panoramas across main-menu screens, with darker backgrounds behind settings and readable native world and texture-pack lists.
 - Fix a regression where every game tick could wait for background settings writes. Restore smooth fake-sneak, fast-placement, light-overlay and other gameplay toggles, with the Active tweaks HUD shown or hidden.
 - Batch light-overlay numbers into one font draw and limit scanning time per tick to reduce toggle and refresh stutters. Preserve native font textures, light values, depth occlusion and deferred settings saves.
 - Double-click gathering combines partial stacks before full stacks and uses player inventory before container slots. Preserve native item data, stack limits and multiplayer transfers.
-- Tighten the game-sounds divider and indent its detailed volume controls. Clarify that scrolling menu backgrounds do not affect panoramas.
+- Indent detailed game-sound volume controls. Clarify that scrolling menu backgrounds do not affect panoramas.
 
 ## [2.2.2] - 2026-10-17
 

@@ -74,6 +74,15 @@ public final class TitleTiles {
         throw new IllegalArgumentException("Use single letters and existing block IDs");
     }
   }
+  public static void validateSwatches(JsonElement value, IntPredicate validBlock) {
+    if (!value.isJsonArray() || value.getAsJsonArray().size() > 16) throw new IllegalArgumentException("Save up to 16 brush swatches");
+    Set<Integer> ids = new HashSet<>();
+    for (JsonElement entry : value.getAsJsonArray()) {
+      if (!entry.isJsonPrimitive() || !entry.getAsJsonPrimitive().isNumber()) throw new IllegalArgumentException("Use block IDs for swatches");
+      int id = entry.getAsBigDecimal().intValueExact();
+      if (!validBlock.test(id) || !ids.add(id)) throw new IllegalArgumentException("Use different valid blocks for swatches");
+    }
+  }
   public static final Set<String> DESIGN_KEYS = Set.of("logo.logo.lines", "logo.blocks.map", "logo.logo.rotation",
       "logo.blocks.inverted", "logo.logo.shadow", "logo.logo.animation.enabled", "logo.logo.animation.speed");
   public static void validatePresets(JsonElement value, IntPredicate validBlock) {
@@ -86,7 +95,10 @@ public final class TitleTiles {
       String id = preset.get("id").getAsString(), name = preset.get("name").getAsString();
       if (!id.equals(UUID.fromString(id).toString()) || !ids.add(id) || name.isBlank() || name.length() > 48
           || name.chars().anyMatch(Character::isISOControl)) throw new IllegalArgumentException("Invalid title preset name or ID");
-      JsonObject design = preset.getAsJsonObject("values");
+      validateDesign(preset.getAsJsonObject("values"), validBlock);
+    }
+  }
+  public static void validateDesign(JsonObject design, IntPredicate validBlock) {
       if (!design.keySet().equals(DESIGN_KEYS)) throw new IllegalArgumentException("Incomplete title preset");
       validateLines(design.get("logo.logo.lines")); validatePalette(design.get("logo.blocks.map"), validBlock);
       JsonArray rotation = design.getAsJsonArray("logo.logo.rotation");
@@ -97,6 +109,6 @@ public final class TitleTiles {
         if (!design.get(key).isJsonPrimitive() || !design.getAsJsonPrimitive(key).isBoolean()) throw new IllegalArgumentException("Invalid title toggle");
       double speed = design.get("logo.logo.animation.speed").getAsDouble();
       if (!Double.isFinite(speed) || speed < 0 || speed > 10) throw new IllegalArgumentException("Invalid animation speed");
-    }
   }
+
 }

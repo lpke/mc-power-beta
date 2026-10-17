@@ -54,6 +54,22 @@ public abstract class UiScreen extends Screen {
         !enabled ? 0xa0a0a0 : labelColour >= 0 ? labelColour : hovered ? 0xffffa0 : 0xe0e0e0);
   }
 
+  protected void tabButton(String label, int x, int y, int w, int mx, int my, boolean selected) {
+    tabButton(label, x, y, w, 18, mx, my, true, selected);
+  }
+  protected void tabButton(String label, int x, int y, int w, int h, int mx, int my, boolean enabled, boolean selected) {
+    boolean hover = inside(mx, my, x, y, w, h);
+    button(label, x, y, w, h, mx, my, enabled, hover ? 0xffffa0 : selected ? 0xffffff : 0xb8b8b8);
+    fill(x + 2, y + h - 3, x + w - 2, y + h - 1, selected ? 0xffdddddd : hover ? 0xffaaaaaa : 0xff909090);
+  }
+
+  protected void chevron(int x, int y, boolean down, int colour) {
+    for (int i = 0; i < 3; i++) {
+      if (down) { fill(x + i, y + i, x + i + 1, y + i + 1, colour); fill(x + 4 - i, y + i, x + 5 - i, y + i + 1, colour); }
+      else { fill(x + i, y + i, x + i + 1, y + i + 1, colour); fill(x + i, y + 4 - i, x + i + 1, y + 5 - i, colour); }
+    }
+  }
+
   protected void trackButton(String label, boolean previous, int x, int y, int w, int mx, int my) {
     button("", x, y, w, 18, mx, my, true);
     int colour = inside(mx, my, x, y, w, 18) ? 0xffffa0 : 0xe0e0e0;

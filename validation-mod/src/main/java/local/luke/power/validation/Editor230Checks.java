@@ -39,10 +39,14 @@ final class Editor230Checks {
   }
   private static void done(Screen screen) throws Exception { invoke(screen, "save", new Class<?>[0]); }
   static void run(Minecraft mc, String action) throws Exception {
+    if (action.equals("refinements")) { Refinement230Checks.run(mc); return; }
     if (action.equals("saved")) {
       var s = SettingsRegistry.open(mc);
       check(find(s, "logo.presets").value.getAsJsonArray().size() == 1, "title preset did not survive restart");
       check(find(s, "infoHud.clusters.2.offsetX").value.getAsInt() == 37, "HUD placement did not survive restart");
+      check(find(s,"logo.swatches").value.getAsJsonArray().size()==2,"swatches lost across restart");
+      check(find(s,"logo.selectedPreset").value.equals(find(s,"logo.presets").value.getAsJsonArray().get(0).getAsJsonObject().get("id")),"selected preset ID lost across restart");
+      check(find(s,"logo.retroBase").value.getAsJsonObject().size()==TitleTiles.DESIGN_KEYS.size(),"retained retro base lost across restart");
       log("PASS 2.3 editor restart persistence"); return;
     }
     if (action.equals("save")) {
@@ -52,7 +56,9 @@ final class Editor230Checks {
       var local = draft(title); JsonObject preset = new JsonObject(), values = new JsonObject();
       preset.addProperty("id", UUID.randomUUID().toString()); preset.addProperty("name", "Restart test");
       TitleTiles.DESIGN_KEYS.forEach(id -> values.add(id, local.get(id).value.deepCopy())); preset.add("values", values);
-      local.get("logo.presets").value = new JsonArray(); local.get("logo.presets").value.getAsJsonArray().add(preset); done(title);
+      local.get("logo.presets").value = new JsonArray(); local.get("logo.presets").value.getAsJsonArray().add(preset);
+      local.get("logo.swatches").value=JsonParser.parseString("[1,45]");local.get("logo.selectedPreset").value=preset.get("id").deepCopy();
+      local.get("logo.retroBase").value=values.deepCopy();done(title);
       check(mc.currentScreen == options, "title save did not return to Options");
       var hud = new HudEditorScreen(options, "infoHud.clusters.2.offsetX"); open(mc, hud, 640, 420);
       draft(hud).get("infoHud.clusters.2.offsetX").value = new JsonPrimitive(37); done(hud);
@@ -93,29 +99,32 @@ final class Editor230Checks {
         }
         check(Arrays.equals(original, Files.readAllBytes(PowerConfig.path())), "HUD preview wrote config");
       });
-      test("Audio volume categories retain a compact divider and indentation at both GUI sizes",()->{
+      test("Audio volume categories retain indentation without a divider at both GUI sizes",()->{
         open(mc,options,640,420);UiChecks.field(options,"page","Audio");UiChecks.search(options,"");
         ((Set<?>)UiChecks.field(options,"collapsed")).clear();UiChecks.call(options,"layout");
         List<?> rows=(List<?>)UiChecks.field(options,"rows");boolean found=false;
         for(int i=0;i<rows.size();i++) {
           Setting s=(Setting)UiChecks.call(rows.get(i),"setting");
           if(s!=null&&s.id.equals("native.sound")) {
-            check((boolean)UiChecks.call(rows.get(i+1),"separator"),"volume divider missing");
-            check((int)UiChecks.call(rows.get(i+1),"height")==7,"volume divider spacing not reduced");found=true;
+            check(!(boolean)UiChecks.call(rows.get(i+1),"separator"),"volume divider remains");found=true;
           }
           if(s!=null&&s.id.startsWith("audio.category."))check(Catalog.number(Catalog.metadata(s.id),"indent",0)==10,"volume child not indented");
         }
         check(found,"game-sounds volume row missing");screenshot(mc,options,"audio-volume-wide",640,420);screenshot(mc,options,"audio-volume-narrow",320,240);
       });
-      test("HUD selection opens a menu of hidden elements; expanded preview and controls toggle at narrow sizes",()->{
+      test("HUD selection sits above settings and the divider resizes without losing either area",()->{
         var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);open(mc,hud,320,240);
-        click(hud,number(hud,"left")+10,number(hud,"controlsBottom")+10,0);
+        click(hud,number(hud,"left")+10,63,0);
         check((boolean)get(hud,"selecting"),"element menu did not open");screenshot(mc,hud,"hud-element-menu",320,240);
         key(hud,Keyboard.KEY_ESCAPE);check(!(boolean)get(hud,"selecting"),"Escape did not close element menu");
-        int left=number(hud,"left"),sw=number(hud,"selectorWidth"),top=number(hud,"controlsBottom")+10;
-        click(hud,left+sw+170,top,0);check((boolean)get(hud,"expanded"),"preview did not expand");
-        screenshot(mc,hud,"hud-expanded",320,240);
-        click(hud,left+sw+170,number(hud,"controlsBottom")+10,0);check(!(boolean)get(hud,"expanded"),"controls did not return");
+        int before=number(hud,"controlsBottom"),x=number(hud,"left")+10;
+        click(hud,x,before+5,0);Object divider=get(hud,"divider");
+        check((boolean)invoke(divider,"dragging",new Class<?>[0]),"divider did not own press");
+        ((ScreenInput)(Object)hud).power$release(x,100,0);
+        check(number(hud,"controlsBottom")<before,"quick divider drag did not use release position");
+        check(!(boolean)invoke(divider,"dragging",new Class<?>[0]),"divider retained released button");
+        screenshot(mc,hud,"hud-divider-narrow",320,240);
+        check(number(hud,"previewBottom")-number(hud,"previewTop")>=48,"preview disappeared");
       });
       test("drag uses GUI coordinates; Escape opens an input-blocking draft prompt and Discard leaves parent untouched", () -> {
         var hud = new HudEditorScreen(options, HudEditorSettings.ENTRY); open(mc, hud, 640, 420);
@@ -137,19 +146,51 @@ final class Editor230Checks {
         check(mc.currentScreen==options,"Discard did not return");
         check(Arrays.equals(original,Files.readAllBytes(PowerConfig.path())),"discard wrote config");
       });
-      test("title clicks toggle tiles, right-click opens a block picker, presets and appearance remain local",()->{
+      test("title paint and erase, filtered instant brush selection, swatches and live sliders stay local",()->{
         var title=new TitleLetteringScreen(options);open(mc,title,640,420);var local=draft(title);
         int tile=number(title,"tileSize"),x=number(title,"gridLeft")+tile/2,y=number(title,"gridTop")+tile/2;
         JsonArray lines=local.get("logo.logo.lines").value.getAsJsonArray();JsonObject palette=local.get("logo.blocks.map").value.getAsJsonObject();
-        int before=TitleTiles.block(lines,palette,0,0);click(title,x,y,0);invoke(title,"stopGesture",new Class<?>[0]);
-        check((TitleTiles.block(lines,palette,0,0)==0)!=(before==0),"tile did not toggle");
-        click(title,x,y,0);invoke(title,"stopGesture",new Class<?>[0]);check(TitleTiles.block(lines,palette,0,0)==before,"second click did not toggle back");
-        click(title,x,y,1);check(mc.currentScreen instanceof ItemPickerScreen,"right-click did not open block picker");
-        key(mc.currentScreen,Keyboard.KEY_ESCAPE);check(mc.currentScreen==title,"unchanged picker did not return");
+        click(title,x,y,0);invoke(title,"stopGesture",new Class<?>[0]);
+        check(TitleTiles.block(lines,palette,0,0)==1,"left click did not paint");
+        click(title,x,y,0);invoke(title,"stopGesture",new Class<?>[0]);check(TitleTiles.block(lines,palette,0,0)==1,"painting toggled an occupied tile");
+        click(title,x,y,1);invoke(title,"stopGesture",new Class<?>[0]);check(TitleTiles.block(lines,palette,0,0)==0,"right click did not erase");
+        click(title,x,y,0);((ScreenInput)(Object)title).power$release(x+2*tile,y,0);
+        check(TitleTiles.block(lines,palette,2,0)==1,"quick paint drag lost final motion");
+        click(title,x,y,1);((ScreenInput)(Object)title).power$release(x+2*tile,y,1);
+        check(TitleTiles.block(lines,palette,0,0)==0&&TitleTiles.block(lines,palette,2,0)==0,"quick erase drag lost final motion");
+        click(title,number(title,"controlX")+10,number(title,"controlsTop")+7,0);
+        check(mc.currentScreen instanceof ItemPickerScreen,"brush button did not open picker");
+        ItemPickerScreen picker=(ItemPickerScreen)mc.currentScreen;
+        for(Object entry:(List<?>)get(picker,"shown"))check(!List.of(8,9,10,11).contains(((ItemCatalogue.Entry)entry).id()),"liquid admitted to brush picker");
+        invoke(picker,"choose",new Class<?>[]{String.class},"45");check(mc.currentScreen==title,"one-click brush did not commit");
+        check(((Setting)get(title,"brush")).value.getAsInt()==45,"brush selection missing");
+        click(title,number(title,"controlX")+10,number(title,"controlsTop")+7,0);picker=(ItemPickerScreen)mc.currentScreen;
+        invoke(picker,"custom",new Class<?>[0]);Screen custom=mc.currentScreen;((TextInput)get(custom,"input")).setText("8");done(custom);
+        check(mc.currentScreen==custom&&((Setting)get(title,"brush")).value.getAsInt()==45,"custom liquid selection was accepted");
+        ((TextInput)get(custom,"input")).setText("17");done(custom);check(mc.currentScreen==title&&((Setting)get(title,"brush")).value.getAsInt()==17,"custom instant selection did not return to editor");
+        ((Setting)get(title,"brush")).value=new JsonPrimitive("45");
+        local.get("logo.swatches").value=new JsonArray();int sy=number(title,"swatchTop");
+        click(title,number(title,"left")+8,sy+8,0);check(local.get("logo.swatches").value.getAsJsonArray().size()==1,"brush swatch not saved");
+        ((Setting)get(title,"brush")).value=new JsonPrimitive("1");click(title,number(title,"left")+8,number(title,"swatchTop")+8,0);
+        check(((Setting)get(title,"brush")).value.getAsInt()==45,"swatch did not switch brush");
+        UiChecks.field(title,"tab",1);int cy=number(title,"controlsTop");
+        click(title,number(title,"controlX")+number(title,"controlWidth")/4,cy+7,0);
+        ((ScreenInput)(Object)title).power$release(number(title,"controlX")+number(title,"controlWidth")*3/4,cy+7,0);
+        check(local.get("logo.logo.rotation").value.getAsJsonArray().get(0).getAsDouble()>100,"rotation slider did not update preview");
+        click(title,number(title,"controlX")+10,cy+7,1);check(mc.currentScreen==title,"precise rotation opened another screen");
+        Object inputEditor=get(title,"inline");((TextInput)get(inputEditor,"input")).setText("22.5");key(title,Keyboard.KEY_RETURN);
+        check(local.get("logo.logo.rotation").value.getAsJsonArray().get(0).getAsDouble()==22.5,"precise rotation lost fraction");
+        var before=local.snapshot();invoke(title,"extraFooterAction",new Class<?>[0]);check(local.snapshot().equals(before),"replay changed settings");
         for(int tab=0;tab<3;tab++) {
           UiChecks.field(title,"tab",tab);screenshot(mc,title,"title-tab-"+tab+"-wide",640,420);
           for(int tick=0;tick<200;tick++)title.tick();
           screenshot(mc,title,"title-tab-"+tab+"-wide",640,420);screenshot(mc,title,"title-tab-"+tab+"-narrow",320,240);
+        }
+        local.get("logo.logo.lines").value=TitleTiles.resize(lines,80,12);local.get("logo.swatches").value=new JsonArray();
+        var valid=(Map<Integer,?>)get(title,"blocks");for(int id:valid.keySet().stream().sorted().limit(16).toList())local.get("logo.swatches").value.getAsJsonArray().add(id);
+        for(int[] size:new int[][]{{320,240},{640,420}}){open(mc,title,size[0],size[1]);
+          int actualRows=(17+number(title,"swatchColumns")-1)/number(title,"swatchColumns");
+          check(number(title,"swatchTop")+actualRows*22<=number(title,"previewBottom"),"maximum grid/swatches overlap footer");
         }
         check(Arrays.equals(original,Files.readAllBytes(PowerConfig.path())),"title preview wrote config");
       });
@@ -157,8 +198,8 @@ final class Editor230Checks {
         var title=new TitleLetteringScreen(options);open(mc,title,640,420);var local=draft(title);
         local.get("logo.presets").value=new JsonArray();UiChecks.field(title,"tab",2);
         int left=number(title,"left"),span=number(title,"span"),top=number(title,"controlsTop");
-        click(title,left+span*3/4,top+8,0);check(mc.currentScreen instanceof ValueScreen,"Save preset did not ask for a name");
-        ((TextInput)get(mc.currentScreen,"input")).setText("UI preset");done(mc.currentScreen);
+        click(title,left+span*3/4,top+8,0);check(mc.currentScreen==title,"preset name left editor");
+        ((TextInput)get(get(title,"inline"),"input")).setText("UI preset");key(title,Keyboard.KEY_RETURN);
         check(mc.currentScreen==title&&local.get("logo.presets").value.getAsJsonArray().size()==1,"preset not saved into draft");
         var saved=local.get("logo.logo.lines").value.deepCopy();
         TitleTiles.paint(local.get("logo.logo.lines").value.getAsJsonArray(),local.get("logo.blocks.map").value.getAsJsonObject(),0,0,45);

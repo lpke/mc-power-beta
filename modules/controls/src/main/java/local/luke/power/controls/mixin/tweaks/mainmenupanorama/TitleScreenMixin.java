@@ -18,7 +18,6 @@ import java.awt.*;
 
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin extends Screen {
-    @Shadow private float ticks;
     @Unique private boolean power$panoramaEnabled() {
         return ControlFeatures.USER_INTERFACE_CONFIG.panoramaConfig.enablePanorma
             && !local.luke.power.input.PanoramaCatalog.folder(ControlFeatures.USER_INTERFACE_CONFIG.panoramaConfig.panoramaFolder).isEmpty();
@@ -56,6 +55,6 @@ public class TitleScreenMixin extends Screen {
     private void drawPanorama(float delta) {
         var settings = ControlFeatures.USER_INTERFACE_CONFIG.panoramaConfig;
         local.luke.power.input.PanoramaRenderer.render(minecraft.textureManager::getTextureId,
-            settings.panoramaFolder, settings.blurBackground, ticks + delta, minecraft.displayWidth, minecraft.displayHeight);
+            settings.panoramaFolder, settings.blurBackground, local.luke.power.input.PanoramaRenderer.animationTicks(), minecraft.displayWidth, minecraft.displayHeight);
     }
 }

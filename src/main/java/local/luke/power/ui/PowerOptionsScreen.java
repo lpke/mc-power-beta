@@ -434,6 +434,7 @@ public final class PowerOptionsScreen extends UiScreen {
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
     }
     for (Setting s : candidates) {
+      if (HudEditorSettings.internal(s)) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
           && (HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY)
               || HudEditorSettings.lettering(s) && !s.id.equals("logo.logo.lines"))) continue;
@@ -1090,11 +1091,12 @@ public final class PowerOptionsScreen extends UiScreen {
     iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 18, 20, mx, my,
         hasSections(), false);
     if (rulesToolbar()) {
-      button(fit(creationRules == null ? "Survival defaults" : "Copy Survival defaults", ruleButtonWidth() - 8), left(), 53, ruleButtonWidth(), 20, mx, my, true);
-      button(fit(creationRules == null ? "Cheat defaults" : "Copy Cheat defaults", ruleButtonWidth() - 8), left() + ruleButtonWidth() + 4, 53, ruleButtonWidth(), 20, mx, my, true);
       if (creationRules == null) {
-        int x = left() + (cheatPreset ? ruleButtonWidth() + 4 : 0);
-        fill(x + 2, 70, x + ruleButtonWidth() - 2, 72, 0xffb0b0b0);
+        tabButton(fit("Survival defaults", ruleButtonWidth() - 8), left(), 53, ruleButtonWidth(), 20, mx, my, true, !cheatPreset);
+        tabButton(fit("Cheat defaults", ruleButtonWidth() - 8), left() + ruleButtonWidth() + 4, 53, ruleButtonWidth(), 20, mx, my, true, cheatPreset);
+      } else {
+        button(fit("Copy Survival defaults", ruleButtonWidth() - 8), left(), 53, ruleButtonWidth(), 20, mx, my, true);
+        button(fit("Copy Cheat defaults", ruleButtonWidth() - 8), left() + ruleButtonWidth() + 4, 53, ruleButtonWidth(), 20, mx, my, true);
       }
     }
     if (musicControlsVisible()) {
@@ -1105,11 +1107,10 @@ public final class PowerOptionsScreen extends UiScreen {
         else if (item.action() == AudioToolbar.Action.PLAY)
           iconButton(local.luke.power.audio.AudioController.musicPlaying() ? "pause" : "play",
               item.x(), item.y(), item.width(), mx, my, true);
+        else if (item.action() == AudioToolbar.Action.QUEUE || item.action() == AudioToolbar.Action.LIBRARY)
+          tabButton(fit(item.label(), item.width() - 4), item.x(), item.y(), item.width(), 18, mx, my, item.enabled(),
+              libraryVisible() && (item.action() == AudioToolbar.Action.QUEUE ? library.queueVisible() : !library.queueVisible()));
         else button(fit(item.label(), item.width() - 4), item.x(), item.y(), item.width(), 18, mx, my, item.enabled());
-        if (libraryVisible() && item.enabled()
-            && (item.action() == AudioToolbar.Action.QUEUE && library.queueVisible()
-                || item.action() == AudioToolbar.Action.LIBRARY && !library.queueVisible()))
-          fill(item.x() + 2, item.y() + 15, item.x() + item.width() - 2, item.y() + 17, 0xffb0b0b0);
       }
       if (!libraryVisible() || library.trackStatusVisible()) musicStatus.render(this,left(),audioContentTop(),
           musicStatusWidth(),mx,my);

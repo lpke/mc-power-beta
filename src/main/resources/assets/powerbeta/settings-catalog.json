@@ -3411,8 +3411,7 @@
   },
   "native.sound": {
     "order": 2,
-    "separatorAfter": true,
-    "separatorSpacing": 7
+    "separatorAfter": false
   },
   "audio.preset": {
     "order": 0

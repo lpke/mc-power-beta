@@ -13,6 +13,19 @@ public final class TitleLogoRenderer implements TitlePreview.Renderer {
     private final Random random = new Random();
     private final class_13 blockRenderer = new class_13();
     private LogoEffectRandomizer[][] logoEffects;
+    public static boolean supportsBlock(int id) {
+        if (id <= 0 || id >= Block.BLOCKS.length || Block.BLOCKS[id] == null) return false;
+        return switch (Block.BLOCKS[id].method_1621()) {
+            case 0, 1, 2, 6, 10, 11, 13, 16, 18 -> true;
+            default -> false;
+        };
+    }
+    public void replay() { logoEffects = null; }
+    public boolean settled() {
+        if (logoEffects == null) return false;
+        for (var column : logoEffects) for (var effect : column) if (effect.target > 0) return false;
+        return true;
+    }
     public void tick() {
         if (logoEffects != null) for (var column : logoEffects) for (var effect : column) effect.tick();
     }

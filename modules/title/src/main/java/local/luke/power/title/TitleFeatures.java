@@ -45,6 +45,8 @@ public class TitleFeatures implements ModInitializer {
     @Override
     public void onInitialize() {
         local.luke.power.ui.TitlePreview.factory = TitleLogoRenderer::new;
+        local.luke.power.ui.TitlePreview.renderableBlock = TitleLogoRenderer::supportsBlock;
+        local.luke.power.ui.TitlePreview.hitTest = TitleLogos::contains;
 
     }
 }

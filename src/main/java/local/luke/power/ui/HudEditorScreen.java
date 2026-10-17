@@ -12,7 +12,9 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private final HudPreview preview;
   private int tab, scenario;
   private String selected = "combined";
-  private boolean snapping = true, expanded, selecting;
+  private boolean snapping = true, selecting;
+  private final EditorSplit divider = new EditorSplit();
+  private int popupIndex;
   private HudPreview.Element dragging;
   private double pressX, pressY;
   private int startX, startY;
@@ -37,7 +39,13 @@ public final class HudEditorScreen extends DraftEditorScreen {
     }
   }
   protected String title() { return "HUD editor"; }
-  protected int controlsBottom() { return expanded ? controlsTop() : super.controlsBottom(); }
+  protected int controlsTop() { return 80; }
+  protected int controlsBottom() { return divider.bottom(controlsTop(), previewBottom()); }
+  protected void beforeRender(int x, int y) {
+    if (divider.dragging()) {
+      if (Mouse.isButtonDown(0) && !modal()) divider.move(y, controlsTop(), previewBottom()); else divider.stop();
+    }
+  }
   protected String label(Setting s) { return s.id.equals(HudEditorSettings.ENTRY) ? "Positioning" : super.label(s); }
   protected List<Setting> controls() {
     if (tab == 0) {
@@ -87,10 +95,16 @@ public final class HudEditorScreen extends DraftEditorScreen {
     }
   }
   private int tabWidth() { return (span() - 16) / 5; }
-  private int selectorWidth() { return Math.max(72, span() - 218); }
+  private int selectorWidth() { return Math.max(72, span() - 154); }
   protected void renderToolbar(int x, int y) {
     String[] tabs = {"Layout", "Info", "Tweaks", "Version", "F3"}; int w = tabWidth();
-    for (int i = 0; i < tabs.length; i++) button((tab == i ? "> " : "") + tabs[i], left() + i * (w + 4), 30, w, 18, x, y, true);
+    for (int i = 0; i < tabs.length; i++) tabButton(tabs[i], left() + i * (w + 4), 30, w, x, y, tab == i);
+    int top = 55, sw = selectorWidth();
+    button("", left(), top, sw, 18, x, y, true);
+    text(fit(selectedLabel(), sw - 24), left() + 5, top + 5, 0xe0e0e0);
+    chevron(left() + sw - 13, top + 7, selecting, 0xffdddddd);
+    button(new String[]{"Normal", "Underwater", "F3"}[scenario], left() + sw + 4, top, 92, 18, x, y, true);
+    button(snapping ? "Snap: On" : "Snap: Off", left() + sw + 100, top, 54, 18, x, y, true);
   }
   protected boolean toolbarClick(int x, int y, int button) {
     if (button != 0 && button != 1) return false;
@@ -99,13 +113,15 @@ public final class HudEditorScreen extends DraftEditorScreen {
       select(i == 0 ? preview.mode() == 1 ? "combined" : "native.0" : i == 1 ? "cluster." + preview.integer("infoHud.selectedCluster") : i == 2 ? "tweaks" : i == 3 ? "version" : "debug");
       return true;
     }
-    int top = controlsBottom() + 3, sw = selectorWidth();
+    if (button == 0 && inside(x, y, left(), controlsBottom() + 1, span(), 10)) {
+      stopGesture(); divider.start(y, controlsTop(), previewBottom()); return true;
+    }
+    int top = 55, sw = selectorWidth();
     if (inside(x, y, left(), top, sw, 18)) {
-      selecting = !selecting; stopGesture(); return true;
+      selecting = !selecting; popupIndex = Math.max(0, selectionIds().indexOf(selected)); stopGesture(); controlsChanged(); return true;
     }
     if (inside(x, y, left() + sw + 4, top, 92, 18)) { scenario = Math.floorMod(scenario + (button == 1 ? -1 : 1), 3); return true; }
     if (inside(x, y, left() + sw + 100, top, 54, 18)) { snapping = !snapping; return true; }
-    if (inside(x, y, left() + sw + 158, top, 60, 18)) { expanded = !expanded; stopGesture(); return true; }
     return false;
   }
   private double scale() { return Math.min((span() - 4d) / width, Math.max(1, previewBottom() - previewTop() - 4d) / height); }
@@ -128,13 +144,19 @@ public final class HudEditorScreen extends DraftEditorScreen {
       return;
     }
   }
-  protected void stopGesture() { dragging = null; }
+  protected void finishGesture(int x, int y, int button) {
+    if (button != 0) return;
+    if (divider.dragging()) divider.move(y, controlsTop(), previewBottom());
+    if (dragging != null) move(x, y);
+    stopGesture();
+  }
+  protected void stopGesture() { dragging = null; divider.stop(); }
   protected void mouseClicked(int x, int y, int button) {
     if (selecting && !modal()) {
       int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows, cellWidth = span() / columns;
-      int top = controlsBottom() + 23;
-      if (button == 0 && inside(x, y, left(), top, span(), rows * 19)) {
-        int index = (x - left()) / cellWidth * rows + (y - top) / 19;
+      int top = 76;
+      if (button == 0 && inside(x, y, left(), top, span(), rows * 20)) {
+        int index = (x - left()) / cellWidth * rows + (y - top) / 20;
         if (index < selectionIds().size()) select(selectionIds().get(index));
       }
       selecting = false; return;
@@ -145,26 +167,32 @@ public final class HudEditorScreen extends DraftEditorScreen {
     if (selecting && !modal()) {
       if (key == Keyboard.KEY_ESCAPE) selecting = false;
       else if (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN) {
-        List<String> ids = selectionIds(); select(ids.get(Math.floorMod(ids.indexOf(selected) + (key == Keyboard.KEY_UP ? -1 : 1), ids.size())));
-      }
+        popupIndex = Math.floorMod(popupIndex + (key == Keyboard.KEY_UP ? -1 : 1), selectionIds().size());
+      } else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) select(selectionIds().get(popupIndex));
       return;
     }
     super.keyPressed(c, key);
   }
-  private int selectorRows() { return Math.max(1, Math.min(selectionIds().size(), (height - controlsBottom() - 32) / 19)); }
+  private int selectorRows() { return Math.max(1, Math.min(selectionIds().size(), (height - 120) / 20)); }
   public void render(int x, int y, float delta) {
     super.render(selecting ? -1000 : x, selecting ? -1000 : y, delta);
     if (!selecting || modal()) return;
     int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows, cellWidth = span() / columns;
-    int top = controlsBottom() + 23; List<String> ids = selectionIds();
-    fill(left() - 2, top - 2, right() + 2, top + rows * 19 + 2, 0xff101010);
+    int top = 76; List<String> ids = selectionIds();
+    fill(left() - 2, top - 2, right() + 2, top + rows * 20 + 2, 0xff777777);
+    fill(left() - 1, top - 1, right() + 1, top + rows * 20 + 1, 0xff181d23);
     for (int i = 0; i < ids.size(); i++) {
       String id = ids.get(i), label = id.startsWith("cluster.") ? "Cluster " + (Integer.parseInt(id.substring(8)) + 1)
           : id.startsWith("native.") ? HudPreview.NAMES[Integer.parseInt(id.substring(7))]
           : id.equals("combined") ? "Combined HUD" : id.equals("tweaks") ? "Active tweaks" : id.equals("version") ? "Version label" : "F3 information";
-      button(fit((id.equals(selected) ? "> " : "") + label, cellWidth - 8), left() + i / rows * cellWidth, top + i % rows * 19, cellWidth - 2, 18, x, y, true);
+      int px = left() + i / rows * cellWidth, py = top + i % rows * 20;
+      boolean hover = inside(x, y, px, py, cellWidth, 20);
+      if (hover || i == popupIndex) fill(px, py, px + cellWidth - 1, py + 19, 0xff344452);
+      if (id.equals(selected)) fill(px + 2, py + 3, px + 4, py + 16, 0xff88ccee);
+      text(fit(label, cellWidth - 17), px + 9, py + 6, hover ? 0xffffaa : id.equals(selected) ? 0xffffff : 0xcccccc);
     }
   }
+
   private int snap(double coordinate, double size, int extent) {
     if (snapping) for (double target : new double[]{2, (extent - size) / 2, extent - size - 2})
       if (Math.abs(coordinate - target) <= 4) return (int)Math.round(target);
@@ -194,13 +222,14 @@ public final class HudEditorScreen extends DraftEditorScreen {
     }
     return true;
   }
-  protected String hint() { return "Sample data. Select hidden elements above. Drag to move; arrows fine-tune. Shift moves 10 px."; }
+  protected String hint() { return "Drag the divider to resize. Select an element above; drag it to move. Arrows fine-tune."; }
   protected void renderPreview(int x, int y, float delta) {
-    int top = controlsBottom() + 3, sw = selectorWidth();
-    button(fit(selectedLabel() + " v", sw - 8), left(), top, sw, 18, x, y, true);
-    button(new String[]{"Normal", "Underwater", "F3"}[scenario], left() + sw + 4, top, 92, 18, x, y, true);
-    button(snapping ? "Snap: On" : "Snap: Off", left() + sw + 100, top, 54, 18, x, y, true);
-    button(expanded ? "Controls" : "Expand", left() + sw + 158, top, 60, 18, x, y, true);
+    int line = controlsBottom() + 5;
+    boolean hover = inside(x, y, left(), controlsBottom() + 1, span(), 10);
+    fill(left(), line, right(), line + 1, divider.dragging() || hover ? 0xffaabbcc : 0xff68737c);
+    fill(width / 2 - 12, line - 2, width / 2 + 12, line + 3, 0xff343e48);
+    fill(width / 2 - 8, line - 1, width / 2 + 8, line, 0xffaabbcc);
+    fill(width / 2 - 8, line + 1, width / 2 + 8, line + 2, 0xffaabbcc);
     if (dragging != null) { if (!modal() && Mouse.isButtonDown(0)) move(x, y); else stopGesture(); }
     fill(left(), previewTop(), right(), previewBottom(), 0xb010161d);
     clip(left(), previewTop(), span(), Math.max(0, previewBottom() - previewTop()));

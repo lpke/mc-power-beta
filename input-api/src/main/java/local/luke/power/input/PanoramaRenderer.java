@@ -5,7 +5,11 @@ import org.lwjgl.opengl.GL11;
 
 /** Shared full-resolution skybox for the title and the settings preview, with scoped GL state. */
 public final class PanoramaRenderer {
+  private static final long START = System.nanoTime();
   private PanoramaRenderer() {}
+
+  /** One clock survives every menu and title-screen instance. */
+  public static float animationTicks() { return (System.nanoTime() - START) / 50_000_000f; }
 
   public static void render(ToIntFunction<String> texture, String selection, boolean blur, float ticks, int width, int height) {
     String folder = PanoramaCatalog.folder(selection);

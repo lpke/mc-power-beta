@@ -10,6 +10,11 @@ import org.lwjgl.input.Mouse;
 
 /** Searchable native icons with an isolated selection, shared by every item/block setting. */
 public final class ItemPickerScreen extends UiScreen {
+  public record Options(boolean instant, java.util.function.Predicate<ItemCatalogue.Entry> accepts) {
+    public Options { Objects.requireNonNull(accepts); }
+    public static Options standard() { return new Options(false, entry -> true); }
+  }
+  private final Options options;
   private final Screen parent;
   private final String title;
   private final ItemCatalogue.Domain domain;
@@ -29,10 +34,16 @@ public final class ItemPickerScreen extends UiScreen {
 
   public ItemPickerScreen(Screen parent,String title,ItemCatalogue.Domain domain,
       Collection<String> selected,boolean multiple,Consumer<List<String>> accepted) {
+    this(parent,title,domain,selected,multiple,Options.standard(),accepted);
+  }
+  public ItemPickerScreen(Screen parent,String title,ItemCatalogue.Domain domain,
+      Collection<String> selected,boolean multiple,Options options,Consumer<List<String>> accepted) {
+    if(multiple && options.instant())throw new IllegalArgumentException("Instant selection requires a single item");
+    this.options=options;
     this.parent=parent;this.title=title;this.domain=domain;this.multiple=multiple;this.accepted=accepted;
-    this.selected=new LinkedHashSet<>(selected);original=Set.copyOf(selected);catalogue=new ArrayList<>(ItemCatalogue.entries(domain));
+    this.selected=new LinkedHashSet<>(selected);original=Set.copyOf(selected);catalogue=new ArrayList<>(ItemCatalogue.entries(domain).stream().filter(options.accepts()).toList());
     for(String value:selected) if(catalogue.stream().noneMatch(e->e.value().equals(value))) {
-      try{catalogue.add(ItemCatalogue.resolve(domain,value));}catch(IllegalArgumentException ignored){}
+      try{var entry=ItemCatalogue.resolve(domain,value);if(options.accepts().test(entry))catalogue.add(entry);}catch(IllegalArgumentException ignored){}
     }
     filter();
   }
@@ -55,27 +66,32 @@ public final class ItemPickerScreen extends UiScreen {
   private void choose(String value){
     if(multiple) {if(!selected.remove(value))selected.add(value);}
     else {selected.clear();selected.add(value);}
-    error="";filter();
+    error="";filter();if(options.instant())save();
+  }
+  private ItemCatalogue.Entry resolve(String value) {
+    var entry=ItemCatalogue.resolve(domain,value);
+    if(!options.accepts().test(entry))throw new IllegalArgumentException("This block cannot render in the title logo");
+    return entry;
   }
   private void custom(){
     var empty=new JsonPrimitive("");
     Setting entry=new Setting("picker.custom","","","","Custom ID",
         domain==ItemCatalogue.Domain.FILTER?"Enter an item ID or identifier. Numeric IDs can include metadata, such as 35:4.":"Enter a numeric ID or a registered identifier, such as minecraft:stone.",
         Setting.Kind.TEXT,empty,empty,0,0,1,List.of(),false);
-    entry.validator(v->ItemCatalogue.resolve(domain,v.getAsString()));
-    minecraft.setScreen(new ValueScreen(entry,this,()->{
-      var chosen=ItemCatalogue.resolve(domain,entry.value.getAsString());
+    entry.validator(v->resolve(v.getAsString()));
+    minecraft.setScreen(new ValueScreen(entry,options.instant()?parent:this,()->{
+      var chosen=resolve(entry.value.getAsString());
       if(catalogue.stream().noneMatch(e->e.value().equals(chosen.value())))catalogue.add(chosen);
-      if(!multiple)selected.clear();selected.add(chosen.value());filter();error="";
+      if(!multiple)selected.clear();selected.add(chosen.value());filter();error="";if(options.instant())accepted.accept(List.copyOf(selected));
     }));
   }
   private void save(){
     if(!multiple && selected.isEmpty())return;
-    try{accepted.accept(List.copyOf(selected));minecraft.setScreen(parent);}
+    try{for(String value:selected)resolve(value);accepted.accept(List.copyOf(selected));minecraft.setScreen(parent);}
     catch(IllegalArgumentException e){error=Objects.toString(e.getMessage(),"Invalid selection");}
   }
   private void leave(){
-    scrollbar.release();exitPrompt.leave(!selected.equals(original),()->minecraft.setScreen(parent));
+    scrollbar.release();exitPrompt.leave(!options.instant() && !selected.equals(original),()->minecraft.setScreen(parent));
   }
   protected void keyPressed(char c,int key){
     if(exitPrompt.key(key))return;
@@ -97,7 +113,7 @@ public final class ItemPickerScreen extends UiScreen {
     }
     if(inside(x,y,left(),height-30,76,20))custom();
     else if(multiple && inside(x,y,left()+80,height-30,44,20)){selected.clear();filter();}
-    else if(inside(x,y,right()-156,height-30,76,20))save();
+    else if(!options.instant() && inside(x,y,right()-156,height-30,76,20))save();
     else if(inside(x,y,right()-76,height-30,76,20))leave();
   }
   public void render(int mx,int my,float delta){
@@ -123,7 +139,7 @@ public final class ItemPickerScreen extends UiScreen {
     text(fit(error.isEmpty()?selected.size()+" selected. Hover for IDs.":error,span()),left(),height-47,error.isEmpty()?0xaaaaaa:0xff8888);
     button("Custom ID",left(),height-30,76,20,mx,my,true);
     if(multiple)button("Clear",left()+80,height-30,44,20,mx,my,!selected.isEmpty());
-    button("Done",right()-156,height-30,76,20,mx,my,multiple || !selected.isEmpty());
+    if(!options.instant())button("Done",right()-156,height-30,76,20,mx,my,multiple || !selected.isEmpty());
     button("Cancel",right()-76,height-30,76,20,mx,my,true);
     if(!exitPrompt.active() && !tip.isEmpty())tooltip(tip,mx,my);
     exitPrompt.render(this,"Save changes to this selection?",pointerX,pointerY);

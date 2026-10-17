@@ -37,8 +37,8 @@ public abstract class MenuListBackgroundMixin {
     int y2 = minecraft.displayHeight - top * minecraft.displayHeight / height;
     GL11.glScissor(0, y1, minecraft.displayWidth, Math.max(0, y2 - y1));
   }
-  @Inject(method = "renderBackground(IIII)V", at = @At("HEAD"), cancellable = true)
-  private void power$transparentBorders(int top, int bottom, int firstAlpha, int lastAlpha, CallbackInfo ci) {
-    if (MenuPanorama.enabled(minecraft)) ci.cancel();
+  @Inject(method = "renderBackground(IIII)V", at = @At("HEAD"))
+  private void power$nativeBorders(int top, int bottom, int firstAlpha, int lastAlpha, CallbackInfo ci) {
+    if (MenuPanorama.enabled(minecraft)) GL11.glDisable(GL11.GL_SCISSOR_TEST);
   }
 }

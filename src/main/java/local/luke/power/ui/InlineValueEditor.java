@@ -4,7 +4,7 @@ import java.util.Objects;
 import local.luke.power.config.Setting;
 import org.lwjgl.input.Keyboard;
 
-/** An isolated numeric draft that occupies exactly the slider it replaces. */
+/** An isolated value draft that occupies exactly the control it replaces. */
 final class InlineValueEditor {
   private Object key;
   private Setting setting;
@@ -26,7 +26,7 @@ final class InlineValueEditor {
     this.key = key;
     this.setting = setting;
     this.accepted = accepted;
-    input = new TextInput(setting.editText(), 64);
+    input = new TextInput(setting.editText(), setting.kind == Setting.Kind.TEXT ? 4096 : setting.kind == Setting.Kind.LIST ? 16384 : 64);
     input.focused = true;
     input.selectAll();
     error = "";

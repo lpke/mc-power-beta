@@ -16,7 +16,8 @@ public final class HudEditorSettings {
         || s.id.startsWith("activeTweaks.") && !s.id.endsWith("Messages")
         || s.page.equals("Interface") && GROUPS.contains(s.group);
   }
+  public static boolean internal(Setting s) { return s.id.equals("logo.selectedPreset") || s.id.equals("logo.retroBase"); }
   public static boolean lettering(Setting s) {
-    return s.id.startsWith("logo.logo.") || s.id.startsWith("logo.blocks.") || s.id.equals("logo.presets");
+    return s.id.startsWith("logo.logo.") || s.id.startsWith("logo.blocks.") || s.id.equals("logo.presets") || s.id.equals("logo.swatches") || internal(s);
   }
 }

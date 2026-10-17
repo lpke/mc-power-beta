@@ -12,6 +12,15 @@ public final class TitleLogos {
 
     private TitleLogos() {}
 
+    public static boolean contains(int x, int y, int width) {
+        int style = TitleFeatures.style.get();
+        double scale = Math.min(1, Math.max(1, width - 20) / 310.0);
+        double logoWidth = (style == 4 ? 310 : style > 0 ? CLASSIC_VISIBLE_WIDTH : 310) * scale;
+        int top = style == 4 ? 20 : style > 0 ? 30 : 20;
+        int bottom = style == 4 ? 98 : style > 1 ? 84 : style == 1 ? 74 : 110;
+        return x >= (width - logoWidth) / 2 && x < (width + logoWidth) / 2 && y >= top && y < bottom;
+    }
+
     public static boolean textured() {
         int style = TitleFeatures.style.get();
         return style > 0 && style < TitleFeatures.TITLE_STYLES.size();

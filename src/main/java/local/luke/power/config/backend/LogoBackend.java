@@ -74,6 +74,13 @@ public final class LogoBackend implements Backend {
     entries.add(new Setting("logo.presets", id(), "Interface", "Title screen", "Title presets",
         "Saved title lettering, blocks, rotation and animation.", Setting.Kind.LIST,
         title.has("presets") ? title.get("presets") : new JsonArray(), new JsonArray(), 0, 0, 1, List.of(), false));
+    entries.add(new Setting("logo.swatches", id(), "Interface", "Title screen", "Brush swatches",
+        "Saved title brush blocks.", Setting.Kind.LIST, title.has("swatches") ? title.get("swatches") : new JsonArray(),
+        new JsonArray(), 0, 0, 1, List.of(), false));
+    entries.add(new Setting("logo.selectedPreset", id(), "Interface", "Title screen", "Selected title preset", "",
+        Setting.Kind.TEXT, title.has("selectedPreset") ? title.get("selectedPreset") : new JsonPrimitive(""), new JsonPrimitive(""), 0, 0, 1, List.of(), false));
+    entries.add(new Setting("logo.retroBase", id(), "Interface", "Title screen", "Retained retro title", "",
+        Setting.Kind.LIST, title.has("retroBase") ? title.get("retroBase") : new JsonObject(), new JsonObject(), 0, 0, 1, List.of(), false));
   }
 
   public static void register(ConfigSession s) throws Exception {
@@ -93,6 +100,12 @@ public final class LogoBackend implements Backend {
     for (var e : values.entrySet()) {
       String id = e.getKey();
       JsonElement v = e.getValue();
+      if (id.equals("logo.selectedPreset") && !v.getAsString().isEmpty()
+          && !UUID.fromString(v.getAsString()).toString().equals(v.getAsString())) throw new IllegalArgumentException("Invalid title preset ID");
+      if (id.equals("logo.retroBase") && (!v.isJsonObject() || v.getAsJsonObject().size() != 0))
+        local.luke.power.ui.TitleTiles.validateDesign(v.getAsJsonObject(), n -> n > 0 && n < Block.BLOCKS.length && Block.BLOCKS[n] != null);
+      if (id.equals("logo.swatches")) local.luke.power.ui.TitleTiles.validateSwatches(v,
+          n -> n > 0 && n < Block.BLOCKS.length && Block.BLOCKS[n] != null);
       if (id.equals("logo.presets")) local.luke.power.ui.TitleTiles.validatePresets(v,
           n -> n > 0 && n < Block.BLOCKS.length && Block.BLOCKS[n] != null);
       if (id.equals("logo.logo.rotation")) {
