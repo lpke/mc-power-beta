@@ -1,11 +1,13 @@
 package local.luke.power.ui;
 
 import java.util.*;
-import java.util.function.ToIntFunction;
+import java.util.function.*;
 
 /** One frame's debug text, including rows supplied by nested and platform mods. */
 public final class DebugOverlay {
-  public record Line(String text, int x, int y, int width) {}
+  public record Line(String text, int x, int y, int width, String id) {
+    public Line(String text, int x, int y, int width) { this(text, x, y, width, DebugLines.identify(text, x, y)); }
+  }
   private static final List<Line> pending = new ArrayList<>();
   private static List<Line> last = List.of();
   public static boolean capturing;
@@ -17,6 +19,32 @@ public final class DebugOverlay {
 
   public static List<Line> layout(int screenWidth, ToIntFunction<String> measure) {
     return last = arrange(pending, screenWidth, measure);
+  }
+  public static List<Line> layoutOrdered(int width, ToIntFunction<String> measure, List<String> order, Predicate<String> enabled, double size) {
+    return last = arrangeOrdered(pending, width, measure, order, enabled, size);
+  }
+  public static List<Line> arrangeOrdered(List<Line> input, int width, ToIntFunction<String> measure,
+      List<String> order, Predicate<String> enabled, double size) {
+    Map<String,Line> left = new LinkedHashMap<>();
+    List<Line> result = new ArrayList<>();
+    for (Line line : input) {
+      if (line.id.isEmpty()) result.add(line);
+      else left.putIfAbsent(line.id, line);
+    }
+    int row = 0;
+    for (String id : order) {
+      if (id.isEmpty()) { row++; continue; }
+      Line line = left.remove(id);
+      if (line == null || !enabled.test(id)) continue;
+      result.add(place(line, row++, width, measure, size));
+    }
+    for (Line line : left.values()) if (enabled.test(line.id)) result.add(place(line, row++, width, measure, size));
+    return List.copyOf(result);
+  }
+  private static Line place(Line line, int row, int width, ToIntFunction<String> measure, double size) {
+    String text = line.text;
+    while (!text.isEmpty() && measure.applyAsInt(text) * size > width - 4) text = text.substring(0, text.length() - 1);
+    return new Line(text, 2, (int)Math.round(2 + row * 10 * size), (int)Math.ceil(measure.applyAsInt(text) * size), line.id);
   }
 
   /** Pure placement also serves editor samples without touching the captured gameplay frame. */

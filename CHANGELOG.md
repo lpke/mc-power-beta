@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [2.4.0] - 2026-10-17
+
+- Reorder individual F3 information lines by dragging them in the HUD preview, leave blank rows between them, control each line's visibility and change the text size.
+- HUD previews share the in-game info-cluster formatting, show chat with its native cursor, and mark hidden clusters only while selected. Background previews start off and include a clear daytime forest scene captured at 12 chunks.
+- Find HUD settings under their editor sections in search, edit individual results directly, and open the matching editor section from its heading.
+- Reorganise Interface settings into General, Title screen and Screenshots, with a Customise button beside Retro titles. Editor controls share inline editing, individual resets and native click sounds.
+- Show the current Power Beta version beside Minecraft's title-screen version, with an option to hide it, and remove blocking settings saves when cycling logos.
+- Rename worlds inline with verified metadata backups, show each world's name in its editor, and keep panorama world selections translucent.
+- Enlarge the achievement map on larger screens and return to the pause menu with Done or Escape.
+- Show panoramas across main-menu screens by default, use the current Power Beta version as the default custom version text, reset weather after sleep only while raining, and limit TNT work by default.
+
 ## [2.3.0] - 2026-10-17
 
 - Adapt the HUD editor to wide and portrait screens, combine normal and underwater previews, and keep crosshair, achievement and controller options under General.

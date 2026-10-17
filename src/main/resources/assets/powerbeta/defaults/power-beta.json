@@ -396,7 +396,7 @@
         "alwaysSnowAboveThisYLevel": 100,
         "disableThunder": false,
         "disableRainInSavannaBiomes": false,
-        "sleepOnlyResetsWeatherWhenRaining": false,
+        "sleepOnlyResetsWeatherWhenRaining": true,
         "timeUntilRainRandomLimit": 168000,
         "timeUntilRainMinimum": 12000,
         "rainDurationRandomLimit": 12000,
@@ -542,7 +542,6 @@
     "power_controls:userinterface": {
       "showQuitButton": true,
       "hideAchievementToast": false,
-      "achievementBackToMenu": true,
       "disableDebugEntityIdTags": true,
       "frontViewThirdPerson": 1,
       "clearTextFieldWithRightClick": false,
@@ -553,13 +552,13 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta | Minecraft Beta 1.7.3"
+        "customVersionText": "Power Beta 2.4.0"
       },
       "panoramaConfig": {
         "enablePanorma": false,
         "blurBackground": false,
         "panoramaFolder": "b1_7_3",
-        "onlyTitleScreen": true
+        "onlyTitleScreen": false
       },
       "photoModeConfig": {
         "enablePhotoModeButton": true
@@ -734,7 +733,36 @@
       "autoApply": true,
       "debugTimeOfDay": false,
       "useFeetYCoordinates": true,
-      "blinkingUiCursor": true
+      "blinkingUiCursor": true,
+      "hidePowerBetaVersion": false,
+      "debugOrder": [
+        "version",
+        "terrain",
+        "entities",
+        "particles",
+        "world",
+        "",
+        "x",
+        "y",
+        "z",
+        "nativeFacing",
+        "",
+        "seed",
+        "playTime",
+        "blockLight",
+        "biome",
+        "day",
+        "slime",
+        "facing",
+        "time",
+        "music",
+        "",
+        "cullingTime",
+        "cullingBlocks",
+        "cullingEntities"
+      ],
+      "debugTextSize": 1,
+      "debugLines": {}
     },
     "death": {
       "enabled": true,
@@ -744,7 +772,7 @@
     "gameplay": {
       "mergeItems": true,
       "mergeThreshold": 256,
-      "limitTnt": false,
+      "limitTnt": true,
       "tntPerTick": 4,
       "tntMillis": 8,
       "leavesDropSaplingsInCreative": true,

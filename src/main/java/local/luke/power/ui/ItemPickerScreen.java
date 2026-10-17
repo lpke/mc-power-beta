@@ -107,14 +107,14 @@ public final class ItemPickerScreen extends UiScreen {
     if(search.focused){search.click(x,button);return;}
     if(button!=0)return;
     if(scrollbar.press(track(),x,y)){scroll=(int)scrollbar.drag(track(),y,true);return;}
-    if(inside(x,y,right()-90,37,90,20)){selectedOnly=!selectedOnly;scroll=0;filter();return;}
+    if(inside(x,y,right()-90,37,90,20)){click();selectedOnly=!selectedOnly;scroll=0;filter();return;}
     if(inside(x,y,left(),66,span()-10,Math.max(0,bottom()-66))){
-      int row=(y-66+scroll)/24;if(row<shown.size())choose(shown.get(row).value());return;
+      int row=(y-66+scroll)/24;if(row<shown.size()){click();choose(shown.get(row).value());}return;
     }
-    if(inside(x,y,left(),height-30,76,20))custom();
-    else if(multiple && inside(x,y,left()+80,height-30,44,20)){selected.clear();filter();}
-    else if(!options.instant() && inside(x,y,right()-156,height-30,76,20))save();
-    else if(inside(x,y,right()-76,height-30,76,20))leave();
+    if(inside(x,y,left(),height-30,76,20)){click();custom();}
+    else if(multiple && inside(x,y,left()+80,height-30,44,20)){click();selected.clear();filter();}
+    else if(!options.instant() && inside(x,y,right()-156,height-30,76,20)){click();save();}
+    else if(inside(x,y,right()-76,height-30,76,20)){click();leave();}
   }
   public void render(int mx,int my,float delta){
     int pointerX=mx,pointerY=my;

@@ -15,7 +15,7 @@ final class HudEditorSections {
   private HudEditorSections() {}
   private static String field(Setting s) { return s.id.substring(s.id.lastIndexOf('.') + 1); }
   static boolean position(Setting s) {
-    return OFFSETS.contains(s.id)
+    return s.id.equals("interface.debugOrder") || OFFSETS.contains(s.id)
         || s.id.startsWith(HudPreview.NATIVE) && NATIVE_POSITION.contains(field(s))
         || (s.id.startsWith("infoHud.clusters.") || s.id.startsWith("activeTweaks.")) && ANCHOR_POSITION.contains(field(s));
   }
@@ -24,16 +24,24 @@ final class HudEditorSections {
     if (HudEditorSettings.itemNames(s)) return "Item names";
     if (s.group.equals("Chat")) return "Chat history";
     if (Set.of(HudEditorSettings.HUD + "disableCrosshair", HudEditorSettings.HUD + "drawXboxXAndYButtons", HudEditorSettings.TOAST).contains(id)) return "Visibility";
-    if (id.startsWith("entityculling:")) return "Culling statistics";
+    if (id.equals("interface.debugOrder")) return "Layout";
+    for (var line : DebugLines.values()) if (line.setting().equals(id)) return line.culling() ? "Culling statistics" : "Information";
+    if (id.equals("power_controls:userinterface.disableDebugEntityIdTags")) return "Appearance";
+    if (id.startsWith("entityculling:") || id.startsWith("interface.debugLines.culling")) return "Culling statistics";
     if (id.contains("MUSIC_CONFIG.overlayForMusicInDebug")) return "Music";
     if (id.equals("interface.useFeetYCoordinates") || id.equals("power_hud:config.coordinateDisplay")) return "Coordinates";
     if (id.equals(HudEditorSettings.ENTRY) || field.startsWith("put")) return "Layout";
     if (position(s)) return "Position";
-    if (Set.of("textColor", "textSize", "opacity", "debugTextColor").contains(field)) return "Appearance";
+    if (Set.of("textColor", "textSize", "opacity", "debugTextColor", "debugTextSize").contains(field)) return "Appearance";
     if (Set.of("enabled", "enableVisibility", "hideWithDebug", "showVersionTextIngame").contains(field)) return "Visibility";
     return s.group.equals("Debug (F3) info") ? "World information" : "Information";
   }
   static List<Setting> order(Collection<Setting> values) {
-    return values.stream().sorted(Comparator.comparingInt(s -> GROUPS.indexOf(group(s)))).toList();
+    return values.stream().sorted(Comparator.comparingInt((Setting s) -> GROUPS.indexOf(group(s)))
+        .thenComparingInt(HudEditorSections::lineOrder)).toList();
+  }
+  private static int lineOrder(Setting s) {
+    for (var line : DebugLines.values()) if (line.setting().equals(s.id)) return line.ordinal();
+    return -1;
   }
 }

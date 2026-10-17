@@ -28,7 +28,7 @@ public final class InfoHud {
     if (!settings.enabled) ticks = 0;
     if (!settings.enabled && !MenuPreferences.debugTimeOfDay()) return;
     long daylight = ((WorldCycles)mc.world.method_262()).power$daylightTime();
-    time = "Time: " + HudText.time(daylight);
+    time = HudText.time(daylight);
     if (!settings.enabled || ticks++ % 4 != 0) return;
     double vx = camera ? DetachedCamera.x() : mc.player.x;
     double vy = HudCoordinates.y(mc.player);
@@ -37,30 +37,24 @@ public final class InfoHud {
     int x = (int)Math.floor(vx), y = (int)Math.floor(vy), z = (int)Math.floor(vz);
     coordinates = HudText.coordinates(x, y, z);
     direction = HudText.direction(camera ? DetachedCamera.facingYaw() : mc.player.yaw);
-    day = "Day: " + Math.floorDiv(daylight, 24000L);
-    chunk = "Chunk: " + Math.floorDiv(x, 16) + " / " + Math.floorDiv(z, 16);
+    day = Long.toString(Math.floorDiv(daylight, 24000L));
+    chunk = Math.floorDiv(x, 16) + " / " + Math.floorDiv(z, 16);
     String debug = mc.debugText == null ? "" : mc.debugText;
     int split = debug.indexOf(' ');
-    fps = "FPS: " + (split < 0 ? debug : debug.substring(0, split));
+    fps = split < 0 ? debug : debug.substring(0, split);
     boolean needsBiome = Arrays.stream(settings.clusters).anyMatch(c -> c.enabled && c.biome);
     if (needsBiome && (biomeX != x || biomeZ != z)) {
       var value = mc.world.method_1781().method_1787(x, z);
-      biome = "Biome: " + (value == null ? "Unknown" : value.field_888);
+      biome = value == null ? "Unknown" : value.field_888;
       biomeX = x; biomeZ = z;
     }
   }
 
-  public static String timeLine() { return time; }
+  public static String timeLine() { return time.isEmpty() ? "" : "Time: " + time; }
+  public static InfoHudData data() { return new InfoHudData(coordinates, direction, biome, time, day, chunk, fps); }
 
   public static List<String> lines(InfoHudSettings.Cluster c) {
-    var lines = new ArrayList<String>(7);
-    if (c.coordinates || c.direction) lines.add(HudText.location(coordinates, direction, c.coordinates, c.direction));
-    if (c.biome) lines.add(biome);
-    if (c.timeOfDay) lines.add(time);
-    if (c.day) lines.add(day);
-    if (c.chunk) lines.add(chunk);
-    if (c.fps) lines.add(fps);
-    return lines;
+    return data().lines(c);
   }
 
   public static void render(Minecraft mc) {
@@ -75,27 +69,7 @@ public final class InfoHud {
       GL11.glAlphaFunc(GL11.GL_GREATER, 0);
       for (var cluster : settings.clusters) {
         if (!cluster.enabled || cluster.opacity == 0 || cluster.hideWithDebug && mc.options.debugHud) continue;
-        List<String> lines = lines(cluster);
-        int maxWidth = Math.max(1, (int)((width - 8) / cluster.textSize));
-        int maxRows = Math.max(0, (int)((height - 8) / (10 * cluster.textSize)));
-        if (lines.size() > maxRows) lines = lines.subList(0, maxRows);
-        int textWidth = 0;
-        for (int i = 0; i < lines.size(); i++) {
-          String line = lines.get(i);
-          while (!line.isEmpty() && mc.textRenderer.getWidth(line) > maxWidth) line = line.substring(0, line.length() - 1);
-          lines.set(i, line); textWidth = Math.max(textWidth, mc.textRenderer.getWidth(line));
-        }
-        var layout = InfoHudLayout.at(width, height, textWidth, lines.size(), cluster);
-        int color = cluster.argb();
-        GL11.glPushMatrix();
-        try {
-          GL11.glTranslated(layout.x(), layout.y(), 0);
-          GL11.glScaled(cluster.textSize, cluster.textSize, 1);
-          for (int i = 0; i < lines.size(); i++) {
-            String line = lines.get(i);
-            mc.textRenderer.drawWithShadow(line, layout.lineX(textWidth, mc.textRenderer.getWidth(line)), i * 10, color);
-          }
-        } finally { GL11.glPopMatrix(); }
+        InfoHudRenderer.draw(mc, InfoHudFrame.at(cluster, data(), width, height, mc.textRenderer::getWidth));
       }
     } finally { GL11.glPopAttrib(); }
   }

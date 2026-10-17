@@ -4,6 +4,11 @@ import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.opengl.GL11;
 
 public abstract class UiScreen extends Screen {
+  protected void click() { minecraft.soundManager.method_2009("random.click", 1, 1); }
+  protected void titleBar(String title) {
+    fill(0, 0, width, 22, 0x70000000);
+    drawCenteredTextWithShadow(textRenderer, title, width / 2, 7, 0xffffff);
+  }
   private final java.nio.IntBuffer inputClip = org.lwjgl.BufferUtils.createIntBuffer(16);
   void rectangle(int left,int top,int right,int bottom,int colour) { fill(left,top,right,bottom,colour); }
   protected boolean inside(int x, int y, int left, int top, int width, int height) {

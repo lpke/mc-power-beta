@@ -28,8 +28,20 @@ class ConfigDefaultsTest {
       assertFalse(disabled, "fresh installs must enable culling");
       assertEquals(!disabled, Catalog.metadata("entityculling:config." + key).get("default").getAsBoolean());
     }
+    assertTrue(settings.getAsJsonObject("gameplay").get("limitTnt").getAsBoolean());
+    assertTrue(Catalog.metadata("gameplay.limitTnt").get("default").getAsBoolean());
     assertTrue(settings.getAsJsonObject("interface").get("useFeetYCoordinates").getAsBoolean());
     assertTrue(settings.getAsJsonObject("interface").get("blinkingUiCursor").getAsBoolean());
+    assertFalse(settings.getAsJsonObject("interface").get("hidePowerBetaVersion").getAsBoolean());
+    assertEquals(local.luke.power.ui.DebugOrder.defaults(), local.luke.power.ui.DebugOrder.read(settings.getAsJsonObject("interface").get("debugOrder")));
+    assertFalse(settings.getAsJsonObject("power_controls:userinterface").getAsJsonObject("panoramaConfig").get("onlyTitleScreen").getAsBoolean());
+    assertFalse(settings.getAsJsonObject("power_controls:userinterface").has("achievementBackToMenu"));
+    assertTrue(settings.getAsJsonObject("power_environment:config").getAsJsonObject("WEATHER_CONFIG").get("sleepOnlyResetsWeatherWhenRaining").getAsBoolean());
+    try (var metadata = getClass().getResourceAsStream("/fabric.mod.json")) {
+      String version = JsonParser.parseReader(new java.io.InputStreamReader(metadata, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject().get("version").getAsString();
+      assertEquals("Power Beta " + version, settings.getAsJsonObject("power_controls:userinterface").getAsJsonObject("versionTextConfig").get("customVersionText").getAsString());
+      assertEquals("Power Beta " + version, Catalog.metadata("power_controls:userinterface.versionTextConfig.customVersionText").get("default").getAsString());
+    }
     assertFalse(settings.getAsJsonObject("gameplay").get("torchShovel").getAsBoolean());
     assertFalse(settings.getAsJsonObject("gameplay").has("fireSpread"));
     assertTrue(local.luke.power.rules.RulePresets.survival().enabled(local.luke.power.rules.GameRule.FIRE_SPREAD));

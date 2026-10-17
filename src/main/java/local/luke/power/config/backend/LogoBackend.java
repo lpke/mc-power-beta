@@ -70,7 +70,7 @@ public final class LogoBackend implements Backend {
               name.equals("style") ? (List<String>) logo.getField("TITLE_STYLES").get(null) : List.of(),
               false));
     }
-    JsonObject title = local.luke.power.storage.PowerConfig.section("title");
+    JsonObject title = (JsonObject)config.getClass().getMethod("snapshot").invoke(config);
     entries.add(new Setting("logo.presets", id(), "Interface", "Title screen", "Title presets",
         "Saved title lettering, blocks, rotation and animation.", Setting.Kind.LIST,
         title.has("presets") ? title.get("presets") : new JsonArray(), new JsonArray(), 0, 0, 1, List.of(), false));
@@ -84,8 +84,12 @@ public final class LogoBackend implements Backend {
   }
 
   public static void register(ConfigSession s) throws Exception {
+    create(s);
+  }
+  public static LogoBackend create(ConfigSession s) throws Exception {
     LogoBackend b = new LogoBackend();
     s.add(b, b.entries);
+    return b;
   }
 
   public String id() {
@@ -145,8 +149,22 @@ public final class LogoBackend implements Backend {
   }
 
   public void apply(Map<String, JsonElement> values) throws Exception {
-    Path file = files().get(0);
     JsonObject data = local.luke.power.storage.PowerConfig.section("title");
+    merge(data, values);
+    local.luke.power.storage.PowerConfig.put("title", data);
+    reload(data);
+  }
+
+  /** Menu cycling publishes one validated in-memory selection and queues owned save bytes. */
+  public void selectDeferred(Map<String, JsonElement> values) throws Exception {
+    validate(values);
+    JsonObject data = (JsonObject)config.getClass().getMethod("snapshot").invoke(config);
+    merge(data, values);
+    reload(data);
+    local.luke.power.storage.PowerConfig.saveDeferred("title", data);
+  }
+
+  private static void merge(JsonObject data, Map<String, JsonElement> values) {
     for (var e : values.entrySet()) {
       String[] path = e.getKey().substring(5).split("\\.");
       JsonObject at = data;
@@ -156,8 +174,10 @@ public final class LogoBackend implements Backend {
       }
       at.add(path[path.length - 1], e.getValue().deepCopy());
     }
-    local.luke.power.storage.PowerConfig.put("title", data);
-    config.getClass().getMethod("load").invoke(config);
+  }
+
+  private void reload(JsonObject data) throws Exception {
+    config.getClass().getMethod("replace", JsonObject.class).invoke(config, data);
     for (Object key : keys.values()) key.getClass().getMethod("load").invoke(key);
   }
 }

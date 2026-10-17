@@ -58,8 +58,8 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
     int minimumPreview = Math.min(170, Math.max(90, height / 3));
     return Math.max(controlsTop() + (tab == 2 ? 42 : 23), Math.min(controlsTop() + desired, previewBottom() - minimumPreview - 12));
   }
-  protected boolean usesSlider(Setting s) { return rotation.contains(s) || !s.id.startsWith("titleEditor.") && super.usesSlider(s); }
-  protected boolean resettable(Setting s) { return rotation.contains(s) || !s.id.startsWith("titleEditor."); }
+  protected boolean usesSlider(Setting s) { return s == rows || s == columns || rotation.contains(s) || !s.id.startsWith("titleEditor.") && super.usesSlider(s); }
+  protected boolean resettable(Setting s) { return s == rows || s == columns || rotation.contains(s) || !s.id.startsWith("titleEditor."); }
   protected String display(Setting s) {
     if (s == brush) { var block = blocks.get(s.value.getAsInt()); return block == null ? "Choose..." : block.name(); }
     return super.display(s);
@@ -82,15 +82,17 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
     draft.get("logo.retroBase").value = TitleSelection.design(draft.settings());
   }
   protected void edit(Setting s, int direction, int y) {
-    if (s == brush) { pick(); return; }
+    if (s == brush) { click(); pick(); return; }
     super.edit(s, direction, y);
   }
   protected void renderControl(Setting s, int y, int mx, int my) {
     if (s != brush) { super.renderControl(s, y, mx, my); return; }
     button("", controlX(), y, controlWidth(), 18, mx, my, true);
     var block = blocks.get(brush.value.getAsInt());
-    if (block != null) icons.draw(this, minecraft, block, controlX() + 3, y + 1);
-    text(fit(display(s), controlWidth() - 28), controlX() + 24, y + 5, inside(mx, my, controlX(), y, controlWidth(), 18) ? 0xffffa0 : 0xe0e0e0);
+    String name = fit(display(s), controlWidth() - 28);
+    int start = controlX() + (controlWidth() - textRenderer.getWidth(name) - 22) / 2;
+    if (block != null) icons.draw(this, minecraft, block, start, y + 1);
+    text(name, start + 22, y + 5, inside(mx, my, controlX(), y, controlWidth(), 18) ? 0xffffa0 : 0xe0e0e0);
   }
   private int tabWidth() { return Math.min(115, (span() - 8) / 3); }
   protected void renderToolbar(int x, int y) {
@@ -100,7 +102,7 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
   protected boolean toolbarClick(int x, int y, int button) {
     if (button != 0) return false;
     int w = tabWidth();
-    for (int i = 0; i < 3; i++) if (inside(x, y, left() + i * (w + 4), 30, w, 18)) { tab = i; stopGesture(); controlsChanged(); return true; }
+    for (int i = 0; i < 3; i++) if (inside(x, y, left() + i * (w + 4), 30, w, 18)) { click(); tab = i; stopGesture(); controlsChanged(); return true; }
     return false;
   }
   private int swatchColumns() { return Math.max(1, span() / 22); }
@@ -115,7 +117,7 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
           brush.value = new JsonPrimitive(Integer.toString(ItemCatalogue.resolve(ItemCatalogue.Domain.BLOCK, chosen.get(0)).id()))));
   }
   protected void previewClick(int x, int y, int button) {
-    if (swatchClick(x, y, button)) return;
+    if (swatchClick(x, y, button)) { click(); return; }
     int tile = tileSize(), cols = TitleTiles.width(lines());
     if ((button != 0 && button != 1) || !inside(x, y, gridLeft(), gridTop(), cols * tile, lines().size() * tile)) return;
     draft.checkpoint(); painting = true; lastCell = -1; strokeButton = button;
@@ -232,7 +234,7 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
   }
   protected void mouseClicked(int x, int y, int button) {
     if (!modal() && inline.press(x, y, button)) return;
-    if (!modal() && tab == 2 && presetClick(x, y, button)) return;
+    if (!modal() && tab == 2 && presetClick(x, y, button)) { click(); return; }
     super.mouseClicked(x, y, button);
   }
   private void renderPresets(int x, int y) {

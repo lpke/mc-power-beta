@@ -1,7 +1,7 @@
 package local.luke.power.gameplay;
 
 public final class GameplaySettings {
-  public boolean mergeItems = true, limitTnt = false, flintIgnitesTnt = true;
+  public boolean mergeItems = true, limitTnt = true, flintIgnitesTnt = true;
   public boolean torchShovel = false;
   public boolean axesSlashLeaves = false;
   public int mergeThreshold = 256;

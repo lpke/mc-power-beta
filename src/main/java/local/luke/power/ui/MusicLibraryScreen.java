@@ -311,10 +311,6 @@ public final class MusicLibraryScreen extends UiScreen {
     parent.finishContinuousChange();
   }
 
-  private void click() {
-    minecraft.soundManager.method_2009("random.click", 1, 1);
-  }
-
   private void refresh() {
     AudioBackend.discoverMusic(parent.session(), minecraft);
     custom.clear();

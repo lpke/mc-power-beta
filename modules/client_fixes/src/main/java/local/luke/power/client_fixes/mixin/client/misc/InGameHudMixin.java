@@ -21,6 +21,7 @@ public class InGameHudMixin extends DrawContext {
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;debugHud:Z"))
     )
     private void onRenderGameOverlay(CallbackInfo ci) {
-        local.luke.power.ui.DebugOverlay.add("Seed: " + this.minecraft.world.getSeed(), 2, 104);
+        if (local.luke.power.client_fixes.Config.config.enableDebugMenuWorldSeed)
+            local.luke.power.ui.DebugOverlay.add("Seed: " + this.minecraft.world.getSeed(), 2, 104);
     }
 }

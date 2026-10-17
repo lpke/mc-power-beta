@@ -10,10 +10,11 @@ import org.lwjgl.opengl.GL11;
 /** Select, drag and precisely edit the same anchored layouts used during gameplay. */
 public final class HudEditorScreen extends DraftEditorScreen {
   private final HudPreview preview;
+  private final DebugReorder reorder;
   private int scenario;
   private int lastNativeIndex;
   private String selected = "layout";
-  private boolean snapping = true, selecting, background = true;
+  private boolean snapping = true, selecting, background;
   private final EditorSplit divider = new EditorSplit();
   private int popupIndex;
   private HudPreview.Element dragging;
@@ -23,25 +24,33 @@ public final class HudEditorScreen extends DraftEditorScreen {
   public HudEditorScreen(PowerOptionsScreen parent, String settingId) {
     super(parent, new SettingsDraft(parent.session().settings(), HudEditorSettings::contains));
     preview = new HudPreview(draft);
-    if (settingId.startsWith("infoHud.")) {
-      int cluster = settingId.startsWith("infoHud.clusters.") ? Character.digit(settingId.charAt("infoHud.clusters.".length()), 10) : preview.integer("infoHud.selectedCluster");
-      select("cluster." + cluster);
-    } else if (settingId.startsWith("activeTweaks.")) select("tweaks");
-    else {
-      Setting setting = draft.get(settingId);
-      if (!HudEditorSettings.view(setting).isEmpty()) select(HudEditorSettings.view(setting));
-      else if (HudEditorSettings.itemNames(setting)) select(preview.mode() == 1 ? "combined" : "native.4");
-      else if (setting.group.equals("Version label")) select("version");
-      else if (setting.group.equals("Debug (F3) info")) select("debug");
-      else if (settingId.startsWith(HudPreview.SIMPLE) || settingId.contains("_POSITION_CONFIG.")) {
-        int index = 0;
-        for (int i = 0; i < HudPreview.PARTS.length; i++) if (settingId.contains(HudPreview.PARTS[i] + "_POSITION_CONFIG")) index = i;
-        select(preview.mode() == 1 ? "combined" : "native." + index);
-      }
-    }
+    reorder = new DebugReorder(draft);
+    select(HudEditorSettings.tab(draft.get(settingId), preview.mode()));
   }
   protected String title() { return "HUD editor"; }
-  public void init() { super.init(); HudPreviewBackground.prepare(minecraft); }
+  public void init() { super.init(); HudPreviewBackground.prepare(minecraft); reorder.init(minecraft, width, height); }
+  public void beginReorder() {
+    select("debug");
+    try { reorder.begin(); preview.suppressDebug = true; error = ""; }
+    catch (IllegalArgumentException failure) { error = failure.getMessage(); }
+  }
+  private void finishReorder() { reorder.finish(); preview.suppressDebug = false; }
+  protected void save() { finishReorder(); super.save(); }
+  protected void leave() { finishReorder(); super.leave(); }
+  protected void undo() { finishReorder(); super.undo(); }
+  protected boolean canUndo() { return reorder.changed() || super.canUndo(); }
+  protected String display(Setting s) { return s.id.equals("interface.debugOrder") ? reorder.active() ? "Save" : "Reorder" : super.display(s); }
+  protected void edit(Setting s, int direction, int y) {
+    if (s.id.equals("interface.debugOrder")) { click(); if (reorder.active()) finishReorder(); else beginReorder(); }
+    else super.edit(s, direction, y);
+  }
+  public void onMouseEvent() {
+    int wheel = Mouse.getEventDWheel();
+    int x = Mouse.getEventX() * width / minecraft.displayWidth;
+    int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+    if (!modal() && reorder.contains(x, y) && wheel != 0) reorder.wheel(wheel);
+    super.onMouseEvent();
+  }
   private HudEditorLayout geometry() {
     return HudEditorLayout.at(width, height, HudEditorLayout.horizontal(width, height)
         ? divider.sideWidth() : divider.bottom(55, height - 53));
@@ -119,12 +128,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   private String selectedLabel() { return selectionLabel(selected); }
   private String selectionLabel(String id) {
-    if (id.equals("layout")) return "General";
-    if (id.equals("combined")) return "Combined HUD";
-    if (id.startsWith("native.")) return HudPreview.NAMES[Integer.parseInt(id.substring(7))];
-    if (id.startsWith("cluster.")) return "Info cluster " + (Integer.parseInt(id.substring(8)) + 1);
-    if (id.equals("chat")) return "Chat";
-    return id.equals("tweaks") ? "Active tweaks" : id.equals("version") ? "Version label" : "F3 information";
+    return HudEditorSettings.tabLabel(id);
   }
   private void select(String id) {
     boolean changed = !selected.equals(id);
@@ -161,7 +165,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
     button("", left(), top, sw, 18, x, y, true);
     text(fit(selectedLabel(), sw - 24), left() + 5, top + 5, 0xe0e0e0);
     chevron(left() + sw - 13, top + 7, selecting, 0xffdddddd);
-    button(scenario == 2 ? "F3" : "Normal", px, top, 60, 18, x, y, true);
+    button(scenario == 2 ? "F3: On" : "F3: Off", px, top, 60, 18, x, y, true);
     button(snapping ? "Snap: On" : "Snap: Off", px + 64, top, 60, 18, x, y, true);
     button(background ? "Bg: On" : "Bg: Off", px + 128, top, 54, 18, x, y, true);
   }
@@ -180,11 +184,12 @@ public final class HudEditorScreen extends DraftEditorScreen {
     }
     int top = 30, sw = selectorWidth(), px = previewToolbarX();
     if (inside(x, y, left(), top, sw, 18)) {
+      click();
       selecting = !selecting; popupIndex = Math.max(0, selectionIds().indexOf(selected)); stopGesture(); return true;
     }
-    if (inside(x, y, px, top, 60, 18)) { scenario = scenario == 2 ? 0 : 2; return true; }
-    if (inside(x, y, px + 64, top, 60, 18)) { snapping = !snapping; return true; }
-    if (inside(x, y, px + 128, top, 54, 18)) { background = !background; return true; }
+    if (inside(x, y, px, top, 60, 18)) { click(); scenario = scenario == 2 ? 0 : 2; return true; }
+    if (inside(x, y, px + 64, top, 60, 18)) { click(); snapping = !snapping; return true; }
+    if (inside(x, y, px + 128, top, 54, 18)) { click(); background = !background; return true; }
     return false;
   }
   private double scale() { return geometry().scale(width, height); }
@@ -197,6 +202,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
     List<HudPreview.Element> elements = preview.elements();
     for (int pass = 0; pass < 3; pass++) for (int i = elements.size() - 1; i >= 0; i--) {
       var element = elements.get(i);
+      if (element.hidden() && !element.id().equals(selected)) continue;
       int priority = !element.hidden() ? 1 : element.id().equals(selected) ? 0 : 2;
       if (pass != priority) continue;
       double padding = element.hidden() ? 3 / scale() : 0;
@@ -210,32 +216,42 @@ public final class HudEditorScreen extends DraftEditorScreen {
       }
       return;
     }
+    select("layout");
   }
   protected void finishGesture(int x, int y, int button) {
+    reorder.release(x, y, button);
     if (button != 0) return;
     if (divider.dragging()) moveDivider(x, y);
     if (dragging != null) move(x, y);
     stopGesture();
   }
-  protected void stopGesture() { dragging = null; divider.stop(); }
+  protected void stopGesture() { dragging = null; divider.stop(); if (reorder != null) reorder.cancelDrag(); }
   protected void mouseClicked(int x, int y, int button) {
+    if (!modal() && reorder.active()) {
+      if (reorder.press(x, y, button)) return;
+      Setting order = draft.get("interface.debugOrder");
+      boolean saveButton = inside(x, y, controlX(), controlY(order), controlWidth(order), 18);
+      finishReorder();
+      if (saveButton) { click(); return; }
+    }
     if (selecting && !modal()) {
       int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows, cellWidth = selectorPopupWidth() / columns;
       int top = 51;
       if (button == 0 && inside(x, y, left(), top, selectorPopupWidth(), rows * 20)) {
         int index = (x - left()) / cellWidth * rows + (y - top) / 20;
-        if (index < selectionIds().size()) select(selectionIds().get(index));
+        if (index < selectionIds().size()) { click(); select(selectionIds().get(index)); }
       }
       selecting = false; return;
     }
     super.mouseClicked(x, y, button);
   }
   protected void keyPressed(char c, int key) {
+    if (key == Keyboard.KEY_ESCAPE && reorder.active()) finishReorder();
     if (selecting && !modal()) {
       if (key == Keyboard.KEY_ESCAPE) selecting = false;
       else if (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN) {
         popupIndex = Math.floorMod(popupIndex + (key == Keyboard.KEY_UP ? -1 : 1), selectionIds().size());
-      } else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) select(selectionIds().get(popupIndex));
+      } else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { click(); select(selectionIds().get(popupIndex)); }
       else if (key == Keyboard.KEY_LEFT || key == Keyboard.KEY_RIGHT)
         popupIndex = Math.floorMod(popupIndex + (key == Keyboard.KEY_LEFT ? -selectorRows() : selectorRows()), selectionIds().size());
       return;
@@ -341,7 +357,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
       preview.draw(this, minecraft, width, height, scenario, selected);
     } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); unclip(); }
     clip(previewLeft(), previewTop(), previewSpan(), Math.max(0, previewBottom() - previewTop()));
-    try { for (var element : preview.elements()) if (element.hidden()) ghostOutline(element); }
+    try { for (var element : preview.elements()) if (element.hidden() && element.id().equals(selected)) ghostOutline(element); }
     finally { unclip(); }
+    reorder.draw(previewLeft(), previewTop(), previewSpan(), previewBottom() - previewTop(), x, y);
   }
 }

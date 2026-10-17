@@ -12,6 +12,7 @@ final class InlineValueEditor {
   private TextInput input;
   private String error = "";
   private boolean rendered;
+  private UiScreen screen;
   private long errorUntil;
   private int x, y, width, clipTop, clipBottom;
   private static final int CHECK_WIDTH = 18, GAP = 2;
@@ -73,11 +74,13 @@ final class InlineValueEditor {
       return;
     }
     Runnable callback = accepted;
+    if (screen != null) screen.click();
     cancel(); // Applying GUI scale can reinitialize this screen immediately.
     callback.run();
   }
 
   void render(UiScreen screen, int x, int y, int width, int mx, int my, int clipTop, int clipBottom) {
+    this.screen = screen;
     if (System.nanoTime() >= errorUntil) error = "";
     bounds(x, y, width, clipTop, clipBottom);
     rendered = y + 18 > clipTop && y < clipBottom;

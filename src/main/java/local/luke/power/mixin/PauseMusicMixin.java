@@ -85,6 +85,7 @@ public class PauseMusicMixin extends Screen {
     if (power$music.press(x, y, button)) return;
     if ((Object) this instanceof net.minecraft.client.gui.screen.TitleScreen && minecraft.world == null
         && (button == 0 || button == 1) && local.luke.power.ui.TitlePreview.hitTest.contains(x, y, width)) {
+      minecraft.soundManager.method_2009("random.click", 1, 1);
       local.luke.power.ui.TitleSelection.cycle(button == 1 ? -1 : 1);
       return;
     }

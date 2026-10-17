@@ -78,7 +78,29 @@ public final class ConfigVersions {
         presets.add(name, RuleSet.readValues(values, defaults).document());
       }
     }
+    validateDebugLayout(settings);
     return root;
+  }
+  private static void validateDebugLayout(JsonObject settings) {
+    JsonObject ui = settings.has("interface") ? settings.getAsJsonObject("interface") : new JsonObject();
+    if (ui.has("debugOrder")) local.luke.power.ui.DebugOrder.read(ui.get("debugOrder"));
+    else {
+      var old = local.luke.power.ui.DebugOrder.legacy(settings);
+      if (!old.equals(local.luke.power.ui.DebugOrder.defaults())) {
+        JsonArray rows = new JsonArray(); old.forEach(rows::add); ui.add("debugOrder", rows); settings.add("interface", ui);
+      }
+    }
+    if (ui.has("debugTextSize")) {
+      var n = ui.get("debugTextSize");
+      if (!n.isJsonPrimitive() || !n.getAsJsonPrimitive().isNumber() || !Double.isFinite(n.getAsDouble()) || n.getAsDouble() < .5 || n.getAsDouble() > 3)
+        throw new IllegalArgumentException("F3 text size must be between 0.5 and 3. Original settings preserved.");
+    }
+    if (ui.has("debugLines")) {
+      if (!ui.get("debugLines").isJsonObject()) throw new IllegalArgumentException("F3 visibility must be an object.");
+      for (var e : ui.getAsJsonObject("debugLines").entrySet())
+        if (!e.getKey().matches("[A-Za-z0-9_.-]{1,96}") || !e.getValue().isJsonPrimitive() || !e.getValue().getAsJsonPrimitive().isBoolean())
+          throw new IllegalArgumentException("Invalid F3 visibility setting. Original settings preserved.");
+    }
   }
   private static void remove(JsonObject settings, String section, String... keys) {
     if (!settings.has(section)) return;

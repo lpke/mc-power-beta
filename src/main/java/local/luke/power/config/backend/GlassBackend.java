@@ -39,7 +39,7 @@ public final class GlassBackend implements Backend {
             });
   }
 
-  private static boolean inverted(String key) { return key.equals("power_hud:config.disableVignette") || key.equals("entityculling:config.disableEntityCulling") || key.equals("entityculling:config.disableBlockEntityCulling"); }
+  private static boolean inverted(String key) { return Set.of("power_hud:config.disableVignette", "entityculling:config.disableEntityCulling", "entityculling:config.disableBlockEntityCulling", "power_hud:config.disableCrosshair", "power_controls:userinterface.hideAchievementToast").contains(key); }
   private static JsonElement encode(String key, Object value) { return inverted(key) ? new JsonPrimitive(!(Boolean)value) : Catalog.JSON.toJsonTree(value); }
 
   private void visit(String prefix, ConfigCategoryHandler category) {
@@ -53,7 +53,9 @@ public final class GlassBackend implements Backend {
       String key = id + "." + prefix + h.id;
       if (Catalog.text(Catalog.metadata(key), "group", "").equals("Available controls")) continue;
       handlers.put(key, h);
-      if (key.equals(PANORAMA + "enablePanorma")) continue;
+      if (Set.of(PANORAMA + "enablePanorma", "power_controls:userinterface.achievementBackToMenu",
+          "power_compat:config.overlayAdditionsYOffset", "entityculling:config.f3InfoYOffset",
+          "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset").contains(key)) continue;
       Class<?> type = h.parentField.getType();
       List<String> choices =
           type.isEnum()

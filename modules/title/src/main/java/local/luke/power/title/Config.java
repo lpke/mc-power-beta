@@ -12,6 +12,8 @@ public class Config {
     private JsonObject jsonObj = new JsonObject();
     public Config(String ignored) { load(); }
     public void load() { jsonObj = local.luke.power.storage.PowerConfig.section("title"); }
+    public JsonObject snapshot() { return jsonObj.deepCopy(); }
+    public void replace(JsonObject value) { jsonObj = value.deepCopy(); }
     public void save() {
         try { local.luke.power.storage.PowerConfig.put("title", jsonObj); }
         catch (IOException e) { throw new IllegalStateException("Could not save title settings", e); }

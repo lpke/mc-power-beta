@@ -69,7 +69,7 @@ public class ClientFixesMixinPlugin implements IMixinConfigPlugin {
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.misc.ChatKeyMixin")) {
             return Config.config.enableChatChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.misc.InGameHudMixin")) {
-            return Config.config.enableDebugMenuWorldSeed;
+            return true;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.misc.MinecraftMixin")) {
             return Config.config.enableAuthenticationChanges;
         } else if (mixinClassName.equals("local.luke.power.client_fixes.mixin.client.misc.ScreenMixin")) {

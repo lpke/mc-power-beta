@@ -41,8 +41,9 @@ public abstract class DebugHudMixin {
     if (MenuPreferences.debugTimeOfDay() && !local.luke.power.hud.InfoHud.timeLine().isEmpty())
       DebugOverlay.add(local.luke.power.hud.InfoHud.timeLine(), 2, 144);
     int width = new class_564(minecraft.options, minecraft.displayWidth, minecraft.displayHeight).method_1857();
-    for (var line : DebugOverlay.layout(width, minecraft.textRenderer::getWidth))
-      minecraft.textRenderer.drawWithShadow(line.text(), line.x(), line.y(), InterfaceState.debugTextColor);
+    local.luke.power.ui.DebugTextRenderer.draw(minecraft,
+        DebugOverlay.layoutOrdered(width, minecraft.textRenderer::getWidth, MenuPreferences.debugOrder(),
+            MenuPreferences::debugLine, MenuPreferences.debugTextSize()), MenuPreferences.debugTextSize(), InterfaceState.debugTextColor);
   }
 
   @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow(Ljava/lang/String;III)V", ordinal = 0))

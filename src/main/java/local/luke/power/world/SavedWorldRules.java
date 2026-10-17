@@ -14,7 +14,7 @@ public final class SavedWorldRules {
   private final BooleanSupplier unloaded;
   private byte[] expectedLevel, expectedOld;
   private RuleSet rules;
-  private final String name;
+  private String name;
 
   public SavedWorldRules(Path game, String folder, BooleanSupplier unloaded) throws IOException {
     this.game = game.toAbsolutePath().normalize();
@@ -35,29 +35,45 @@ public final class SavedWorldRules {
   public void validate() throws IOException {
     checkIdle();
     if (!Arrays.equals(expectedLevel, bytes(level)) || !Arrays.equals(expectedOld, bytes(old)))
-      throw new IOException("World metadata changed. Reopen Edit game rules before saving.");
+      throw new IOException("World metadata changed. Reopen the world editor before saving.");
   }
 
   public void save(RuleSet next) throws IOException {
     next = next.copy();
     validate();
     if (rules.equals(next)) return;
+    RuleSet chosen = next;
+    edit(data -> WorldRuleData.write(data, chosen), data -> WorldRuleData.read(data).equals(chosen));
+    rules = chosen;
+  }
+
+  public void rename(String next) throws IOException {
+    String chosen = next.strip();
+    if (chosen.isEmpty() || chosen.length() > 128 || chosen.chars().anyMatch(Character::isISOControl))
+      throw new IOException("Use a world name of 1 to 128 characters.");
+    validate();
+    if (name.equals(chosen)) return;
+    edit(data -> data.putString("LevelName", chosen), data -> data.getString("LevelName").equals(chosen));
+    name = chosen;
+  }
+
+  private void edit(java.util.function.Consumer<NbtCompound> change, java.util.function.Predicate<NbtCompound> verified) throws IOException {
     byte[] saved;
     try (FileTransaction transaction = FileTransaction.begin(game, List.of(level, old))) {
       validate();
       NbtCompound root = WorldRuleFiles.read(source());
-      WorldRuleData.write(root.getCompound("Data"), next);
+      change.accept(root.getCompound("Data"));
       ByteArrayOutputStream output = new ByteArrayOutputStream();
       NbtIo.writeCompressed(root, output); saved = output.toByteArray();
       validate();
       FileTransaction.atomicWrite(level, saved);
       checkIdle();
-      if (!Arrays.equals(saved, bytes(level)) || !WorldRuleData.read(WorldRuleFiles.read(level).getCompound("Data")).equals(next))
-        throw new IOException("Saved game rules could not be verified. The original metadata will be restored.");
+      if (!Arrays.equals(saved, bytes(level)) || !Arrays.equals(expectedOld, bytes(old))
+          || !verified.test(WorldRuleFiles.read(level).getCompound("Data")))
+        throw new IOException("Saved world metadata could not be verified. The original metadata will be restored.");
       transaction.commit();
     }
     expectedLevel = saved;
-    rules = next.copy();
   }
 
   private Path source() throws IOException {

@@ -5,9 +5,8 @@ import java.util.*;
 import local.luke.power.PowerBeta;
 import local.luke.power.config.*;
 import local.luke.power.config.backend.LogoBackend;
-import net.fabricmc.loader.api.FabricLoader;
 
-/** Menu clicks commit one complete title selection through the ordinary settings transaction. */
+/** Menu clicks apply one complete selection; the shared durable worker saves its snapshot. */
 public final class TitleSelection {
   private static String error = "";
   private TitleSelection() {}
@@ -28,7 +27,7 @@ public final class TitleSelection {
   public static void cycle(int direction) {
     if (direction != -1 && direction != 1) throw new IllegalArgumentException("Invalid title cycle direction");
     try {
-      ConfigSession session = new ConfigSession(); LogoBackend.register(session);
+      ConfigSession session = new ConfigSession(); LogoBackend backend = LogoBackend.create(session);
       Map<String, Setting> settings = new LinkedHashMap<>(); session.settings().forEach(s -> settings.put(s.id, s));
       JsonArray presets = settings.get("logo.presets").value.getAsJsonArray();
       new LogoBackend().validate(Map.of("logo.presets", presets));
@@ -47,7 +46,10 @@ public final class TitleSelection {
       }
       settings.get("logo.style").value = new JsonPrimitive(next <= presets.size() ? 0 : next - presets.size());
       if (chosen != null) chosen.entrySet().forEach(e -> settings.get(e.getKey()).value = e.getValue().deepCopy());
-      session.save(FabricLoader.getInstance().getGameDir()); error = "";
+      for (Setting setting : settings.values()) setting.validate(setting.value);
+      Map<String, JsonElement> values = new LinkedHashMap<>();
+      settings.forEach((id, setting) -> values.put(id, setting.value.deepCopy()));
+      backend.selectDeferred(values); error = "";
     } catch (Exception failure) {
       error = "Could not save title selection. Check settings recovery.";
       PowerBeta.LOG.error("Could not change title selection", failure);

@@ -27,8 +27,11 @@ final class HudPreview {
   private final InfoHudSettings.Cluster[] clusters = new InfoHudSettings.Cluster[4];
   private StatusSettings status;
   private boolean sampledItem;
+  boolean suppressDebug;
+  private final DebugPreview debugPreview;
   HudPreview(SettingsDraft draft) {
     this.draft = draft;
+    debugPreview = new DebugPreview(draft);
     for (int id : new int[]{1, 3, 5, 45, 50, 257, 267, 260, 345})
       samples.add(ItemCatalogue.resolve(ItemCatalogue.Domain.ITEM, Integer.toString(id)));
     rebuild();
@@ -58,6 +61,7 @@ final class HudPreview {
       }
     }
     GL11.glEnable(GL11.GL_BLEND); GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+    GL11.glAlphaFunc(GL11.GL_GREATER, 0);
     for (int i = 0; i < 5; i++) {
       if (i == 4 && !bool(HudEditorSettings.ITEM_NAMES)) continue;
       String prefix = mode() == 1 ? SIMPLE : nativePrefix(i);
@@ -92,7 +96,7 @@ final class HudPreview {
             SIMPLE + "horizontalPositionOffset", SIMPLE + "verticalPositionOffset"));
       }
     }
-    if (!bool(HudEditorSettings.HUD + "disableCrosshair")) {
+    if (bool(HudEditorSettings.HUD + "disableCrosshair")) {
       GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
       texture(screen, mc, "/gui/icons.png", width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -105,7 +109,7 @@ final class HudPreview {
       screen.text("Inventory", 99, height - 24, 0xffffff);
       elements.add(new Element("layout", "Controller prompts", 10, height - 30, 145, 20, null, null));
     }
-    if (selected.equals("layout") && !bool(HudEditorSettings.TOAST)) {
+    if (scenario != 2 && bool(HudEditorSettings.TOAST)) {
       int x = width - 160;
       texture(screen, mc, "/achievement/bg.png", x, 0, 96, 202, 160, 32);
       screen.text("Achievement get!", x + 30, 7, 0xffff00);
@@ -113,7 +117,7 @@ final class HudPreview {
       icons.draw(screen, mc, samples.get(2), x + 8, 8);
       elements.add(new Element("layout", "Achievement toast", x, 0, 160, 32, null, null));
     }
-    if (selected.equals("chat")) {
+    if (scenario != 2 || selected.equals("chat")) {
       String[] messages = {"<Player> Hello!", "<Player> Welcome back."};
       int count = Math.min(messages.length, Math.max(0, integer(HudEditorSettings.HUD + "chatHistorySize")));
       for (int i = 0; i < count; i++) {
@@ -121,33 +125,23 @@ final class HudPreview {
         screen.rectangle(2, y - 1, Math.min(width - 2, 322), y + 8, 0x80000000);
         screen.text(messages[i], 2, y, 0xffffff);
       }
-      screen.rectangle(2, height - 14, width - 2, height - 2, 0x80000000);
+      int chatWidth = Math.min(width - 4, 320);
+      screen.rectangle(2, height - 14, 2 + chatWidth, height - 2, 0x80000000);
       boolean cursor = !bool("interface.blinkingChatCursor") || System.nanoTime() / 500_000_000L % 2 == 0;
-      screen.text("> Hello" + (cursor ? "_" : ""), 4, height - 12, 0xffffff);
-      elements.add(new Element("chat", "Chat", 2, height - 49 - count * 9, width - 4, 47 + count * 9, null, null));
+      screen.text("> Hello" + (cursor ? "|" : ""), 4, height - 12, 0xffffff);
+      elements.add(new Element("chat", "Chat", 2, height - 49 - count * 9, chatWidth, 47 + count * 9, null, null));
     }
     for (int cluster = 0; cluster < 4; cluster++) {
       String prefix = "infoHud.clusters." + cluster + ".";
       InfoHudSettings.Cluster state = cluster(cluster);
-      List<String> lines = new ArrayList<>();
-      if (state.coordinates || state.direction) lines.add(HudText.location("XYZ: 128 / 64 / -32", "South (+Z)", state.coordinates, state.direction));
-      if (state.biome) lines.add("Biome: Forest");
-      if (state.timeOfDay) lines.add("Time: 10:30 AM");
-      if (state.day) lines.add("Day: 12");
-      if (state.chunk) lines.add("Chunk: 8 / -2");
-      if (state.fps) lines.add("FPS: 120");
+      InfoHudFrame frame = InfoHudFrame.at(state, InfoHudData.sample(), width, height, mc.textRenderer::getWidth);
+      List<String> lines = frame.lines();
       boolean visible = bool("infoHud.enabled") && state.enabled && state.opacity > 0
           && (!state.hideWithDebug || scenario != 2) && !lines.isEmpty();
-      int textWidth = lines.stream().mapToInt(mc.textRenderer::getWidth).max().orElse(mc.textRenderer.getWidth("Info cluster " + (cluster + 1)));
+      int textWidth = lines.isEmpty() ? mc.textRenderer.getWidth("Info cluster " + (cluster + 1)) : frame.textWidth();
       int rows = Math.max(1, lines.size());
       var layout = InfoHudLayout.at(width, height, textWidth, rows, state);
-      if (visible) {
-        GL11.glPushMatrix();
-        try {
-          GL11.glTranslated(layout.x(), layout.y(), 0); GL11.glScaled(state.textSize, state.textSize, 1);
-          for (int row = 0; row < lines.size(); row++) screen.text(lines.get(row), layout.lineX(textWidth, mc.textRenderer.getWidth(lines.get(row))), row * 10, state.argb());
-        } finally { GL11.glPopMatrix(); }
-      }
+      if (visible) InfoHudRenderer.draw(mc, frame);
       elements.add(new Element("cluster." + cluster, "Info cluster " + (cluster + 1), layout.x(), layout.y(),
           textWidth * state.textSize, rows * 10 * state.textSize, prefix + "offsetX", prefix + "offsetY", !visible));
     }
@@ -171,8 +165,8 @@ final class HudPreview {
       if (bool(versionPrefix + "unlicensedCopy")) screen.text("Unlicensed copy", 2, 12, 0xffffff);
       elements.add(new Element("version", "Version label", 2, 2, Math.max(8, mc.textRenderer.getWidth(version)), bool(versionPrefix + "unlicensedCopy") ? 20 : 10, null, null));
     }
-    if (scenario == 2) debug(screen, mc, width);
-    for (Element element : elements) if (element.id.equals(selected) && !element.hidden) {
+    if (scenario == 2 && !suppressDebug) debug(screen, mc, width);
+    for (Element element : elements) if (!element.id.equals("layout") && element.id.equals(selected) && !element.hidden) {
       int x = (int)element.x - 2, y = (int)element.y - 2, r = (int)Math.ceil(element.x + element.width) + 2, b = (int)Math.ceil(element.y + element.height) + 2;
       screen.rectangle(x, y, r, y + 1, 0xffffff66); screen.rectangle(x, b - 1, r, b, 0xffffff66);
       screen.rectangle(x, y, x + 1, b, 0xffffff66); screen.rectangle(r - 1, y, r, b, 0xffffff66);
@@ -191,30 +185,9 @@ final class HudPreview {
     } catch (ReflectiveOperationException e) { throw new IllegalStateException(e); }
   }
   private void debug(UiScreen screen, Minecraft mc, int width) {
-    List<DebugOverlay.Line> lines = new ArrayList<>();
-    String[] nativeLines = {"Minecraft Beta 1.7.3 (120 fps)", "C: 256/1024. F: 64, O: 12, E: 2", "E: 8/32. B: 0, I: 32"};
-    for (int row = 0; row < nativeLines.length; row++) lines.add(new DebugOverlay.Line(nativeLines[row], 2, 2 + row * 10, 0));
-    int coordinates = integer("power_hud:config.coordinateDisplay");
-    if (coordinates != 1) {
-      String[] location = coordinates == 2 ? new String[]{"x: -182.137", "y: 372.069", "z: -41.925"}
-          : new String[]{"x: 128.000", bool("interface.useFeetYCoordinates") ? "y: 64.000" : "y: 65.620", "z: -32.000"};
-      for (int row = 0; row < location.length; row++) lines.add(new DebugOverlay.Line(location[row], 2, 64 + row * 8, 0));
-    }
-    int extra = integer("power_compat:config.overlayAdditionsYOffset");
-    String[] ids = {"addTotalPlayTimeToDebugOverlay", "addBlockLightToDebugOverlay", "addBiomeToDebugOverlay",
-        "addDayCounterToDebugOverlay", "addSlimeChunkToDebugOverlay", "addFacingToDebugOverlay"};
-    String[] labels = {"Play Time: 3 hours", "Block light: 0", "Biome: Forest", "Day: 12", "Slime Chunk: false", "Facing: south (+Z)"};
-    int[] ys = {96, 112, 120, 128, 136, 144};
-    for (int i = 0; i < ids.length; i++) if (bool("power_compat:config." + ids[i]))
-      lines.add(new DebugOverlay.Line(labels[i], 2, ys[i] + extra, 0));
-    if (bool("interface.debugTimeOfDay")) lines.add(new DebugOverlay.Line("Time: 10:30 AM", 2, 144, 0));
-    if (bool("entityculling:config.showF3Info")) lines.add(new DebugOverlay.Line("Culling: 8 visible, 24 hidden", 2, 160 + integer("entityculling:config.f3InfoYOffset"), 0));
-    if (bool("power_environment:config.MUSIC_CONFIG.overlayForMusicInDebug"))
-      lines.add(new DebugOverlay.Line("Music: C418 - Sweden", 2, 152 + integer("power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset"), 0));
-    if (bool("power_client_fixes:config.enableDebugMenuWorldSeed")) lines.add(new DebugOverlay.Line("Seed: 123456789", 2, 88, 0));
-    lines.add(new DebugOverlay.Line("64-bit Java", Math.max(2, width - mc.textRenderer.getWidth("64-bit Java") - 2), 2, 0));
-    int color = local.luke.power.light.LightSettings.rgb(string("interface.debugTextColor"));
-    for (var line : DebugOverlay.arrange(lines, width, mc.textRenderer::getWidth)) screen.text(line.text(), line.x(), line.y(), color);
-    elements.add(new Element("debug", "F3 information", 2, 2, Math.min(width - 4, 210), 154 + Math.max(0, extra), null, null));
+    var lines = debugPreview.draw(mc, width).stream().filter(line -> !line.id().isEmpty()).toList();
+    double right = lines.stream().mapToDouble(line -> line.x() + line.width()).max().orElse(20);
+    double bottom = lines.stream().mapToDouble(line -> line.y() + 10 * draft.get("interface.debugTextSize").value.getAsDouble()).max().orElse(12);
+    elements.add(new Element("debug", "F3 information", 2, 2, Math.max(18, right - 2), Math.max(10, bottom - 2), null, null));
   }
 }

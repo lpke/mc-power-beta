@@ -12,6 +12,11 @@ public final class TitleLogos {
 
     private TitleLogos() {}
 
+    public static void prepare(Minecraft minecraft) {
+        for (String file : new String[]{"beta.png", "java_2017.png", "java_2020.png", "modern.png", "edition.png", "edition_modern.png"})
+            minecraft.textureManager.getTextureId(ROOT + file);
+    }
+
     public static boolean contains(int x, int y, int width) {
         int style = TitleFeatures.style.get();
         double scale = Math.min(1, Math.max(1, width - 20) / 310.0);

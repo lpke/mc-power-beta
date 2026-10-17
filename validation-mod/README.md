@@ -8,6 +8,16 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-240 hud` checks search editing/navigation, responsive previews, draft isolation,
+  individual resets, title grid sliders, click sounds and temporary F3 reorder/Undo/gaps.
+  `release-240 menus` checks title versions, logo clicks while the settings writer is
+  stalled, Interface rows, native world rename and metadata preservation. Create a
+  disposable world first, then return with `title`. Run `save`, restart and `saved`
+  through `release-240` for F3 ordering/visibility/size persistence.
+- `release-240 forest` locates untouched generated Forest terrain with 12-chunk
+  rendering, noon and clear weather. Capture the settled native window at 2560x1440
+  without overlays or image edits for the HUD asset.
+
 - `release-230 refinements` checks native title clicks through every preset/style, reverse cycling and retained retro data; inline custom version text; a continuous panorama clock; and pixel-identical native dirt headers/footers.
 - `hud-responsive-230 layout`, `ghosts` and `drafts` cover responsive splits, the background switch, delayed tooltips, disabled-cluster outlines and dragging, individual resets with Undo, and nested colour isolation with automatic/manual Apply and Save/Discard. Use an isolated display and client of at least 3440×1920 for the large captures.
 - `hud-responsive-230 forest` prepares an anonymous forest-biome scene for a clean native-renderer background capture. Use a muted disposable instance at 2560×1440; keep the HUD hidden and first-person view. Capture only the scene, never menus or fixture output.

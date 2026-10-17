@@ -12,7 +12,7 @@ class HudEditorSectionsTest {
         new JsonPrimitive(0), new JsonPrimitive(0), -4096, 4096, 1, List.of(), false);
   }
   @Test void positionResetIncludesAnchorsAndProviderOffsetsButNeverModeVisibilityOrContent() {
-    for (String id : List.of("infoHud.clusters.0.position", "infoHud.clusters.3.offsetX", "activeTweaks.offsetY",
+    for (String id : List.of("interface.debugOrder", "infoHud.clusters.0.position", "infoHud.clusters.3.offsetX", "activeTweaks.offsetY",
         "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPosition",
         "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPositionOffset",
         "power_hud:hudpositions.putStatusBarIconsBelowHotbar", "power_compat:config.overlayAdditionsYOffset",

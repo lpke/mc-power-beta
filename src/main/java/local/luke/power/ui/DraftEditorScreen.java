@@ -57,6 +57,8 @@ abstract class DraftEditorScreen extends UiScreen {
   protected void reset() { controls().forEach(Setting::reset); }
   protected void resetFinished() {}
   protected void afterEdit() {}
+  protected void undo() { stopGesture(); draft.undo(); afterEdit(); }
+  protected boolean canUndo() { return draft.canUndo(); }
   protected void valueChanged(Setting s) { afterEdit(); }
   protected String hint() { return "Click an element to edit it. Drag to move. Arrow keys fine-tune."; }
   protected String resetLabel() { return "Reset..."; }
@@ -114,6 +116,7 @@ abstract class DraftEditorScreen extends UiScreen {
   }
   protected void edit(Setting s, int direction, int y) {
     draft.checkpoint(); error = "";
+    click();
     if (s.kind == Setting.Kind.BOOLEAN || s.kind == Setting.Kind.CHOICE) { s.cycle(direction); valueChanged(s); }
     else if (ColourScreen.accepts(s)) {
       Setting colours = draft.settings().stream().filter(value -> value.id.equals(HudEditorSettings.COLOURS)).findFirst().orElse(null);
@@ -134,7 +137,7 @@ abstract class DraftEditorScreen extends UiScreen {
     if (inline.key(c, key)) return;
     if (key == Keyboard.KEY_ESCAPE) { leave(); return; }
     if ((Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL)) && key == Keyboard.KEY_Z) {
-      stopGesture(); draft.undo(); afterEdit(); return;
+      undo(); return;
     }
     editorKey(c, key);
   }
@@ -163,10 +166,10 @@ abstract class DraftEditorScreen extends UiScreen {
     for (int i = 0; i < sizes.length; i++) {
       if (i == sizes.length - 2) x = right() - sizes[i] - sizes[i + 1] - 4;
       String label = labels.get(i);
-      Runnable action = i == 0 ? () -> { stopGesture(); draft.undo(); afterEdit(); }
+      Runnable action = i == 0 ? this::undo
           : i == 1 ? () -> { stopGesture(); resetPrompt = true; }
           : i == sizes.length - 2 ? this::leave : i == sizes.length - 1 ? this::save : this::extraFooterAction;
-      buttons.add(new Footer(label, x, sizes[i], action, i != 0 || draft.canUndo())); x += sizes[i] + 4;
+      buttons.add(new Footer(label, x, sizes[i], action, i != 0 || canUndo())); x += sizes[i] + 4;
     }
     return buttons;
   }
@@ -200,7 +203,7 @@ abstract class DraftEditorScreen extends UiScreen {
     if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent))) return;
     if (resetPrompt) {
       if (button == 0) for (ResetButton f : resetButtons()) if (inside(x, y, f.x, f.y, f.width, 20)) {
-        if (f.enabled) f.action.run(); break;
+        if (f.enabled) { click(); f.action.run(); } break;
       }
       return;
     }
@@ -230,6 +233,7 @@ abstract class DraftEditorScreen extends UiScreen {
         if (resettable(s) && x >= resetX()) {
           if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !s.value.equals(s.defaultValue)) {
             draft.checkpoint(); error = ""; s.reset(); valueChanged(s);
+            click();
           }
           return;
         }
@@ -241,7 +245,7 @@ abstract class DraftEditorScreen extends UiScreen {
       return;
     }
     if (button == 0) for (Footer f : footer()) if (inside(x, y, f.x, height - 29, f.width, 20)) {
-      if (f.enabled) f.action.run(); return;
+      if (f.enabled) { click(); f.action.run(); } return;
     }
     previewClick(x, y, button);
   }
@@ -271,7 +275,7 @@ abstract class DraftEditorScreen extends UiScreen {
     beforeRender(mx, my); inline.beginFrame();
     if (slider != null) { if (Mouse.isButtonDown(0)) slide(mx); else slider = null; }
     scroll = Math.max(0, Math.min(track().maximum(), bar.drag(track(), my, !modal() && Mouse.isButtonDown(0))));
-    renderBackground(); drawCenteredTextWithShadow(textRenderer, title(), width / 2, 13, 0xffffff); renderToolbar(mx, my);
+    renderBackground(); titleBar(title()); renderToolbar(mx, my);
     fill(controlsLeft(), controlsTop() - 2, controlsRight(), controlsBottom(), 0x80000000);
     List<ControlRow> rows = controlRows(); StickyHeader sticky = stickyHeader(rows);
     int rowsTop = sticky == null ? controlsTop() : Math.max(controlsTop(), sticky.y() + sticky.height());

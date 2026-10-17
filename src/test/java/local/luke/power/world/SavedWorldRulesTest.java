@@ -73,6 +73,24 @@ class SavedWorldRulesTest {
     assertArrayEquals(original, Files.readAllBytes(level));
     assertFalse(Files.exists(game.resolve("power-beta-data/settings-backups")));
   }
+  @Test void renamePreservesRulesPlayerDataAndPreviousMetadataAndRejectsConcurrentChanges() throws Exception {
+    byte[] previous = Files.readAllBytes(old);
+    var world = open(); var rules = world.rules();
+    world.rename("  A new name  ");
+    assertEquals("A new name", world.name());
+    var data = WorldRuleFiles.read(level).getCompound("Data");
+    assertEquals("A new name", data.getString("LevelName"));
+    assertEquals(rules, WorldRuleData.read(data));
+    assertEquals("untouched", data.getCompound("Player").getString("NativeInventoryData"));
+    assertEquals("SURVIVAL", data.getCompound("Player").getString("PowerBetaGameMode"));
+    assertEquals(987654321L, data.getLong("Time"));
+    assertArrayEquals(previous, Files.readAllBytes(old));
+    byte[] named = Files.readAllBytes(level);
+    assertThrows(IOException.class, () -> world.rename("   ")); assertArrayEquals(named, Files.readAllBytes(level));
+    var external = WorldRuleFiles.read(level); external.getCompound("Data").putString("LevelName", "External edit"); write(level, external);
+    byte[] changed = Files.readAllBytes(level);
+    assertThrows(IOException.class, () -> world.rename("Replace")); assertArrayEquals(changed, Files.readAllBytes(level));
+  }
   @Test void changedMetadataAndLoadedWorldsBlockWrites() throws Exception {
     var session = SavedWorldBackend.open(open()); edit(session, GameRule.ALLOW_SLEEP, false);
     var root = WorldRuleFiles.read(level); root.getCompound("Data").putLong("Time", 333); write(level, root);

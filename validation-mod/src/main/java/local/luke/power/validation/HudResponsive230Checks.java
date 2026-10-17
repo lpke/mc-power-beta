@@ -90,7 +90,7 @@ final class HudResponsive230Checks {
       byte[] bytes=Files.readAllBytes(PowerConfig.path());var before=live(mc);
       for(int[] size:new int[][]{{320,240},{640,420},{960,540},{1720,720},{540,960}}){
         shot(mc,hud,"layout-"+size[0]+"-"+size[1],size[0],size[1]);
-        check((boolean)get(hud,"background"),"background should start enabled");
+        check(!(boolean)get(hud,"background"),"background should start disabled");
         var ids=(List<String>)call(hud,"selectionIds");check(!ids.contains("crosshair")&&!ids.contains("prompts")&&!ids.contains("toast"),"general controls remain in the selector");
         select(hud,"layout");var controls=(List<Setting>)call(hud,"controls");
         for(String id:List.of("power_hud:config.disableCrosshair","power_hud:config.drawXboxXAndYButtons","power_controls:userinterface.hideAchievementToast"))check(controls.stream().anyMatch(s->s.id.equals(id)),"General missed "+id);
@@ -98,7 +98,7 @@ final class HudResponsive230Checks {
         for(int i=0;i<4;i++){click(hud,left+sw+12,38,0);int scenario=(int)get(hud,"scenario");check(scenario==0||scenario==2,"underwater remains a separate scenario");}
         values.get(HudEditorSettings.ENTRY).value=new com.google.gson.JsonPrimitive(2);refresh(hud);hud.render(-1,-1,0);
         element(hud,"native.3");check((int)get(hud,"scenario")==0,"Normal not selected");
-        var snapshot=values.snapshot();click(hud,left+sw+150,38,0);check(!(boolean)get(hud,"background"),"Bg button missed");
+        var snapshot=values.snapshot();click(hud,left+sw+150,38,0);check((boolean)get(hud,"background"),"Bg button missed");
         SettingsSnapshot.render(mc,hud,size[0],size[1],REPORT.resolve("solid-"+size[0]+".png"));
         check(values.snapshot().equals(snapshot),"preview background changed a saved setting");click(hud,left+sw+150,38,0);
         boolean horizontal=(boolean)call(call(hud,"geometry"),"horizontal");int x=horizontal?n(hud,"controlsRight")+5:left+15,y=horizontal?100:n(hud,"controlsBottom")+5;
@@ -132,7 +132,8 @@ final class HudResponsive230Checks {
       int count=0;for(Object e:elements(hud))if(((String)call(e,"id")).startsWith("cluster.")){check((boolean)call(e,"hidden"),"disabled HUD rendered a cluster");count++;}check(count==4,"missing hidden cluster outlines");
       Object e=element(hud,"cluster.1");double scale=d(hud,"scale"),cx=d(hud,"canvasX"),cy=d(hud,"canvasY");int x=(int)Math.round(cx+(d(e,"x")+d(e,"width")/2)*scale),y=(int)Math.round(cy+(d(e,"y")+d(e,"height")/2)*scale);
       int old=values.get("infoHud.clusters.1.offsetX").value.getAsInt();click(hud,x,y,0);((ScreenInput)(Object)hud).power$release(x+15,y+5,0);
-      check(get(hud,"selected").equals("cluster.1")&&values.get("infoHud.clusters.1.offsetX").value.getAsInt()==old,"first selection dragged a hidden cluster");
+      check(!get(hud,"selected").equals("cluster.1")&&values.get("infoHud.clusters.1.offsetX").value.getAsInt()==old,"unselected hidden cluster claimed a click");
+      select(hud,"cluster.1");hud.render(-1,-1,0);
       click(hud,x,y,0);((ScreenInput)(Object)hud).power$release(x+15,y+5,0);
       check(values.get("infoHud.clusters.1.offsetX").value.getAsInt()>old,"hidden cluster did not drag");
       check(!values.get("infoHud.enabled").value.getAsBoolean()&&!values.get("infoHud.clusters.1.enabled").value.getAsBoolean(),"drag enabled a hidden cluster");
@@ -157,7 +158,7 @@ final class HudResponsive230Checks {
             var original=s.value.deepCopy();
             // Keep already-modified conditional rows visible, especially Vanilla's mode selector.
             if(s.value.equals(s.defaultValue)) {
-              if(s.kind==Setting.Kind.TEXT)s.value=new com.google.gson.JsonPrimitive(ColourScreen.accepts(s)?"#224466":"Custom preview");else s.cycle(1);
+              if(s.kind==Setting.Kind.TEXT)s.value=new com.google.gson.JsonPrimitive(ColourScreen.accepts(s)?"#224466":"Custom preview");else if(s.kind==Setting.Kind.LIST){var array=s.value.getAsJsonArray().deepCopy();var a=array.get(0);array.set(0,array.get(1));array.set(1,a);s.value=array;}else s.cycle(1);
             }
             check(!s.value.equals(s.defaultValue),"unchanged reset fixture "+s.id);var snapshot=values.snapshot();
             int y=expose(mc,hud,s);click(hud,n(hud,"resetX")+8,y+7,0);check(s.value.equals(s.defaultValue),"R failed for "+s.id);

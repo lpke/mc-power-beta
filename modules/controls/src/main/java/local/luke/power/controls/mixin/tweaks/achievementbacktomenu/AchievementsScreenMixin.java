@@ -14,11 +14,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class AchievementsScreenMixin extends Screen {
     @Inject(method = "buttonClicked", at = @At(value = "HEAD"), cancellable = true)
     public void redirectToGameMenu(ButtonWidget button, CallbackInfo ci) {
-        if (ControlFeatures.USER_INTERFACE_CONFIG.achievementBackToMenu) {
-            if (button.id == 1) {
-                this.minecraft.setScreen(new GameMenuScreen());
-                ci.cancel();
-            }
+        if (button.id == 1) {
+            this.minecraft.setScreen(new GameMenuScreen());
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    private void power$back(char character, int key, CallbackInfo ci) {
+        if (key == org.lwjgl.input.Keyboard.KEY_ESCAPE || key == minecraft.options.inventoryKey.code) {
+            minecraft.setScreen(new GameMenuScreen()); ci.cancel();
         }
     }
 }

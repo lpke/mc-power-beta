@@ -265,8 +265,9 @@ public final class PowerOptionsScreen extends UiScreen {
         : !ControlLinks.controls(session, setting).isEmpty();
   }
   private int mainControlLeft(Row row) {
-    return controlLeft(row) + (soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
+    return controlLeft(row) + (customise(row.setting) ? 66 : soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
   }
+  private boolean customise(Setting s) { return s.id.equals("logo.style") && s.value.getAsInt() == 0; }
   private boolean canClear() { return libraryVisible() ? library.hasQuery() : !search.text().isBlank() || filtered(); }
   private int sectionButtonX() { return right() - 32; }
   private int clearSearchX() { return sectionButtonX() - 22; }
@@ -316,7 +317,6 @@ public final class PowerOptionsScreen extends UiScreen {
     conflictIds = List.of(); changedOnly = false; search.setText(""); scroll = 0;
     layout();
   }
-  private void click() { minecraft.soundManager.method_2009("random.click", 1, 1); }
   private void related(Setting key) {
     Setting target = ControlLinks.related(session, key);
     if (target == null) return;
@@ -333,6 +333,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void openGroup(Setting setting) {
+    if (HudEditorSettings.contains(setting)) { minecraft.setScreen(new HudEditorScreen(this, setting.id)); return; }
     rememberPosition();
     pushView();
     page = setting.page;
@@ -418,6 +419,8 @@ public final class PowerOptionsScreen extends UiScreen {
     String query = search.text().strip().toLowerCase(Locale.ROOT);
     int cluster = session.settings().stream().filter(s -> s.id.equals("infoHud.selectedCluster"))
         .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(0);
+    int hudMode = session.settings().stream().filter(s -> s.id.equals(HudEditorSettings.ENTRY))
+        .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(1);
     Map<String, List<Setting>> groups = new LinkedHashMap<>();
     List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
     List<Setting> candidates = listed.isEmpty() ? SettingsLayout.ordered(session.settings()) : listed.stream()
@@ -428,14 +431,15 @@ public final class PowerOptionsScreen extends UiScreen {
         !s.group.equals("Individual music tracks") && !s.group.equals("Track rotation")
             && !s.id.startsWith("audio.sound.music:")).toList();
     if (!query.isEmpty() && listed.isEmpty()) {
-      for (Setting s : candidates) scores.put(s.id, FuzzySearch.score(query, s.label, s.description + " " + s.group + " " + s.page));
+      for (Setting s : candidates) scores.put(s.id, FuzzySearch.score(query, s.label, s.description + " " + s.group + " " + s.page
+          + (HudEditorSettings.contains(s) ? " HUD editor " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode)) : "")));
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
     }
     for (Setting s : candidates) {
       if (HudEditorSettings.internal(s)) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
           && (HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY)
-              || HudEditorSettings.lettering(s) && !s.id.equals("logo.logo.lines"))) continue;
+              || HudEditorSettings.lettering(s))) continue;
       if (!SettingAccess.visible(session, s) || !selectedPreset(s)) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
           && !local.luke.power.config.backend.InfoHudBackend.selected(s, cluster)) continue;
@@ -445,7 +449,9 @@ public final class PowerOptionsScreen extends UiScreen {
       if ((!changedOnly || s.changed()) && (!listed.isEmpty() || (query.isEmpty()
           ? changedOnly || s.page.equals(page)
           : scores.getOrDefault(s.id, FuzzySearch.NONE) < FuzzySearch.NONE)))
-        groups.computeIfAbsent(query.isEmpty() && !changedOnly ? s.group : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
+        groups.computeIfAbsent(query.isEmpty() && !changedOnly ? s.group
+            : HudEditorSettings.contains(s) ? "Interface / HUD editor / " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode))
+            : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
     }
     List<Row> next = new ArrayList<>();
     int y = 0, rowHeight = span() < 340 ? 40 : 24;
@@ -726,12 +732,13 @@ public final class PowerOptionsScreen extends UiScreen {
           search.setText(""); changedOnly = false; scroll = 0; layout(); return;
         }
         if (x >= controlLeft(r) && x < mainControlLeft(r)) {
-          if (soundPreview(s)) local.luke.power.audio.AudioController.previewSound(previewId(s));
+          if (customise(s)) { click(); minecraft.setScreen(new TitleLetteringScreen(this)); }
+          else if (soundPreview(s)) local.luke.power.audio.AudioController.previewSound(previewId(s));
           else { click(); if (s.kind == Setting.Kind.KEY) related(s); else linkedControls(s); }
           return;
         }
         if (x < mainControlLeft(r) || x >= right() - 38) return;
-        if (HudEditorSettings.contains(s) || HudEditorSettings.lettering(s) || ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
+        if (s.id.equals(HudEditorSettings.ENTRY) || HudEditorSettings.lettering(s) || ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
         else if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0 && s.slider()) {
             dragging = s;
@@ -797,7 +804,11 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!SettingAccess.reason(session, s).isEmpty()) return;
     error = "";
     click();
-    if (HudEditorSettings.contains(s)) {
+    if (s.id.equals("interface.debugOrder")) {
+      var editor = new HudEditorScreen(this, s.id);
+      minecraft.setScreen(editor); editor.beginReorder(); return;
+    }
+    if (s.id.equals(HudEditorSettings.ENTRY)) {
       minecraft.setScreen(new HudEditorScreen(this, s.id));
       return;
     }
@@ -820,7 +831,7 @@ public final class PowerOptionsScreen extends UiScreen {
       minecraft.setScreen(ItemEditors.screen(this, s));
       return;
     }
-    if (s.numeric() && !s.slider()) {
+    if (s.numeric() && !s.slider() || s.kind == Setting.Kind.TEXT && !ColourScreen.accepts(s)) {
       Row row = rows.stream().filter(r -> r.setting == s).findFirst().orElseThrow();
       int y = top() + row.y - (int) scroll + (row.height == 40 ? 16 : 2);
       valueEditor.begin(s, s, () -> changed(s), mainControlLeft(row), y,
@@ -976,6 +987,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private String value(Setting s) {
+    if (s.id.equals("interface.debugOrder")) return "Reorder";
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("logo.logo.lines")) return "Edit...";
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) return local.luke.power.input.PanoramaCatalog.label(s.value.getAsString());
@@ -1152,7 +1164,7 @@ public final class PowerOptionsScreen extends UiScreen {
       List<Setting> conflicts = conflicts(s);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
       int valueEnd = right() - 38;
-      if (numeric && editable && valueEditor.editing(s))
+      if (editable && valueEditor.editing(s))
         valueEditor.render(this, controlLeft, cy, valueEnd - controlLeft, mx, listMouseY, rowsTop, bottom());
       else if (s.slider() && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
           (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
@@ -1163,7 +1175,8 @@ public final class PowerOptionsScreen extends UiScreen {
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, editable);
       button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !s.value.equals(s.defaultValue));
-      if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, listMouseY, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
+      if (customise(s)) button("Customise", controlLeft(row), cy, 62, 18, mx, listMouseY, editable);
+      else if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, listMouseY, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
@@ -1172,7 +1185,7 @@ public final class PowerOptionsScreen extends UiScreen {
         else if (!conflicts.isEmpty() && inside(mx, listMouseY, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
-          tip = soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
+          tip = customise(s) ? "Paint and customise the retro title lettering." : soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = Tooltips.setting(s, valueEditor.editing(s) ? valueEditor.help()
             : ItemEditors.accepts(s) ? "Choose from the item or block list."
             : numeric && mx >= controlLeft ? s.slider() ? "Right-click to enter an exact value." : "Click to enter an exact value." : "");

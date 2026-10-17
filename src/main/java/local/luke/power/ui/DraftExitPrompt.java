@@ -30,6 +30,7 @@ final class DraftExitPrompt {
     if (!active) return false;
     if (button == 0) for (int i = 0; i < 3; i++)
       if (screen.inside(x, y, buttonX(screen, i), screen.height / 2 + 8, buttonWidth(screen), 20)) {
+        screen.click();
         active = false;
         if (i == 0) save.run();
         else if (i == 1) discard.run();

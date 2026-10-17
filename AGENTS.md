@@ -55,6 +55,11 @@
   Creative starting mode lacks permission.
   Update linked values together. Preserve search, scroll, related-view history and
   modifier ownership when rebuilding rows. Share render and hit-test geometry.
+- Settings in other screens and menus reuse the main Options controls and behavior:
+  inline text/numeric editing with check/Enter commit and Escape cancel, bounded
+  sliders with right-click exact entry, individual resets and isolated editor drafts.
+  Play the native UI click sound for buttons, tabs, toggles and confirmations.
+  Slider movement, pointer selection, dragging and silent group chevrons stay quiet.
 - `settings-layout.json` owns tab/group order; catalogue `order` values arrange
   settings inside groups. Presentation metadata applies to every adapter without
   changing storage IDs. Keep the flight sprint binding shared; Creative, Spectator and freecam own separate sprint preferences.
@@ -413,7 +418,9 @@
 
 - Title, panorama picker and other main-menu backgrounds share one animation clock.
   Native scrolling lists keep dirt header/footer textures over the panorama. Title clicks
-  cycle a retained retro draft, stable preset IDs and official styles through ConfigSession.
+  cycle a retained retro draft, stable preset IDs and official styles. Validate the full
+  selection and queue its immutable snapshot through PowerConfig; never back up, read
+  or flush settings on a logo click. Prepare title textures before interactive cycling.
   Brush pickers may opt into filtered instant selection; other pickers retain draft exits.
   HUD/title inline edits and underline tabs use shared controls. HUD divider drags are
   visit-local, cancel on focus loss and always retain controls and preview space.
@@ -430,6 +437,14 @@
 
 - HUD editor layout shares one geometry model for controls, scrollbars, dividers and
   preview input. Preview coordinates retain the window aspect ratio in both split
-  orientations. Hidden info clusters stay selectable without enabling them. Preview
+  orientations. Only the selected hidden info cluster has an empty outline and hit
+  target; selection never enables it. Preview
   backgrounds are cached captures, never a second live world. Nested colour swatches
   stay in the HUD draft and share its Undo, Done and Discard boundary.
+- Info-cluster previews use the gameplay formatter, clipping, anchors and renderer.
+  F3 left-side rows use stable IDs, individual visibility and a bounded saved order
+  with explicit gap rows. Reorder keeps a temporary draft at GUI font size; Save or
+  an outside click accepts it into the HUD draft as one undoable edit. Preserve
+  unknown IDs during reordering and frozen legacy offsets; right-side information keeps native placement.
+  HUD scene backgrounds default off and use an untouched native-renderer capture at
+  12 chunks in clear daytime Forest terrain, without loading a second world in menus.

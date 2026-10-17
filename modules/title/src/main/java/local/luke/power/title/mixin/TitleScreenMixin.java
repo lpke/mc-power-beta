@@ -10,6 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = TitleScreen.class, priority = 56676)
 public class TitleScreenMixin extends net.minecraft.client.gui.screen.Screen {
     @Unique private final TitleLogoRenderer power$titleRenderer = new TitleLogoRenderer();
+    @Inject(method = "init", at = @At("TAIL"))
+    private void power_title$prepare(CallbackInfo ci) { TitleLogos.prepare(minecraft); }
     @Redirect(method = "render(IIF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/TitleScreen;drawTexture(IIIIII)V"))
     private void power_title$cancelOriginal(TitleScreen instance, int x, int y, int u, int v, int w, int h) {
         if (w != 155 || h != 44) instance.drawTexture(x, y, u, v, w, h);

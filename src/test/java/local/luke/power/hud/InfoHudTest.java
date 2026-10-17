@@ -69,4 +69,19 @@ class InfoHudTest {
     assertEquals("(-Z, N)", HudText.location(coordinates, HudText.direction(180), false, true));
     assertEquals("", HudText.location(coordinates, HudText.direction(0), false, false));
   }
+  @Test void editorDataUsesGameplayFormattingAndSharedClipping() {
+    var cluster = new InfoHudSettings.Cluster();
+    cluster.coordinates = true; cluster.direction = true; cluster.biome = true; cluster.timeOfDay = true;
+    var data = InfoHudData.sample();
+    var lines = data.lines(cluster);
+    assertEquals("128, 64, -32 (Z, S)", lines.get(0));
+    assertFalse(lines.stream().anyMatch(line -> line.contains("XYZ")));
+    for (double size : new double[]{.5, 1, 3}) {
+      cluster.textSize = size;
+      var frame = InfoHudFrame.at(cluster, data, 80, 60, text -> text.length() * 6);
+      assertTrue(frame.textWidth() * size <= 72);
+      assertTrue(frame.lines().size() * 10 * size <= 52);
+      assertEquals(cluster.argb(), frame.argb());
+    }
+  }
 }

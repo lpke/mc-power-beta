@@ -183,8 +183,8 @@ final class HudMenu230Checks {
         String[] ids={"crosshair","prompts","toast","native.4"};
         String[] fields={"power_hud:config.disableCrosshair","power_hud:config.drawXboxXAndYButtons","power_controls:userinterface.hideAchievementToast","power_hud:config.enableHotbarItemSelectionTooltips"};
         for(int i=0;i<ids.length;i++)for(boolean visible:new boolean[]{true,false}){
-          String id=ids[i];boolean negative=i==0||i==2;
-          local.get(fields[i]).value=new JsonPrimitive(visible!=negative);select(hud,i==3?"combined":"layout");refresh(hud);
+          String id=ids[i];
+          local.get(fields[i]).value=new JsonPrimitive(visible);select(hud,i==3?"combined":"layout");refresh(hud);
           SettingsSnapshot.render(mc,hud,640,420,REPORT.resolve("preview-"+id+"-"+visible+".png"));
           List<?> elements=(List<?>)call(get(hud,"preview"),"elements");
           if(i<3){boolean found=false;String name=new String[]{"Crosshair","Controller prompts","Achievement toast"}[i];for(Object e:elements)if(call(e,"label").equals(name))found=true;check(found==visible,"preview ignores "+fields[i]);}

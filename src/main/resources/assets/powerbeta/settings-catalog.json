@@ -2,35 +2,36 @@
   "power_capture:config.addBasicScreenshotsToClipboard": {
     "page": "Interface",
     "group": "Screenshots",
-    "label": "Add basic screenshots to clipboard",
+    "label": "Add normal screenshots to clipboard",
     "description": "",
     "default": true,
-    "restart": false
+    "restart": false,
+    "order": 0
   },
   "power_capture:config.customResolutionPhotoHeight": {
     "page": "Interface",
-    "group": "Custom screenshots",
-    "label": "Height, pixels",
+    "group": "Screenshots",
+    "label": "Custom screenshot height (px)",
     "description": "",
     "default": 2240,
     "restart": false,
     "min": 16,
     "max": 16384,
     "step": 1,
-    "order": 1,
+    "order": 2,
     "control": "number"
   },
   "power_capture:config.customResolutionPhotoWidth": {
     "page": "Interface",
-    "group": "Custom screenshots",
-    "label": "Width, pixels",
+    "group": "Screenshots",
+    "label": "Custom screenshot width (px)",
     "description": "",
     "default": 7680,
     "restart": false,
     "min": 16,
     "max": 16384,
     "step": 1,
-    "order": 0,
+    "order": 1,
     "control": "number"
   },
   "power_capture:config.disableRenderingNetherBedrock": {
@@ -306,9 +307,9 @@
   "power_hud:config.disableCrosshair": {
     "page": "Interface",
     "group": "General HUD",
-    "label": "Disable crosshair",
+    "label": "Show crosshair",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false
   },
   "power_hud:config.disableVignette": {
@@ -634,12 +635,13 @@
   },
   "power_hud:hudpositions.hudPositioningSystem": {
     "page": "Interface",
-    "group": "General HUD",
+    "group": "General",
     "label": "HUD editor",
     "description": "Arrange and preview the HUD, custom info, active tweaks, version label and F3 debug information.",
     "default": 1,
     "restart": false,
-    "order": -1
+    "order": 0,
+    "separatorAfter": true
   },
   "power_hud:hudpositions.putOverlayMessagesBelowHotbar": {
     "page": "Interface",
@@ -999,11 +1001,12 @@
   },
   "power_client_fixes:config.disableServerListIpAddresses": {
     "page": "Interface",
-    "group": "Menus",
+    "group": "General",
     "label": "Hide server IP addresses",
     "description": "Hides IP addresses for the server list only",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 2
   },
   "power_client_fixes:config.disableStatsChecksumVerification": {
     "page": "Fixes",
@@ -1040,10 +1043,10 @@
   "power_client_fixes:config.enableDebugMenuWorldSeed": {
     "page": "Interface",
     "group": "Debug (F3) info",
-    "label": "Debug menu world seed",
-    "description": "Restart required for changes to take effect",
+    "label": "World seed",
+    "description": "Include world seed in the left-side F3 information.",
     "default": true,
-    "restart": true
+    "restart": false
   },
   "power_client_fixes:config.enableMultiplayerServerChanges": {
     "page": "Fixes",
@@ -1263,8 +1266,8 @@
   "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebug": {
     "page": "Interface",
     "group": "Debug (F3) info",
-    "label": "Show music in debug",
-    "description": "Show the current track in the F3 debug overlay.",
+    "label": "Current music",
+    "description": "Include current music in the left-side F3 information.",
     "default": false,
     "restart": false
   },
@@ -1402,7 +1405,7 @@
     "group": "Weather",
     "label": "Sleep only resets weather when raining",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 5
   },
@@ -1558,11 +1561,12 @@
   },
   "station-api-configuration:config.loadingScreenOption": {
     "page": "Interface",
-    "group": "Menus",
+    "group": "General",
     "label": "Loading screen style",
     "description": "",
     "default": 0,
-    "restart": false
+    "restart": false,
+    "order": 1
   },
   "power_controls:bugfixes.bitDepthFix": {
     "page": "Fixes",
@@ -2384,25 +2388,18 @@
   },
   "power_controls:userinterface.showQuitButton": {
     "page": "Interface",
-    "group": "Menus",
+    "group": "General",
     "label": "Show quit button",
     "description": "Shows Quit Button on the Main Menu",
     "default": true,
-    "restart": true
+    "restart": true,
+    "order": 4
   },
   "power_controls:userinterface.hideAchievementToast": {
     "page": "Interface",
     "group": "Menus",
-    "label": "Hide achievement toast",
+    "label": "Show achievement toasts",
     "description": "",
-    "default": false,
-    "restart": false
-  },
-  "power_controls:userinterface.achievementBackToMenu": {
-    "page": "Interface",
-    "group": "Menus",
-    "label": "Achievement screen back to menu",
-    "description": "Done button will lead to Game Menu instead of unpausing",
     "default": true,
     "restart": false
   },
@@ -2425,11 +2422,12 @@
   },
   "power_controls:userinterface.clearTextFieldWithRightClick": {
     "page": "Interface",
-    "group": "Menus",
+    "group": "General",
     "label": "Clear text field with right click",
     "description": "Right clicking on a text field will clear it",
     "default": false,
-    "restart": false
+    "restart": false,
+    "order": 5
   },
   "power_controls:userinterface.versionTextConfig.showVersionTextIngame": {
     "page": "Interface",
@@ -2460,7 +2458,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta | Minecraft Beta 1.7.3",
+    "default": "Power Beta 2.4.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -2474,29 +2472,30 @@
   },
   "power_controls:userinterface.panoramaConfig.blurBackground": {
     "page": "Interface",
-    "group": "Title background",
+    "group": "Title screen",
     "label": "Blur panorama",
     "description": "",
     "default": false,
     "restart": false,
-    "order": 1
+    "order": 2
   },
   "power_controls:userinterface.panoramaConfig.panoramaFolder": {
     "page": "Interface",
-    "group": "Title background",
-    "label": "Panorama",
+    "group": "Title screen",
+    "label": "Background",
     "description": "Choose an original Minecraft panorama, or Original dirt background to use the classic menu background. Preview each scene before going Back.",
     "default": "b1_7_3",
     "restart": false,
-    "order": 0
+    "order": 1
   },
   "power_controls:userinterface.photoModeConfig.enablePhotoModeButton": {
     "page": "Interface",
-    "group": "Screenshots",
+    "group": "General",
     "label": "Photo mode button",
     "description": "Enables the Photo Mode button in game menu",
     "default": true,
-    "restart": false
+    "restart": false,
+    "order": 3
   },
   "power_compat:config.PARTICLES_CONFIG.disableAllParticles": {
     "page": "Video",
@@ -2670,32 +2669,32 @@
   "power_compat:config.addBiomeToDebugOverlay": {
     "page": "Interface",
     "group": "Debug (F3) info",
-    "label": "Add biome to debug overlay",
-    "description": "",
+    "label": "Biome",
+    "description": "Include biome in the left-side F3 information.",
     "default": true,
     "restart": false
   },
   "power_compat:config.addDayCounterToDebugOverlay": {
     "page": "Interface",
     "group": "Debug (F3) info",
-    "label": "Add day counter to debug overlay",
-    "description": "",
+    "label": "Day count",
+    "description": "Include day count in the left-side F3 information.",
     "default": true,
     "restart": false
   },
   "power_compat:config.addTotalPlayTimeToDebugOverlay": {
     "page": "Interface",
     "group": "Debug (F3) info",
-    "label": "Add hours played to debug overlay",
-    "description": "",
+    "label": "Hours played",
+    "description": "Include hours played in the left-side F3 information.",
     "default": true,
     "restart": false
   },
   "power_compat:config.addSlimeChunkToDebugOverlay": {
     "page": "Interface",
     "group": "Debug (F3) info",
-    "label": "Add slime chunk to debug overlay",
-    "description": "",
+    "label": "Slime chunk",
+    "description": "Include slime chunk in the left-side F3 information.",
     "default": true,
     "restart": false
   },
@@ -3801,19 +3800,19 @@
   },
   "logo.scrollingBackground.enabled": {
     "page": "Interface",
-    "group": "Title background",
-    "order": 3,
+    "group": "Title screen",
+    "order": 4,
     "description": "Scroll the classic tiled menu background. Does not affect panorama backgrounds."
   },
   "logo.scrollingBackground.speed": {
     "page": "Interface",
-    "group": "Title background",
-    "order": 4
+    "group": "Title screen",
+    "order": 5
   },
   "logo.scrollingBackground.onlyTitle": {
     "page": "Interface",
-    "group": "Title background",
-    "order": 5
+    "group": "Title screen",
+    "order": 6
   },
   "logo.blocks.map": {
     "order": 1,
@@ -3928,7 +3927,7 @@
     "page": "Interface",
     "group": "Debug (F3) info",
     "label": "Facing direction",
-    "description": "Show your facing direction and axis in the F3 debug overlay.",
+    "description": "Include facing direction in the left-side F3 information.",
     "order": 11,
     "default": true
   },
@@ -4033,7 +4032,7 @@
     "label": "Limit TNT work",
     "description": "Spread TNT simulation and explosions across ticks, with fewer visible TNT entities and explosion particles. Chains take longer. Enable from the main menu before loading a struggling singleplayer world.",
     "order": 13,
-    "default": false
+    "default": true
   },
   "gameplay.tntPerTick": {
     "page": "Video",
@@ -4394,8 +4393,8 @@
   },
   "interface.blinkingUiCursor": {
     "page": "Interface",
-    "group": "Menus",
-    "order": 10,
+    "group": "General",
+    "order": 6,
     "default": true
   },
   "gameplay.torchShovel": {
@@ -4719,7 +4718,7 @@
     "label": "Title style",
     "description": "Choose customisable retro block lettering or an original Beta, Java Edition or modern Minecraft logo. Your retro customisation is retained.",
     "default": 0,
-    "order": -1
+    "order": 0
   },
   "activeTweaks.enabled": {
     "order": 0
@@ -4803,10 +4802,30 @@
   },
   "power_controls:userinterface.panoramaConfig.onlyTitleScreen": {
     "page": "Interface",
-    "group": "Title background",
+    "group": "Title screen",
     "label": "Panorama only on the title screen",
     "description": "Off also shows the selected panorama behind menus opened from the title screen. In-game menus keep their world background.",
-    "order": 1.5,
-    "default": true
+    "order": 3,
+    "default": false
+  },
+  "interface.hidePowerBetaVersion": {
+    "page": "Interface",
+    "group": "Title screen",
+    "order": 7,
+    "label": "Hide Power Beta version",
+    "default": false,
+    "description": "Hide the Power Beta version beside the Minecraft version on the title screen."
+  },
+  "interface.debugOrder": {
+    "page": "Interface",
+    "group": "Debug (F3) info",
+    "label": "Info order",
+    "order": -10
+  },
+  "interface.debugTextSize": {
+    "page": "Interface",
+    "group": "Debug (F3) info",
+    "label": "Text size",
+    "order": -9
   }
 }

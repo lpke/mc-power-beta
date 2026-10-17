@@ -272,7 +272,7 @@ public class Config {
                 name = "Sleep Only Resets Weather When Raining",
                 multiplayerSynced = true
         )
-        public Boolean sleepOnlyResetsWeatherWhenRaining = false;
+        public Boolean sleepOnlyResetsWeatherWhenRaining = true;
 
         @ConfigEntry(
                 name = "Time Until Rain: Random Limit",

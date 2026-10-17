@@ -11,8 +11,12 @@ public final class MenuPreferences {
     public boolean autoApply = true;
     public boolean pauseToOptions, blinkingChatCursor = true;
     public boolean blinkingUiCursor = true;
+    public boolean hidePowerBetaVersion;
     public boolean debugTimeOfDay, useFeetYCoordinates = true;
     public String debugTextColor = "#FFFFFF";
+    public double debugTextSize = 1;
+    public List<String> debugOrder = DebugOrder.defaults();
+    public Map<String, Boolean> debugLines = new LinkedHashMap<>();
     public String musicBrowserDirectory = "";
     public List<String> colours = new ArrayList<>();
 
@@ -21,6 +25,10 @@ public final class MenuPreferences {
         throw new IllegalArgumentException("Save up to 16 colours");
       colours.forEach(LightSettings::rgb);
       LightSettings.rgb(debugTextColor);
+      DebugOrder.validate(debugOrder);
+      if (!Double.isFinite(debugTextSize) || debugTextSize < .5 || debugTextSize > 3) throw new IllegalArgumentException("F3 text size must be between 0.5 and 3.");
+      if (debugLines == null || debugLines.size() > 256 || debugLines.entrySet().stream().anyMatch(e -> e.getKey() == null
+          || !e.getKey().matches("[A-Za-z0-9_.-]{1,96}") || e.getValue() == null)) throw new IllegalArgumentException("Invalid F3 line visibility.");
       if (musicBrowserDirectory == null || musicBrowserDirectory.length() > 4096 || musicBrowserDirectory.indexOf('\0') >= 0)
         throw new IllegalArgumentException("Invalid music browser location");
     }
@@ -32,6 +40,10 @@ public final class MenuPreferences {
   private static String debugColorPreview;
   private static Boolean debugTimePreview;
   private static Boolean feetYPreview;
+  private static Boolean powerVersionPreview;
+  private static Double debugSizePreview;
+  private static List<String> debugOrderPreview;
+  private static final Map<String, Boolean> debugLinePreviews = new HashMap<>();
 
   private static Values load() {
     try {
@@ -73,8 +85,16 @@ public final class MenuPreferences {
   public static boolean debugTimeOfDay() { return debugTimePreview == null ? current.debugTimeOfDay : debugTimePreview; }
   public static void previewDebugTime(boolean enabled) { debugTimePreview = enabled; }
   public static boolean useFeetYCoordinates() { return feetYPreview == null ? current.useFeetYCoordinates : feetYPreview; }
+  public static boolean hidePowerBetaVersion() { return powerVersionPreview == null ? current.hidePowerBetaVersion : powerVersionPreview; }
+  public static void previewPowerVersion(boolean hidden) { powerVersionPreview = hidden; }
   public static void previewFeetY(boolean enabled) { feetYPreview = enabled; }
   public static String debugTextColor() { return debugColorPreview == null ? current.debugTextColor : debugColorPreview; }
+  public static double debugTextSize() { return debugSizePreview == null ? current.debugTextSize : debugSizePreview; }
+  public static List<String> debugOrder() { return debugOrderPreview == null ? current.debugOrder : debugOrderPreview; }
+  public static boolean debugLine(String id) { return debugLinePreviews.getOrDefault(id, current.debugLines.getOrDefault(id, true)); }
+  public static void previewDebugSize(double size) { debugSizePreview = size; }
+  public static void previewDebugOrder(List<String> order) { debugOrderPreview = DebugOrder.validate(order); }
+  public static void previewDebugLine(String id, boolean enabled) { debugLinePreviews.put(id, enabled); }
   public static void previewBlink(boolean enabled) { blinkPreview = enabled; syncPresentation(); }
   public static void previewDebugColor(String color) { LightSettings.rgb(color); debugColorPreview = color; syncPresentation(); }
   public static void syncPresentation() {

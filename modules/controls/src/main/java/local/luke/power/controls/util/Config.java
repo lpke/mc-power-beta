@@ -38,9 +38,6 @@ public class Config {
         @ConfigEntry(name = "Hide Achievement Toast")
         public Boolean hideAchievementToast = false;
 
-        @ConfigEntry(name = "Achievement Screen Back To Menu", description = "Done button will lead to Game Menu instead of unpausing")
-        public Boolean achievementBackToMenu = true;
-
         @ConfigEntry(name = "Disable F3 Entity ID Tags")
         public Boolean disableDebugEntityIdTags = true;
 
@@ -77,7 +74,7 @@ public class Config {
             public Boolean blurBackground = false;
 
             @ConfigEntry(name = "Panorama only on the title screen")
-            public Boolean onlyTitleScreen = true;
+            public Boolean onlyTitleScreen = false;
 
             @ConfigEntry(name = "Panorama folder to use", description = "Choose an original Minecraft title background.")
             public String panoramaFolder = "b1_7_3";
@@ -95,7 +92,8 @@ public class Config {
             public Boolean enableCustomVersionText = false;
 
             @ConfigEntry(name = "Custom Version Text", maxValue = 64, description = "Only has effect if custom version text is enabled")
-            public String customVersionText = "Minecraft Beta 1.7.3";
+            public String customVersionText = "Power Beta " + net.fabricmc.loader.api.FabricLoader.getInstance()
+                .getModContainer("power_beta").map(mod -> mod.getMetadata().getVersion().getFriendlyString()).orElse("development");
         }
         
         public static class PhotoModeConfig {

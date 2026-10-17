@@ -9,6 +9,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = TitleScreen.class, priority = 800)
 public class TitleMixin extends Screen {
+  @ModifyArg(method = "render", at = @At(value = "INVOKE",
+      target = "Lnet/minecraft/client/gui/screen/TitleScreen;drawStringWithShadow(Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)V", ordinal = 0), index = 1)
+  private String power$version(String original) {
+    return local.luke.power.ui.MenuPreferences.hidePowerBetaVersion() ? original
+        : original + " (" + local.luke.power.ui.PackVersion.label() + ")";
+  }
   @Inject(method = "render", at = @At("TAIL"))
   private void power$titleError(int x, int y, float delta, CallbackInfo ci) {
     String error = local.luke.power.ui.TitleSelection.error();

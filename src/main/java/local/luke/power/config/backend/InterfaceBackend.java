@@ -9,9 +9,16 @@ import local.luke.power.ui.MenuPreferences;
 
 public final class InterfaceBackend implements Backend {
   public static void register(ConfigSession session) {
-    session.add(
-        new InterfaceBackend(),
-        List.of(
+    List<Setting> settings = new ArrayList<>(List.of(
+            new Setting("interface.debugOrder", "interface", "Interface", "Debug (F3) info", "Info order",
+                "Arrange the left-side F3 lines in the preview. Drag between lines to insert, or into an empty row to leave a gap.", Setting.Kind.LIST,
+                Catalog.JSON.toJsonTree(MenuPreferences.debugOrder()), Catalog.JSON.toJsonTree(local.luke.power.ui.DebugOrder.defaults()), 0, 0, 1, List.of(), false),
+            new Setting("interface.debugTextSize", "interface", "Interface", "Debug (F3) info", "Text size",
+                "Scale the left-side F3 text. Right-side memory information keeps its native size and position.", Setting.Kind.DECIMAL,
+                new JsonPrimitive(MenuPreferences.debugTextSize()), new JsonPrimitive(1), .5, 3, .1, List.of(), false),
+            new Setting("interface.hidePowerBetaVersion", "interface", "Interface", "Title screen", "Hide Power Beta version",
+                "Hide the Power Beta version beside the Minecraft version on the title screen.", Setting.Kind.BOOLEAN,
+                new JsonPrimitive(MenuPreferences.hidePowerBetaVersion()), new JsonPrimitive(false), 0, 1, 1, List.of(), false),
             new Setting("interface.colours", "interface", "Interface", "General HUD", "Saved colours", "", Setting.Kind.LIST,
                 Catalog.JSON.toJsonTree(MenuPreferences.current().colours), new JsonArray(), 0, 16, 1, List.of(), false),
             new Setting(
@@ -45,6 +52,11 @@ public final class InterfaceBackend implements Backend {
             new Setting("interface.debugTextColor", "interface", "Interface", "Debug (F3) info", "Text colour",
                 "Colour of all F3 debug text.", Setting.Kind.TEXT,
                 new JsonPrimitive(MenuPreferences.debugTextColor()), new JsonPrimitive("#FFFFFF"), 0, 0, 1, List.of(), false)));
+    for (var line : local.luke.power.ui.DebugLines.values()) if (line.ownsSetting())
+      settings.add(new Setting(line.setting(), "interface", "Interface", "Debug (F3) info", line.label,
+          "Include this line in the left-side F3 information.", Setting.Kind.BOOLEAN,
+          new JsonPrimitive(MenuPreferences.debugLine(line.id)), new JsonPrimitive(true), 0, 1, 1, List.of(), false));
+    session.add(new InterfaceBackend(), settings);
   }
 
   public String id() {
@@ -57,7 +69,15 @@ public final class InterfaceBackend implements Backend {
 
   public void validate(Map<String, JsonElement> values) {
     for (var e : values.entrySet()) {
-      if (e.getKey().equals("interface.colours")) {
+      if (e.getKey().equals("interface.debugOrder")) {
+        local.luke.power.ui.DebugOrder.read(e.getValue());
+      } else if (e.getKey().equals("interface.debugTextSize")) {
+        double n = e.getValue().getAsDouble();
+        if (!Double.isFinite(n) || n < .5 || n > 3) throw new IllegalArgumentException("F3 text size must be between 0.5 and 3.");
+      } else if (e.getKey().startsWith("interface.debugLines.")) {
+        var line = local.luke.power.ui.DebugLines.find(e.getKey().substring("interface.debugLines.".length()));
+        if (line == null || !line.ownsSetting() || !e.getValue().isJsonPrimitive() || !e.getValue().getAsJsonPrimitive().isBoolean()) throw new IllegalArgumentException("Invalid F3 line visibility.");
+      } else if (e.getKey().equals("interface.colours")) {
         if (!e.getValue().isJsonArray() || e.getValue().getAsJsonArray().size() > 16) throw new IllegalArgumentException("Save up to 16 colours");
         for (JsonElement value : e.getValue().getAsJsonArray()) {
           if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString()) throw new IllegalArgumentException("Invalid saved colour");
@@ -65,7 +85,7 @@ public final class InterfaceBackend implements Backend {
         }
       } else if (e.getKey().equals("interface.debugTextColor")) {
         local.luke.power.light.LightSettings.rgb(e.getValue().getAsString());
-      } else if ((!e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
+      } else if ((!e.getKey().equals("interface.hidePowerBetaVersion") && !e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
           || !e.getValue().isJsonPrimitive() || !e.getValue().getAsJsonPrimitive().isBoolean())
         throw new IllegalArgumentException("Invalid interface preference");
     }
@@ -77,6 +97,11 @@ public final class InterfaceBackend implements Backend {
 
   public void preview(Map<String, JsonElement> values) {
     validate(values);
+    if (values.containsKey("interface.debugOrder")) MenuPreferences.previewDebugOrder(local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder")));
+    if (values.containsKey("interface.debugTextSize")) MenuPreferences.previewDebugSize(values.get("interface.debugTextSize").getAsDouble());
+    values.forEach((id, value) -> { if (id.startsWith("interface.debugLines.")) MenuPreferences.previewDebugLine(id.substring("interface.debugLines.".length()), value.getAsBoolean()); });
+    if (values.containsKey("interface.hidePowerBetaVersion"))
+      MenuPreferences.previewPowerVersion(values.get("interface.hidePowerBetaVersion").getAsBoolean());
     if (values.containsKey("interface.pauseToOptions"))
       MenuPreferences.previewPause(values.get("interface.pauseToOptions").getAsBoolean());
     if (values.containsKey("interface.blinkingUiCursor"))
@@ -94,6 +119,10 @@ public final class InterfaceBackend implements Backend {
   public void apply(Map<String, JsonElement> values) throws Exception {
     validate(values);
     MenuPreferences.update(v -> {
+      if (values.containsKey("interface.debugOrder")) v.debugOrder = local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder"));
+      if (values.containsKey("interface.debugTextSize")) v.debugTextSize = values.get("interface.debugTextSize").getAsDouble();
+      values.forEach((id, value) -> { if (id.startsWith("interface.debugLines.")) v.debugLines.put(id.substring("interface.debugLines.".length()), value.getAsBoolean()); });
+      if (values.containsKey("interface.hidePowerBetaVersion")) v.hidePowerBetaVersion = values.get("interface.hidePowerBetaVersion").getAsBoolean();
       if (values.containsKey("interface.colours")) {
         v.colours = new ArrayList<>(); values.get("interface.colours").getAsJsonArray().forEach(c -> v.colours.add(c.getAsString()));
       }

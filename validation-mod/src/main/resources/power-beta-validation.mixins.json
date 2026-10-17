@@ -9,6 +9,8 @@
     "OutlineCapture",
     "AudioPreloadMixin",
     "ScreenInput",
+    "UiClickCapture",
+    "TitleTextCapture",
     "ButtonBounds",
     "CapeCapture",
     "CapeRenderAccess",

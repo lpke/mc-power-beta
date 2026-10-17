@@ -189,7 +189,7 @@ final class Editor230Checks {
         double scale = ((Number)invoke(hud,"scale",new Class<?>[0])).doubleValue();
         double cx = ((Number)invoke(hud,"canvasX",new Class<?>[0])).doubleValue(), cy = ((Number)invoke(hud,"canvasY",new Class<?>[0])).doubleValue();
         double ex = ((Number)invoke(combined,"x",new Class<?>[0])).doubleValue(), ey = ((Number)invoke(combined,"y",new Class<?>[0])).doubleValue();
-        int x = (int)Math.round(cx + (ex + 20) * scale), y = (int)Math.round(cy + (ey + 10) * scale);
+        int x = (int)Math.round(cx + (ex + 170) * scale), y = (int)Math.round(cy + (ey + 10) * scale);
         var unselected=draft(hud).snapshot();
         click(hud,x,y,0);((ScreenInput)(Object)hud).power$release(x+12,y-10,0);
         check(draft(hud).snapshot().equals(unselected)&&get(hud,"dragging")==null,"selection press moved the HUD");

@@ -105,6 +105,7 @@ public final class ColourScreen extends UiScreen {
     hex.focused = inside(x, y, left(), top() + 92, span() - 108, 18);
     if (hex.focused) { hex.click(x, button); return; }
     if (button == 0 && inside(x, y, left() + span() - 104, top() + 91, 50, 20)) {
+      click();
       try {
         Toolkit.getDefaultToolkit()
             .getSystemClipboard()
@@ -115,10 +116,12 @@ public final class ColourScreen extends UiScreen {
       }
     }
     if (button == 0 && inside(x, y, left() + span() - 50, top() + 91, 50, 20)) {
+      click();
       hex.setText(getClipboard().strip());
       parse();
     }
     if (button == 0 && inside(x, y, left(), top() + 116, 96, 20)) {
+      click();
       try {
         parse();
         if (!error.isEmpty()) return;
@@ -136,6 +139,7 @@ public final class ColourScreen extends UiScreen {
     var saved = colours();
     for (int i = 0; i < saved.size(); i++) {
       if (inside(x, y, left() + i % 8 * 25, top() + 140 + i / 8 * 22, 22, 20)) {
+        click();
         String value = saved.get(i);
         if (button == 0) {
           colour = LightSettings.rgb(value);
@@ -150,9 +154,8 @@ public final class ColourScreen extends UiScreen {
         return;
       }
     }
-    if (button == 0 && inside(x, y, width / 2 - 102, height - 28, 100, 20)) save();
-    if (button == 0 && inside(x, y, width / 2 + 2, height - 28, 100, 20))
-      minecraft.setScreen(parent);
+    if (button == 0 && inside(x, y, width / 2 - 102, height - 28, 100, 20)) { click(); save(); }
+    if (button == 0 && inside(x, y, width / 2 + 2, height - 28, 100, 20)) { click(); minecraft.setScreen(parent); }
   }
 
   private void save() {
