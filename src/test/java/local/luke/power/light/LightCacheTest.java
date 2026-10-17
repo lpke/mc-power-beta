@@ -5,11 +5,30 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LightCacheTest {
+  @Test void slowScansYieldAndResumeWithoutExceedingTheConfiguredCountOrLosingCells() {
+    var nanos = new java.util.concurrent.atomic.AtomicLong();
+    LightCache cache = new LightCache(nanos::get);
+    LightSettings settings = new LightSettings(); settings.enabled = true; settings.checksPerTick = 256;
+    Object world = new Object(); int total = 0;
+    for (int tick = 0; tick < 300 && cache.cells().isEmpty(); tick++) {
+      AtomicInteger reads = new AtomicInteger();
+      cache.tick(world, 0, 64, 0, settings, (x,y,z) -> {
+        reads.incrementAndGet(); nanos.addAndGet(100_000L); return y == 64 ? 7 : -1;
+      });
+      assertTrue(reads.get() <= 32);
+      total += reads.get();
+    }
+    assertEquals(5733, total);
+    assertEquals(441, cache.cells().size());
+    settings.enabled = false;
+    cache.tick(world, 0, 64, 0, settings, (x,y,z) -> { fail("disabled scan"); return 0; });
+    assertTrue(cache.cells().isEmpty());
+  }
   @Test void configurableBudgetPreservesDefaultAndFinishesFasterWithoutExtraWorkWhenOff() {
     assertEquals(2048,new LightSettings().checksPerTick);
     for (int budget : new int[]{256,2048,16384}) {
       LightSettings s=new LightSettings();s.enabled=true;s.checksPerTick=budget;s.validate();
-      LightCache cache=new LightCache();Object world=new Object();int ticks=0;
+      LightCache cache=new LightCache(() -> 0);Object world=new Object();int ticks=0;
       while(cache.cells().isEmpty() && ticks<100) {
         AtomicInteger reads=new AtomicInteger();
         cache.tick(world,0,64,0,s,(x,y,z)->{reads.incrementAndGet();return y==64?7:-1;});
@@ -24,7 +43,7 @@ class LightCacheTest {
     s.checksPerTick=Integer.MAX_VALUE;assertThrows(IllegalArgumentException.class,s::validate);
   }
   @Test void inactiveAndMissingWorldNeverReadBlocksAndDropCachedLabels() {
-    LightCache cache = new LightCache();
+    LightCache cache = new LightCache(() -> 0);
     LightSettings settings = new LightSettings();
     Object world = new Object();
     var count = new AtomicInteger();
@@ -43,7 +62,7 @@ class LightCacheTest {
   }
 
   @Test void workMemoryAndWorldHeightStayBoundedAtMaximumRange() {
-    LightCache cache = new LightCache();
+    LightCache cache = new LightCache(() -> 0);
     LightSettings settings = new LightSettings();
     settings.enabled=true;settings.radius=24;settings.verticalRange=16;
     Object world = new Object();
@@ -62,7 +81,7 @@ class LightCacheTest {
   }
 
   @Test void refreshesStationaryLightingAndInvalidatesOnTeleportWorldAndModeChange() {
-    LightCache cache = new LightCache();
+    LightCache cache = new LightCache(() -> 0);
     LightSettings settings = new LightSettings();settings.enabled=true;settings.radius=2;settings.verticalRange=1;
     Object first=new Object(),second=new Object();
     cache.tick(first,0,64,0,settings,(x,y,z)->7);
@@ -77,7 +96,7 @@ class LightCacheTest {
   }
 
   @Test void partialScansFinishWhileWalkingAndDoNotPublishInvalidLevels() {
-    LightCache cache = new LightCache();
+    LightCache cache = new LightCache(() -> 0);
     LightSettings s=new LightSettings();s.enabled=true;
     Object world=new Object();
     for(int i=0;i<20;i++)cache.tick(world,i/4,64,0,s,(x,y,z)-> y==64?15:99);

@@ -134,7 +134,9 @@
     "TntPauseMixin",
     "PortalRulesMixin",
     "PortalContactAccessor",
-    "DebugGraphMixin"
+    "DebugGraphMixin",
+    "MenuBackgroundMixin",
+    "MenuListBackgroundMixin"
   ],
   "injectors": {
     "defaultRequire": 1

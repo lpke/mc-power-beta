@@ -123,6 +123,61 @@ final class QuickTransferChecks {
         check(mc.player.inventory.getCursorStack()!=null&&mc.player.inventory.getCursorStack().count==20,"normal gathering failed");
         check(c.method_2084(2).getStack().count==11,"gathering merged different native data");
       });
+      test("gathering consolidates player partial stacks before full stacks and then container stacks",()->{
+        keys.put(42,(byte)0);
+        for(boolean playerSources:new boolean[]{true,false}) {
+          var screen=open(mc,new TestInventory(27,64));var c=screen.container;
+          c.method_2084(0).setStack(item(4,7,0,"same"));
+          c.method_2084(1).setStack(item(4,64,0,"same"));
+          c.method_2084(2).setStack(item(4,13,0,"same"));
+          if(playerSources) {
+            c.method_2084(27).setStack(item(4,64,0,"same"));
+            c.method_2084(28).setStack(item(4,8,0,"same"));
+          }
+          int before=total(c,4,0,"same");
+          click(screen,0);release(screen,0);click(screen,0);release(screen,0);
+          var held=mc.player.inventory.getCursorStack();
+          check(held!=null&&held.count==64,"gathered stack is not full");
+          check(total(c,4,0,"same")+held.count==before,"gather changed total count");
+          if(playerSources) {
+            check(c.method_2084(28).getStack()==null,"player partial stack left behind");
+            check(c.method_2084(27).getStack().count==15,"player full stack used before player partial stack");
+            check(c.method_2084(1).getStack().count==64&&c.method_2084(2).getStack().count==13,"container used before player inventory");
+          } else {
+            check(c.method_2084(2).getStack()==null,"container partial stack left behind");
+            check(c.method_2084(1).getStack().count==20,"container full stack used before partial stack");
+          }
+          check(c.method_2084(0).getStack()==null,"temporary slot left occupied");
+        }
+      });
+      test("gathering preserves native NBT, damage, restricted slot limits and oversized stacks",()->{
+        keys.put(42,(byte)0);
+        for(int limit:new int[]{16,64}) {
+          var screen=open(mc,new TestInventory(27,limit));var c=screen.container;
+          c.method_2084(0).setStack(item(35,7,5,"same"));
+          c.method_2084(1).setStack(item(35,13,5,"same"));
+          c.method_2084(2).setStack(item(35,11,5,"different"));
+          c.method_2084(3).setStack(item(35,9,6,"same"));
+          c.method_2084(27).setStack(item(35,70,5,"same"));
+          c.method_2084(28).setStack(item(35,8,5,"same"));
+          click(screen,0);release(screen,0);click(screen,0);release(screen,0);
+          var held=mc.player.inventory.getCursorStack();
+          check(held!=null&&held.count==28&&held.getDamage()==5,"restricted-slot gathering failed "+limit);
+          check(c.method_2084(27).getStack().count==70,"oversized stack changed");
+          check(c.method_2084(2).getStack().count==11&&c.method_2084(3).getStack().count==9,"different NBT or damage gathered");
+          check(total(c,35,5,"same")+held.count==98,"gather lost native data or counts");
+          check(c.method_2084(0).getStack()==null&&c.method_2084(1).getStack()==null&&c.method_2084(28).getStack()==null,"partial stacks not consolidated");
+        }
+      });
+      test("gathering stops after a native callback changes source data without overwriting it",()->{
+        keys.put(42,(byte)0);var chest=new TestInventory(27,64);var screen=open(mc,chest);var c=screen.container;
+        c.method_2084(0).setStack(item(4,7,0,"same"));c.method_2084(1).setStack(item(4,13,0,"same"));
+        click(screen,0);release(screen,0);
+        var changed=item(264,9,0,"callback");chest.dirty=()->chest.setStack(1,changed);
+        click(screen,0);release(screen,0);
+        check(chest.getStack(1)==changed&&changed.count==9,"gather overwrote callback data");
+        check(chest.getStack(0)!=null&&chest.getStack(0).count==7&&mc.player.inventory.getCursorStack()==null,"gather lost the safely placed cursor stack");
+      });
       test("disabled batches, changed sources and changed held data never sweep other slots",()->{
         for(String change:List.of("disabled","source","count","nbt","expired","container")) {
           keys.put(42,(byte)1);var screen=open(mc,new TestInventory(27,64));var c=screen.container;
@@ -301,11 +356,11 @@ final class QuickTransferChecks {
   private static void release(ContainerScreen screen,int index)throws Exception{var p=point(screen,index);((ScreenInput)screen).power$release(p[0],p[1],0);}
   private static ByteBuffer mouseButtons()throws Exception{var f=org.lwjgl.input.Mouse.class.getDeclaredField("buttons");f.setAccessible(true);return (ByteBuffer)f.get(null);}
   private static final class TestInventory implements Inventory {
-    final ItemStack[] stacks;final int limit;
+    final ItemStack[] stacks;final int limit;Runnable dirty;
     TestInventory(int size,int limit){stacks=new ItemStack[size];this.limit=limit;}
     public int size(){return stacks.length;}public ItemStack getStack(int i){return stacks[i];}
     public ItemStack removeStack(int i,int count){var stack=stacks[i];if(stack==null)return null;if(count>=stack.count){stacks[i]=null;return stack;}return stack.split(count);}
     public void setStack(int i,ItemStack stack){stacks[i]=stack;}public String getName(){return "Transfer fixture";}
-    public int getMaxCountPerStack(){return limit;}public void markDirty(){}public boolean canPlayerUse(PlayerEntity p){return true;}
+    public int getMaxCountPerStack(){return limit;}public void markDirty(){if(dirty!=null){var action=dirty;dirty=null;action.run();}}public boolean canPlayerUse(PlayerEntity p){return true;}
   }
 }

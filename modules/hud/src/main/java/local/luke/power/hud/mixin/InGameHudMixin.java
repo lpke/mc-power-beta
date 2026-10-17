@@ -68,238 +68,59 @@ public abstract class InGameHudMixin extends DrawContext {
     public void powerHud_render(float tickDelta, boolean screenOpen, int mouseX, int mouseY, CallbackInfo ci) {
         ScreenScaler screenScaler = new ScreenScaler(this.minecraft.options, this.minecraft.displayWidth, this.minecraft.displayHeight);
 
-        // Unified settings preview and rollback change fields without the legacy save event.
-        // This is bounded arithmetic over five elements, with no config reads or allocations.
-        {
-            scaledWidth = screenScaler.getScaledWidth();
-            scaledHeight = screenScaler.getScaledHeight();
-            ModHelper.configUpdated = false;
-
-            if (HudPositioningSystemEnum.SIMPLE == Config.hudpositions.hudPositioningSystem) {
-                if (Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.enableVisibility) {
-                    int xOffset = 0;
-                    int yOffset = 0;
-
-                    if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPosition) {
-                        xOffset = 91 - (scaledWidth / 2);
-                    } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPosition) {
-                        xOffset = -91 + (scaledWidth / 2) + (scaledWidth % 2);
-                    }
-
-                    if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition) {
-                        yOffset = 52 - scaledHeight;
-                    } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition) {
-                        yOffset = (52 - scaledHeight) / 2;
-                    }
-
-                    xOffset += Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPositionOffset;
-                    yOffset += Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPositionOffset;
-
-                    xOffsetHotbar  = xOffset;
-                    yOffsetHotbar  = yOffset;
-                    xOffsetHearts  = xOffset;
-                    yOffsetHearts  = yOffset;
-                    xOffsetArmor   = xOffset;
-                    yOffsetArmor   = yOffset;
-                    xOffsetOxygen  = xOffset;
-                    yOffsetOxygen  = yOffset;
-                    xOffsetOverlay = xOffset;
-                    yOffsetOverlay = yOffset;
-
-                    if (  (ScreenPositionVerticalEnum.TOP == Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition)
-                       || (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition)
-                       || (0 > yOffsetHotbar)
-                    ) {
-                        isHotbarRaised = true;
-                    } else {
-                        isHotbarRaised = false;
-                    }
-
-                    if (Config.hudpositions.putStatusBarIconsBelowHotbar) {
-                        yOffsetHearts  += 33;
-                        yOffsetArmor   += 33;
-                        yOffsetOxygen  += 51;
-                    }
-
-                    if (Config.hudpositions.putOverlayMessagesBelowHotbar) {
-                        yOffsetOverlay += 74;
-                    }
-
-                    hotbarVisibility  = true;
-                    heartsVisibility  = true;
-                    armorVisibility   = true;
-                    oxygenVisibility  = true;
-                    overlayVisibility = true;
-                } else {
-                    hotbarVisibility  = false;
-                    heartsVisibility  = false;
-                    armorVisibility   = false;
-                    oxygenVisibility  = false;
-                    overlayVisibility = false;
-
-                }
-            } else if (HudPositioningSystemEnum.ADVANCED == Config.hudpositions.hudPositioningSystem) {
-                xOffsetHotbar  = 0;
-                yOffsetHotbar  = 0;
-                xOffsetHearts  = 0;
-                yOffsetHearts  = 0;
-                xOffsetArmor   = 0;
-                yOffsetArmor   = 0;
-                xOffsetOxygen  = 0;
-                yOffsetOxygen  = 0;
-                xOffsetOverlay = 0;
-                yOffsetOverlay = 0;
-
-                if (Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.enableVisibility) {
-                    if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetHotbar = 91 - (scaledWidth / 2);
-                    } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetHotbar = -91 + (scaledWidth / 2) + (scaledWidth % 2);
-                    }
-
-                    if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.verticalPosition) {
-                        yOffsetHotbar = 22 - (scaledHeight);
-                    } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.verticalPosition) {
-                        yOffsetHotbar = 11 - (scaledHeight / 2) - (scaledHeight % 2);
-                    }
-
-                    xOffsetHotbar += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.horizontalPositionOffset;
-                    yOffsetHotbar += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.verticalPositionOffset;
-
-                    if (  (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.verticalPosition)
-                       || (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.verticalPosition)
-                       || (0 > yOffsetHotbar)
-                    ) {
-                        isHotbarRaised = true;
-                    } else {
-                        isHotbarRaised = false;
-                    }
-
-                    hotbarVisibility  = true;
-                } else {
-                    hotbarVisibility  = false;
-                }
-
-                if (Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.enableVisibility) {
-                    if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetHearts = 91 - (scaledWidth / 2);
-                    } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetHearts = 10 + (scaledWidth / 2) + (scaledWidth % 2);
-                    }
-
-                    if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPosition) {
-                        yOffsetHearts = 32 - scaledHeight;
-                    } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPosition) {
-                        yOffsetHearts = 11 - (scaledHeight / 2) - (scaledHeight % 2);
-                    }
-
-                    xOffsetHearts += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.horizontalPositionOffset;
-                    yOffsetHearts += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPositionOffset;
-
-                    if (Config.hudpositions.putStatusBarIconsBelowHotbar) {
-                        yOffsetHearts += 33;
-                    }
-
-                    heartsVisibility  = true;
-                } else {
-                    heartsVisibility  = false;
-                }
-
-                if (Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.enableVisibility) {
-                    if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetArmor = -(scaledWidth / 2) - 10;
-                    } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetArmor = -91 + (scaledWidth / 2) + (scaledWidth % 2);
-                    }
-
-                    if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.verticalPosition) {
-                        yOffsetArmor = 32 - scaledHeight;
-                    } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.verticalPosition) {
-                        yOffsetArmor = 11 - (scaledHeight / 2) - (scaledHeight % 2);
-                    }
-
-                    xOffsetArmor += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.horizontalPositionOffset;
-                    yOffsetArmor += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.verticalPositionOffset;
-
-                    if (Config.hudpositions.putStatusBarIconsBelowHotbar) {
-                        yOffsetArmor += 33;
-                    }
-
-                    armorVisibility  = true;
-                } else {
-                    armorVisibility  = false;
-                }
-
-                if (Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.enableVisibility) {
-                    if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetOxygen = 91 - (scaledWidth / 2);
-                    } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetOxygen = 10 + (scaledWidth / 2) + (scaledWidth % 2);
-                    }
-
-                    if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.verticalPosition) {
-                        yOffsetOxygen = 41 - scaledHeight;
-                    } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.verticalPosition) {
-                        yOffsetOxygen = 11 - (scaledHeight / 2) - (scaledHeight % 2);
-                    }
-
-                    xOffsetOxygen += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.horizontalPositionOffset;
-                    yOffsetOxygen += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.verticalPositionOffset;
-
-                    if (Config.hudpositions.putStatusBarIconsBelowHotbar) {
-                        yOffsetOxygen += 51;
-                    }
-
-                    oxygenVisibility  = true;
-                } else {
-                    oxygenVisibility  = false;
-                }
-
-                if (Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.enableVisibility) {
-                    if (ScreenPositionHorizontalEnum.LEFT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetOverlay = minecraft.textRenderer.getWidth(overlayMessage) / 2 - scaledWidth / 2;
-                    } else if (ScreenPositionHorizontalEnum.RIGHT == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.horizontalPosition) {
-                        xOffsetOverlay = scaledWidth - (minecraft.textRenderer.getWidth(overlayMessage) + 1) / 2 - scaledWidth / 2;
-                    }
-
-                    if (ScreenPositionVerticalEnum.TOP == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.verticalPosition) {
-                        yOffsetOverlay = 52 - scaledHeight;
-                    } else if (ScreenPositionVerticalEnum.CENTERED == Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.verticalPosition) {
-                        yOffsetOverlay = 11 - (scaledHeight / 2) - (scaledHeight % 2);
-                    }
-
-                    xOffsetOverlay += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.horizontalPositionOffset;
-                    yOffsetOverlay += Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.verticalPositionOffset;
-
-                    if (Config.hudpositions.putOverlayMessagesBelowHotbar) {
-                        yOffsetOverlay += 74;
-                    }
-
-                    overlayVisibility  = true;
-                } else {
-                    overlayVisibility  = false;
-                }
-
-            } else {
-                // HudPositioningSystemEnum.DISABLED
-                isHotbarRaised = false;
-                xOffsetHotbar  = 0;
-                yOffsetHotbar  = 0;
-                xOffsetHearts  = 0;
-                yOffsetHearts  = 0;
-                xOffsetArmor   = 0;
-                yOffsetArmor   = 0;
-                xOffsetOxygen  = 0;
-                yOffsetOxygen  = 0;
-                xOffsetOverlay = 0;
-                yOffsetOverlay = 0;
-                hotbarVisibility  = true;
-                heartsVisibility  = true;
-                armorVisibility   = true;
-                oxygenVisibility  = true;
-                overlayVisibility = true;
-            }
-        }
+        scaledWidth = screenScaler.getScaledWidth();
+        scaledHeight = screenScaler.getScaledHeight();
+        ModHelper.configUpdated = false;
+        int mode = Config.hudpositions.hudPositioningSystem.ordinal();
+        var simple = Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG;
+        int messageWidth = mode == 2 && Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.horizontalPosition != ScreenPositionHorizontalEnum.CENTERED
+            ? minecraft.textRenderer.getWidth(overlayMessage) : 0;
+        var hotbar = Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG;
+        int hotbarHorizontal = (mode == 1 ? simple.horizontalPosition : hotbar.horizontalPosition).ordinal();
+        int hotbarVertical = (mode == 1 ? simple.verticalPosition : hotbar.verticalPosition).ordinal();
+        xOffsetHotbar = local.luke.power.ui.NativeHudLayout.xOffset(scaledWidth, 0, mode, hotbarHorizontal, messageWidth)
+            + (mode == 0 ? 0 : mode == 1 ? simple.horizontalPositionOffset : hotbar.horizontalPositionOffset);
+        yOffsetHotbar = local.luke.power.ui.NativeHudLayout.yOffset(scaledHeight, 0, mode, hotbarVertical,
+            Config.hudpositions.putStatusBarIconsBelowHotbar, Config.hudpositions.putOverlayMessagesBelowHotbar)
+            + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : hotbar.verticalPositionOffset);
+        hotbarVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : hotbar.enableVisibility);
+        var hearts = Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG;
+        int heartsHorizontal = (mode == 1 ? simple.horizontalPosition : hearts.horizontalPosition).ordinal();
+        int heartsVertical = (mode == 1 ? simple.verticalPosition : hearts.verticalPosition).ordinal();
+        xOffsetHearts = local.luke.power.ui.NativeHudLayout.xOffset(scaledWidth, 1, mode, heartsHorizontal, messageWidth)
+            + (mode == 0 ? 0 : mode == 1 ? simple.horizontalPositionOffset : hearts.horizontalPositionOffset);
+        yOffsetHearts = local.luke.power.ui.NativeHudLayout.yOffset(scaledHeight, 1, mode, heartsVertical,
+            Config.hudpositions.putStatusBarIconsBelowHotbar, Config.hudpositions.putOverlayMessagesBelowHotbar)
+            + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : hearts.verticalPositionOffset);
+        heartsVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : hearts.enableVisibility);
+        var armor = Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG;
+        int armorHorizontal = (mode == 1 ? simple.horizontalPosition : armor.horizontalPosition).ordinal();
+        int armorVertical = (mode == 1 ? simple.verticalPosition : armor.verticalPosition).ordinal();
+        xOffsetArmor = local.luke.power.ui.NativeHudLayout.xOffset(scaledWidth, 2, mode, armorHorizontal, messageWidth)
+            + (mode == 0 ? 0 : mode == 1 ? simple.horizontalPositionOffset : armor.horizontalPositionOffset);
+        yOffsetArmor = local.luke.power.ui.NativeHudLayout.yOffset(scaledHeight, 2, mode, armorVertical,
+            Config.hudpositions.putStatusBarIconsBelowHotbar, Config.hudpositions.putOverlayMessagesBelowHotbar)
+            + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : armor.verticalPositionOffset);
+        armorVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : armor.enableVisibility);
+        var oxygen = Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG;
+        int oxygenHorizontal = (mode == 1 ? simple.horizontalPosition : oxygen.horizontalPosition).ordinal();
+        int oxygenVertical = (mode == 1 ? simple.verticalPosition : oxygen.verticalPosition).ordinal();
+        xOffsetOxygen = local.luke.power.ui.NativeHudLayout.xOffset(scaledWidth, 3, mode, oxygenHorizontal, messageWidth)
+            + (mode == 0 ? 0 : mode == 1 ? simple.horizontalPositionOffset : oxygen.horizontalPositionOffset);
+        yOffsetOxygen = local.luke.power.ui.NativeHudLayout.yOffset(scaledHeight, 3, mode, oxygenVertical,
+            Config.hudpositions.putStatusBarIconsBelowHotbar, Config.hudpositions.putOverlayMessagesBelowHotbar)
+            + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : oxygen.verticalPositionOffset);
+        oxygenVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : oxygen.enableVisibility);
+        var overlay = Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG;
+        int overlayHorizontal = (mode == 1 ? simple.horizontalPosition : overlay.horizontalPosition).ordinal();
+        int overlayVertical = (mode == 1 ? simple.verticalPosition : overlay.verticalPosition).ordinal();
+        xOffsetOverlay = local.luke.power.ui.NativeHudLayout.xOffset(scaledWidth, 4, mode, overlayHorizontal, messageWidth)
+            + (mode == 0 ? 0 : mode == 1 ? simple.horizontalPositionOffset : overlay.horizontalPositionOffset);
+        yOffsetOverlay = local.luke.power.ui.NativeHudLayout.yOffset(scaledHeight, 4, mode, overlayVertical,
+            Config.hudpositions.putStatusBarIconsBelowHotbar, Config.hudpositions.putOverlayMessagesBelowHotbar)
+            + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : overlay.verticalPositionOffset);
+        overlayVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : overlay.enableVisibility);
+        isHotbarRaised = mode != 0 && (hotbarVertical != 0 || yOffsetHotbar < 0);
 
         local.luke.power.ui.HudElements.heartsX = xOffsetHearts;
         local.luke.power.ui.HudElements.heartsY = yOffsetHearts;

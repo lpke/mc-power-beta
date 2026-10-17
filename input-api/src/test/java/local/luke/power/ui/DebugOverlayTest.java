@@ -4,6 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class DebugOverlayTest {
+  @Test void editorPlacementDoesNotChangeCapturedGameplayText() {
+    DebugOverlay.begin(); DebugOverlay.add("World", 2, 2);
+    var world = DebugOverlay.layout(320, text -> text.length() * 6);
+    var input = java.util.List.of(new DebugOverlay.Line("Sample B", 2, 20, 0), new DebugOverlay.Line("Sample A", 2, 2, 0));
+    var result = DebugOverlay.arrange(input, 320, text -> text.length() * 6);
+    assertEquals("Sample A", result.get(0).text());
+    assertEquals("Sample B", input.get(0).text());
+    assertEquals(world, DebugOverlay.lastLayout());
+  }
   @Test void overlappingProvidersAndNarrowColumnsStaySeparate() {
     for (int width : new int[]{320, 640}) {
       DebugOverlay.begin();

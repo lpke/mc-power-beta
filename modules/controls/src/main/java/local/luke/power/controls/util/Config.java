@@ -76,6 +76,9 @@ public class Config {
             @ConfigEntry(name = "Blur Panorama")
             public Boolean blurBackground = false;
 
+            @ConfigEntry(name = "Panorama only on the title screen")
+            public Boolean onlyTitleScreen = true;
+
             @ConfigEntry(name = "Panorama folder to use", description = "Choose an original Minecraft title background.")
             public String panoramaFolder = "b1_7_3";
         }

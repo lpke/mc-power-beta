@@ -145,7 +145,7 @@
   "power_compat:config.allowCraftingInventorySlots": "Retains items in the player's 2x2 crafting grid when closing the inventory.",
   "power_compat:config.vehicleLogoutLoginFixesEnabled": "Restores the player's mounted vehicle correctly after saving and reloading.",
   "logo.blocks.inverted": "Swaps filled and empty cells in the title's block lettering.",
-  "logo.scrollingBackground.enabled": "Moves the menu's tiled background instead of keeping it static.",
+  "logo.scrollingBackground.enabled": "Moves the classic tiled menu background. Does not affect panorama backgrounds.",
   "logo.scrollingBackground.speed": "Rate at which the tiled menu background moves.",
   "logo.scrollingBackground.onlyTitle": "Limits background movement to the title screen instead of all menus.",
   "logo.logo.shadow": "Draws a shadow behind the block-based Minecraft logo.",

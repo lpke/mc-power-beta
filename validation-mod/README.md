@@ -8,6 +8,9 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-230 check` exercises HUD dragging and every editor tab, tile painting, nested block selection, preset save/load/removal, undo, draft warnings, Apply/Discard and main-menu panorama backgrounds. It captures narrow and wide screens under `reports/editors-230`. Run `save`, restart, then `saved` for editor persistence.
+- `light-performance-230` compares batched light numbers against the previous native font renderer at all four rotations, checks pixel differences and records median/p95 draw timings for 2,048 labels. Run `overlay-setup`, `overlay-check` and `toggle-saves` for native light sampling, GL restoration and deferred writes under a stalled disk. Use a muted disposable world.
+
 - `release-220`: flight units/order/defaults, retired switches, settings/library searches, in-group divider geometry at narrow/wide sizes, reported command origins, mode-aware camera collisions and solid/translucent head draws. Run after `new-world`.
 - `release-211`: daytime and nighttime bed respawn, native sleeping and bed occupancy, HUD order, merged panorama settings, live preview, immediate selection and manual Back/Escape. Run after `new-world`. Then use `title` and `release-211-editor` for the native Select world > Edit route, dirty-exit confirmation, durable saves, preserved world name/player data and future-format recovery UI.
 - `title-alignment`: captures every title style at narrow, wide and odd GUI widths, measures the rendered lettering against the screen centre and verifies retro customisation is preserved. Requires a muted disposable client at least 1280×840 pixels.

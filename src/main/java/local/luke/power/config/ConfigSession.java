@@ -41,6 +41,15 @@ public final class ConfigSession {
     return settings.stream().anyMatch(s -> s.changed() && s.restart);
   }
 
+  public void validate() throws Exception {
+    Map<String, Map<String, JsonElement>> values = new LinkedHashMap<>();
+    for (Setting s : settings) if (s.changed()) {
+      s.validate(s.value);
+      values.computeIfAbsent(s.backend, key -> new LinkedHashMap<>()).put(s.id, s.value.deepCopy());
+    }
+    for (var entry : values.entrySet()) backends.get(entry.getKey()).validate(entry.getValue());
+  }
+
   public void link(Setting changed) {
     if (changed.id.startsWith("audio.trackEnabled.")) {
       String id = changed.id.substring("audio.trackEnabled.".length());

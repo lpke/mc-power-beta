@@ -110,6 +110,41 @@ final class ToggleSaveChecks {
         check(!Config.current().sneak.enabled, "Apply missing");
         check(!PowerConfig.section("building").getAsJsonObject("sneak").get("enabled").getAsBoolean(), "older queued state overwrote Apply");
       });
+      test("complete game ticks and Active tweaks HUD never wait for toggle writes, on or off", () -> {
+        var disk = PowerConfig.class.getDeclaredField("DISK"); disk.setAccessible(true);
+        long longest = 0;
+        var workers = Executors.newSingleThreadExecutor(); var watchdog = Executors.newSingleThreadScheduledExecutor();
+        try {
+          for (boolean visible : new boolean[]{true, false}) {
+            var settings = StatusConfig.copy(); settings.enabled = visible; StatusConfig.preview(settings);
+            for (int feature = 0; feature < 3; feature++) for (int transition = 0; transition < 2; transition++) {
+              FastPlace.beginTick(mc, false, false, true); FakeSneak.beginTick(mc, false, true);
+              var entered = new CountDownLatch(1); var release = new CountDownLatch(1);
+              Future<?> writer = workers.submit(() -> {
+                synchronized (disk.get(null)) { entered.countDown(); check(release.await(5, TimeUnit.SECONDS), "fixture lock timed out"); }
+                return null;
+              });
+              try {
+                check(entered.await(5, TimeUnit.SECONDS), "fixture writer did not start");
+                // A bounded watchdog also makes this fail safely against the regressed implementation.
+                Future<?> timeout = watchdog.schedule(release::countDown, 300, TimeUnit.MILLISECONDS);
+                try {
+                  long start = System.nanoTime();
+                  if (feature == 0) FastPlace.beginTick(mc, false, true, true);
+                  else if (feature == 1) FakeSneak.beginTick(mc, true, true);
+                  else LightConfig.toggle();
+                  local.luke.power.PowerBeta.tick(mc);
+                  ActiveTweaks.render(mc);
+                  long duration = System.nanoTime() - start; longest = Math.max(longest, duration);
+                  check(duration < 100_000_000L, "full tick waited for disk: " + duration / 1_000_000.0 + "ms");
+                  check(release.getCount() == 1, "watchdog released writer before the game tick returned");
+                } finally { timeout.cancel(false); }
+              } finally { release.countDown(); writer.get(5, TimeUnit.SECONDS); PowerConfig.flushPending(); }
+            }
+          }
+        } finally { workers.shutdownNow(); watchdog.shutdownNow(); }
+        log("TIMING maximum complete toggle/tick/HUD with disk stalled ms=" + longest / 1_000_000.0);
+      });
     } finally {
       FastPlace.beginTick(mc, false, false, true); FakeSneak.beginTick(mc, false, true);
       Config.apply(before); StatusConfig.preview(display); LightConfig.save(light);

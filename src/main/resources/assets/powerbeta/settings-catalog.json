@@ -634,11 +634,12 @@
   },
   "power_hud:hudpositions.hudPositioningSystem": {
     "page": "Interface",
-    "group": "HUD layout",
-    "label": "HUD positioning",
-    "description": "Which configs or defaults to use for the HUD",
+    "group": "General HUD",
+    "label": "HUD editor",
+    "description": "Arrange and preview the HUD, custom info, active tweaks, version label and F3 debug information.",
     "default": 1,
-    "restart": false
+    "restart": false,
+    "order": -1
   },
   "power_hud:hudpositions.putOverlayMessagesBelowHotbar": {
     "page": "Interface",
@@ -700,7 +701,7 @@
     "page": "Inventory",
     "group": "Clicking",
     "label": "Double-click to gather a stack",
-    "description": "Initially empty cursor double click to pickup",
+    "description": "Double-click a stack with an empty cursor to gather matching items. Use player inventory before container slots, combining partial stacks before full stacks.",
     "default": true,
     "restart": false
   },
@@ -3170,7 +3171,7 @@
     "page": "Interface",
     "group": "Title screen",
     "label": "Title lettering",
-    "description": "Rows use the letter block palette. Spaces leave gaps.",
+    "description": "Paint title tiles, choose their blocks and preview the lettering. Includes rotation, shadow, animation and saved presets.",
     "default": [
       " *   * * *   * *** *** *** *** *** ***",
       " ** ** * **  * *   *   * * * * *    * ",
@@ -3410,7 +3411,8 @@
   },
   "native.sound": {
     "order": 2,
-    "separatorAfter": true
+    "separatorAfter": true,
+    "separatorSpacing": 7
   },
   "audio.preset": {
     "order": 0
@@ -3801,7 +3803,8 @@
   "logo.scrollingBackground.enabled": {
     "page": "Interface",
     "group": "Title background",
-    "order": 3
+    "order": 3,
+    "description": "Scroll the classic tiled menu background. Does not affect panorama backgrounds."
   },
   "logo.scrollingBackground.speed": {
     "page": "Interface",
@@ -4666,42 +4669,50 @@
   "audio.category.ambient": {
     "page": "Audio",
     "group": "Volume",
-    "order": 100
+    "order": 100,
+    "indent": 10
   },
   "audio.category.blocks": {
     "page": "Audio",
     "group": "Volume",
-    "order": 100
+    "order": 100,
+    "indent": 10
   },
   "audio.category.hostile": {
     "page": "Audio",
     "group": "Volume",
-    "order": 100
+    "order": 100,
+    "indent": 10
   },
   "audio.category.players": {
     "page": "Audio",
     "group": "Volume",
-    "order": 100
+    "order": 100,
+    "indent": 10
   },
   "audio.category.records": {
     "page": "Audio",
     "group": "Volume",
-    "order": 100
+    "order": 100,
+    "indent": 10
   },
   "audio.category.weather": {
     "page": "Audio",
     "group": "Volume",
-    "order": 100
+    "order": 100,
+    "indent": 10
   },
   "audio.category.passive": {
     "page": "Audio",
     "group": "Volume",
-    "order": 100
+    "order": 100,
+    "indent": 10
   },
   "audio.category.interface": {
     "page": "Audio",
     "group": "Volume",
-    "order": 100
+    "order": 100,
+    "indent": 10
   },
   "logo.style": {
     "page": "Interface",
@@ -4790,5 +4801,13 @@
     "description": "Break all leaf types faster with axes, scaled by tool material. Diamond takes about as long as a diamond shovel on sand. Keeps normal leaf drops and one normal durability hit per block. Singleplayer Survival only.",
     "default": false,
     "order": 31
+  },
+  "power_controls:userinterface.panoramaConfig.onlyTitleScreen": {
+    "page": "Interface",
+    "group": "Title background",
+    "label": "Panorama only on the title screen",
+    "description": "Off also shows the selected panorama behind menus opened from the title screen. In-game menus keep their world background.",
+    "order": 1.5,
+    "default": true
   }
 }

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-17
+
+- Add an interactive HUD editor with draggable previews, screen anchors, precise offsets, snapping and undo. Bring native HUD positioning, four custom info clusters, active tweaks, version labels and F3 settings into one editor using the active texture pack.
+- Paint retro title lettering on a tile grid, choose blocks per tile and preview the actual 3D logo. Keep rotation, shadow and animation controls together, with saved presets, undo and a default Minecraft logo reset. Done accepts edits; unsaved exits offer Save, Discard or Cancel.
+- Add Panorama only on the title screen, enabled by default. Turn it off to show panoramas across main-menu screens, with darker backgrounds behind settings and readable native world and texture-pack lists.
+- Fix a regression where every game tick could wait for background settings writes. Restore smooth fake-sneak, fast-placement, light-overlay and other gameplay toggles, with the Active tweaks HUD shown or hidden.
+- Batch light-overlay numbers into one font draw and limit scanning time per tick to reduce toggle and refresh stutters. Preserve native font textures, light values, depth occlusion and deferred settings saves.
+- Double-click gathering combines partial stacks before full stacks and uses player inventory before container slots. Preserve native item data, stack limits and multiplayer transfers.
+- Tighten the game-sounds divider and indent its detailed volume controls. Clarify that scrolling menu backgrounds do not affect panoramas.
+
 ## [2.2.2] - 2026-10-17
 
 - Add Axes slash leaves, off by default. Axes cut all leaf variants quickly according to their material, with diamond taking about the same time as a diamond shovel on sand. Keep vanilla leaf drops and normal tool durability.

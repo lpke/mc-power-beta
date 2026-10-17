@@ -401,3 +401,12 @@
   penalties; compose with StationAPI and vein timing without applying the speed twice.
 - Flight response sliders step by whole numbers; numeric entry and saved values may
   remain fractional. Keep acceleration/deceleration storage IDs and defaults intact.
+
+- HUD and title editors own isolated drafts until Done. Preserve existing setting IDs, combined/separate layouts and title preset IDs; nested pickers and modal exits must not leak changes. HUD previews share native positioning maths and the active font/item textures.
+- Light-overlay rendering batches native digit geometry with the current font texture and advances. Keep camera-relative precision, depth occlusion and restored GL state. Scans obey both the configured check limit and a short time budget, stay tick-owned and never load terrain.
+
+- Recovery-status checks run every game tick and must never acquire the settings writer's disk lock. Publish the status independently while retaining locked durable writes and explicit menu/shutdown flushes. Toggle regression checks must include the following full tick and HUD draw, with the writer stalled.
+
+- Plain double-click gathering consumes player inventory before container sources, partial
+  stacks before full stacks within each inventory. Use native clicks, preserve oversized
+  stacks and full native data, and revalidate callback results without overwriting changes.

@@ -434,6 +434,9 @@ public final class PowerOptionsScreen extends UiScreen {
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
     }
     for (Setting s : candidates) {
+      if (query.isEmpty() && !changedOnly && listed.isEmpty()
+          && (HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY)
+              || HudEditorSettings.lettering(s) && !s.id.equals("logo.logo.lines"))) continue;
       if (!SettingAccess.visible(session, s) || !selectedPreset(s)) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
           && !local.luke.power.config.backend.InfoHudBackend.selected(s, cluster)) continue;
@@ -457,7 +460,8 @@ public final class PowerOptionsScreen extends UiScreen {
         if (!flat && query.isEmpty() && !changedOnly
             && s != group.getValue().get(group.getValue().size() - 1)
             && Catalog.metadata(s.id).has("separatorAfter") && Catalog.metadata(s.id).get("separatorAfter").getAsBoolean()) {
-          next.add(new Row(group.getKey(), null, y, 13, true)); y += 13;
+          int spacing = (int)Catalog.number(Catalog.metadata(s.id), "separatorSpacing", 13);
+          next.add(new Row(group.getKey(), null, y, spacing, true)); y += spacing;
         }
       }
       y += 6;
@@ -480,6 +484,29 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void changed(Setting setting) { changed(setting, false); }
+
+  boolean acceptEditor(SettingsDraft draft) {
+    Map<Setting, com.google.gson.JsonElement> before = new LinkedHashMap<>();
+    for (Setting copy : draft.settings()) {
+      Setting target = session.settings().stream().filter(s -> s.id.equals(copy.id)).findFirst().orElseThrow();
+      before.put(target, target.value.deepCopy());
+      target.value = copy.value.deepCopy();
+    }
+    try { session.validate(); }
+    catch (Exception e) {
+      before.forEach((s, v) -> s.value = v);
+      error = Objects.toString(e.getMessage(), "Invalid editor settings");
+      return false;
+    }
+    changed(before.keySet(), false);
+    if (error.isEmpty()) return true;
+    before.forEach((s, v) -> s.value = v);
+    try { session.preview(MenuPreferences.current().autoApply); }
+    catch (Exception e) { PowerBeta.LOG.error("Could not restore editor preview", e); }
+    return false;
+  }
+
+  String editorError() { return error; }
 
   public void finishContinuousChange() { if (autoSavePending) save(false, false); }
 
@@ -705,7 +732,7 @@ public final class PowerOptionsScreen extends UiScreen {
           return;
         }
         if (x < mainControlLeft(r) || x >= right() - 38) return;
-        if (ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
+        if (HudEditorSettings.contains(s) || HudEditorSettings.lettering(s) || ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
         else if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0 && s.slider()) {
             dragging = s;
@@ -771,6 +798,14 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!SettingAccess.reason(session, s).isEmpty()) return;
     error = "";
     click();
+    if (HudEditorSettings.contains(s)) {
+      minecraft.setScreen(new HudEditorScreen(this, s.id));
+      return;
+    }
+    if (HudEditorSettings.lettering(s)) {
+      minecraft.setScreen(new TitleLetteringScreen(this));
+      return;
+    }
     if (s.id.equals("audio.preset")) {
       libraryOpen = true; library.openPresets(); layout(); return;
     }
@@ -942,6 +977,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private String value(Setting s) {
+    if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("logo.logo.lines")) return "Edit...";
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) return local.luke.power.input.PanoramaCatalog.label(s.value.getAsString());
     if (s.id.equals("audio.preset")) return new MusicEdits(this).name(s.value.getAsString());
@@ -1105,13 +1141,14 @@ public final class PowerOptionsScreen extends UiScreen {
       int cy = y + (narrow ? 16 : 2),
           controlLeft = mainControlLeft(row);
       int textWidth = narrow ? span() - 4 : controlLeft(row) - left() - 13;
-      String label = fit(SettingLabels.display(s, !search.text().isBlank()), textWidth - (s.restart ? 9 : 0));
+      int indent = (int)Catalog.number(Catalog.metadata(s.id), "indent", 0);
+      String label = fit(SettingLabels.display(s, !search.text().isBlank()), textWidth - indent - (s.restart ? 9 : 0));
       text(
           label,
-          left() + 3,
+          left() + 3 + indent,
           y + (narrow ? 3 : 8),
           s.changed() ? 0xffdd88 : 0xc4c4c4);
-      if (s.restart) text("*", left() + 6 + textRenderer.getWidth(label),
+      if (s.restart) text("*", left() + 6 + indent + textRenderer.getWidth(label),
           y + (narrow ? 3 : 8), 0xe8a0a0);
       List<Setting> conflicts = conflicts(s);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;

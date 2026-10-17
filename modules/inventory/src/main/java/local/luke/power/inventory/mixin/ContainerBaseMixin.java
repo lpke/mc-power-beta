@@ -533,49 +533,11 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	}
 
 	@Unique private boolean powerInventory_handleDoubleClickEmptyCursor(int mouseX, int mouseY, int button, Slot clickedSlot) {
-		if (null != clickedSlot) {
-			HandledScreen handledScreen = (HandledScreen) minecraft.currentScreen;
-
-			ItemStack slotStack = minecraft.player.inventory.getCursorStack();
-			int playerInventorySlotIndex;
-
-			/** - Shift item back into player inventory */
-			for (playerInventorySlotIndex = 0; playerInventorySlotIndex < handledScreen.container.slots.size(); playerInventorySlotIndex++) {
-
-				if (QuickTransfers.writable((Slot) handledScreen.container.slots.get(playerInventorySlotIndex), slotStack)
-						&& ModHelper.isItemInSlot(slotStack, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)))) {
-					this.minecraft.interactionManager.clickSlot(this.container.syncId, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)).id, 0, false, this.minecraft.player);
-					this.minecraft.interactionManager.clickSlot(this.container.syncId, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)).id, 0, false, this.minecraft.player);
-
-					ItemStack itemStack = ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)).getStack();
-					if (  null != itemStack
-					   && itemStack.getItem().getMaxCount() == itemStack.count
-					) {
-						this.minecraft.interactionManager.clickSlot(this.container.syncId, clickedSlot.id, 0, false, this.minecraft.player);
-						this.minecraft.interactionManager.clickSlot(this.container.syncId, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)).id, 0, false, this.minecraft.player);
-						this.minecraft.interactionManager.clickSlot(this.container.syncId, clickedSlot.id, 0, false, this.minecraft.player);
-						this.minecraft.interactionManager.clickSlot(this.container.syncId, ((Slot)handledScreen.container.slots.get(playerInventorySlotIndex)).id, 0, false, this.minecraft.player);
-						this.minecraft.interactionManager.clickSlot(this.container.syncId, clickedSlot.id, 0, false, this.minecraft.player);
-
-						/** - Stack is full */
-						break;
-					}
-				}
-
-				ItemStack cursorStack = minecraft.player.inventory.getCursorStack();
-				if (  null != cursorStack
-				   && cursorStack.getItem().getMaxCount() == cursorStack.count
-				) {
-					/** - Stack is full */
-					break;
-				}
-			}
-
-			/** - Still pick up the item even if no items are shifted */
-			return true;
-		}
-
-		return false;
+		if (clickedSlot == null) return false;
+		powerInventory_resetRightClickDragVariables();
+		powerInventory_resetLeftClickDragVariables();
+		GatherStacks.gather(minecraft, container, clickedSlot);
+		return true;
 	}
 
 	@Unique private void powerInventory_internalMouseClicked(int mouseX, int mouseY, int button) {

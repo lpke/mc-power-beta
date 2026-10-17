@@ -54,9 +54,9 @@ improvements and optional tweaks in one searchable Options menu.
 - Optional equipment durability and defence changes, mob drops, sheep punching for wool, grass hoeing for seeds, squid milking and food-waste prevention.
 - Older block textures, softer rain and snow, low fire, redstone power numbers, leaf rendering, particle controls, camera shake and fog options.
 - Light-level overlays, configurable active-tweak indicators and toggle messages, hotbar item names, HUD positioning, crosshair and vignette controls.
-- Four custom HUD info clusters with separate positions, content and text styles, plus an optional 12-hour F3 daylight clock.
+- An interactive HUD editor with dragging, anchors, snapping and undo. Arrange native HUD elements, four custom info clusters, active tweaks, version labels and F3 information with texture-pack previews.
 - Expanded F3 information for coordinates, facing, biome, day, play time, slime chunks, light, music and culling, with shared text colour and layout.
-- Title-screen logo and panorama controls, version labels, achievement display options and recovery controls for missing achievements.
+- Paint custom block lettering for the title screen, preview it in 3D and save presets. Choose panorama backgrounds for the title screen or all main-menu screens. Achievement display options include recovery controls for missing achievements.
 - Configurable autosaving, focus-loss pausing, raw mouse input and network options. Optional tall-grass and dead-bush generation controls for new terrain.
 - Fixes for rendering, lighting, item and block drops, mining, boats, stairs, fences, liquids, mob behaviour, sleeping, multiplayer jitter and legacy client behaviour.
 

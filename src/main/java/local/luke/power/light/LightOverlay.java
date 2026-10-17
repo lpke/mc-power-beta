@@ -9,9 +9,10 @@ import org.lwjgl.opengl.GL11;
 
 public final class LightOverlay {
   private static final LightCache CACHE = new LightCache();
-  private static final String[] NUMBERS = new String[16];
+  private static final LightTextBatch TEXT = new LightTextBatch();
+  private static LightSettings style;
+  private static int low, high;
   private static World world;
-  static { for (int i = 0; i < NUMBERS.length; i++) NUMBERS[i] = Integer.toString(i); }
 
   public static void tick(Minecraft mc) {
     LightSettings settings = LightConfig.current();
@@ -57,14 +58,15 @@ public final class LightOverlay {
     double cx = camera.field_1637 + (camera.x - camera.field_1637) * delta;
     double cy = camera.field_1638 + (camera.y - camera.field_1638) * delta;
     double cz = camera.field_1639 + (camera.z - camera.field_1639) * delta;
-    int low = LightSettings.rgb(s.lowColor), high = LightSettings.rgb(s.highColor);
+    if (style != s) { low = LightSettings.rgb(s.lowColor); high = LightSettings.rgb(s.highColor); style = s; }
+    TEXT.prepare(mc.textRenderer);
     // Rotate in 90-degree steps so the text reads toward the viewing direction.
     float angle = Math.round(camera.yaw / 90f) * 90f;
+    double cosine = Math.cos(Math.toRadians(angle)), sine = Math.sin(Math.toRadians(angle));
     double scale = s.textSize / 12;
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     GL11.glPushMatrix();
     try {
-      GL11.glTranslated(-cx, -cy, -cz);
       GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glDisable(GL11.GL_FOG);
       GL11.glDisable(GL11.GL_CULL_FACE);
@@ -73,21 +75,16 @@ public final class LightOverlay {
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glDepthMask(false);
-      for (LightCache.Cell cell : CACHE.cells()) {
-        double dx = cell.x() + .5 - camera.x, dz = cell.z() + .5 - camera.z;
-        if (dx * dx + dz * dz > s.radius * s.radius
-            || Math.abs(cell.y() + 1 - camera.boundingBox.minY) > s.verticalRange + 1) continue;
-        GL11.glPushMatrix();
-        try {
-          GL11.glTranslated(cell.x() + .5, cell.y() + 1.006, cell.z() + .5);
-          GL11.glRotatef(-angle, 0, 1, 0);
-          GL11.glRotatef(90, 1, 0, 0);
-          GL11.glScaled(-scale, -scale, scale);
-          String number = NUMBERS[cell.level()];
-          mc.textRenderer.draw(number, -mc.textRenderer.getWidth(number) / 2, -4,
-              cell.level() < s.greenFrom ? low : high);
-        } finally { GL11.glPopMatrix(); }
-      }
+      TEXT.begin();
+      try {
+        for (LightCache.Cell cell : CACHE.cells()) {
+          double dx = cell.x() + .5 - camera.x, dz = cell.z() + .5 - camera.z;
+          if (dx * dx + dz * dz > s.radius * s.radius
+              || Math.abs(cell.y() + 1 - camera.boundingBox.minY) > s.verticalRange + 1) continue;
+          TEXT.number(cell.level(), cell.x() + .5 - cx, cell.y() + 1.006 - cy, cell.z() + .5 - cz,
+              scale, cosine, sine, cell.level() < s.greenFrom ? low : high);
+        }
+      } finally { TEXT.end(); }
     } finally {
       GL11.glPopMatrix();
       GL11.glPopAttrib();

@@ -14,12 +14,13 @@ public final class PowerConfig {
   private static final DeferredSaves DEFERRED = new DeferredSaves(PowerConfig::writeDeferred);
   private static Path file;
   private static JsonObject recoveryDefaults;
-  private static String problem = "";
+  private static volatile String problem = "";
   /** Only bootstrap may enter recovery mode. Defaults remain in memory and writes stay blocked. */
   public static void recovery(JsonObject defaults, String message) {
     synchronized (DISK) { recoveryDefaults = ConfigVersions.convert(defaults); problem = message; }
   }
-  public static String problem() { synchronized (DISK) { return problem; } }
+  /** Read on every game tick. Never join the durable writer's disk lock here. */
+  public static String problem() { return problem; }
   static {
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
       try { flushPending(); }

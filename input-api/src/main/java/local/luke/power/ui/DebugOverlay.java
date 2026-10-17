@@ -16,9 +16,15 @@ public final class DebugOverlay {
   public static List<Line> lastLayout() { return last; }
 
   public static List<Line> layout(int screenWidth, ToIntFunction<String> measure) {
+    return last = arrange(pending, screenWidth, measure);
+  }
+
+  /** Pure placement also serves editor samples without touching the captured gameplay frame. */
+  public static List<Line> arrange(List<Line> inputLines, int screenWidth, ToIntFunction<String> measure) {
     List<Line> placed = new ArrayList<>();
-    pending.sort(Comparator.comparingInt(Line::y));
-    for (Line input : pending) {
+    List<Line> ordered = new ArrayList<>(inputLines);
+    ordered.sort(Comparator.comparingInt(Line::y));
+    for (Line input : ordered) {
       String text = input.text;
       while (!text.isEmpty() && measure.applyAsInt(text) > screenWidth - 4) text = text.substring(0, text.length() - 1);
       int width = measure.applyAsInt(text), x = Math.max(2, Math.min(input.x, screenWidth - width - 2));
@@ -34,6 +40,6 @@ public final class DebugOverlay {
       } while (moved);
       placed.add(new Line(text, x, y, width));
     }
-    return last = List.copyOf(placed);
+    return List.copyOf(placed);
   }
 }

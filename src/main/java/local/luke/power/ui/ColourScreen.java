@@ -10,14 +10,20 @@ import org.lwjgl.input.Mouse;
 
 /** RGB sliders, an exact hex field and shared saved swatches; edits stay local until Done. */
 public final class ColourScreen extends UiScreen {
-  private final PowerOptionsScreen parent;
+  private final net.minecraft.client.gui.screen.Screen parent;
+  private final Runnable accepted;
   private final Setting setting;
   private final TextInput hex;
   private int colour, dragging = -1;
   private String error = "";
 
   public ColourScreen(PowerOptionsScreen parent, Setting setting) {
+    this(parent, setting, () -> parent.changed(setting));
+  }
+
+  public ColourScreen(net.minecraft.client.gui.screen.Screen parent, Setting setting, Runnable accepted) {
     this.parent = parent;
+    this.accepted = accepted;
     this.setting = setting;
     colour = LightSettings.rgb(setting.value.getAsString());
     hex = new TextInput(format(colour), 7);
@@ -141,7 +147,7 @@ public final class ColourScreen extends UiScreen {
     parse();
     if (!error.isEmpty()) return;
     setting.parse(format(colour));
-    parent.changed(setting);
+    accepted.run();
     minecraft.setScreen(parent);
   }
 

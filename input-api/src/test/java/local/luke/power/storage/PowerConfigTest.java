@@ -12,6 +12,21 @@ class PowerConfigTest {
   @BeforeAll static void setup() { PowerConfig.configure(dir.resolve("settings.json")); }
   @BeforeEach void clear() throws Exception { Files.deleteIfExists(PowerConfig.path()); }
   @AfterEach void finish() throws Exception { PowerConfig.flushPending(); PowerConfig.takeSaveFailure(); }
+  @Test void recoveryStatusReadNeverWaitsForTheDiskWriter() throws Exception {
+    var field = PowerConfig.class.getDeclaredField("DISK"); field.setAccessible(true);
+    var entered = new CountDownLatch(1); var release = new CountDownLatch(1);
+    var workers = Executors.newFixedThreadPool(2);
+    try {
+      Future<?> writer = workers.submit(() -> {
+        synchronized (field.get(null)) { entered.countDown(); assertTrue(release.await(5, TimeUnit.SECONDS)); }
+        return null;
+      });
+      assertTrue(entered.await(5, TimeUnit.SECONDS));
+      Future<String> status = workers.submit(PowerConfig::problem);
+      assertEquals("", status.get(200, TimeUnit.MILLISECONDS), "tick recovery check waited for disk I/O");
+      assertFalse(writer.isDone(), "writer was released before the status read");
+    } finally { release.countDown(); workers.shutdownNow(); }
+  }
   @Test void independentWritersRetainEverySection() throws Exception {
     var workers=Executors.newFixedThreadPool(4);
     try {

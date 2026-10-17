@@ -70,6 +70,10 @@ public final class LogoBackend implements Backend {
               name.equals("style") ? (List<String>) logo.getField("TITLE_STYLES").get(null) : List.of(),
               false));
     }
+    JsonObject title = local.luke.power.storage.PowerConfig.section("title");
+    entries.add(new Setting("logo.presets", id(), "Interface", "Title screen", "Title presets",
+        "Saved title lettering, blocks, rotation and animation.", Setting.Kind.LIST,
+        title.has("presets") ? title.get("presets") : new JsonArray(), new JsonArray(), 0, 0, 1, List.of(), false));
   }
 
   public static void register(ConfigSession s) throws Exception {
@@ -89,6 +93,8 @@ public final class LogoBackend implements Backend {
     for (var e : values.entrySet()) {
       String id = e.getKey();
       JsonElement v = e.getValue();
+      if (id.equals("logo.presets")) local.luke.power.ui.TitleTiles.validatePresets(v,
+          n -> n > 0 && n < Block.BLOCKS.length && Block.BLOCKS[n] != null);
       if (id.equals("logo.logo.rotation")) {
         if (!v.isJsonArray() || v.getAsJsonArray().size() != 3)
           throw new IllegalArgumentException("Use three rotation angles");
@@ -100,6 +106,7 @@ public final class LogoBackend implements Backend {
             throw new IllegalArgumentException("Angles must be -360 to 360");
       }
       if (id.equals("logo.logo.lines")) {
+        local.luke.power.ui.TitleTiles.validateLines(v);
         if (!v.isJsonArray() || v.getAsJsonArray().size() < 1 || v.getAsJsonArray().size() > 12)
           throw new IllegalArgumentException("Use 1 to 12 title rows");
         for (var line : v.getAsJsonArray())
@@ -109,6 +116,7 @@ public final class LogoBackend implements Backend {
             throw new IllegalArgumentException("Title rows must be text up to 80 characters");
       }
       if (id.equals("logo.blocks.map")) {
+        local.luke.power.ui.TitleTiles.validatePalette(v, n -> n > 0 && n < Block.BLOCKS.length && Block.BLOCKS[n] != null);
         if (!v.isJsonObject() || v.getAsJsonObject().size() > 64)
           throw new IllegalArgumentException("Use a letter-to-block object");
         for (var block : v.getAsJsonObject().entrySet()) {

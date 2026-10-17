@@ -5,6 +5,8 @@ import java.util.*;
 /** Bounded main-thread scans. Rendering consumes snapshots and never reads the world. */
 public final class LightCache {
   public static final int WORK_PER_TICK = 2048, MAX_LABELS = 2048;
+  public static final long MAX_SCAN_NANOS = 1_000_000L;
+  private final java.util.function.LongSupplier clock;
   public record Cell(int x, int y, int z, int level) {}
   private record Column(int x, int z) {}
   @FunctionalInterface public interface Sampler { int light(int x, int y, int z); }
@@ -14,6 +16,9 @@ public final class LightCache {
   private List<Column> columns = List.of();
   private final List<Cell> pending = new ArrayList<>();
   private List<Cell> visible = List.of();
+
+  public LightCache() { this(System::nanoTime); }
+  LightCache(java.util.function.LongSupplier clock) { this.clock = clock; }
 
   public List<Cell> cells() { return visible; }
 
@@ -49,7 +54,11 @@ public final class LightCache {
     int height = vertical * 2 + 1, total = columns.size() * height;
     int budget = Math.max(256, Math.min(16384, s.checksPerTick));
     int stop = Math.min(total, cursor + budget);
+    long started = clock.getAsLong();
+    int work = 0;
     while (cursor < stop && pending.size() < MAX_LABELS) {
+      if (work != 0 && (work & 31) == 0 && clock.getAsLong() - started >= MAX_SCAN_NANOS) break;
+      work++;
       Column c = columns.get(cursor / height);
       int yi = cursor++ % height;
       int by = cy + (yi % 2 == 0 ? yi / 2 : -(yi + 1) / 2);
