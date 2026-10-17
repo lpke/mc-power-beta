@@ -97,7 +97,11 @@ public final class PowerOptionsScreen extends UiScreen {
   private Setting dragging;
   private double dragLeft, dragSpan;
 
-  private int uiWidth() { return Math.min(width, height * 16 / 9); }
+  private static int sidebarWidth(int width) { return Math.max(90, Math.min(155, width / 4)); }
+  private int uiWidth() {
+    int available = Math.min(width, height * 16 / 9);
+    return isolatedRules() ? available - sidebarWidth(available) - 2 : available;
+  }
   private int origin() { return (width - uiWidth()) / 2; }
   private int right() { return origin() + uiWidth(); }
   private int footerY() { return height - (uiWidth() < (controls() || video() || directPause ? 700 : 470) ? 51 : 28); }
@@ -367,11 +371,11 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private int sidebar() {
-    return Math.max(90, Math.min(155, uiWidth() / 4));
+    return isolatedRules() ? 0 : sidebarWidth(uiWidth());
   }
 
   private int left() {
-    return origin() + sidebar() + 16;
+    return origin() + (isolatedRules() ? 14 : sidebar() + 16);
   }
 
   private int span() {
@@ -554,7 +558,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (hidden || wheel == 0 || capture != null || confirmClose || confirmReset) return;
     valueEditor.cancel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
-    if (x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
+    if (!isolatedRules() && x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
     else if (libraryVisible()) library.wheel(wheel);
     else scroll -= Math.signum(wheel) * 48;
     layout();
@@ -590,7 +594,7 @@ public final class PowerOptionsScreen extends UiScreen {
         click(); chooseRulePreset(i == 1); return;
       }
     }
-    if (button == 0 && sidebarBar.press(sidebarTrack(), x, y)) { sideScroll = sidebarBar.drag(sidebarTrack(), y, true); return; }
+    if (!isolatedRules() && button == 0 && sidebarBar.press(sidebarTrack(), x, y)) { sideScroll = sidebarBar.drag(sidebarTrack(), y, true); return; }
     if (!libraryVisible() && button == 0 && contentBar.press(contentTrack(), x, y)) { scroll = contentBar.drag(contentTrack(), y, true); return; }
     if (button == 0 && (libraryVisible() || !history.isEmpty()) && inside(x, y, left(), 27, 44, 20)) {
       click(); if (libraryVisible()) library.back(this::closeLibrary); else back(); return;
@@ -624,7 +628,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     search.focused = false;
     if (library != null) library.unfocus();
-    if (button == 0 && y >= 24 && y < bottom() && x >= origin() && x < origin() + sidebar()) {
+    if (!isolatedRules() && button == 0 && y >= 24 && y < bottom() && x >= origin() && x < origin() + sidebar()) {
       int index = (int) ((y - 24 + sideScroll) / 22);
       if (index >= 0 && index < pages.size()) {
         boolean same = pages.get(index).equals(page);
@@ -1040,10 +1044,37 @@ public final class PowerOptionsScreen extends UiScreen {
     return null;
   }
 
+  private void renderSidebar(int mx, int my) {
+    if (isolatedRules()) return;
+    fill(origin() + sidebar() + 4, 24, origin() + sidebar() + 7, bottom(), 0x90404040);
+    fill(origin() + sidebar() + 7, 24, origin() + sidebar() + 8, bottom(), 0x90000000);
+    clip(origin(), 24, sidebar() + 2, bottom() - 24);
+    for (int i = 0; i < pages.size(); i++) {
+      int y = 24 + i * 22 - (int) sideScroll;
+      boolean hover = inside(mx, my, origin(), y, sidebar(), 22);
+      if (pages.get(i).equals(page) && search.text().isBlank() && !changedOnly)
+        fill(origin(), y, origin() + sidebar(), y + 21, 0xc0000000);
+      GL11.glPushMatrix();
+      GL11.glColor4f(1, 1, 1, 1);
+      icons.method_1487(
+          textRenderer, minecraft.textureManager, new ItemStack(ICONS[PAGES.indexOf(pages.get(i))], 1, 0), origin() + 7, y + 2);
+      GL11.glPopMatrix();
+      GL11.glDisable(GL11.GL_LIGHTING);
+      GL11.glDisable(GL11.GL_DEPTH_TEST);
+      text(
+          fit(pages.get(i), sidebar() - 31),
+          origin() + 28,
+          y + 7,
+          hover ? 0xffffa0 : pages.get(i).equals(page) ? 0xffffff : 0xaaaaaa);
+    }
+    unclip();
+    sidebarBar.render(this, sidebarTrack());
+  }
+
   public void render(int mx, int my, float delta) {
     valueEditor.beginFrame();
     if (!hidden && !confirmClose && !confirmReset && capture == null) {
-      sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
+      if (!isolatedRules()) sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
       if (!libraryVisible()) scroll = contentBar.drag(contentTrack(), my, Mouse.isButtonDown(0));
     }
     // This wait belongs only to binding capture, never gameplay input.
@@ -1070,29 +1101,7 @@ public final class PowerOptionsScreen extends UiScreen {
       button("Back", width / 2 - 50, height - 28, 100, 20, mx, my, true);
       return;
     }
-    fill(origin() + sidebar() + 4, 24, origin() + sidebar() + 7, bottom(), 0x90404040);
-    fill(origin() + sidebar() + 7, 24, origin() + sidebar() + 8, bottom(), 0x90000000);
-    clip(origin(), 24, sidebar() + 2, bottom() - 24);
-    for (int i = 0; i < pages.size(); i++) {
-      int y = 24 + i * 22 - (int) sideScroll;
-      boolean hover = inside(mx, my, origin(), y, sidebar(), 22);
-      if (pages.get(i).equals(page) && search.text().isBlank() && !changedOnly)
-        fill(origin(), y, origin() + sidebar(), y + 21, 0xc0000000);
-      GL11.glPushMatrix();
-      GL11.glColor4f(1, 1, 1, 1);
-      icons.method_1487(
-          textRenderer, minecraft.textureManager, new ItemStack(ICONS[PAGES.indexOf(pages.get(i))], 1, 0), origin() + 7, y + 2);
-      GL11.glPopMatrix();
-      GL11.glDisable(GL11.GL_LIGHTING);
-      GL11.glDisable(GL11.GL_DEPTH_TEST);
-      text(
-          fit(pages.get(i), sidebar() - 31),
-          origin() + 28,
-          y + 7,
-          hover ? 0xffffa0 : pages.get(i).equals(page) ? 0xffffff : 0xaaaaaa);
-    }
-    unclip();
-    sidebarBar.render(this, sidebarTrack());
+    renderSidebar(mx, my);
     if (libraryVisible() || !history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,

@@ -8,6 +8,13 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-242 ui` checks Interface grouping, responsive toolbar rows, preview-click
+  highlights, draft isolation and centered creation rules. After four seconds,
+  `release-242 expiry` checks the real highlight timeout. `release-242 audio` checks
+  waiting-track stability through 80 settings edits, exclusions and playback.
+  After `new-world` and `title`, `release-242 saved-rules` checks centered saved-world
+  rules without metadata writes. Use a muted disposable client and silent output.
+
 - `release-241 ui` checks Interface search placement, transient preview toggles,
   responsive layout, editor memory, linked F3 resets, Clear logo/Undo and entity tags.
   `gameplay` checks pause across all dimension policies, native dimension travel,

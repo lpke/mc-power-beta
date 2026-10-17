@@ -640,8 +640,7 @@
     "description": "Arrange and preview the HUD, custom info, active tweaks, version label and F3 debug information.",
     "default": 1,
     "restart": false,
-    "order": 0,
-    "separatorAfter": true
+    "order": 0
   },
   "power_hud:hudpositions.putOverlayMessagesBelowHotbar": {
     "page": "Interface",
@@ -1001,7 +1000,7 @@
   },
   "power_client_fixes:config.disableServerListIpAddresses": {
     "page": "Interface",
-    "group": "",
+    "group": "General",
     "label": "Hide server IP addresses",
     "description": "Hides IP addresses for the server list only",
     "default": false,
@@ -1561,7 +1560,7 @@
   },
   "station-api-configuration:config.loadingScreenOption": {
     "page": "Interface",
-    "group": "",
+    "group": "General",
     "label": "Loading screen style",
     "description": "",
     "default": 0,
@@ -2388,7 +2387,7 @@
   },
   "power_controls:userinterface.showQuitButton": {
     "page": "Interface",
-    "group": "",
+    "group": "General",
     "label": "Show quit button",
     "description": "Shows Quit Button on the Main Menu",
     "default": true,
@@ -2422,7 +2421,7 @@
   },
   "power_controls:userinterface.clearTextFieldWithRightClick": {
     "page": "Interface",
-    "group": "",
+    "group": "General",
     "label": "Clear text field with right click",
     "description": "Right clicking on a text field will clear it",
     "default": false,
@@ -2458,7 +2457,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 2.4.1",
+    "default": "Power Beta 2.4.2",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -2490,7 +2489,7 @@
   },
   "power_controls:userinterface.photoModeConfig.enablePhotoModeButton": {
     "page": "Interface",
-    "group": "",
+    "group": "General",
     "label": "Photo mode button",
     "description": "Enables the Photo Mode button in game menu",
     "default": true,
@@ -4393,7 +4392,7 @@
   },
   "interface.blinkingUiCursor": {
     "page": "Interface",
-    "group": "",
+    "group": "General",
     "order": 6,
     "default": true
   },

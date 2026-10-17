@@ -101,14 +101,14 @@ final class HudPreview {
       GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
       texture(screen, mc, "/gui/icons.png", width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-      elements.add(new Element("layout", "Crosshair", width / 2 - 7, height / 2 - 7, 16, 16, null, null));
+      elements.add(new Element("crosshair", "Crosshair", width / 2 - 7, height / 2 - 7, 16, 16, null, null));
     }
     if (bool(HudEditorSettings.HUD + "drawXboxXAndYButtons")) {
       texture(screen, mc, "/assets/power_hud/button_icons.png", 10, height - 30, 40, 0, 20, 20);
       screen.text("Crafting", 31, height - 24, 0xffffff);
       texture(screen, mc, "/assets/power_hud/button_icons.png", 78, height - 30, 60, 0, 20, 20);
       screen.text("Inventory", 99, height - 24, 0xffffff);
-      elements.add(new Element("layout", "Controller prompts", 10, height - 30, 145, 20, null, null));
+      elements.add(new Element("controller", "Controller prompts", 10, height - 30, 145, 20, null, null));
     }
     if (showToast && bool(HudEditorSettings.TOAST)) {
       int x = width - 160;
@@ -116,7 +116,7 @@ final class HudPreview {
       screen.text("Achievement get!", x + 30, 7, 0xffff00);
       screen.text("Getting Wood", x + 30, 18, 0xffffff);
       icons.draw(screen, mc, samples.get(2), x + 8, 8);
-      elements.add(new Element("layout", "Achievement toast", x, 0, 160, 32, null, null));
+      elements.add(new Element("toast", "Achievement toast", x, 0, 160, 32, null, null));
     }
     if (showChat) {
       String[] messages = {"<Player> Hello!", "<Player> Welcome back."};

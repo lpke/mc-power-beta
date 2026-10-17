@@ -20,6 +20,9 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private HudPreview.Element dragging;
   private HudEditorToolbar toolbarCache;
   private int toolbarWidth = -1;
+  private int toolbarSelectorWidth = -1;
+  private String highlightedElement = "", highlightedSetting = "";
+  private long highlightUntil;
   private double pressX, pressY;
   private int startX, startY;
 
@@ -38,9 +41,12 @@ public final class HudEditorScreen extends DraftEditorScreen {
     HudEditorMemory.collapsed.clear(); HudEditorMemory.collapsed.addAll(collapsed); super.removed();
   }
   private HudEditorToolbar toolbar() {
-    if (toolbarCache == null || toolbarWidth != width) {
+    int selector = HudEditorLayout.horizontal(width, height)
+        ? HudEditorLayout.at(width, height, divider.sideWidth()).controlsWidth() : span();
+    if (toolbarCache == null || toolbarWidth != width || toolbarSelectorWidth != selector) {
       toolbarWidth = width;
-      toolbarCache = HudEditorToolbar.at(width, text -> textRenderer == null ? text.length() * 6 : textRenderer.getWidth(text));
+      toolbarSelectorWidth = selector;
+      toolbarCache = HudEditorToolbar.at(width, selector, text -> textRenderer == null ? text.length() * 6 : textRenderer.getWidth(text));
     }
     return toolbarCache;
   }
@@ -156,7 +162,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   private void select(String id) {
     boolean changed = !selected.equals(id);
-    if (changed) HudEditorMemory.scrolls.put(selected, scroll);
+    if (changed) { HudEditorMemory.scrolls.put(selected, scroll); highlightUntil = 0; }
     selected = id; selecting = false; stopGesture();
     if (id.startsWith("native.")) lastNativeIndex = nativeIndex();
     if (changed) { controlsChanged(); scroll = HudEditorMemory.scrolls.getOrDefault(id, 0d); }
@@ -197,7 +203,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected void renderToolbar(int x, int y) {
     int sw = selectorWidth(); button("", left(), 30, sw, 18, x, y, true);
     text(fit(selectedLabel(), sw - 24), left() + 5, 35, 0xe0e0e0); chevron(left() + sw - 13, 37, selecting, 0xffdddddd);
-    text("Preview toggles:", left(), 59, 0xb0b0b0);
+    text(HudEditorToolbar.LABEL, toolbar().labelX(), toolbar().labelY(), 0xb0b0b0);
     for (var toggle : toolbar().toggles()) button(toggleLabel(toggle.id()), toggle.x(), toggle.y(), toggle.width(), 18, x, y, true);
   }
   private boolean overDivider(int x, int y) {
@@ -235,17 +241,32 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private double canvasY() { return geometry().canvasY(width, height); }
   private double virtualX(int x) { return (x - canvasX()) / scale(); }
   private double virtualY(int y) { return (y - canvasY()) / scale(); }
+  private static String generalSetting(String elementId) {
+    return switch (elementId) {
+      case "crosshair" -> HudEditorSettings.HUD + "disableCrosshair";
+      case "controller" -> HudEditorSettings.HUD + "drawXboxXAndYButtons";
+      case "toast" -> HudEditorSettings.TOAST;
+      default -> "";
+    };
+  }
   protected void previewClick(int x, int y, int button) {
     if (button != 0 || !inside(x, y, previewLeft(), previewTop(), previewSpan(), previewBottom() - previewTop())) return;
     List<HudPreview.Element> elements = preview.elements();
     for (int pass = 0; pass < 3; pass++) for (int i = elements.size() - 1; i >= 0; i--) {
       var element = elements.get(i);
       if (element.hidden() && !element.id().equals(selected)) continue;
-      int priority = !element.hidden() ? 1 : element.id().equals(selected) ? 0 : 2;
+      int priority = !element.hidden() ? generalSetting(element.id()).isEmpty() ? 2 : 0 : 1;
       if (pass != priority) continue;
       double padding = element.hidden() ? 3 / scale() : 0;
       if (virtualX(x) < element.x() - padding || virtualX(x) >= element.x() + element.width() + padding
           || virtualY(y) < element.y() - padding || virtualY(y) >= element.y() + element.height() + padding) continue;
+      String settingId = generalSetting(element.id());
+      if (!settingId.isEmpty()) {
+        select("layout"); revealControl(draft.get(settingId));
+        highlightedElement = element.id(); highlightedSetting = settingId;
+        highlightUntil = System.nanoTime() + 4_000_000_000L;
+        return;
+      }
       if (!element.id().equals(selected)) { select(element.id()); return; }
       if (element.offsetX() != null || element.offsetY() != null) {
         draft.checkpoint(); dragging = element; pressX = virtualX(x); pressY = virtualY(y);
@@ -344,6 +365,15 @@ public final class HudEditorScreen extends DraftEditorScreen {
     return true;
   }
   protected String hint() { return ""; }
+  private boolean highlighting() { return selected.equals("layout") && System.nanoTime() < highlightUntil; }
+  protected void renderControl(Setting s, int y, int mx, int my) {
+    super.renderControl(s, y, mx, my);
+    if (highlighting() && s.id.equals(highlightedSetting)) {
+      int l = controlsLeft() + 2, r = controlsRight() - 9;
+      fill(l, y - 1, r, y, 0xffffff66); fill(l, y + 18, r, y + 19, 0xffffff66);
+      fill(l, y - 1, l + 1, y + 19, 0xffffff66); fill(r - 1, y - 1, r, y + 19, 0xffffff66);
+    }
+  }
   private void ghostOutline(HudPreview.Element element) {
     int l = (int)Math.floor(canvasX() + element.x() * scale()) - 1;
     int t = (int)Math.floor(canvasY() + element.y() * scale()) - 1;
@@ -392,7 +422,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
         fill(width / 2, 0, width / 2 + 1, height, 0x5566bbff);
         fill(0, height / 2, width, height / 2 + 1, 0x5566bbff);
       }
-      preview.draw(this, minecraft, width, height, scenario, selected, background);
+      preview.draw(this, minecraft, width, height, scenario, highlighting() ? highlightedElement : selected, background);
     } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); unclip(); }
     clip(previewLeft(), previewTop(), previewSpan(), Math.max(0, previewBottom() - previewTop()));
     try { for (var element : preview.elements()) if (element.hidden() && element.id().equals(selected)) ghostOutline(element); }

@@ -98,6 +98,8 @@
   Keep missing track IDs, queues and user music files intact.
   Previous during a between-track gap replays the last played track without
   moving back in history or consuming queued tracks. Paused tracks remain current.
+  Keep the advertised next track reserved through settings previews while it remains
+  eligible; volume, gap and menu-control edits must not consume the selector.
 - Difficulty is per-world, independent of access permissions, including creation, world switches,
   dimension copies and commands. Never copy it from global GameOptions. Defaults
   are Normal; manual menu edits take effect on Apply and auto-apply commits them.
@@ -409,6 +411,9 @@
   remain fractional. Keep acceleration/deceleration storage IDs and defaults intact.
 
 - HUD and title editors own isolated drafts until Done. Preserve existing setting IDs, combined/separate layouts and title preset IDs; nested pickers and modal exits must not leak changes. HUD previews share native positioning maths and the active font/item textures.
+- HUD preview controls share the selector row when they fit and wrap otherwise.
+  General-element clicks reveal their setting and highlight both its row and the
+  clicked preview element for four seconds without changing the draft.
 - Light-overlay rendering batches native digit geometry with the current font texture and advances. Keep camera-relative precision, depth occlusion and restored GL state. Scans obey both the configured check limit and a short time budget, stay tick-owned and never load terrain.
 
 - Recovery-status checks run every game tick and must never acquire the settings writer's disk lock. Publish the status independently while retaining locked durable writes and explicit menu/shutdown flushes. Toggle regression checks must include the following full tick and HUD draw, with the writer stalled.

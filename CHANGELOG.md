@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2.4.2] - 2026-10-18
+
+- Group general Interface settings below the HUD editor without an extra divider.
+- Keep Toggle in preview controls beside the HUD selector when space allows. Clicking the crosshair, achievement toast or controller prompts highlights its setting and preview outline for four seconds.
+- Center standalone game-rule editors without a sidebar, preserving the settings area's width.
+- Keep the next music track stable while adjusting settings before playback starts.
+
 ## [2.4.1] - 2026-10-18
 
 - Fix F3 drag releases and save both information columns, with cross-column moves, gap rows and Undo shared by the preview and live HUD.

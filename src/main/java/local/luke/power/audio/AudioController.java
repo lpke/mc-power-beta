@@ -569,11 +569,13 @@ public final class AudioController {
     }
     if (historyIndex + 1 < history.size()) return history.get(historyIndex + 1);
     PoolKey key = new PoolKey(AudioConfig.current(), rules(), context(client), libraryRevision);
-    if (!key.equals(nextKey)) { upcoming = null; nextKey = key; }
-    if (upcoming == null) {
+    if (upcoming == null || !key.equals(nextKey)) {
       AudioSettings s = AudioConfig.current();
-      upcoming = WORLD.choose(backgroundPool(BundledMusic.selection(s.musicMode), key.context, false),
-          s.shuffle, s.avoidRepeats, RANDOM, t -> t.field_2127.toExternalForm());
+      var pool = backgroundPool(BundledMusic.selection(s.musicMode), key.context, false);
+      // Volume, timing and UI edits replace the settings snapshot, but do not revoke a valid reservation.
+      if (upcoming == null || pool.stream().noneMatch(t -> trackId(t).equals(trackId(upcoming))))
+        upcoming = WORLD.choose(pool, s.shuffle, s.avoidRepeats, RANDOM, t -> t.field_2127.toExternalForm());
+      nextKey = key;
     }
     return upcoming;
   }

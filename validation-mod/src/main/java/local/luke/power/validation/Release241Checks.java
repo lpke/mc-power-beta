@@ -127,10 +127,10 @@ public final class Release241Checks {
         check((image.getRGB(428*2,(rowY+27)*2)&0xffffff)==0,"selected-world fill is translucent");
       } finally {set(panorama,"enablePanorma",enabled);set(panorama,"onlyTitleScreen",only);set(panorama,"panoramaFolder",folder);mc.setScreen(options);}
     });
-    test("Interface top rows are ungrouped with a divider and HUD entry search belongs to Interface",()->{
+    test("Interface starts with HUD editor then General and HUD entry search belongs to Interface",()->{
       set(options,"page","Interface");UiChecks.search(options,"");call(options,"layout");var rows=(List<?>)get(options,"rows");
       Object first=rows.get(0);check(call(first,"setting")!=null&&((Setting)call(first,"setting")).id.equals(HudEditorSettings.ENTRY),"Interface starts with a group heading");
-      check(rows.stream().anyMatch(row->{try{return (boolean)call(row,"separator");}catch(Exception e){throw new RuntimeException(e);}}),"HUD divider missing");
+      check(!(boolean)call(rows.get(1),"separator")&&call(rows.get(1),"group").equals("General"),"General did not follow HUD entry");
       UiChecks.search(options,"HUD editor");rows=(List<?>)get(options,"rows");
       for(Object row:rows){Setting setting=(Setting)call(row,"setting");if(setting!=null&&setting.id.equals(HudEditorSettings.ENTRY))check(call(row,"group").equals("Interface"),"HUD entry search group wrong");}
       UiChecks.search(options,"");shot(mc,options,"interface");

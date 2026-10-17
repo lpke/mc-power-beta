@@ -97,6 +97,14 @@ abstract class DraftEditorScreen extends UiScreen {
     return controlRows().stream().filter(row -> row.setting == setting).findFirst()
         .map(row -> controlsTop() + row.y - (int)scroll).orElse(controlsTop());
   }
+  protected void revealControl(Setting setting) {
+    collapsed.remove(groupKey(controlGroup(setting)));
+    int y = controlY(setting);
+    int visibleTop = controlsTop() + SettingsGroup.HEIGHT;
+    if (y < visibleTop) scroll -= visibleTop - y;
+    else if (y + 19 > controlsBottom()) scroll += y + 19 - controlsBottom();
+    scroll = Math.max(0, Math.min(track().maximum(), scroll));
+  }
   private ScrollBar.Track track() {
     List<ControlRow> rows = controlRows();
     int content = rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height;

@@ -70,7 +70,7 @@ class SettingsLayoutTest {
     for (String page : List.of("Gameplay", "Fixes")) for (String group : SettingsLayout.groups(page))
       assertTrue(initial.contains(page + "/" + group));
     for (String group : SettingsLayout.groups("Interface"))
-      assertEquals(!Set.of("", "Title screen").contains(group), initial.contains("Interface/" + group));
+      assertEquals(!Set.of("", "General", "Title screen").contains(group), initial.contains("Interface/" + group));
     assertTrue(initial.containsAll(Set.of("Video/Entity visibility", "Video/Particles", "Audio/Individual sounds", "Advanced/Achievement recovery")));
     initial.clear(); assertFalse(SettingsLayout.initiallyCollapsed().isEmpty());
   }
