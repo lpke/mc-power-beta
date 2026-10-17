@@ -417,3 +417,8 @@
   Brush pickers may opt into filtered instant selection; other pickers retain draft exits.
   HUD/title inline edits and underline tabs use shared controls. HUD divider drags are
   visit-local, cancel on focus loss and always retain controls and preview space.
+- Title music and logo clicks share one input handler, with music controls taking priority.
+  Releasing an already-free pointer must not warp it during menu navigation; gameplay
+  capture requires an open world. HUD editor
+  selection presses never start a drag; position-only resets use explicit position fields
+  and preserve layout mode, visibility, information, styling and unrelated elements.

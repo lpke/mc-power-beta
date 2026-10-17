@@ -9,6 +9,11 @@ import org.spongepowered.asm.mixin.injection.*;
 
 @Mixin(Minecraft.class)
 public class OptionsMixin {
+  @Inject(method = "method_2133", at = @At("HEAD"), cancellable = true)
+  private void power$menuPointer(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+    // Beta's generic Escape handler tries to recapture even when setScreen(null) opens the title.
+    if (((Minecraft) (Object) this).world == null) ci.cancel();
+  }
   @Inject(method = "method_2135", at = @At("HEAD"), cancellable = true)
   private void power$directOptions(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
     Minecraft mc = (Minecraft) (Object) this;

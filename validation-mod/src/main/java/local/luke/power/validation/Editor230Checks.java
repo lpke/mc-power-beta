@@ -46,6 +46,7 @@ final class Editor230Checks {
   private static void done(Screen screen) throws Exception { invoke(screen, "save", new Class<?>[0]); }
   static void run(Minecraft mc, String action) throws Exception {
     if (action.equals("refinements")) { Refinement230Checks.run(mc); return; }
+    if (action.equals("menus")) { HudMenu230Checks.run(mc); return; }
     if (action.equals("saved")) {
       var s = SettingsRegistry.open(mc);
       check(find(s, "logo.presets").value.getAsJsonArray().size() == 1, "title preset did not survive restart");
@@ -89,7 +90,7 @@ final class Editor230Checks {
         check(((List<?>)UiChecks.field(options, "rows")).size() > 0, "nested cluster search lost");
         UiChecks.search(options, "");
       });
-      test("native HUD modes, sample situations and every editor tab render at narrow and wide sizes", () -> {
+      test("native HUD modes, sample situations and every editor view render at narrow and wide sizes", () -> {
         var hud = new HudEditorScreen(options, HudEditorSettings.ENTRY); open(mc, hud, 640, 420);
         for (int mode = 0; mode < 3; mode++) {
           draft(hud).get(HudEditorSettings.ENTRY).value = new JsonPrimitive(mode); refresh(hud);
@@ -100,8 +101,8 @@ final class Editor230Checks {
         }
         for (String id : List.of("infoHud.clusters.0.position", "activeTweaks.enabled", "power_controls:userinterface.versionTextConfig.customVersionText", "interface.debugTextColor")) {
           hud = new HudEditorScreen(options, id); open(mc, hud, 640, 420);
-          screenshot(mc, hud, "hud-tab-" + get(hud, "tab") + "-wide", 640, 420);
-          screenshot(mc, hud, "hud-tab-" + get(hud, "tab") + "-narrow", 320, 240);
+          screenshot(mc, hud, "hud-view-" + get(hud, "selected") + "-wide", 640, 420);
+          screenshot(mc, hud, "hud-view-" + get(hud, "selected") + "-narrow", 320, 240);
         }
         check(Arrays.equals(original, Files.readAllBytes(PowerConfig.path())), "HUD preview wrote config");
       });
@@ -120,11 +121,11 @@ final class Editor230Checks {
       });
       test("HUD selection sits above settings and the divider resizes without losing either area",()->{
         var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);open(mc,hud,320,240);
-        click(hud,number(hud,"left")+10,63,0);
+        click(hud,number(hud,"left")+10,38,0);
         check((boolean)get(hud,"selecting"),"element menu did not open");screenshot(mc,hud,"hud-element-menu",320,240);
         var menu=javax.imageio.ImageIO.read(REPORT.resolve("hud-element-menu.png").toFile());
         int menuRows=number(hud,"selectorRows");
-        for(int py=76*2;py<(76+menuRows*20)*2;py++)for(int px=number(hud,"left")*2;px<number(hud,"right")*2;px++) {
+        for(int py=51*2;py<(51+menuRows*20)*2;py++)for(int px=number(hud,"left")*2;px<number(hud,"right")*2;px++) {
           int pixel=menu.getRGB(px,py),r=(pixel>>16)&255,g=(pixel>>8)&255,b=pixel&255;
           check(Math.abs(r-g)<=1&&Math.abs(g-b)<=1,"HUD dropdown contains coloured pixels");
         }
@@ -189,6 +190,9 @@ final class Editor230Checks {
         double cx = ((Number)invoke(hud,"canvasX",new Class<?>[0])).doubleValue(), cy = ((Number)invoke(hud,"canvasY",new Class<?>[0])).doubleValue();
         double ex = ((Number)invoke(combined,"x",new Class<?>[0])).doubleValue(), ey = ((Number)invoke(combined,"y",new Class<?>[0])).doubleValue();
         int x = (int)Math.round(cx + (ex + 20) * scale), y = (int)Math.round(cy + (ey + 10) * scale);
+        var unselected=draft(hud).snapshot();
+        click(hud,x,y,0);((ScreenInput)(Object)hud).power$release(x+12,y-10,0);
+        check(draft(hud).snapshot().equals(unselected)&&get(hud,"dragging")==null,"selection press moved the HUD");
         click(hud, x, y, 0); invoke(hud,"move",new Class<?>[]{int.class,int.class},x+12,y-10);
         check(draft(hud).get("power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPositionOffset").value.getAsInt() > 0,"drag did not move HUD");
         key(hud,Keyboard.KEY_ESCAPE); Object prompt=get(hud,"exit");

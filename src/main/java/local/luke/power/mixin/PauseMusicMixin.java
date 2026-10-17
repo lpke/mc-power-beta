@@ -82,6 +82,12 @@ public class PauseMusicMixin extends Screen {
   @Override
   protected void mouseClicked(int x, int y, int button) {
     power$layout();
-    if (!power$music.press(x, y, button)) super.mouseClicked(x, y, button);
+    if (power$music.press(x, y, button)) return;
+    if ((Object) this instanceof net.minecraft.client.gui.screen.TitleScreen && minecraft.world == null
+        && (button == 0 || button == 1) && local.luke.power.ui.TitlePreview.hitTest.contains(x, y, width)) {
+      local.luke.power.ui.TitleSelection.cycle(button == 1 ? -1 : 1);
+      return;
+    }
+    super.mouseClicked(x, y, button);
   }
 }

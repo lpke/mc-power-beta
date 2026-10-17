@@ -6,7 +6,7 @@ final class EditorSplit {
   private boolean dragging;
   int bottom(int top, int previewBottom) {
     int available = Math.max(0, previewBottom - top - 12);
-    int minimum = Math.min(23, available), maximum = Math.max(minimum, available - 48);
+    int minimum = Math.min(41, available), maximum = Math.max(minimum, available - 48);
     return top + Math.max(minimum, Math.min(maximum, (int)Math.round(available * fraction)));
   }
   void start(int y, int top, int previewBottom) { dragging = true; move(y, top, previewBottom); }

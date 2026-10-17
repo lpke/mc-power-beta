@@ -99,7 +99,7 @@ final class HudPreview {
         GL11.glTranslated(layout.x(), layout.y(), 0); GL11.glScaled(state.textSize, state.textSize, 1);
         for (int row = 0; row < lines.size(); row++) screen.text(lines.get(row), layout.lineX(textWidth, mc.textRenderer.getWidth(lines.get(row))), row * 10, state.argb());
       } finally { GL11.glPopMatrix(); }
-      elements.add(new Element("cluster." + cluster, "Cluster " + (cluster + 1), layout.x(), layout.y(),
+      elements.add(new Element("cluster." + cluster, "Info cluster " + (cluster + 1), layout.x(), layout.y(),
           textWidth * state.textSize, lines.size() * 10 * state.textSize, prefix + "offsetX", prefix + "offsetY"));
     }
     StatusSettings status = status();

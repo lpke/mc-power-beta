@@ -9,7 +9,7 @@ class EditorSplitTest {
       EditorSplit split = new EditorSplit(); int top = 80, bottom = height - 53;
       for (int pointer : new int[]{-100, 0, 120, 300, 10000}) {
         split.start(pointer, top, bottom);
-        assertTrue(split.dragging()); assertTrue(split.bottom(top, bottom) >= top + 23);
+        assertTrue(split.dragging()); assertTrue(split.bottom(top, bottom) >= top + 41);
         assertTrue(bottom - split.bottom(top, bottom) - 12 >= 48);
         split.stop(); assertFalse(split.dragging());
       }

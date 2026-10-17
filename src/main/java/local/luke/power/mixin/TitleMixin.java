@@ -9,14 +9,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = TitleScreen.class, priority = 800)
 public class TitleMixin extends Screen {
-  @Override
-  protected void mouseClicked(int x, int y, int button) {
-    if ((button == 0 || button == 1) && minecraft.world == null && local.luke.power.ui.TitlePreview.hitTest.contains(x, y, width)) {
-      local.luke.power.ui.TitleSelection.cycle(button == 1 ? -1 : 1);
-      return;
-    }
-    super.mouseClicked(x, y, button);
-  }
   @Inject(method = "render", at = @At("TAIL"))
   private void power$titleError(int x, int y, float delta, CallbackInfo ci) {
     String error = local.luke.power.ui.TitleSelection.error();

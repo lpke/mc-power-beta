@@ -1,0 +1,36 @@
+package local.luke.power.ui;
+
+import java.util.*;
+import local.luke.power.config.Setting;
+
+/** Presentation groups and the explicit boundary of a position-only reset. */
+final class HudEditorSections {
+  private static final List<String> GROUPS = List.of("Visibility", "Layout", "Position", "Appearance",
+      "Coordinates", "Information", "World information", "Culling statistics", "Music");
+  private static final Set<String> OFFSETS = Set.of("power_compat:config.overlayAdditionsYOffset",
+      "entityculling:config.f3InfoYOffset", "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");
+  private static final Set<String> NATIVE_POSITION = Set.of("horizontalPosition", "verticalPosition",
+      "horizontalPositionOffset", "verticalPositionOffset", "putStatusBarIconsBelowHotbar", "putOverlayMessagesBelowHotbar");
+  private static final Set<String> ANCHOR_POSITION = Set.of("position", "offsetX", "offsetY");
+  private HudEditorSections() {}
+  private static String field(Setting s) { return s.id.substring(s.id.lastIndexOf('.') + 1); }
+  static boolean position(Setting s) {
+    return OFFSETS.contains(s.id)
+        || s.id.startsWith(HudPreview.NATIVE) && NATIVE_POSITION.contains(field(s))
+        || (s.id.startsWith("infoHud.clusters.") || s.id.startsWith("activeTweaks.")) && ANCHOR_POSITION.contains(field(s));
+  }
+  static String group(Setting s) {
+    String id = s.id, field = field(s);
+    if (id.startsWith("entityculling:")) return "Culling statistics";
+    if (id.contains("MUSIC_CONFIG.overlayForMusicInDebug")) return "Music";
+    if (id.equals("interface.useFeetYCoordinates") || id.equals("power_hud:config.coordinateDisplay")) return "Coordinates";
+    if (id.equals(HudEditorSettings.ENTRY) || field.startsWith("put")) return "Layout";
+    if (position(s)) return "Position";
+    if (Set.of("textColor", "textSize", "opacity", "debugTextColor").contains(field)) return "Appearance";
+    if (Set.of("enabled", "enableVisibility", "hideWithDebug", "showVersionTextIngame").contains(field)) return "Visibility";
+    return s.group.equals("Debug (F3) info") ? "World information" : "Information";
+  }
+  static List<Setting> order(Collection<Setting> values) {
+    return values.stream().sorted(Comparator.comparingInt(s -> GROUPS.indexOf(group(s)))).toList();
+  }
+}

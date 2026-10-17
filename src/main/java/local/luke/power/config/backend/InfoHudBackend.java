@@ -20,7 +20,7 @@ public final class InfoHudBackend implements Backend {
         Setting.Kind.BOOLEAN, new JsonPrimitive(current.enabled), new JsonPrimitive(false), 0, 1, 1, List.of()));
     entries.add(setting("selectedCluster", "Edit cluster", "Choose one of four independent clusters to edit. All enabled clusters remain visible.",
         Setting.Kind.CHOICE, new JsonPrimitive(current.selectedCluster), new JsonPrimitive(0), 0, 3, 1,
-        List.of("Cluster 1", "Cluster 2", "Cluster 3", "Cluster 4")));
+        List.of("Info cluster 1", "Info cluster 2", "Info cluster 3", "Info cluster 4")));
     for (int i = 0; i < InfoHudSettings.CLUSTERS; i++) for (var field : InfoHudSettings.Cluster.class.getFields()) {
       String name = field.getName();
       boolean offset = name.startsWith("offset");
@@ -38,7 +38,7 @@ public final class InfoHudBackend implements Backend {
         case "fps" -> "Frame rate";
         default -> Catalog.words(name);
       };
-      String help = "Cluster " + (i + 1) + ". " + switch (name) {
+      String help = "Info cluster " + (i + 1) + ". " + switch (name) {
         case "enabled" -> "Show this cluster when custom HUD info is on.";
         case "position" -> "Anchor the cluster to a screen edge or centre. Each line aligns to this anchor.";
         case "offsetX" -> "Move right with positive values, left with negative values. Uses GUI pixels.";

@@ -22,7 +22,7 @@ public final class AudioBackend implements Backend {
         Setting.Kind.INTEGER,
         new JsonPrimitive(s.master),
         new JsonPrimitive(100),
-        "Multiplies music, sound effects and every category.",
+        "Multiplies Music, Game sounds and every category.",
         List.of());
     for (var e : s.categories.entrySet())
       add(
@@ -32,7 +32,7 @@ public final class AudioBackend implements Backend {
           Setting.Kind.INTEGER,
           new JsonPrimitive(e.getValue()),
           new JsonPrimitive(100),
-          "Volume in percent, multiplied by master and sound-effects volume.",
+          "Volume in percent, multiplied by Master volume and Game sounds.",
           List.of());
     add("preset", "Music library", "World music preset", Setting.Kind.TEXT,
         new JsonPrimitive(s.preset), new JsonPrimitive(""),
@@ -163,7 +163,7 @@ public final class AudioBackend implements Backend {
           Setting.Kind.INTEGER,
           new JsonPrimitive(s.sounds.getOrDefault(sound, 100)),
           new JsonPrimitive(100),
-          "Volume in percent, multiplied by its category and sound-effects volumes.",
+          "Volume in percent, multiplied by its category, Game sounds and Master volume.",
           List.of());
     }
     entries.addAll(musicEntries(mc));

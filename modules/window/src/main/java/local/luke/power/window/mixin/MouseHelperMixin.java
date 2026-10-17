@@ -11,8 +11,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MouseHelperMixin {
     @Inject(method = "unlockCursor", at = @At(value = "HEAD"), cancellable = true)
     public void ungrabCursor(CallbackInfo ci){
-        Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
-        Mouse.setGrabbed(false);
+        if (Mouse.isGrabbed()) {
+            Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2);
+            Mouse.setGrabbed(false);
+        }
         ci.cancel();
     }
 }

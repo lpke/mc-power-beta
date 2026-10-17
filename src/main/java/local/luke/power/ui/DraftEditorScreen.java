@@ -40,6 +40,9 @@ abstract class DraftEditorScreen extends UiScreen {
   protected String display(Setting s) { return s.display(); }
   protected boolean usesSlider(Setting s) { return s.slider(); }
   protected boolean resettable(Setting s) { return false; }
+  protected String controlGroup(Setting s) { return ""; }
+  protected boolean offersPositionReset() { return false; }
+  protected List<Setting> positionSettings() { return List.of(); }
   protected void reset() { controls().forEach(Setting::reset); }
   protected void resetFinished() {}
   protected void afterEdit() {}
@@ -55,8 +58,24 @@ abstract class DraftEditorScreen extends UiScreen {
   protected int controlWidth() { return span() / 2 - 10; }
   protected int controlWidth(Setting s) { return controlWidth() - (resettable(s) ? 24 : 0); }
   private int resetX() { return controlX() + controlWidth() - 20; }
+  private record ControlRow(Setting setting, String heading, int y, int height) {}
+  private List<ControlRow> controlRows() {
+    List<ControlRow> rows = new ArrayList<>(); String previous = ""; int y = 0;
+    for (Setting setting : controls()) {
+      String group = controlGroup(setting);
+      if (!group.isEmpty() && !group.equals(previous)) { rows.add(new ControlRow(null, group, y, 18)); y += 18; }
+      rows.add(new ControlRow(setting, "", y, 23)); y += 23; previous = group;
+    }
+    return rows;
+  }
+  protected int controlY(Setting setting) {
+    return controlRows().stream().filter(row -> row.setting == setting).findFirst()
+        .map(row -> controlsTop() + row.y - (int)scroll).orElse(controlsTop());
+  }
   private ScrollBar.Track track() {
-    return new ScrollBar.Track(right() - 4, controlsTop(), Math.max(0, controlsBottom() - controlsTop()), controls().size() * 23, scroll);
+    List<ControlRow> rows = controlRows();
+    int content = rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height;
+    return new ScrollBar.Track(right() - 4, controlsTop(), Math.max(0, controlsBottom() - controlsTop()), content, scroll);
   }
   public void init() { Keyboard.enableRepeatEvents(true); inline.cancel(); stopGesture(); }
   public void removed() { Keyboard.enableRepeatEvents(false); stopGesture(); slider = null; bar.release(); inline.cancel(); TextDrag.cancel(); }
@@ -125,12 +144,28 @@ abstract class DraftEditorScreen extends UiScreen {
     }
     return buttons;
   }
+  private void performReset(boolean positionOnly) {
+    draft.checkpoint();
+    if (positionOnly) positionSettings().forEach(Setting::reset); else reset();
+    afterEdit(); resetFinished(); resetPrompt = false;
+  }
+  private List<Footer> resetButtons() {
+    boolean positions = offersPositionReset(); int count = positions ? 3 : 2;
+    int w = positions ? Math.min(112, (width - 28) / 3) : 80;
+    int x = (width - count * w - (count - 1) * 4) / 2;
+    List<Footer> buttons = new ArrayList<>();
+    buttons.add(new Footer(positions ? "All settings" : "Reset", x, w, () -> performReset(false), true));
+    if (positions) buttons.add(new Footer("Position only", x + w + 4, w, () -> performReset(true),
+        positionSettings().stream().anyMatch(s -> !s.value.equals(s.defaultValue))));
+    buttons.add(new Footer("Cancel", x + (count - 1) * (w + 4), w, () -> resetPrompt = false, true));
+    return buttons;
+  }
   protected void mouseClicked(int x, int y, int button) {
     if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent))) return;
     if (resetPrompt) {
-      if (button == 0 && inside(x, y, width / 2 - 82, height / 2 + 8, 80, 20)) {
-        draft.checkpoint(); reset(); afterEdit(); resetFinished(); resetPrompt = false;
-      } else if (button == 0 && inside(x, y, width / 2 + 2, height / 2 + 8, 80, 20)) resetPrompt = false;
+      if (button == 0) for (Footer f : resetButtons()) if (inside(x, y, f.x, height / 2 + 8, f.width, 20)) {
+        if (f.enabled) f.action.run(); break;
+      }
       return;
     }
     if (inline.press(x, y, button)) return;
@@ -138,10 +173,11 @@ abstract class DraftEditorScreen extends UiScreen {
     if (toolbarClick(x, y, button)) return;
     if (button == 0 && bar.press(track(), x, y)) return;
     if ((button == 0 || button == 1) && inside(x, y, left(), controlsTop(), span() - 9, controlsBottom() - controlsTop())) {
-      int row = (int)((y - controlsTop() + scroll) / 23);
-      List<Setting> values = controls(); int rowY = controlsTop() + row * 23 - (int)scroll;
-      if (row < values.size() && rowY >= controlsTop() && rowY + 18 <= controlsBottom() && y < rowY + 18 && x >= controlX()) {
-        Setting s = values.get(row);
+      for (ControlRow row : controlRows()) {
+        int rowY = controlsTop() + row.y - (int)scroll;
+        if (row.setting == null || rowY < controlsTop() || rowY + 18 > controlsBottom()
+            || y < rowY || y >= rowY + 18 || x < controlX()) continue;
+        Setting s = row.setting;
         if (resettable(s) && x >= resetX()) {
           if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !s.value.equals(s.defaultValue)) {
             draft.checkpoint(); error = ""; s.reset(); valueChanged(s);
@@ -151,6 +187,7 @@ abstract class DraftEditorScreen extends UiScreen {
         if (x >= controlX() + controlWidth(s)) return;
         if (button == 0 && usesSlider(s)) { draft.checkpoint(); slider = s; slide(x); }
         else edit(s, button == 1 ? -1 : 1, rowY);
+        break;
       }
       return;
     }
@@ -188,12 +225,16 @@ abstract class DraftEditorScreen extends UiScreen {
     renderBackground(); drawCenteredTextWithShadow(textRenderer, title(), width / 2, 13, 0xffffff); renderToolbar(mx, my);
     fill(left(), controlsTop() - 2, right(), controlsBottom(), 0x80000000);
     clip(left(), controlsTop(), span() - 8, Math.max(0, controlsBottom() - controlsTop()));
-    List<Setting> values = controls(); String tip = "";
-    for (int i = (int)scroll / 23; i < values.size(); i++) {
-      int y = controlsTop() + i * 23 - (int)scroll;
+    String tip = "";
+    for (ControlRow row : controlRows()) {
+      int y = controlsTop() + row.y - (int)scroll;
       if (y >= controlsBottom()) break;
       if (y < controlsTop() || y + 18 > controlsBottom()) continue;
-      Setting s = values.get(i);
+      if (row.setting == null) {
+        text(fit(row.heading, span() - 16), left() + 4, y + 5, 0xaaaaaa);
+        continue;
+      }
+      Setting s = row.setting;
       text(fit(label(s) + (s.restart ? " *" : ""), span() / 2 - 12), left() + 4, y + 6, s.changed() ? 0xffdd88 : 0xdddddd);
       renderControl(s, y, mx, my);
       if (inside(mx, my, left(), y, span() - 9, 23)) tip = inline.editing(s) ? inline.help()
@@ -208,8 +249,7 @@ abstract class DraftEditorScreen extends UiScreen {
     if (resetPrompt) {
       fill(0, 0, width, height, 0xc0000000);
       drawCenteredTextWithShadow(textRenderer, fit(resetQuestion(), width - 20), width / 2, height / 2 - 16, 0xffffff);
-      button("Reset", width / 2 - 82, height / 2 + 8, 80, 20, pointerX, pointerY, true);
-      button("Cancel", width / 2 + 2, height / 2 + 8, 80, 20, pointerX, pointerY, true);
+      for (Footer f : resetButtons()) button(f.label, f.x, height / 2 + 8, f.width, 20, pointerX, pointerY, f.enabled);
     }
     exit.render(this, "Save changes to " + title().toLowerCase(Locale.ROOT) + "?", pointerX, pointerY);
   }

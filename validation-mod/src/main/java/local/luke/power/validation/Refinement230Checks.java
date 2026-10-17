@@ -67,7 +67,8 @@ final class Refinement230Checks {
         int index=controls.indexOf(value);var scrollField=hud.getClass().getSuperclass().getDeclaredField("scroll");scrollField.setAccessible(true);scrollField.set(hud,index*23d);
         SettingsSnapshot.render(mc,hud,640,420,REPORT.resolve("version-before.png"));
         int x=((Number)Editor230Checks.invoke(hud,"controlX",new Class<?>[0])).intValue();
-        int y=80+index*23-((Number)get(hud,"scroll")).intValue()+7;click(hud,x+12,y,0);check(mc.currentScreen==hud,"text edit opened another screen");
+        int y=((Number)Editor230Checks.invoke(hud,"controlY",new Class<?>[]{Setting.class},value)).intValue()+7;
+        click(hud,x+12,y,0);check(mc.currentScreen==hud,"text edit opened another screen");
         ((TextInput)get(get(hud,"inline"),"input")).setText("Inline version preview");((ScreenInput)(Object)hud).power$key('\0',Keyboard.KEY_RETURN);
         SettingsDraft draft=(SettingsDraft)get(hud,"draft");check(draft.get(value.id).value.getAsString().equals("Inline version preview"),"inline text not accepted");
         check(!setting(options.session(),value.id).value.getAsString().equals("Inline version preview"),"inline text leaked to parent");
