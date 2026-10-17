@@ -31,6 +31,24 @@ class SettingsDraftTest {
     assertTrue(HudEditorSettings.lettering(setting("logo.presets", "[]")));
     assertFalse(HudEditorSettings.lettering(setting("logo.style", "[]")));
   }
+  @Test void undoSkipsCancelledEditsAndRestoresAWholeReset() {
+    var draft = new SettingsDraft(List.of(setting("test.a", "[1]"), setting("test.b", "[2]")), s -> true);
+    var before = draft.snapshot(); draft.checkpoint(); draft.settings().forEach(Setting::reset);
+    assertTrue(draft.canUndo()); draft.checkpoint();
+    draft.undo(); assertEquals(before, draft.snapshot()); assertFalse(draft.canUndo());
+    draft.checkpoint(); assertFalse(draft.canUndo());
+    draft.get("test.a").value = new JsonArray();
+    assertTrue(draft.canUndo()); draft.undo(); assertEquals(before, draft.snapshot());
+  }
+  @Test void auditedHudControlsRouteWithoutTakingOverCameraEffectsOrGameplay() {
+    for (String id : List.of(HudEditorSettings.ITEM_NAMES, HudEditorSettings.ITEM_FADE, HudEditorSettings.TOAST,
+        "power_hud:config.disableCrosshair", "power_hud:config.drawXboxXAndYButtons", "power_hud:config.enableChatScroll",
+        "power_hud:config.chatHistorySize", "power_hud:config.chatFadeTime", "interface.blinkingChatCursor"))
+      assertTrue(HudEditorSettings.contains(setting(id, "[]")), id);
+    for (String id : List.of("power_hud:config.disableVignette", "power_hud:config.enableHotbarBlockRenderingFix",
+        "interface.blinkingUiCursor", "activeTweaks.fakeSneakMessages", "power_controls:userinterface.showQuitButton"))
+      assertFalse(HudEditorSettings.contains(setting(id, "[]")), id);
+  }
   @Test void validationChecksTheCompleteEditBeforeAnyBackendWrites() {
     ConfigSession session = new ConfigSession(); int[] writes = {0};
     session.add(new Backend() {

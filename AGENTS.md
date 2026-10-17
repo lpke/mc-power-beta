@@ -422,3 +422,8 @@
   capture requires an open world. HUD editor
   selection presses never start a drag; position-only resets use explicit position fields
   and preserve layout mode, visibility, information, styling and unrelated elements.
+
+- HUD editor groups share the Options heading renderer, collapse actions and sticky
+  geometry. Reset scopes cover all editor-owned fields or the selected view, and
+  remain undoable as one edit. Preserve the selected info-cluster ID during global
+  resets. Item-name previews use the shared native message position only when enabled.

@@ -146,7 +146,6 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
   protected String extraFooterLabel() { return "Play animation"; }
   protected void extraFooterAction() { if (renderer != null) { renderer.replay(); replaying = true; } }
   protected void resetFinished() { extraFooterAction(); }
-  protected String resetQuestion() { return "Restore the default Minecraft logo and appearance?"; }
   protected void reset() { draft.settings().stream().filter(s -> !Set.of("logo.presets", "logo.swatches").contains(s.id)).forEach(Setting::reset); }
   protected String hint() { return tab == 2 ? "Click a preset to load it. Right-click to remove it. Done saves your changes."
       : "Left-click to paint. Right-click to erase. Drag either button. + saves the brush as a swatch."; }

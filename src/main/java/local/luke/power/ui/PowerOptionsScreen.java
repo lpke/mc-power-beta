@@ -399,9 +399,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void groupHeading(Row row, int y) {
-    text((collapsed.contains(sectionKey(row.group)) ? "> " : "v ")
-        + row.group, left(), y + 8, 0xffffff);
-    fill(left(), y + 21, right() - 14, y + 22, 0x50555555);
+    SettingsGroup.draw(this, row.group, collapsed.contains(sectionKey(row.group)), left(), right() - 14, y);
   }
 
   private int groupChevronWidth() { return Math.max(textRenderer.getWidth("> "), textRenderer.getWidth("v ")); }
@@ -453,7 +451,7 @@ public final class PowerOptionsScreen extends UiScreen {
     int y = 0, rowHeight = span() < 340 ? 40 : 24;
     for (var group : groups.entrySet()) {
       boolean flat = !listed.isEmpty();
-      if (!flat) { next.add(new Row(group.getKey(), null, y, 24)); y += 24; }
+      if (!flat) { next.add(new Row(group.getKey(), null, y, SettingsGroup.HEIGHT)); y += SettingsGroup.HEIGHT; }
       if (!flat && collapsed.contains(sectionKey(group.getKey()))) continue;
       for (Setting s : group.getValue()) {
         next.add(new Row(group.getKey(), s, y, rowHeight));
@@ -701,7 +699,7 @@ public final class PowerOptionsScreen extends UiScreen {
                 click(); openGroup(rows.get(i + 1).setting);
               }
             } else {
-              if (!collapsed.add(id)) collapsed.remove(id);
+              SettingsGroup.toggle(collapsed, id);
               if (pinned >= 0) scroll = r.y;
               layout();
             }

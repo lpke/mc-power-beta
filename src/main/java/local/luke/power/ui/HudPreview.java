@@ -23,6 +23,7 @@ final class HudPreview {
   private final List<ItemCatalogue.Entry> samples = new ArrayList<>();
   private final InfoHudSettings.Cluster[] clusters = new InfoHudSettings.Cluster[4];
   private StatusSettings status;
+  private boolean sampledItem;
   HudPreview(SettingsDraft draft) {
     this.draft = draft;
     for (int id : new int[]{1, 3, 5, 45, 50, 257, 267, 260, 345})
@@ -45,12 +46,21 @@ final class HudPreview {
   }
   void draw(UiScreen screen, Minecraft mc, int width, int height, int scenario, String selected) {
     elements.clear();
+    if (!sampledItem) {
+      sampledItem = true;
+      if (mc.player != null && mc.player.inventory.getSelectedItem() != null) {
+        var item = mc.player.inventory.getSelectedItem();
+        try { samples.set(0, ItemCatalogue.resolve(ItemCatalogue.Domain.FILTER, item.itemId + ":" + item.getDamage())); }
+        catch (IllegalArgumentException ignored) { /* Keep the registry-validated sample. */ }
+      }
+    }
     GL11.glEnable(GL11.GL_BLEND); GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
     for (int i = 0; i < 5; i++) {
       if (i == 3 && scenario != 1) continue;
+      if (i == 4 && !bool(HudEditorSettings.ITEM_NAMES)) continue;
       String prefix = mode() == 1 ? SIMPLE : nativePrefix(i);
       if (mode() != 0 && !bool(prefix + "enableVisibility")) continue;
-      String message = "Now playing: C418 - Sweden"; int textWidth = mc.textRenderer.getWidth(message);
+      String message = samples.get(0).name(); int textWidth = mc.textRenderer.getWidth(message);
       int x = NativeHudLayout.baseX(width, i, textWidth), y = NativeHudLayout.baseY(height, i);
       int w = i == 0 ? 182 : i == 4 ? textWidth : 81, h = i == 0 ? 22 : 9;
       if (mode() != 0) {
@@ -79,6 +89,40 @@ final class HudPreview {
         elements.clear(); elements.add(new Element("combined", "Combined HUD", x, y, right - x, bottom - y,
             SIMPLE + "horizontalPositionOffset", SIMPLE + "verticalPositionOffset"));
       }
+    }
+    if (!bool(HudEditorSettings.HUD + "disableCrosshair")) {
+      GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
+      texture(screen, mc, "/gui/icons.png", width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
+      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      elements.add(new Element("crosshair", "Crosshair", width / 2 - 7, height / 2 - 7, 16, 16, null, null));
+    }
+    if (bool(HudEditorSettings.HUD + "drawXboxXAndYButtons")) {
+      texture(screen, mc, "/assets/power_hud/button_icons.png", 10, height - 30, 40, 0, 20, 20);
+      screen.text("Crafting", 31, height - 24, 0xffffff);
+      texture(screen, mc, "/assets/power_hud/button_icons.png", 78, height - 30, 60, 0, 20, 20);
+      screen.text("Inventory", 99, height - 24, 0xffffff);
+      elements.add(new Element("prompts", "Controller prompts", 10, height - 30, 145, 20, null, null));
+    }
+    if (selected.equals("toast") && !bool(HudEditorSettings.TOAST)) {
+      int x = width - 160;
+      texture(screen, mc, "/achievement/bg.png", x, 0, 96, 202, 160, 32);
+      screen.text("Achievement get!", x + 30, 7, 0xffff00);
+      screen.text("Getting Wood", x + 30, 18, 0xffffff);
+      icons.draw(screen, mc, samples.get(2), x + 8, 8);
+      elements.add(new Element("toast", "Achievement toast", x, 0, 160, 32, null, null));
+    }
+    if (selected.equals("chat")) {
+      String[] messages = {"<Player> Hello!", "<Player> Welcome back."};
+      int count = Math.min(messages.length, Math.max(0, integer(HudEditorSettings.HUD + "chatHistorySize")));
+      for (int i = 0; i < count; i++) {
+        int y = height - 48 - i * 9;
+        screen.rectangle(2, y - 1, Math.min(width - 2, 322), y + 8, 0x80000000);
+        screen.text(messages[i], 2, y, 0xffffff);
+      }
+      screen.rectangle(2, height - 14, width - 2, height - 2, 0x80000000);
+      boolean cursor = !bool("interface.blinkingChatCursor") || System.nanoTime() / 500_000_000L % 2 == 0;
+      screen.text("> Hello" + (cursor ? "_" : ""), 4, height - 12, 0xffffff);
+      elements.add(new Element("chat", "Chat", 2, height - 49 - count * 9, width - 4, 47 + count * 9, null, null));
     }
     for (int cluster = 0; cluster < 4; cluster++) {
       String prefix = "infoHud.clusters." + cluster + ".";

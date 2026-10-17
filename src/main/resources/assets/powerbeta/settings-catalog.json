@@ -322,7 +322,7 @@
   "power_hud:config.drawXboxXAndYButtons": {
     "page": "Interface",
     "group": "General HUD",
-    "label": "Draw xbox x and y buttons",
+    "label": "Controller button prompts",
     "description": "",
     "default": false,
     "restart": false
@@ -338,7 +338,7 @@
   "power_hud:config.enableHotbarItemSelectionTooltips": {
     "page": "Interface",
     "group": "General HUD",
-    "label": "Hotbar item selection tooltips",
+    "label": "Show selected item name",
     "description": "",
     "default": false,
     "restart": false
@@ -346,7 +346,7 @@
   "power_hud:config.hotbarItemSelectionFadeTime": {
     "page": "Interface",
     "group": "General HUD",
-    "label": "Hotbar item selection fade time (seconds)",
+    "label": "Item name fade time (seconds)",
     "description": "Time the selected hotbar item name stays visible.",
     "default": 40,
     "restart": false,

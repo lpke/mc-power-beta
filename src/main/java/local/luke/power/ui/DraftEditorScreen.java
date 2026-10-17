@@ -17,6 +17,7 @@ abstract class DraftEditorScreen extends UiScreen {
   private double scroll;
   private Setting slider;
   private boolean resetPrompt;
+  private final Set<String> collapsed = new HashSet<>();
 
   DraftEditorScreen(PowerOptionsScreen parent, SettingsDraft draft) { this.parent = parent; this.draft = draft; }
   protected int left() { return (width - span()) / 2; }
@@ -41,15 +42,18 @@ abstract class DraftEditorScreen extends UiScreen {
   protected boolean usesSlider(Setting s) { return s.slider(); }
   protected boolean resettable(Setting s) { return false; }
   protected String controlGroup(Setting s) { return ""; }
+  protected String groupKey(String group) { return group; }
   protected boolean offersPositionReset() { return false; }
   protected List<Setting> positionSettings() { return List.of(); }
+  protected List<Setting> allResetSettings() { return draft.settings(); }
+  protected String resetSubject() { return "Selected"; }
   protected void reset() { controls().forEach(Setting::reset); }
   protected void resetFinished() {}
   protected void afterEdit() {}
   protected void valueChanged(Setting s) { afterEdit(); }
   protected String hint() { return "Click an element to edit it. Drag to move. Arrow keys fine-tune."; }
   protected String resetLabel() { return "Reset..."; }
-  protected String resetQuestion() { return "Reset the selected settings?"; }
+  protected String resetQuestion() { return "Reset to defaults?"; }
   protected String extraFooterLabel() { return ""; }
   protected void extraFooterAction() {}
   protected void controlsChanged() { scroll = 0; bar.release(); slider = null; inline.cancel(); }
@@ -63,10 +67,20 @@ abstract class DraftEditorScreen extends UiScreen {
     List<ControlRow> rows = new ArrayList<>(); String previous = ""; int y = 0;
     for (Setting setting : controls()) {
       String group = controlGroup(setting);
-      if (!group.isEmpty() && !group.equals(previous)) { rows.add(new ControlRow(null, group, y, 18)); y += 18; }
-      rows.add(new ControlRow(setting, "", y, 23)); y += 23; previous = group;
+      if (!group.isEmpty() && !group.equals(previous)) { rows.add(new ControlRow(null, group, y, SettingsGroup.HEIGHT)); y += SettingsGroup.HEIGHT; }
+      if (group.isEmpty() || !collapsed.contains(groupKey(group))) {
+        rows.add(new ControlRow(setting, "", y, 23)); y += 23;
+      }
+      previous = group;
     }
     return rows;
+  }
+  private StickyHeader stickyHeader(List<ControlRow> rows) {
+    return StickyHeader.at(rows, row -> row.setting == null, row -> row.setting != null,
+        ControlRow::y, ControlRow::height, (int)scroll, controlsTop(), controlsBottom());
+  }
+  private void groupHeading(ControlRow row, int y) {
+    SettingsGroup.draw(this, fit(row.heading, span() - 24), collapsed.contains(groupKey(row.heading)), left() + 4, right() - 10, y);
   }
   protected int controlY(Setting setting) {
     return controlRows().stream().filter(row -> row.setting == setting).findFirst()
@@ -144,26 +158,36 @@ abstract class DraftEditorScreen extends UiScreen {
     }
     return buttons;
   }
-  private void performReset(boolean positionOnly) {
+  private void performReset(boolean positionOnly, boolean all) {
+    stopGesture(); slider = null; bar.release(); inline.cancel(); error = "";
     draft.checkpoint();
-    if (positionOnly) positionSettings().forEach(Setting::reset); else reset();
+    if (offersPositionReset()) {
+      List<Setting> scope = all ? allResetSettings() : controls();
+      scope.stream().filter(s -> !positionOnly || HudEditorSections.position(s)).forEach(Setting::reset);
+    } else reset();
     afterEdit(); resetFinished(); resetPrompt = false;
   }
-  private List<Footer> resetButtons() {
-    boolean positions = offersPositionReset(); int count = positions ? 3 : 2;
-    int w = positions ? Math.min(112, (width - 28) / 3) : 80;
-    int x = (width - count * w - (count - 1) * 4) / 2;
-    List<Footer> buttons = new ArrayList<>();
-    buttons.add(new Footer(positions ? "All settings" : "Reset", x, w, () -> performReset(false), true));
-    if (positions) buttons.add(new Footer("Position only", x + w + 4, w, () -> performReset(true),
-        positionSettings().stream().anyMatch(s -> !s.value.equals(s.defaultValue))));
-    buttons.add(new Footer("Cancel", x + (count - 1) * (w + 4), w, () -> resetPrompt = false, true));
+  private record ResetButton(String label, int x, int y, int width, Runnable action, boolean enabled) {}
+  private List<ResetButton> resetButtons() {
+    List<ResetButton> buttons = new ArrayList<>();
+    int w = Math.min(220, (width - 28) / 2), top = height / 2 - 16;
+    if (offersPositionReset()) {
+      List<String> labels = List.of("All settings", "All positions", resetSubject() + " settings", resetSubject() + " positions");
+      for (int i = 0; i < labels.size(); i++) {
+        boolean positions = i % 2 == 1, all = i < 2;
+        List<Setting> scope = all ? allResetSettings() : controls();
+        boolean enabled = scope.stream().anyMatch(s -> (!positions || HudEditorSections.position(s)) && !s.value.equals(s.defaultValue));
+        buttons.add(new ResetButton(labels.get(i), width / 2 - w - 2 + i % 2 * (w + 4), top + i / 2 * 24,
+            w, () -> performReset(positions, all), enabled));
+      }
+    } else buttons.add(new ResetButton("Reset", (width - w) / 2, top, w, () -> performReset(false, false), true));
+    buttons.add(new ResetButton("Cancel", (width - w) / 2, top + (offersPositionReset() ? 48 : 24), w, () -> resetPrompt = false, true));
     return buttons;
   }
   protected void mouseClicked(int x, int y, int button) {
     if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent))) return;
     if (resetPrompt) {
-      if (button == 0) for (Footer f : resetButtons()) if (inside(x, y, f.x, height / 2 + 8, f.width, 20)) {
+      if (button == 0) for (ResetButton f : resetButtons()) if (inside(x, y, f.x, f.y, f.width, 20)) {
         if (f.enabled) f.action.run(); break;
       }
       return;
@@ -173,10 +197,23 @@ abstract class DraftEditorScreen extends UiScreen {
     if (toolbarClick(x, y, button)) return;
     if (button == 0 && bar.press(track(), x, y)) return;
     if ((button == 0 || button == 1) && inside(x, y, left(), controlsTop(), span() - 9, controlsBottom() - controlsTop())) {
-      for (ControlRow row : controlRows()) {
-        int rowY = controlsTop() + row.y - (int)scroll;
-        if (row.setting == null || rowY < controlsTop() || rowY + 18 > controlsBottom()
-            || y < rowY || y >= rowY + 18 || x < controlX()) continue;
+      List<ControlRow> rows = controlRows(); StickyHeader sticky = stickyHeader(rows);
+      int pinned = sticky != null && sticky.contains(y, controlsTop()) ? sticky.index() : -1;
+      for (int i = 0; i < rows.size(); i++) {
+        if (pinned >= 0 && pinned != i) continue;
+        ControlRow row = rows.get(i);
+        int rowY = pinned == i ? sticky.y() : controlsTop() + row.y - (int)scroll;
+        if (y < rowY || y >= rowY + row.height) continue;
+        if (row.setting == null) {
+          if (button == 0) {
+            stopGesture(); inline.cancel(); SettingsGroup.toggle(collapsed, groupKey(row.heading));
+            if (pinned >= 0) scroll = row.y;
+            scroll = Math.min(scroll, track().maximum());
+          }
+          return;
+        }
+        int rowsTop = sticky == null ? controlsTop() : Math.max(controlsTop(), sticky.y() + sticky.height());
+        if (rowY < rowsTop || rowY + 18 > controlsBottom() || y >= rowY + 18 || x < controlX()) continue;
         Setting s = row.setting;
         if (resettable(s) && x >= resetX()) {
           if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !s.value.equals(s.defaultValue)) {
@@ -224,22 +261,30 @@ abstract class DraftEditorScreen extends UiScreen {
     scroll = Math.max(0, Math.min(track().maximum(), bar.drag(track(), my, !modal() && Mouse.isButtonDown(0))));
     renderBackground(); drawCenteredTextWithShadow(textRenderer, title(), width / 2, 13, 0xffffff); renderToolbar(mx, my);
     fill(left(), controlsTop() - 2, right(), controlsBottom(), 0x80000000);
-    clip(left(), controlsTop(), span() - 8, Math.max(0, controlsBottom() - controlsTop()));
+    List<ControlRow> rows = controlRows(); StickyHeader sticky = stickyHeader(rows);
+    int rowsTop = sticky == null ? controlsTop() : Math.max(controlsTop(), sticky.y() + sticky.height());
+    clip(left(), rowsTop, span() - 8, Math.max(0, controlsBottom() - rowsTop));
+    int listMouseY = sticky != null && sticky.contains(my, controlsTop()) ? -1000 : my;
     String tip = "";
-    for (ControlRow row : controlRows()) {
+    for (int index = 0; index < rows.size(); index++) {
+      ControlRow row = rows.get(index);
       int y = controlsTop() + row.y - (int)scroll;
       if (y >= controlsBottom()) break;
       if (y < controlsTop() || y + 18 > controlsBottom()) continue;
       if (row.setting == null) {
-        text(fit(row.heading, span() - 16), left() + 4, y + 5, 0xaaaaaa);
+        if (sticky == null || index != sticky.index()) groupHeading(row, y);
         continue;
       }
       Setting s = row.setting;
       text(fit(label(s) + (s.restart ? " *" : ""), span() / 2 - 12), left() + 4, y + 6, s.changed() ? 0xffdd88 : 0xdddddd);
-      renderControl(s, y, mx, my);
-      if (inside(mx, my, left(), y, span() - 9, 23)) tip = inline.editing(s) ? inline.help()
+      renderControl(s, y, mx, listMouseY);
+      if (inside(mx, listMouseY, left(), y, span() - 9, 23)) tip = inline.editing(s) ? inline.help()
           : s.description + (s.numeric() ? "\nRight-click to enter an exact value." : "") + (s.restart ? "\nRestart required." : "");
-      if (resettable(s) && inside(mx, my, resetX(), y, 20, 18)) tip = "Reset to " + s.display(s.defaultValue);
+      if (resettable(s) && inside(mx, listMouseY, resetX(), y, 20, 18)) tip = "Reset to " + s.display(s.defaultValue);
+    }
+    if (sticky != null) {
+      clip(left(), controlsTop(), span() - 8, controlsBottom() - controlsTop());
+      groupHeading(rows.get(sticky.index()), sticky.y());
     }
     unclip(); bar.render(this, track()); renderPreview(mx, my, delta); inline.endFrame();
     text(fit(error.isEmpty() ? hint() : error, span()), left(), height - 43, error.isEmpty() ? 0xaaaaaa : 0xff8888);
@@ -248,8 +293,8 @@ abstract class DraftEditorScreen extends UiScreen {
     inline.renderError(this);
     if (resetPrompt) {
       fill(0, 0, width, height, 0xc0000000);
-      drawCenteredTextWithShadow(textRenderer, fit(resetQuestion(), width - 20), width / 2, height / 2 - 16, 0xffffff);
-      for (Footer f : resetButtons()) button(f.label, f.x, height / 2 + 8, f.width, 20, pointerX, pointerY, f.enabled);
+      drawCenteredTextWithShadow(textRenderer, fit(resetQuestion(), width - 20), width / 2, height / 2 - 43, 0xffffff);
+      for (ResetButton f : resetButtons()) button(fit(f.label, f.width - 8), f.x, f.y, f.width, 20, pointerX, pointerY, f.enabled);
     }
     exit.render(this, "Save changes to " + title().toLowerCase(Locale.ROOT) + "?", pointerX, pointerY);
   }

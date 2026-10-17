@@ -6,7 +6,7 @@ import local.luke.power.config.Setting;
 /** Presentation groups and the explicit boundary of a position-only reset. */
 final class HudEditorSections {
   private static final List<String> GROUPS = List.of("Visibility", "Layout", "Position", "Appearance",
-      "Coordinates", "Information", "World information", "Culling statistics", "Music");
+      "Item names", "Chat history", "Coordinates", "Information", "World information", "Culling statistics", "Music");
   private static final Set<String> OFFSETS = Set.of("power_compat:config.overlayAdditionsYOffset",
       "entityculling:config.f3InfoYOffset", "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");
   private static final Set<String> NATIVE_POSITION = Set.of("horizontalPosition", "verticalPosition",
@@ -21,6 +21,9 @@ final class HudEditorSections {
   }
   static String group(Setting s) {
     String id = s.id, field = field(s);
+    if (HudEditorSettings.itemNames(s)) return "Item names";
+    if (s.group.equals("Chat")) return "Chat history";
+    if (Set.of(HudEditorSettings.HUD + "disableCrosshair", HudEditorSettings.HUD + "drawXboxXAndYButtons", HudEditorSettings.TOAST).contains(id)) return "Visibility";
     if (id.startsWith("entityculling:")) return "Culling statistics";
     if (id.contains("MUSIC_CONFIG.overlayForMusicInDebug")) return "Music";
     if (id.equals("interface.useFeetYCoordinates") || id.equals("power_hud:config.coordinateDisplay")) return "Coordinates";

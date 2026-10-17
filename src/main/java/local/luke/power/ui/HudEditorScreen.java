@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 public final class HudEditorScreen extends DraftEditorScreen {
   private final HudPreview preview;
   private int scenario;
+  private int lastNativeIndex;
   private String selected = "layout";
   private boolean snapping = true, selecting;
   private final EditorSplit divider = new EditorSplit();
@@ -28,7 +29,9 @@ public final class HudEditorScreen extends DraftEditorScreen {
     } else if (settingId.startsWith("activeTweaks.")) select("tweaks");
     else {
       Setting setting = draft.get(settingId);
-      if (setting.group.equals("Version label")) select("version");
+      if (!HudEditorSettings.view(setting).isEmpty()) select(HudEditorSettings.view(setting));
+      else if (HudEditorSettings.itemNames(setting)) select(preview.mode() == 1 ? "combined" : "native.4");
+      else if (setting.group.equals("Version label")) select("version");
       else if (setting.group.equals("Debug (F3) info")) select("debug");
       else if (settingId.startsWith(HudPreview.SIMPLE) || settingId.contains("_POSITION_CONFIG.")) {
         int index = 0;
@@ -62,13 +65,18 @@ public final class HudEditorScreen extends DraftEditorScreen {
     return super.label(s);
   }
   protected String controlGroup(Setting s) { return HudEditorSections.group(s); }
+  protected String groupKey(String group) { return selected + "/" + group; }
   protected List<Setting> controls() {
     if (selected.equals("layout")) return HudEditorSections.order(List.of(draft.get(HudEditorSettings.ENTRY),
         draft.get(HudPreview.NATIVE + "putStatusBarIconsBelowHotbar"), draft.get(HudPreview.NATIVE + "putOverlayMessagesBelowHotbar")));
     if (selected.equals("combined") || selected.startsWith("native.")) {
       String prefix = preview.mode() == 1 ? HudPreview.SIMPLE : HudPreview.nativePrefix(nativeIndex());
-      if (preview.mode() == 0) return List.of(draft.get(HudEditorSettings.ENTRY));
-      return HudEditorSections.order(draft.settings().stream().filter(s -> s.id.startsWith(prefix)).toList());
+      List<Setting> values = new ArrayList<>(preview.mode() == 0 ? List.of(draft.get(HudEditorSettings.ENTRY))
+          : draft.settings().stream().filter(s -> s.id.startsWith(prefix)).toList());
+      if (selected.equals("combined") || nativeIndex() == 4) {
+        values.add(draft.get(HudEditorSettings.ITEM_NAMES)); values.add(draft.get(HudEditorSettings.ITEM_FADE));
+      }
+      return HudEditorSections.order(values);
     }
     if (selected.startsWith("cluster.")) {
       int cluster = Integer.parseInt(selected.substring(8));
@@ -77,17 +85,20 @@ public final class HudEditorScreen extends DraftEditorScreen {
     }
     if (selected.equals("tweaks")) return HudEditorSections.order(draft.settings().stream()
         .filter(s -> s.id.startsWith("activeTweaks.") && !s.id.endsWith("Messages")).toList());
+    if (Set.of("crosshair", "chat", "prompts", "toast").contains(selected)) return HudEditorSections.order(draft.settings().stream()
+        .filter(s -> HudEditorSettings.view(s).equals(selected)).toList());
     return HudEditorSections.order(draft.settings().stream().filter(s -> s.group.equals(selected.equals("version") ? "Version label" : "Debug (F3) info")).toList());
   }
   protected boolean offersPositionReset() { return true; }
   protected List<Setting> positionSettings() { return controls().stream().filter(HudEditorSections::position).toList(); }
-  protected String resetQuestion() { return "Reset " + selectedLabel().toLowerCase(Locale.ROOT) + "?"; }
+  protected String resetSubject() { return selectedLabel(); }
+  protected List<Setting> allResetSettings() { return draft.settings().stream().filter(s -> !s.id.equals("infoHud.selectedCluster")).toList(); }
   private int nativeIndex() { return selected.startsWith("native.") ? Integer.parseInt(selected.substring(7)) : 0; }
   private List<String> selectionIds() {
     List<String> ids = new ArrayList<>(); ids.add("layout");
     if (preview.mode() == 1) ids.add("combined"); else for (int i = 0; i < 5; i++) ids.add("native." + i);
     for (int i = 0; i < 4; i++) ids.add("cluster." + i);
-    ids.addAll(List.of("tweaks", "version", "debug")); return ids;
+    ids.addAll(List.of("crosshair", "chat", "prompts", "toast", "tweaks", "version", "debug")); return ids;
   }
   private String selectedLabel() { return selectionLabel(selected); }
   private String selectionLabel(String id) {
@@ -95,23 +106,30 @@ public final class HudEditorScreen extends DraftEditorScreen {
     if (id.equals("combined")) return "Combined HUD";
     if (id.startsWith("native.")) return HudPreview.NAMES[Integer.parseInt(id.substring(7))];
     if (id.startsWith("cluster.")) return "Info cluster " + (Integer.parseInt(id.substring(8)) + 1);
+    if (id.equals("crosshair")) return "Crosshair";
+    if (id.equals("chat")) return "Chat";
+    if (id.equals("prompts")) return "Controller prompts";
+    if (id.equals("toast")) return "Achievement toast";
     return id.equals("tweaks") ? "Active tweaks" : id.equals("version") ? "Version label" : "F3 information";
   }
   private void select(String id) {
     boolean changed = !selected.equals(id);
     selected = id; selecting = false; stopGesture();
+    if (id.startsWith("native.")) lastNativeIndex = nativeIndex();
     if (changed) controlsChanged();
     if (id.startsWith("cluster.")) {
       draft.get("infoHud.selectedCluster").value = new JsonPrimitive(Integer.parseInt(id.substring(8)));
     } else if (id.equals("debug")) scenario = 2;
     else if (id.equals("native.3")) scenario = 1;
+    else if (Set.of("crosshair", "chat", "prompts", "toast", "version").contains(id)) scenario = 0;
   }
   protected void afterEdit() {
     preview.rebuild();
     if (selected.startsWith("cluster.")) selected = "cluster." + preview.integer("infoHud.selectedCluster");
     if (selected.equals("combined") || selected.startsWith("native.")) {
+      if (selected.startsWith("native.")) lastNativeIndex = nativeIndex();
       if (preview.mode() == 1) selected = "combined";
-      else if (!selected.startsWith("native.")) selected = "native.0";
+      else if (!selected.startsWith("native.")) selected = "native." + lastNativeIndex;
     }
   }
   private int selectorWidth() { return Math.max(72, span() - 154); }

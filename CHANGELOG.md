@@ -4,6 +4,9 @@
 
 ## [2.3.0] - 2026-10-17
 
+- Share collapsible Options groups with the HUD editor. Reset all HUD settings, all positions or only the selected element, with Undo for every reset.
+- Preview selected item names only when enabled, using their shared message position. Bring item-name controls, crosshair, chat, controller prompts and achievement toasts into the HUD editor.
+
 - Preserve the cursor position between main-menu screens and restore clickable title-screen music controls alongside logo cycling.
 - Simplify the HUD editor to one top selector, group related settings and rename custom info clusters. Select preview elements before dragging, and reset positioning separately from visibility, styling and content.
 - Use the Game sounds setting name in category and individual-sound volume tooltips.

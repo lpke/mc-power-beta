@@ -33,9 +33,19 @@ final class HudMenu230Checks {
   private static void refresh(HudEditorScreen s)throws Exception{call(s,"afterEdit");}
   private static void resetButton(HudEditorScreen s,String label)throws Exception{
     for(Object button:(List<?>)call(s,"resetButtons"))if(call(button,"label").equals(label)){
-      click(s,number(button,"x")+number(button,"width")/2,s.height/2+16,0);return;
+      click(s,number(button,"x")+number(button,"width")/2,number(button,"y")+10,0);return;
     }
     throw new AssertionError("Missing reset action "+label);
+  }
+  private static boolean position(Setting s)throws Exception{
+    Method method=Class.forName("local.luke.power.ui.HudEditorSections").getDeclaredMethod("position",Setting.class);
+    method.setAccessible(true);return (boolean)method.invoke(null,s);
+  }
+  private static void footer(HudEditorScreen s,String label)throws Exception{
+    for(Object button:(List<?>)call(s,"footer"))if(call(button,"label").equals(label)){
+      click(s,number(button,"x")+number(button,"width")/2,s.height-19,0);return;
+    }
+    throw new AssertionError("Missing footer "+label);
   }
   private static boolean paused()throws Exception{Field f=AudioController.class.getDeclaredField("paused");f.setAccessible(true);return f.getBoolean(null);}
   static void run(Minecraft mc)throws Exception{
@@ -101,7 +111,7 @@ final class HudMenu230Checks {
         check(Arrays.equals(before,Files.readAllBytes(PowerConfig.path())),"music clicks changed saved title/settings");
       });
       AudioController.quiet();AudioConfig.preview(audio);
-      test("one top selector reaches every HUD setting with clear groups and inert headings",()->{
+      test("one top selector reaches every HUD setting with shared collapsible groups",()->{
         var options=new PowerOptionsScreen(null);open(mc,options,640,420);var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);
         open(mc,hud,640,420);var local=draft(hud);Set<String> seen=new HashSet<>();
         for(int mode=0;mode<3;mode++){
@@ -115,9 +125,13 @@ final class HudMenu230Checks {
               Path image=REPORT.resolve("mode-"+mode+"-"+id+"-"+size[0]+".png");SettingsSnapshot.render(mc,hud,size[0],size[1],image);
               check(number(hud,"controlsTop")==55,"top tabs still reserve space");
               check(((String)call(hud,"hint")).isEmpty(),"bottom help remains");
-              Object heading=((List<?>)call(hud,"controlRows")).get(0);var before=local.snapshot();
-              click(hud,number(hud,"controlX")+8,number(hud,"controlsTop")+8,0);
-              check(local.snapshot().equals(before),"heading claimed a setting click");
+              int beforeRows=((List<?>)call(hud,"controlRows")).size();var before=local.snapshot();
+              int hx=number(hud,"left")+8,hy=number(hud,"controlsTop")+8;
+              click(hud,hx,hy,0);
+              check(((List<?>)call(hud,"controlRows")).size()<beforeRows,"heading did not collapse");
+              check(local.snapshot().equals(before),"heading changed a setting");
+              click(hud,hx,hy,0);
+              check(((List<?>)call(hud,"controlRows")).size()==beforeRows,"heading did not expand");
             }
           }
         }
@@ -127,31 +141,61 @@ final class HudMenu230Checks {
         click(hud,number(hud,"left")+8,38,0);((ScreenInput)(Object)hud).power$key((char)0,Keyboard.KEY_RETURN);
         check(get(hud,"scroll").equals(scroll),"opening or confirming the current selector item reset scroll");
       });
-      test("position-only and full resets preserve their boundaries, support Undo and block background input",()->{
+      test("all four HUD reset scopes undo through the button and preserve parent/disk",()->{
         for(int[] size:new int[][]{{320,240},{640,420}}){
           var options=new PowerOptionsScreen(null);open(mc,options,size[0],size[1]);
-          var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);open(mc,hud,size[0],size[1]);var local=draft(hud);
           byte[] bytes=Files.readAllBytes(PowerConfig.path());
-          for(String id:List.of("layout","combined","cluster.1","tweaks","version","debug")){
-            local.get(HudEditorSettings.ENTRY).value=new JsonPrimitive(1);select(hud,id);
-            for(Setting s:(List<Setting>)call(hud,"controls")){
-              if(s.kind==Setting.Kind.TEXT)s.value=new JsonPrimitive(s.id.endsWith("Color")?"#224466":"Custom version");else s.cycle(1);
+          for(String id:List.of("layout","combined","native.4","cluster.1","tweaks","version","debug","crosshair","chat","prompts","toast"))
+            for(int choice=0;choice<4;choice++){
+              var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);open(mc,hud,size[0],size[1]);var local=draft(hud);
+              for(Setting s:local.settings()){
+                if(s.id.equals("infoHud.selectedCluster"))continue;
+                if(s.kind==Setting.Kind.TEXT)s.value=new JsonPrimitive(s.id.endsWith("Color")?"#224466":"Custom version");else s.cycle(1);
+              }
+              local.get(HudEditorSettings.ENTRY).value=new JsonPrimitive(id.startsWith("native.")?2:1);select(hud,id);refresh(hud);
+              var before=local.snapshot();List<Setting> scope=(List<Setting>)call(hud,choice<2?"allResetSettings":"controls");
+              boolean positions=choice%2==1;Set<String> targets=new HashSet<>();
+              for(Setting setting:scope)if(!positions||position(setting))targets.add(setting.id);
+              // Open the real footer, then consume a background click outside its buttons.
+              footer(hud,"Reset...");check((boolean)get(hud,"resetPrompt"),"reset footer missed");
+              if(choice==0&&Set.of("combined","cluster.1","debug").contains(id))
+                SettingsSnapshot.render(mc,hud,size[0],size[1],REPORT.resolve("reset-"+id+"-"+size[0]+".png"));
+              check(call(hud,"resetQuestion").equals("Reset to defaults?"),"reset question is not shared");
+              click(hud,5,5,0);check(local.snapshot().equals(before),"reset overlay leaked input");
+              List<?> buttons=(List<?>)call(hud,"resetButtons");check(buttons.size()==5,"missing reset choice");
+              Object cancel=buttons.get(4);check(number(cancel,"x")+number(cancel,"width")/2==hud.width/2,"Cancel is not centered");
+              check(number(cancel,"y")>number(buttons.get(2),"y"),"Cancel is not below the scope rows");
+              String label=(String)call(buttons.get(choice),"label");resetButton(hud,label);
+              if(targets.isEmpty()){
+                check((boolean)get(hud,"resetPrompt"),"empty position reset should be disabled");resetButton(hud,"Cancel");
+              }else{
+                for(var entry:before.entrySet())check(local.get(entry.getKey()).value.equals(targets.contains(entry.getKey())?local.get(entry.getKey()).defaultValue:entry.getValue()),"reset changed wrong scope: "+entry.getKey());
+                footer(hud,"Undo");check(local.snapshot().equals(before),"Undo button failed after "+label+" in "+id);
+                check(get(hud,"selected").equals(id),"Undo lost the selected HUD element after "+label);
+              }
+              check(options.session().changes()==0&&Arrays.equals(bytes,Files.readAllBytes(PowerConfig.path())),"reset changed parent or disk before Done");
             }
-            refresh(hud);var before=local.snapshot();List<Setting> positions=(List<Setting>)call(hud,"positionSettings");
-            set(hud,"resetPrompt",true);SettingsSnapshot.render(mc,hud,size[0],size[1],REPORT.resolve("reset-"+id+"-"+size[0]+".png"));
-            click(hud,number(hud,"controlX")+8,number(hud,"controlsTop")+24,0);check(local.snapshot().equals(before),"reset overlay leaked input");
-            resetButton(hud,"Position only");
-            if(positions.isEmpty())check((boolean)get(hud,"resetPrompt"),"position reset should be disabled without positions");
-            else{
-              Set<String> targets=new HashSet<>();positions.forEach(s->targets.add(s.id));
-              for(var entry:before.entrySet())check(local.get(entry.getKey()).value.equals(targets.contains(entry.getKey())?local.get(entry.getKey()).defaultValue:entry.getValue()),"position reset changed "+entry.getKey());
-              local.undo();refresh(hud);check(local.snapshot().equals(before),"Undo lost settings after position reset");
-            }
-            set(hud,"resetPrompt",true);List<Setting> all=(List<Setting>)call(hud,"controls");resetButton(hud,"All settings");
-            for(Setting s:all)check(s.value.equals(s.defaultValue),"full reset missed "+s.id);
-          }
-          check(options.session().changes()==0&&Arrays.equals(bytes,Files.readAllBytes(PowerConfig.path())),"reset changed parent or disk before Done");
         }
+      });
+      test("audited HUD previews follow their draft switches and remain independently selectable",()->{
+        var options=new PowerOptionsScreen(null);open(mc,options,640,420);var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);
+        open(mc,hud,640,420);var local=draft(hud);local.get(HudEditorSettings.ENTRY).value=new JsonPrimitive(1);
+        String[] ids={"crosshair","prompts","toast","native.4"};
+        String[] fields={"power_hud:config.disableCrosshair","power_hud:config.drawXboxXAndYButtons","power_controls:userinterface.hideAchievementToast","power_hud:config.enableHotbarItemSelectionTooltips"};
+        for(int i=0;i<ids.length;i++)for(boolean visible:new boolean[]{true,false}){
+          String id=ids[i];boolean negative=i==0||i==2;
+          local.get(fields[i]).value=new JsonPrimitive(visible!=negative);select(hud,i==3?"combined":id);refresh(hud);
+          SettingsSnapshot.render(mc,hud,640,420,REPORT.resolve("preview-"+id+"-"+visible+".png"));
+          List<?> elements=(List<?>)call(get(hud,"preview"),"elements");
+          if(i<3)check(elements.stream().anyMatch(e->{try{return call(e,"id").equals(id);}catch(Exception ex){throw new RuntimeException(ex);}})==visible,"preview ignores "+fields[i]);
+          if(i==3){
+            local.get(HudEditorSettings.ENTRY).value=new JsonPrimitive(2);select(hud,id);refresh(hud);hud.render(-1,-1,0);
+            elements=(List<?>)call(get(hud,"preview"),"elements");
+            boolean found=false;for(Object e:elements)if(call(e,"id").equals(id))found=true;
+            check(found==visible,"item-name preview ignores its toggle");local.get(HudEditorSettings.ENTRY).value=new JsonPrimitive(1);
+          }
+        }
+        select(hud,"chat");SettingsSnapshot.render(mc,hud,640,420,REPORT.resolve("preview-chat.png"));
       });
     }finally{
       AudioController.quiet();AudioConfig.preview(audio);Mouse.setGrabbed(false);Display.setFullscreen(fullscreen);

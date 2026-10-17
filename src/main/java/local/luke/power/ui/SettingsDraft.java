@@ -30,8 +30,14 @@ public final class SettingsDraft {
     settings.forEach(s -> values.put(s.id, s.value.deepCopy()));
     return values;
   }
-  public boolean changed() { return !snapshot().equals(original); }
-  public boolean canUndo() { return !undo.isEmpty(); }
+  private boolean matches(Map<String, JsonElement> state) {
+    return settings.stream().allMatch(s -> s.value.equals(state.get(s.id)));
+  }
+  public boolean changed() { return !matches(original); }
+  public boolean canUndo() {
+    if (undo.isEmpty()) return false;
+    return undo.stream().anyMatch(saved -> !matches(saved));
+  }
   public void checkpoint() {
     Map<String, JsonElement> state = snapshot();
     if (!undo.isEmpty() && undo.peek().equals(state)) return;
@@ -41,5 +47,8 @@ public final class SettingsDraft {
   public void restore(Map<String, JsonElement> values) {
     settings.forEach(s -> s.value = values.get(s.id).deepCopy());
   }
-  public void undo() { if (!undo.isEmpty()) restore(undo.pop()); }
+  public void undo() {
+    while (!undo.isEmpty() && matches(undo.peek())) undo.pop();
+    if (!undo.isEmpty()) restore(undo.pop());
+  }
 }
