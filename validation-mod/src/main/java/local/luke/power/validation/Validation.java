@@ -45,6 +45,8 @@ public final class Validation {
   }
 
   public static void tick(Minecraft mc) {
+    Forest241Capture.tick(mc);
+    try { Release241Checks.observe(mc); } catch (Throwable failure) { try { log("FAIL native 2.4.1 observer "+failure); } catch (Exception ignored) {} }
     Release151SphereChecks.observe(mc);
     WebsiteMotion.tick(mc);
     if (++ticks % 5 != 0 || !Files.exists(COMMAND)) return;
@@ -61,6 +63,7 @@ public final class Validation {
       else if (command.equals("light-performance-230")) LightPerformance230.run(mc);
       else if (command.startsWith("release-230 ")) Editor230Checks.run(mc,command.substring(12));
       else if (command.startsWith("hud-responsive-230 ")) HudResponsive230Checks.run(mc,command.substring(19));
+      else if (command.startsWith("release-241 ")) Release241Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-240 ")) Release240Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-222 ")) Release222Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-221 ")) Release221Checks.run(mc,command.substring(12));

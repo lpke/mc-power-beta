@@ -38,7 +38,7 @@ final class Hud240Checks {
     });
     test("all responsive sizes show quiet sliders, shared bars and selected-only cluster outlines",()->{
       var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);open(mc,hud,640,420);
-      check(!(boolean)get(hud,"background"),"background did not start Off");
+      check((boolean)get(hud,"background"),"background did not start On");
       for(int[] size:new int[][]{{320,240},{640,420},{960,540},{1720,720},{540,960}}){
         shot(mc,hud,"hud-"+size[0]+"x"+size[1],size[0],size[1]);
         check(n(hud,"previewSpan")>=280&&n(hud,"previewBottom")-n(hud,"previewTop")>=48,"responsive preview lost space");
@@ -65,7 +65,7 @@ final class Hud240Checks {
       int left=(int)get(reorder,"left"),top=(int)get(reorder,"top");
       click(hud,left+30,top+8,0);((ScreenInput)(Object)hud).power$release(left+30,top+5+4*12+5,0);
       check(d.get("interface.debugOrder").value.equals(original),"temporary reorder changed the HUD draft before Save");
-      check(!Catalog.JSON.toJsonTree(get(reorder,"rows")).equals(original),"drag did not change temporary order");
+      check(!Catalog.JSON.toJsonTree(((DebugColumns)get(reorder,"rows")).left()).equals(original),"drag did not change temporary order");
       cy=expose(hud,order);click(hud,n(hud,"controlX")+8,cy+7,0);
       check(!(boolean)call(reorder,"active")&&!d.get(order.id).value.equals(original),"Save did not commit local order");
       check(Arrays.equals(bytes,Files.readAllBytes(PowerConfig.path()))&&options.session().changes()==0,"reorder wrote live settings");

@@ -9,6 +9,7 @@ final class DebugPreview {
   private final SettingsDraft draft;
   DebugPreview(SettingsDraft draft) { this.draft = draft; }
   List<String> order() { return DebugOrder.read(draft.get("interface.debugOrder").value); }
+  List<String> rightOrder() { return DebugOrder.read(draft.get("interface.debugRightOrder").value); }
   boolean enabled(String id) {
     DebugLines line = DebugLines.find(id);
     if (line == null) return false;
@@ -26,10 +27,8 @@ final class DebugPreview {
   List<DebugOverlay.Line> draw(Minecraft mc, int width) {
     List<DebugOverlay.Line> source = new ArrayList<>();
     for (var line : DebugLines.values()) if (enabled(line.id)) source.add(new DebugOverlay.Line(text(line.id), 2, 2, 0, line.id));
-    String[] memory = {"Used memory: 35% (350MB) of 1000MB", "Allocated memory: 50% (500MB)"};
-    for (int row = 0; row < memory.length; row++) source.add(new DebugOverlay.Line(memory[row], width - mc.textRenderer.getWidth(memory[row]) - 2, 2 + row * 10, mc.textRenderer.getWidth(memory[row]), ""));
     double size = draft.get("interface.debugTextSize").value.getAsDouble();
-    var placed = DebugOverlay.arrangeOrdered(source, width, mc.textRenderer::getWidth, order(), this::enabled, size);
+    var placed = DebugOverlay.arrangeOrdered(source, width, mc.textRenderer::getWidth, order(), rightOrder(), this::enabled, size);
     DebugTextRenderer.draw(mc, placed, size, LightSettings.rgb(draft.get("interface.debugTextColor").value.getAsString()));
     return placed;
   }

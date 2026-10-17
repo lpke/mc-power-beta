@@ -39,7 +39,7 @@ public class Config {
         public Boolean hideAchievementToast = false;
 
         @ConfigEntry(name = "Disable F3 Entity ID Tags")
-        public Boolean disableDebugEntityIdTags = true;
+        public Boolean disableDebugEntityIdTags = false;
 
         @ConfigEntry(name = "Front View Third Person")
         public FrontViewMode frontViewThirdPerson = FrontViewMode.NORMAL;

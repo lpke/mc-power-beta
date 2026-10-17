@@ -35,8 +35,8 @@ public class PhotoModeScreen extends Screen {
 
     public float rotation = 0.0f;
     public float rotationGoal = 0.0f;
-    public float zoom = 1.0f;
-    public float zoomGoal = 1.0f;
+    public float zoom = 1.25f;
+    public float zoomGoal = 1.25f;
     public float tilt = 30.0f;
     public float tiltGoal = 30.0f;
     public float cameraX = 0.0f;
@@ -143,8 +143,8 @@ public class PhotoModeScreen extends Screen {
         if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT)) {
             this.rotation = 0;
             this.rotationGoal = 0;
-            this.zoom = 1.0f;
-            this.zoomGoal = 1.0f;
+            this.zoom = 1.25f;
+            this.zoomGoal = 1.25f;
             this.tilt = 30.0f;
             this.tiltGoal = 30.0f;
             this.tiltSlider.value = 1.0f / 3.0f;

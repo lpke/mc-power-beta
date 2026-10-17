@@ -37,20 +37,6 @@ public abstract class MenuListBackgroundMixin {
     int y2 = minecraft.displayHeight - top * minecraft.displayHeight / height;
     GL11.glScissor(0, y1, minecraft.displayWidth, Math.max(0, y2 - y1));
   }
-  @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Tessellator;color(I)V", ordinal = 2))
-  private void power$selectedBackdrop(Tessellator tessellator, int color, Operation<Void> original) {
-    if (MenuPanorama.enabled(minecraft)) tessellator.color(color, 0x70);
-    else original.call(tessellator, color);
-  }
-  @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Tessellator;draw()V", ordinal = 1))
-  private void power$blendSelection(Tessellator tessellator, Operation<Void> original) {
-    if (!MenuPanorama.enabled(minecraft)) { original.call(tessellator); return; }
-    GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT);
-    try {
-      GL11.glEnable(GL11.GL_BLEND); GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-      original.call(tessellator);
-    } finally { GL11.glPopAttrib(); }
-  }
   @Inject(method = "renderBackground(IIII)V", at = @At("HEAD"))
   private void power$nativeBorders(int top, int bottom, int firstAlpha, int lastAlpha, CallbackInfo ci) {
     if (MenuPanorama.enabled(minecraft)) GL11.glDisable(GL11.GL_SCISSOR_TEST);

@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DebugOrderTest {
-  @Test void identitiesCoverNativeAndBundledLinesWithoutCapturingRightSideText() {
+  @Test void identitiesCoverNativeAndBundledLinesInBothColumns() {
     for (var line : DebugLines.values()) assertEquals(line.id, DebugLines.identify(line.sample, 2, 2), line.id);
-    assertEquals("", DebugLines.identify("Used memory: 10%", 2, 2));
-    assertEquals("", DebugLines.identify("Allocated memory: 50%", 140, 12));
+    assertEquals("usedMemory", DebugLines.identify("Used memory: 10%", 2, 2));
+    assertEquals("allocatedMemory", DebugLines.identify("Allocated memory: 50%", 140, 12));
     assertEquals("version", DebugLines.identify("Power Beta 2.4.0 (120 fps)", 2, 2));
     assertEquals("world", DebugLines.identify("MultiplayerChunkCache: 1024", 2, 42));
   }
@@ -17,7 +17,7 @@ class DebugOrderTest {
     var rows = new ArrayList<>(List.of("future.provider", "", "version"));
     var complete = DebugOrder.complete(rows);
     assertEquals(rows, complete.subList(0, rows.size()));
-    assertEquals(DebugLines.values().length + 2, complete.size());
+    assertEquals((int)Arrays.stream(DebugLines.values()).filter(line -> !line.right()).count() + 2, complete.size());
     assertEquals(complete, DebugOrder.complete(complete));
     assertThrows(IllegalArgumentException.class, () -> DebugOrder.read(JsonParser.parseString("[1]")));
     assertThrows(IllegalArgumentException.class, () -> DebugOrder.read(JsonParser.parseString("[\"x\",\"x\"]")));
@@ -37,13 +37,13 @@ class DebugOrderTest {
     var far = DebugOrder.move(List.of("version", "terrain"), "version", 10000, false, id -> true);
     assertEquals(256, far.size()); assertEquals("version", far.get(255)); assertEquals("terrain", far.get(1));
   }
-  @Test void savedOrderAndGapsDriveTheSameLayoutWithoutMovingTheRightColumn() {
+  @Test void savedOrderAndGapsDriveBothColumns() {
     var source = List.of(new DebugOverlay.Line("x: 128", 2, 64, 0), new DebugOverlay.Line("Biome: Forest", 2, 120, 0),
         new DebugOverlay.Line("Used memory: 10%", 180, 2, 100));
-    var placed = DebugOverlay.arrangeOrdered(source, 320, String::length, List.of("biome", "", "x"), id -> true, 2);
-    assertEquals(source.get(2), placed.get(0));
-    assertEquals(2, placed.get(1).y()); assertEquals("biome", placed.get(1).id());
-    assertEquals(42, placed.get(2).y()); assertEquals("x", placed.get(2).id());
-    assertEquals(2, DebugOverlay.arrangeOrdered(source, 320, String::length, List.of("biome", "x"), id -> !id.equals("x"), 1).size());
+    var placed = DebugOverlay.arrangeOrdered(source, 320, String::length, List.of("biome", "", "x"), List.of("usedMemory"), id -> true, 2);
+    assertEquals(2, placed.get(0).y()); assertEquals("biome", placed.get(0).id());
+    assertEquals(42, placed.get(1).y()); assertEquals("x", placed.get(1).id());
+    assertEquals(2, placed.get(2).y()); assertEquals("usedMemory", placed.get(2).id());
+    assertEquals(318 - "Used memory: 10%".length()*2, placed.get(2).x());
   }
 }

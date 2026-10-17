@@ -17,7 +17,7 @@ class DebugConfigUpgradeTest {
     assertEquals(order, DebugOrder.read(ConfigVersions.convert(converted).getAsJsonObject("settings").getAsJsonObject("interface").get("debugOrder")));
   }
   @Test void invalidLayoutsBlockConversionAndFutureIdsArePreserved() {
-    for (String body : new String[]{"\"debugOrder\":[1]", "\"debugOrder\":[\"x\",\"x\"]", "\"debugTextSize\":0", "\"debugLines\":{\"x\":1}"}) {
+    for (String body : new String[]{"\"debugOrder\":[1]", "\"debugOrder\":[\"x\",\"x\"]", "\"debugTextSize\":0", "\"debugRightOrder\":[1]", "\"debugOrder\":[\"version\"],\"debugRightOrder\":[\"version\"]", "\"debugLines\":{\"x\":1}"}) {
       var source = JsonParser.parseString("{\"schemaVersion\":7,\"settings\":{\"interface\":{" + body + "}}}").getAsJsonObject();
       var before = source.deepCopy(); assertThrows(IllegalArgumentException.class, () -> ConfigVersions.convert(source)); assertEquals(before, source);
     }

@@ -12,6 +12,14 @@ class InterfacePreferencesTest {
     assertTrue(values.blinkingChatCursor);
     assertEquals("#FFFFFF",values.debugTextColor);
   }
+  @Test void bothColumnsRoundTripWithNativeGsonAndRejectDuplicateOwnership() {
+    Gson gson=new Gson();var values=new MenuPreferences.Values();
+    values.debugOrder=java.util.List.of("usedMemory","","future.provider","x");
+    values.debugRightOrder=java.util.List.of("version","","allocatedMemory");
+    var saved=gson.fromJson(gson.toJson(values),MenuPreferences.Values.class);saved.validate();
+    assertEquals(values.debugOrder,saved.debugOrder);assertEquals(values.debugRightOrder,saved.debugRightOrder);
+    saved.debugRightOrder=java.util.List.of("x");assertThrows(IllegalArgumentException.class,saved::validate);
+  }
   @Test void coloursAndBlinkingRoundTripAndInvalidColoursFail() {
     Gson gson=new Gson();var values=new MenuPreferences.Values();
     values.blinkingChatCursor=true;values.debugTextColor="#12AbEf";

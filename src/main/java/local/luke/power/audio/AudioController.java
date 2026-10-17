@@ -32,6 +32,7 @@ public final class AudioController {
           new MusicLibrary.Scan(List.of(), List.of()), new MusicLibrary.Scan(List.of(), List.of()));
   private static Minecraft client;
   private static MusicRules rules;
+  private static Object musicWorld;
   private static boolean dirty = true, paused, wasWorld, rescan, silenced;
   private static String currentMusic = "",
       menuMusic = "",
@@ -447,9 +448,14 @@ public final class AudioController {
     }
     MusicDisplay.update(nowPlaying());
     boolean inWorld = mc.world != null;
+    boolean keepMusic = AudioConfig.current().continuesAcrossMenus();
+    if (mc.world != musicWorld) {
+      boolean previewPaused = MusicPreview.active() && MusicPreview.paused();
+      MusicPreview.worldChanged(mc, system, inWorld == wasWorld || keepMusic);
+      if (previewPaused && !MusicPreview.active()) paused = true;
+      musicWorld = mc.world;
+    }
     if (inWorld != wasWorld) {
-      boolean keepMusic = AudioConfig.current().continuesAcrossMenus();
-      MusicPreview.worldChanged(mc, system, keepMusic);
       if (!keepMusic) {
         MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
         system.stop("PowerBetaMenu");
@@ -458,7 +464,7 @@ public final class AudioController {
         menuMusic = "";
         history.clear();
         historyIndex = -1;
-        paused = false;
+        // Context changes never revoke an explicit pause. Resume chooses a new track if needed.
         silenced = true;
         trackWasPlaying = false;
         nextDelay((SoundManagerAccessor) mc.soundManager);
@@ -579,6 +585,7 @@ public final class AudioController {
   }
 
   public static void changingDimension() {
+    if (paused || MusicPreview.active() && MusicPreview.paused()) return;
     var policy = AudioConfig.current().dimensionMusic;
     if (policy == AudioSettings.DimensionMusic.STOP_ALL
         || policy == AudioSettings.DimensionMusic.STOP_SPECIFIC && client != null && client.player != null

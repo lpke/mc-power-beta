@@ -333,7 +333,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void openGroup(Setting setting) {
-    if (HudEditorSettings.contains(setting)) { minecraft.setScreen(new HudEditorScreen(this, setting.id)); return; }
+    if (HudEditorSettings.contains(setting) && !setting.id.equals(HudEditorSettings.ENTRY)) { minecraft.setScreen(new HudEditorScreen(this, setting.id)); return; }
     rememberPosition();
     pushView();
     page = setting.page;
@@ -450,19 +450,20 @@ public final class PowerOptionsScreen extends UiScreen {
           ? changedOnly || s.page.equals(page)
           : scores.getOrDefault(s.id, FuzzySearch.NONE) < FuzzySearch.NONE)))
         groups.computeIfAbsent(query.isEmpty() && !changedOnly ? s.group
+            : s.id.equals(HudEditorSettings.ENTRY) ? "Interface"
             : HudEditorSettings.contains(s) ? "Interface / HUD editor / " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode))
-            : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
+            : s.group.isEmpty() ? s.page : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
     }
     List<Row> next = new ArrayList<>();
     int y = 0, rowHeight = span() < 340 ? 40 : 24;
     for (var group : groups.entrySet()) {
-      boolean flat = !listed.isEmpty();
+      boolean flat = !listed.isEmpty() || group.getKey().isEmpty();
       if (!flat) { next.add(new Row(group.getKey(), null, y, SettingsGroup.HEIGHT)); y += SettingsGroup.HEIGHT; }
       if (!flat && collapsed.contains(sectionKey(group.getKey()))) continue;
       for (Setting s : group.getValue()) {
         next.add(new Row(group.getKey(), s, y, rowHeight));
         y += rowHeight;
-        if (!flat && query.isEmpty() && !changedOnly
+        if (listed.isEmpty() && query.isEmpty() && !changedOnly
             && s != group.getValue().get(group.getValue().size() - 1)
             && Catalog.metadata(s.id).has("separatorAfter") && Catalog.metadata(s.id).get("separatorAfter").getAsBoolean()) {
           int spacing = (int)Catalog.number(Catalog.metadata(s.id), "separatorSpacing", 13);
@@ -720,6 +721,7 @@ public final class PowerOptionsScreen extends UiScreen {
         if (x >= right() - 34) {
           click();
           s.reset();
+          if (s.id.equals("interface.debugOrder")) session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).forEach(Setting::reset);
           changed(s);
           return;
         }
@@ -1174,7 +1176,9 @@ public final class PowerOptionsScreen extends UiScreen {
           local.luke.power.input.Chord.decode(s.value.getAsInt()).key() == 0 ? 0x999999 : -1);
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, editable);
-      button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !s.value.equals(s.defaultValue));
+      boolean defaultValue = s.value.equals(s.defaultValue) && (!s.id.equals("interface.debugOrder")
+          || session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).allMatch(value -> value.value.equals(value.defaultValue)));
+      button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !defaultValue);
       if (customise(s)) button("Customise", controlLeft(row), cy, 62, 18, mx, listMouseY, editable);
       else if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, listMouseY, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);

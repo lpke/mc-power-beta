@@ -90,6 +90,9 @@ public final class ConfigVersions {
         JsonArray rows = new JsonArray(); old.forEach(rows::add); ui.add("debugOrder", rows); settings.add("interface", ui);
       }
     }
+    var left = ui.has("debugOrder") ? local.luke.power.ui.DebugOrder.read(ui.get("debugOrder")) : local.luke.power.ui.DebugOrder.defaults();
+    var right = ui.has("debugRightOrder") ? local.luke.power.ui.DebugOrder.read(ui.get("debugRightOrder")) : local.luke.power.ui.DebugColumns.defaultRight();
+    new local.luke.power.ui.DebugColumns(left, right);
     if (ui.has("debugTextSize")) {
       var n = ui.get("debugTextSize");
       if (!n.isJsonPrimitive() || !n.getAsJsonPrimitive().isNumber() || !Double.isFinite(n.getAsDouble()) || n.getAsDouble() < .5 || n.getAsDouble() > 3)

@@ -635,7 +635,7 @@
   },
   "power_hud:hudpositions.hudPositioningSystem": {
     "page": "Interface",
-    "group": "General",
+    "group": "",
     "label": "HUD editor",
     "description": "Arrange and preview the HUD, custom info, active tweaks, version label and F3 debug information.",
     "default": 1,
@@ -1001,7 +1001,7 @@
   },
   "power_client_fixes:config.disableServerListIpAddresses": {
     "page": "Interface",
-    "group": "General",
+    "group": "",
     "label": "Hide server IP addresses",
     "description": "Hides IP addresses for the server list only",
     "default": false,
@@ -1561,7 +1561,7 @@
   },
   "station-api-configuration:config.loadingScreenOption": {
     "page": "Interface",
-    "group": "General",
+    "group": "",
     "label": "Loading screen style",
     "description": "",
     "default": 0,
@@ -2388,7 +2388,7 @@
   },
   "power_controls:userinterface.showQuitButton": {
     "page": "Interface",
-    "group": "General",
+    "group": "",
     "label": "Show quit button",
     "description": "Shows Quit Button on the Main Menu",
     "default": true,
@@ -2406,7 +2406,7 @@
   "power_controls:userinterface.disableDebugEntityIdTags": {
     "page": "Interface",
     "group": "Debug (F3) info",
-    "label": "Disable F3 entity id tags",
+    "label": "Show F3 entity id tags",
     "description": "",
     "default": true,
     "restart": false
@@ -2422,7 +2422,7 @@
   },
   "power_controls:userinterface.clearTextFieldWithRightClick": {
     "page": "Interface",
-    "group": "General",
+    "group": "",
     "label": "Clear text field with right click",
     "description": "Right clicking on a text field will clear it",
     "default": false,
@@ -2458,7 +2458,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 2.4.0",
+    "default": "Power Beta 2.4.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -2490,7 +2490,7 @@
   },
   "power_controls:userinterface.photoModeConfig.enablePhotoModeButton": {
     "page": "Interface",
-    "group": "General",
+    "group": "",
     "label": "Photo mode button",
     "description": "Enables the Photo Mode button in game menu",
     "default": true,
@@ -4393,7 +4393,7 @@
   },
   "interface.blinkingUiCursor": {
     "page": "Interface",
-    "group": "General",
+    "group": "",
     "order": 6,
     "default": true
   },

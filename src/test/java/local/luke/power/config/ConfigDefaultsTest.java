@@ -23,6 +23,7 @@ class ConfigDefaultsTest {
     assertEquals(local.luke.power.storage.ConfigVersions.CURRENT, root.get("schemaVersion").getAsInt());
     assertEquals(2, root.size());
     var settings = root.getAsJsonObject("settings");
+    assertFalse(settings.getAsJsonObject("power_controls:userinterface").get("disableDebugEntityIdTags").getAsBoolean());
     for (String key : List.of("disableEntityCulling", "disableBlockEntityCulling")) {
       boolean disabled = settings.getAsJsonObject("entityculling:config").get(key).getAsBoolean();
       assertFalse(disabled, "fresh installs must enable culling");
@@ -34,6 +35,7 @@ class ConfigDefaultsTest {
     assertTrue(settings.getAsJsonObject("interface").get("blinkingUiCursor").getAsBoolean());
     assertFalse(settings.getAsJsonObject("interface").get("hidePowerBetaVersion").getAsBoolean());
     assertEquals(local.luke.power.ui.DebugOrder.defaults(), local.luke.power.ui.DebugOrder.read(settings.getAsJsonObject("interface").get("debugOrder")));
+    assertEquals(local.luke.power.ui.DebugColumns.defaultRight(), local.luke.power.ui.DebugOrder.read(settings.getAsJsonObject("interface").get("debugRightOrder")));
     assertFalse(settings.getAsJsonObject("power_controls:userinterface").getAsJsonObject("panoramaConfig").get("onlyTitleScreen").getAsBoolean());
     assertFalse(settings.getAsJsonObject("power_controls:userinterface").has("achievementBackToMenu"));
     assertTrue(settings.getAsJsonObject("power_environment:config").getAsJsonObject("WEATHER_CONFIG").get("sleepOnlyResetsWeatherWhenRaining").getAsBoolean());

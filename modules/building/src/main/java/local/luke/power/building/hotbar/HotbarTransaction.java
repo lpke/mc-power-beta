@@ -16,69 +16,77 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 
-/** Flush off-thread, then revalidate and publish on a later game tick. */
+/** Prepare and flush off-thread; only an armed, revalidated plan may publish on the game thread. */
 final class HotbarTransaction {
   private static boolean failed;
   private static Thread gameThread;
   private static Path journalPath;
   private static RecoveryJournal journal;
   private static Pending pending;
+  private static int previewRow = -1;
   private static final ArrayDeque<Integer> rows = new ArrayDeque<>();
   private static final int MAX_QUEUED = 16;
 
   private HotbarTransaction() {}
 
   static void cancel() {
-    rows.clear();
+    rows.clear(); previewRow = -1;
     if (pending != null) pending.cancelled = true;
+  }
+
+  static void preview(Minecraft mc, int row) {
+    if (failed || gameThread != Thread.currentThread() || !Hotbars.eligible(mc) || row < 0 || row > 2) return;
+    previewRow = row;
+    if (pending == null) try { prepare(mc, row, false); }
+    catch (Exception | LinkageError error) { fail(mc, error); }
   }
 
   static void tick(Minecraft mc) {
     if (gameThread == null) gameThread = Thread.currentThread();
-    if (Thread.currentThread() != gameThread) return;
-    if (pending == null) return;
+    if (Thread.currentThread() != gameThread || pending == null) return;
     if (!pending.owns(mc)) cancel();
     if (!pending.write.isDone()) return;
     Pending ready = pending;
-    pending = null;
     try {
-      // isDone makes this non-blocking. Even a cancelled request must report disk failures.
-      ready.write.get();
-      if (ready.cancelled || !ready.owns(mc)
-          || ready.inventory.main != ready.source
-          || !ready.before.matches(ready.inventory.main)
-          || !ready.armor.matches(ready.inventory.armor)) {
-        rows.clear();
+      if (!ready.flushed) { ready.write.get(); ready.flushed = true; }
+      if (!ready.armed && !ready.cancelled && ready.row == previewRow) return;
+      pending = null;
+      if (ready.cancelled || !ready.owns(mc) || !ready.armed) {
+        if (!rows.isEmpty() && Hotbars.eligible(mc)) prepare(mc, rows.removeFirst(), true);
+        else if (previewRow >= 0 && Hotbars.eligible(mc)) prepare(mc, previewRow, false);
         return;
       }
+      if (ready.inventory.main != ready.source || !ready.before.matches(ready.inventory.main)
+          || !ready.armor.matches(ready.inventory.armor)) { rows.clear(); previewRow = -1; return; }
       InventoryExchange.commit(
           () -> ready.inventory.main, a -> ready.inventory.main = a,
           ready.source, ready.before.references, ready.after.references, ready.before.rollback,
           () -> {}, () -> ready.inventory.dirty = true);
-      if (!rows.isEmpty()) prepare(mc, rows.removeFirst());
-    } catch (Exception | LinkageError error) {
-      fail(mc, error);
-    }
+      if (!rows.isEmpty()) prepare(mc, rows.removeFirst(), true);
+    } catch (Exception | LinkageError error) { pending = null; fail(mc, error); }
   }
 
   static boolean run(Minecraft mc, int row) {
     if (failed || gameThread == null || Thread.currentThread() != gameThread
         || row < 0 || row > 2 || !Hotbars.eligible(mc)) return false;
-    if (pending != null) {
-      if (pending.cancelled || !pending.owns(mc) || rows.size() >= MAX_QUEUED) return false;
-      rows.addLast(row);
-      return true;
-    }
+    previewRow = -1;
     try {
-      prepare(mc, row);
-      return true;
-    } catch (Exception | LinkageError error) {
-      fail(mc, error);
-      return false;
-    }
+      if (pending != null) {
+        if (pending.cancelled || !pending.owns(mc) || rows.size() >= MAX_QUEUED) return false;
+        if (!pending.armed) {
+          if (pending.row == row && pending.inventory.main == pending.source
+              && pending.before.matches(pending.inventory.main) && pending.armor.matches(pending.inventory.armor)) {
+            pending.armed = true; tick(mc); return true;
+          }
+          pending.cancelled = true;
+        }
+        rows.addLast(row); return true;
+      }
+      prepare(mc, row, true); return true;
+    } catch (Exception | LinkageError error) { fail(mc, error); return false; }
   }
 
-  private static void prepare(Minecraft mc, int row) throws IOException {
+  private static void prepare(Minecraft mc, int row, boolean armed) throws IOException {
     var player = mc.player;
     var inventory = player.inventory;
     var world = mc.world;
@@ -114,7 +122,7 @@ final class HotbarTransaction {
       journal = new RecoveryJournal(path);
     }
     pending = new Pending(world, player, inventory, source, before, after, armor,
-        JournalWriter.append(journal, bytes));
+        JournalWriter.append(journal, bytes), row, armed);
   }
 
   private static void fail(Minecraft mc, Throwable error) {
@@ -133,10 +141,11 @@ final class HotbarTransaction {
     final ItemStack[] source;
     final InventorySnapshot before, after, armor;
     final Future<?> write;
-    boolean cancelled;
+    final int row;
+    boolean cancelled, armed, flushed;
 
     Pending(World world, ClientPlayerEntity player, PlayerInventory inventory, ItemStack[] source,
-        InventorySnapshot before, InventorySnapshot after, InventorySnapshot armor, Future<?> write) {
+        InventorySnapshot before, InventorySnapshot after, InventorySnapshot armor, Future<?> write, int row, boolean armed) {
       this.world = world;
       this.player = player;
       this.inventory = inventory;
@@ -144,7 +153,7 @@ final class HotbarTransaction {
       this.before = before;
       this.after = after;
       this.armor = armor;
-      this.write = write;
+      this.write = write; this.row = row; this.armed = armed;
     }
 
     boolean owns(Minecraft mc) {

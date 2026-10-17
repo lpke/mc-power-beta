@@ -147,6 +147,26 @@ final class Release171Checks {
     inventory.armor[0]=new ItemStack(301,1,8);
     try {
       Hotbars.tick(mc);check(Hotbars.eligible(mc),"focused gameplay required");
+      test("prepared preview remains inert until release and a ready plan publishes immediately",()->{
+        var before=inventory.main.clone();
+        Method preview=transaction().getDeclaredMethod("preview",Minecraft.class,int.class);preview.setAccessible(true);
+        preview.invoke(null,mc,1);
+        ((Future<?>)UiChecks.field(state("pending"),"write")).get(5,TimeUnit.SECONDS);tick(mc);
+        check(InventoryRows.identical(before,inventory.main),"preview changed inventory before release");
+        long start=System.nanoTime();Hotbars.swap(mc,1);
+        check(state("pending")==null&&InventoryRows.identical(InventoryRows.swapped(before,1),inventory.main),"ready preview waited after release");
+        log("HOTBAR prepared release ms="+(System.nanoTime()-start)/1e6);
+        Hotbars.swap(mc,1);drain(mc);
+      });
+      test("changing a prepared preview row never publishes an unrequested swap",()->{
+        var before=inventory.main.clone();
+        Method preview=transaction().getDeclaredMethod("preview",Minecraft.class,int.class);preview.setAccessible(true);
+        preview.invoke(null,mc,0);((Future<?>)UiChecks.field(state("pending"),"write")).get(5,TimeUnit.SECONDS);tick(mc);
+        preview.invoke(null,mc,2);tick(mc);((Future<?>)UiChecks.field(state("pending"),"write")).get(5,TimeUnit.SECONDS);tick(mc);
+        check(InventoryRows.identical(before,inventory.main),"row preview published inventory");
+        Hotbars.swap(mc,2);check(InventoryRows.identical(InventoryRows.swapped(before,2),inventory.main),"latest preview row not committed");
+        Hotbars.swap(mc,2);drain(mc);
+      });
       test("hotbar publishes only after durable flush and preserves native stacks",()->{
         ItemStack[] before=inventory.main.clone();
         try(var blocked=new BlockedWriter()) {

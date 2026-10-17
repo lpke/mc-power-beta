@@ -8,6 +8,17 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-241 ui` checks Interface search placement, transient preview toggles,
+  responsive layout, editor memory, linked F3 resets, Clear logo/Undo and entity tags.
+  `gameplay` checks pause across all dimension policies, native dimension travel,
+  paused auditions and the initial photo zoom. `drag-setup` reports native mouse
+  coordinates; perform real drags, then `drag-check` and `drag-save`. Restart and run
+  `saved`, load the world and run `live` to check both persisted columns.
+  `hotbar-setup`, hold F8 until `NATIVE HOTBAR PREPARED`, release, then `hotbar-result`
+  checks first-release-tick publication. Run `release-171 hotbar` for rollback,
+  cancellation and stalled-disk coverage. `forest`, `tag-project` and `tag-hide`
+  prepare the native forest/cow capture and record its native entity-tag projection.
+
 - `release-240 hud` checks search editing/navigation, responsive previews, draft isolation,
   individual resets, title grid sliders, click sounds and temporary F3 reorder/Undo/gaps.
   `release-240 menus` checks title versions, logo clicks while the settings writer is

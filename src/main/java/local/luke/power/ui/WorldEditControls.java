@@ -17,6 +17,7 @@ public final class WorldEditControls extends UiScreen {
   private ButtonWidget rename;
   private boolean ownsNativePress;
   private String name, error = "";
+  public boolean hides(ButtonWidget button) { return inline.active() && button == rename; }
   public boolean active() { return inline.active(); }
   public boolean ownsPress() { return active() || ownsNativePress; }
   public String title(EditWorldScreen screen) {

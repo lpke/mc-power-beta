@@ -312,8 +312,9 @@
   without changing inclusion, volume, presets or queues. Menu scrub tracks reserve equal
   space on either side so the track itself stays centred with the menu.
 
-- Hotbar swaps flush immutable recovery bytes on a worker before publishing on a later
-  game tick. Keep native NBT access on the game thread, bound queued requests, and cancel
+- Hotbar swaps flush immutable recovery bytes on a worker before publication on the
+  game thread. Prepare selected preview rows while held; only a validated, durable
+  plan can publish on release. Previewing alone never changes inventory. Keep native NBT access on the game thread, bound queued requests, and cancel
   stale plans on inventory/owner, menu, focus or world changes. Never skip the durable flush.
 - Text inputs share editing and pointer selection through the input bridge. UI cursor
   blinking is separate from chat. Cancel selection on focus/screen changes; keep native
@@ -442,9 +443,12 @@
   backgrounds are cached captures, never a second live world. Nested colour swatches
   stay in the HUD draft and share its Undo, Done and Discard boundary.
 - Info-cluster previews use the gameplay formatter, clipping, anchors and renderer.
-  F3 left-side rows use stable IDs, individual visibility and a bounded saved order
+  F3 rows in both columns use stable IDs, individual visibility and a bounded saved order
   with explicit gap rows. Reorder keeps a temporary draft at GUI font size; Save or
   an outside click accepts it into the HUD draft as one undoable edit. Preserve
-  unknown IDs during reordering and frozen legacy offsets; right-side information keeps native placement.
-  HUD scene backgrounds default off and use an untouched native-renderer capture at
-  12 chunks in clear daytime Forest terrain, without loading a second world in menus.
+  unknown IDs during reordering and frozen legacy offsets. Columns share validation, preview and live placement.
+  Drag ownership lasts through the native release event; polling may lead queued releases.
+  HUD scene backgrounds default on and use an untouched native-renderer capture at
+  12 chunks in clear daytime Forest terrain with a visible mob for the dynamic entity-ID
+  tag preview, without loading a second world in menus. Preview toggles never change
+  settings, and editor selection/scroll memory stays separate from drafts.

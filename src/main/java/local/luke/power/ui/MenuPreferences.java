@@ -16,6 +16,7 @@ public final class MenuPreferences {
     public String debugTextColor = "#FFFFFF";
     public double debugTextSize = 1;
     public List<String> debugOrder = DebugOrder.defaults();
+    public List<String> debugRightOrder = DebugColumns.defaultRight();
     public Map<String, Boolean> debugLines = new LinkedHashMap<>();
     public String musicBrowserDirectory = "";
     public List<String> colours = new ArrayList<>();
@@ -25,7 +26,7 @@ public final class MenuPreferences {
         throw new IllegalArgumentException("Save up to 16 colours");
       colours.forEach(LightSettings::rgb);
       LightSettings.rgb(debugTextColor);
-      DebugOrder.validate(debugOrder);
+      new DebugColumns(debugOrder, debugRightOrder);
       if (!Double.isFinite(debugTextSize) || debugTextSize < .5 || debugTextSize > 3) throw new IllegalArgumentException("F3 text size must be between 0.5 and 3.");
       if (debugLines == null || debugLines.size() > 256 || debugLines.entrySet().stream().anyMatch(e -> e.getKey() == null
           || !e.getKey().matches("[A-Za-z0-9_.-]{1,96}") || e.getValue() == null)) throw new IllegalArgumentException("Invalid F3 line visibility.");
@@ -42,7 +43,7 @@ public final class MenuPreferences {
   private static Boolean feetYPreview;
   private static Boolean powerVersionPreview;
   private static Double debugSizePreview;
-  private static List<String> debugOrderPreview;
+  private static List<String> debugOrderPreview, debugRightOrderPreview;
   private static final Map<String, Boolean> debugLinePreviews = new HashMap<>();
 
   private static Values load() {
@@ -91,6 +92,8 @@ public final class MenuPreferences {
   public static String debugTextColor() { return debugColorPreview == null ? current.debugTextColor : debugColorPreview; }
   public static double debugTextSize() { return debugSizePreview == null ? current.debugTextSize : debugSizePreview; }
   public static List<String> debugOrder() { return debugOrderPreview == null ? current.debugOrder : debugOrderPreview; }
+  public static List<String> debugRightOrder() { return debugRightOrderPreview == null ? current.debugRightOrder : debugRightOrderPreview; }
+  public static void previewDebugRightOrder(List<String> order) { debugRightOrderPreview = DebugOrder.validate(order); }
   public static boolean debugLine(String id) { return debugLinePreviews.getOrDefault(id, current.debugLines.getOrDefault(id, true)); }
   public static void previewDebugSize(double size) { debugSizePreview = size; }
   public static void previewDebugOrder(List<String> order) { debugOrderPreview = DebugOrder.validate(order); }

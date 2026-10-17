@@ -7,13 +7,16 @@ record HudEditorLayout(boolean horizontal, int controlsLeft, int controlsTop, in
     return width >= 640 && (width >= height * 1.45 || width >= 800 && width >= height * 1.2);
   }
   static HudEditorLayout at(int width, int height, int split) {
-    int left = 10, right = width - 10, top = 55, bottom = height - 53;
+    return at(width, height, split, 55);
+  }
+  static HudEditorLayout at(int width, int height, int split, int top) {
+    int left = 10, right = width - 10, bottom = height - 53;
     if (horizontal(width, height)) {
       int settings = Math.max(280, Math.min(Math.min(440, width - 312), split));
       return new HudEditorLayout(true, left, top, settings, bottom,
           left + settings + 12, top, right - left - settings - 12, bottom);
     }
-    int settingsBottom = Math.max(top + 47, Math.min(bottom - 60, split));
+    int settingsBottom = Math.max(top + (top > 55 && height < 300 ? 23 : 47), Math.min(bottom - 60, split));
     return new HudEditorLayout(false, left, top, right - left, settingsBottom,
         left, settingsBottom + 12, right - left, bottom);
   }

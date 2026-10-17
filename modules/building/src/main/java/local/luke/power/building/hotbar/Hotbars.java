@@ -63,6 +63,7 @@ public final class Hotbars {
       owner = mc.player;
       row = settings.selectedRow;
     }
+    if (scrolling && down) HotbarTransaction.preview(mc, row);
     boolean consumedScroll = scrolling;
     if (scrolling && !down) {
       if (!blocked) {
@@ -118,6 +119,7 @@ public final class Hotbars {
     }
     scrollDown = true;
     row = InventoryRows.scroll(row, delta, Config.current().hotbar.reverseScroll);
+    HotbarTransaction.preview(mc, row);
     return 0;
   }
 

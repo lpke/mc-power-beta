@@ -20,31 +20,41 @@ public final class DebugOverlay {
   public static List<Line> layout(int screenWidth, ToIntFunction<String> measure) {
     return last = arrange(pending, screenWidth, measure);
   }
-  public static List<Line> layoutOrdered(int width, ToIntFunction<String> measure, List<String> order, Predicate<String> enabled, double size) {
-    return last = arrangeOrdered(pending, width, measure, order, enabled, size);
+  public static List<Line> layoutOrdered(int width, ToIntFunction<String> measure, List<String> left, List<String> right, Predicate<String> enabled, double size) {
+    return last = arrangeOrdered(pending, width, measure, left, right, enabled, size);
   }
   public static List<Line> arrangeOrdered(List<Line> input, int width, ToIntFunction<String> measure,
       List<String> order, Predicate<String> enabled, double size) {
-    Map<String,Line> left = new LinkedHashMap<>();
+    return arrangeOrdered(input, width, measure, order, DebugColumns.defaultRight(), enabled, size);
+  }
+  public static List<Line> arrangeOrdered(List<Line> input, int width, ToIntFunction<String> measure,
+      List<String> leftOrder, List<String> rightOrder, Predicate<String> enabled, double size) {
+    Map<String,Line> lines = new LinkedHashMap<>();
     List<Line> result = new ArrayList<>();
     for (Line line : input) {
       if (line.id.isEmpty()) result.add(line);
-      else left.putIfAbsent(line.id, line);
+      else lines.putIfAbsent(line.id, line);
     }
-    int row = 0;
-    for (String id : order) {
-      if (id.isEmpty()) { row++; continue; }
-      Line line = left.remove(id);
-      if (line == null || !enabled.test(id)) continue;
-      result.add(place(line, row++, width, measure, size));
+    int[] rows = new int[2];
+    List<List<String>> orders = List.of(leftOrder, rightOrder);
+    for (int side = 0; side < 2; side++) for (String id : orders.get(side)) {
+      if (id.isEmpty()) { rows[side]++; continue; }
+      Line line = lines.remove(id);
+      if (line != null && enabled.test(id)) result.add(place(line, rows[side]++, side, width, measure, size));
     }
-    for (Line line : left.values()) if (enabled.test(line.id)) result.add(place(line, row++, width, measure, size));
+    for (Line line : lines.values()) if (enabled.test(line.id)) {
+      DebugLines known = DebugLines.find(line.id);
+      int side = known != null ? known.right() ? 1 : 0 : line.x > width / 2 ? 1 : 0;
+      result.add(place(line, rows[side]++, side, width, measure, size));
+    }
     return List.copyOf(result);
   }
-  private static Line place(Line line, int row, int width, ToIntFunction<String> measure, double size) {
+  private static Line place(Line line, int row, int side, int width, ToIntFunction<String> measure, double size) {
     String text = line.text;
-    while (!text.isEmpty() && measure.applyAsInt(text) * size > width - 4) text = text.substring(0, text.length() - 1);
-    return new Line(text, 2, (int)Math.round(2 + row * 10 * size), (int)Math.ceil(measure.applyAsInt(text) * size), line.id);
+    int available = Math.max(1, width / 2 - 6);
+    while (!text.isEmpty() && measure.applyAsInt(text) * size > available) text = text.substring(0, text.length() - 1);
+    int span = (int)Math.ceil(measure.applyAsInt(text) * size);
+    return new Line(text, side == 0 ? 2 : width - span - 2, (int)Math.round(2 + row * 10 * size), span, line.id);
   }
 
   /** Pure placement also serves editor samples without touching the captured gameplay frame. */

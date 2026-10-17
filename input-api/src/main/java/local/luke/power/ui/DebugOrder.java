@@ -11,6 +11,7 @@ public final class DebugOrder {
   public static List<String> defaults() {
     List<String> rows = new ArrayList<>();
     for (var line : DebugLines.values()) {
+      if (line.right()) continue;
       if (line == DebugLines.X || line == DebugLines.SEED || line == DebugLines.CULL_TIME) rows.add("");
       rows.add(line.id);
     }
@@ -36,7 +37,7 @@ public final class DebugOrder {
   }
   public static List<String> complete(List<String> rows) {
     List<String> result = new ArrayList<>(validate(rows));
-    for (var line : DebugLines.values()) if (!result.contains(line.id)) result.add(line.id);
+    for (var line : DebugLines.values()) if (!line.right() && !result.contains(line.id)) result.add(line.id);
     return validate(result);
   }
   public static List<String> visible(List<String> rows, Predicate<String> enabled) {
@@ -93,6 +94,7 @@ public final class DebugOrder {
     Map<String,Integer> y = new LinkedHashMap<>();
     int[] ys = {2,12,22,32,42,64,72,80,88,104,96,112,120,128,136,144,144,152,106,115,124};
     for (var line : DebugLines.values()) {
+      if (line.right()) continue;
       int offset = line.culling() ? culling : line == DebugLines.MUSIC ? music
           : EnumSet.of(DebugLines.PLAY_TIME, DebugLines.LIGHT, DebugLines.BIOME, DebugLines.DAY, DebugLines.SLIME, DebugLines.FACING).contains(line) ? extra : 0;
       y.put(line.id, Math.max(2, ys[line.ordinal()] + offset));

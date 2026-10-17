@@ -42,7 +42,7 @@ public abstract class DebugHudMixin {
       DebugOverlay.add(local.luke.power.hud.InfoHud.timeLine(), 2, 144);
     int width = new class_564(minecraft.options, minecraft.displayWidth, minecraft.displayHeight).method_1857();
     local.luke.power.ui.DebugTextRenderer.draw(minecraft,
-        DebugOverlay.layoutOrdered(width, minecraft.textRenderer::getWidth, MenuPreferences.debugOrder(),
+        DebugOverlay.layoutOrdered(width, minecraft.textRenderer::getWidth, MenuPreferences.debugOrder(), MenuPreferences.debugRightOrder(),
             MenuPreferences::debugLine, MenuPreferences.debugTextSize()), MenuPreferences.debugTextSize(), InterfaceState.debugTextColor);
   }
 

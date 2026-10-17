@@ -39,7 +39,7 @@ public final class GlassBackend implements Backend {
             });
   }
 
-  private static boolean inverted(String key) { return Set.of("power_hud:config.disableVignette", "entityculling:config.disableEntityCulling", "entityculling:config.disableBlockEntityCulling", "power_hud:config.disableCrosshair", "power_controls:userinterface.hideAchievementToast").contains(key); }
+  private static boolean inverted(String key) { return Set.of("power_hud:config.disableVignette", "entityculling:config.disableEntityCulling", "entityculling:config.disableBlockEntityCulling", "power_hud:config.disableCrosshair", "power_controls:userinterface.hideAchievementToast", "power_controls:userinterface.disableDebugEntityIdTags").contains(key); }
   private static JsonElement encode(String key, Object value) { return inverted(key) ? new JsonPrimitive(!(Boolean)value) : Catalog.JSON.toJsonTree(value); }
 
   private void visit(String prefix, ConfigCategoryHandler category) {

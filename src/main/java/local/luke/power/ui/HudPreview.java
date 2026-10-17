@@ -27,7 +27,7 @@ final class HudPreview {
   private final InfoHudSettings.Cluster[] clusters = new InfoHudSettings.Cluster[4];
   private StatusSettings status;
   private boolean sampledItem;
-  boolean suppressDebug;
+  boolean suppressDebug, showToast = true, showChat = true, showTweaks = true;
   private final DebugPreview debugPreview;
   HudPreview(SettingsDraft draft) {
     this.draft = draft;
@@ -50,7 +50,8 @@ final class HudPreview {
     GL11.glBindTexture(GL11.GL_TEXTURE_2D, mc.textureManager.getTextureId(path)); GL11.glColor4f(1, 1, 1, 1);
     screen.drawTexture(x, y, u, v, w, h);
   }
-  void draw(UiScreen screen, Minecraft mc, int width, int height, int scenario, String selected) {
+  void draw(UiScreen screen, Minecraft mc, int width, int height, int scenario, String selected) { draw(screen, mc, width, height, scenario, selected, false); }
+  void draw(UiScreen screen, Minecraft mc, int width, int height, int scenario, String selected, boolean background) {
     elements.clear();
     if (!sampledItem) {
       sampledItem = true;
@@ -109,7 +110,7 @@ final class HudPreview {
       screen.text("Inventory", 99, height - 24, 0xffffff);
       elements.add(new Element("layout", "Controller prompts", 10, height - 30, 145, 20, null, null));
     }
-    if (scenario != 2 && bool(HudEditorSettings.TOAST)) {
+    if (showToast && bool(HudEditorSettings.TOAST)) {
       int x = width - 160;
       texture(screen, mc, "/achievement/bg.png", x, 0, 96, 202, 160, 32);
       screen.text("Achievement get!", x + 30, 7, 0xffff00);
@@ -117,7 +118,7 @@ final class HudPreview {
       icons.draw(screen, mc, samples.get(2), x + 8, 8);
       elements.add(new Element("layout", "Achievement toast", x, 0, 160, 32, null, null));
     }
-    if (scenario != 2 || selected.equals("chat")) {
+    if (showChat) {
       String[] messages = {"<Player> Hello!", "<Player> Welcome back."};
       int count = Math.min(messages.length, Math.max(0, integer(HudEditorSettings.HUD + "chatHistorySize")));
       for (int i = 0; i < count; i++) {
@@ -146,7 +147,7 @@ final class HudPreview {
           textWidth * state.textSize, rows * 10 * state.textSize, prefix + "offsetX", prefix + "offsetY", !visible));
     }
     StatusSettings status = status();
-    if (status.enabled && status.opacity > 0) {
+    if (showTweaks && status.enabled && status.opacity > 0) {
       List<String> lines = new ArrayList<>();
       for (var tweak : local.luke.power.input.TweakIndicators.Tweak.values()) if (status.includes(tweak))
         lines.add(switch (tweak) { case AUTO_WALK -> "Auto-walk"; case AUTO_MINE -> "Auto-mine";
@@ -165,6 +166,7 @@ final class HudPreview {
       if (bool(versionPrefix + "unlicensedCopy")) screen.text("Unlicensed copy", 2, 12, 0xffffff);
       elements.add(new Element("version", "Version label", 2, 2, Math.max(8, mc.textRenderer.getWidth(version)), bool(versionPrefix + "unlicensedCopy") ? 20 : 10, null, null));
     }
+    if (scenario == 2 && background && bool("power_controls:userinterface.disableDebugEntityIdTags")) EntityTagPreview.draw(screen, mc, width, height);
     if (scenario == 2 && !suppressDebug) debug(screen, mc, width);
     for (Element element : elements) if (!element.id.equals("layout") && element.id.equals(selected) && !element.hidden) {
       int x = (int)element.x - 2, y = (int)element.y - 2, r = (int)Math.ceil(element.x + element.width) + 2, b = (int)Math.ceil(element.y + element.height) + 2;

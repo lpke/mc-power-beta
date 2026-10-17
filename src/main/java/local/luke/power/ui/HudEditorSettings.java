@@ -51,7 +51,7 @@ public final class HudEditorSettings {
     return switch (id) { case "chat" -> "Chat"; case "tweaks" -> "Active tweaks"; case "version" -> "Version label"; default -> "F3 information"; };
   }
   private static boolean internalLogo(Setting s) { return s.id.equals("logo.selectedPreset") || s.id.equals("logo.retroBase"); }
-  public static boolean internal(Setting s) { return internalLogo(s) || s.id.equals(COLOURS) || s.id.equals("infoHud.selectedCluster") || LEGACY_DEBUG.contains(s.id); }
+  public static boolean internal(Setting s) { return internalLogo(s) || s.id.equals("interface.debugRightOrder") || s.id.equals(COLOURS) || s.id.equals("infoHud.selectedCluster") || LEGACY_DEBUG.contains(s.id); }
   public static boolean lettering(Setting s) {
     return s.id.startsWith("logo.logo.") || s.id.startsWith("logo.blocks.") || s.id.equals("logo.presets") || s.id.equals("logo.swatches") || internalLogo(s);
   }

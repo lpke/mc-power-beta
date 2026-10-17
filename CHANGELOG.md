@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [2.4.1] - 2026-10-18
+
+- Fix F3 drag releases and save both information columns, with cross-column moves, gap rows and Undo shared by the preview and live HUD.
+- Start HUD previews with the forest background enabled, add independent toast, chat and active-tweaks preview toggles, and remember the editor section and scroll position.
+- Preview F3 entity ID tags over a mob in the forest scene, and expose Show F3 entity id tags with an On default.
+- Place general Interface settings above the groups, fix the HUD editor search heading, restore black world selections and hide Rename beneath its inline input.
+- Add Clear logo with Undo, compact the lettering editor's utility buttons and open photo mode slightly closer.
+- Prepare hotbar recovery snapshots while selecting a row, so ready swaps apply on release with durable backup and inventory validation retained.
+- Preserve music pause through dimension and menu transitions, including custom menu music.
+
 ## [2.4.0] - 2026-10-17
 
 - Reorder individual F3 information lines by dragging them in the HUD preview, leave blank rows between them, control each line's visibility and change the text size.

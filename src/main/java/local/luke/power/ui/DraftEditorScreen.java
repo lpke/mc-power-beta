@@ -14,10 +14,10 @@ abstract class DraftEditorScreen extends UiScreen {
   protected final InlineValueEditor inline = new InlineValueEditor();
   protected String error = "";
   private final ScrollBar bar = new ScrollBar();
-  private double scroll;
+  protected double scroll;
   private Setting slider;
   private boolean resetPrompt;
-  private final Set<String> collapsed = new HashSet<>();
+  protected final Set<String> collapsed = new HashSet<>();
   private final HoverDelay hover = new HoverDelay();
 
   DraftEditorScreen(PowerOptionsScreen parent, SettingsDraft draft) { this.parent = parent; this.draft = draft; }
@@ -47,6 +47,8 @@ abstract class DraftEditorScreen extends UiScreen {
   protected String label(Setting s) { return s.label; }
   protected String display(Setting s) { return s.display(); }
   protected boolean usesSlider(Setting s) { return s.slider(); }
+  protected void resetValue(Setting s) { s.reset(); }
+  protected boolean atDefault(Setting s) { return s.value.equals(s.defaultValue); }
   protected boolean resettable(Setting s) { return false; }
   protected String controlGroup(Setting s) { return ""; }
   protected String groupKey(String group) { return group; }
@@ -149,10 +151,13 @@ abstract class DraftEditorScreen extends UiScreen {
     if (!modal() && wheel != 0 && inside(x, y, controlsLeft(), controlsTop(), controlsSpan(), controlsBottom() - controlsTop()))
       scroll = Math.max(0, Math.min(track().maximum(), scroll - Math.signum(wheel) * 46));
   }
+  protected List<String> extraFooterLabels() { return extraFooterLabel().isEmpty() ? List.of() : List.of(extraFooterLabel()); }
+  protected void extraFooterAction(int index) { extraFooterAction(); }
+  protected int utilityPadding() { return 76; }
   private record Footer(String label, int x, int width, Runnable action, boolean enabled) {}
   private List<Footer> footer() {
     List<String> labels = new ArrayList<>(List.of("Undo", resetLabel()));
-    if (!extraFooterLabel().isEmpty()) labels.add(extraFooterLabel());
+    labels.addAll(extraFooterLabels());
     labels.addAll(List.of("Cancel", "Done"));
     int[] sizes = new int[labels.size()]; int total = 0;
     for (int i = 0; i < sizes.length; i++) { sizes[i] = Math.max(36, textRenderer.getWidth(labels.get(i)) + 12); total += sizes[i]; }
@@ -160,15 +165,16 @@ abstract class DraftEditorScreen extends UiScreen {
     if (total > room) for (int i = 0; i < sizes.length; i++) sizes[i] = Math.max(10, sizes[i] * room / total);
     else {
       int extra = Math.min(76, (room - total) / sizes.length);
-      for (int i = 0; i < sizes.length; i++) sizes[i] += extra;
+      for (int i = 0; i < sizes.length; i++) sizes[i] += i < sizes.length - 2 ? Math.min(extra, utilityPadding()) : extra;
     }
     List<Footer> buttons = new ArrayList<>(); int x = left();
     for (int i = 0; i < sizes.length; i++) {
       if (i == sizes.length - 2) x = right() - sizes[i] - sizes[i + 1] - 4;
       String label = labels.get(i);
+      int extraIndex = i - 2;
       Runnable action = i == 0 ? this::undo
           : i == 1 ? () -> { stopGesture(); resetPrompt = true; }
-          : i == sizes.length - 2 ? this::leave : i == sizes.length - 1 ? this::save : this::extraFooterAction;
+          : i == sizes.length - 2 ? this::leave : i == sizes.length - 1 ? this::save : () -> extraFooterAction(extraIndex);
       buttons.add(new Footer(label, x, sizes[i], action, i != 0 || canUndo())); x += sizes[i] + 4;
     }
     return buttons;
@@ -177,8 +183,8 @@ abstract class DraftEditorScreen extends UiScreen {
     stopGesture(); slider = null; bar.release(); inline.cancel(); error = "";
     draft.checkpoint();
     if (offersPositionReset()) {
-      List<Setting> scope = all ? allResetSettings() : controls();
-      scope.stream().filter(s -> !positionOnly || HudEditorSections.position(s)).forEach(Setting::reset);
+      List<Setting> scope = all ? allResetSettings() : positionOnly ? positionSettings() : controls();
+      scope.stream().filter(s -> !positionOnly || HudEditorSections.position(s)).forEach(this::resetValue);
     } else reset();
     afterEdit(); resetFinished(); resetPrompt = false;
   }
@@ -190,8 +196,8 @@ abstract class DraftEditorScreen extends UiScreen {
       List<String> labels = List.of("All settings", "All positions", resetSubject() + " settings", resetSubject() + " positions");
       for (int i = 0; i < labels.size(); i++) {
         boolean positions = i % 2 == 1, all = i < 2;
-        List<Setting> scope = all ? allResetSettings() : controls();
-        boolean enabled = scope.stream().anyMatch(s -> (!positions || HudEditorSections.position(s)) && !s.value.equals(s.defaultValue));
+        List<Setting> scope = all ? allResetSettings() : positions ? positionSettings() : controls();
+        boolean enabled = scope.stream().anyMatch(s -> (!positions || HudEditorSections.position(s)) && !atDefault(s));
         buttons.add(new ResetButton(labels.get(i), width / 2 - w - 2 + i % 2 * (w + 4), top + i / 2 * 24,
             w, () -> performReset(positions, all), enabled));
       }
@@ -231,8 +237,8 @@ abstract class DraftEditorScreen extends UiScreen {
         if (rowY < rowsTop || rowY + 18 > controlsBottom() || y >= rowY + 18 || x < controlX()) continue;
         Setting s = row.setting;
         if (resettable(s) && x >= resetX()) {
-          if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !s.value.equals(s.defaultValue)) {
-            draft.checkpoint(); error = ""; s.reset(); valueChanged(s);
+          if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !atDefault(s)) {
+            draft.checkpoint(); error = ""; resetValue(s); valueChanged(s);
             click();
           }
           return;
@@ -266,7 +272,7 @@ abstract class DraftEditorScreen extends UiScreen {
     else if (ColourScreen.accepts(s)) colourButton(s.value.getAsString(), controlX(), y, w, mx, my);
     else if (usesSlider(s)) slider(fit(display(s), w - 8), controlX(), y, w, mx, my, (s.value.getAsDouble() - s.min) / Math.max(.0001, s.max - s.min));
     else button(fit(display(s), w - 8), controlX(), y, w, 18, mx, my, true);
-    if (resettable(s)) button("R", resetX(), y, 20, 18, mx, my, !s.value.equals(s.defaultValue));
+    if (resettable(s)) button("R", resetX(), y, 20, 18, mx, my, !atDefault(s));
   }
   public void render(int mx, int my, float delta) {
     int pointerX = mx, pointerY = my;

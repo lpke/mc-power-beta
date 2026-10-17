@@ -9,7 +9,7 @@ public final class DebugTextRenderer {
   private DebugTextRenderer() {}
   public static void draw(Minecraft mc, List<DebugOverlay.Line> lines, double size, int color) {
     for (var line : lines) {
-      if (line.id().isEmpty() || size == 1) mc.textRenderer.drawWithShadow(line.text(), line.x(), line.y(), color);
+      if (size == 1) mc.textRenderer.drawWithShadow(line.text(), line.x(), line.y(), color);
       else {
         GL11.glPushMatrix();
         try {

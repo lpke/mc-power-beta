@@ -146,6 +146,15 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
     if (renderer != null && (replaying || draft.get("logo.logo.animation.enabled").value.getAsBoolean())) { renderer.tick(); if (renderer.settled()) replaying = false; }
   }
   protected String resetLabel() { return "Reset logo"; }
+  protected int utilityPadding() { return 20; }
+  protected List<String> extraFooterLabels() { return List.of("Clear logo", "Play animation"); }
+  protected void extraFooterAction(int index) {
+    if (index == 1) { extraFooterAction(); return; }
+    draft.checkpoint();
+    JsonArray blank = new JsonArray(); int width = TitleTiles.width(lines());
+    for (int row = 0; row < lines().size(); row++) blank.add(" ".repeat(width));
+    draft.get(LINES).value = blank; markCustom(); afterEdit();
+  }
   protected String extraFooterLabel() { return "Play animation"; }
   protected void extraFooterAction() { if (renderer != null) { renderer.replay(); replaying = true; } }
   protected void resetFinished() { extraFooterAction(); }

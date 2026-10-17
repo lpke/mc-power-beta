@@ -2,7 +2,7 @@ package local.luke.power.ui;
 
 import java.util.*;
 
-/** Stable identities for native and bundled left-side F3 providers. */
+/** Stable identities for native and bundled F3 providers. */
 public enum DebugLines {
   VERSION("version", "Version and frame rate", "Minecraft Beta 1.7.3 (120 fps, 0 chunk updates)", ""),
   TERRAIN("terrain", "Terrain statistics", "C: 256/1024. F: 64, O: 12, E: 2", ""),
@@ -24,7 +24,10 @@ public enum DebugLines {
   MUSIC("music", "Current music", "Music: C418 - Sweden", "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebug"),
   CULL_TIME("cullingTime", "Culling pass time", "[Culling] Last pass: 1ms", ""),
   CULL_BLOCKS("cullingBlocks", "Block entity culling counts", "[Culling] Rendered Block Entities: 4 Skipped: 12", ""),
-  CULL_ENTITIES("cullingEntities", "Entity culling counts", "[Culling] Rendered Entities: 8 Skipped: 24", "");
+  CULL_ENTITIES("cullingEntities", "Entity culling counts", "[Culling] Rendered Entities: 8 Skipped: 24", ""),
+  USED_MEMORY("usedMemory", "Used memory", "Used memory: 35% (350MB) of 1000MB", ""),
+  ALLOCATED_MEMORY("allocatedMemory", "Allocated memory", "Allocated memory: 50% (500MB)", ""),
+  JAVA("java", "Java architecture", "64-bit Java", "");
 
   public final String id, label, sample;
   private final String setting;
@@ -33,10 +36,13 @@ public enum DebugLines {
   }
   public String setting() { return setting.isEmpty() ? "interface.debugLines." + id : setting; }
   public boolean ownsSetting() { return setting.isEmpty(); }
+  public boolean right() { return this == USED_MEMORY || this == ALLOCATED_MEMORY || this == JAVA; }
   public boolean culling() { return id.startsWith("culling"); }
   public static DebugLines find(String id) { for (var line : values()) if (line.id.equals(id)) return line; return null; }
   public static String identify(String text, int x, int y) {
-    if (text.startsWith("Used memory:") || text.startsWith("Allocated memory:") || text.equals("64-bit Java") || x > 4) return "";
+    if (text.startsWith("Used memory:")) return USED_MEMORY.id;
+    if (text.startsWith("Allocated memory:")) return ALLOCATED_MEMORY.id;
+    if (text.equals("64-bit Java")) return JAVA.id;
     if (text.startsWith("Minecraft ") || text.startsWith("Power Beta ")) return VERSION.id;
     if (text.startsWith("C:")) return TERRAIN.id;
     if (text.startsWith("E:")) return ENTITIES.id;
