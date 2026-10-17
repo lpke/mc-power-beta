@@ -9,8 +9,9 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
 - `release-242 ui` checks Interface grouping, responsive toolbar rows, preview-click
-  highlights, draft isolation and centered creation rules. After four seconds,
-  `release-242 expiry` checks the real highlight timeout. `release-242 audio` checks
+  selection, draft isolation and centered creation rules. After five seconds,
+  `release-242 selection` checks persistent selection and deselection through empty
+  preview space, another element, setting labels and controls. `release-242 audio` checks
   waiting-track stability through 80 settings edits, exclusions and playback.
   After `new-world` and `title`, `release-242 saved-rules` checks centered saved-world
   rules without metadata writes. Use a muted disposable client and silent output.

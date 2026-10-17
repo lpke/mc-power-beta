@@ -41,6 +41,7 @@ abstract class DraftEditorScreen extends UiScreen {
   protected String hoverHelp(int x, int y) { return ""; }
   protected boolean toolbarClick(int x, int y, int button) { return false; }
   protected void previewClick(int x, int y, int button) {}
+  protected void settingClicked(Setting setting) {}
   protected void stopGesture() {}
   protected void finishGesture(int x, int y, int button) {}
   protected boolean editorKey(char c, int key) { return false; }
@@ -242,8 +243,10 @@ abstract class DraftEditorScreen extends UiScreen {
           return;
         }
         int rowsTop = sticky == null ? controlsTop() : Math.max(controlsTop(), sticky.y() + sticky.height());
-        if (rowY < rowsTop || rowY + 18 > controlsBottom() || y >= rowY + 18 || x < controlX()) continue;
+        if (rowY < rowsTop || rowY + 18 > controlsBottom() || y >= rowY + 18) continue;
         Setting s = row.setting;
+        settingClicked(s);
+        if (x < controlX()) continue;
         if (resettable(s) && x >= resetX()) {
           if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !atDefault(s)) {
             draft.checkpoint(); error = ""; resetValue(s); valueChanged(s);

@@ -22,7 +22,6 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private int toolbarWidth = -1;
   private int toolbarSelectorWidth = -1;
   private String highlightedElement = "", highlightedSetting = "";
-  private long highlightUntil;
   private double pressX, pressY;
   private int startX, startY;
 
@@ -162,7 +161,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   private void select(String id) {
     boolean changed = !selected.equals(id);
-    if (changed) { HudEditorMemory.scrolls.put(selected, scroll); highlightUntil = 0; }
+    clearHighlight();
+    if (changed) HudEditorMemory.scrolls.put(selected, scroll);
     selected = id; selecting = false; stopGesture();
     if (id.startsWith("native.")) lastNativeIndex = nativeIndex();
     if (changed) { controlsChanged(); scroll = HudEditorMemory.scrolls.getOrDefault(id, 0d); }
@@ -264,7 +264,6 @@ public final class HudEditorScreen extends DraftEditorScreen {
       if (!settingId.isEmpty()) {
         select("layout"); revealControl(draft.get(settingId));
         highlightedElement = element.id(); highlightedSetting = settingId;
-        highlightUntil = System.nanoTime() + 4_000_000_000L;
         return;
       }
       if (!element.id().equals(selected)) { select(element.id()); return; }
@@ -365,7 +364,9 @@ public final class HudEditorScreen extends DraftEditorScreen {
     return true;
   }
   protected String hint() { return ""; }
-  private boolean highlighting() { return selected.equals("layout") && System.nanoTime() < highlightUntil; }
+  private void clearHighlight() { highlightedElement = ""; highlightedSetting = ""; }
+  private boolean highlighting() { return selected.equals("layout") && !highlightedElement.isEmpty(); }
+  protected void settingClicked(Setting setting) { clearHighlight(); }
   protected void renderControl(Setting s, int y, int mx, int my) {
     super.renderControl(s, y, mx, my);
     if (highlighting() && s.id.equals(highlightedSetting)) {

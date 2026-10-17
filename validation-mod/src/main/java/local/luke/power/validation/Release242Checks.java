@@ -18,6 +18,7 @@ import net.minecraft.client.gui.screen.Screen;
 final class Release242Checks {
   private static final Path REPORT = Path.of("power-beta-data/reports/release-242");
   private static HudEditorScreen highlighted;
+  private static long selectedAt;
   private static Object audio(String name, Object... args) throws Exception {
     for (var method : AudioController.class.getDeclaredMethods())
       if (method.getName().equals(name) && method.getParameterCount() == args.length) {
@@ -30,12 +31,9 @@ final class Release242Checks {
   }
   static void run(Minecraft mc, String action) throws Exception {
     Files.createDirectories(REPORT);
-    if (action.equals("expiry")) {
-      check(highlighted != null && !(boolean)call(highlighted, "highlighting"), "highlight did not expire after four seconds");
-      shot(mc, highlighted, "highlight-expired"); log("PASS highlight expired on the real clock"); return;
-    }
     failures = 0;
     if (action.equals("ui")) ui(mc);
+    else if (action.equals("selection")) selection(mc);
     else if (action.equals("audio")) music(mc);
     else if (action.equals("saved-rules")) {
       check(mc.world == null, "return to title before editing saved rules");
@@ -92,7 +90,7 @@ final class Release242Checks {
         shot(mc,hud,"hud-"+size[0]+"x"+size[1]);
       }
     });
-    test("General preview clicks reveal their setting and outline only the clicked item for four seconds", () -> {
+    test("General preview clicks reveal their setting and select only the clicked item", () -> {
       highlighted = new HudEditorScreen(options,HudEditorSettings.ENTRY); open(mc,highlighted,960,540);
       var draft = draft(highlighted); Object preview = get(highlighted,"preview");
       for(String id : List.of("power_hud:config.disableCrosshair","power_hud:config.drawXboxXAndYButtons","power_controls:userinterface.hideAchievementToast"))
@@ -100,26 +98,61 @@ final class Release242Checks {
       var before = draft.snapshot(); byte[] disk = Files.readAllBytes(PowerConfig.path());
       for(var entry : Map.of("crosshair","power_hud:config.disableCrosshair","controller","power_hud:config.drawXboxXAndYButtons","toast","power_controls:userinterface.hideAchievementToast").entrySet()) {
         call(highlighted,"select","debug"); ((Set<String>)get(highlighted,"collapsed")).add("layout/Visibility");
-        highlighted.render(-1,-1,0);
-        Object element = ((List<?>)call(preview,"elements")).stream().filter(e -> { try { return call(e,"id").equals(entry.getKey()); } catch(Exception ex) { throw new RuntimeException(ex); } }).findFirst().orElseThrow();
-        double scale = ((Number)call(highlighted,"scale")).doubleValue();
-        int x = (int)Math.round(((Number)call(highlighted,"canvasX")).doubleValue() + (n(element,"x")+n(element,"width")/2d)*scale);
-        int y = (int)Math.round(((Number)call(highlighted,"canvasY")).doubleValue() + (n(element,"y")+n(element,"height")/2d)*scale);
-        click(highlighted,x,y,0);
+        clickElement(entry.getKey());
         check(get(highlighted,"selected").equals("layout") && get(highlighted,"highlightedSetting").equals(entry.getValue()), "click missed " + entry.getKey() + ": selected=" + get(highlighted,"selected"));
         check(get(highlighted,"highlightedElement").equals(entry.getKey()) && (boolean)call(highlighted,"highlighting"), "preview outline missing");
-        long remaining = ((Number)get(highlighted,"highlightUntil")).longValue()-System.nanoTime();
-        check(remaining>3_500_000_000L && remaining<=4_000_000_000L, "highlight duration differs");
         check(!((Set<?>)get(highlighted,"collapsed")).contains("layout/Visibility"), "highlighted setting remains collapsed");
         int row = (int)call(highlighted,"controlY",draft.get(entry.getValue()));
         check(row>=n(highlighted,"controlsTop")+20 && row+19<=n(highlighted,"controlsBottom"), "highlighted setting offscreen");
         shot(mc,highlighted,"highlight-"+entry.getKey());
       }
+      selectedAt = System.nanoTime();
       check(before.equals(draft.snapshot()) && Arrays.equals(disk,Files.readAllBytes(PowerConfig.path())), "highlight changed settings");
     });
     PowerOptionsScreen.openCreationRules(mc,options,new CreationRules(RulePresets.survival(),RulePresets.cheats()));
     rules(mc,(PowerOptionsScreen)mc.currentScreen,"creation");
     mc.setScreen(highlighted);
+  }
+  private static void clickElement(String id) throws Exception {
+    highlighted.render(-1,-1,0);
+    Object preview = get(highlighted,"preview");
+    Object element = ((List<?>)call(preview,"elements")).stream().filter(e -> { try { return call(e,"id").equals(id); } catch(Exception ex) { throw new RuntimeException(ex); } }).findFirst().orElseThrow();
+    double scale = ((Number)call(highlighted,"scale")).doubleValue();
+    int x = (int)Math.round(((Number)call(highlighted,"canvasX")).doubleValue() + (n(element,"x")+n(element,"width")/2d)*scale);
+    int y = (int)Math.round(((Number)call(highlighted,"canvasY")).doubleValue() + (n(element,"y")+n(element,"height")/2d)*scale);
+    click(highlighted,x,y,0);
+  }
+  private static void selection(Minecraft mc) throws Exception {
+    check(highlighted != null,"run ui first");
+    highlighted.init(mc,960,540);
+    var draft = draft(highlighted); var before = draft.snapshot(); byte[] disk = Files.readAllBytes(PowerConfig.path());
+    test("preview selection persists beyond the former four-second timeout", () -> {
+      check(System.nanoTime()-selectedAt>=5_000_000_000L,"wait five seconds after ui");
+      check((boolean)call(highlighted,"highlighting"),"selection expired");
+      shot(mc,highlighted,"selection-retained");
+    });
+    test("empty preview space deselects even while General remains selected", () -> {
+      click(highlighted,n(highlighted,"previewLeft")+2,n(highlighted,"previewTop")+2,0);
+      check(get(highlighted,"selected").equals("layout") && !(boolean)call(highlighted,"highlighting"),"blank preview retained selection");
+      shot(mc,highlighted,"selection-cleared");
+    });
+    test("another preview item replaces or clears the General selection", () -> {
+      clickElement("crosshair"); clickElement("toast");
+      check(get(highlighted,"highlightedElement").equals("toast"),"another General item did not replace selection");
+      clickElement("combined");
+      check(get(highlighted,"selected").equals("combined") && !(boolean)call(highlighted,"highlighting"),"another HUD item retained General selection");
+    });
+    test("setting labels and controls deselect without leaking editor changes", () -> {
+      var setting = draft.get("power_hud:hudpositions.putStatusBarIconsBelowHotbar");
+      for(boolean control : new boolean[]{false,true}) {
+        clickElement("crosshair"); call(highlighted,"revealControl",setting);
+        int y = (int)call(highlighted,"controlY",setting);
+        click(highlighted,n(highlighted,control ? "controlX" : "controlsLeft")+5,y+6,0);
+        check(!(boolean)call(highlighted,"highlighting"),"setting click retained selection");
+        if(control) call(highlighted,"undo");
+      }
+      check(before.equals(draft.snapshot()) && Arrays.equals(disk,Files.readAllBytes(PowerConfig.path())),"selection handling leaked settings");
+    });
   }
   private static void music(Minecraft mc) throws Exception {
     AudioSettings original = AudioConfig.copy(); float volume = mc.options.musicVolume;
