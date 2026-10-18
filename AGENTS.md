@@ -67,6 +67,7 @@
   explicit overrides and fresh-install JSON must agree. Never copy personal controls,
   paths, music libraries, HUD layouts or world IDs into defaults. Ore vein mining
   starts with ores only; Creative/Spectator use modern response and standard speed.
+  All three flight modes default sprint activation to Toggle in every base.
   All bases start at GUI scale 4. `DefaultBases` resolves stable setting IDs against the explicit
   `default-bases.json` overrides; retain each setting's shared fallback default
   when copying drafts. Use as base changes only reset targets, never setting values.
@@ -129,7 +130,9 @@
   and photo mode use the daylight clock. Sleep must wake players without advancing
   frozen daylight or clearing frozen weather. Test normal and accelerated sleep,
   scheduled updates, pause/resume, save/reload and access permissions being disabled.
-- Numeric display units do not change stored values. Duration editors use seconds;
+- Numeric display units do not change stored values. Percentages belong in slider
+  values, not setting names; exact-entry fields retain plain numeric text and convert
+  through the same display units. Duration editors use seconds;
   processing budgets remain per tick. Validate item/filter IDs before accepting
   drafts, and keep temporary errors outside row layout.
 - Shift-double-click transfers matching native item data from the clicked inventory,
@@ -457,7 +460,8 @@
   resets. Item-name previews use the shared native message position only when enabled.
 
 - HUD editor layout shares one geometry model for controls, scrollbars, dividers and
-  preview input. Small layouts can hide the settings pane for that visit; keep its
+  preview input. Small layouts can hide either pane for that visit, keeping at least
+  one visible. Hiding preview cancels its input and gives settings the space; keep its
   scroll and selection, nested F3 drafts and modal ownership intact. Wide layouts
   retain their existing controls. Preview coordinates retain the window aspect ratio in both split
   orientations. Only the selected hidden info cluster has an empty outline and hit

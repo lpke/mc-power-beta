@@ -50,11 +50,13 @@ public final class Setting {
     JsonObject metadata = Catalog.metadata(id);
     this.displayDivisor = Catalog.number(metadata, "displayDivisor", 1);
     this.displayPrecision = (int)Catalog.number(metadata, "displayPrecision", -1);
-    this.unit = Catalog.text(metadata, "unit", "");
+    String title = Catalog.text(metadata, "label", label).replace(", %", " %");
+    this.unit = Catalog.text(metadata, "unit", title.endsWith(" %") || id.equals("audio.master")
+        || id.startsWith("audio.category.") || id.startsWith("audio.sound.") ? "%" : "");
     this.control = Catalog.text(metadata, "control", "slider");
     this.page = Catalog.text(metadata, "page", page);
     this.group = Catalog.text(metadata, "group", group);
-    String title = Catalog.text(metadata, "label", label).replace(", %", " %");
+    if (unit.equals("%") && title.endsWith(" %")) title = title.substring(0, title.length() - 2);
     this.label = SettingScope.label(id, backend, this.group, title);
     this.description = Tooltips.description(id, title, Catalog.text(metadata, "description", description));
     this.kind = kind;
@@ -208,7 +210,7 @@ public final class Setting {
           v.isJsonArray()
               ? v.getAsJsonArray().size() + " entries"
               : v.getAsJsonObject().size() + " entries";
-      case INTEGER, DECIMAL -> numericText(v.getAsBigDecimal());
+      case INTEGER, DECIMAL -> numericText(v.getAsBigDecimal()) + (unit.equals("%") ? "%" : "");
       default -> v.getAsString();
     };
   }

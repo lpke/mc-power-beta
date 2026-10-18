@@ -16,7 +16,12 @@ record HudEditorLayout(boolean horizontal, int controlsLeft, int controlsTop, in
     return at(width, height, split, top, false);
   }
   static HudEditorLayout at(int width, int height, int split, int top, boolean hidden) {
-    int left = 10, right = width - 10, bottom = height - 53;
+    return at(width, height, split, top, hidden, false, height - 53);
+  }
+  static HudEditorLayout at(int width, int height, int split, int top, boolean hidden, boolean previewHidden, int bottom) {
+    int left = 10, right = width - 10;
+    if (previewHidden && compact(width, height))
+      return new HudEditorLayout(horizontal(width, height), left, top, right - left, bottom, left, bottom, right - left, bottom);
     if (hidden && compact(width, height))
       return new HudEditorLayout(horizontal(width, height), left, top, right - left, top, left, top, right - left, bottom);
     if (horizontal(width, height)) {

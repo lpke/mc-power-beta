@@ -2,8 +2,8 @@
   "power_beta": {
     "audio.gapMaxSeconds": 350,
     "audio.gapMinSeconds": 100,
-    "creative.spectatorSprintToggle": false,
-    "creative.sprintToggle": false,
+    "creative.spectatorSprintToggle": true,
+    "creative.sprintToggle": true,
     "gameplay.axesSlashLeaves": true,
     "gameplay.leavesDropSaplingsInCreative": false,
     "gameplay.torchShovel": true,
@@ -36,7 +36,9 @@
     "visual.softSnow": true,
     "visual.underwaterDarkness": 75,
     "visual.underwaterDarknessOutside": 95,
-    "visual.underwaterFogDensity": 30
+    "visual.underwaterFogDensity": 30,
+    "power_camera:config.sprintToggle": true,
+    "power_camera:config.speed": 11.977777777777783
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -214,7 +216,10 @@
     "visual.limitCapeRotation": false,
     "visual.narrowUnderwaterFov": false,
     "visual.shiftClickIntoCraftingGrid": false,
-    "visual.swapEquipment": false
+    "visual.swapEquipment": false,
+    "creative.sprintToggle": true,
+    "creative.spectatorSprintToggle": true,
+    "power_camera:config.sprintToggle": true
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -353,6 +358,9 @@
     "tweaks.slabs.enabled": false,
     "visual.containerCarry": false,
     "visual.limitCapeRotation": true,
-    "visual.narrowUnderwaterFov": false
+    "visual.narrowUnderwaterFov": false,
+    "creative.sprintToggle": true,
+    "creative.spectatorSprintToggle": true,
+    "power_camera:config.sprintToggle": true
   }
 }

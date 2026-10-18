@@ -63,11 +63,15 @@ class DefaultBasesTest {
     assertTrue(panorama.get("blurBackground").getAsBoolean());
     assertTrue(panorama.get("enablePanorma").getAsBoolean());
     for (var base : DefaultBases.Base.values()) {
+      for (String id : List.of("creative.sprintToggle", "creative.spectatorSprintToggle", "power_camera:config.sprintToggle"))
+        assertTrue(DefaultBases.value(base,id,new JsonPrimitive(false)).getAsBoolean(),base + " " + id);
       assertEquals(4, DefaultBases.value(base, "native.guiScale", new JsonPrimitive(4)).getAsInt());
       assertTrue(DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.blurBackground", blurDefault).getAsBoolean());
       assertEquals(base == DefaultBases.Base.POWER_BETA ? "b1_8_1" : "b1_7_3",
           DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.panoramaFolder", new JsonPrimitive("b1_7_3")).getAsString());
     }
+    assertTrue(PowerConfig.section("creative").get("sprintToggle").getAsBoolean());
+    assertTrue(PowerConfig.section("creative").get("spectatorSprintToggle").getAsBoolean());
   }
   @Test void powerBetaKeepsOresAndStandardControlsWhileUsingClearerWater() throws Exception {
     ConfigDefaults.prepare(game);

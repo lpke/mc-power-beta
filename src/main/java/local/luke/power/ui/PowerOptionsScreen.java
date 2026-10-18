@@ -464,8 +464,7 @@ public final class PowerOptionsScreen extends UiScreen {
           ? changedOnly || s.page.equals(page)
           : scores.getOrDefault(s.id, FuzzySearch.NONE) < FuzzySearch.NONE)))
         groups.computeIfAbsent(query.isEmpty() && !changedOnly ? s.group
-            : s.id.equals(HudEditorSettings.ENTRY) ? "Interface"
-            : HudEditorSettings.contains(s) ? "Interface / HUD editor / " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode))
+            : HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY) ? "Interface / HUD editor / " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode))
             : s.group.isEmpty() ? s.page : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
     }
     List<Row> next = new ArrayList<>();
@@ -570,6 +569,7 @@ public final class PowerOptionsScreen extends UiScreen {
     valueEditor.cancel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     if (!isolatedRules() && x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
+    else if (page.equals("Defaults")) { defaultsPanel.wheel(wheel, left(), span()); return; }
     else if (libraryVisible()) library.wheel(wheel);
     else scroll -= Math.signum(wheel) * 48;
     layout();
@@ -739,7 +739,7 @@ public final class PowerOptionsScreen extends UiScreen {
         if (!SettingAccess.reason(session, s).isEmpty()) return;
         int controlY = ry + SettingRows.buttonOffset(span());
         if (y < controlY) return;
-        if (x >= right() - 34) {
+        if (!s.id.equals(HudEditorSettings.ENTRY) && x >= right() - 34) {
           click();
           s.reset();
           if (s.id.equals("interface.debugOrder")) session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).forEach(Setting::reset);
@@ -760,7 +760,7 @@ public final class PowerOptionsScreen extends UiScreen {
           else { click(); if (s.kind == Setting.Kind.KEY) related(s); else linkedControls(s); }
           return;
         }
-        if (x < mainControlLeft(r) || x >= right() - 38) return;
+        if (x < mainControlLeft(r) || x >= controlEnd(s)) return;
         if (s.id.equals(HudEditorSettings.ENTRY) || HudEditorSettings.lettering(s) || ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
         else if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0 && s.slider()) {
@@ -1028,6 +1028,7 @@ public final class PowerOptionsScreen extends UiScreen {
             ? "Mouse " + (code + 101)
             : Objects.toString(Keyboard.getKeyName(code), "Key " + code));
   }
+  private int controlEnd(Setting s) { return right() - (s.id.equals(HudEditorSettings.ENTRY) ? 14 : 38); }
 
   private static String modifierLabel(int mask) {
     return ((mask & Chord.CTRL) != 0 ? "Ctrl+" : "")
@@ -1208,7 +1209,7 @@ public final class PowerOptionsScreen extends UiScreen {
           y + SettingRows.labelOffset(span()), 0xe8a0a0);
       List<Setting> conflicts = conflicts(s);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
-      int valueEnd = right() - 38;
+      int valueEnd = controlEnd(s);
       if (editable && valueEditor.editing(s))
         valueEditor.render(this, controlLeft, cy, valueEnd - controlLeft, mx, listMouseY, rowsTop, bottom());
       else if (s.slider() && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
@@ -1221,14 +1222,14 @@ public final class PowerOptionsScreen extends UiScreen {
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, editable);
       boolean defaultValue = s.value.equals(s.defaultValue) && (!s.id.equals("interface.debugOrder")
           || session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).allMatch(value -> value.value.equals(value.defaultValue)));
-      button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !defaultValue);
+      if (!s.id.equals(HudEditorSettings.ENTRY)) button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !defaultValue);
       if (customise(s)) button("Customise", controlLeft(row), cy, 62, 18, mx, listMouseY, editable);
       else if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, listMouseY, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
         if (!editable) tip = Tooltips.setting(s, lock);
-        else if (mx >= right() - 34) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
+        else if (!s.id.equals(HudEditorSettings.ENTRY) && mx >= right() - 34) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
         else if (!conflicts.isEmpty() && inside(mx, listMouseY, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {

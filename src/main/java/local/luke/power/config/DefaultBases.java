@@ -12,9 +12,9 @@ import net.minecraft.client.Minecraft;
 /** Reset targets are independent of the currently applied settings. */
 public final class DefaultBases {
   public enum Base {
-    POWER_BETA("power_beta", "Power Beta", "Power Beta gameplay, fixes and inventory controls, with ore vein mining, faster vehicles, clearer water and a blurred Beta 1.8 panorama. Controls, sensitivity, field of view, brightness and cloud height use standard defaults. World permissions still apply."),
-    REFINED("refined_beta", "Refined Beta 1.7.3", "Beta gameplay with performance improvements, fixes and inventory quality of life. Extra gameplay mechanics and recipes are off."),
-    BETA("beta", "Beta 1.7.3", "Closest to vanilla Beta. Optional fixes, culling and performance controls are off. SmoothBeta rendering, StationAPI, shared input/configuration, GlassNetworking, RetroAuth and faster startup remain installed. Pack menus, safe data recovery and platform compatibility remain available.");
+    POWER_BETA("power_beta", "Power Beta", "Larger quality-of-life upgrades, including ore vein mining, faster boats and minecarts, easier building, clearer water and extra recipes and tool abilities. Includes inventory shortcuts, bug fixes and performance improvements."),
+    REFINED("refined_beta", "Refined Beta 1.7.3", "Original Beta gameplay with bug fixes, smoother performance and easier inventory management. Keeps native recipes, tools and travel speeds; vein mining and other added gameplay mechanics are off."),
+    BETA("beta", "Beta 1.7.3", "The original Beta experience, including its quirks. Optional bug fixes, inventory shortcuts and extra performance tweaks are off, so busy worlds may run slower. The bundled graphics renderer, faster startup, online login and compatibility support remain installed.");
     public final String id, label, description;
     Base(String id, String label, String description) { this.id = id; this.label = label; this.description = description; }
     public static Base read(String id) {

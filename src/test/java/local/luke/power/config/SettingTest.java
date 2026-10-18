@@ -27,12 +27,30 @@ class SettingTest {
     Setting s=Catalog.setting("power_camera:config.speed","test","Camera","Free camera","Speed","",
         Setting.Kind.DECIMAL,new JsonPrimitive(base*1.1),new JsonPrimitive(12),0,1000,.1,List.of(),false);
     assertEquals("110",s.editText());
+    assertEquals("110%",s.display());
+    assertEquals("Freecam speed",s.label);
     assertEquals(110,s.defaultValue.getAsDouble()*100/base,1e-7);
     s.parse("100");assertEquals(base,s.value.getAsDouble(),1e-9);
     s.parse("40");assertEquals(base*.4,s.value.getAsDouble(),1e-9);
     s.slide(1);String boundary=s.editText();s.parse(boundary);assertEquals(s.max,s.value.getAsDouble());
     s.parse("0");assertEquals(0,s.value.getAsDouble());
     assertThrows(IllegalArgumentException.class,()->s.parse("100000"));
+  }
+
+  @Test void percentagesShareLabelsAndDisplayWithoutChangingExactEntryOrStoredUnits() {
+    for (String id : List.of("worldedit.opacity", "tweaks.flexible.overlayOpacity", "creative.flightSpeed",
+        "visual.underwaterFogDensity", "native.music", "native.sensitivity", "infoHud.clusters.0.opacity",
+        "audio.master", "audio.category.blocks", "audio.sound.music:test", "rules.creation.explosion_drop_chance")) {
+      var s = new Setting(id,"test","","","Test %","",Setting.Kind.INTEGER,
+          new JsonPrimitive(75),new JsonPrimitive(100),0,200,1,List.of(),false);
+      assertFalse(s.label.contains("%"),id); assertEquals("75%",s.display(),id);
+      assertEquals("75",s.editText(),id); s.parse("35"); assertEquals(35,s.value.getAsInt(),id);
+    }
+    var ambient = Catalog.setting("power_environment:config.MUSIC_CONFIG.volumeRainAmbient", "test", "", "", "", "",
+        Setting.Kind.DECIMAL,new JsonPrimitive(.75),new JsonPrimitive(1),0,1,.05,List.of(),false);
+    assertEquals("75%",ambient.display()); assertEquals("75",ambient.editText());
+    ambient.parse("25"); assertEquals(.25,ambient.value.getAsDouble());
+    assertThrows(IllegalArgumentException.class,()->ambient.parse("101"));
   }
 
   @Test void durationEditorsUseSecondsWithoutChangingStorageOrPrecision() {

@@ -12,6 +12,9 @@
 - Keep title-editor reset confirmations above the paint grid, including while playing a world.
 - Keep music labels steady when skipping forward or back between tracks.
 - Bring game-rule names and controls closer together in creation and saved-world editors.
+- Keep HUD preview toggles beside the selector at more screen sizes, add a preview visibility button on small screens, reduce footer spacing and restore the blue selection marker. Hide the HUD editor launcher's reset button and use its normal search group.
+- Keep Defaults actions close to preset names, explain reset bases in plain language and allow the explanation and choices to scroll on small screens.
+- Show percentages in slider values instead of setting names. Default flight sprint to Toggle in every base and set Power Beta freecam speed to 110%.
 
 ## [2.4.2] - 2026-10-18
 

@@ -103,9 +103,11 @@ public abstract class UiScreen extends Screen {
 
   protected void iconButton(String icon, int x, int y, int w, int h, int mx, int my, boolean enabled, boolean active) {
     button("", x, y, w, h, mx, my, enabled);
-    int color = !enabled ? 0xff777777 : active ? icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
+    int color = !enabled ? 0xff777777 : icon.startsWith("eye") ? 0xffffffff : active ? icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
     int cx = x + w / 2;
     String[] pixels = switch (icon) {
+      case "eye" -> new String[]{"   ###   ", " ##   ## ", "#   #   #", "#  ###  #", "#   #   #", " ##   ## ", "   ###   "};
+      case "eyeClosed" -> new String[]{"         ", "         ", "#       #", " #     # ", "  #####  ", " #  #  # ", "         "};
       case "collapse" -> new String[]{"  #   #  ", "   # #   ", "    #    ", "         ", "         ", "    #    ", "   # #   ", "  #   #  "};
       case "expand" -> new String[]{"    #    ", "   # #   ", "  #   #  ", "         ", "  #   #  ", "   # #   ", "    #    "};
       case "check" -> new String[]{"        #", "       ##", "      ## ", "#    ##  ", "##  ##   ", " ####    ", "  ##     "};

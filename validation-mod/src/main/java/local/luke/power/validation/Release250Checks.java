@@ -98,8 +98,10 @@ final class Release250Checks {
         row.addProperty("label",setting.label); row.addProperty("description",setting.description);
         row.addProperty("kind",setting.kind.name()); row.add("choices",Catalog.JSON.toJsonTree(setting.choices));
         var values = new JsonObject();
+        var displays = new JsonObject();
         for (var base : DefaultBases.Base.values()) values.add(base.id,DefaultBases.value(base,setting.id,setting.powerBetaDefault));
-        row.add("values",values); comparison.add(row);
+        for (var base : DefaultBases.Base.values()) displays.addProperty(base.id,setting.display(values.get(base.id)));
+        row.add("values",values); row.add("display",displays); comparison.add(row);
       }
       Files.writeString(REPORT.resolve("defaults-comparison.json"),Catalog.JSON.toJson(comparison));
       for (var base : DefaultBases.Base.values()) {
@@ -119,6 +121,14 @@ final class Release250Checks {
         check(panorama.get("blurBackground").getAsBoolean(), "panorama blur default disabled for " + base);
         check(panorama.get("enablePanorma").getAsBoolean() == (base == DefaultBases.Base.POWER_BETA),"panorama enable flag not linked to base selection");
         var loaded = SettingsRegistry.openDefaults(mc);
+        for (var id : List.of("creative.sprintToggle", "creative.spectatorSprintToggle", "power_camera:config.sprintToggle"))
+          check(loaded.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElseThrow().value.getAsBoolean(),base + " not Toggle " + id);
+        var speed=loaded.settings().stream().filter(s -> s.id.equals("power_camera:config.speed")).findFirst().orElseThrow();
+        check(speed.display().equals("110%"),"freecam display/default differs: "+speed.display());
+        for (var setting : loaded.settings()) if (setting.numeric()) {
+          check(!setting.label.endsWith(" %"),"percent label retained "+setting.id);
+          if(Catalog.text(Catalog.metadata(setting.id),"unit","").equals("%")) check(setting.display().endsWith("%"),"percent suffix missing "+setting.id);
+        }
         check(loaded.settings().stream().filter(s -> s.id.equals("native.guiScale")).findFirst().orElseThrow().value.getAsInt() == 4,"GUI scale changed for " + base);
         for (var setting : loaded.settings()) if (!Set.of("audio.presets", "audio.favourites", "logo.presets", "interface.debugPresets", "interface.colours", "defaults.base", "defaults.setupComplete").contains(setting.id)) {
           check(same(setting.value, DefaultBases.value(base, setting.id, setting.powerBetaDefault)), "load mismatch " + base + " " + setting.id + " = " + setting.value + " expected " + DefaultBases.value(base, setting.id, setting.powerBetaDefault));
@@ -136,25 +146,39 @@ final class Release250Checks {
       int hoverX=n(options,"left")+10;
       int rowHeight=(int)call(panel,"rowTop",n(options,"span"),1)-(int)call(panel,"rowTop",n(options,"span"),0);
       check(rowHeight==24,"Defaults row differs from normal settings");
-      int buttonY=(int)call(panel,"buttonY",n(options,"span"),84);
-      check(buttonY==87,"Defaults buttons not centered in hover row");
-      options.render(hoverX,90,0);
+      int rowSpan=(int)call(panel,"rowSpan",n(options,"span")),rowTop=(int)call(panel,"rowTop",n(options,"span"),0);
+      check(rowSpan<=560,"wide defaults buttons too far from labels");
+      int buttonY=(int)call(panel,"buttonY",rowSpan,rowTop);
+      check(buttonY-rowTop==3,"Defaults buttons not centered in hover row");
+      int hoverY=rowTop+8;
+      options.render(hoverX,hoverY,0);
       Object delay=get(panel,"hoverDelay");
       check((int)get(delay,"ticks")==0,"tooltip appeared immediately");
       for(int i=0;i<13;i++)options.tick();
-      options.render(hoverX,90,0);
+      options.render(hoverX,hoverY,0);
       GL11.glEnable(GL11.GL_DEPTH_TEST); GL11.glEnable(GL11.GL_LIGHTING);
       call(panel,"foregroundTooltip","tooltip state check",hoverX,90);
       check(GL11.glIsEnabled(GL11.GL_DEPTH_TEST) && GL11.glIsEnabled(GL11.GL_LIGHTING),"tooltip leaked GL state");
-      SettingsSnapshot.render(mc,options,960,540,REPORT.resolve("defaults-tooltip.png"),hoverX,90);
-      click(options, n(options,"right")-180, 90, 0);
+      SettingsSnapshot.render(mc,options,960,540,REPORT.resolve("defaults-tooltip.png"),hoverX,hoverY);
+      click(options,(int)call(panel,"loadX",n(options,"left"),rowSpan)+4,buttonY+6,0);
       check((boolean)call(panel,"modal"), "Load did not warn");
       byte[] before = Files.readAllBytes(PowerConfig.path());
       click(options, n(options,"origin")+3, 28, 0);
       check(Arrays.equals(before, Files.readAllBytes(PowerConfig.path())), "modal leaked input");
       capture(mc, options, "defaults-warning"); key(options, Keyboard.KEY_ESCAPE);
       check(!(boolean)call(panel,"modal"), "Escape failed to cancel");
-      for (int[] size : new int[][]{{320,240},{640,420}}) { options.init(mc,size[0],size[1]); capture(mc,options,"defaults-"+size[0]); }
+      for (int[] size : new int[][]{{320,240},{640,420}}) {
+        options.init(mc,size[0],size[1]); capture(mc,options,"defaults-"+size[0]);
+        panel=get(options,"defaultsPanel");
+        call(panel,"wheel",-120,n(options,"left"),n(options,"span"));options.render(-1,-1,0);
+        rowSpan=(int)call(panel,"rowSpan",n(options,"span"));
+        int last=(int)call(panel,"rowTop",n(options,"span"),2);
+        int lastButton=(int)call(panel,"buttonY",rowSpan,last);
+        check(lastButton+18<=size[1]-44,"last defaults choice cannot be reached");
+        click(options,(int)call(panel,"loadX",n(options,"left"),rowSpan)+4,lastButton+6,0);
+        check((boolean)call(panel,"modal"),"scrolled Load did not hit rendered button");key(options,Keyboard.KEY_ESCAPE);
+        capture(mc,options,"defaults-scrolled-"+size[0]);
+      }
     });
   }
   private static void chooserTooltips(Minecraft mc) throws Exception {
@@ -171,6 +195,22 @@ final class Release250Checks {
       set(options,"page","General"); UiChecks.search(options,""); call(options,"layout");
       var ordered = SettingsLayout.ordered(options.session().settings()).stream().filter(s -> s.page.equals("General") && s.group.equals("Interface")).toList();
       check(ordered.get(0).id.equals(HudEditorSettings.ENTRY),"HUD editor misplaced"); capture(mc,options,"general");
+      UiChecks.search(options,"HUD editor");options.render(-1,-1,0);
+      Object launcher=null;
+      for(Object row:(List<?>)get(options,"rows")) {
+        Object setting=call(row,"setting");
+        if(setting instanceof Setting s && s.id.equals(HudEditorSettings.ENTRY)) {launcher=row;break;}
+      }
+      check(launcher!=null,"launcher missing in search");
+      check(call(launcher,"group").equals("General / Interface"),"launcher search group hardcoded");
+      var setting=(Setting)call(launcher,"setting");
+      check((int)call(options,"controlEnd",setting)==n(options,"right")-14,"launcher still reserves reset width");
+      set(options,"scroll",Math.max(0,((Number)call(launcher,"y")).doubleValue()-24));options.render(-1,-1,0);
+      int cy=n(options,"top")+n(launcher,"y")-((Number)get(options,"scroll")).intValue()+9;
+      capture(mc,options,"hud-launcher-search");
+      click(options,n(options,"right")-24,cy,0);
+      check(mc.currentScreen instanceof HudEditorScreen,"old reset position did not open HUD editor");
+      open(mc,options,960,540);UiChecks.search(options,"");
     });
     test("F3 selection reveals settings and range dragging stays in its nested draft", () -> {
       var hud = new HudEditorScreen(options,HudEditorSettings.ENTRY); open(mc,hud,960,540);
@@ -223,6 +263,18 @@ final class Release250Checks {
       click(hud,toggleX,38,0); hud.render(-1,-1,0);
       check((boolean)call(hud,"controlsVisible"),"show control failed");
       check(((Number)get(hud,"scroll")).doubleValue()==scrollBefore,"showing reset scroll");
+      int eyeX=toggleX+22;
+      check(call(hud,"hoverHelp",toggleX,38).equals("Hide settings"),"settings tooltip differs");
+      check(call(hud,"hoverHelp",eyeX,38).equals("Hide preview"),"preview tooltip differs");
+      click(hud,eyeX,38,0);hud.render(-1,-1,0);
+      check(!(boolean)call(hud,"previewVisible"),"eye did not hide preview");
+      check(n(hud,"controlsBottom")==n(hud,"previewBottom"),"hidden preview still reserves space");
+      check(original.equals(outer.snapshot()),"hiding preview changed settings");
+      check(call(hud,"hoverHelp",eyeX,38).equals("Show preview"),"closed eye tooltip differs");
+      capture(mc,hud,"hud-preview-hidden");
+      click(hud,toggleX,38,0);hud.render(-1,-1,0);
+      check((boolean)call(hud,"previewVisible") && !(boolean)call(hud,"controlsVisible"),"both panels hidden");
+      click(hud,toggleX,38,0);hud.render(-1,-1,0);
       call(hud,"beginReorder"); hud.render(-1,-1,0);
       Object reorder=get(hud,"reorder"); var nested=(SettingsDraft)call(reorder,"draft");
       check(!(boolean)call(hud,"controlsVisible"),"compact F3 not expanded");
@@ -249,8 +301,14 @@ final class Release250Checks {
         check((boolean)call(reorder,"active"),"preview toggle exited F3");
       }
       check(before.equals(nested.snapshot()),"preview toggles changed F3 settings");
+      click(hud,eyeX,38,0);hud.render(-1,-1,0);
+      check((boolean)call(reorder,"active") && !(boolean)call(hud,"previewVisible") && (boolean)call(hud,"controlsVisible"),"eye exited F3 or hid both panels");
+      check(before.equals(nested.snapshot()),"eye changed nested draft");
+      capture(mc,hud,"hud-f3-preview-hidden");
+      click(hud,eyeX,38,0);click(hud,toggleX,38,0);hud.render(-1,-1,0);
       key(hud,Keyboard.KEY_ESCAPE);check((boolean)call(get(hud,"reorderExit"),"active"),"compact dirty Escape did not warn");
       click(hud,toggleX,38,0);check(!(boolean)call(hud,"controlsVisible"),"warning leaked panel input");
+      click(hud,eyeX,38,0);check((boolean)call(hud,"previewVisible"),"warning leaked eye input");
       key(hud,Keyboard.KEY_ESCAPE);call(hud,"finishReorder",false);
       check((boolean)call(hud,"controlsVisible"),"F3 exit did not restore panel");
       check(original.equals(outer.snapshot()),"compact edits escaped discard");
@@ -258,6 +316,14 @@ final class Release250Checks {
       check(!(boolean)call(hud,"compact"),"large screen shows compact controls");
       check(n(hud,"controlsSpan")==360,"large screen layout changed");
       capture(mc,hud,"hud-wide-unchanged");
+      for(int[] size : new int[][]{{320,240},{480,320},{540,360},{640,420},{800,600},{960,540}}) {
+        hud.init(mc,size[0],size[1]);hud.render(-1,-1,0);
+        Object bar=call(hud,"toolbar");
+        var buttons=(List<?>)call(bar,"toggles");
+        if(size[0]>=480) for(Object b:buttons) check(n(b,"y")==30,"toggles wrapped early at "+size[0]);
+        check(n(hud,"previewBottom")==size[1]-35,"unused footer margin remains");
+        capture(mc,hud,"hud-responsive-"+size[0]);
+      }
     });
     test("creation rules stay centered with a narrower bounded content width", () -> {
       PowerOptionsScreen.openCreationRules(mc,options,new CreationRules(RulePresets.survival(),RulePresets.cheats()));

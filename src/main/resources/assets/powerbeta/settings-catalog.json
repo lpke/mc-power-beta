@@ -126,7 +126,7 @@
   "power_camera:config.speed": {
     "page": "Camera",
     "group": "Free camera",
-    "label": "Freecam speed %",
+    "label": "Freecam speed",
     "description": "100% matches standard modern Creative flight. Around 40% matches Beta walking horizontally; 200% doubles the 100% speed. Applies before the sprint multiplier.",
     "default": 11.977777777777783,
     "restart": false,
@@ -1285,45 +1285,57 @@
     "page": "Audio",
     "group": "Individual sounds",
     "label": "Nether portal",
-    "description": "Volume multiplier from 0 to 1.",
+    "description": "Volume as a percentage, multiplied by Game sounds and Master volume.",
     "default": 1.0,
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05
+    "step": 0.05,
+    "unit": "%",
+    "displayDivisor": 0.01,
+    "displayPrecision": 0
   },
   "power_environment:config.MUSIC_CONFIG.volumeRainAmbient": {
     "page": "Audio",
     "group": "Individual sounds",
     "label": "Rain ambience",
-    "description": "Volume multiplier from 0 to 1.",
+    "description": "Volume as a percentage, multiplied by Game sounds and Master volume.",
     "default": 1.0,
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05
+    "step": 0.05,
+    "unit": "%",
+    "displayDivisor": 0.01,
+    "displayPrecision": 0
   },
   "power_environment:config.MUSIC_CONFIG.volumeGhastAmbient": {
     "page": "Audio",
     "group": "Individual sounds",
     "label": "Ghast ambience",
-    "description": "Volume multiplier from 0 to 1.",
+    "description": "Volume as a percentage, multiplied by Game sounds and Master volume.",
     "default": 1.0,
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05
+    "step": 0.05,
+    "unit": "%",
+    "displayDivisor": 0.01,
+    "displayPrecision": 0
   },
   "power_environment:config.MUSIC_CONFIG.volumeCaveAmbient": {
     "page": "Audio",
     "group": "Individual sounds",
     "label": "Cave ambience",
-    "description": "Volume multiplier from 0 to 1.",
+    "description": "Volume as a percentage, multiplied by Game sounds and Master volume.",
     "default": 1.0,
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05
+    "step": 0.05,
+    "unit": "%",
+    "displayDivisor": 0.01,
+    "displayPrecision": 0
   },
   "power_environment:config.SLEEP_CONFIG.bedsSpeedUpNightRatherThanSkipIt": {
     "page": "Gameplay",
@@ -2780,16 +2792,18 @@
   "creative.flightSpeed": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Flight speed %",
+    "label": "Flight speed",
     "description": "100% matches standard modern Creative flight. Around 40% matches Beta walking horizontally; 200% doubles the 100% speed. Applies before the sprint multiplier.",
-    "order": 0
+    "order": 0,
+    "unit": "%"
   },
   "creative.sprintMultiplier": {
     "page": "Creative",
     "group": "Flight",
-    "label": "Flight sprint speed %",
+    "label": "Flight sprint speed",
     "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first.",
-    "order": 1
+    "order": 1,
+    "unit": "%"
   },
   "creative.glide": {
     "page": "Creative",
@@ -2825,16 +2839,18 @@
   "creative.spectatorSpeed": {
     "page": "Creative",
     "group": "Spectator",
-    "label": "Flight speed %",
+    "label": "Flight speed",
     "description": "100% matches standard modern Creative flight. Around 40% matches Beta walking horizontally; 200% doubles the 100% speed. The wheel adjusts the speed during the visit.",
-    "order": 0
+    "order": 0,
+    "unit": "%"
   },
   "creative.spectatorScrollStep": {
     "page": "Creative",
     "group": "Spectator",
-    "label": "Speed step %",
+    "label": "Speed step",
     "description": "Percentage points added or removed per wheel notch, relative to the 100% modern Creative flight baseline. 10 changes 100% to 110%, rather than multiplying the current speed.",
-    "order": 16
+    "order": 16,
+    "unit": "%"
   },
   "creative.blockReach": {
     "page": "Creative",
@@ -2905,8 +2921,9 @@
   "worldedit.opacity": {
     "page": "World editing",
     "group": "Selection outline",
-    "label": "Outline opacity %",
-    "description": ""
+    "label": "Outline opacity",
+    "description": "",
+    "unit": "%"
   },
   "worldedit.lineWidth": {
     "page": "World editing",
@@ -3030,8 +3047,9 @@
   "tweaks.flexible.overlayOpacity": {
     "page": "Building",
     "group": "Flexible placement",
-    "label": "Overlay opacity %",
-    "description": ""
+    "label": "Overlay opacity",
+    "description": "",
+    "unit": "%"
   },
   "tweaks.hotbar.numberRowKeys": {
     "page": "Inventory",
@@ -3323,7 +3341,8 @@
     "order": 6
   },
   "native.sensitivity": {
-    "order": 7
+    "order": 7,
+    "unit": "%"
   },
   "native.invert": {
     "order": 8
@@ -3405,11 +3424,13 @@
     "order": 0
   },
   "native.music": {
-    "order": 1
+    "order": 1,
+    "unit": "%"
   },
   "native.sound": {
     "order": 2,
-    "separatorAfter": false
+    "separatorAfter": false,
+    "unit": "%"
   },
   "audio.preset": {
     "order": 0
@@ -4249,7 +4270,8 @@
     "order": 23
   },
   "infoHud.clusters.0.opacity": {
-    "order": 24
+    "order": 24,
+    "unit": "%"
   },
   "infoHud.clusters.1.enabled": {
     "order": 110
@@ -4294,7 +4316,8 @@
     "order": 123
   },
   "infoHud.clusters.1.opacity": {
-    "order": 124
+    "order": 124,
+    "unit": "%"
   },
   "infoHud.clusters.2.enabled": {
     "order": 210
@@ -4339,7 +4362,8 @@
     "order": 223
   },
   "infoHud.clusters.2.opacity": {
-    "order": 224
+    "order": 224,
+    "unit": "%"
   },
   "infoHud.clusters.3.enabled": {
     "order": 310
@@ -4384,7 +4408,8 @@
     "order": 323
   },
   "infoHud.clusters.3.opacity": {
-    "order": 324
+    "order": 324,
+    "unit": "%"
   },
   "interface.useFeetYCoordinates": {
     "order": 1,
@@ -4625,12 +4650,13 @@
     "page": "Creative",
     "group": "Spectator",
     "order": 1,
-    "label": "Flight sprint speed %",
+    "label": "Flight sprint speed",
     "default": 200,
     "min": 100,
     "max": 400,
     "step": 1,
-    "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first."
+    "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first.",
+    "unit": "%"
   },
   "power_camera:config.sprintToggle": {
     "page": "Camera",
@@ -4644,12 +4670,13 @@
     "page": "Camera",
     "group": "Free camera",
     "order": 1,
-    "label": "Freecam sprint speed %",
+    "label": "Freecam sprint speed",
     "default": 200,
     "min": 100,
     "max": 400,
     "step": 1,
-    "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first."
+    "description": "Multiplier of this mode's normal flight speed: 100% gives no boost; 200% doubles it. The flight speed setting applies first.",
+    "unit": "%"
   },
   "rules.world.explosion_drop_chance": {
     "unit": "%"
@@ -4735,7 +4762,8 @@
     "order": 4
   },
   "activeTweaks.opacity": {
-    "order": 5
+    "order": 5,
+    "unit": "%"
   },
   "activeTweaks.autoWalk": {
     "order": 100
@@ -4756,7 +4784,8 @@
     "order": 108
   },
   "native.brightness": {
-    "order": 0
+    "order": 0,
+    "unit": "%"
   },
   "creative.acceleration": {
     "page": "Creative",
