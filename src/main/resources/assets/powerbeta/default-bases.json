@@ -38,7 +38,8 @@
     "visual.underwaterDarknessOutside": 95,
     "visual.underwaterFogDensity": 30,
     "power_camera:config.sprintToggle": true,
-    "power_camera:config.speed": 11.977777777777783
+    "power_camera:config.speed": 11.977777777777783,
+    "gameplay.boatPlacementFacing": true
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -219,7 +220,8 @@
     "visual.swapEquipment": false,
     "creative.sprintToggle": true,
     "creative.spectatorSprintToggle": true,
-    "power_camera:config.sprintToggle": true
+    "power_camera:config.sprintToggle": true,
+    "gameplay.boatPlacementFacing": false
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -361,6 +363,7 @@
     "visual.narrowUnderwaterFov": false,
     "creative.sprintToggle": true,
     "creative.spectatorSprintToggle": true,
-    "power_camera:config.sprintToggle": true
+    "power_camera:config.sprintToggle": true,
+    "gameplay.boatPlacementFacing": true
   }
 }

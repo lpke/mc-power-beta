@@ -8,6 +8,12 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- After `new-world`, `release-251 boats` checks native item placement with the fix
+  off/on, both steering and speed settings, source/flowing-water blocks, cardinal
+  and diagonal bearings, first-tick interpolation, actual mounted forward movement,
+  multiplayer authority, defaults and durable Apply. Restart the muted clone and run
+  `release-251 saved` to verify the saved Off preference.
+
 - `release-250 setup` checks the fresh first-launch chooser and one-time save.
   `defaults` checks all three complete loads, 4x GUI scale, reset bases and delayed
   foreground tooltips, and exports their full setting comparison; `ui` checks nested F3

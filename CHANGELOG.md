@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [2.5.1] - 2026-10-19
+
+- Place boats facing the direction you look, with original or improved steering and either speed setting. Add Boat placement direction fix under Fixes, enabled in Power Beta and Refined Beta defaults and disabled in Beta 1.7.3 defaults. Singleplayer only.
+
 ## [2.5.0] - 2026-10-18
 
 - Choose Power Beta, Refined Beta 1.7.3 or Beta 1.7.3 defaults on first launch or from the new Defaults tab. Load a setup or change the reset base without changing current values. Power Beta enables ore vein mining, torch shovel, faster vehicles, clearer water and a blurred Beta 1.8 panorama, with standard controls, full volume and modern Creative/Spectator flight response. Previous Full and Lite selections remain readable.

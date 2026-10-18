@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 2.5.0",
+    "default": "Power Beta 2.5.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -4855,5 +4855,14 @@
     "group": "Debug (F3) info",
     "label": "Text size",
     "order": -9
+  },
+  "gameplay.boatPlacementFacing": {
+    "page": "Fixes",
+    "group": "Entities",
+    "label": "Boat placement direction fix",
+    "description": "Place boats facing the direction you look, so forward starts in that direction when you board. Works with original and improved steering, at either speed. Affects new placements only. Singleplayer only.",
+    "default": true,
+    "restart": false,
+    "order": 45
   }
 }

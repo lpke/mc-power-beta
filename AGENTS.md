@@ -166,6 +166,11 @@
 
 - Flight sprint covers all three movement axes in creative, spectator and freecam.
   Opposing inputs cancel; stopping movement resets Toggle sprint.
+- Boat placement facing is a global Fixes preference, independent of speed, steering
+  and world permissions. Set the new boat's current/previous yaw before native spawn;
+  preserve placement eligibility, item use, existing boats and multiplayer authority.
+  Initialise a missing preference once from the selected base with a verified backup,
+  so later Use as base changes cannot alter it on restart.
 - Chat editing shares a buffer across input and completion. History keeps arrow
   ownership until editing or explicit completion; rendering must not change text.
   Wrapped chat keeps the last Beta colour code from the preceding line.

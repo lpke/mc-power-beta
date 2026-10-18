@@ -9,6 +9,7 @@ public final class GameplaySettings {
   public int tntMillis = 8;
   public boolean leavesDropSaplingsInCreative = true;
   public boolean fastItemCollisions = true;
+  public boolean boatPlacementFacing = true;
 
   public void validate() {
     if (mergeThreshold < 16 || mergeThreshold > 16384 || tntPerTick < 1 || tntPerTick > 64

@@ -31,6 +31,18 @@ public final class ConfigDefaults {
       catch (RuntimeException failure) {
         PowerConfig.recovery(defaults, failure.getMessage()); DefaultBases.reload();
       }
+      if (PowerConfig.problem().isEmpty()) initializeBoatPlacement(game);
+    }
+  }
+
+  private static void initializeBoatPlacement(Path game) throws IOException {
+    JsonObject gameplay = PowerConfig.section("gameplay");
+    if (gameplay.has("boatPlacementFacing")) return;
+    // Freeze the first value so later reset-base changes cannot change it on restart.
+    gameplay.add("boatPlacementFacing", DefaultBases.value("gameplay.boatPlacementFacing", new JsonPrimitive(true)));
+    try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
+      PowerConfig.put("gameplay", gameplay);
+      transaction.commit();
     }
   }
 }

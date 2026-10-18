@@ -64,6 +64,7 @@ public final class Validation {
       else if (command.startsWith("release-230 ")) Editor230Checks.run(mc,command.substring(12));
       else if (command.startsWith("hud-responsive-230 ")) HudResponsive230Checks.run(mc,command.substring(19));
       else if (command.startsWith("release-250 ")) Release250Checks.run(mc,command.substring(12));
+      else if (command.startsWith("release-251 ")) Release251BoatChecks.run(mc,command.substring(12));
       else if (command.startsWith("release-242 ")) Release242Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-241 ")) Release241Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-240 ")) Release240Checks.run(mc,command.substring(12));

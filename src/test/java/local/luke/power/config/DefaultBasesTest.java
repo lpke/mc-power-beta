@@ -45,6 +45,29 @@ class DefaultBasesTest {
       applied.remove("defaults"); assertEquals(before, applied);
     } finally { DefaultBases.use(DefaultBases.Base.POWER_BETA, game); }
   }
+  @Test void missingBoatDirectionIsInitializedOnceAndResetBaseNeverChangesItsSavedValue() throws Exception {
+    ConfigDefaults.prepare(game);
+    for (var base : DefaultBases.Base.values()) {
+      JsonObject old = PowerConfig.document();
+      old.getAsJsonObject("settings").getAsJsonObject("defaults").addProperty("base",base.id);
+      old.getAsJsonObject("settings").getAsJsonObject("gameplay").remove("boatPlacementFacing");
+      old.addProperty("preservedEvidence", "unchanged");
+      PowerConfig.write(old);byte[] original = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      boolean enabled = base != DefaultBases.Base.BETA;
+      JsonObject expected = old.deepCopy();
+      expected.getAsJsonObject("settings").getAsJsonObject("gameplay").addProperty("boatPlacementFacing", enabled);
+      assertEquals(expected,PowerConfig.document());
+      assertEquals(enabled,DefaultBases.value(base,"gameplay.boatPlacementFacing",new JsonPrimitive(true)).getAsBoolean());
+      try (var dirs=Files.list(game.resolve("power-beta-data/settings-backups"))) {
+        assertTrue(dirs.anyMatch(dir->{try{return java.util.Arrays.equals(original,Files.readAllBytes(dir.resolve("file-0"))) && Files.exists(dir.resolve("complete.json"));}catch(Exception e){return false;}}));
+      }
+      DefaultBases.use(enabled ? DefaultBases.Base.BETA : DefaultBases.Base.POWER_BETA,game);
+      byte[] saved=Files.readAllBytes(PowerConfig.path());ConfigDefaults.prepare(game);
+      assertArrayEquals(saved,Files.readAllBytes(PowerConfig.path()));
+      assertEquals(enabled,PowerConfig.section("gameplay").get("boatPlacementFacing").getAsBoolean());
+    }
+  }
   @Test void consolidatedPowerBetaRetainsBothIdsAndUsesStandardDisplayDefaults() throws Exception {
     ConfigDefaults.prepare(game);
     assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.read("power_beta"));
