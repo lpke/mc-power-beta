@@ -60,6 +60,14 @@
   sliders with right-click exact entry, individual resets and isolated editor drafts.
   Play the native UI click sound for buttons, tabs, toggles and confirmations.
   Slider movement, pointer selection, dragging and silent group chevrons stay quiet.
+- Reset values depend on the user's Defaults base: Power Beta, Refined Beta 1.7.3 or
+  Beta 1.7.3. `DefaultBases` resolves stable setting IDs against the explicit
+  `default-bases.json` overrides; retain each setting's canonical Power Beta default
+  when copying drafts. Use as base changes only reset targets, never setting values.
+  Load resets global preferences and creation templates, never existing world rules
+  or recovery data. Saved music, title and F3 presets remain user data. Keep reset
+  controls in every editor consistent with the selected base. Existing installations
+  skip the first-launch chooser; fresh exports keep setupComplete false until chosen.
 - `settings-layout.json` owns tab/group order; catalogue `order` values arrange
   settings inside groups. Presentation metadata applies to every adapter without
   changing storage IDs. Keep the flight sprint binding shared; Creative, Spectator and freecam own separate sprint preferences.

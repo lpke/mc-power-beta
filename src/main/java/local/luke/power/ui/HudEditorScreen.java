@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 public final class HudEditorScreen extends DraftEditorScreen {
   private final HudPreview preview;
   private final DebugReorder reorder;
+  private final DraftExitPrompt reorderExit = new DraftExitPrompt();
   private int scenario;
   private int lastNativeIndex;
   private String selected = "layout";
@@ -28,7 +29,14 @@ public final class HudEditorScreen extends DraftEditorScreen {
   public HudEditorScreen(PowerOptionsScreen parent, String settingId) {
     super(parent, new SettingsDraft(parent.session().settings(), HudEditorSettings::contains));
     preview = new HudPreview(draft);
-    reorder = new DebugReorder(draft);
+    reorder = new DebugReorder(draft, id -> {
+      highlightedSetting = "";
+      var line = DebugLines.find(id);
+      if (line != null) {
+        Setting setting = editingDraft().get(line.setting());
+        highlightedSetting = setting.id; revealControl(setting);
+      }
+    });
     collapsed.addAll(HudEditorMemory.collapsed);
     select(HudEditorSettings.tab(draft.get(settingId), preview.mode()));
     if (settingId.equals(HudEditorSettings.ENTRY) && selectionIds().contains(HudEditorMemory.selected)) {
@@ -51,27 +59,30 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   protected int controlsTop() { return toolbar().controlsTop(); }
   protected String title() { return "HUD editor"; }
+  protected String doneLabel() { return reorder.active() ? "Save F3" : "Done"; }
+  protected String cancelLabel() { return reorder.active() ? "Back" : "Cancel"; }
   public void init() { toolbarCache = null; super.init(); HudPreviewBackground.prepare(minecraft); reorder.init(minecraft, width, height); }
   public void beginReorder() {
     select("debug");
     try { reorder.begin(); preview.suppressDebug = true; error = ""; }
     catch (IllegalArgumentException failure) { error = failure.getMessage(); }
   }
-  private void finishReorder() { reorder.finish(); preview.suppressDebug = false; }
-  protected void save() { finishReorder(); super.save(); }
-  protected void leave() { finishReorder(); super.leave(); }
-  protected void undo() { finishReorder(); super.undo(); }
-  protected boolean canUndo() { return reorder.changed() || super.canUndo(); }
+  private void finishReorder(boolean save) { reorder.finish(save); preview.suppressDebug = false; clearHighlight(); controlsChanged(); }
+  protected SettingsDraft editingDraft() { return reorder == null ? draft : reorder.draft(); }
+  protected boolean modal() { return super.modal() || reorderExit.active() || reorder != null && reorder.prompt(); }
+  protected void save() { if (reorder.active()) finishReorder(true); else super.save(); }
+  protected void leave() { if (reorder.active()) leaveReorder(); else super.leave(); }
+  private void leaveReorder() { stopGesture(); inline.cancel(); reorderExit.leave(reorder.changed(), () -> finishReorder(false)); }
   protected String display(Setting s) { return s.id.equals("interface.debugOrder") ? reorder.active() ? "Save" : "Reorder" : super.display(s); }
   protected void edit(Setting s, int direction, int y) {
-    if (s.id.equals("interface.debugOrder")) { click(); if (reorder.active()) finishReorder(); else beginReorder(); }
+    if (s.id.equals("interface.debugOrder")) { click(); if (reorder.active()) finishReorder(true); else beginReorder(); }
     else super.edit(s, direction, y);
   }
   public void onMouseEvent() {
     int wheel = Mouse.getEventDWheel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
-    if (!modal() && reorder.contains(x, y) && wheel != 0) reorder.wheel(wheel, x, y);
+    if (!modal() && reorder.active() && wheel != 0) reorder.wheel(wheel, x, y);
     super.onMouseEvent();
   }
   private HudEditorLayout geometry() {
@@ -86,10 +97,10 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected int previewSpan() { return geometry().previewWidth(); }
   protected int previewTop() { return geometry().previewTop(); }
   protected void resetValue(Setting s) {
-    s.reset(); if (s.id.equals("interface.debugOrder")) draft.get("interface.debugRightOrder").reset();
+    s.reset(); if (s.id.equals("interface.debugOrder")) editingDraft().get("interface.debugRightOrder").reset();
   }
   protected boolean atDefault(Setting s) {
-    return super.atDefault(s) && (!s.id.equals("interface.debugOrder") || super.atDefault(draft.get("interface.debugRightOrder")));
+    return super.atDefault(s) && (!s.id.equals("interface.debugOrder") || super.atDefault(editingDraft().get("interface.debugRightOrder")));
   }
   protected boolean resettable(Setting s) { return true; }
   private void moveDivider(int x, int y) {
@@ -121,6 +132,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected String controlGroup(Setting s) { return HudEditorSections.group(s); }
   protected String groupKey(String group) { return selected + "/" + group; }
   protected List<Setting> controls() {
+    if (reorder != null && reorder.active()) return HudEditorSections.order(editingDraft().settings().stream()
+        .filter(s -> s.group.equals("Debug (F3) info") && !HudEditorSettings.internal(s)).toList());
     if (selected.equals("layout")) return HudEditorSections.order(List.of(draft.get(HudEditorSettings.ENTRY),
         draft.get(HudPreview.NATIVE + "putStatusBarIconsBelowHotbar"), draft.get(HudPreview.NATIVE + "putOverlayMessagesBelowHotbar"),
         draft.get(HudEditorSettings.HUD + "disableCrosshair"), draft.get(HudEditorSettings.HUD + "drawXboxXAndYButtons"), draft.get(HudEditorSettings.TOAST)));
@@ -142,12 +155,13 @@ public final class HudEditorScreen extends DraftEditorScreen {
         .filter(s -> s.id.startsWith("activeTweaks.") && !s.id.endsWith("Messages")).toList());
     if (selected.equals("chat")) return HudEditorSections.order(draft.settings().stream()
         .filter(s -> HudEditorSettings.view(s).equals(selected)).toList());
-    return HudEditorSections.order(draft.settings().stream().filter(s -> !s.id.equals("interface.debugRightOrder") && s.group.equals(selected.equals("version") ? "Version label" : "Debug (F3) info")).toList());
+    return HudEditorSections.order(draft.settings().stream().filter(s -> !HudEditorSettings.internal(s) && s.group.equals(selected.equals("version") ? "Version label" : "Debug (F3) info")).toList());
   }
-  protected boolean offersPositionReset() { return true; }
+  protected boolean offersPositionReset() { return !reorder.active(); }
+  protected void reset() { if (reorder.active()) { editingDraft().get("interface.debugOrder").reset(); editingDraft().get("interface.debugRightOrder").reset(); } else super.reset(); }
   protected List<Setting> positionSettings() { return (selected.equals("debug") ? draft.settings().stream().filter(s -> s.id.equals("interface.debugOrder") || s.id.equals("interface.debugRightOrder")) : controls().stream()).filter(HudEditorSections::position).toList(); }
   protected String resetSubject() { return selectedLabel(); }
-  protected List<Setting> allResetSettings() { return draft.settings().stream().filter(s -> !s.id.equals("infoHud.selectedCluster") && !s.id.equals(HudEditorSettings.COLOURS)).toList(); }
+  protected List<Setting> allResetSettings() { return draft.settings().stream().filter(s -> !s.id.equals("infoHud.selectedCluster") && !s.id.equals("interface.debugPresets") && !s.id.equals(HudEditorSettings.COLOURS)).toList(); }
   private int nativeIndex() { return selected.startsWith("native.") ? Integer.parseInt(selected.substring(7)) : 0; }
   private List<String> selectionIds() {
     List<String> ids = new ArrayList<>(); ids.add("layout");
@@ -183,7 +197,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private int selectorWidth() { return geometry().horizontal() ? controlsSpan() : span(); }
   private int selectorPopupWidth() { return geometry().horizontal() ? controlsSpan() : span(); }
   protected String hoverHelp(int x, int y) {
-    if (reorder.contains(x, y)) return reorder.help(x, y);
+    if (reorder.active() && !reorder.help(x, y).isEmpty()) return reorder.help(x, y);
     if (inside(x, y, left(), 30, selectorWidth(), 18)) return selectedLabel();
     for (var toggle : toolbar().toggles()) if (inside(x, y, toggle.x(), toggle.y(), toggle.width(), 18)) return switch (toggle.id()) {
       case "snap" -> "Snap dragged elements to the screen edges and centre.";
@@ -285,12 +299,14 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   protected void stopGesture() { dragging = null; divider.stop(); if (reorder != null) reorder.cancelDrag(); }
   protected void mouseClicked(int x, int y, int button) {
-    if (!modal() && reorder.active()) {
+    if (reorderExit.click(this, x, y, button, () -> finishReorder(true), () -> finishReorder(false))) return;
+    if (reorder.active() && !super.modal()) {
       if (reorder.press(x, y, button)) return;
-      Setting order = draft.get("interface.debugOrder");
-      boolean saveButton = inside(x, y, controlX(), controlY(order), controlWidth(order), 18);
-      finishReorder();
-      if (saveButton) { click(); return; }
+      Setting order = editingDraft().get("interface.debugOrder");
+      if (inside(x, y, controlX(), controlY(order), controlWidth(order), 18)) { click(); finishReorder(true); return; }
+      boolean controls = inside(x, y, controlsLeft(), controlsTop(), controlsSpan(), controlsBottom() - controlsTop());
+      boolean footer = y >= height - 31;
+      if (!controls && !footer) { leaveReorder(); return; }
     }
     if (selecting && !modal()) {
       int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows, cellWidth = selectorPopupWidth() / columns;
@@ -304,7 +320,9 @@ public final class HudEditorScreen extends DraftEditorScreen {
     super.mouseClicked(x, y, button);
   }
   protected void keyPressed(char c, int key) {
-    if (key == Keyboard.KEY_ESCAPE && reorder.active()) finishReorder();
+    if (reorderExit.key(key)) return;
+    if (reorder.active() && reorder.key(c, key)) return;
+    if (key == Keyboard.KEY_ESCAPE && reorder.active() && !super.modal() && !inline.active()) { leaveReorder(); return; }
     if (selecting && !modal()) {
       if (key == Keyboard.KEY_ESCAPE) selecting = false;
       else if (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN) {
@@ -319,6 +337,14 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private int selectorRows() { return Math.max(1, Math.min(selectionIds().size(), (height - 96) / 20)); }
   public void render(int x, int y, float delta) {
     super.render(selecting ? -1000 : x, selecting ? -1000 : y, delta);
+    if (reorder.active()) {
+      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT);
+      try {
+        GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING);
+        reorder.drawPrompt(x, y);
+        reorderExit.render(this, "Save F3 changes?", x, y);
+      } finally { GL11.glPopAttrib(); }
+    }
     if (!selecting || modal()) return;
     int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows, cellWidth = selectorPopupWidth() / columns;
     int top = 51; List<String> ids = selectionIds();
@@ -366,10 +392,10 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected String hint() { return ""; }
   private void clearHighlight() { highlightedElement = ""; highlightedSetting = ""; }
   private boolean highlighting() { return selected.equals("layout") && !highlightedElement.isEmpty(); }
-  protected void settingClicked(Setting setting) { clearHighlight(); }
+  protected void settingClicked(Setting setting) { clearHighlight(); if (reorder.active()) reorder.clearSelection(); }
   protected void renderControl(Setting s, int y, int mx, int my) {
     super.renderControl(s, y, mx, my);
-    if (highlighting() && s.id.equals(highlightedSetting)) {
+    if (s.id.equals(highlightedSetting)) {
       int l = controlsLeft() + 2, r = controlsRight() - 9;
       fill(l, y - 1, r, y, 0xffffff66); fill(l, y + 18, r, y + 19, 0xffffff66);
       fill(l, y - 1, l + 1, y + 19, 0xffffff66); fill(r - 1, y - 1, r, y + 19, 0xffffff66);

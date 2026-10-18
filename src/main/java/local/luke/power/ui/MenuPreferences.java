@@ -17,6 +17,7 @@ public final class MenuPreferences {
     public double debugTextSize = 1;
     public List<String> debugOrder = DebugOrder.defaults();
     public List<String> debugRightOrder = DebugColumns.defaultRight();
+    public com.google.gson.JsonArray debugPresets = new com.google.gson.JsonArray();
     public Map<String, Boolean> debugLines = new LinkedHashMap<>();
     public String musicBrowserDirectory = "";
     public List<String> colours = new ArrayList<>();
@@ -27,6 +28,7 @@ public final class MenuPreferences {
       colours.forEach(LightSettings::rgb);
       LightSettings.rgb(debugTextColor);
       new DebugColumns(debugOrder, debugRightOrder);
+      DebugPresets.checked(debugPresets);
       if (!Double.isFinite(debugTextSize) || debugTextSize < .5 || debugTextSize > 3) throw new IllegalArgumentException("F3 text size must be between 0.5 and 3.");
       if (debugLines == null || debugLines.size() > 256 || debugLines.entrySet().stream().anyMatch(e -> e.getKey() == null
           || !e.getKey().matches("[A-Za-z0-9_.-]{1,96}") || e.getValue() == null)) throw new IllegalArgumentException("Invalid F3 line visibility.");

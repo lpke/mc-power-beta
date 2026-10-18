@@ -60,11 +60,16 @@ improvements and optional tweaks in one searchable Options menu.
 - Configurable autosaving, focus-loss pausing, raw mouse input and network options. Optional tall-grass and dead-bush generation controls for new terrain.
 - Fixes for rendering, lighting, item and block drops, mining, boats, stairs, fences, liquids, mob behaviour, sleeping, multiplayer jitter and legacy client behaviour.
 
-Fixes, performance improvements and common inventory conveniences start on.
+The Power Beta defaults start with fixes, performance improvements and common inventory conveniences on.
 Survival worlds start with game-changing command permissions off. New-world
 presets and individual world rules let you choose the permissions you want.
 
 ## Settings and worlds
+
+On first launch, choose Power Beta, Refined Beta 1.7.3 or Beta 1.7.3 defaults.
+Options > Defaults lets you load another setup or choose Use as base. Changing the
+base keeps your settings and changes what each reset button restores. Loading
+resets preferences and new-world templates; existing worlds and saved presets stay intact.
 
 Options changes global preferences. The Game rules tab changes the open singleplayer
 world; from the main menu it edits Survival defaults and Cheat defaults for future

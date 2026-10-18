@@ -14,7 +14,7 @@ public final class SettingsDraft {
 
   public SettingsDraft(Collection<Setting> source, Predicate<Setting> includes) {
     settings = source.stream().filter(includes).map(s -> new Setting(s.id, s.backend, s.page,
-        s.group, s.label, s.description, s.kind, s.value, s.defaultValue, s.min, s.max,
+        s.group, s.label, s.description, s.kind, s.value, s.powerBetaDefault, s.min, s.max,
         s.step, s.choices, s.restart)).toList();
     settings.forEach(s -> byId.put(s.id, s));
     original = snapshot();

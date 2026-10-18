@@ -8,6 +8,13 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-250 setup` checks the fresh first-launch chooser and one-time save.
+  `defaults` checks all three complete loads and reset bases; `ui` checks nested F3
+  selection, range dragging, presets, exit prompts and responsive rule editors.
+  `audio` checks skip labels. After `new-world`, `world` verifies existing rules
+  survive default loads and captures the title reset modal with world depth enabled.
+  Restart and run `saved` for durable preset/setup checks. Use a silent output.
+
 - `release-242 ui` checks Interface grouping, responsive toolbar rows, preview-click
   selection, draft isolation and centered creation rules. After five seconds,
   `release-242 selection` checks persistent selection and deselection through empty

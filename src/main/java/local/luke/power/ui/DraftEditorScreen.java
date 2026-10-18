@@ -5,6 +5,7 @@ import local.luke.power.config.Setting;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
 
 /** Shared draft controls, inline input, bounded scrolling and modal exit handling. */
 abstract class DraftEditorScreen extends UiScreen {
@@ -60,10 +61,13 @@ abstract class DraftEditorScreen extends UiScreen {
   protected void reset() { controls().forEach(Setting::reset); }
   protected void resetFinished() {}
   protected void afterEdit() {}
-  protected void undo() { stopGesture(); draft.undo(); afterEdit(); }
-  protected boolean canUndo() { return draft.canUndo(); }
+  protected SettingsDraft editingDraft() { return draft; }
+  protected void undo() { stopGesture(); editingDraft().undo(); afterEdit(); }
+  protected boolean canUndo() { return editingDraft().canUndo(); }
   protected void valueChanged(Setting s) { afterEdit(); }
   protected String hint() { return "Click an element to edit it. Drag to move. Arrow keys fine-tune."; }
+  protected String doneLabel() { return "Done"; }
+  protected String cancelLabel() { return "Cancel"; }
   protected String resetLabel() { return "Reset..."; }
   protected String resetQuestion() { return "Reset to defaults?"; }
   protected String extraFooterLabel() { return ""; }
@@ -126,11 +130,11 @@ abstract class DraftEditorScreen extends UiScreen {
     inline.begin(s, s, accepted, x, y, w, controlsTop(), controlsBottom());
   }
   protected void edit(Setting s, int direction, int y) {
-    draft.checkpoint(); error = "";
+    editingDraft().checkpoint(); error = "";
     click();
     if (s.kind == Setting.Kind.BOOLEAN || s.kind == Setting.Kind.CHOICE) { s.cycle(direction); valueChanged(s); }
     else if (ColourScreen.accepts(s)) {
-      Setting colours = draft.settings().stream().filter(value -> value.id.equals(HudEditorSettings.COLOURS)).findFirst().orElse(null);
+      Setting colours = editingDraft().settings().stream().filter(value -> value.id.equals(HudEditorSettings.COLOURS)).findFirst().orElse(null);
       minecraft.setScreen(colours == null ? new ColourScreen(this, s, () -> valueChanged(s))
           : new ColourScreen(this, s, () -> valueChanged(s), colours));
     }
@@ -167,7 +171,7 @@ abstract class DraftEditorScreen extends UiScreen {
   private List<Footer> footer() {
     List<String> labels = new ArrayList<>(List.of("Undo", resetLabel()));
     labels.addAll(extraFooterLabels());
-    labels.addAll(List.of("Cancel", "Done"));
+    labels.addAll(List.of(cancelLabel(), doneLabel()));
     int[] sizes = new int[labels.size()]; int total = 0;
     for (int i = 0; i < sizes.length; i++) { sizes[i] = Math.max(36, textRenderer.getWidth(labels.get(i)) + 12); total += sizes[i]; }
     int room = span() - (sizes.length - 1) * 4;
@@ -190,7 +194,7 @@ abstract class DraftEditorScreen extends UiScreen {
   }
   private void performReset(boolean positionOnly, boolean all) {
     stopGesture(); slider = null; bar.release(); inline.cancel(); error = "";
-    draft.checkpoint();
+    editingDraft().checkpoint();
     if (offersPositionReset()) {
       List<Setting> scope = all ? allResetSettings() : positionOnly ? positionSettings() : controls();
       scope.stream().filter(s -> !positionOnly || HudEditorSections.position(s)).forEach(this::resetValue);
@@ -249,13 +253,13 @@ abstract class DraftEditorScreen extends UiScreen {
         if (x < controlX()) continue;
         if (resettable(s) && x >= resetX()) {
           if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !atDefault(s)) {
-            draft.checkpoint(); error = ""; resetValue(s); valueChanged(s);
+            editingDraft().checkpoint(); error = ""; resetValue(s); valueChanged(s);
             click();
           }
           return;
         }
         if (x >= controlX() + controlWidth(s)) return;
-        if (button == 0 && usesSlider(s)) { draft.checkpoint(); slider = s; slide(x); }
+        if (button == 0 && usesSlider(s)) { editingDraft().checkpoint(); slider = s; slide(x); }
         else edit(s, button == 1 ? -1 : 1, rowY);
         break;
       }
@@ -330,9 +334,14 @@ abstract class DraftEditorScreen extends UiScreen {
     if (hover.ready(!modal() && Display.isActive() ? hoverId : "") && !tip.isBlank()) tooltip(tip, mx, my);
     inline.renderError(this);
     if (resetPrompt) {
+      GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+      try {
+      GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING);
+      GL11.glDepthMask(false);
       fill(0, 0, width, height, 0xc0000000);
       drawCenteredTextWithShadow(textRenderer, fit(resetQuestion(), width - 20), width / 2, height / 2 - 43, 0xffffff);
       for (ResetButton f : resetButtons()) button(fit(f.label, f.width - 8), f.x, f.y, f.width, 20, pointerX, pointerY, f.enabled);
+      } finally { GL11.glPopAttrib(); }
     }
     exit.render(this, "Save changes to " + title().toLowerCase(Locale.ROOT) + "?", pointerX, pointerY);
   }

@@ -41,7 +41,6 @@
     "Key bindings"
   ],
   "Interface": [
-    "",
     "General",
     "Title screen",
     "Screenshots",
@@ -151,5 +150,6 @@
     "Server settings",
     "Achievement recovery",
     "Miscellaneous"
-  ]
+  ],
+  "Defaults": []
 }

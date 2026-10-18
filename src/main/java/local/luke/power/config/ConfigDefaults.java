@@ -16,9 +16,21 @@ public final class ConfigDefaults {
       if (input == null) throw new IOException("Missing Power Beta defaults");
       JsonObject defaults = JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject();
       if (Files.exists(PowerConfig.path(), LinkOption.NOFOLLOW_LINKS)) {
-        try { PowerConfig.document(); }
+        try {
+          JsonObject document = PowerConfig.document();
+          if (!document.getAsJsonObject("settings").has("defaults")) {
+            DefaultBases.State state = new DefaultBases.State(); state.setupComplete = true;
+            try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
+              PowerConfig.save("defaults", state); transaction.commit();
+            }
+          }
+        }
         catch (IllegalStateException failure) { PowerConfig.recovery(defaults, failure.getMessage()); }
       } else PowerConfig.write(defaults);
+      try { DefaultBases.reload(); }
+      catch (RuntimeException failure) {
+        PowerConfig.recovery(defaults, failure.getMessage()); DefaultBases.reload();
+      }
     }
   }
 }

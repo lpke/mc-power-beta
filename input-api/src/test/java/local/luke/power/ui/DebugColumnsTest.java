@@ -32,4 +32,20 @@ class DebugColumnsTest {
     assertTrue(version.x()>320); assertEquals(2,version.y());
     assertEquals(2,memory.x()); assertEquals(32,memory.y());
   }
+  @org.junit.jupiter.api.Test void rangeMovesPreserveGapsUnknownIdsAndBothColumns() {
+    var original = new DebugColumns(java.util.List.of("version", "", "future.provider", "terrain"), java.util.List.of("", "", "", "usedMemory"));
+    var moved = original.moveRange(0, 0, 2, 1, 0, false);
+    assertEquals(java.util.List.of("", "", "", "terrain"), moved.left());
+    assertEquals(java.util.List.of("version", "", "future.provider", "usedMemory"), moved.right());
+    assertEquals(original, original.moveRange(0, 0, 2, 0, 1, true));
+    assertEquals(java.util.List.of("terrain", "version", "", "future.provider"), original.moveRange(0, 0, 2, 0, 4, true).left());
+  }
+  @org.junit.jupiter.api.Test void blankBoundariesOnlyInsertBesidePopulatedRows() {
+    var rows = java.util.List.of("version", "", "", "terrain");
+    assertFalse(DebugColumns.insertion(rows, 1, 11, 12));
+    assertFalse(DebugColumns.insertion(rows, 2, 0, 12));
+    assertTrue(DebugColumns.insertion(rows, 1, 0, 12));
+    assertTrue(DebugColumns.insertion(rows, 2, 11, 12));
+    assertFalse(DebugColumns.insertion(rows, 2, 6, 12));
+  }
 }

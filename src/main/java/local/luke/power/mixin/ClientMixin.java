@@ -8,6 +8,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class ClientMixin {
+  @ModifyVariable(method = "setScreen", at = @At("HEAD"), argsOnly = true)
+  private net.minecraft.client.gui.screen.Screen power$firstSetup(net.minecraft.client.gui.screen.Screen screen) {
+    Minecraft mc = (Minecraft)(Object)this;
+    return screen instanceof net.minecraft.client.gui.screen.TitleScreen && mc.world == null
+        && local.luke.power.storage.PowerConfig.problem().isEmpty()
+        && local.luke.power.config.DefaultBases.needsSetup()
+        ? new local.luke.power.ui.DefaultsSetupScreen(screen) : screen;
+  }
   @Inject(method = "method_2120", at = @At("HEAD"), cancellable = true)
   private void power$validateWorld(String folder, String name, long seed, CallbackInfo ci) {
     if (!local.luke.power.world.WorldLoadGuard.allow(folder)) ci.cancel();

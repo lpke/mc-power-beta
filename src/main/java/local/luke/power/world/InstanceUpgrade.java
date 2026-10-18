@@ -45,6 +45,7 @@ public final class InstanceUpgrade {
         JsonObject nativeDefaults = fresh.getAsJsonObject("settings").getAsJsonObject("native");
         for (String key : List.of("fov", "guiScale", "gui_scale", "fpsLimit", "framerate_limit"))
           if (previous != null && previous.has(key)) nativeDefaults.add(key, previous.get(key).deepCopy());
+        fresh.getAsJsonObject("settings").getAsJsonObject("defaults").addProperty("setupComplete", true);
         // Keep immutable conversion evidence for worlds imported after this maintenance pass.
         for (String key : List.of("legacyWorldRules", "worldRuleUpgrade", "worldRuleUpgrade210"))
           if (converted.has(key)) fresh.add(key, converted.get(key).deepCopy());

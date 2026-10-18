@@ -634,13 +634,13 @@
     "step": 1
   },
   "power_hud:hudpositions.hudPositioningSystem": {
-    "page": "Interface",
-    "group": "",
+    "page": "General",
+    "group": "Interface",
     "label": "HUD editor",
     "description": "Arrange and preview the HUD, custom info, active tweaks, version label and F3 debug information.",
     "default": 1,
     "restart": false,
-    "order": 0
+    "order": -100
   },
   "power_hud:hudpositions.putOverlayMessagesBelowHotbar": {
     "page": "Interface",
@@ -2457,7 +2457,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 2.4.2",
+    "default": "Power Beta 2.5.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {

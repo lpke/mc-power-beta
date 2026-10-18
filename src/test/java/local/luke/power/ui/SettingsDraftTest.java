@@ -24,7 +24,7 @@ class SettingsDraftTest {
     assertEquals(64, undos);
   }
   @Test void editorRoutingRetainsGameplaySettingsAndExcludesMessages() {
-    var hud = setting(HudEditorSettings.ENTRY, "[]"); assertEquals("", hud.group);
+    var hud = setting(HudEditorSettings.ENTRY, "[]"); assertEquals("General", hud.page); assertEquals("Interface", hud.group);
     assertTrue(HudEditorSettings.contains(hud));
     assertTrue(HudEditorSettings.contains(setting("infoHud.clusters.2.offsetX", "[]")));
     assertFalse(HudEditorSettings.contains(setting("activeTweaks.cinematicCameraMessages", "[]")));

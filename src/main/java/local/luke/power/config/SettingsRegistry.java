@@ -5,6 +5,19 @@ import net.minecraft.client.Minecraft;
 
 public final class SettingsRegistry {
   public static ConfigSession open(Minecraft mc) throws Exception {
+    ConfigSession s = globals(mc);
+    WorldBackend.register(s, mc);
+    return s;
+  }
+
+  public static ConfigSession openDefaults(Minecraft mc) throws Exception {
+    ConfigSession s = globals(mc);
+    RulePresetBackend.register(s);
+    DefaultsBackend.register(s);
+    return s;
+  }
+
+  private static ConfigSession globals(Minecraft mc) throws Exception {
     ConfigSession s = new ConfigSession();
     NativeBackend.register(s, mc);
     VideoBackend.register(s, mc);
@@ -17,7 +30,6 @@ public final class SettingsRegistry {
     ComponentBackend.register(s);
     GlassBackend.register(s);
     LogoBackend.register(s);
-    WorldBackend.register(s, mc);
     DeathBackend.register(s);
     GameplayBackend.register(s);
     VeinBackend.register(s);

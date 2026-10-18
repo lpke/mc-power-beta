@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2.5.0] - 2026-10-18
+
+- Choose Power Beta, Refined Beta 1.7.3 or Beta 1.7.3 defaults on first launch or from the new Defaults tab. Load a full setup or change the reset base without changing current values.
+- Move the HUD editor to General and add F3 row selection, range dragging, saved layouts and a separate Save/Discard boundary.
+- Keep title-editor reset confirmations above the paint grid, including while playing a world.
+- Keep music labels steady when skipping forward or back between tracks.
+- Bring game-rule names and controls closer together in creation and saved-world editors.
+
 ## [2.4.2] - 2026-10-18
 
 - Group general Interface settings below the HUD editor without an extra divider.

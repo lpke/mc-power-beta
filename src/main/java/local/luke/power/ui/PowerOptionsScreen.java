@@ -31,15 +31,16 @@ public final class PowerOptionsScreen extends UiScreen {
           "Gameplay",
           "Crafting",
           "Fixes",
-          "Advanced");
+          "Advanced", "Defaults");
   private List<String> pages = PAGES;
+  private final DefaultsPanel defaultsPanel = new DefaultsPanel(this);
   private local.luke.power.rules.CreationRules creationRules;
   private String savedWorldName;
   private boolean cheatPreset;
   public List<String> visiblePages() { return pages; }
 
   private static final int[] ICONS = {
-    58, 20, 2256, 280, 323, 345, 301, 54, 45, 2, 271, 339, 260, 61, 265, 331
+    58, 20, 2256, 280, 323, 345, 301, 54, 45, 2, 271, 339, 260, 61, 265, 331, 340
   };
 
   private record Row(String group, Setting setting, int y, int height, boolean separator) {
@@ -100,7 +101,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private static int sidebarWidth(int width) { return Math.max(90, Math.min(155, width / 4)); }
   private int uiWidth() {
     int available = Math.min(width, height * 16 / 9);
-    return isolatedRules() ? available - sidebarWidth(available) - 2 : available;
+    return isolatedRules() ? Math.min(668, Math.max(200, (available - sidebarWidth(available) - 2) * 88 / 100)) : available;
   }
   private int origin() { return (width - uiWidth()) / 2; }
   private int right() { return origin() + uiWidth(); }
@@ -366,6 +367,15 @@ public final class PowerOptionsScreen extends UiScreen {
         .toList();
   }
 
+  void loadDefaults(DefaultBases.Base base) throws Exception {
+    session.discard();
+    boolean restart;
+    try { restart = DefaultBases.load(base, minecraft, FabricLoader.getInstance().getGameDir()); }
+    finally { session = SettingsRegistry.open(minecraft); layout(); }
+    error = restart ? "Loaded. Restart the game for marked changes." : "Loaded " + base.label + ".";
+    layout();
+  }
+
   public ConfigSession session() {
     return session;
   }
@@ -411,7 +421,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private void layout() {
     if (session == null) return;
-    pages = PAGES.stream().filter(p -> session.settings().stream()
+    pages = PAGES.stream().filter(p -> p.equals("Defaults") && !isolatedRules() || session.settings().stream()
         .anyMatch(s -> s.page.equals(p) && SettingAccess.visible(session, s))).toList();
     if (!pages.contains(page) && !pages.isEmpty()) {
       positions.put(page, scroll);
@@ -440,7 +450,7 @@ public final class PowerOptionsScreen extends UiScreen {
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
     }
     for (Setting s : candidates) {
-      if (HudEditorSettings.internal(s)) continue;
+      if (s.backend.equals("defaults") || HudEditorSettings.internal(s)) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
           && (HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY)
               || HudEditorSettings.lettering(s))) continue;
@@ -565,6 +575,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   protected void mouseClicked(int x, int y, int button) {
+    if (page.equals("Defaults") && !confirmClose && !confirmReset && defaultsPanel.press(x, y, button, left(), span())) return;
     if (valueEditor.press(x, y, button)) return;
     if (hidden) {
       if (button == 0 && inside(x, y, disabledX(), height - 28, 90, 20)) { hidden = false; click(); }
@@ -601,6 +612,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (inside(x, y, searchLeft(), 27, searchWidth(), 20)) {
       if (libraryVisible()) { library.searchClick(x, y, button); return; }
+      if (page.equals("Defaults")) return;
       search.focused = true;
       search.click(x, button);
       if (button == 1) {
@@ -647,6 +659,10 @@ public final class PowerOptionsScreen extends UiScreen {
         selected = -1;
         layout();
       }
+      return;
+    }
+    if (page.equals("Defaults")) {
+      if (button == 0 && inside(x, y, actionX(2), height - 28, actionWidth(), 20)) save(true);
       return;
     }
     if (musicControlsVisible() && button == 0 && y >= 52 && y < audioContentTop() - 3 && x >= left() && x < contentRight()) {
@@ -914,6 +930,7 @@ public final class PowerOptionsScreen extends UiScreen {
   public boolean capturingBinding() { return capture != null; }
 
   protected void keyPressed(char c, int key) {
+    if (page.equals("Defaults") && defaultsPanel.key(key)) return;
     if (valueEditor.key(c, key)) return;
     if (hidden) { if (key == Keyboard.KEY_ESCAPE || key == Keyboard.KEY_F1) hidden = false; return; }
     if (capture != null) {
@@ -954,6 +971,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if ((Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
         && key == Keyboard.KEY_F) {
       if (libraryVisible()) { library.focus(); return; }
+      if (page.equals("Defaults")) return;
       search.focused = true;
       search.selectAll();
       return;
@@ -1102,6 +1120,20 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     renderSidebar(mx, my);
+    if (page.equals("Defaults")) {
+      defaultsPanel.init(minecraft, width, height);
+      defaultsPanel.draw(confirmClose ? -1000 : mx, confirmClose ? -1000 : my, left(), span());
+      if (confirmClose) {
+        fill(0, 0, width, height, 0xc0000000);
+        centeredText("Save your changes?", height / 2 - 18, 0xffffff);
+        button("Save", width / 2 - 102, height / 2 + 12, 100, 20, mx, my, true);
+        button("Discard", width / 2 + 2, height / 2 + 12, 100, 20, mx, my, true);
+        button("Keep editing", width / 2 - 50, height / 2 + 36, 100, 20, mx, my, true);
+      }
+      if (!error.isEmpty()) text(fit(error, span()), left(), height - 44, 0xffbb88);
+      button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
+      return;
+    }
     if (libraryVisible() || !history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,

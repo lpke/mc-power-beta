@@ -232,9 +232,11 @@ public final class AudioController {
     if (paused) return currentTrackId().isEmpty() ? "Music paused" : "Paused: " + musicLabel(currentTrackId());
     if (AudioConfig.current().master == 0 || client != null && client.options.musicVolume == 0)
       return "Music muted";
+    // Source commands are queued on the sound thread. The chosen track owns the
+    // label throughout that handoff, even before playing() observes the new source.
+    if (!silenced && !currentTrackId().isBlank()) return "Playing: " + musicLabel(currentTrackId());
     String playing = nowPlaying();
     if (!playing.equals("none") && !playing.isBlank()) return "Playing: " + playing;
-    if (!silenced && !currentMusic.isBlank()) return "Starting: " + musicLabel(currentMusic);
     if (!status.isEmpty()) return status;
     class_267 next = upcoming();
     return MusicTiming.status(remainingDelay(), next == null ? "next track" : musicLabel(trackId(next)));

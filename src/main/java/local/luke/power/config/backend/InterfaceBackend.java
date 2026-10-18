@@ -10,6 +10,10 @@ import local.luke.power.ui.MenuPreferences;
 public final class InterfaceBackend implements Backend {
   public static void register(ConfigSession session) {
     List<Setting> settings = new ArrayList<>(List.of(
+            new Setting("interface.autoApply", "interface", "Interface", "General", "Auto apply", "", Setting.Kind.BOOLEAN,
+                new JsonPrimitive(MenuPreferences.current().autoApply), new JsonPrimitive(true), 0, 1, 1, List.of(), false),
+            new Setting("interface.debugPresets", "interface", "Interface", "Debug (F3) info", "F3 presets", "", Setting.Kind.LIST,
+                MenuPreferences.current().debugPresets, new JsonArray(), 0, 0, 1, List.of(), false),
             new Setting("interface.debugOrder", "interface", "Interface", "Debug (F3) info", "Info order",
                 "Arrange both columns of F3 lines in the preview. Drag between lines to insert, or into an empty row to leave a gap.", Setting.Kind.LIST,
                 Catalog.JSON.toJsonTree(MenuPreferences.debugOrder()), Catalog.JSON.toJsonTree(local.luke.power.ui.DebugOrder.defaults()), 0, 0, 1, List.of(), false),
@@ -76,7 +80,9 @@ public final class InterfaceBackend implements Backend {
           ? local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder")) : MenuPreferences.debugOrder(),
           values.containsKey("interface.debugRightOrder") ? local.luke.power.ui.DebugOrder.read(values.get("interface.debugRightOrder")) : MenuPreferences.debugRightOrder());
     for (var e : values.entrySet()) {
-      if ((e.getKey().equals("interface.debugOrder") || e.getKey().equals("interface.debugRightOrder"))) {
+      if (e.getKey().equals("interface.debugPresets")) {
+        local.luke.power.ui.DebugPresets.checked(e.getValue());
+      } else if ((e.getKey().equals("interface.debugOrder") || e.getKey().equals("interface.debugRightOrder"))) {
         local.luke.power.ui.DebugOrder.read(e.getValue());
       } else if (e.getKey().equals("interface.debugTextSize")) {
         double n = e.getValue().getAsDouble();
@@ -92,7 +98,7 @@ public final class InterfaceBackend implements Backend {
         }
       } else if (e.getKey().equals("interface.debugTextColor")) {
         local.luke.power.light.LightSettings.rgb(e.getValue().getAsString());
-      } else if ((!e.getKey().equals("interface.hidePowerBetaVersion") && !e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
+      } else if ((!e.getKey().equals("interface.autoApply") && !e.getKey().equals("interface.hidePowerBetaVersion") && !e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
           || !e.getValue().isJsonPrimitive() || !e.getValue().getAsJsonPrimitive().isBoolean())
         throw new IllegalArgumentException("Invalid interface preference");
     }
@@ -127,6 +133,8 @@ public final class InterfaceBackend implements Backend {
   public void apply(Map<String, JsonElement> values) throws Exception {
     validate(values);
     MenuPreferences.update(v -> {
+      if (values.containsKey("interface.autoApply")) v.autoApply = values.get("interface.autoApply").getAsBoolean();
+      if (values.containsKey("interface.debugPresets")) v.debugPresets = local.luke.power.ui.DebugPresets.checked(values.get("interface.debugPresets"));
       if (values.containsKey("interface.debugOrder")) v.debugOrder = local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder"));
       if (values.containsKey("interface.debugRightOrder")) v.debugRightOrder = local.luke.power.ui.DebugOrder.read(values.get("interface.debugRightOrder"));
       if (values.containsKey("interface.debugTextSize")) v.debugTextSize = values.get("interface.debugTextSize").getAsDouble();

@@ -19,7 +19,8 @@ public final class Setting {
   public final String id, backend, page, group, label, description;
   public final Kind kind;
   public final List<String> choices;
-  public final JsonElement defaultValue;
+  public final JsonElement powerBetaDefault;
+  public JsonElement defaultValue;
   public final double min, max, step;
   public final boolean restart;
   private final double displayDivisor;
@@ -59,7 +60,8 @@ public final class Setting {
     this.kind = kind;
     this.value = value.deepCopy();
     this.original = value.deepCopy();
-    this.defaultValue = defaultValue.deepCopy();
+    this.powerBetaDefault = defaultValue.deepCopy();
+    refreshDefault();
     this.min = min;
     this.max = max;
     this.step = step;
@@ -82,6 +84,8 @@ public final class Setting {
   public void reset() {
     value = defaultValue.deepCopy();
   }
+
+  public void refreshDefault() { defaultValue = DefaultBases.value(id, powerBetaDefault); }
 
   public void cycle(int direction) {
     if (direction != 1 && direction != -1)
@@ -148,7 +152,7 @@ public final class Setting {
       if (!next.isJsonArray() && !next.isJsonObject())
         throw new IllegalArgumentException("Enter a list or object");
       int limit = switch (id) {
-        case "audio.presets", "audio.favourites", "audio.exclusions", "audio.groupVolumes", "audio.presetTrackPool", "logo.presets" -> 1048576;
+        case "audio.presets", "audio.favourites", "audio.exclusions", "audio.groupVolumes", "audio.presetTrackPool", "logo.presets", "interface.debugPresets" -> 1048576;
         default -> 16384;
       };
       if (next.toString().length() > limit)
