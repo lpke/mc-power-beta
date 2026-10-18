@@ -10,7 +10,10 @@ final class DefaultsPanel extends UiScreen {
   private final PowerOptionsScreen owner;
   private DefaultBases.Base pending;
   private String error = "";
+  private final HoverDelay hoverDelay = new HoverDelay();
+  private DefaultBases.Base hovered;
   DefaultsPanel(PowerOptionsScreen owner) { this.owner = owner; }
+  void tick(boolean active) { if (active) hoverDelay.tick(); else hoverDelay.clear(); }
   boolean modal() { return pending != null; }
   boolean key(int key) {
     if (!modal()) return false;
@@ -19,7 +22,7 @@ final class DefaultsPanel extends UiScreen {
   }
   private boolean stacked(int span) { return span < 290; }
   private int buttonWidth(int span) { return stacked(span) ? 78 : 90; }
-  private int rowTop(int span, int index) { return (stacked(span) ? 75 : 84) + index * (stacked(span) ? 40 : 34); }
+  private int rowTop(int span, int index) { return (stacked(span) ? 64 : 84) + index * (stacked(span) ? 36 : 34); }
   private int loadX(int left, int span) { return left + span - buttonWidth(span) * (stacked(span) ? 1 : 2) - (stacked(span) ? 0 : 4); }
   private int baseY(int span, int top) { return top + (stacked(span) ? 18 : 0); }
   boolean press(int x, int y, int button, int left, int span) {
@@ -48,19 +51,26 @@ final class DefaultsPanel extends UiScreen {
     return false;
   }
   void draw(int x, int y, int left, int span) {
+    hovered = null;
     text(fit("Choose what Reset restores, or load a complete setup.", span), left, 37, 0xdddddd);
-    text(fit("Changing the base keeps your current settings.", span), left, 54, 0xaaaaaa);
+    text(fit(error.isEmpty() ? "Changing the base keeps your current settings." : error, span), left, 54, error.isEmpty() ? 0xaaaaaa : 0xff8888);
     int w = buttonWidth(span);
     for (var base : DefaultBases.Base.values()) {
       int top = rowTop(span, base.ordinal());
+      if (!modal() && inside(x, y, left, top, span, stacked(span) ? 36 : 24)) {
+        rectangle(left - 2, top, left + span, top + (stacked(span) ? 36 : 24), 0x60000000);
+        hovered = base;
+      }
       boolean selected = base == DefaultBases.current();
       if (selected) rectangle(left + 1, top + 5, left + 3, top + 15, 0xffffdd66);
       text(fit(base.label, span - w * (stacked(span) ? 1 : 2) - 16), left + 8, top + (stacked(span) ? 14 : 6), selected ? 0xffffdd66 : 0xdddddd);
       button("Load", loadX(left, span), top, w, stacked(span) ? 18 : 20, x, y, true);
       button("Use as base", left + span - w, baseY(span, top), w, stacked(span) ? 18 : 20, x, y, !selected);
-      if (!modal() && inside(x, y, left, top, span - w * (stacked(span) ? 1 : 2) - 8, 20)) tooltip(base.label + "\n" + base.description, x, y);
     }
-    if (!error.isEmpty()) text(fit(error, span), left, 201, 0xff8888);
+  }
+  void overlay(int x, int y) {
+    if (hoverDelay.ready(hovered == null ? "" : hovered.id))
+      foregroundTooltip(hovered.label + "\n" + hovered.description, x, y);
     if (modal()) {
       GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT);
       try {

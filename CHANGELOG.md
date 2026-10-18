@@ -4,7 +4,9 @@
 
 ## [2.5.0] - 2026-10-18
 
-- Choose Power Beta, Refined Beta 1.7.3 or Beta 1.7.3 defaults on first launch or from the new Defaults tab. Load a full setup or change the reset base without changing current values.
+- Choose Power Beta Full, Power Beta Lite, Refined Beta 1.7.3 or Beta 1.7.3 defaults on first launch or from the new Defaults tab. Load a full setup or change the reset base without changing current values. Lite retains the original Power Beta defaults; Full enables vein mining, torch shovel, faster vehicles and extra visual controls.
+- Start every defaults base at GUI scale 4x, keeping the welcome selection from switching to Auto scale.
+- Keep welcome and Defaults tooltips above buttons, use the normal Options tooltip delay and hover backgrounds, and place the welcome reminder below the choices.
 - Move the HUD editor to General and add F3 row selection, range dragging, saved layouts and a separate Save/Discard boundary.
 - Keep title-editor reset confirmations above the paint grid, including while playing a world.
 - Keep music labels steady when skipping forward or back between tracks.

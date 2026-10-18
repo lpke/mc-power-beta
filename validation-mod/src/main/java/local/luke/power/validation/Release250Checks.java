@@ -29,7 +29,8 @@ final class Release250Checks {
       test("fresh startup presents a chooser before the title", () -> {
         check(mc.currentScreen instanceof DefaultsSetupScreen, "chooser missing: " + mc.currentScreen);
         mc.currentScreen.init(mc, 960, 540); capture(mc, mc.currentScreen, "first-launch");
-        click(mc.currentScreen, 480, 95, 0);
+        chooserTooltips(mc);
+        click(mc.currentScreen, 480, 106, 0);
         check(!DefaultBases.needsSetup(), "choice not saved");
         check(!(mc.currentScreen instanceof DefaultsSetupScreen), "Power Beta needs an unnecessary restart");
         mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen());
@@ -39,7 +40,7 @@ final class Release250Checks {
       check(mc.world == null, "return to title first");
       var state = new DefaultBases.State(); PowerConfig.save("defaults", state); DefaultBases.reload();
       mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen()); mc.currentScreen.init(mc,960,540);
-      click(mc.currentScreen,480,151,0);
+      click(mc.currentScreen,480,162,0);
       check(DefaultBases.current() == DefaultBases.Base.BETA && !DefaultBases.needsSetup(), "Beta setup not saved");
       check((boolean)get(mc.currentScreen,"restart"), "Beta setup did not request a restart");
       capture(mc,mc.currentScreen,"beta-restart");
@@ -80,7 +81,18 @@ final class Release250Checks {
   }
   private static void defaults(Minecraft mc) throws Exception {
     var game = Path.of(".").toAbsolutePath();
-    test("all three complete loads validate and refresh every registered reset value", () -> {
+    test("all four complete loads validate and refresh every registered reset value", () -> {
+      var comparison = new JsonArray();
+      for (var setting : SettingsRegistry.openDefaults(mc).settings()) {
+        var row = new JsonObject();
+        row.addProperty("id",setting.id); row.addProperty("page",setting.page); row.addProperty("group",setting.group);
+        row.addProperty("label",setting.label); row.addProperty("description",setting.description);
+        row.addProperty("kind",setting.kind.name()); row.add("choices",Catalog.JSON.toJsonTree(setting.choices));
+        var values = new JsonObject();
+        for (var base : DefaultBases.Base.values()) values.add(base.id,DefaultBases.value(base,setting.id,setting.powerBetaDefault));
+        row.add("values",values); comparison.add(row);
+      }
+      Files.writeString(REPORT.resolve("defaults-comparison.json"),Catalog.JSON.toJson(comparison));
       for (var base : DefaultBases.Base.values()) {
         var before = PowerConfig.document().getAsJsonObject("settings").deepCopy();
         DefaultBases.use(base, game);
@@ -95,6 +107,7 @@ final class Release250Checks {
         DefaultBases.load(base, mc, game);
         check(DefaultBases.current() == base, "base not applied");
         var loaded = SettingsRegistry.openDefaults(mc);
+        check(loaded.settings().stream().filter(s -> s.id.equals("native.guiScale")).findFirst().orElseThrow().value.getAsInt() == 4,"GUI scale changed for " + base);
         for (var setting : loaded.settings()) if (!Set.of("audio.presets", "audio.favourites", "logo.presets", "interface.debugPresets", "interface.colours", "defaults.base", "defaults.setupComplete").contains(setting.id)) {
           check(same(setting.value, DefaultBases.value(base, setting.id, setting.powerBetaDefault)), "load mismatch " + base + " " + setting.id + " = " + setting.value + " expected " + DefaultBases.value(base, setting.id, setting.powerBetaDefault));
         }
@@ -108,6 +121,16 @@ final class Release250Checks {
       capture(mc, options, "defaults-wide");
       Object panel = get(options, "defaultsPanel");
       options.render(-1, -1, 0);
+      int hoverX=n(options,"left")+10;
+      options.render(hoverX,90,0);
+      Object delay=get(panel,"hoverDelay");
+      check((int)get(delay,"ticks")==0,"tooltip appeared immediately");
+      for(int i=0;i<13;i++)options.tick();
+      options.render(hoverX,90,0);
+      GL11.glEnable(GL11.GL_DEPTH_TEST); GL11.glEnable(GL11.GL_LIGHTING);
+      call(panel,"foregroundTooltip","tooltip state check",hoverX,90);
+      check(GL11.glIsEnabled(GL11.GL_DEPTH_TEST) && GL11.glIsEnabled(GL11.GL_LIGHTING),"tooltip leaked GL state");
+      SettingsSnapshot.render(mc,options,960,540,REPORT.resolve("defaults-tooltip.png"),hoverX,90);
       click(options, n(options,"right")-180, 90, 0);
       check((boolean)call(panel,"modal"), "Load did not warn");
       byte[] before = Files.readAllBytes(PowerConfig.path());
@@ -117,6 +140,13 @@ final class Release250Checks {
       check(!(boolean)call(panel,"modal"), "Escape failed to cancel");
       for (int[] size : new int[][]{{320,240},{640,420}}) { options.init(mc,size[0],size[1]); capture(mc,options,"defaults-"+size[0]); }
     });
+  }
+  private static void chooserTooltips(Minecraft mc) throws Exception {
+    var screen=mc.currentScreen;
+    screen.render(480,78,0);
+    check((int)get(get(screen,"hoverDelay"),"ticks")==0,"welcome tooltip appeared immediately");
+    for(int i=0;i<13;i++)screen.tick();
+    SettingsSnapshot.render(mc,screen,960,540,REPORT.resolve("welcome-tooltip.png"),480,78);
   }
   private static void ui(Minecraft mc) throws Exception {
     MenuPreferences.update(v -> v.autoApply = false);

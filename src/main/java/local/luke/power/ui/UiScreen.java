@@ -211,6 +211,15 @@ public abstract class UiScreen extends Screen {
     GL11.glPopAttrib();
   }
 
+  protected void foregroundTooltip(String message, int mx, int my) {
+    GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT);
+    try {
+      GL11.glDisable(GL11.GL_DEPTH_TEST);
+      GL11.glDisable(GL11.GL_LIGHTING);
+      tooltip(message, mx, my);
+    } finally { GL11.glPopAttrib(); }
+  }
+
   protected void tooltip(String message, int mx, int my) {
     int max = Math.min(width - 20, 280);
     java.util.List<String> lines = new java.util.ArrayList<>();

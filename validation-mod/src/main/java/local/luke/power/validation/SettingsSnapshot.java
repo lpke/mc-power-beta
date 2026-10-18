@@ -121,7 +121,8 @@ final class SettingsSnapshot {
     GL11.glDisable(GL11.GL_LIGHTING);
     screen.render(mx, my, 0);
     if (screen instanceof PowerOptionsScreen && mx >= 0) {
-      field(screen,"hoverTicks",1000);screen.render(mx,my,0);
+      for (int tick = 0; tick < 13; tick++) screen.tick();
+      screen.render(mx,my,0);
     }
     GL11.glFinish();
     ByteBuffer pixels = BufferUtils.createByteBuffer(pixelsWide * pixelsHigh * 4);

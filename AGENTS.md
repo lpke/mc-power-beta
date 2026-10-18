@@ -60,8 +60,10 @@
   sliders with right-click exact entry, individual resets and isolated editor drafts.
   Play the native UI click sound for buttons, tabs, toggles and confirmations.
   Slider movement, pointer selection, dragging and silent group chevrons stay quiet.
-- Reset values depend on the user's Defaults base: Power Beta, Refined Beta 1.7.3 or
-  Beta 1.7.3. `DefaultBases` resolves stable setting IDs against the explicit
+- Reset values depend on the user's Defaults base: Power Beta Full, Power Beta Lite,
+  Refined Beta 1.7.3 or Beta 1.7.3. Lite retains the original `power_beta` ID and
+  canonical defaults; Full adds explicit opt-ins without copying personal settings.
+  All bases start at GUI scale 4. `DefaultBases` resolves stable setting IDs against the explicit
   `default-bases.json` overrides; retain each setting's canonical Power Beta default
   when copying drafts. Use as base changes only reset targets, never setting values.
   Load resets global preferences and creation templates, never existing world rules

@@ -41,7 +41,26 @@ class DefaultBasesTest {
       assertTrue(nested.get(setting.id).defaultValue.getAsBoolean());
       assertTrue(nested.get(setting.id).value.getAsBoolean());
       DefaultBases.reload(); assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.current());
+      DefaultBases.use(DefaultBases.Base.FULL, game);
+      DefaultBases.reload(); assertEquals(DefaultBases.Base.FULL, DefaultBases.current());
+      JsonObject full = PowerConfig.document().getAsJsonObject("settings").deepCopy();
+      full.remove("defaults"); assertEquals(before, full);
     } finally { DefaultBases.use(DefaultBases.Base.POWER_BETA, game); }
+  }
+  @Test void liteKeepsItsStorageIdAndFullEnablesToolsWithoutChangingGuiScale() throws Exception {
+    ConfigDefaults.prepare(game);
+    assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.read("power_beta"));
+    assertEquals("Power Beta Lite", DefaultBases.Base.POWER_BETA.label);
+    assertEquals(DefaultBases.Base.FULL, DefaultBases.Base.values()[0]);
+    for (var id : List.of("veinMining.enabled", "gameplay.torchShovel", "gameplay.axesSlashLeaves", "tweaks.boatSpeed")) {
+      assertTrue(DefaultBases.value(DefaultBases.Base.FULL, id, new JsonPrimitive(false)).getAsBoolean(), id);
+      assertFalse(DefaultBases.value(DefaultBases.Base.POWER_BETA, id, new JsonPrimitive(false)).getAsBoolean(), id);
+    }
+    var nativeDefaults = PowerConfig.section("native");
+    assertEquals(4, nativeDefaults.get("guiScale").getAsInt());
+    assertEquals(.5, nativeDefaults.get("gui_scale").getAsDouble());
+    for (var base : DefaultBases.Base.values())
+      assertEquals(4, DefaultBases.value(base, "native.guiScale", new JsonPrimitive(4)).getAsInt());
   }
   @Test void existingInstallsSkipSetupAndFreshInstallsAskOnce() throws Exception {
     ConfigDefaults.prepare(game); assertTrue(DefaultBases.needsSetup());

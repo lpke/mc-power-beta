@@ -12,7 +12,8 @@ import net.minecraft.client.Minecraft;
 /** Reset targets are independent of the currently applied settings. */
 public final class DefaultBases {
   public enum Base {
-    POWER_BETA("power_beta", "Power Beta", "The Power Beta defaults, with gameplay additions, fixes and inventory controls."),
+    FULL("power_beta_full", "Power Beta Full", "The full Power Beta setup, with vein mining, torch shovel, faster vehicles, clearer water and extra visual controls enabled. Temporary tools still need their controls, and world permissions still apply."),
+    POWER_BETA("power_beta", "Power Beta Lite", "The original Power Beta defaults, with gameplay additions, fixes and inventory controls. Vein mining, faster vehicles and extra visual overrides start off."),
     REFINED("refined_beta", "Refined Beta 1.7.3", "Beta gameplay with performance improvements, fixes and inventory quality of life. Extra gameplay mechanics and recipes are off."),
     BETA("beta", "Beta 1.7.3", "Closest to vanilla Beta. Optional fixes, culling and performance controls are off. SmoothBeta rendering, StationAPI, shared input/configuration, GlassNetworking, RetroAuth and faster startup remain installed. Pack menus, safe data recovery and platform compatibility remain available.");
     public final String id, label, description;

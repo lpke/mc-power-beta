@@ -93,7 +93,7 @@ public final class NativeBackend implements Backend {
             "GUI scale",
             "0",
             "8",
-            "0"
+            "4"
           }
         }) {
       Option option = (Option) mod.getField(spec[1]).get(null);

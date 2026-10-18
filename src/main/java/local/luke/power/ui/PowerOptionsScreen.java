@@ -495,6 +495,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   public void tick() {
     hoverDelay.tick();
+    defaultsPanel.tick(page.equals("Defaults"));
     if (library != null) library.tick();
     int revision = local.luke.power.audio.AudioController.libraryRevision();
     if (session != null && !isolatedRules() && revision != musicRevision) {
@@ -1123,6 +1124,9 @@ public final class PowerOptionsScreen extends UiScreen {
     if (page.equals("Defaults")) {
       defaultsPanel.init(minecraft, width, height);
       defaultsPanel.draw(confirmClose ? -1000 : mx, confirmClose ? -1000 : my, left(), span());
+      if (!error.isEmpty()) text(fit(error, span()), left(), height - 44, 0xffbb88);
+      button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
+      defaultsPanel.overlay(mx, my);
       if (confirmClose) {
         fill(0, 0, width, height, 0xc0000000);
         centeredText("Save your changes?", height / 2 - 18, 0xffffff);
@@ -1130,8 +1134,6 @@ public final class PowerOptionsScreen extends UiScreen {
         button("Discard", width / 2 + 2, height / 2 + 12, 100, 20, mx, my, true);
         button("Keep editing", width / 2 - 50, height / 2 + 36, 100, 20, mx, my, true);
       }
-      if (!error.isEmpty()) text(fit(error, span()), left(), height - 44, 0xffbb88);
-      button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
       return;
     }
     if (libraryVisible() || !history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
