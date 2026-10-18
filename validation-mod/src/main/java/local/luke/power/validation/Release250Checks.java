@@ -82,6 +82,15 @@ final class Release250Checks {
   private static void defaults(Minecraft mc) throws Exception {
     var game = Path.of(".").toAbsolutePath();
     test("all four complete loads validate and refresh every registered reset value", () -> {
+      var registered = new HashSet<String>();
+      for (var setting : SettingsRegistry.openDefaults(mc).settings()) registered.add(setting.id);
+      try (var input = new java.io.InputStreamReader(DefaultBases.class.getResourceAsStream("/assets/powerbeta/default-bases.json"), java.nio.charset.StandardCharsets.UTF_8)) {
+        var profiles = JsonParser.parseReader(input).getAsJsonObject();
+        for (var profile : profiles.entrySet()) for (var key : profile.getValue().getAsJsonObject().keySet()) {
+          String id = key.startsWith("rule.") ? "rules.survival." + key.substring(5) : key;
+          check(registered.contains(id), "unused defaults override " + profile.getKey() + " " + key);
+        }
+      }
       var comparison = new JsonArray();
       for (var setting : SettingsRegistry.openDefaults(mc).settings()) {
         var row = new JsonObject();
@@ -106,6 +115,8 @@ final class Release250Checks {
         }
         DefaultBases.load(base, mc, game);
         check(DefaultBases.current() == base, "base not applied");
+        var panorama = PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig");
+        check(panorama.get("enablePanorma").getAsBoolean() == (base == DefaultBases.Base.FULL),"panorama enable flag not linked to base selection");
         var loaded = SettingsRegistry.openDefaults(mc);
         check(loaded.settings().stream().filter(s -> s.id.equals("native.guiScale")).findFirst().orElseThrow().value.getAsInt() == 4,"GUI scale changed for " + base);
         for (var setting : loaded.settings()) if (!Set.of("audio.presets", "audio.favourites", "logo.presets", "interface.debugPresets", "interface.colours", "defaults.base", "defaults.setupComplete").contains(setting.id)) {

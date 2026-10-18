@@ -9,7 +9,6 @@
     "power_controls:general.rawInput": true,
     "power_controls:userinterface.clearTextFieldWithRightClick": true,
     "power_controls:userinterface.frontViewThirdPerson": 0,
-    "power_controls:userinterface.panoramaConfig.enablePanorma": true,
     "power_controls:userinterface.panoramaConfig.panoramaFolder": "b1_8_1",
     "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebug": true,
     "power_environment:config.MUSIC_CONFIG.volumeCaveAmbient": 0,
