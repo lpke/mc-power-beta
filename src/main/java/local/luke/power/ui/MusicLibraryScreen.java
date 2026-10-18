@@ -795,7 +795,7 @@ public final class MusicLibraryScreen extends UiScreen {
       if(!presetsOpen){
         if (volume != null && parent.valueEditor.editing(row))
           parent.valueEditor.render(this, volumeX(), cy, layout.volumeWidth(), mx, listMouseY, rowsTop, bottom());
-        else if (volume != null) slider(volume.display()+"%",volumeX(),cy,layout.volumeWidth(),mx,listMouseY,volume.value.getAsDouble()/100);
+        else if (volume != null) slider(volume.display(),volumeX(),cy,layout.volumeWidth(),mx,listMouseY,volume.value.getAsDouble()/100);
         iconButton("star",layout.favouriteX(),cy,bw,mx,listMouseY,true,edits.favourites().contains(id));
       }
       if(queue){

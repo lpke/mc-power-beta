@@ -335,6 +335,15 @@ final class Release250Checks {
     });
   }
   private static void audio(Minecraft mc) throws Exception {
+    test("music library shares percentage labels at every width", () -> {
+      PowerOptionsScreen.openMusic(mc,mc.currentScreen,false,"music:calm1.ogg");
+      var screen=(PowerOptionsScreen)mc.currentScreen;
+      var volume=screen.session().settings().stream().filter(s->s.id.equals("audio.sound.music:calm1.ogg")).findFirst().orElseThrow();
+      check(volume.display().equals(volume.editText()+"%"),"track percentage differs from exact entry");
+      for(int[] size:new int[][]{{320,240},{960,540},{1720,720}}) {
+        screen.init(mc,size[0],size[1]);capture(mc,screen,"music-percent-"+size[0]);
+      }
+    });
     test("next/previous handoffs never expose transient Starting labels", () -> {
       var config=AudioConfig.copy();config.master=100;AudioConfig.preview(config);mc.options.musicVolume=1;
       for(int i=0;i<12;i++) {
