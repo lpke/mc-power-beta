@@ -60,11 +60,15 @@
   sliders with right-click exact entry, individual resets and isolated editor drafts.
   Play the native UI click sound for buttons, tabs, toggles and confirmations.
   Slider movement, pointer selection, dragging and silent group chevrons stay quiet.
-- Reset values depend on the user's Defaults base: Power Beta Full, Power Beta Lite,
-  Refined Beta 1.7.3 or Beta 1.7.3. Lite retains the original `power_beta` ID and
-  canonical defaults; Full adds explicit opt-ins without copying personal settings.
+- Reset values depend on the user's Defaults base: Power Beta, Refined Beta 1.7.3
+  or Beta 1.7.3. Power Beta keeps the `power_beta` ID; the retired `power_beta_full`
+  ID is an alias, never a reason to reload settings. Keep the backend/catalogue
+  fallback values stable so changes to one base do not change another. Power Beta's
+  explicit overrides and fresh-install JSON must agree. Never copy personal controls,
+  paths, music libraries, HUD layouts or world IDs into defaults. Ore vein mining
+  starts with ores only; Creative/Spectator use modern response and standard speed.
   All bases start at GUI scale 4. `DefaultBases` resolves stable setting IDs against the explicit
-  `default-bases.json` overrides; retain each setting's canonical Power Beta default
+  `default-bases.json` overrides; retain each setting's shared fallback default
   when copying drafts. Use as base changes only reset targets, never setting values.
   Load resets global preferences and creation templates, never existing world rules
   or recovery data. Saved music, title and F3 presets remain user data. Keep reset
@@ -453,7 +457,9 @@
   resets. Item-name previews use the shared native message position only when enabled.
 
 - HUD editor layout shares one geometry model for controls, scrollbars, dividers and
-  preview input. Preview coordinates retain the window aspect ratio in both split
+  preview input. Small layouts can hide the settings pane for that visit; keep its
+  scroll and selection, nested F3 drafts and modal ownership intact. Wide layouts
+  retain their existing controls. Preview coordinates retain the window aspect ratio in both split
   orientations. Only the selected hidden info cluster has an empty outline and hit
   target; selection never enables it. Preview
   backgrounds are cached captures, never a second live world. Nested colour swatches

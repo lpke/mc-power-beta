@@ -53,7 +53,7 @@ final class DebugReorder extends UiScreen {
   String help(int mx, int my) {
     if (active() && inside(mx, my, left, toolbarTop, toolbarWidth, 18)) {
       int at = Math.min(3, (mx - left) / (toolbarButtonWidth() + 4));
-      return switch (at) { case 0 -> "Load a saved F3 layout and line visibility. Scroll the list for more presets.";
+      return switch (at) { case 0 -> "Preset: " + selectedPreset() + "\nLoad a saved F3 layout and line visibility. Scroll the list for more presets.";
         case 1 -> "Save this F3 layout and visibility as a named preset.";
         case 2 -> "Remove the selected saved preset."; default -> "Restore the F3 layout for your Defaults base. Visibility is kept."; };
     }
@@ -84,6 +84,7 @@ final class DebugReorder extends UiScreen {
     }
     return true;
   }
+  void closePicker() { choosing = false; }
   void cancelDrag() { pressed = dragging = false; }
   void wheel(int amount, int mx, int my) {
     if (choosing) { presetScroll = Math.max(0, Math.min(Math.max(0, presets().size() - popupRows()), presetScroll - Integer.signum(amount))); return; }
@@ -187,7 +188,8 @@ final class DebugReorder extends UiScreen {
     }
     for (int side = 0; side < 2; side++) drawColumn(side, mx, my);
     int w = toolbarButtonWidth();
-    String[] labels = {"Preset: " + selectedPreset(), "Save as...", "Remove", "Reset layout..."};
+    String[] labels = w < 90 ? new String[]{"Presets", "Save as...", "Remove", "Reset..."}
+        : new String[]{"Preset: " + selectedPreset(), "Save as...", "Remove", "Reset layout..."};
     for (int i = 0; i < labels.length; i++) button(fit(labels[i], w - 8), left + i * (w + 4), toolbarTop, w, 18, mx, my, i != 0 && i != 2 || presets().size() > 0);
     if (choosing) for (int i = presetScroll; i < Math.min(presets().size(), presetScroll + popupRows()); i++) button(fit(presets().get(i).getAsJsonObject().get("name").getAsString(), toolbarWidth - 8), left, toolbarTop + 19 + (i - presetScroll) * 18, toolbarWidth, 18, mx, my, true);
     if (!error.isEmpty() && !prompt()) tooltip(error, left, top + tall - 12);

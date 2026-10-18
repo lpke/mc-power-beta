@@ -4,11 +4,11 @@
 
 ## [2.5.0] - 2026-10-18
 
-- Choose Power Beta Full, Power Beta Lite, Refined Beta 1.7.3 or Beta 1.7.3 defaults on first launch or from the new Defaults tab. Load a full setup or change the reset base without changing current values. Lite retains the original Power Beta defaults; Full enables vein mining, torch shovel, faster vehicles and extra visual controls.
+- Choose Power Beta, Refined Beta 1.7.3 or Beta 1.7.3 defaults on first launch or from the new Defaults tab. Load a setup or change the reset base without changing current values. Power Beta enables ore vein mining, torch shovel, faster vehicles, clearer water and a blurred Beta 1.8 panorama, with standard controls, full volume and modern Creative/Spectator flight response. Previous Full and Lite selections remain readable.
 - Start every defaults base at GUI scale 4x, keeping the welcome selection from switching to Auto scale.
 - Enable panorama blur by default in every defaults base while retaining each base's selected background.
-- Keep welcome and Defaults tooltips above buttons, use the normal Options tooltip delay and hover backgrounds, and place the welcome reminder below the choices.
-- Move the HUD editor to General and add F3 row selection, range dragging, saved layouts and a separate Save/Discard boundary.
+- Keep welcome and Defaults tooltips above buttons, use the normal Options tooltip delay and hover backgrounds, and place the welcome reminder below the choices. Defaults rows match ordinary setting sizes and spacing, and Options tab labels sit centrally.
+- Move the HUD editor to General and add F3 row selection, range dragging, saved layouts and a separate Save/Discard boundary. Small screens get compact preview toggles and a settings-panel toggle, with more room for F3 reordering.
 - Keep title-editor reset confirmations above the paint grid, including while playing a world.
 - Keep music labels steady when skipping forward or back between tracks.
 - Bring game-rule names and controls closer together in creation and saved-world editors.

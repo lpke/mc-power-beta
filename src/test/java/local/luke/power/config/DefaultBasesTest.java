@@ -41,20 +41,19 @@ class DefaultBasesTest {
       assertTrue(nested.get(setting.id).defaultValue.getAsBoolean());
       assertTrue(nested.get(setting.id).value.getAsBoolean());
       DefaultBases.reload(); assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.current());
-      DefaultBases.use(DefaultBases.Base.FULL, game);
-      DefaultBases.reload(); assertEquals(DefaultBases.Base.FULL, DefaultBases.current());
-      JsonObject full = PowerConfig.document().getAsJsonObject("settings").deepCopy();
-      full.remove("defaults"); assertEquals(before, full);
+      JsonObject applied = PowerConfig.document().getAsJsonObject("settings").deepCopy();
+      applied.remove("defaults"); assertEquals(before, applied);
     } finally { DefaultBases.use(DefaultBases.Base.POWER_BETA, game); }
   }
-  @Test void liteKeepsItsStorageIdAndFullEnablesToolsWithoutChangingGuiScale() throws Exception {
+  @Test void consolidatedPowerBetaRetainsBothIdsAndUsesStandardDisplayDefaults() throws Exception {
     ConfigDefaults.prepare(game);
     assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.read("power_beta"));
-    assertEquals("Power Beta Lite", DefaultBases.Base.POWER_BETA.label);
-    assertEquals(DefaultBases.Base.FULL, DefaultBases.Base.values()[0]);
+    assertEquals("Power Beta", DefaultBases.Base.POWER_BETA.label);
+    assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.values()[0]);
+    assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.read("power_beta_full"));
+    assertEquals(3, DefaultBases.Base.values().length);
     for (var id : List.of("veinMining.enabled", "gameplay.torchShovel", "gameplay.axesSlashLeaves", "tweaks.boatSpeed")) {
-      assertTrue(DefaultBases.value(DefaultBases.Base.FULL, id, new JsonPrimitive(false)).getAsBoolean(), id);
-      assertFalse(DefaultBases.value(DefaultBases.Base.POWER_BETA, id, new JsonPrimitive(false)).getAsBoolean(), id);
+      assertTrue(DefaultBases.value(DefaultBases.Base.POWER_BETA, id, new JsonPrimitive(false)).getAsBoolean(), id);
     }
     var nativeDefaults = PowerConfig.section("native");
     assertEquals(4, nativeDefaults.get("guiScale").getAsInt());
@@ -62,13 +61,40 @@ class DefaultBasesTest {
     var panorama = PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig");
     var blurDefault = Catalog.metadata("power_controls:userinterface.panoramaConfig.blurBackground").get("default");
     assertTrue(panorama.get("blurBackground").getAsBoolean());
-    assertFalse(panorama.get("enablePanorma").getAsBoolean());
+    assertTrue(panorama.get("enablePanorma").getAsBoolean());
     for (var base : DefaultBases.Base.values()) {
       assertEquals(4, DefaultBases.value(base, "native.guiScale", new JsonPrimitive(4)).getAsInt());
       assertTrue(DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.blurBackground", blurDefault).getAsBoolean());
-      assertEquals(base == DefaultBases.Base.FULL ? "b1_8_1" : "b1_7_3",
-          DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.panoramaFolder", panorama.get("panoramaFolder")).getAsString());
+      assertEquals(base == DefaultBases.Base.POWER_BETA ? "b1_8_1" : "b1_7_3",
+          DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.panoramaFolder", new JsonPrimitive("b1_7_3")).getAsString());
     }
+  }
+  @Test void powerBetaKeepsOresAndStandardControlsWhileUsingClearerWater() throws Exception {
+    ConfigDefaults.prepare(game);
+    JsonObject nativeValues = PowerConfig.section("native");
+    assertEquals(.5, nativeValues.get("mouseSensitivity").getAsDouble());
+    assertEquals(0, nativeValues.get("fov").getAsDouble());
+    assertEquals(0, nativeValues.get("brightness").getAsDouble());
+    assertEquals(0, nativeValues.get("cloud_height").getAsDouble());
+    assertEquals(1, nativeValues.get("music").getAsDouble());
+    assertEquals(1, nativeValues.get("sound").getAsDouble());
+    var veins = PowerConfig.section("veinMining");
+    assertEquals(java.util.Set.of("16", "15", "14", "21", "56", "73"), veins.getAsJsonObject("tools").keySet());
+    var creative = PowerConfig.section("creative");
+    for (String id : List.of("acceleration", "glide", "spectatorAcceleration", "spectatorGlide"))
+      assertEquals(5, creative.get(id).getAsDouble(), id);
+    for (String id : List.of("flightSpeed", "spectatorSpeed")) assertEquals(100, creative.get(id).getAsInt());
+    for (String id : List.of("sprintMultiplier", "spectatorSprintMultiplier")) assertEquals(200, creative.get(id).getAsInt());
+    var water = PowerConfig.section("visual");
+    assertEquals(30, water.get("underwaterFogDensity").getAsInt());
+    assertEquals(75, water.get("underwaterDarkness").getAsInt());
+    assertEquals(95, water.get("underwaterDarknessOutside").getAsInt());
+    assertTrue(water.get("removeUnderwaterOverlay").getAsBoolean());
+    assertEquals(1, PowerConfig.section("title").get("style").getAsInt());
+    var alias = new DefaultBases.State(); alias.base = "power_beta_full"; alias.setupComplete = true;
+    PowerConfig.save("defaults", alias); byte[] before = java.nio.file.Files.readAllBytes(PowerConfig.path());
+    DefaultBases.reload(); assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.current());
+    assertArrayEquals(before, java.nio.file.Files.readAllBytes(PowerConfig.path()));
   }
   @Test void existingInstallsSkipSetupAndFreshInstallsAskOnce() throws Exception {
     ConfigDefaults.prepare(game); assertTrue(DefaultBases.needsSetup());

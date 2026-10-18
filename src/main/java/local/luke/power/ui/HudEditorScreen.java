@@ -22,6 +22,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private HudEditorToolbar toolbarCache;
   private int toolbarWidth = -1;
   private int toolbarSelectorWidth = -1;
+  private boolean toolbarCompact, settingsHidden, settingsHiddenBeforeReorder;
   private String highlightedElement = "", highlightedSetting = "";
   private double pressX, pressY;
   private int startX, startY;
@@ -50,10 +51,12 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private HudEditorToolbar toolbar() {
     int selector = HudEditorLayout.horizontal(width, height)
         ? HudEditorLayout.at(width, height, divider.sideWidth()).controlsWidth() : span();
-    if (toolbarCache == null || toolbarWidth != width || toolbarSelectorWidth != selector) {
+    boolean compact = compact();
+    if (toolbarCache == null || toolbarWidth != width || toolbarSelectorWidth != selector || toolbarCompact != compact) {
+      toolbarCompact = compact;
       toolbarWidth = width;
       toolbarSelectorWidth = selector;
-      toolbarCache = HudEditorToolbar.at(width, selector, text -> textRenderer == null ? text.length() * 6 : textRenderer.getWidth(text));
+      toolbarCache = HudEditorToolbar.at(width, selector, text -> textRenderer == null ? text.length() * 6 : textRenderer.getWidth(text), compact);
     }
     return toolbarCache;
   }
@@ -64,10 +67,14 @@ public final class HudEditorScreen extends DraftEditorScreen {
   public void init() { toolbarCache = null; super.init(); HudPreviewBackground.prepare(minecraft); reorder.init(minecraft, width, height); }
   public void beginReorder() {
     select("debug");
-    try { reorder.begin(); preview.suppressDebug = true; error = ""; }
+    try {
+      reorder.begin(); preview.suppressDebug = true; error = "";
+      settingsHiddenBeforeReorder = settingsHidden;
+      if (compact()) { settingsHidden = true; cancelControlGesture(); }
+    }
     catch (IllegalArgumentException failure) { error = failure.getMessage(); }
   }
-  private void finishReorder(boolean save) { reorder.finish(save); preview.suppressDebug = false; clearHighlight(); controlsChanged(); }
+  private void finishReorder(boolean save) { reorder.finish(save); settingsHidden = settingsHiddenBeforeReorder; preview.suppressDebug = false; clearHighlight(); controlsChanged(); }
   protected SettingsDraft editingDraft() { return reorder == null ? draft : reorder.draft(); }
   protected boolean modal() { return super.modal() || reorderExit.active() || reorder != null && reorder.prompt(); }
   protected void save() { if (reorder.active()) finishReorder(true); else super.save(); }
@@ -87,8 +94,10 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   private HudEditorLayout geometry() {
     return HudEditorLayout.at(width, height, HudEditorLayout.horizontal(width, height)
-        ? divider.sideWidth() : divider.bottom(controlsTop(), height - 53), controlsTop());
+        ? divider.sideWidth() : divider.bottom(controlsTop(), height - 53), controlsTop(), !controlsVisible());
   }
+  private boolean compact() { return HudEditorLayout.compact(width, height); }
+  protected boolean controlsVisible() { return !compact() || !settingsHidden; }
   protected int span() { return width - 20; }
   protected int controlsLeft() { return geometry().controlsLeft(); }
   protected int controlsSpan() { return geometry().controlsWidth(); }
@@ -194,12 +203,24 @@ public final class HudEditorScreen extends DraftEditorScreen {
       else if (!selected.startsWith("native.")) selected = "native." + lastNativeIndex;
     }
   }
-  private int selectorWidth() { return geometry().horizontal() ? controlsSpan() : span(); }
+  private int selectorWidth() {
+    int base = HudEditorLayout.horizontal(width, height)
+        ? HudEditorLayout.at(width, height, divider.sideWidth()).controlsWidth() : span();
+    return base - (compact() ? 22 : 0);
+  }
+  private int panelToggleX() { return left() + selectorWidth() + 4; }
+  private boolean panelToggleAt(int x, int y) { return compact() && inside(x, y, panelToggleX(), 30, 18, 18); }
+  private void toggleSettings() {
+    click(); stopGesture(); cancelControlGesture(); reorder.closePicker();
+    settingsHidden = !settingsHidden;
+    if (controlsVisible() && !highlightedSetting.isEmpty()) revealControl(editingDraft().get(highlightedSetting));
+  }
   private int selectorPopupWidth() { return geometry().horizontal() ? controlsSpan() : span(); }
   protected String hoverHelp(int x, int y) {
+    if (panelToggleAt(x, y)) return controlsVisible() ? "Hide settings to give the preview more space." : "Show settings.";
     if (reorder.active() && !reorder.help(x, y).isEmpty()) return reorder.help(x, y);
     if (inside(x, y, left(), 30, selectorWidth(), 18)) return selectedLabel();
-    for (var toggle : toolbar().toggles()) if (inside(x, y, toggle.x(), toggle.y(), toggle.width(), 18)) return switch (toggle.id()) {
+    for (var toggle : toolbar().toggles()) if (inside(x, y, toggle.x(), toggle.y(), toggle.width(), 18)) return toggleLabel(toggle.id()) + "\n" + switch (toggle.id()) {
       case "snap" -> "Snap dragged elements to the screen edges and centre.";
       case "f3" -> "Show F3 information in the preview.";
       case "background" -> "Show the forest scene in the preview.";
@@ -207,20 +228,29 @@ public final class HudEditorScreen extends DraftEditorScreen {
     };
     return "";
   }
-  private String toggleLabel(String id) {
-    String label = switch (id) { case "f3" -> "F3"; case "background" -> "Bg"; case "toast" -> "Toast";
-      case "chat" -> "Chat"; case "tweaks" -> "Active tweaks"; default -> "Snap"; };
-    boolean enabled = switch (id) { case "f3" -> scenario == 2; case "background" -> background; case "toast" -> preview.showToast;
+  private String toggleName(String id) {
+    return switch (id) { case "f3" -> "F3"; case "background" -> "Bg"; case "toast" -> "Toast";
+      case "chat" -> "Chat"; case "tweaks" -> compact() ? "Tweaks" : "Active tweaks"; default -> "Snap"; };
+  }
+  private boolean toggleEnabled(String id) {
+    return switch (id) { case "f3" -> scenario == 2; case "background" -> background; case "toast" -> preview.showToast;
       case "chat" -> preview.showChat; case "tweaks" -> preview.showTweaks; default -> snapping; };
-    return label + (enabled ? ": On" : ": Off");
+  }
+  private String toggleLabel(String id) {
+    return toggleName(id) + (toggleEnabled(id) ? ": On" : ": Off");
   }
   protected void renderToolbar(int x, int y) {
     int sw = selectorWidth(); button("", left(), 30, sw, 18, x, y, true);
     text(fit(selectedLabel(), sw - 24), left() + 5, 35, 0xe0e0e0); chevron(left() + sw - 13, 37, selecting, 0xffdddddd);
-    text(HudEditorToolbar.LABEL, toolbar().labelX(), toolbar().labelY(), 0xb0b0b0);
-    for (var toggle : toolbar().toggles()) button(toggleLabel(toggle.id()), toggle.x(), toggle.y(), toggle.width(), 18, x, y, true);
+    if (compact()) iconButton(controlsVisible() ? "collapse" : "expand", panelToggleX(), 30, 18, x, y, true);
+    else text(HudEditorToolbar.LABEL, toolbar().labelX(), toolbar().labelY(), 0xb0b0b0);
+    for (var toggle : toolbar().toggles()) {
+      if (compact()) tabButton(toggleName(toggle.id()), toggle.x(), toggle.y(), toggle.width(), 18, x, y, true, toggleEnabled(toggle.id()));
+      else button(toggleLabel(toggle.id()), toggle.x(), toggle.y(), toggle.width(), 18, x, y, true);
+    }
   }
   private boolean overDivider(int x, int y) {
+    if (!controlsVisible()) return false;
     var g = geometry();
     return g.horizontal() ? inside(x, y, controlsRight() + 1, controlsTop(), 10, controlsBottom() - controlsTop())
         : inside(x, y, left(), controlsBottom() + 1, span(), 10);
@@ -300,10 +330,15 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected void stopGesture() { dragging = null; divider.stop(); if (reorder != null) reorder.cancelDrag(); }
   protected void mouseClicked(int x, int y, int button) {
     if (reorderExit.click(this, x, y, button, () -> finishReorder(true), () -> finishReorder(false))) return;
+    if (!modal() && !selecting && button == 0 && panelToggleAt(x, y)) { toggleSettings(); return; }
+    if (reorder.active() && !modal() && !selecting
+        && toolbar().toggles().stream().anyMatch(t -> inside(x, y, t.x(), t.y(), t.width(), 18))) {
+      toolbarClick(x, y, button); return;
+    }
     if (reorder.active() && !super.modal()) {
       if (reorder.press(x, y, button)) return;
       Setting order = editingDraft().get("interface.debugOrder");
-      if (inside(x, y, controlX(), controlY(order), controlWidth(order), 18)) { click(); finishReorder(true); return; }
+      if (controlsVisible() && inside(x, y, controlX(), controlY(order), controlWidth(order), 18)) { click(); finishReorder(true); return; }
       boolean controls = inside(x, y, controlsLeft(), controlsTop(), controlsSpan(), controlsBottom() - controlsTop());
       boolean footer = y >= height - 31;
       if (!controls && !footer) { leaveReorder(); return; }
@@ -422,13 +457,13 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   protected void renderPreview(int x, int y, float delta) {
     int colour = divider.dragging() || overDivider(x, y) ? 0xffaaaaaa : 0xff686868;
-    if (geometry().horizontal()) {
+    if (controlsVisible() && geometry().horizontal()) {
       int line = controlsRight() + 5, middle = (controlsTop() + controlsBottom()) / 2;
       fill(line, controlsTop(), line + 1, controlsBottom(), colour);
       fill(line - 2, middle - 12, line + 3, middle + 12, 0xff343434);
       fill(line - 1, middle - 8, line, middle + 8, colour);
       fill(line + 1, middle - 8, line + 2, middle + 8, colour);
-    } else {
+    } else if (controlsVisible()) {
       int line = controlsBottom() + 5;
       fill(left(), line, right(), line + 1, colour);
       fill(width / 2 - 12, line - 2, width / 2 + 12, line + 3, 0xff343434);

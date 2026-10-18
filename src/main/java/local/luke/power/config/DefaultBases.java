@@ -12,13 +12,13 @@ import net.minecraft.client.Minecraft;
 /** Reset targets are independent of the currently applied settings. */
 public final class DefaultBases {
   public enum Base {
-    FULL("power_beta_full", "Power Beta Full", "The full Power Beta setup, with vein mining, torch shovel, faster vehicles, clearer water and extra visual controls enabled. Temporary tools still need their controls, and world permissions still apply."),
-    POWER_BETA("power_beta", "Power Beta Lite", "The original Power Beta defaults, with gameplay additions, fixes and inventory controls. Vein mining, faster vehicles and extra visual overrides start off."),
+    POWER_BETA("power_beta", "Power Beta", "Power Beta gameplay, fixes and inventory controls, with ore vein mining, faster vehicles, clearer water and a blurred Beta 1.8 panorama. Controls, sensitivity, field of view, brightness and cloud height use standard defaults. World permissions still apply."),
     REFINED("refined_beta", "Refined Beta 1.7.3", "Beta gameplay with performance improvements, fixes and inventory quality of life. Extra gameplay mechanics and recipes are off."),
     BETA("beta", "Beta 1.7.3", "Closest to vanilla Beta. Optional fixes, culling and performance controls are off. SmoothBeta rendering, StationAPI, shared input/configuration, GlassNetworking, RetroAuth and faster startup remain installed. Pack menus, safe data recovery and platform compatibility remain available.");
     public final String id, label, description;
     Base(String id, String label, String description) { this.id = id; this.label = label; this.description = description; }
     public static Base read(String id) {
+      if ("power_beta_full".equals(id)) return POWER_BETA; // Retain the retired Full selection without changing values.
       for (Base base : values()) if (base.id.equals(id)) return base;
       throw new IllegalArgumentException("Unknown defaults base: " + id + ". Use a compatible Power Beta version.");
     }
@@ -53,7 +53,7 @@ public final class DefaultBases {
   public static boolean needsSetup() { return !setupComplete; }
   public static JsonElement value(String id, JsonElement powerBeta) { return value(current, id, powerBeta); }
   public static JsonElement value(Base base, String id, JsonElement powerBeta) {
-    JsonObject values = base == Base.POWER_BETA ? null : OVERRIDES.getAsJsonObject(base.id);
+    JsonObject values = OVERRIDES.getAsJsonObject(base.id);
     String lookup = id.startsWith("rules.") ? "rule." + id.substring(id.lastIndexOf('.') + 1) : id;
     return values != null && values.has(lookup) ? values.get(lookup).deepCopy() : powerBeta.deepCopy();
   }

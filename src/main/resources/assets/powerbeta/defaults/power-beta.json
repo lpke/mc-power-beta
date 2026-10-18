@@ -2,7 +2,7 @@
   "schemaVersion": 7,
   "settings": {
     "power_capture:config": {
-      "addBasicScreenshotsToClipboard": true,
+      "addBasicScreenshotsToClipboard": false,
       "customResolutionPhotoHeight": 2240,
       "customResolutionPhotoWidth": 7680,
       "disableRenderingNetherBedrock": false,
@@ -116,7 +116,7 @@
         "DoubleLeftClickItemPickup": true,
         "EnableLeftClickDrag": true,
         "EnableRightClickDrag": true,
-        "MultiplayerShiftClickingItemsIntoDispensers": false,
+        "MultiplayerShiftClickingItemsIntoDispensers": true,
         "LMBPreferShiftClick": true,
         "RMBPreferShiftClick": true,
         "UseDropKeyInInventory": true,
@@ -146,12 +146,12 @@
       "spectatorScroll": true,
       "blockReach": 50,
       "entityReach": 50,
-      "sprintToggle": true,
+      "sprintToggle": false,
       "glide": 5,
       "doubleTapTicks": 7,
       "landStopsFlight": true,
       "showSpectatorSpeed": true,
-      "spectatorSprintToggle": true,
+      "spectatorSprintToggle": false,
       "spectatorSprintMultiplier": 200,
       "spectatorGlide": 5,
       "acceleration": 5,
@@ -171,7 +171,7 @@
         "numberRowKeys": true,
         "offsetY": 4
       },
-      "fastMinecarts": false,
+      "fastMinecarts": true,
       "flexible": {
         "overlayColor": 0,
         "placeAgainstContainers": false,
@@ -194,18 +194,18 @@
         "announceToggle": false,
         "announceRestrictionToggle": false
       },
-      "clickMining": false,
+      "clickMining": true,
       "obsidianBreakingSpeed": 60,
       "inventoryMouseLook": true,
       "freeLookFollowThirdPerson": true,
       "freeLookToggle": false,
-      "boatSteering": false,
+      "boatSteering": true,
       "sneak": {
         "announceToggle": false,
         "enabled": false
       },
-      "boatSpeed": false,
-      "boatProtection": false,
+      "boatSpeed": true,
+      "boatProtection": true,
       "autoWalkAnnounceToggle": false,
       "freeLookAnnounceToggle": false,
       "autoMineAnnounceToggle": false,
@@ -222,7 +222,7 @@
         "enableSnowballsExtinguishFire": false,
         "enableFireTurnsGrassIntoDirt": false,
         "enableGhastFireballsToInstaKillGhasts": true,
-        "enableDefusingTnt": false
+        "enableDefusingTnt": true
       },
       "FLORA_CONFIG": {
         "enableRandomStickDropFromDeadBushes": true,
@@ -287,7 +287,7 @@
         "speed": 0.1,
         "onlyTitle": false
       },
-      "style": 0
+      "style": 1
     },
     "audio": {
       "master": 100,
@@ -310,23 +310,23 @@
       "avoidRepeats": true,
       "menuMusic": "MIX",
       "dimensionMusic": "CONTINUE",
-      "gapMinSeconds": 600,
-      "gapMaxSeconds": 1200,
+      "gapMinSeconds": 100,
+      "gapMaxSeconds": 350,
       "redstonePlacementSound": true,
       "menuControls": true
     },
     "visual": {
-      "softRain": false,
-      "softSnow": false,
+      "softRain": true,
+      "softSnow": true,
       "oldCobble": false,
       "oldBricks": false,
       "thirdPersonDistance": 4,
       "inventoryInPortals": true,
-      "lowFire": false,
+      "lowFire": true,
       "shiftClickIntoCraftingGrid": true,
-      "redstonePowerLevels": false,
+      "redstonePowerLevels": true,
       "damageCameraShake": true,
-      "fireDamageCameraShake": true,
+      "fireDamageCameraShake": false,
       "hideEntities": false,
       "hideItems": true,
       "hideMobs": false,
@@ -339,11 +339,11 @@
       "fullBrightMessages": false,
       "spectatorFullBright": false,
       "limitCapeRotation": true,
-      "removeUnderwaterOverlay": false,
-      "underwaterFogDensity": 100,
-      "underwaterDarkness": 100,
-      "underwaterDarknessOutside": 100,
-      "narrowUnderwaterFov": true,
+      "removeUnderwaterOverlay": true,
+      "underwaterFogDensity": 30,
+      "underwaterDarkness": 75,
+      "underwaterDarknessOutside": 95,
+      "narrowUnderwaterFov": false,
       "swapEquipment": true,
       "containerCarry": true
     },
@@ -378,7 +378,7 @@
         "MAX_SPAWN_CAPACITY_SQUID": 5
       },
       "MUSIC_CONFIG": {
-        "overlayForMusicInDebug": false,
+        "overlayForMusicInDebug": true,
         "overlayForMusicInDebugYOffset": 0,
         "volumeNetherPortalAmbient": 1.0,
         "volumeRainAmbient": 1.0,
@@ -386,7 +386,7 @@
         "volumeCaveAmbient": 1.0
       },
       "SLEEP_CONFIG": {
-        "bedsSpeedUpNightRatherThanSkipIt": false,
+        "bedsSpeedUpNightRatherThanSkipIt": true,
         "bedsSpeedUpNightTickRate": 20,
         "bedsSpeedUpNightTickWorld": true,
         "handSwingClickToExitBedsEnabled": true
@@ -441,7 +441,7 @@
       "hotbarRenderingFix": true,
       "woodenSlabMiningFix": true,
       "grassBlockItemFix": true,
-      "miningDelayFix": false,
+      "miningDelayFix": true,
       "lastDurabilityFix": true,
       "fenceLightingFix": true,
       "torchBottomFaceFix": true,
@@ -469,10 +469,10 @@
       "fenceJumping": false
     },
     "power_controls:general": {
-      "pauseOnLostFocus": true,
+      "pauseOnLostFocus": false,
       "autosaveInterval": 30,
       "tcpNoDelay": true,
-      "rawInput": false,
+      "rawInput": true,
       "disableControllerInit": true,
       "resourceDownloadUrl": "http://s3.betacraft.uk:11705/MinecraftResources/",
       "disabledDimensions": [
@@ -490,7 +490,7 @@
       "minecartBoosters": false
     },
     "power_controls:recipes": {
-      "furnaceFuels": true,
+      "furnaceFuels": false,
       "toolRepair": true,
       "modern": {
         "shapelessFlintAndSteel": true,
@@ -514,7 +514,7 @@
       "obtainable": {
         "craftableGrassBlocks": true,
         "craftableCobwebs": true,
-        "craftableFire": true,
+        "craftableFire": false,
         "craftableCoalOre": false,
         "craftableIronOre": false,
         "craftableGoldOre": false,
@@ -543,8 +543,8 @@
       "showQuitButton": true,
       "hideAchievementToast": false,
       "disableDebugEntityIdTags": false,
-      "frontViewThirdPerson": 1,
-      "clearTextFieldWithRightClick": false,
+      "frontViewThirdPerson": 0,
+      "clearTextFieldWithRightClick": true,
       "videoSettingsConfig": {
         "vanillaFarValues": true
       },
@@ -555,9 +555,9 @@
         "customVersionText": "Power Beta 2.5.0"
       },
       "panoramaConfig": {
-        "enablePanorma": false,
+        "enablePanorma": true,
         "blurBackground": true,
-        "panoramaFolder": "b1_7_3",
+        "panoramaFolder": "b1_8_1",
         "onlyTitleScreen": false
       },
       "photoModeConfig": {
@@ -780,11 +780,11 @@
       "limitTnt": true,
       "tntPerTick": 4,
       "tntMillis": 8,
-      "leavesDropSaplingsInCreative": true,
+      "leavesDropSaplingsInCreative": false,
       "flintIgnitesTnt": true,
       "fastItemCollisions": true,
-      "torchShovel": false,
-      "axesSlashLeaves": false
+      "torchShovel": true,
+      "axesSlashLeaves": true
     },
     "infoHud": {
       "enabled": false,
@@ -861,7 +861,7 @@
       ]
     },
     "veinMining": {
-      "enabled": false,
+      "enabled": true,
       "crouchingOnly": true,
       "durabilityPerBlock": true,
       "maxBlocks": 64,

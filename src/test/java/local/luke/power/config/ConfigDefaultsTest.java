@@ -44,11 +44,11 @@ class ConfigDefaultsTest {
       assertEquals("Power Beta " + version, settings.getAsJsonObject("power_controls:userinterface").getAsJsonObject("versionTextConfig").get("customVersionText").getAsString());
       assertEquals("Power Beta " + version, Catalog.metadata("power_controls:userinterface.versionTextConfig.customVersionText").get("default").getAsString());
     }
-    assertFalse(settings.getAsJsonObject("gameplay").get("torchShovel").getAsBoolean());
+    assertTrue(settings.getAsJsonObject("gameplay").get("torchShovel").getAsBoolean());
     assertFalse(settings.getAsJsonObject("gameplay").has("fireSpread"));
     assertTrue(local.luke.power.rules.RulePresets.survival().enabled(local.luke.power.rules.GameRule.FIRE_SPREAD));
     assertTrue(settings.getAsJsonObject("activeTweaks").get("clickMining").getAsBoolean());
-    assertFalse(settings.getAsJsonObject("veinMining").get("enabled").getAsBoolean());
+    assertTrue(settings.getAsJsonObject("veinMining").get("enabled").getAsBoolean());
     assertEquals(25, settings.getAsJsonObject("veinMining").get("timePercent").getAsInt());
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("building").get("inventoryMouseLook").getAsBoolean());
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("death").get("enabled").getAsBoolean());
@@ -62,9 +62,9 @@ class ConfigDefaultsTest {
     assertTrue(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).inventoryInPortals);
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get("shiftClickIntoCraftingGrid").getAsBoolean());
     assertTrue(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).shiftClickIntoCraftingGrid);
-    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("lowFire").getAsBoolean());
-    for (String key : List.of("damageCameraShake", "fireDamageCameraShake"))
-      assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get(key).getAsBoolean());
+    assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get("lowFire").getAsBoolean());
+    assertTrue(settings.getAsJsonObject("visual").get("damageCameraShake").getAsBoolean());
+    assertFalse(settings.getAsJsonObject("visual").get("fireDamageCameraShake").getAsBoolean());
     var oldVisual = Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class);
     assertFalse(oldVisual.lowFire);
     assertTrue(oldVisual.damageCameraShake);

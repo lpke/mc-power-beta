@@ -30,7 +30,7 @@ final class Release250Checks {
         check(mc.currentScreen instanceof DefaultsSetupScreen, "chooser missing: " + mc.currentScreen);
         mc.currentScreen.init(mc, 960, 540); capture(mc, mc.currentScreen, "first-launch");
         chooserTooltips(mc);
-        click(mc.currentScreen, 480, 106, 0);
+        click(mc.currentScreen, 480, 78, 0);
         check(!DefaultBases.needsSetup(), "choice not saved");
         check(!(mc.currentScreen instanceof DefaultsSetupScreen), "Power Beta needs an unnecessary restart");
         mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen());
@@ -40,7 +40,7 @@ final class Release250Checks {
       check(mc.world == null, "return to title first");
       var state = new DefaultBases.State(); PowerConfig.save("defaults", state); DefaultBases.reload();
       mc.setScreen(new net.minecraft.client.gui.screen.TitleScreen()); mc.currentScreen.init(mc,960,540);
-      click(mc.currentScreen,480,162,0);
+      click(mc.currentScreen,480,134,0);
       check(DefaultBases.current() == DefaultBases.Base.BETA && !DefaultBases.needsSetup(), "Beta setup not saved");
       check((boolean)get(mc.currentScreen,"restart"), "Beta setup did not request a restart");
       capture(mc,mc.currentScreen,"beta-restart");
@@ -81,7 +81,7 @@ final class Release250Checks {
   }
   private static void defaults(Minecraft mc) throws Exception {
     var game = Path.of(".").toAbsolutePath();
-    test("all four complete loads validate and refresh every registered reset value", () -> {
+    test("all three complete loads validate and refresh every registered reset value", () -> {
       var registered = new HashSet<String>();
       for (var setting : SettingsRegistry.openDefaults(mc).settings()) registered.add(setting.id);
       try (var input = new java.io.InputStreamReader(DefaultBases.class.getResourceAsStream("/assets/powerbeta/default-bases.json"), java.nio.charset.StandardCharsets.UTF_8)) {
@@ -117,7 +117,7 @@ final class Release250Checks {
         check(DefaultBases.current() == base, "base not applied");
         var panorama = PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig");
         check(panorama.get("blurBackground").getAsBoolean(), "panorama blur default disabled for " + base);
-        check(panorama.get("enablePanorma").getAsBoolean() == (base == DefaultBases.Base.FULL),"panorama enable flag not linked to base selection");
+        check(panorama.get("enablePanorma").getAsBoolean() == (base == DefaultBases.Base.POWER_BETA),"panorama enable flag not linked to base selection");
         var loaded = SettingsRegistry.openDefaults(mc);
         check(loaded.settings().stream().filter(s -> s.id.equals("native.guiScale")).findFirst().orElseThrow().value.getAsInt() == 4,"GUI scale changed for " + base);
         for (var setting : loaded.settings()) if (!Set.of("audio.presets", "audio.favourites", "logo.presets", "interface.debugPresets", "interface.colours", "defaults.base", "defaults.setupComplete").contains(setting.id)) {
@@ -134,6 +134,10 @@ final class Release250Checks {
       Object panel = get(options, "defaultsPanel");
       options.render(-1, -1, 0);
       int hoverX=n(options,"left")+10;
+      int rowHeight=(int)call(panel,"rowTop",n(options,"span"),1)-(int)call(panel,"rowTop",n(options,"span"),0);
+      check(rowHeight==24,"Defaults row differs from normal settings");
+      int buttonY=(int)call(panel,"buttonY",n(options,"span"),84);
+      check(buttonY==87,"Defaults buttons not centered in hover row");
       options.render(hoverX,90,0);
       Object delay=get(panel,"hoverDelay");
       check((int)get(delay,"ticks")==0,"tooltip appeared immediately");
@@ -173,9 +177,10 @@ final class Release250Checks {
       var outer = draft(hud); var before = outer.snapshot(); call(hud,"beginReorder"); hud.render(-1,-1,0);
       Object reorder = get(hud,"reorder"); var nested = (SettingsDraft)call(reorder,"draft");
       int left = ((Number)get(reorder,"left")).intValue(), top = ((Number)get(reorder,"top")).intValue();
+      String selectedSetting=DebugLines.find(DebugOrder.read(nested.get("interface.debugOrder").value).get(0)).setting();
       click(hud,left+30,top+7,0); ((ScreenInput)(Object)hud).power$release(left+30,top+7,0);
-      check(get(hud,"highlightedSetting").equals(DebugLines.VERSION.setting()),"selection not linked to setting");
-      check((int)call(hud,"controlY",nested.get(DebugLines.VERSION.setting()))>=n(hud,"controlsTop"),"setting not revealed");
+      check(get(hud,"highlightedSetting").equals(selectedSetting),"selection not linked to setting");
+      check((int)call(hud,"controlY",nested.get(selectedSetting))>=n(hud,"controlsTop"),"setting not revealed");
       var f=Keyboard.class.getDeclaredField("keyDownBuffer");f.setAccessible(true);var keys=(ByteBuffer)f.get(null);byte prior=keys.get(Keyboard.KEY_LSHIFT);
       try { keys.put(Keyboard.KEY_LSHIFT,(byte)1); click(hud,left+30,top+31,0); ((ScreenInput)(Object)hud).power$release(left+30,top+31,0); }
       finally { keys.put(Keyboard.KEY_LSHIFT,prior); }
@@ -191,7 +196,7 @@ final class Release250Checks {
       check((boolean)call(reorder,"active"),"keep editing closed F3");
       call(hud,"finishReorder",false); check(before.equals(outer.snapshot()),"discard changed parent");
       call(hud,"beginReorder"); hud.render(-1,-1,0); nested=(SettingsDraft)call(reorder,"draft");
-      var order = new ArrayList<>(DebugOrder.defaults()); Collections.swap(order,0,1); nested.get("interface.debugOrder").value=Catalog.JSON.toJsonTree(order);
+      var order = new ArrayList<>(DebugOrder.read(nested.get("interface.debugOrder").value)); Collections.swap(order,0,1); nested.get("interface.debugOrder").value=Catalog.JSON.toJsonTree(order);
       int toolbar=((Number)get(reorder,"toolbarTop")).intValue(), w=(int)call(reorder,"toolbarButtonWidth");
       click(hud,left+w+12,toolbar+6,0);
       Object name=get(reorder,"name"); call(name,"setText","Release layout"); key(hud,Keyboard.KEY_RETURN);
@@ -202,7 +207,57 @@ final class Release250Checks {
       check(MenuPreferences.current().debugPresets.size()>0,"preset not durable");
       var clean = new HudEditorScreen(options,HudEditorSettings.ENTRY); open(mc,clean,960,540); call(clean,"beginReorder"); key(clean,Keyboard.KEY_ESCAPE);
       check(mc.currentScreen==clean && !(boolean)call(get(clean,"reorder"),"active"),"clean Escape left HUD editor");
-      for(int[] size:new int[][]{{320,240},{640,420},{1720,720},{540,960}}) { clean.init(mc,size[0],size[1]); call(clean,"beginReorder"); capture(mc,clean,"f3-"+size[0]); call(clean,"finishReorder",false); }
+      for(int[] size:new int[][]{{320,240},{480,270},{640,360},{640,420},{1720,720},{540,960}}) { clean.init(mc,size[0],size[1]); call(clean,"beginReorder"); capture(mc,clean,"f3-"+size[0]); call(clean,"finishReorder",false); }
+    });
+    test("compact HUD panels and toggles preserve nested edits, selection, scroll and warnings", () -> {
+      var hud = new HudEditorScreen(options,HudEditorSettings.ENTRY); open(mc,hud,320,240);
+      var outer=draft(hud); var original=outer.snapshot();
+      hud.render(-1,-1,0);
+      check((boolean)call(hud,"controlsVisible"),"normal controls start hidden");
+      int toggleX=n(hud,"panelToggleX")+8;
+      double scrollBefore=((Number)get(hud,"scroll")).doubleValue();
+      click(hud,toggleX,38,0); hud.render(-1,-1,0);
+      check(!(boolean)call(hud,"controlsVisible"),"hide control failed");
+      check(n(hud,"previewTop")==n(hud,"controlsTop"),"hidden panel still reserves space");
+      check(original.equals(outer.snapshot()),"hiding changed settings");
+      click(hud,toggleX,38,0); hud.render(-1,-1,0);
+      check((boolean)call(hud,"controlsVisible"),"show control failed");
+      check(((Number)get(hud,"scroll")).doubleValue()==scrollBefore,"showing reset scroll");
+      call(hud,"beginReorder"); hud.render(-1,-1,0);
+      Object reorder=get(hud,"reorder"); var nested=(SettingsDraft)call(reorder,"draft");
+      check(!(boolean)call(hud,"controlsVisible"),"compact F3 not expanded");
+      String firstId=DebugOrder.read(nested.get("interface.debugOrder").value).get(0);
+      String firstSetting=DebugLines.find(firstId).setting();
+      int left=((Number)get(reorder,"left")).intValue(),top=((Number)get(reorder,"top")).intValue();
+      click(hud,left+30,top+7,0); ((ScreenInput)(Object)hud).power$release(left+30,top+7,0);
+      check(get(hud,"highlightedSetting").equals(firstSetting),"hidden selection lost");
+      click(hud,toggleX,38,0); hud.render(-1,-1,0);
+      check((boolean)call(reorder,"active") && (boolean)call(hud,"controlsVisible"),"showing controls exited F3");
+      int selectedY=((Number)call(hud,"controlY",nested.get(firstSetting))).intValue();
+      check(selectedY>=n(hud,"controlsTop")+24 && selectedY+18<=n(hud,"controlsBottom"),"selected row not revealed below sticky heading");
+      var order=new ArrayList<>(DebugOrder.read(nested.get("interface.debugOrder").value));Collections.swap(order,0,1);
+      nested.get("interface.debugOrder").value=Catalog.JSON.toJsonTree(order);
+      var before=nested.snapshot(); click(hud,toggleX,38,0);hud.render(-1,-1,0);
+      check(before.equals(nested.snapshot()),"panel toggle changed F3 draft");
+      Object toolbar=call(hud,"toolbar");
+      var toggles=(List<?>)call(toolbar,"toggles");
+      for(Object toggle:toggles) {
+        String id=(String)call(toggle,"id");
+        boolean old=(boolean)call(hud,"toggleEnabled",id);
+        click(hud,n(toggle,"x")+4,n(toggle,"y")+6,0);
+        check((boolean)call(hud,"toggleEnabled",id)!=old,"compact toggle failed "+id);
+        check((boolean)call(reorder,"active"),"preview toggle exited F3");
+      }
+      check(before.equals(nested.snapshot()),"preview toggles changed F3 settings");
+      key(hud,Keyboard.KEY_ESCAPE);check((boolean)call(get(hud,"reorderExit"),"active"),"compact dirty Escape did not warn");
+      click(hud,toggleX,38,0);check(!(boolean)call(hud,"controlsVisible"),"warning leaked panel input");
+      key(hud,Keyboard.KEY_ESCAPE);call(hud,"finishReorder",false);
+      check((boolean)call(hud,"controlsVisible"),"F3 exit did not restore panel");
+      check(original.equals(outer.snapshot()),"compact edits escaped discard");
+      hud.init(mc,1720,720);hud.render(-1,-1,0);
+      check(!(boolean)call(hud,"compact"),"large screen shows compact controls");
+      check(n(hud,"controlsSpan")==360,"large screen layout changed");
+      capture(mc,hud,"hud-wide-unchanged");
     });
     test("creation rules stay centered with a narrower bounded content width", () -> {
       PowerOptionsScreen.openCreationRules(mc,options,new CreationRules(RulePresets.survival(),RulePresets.cheats()));

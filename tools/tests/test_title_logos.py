@@ -25,7 +25,7 @@ class TitleLogosTest(unittest.TestCase):
                               ['piston-data.mojang.com', 'launcher.mojang.com'])
                 self.assertEqual(40, len(row['client']['sha1']))
 
-    def test_fresh_installs_keep_the_custom_retro_logo(self):
+    def test_fresh_installs_use_beta_style_and_retain_the_retro_draft(self):
         defaults = json.loads((ROOT / 'src/main/resources/assets/powerbeta/defaults/power-beta.json').read_text())
-        self.assertEqual(0, defaults['settings']['title']['style'])
+        self.assertEqual(1, defaults['settings']['title']['style'])
         self.assertGreater(len(defaults['settings']['title']['logo']['lines']), 0)

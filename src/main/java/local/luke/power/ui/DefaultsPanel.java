@@ -20,11 +20,10 @@ final class DefaultsPanel extends UiScreen {
     if (key == Keyboard.KEY_ESCAPE) pending = null;
     return true;
   }
-  private boolean stacked(int span) { return span < 290; }
-  private int buttonWidth(int span) { return stacked(span) ? 78 : 90; }
-  private int rowTop(int span, int index) { return (stacked(span) ? 64 : 84) + index * (stacked(span) ? 36 : 34); }
-  private int loadX(int left, int span) { return left + span - buttonWidth(span) * (stacked(span) ? 1 : 2) - (stacked(span) ? 0 : 4); }
-  private int baseY(int span, int top) { return top + (stacked(span) ? 18 : 0); }
+  private int buttonWidth(int span) { return SettingRows.narrow(span) ? Math.min(90, (span - 8) / 2) : 90; }
+  private int rowTop(int span, int index) { return (SettingRows.narrow(span) ? 64 : 84) + index * SettingRows.height(span); }
+  private int loadX(int left, int span) { return left + span - buttonWidth(span) * 2 - 4; }
+  private int buttonY(int span, int top) { return top + SettingRows.buttonOffset(span); }
   boolean press(int x, int y, int button, int left, int span) {
     if (modal()) {
       if (button == 0 && inside(x, y, width / 2 - 102, height / 2 + 24, 100, 20)) {
@@ -38,8 +37,8 @@ final class DefaultsPanel extends UiScreen {
     int w = buttonWidth(span);
     for (var base : DefaultBases.Base.values()) {
       int top = rowTop(span, base.ordinal());
-      if (inside(x, y, loadX(left, span), top, w, stacked(span) ? 18 : 20)) { click(); pending = base; return true; }
-      if (inside(x, y, left + span - w, baseY(span, top), w, stacked(span) ? 18 : 20)) {
+      if (inside(x, y, loadX(left, span), buttonY(span, top), w, SettingRows.BUTTON_HEIGHT)) { click(); pending = base; return true; }
+      if (inside(x, y, left + span - w, buttonY(span, top), w, SettingRows.BUTTON_HEIGHT)) {
         if (base != DefaultBases.current()) {
           click();
           try { DefaultBases.use(base, FabricLoader.getInstance().getGameDir()); owner.session().settings().forEach(s -> s.refreshDefault()); }
@@ -57,15 +56,16 @@ final class DefaultsPanel extends UiScreen {
     int w = buttonWidth(span);
     for (var base : DefaultBases.Base.values()) {
       int top = rowTop(span, base.ordinal());
-      if (!modal() && inside(x, y, left, top, span, stacked(span) ? 36 : 24)) {
-        rectangle(left - 2, top, left + span, top + (stacked(span) ? 36 : 24), 0x60000000);
+      if (!modal() && inside(x, y, left, top, span, SettingRows.height(span))) {
+        rectangle(left - 2, top, left + span + 2, top + SettingRows.height(span), 0x60000000);
         hovered = base;
       }
       boolean selected = base == DefaultBases.current();
-      if (selected) rectangle(left + 1, top + 5, left + 3, top + 15, 0xffffdd66);
-      text(fit(base.label, span - w * (stacked(span) ? 1 : 2) - 16), left + 8, top + (stacked(span) ? 14 : 6), selected ? 0xffffdd66 : 0xdddddd);
-      button("Load", loadX(left, span), top, w, stacked(span) ? 18 : 20, x, y, true);
-      button("Use as base", left + span - w, baseY(span, top), w, stacked(span) ? 18 : 20, x, y, !selected);
+      int labelY = top + SettingRows.labelOffset(span);
+      if (selected) rectangle(left + 1, labelY - 1, left + 3, labelY + 9, 0xffffdd66);
+      text(fit(base.label, SettingRows.narrow(span) ? span - 12 : span - w * 2 - 16), left + 8, labelY, selected ? 0xffffdd66 : 0xdddddd);
+      button("Load", loadX(left, span), buttonY(span, top), w, SettingRows.BUTTON_HEIGHT, x, y, true);
+      button("Use as base", left + span - w, buttonY(span, top), w, SettingRows.BUTTON_HEIGHT, x, y, !selected);
     }
   }
   void overlay(int x, int y) {

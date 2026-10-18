@@ -469,7 +469,7 @@ public final class PowerOptionsScreen extends UiScreen {
             : s.group.isEmpty() ? s.page : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
     }
     List<Row> next = new ArrayList<>();
-    int y = 0, rowHeight = span() < 340 ? 40 : 24;
+    int y = 0, rowHeight = SettingRows.height(span());
     for (var group : groups.entrySet()) {
       boolean flat = !listed.isEmpty() || group.getKey().isEmpty();
       if (!flat) { next.add(new Row(group.getKey(), null, y, SettingsGroup.HEIGHT)); y += SettingsGroup.HEIGHT; }
@@ -737,7 +737,7 @@ public final class PowerOptionsScreen extends UiScreen {
         selected = i;
         Setting s = r.setting;
         if (!SettingAccess.reason(session, s).isEmpty()) return;
-        int controlY = r.height == 40 ? ry + 16 : ry + 2;
+        int controlY = ry + SettingRows.buttonOffset(span());
         if (y < controlY) return;
         if (x >= right() - 34) {
           click();
@@ -856,7 +856,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (s.numeric() && !s.slider() || s.kind == Setting.Kind.TEXT && !ColourScreen.accepts(s)) {
       Row row = rows.stream().filter(r -> r.setting == s).findFirst().orElseThrow();
-      int y = top() + row.y - (int) scroll + (row.height == 40 ? 16 : 2);
+      int y = top() + row.y - (int) scroll + SettingRows.buttonOffset(span());
       valueEditor.begin(s, s, () -> changed(s), mainControlLeft(row), y,
           right() - 38 - mainControlLeft(row), top(), bottom());
       return;
@@ -1083,7 +1083,7 @@ public final class PowerOptionsScreen extends UiScreen {
       text(
           fit(pages.get(i), sidebar() - 31),
           origin() + 28,
-          y + 7,
+          y + 6,
           hover ? 0xffffa0 : pages.get(i).equals(page) ? 0xffffff : 0xaaaaaa);
     }
     unclip();
@@ -1194,7 +1194,7 @@ public final class PowerOptionsScreen extends UiScreen {
       boolean hover = inside(mx, listMouseY, left(), y, span(), row.height) && listMouseY >= top() && listMouseY < bottom();
       if (hover) fill(left() - 2, y, right() - 12, y + row.height, 0x60000000);
       boolean narrow = row.height == 40;
-      int cy = y + (narrow ? 16 : 2),
+      int cy = y + SettingRows.buttonOffset(span()),
           controlLeft = mainControlLeft(row);
       int textWidth = narrow ? span() - 4 : controlLeft(row) - left() - 13;
       int indent = (int)Catalog.number(Catalog.metadata(s.id), "indent", 0);
@@ -1202,10 +1202,10 @@ public final class PowerOptionsScreen extends UiScreen {
       text(
           label,
           left() + 3 + indent,
-          y + (narrow ? 3 : 8),
+          y + SettingRows.labelOffset(span()),
           s.changed() ? 0xffdd88 : 0xc4c4c4);
       if (s.restart) text("*", left() + 6 + indent + textRenderer.getWidth(label),
-          y + (narrow ? 3 : 8), 0xe8a0a0);
+          y + SettingRows.labelOffset(span()), 0xe8a0a0);
       List<Setting> conflicts = conflicts(s);
       boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
       int valueEnd = right() - 38;

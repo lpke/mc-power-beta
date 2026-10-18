@@ -66,9 +66,10 @@ presets and individual world rules let you choose the permissions you want.
 
 ## Settings and worlds
 
-On first launch, choose Power Beta Full, Power Beta Lite, Refined Beta 1.7.3 or
-Beta 1.7.3 defaults. Full enables vein mining, faster vehicles and extra visual
-controls; Lite keeps the original Power Beta setup. All four start at GUI scale 4.
+On first launch, choose Power Beta, Refined Beta 1.7.3 or Beta 1.7.3 defaults.
+Power Beta enables ore vein mining, faster vehicles, clearer water and a blurred
+Beta 1.8 panorama, with standard controls and modern flight response. All three
+start at GUI scale 4.
 Options > Defaults lets you load another setup or choose Use as base. Changing the
 base keeps your settings and changes what each reset button restores. Loading
 resets preferences and new-world templates; existing worlds and saved presets stay intact.

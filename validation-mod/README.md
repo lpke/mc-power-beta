@@ -9,9 +9,9 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
 - `release-250 setup` checks the fresh first-launch chooser and one-time save.
-  `defaults` checks all four complete loads, 4x GUI scale, reset bases and delayed
+  `defaults` checks all three complete loads, 4x GUI scale, reset bases and delayed
   foreground tooltips, and exports their full setting comparison; `ui` checks nested F3
-  selection, range dragging, presets, exit prompts and responsive rule editors.
+  selection, range dragging, presets, exit prompts, compact panel/toggle ownership and responsive rule editors.
   `audio` checks skip labels. After `new-world`, `world` verifies existing rules
   survive default loads and captures the title reset modal with world depth enabled.
   Restart and run `saved` for durable preset/setup checks. Use a silent output.
