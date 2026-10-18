@@ -59,8 +59,16 @@ class DefaultBasesTest {
     var nativeDefaults = PowerConfig.section("native");
     assertEquals(4, nativeDefaults.get("guiScale").getAsInt());
     assertEquals(.5, nativeDefaults.get("gui_scale").getAsDouble());
-    for (var base : DefaultBases.Base.values())
+    var panorama = PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig");
+    var blurDefault = Catalog.metadata("power_controls:userinterface.panoramaConfig.blurBackground").get("default");
+    assertTrue(panorama.get("blurBackground").getAsBoolean());
+    assertFalse(panorama.get("enablePanorma").getAsBoolean());
+    for (var base : DefaultBases.Base.values()) {
       assertEquals(4, DefaultBases.value(base, "native.guiScale", new JsonPrimitive(4)).getAsInt());
+      assertTrue(DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.blurBackground", blurDefault).getAsBoolean());
+      assertEquals(base == DefaultBases.Base.FULL ? "b1_8_1" : "b1_7_3",
+          DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.panoramaFolder", panorama.get("panoramaFolder")).getAsString());
+    }
   }
   @Test void existingInstallsSkipSetupAndFreshInstallsAskOnce() throws Exception {
     ConfigDefaults.prepare(game); assertTrue(DefaultBases.needsSetup());

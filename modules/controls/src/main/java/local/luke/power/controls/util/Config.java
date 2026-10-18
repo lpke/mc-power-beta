@@ -71,7 +71,7 @@ public class Config {
             public Boolean enablePanorma = false;
 
             @ConfigEntry(name = "Blur Panorama")
-            public Boolean blurBackground = false;
+            public Boolean blurBackground = true;
 
             @ConfigEntry(name = "Panorama only on the title screen")
             public Boolean onlyTitleScreen = false;

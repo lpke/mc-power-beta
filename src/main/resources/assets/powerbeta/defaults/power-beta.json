@@ -556,7 +556,7 @@
       },
       "panoramaConfig": {
         "enablePanorma": false,
-        "blurBackground": false,
+        "blurBackground": true,
         "panoramaFolder": "b1_7_3",
         "onlyTitleScreen": false
       },

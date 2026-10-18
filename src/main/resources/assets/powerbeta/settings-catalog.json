@@ -2474,7 +2474,7 @@
     "group": "Title screen",
     "label": "Blur panorama",
     "description": "",
-    "default": false,
+    "default": true,
     "restart": false,
     "order": 2
   },

@@ -116,6 +116,7 @@ final class Release250Checks {
         DefaultBases.load(base, mc, game);
         check(DefaultBases.current() == base, "base not applied");
         var panorama = PowerConfig.section("power_controls:userinterface").getAsJsonObject("panoramaConfig");
+        check(panorama.get("blurBackground").getAsBoolean(), "panorama blur default disabled for " + base);
         check(panorama.get("enablePanorma").getAsBoolean() == (base == DefaultBases.Base.FULL),"panorama enable flag not linked to base selection");
         var loaded = SettingsRegistry.openDefaults(mc);
         check(loaded.settings().stream().filter(s -> s.id.equals("native.guiScale")).findFirst().orElseThrow().value.getAsInt() == 4,"GUI scale changed for " + base);
