@@ -169,7 +169,7 @@
 - WorldEdit selection/query commands use the reported camera position and current-view
   ray in Spectator/freecam. Keep rays loaded-terrain-only and separate from interaction
   targets; freecam does not permit world mutations, navigation or inventory actions.
-- The locally ridden minecart bypasses render frustum/occlusion culling only while
+- The locally ridden boat or minecart bypasses render frustum/occlusion culling only while
   that player owns the view. Keep other entities, visibility preferences, saved flags
   and physics unchanged; normal culling resumes immediately on dismount.
 - Armour Shift-drags share the inventory gesture cancellation boundary and native
@@ -337,6 +337,14 @@
 - Photo-mode drags own the button from its originating press through release. Widget
   drags never become camera drags; lost focus cancels them. Clamp tilt before setting its
   target and preserve the original daylight snapshot through GUI resizing.
+- Creative vehicle placement uses press events only; holding use must not spawn extra
+  boats or minecarts. Preserve native item use and other held-button actions.
+- Modern water movement is a global player-only singleplayer preference, enabled
+  only in Power Beta defaults. Keep native collision, limb interpolation, other
+  fluids, mobs, vehicles and flight; see `docs/water-movement.md`. Bound current
+  sampling to loaded terrain. Retain normal swimming speed; do not add sprint-swimming.
+- Boat riders suppress lateral cape rotations only while rendering, retaining native
+  pitch motion and restoring ordinary cape response immediately on dismount.
 - Cape limits change only rendered cape angles, leaving player interpolation and movement
   untouched. Lava/cactus item rules affect only dropped items in singleplayer.
   Player and mob trampling use independent world rules, both off in new presets.

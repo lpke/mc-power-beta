@@ -8,7 +8,7 @@ import local.luke.power.config.*;
 import local.luke.power.death.DeathItems;
 import local.luke.power.hud.HudCoordinates;
 import local.luke.power.input.*;
-import local.luke.power.render.RiddenMinecart;
+import local.luke.power.render.RiddenVehicle;
 import local.luke.power.rules.*;
 import local.luke.power.validation.mixin.*;
 import local.luke.power.worldedit.WorldEditor;
@@ -106,7 +106,7 @@ public final class Release252Checks {
           for(int tick=0;tick<24;tick++){
             cart.tick();mc.player.method_1384();cart.method_1382();mc.player.yaw=mc.player.prevYaw=90;
             culled(cart);
-            check(RiddenMinecart.visible(cart)&&!(boolean)cart.getClass().getMethod("isCulled").invoke(cart),"ridden cart was occlusion culled");
+            check(RiddenVehicle.visible(cart)&&!(boolean)cart.getClass().getMethod("isCulled").invoke(cart),"ridden cart was occlusion culled");
             for(float partial:new float[]{0,.25f,.5f,.75f,1}){
               render(mc,partial,false);check(renderedCarts.contains(cart),"cart flickered fast="+fast+" tick="+tick+" partial="+partial);
             }
@@ -115,7 +115,7 @@ public final class Release252Checks {
           var hidden=local.luke.power.visual.VisualConfig.copy();hidden.hideEntities=true;hidden.hideVehicles=true;local.luke.power.visual.VisualConfig.preview(hidden);render(mc,.5f,false);
           check(!renderedCarts.contains(cart),"vehicle visibility preference ignored");local.luke.power.visual.VisualConfig.preview(visual);
           mc.player.method_1376(null);culled(cart);
-          check(!RiddenMinecart.visible(cart)&&(boolean)cart.getClass().getMethod("isCulled").invoke(cart),"dismount kept a culling override");render(mc,1,false);check(!renderedCarts.contains(cart),"dismounted cart bypassed frustum");
+          check(!RiddenVehicle.visible(cart)&&(boolean)cart.getClass().getMethod("isCulled").invoke(cart),"dismount kept a culling override");render(mc,1,false);check(!renderedCarts.contains(cart),"dismounted cart bypassed frustum");
           cart.markDead();cart.method_1340(140,110,140);
         }
       });

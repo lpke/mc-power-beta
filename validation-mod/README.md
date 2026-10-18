@@ -14,6 +14,12 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   multiplayer authority, defaults and durable Apply. Restart the muted clone and run
   `release-251 saved` to verify the saved Off preference.
 
+- After `new-world`, `water-253` compares actual player ticks and displacement
+  with modern water response, including currents, bindings, modes and live changes.
+- After `new-world`, `release-253` exercises native Creative boat/cart press and
+  held-use paths, quick clicks, native item preservation, Survival use, ridden-boat
+  frustum/occlusion rendering and cape alignment. Run `release-252` for cart and
+  inventory regressions. Use only the muted disposable clone.
 - After `new-world`, `release-252` checks Spectator/freecam selection and targeting,
   unchanged access rules, moving ridden-cart rendering across culling samples with
   either speed, native armour Shift-drags, cursor/NBT/count preservation, slot limits,

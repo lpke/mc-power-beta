@@ -3,6 +3,8 @@ package local.luke.power.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.*;
 import local.luke.power.input.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.class_381;
+import net.minecraft.class_483;
 import org.lwjgl.input.Mouse;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,6 +33,13 @@ public class MouseBindingMixin {
 
   @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Mouse;isButtonDown(I)Z", remap = false))
   private boolean power$heldMouse(int button, Operation<Boolean> original) {
+    Minecraft mc = (Minecraft)(Object)this;
+    if (button == 1 && mc.player instanceof PlayerMode mode && mode.power$creative()) {
+      var held = mc.player.inventory.getSelectedItem();
+      // The event path still handles every press. Creative keeps the item, so
+      // Beta's separate held-button path would otherwise place another vehicle.
+      if (held != null && (held.getItem() instanceof class_483 || held.getItem() instanceof class_381)) return false;
+    }
     return button == 0 && AttackInput.held()
         || !Bindings.claimsMouse(button - 100) && original.call(button);
   }

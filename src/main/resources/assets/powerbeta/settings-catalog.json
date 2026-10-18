@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 2.5.2",
+    "default": "Power Beta 2.5.3",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -4864,5 +4864,13 @@
     "default": true,
     "restart": false,
     "order": 45
+  },
+  "gameplay.modernWaterMovement": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Modern water movement",
+    "description": "Gentler sinking and modern current response, especially in shallow or mixed currents. Hold Sneak to descend. Keeps normal swimming speed and Beta's upright player model and collision size. Players only, in singleplayer; flight and riding keep their own movement.",
+    "default": true,
+    "order": 40
   }
 }

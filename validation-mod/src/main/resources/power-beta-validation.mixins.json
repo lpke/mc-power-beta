@@ -26,6 +26,8 @@
     "CullingThreadChecks",
     "EntityRenderCapture",
     "Minecart252Capture",
+    "Boat253Capture",
+    "Client253Access",
     "Armor252Callbacks",
     "BlockEntityRenderCapture",
     "Performance151Capture",

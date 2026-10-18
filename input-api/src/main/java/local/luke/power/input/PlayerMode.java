@@ -4,4 +4,5 @@ package local.luke.power.input;
 public interface PlayerMode {
   boolean power$creative();
   boolean power$spectator();
+  default boolean power$flying() { return false; }
 }

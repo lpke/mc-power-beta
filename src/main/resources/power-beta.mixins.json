@@ -6,6 +6,8 @@
   "client": [
     "ClientMixin",
     "BoatPlacementMixin",
+    "PlayerWaterContactMixin",
+    "PlayerWaterTravelMixin",
     "OptionsAccessor",
     "OptionsMixin",
     "EditWorldEscapeMixin",

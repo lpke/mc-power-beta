@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2.5.3] - 2026-10-19
+
+- Place one boat or minecart per right-click in Creative, without repeated placement while holding the button.
+- Keep ridden boats visible through frustum and occlusion culling, with original or improved boat movement.
+- Keep capes aligned behind boat riders instead of twisting sideways during travel.
+- Add Modern water movement for singleplayer players, with gentler currents and sinking, and Sneak-to-descend at normal swimming speed. Enabled in Power Beta defaults; disabled in Refined Beta and Beta 1.7.3 defaults.
+
 ## [2.5.2] - 2026-10-19
 
 - Use WorldEdit selection and query commands from Spectator or freecam, including current-view block targeting and camera-relative selection directions. Existing access rules still protect world changes.

@@ -68,6 +68,30 @@ class DefaultBasesTest {
       assertEquals(enabled,PowerConfig.section("gameplay").get("boatPlacementFacing").getAsBoolean());
     }
   }
+  @Test void waterMovementUsesItsInitialBaseAndSurvivesBaseChangesRollbackAndRestart() throws Exception {
+    ConfigDefaults.prepare(game);
+    for(var base:DefaultBases.Base.values()) {
+      var old=PowerConfig.document();var settings=old.getAsJsonObject("settings");
+      settings.getAsJsonObject("defaults").addProperty("base",base.id);
+      settings.getAsJsonObject("gameplay").remove("modernWaterMovement");
+      PowerConfig.write(old);byte[] bytes=Files.readAllBytes(PowerConfig.path());ConfigDefaults.prepare(game);
+      boolean enabled=base==DefaultBases.Base.POWER_BETA;
+      var expected=old.deepCopy();expected.getAsJsonObject("settings").getAsJsonObject("gameplay").addProperty("modernWaterMovement",enabled);
+      assertEquals(expected,PowerConfig.document());
+      assertEquals(enabled,PowerConfig.read("gameplay",local.luke.power.gameplay.GameplaySettings.class).modernWaterMovement);
+      try(var dirs=Files.list(game.resolve("power-beta-data/settings-backups"))){
+        assertTrue(dirs.anyMatch(dir->{try{return Arrays.equals(bytes,Files.readAllBytes(dir.resolve("file-0")))&&Files.exists(dir.resolve("complete.json"));}catch(Exception e){return false;}}));
+      }
+      DefaultBases.use(enabled?DefaultBases.Base.BETA:DefaultBases.Base.POWER_BETA,game);
+      byte[] applied=Files.readAllBytes(PowerConfig.path());ConfigDefaults.prepare(game);assertArrayEquals(applied,Files.readAllBytes(PowerConfig.path()));
+      assertEquals(enabled,PowerConfig.section("gameplay").get("modernWaterMovement").getAsBoolean());
+      try(var transaction=FileTransaction.begin(game,List.of(PowerConfig.path()))) {
+        var draft=PowerConfig.read("gameplay",local.luke.power.gameplay.GameplaySettings.class);draft.modernWaterMovement=!enabled;PowerConfig.save("gameplay",draft);
+      }
+      assertArrayEquals(applied,Files.readAllBytes(PowerConfig.path()));ConfigDefaults.prepare(game);
+      assertEquals(enabled,PowerConfig.read("gameplay",local.luke.power.gameplay.GameplaySettings.class).modernWaterMovement);
+    }
+  }
   @Test void consolidatedPowerBetaRetainsBothIdsAndUsesStandardDisplayDefaults() throws Exception {
     ConfigDefaults.prepare(game);
     assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.read("power_beta"));

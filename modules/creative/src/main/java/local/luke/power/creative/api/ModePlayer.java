@@ -4,6 +4,9 @@ package local.luke.power.creative.api;
 public interface ModePlayer extends local.luke.power.input.PlayerMode {
   default boolean power$creative() { return power_mode() == GameMode.CREATIVE; }
   default boolean power$spectator() { return power_isSpectator(); }
+  default boolean power$flying() {
+    return local.luke.power.creative.Modes.flying((net.minecraft.entity.living.player.PlayerEntity)this);
+  }
   int power_flightOverride();
 
   void power_flightOverride(int value);
