@@ -166,6 +166,15 @@
 
 - Flight sprint covers all three movement axes in creative, spectator and freecam.
   Opposing inputs cancel; stopping movement resets Toggle sprint.
+- WorldEdit selection/query commands use the reported camera position and current-view
+  ray in Spectator/freecam. Keep rays loaded-terrain-only and separate from interaction
+  targets; freecam does not permit world mutations, navigation or inventory actions.
+- The locally ridden minecart bypasses render frustum/occlusion culling only while
+  that player owns the view. Keep other entities, visibility preferences, saved flags
+  and physics unchanged; normal culling resumes immediately on dismount.
+- Armour Shift-drags share the inventory gesture cancellation boundary and native
+  clicks, keep cursor/NBT/count ownership, visit each source once and exclude custom
+  containers, catalogue/output and read-only slots.
 - Boat placement facing is a global Fixes preference, independent of speed, steering
   and world permissions. Set the new boat's current/previous yaw before native spawn;
   preserve placement eligibility, item use, existing boats and multiplayer authority.

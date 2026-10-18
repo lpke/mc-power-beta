@@ -7,6 +7,26 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CommandAccessTest {
+  @Test void detachedSelectionCommandsShareHelpCompletionAndExecutionWithoutGrantingMutations() {
+    RuleSet rules = RuleSet.cheats();
+    CommandPermissions.context(() -> new CommandPermissions.Context("world", false, rules));
+    local.luke.power.input.DetachedCamera.register(() -> true);
+    try {
+      for (String name : CommandCatalog.COMMANDS)
+        assertEquals(CommandAccess.owner(name) == null, CommandAccess.allowed(name), name);
+      var complete = CommandCatalog.complete("//");
+      assertTrue(complete.contains("//pos1")); assertTrue(complete.contains("//pos2"));
+      assertTrue(complete.contains("//hpos1")); assertTrue(complete.contains("//chunk"));
+      assertFalse(complete.contains("//set")); assertFalse(complete.contains("//wand"));
+      var help = new java.util.ArrayList<String>();
+      CommandHelp.index(1, true, CommandAccess::allowed, help::add);
+      assertTrue(help.stream().anyMatch(s -> s.replaceAll("§.", "").contains("//pos1 ")));
+      assertFalse(help.stream().anyMatch(s -> s.replaceAll("§.", "").contains("//set ")));
+    } finally {
+      local.luke.power.input.DetachedCamera.register(() -> false);
+      CommandPermissions.context(() -> new CommandPermissions.Context("", false, new RuleSet()));
+    }
+  }
   @Test void everyCommandAndAliasHasHelpAndAnExplicitPermissionOwner() {
     for (String name : CommandCatalog.COMMANDS) {
       assertNotNull(CommandHelp.line(name), name);

@@ -20,6 +20,10 @@ public class EntityVisibilityMixin {
   private boolean power$visible(Entity entity, net.minecraft.util.math.Vec3d position, Operation<Boolean> original) {
     return !EntityVisibility.hidden(entity) && original.call(entity, position);
   }
+  @WrapOperation(method = "method_1544", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;field_1622:Z"))
+  private boolean power$riddenCart(Entity entity, Operation<Boolean> original) {
+    return local.luke.power.render.RiddenMinecart.visible(entity) || original.call(entity);
+  }
   @WrapOperation(method = "method_1544", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;method_1921(Lnet/minecraft/entity/Entity;F)V"))
   private void power$entity(EntityRenderDispatcher dispatcher, Entity entity, float delta, Operation<Void> original) {
     if (EntityVisibility.hidden(entity)) return;

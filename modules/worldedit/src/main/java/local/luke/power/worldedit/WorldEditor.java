@@ -9,7 +9,6 @@ import local.luke.power.worldedit.core.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Item;
 import net.minecraft.block.Block;
-import net.minecraft.class_212;
 import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -86,10 +85,12 @@ public final class WorldEditor {
         && local.luke.power.rules.WorldRules.enabled(mc.world.method_262(), local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING);
   }
   public static boolean commandAvailable(Minecraft mc, String name) {
-    return localPlayer(mc) && local.luke.power.worldedit.chat.CommandAccess.allowed(name);
+    return localPlayer(mc)
+        && (!freecam() || local.luke.power.worldedit.chat.CommandAccess.owner(name) == null)
+        && local.luke.power.worldedit.chat.CommandAccess.allowed(name);
   }
   public static boolean available(Minecraft mc) {
-    return localPlayer(mc) && permitted(mc);
+    return localPlayer(mc) && !freecam() && permitted(mc);
   }
 
   public static boolean localPlayer(Minecraft mc) {
@@ -105,8 +106,7 @@ public final class WorldEditor {
         && Double.isFinite(mc.player.z)
         && Float.isFinite(mc.player.yaw)
         && Float.isFinite(mc.player.pitch)
-        && mc.field_2807 == mc.player
-        && !freecam();
+        && mc.field_2807 == mc.player;
   }
 
   public static Editor editor(Minecraft mc) {
@@ -163,6 +163,7 @@ public final class WorldEditor {
     }
     if (!commandAvailable(mc, name)) {
       message(mc, !localPlayer(mc) ? "A live local singleplayer world is required."
+          : freecam() ? "Leave freecam before changing the world or moving the player."
           : local.luke.power.worldedit.chat.CommandAccess.requirement(name) + " Change it in Options > Game rules.");
       return true;
     }
@@ -191,10 +192,7 @@ public final class WorldEditor {
       }
 
       public Pos target() {
-        var h = mc.field_2823;
-        return h != null && h.field_1983 == class_212.TILE
-            ? new Pos(h.field_1984, h.field_1985, h.field_1986)
-            : null;
+        return SelectionTarget.find(mc);
       }
 
       public Pos facing() {

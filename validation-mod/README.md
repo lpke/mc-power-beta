@@ -14,6 +14,11 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   multiplayer authority, defaults and durable Apply. Restart the muted clone and run
   `release-251 saved` to verify the saved Off preference.
 
+- After `new-world`, `release-252` checks Spectator/freecam selection and targeting,
+  unchanged access rules, moving ridden-cart rendering across culling samples with
+  either speed, native armour Shift-drags, cursor/NBT/count preservation, slot limits,
+  full inventories, disabled gestures and cancellation.
+
 - `release-250 setup` checks the fresh first-launch chooser and one-time save.
   `defaults` checks all three complete loads, 4x GUI scale, reset bases and delayed
   foreground tooltips, and exports their full setting comparison; `ui` checks nested F3

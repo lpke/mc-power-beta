@@ -25,6 +25,8 @@
     "PlacementSoundCaptureMixin",
     "CullingThreadChecks",
     "EntityRenderCapture",
+    "Minecart252Capture",
+    "Armor252Callbacks",
     "BlockEntityRenderCapture",
     "Performance151Capture",
     "Render151Capture",

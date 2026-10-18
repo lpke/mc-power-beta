@@ -14,6 +14,6 @@ public class FreecamCullingMixin {
   @Inject(method = {"isCulled", "isOutOfCamera"}, at = @At("HEAD"), cancellable = true, remap = false)
   private void power$freecamVisible(CallbackInfoReturnable<Boolean> cir) {
     // Keep the worker's player-view results current so normal culling resumes on exit.
-    if (DetachedCamera.isActive()) cir.setReturnValue(false);
+    if (DetachedCamera.isActive() || local.luke.power.render.RiddenMinecart.visible(this)) cir.setReturnValue(false);
   }
 }

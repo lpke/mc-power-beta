@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [2.5.2] - 2026-10-19
+
+- Use WorldEdit selection and query commands from Spectator or freecam, including current-view block targeting and camera-relative selection directions. Existing access rules still protect world changes.
+- Keep the ridden minecart visible when looking backwards, with normal or faster minecart movement.
+- Shift-drag across armour pieces to equip or remove them, preserving native item data and slot limits.
+
 ## [2.5.1] - 2026-10-19
 
 - Place boats facing the direction you look, with original or improved steering and either speed setting. Add Boat placement direction fix under Fixes, enabled in Power Beta and Refined Beta defaults and disabled in Beta 1.7.3 defaults. Singleplayer only.

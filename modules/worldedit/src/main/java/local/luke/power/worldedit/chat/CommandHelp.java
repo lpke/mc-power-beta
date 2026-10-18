@@ -13,8 +13,8 @@ public final class CommandHelp {
     add("wand", "", "Give a selection wand, or select one you own.");
     add("toggleeditwand", "", "Toggle the selection wand.");
     add("drawsel", "", "Toggle the selection outline.");
-    for (String name : List.of("pos1", "pos2")) add(name, "[x,y,z]", "Set a selection corner, at your reported coordinates by default.");
-    for (String name : List.of("hpos1", "hpos2")) add(name, "", "Set a selection corner at the targeted block.");
+    for (String name : List.of("pos1", "pos2")) add(name, "[x,y,z]", "Set a selection corner at your reported coordinates, including Spectator and freecam.");
+    for (String name : List.of("hpos1", "hpos2")) add(name, "", "Set a selection corner at the block under your current view, including Spectator and freecam.");
     add("sel", "[cuboid]", "Clear the selection."); add("chunk", "", "Select the current chunk, from bedrock to sky.");
     add("size", "", "Show selection dimensions and volume.");
     add("expand", "<amount> [reverse] [direction] | vert", "Expand the selection.");

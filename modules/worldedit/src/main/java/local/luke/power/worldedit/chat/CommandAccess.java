@@ -23,7 +23,10 @@ public final class CommandAccess {
     GameRule shared = CommandPermissions.owner(command);
     return shared == null ? GameRule.ALLOW_WORLD_EDITING : shared;
   }
-  public static boolean allowed(String name) { GameRule owner = owner(name); return owner == null || CommandPermissions.allowed(owner); }
+  public static boolean allowed(String name) {
+    GameRule owner = owner(name);
+    return owner == null || !local.luke.power.input.DetachedCamera.isActive() && CommandPermissions.allowed(owner);
+  }
   public static String requirement(String name) {
     GameRule owner = owner(name);
     return owner == null ? "Available without an access rule." : "Requires " + owner.id() + ".";
