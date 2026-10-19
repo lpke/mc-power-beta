@@ -6,9 +6,7 @@ import org.junit.jupiter.api.Test;
 
 class SprintStateTest {
   private SprintSettings settings() {
-    var s = new SprintSettings();
-    s.enabled = true;
-    return s;
+    return new SprintSettings();
   }
 
   @Test
@@ -122,14 +120,53 @@ class SprintStateTest {
   }
 
   @Test
-  void disabledDefaultsNeverSprintAndEveryFovEffectStartsOff() {
+  void disabledWorldNeverSprintsAndEveryFovEffectStartsOff() {
     var s = new SprintSettings();
     s.validate();
     assertFalse(s.enabled || s.dynamicFov || s.creativeFov || s.spectatorFov || s.freecamFov);
     var state = new SprintState();
-    state.tick(s, true, 1, true, true, false);
+    state.tick(s, false, 1, true, true, false);
     assertFalse(state.sprinting);
     s.capacity = Double.NaN;
     assertThrows(IllegalArgumentException.class, s::validate);
+  }
+
+  @Test
+  void worldEligibilityOwnsSprintRegardlessOfRetainedGlobalEnablement() {
+    for (boolean oldEnabled : new boolean[]{false, true}) {
+      var s = settings();
+      s.enabled = oldEnabled;
+      s.activation = 2;
+      var state = new SprintState();
+      state.tick(s, false, 1, true, true, false);
+      assertFalse(state.sprinting);
+      state.tick(s, true, 1, false, true, false);
+      state.tick(s, true, 1, true, true, false);
+      assertTrue(state.sprinting);
+      state.tick(s, true, 1, false, true, false);
+      assertTrue(state.sprinting);
+      state.tick(s, false, 1, false, true, false);
+      assertFalse(state.sprinting);
+      state.tick(s, true, 1, false, true, false);
+      assertFalse(state.sprinting, "Restoring permission must not restore a cancelled toggle");
+      assertEquals(oldEnabled, s.enabled);
+    }
+  }
+
+  @Test
+  void revocationClearsDoubleTapButPreservesStaminaAndCombatRecords() {
+    var s = settings();
+    var state = new SprintState();
+    state.tick(s, true, 1, false, true, false);
+    state.tick(s, true, 0, false, true, false);
+    state.stamina = 35;
+    state.rechargeTicks = 12;
+    state.combat(s);
+    state.cancel(false);
+    assertEquals(35, state.stamina);
+    assertEquals(12, state.rechargeTicks);
+    assertEquals(160, state.combatTicks);
+    state.tick(s, true, 1, false, true, false);
+    assertFalse(state.sprinting);
   }
 }

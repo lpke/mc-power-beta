@@ -17,7 +17,7 @@ final class RuleRestartChecks {
       record.add("oldCheats",RulePresets.cheats().document());
       var rules=new RuleSet();
       for(var rule:GameRule.values()) {
-        if(rule.integer())rules.set(rule,137);else rules.set(rule,rule.ordinal()%2==0);
+        if(rule.integer())rules.set(rule,73);else rules.set(rule,rule.ordinal()%2==0);
       }
       rules.set(GameRule.ALLOW_CREATIVE_MODE,true);
       WorldRuleChanges.apply(mc,rules);CreativeVehicleChecks.mode(mc,"CREATIVE");

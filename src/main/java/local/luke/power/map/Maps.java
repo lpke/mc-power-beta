@@ -16,7 +16,17 @@ import net.minecraft.world.World;
 
 /** One session supplies both views. It owns no simulation or player inventory state. */
 public final class Maps {
-  public record Radar(double x, double y, double z, String name, int colour, boolean item) {}
+  public record Radar(
+      double x,
+      double y,
+      double z,
+      String name,
+      int colour,
+      boolean item,
+      double previousX,
+      double previousY,
+      double previousZ,
+      int tick) {}
 
   public record Step(double x, double z, int dimension) {}
 
@@ -69,6 +79,10 @@ public final class Maps {
     return radar;
   }
 
+  public static float radarDelta(Radar entity, float delta) {
+    return ticks - entity.tick() <= 1 ? delta : 1;
+  }
+
   public static Collection<Step> path() {
     return Collections.unmodifiableCollection(PATH);
   }
@@ -87,6 +101,19 @@ public final class Maps {
 
   public static float yaw() {
     return yaw;
+  }
+
+  public static ReportedPosition.Pose framePose(Minecraft mc, float delta) {
+    if (mc.player == null || mc.world != world) return new ReportedPosition.Pose(x, y, z, yaw, 0);
+    if (DetachedCamera.isActive())
+      return ReportedPosition.current(mc.player, x, y, z, yaw, mc.player.pitch);
+    var p = mc.player;
+    return new ReportedPosition.Pose(
+        MapMotion.position(p.prevX, p.x, delta),
+        local.luke.power.hud.HudCoordinates.y(p) + MapMotion.position(p.prevY, p.y, delta) - p.y,
+        MapMotion.position(p.prevZ, p.z, delta),
+        CameraView.yaw(MapMotion.angle(p.prevYaw, p.yaw, delta)),
+        CameraView.pitch(MapMotion.angle(p.prevPitch, p.pitch, delta)));
   }
 
   public static int dimension() {
@@ -281,7 +308,18 @@ public final class Maps {
       String name =
           entity instanceof PlayerEntity p ? p.name : net.minecraft.class_206.method_734(entity);
       if (name == null || name.isBlank()) name = "Entity";
-      result.add(new Radar(entity.x, entity.y, entity.z, name, colour, item));
+      result.add(
+          new Radar(
+              entity.x,
+              entity.y,
+              entity.z,
+              name,
+              colour,
+              item,
+              entity.prevX,
+              entity.prevY,
+              entity.prevZ,
+              ticks));
     }
     radarScan.addAll(result);
     if (radarScan.size() > settings.radarLimit) {
@@ -312,6 +350,7 @@ public final class Maps {
     }
     if (cache != null || waypoints != null) MapIO.awaitQueued();
     MapRenderer.clear();
+    MinimapBuffer.clear();
     cache = null;
     waypoints = null;
     sampler = null;

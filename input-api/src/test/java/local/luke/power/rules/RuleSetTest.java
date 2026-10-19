@@ -7,7 +7,7 @@ import static local.luke.power.rules.GameRule.*;
 
 class RuleSetTest {
   @Test void aliasesAndDefaultsHaveOneOwner() {
-    assertEquals(39, GameRule.values().length);
+    assertEquals(40, GameRule.values().length);
     assertEquals(12, java.util.Arrays.stream(GameRule.values()).filter(GameRule::access).count());
     RuleSet survival = new RuleSet(), cheats = RuleSet.cheats();
     for (GameRule rule : GameRule.values()) {
@@ -51,5 +51,25 @@ class RuleSetTest {
     for (String value : new String[]{"true", "-1", "1.0", "1e2", "2147483648"})
       assertThrows(IllegalArgumentException.class, () -> PLAYERS_SLEEPING_PERCENTAGE.parse(value));
     assertThrows(IllegalArgumentException.class, () -> FIRE_SPREAD.parse("yes"));
+  }
+  @Test void groundSprintDefaultsOffAndRoundTripsIndependentlyOfOtherPermissions() {
+    assertSame(ALLOW_SPRINTING, GameRule.find("allowSprinting"));
+    assertTrue(ALLOW_SPRINTING.help().contains("/gamerule allow_sprinting"));
+    for (RuleSet defaults : new RuleSet[]{new RuleSet(), RuleSet.cheats()}) {
+      assertFalse(defaults.enabled(ALLOW_SPRINTING));
+      for (int version = 1; version <= RuleSet.VERSION; version++) {
+        JsonObject old = defaults.document();
+        old.addProperty("version", version);
+        old.getAsJsonObject("values").remove("allow_sprinting");
+        assertFalse(RuleSet.read(old, defaults).enabled(ALLOW_SPRINTING));
+      }
+      RuleSet enabled = defaults.copy();
+      enabled.set(ALLOW_SPRINTING, ALLOW_SPRINTING.parse("true"));
+      RuleSet loaded = RuleSet.read(new Gson().fromJson(new Gson().toJson(enabled.document()), JsonObject.class), new RuleSet());
+      assertTrue(loaded.enabled(ALLOW_SPRINTING));
+      for (GameRule rule : GameRule.values()) if (rule != ALLOW_SPRINTING)
+        assertEquals(defaults.get(rule), loaded.get(rule), rule.id());
+      assertFalse(defaults.enabled(ALLOW_SPRINTING));
+    }
   }
 }

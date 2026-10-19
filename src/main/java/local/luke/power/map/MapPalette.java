@@ -102,22 +102,28 @@ public final class MapPalette {
         int[] result = new int[256];
         int tw = w / 16, th = h / 16;
         for (int tile = 0; tile < 256; tile++) {
-          long r = 0, g = 0, b = 0, weight = 0;
-          for (int y = 0; y < th; y += Math.max(1, th / 16))
-            for (int x = 0; x < tw; x += Math.max(1, tw / 16)) {
+          long r = 0, g = 0, b = 0, a = 0, count = 0;
+          int stepX = Math.max(1, Math.min(4, tw / 8));
+          int stepY = Math.max(1, Math.min(4, th / 8));
+          for (int y = 0; y < th; y += stepY)
+            for (int x = 0; x < tw; x += stepX) {
               int pixel = image.getRGB((tile % 16) * tw + x, (tile / 16) * th + y),
                   alpha = pixel >>> 24;
-              r += (pixel >> 16 & 255) * alpha;
-              g += (pixel >> 8 & 255) * alpha;
-              b += (pixel & 255) * alpha;
-              weight += alpha;
+              // Cutout holes are not black pigment. Keep translucent pigment and its
+              // opacity separate so a surface can be composed over the block below.
+              if (alpha <= 10) continue;
+              r += pixel >> 16 & 255;
+              g += pixel >> 8 & 255;
+              b += pixel & 255;
+              a += alpha;
+              count++;
             }
-          if (weight > 0)
+          if (count > 0)
             result[tile] =
-                0xff000000
-                    | (int) (r / weight) << 16
-                    | (int) (g / weight) << 8
-                    | (int) (b / weight);
+                (int) (a / count) << 24
+                    | (int) (r / count) << 16
+                    | (int) (g / count) << 8
+                    | (int) (b / count);
         }
         return result;
       } finally {
@@ -126,17 +132,29 @@ public final class MapPalette {
     }
   }
 
-  public int accurate(Block block, World world, int x, int y, int z, int depth) {
-    if (block.field_1900 == Material.WATER)
-      return MapMath.shade(0x386bc7, Math.max(.52, 1 - depth * .025));
-    if (block.field_1900 == Material.LAVA) return 0xf36b12;
+  /** ARGB before terrain lighting. Beta's animated fluids have no static atlas pigment. */
+  int surfaceColour(Block block, World world, int x, int y, int z) {
+    if (block.field_1900 == Material.WATER) return 0xbf386bc7;
+    if (block.field_1900 == Material.LAVA) return 0xfff36b12;
     int texture = block.method_1626(world, x, y, z, 1);
     int base = texture >= 0 && texture < colours.length ? colours[texture] : 0;
-    if (base == 0) return nativeColour(block, world, x, y, z);
-    int tint = block.method_1600(world, x, y, z);
-    return ((base >> 16 & 255) * (tint >> 16 & 255) / 255) << 16
-        | ((base >> 8 & 255) * (tint >> 8 & 255) / 255) << 8
-        | (base & 255) * (tint & 255) / 255;
+    int colour;
+    if (base == 0) {
+      colour = nativeColour(block, world, x, y, z);
+      base = 0xff000000;
+    } else {
+      int tint = block.method_1600(world, x, y, z);
+      colour =
+          ((base >> 16 & 255) * (tint >> 16 & 255) / 255) << 16
+              | ((base >> 8 & 255) * (tint >> 8 & 255) / 255) << 8
+              | (base & 255) * (tint & 255) / 255;
+    }
+    int alpha = base >>> 24;
+    // Glass has opaque borders around cutout holes; averaging those borders alone
+    // would otherwise turn a glass roof into a solid white patch. Ice is translucent.
+    if (block.id == Block.GLASS.id) alpha = Math.min(alpha, 96);
+    else if (block.id == 79) alpha = Math.min(alpha, 160);
+    return alpha << 24 | colour;
   }
 
   public static int nativeColour(Block block, World world, int x, int y, int z) {

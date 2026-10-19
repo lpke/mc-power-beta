@@ -37,7 +37,7 @@ public abstract class DebugHudMixin {
     try { original.call(delta, focused, mx, my); }
     finally { DebugOverlay.capturing = false; }
     local.luke.power.hud.InfoHud.render(minecraft);
-    local.luke.power.map.Minimap.render(minecraft);
+    local.luke.power.map.Minimap.render(minecraft, delta);
     local.luke.power.map.WaypointMarkers.render(minecraft);
     if (!minecraft.options.debugHud) return;
     if (MenuPreferences.debugTimeOfDay() && !local.luke.power.hud.InfoHud.timeLine().isEmpty())

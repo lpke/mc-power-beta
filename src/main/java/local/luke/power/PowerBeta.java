@@ -61,7 +61,7 @@ public final class PowerBeta {
       local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
       local.luke.power.input.Bindings.availability(id ->
           local.luke.power.map.MapKeys.available(id)
-              && (!id.equals("powerbeta.sprint") || local.luke.power.sprint.SprintConfig.current().enabled && mc.world != null && !mc.world.isRemote)
+              && (!id.equals("powerbeta.sprint") || local.luke.power.sprint.SprintController.allowed(mc))
               && (!id.equals("power_creative.picker") && !id.equals("power_creative.modifier")
               || (local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE)
                   || local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE))));

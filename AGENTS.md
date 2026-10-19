@@ -506,16 +506,25 @@
   Compression, image decoding, exports and durable writes use immutable requests on
   the bounded map worker. Corrupt/future terrain and waypoint data remain protected.
   Keep world/server identity, dimensions and cave layers separate; terrain edits and
-  texture changes invalidate loaded samples. Map navigation never moves the player
+  texture changes invalidate loaded samples. Terrain format 2 reads format 1; verify
+  the original tile backup before upgrading. Bake directional relief before reducing
+  map levels; reconcile cached neighbour seams without sampling new terrain. Map
+  movement is frame-owned; sampling cadence, worker queues and texture uploads stay
+  bounded. Buffer padding must not select terrain detail or request extra tiles.
+  Map navigation never moves the player
   or loads terrain. Teleport actions use the existing local permission and command.
   Map preferences use PowerConfig; minimap presentation belongs to the HUD draft,
   with a link from the Map tab. Initialise a missing minimap enablement once from
   the selected base with a verified backup; later Use as base changes never alter it
   on restart. Preserve waypoints while features are disabled.
-- Ground sprinting is a global singleplayer preference, off in every defaults base.
+- Ground sprinting uses the per-world `allow_sprinting` rule, off in both creation
+  presets and every defaults base. Speed, activation, stamina, combat and FOV tuning
+  stay global. Retain legacy `sprint.enabled` data inert; never use it to grant a
+  world permission. Missing rules default off. Revocation immediately cancels ground
+  sprint and its FOV, preserving flight and freecam sprint preferences and state.
   Preserve native land collision, fluids, vehicles, flight and multiplayer authority.
   Modern defaults use a 1.3 speed multiplier, 0.2 horizontal jump impulse and native
   terrain dust with modern particle movement. Optional stamina/combat rules persist
-  in player NBT without changing global enablement. Each movement mode publishes
+  in player NBT without changing the world rule. Each movement mode publishes
   sprint state for its independent FOV preference; render code never polls keys.
   Boat interaction consumes a held boat's placement fallback without skipping native boarding.

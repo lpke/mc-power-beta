@@ -66,6 +66,7 @@ public final class MapProjection {
   }
 
   public List<Point> clip(List<Point> polygon, boolean circle) {
+    if (polygon.stream().allMatch(p -> contains(p.x, p.y, circle))) return polygon;
     int sides = circle ? 48 : 4;
     for (int side = 0; side < sides && !polygon.isEmpty(); side++) {
       double a = (circle ? side * 2 * Math.PI / sides : Math.PI / 4 + side * Math.PI / 2);

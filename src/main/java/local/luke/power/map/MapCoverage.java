@@ -11,7 +11,12 @@ public final class MapCoverage {
   private MapCoverage() {}
 
   public static Bounds select(MapProjection view, boolean circle, int budget) {
-    int level = MapMath.level(view.scale);
+    return select(view, circle, budget, 1);
+  }
+
+  public static Bounds select(
+      MapProjection view, boolean circle, int budget, double pixelsPerUnit) {
+    int level = MapMath.level(view.scale * pixelsPerUnit);
     Bounds bounds = bounds(view, circle, level);
     while (bounds.count() > budget && level < MapMath.MAX_LEVEL)
       bounds = bounds(view, circle, ++level);

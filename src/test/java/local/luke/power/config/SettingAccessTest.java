@@ -94,6 +94,24 @@ class SettingAccessTest {
     assertThrows(IllegalArgumentException.class, () -> number.parse("101"));
   }
 
+  @Test void groundSprintRuleHidesOnlyItsControlsAndPreservesGlobalPreferences() {
+    var session = world();
+    for (boolean allowed : new boolean[]{false, true, false}) {
+      rule(session, GameRule.ALLOW_SPRINTING, allowed);
+      for (String id : List.of("keys.powerbeta.sprint", "sprint.speed", "sprint.activation",
+          "sprint.stamina", "sprint.noSprintInCombat", "sprint.dynamicFov")) {
+        Setting preference = entry(id);
+        assertEquals(allowed, SettingAccess.visible(session, preference), id);
+        assertTrue(preference.value.getAsBoolean());
+        assertFalse(preference.changed());
+        assertTrue(SettingAccess.visible(new ConfigSession(), preference));
+      }
+      for (String id : List.of("keys.power_creative.sprint", "sprint.creativeFov",
+          "sprint.spectatorFov", "sprint.freecamFov", "sprint.fovStrength", "rules.world.allow_sprinting"))
+        assertTrue(SettingAccess.visible(session, entry(id)), id);
+    }
+  }
+
   @Test void titleStylesRetainRetroDraftsWhileHidingTheirEditors() {
     var session = world();
     Setting style = new Setting("logo.style", "test", "Interface", "Title screen", "Title style", "",

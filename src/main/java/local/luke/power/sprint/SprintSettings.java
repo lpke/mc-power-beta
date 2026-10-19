@@ -1,6 +1,7 @@
 package local.luke.power.sprint;
 
 public final class SprintSettings {
+  /** Retained legacy data only. World rules own ground-sprint availability. */
   public boolean enabled;
   public int activation, doubleTapTicks = 7;
   public boolean doubleTap = true, jumpBoost = true, particles = true, sprintKnockback = true;

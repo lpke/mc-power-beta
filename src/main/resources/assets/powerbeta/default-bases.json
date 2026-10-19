@@ -42,11 +42,11 @@
     "gameplay.boatPlacementFacing": true,
     "gameplay.modernWaterMovement": true,
     "maps.minimap": true,
-    "sprint.enabled": false,
     "sprint.dynamicFov": false,
     "sprint.creativeFov": false,
     "sprint.spectatorFov": false,
-    "sprint.freecamFov": false
+    "sprint.freecamFov": false,
+    "rule.allow_sprinting": false
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -231,11 +231,11 @@
     "gameplay.boatPlacementFacing": false,
     "gameplay.modernWaterMovement": false,
     "maps.minimap": false,
-    "sprint.enabled": false,
     "sprint.dynamicFov": false,
     "sprint.creativeFov": false,
     "sprint.spectatorFov": false,
-    "sprint.freecamFov": false
+    "sprint.freecamFov": false,
+    "rule.allow_sprinting": false
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -381,10 +381,10 @@
     "gameplay.boatPlacementFacing": true,
     "gameplay.modernWaterMovement": false,
     "maps.minimap": false,
-    "sprint.enabled": false,
     "sprint.dynamicFov": false,
     "sprint.creativeFov": false,
     "sprint.spectatorFov": false,
-    "sprint.freecamFov": false
+    "sprint.freecamFov": false,
+    "rule.allow_sprinting": false
   }
 }

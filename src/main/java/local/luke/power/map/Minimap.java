@@ -48,7 +48,7 @@ public final class Minimap {
                   : "Cave · Y " + (Maps.layer() * 8 + 7));
     if (settings.clock)
       lines.add(preview ? "12:00" : local.luke.power.hud.InfoHud.timeLine().replace("Time: ", ""));
-    int left = layout.x, right = layout.x + layout.size, y = layout.y + layout.size + 3;
+    int left = layout.x - 2, right = layout.x + layout.size + 2, y = layout.y + layout.size + 3;
     for (String text : lines) {
       int textWidth = mc.textRenderer.getWidth(text),
           x =
@@ -63,9 +63,9 @@ public final class Minimap {
         layout,
         new Box(
             left,
-            layout.y,
+            layout.y - 2,
             right - left,
-            layout.size + (lines.isEmpty() ? 0 : 3 + lines.size() * 10)),
+            layout.size + (lines.isEmpty() ? 4 : 5 + lines.size() * 10)),
         List.copyOf(labels));
   }
 
@@ -94,22 +94,28 @@ public final class Minimap {
   }
 
   public static void render(Minecraft mc) {
+    render(mc, 1);
+  }
+
+  public static void render(Minecraft mc, float delta) {
     MapSettings settings = MapConfig.current();
-    MapRenderer.beginFrame();
     if (!visible(settings, mc.options.debugHud)
         || Maps.cache() == null
         || mc.world == null
         || mc.player == null
         || mc.options.hideHud
         || mc.currentScreen != null) return;
+    MapRenderer.beginFrame(delta);
     var screen = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
-    draw(
-        mc,
-        settings,
-        screen.method_1857(),
-        screen.method_1858(),
-        Bindings.down(MapKeys.ENLARGE),
-        false);
+    var frame =
+        frame(
+            mc,
+            settings,
+            screen.method_1857(),
+            screen.method_1858(),
+            Bindings.down(MapKeys.ENLARGE),
+            false);
+    drawFrame(mc, settings, frame, false, delta);
   }
 
   public static Layout draw(
@@ -120,11 +126,17 @@ public final class Minimap {
   }
 
   public static void drawFrame(Minecraft mc, MapSettings s, Frame frame, boolean preview) {
+    drawFrame(mc, s, frame, preview, 1);
+  }
+
+  private static void drawFrame(
+      Minecraft mc, MapSettings s, Frame frame, boolean preview, float delta) {
     Layout bounds = frame.layout;
-    double angle = s.rotate ? Math.toRadians(-Maps.yaw() - 180) : 0;
+    var pose = Maps.framePose(mc, delta);
+    double angle = s.rotate ? Math.toRadians(-pose.yaw() - 180) : 0;
     var view =
         new MapProjection(
-            Maps.x(), Maps.z(), s.zoom, bounds.x, bounds.y, bounds.size, bounds.size, angle);
+            pose.x(), pose.z(), s.zoom, bounds.x, bounds.y, bounds.size, bounds.size, angle);
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {
       GL11.glDisable(GL11.GL_DEPTH_TEST);
@@ -134,15 +146,16 @@ public final class Minimap {
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glAlphaFunc(GL11.GL_GREATER, 0);
       if (Maps.cache() != null && !preview) {
-        MapRenderer.terrain(
-            Maps.cache(),
-            view,
-            Maps.dimension(),
-            Maps.layer(),
-            s.circular,
-            s,
-            !mc.world.isRemote,
-            mc.world.getSeed());
+        if (!MinimapBuffer.draw(mc, view, s))
+          MapRenderer.terrain(
+              Maps.cache(),
+              view,
+              Maps.dimension(),
+              Maps.layer(),
+              s.circular,
+              s,
+              !mc.world.isRemote,
+              mc.world.getSeed());
         MapRenderer.markers(mc, view, Maps.dimension(), s.circular, true);
       } else {
         // A fixed sample never starts world sampling, disk I/O or another world in the HUD editor.
@@ -174,23 +187,25 @@ public final class Minimap {
         MapRenderer.arrow(bounds.x + bounds.size / 2d, bounds.y + bounds.size / 2d, 0, 0xffffff);
       }
       GL11.glDisable(GL11.GL_TEXTURE_2D);
-      GL11.glColor4f(.75f, .75f, .75f, 1);
-      GL11.glBegin(GL11.GL_LINE_LOOP);
-      int count = s.circular ? 64 : 4;
-      if (s.circular)
-        for (int i = 0; i < count; i++) {
-          double a = i * Math.PI * 2 / count;
-          GL11.glVertex2d(
-              bounds.x + bounds.size / 2d + Math.cos(a) * bounds.size / 2,
-              bounds.y + bounds.size / 2d + Math.sin(a) * bounds.size / 2);
+      for (int ring = 2; ring >= 0; ring--) {
+        float light = ring == 2 ? 0 : ring == 1 ? .65f : .22f;
+        GL11.glColor4f(light, light, light, 1);
+        GL11.glBegin(GL11.GL_LINE_LOOP);
+        if (s.circular) {
+          for (int i = 0; i < 64; i++) {
+            double a = i * Math.PI * 2 / 64;
+            GL11.glVertex2d(
+                bounds.x + bounds.size / 2d + Math.cos(a) * (bounds.size / 2d + ring),
+                bounds.y + bounds.size / 2d + Math.sin(a) * (bounds.size / 2d + ring));
+          }
+        } else {
+          GL11.glVertex2d(bounds.x - ring, bounds.y - ring);
+          GL11.glVertex2d(bounds.x + bounds.size + ring, bounds.y - ring);
+          GL11.glVertex2d(bounds.x + bounds.size + ring, bounds.y + bounds.size + ring);
+          GL11.glVertex2d(bounds.x - ring, bounds.y + bounds.size + ring);
         }
-      else {
-        GL11.glVertex2d(bounds.x, bounds.y);
-        GL11.glVertex2d(bounds.x + bounds.size, bounds.y);
-        GL11.glVertex2d(bounds.x + bounds.size, bounds.y + bounds.size);
-        GL11.glVertex2d(bounds.x, bounds.y + bounds.size);
+        GL11.glEnd();
       }
-      GL11.glEnd();
       GL11.glEnable(GL11.GL_TEXTURE_2D);
       GL11.glColor4f(1, 1, 1, 1);
       if (s.compass)

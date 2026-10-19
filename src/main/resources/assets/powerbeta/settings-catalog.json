@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 2.6.0",
+    "default": "Power Beta 2.6.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -5371,16 +5371,6 @@
     "step": 1.0,
     "order": 47
   },
-  "sprint.enabled": {
-    "page": "Gameplay",
-    "group": "Sprinting",
-    "label": "Sprinting",
-    "description": "Allow modern sprinting on foot in singleplayer. Disabled by default in every base. Uses native collision, surfaces and held-item behavior.",
-    "min": 0.0,
-    "max": 1.0,
-    "step": 1.0,
-    "order": 0
-  },
   "sprint.activation": {
     "page": "Gameplay",
     "group": "Sprinting",
@@ -5610,5 +5600,15 @@
     "step": 5.0,
     "order": 22,
     "unit": "%"
+  },
+  "maps.updateRate": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Terrain updates per second",
+    "description": "Set the terrain update rate per second. Map movement and rotation follow every rendered frame. Lower values reduce background work.",
+    "min": 1.0,
+    "max": 20.0,
+    "step": 1.0,
+    "order": 43.5
   }
 }

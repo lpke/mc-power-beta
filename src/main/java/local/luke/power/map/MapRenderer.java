@@ -16,11 +16,31 @@ public final class MapRenderer {
   private static final ByteBuffer BUFFER = BufferUtils.createByteBuffer(PIXELS * 4);
   private static MapCache cache;
   private static int remaining;
+  private static float delta = 1;
+  private static double pixelsPerUnit = 1;
+  private static boolean pending;
 
   private MapRenderer() {}
 
   public static void beginFrame() {
+    beginFrame(1);
+  }
+
+  public static void beginFrame(float tickDelta) {
     remaining = MapConfig.current().uploadsPerFrame;
+    pending = false;
+    delta = tickDelta;
+    var mc = (Minecraft) net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
+    var scaled = new net.minecraft.class_564(mc.options, mc.displayWidth, mc.displayHeight);
+    pixelsPerUnit = (double) mc.displayWidth / scaled.method_1857();
+  }
+
+  public static boolean pending() {
+    return pending;
+  }
+
+  public static double pixelsPerUnit() {
+    return pixelsPerUnit;
   }
 
   public static void clear() {
@@ -38,11 +58,24 @@ public final class MapRenderer {
       MapSettings settings,
       boolean local,
       long seed) {
+    terrain(source, view, dimension, layer, circle, settings, local, seed, pixelsPerUnit);
+  }
+
+  public static void terrain(
+      MapCache source,
+      MapProjection view,
+      int dimension,
+      int layer,
+      boolean circle,
+      MapSettings settings,
+      boolean local,
+      long seed,
+      double pixelScale) {
     if (source != cache) {
       clear();
       cache = source;
     }
-    var coverage = MapCoverage.select(view, circle, settings.cacheTiles);
+    var coverage = MapCoverage.select(view, circle, settings.cacheTiles, pixelScale);
     int level = coverage.level(), span = SIZE << level;
     int minX = coverage.minX(),
         maxX = coverage.maxX(),
@@ -57,7 +90,7 @@ public final class MapRenderer {
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glAlphaFunc(GL11.GL_GREATER, 0);
       GL11.glDisable(GL11.GL_TEXTURE_2D);
-      GL11.glColor4d(.035, .035, .045, settings.opacity);
+      GL11.glColor4d(0, 0, 0, settings.opacity);
       polygon(
           view.clip(
               List.of(
@@ -94,7 +127,10 @@ public final class MapRenderer {
                   circle);
           if (polygon.isEmpty()) continue;
           MapTile tile = source.get(key);
-          if (tile == null) continue;
+          if (tile == null) {
+            pending = true;
+            continue;
+          }
           Texture texture = TEXTURES.get(key);
           if ((texture == null
                   || texture.owner != tile
@@ -105,6 +141,8 @@ public final class MapRenderer {
             texture = upload(tile, texture, settings, style, local, seed);
             TEXTURES.put(key, texture);
           }
+          if (texture == null || texture.revision != tile.revision || texture.style != style)
+            pending = true;
           if (texture == null) continue;
           GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.id);
           polygon(polygon);
@@ -143,10 +181,12 @@ public final class MapRenderer {
     }
     BUFFER.flip();
     GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
-    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
+    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
     GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_CLAMP);
-    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_CLAMP);
+    GL11.glTexParameteri(
+        GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE);
+    GL11.glTexParameteri(
+        GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE);
     GL11.glPushClientAttrib(GL11.GL_CLIENT_PIXEL_STORE_BIT);
     try {
       GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
@@ -169,7 +209,7 @@ public final class MapRenderer {
     return new Texture(id, tile, tile.revision, style);
   }
 
-  private static void polygon(List<MapProjection.Point> points) {
+  static void polygon(List<MapProjection.Point> points) {
     if (points.size() < 3) return;
     GL11.glBegin(GL11.GL_TRIANGLE_FAN);
     for (var p : points) {
@@ -192,20 +232,44 @@ public final class MapRenderer {
     GL11.glColor4f(1, 1, 1, 1);
   }
 
+  private static void diamond(double x, double y, int colour, double size) {
+    GL11.glDisable(GL11.GL_TEXTURE_2D);
+    for (int outline = 1; outline >= 0; outline--) {
+      double r = size + outline * .8;
+      int rgb = outline == 1 ? 0 : colour;
+      GL11.glColor4ub((byte) (rgb >> 16), (byte) (rgb >> 8), (byte) rgb, (byte) 255);
+      GL11.glBegin(GL11.GL_QUADS);
+      GL11.glVertex2d(x, y - r);
+      GL11.glVertex2d(x + r, y);
+      GL11.glVertex2d(x, y + r);
+      GL11.glVertex2d(x - r, y);
+      GL11.glEnd();
+    }
+    GL11.glEnable(GL11.GL_TEXTURE_2D);
+    GL11.glColor4f(1, 1, 1, 1);
+  }
+
   public static void arrow(double x, double y, double angle, int colour) {
     GL11.glPushMatrix();
     GL11.glTranslated(x, y, 0);
     GL11.glRotated(Math.toDegrees(angle), 0, 0, 1);
     GL11.glDisable(GL11.GL_TEXTURE_2D);
-    GL11.glColor4ub((byte) (colour >> 16), (byte) (colour >> 8), (byte) colour, (byte) 255);
-    GL11.glBegin(GL11.GL_TRIANGLES);
-    GL11.glVertex2d(0, -5);
-    GL11.glVertex2d(3.5, 4);
-    GL11.glVertex2d(0, 2);
-    GL11.glVertex2d(0, -5);
-    GL11.glVertex2d(0, 2);
-    GL11.glVertex2d(-3.5, 4);
-    GL11.glEnd();
+    for (int outline = 1; outline >= 0; outline--) {
+      GL11.glPushMatrix();
+      double scale = outline == 1 ? 1.3 : 1;
+      GL11.glScaled(scale, scale, 1);
+      int rgb = outline == 1 ? 0 : colour;
+      GL11.glColor4ub((byte) (rgb >> 16), (byte) (rgb >> 8), (byte) rgb, (byte) 255);
+      GL11.glBegin(GL11.GL_TRIANGLES);
+      GL11.glVertex2d(0, -5);
+      GL11.glVertex2d(3.5, 4);
+      GL11.glVertex2d(0, 2);
+      GL11.glVertex2d(0, -5);
+      GL11.glVertex2d(0, 2);
+      GL11.glVertex2d(-3.5, 4);
+      GL11.glEnd();
+      GL11.glPopMatrix();
+    }
     GL11.glEnable(GL11.GL_TEXTURE_2D);
     GL11.glColor4f(1, 1, 1, 1);
     GL11.glPopMatrix();
@@ -224,6 +288,7 @@ public final class MapRenderer {
   public static void markers(
       Minecraft mc, MapProjection view, int dimension, boolean circle, boolean mini) {
     MapSettings s = MapConfig.current();
+    var pose = Maps.framePose(mc, delta);
     var store = Maps.waypoints();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {
@@ -273,16 +338,29 @@ public final class MapRenderer {
                 point.colour);
             continue;
           }
-          dot(p.x(), p.y(), point.colour, 2.5);
+          diamond(p.x(), p.y(), point.colour, mini ? 2.5 : 4);
+          if (!mini && !point.name.isEmpty()) {
+            String initial = point.name.substring(0, 1);
+            mc.textRenderer.drawWithShadow(
+                initial,
+                (int) p.x() - mc.textRenderer.getWidth(initial) / 2,
+                (int) p.y() - 4,
+                0xffffff);
+          }
           if (s.waypointNames && !mini)
             mc.textRenderer.drawWithShadow(
                 point.name, (int) p.x() + 5, (int) p.y() - 4, point.colour);
         }
       if (s.radar && dimension == Maps.dimension())
         for (var entity : Maps.radar()) {
-          var p = view.screen(entity.x(), entity.z());
+          var p =
+              view.screen(
+                  MapMotion.position(
+                      entity.previousX(), entity.x(), Maps.radarDelta(entity, delta)),
+                  MapMotion.position(
+                      entity.previousZ(), entity.z(), Maps.radarDelta(entity, delta)));
           if (!view.contains(p.x(), p.y(), circle, 2)) continue;
-          dot(p.x(), p.y(), entity.colour(), entity.item() ? 1 : 1.6);
+          diamond(p.x(), p.y(), entity.colour(), entity.item() ? .7 : 1.3);
           if (s.entityHeights && Math.abs(entity.y() - Maps.y()) > 3)
             label(
                 mc,
@@ -297,9 +375,14 @@ public final class MapRenderer {
                 mc, view, circle, entity.name(), (int) p.x() + 3, (int) p.y() + 3, entity.colour());
         }
       if (dimension == Maps.dimension()) {
-        var p = view.screen(Maps.x(), Maps.z());
-        if (view.contains(p.x(), p.y(), circle, 6))
-          arrow(p.x(), p.y(), Math.toRadians(Maps.yaw() + 180) + view.angle, 0xffffff);
+        var p = view.screen(pose.x(), pose.z());
+        if (view.contains(p.x(), p.y(), circle, 6)) {
+          GL11.glPushMatrix();
+          GL11.glTranslated(p.x(), p.y(), 0);
+          if (mini) GL11.glScaled(.55, .55, 1);
+          arrow(0, 0, Math.toRadians(pose.yaw() + 180) + view.angle, mini ? 0xffffff : 0xf13c3c);
+          GL11.glPopMatrix();
+        }
       }
     } finally {
       GL11.glPopAttrib();

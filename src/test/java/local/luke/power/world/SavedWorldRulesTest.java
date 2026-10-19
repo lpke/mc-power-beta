@@ -73,6 +73,42 @@ class SavedWorldRulesTest {
     assertArrayEquals(original, Files.readAllBytes(level));
     assertFalse(Files.exists(game.resolve("power-beta-data/settings-backups")));
   }
+  @Test void sprintRuleDefaultsOffForOlderWorldsDespiteGlobalEnablementAndSurvivesSavedEdits() throws Exception {
+    var preferences = new local.luke.power.sprint.SprintSettings();
+    preferences.enabled = true;
+    preferences.speed = 145;
+    preferences.stamina = true;
+    PowerConfig.save("sprint", preferences);
+    byte[] global = Files.readAllBytes(PowerConfig.path());
+    var root = WorldRuleFiles.read(level);
+    var data = root.getCompound("Data");
+    data.putString("PowerBetaCommandWorldId", "stable-sprint-world");
+    for (int version = 1; version <= RuleSet.VERSION; version++) {
+      var oldRules = new NbtCompound();
+      oldRules.putInt("version", version);
+      oldRules.putBoolean("allow_creative_mode", true);
+      data.put("GameRules", oldRules);
+      assertFalse(WorldRuleData.read(data).enabled(GameRule.ALLOW_SPRINTING));
+    }
+    write(level, root);
+    byte[] previous = Files.readAllBytes(old);
+    var session = SavedWorldBackend.open(open());
+    edit(session, GameRule.ALLOW_SPRINTING, true);
+    session.save(game);
+    data = WorldRuleFiles.read(level).getCompound("Data");
+    assertTrue(WorldRuleData.read(data).enabled(GameRule.ALLOW_SPRINTING));
+    assertTrue(WorldRuleData.read(data).enabled(GameRule.ALLOW_CREATIVE_MODE));
+    assertEquals("stable-sprint-world", data.getString("PowerBetaCommandWorldId"));
+    assertEquals(3, data.getInt("PowerBetaDifficulty"));
+    assertEquals("SURVIVAL", data.getCompound("Player").getString("PowerBetaGameMode"));
+    assertArrayEquals(previous, Files.readAllBytes(old));
+    assertArrayEquals(global, Files.readAllBytes(PowerConfig.path()));
+    var restarted = SavedWorldBackend.open(open());
+    edit(restarted, GameRule.ALLOW_SPRINTING, false);
+    restarted.save(game);
+    assertFalse(open().rules().enabled(GameRule.ALLOW_SPRINTING));
+    assertArrayEquals(global, Files.readAllBytes(PowerConfig.path()));
+  }
   @Test void renamePreservesRulesPlayerDataAndPreviousMetadataAndRejectsConcurrentChanges() throws Exception {
     byte[] previous = Files.readAllBytes(old);
     var world = open(); var rules = world.rules();

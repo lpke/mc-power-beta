@@ -552,7 +552,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 2.6.0"
+        "customVersionText": "Power Beta 2.6.1"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -946,7 +946,8 @@
           "allow_flight": false,
           "ghast_explosion_fire": true,
           "lightning_strike_fire": false,
-          "explosion_drop_chance": 100
+          "explosion_drop_chance": 100,
+          "allow_sprinting": false
         }
       },
       "cheats": {
@@ -990,7 +991,8 @@
           "allow_flight": true,
           "ghast_explosion_fire": true,
           "lightning_strike_fire": false,
-          "explosion_drop_chance": 100
+          "explosion_drop_chance": 100,
+          "allow_sprinting": false
         }
       }
     },
@@ -1049,10 +1051,10 @@
       "columnsPerTick": 512,
       "cacheTiles": 256,
       "uploadsPerFrame": 4,
-      "refreshSeconds": 5
+      "refreshSeconds": 5,
+      "updateRate": 20
     },
     "sprint": {
-      "enabled": false,
       "activation": 0,
       "doubleTapTicks": 7,
       "doubleTap": true,

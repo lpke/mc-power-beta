@@ -22,7 +22,7 @@ improvements and optional tweaks in one searchable Options menu.
 - One searchable Options menu with categories, linked settings, tooltips, live previews, reset controls, automatic saving and optional Apply/Cancel editing.
 - Configurable keyboard and mouse bindings, Ctrl/Shift/Alt chords, conflict detection and a shared view for resolving overlapping bindings.
 - A persistent world map and HUD minimap with surface and cave layers, terrain shading, entity radar, waypoints, deathpoints, chunk and slime overlays, recent paths and PNG export.
-- Optional modern sprinting on foot, with stamina and combat limits, sprint jumping and surface particles. Separate optional sprint FOV effects for ground sprinting and each flight mode. All start off.
+- Optional modern sprinting on foot, enabled per world, with global stamina and combat limits, sprint jumping and surface particles. Separate optional sprint FOV effects for ground sprinting and each flight mode. All start off.
 - Creative and spectator modes, a mode picker, configurable reach, flight speed, drift and sprint, and adjustable spectator speed.
 - Creative item categories and a survival inventory view. Shift-click for full stacks, middle-drag to fill slots, and use a destroy slot or clear the inventory.
 - WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
@@ -45,7 +45,7 @@ improvements and optional tweaks in one searchable Options menu.
 - Faster boats and minecarts, boat steering and collision protection, boat elevators, minecart boosters and optional faster obsidian mining.
 - Optional water landings and bucket clutches, including flowing water. Empty buckets stack to 16; doors and signs have optional modern stack limits.
 - Individual modern recipes, shapeless recipes, tool repair, wool redyeing, adjusted slab/stair/trapdoor/ladder yields, material recovery, soul sand and otherwise unobtainable blocks.
-- Per-world difficulty and 34 searchable game rules, editable in Options or with /gamerule. Separate permissions cover game modes, editing, items, travel and recovery. Time freezing preserves the simulation clock.
+- Per-world difficulty and searchable game rules, editable in Options or with /gamerule. Separate permissions cover game modes, editing, items, travel and recovery. Time freezing preserves the simulation clock.
 - Editable Survival and Cheat defaults for new worlds, plus a Custom creation preset with its own searchable rule editor and starting-mode choice. Existing worlds keep their own rules.
 - World rules for monsters, animals, dungeon spawners and sleep ambushes. Global spawn limits, light thresholds, group sizes and despawning preferences, including saddled-pig preservation.
 - Sleep controls for night skipping or acceleration, a per-world sleeping percentage, wake-on-click and respawn-only beds; configurable rain, thunder, snow height and weather timing.
@@ -92,7 +92,7 @@ Settings save automatically by default. Right-click Apply to use manual editing;
 leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
 edits stay in the draft until you create the world.
 
-Version 2.6.0 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
+Version 2.6.1 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
 with a verified backup. World rules use format 3 and support formats 1, 2 and
 Power Beta's earlier world settings. Existing worlds retain their rules and item
 protection. Old footwear-specific crop protection needs an explicit trampling choice. Conflicting old permissions or unsupported formats stop conversion
@@ -108,6 +108,8 @@ coordinate navigation. Hold **Z** to enlarge the minimap; **I** and **O** change
 All gameplay bindings can be changed in Controls.
 
 Options > Map contains terrain, caves, radar, waypoint and performance settings.
+Terrain updates per second controls sampling work; minimap movement and rotation
+follow every rendered frame. Relief stays visible when zooming out.
 Its layout button opens the minimap section of the HUD editor for position, size,
 shape, opacity, rotation and information. These edits use the same Done, Undo and
 Cancel controls as the rest of the HUD. Power Beta defaults show the minimap;
@@ -115,15 +117,22 @@ Refined Beta and Beta defaults leave it hidden.
 
 Explored terrain and waypoints are stored in `power-beta-data/maps`, separately
 from preferences and inventory recovery. Map sampling reads loaded terrain only.
+Terrain format 2 reads format 1 and retains a verified `.v1.bak` before replacing
+an older tile. Previously explored areas gain the new distant relief as their
+detailed tiles are read again.
 PNG export saves the visible terrain, up to 4096 pixels on the longer side, in the
 map's `exports` folder. In multiplayer, name each server map in the map screen when
 the server has multiple worlds. Teleportation requires a local singleplayer world's
 teleport permission and the player's view. Maps do not grant access permissions.
 
-Options > Gameplay > Sprinting enables singleplayer ground sprinting. The default
+Options > Game rules > Allow sprinting enables ground sprinting for the current
+singleplayer world. `/gamerule allow_sprinting true` changes the same rule. Both
+creation presets and all defaults bases start it off; existing worlds without the
+rule also start it off. Options > Gameplay > Sprinting keeps its global tuning. The default
 activation uses Ctrl or a forward double tap, with modern acceleration, jump boost,
 dust and sprint-hit knockback. Sprint stamina and combat contains optional stamina,
-recharge delays and combat limits that can balance it without adding a hunger system. Ground sprinting stays disabled in
+recharge delays and combat limits that can balance it without adding a hunger system.
+These preferences apply across worlds that allow sprinting. Ground sprinting stays disabled in
 multiplayer. Sprint FOV effects have separate settings for ground, Creative,
 Spectator and freecam movement, and all default off. Their shared strength is in Camera > View.
 

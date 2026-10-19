@@ -3,14 +3,18 @@ package local.luke.power.map;
 import static local.luke.power.map.MapMath.*;
 
 import java.util.Arrays;
+import java.util.BitSet;
 
 /** Mutable only on the game thread. Workers receive deep copies. Zero alpha means unexplored. */
 public final class MapTile {
   public final Key key;
   final int[] accurate = new int[PIXELS], vanilla = new int[PIXELS], blocks = new int[PIXELS];
+  final int[] reliefAccurate = new int[PIXELS], reliefVanilla = new int[PIXELS];
+  private final BitSet dirtyRelief = new BitSet(PIXELS);
   final byte[] heights = new byte[PIXELS], lights = new byte[PIXELS], biomes = new byte[PIXELS];
   public long revision, savedRevision, textureRevision;
   public boolean readOnly;
+  boolean propagateRelief;
 
   public MapTile(Key key) {
     this.key = key;
@@ -39,13 +43,11 @@ public final class MapTile {
 
   public int colour(int i, MapSettings s) {
     if (!known(i)) return 0;
-    int rgb = s.colourMode == 0 ? accurate[i] : vanilla[i];
-    double shade = 1;
-    if (s.heightShading) shade *= .82 + height(i) / 350.0;
-    if (s.slopeShading) {
-      int north = i >= SIZE && known(i - SIZE) ? height(i - SIZE) : height(i);
-      shade *= Math.max(.62, Math.min(1.22, 1 + (north - height(i)) * .055));
-    }
+    int rgb =
+        s.slopeShading
+            ? (s.colourMode == 0 ? reliefAccurate[i] : reliefVanilla[i])
+            : (s.colourMode == 0 ? accurate[i] : vanilla[i]);
+    double shade = s.heightShading ? Math.max(.9, Math.min(1, height(i) / 63d)) : 1;
     if (s.caveLighting && key.layer() != -1) shade *= .35 + light(i) * .65 / 15;
     return 0xff000000 | MapMath.shade(rgb, shade);
   }
@@ -65,8 +67,62 @@ public final class MapTile {
     lights[i] = (byte) light;
     blocks[i] = block;
     biomes[i] = (byte) biome;
+    reliefAccurate[i] = colour;
+    reliefVanilla[i] = nativeColour;
+    invalidateRelief(i);
     revision++;
     return true;
+  }
+
+  @FunctionalInterface
+  interface Heights {
+    int at(int x, int z);
+  }
+
+  void invalidateRelief(int i) {
+    if (key.level() != 0 || readOnly) return;
+    dirtyRelief.set(i);
+    if (i + SIZE < PIXELS) dirtyRelief.set(i + SIZE);
+    if (i % SIZE < SIZE - 1 && i + SIZE + 1 < PIXELS) dirtyRelief.set(i + SIZE + 1);
+  }
+
+  void invalidateReliefPixel(int i) {
+    if (key.level() == 0 && !readOnly) dirtyRelief.set(i);
+  }
+
+  void invalidateAllRelief() {
+    if (key.level() == 0 && !readOnly) dirtyRelief.set(0, PIXELS);
+  }
+
+  /** Reads neighbouring cached heights only, never native terrain or disk. */
+  boolean refreshRelief(Heights neighbours) {
+    if (readOnly || key.level() != 0) return false;
+    boolean changed = false;
+    for (int i = dirtyRelief.nextSetBit(0); i >= 0; i = dirtyRelief.nextSetBit(i + 1)) {
+      if (!known(i)) continue;
+      int x = i % SIZE, z = i / SIZE, h = height(i);
+      int north = adjacent(x, z - 1, h, neighbours);
+      int northwest = adjacent(x - 1, z - 1, h, neighbours);
+      int a = MapRelief.colour(accurate[i], h, north, northwest, key.dimension());
+      int v = MapRelief.colour(vanilla[i], h, north, northwest, key.dimension());
+      if (reliefAccurate[i] != a || reliefVanilla[i] != v) {
+        reliefAccurate[i] = a;
+        reliefVanilla[i] = v;
+        changed = true;
+      }
+    }
+    dirtyRelief.clear();
+    if (changed) revision++;
+    return changed;
+  }
+
+  private int adjacent(int x, int z, int fallback, Heights neighbours) {
+    if (x >= 0 && z >= 0) {
+      int i = z * SIZE + x;
+      return known(i) ? height(i) : fallback;
+    }
+    int value = neighbours == null ? -1 : neighbours.at((int) key.minX() + x, (int) key.minZ() + z);
+    return value < 0 ? fallback : value;
   }
 
   public boolean dirty() {
@@ -77,6 +133,9 @@ public final class MapTile {
     MapTile tile = new MapTile(key);
     System.arraycopy(accurate, 0, tile.accurate, 0, PIXELS);
     System.arraycopy(vanilla, 0, tile.vanilla, 0, PIXELS);
+    System.arraycopy(reliefAccurate, 0, tile.reliefAccurate, 0, PIXELS);
+    System.arraycopy(reliefVanilla, 0, tile.reliefVanilla, 0, PIXELS);
+    tile.dirtyRelief.or(dirtyRelief);
     System.arraycopy(blocks, 0, tile.blocks, 0, PIXELS);
     System.arraycopy(heights, 0, tile.heights, 0, PIXELS);
     System.arraycopy(lights, 0, tile.lights, 0, PIXELS);
@@ -90,6 +149,8 @@ public final class MapTile {
   /** Update one child quadrant, preserving the other three quadrants loaded from disk. */
   public boolean merge(MapTile child) {
     if (!key.equals(child.key.parent())) throw new IllegalArgumentException("Wrong map parent");
+    if (readOnly) return false;
+    child.refreshRelief(null);
     int ox = Math.floorMod(child.key.x(), 2) * SIZE / 2,
         oz = Math.floorMod(child.key.z(), 2) * SIZE / 2;
     boolean changed = false;
@@ -103,6 +164,12 @@ public final class MapTile {
             vr = 0,
             vg = 0,
             vb = 0,
+            ra = 0,
+            ga = 0,
+            ba = 0,
+            rv = 0,
+            gv = 0,
+            bv = 0,
             h = 0,
             l = 0,
             source = first;
@@ -118,20 +185,38 @@ public final class MapTile {
             vr += v >> 16 & 255;
             vg += v >> 8 & 255;
             vb += v & 255;
+            int sa = child.reliefAccurate[p], sv = child.reliefVanilla[p];
+            ra += sa >> 16 & 255;
+            ga += sa >> 8 & 255;
+            ba += sa & 255;
+            rv += sv >> 16 & 255;
+            gv += sv >> 8 & 255;
+            bv += sv & 255;
             h += child.height(p);
             l += child.light(p);
           }
         }
         if (count == 0) continue;
+        int destination = (oz + z) * SIZE + ox + x;
+        int shadedA = (ra / count) << 16 | (ga / count) << 8 | ba / count;
+        int shadedV = (rv / count) << 16 | (gv / count) << 8 | bv / count;
+        boolean reliefChanged =
+            reliefAccurate[destination] != shadedA || reliefVanilla[destination] != shadedV;
         changed |=
             put(
-                (oz + z) * SIZE + ox + x,
+                destination,
                 (ar / count) << 16 | (ag / count) << 8 | ab / count,
                 (vr / count) << 16 | (vg / count) << 8 | vb / count,
                 h / count,
                 l / count,
                 child.block(source),
                 child.biome(source));
+        reliefAccurate[destination] = shadedA;
+        reliefVanilla[destination] = shadedV;
+        if (reliefChanged) {
+          revision++;
+          changed = true;
+        }
       }
     return changed;
   }

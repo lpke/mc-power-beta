@@ -45,7 +45,6 @@ public final class SprintState {
     }
     boolean can =
         eligible
-            && s.enabled
             && (!s.noSprintInCombat || combatTicks == 0)
             && (!s.stamina || !exhausted && stamina > 0);
     if (!can || forward <= 0 || collision) {

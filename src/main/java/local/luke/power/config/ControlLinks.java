@@ -31,7 +31,7 @@ public final class ControlLinks {
     link("powerbeta.mapZoomIn", "maps.zoom", "maps.minimap", "Zoom the minimap in.");
     link("powerbeta.mapZoomOut", "maps.zoom", "maps.minimap", "Zoom the minimap out.");
     link("powerbeta.minimap", "maps.minimap", "", "Show or hide the minimap.");
-    link("powerbeta.sprint", "sprint.enabled", "sprint.enabled", "Sprint forward using the selected activation and stamina rules.");
+    link("powerbeta.sprint", "sprint.activation", "rules.world.allow_sprinting", "Sprint forward when Allow sprinting is enabled in this world's Game rules, using the global activation and stamina preferences.");
     link("powerbeta.infoHud", "infoHud.enabled", "", "Toggle all custom HUD clusters together. Each cluster keeps its contents, appearance and F3 visibility preference.");
     // These settings are live toggle states, not feature-availability switches.
     link("power_beta.clickMining", "tweaks.clickMining", "", "Temporarily invert Continuous click mining until the next press or world exit.");
@@ -104,7 +104,7 @@ public final class ControlLinks {
     if (setting.kind == Setting.Kind.KEY) return false;
     if (setting.id.equals(link.setting) || setting.id.equals(link.featureGate)) return true;
     String family = switch (link.setting) {
-      case "sprint.enabled" -> "sprint.";
+      case "sprint.activation" -> "sprint.";
       case "maps.worldMap", "maps.waypoints", "maps.minimap", "maps.zoom", "maps.size" -> "maps.";
       case "lightOverlay.enabled" -> "lightOverlay.";
       case "infoHud.enabled" -> "infoHud.";

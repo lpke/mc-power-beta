@@ -8,16 +8,19 @@ import java.util.zip.*;
 
 /** Fixed-size decoded payload and CRC reject truncated, corrupt and oversized map files. */
 public final class MapCodec {
-  private static final int MAGIC = 0x50424d50, VERSION = 1, RAW_SIZE = PIXELS * 15;
+  private static final int MAGIC = 0x50424d50, VERSION = 2, RAW_SIZE = PIXELS * 23;
 
   private MapCodec() {}
 
   public static byte[] encode(MapTile tile) throws IOException {
+    tile.refreshRelief(null);
     var raw = new ByteArrayOutputStream(RAW_SIZE);
     try (var out = new DataOutputStream(raw)) {
       for (int i = 0; i < PIXELS; i++) {
         out.writeInt(tile.accurate[i]);
         out.writeInt(tile.vanilla[i]);
+        out.writeInt(tile.reliefAccurate[i]);
+        out.writeInt(tile.reliefVanilla[i]);
         out.writeInt(tile.blocks[i]);
         out.writeByte(tile.heights[i]);
         out.writeByte(tile.lights[i]);
@@ -51,7 +54,7 @@ public final class MapCodec {
     var header = new DataInputStream(input);
     if (header.readInt() != MAGIC) throw new IOException("Unknown map file");
     int version = header.readInt();
-    if (version != VERSION)
+    if (version != 1 && version != VERSION)
       throw new IOException("Unsupported map format " + version + "; original retained");
     Key key;
     try {
@@ -67,10 +70,11 @@ public final class MapCodec {
     }
     if (!key.equals(expected)) throw new IOException("Map tile belongs to another location");
     int checksum = header.readInt();
+    int rawSize = PIXELS * (version == 1 ? 15 : 23);
     byte[] raw;
     try (var inflater = new InflaterInputStream(input)) {
-      raw = inflater.readNBytes(RAW_SIZE + 1);
-      if (raw.length != RAW_SIZE || inflater.read() != -1)
+      raw = inflater.readNBytes(rawSize + 1);
+      if (raw.length != rawSize || inflater.read() != -1)
         throw new IOException("Invalid decoded map size");
     }
     CRC32 crc = new CRC32();
@@ -81,6 +85,8 @@ public final class MapCodec {
       for (int i = 0; i < PIXELS; i++) {
         tile.accurate[i] = in.readInt();
         tile.vanilla[i] = in.readInt();
+        tile.reliefAccurate[i] = version == 1 ? tile.accurate[i] : in.readInt();
+        tile.reliefVanilla[i] = version == 1 ? tile.vanilla[i] : in.readInt();
         tile.blocks[i] = in.readInt();
         tile.heights[i] = in.readByte();
         tile.lights[i] = in.readByte();
@@ -89,6 +95,14 @@ public final class MapCodec {
             || (tile.lights[i] & 255) > 15
             || tile.blocks[i] < 0) throw new IOException("Invalid map pixel");
       }
+    }
+    if (version == 1) {
+      tile.invalidateAllRelief();
+      tile.refreshRelief(null);
+      tile.savedRevision = tile.revision;
+      // Existing coarser files predate stored relief. Rebuild their quadrant even
+      // when revisiting the leaf finds no changes in native terrain.
+      tile.propagateRelief = tile.key.level() == 0;
     }
     return tile;
   }
@@ -102,6 +116,19 @@ public final class MapCodec {
   public static void write(Path path, MapTile tile) throws IOException {
     byte[] bytes = encode(tile);
     decode(bytes, tile.key);
+    if (Files.exists(path)) {
+      if (Files.size(path) > RAW_SIZE + 4096)
+        throw new IOException("Existing map file too large; retained");
+      byte[] previous = Files.readAllBytes(path);
+      decode(previous, tile.key); // Future and corrupt files must never be overwritten.
+      if (java.nio.ByteBuffer.wrap(previous).getInt(4) == 1) {
+        Path backup = path.resolveSibling(path.getFileName() + ".v1.bak");
+        if (!Files.exists(backup)) MapFiles.replace(backup, previous);
+        if (Files.size(backup) != previous.length
+            || !java.util.Arrays.equals(previous, Files.readAllBytes(backup)))
+          throw new IOException("Map upgrade backup could not be verified; original retained");
+      }
+    }
     MapFiles.replace(path, bytes);
   }
 }

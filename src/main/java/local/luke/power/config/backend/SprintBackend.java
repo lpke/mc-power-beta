@@ -13,6 +13,7 @@ public final class SprintBackend implements Backend {
     SprintSettings now = SprintConfig.copy(), defaults = new SprintSettings();
     for (var field : SprintSettings.class.getFields()) {
       String name = field.getName();
+      if (name.equals("enabled")) continue;
       var meta = Catalog.metadata("sprint." + name);
       if (meta.size() == 0)
         throw new IllegalStateException("Missing sprint setting metadata: " + name);

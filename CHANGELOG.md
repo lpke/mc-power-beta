@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-10-19
+
+- Smooth minimap movement and rotation on every rendered frame, with a terrain update-rate slider in Map performance settings.
+- Give maps sharper terrain contours, clearer shallow water and translucent glass and ice. Add a grey minimap frame, outlined markers and a full-window world map with compact controls.
+- Preserve terrain detail longer when zooming out, with physical-resolution detail selection, relief retained in smaller map levels and smooth cursor-centred zooming.
+- Make ground sprinting a per-world `allow_sprinting` game rule, off by default. Keep speed, activation, stamina, combat and FOV preferences global; disabling the rule stops ground sprinting immediately.
+- Upgrade terrain storage to format 2 while reading format 1 and keeping verified original tile backups. Configuration format 7 still supports 3–6; world-rule format 3 still supports 1, 2 and earlier world metadata.
+
 ## [2.6.0] - 2026-10-19
 
 - Add a shared minimap and explored world map with persistent surface and cave terrain, zooming, panning, terrain shading, entity radar, chunk and slime overlays, recent paths and PNG exports.

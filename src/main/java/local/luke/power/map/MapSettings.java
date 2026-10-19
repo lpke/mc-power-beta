@@ -18,7 +18,11 @@ public final class MapSettings {
   public int waypointDistance = 1000;
   public boolean deathpoints = true, keepOldDeaths = true;
   public boolean chunkGrid, slimeChunks, lightOverlay, footsteps = true, pauseMap;
-  public int columnsPerTick = 512, cacheTiles = 256, uploadsPerFrame = 4, refreshSeconds = 5;
+  public int columnsPerTick = 512,
+      cacheTiles = 256,
+      uploadsPerFrame = 4,
+      refreshSeconds = 5,
+      updateRate = 20;
 
   public void validate() {
     range(size, 64, 240);
@@ -38,6 +42,7 @@ public final class MapSettings {
     range(cacheTiles, 64, 1024);
     range(uploadsPerFrame, 1, 16);
     range(refreshSeconds, 1, 60);
+    range(updateRate, 1, 20);
   }
 
   private static void range(int v, int min, int max) {

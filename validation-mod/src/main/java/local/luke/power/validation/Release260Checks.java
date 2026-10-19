@@ -8,8 +8,10 @@ import java.util.*;
 import local.luke.power.config.*;
 import local.luke.power.input.*;
 import local.luke.power.map.*;
+import local.luke.power.rules.*;
 import local.luke.power.sprint.*;
 import local.luke.power.ui.*;
+import local.luke.power.world.WorldDifficulty;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NbtCompound;
 import org.lwjgl.input.Keyboard;
@@ -265,10 +267,16 @@ public final class Release260Checks {
               "terrain setting incorrectly hidden in HUD");
           check(find(session, "maps.hudEditor").page.equals("Map"), "HUD editor link absent");
           check(
-              find(session, "sprint.enabled").page.equals("Gameplay"),
-              "ground sprint left Gameplay");
+              find(session, "sprint.activation").page.equals("Gameplay"),
+              "ground sprint tuning left Gameplay");
           check(
-              !find(session, "sprint.stamina").group.equals(find(session, "sprint.enabled").group),
+              find(session, mc.world == null ? "rules.survival.allow_sprinting"
+                  : "rules.world.allow_sprinting").page.equals("Game rules"),
+              "ground sprint rule absent");
+          check(session.settings().stream().noneMatch(s -> s.id.equals("sprint.enabled")),
+              "legacy global sprint enablement is editable");
+          check(
+              !find(session, "sprint.stamina").group.equals(find(session, "sprint.activation").group),
               "balance controls were not grouped");
           check(
               find(session, "sprint.fovStrength").page.equals("Camera"),
@@ -287,14 +295,22 @@ public final class Release260Checks {
     test(
         "all bases keep sprinting and every dynamic FOV effect disabled",
         () -> {
-          for (var base : DefaultBases.Base.values())
+          check(!new RuleSet().enabled(GameRule.ALLOW_SPRINTING)
+                  && !RuleSet.cheats().enabled(GameRule.ALLOW_SPRINTING),
+              "factory creation preset grants sprinting");
+          for (var base : DefaultBases.Base.values()) {
+            for (String scope : List.of("world", "survival", "cheats"))
+              check(!DefaultBases.value(base, "rules." + scope + ".allow_sprinting",
+                      new com.google.gson.JsonPrimitive(true)).getAsBoolean(),
+                  "sprint rule defaults on in " + base + " " + scope);
             for (String field :
-                List.of("enabled", "dynamicFov", "creativeFov", "spectatorFov", "freecamFov"))
+                List.of("dynamicFov", "creativeFov", "spectatorFov", "freecamFov"))
               check(
                   !DefaultBases.value(
                           base, "sprint." + field, new com.google.gson.JsonPrimitive(false))
                       .getAsBoolean(),
                   "enabled default " + field + " " + base);
+          }
         });
     test(
         "ConfigSession previews map preferences and restores them without writes",
@@ -390,7 +406,7 @@ public final class Release260Checks {
               .power$key((char) 0, Keyboard.KEY_RETURN);
           check(mc.currentScreen == screen, "valid border coordinate rejected");
           screen.render(-1, -1, 0);
-          int cell = (screen.width - 28) / 6;
+          int cell = ((Number) UiChecks.call(screen, "buttonWidth")).intValue();
           input.power$click(8 + 5 * (cell + 2) + cell / 2, screen.height - 15, 0);
           MapIO.awaitQueued();
           check(
@@ -573,18 +589,39 @@ public final class Release260Checks {
       mc.field_2778 = true;
       var next = SprintConfig.copy();
       next.enabled = true;
+      next.activation = 0;
+      next.speed = 130;
+      next.jumpBoost = true;
+      next.noSprintInCombat = false;
+      next.fovStrength = 100;
       next.doubleTap = false;
       next.stamina = false;
       SprintConfig.preview(next);
+      sprintRule(mc, false);
+      test(
+          "sprint rule query, help and completion leave rules and global preferences unchanged",
+          () -> {
+            RuleSet before = AccessRules.copy(mc);
+            byte[] global = Files.readAllBytes(local.luke.power.storage.PowerConfig.path());
+            int difficulty = ((WorldDifficulty) mc.world.method_262()).power$difficulty();
+            local.luke.power.commands.GameRuleCommand.execute(mc, new String[]{"gamerule", "allow_sprinting"});
+            local.luke.power.commands.GameRuleCommand.execute(mc, new String[]{"gamerule", "allowSprinting"});
+            local.luke.power.commands.GameRuleCommand.execute(mc, new String[]{"gamerule", "help"});
+            check(Arrays.asList(local.luke.power.commands.GameRuleCommand.suggestions(1, "allow_s", "/gamerule allow_s"))
+                    .contains("printing"), "sprint rule completion absent");
+            check(GameRule.ALLOW_SPRINTING.help().contains("/gamerule allow_sprinting"), "sprint help absent");
+            check(before.equals(AccessRules.copy(mc)), "read-only command changed world rules");
+            check(difficulty == ((WorldDifficulty) mc.world.method_262()).power$difficulty(), "read-only command changed difficulty");
+            check(Arrays.equals(global, Files.readAllBytes(local.luke.power.storage.PowerConfig.path())), "read-only command changed preferences");
+          });
       test(
           "full native ground travel matches modern sprint displacement and 0.2 jump impulse",
           () -> {
             double[] distances = new double[2];
             for (int mode = 0; mode < 2; mode++) {
-              next.enabled = mode == 1;
-              SprintConfig.preview(next);
+              sprintRule(mc, mode == 1);
               position(mc, 0);
-              keys.put(29, (byte) (mode == 1 ? 1 : 0));
+              keys.put(29, (byte) 1);
               double start = mc.player.z;
               for (int i = 0; i < 80; i++) {
                 fixtureInput.field_2533 = 1;
@@ -602,7 +639,7 @@ public final class Release260Checks {
             log("SPRINT full native displacement walk=" + distances[0] + " sprint=" + distances[1]);
           });
       test(
-          "menus, water, death, vehicles and disabled preferences cancel sprint physics",
+          "menus and a revoked world rule cancel sprint physics despite legacy global enablement",
           () -> {
             position(mc, 0);
             fixtureInput.field_2533 = 1;
@@ -612,8 +649,7 @@ public final class Release260Checks {
             SprintController.movement(mc.player);
             check(!SprintController.active(mc.player), "sprint survived menu");
             mc.setScreen(null);
-            next.enabled = false;
-            SprintConfig.preview(next);
+            sprintRule(mc, false);
             SprintController.movement(mc.player);
             check(!SprintController.active(mc.player), "disabled sprint active");
             near(
@@ -636,7 +672,39 @@ public final class Release260Checks {
             mc.player.read(nbt);
             near(state.stamina, 37.25, 1e-9, "stamina NBT");
             check(state.combatTicks == 80 && state.exhausted, "stamina flags lost");
-            check(!SprintConfig.current().enabled, "NBT changed global preference");
+            check(!SprintController.allowed(mc), "NBT enabled the world sprint rule");
+            check(SprintConfig.current().enabled, "NBT changed inert legacy data");
+          });
+      test(
+          "world-rule revocation immediately clears sprint and FOV while preserving tuning and recovery",
+          () -> {
+            sprintRule(mc, true);
+            position(mc, 0);
+            next.enabled = false;
+            next.dynamicFov = true;
+            SprintConfig.preview(next);
+            fixtureInput.field_2533 = 1;
+            keys.put(29, (byte) 1);
+            SprintController.movement(mc.player);
+            check(SprintController.active(mc.player), "legacy false overrode allowed world");
+            SprintController.reset();
+            var state = ((SprintPlayer) mc.player).power$sprint();
+            state.sprinting = true;
+            state.stamina = 37.25;
+            state.combatTicks = 80;
+            SprintController.tick(mc);
+            check(SprintController.fov(1) > 1, "sprint FOV did not start");
+            var tuning = Catalog.JSON.toJsonTree(SprintConfig.current());
+            mc.setScreen(new net.minecraft.client.gui.screen.ChatScreen());
+            sprintRule(mc, false);
+            check(!state.sprinting && !SprintController.active(mc.player), "revocation retained sprint");
+            near(SprintController.fov(0), 1, 1e-8, "previous FOV after revocation");
+            near(SprintController.fov(1), 1, 1e-8, "current FOV after revocation");
+            near(SprintView.ratio(SprintView.Kind.GROUND), 1, 1e-8, "published sprint after revocation");
+            near(state.stamina, 37.25, 1e-9, "revocation erased stamina");
+            check(state.combatTicks == 80, "revocation erased combat state");
+            check(tuning.equals(Catalog.JSON.toJsonTree(SprintConfig.current())), "world edit changed global tuning");
+            mc.setScreen(null);
           });
     } finally {
       keys.put(29, ctrl);
@@ -645,7 +713,14 @@ public final class Release260Checks {
       mc.player.read(saved);
       mc.player.field_161 = input;
       mc.paused = paused;
+      SprintController.reset();
     }
+  }
+
+  private static void sprintRule(Minecraft mc, boolean enabled) throws Exception {
+    RuleSet rules = AccessRules.copy(mc);
+    rules.set(GameRule.ALLOW_SPRINTING, enabled);
+    local.luke.power.world.WorldRuleChanges.apply(mc, rules);
   }
 
   private static void near(double actual, double expected, double tolerance, String name) {
@@ -726,6 +801,7 @@ public final class Release260Checks {
     boolean oldPause = mc.paused;
     try {
       CreativeVehicleChecks.mode(mc, "SURVIVAL");
+      sprintRule(mc, true);
       position(mc, 0);
       mc.paused = false;
       mc.player.tick();
@@ -775,7 +851,6 @@ public final class Release260Checks {
           "native particle dispatch emits one dust particle at modern feet height",
           () -> {
             var s = SprintConfig.copy();
-            s.enabled = true;
             s.particles = true;
             SprintConfig.preview(s);
             position(mc, 0);
@@ -797,7 +872,6 @@ public final class Release260Checks {
           "ground sprint FOV follows modern half-tick smoothing and cancels after menus",
           () -> {
             var s = SprintConfig.copy();
-            s.enabled = true;
             s.dynamicFov = true;
             SprintConfig.preview(s);
             SprintController.reset();
@@ -833,7 +907,6 @@ public final class Release260Checks {
             position(mc, 0);
             mc.player.inventory.main[mc.player.inventory.selectedSlot] = null;
             var settingsNow = SprintConfig.copy();
-            settingsNow.enabled = true;
             settingsNow.sprintKnockback = true;
             settingsNow.noSprintInCombat = true;
             SprintConfig.preview(settingsNow);
@@ -862,6 +935,7 @@ public final class Release260Checks {
           "Creative, Spectator and freecam FOV remain independent",
           () -> {
             AccessRules.restore(mc, local.luke.power.rules.RuleSet.cheats());
+            check(!SprintController.allowed(mc), "Cheats preset unexpectedly grants ground sprinting");
             for (String mode : List.of("CREATIVE", "SPECTATOR", "FREECAM")) {
               CreativeVehicleChecks.mode(mc, mode.equals("FREECAM") ? "CREATIVE" : mode);
               mc.player

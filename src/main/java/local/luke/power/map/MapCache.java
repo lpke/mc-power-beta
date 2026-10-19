@@ -19,6 +19,7 @@ public final class MapCache {
   private int retryTicks;
   private boolean writeFailed;
   private boolean closed;
+  private long generation;
 
   private record Save(long revision, CompletableFuture<Void> future) {}
 
@@ -34,6 +35,10 @@ public final class MapCache {
 
   public int size() {
     return tiles.size();
+  }
+
+  public long generation() {
+    return generation;
   }
 
   public int pending() {
@@ -54,9 +59,16 @@ public final class MapCache {
   }
 
   public MapTile get(Key key) {
+    return get(key, false);
+  }
+
+  private MapTile get(Key key, boolean requiredParent) {
     if (closed) return null;
     MapTile tile = tiles.get(key);
     if (tile != null) return tile;
+    // Panning cannot build an unbounded backlog of migrated/seam-repaired leaves.
+    // Parent reads still proceed so existing durable work can drain.
+    if (!requiredParent && parents.size() >= limit) return null;
     // Reserve cache slots for in-flight loads, even if every resident tile is dirty.
     if (loading.containsKey(key) || loading.size() >= 16) return null;
     trim();
@@ -71,7 +83,41 @@ public final class MapCache {
   }
 
   public void changed(MapTile tile) {
+    if (tile.key.level() == 0) {
+      refresh(tile);
+      refreshEdges(tile.key);
+    }
+    queueParent(tile);
+  }
+
+  private void queueParent(MapTile tile) {
+    generation++;
     if (tile.key.level() < MAX_LEVEL) parents.put(tile.key, tile.copy());
+  }
+
+  private boolean refresh(MapTile tile) {
+    return tile.refreshRelief(
+        (x, z) -> {
+          MapTile neighbour = tiles.get(key(tile.key.dimension(), tile.key.layer(), 0, x, z));
+          int i = index(x, z);
+          return neighbour != null && neighbour.known(i) ? neighbour.height(i) : -1;
+        });
+  }
+
+  private void refreshEdges(Key key) {
+    for (int dx = 0; dx <= 1; dx++)
+      for (int dz = 0; dz <= 1; dz++) {
+        if (dx == 0 && dz == 0) continue;
+        if (Math.abs((long) key.x() + dx) > BORDER / SIZE + 1
+            || Math.abs((long) key.z() + dz) > BORDER / SIZE + 1) continue;
+        MapTile neighbour =
+            tiles.get(new Key(key.dimension(), key.layer(), 0, key.x() + dx, key.z() + dz));
+        if (neighbour == null || neighbour.readOnly) continue;
+        if (dx == 0) for (int x = 0; x < SIZE; x++) neighbour.invalidateReliefPixel(x);
+        else if (dz == 0) for (int z = 1; z < SIZE; z++) neighbour.invalidateReliefPixel(z * SIZE);
+        else neighbour.invalidateReliefPixel(0);
+        if (refresh(neighbour)) queueParent(neighbour);
+      }
   }
 
   public void tick() {
@@ -84,7 +130,7 @@ public final class MapCache {
         parents.remove(key);
         continue;
       }
-      MapTile parent = get(key.parent());
+      MapTile parent = get(key.parent(), true);
       if (parent == null) continue;
       parents.remove(key);
       if (parent.merge(child)) changed(parent);
@@ -131,6 +177,27 @@ public final class MapCache {
             "Map tile retained without changes: " + entry.getKey().file() + ": " + reason(e));
       }
       tiles.put(entry.getKey(), tile);
+      generation++;
+      if (tile.key.level() == 0 && !tile.readOnly) {
+        // Reconcile resident seams as either side arrives, without requesting new terrain.
+        if (tile.key.z() > -BORDER / SIZE - 1
+            && tiles.containsKey(
+                new Key(tile.key.dimension(), tile.key.layer(), 0, tile.key.x(), tile.key.z() - 1)))
+          for (int x = 0; x < SIZE; x++) tile.invalidateReliefPixel(x);
+        if (tile.key.x() > -BORDER / SIZE - 1
+            && tiles.containsKey(
+                new Key(tile.key.dimension(), tile.key.layer(), 0, tile.key.x() - 1, tile.key.z())))
+          for (int z = 0; z < SIZE; z++) tile.invalidateReliefPixel(z * SIZE);
+        if (tile.key.x() > -BORDER / SIZE - 1
+            && tile.key.z() > -BORDER / SIZE - 1
+            && tiles.containsKey(
+                new Key(
+                    tile.key.dimension(), tile.key.layer(), 0, tile.key.x() - 1, tile.key.z() - 1)))
+          tile.invalidateReliefPixel(0);
+        if (refresh(tile) || tile.propagateRelief) queueParent(tile);
+        tile.propagateRelief = false;
+        refreshEdges(tile.key);
+      }
       it.remove();
     }
     for (var it = saving.entrySet().iterator(); it.hasNext(); ) {

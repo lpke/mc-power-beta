@@ -22,6 +22,7 @@ public final class WorldRuleChanges {
     if (revoked(mc, rules)) Class.forName("local.luke.power.creative.Modes")
         .getMethod("returnToSurvival", Minecraft.class).invoke(null, mc);
     ((WorldRules) mc.world.method_262()).power$rules(rules);
+    local.luke.power.sprint.SprintController.rulesChanged(mc);
     if (!rules.enabled(GameRule.ALLOW_SURVIVAL_ASSISTANCE))
       Class.forName("local.luke.power.commands.command.extra.God").getMethod("clear").invoke(null);
   }

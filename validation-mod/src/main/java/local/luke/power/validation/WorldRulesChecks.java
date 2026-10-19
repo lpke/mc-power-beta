@@ -28,8 +28,8 @@ final class WorldRulesChecks {
     String mode = mc.player.getClass().getMethod("power_mode").invoke(mc.player).toString();
     try {
       mc.setScreen(null); DeathChecks.alive(mc); CreativeVehicleChecks.mode(mc, "SURVIVAL");
-      test("all 39 rules retain types, aliases, defaults, dimension copies and native NBT", () -> {
-        check(GameRule.values().length == 39, "rule inventory differs from the decision record");
+      test("all rules retain types, aliases, defaults, dimension copies and native NBT", () -> {
+        check(GameRule.values().length == 40, "unexpected registered rule count");
         RuleSet values = new RuleSet();
         for (GameRule rule : GameRule.values()) {
           check(GameRule.find(rule.id()) == rule && GameRule.find(rule.alias()) == rule, "alias mismatch " + rule);
@@ -141,13 +141,13 @@ final class WorldRulesChecks {
   }
 
   static void ui(Minecraft mc) throws Exception {
-    test("rule editor exposes 39 searchable rules and independently hides unavailable tools", () -> {
+    test("rule editor exposes every searchable rule and independently hides unavailable tools", () -> {
       AccessRules.restore(mc, new RuleSet());
       var screen = new PowerOptionsScreen(null); mc.setScreen(screen);
       check(screen.visiblePages().contains("Game rules"), "missing rules tab");
       check(!screen.visiblePages().contains("World editing"), "unavailable editing tab visible");
       var session = screen.session();
-      check(session.settings().stream().filter(s -> s.id.startsWith("rules.world.")).count() == 39, "missing rules");
+      check(session.settings().stream().filter(s -> s.id.startsWith("rules.world.")).count() == GameRule.values().length, "missing rules");
       check(session.settings().stream().noneMatch(s -> s.id.equals("world.cheats") || s.backend.equals("commandAccess")), "obsolete access controls");
       for (var rule : GameRule.values()) check(SettingAccess.visible(session, find(session, "rules.world." + rule.id())), "rule hidden " + rule);
       find(session, "rules.world.allow_spectator_mode").parse("true"); call(screen, "layout");

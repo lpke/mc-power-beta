@@ -12,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 /** Full map navigation only changes the view. Panning never loads native terrain. */
 public final class WorldMapScreen extends UiScreen {
   private final MapMath.View view = new MapMath.View(Maps.x(), Maps.z());
+  private final MapZoom zoom = new MapZoom();
   private final TextInput serverMap = new TextInput(Maps.submap(), 48);
   private int dimension = Maps.dimension(), layer = Maps.layer();
   private boolean dragging, context;
@@ -30,11 +31,11 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   private int top() {
-    return 42;
+    return 0;
   }
 
   private int bottom() {
-    return height - 48;
+    return height;
   }
 
   private MapProjection projection() {
@@ -51,10 +52,26 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   private int buttonWidth() {
-    return (width - 28) / 6;
+    return Math.min(90, (width - 28) / 6);
+  }
+
+  private boolean overControls(int x, int y) {
+    if (inside(x, y, width - 124, 4, 116, 18)) return true;
+    if (minecraft.world != null
+        && minecraft.world.isRemote
+        && inside(x, y, 8, 4, Math.min(180, width / 3), 18)) return true;
+    for (int i = 0; i < 6; i++)
+      if (inside(x, y, 8 + i * (buttonWidth() + 2), height - 24, buttonWidth(), 18)) return true;
+    return false;
+  }
+
+  private void overlay(String label, int x, int y, int colour) {
+    fill(x - 3, y - 3, x + textRenderer.getWidth(label) + 3, y + 11, 0x90000000);
+    text(label, x, y, colour);
   }
 
   private void centre() {
+    zoom.cancel();
     view.x = Maps.x();
     view.z = Maps.z();
     dimension = Maps.dimension();
@@ -67,6 +84,7 @@ public final class WorldMapScreen extends UiScreen {
 
   public void removed() {
     dragging = false;
+    zoom.cancel();
     Keyboard.enableRepeatEvents(false);
     TextDrag.cancel();
   }
@@ -104,8 +122,10 @@ public final class WorldMapScreen extends UiScreen {
     if (key == Keyboard.KEY_DOWN) view.pan(0, -32);
     if (key == Keyboard.KEY_LEFT) view.pan(32, 0);
     if (key == Keyboard.KEY_RIGHT) view.pan(-32, 0);
-    if (key == Keyboard.KEY_EQUALS || key == Keyboard.KEY_ADD) view.zoom(2, 0, 0);
-    if (key == Keyboard.KEY_MINUS || key == Keyboard.KEY_SUBTRACT) view.zoom(.5, 0, 0);
+    if (key == Keyboard.KEY_EQUALS || key == Keyboard.KEY_ADD)
+      zoom.wheel(view, 1, 0, 0, System.nanoTime());
+    if (key == Keyboard.KEY_MINUS || key == Keyboard.KEY_SUBTRACT)
+      zoom.wheel(view, -1, 0, 0, System.nanoTime());
     if (local.luke.power.input.Bindings.matches(MapKeys.WAYPOINT, key)) createAt(view.x, view.z);
     if (key == Keyboard.KEY_G) goTo();
   }
@@ -135,6 +155,7 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   protected void mouseClicked(int x, int y, int button) {
+    zoom.cancel();
     if (context) {
       if (button == 0 && inside(x, y, contextX, contextY, 142, 90)) {
         int action = (y - contextY) / 18;
@@ -210,7 +231,7 @@ public final class WorldMapScreen extends UiScreen {
       }
       serverMap.focused = false;
     }
-    if (y < top() || y >= bottom()) return;
+    if (y < top() || y >= bottom() || overControls(x, y)) return;
     if (button == 0) {
       dragging = true;
       lastX = x;
@@ -249,20 +270,30 @@ public final class WorldMapScreen extends UiScreen {
         y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
     if (!Display.isActive()) dragging = false;
     if (dragging && !context) {
+      zoom.cancel();
       view.pan(x - lastX, y - lastY);
       lastX = x;
       lastY = y;
     }
-    if (!context && Mouse.getEventDWheel() != 0 && y >= top() && y < bottom())
-      view.zoom(
-          Mouse.getEventDWheel() > 0 ? 1.5 : 1 / 1.5, x - width / 2d, y - (top() + bottom()) / 2d);
+    if (!context
+        && !overControls(x, y)
+        && Mouse.getEventDWheel() != 0
+        && y >= top()
+        && y < bottom())
+      zoom.wheel(
+          view,
+          Mouse.getEventDWheel(),
+          x - width / 2d,
+          y - (top() + bottom()) / 2d,
+          System.nanoTime());
     super.onMouseEvent();
   }
 
   public void render(int mx, int my, float delta) {
+    zoom.update(view, System.nanoTime());
     if (!Display.isActive()) dragging = false;
     fill(0, 0, width, height, 0xff101015);
-    MapRenderer.beginFrame();
+    MapRenderer.beginFrame(delta);
     if (Maps.cache() != null && minecraft.world != null) {
       var projection = projection();
       var style = worldStyle();
@@ -280,24 +311,17 @@ public final class WorldMapScreen extends UiScreen {
       MapRenderer.markers(minecraft, projection, dimension, false, false);
       GL11.glPopAttrib();
     }
-    fill(0, 0, width, top(), 0xe0202020);
-    fill(0, bottom(), width, height, 0xe0202020);
     int headingX =
         minecraft.world != null && minecraft.world.isRemote ? Math.min(180, width / 3) + 16 : 8;
-    text(
+    overlay(
         fit(
             "World map · " + (layer < 0 ? "Surface" : "Cave Y " + (layer * 8 + 7)),
-            Math.max(10, width - 132 - headingX)),
+            Math.max(10, Math.min(180, width - 132 - headingX))),
         headingX,
         9,
         0xffffff);
     button("Go to", width - 124, 4, 56, 18, mx, my, true);
     button("Close", width - 64, 4, 56, 18, mx, my, true);
-    text(
-        fit("Drag to pan · Scroll to zoom · Right-click for waypoints", width - 16),
-        8,
-        28,
-        0xaaaaaa);
     if (minecraft.world != null && minecraft.world.isRemote)
       input(serverMap, 8, 4, Math.min(180, width / 3), mx, my, "Map name");
     var cursor = bounded(projection().world(mx, my));
@@ -319,13 +343,23 @@ public final class WorldMapScreen extends UiScreen {
       }
     }
     int blocks = (int) Math.max(1, Math.round(80 / view.scale));
-    text(fit(readout, width - 112), 8, bottom() + 5, 0xcccccc);
-    int barX = width - 88, barY = bottom() + 16;
+    boolean separateReadout = width < 640 || minecraft.world != null && minecraft.world.isRemote;
+    int readoutY = separateReadout ? 29 : 9;
+    int readoutWidth = separateReadout ? width - 16 : Math.max(40, width - 520);
+    readout = fit(readout, readoutWidth);
+    overlay(readout, (width - textRenderer.getWidth(readout)) / 2, readoutY, 0xffffff);
+    String hint =
+        width >= 600
+            ? "Drag to pan · Scroll to zoom · Right-click for waypoints"
+            : "Drag · Scroll · Right-click";
+    overlay(fit(hint, width - 112), 8, height - 40, 0xcccccc);
+    int barX = width - 88, barY = height - 31;
+    fill(barX - 3, height - 47, width - 5, height - 27, 0x90000000);
     fill(barX, barY, barX + 80, barY + 1, 0xffcccccc);
     fill(barX, barY - 2, barX + 1, barY + 2, 0xffcccccc);
     fill(barX + 79, barY - 2, barX + 80, barY + 2, 0xffcccccc);
     String scaleLabel = blocks + " blocks";
-    text(scaleLabel, barX + (80 - textRenderer.getWidth(scaleLabel)) / 2, bottom() + 5, 0xcccccc);
+    text(scaleLabel, barX + (80 - textRenderer.getWidth(scaleLabel)) / 2, height - 44, 0xcccccc);
     String[] labels = {
       "Centre",
       "Waypoints",
@@ -367,7 +401,7 @@ public final class WorldMapScreen extends UiScreen {
     }
     String status = MapExport.status();
     if (status.isEmpty()) status = message.isEmpty() ? Maps.error() : message;
-    if (!status.isEmpty()) text(fit(status, width - 16), 8, top() + 5, 0xffdd99);
+    if (!status.isEmpty()) overlay(fit(status, width - 16), 8, readoutY + 20, 0xffdd99);
   }
 
   public boolean shouldPause() {

@@ -1,6 +1,8 @@
 package local.luke.power.sprint;
 
 import local.luke.power.input.*;
+import local.luke.power.rules.GameRule;
+import local.luke.power.rules.WorldRules;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -18,6 +20,13 @@ public final class SprintController {
     return (Minecraft) FabricLoader.getInstance().getGameInstance();
   }
 
+  /** Shared by input ownership and movement. Multiplayer remains server-owned. */
+  public static boolean allowed(Minecraft mc) {
+    return mc.world != null
+        && !mc.world.isRemote
+        && WorldRules.enabled(mc.world.method_262(), GameRule.ALLOW_SPRINTING);
+  }
+
   public static boolean active(Entity entity) {
     return entity instanceof ClientPlayerEntity
         && entity == mc().player
@@ -28,7 +37,7 @@ public final class SprintController {
 
   private static boolean eligible(ClientPlayerEntity player) {
     var mc = mc();
-    return SprintConfig.current().enabled
+    return allowed(mc)
         && player.world != null
         && !player.world.isRemote
         && player == mc.player
@@ -116,6 +125,7 @@ public final class SprintController {
 
   public static void tick(Minecraft mc) {
     SprintView.configure(SprintController::fov);
+    rulesChanged(mc);
     previousFov = fov;
     var settings = SprintConfig.current();
     double ratio = 1;
@@ -138,6 +148,17 @@ public final class SprintController {
     double target = 1 + (ratio - 1) * .5 * settings.fovStrength / 100;
     fov += (Math.max(1, Math.min(1.5, target)) - fov) * .5;
     if (Math.abs(fov - 1) < 1e-5) fov = 1;
+  }
+
+  /** Clear only ground sprint when its rule is revoked, including while a menu pauses ticks. */
+  public static void rulesChanged(Minecraft mc) {
+    if (allowed(mc)) return;
+    if (mc.player instanceof SprintPlayer player)
+      player.power$sprint().cancel(false);
+    SprintView.publish(SprintView.Kind.GROUND, false, 1);
+    if (!DetachedCamera.isActive()
+        && !(mc.player instanceof PlayerMode mode && mode.power$flying()))
+      previousFov = fov = 1;
   }
 
   public static double fov(double delta) {

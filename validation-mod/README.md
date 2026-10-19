@@ -8,6 +8,23 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- After `new-world`, `release-261 terrain` checks native shallow/deep water, glass,
+  ice and thin/full snow in loaded columns. `cadence` checks 1/5/20 Hz sampling,
+  periodic native edits and column budgets using disposable caches. `pose` checks
+  interpolated native positions and wrapped heading without changing simulation.
+  `render` checks the minimap FBO and GL restoration across GUI scales, shapes,
+  rotation, opacity and terrain styles, followed by native text rendering.
+  `textures` runs the native texture-pack switch/restore check and needs the bundled
+  `1.14 Textures.zip`. Prefix each phase with `release-261 `.
+  `rules` runs `/gamerule allow_sprinting true` and `/gamerule allowSprinting false`,
+  verifies each durable metadata save and immediate cancellation with chat open,
+  checks unchanged global settings, other rules, difficulty and player mode, then
+  restores and verifies the original rules. It does not prepare the map scene.
+  `scene` prepares water, glass, ice and snow patches at X/Z 16–31, Y 105, and opens
+  the HUD for screenshots. `open` opens the world map; `state` reports its cache,
+  column count and errors. These fixtures replace blocks only in the loaded scene
+  chunk and leave the scene/map preview preferences available for inspection.
+
 - `release-260 menus` checks Map/HUD routing, isolated drafts, preview rollback and
   sprint defaults. After `new-world`, `map` checks loaded-only sampling, native
   terrain edits, caves and GL restoration; `sprint` compares actual native travel,

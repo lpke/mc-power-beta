@@ -19,6 +19,7 @@ public final class MapSampler {
   private final ArrayDeque<Chunk> queue = new ArrayDeque<>();
   private final LinkedHashSet<Chunk> dirty = new LinkedHashSet<>();
   private final MapPalette palette;
+  private final MapCadence cadence = new MapCadence();
   private World world;
   private Chunk current;
   private int column,
@@ -55,6 +56,13 @@ public final class MapSampler {
   public void tick(Minecraft mc, MapCache cache, int selectedLayer, double x, double y, double z) {
     long start = System.nanoTime();
     columnsLastTick = 0;
+    // Refresh seconds use the game clock, independently of the sampling rate or
+    // temporary cache backpressure.
+    ticks++;
+    if (!cadence.tick(MapConfig.current().updateRate)) {
+      nanosLastTick = 0;
+      return;
+    }
     int cx = (int) Math.floor(x) >> 4, cz = (int) Math.floor(z) >> 4;
     dirty.removeIf(c -> Math.abs((long) c.x - cx) > 16 || Math.abs((long) c.z - cz) > 16);
     if (!cache.canSample()) {
@@ -71,7 +79,6 @@ public final class MapSampler {
       centreX = Integer.MIN_VALUE;
       paletteRevision = palette.revision();
     }
-    ticks++;
     if (centreX != cx || centreZ != cz || queue.isEmpty() && current == null) rebuild(cx, cz);
     // Always revisit the camera's chunk on time, even during a long first exploration.
     Chunk focus = new Chunk(cx, cz);
@@ -165,24 +172,58 @@ public final class MapSampler {
       tile.put(index(x, z), 0, 0, 0, 0, 0, 0);
       return;
     }
-    Block block = Block.BLOCKS[id];
-    int depth = 0;
-    if (block.field_1900 == Material.WATER)
-      while (depth < 16
-          && y - depth > 0
-          && material(chunk.method_859(lx, y - depth, lz)) == Material.WATER) depth++;
-    int colour = palette.accurate(block, world, x, y, z, depth),
-        nativeColour = MapPalette.nativeColour(block, world, x, y, z);
-    int light = world.method_164(class_56.BLOCK, x, Math.min(127, y + 1), z);
+    int surfaceY = y;
+    // Thin snow contributes its white pigment without raising the terrain by a
+    // whole block. The full snow block keeps its actual height.
+    int terrainY = id == 78 ? Math.max(0, y - 1) : y;
+    double r = 0, g = 0, b = 0, nr = 0, ng = 0, nb = 0, remaining = 1;
+    int waterOpacity = 0;
+    // Descend only within this already-loaded column. Both the 128-block world
+    // height and eight distinct transparent surfaces bound the extra work.
+    for (int surfaces = 0; surfaces < 8 && y >= 0 && remaining > .01; surfaces++) {
+      while (y >= 0 && !visible(chunk.method_859(lx, y, lz))) y--;
+      if (y < 0) break;
+      int layerId = chunk.method_859(lx, y, lz);
+      Block surface = Block.BLOCKS[layerId];
+      int colour = palette.surfaceColour(surface, world, x, y, z);
+      int nativeColour = MapPalette.nativeColour(surface, world, x, y, z);
+      double alpha = (colour >>> 24) / 255.0;
+      double lightThroughWater = (9 + Math.max(0, 15 - waterOpacity)) / 24.0;
+      double weight = remaining * alpha * lightThroughWater;
+      r += (colour >> 16 & 255) * weight;
+      g += (colour >> 8 & 255) * weight;
+      b += (colour & 255) * weight;
+      nr += (nativeColour >> 16 & 255) * weight;
+      ng += (nativeColour >> 8 & 255) * weight;
+      nb += (nativeColour & 255) * weight;
+      remaining *= 1 - alpha;
+      if (remaining <= .01) break;
+      // A continuous body of water has one top surface. Its depth attenuates
+      // light reaching the seabed instead of repeatedly painting opaque blue.
+      int depth = 1;
+      y--;
+      while (y >= 0 && chunk.method_859(lx, y, lz) == layerId) {
+        depth++;
+        y--;
+      }
+      if (surface.field_1900 == Material.WATER || layerId == 79)
+        waterOpacity = Math.min(15, waterOpacity + depth * 3);
+    }
+    int colour = rgb(r, g, b), nativeColour = rgb(nr, ng, nb);
+    int light = world.method_164(class_56.BLOCK, x, Math.min(127, surfaceY + 1), z);
     var biome = world.method_1781().method_1787(x, z);
     tile.put(
         index(x, z),
         colour,
         nativeColour,
-        y,
+        terrainY,
         light,
         id,
         biome == null ? 0 : MapPalette.biome(biome.field_888));
+  }
+
+  private static int rgb(double r, double g, double b) {
+    return (int) Math.min(255, r) << 16 | (int) Math.min(255, g) << 8 | (int) Math.min(255, b);
   }
 
   private static Material material(int id) {

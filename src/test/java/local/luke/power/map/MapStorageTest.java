@@ -28,8 +28,163 @@ class MapStorageTest {
     assertArrayEquals(tile.blocks, restored.blocks);
     assertArrayEquals(tile.lights, restored.lights);
     assertArrayEquals(tile.biomes, restored.biomes);
+    assertArrayEquals(tile.reliefAccurate, restored.reliefAccurate);
+    assertArrayEquals(tile.reliefVanilla, restored.reliefVanilla);
     assertTrue(encoded.length < 4096 * 15 / 2);
     assertFalse(restored.dirty());
+  }
+
+  private byte[] legacy(MapTile tile) throws Exception {
+    var raw = new java.io.ByteArrayOutputStream();
+    try (var out = new java.io.DataOutputStream(raw)) {
+      for (int i = 0; i < MapMath.PIXELS; i++) {
+        out.writeInt(tile.accurate[i]);
+        out.writeInt(tile.vanilla[i]);
+        out.writeInt(tile.blocks[i]);
+        out.writeByte(tile.heights[i]);
+        out.writeByte(tile.lights[i]);
+        out.writeByte(tile.biomes[i]);
+      }
+    }
+    var crc = new java.util.zip.CRC32();
+    crc.update(raw.toByteArray());
+    var result = new java.io.ByteArrayOutputStream();
+    var out = new java.io.DataOutputStream(result);
+    out.writeInt(0x50424d50);
+    out.writeInt(1);
+    for (int value :
+        new int[] {
+          tile.key.dimension(),
+          tile.key.layer(),
+          tile.key.level(),
+          tile.key.x(),
+          tile.key.z(),
+          (int) crc.getValue()
+        }) out.writeInt(value);
+    try (var compressed = new java.util.zip.DeflaterOutputStream(result)) {
+      compressed.write(raw.toByteArray());
+    }
+    return result.toByteArray();
+  }
+
+  @Test
+  void legacyUpgradeRetainsVerifiedOriginalAndRestartsWithShadedLevels() throws Exception {
+    var tile = tile(-5, 3);
+    byte[] original = legacy(tile);
+    Path file = root.resolve(tile.key.file());
+    Files.createDirectories(file.getParent());
+    Files.write(file, original);
+    var loaded = MapCodec.read(file, tile.key);
+    assertArrayEquals(tile.accurate, loaded.accurate);
+    assertFalse(loaded.dirty());
+    assertNotEquals(loaded.accurate[0], loaded.reliefAccurate[0]);
+    loaded.put(1, 0x112233, 0x445566, 65, 15, 2, 3);
+    MapCodec.write(file, loaded);
+    assertArrayEquals(
+        original, Files.readAllBytes(file.resolveSibling(file.getFileName() + ".v1.bak")));
+    var restarted = MapCodec.read(file, tile.key);
+    assertArrayEquals(loaded.reliefAccurate, restarted.reliefAccurate);
+    assertEquals(0x112233, restarted.accurate[1]);
+    MapCodec.write(file, restarted);
+    assertArrayEquals(
+        original, Files.readAllBytes(file.resolveSibling(file.getFileName() + ".v1.bak")));
+  }
+
+  @Test
+  void failedUpgradeAndFutureReplacementKeepOriginalBytes() throws Exception {
+    var tile = tile(4, 7);
+    Path file = root.resolve(tile.key.file());
+    Files.createDirectories(file.getParent());
+    byte[] original = legacy(tile);
+    Files.write(file, original);
+    Files.write(file.resolveSibling(file.getFileName() + ".v1.bak"), new byte[] {1, 2, 3});
+    assertThrows(java.io.IOException.class, () -> MapCodec.write(file, tile));
+    assertArrayEquals(original, Files.readAllBytes(file));
+    byte[] future = MapCodec.encode(tile);
+    future[7] = 50;
+    Files.write(file, future);
+    assertThrows(java.io.IOException.class, () -> MapCodec.write(file, tile));
+    assertArrayEquals(future, Files.readAllBytes(file));
+    Files.write(file, new byte[] {1, 2, 3});
+    assertThrows(java.io.IOException.class, () -> MapCodec.write(file, tile));
+    assertArrayEquals(new byte[] {1, 2, 3}, Files.readAllBytes(file));
+  }
+
+  @Test
+  void unchangedLegacyLeafRebuildsExistingDistantRelief() throws Exception {
+    var leaf = tile(0, 0);
+    var parent = new MapTile(leaf.key.parent());
+    parent.merge(leaf);
+    int[] expected = parent.reliefAccurate.clone();
+    byte[] oldParent = legacy(parent);
+    for (var value : List.of(leaf, parent)) {
+      Path path = root.resolve(value.key.file());
+      Files.createDirectories(path.getParent());
+      Files.write(path, value == parent ? oldParent : legacy(value));
+    }
+    var errors = new ArrayList<String>();
+    var cache = new MapCache(root, 16, errors::add);
+    assertNull(cache.get(leaf.key));
+    MapIO.awaitQueued();
+    cache.tick();
+    cache.finish();
+    assertEquals(List.of(), errors);
+    assertArrayEquals(
+        expected, MapCodec.read(root.resolve(parent.key.file()), parent.key).reliefAccurate);
+    Path path = root.resolve(parent.key.file());
+    assertArrayEquals(
+        oldParent, Files.readAllBytes(path.resolveSibling(path.getFileName() + ".v1.bak")));
+  }
+
+  @Test
+  void diagonalReliefCornerIsIndependentOfTileLoadOrder() throws Exception {
+    var northwest = new MapTile(new MapMath.Key(0, -1, 0, 0, 0));
+    northwest.put(4095, 0x808080, 0x808080, 63, 15, 1, 0);
+    var southeast = new MapTile(new MapMath.Key(0, -1, 0, 1, 1));
+    southeast.put(0, 0x808080, 0x808080, 64, 15, 1, 0);
+    int expected = MapRelief.colour(0x808080, 64, 64, 63, 0);
+    for (boolean reverse : new boolean[] {false, true}) {
+      Path folder = root.resolve(reverse ? "reverse" : "forward");
+      for (var tile : List.of(northwest, southeast))
+        MapCodec.write(folder.resolve(tile.key.file()), tile);
+      var errors = new ArrayList<String>();
+      var cache = new MapCache(folder, 16, errors::add);
+      for (var tile : reverse ? List.of(southeast, northwest) : List.of(northwest, southeast)) {
+        cache.get(tile.key);
+        MapIO.awaitQueued();
+        cache.tick();
+      }
+      assertEquals(expected, cache.peek(southeast.key).reliefAccurate[0]);
+      cache.finish();
+      assertEquals(List.of(), errors);
+      assertEquals(
+          expected,
+          MapCodec.read(folder.resolve(southeast.key.file()), southeast.key).reliefAccurate[0]);
+    }
+  }
+
+  @Test
+  void rapidLegacyMapPanningKeepsMigrationBacklogBoundedAndDurable() throws Exception {
+    for (int x = 0; x < 96; x++) {
+      var tile = tile(x, 0);
+      Path path = root.resolve(tile.key.file());
+      Files.createDirectories(path.getParent());
+      Files.write(path, legacy(tile));
+    }
+    var errors = new ArrayList<String>();
+    var cache = new MapCache(root, 16, errors::add);
+    var field = MapCache.class.getDeclaredField("parents");
+    field.setAccessible(true);
+    for (int tick = 0; tick < 500; tick++) {
+      for (int x = 0; x < 96; x++) cache.get(new MapMath.Key(0, -1, 0, x, 0));
+      cache.tick();
+      assertTrue(((Map<?, ?>) field.get(cache)).size() <= 16 + 64);
+      assertTrue(cache.size() <= 16);
+      if (tick % 10 == 0) Thread.sleep(1);
+    }
+    cache.finish();
+    assertEquals(List.of(), errors);
+    assertTrue(((Map<?, ?>) field.get(cache)).isEmpty());
   }
 
   @Test
@@ -46,7 +201,7 @@ class MapStorageTest {
     assertThrows(
         java.io.IOException.class, () -> MapCodec.decode(encoded, new MapMath.Key(0, -1, 0, 1, 0)));
     byte[] future = encoded.clone();
-    future[7] = 2;
+    future[7] = 50;
     assertThrows(java.io.IOException.class, () -> MapCodec.decode(future, tile.key));
   }
 
@@ -75,6 +230,34 @@ class MapStorageTest {
     assertThrows(
         IllegalArgumentException.class,
         () -> new MapTile(new MapMath.Key(0, -1, 1, 4, 0)).merge(child));
+  }
+
+  @Test
+  void readOnlyParentRejectsMergeWithoutMutation() {
+    var child = tile(0, 0);
+    var parent = new MapTile(child.key.parent());
+    parent.put(0, 0x123456, 0x654321, 32, 4, 5, 2);
+    parent.savedRevision = parent.revision;
+    parent.readOnly = true;
+    var before = parent.copy();
+    long childRevision = child.revision;
+
+    assertFalse(parent.merge(child));
+    assertArrayEquals(before.accurate, parent.accurate);
+    assertArrayEquals(before.vanilla, parent.vanilla);
+    assertArrayEquals(before.reliefAccurate, parent.reliefAccurate);
+    assertArrayEquals(before.reliefVanilla, parent.reliefVanilla);
+    assertArrayEquals(before.blocks, parent.blocks);
+    assertArrayEquals(before.heights, parent.heights);
+    assertArrayEquals(before.lights, parent.lights);
+    assertArrayEquals(before.biomes, parent.biomes);
+    assertEquals(before.revision, parent.revision);
+    assertEquals(before.savedRevision, parent.savedRevision);
+    assertEquals(childRevision, child.revision);
+    assertFalse(parent.dirty());
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> parent.merge(new MapTile(new MapMath.Key(0, -1, 0, 8, 0))));
   }
 
   @Test
