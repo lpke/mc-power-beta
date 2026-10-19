@@ -16,6 +16,23 @@ public final class WaypointMarkers {
   private static final IntBuffer VIEWPORT = BufferUtils.createIntBuffer(16);
   private static final List<Label> LABELS = new ArrayList<>();
   private static Object world;
+  private static final WaypointCamera CAMERA = new WaypointCamera();
+  private static final FloatBuffer UNBOBBED = BufferUtils.createFloatBuffer(16);
+  private static boolean captureBob;
+  private static boolean eligible(Minecraft mc) {
+    return MapConfig.current().worldWaypoints && mc.world != null && mc.player != null
+        && !mc.options.hideHud && mc.currentScreen == null && Maps.waypoints() != null && !Maps.points().isEmpty();
+  }
+  public static void beginCamera(Minecraft mc) {
+    CAMERA.reset();
+    captureBob = eligible(mc) && !local.luke.power.input.DetachedCamera.isActive();
+  }
+  public static void beforeBob() {
+    if (captureBob) { GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, MODEL); CAMERA.before(MODEL); }
+  }
+  public static void afterBob() {
+    if (captureBob) { GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, MODEL); CAMERA.after(MODEL); }
+  }
 
   private WaypointMarkers() {}
 
@@ -24,16 +41,16 @@ public final class WaypointMarkers {
     world = mc.world;
     var settings = MapConfig.current();
     var store = Maps.waypoints();
-    if (!settings.worldWaypoints
-        || store == null
-        || mc.world == null
-        || mc.player == null
-        || mc.options.hideHud) return;
+    if (!eligible(mc)) return;
     var camera = mc.field_2807 == null ? mc.player : mc.field_2807;
     double bx = camera.field_1637 + (camera.x - camera.field_1637) * delta,
         by = camera.field_1638 + (camera.y - camera.field_1638) * delta,
         bz = camera.field_1639 + (camera.z - camera.field_1639) * delta;
     GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, MODEL);
+    if (!local.luke.power.input.DetachedCamera.isActive()) {
+      CAMERA.apply(MODEL, UNBOBBED);
+      for (int i = 0; i < 16; i++) MODEL.put(i, UNBOBBED.get(i));
+    }
     GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, PROJECTION);
     GL11.glGetInteger(GL11.GL_VIEWPORT, VIEWPORT);
     for (Waypoint p : Maps.points()) {
@@ -64,6 +81,13 @@ public final class WaypointMarkers {
     try {
       GL11.glDisable(GL11.GL_DEPTH_TEST);
       GL11.glDisable(GL11.GL_LIGHTING);
+      GL11.glDisable(GL11.GL_CULL_FACE);
+      GL11.glEnable(GL11.GL_TEXTURE_2D);
+      GL11.glEnable(GL11.GL_BLEND);
+      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      GL11.glEnable(GL11.GL_ALPHA_TEST);
+      GL11.glAlphaFunc(GL11.GL_GREATER, 0.01f);
+      GL11.glColor4f(1, 1, 1, 1);
       for (Label label : LABELS)
         if (label.x > 0 && label.x < 1 && label.y > 0 && label.y < 1)
           {

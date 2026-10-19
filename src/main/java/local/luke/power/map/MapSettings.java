@@ -6,8 +6,12 @@ public final class MapSettings {
   public int size = 108, corner = 1, offsetX = 6, offsetY = 6;
   public double opacity = 1, zoom = 1;
   public boolean coordinates = true, biome = true, clock, compass = true;
+  public int directionTextSize = 100, belowTextSize = 100, minimapArrowSize = 100;
+  public boolean minimapWaypointArrows = true, minimapDestinationArrow = true, minimapDeathpointArrows = true;
+  public int destinationArrowColor = 0xffdf55;
+  public double destinationArrowOpacity = 1;
   public int colourMode, caveMode = 1, caveTop = 64, roofSize = 3;
-  public int caveAbove = 2, caveBelow = 8;
+  public int caveAbove = 10, caveBelow = 10;
   public int pathColor = 0xffff99, playerColor = 0xf13c3c, playerIcon, playerSize = 100;
   public double pathOpacity = .7, playerOpacity = 1;
   public boolean automaticDetail = true, mapSmoothing;
@@ -23,7 +27,7 @@ public final class MapSettings {
       waypointDistances = true;
   public int waypointDistance = 1000;
   public boolean deathpoints = true, keepOldDeaths = true;
-  public boolean chunkGrid, slimeChunks, lightOverlay, footsteps = true, pauseMap;
+  public boolean chunkGrid, slimeChunks, lightOverlay, footsteps, pauseMap;
   public int columnsPerTick = 512,
       cacheTiles = 256,
       uploadsPerFrame = 4,
@@ -37,12 +41,17 @@ public final class MapSettings {
     range(offsetY, 0, 500);
     finite(opacity, .1, 1);
     finite(zoom, .25, 4);
+    range(directionTextSize, 50, 200);
+    range(belowTextSize, 50, 200);
+    range(minimapArrowSize, 50, 200);
+    range(destinationArrowColor, 0, 0xffffff);
+    finite(destinationArrowOpacity, 0, 1);
     range(colourMode, 0, 1);
     range(caveMode, 0, 2);
     range(caveTop, 1, 127);
     range(roofSize, 1, 5);
-    range(caveAbove, 0, 32);
-    range(caveBelow, 1, 64);
+    range(caveAbove, 0, 64);
+    range(caveBelow, 0, 64);
     range(pathColor, 0, 0xffffff);
     range(playerColor, 0, 0xffffff);
     range(playerIcon, 0, 3);

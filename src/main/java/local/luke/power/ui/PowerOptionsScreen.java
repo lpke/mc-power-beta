@@ -732,7 +732,8 @@ public final class PowerOptionsScreen extends UiScreen {
         rememberPosition();
         click();
         history.clear();
-        if (!acceptLocation) highlightedId = "";
+        highlightedId = "";
+        focusAnchorId = "";
         page = pages.get(index);
         conflictIds = List.of();
         changedOnly = false;

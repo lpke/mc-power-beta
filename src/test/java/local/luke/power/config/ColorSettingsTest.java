@@ -26,7 +26,8 @@ class ColorSettingsTest {
   @Test void everyDirectPairHidesOnlyItsOwnOpacityAndLabelsSharePercentages() {
     Map<String, String> pairs = new LinkedHashMap<>(Map.of(
         "worldedit.color", "worldedit.opacity", "tweaks.flexible.overlayColor", "tweaks.flexible.overlayOpacity",
-        "activeTweaks.textColor", "activeTweaks.opacity", "maps.pathColor", "maps.pathOpacity", "maps.playerColor", "maps.playerOpacity"));
+        "activeTweaks.textColor", "activeTweaks.opacity", "maps.pathColor", "maps.pathOpacity", "maps.playerColor", "maps.playerOpacity",
+        "maps.destinationArrowColor", "maps.destinationArrowOpacity"));
     for (int i = 0; i < 4; i++) pairs.put("infoHud.clusters." + i + ".textColor", "infoHud.clusters." + i + ".opacity");
     for (var pair : pairs.entrySet()) {
       boolean integer = pair.getKey().startsWith("maps.") || pair.getKey().equals("worldedit.color") || pair.getKey().equals("tweaks.flexible.overlayColor");

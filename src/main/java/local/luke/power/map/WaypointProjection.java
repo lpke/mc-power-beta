@@ -11,9 +11,9 @@ public final class WaypointProjection {
     double mx = row(model, 0, x, y, z, 1), my = row(model, 1, x, y, z, 1),
         mz = row(model, 2, x, y, z, 1), mw = row(model, 3, x, y, z, 1);
     double w = row(projection, 3, mx, my, mz, mw);
-    if (!Double.isFinite(w) || w <= 0) return null;
+    if (!Double.isFinite(w) || w <= 1e-9) return null;
     double depth = row(projection, 2, mx, my, mz, mw) / w;
-    if (depth < -1 || depth >= 1) return null;
+    if (!Double.isFinite(depth) || depth < -1) return null;
     double px = row(projection, 0, mx, my, mz, mw) / w,
         py = row(projection, 1, mx, my, mz, mw) / w;
     return Double.isFinite(px) && Double.isFinite(py) ? new Point((px + 1) / 2, (py + 1) / 2) : null;

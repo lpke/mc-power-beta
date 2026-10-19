@@ -1,6 +1,9 @@
 package local.luke.power.mixin;
 
 import local.luke.power.light.LightOverlay;
+import local.luke.power.map.WaypointMarkers;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import net.minecraft.class_555;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.*;
@@ -20,6 +23,16 @@ public abstract class LightOverlayMixin {
       org.lwjgl.opengl.GL11.glColorMask(true, true, true, true);
       ci.cancel();
     }
+  }
+
+  @Inject(method = "method_1840", at = @At("HEAD"))
+  private void power$beginWaypointCamera(float delta, int eye, CallbackInfo ci) { WaypointMarkers.beginCamera(field_2349); }
+
+  @WrapOperation(method = "method_1840", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_555;method_1850(F)V"))
+  private void power$waypointBob(class_555 renderer, float delta, Operation<Void> original) {
+    WaypointMarkers.beforeBob();
+    original.call(renderer, delta);
+    WaypointMarkers.afterBob();
   }
 
   @Inject(method = "method_1841", at = @At(value = "INVOKE",

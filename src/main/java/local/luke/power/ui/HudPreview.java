@@ -41,9 +41,13 @@ final class HudPreview {
   void rebuild() {
     for (int i = 0; i < 4; i++) { clusters[i] = new InfoHudSettings.Cluster(); populate(clusters[i], "infoHud.clusters." + i + "."); }
     status = new StatusSettings(); populate(status, "activeTweaks.");
-    map = local.luke.power.map.MapConfig.copy();
-    populate(map, "maps.");
-    map.minimap = minimapEnabled;
+    map = minimapDraft(draft, local.luke.power.map.MapConfig.current(), minimapEnabled);
+  }
+  static local.luke.power.map.MapSettings minimapDraft(SettingsDraft draft,
+      local.luke.power.map.MapSettings source, boolean enabled) {
+    var copy = Catalog.JSON.fromJson(Catalog.JSON.toJson(source), local.luke.power.map.MapSettings.class);
+    populate(copy, "maps.", draft); copy.minimap = enabled;
+    return copy;
   }
   int integer(String id) { return draft.get(id).value.getAsInt(); }
   boolean bool(String id) { return draft.get(id).value.getAsBoolean(); }
@@ -194,6 +198,9 @@ final class HudPreview {
   }
   private StatusSettings status() { return status; }
   private void populate(Object value, String prefix) {
+    populate(value, prefix, draft);
+  }
+  private static void populate(Object value, String prefix, SettingsDraft draft) {
     try {
       for (var field : value.getClass().getFields()) {
         var setting = draft.settings().stream().filter(s -> s.id.equals(prefix + field.getName())).findFirst().orElse(null);

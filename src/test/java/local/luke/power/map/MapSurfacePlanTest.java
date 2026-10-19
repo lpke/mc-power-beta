@@ -53,6 +53,7 @@ class MapSurfacePlanTest {
     projection.put(15, -1);
     assertNull(WaypointProjection.project(0, 0, 0, model, projection));
     projection.put(15, 1);
-    assertNull(WaypointProjection.project(0, 0, 2, model, projection));
+    assertNotNull(WaypointProjection.project(0, 0, 2, model, projection));
+    assertNull(WaypointProjection.project(0, 0, -2, model, projection));
   }
 }

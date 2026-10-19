@@ -41,7 +41,7 @@ public final class MapRenderer {
   static int tile(MapCache source, Key key, MapSettings settings, boolean local, long seed) {
     if (source != cache) { clear(); cache = source; }
     key = source.viewKey(key);
-    MapTile tile = source.get(key);
+    MapTile tile = source.visible(key);
     if (tile == null) return 0;
     int style = Objects.hash(settings.style(), settings.chunkGrid, settings.slimeChunks,
         settings.lightOverlay, seed, local, settings.mapSmoothing);
@@ -101,6 +101,8 @@ public final class MapRenderer {
       cache = source;
     }
     var coverage = MapCoverage.select(view, circle, settings.cacheTiles, pixelScale);
+    source.visibleView(dimension, layer, coverage);
+    source.publish(4, System.nanoTime() + 250_000);
     int level = coverage.level(), span = SIZE << level;
     int minX = coverage.minX(),
         maxX = coverage.maxX(),
@@ -134,8 +136,10 @@ public final class MapRenderer {
               settings.lightOverlay,
               seed,
               local, settings.mapSmoothing);
-      for (int z = minZ; z <= maxZ; z++)
-        for (int x = minX; x <= maxX; x++) {
+      int centerX = Math.max(minX, Math.min(maxX, (int)Math.floor(view.x / span)));
+      int centerZ = Math.max(minZ, Math.min(maxZ, (int)Math.floor(view.z / span)));
+      for (var cell : MapTileSweep.nearest(coverage, centerX, centerZ)) {
+          int x = cell.x(), z = cell.z();
           Key key = source.viewKey(new Key(dimension, layer, level, x, z));
           double wx = key.minX(), wz = key.minZ();
           var a = view.screen(wx, wz);
@@ -151,7 +155,7 @@ public final class MapRenderer {
                       new MapProjection.Point(d.x(), d.y(), 0, 1)),
                   circle);
           if (polygon.isEmpty()) continue;
-          MapTile tile = source.get(key);
+          MapTile tile = source.visible(key);
           if (tile == null) {
             pending = true;
             continue;
@@ -278,29 +282,39 @@ public final class MapRenderer {
   }
 
   public static void arrow(double x, double y, double angle, int color) {
+    arrow(x, y, angle, color, 1, 1);
+  }
+
+  private static void arrow(double x, double y, double angle, int color, double size, double opacity) {
+    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     GL11.glPushMatrix();
-    GL11.glTranslated(x, y, 0);
-    GL11.glRotated(Math.toDegrees(angle), 0, 0, 1);
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-    for (int outline = 1; outline >= 0; outline--) {
-      GL11.glPushMatrix();
-      double scale = outline == 1 ? 1.3 : 1;
-      GL11.glScaled(scale, scale, 1);
-      int rgb = outline == 1 ? 0 : color;
-      GL11.glColor4ub((byte) (rgb >> 16), (byte) (rgb >> 8), (byte) rgb, (byte) 255);
-      GL11.glBegin(GL11.GL_TRIANGLES);
-      GL11.glVertex2d(0, -5);
-      GL11.glVertex2d(3.5, 4);
-      GL11.glVertex2d(0, 2);
-      GL11.glVertex2d(0, -5);
-      GL11.glVertex2d(0, 2);
-      GL11.glVertex2d(-3.5, 4);
-      GL11.glEnd();
+    try {
+      GL11.glTranslated(x, y, 0);
+      GL11.glRotated(Math.toDegrees(angle), 0, 0, 1);
+      GL11.glScaled(size, size, 1);
+      GL11.glDisable(GL11.GL_TEXTURE_2D);
+      GL11.glEnable(GL11.GL_BLEND);
+      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      for (int outline = 1; outline >= 0; outline--) {
+        GL11.glPushMatrix();
+        double scale = outline == 1 ? 1.3 : 1;
+        GL11.glScaled(scale, scale, 1);
+        int rgb = outline == 1 ? 0 : color;
+        color(rgb, opacity);
+        GL11.glBegin(GL11.GL_TRIANGLES);
+        GL11.glVertex2d(0, -5);
+        GL11.glVertex2d(3.5, 4);
+        GL11.glVertex2d(0, 2);
+        GL11.glVertex2d(0, -5);
+        GL11.glVertex2d(0, 2);
+        GL11.glVertex2d(-3.5, 4);
+        GL11.glEnd();
+        GL11.glPopMatrix();
+      }
+    } finally {
       GL11.glPopMatrix();
+      GL11.glPopAttrib();
     }
-    GL11.glEnable(GL11.GL_TEXTURE_2D);
-    GL11.glColor4f(1, 1, 1, 1);
-    GL11.glPopMatrix();
   }
 
   /** Two shaded faces give the default arrow its raised center seam at every UI scale. */
@@ -406,19 +420,22 @@ public final class MapRenderer {
       if (s.waypoints && store != null)
         for (var point : Maps.points()) {
           if (waypointCount >= 512) break;
-          if (!point.visible(
+          if (MinimapArrows.destination(point)) {
+            if (!point.enabled || point.dimension != dimension) continue;
+          } else if (!point.visible(
               dimension, store.selectedSet(), store.allSets(), Maps.x(), Maps.z(), s)) continue;
           var p = view.screen(point.x + .5, point.z + .5);
           waypointCount++;
           if (!view.contains(p.x(), p.y(), circle, 6)) {
-            if (!mini) continue;
-            var edge = view.edge(p, circle, 7);
+            var style = MinimapArrows.style(point, s, mini);
+            if (!style.visible()) continue;
+            var edge = view.edge(p, circle, style.inset());
             arrow(
                 edge.x(),
                 edge.y(),
                 Math.atan2(p.y() - view.top - view.height / 2, p.x() - view.left - view.width / 2)
                     + Math.PI / 2,
-                point.colour);
+                style.color(), style.scale(), style.opacity());
             continue;
           }
           diamond(p.x(), p.y(), point.colour, mini ? 2.5 : 4);

@@ -5,7 +5,7 @@ import java.util.function.IntPredicate;
 /** Exact camera-height windows keep cave traversal and saved tile identity in agreement. */
 public record CaveWindow(int reference, int above, int below) {
   public CaveWindow {
-    if (reference < 0 || reference > 127 || above < 0 || above > 32 || below < 1 || below > 64)
+    if (reference < 0 || reference > 127 || above < 0 || above > 64 || below < 0 || below > 64)
       throw new IllegalArgumentException("Invalid cave search window");
   }
 

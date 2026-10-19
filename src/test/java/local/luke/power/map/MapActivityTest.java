@@ -18,6 +18,7 @@ class MapActivityTest {
     for (boolean minimap : new boolean[] {false, true}) {
       var settings = new MapSettings();
       settings.minimap = minimap; settings.worldMap = !minimap;
+      settings.footsteps = true;
       var activity = MapActivity.of(settings, false);
       assertTrue(activity.terrain());
       assertTrue(activity.radar());

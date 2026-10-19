@@ -18,7 +18,27 @@ class CaveWindowTest {
     assertEquals(0, CaveWindow.at(-20, 2, 8).bottom());
     assertEquals(127, CaveWindow.at(140, 2, 8).top());
     assertThrows(IllegalArgumentException.class, () -> CaveWindow.at(Double.NaN, 2, 8));
-    assertThrows(IllegalArgumentException.class, () -> CaveWindow.at(64, 2, 0));
+    assertThrows(IllegalArgumentException.class, () -> CaveWindow.at(64, 2, -1));
+  }
+  @Test void aboveAndBelowAcceptTheSameZeroThrough64RangeAndPreserveLegacyContexts() {
+    for (int above : new int[]{0, 1, 10, 32, 64}) for (int below : new int[]{0, 1, 8, 10, 64}) {
+      var window = CaveWindow.at(64, above, below);
+      var key = new MapMath.Key(0, window.layer(), 0, 0, 0, window.context());
+      assertEquals(window.context(), key.context());
+      assertEquals(Math.min(127, 64 + above), window.top());
+      assertEquals(Math.max(0, 64 - below), window.bottom());
+    }
+    var single = CaveWindow.at(64, 0, 0);
+    assertEquals(64, single.floor(y -> false, y -> { assertEquals(64, y); return true; }));
+    assertEquals(63, single.floor(y -> false, y -> { assertEquals(64, y); return false; }));
+    assertEquals("cave-v2/a0-b1/p0", CaveWindow.at(64, 0, 1).context());
+    for (int invalid : new int[]{-1, 65}) {
+      assertThrows(IllegalArgumentException.class, () -> CaveWindow.at(64, invalid, 10));
+      assertThrows(IllegalArgumentException.class, () -> CaveWindow.at(64, 10, invalid));
+    }
+    var key = new MapMath.Key(0, 8, 0, 0, 0);
+    assertThrows(IllegalArgumentException.class, () -> key.withContext("cave-v2/a65-b10/p0"));
+    assertThrows(IllegalArgumentException.class, () -> key.withContext("cave-v2/a10-b65/p0"));
   }
   @Test void skipsCeilingAndSelectsOnlyFloorsInsideTheExactWindow() {
     CaveWindow window = CaveWindow.at(64, 2, 8);

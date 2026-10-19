@@ -230,7 +230,7 @@ public final class WorldMapBuffer {
     this.style = style;
     long deadline = System.nanoTime() + (long) (settings.mapOpenBudget * 1_000_000);
     // Disk workers can publish between ticks; native sampling, parent merges and saves stay tick-owned.
-    source.publish(4, deadline);
+
     int oldBuffer = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
     int oldMatrix = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
     boolean preserve = pending != null && (restyle || pending.plan.level() != plan.level()
@@ -257,7 +257,7 @@ public final class WorldMapBuffer {
       GL11.glColor4f(1, 1, 1, 1);
       boolean need = restyle || active == null || active.plan.level() != plan.level() || !active.contains(view)
           || plan.scale() / active.plan.scale() > 1.5 || plan.scale() / active.plan.scale() < .75;
-      if (pending != null && (restyle || pending.plan.level() != plan.level() || !pending.useful(view))) {
+      if (pending != null && (restyle || pending.plan.level() != plan.level() || !pending.useful(view) || !pending.contains(view))) {
         pending.reset(plan, view);
         if (active != null && active.plan.level() <= plan.level()) {
           GL11.glDisable(GL11.GL_BLEND);
@@ -275,8 +275,11 @@ public final class WorldMapBuffer {
           pending.seeded();
         }
       }
-      if (active != null) active.paint(mc, settings, deadline);
+      var filling = pending != null ? pending : active;
+      if (filling != null) source.visibleView(dimension, layer, filling.bounds);
+      source.publish(4, deadline);
       if (pending != null) pending.paint(mc, settings, deadline);
+      else if (active != null) active.paint(mc, settings, deadline);
       if (pending != null && pending.ready() && pending.contains(view)) {
         spare = active;
         active = pending; pending = null;

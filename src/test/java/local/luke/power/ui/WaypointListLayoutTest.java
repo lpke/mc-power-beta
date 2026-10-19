@@ -9,6 +9,9 @@ class WaypointListLayoutTest {
       var layout = WaypointListLayout.at(size[0], size[1]);
       assertEquals(size[0], layout.left() * 2 + layout.width(), 1);
       assertTrue(layout.width() <= size[1] * 16 / 9 - 16);
+      assertTrue(layout.width() <= 600);
+      assertTrue(layout.searchWidth() <= 400);
+      assertTrue(layout.actionWidth() <= 150);
       assertTrue(layout.left() >= 8);
       assertTrue(layout.right() <= size[0] - 8);
       assertTrue(layout.searchWidth() >= 100);
@@ -26,5 +29,24 @@ class WaypointListLayoutTest {
         assertTrue(69 + visible * 20 < size[1]);
       }
     }
+  }
+
+  @Test void wideWindowsKeepTheSameControlWidthsAndUseExtraSpaceAsMargins() {
+    var normal = WaypointListLayout.at(640, 360);
+    for (int[] size : new int[][] {{800,600}, {1720,720}, {1920,540}, {2560,1080}}) {
+      var wide = WaypointListLayout.at(size[0], size[1]);
+      assertEquals(600, wide.width());
+      assertEquals(normal.searchWidth(), wide.searchWidth());
+      assertEquals(normal.setWidth(), wide.setWidth());
+      assertEquals(normal.actionWidth(), wide.actionWidth());
+      assertTrue(wide.left() > normal.left());
+      assertEquals(size[0], wide.left() * 2 + wide.width(), 1);
+    }
+  }
+
+  @Test void shortAndPortraitWindowsStillRespectTheirAvailableContentArea() {
+    assertEquals(304, WaypointListLayout.at(320, 240).width());
+    assertEquals(304, WaypointListLayout.at(1280, 180).width());
+    assertEquals(524, WaypointListLayout.at(540, 960).width());
   }
 }

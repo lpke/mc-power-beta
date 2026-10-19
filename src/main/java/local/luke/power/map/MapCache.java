@@ -13,6 +13,16 @@ public final class MapCache {
   private final Consumer<String> errors;
   private final LinkedHashMap<Key, MapTile> tiles = new LinkedHashMap<>(64, .75f, true);
   private final Map<Key, CompletableFuture<MapTile>> loading = new LinkedHashMap<>();
+  private static final int VISIBLE = 1, SAMPLE = 2, PARENT = 4, GENERAL = 8;
+  private final Map<Key, Integer> loadKinds = new HashMap<>();
+  private ViewRequest visibleView;
+  private record ViewRequest(int dimension, int layer, String context, MapCoverage.Bounds bounds) {
+    boolean contains(Key key) {
+      return key.dimension() == dimension && key.layer() == layer && key.context().equals(context)
+          && key.level() == bounds.level() && key.x() >= bounds.minX() && key.x() <= bounds.maxX()
+          && key.z() >= bounds.minZ() && key.z() <= bounds.maxZ();
+    }
+  }
   private final Map<Key, Save> saving = new LinkedHashMap<>();
   private final LinkedHashMap<Key, MapTile> parents = new LinkedHashMap<>();
   private int limit;
@@ -99,11 +109,31 @@ public final class MapCache {
     return closed || retiring ? null : tiles.get(viewKey(key));
   }
 
-  public MapTile get(Key key) {
-    return get(viewKey(key), false);
+  public MapTile get(Key key) { return get(viewKey(key), GENERAL); }
+  public MapTile visible(Key key) { return get(viewKey(key), VISIBLE); }
+  public MapTile sample(Key key) { return get(viewKey(key), SAMPLE); }
+
+  /** Retire only queued reads that belonged solely to the previous view. Never discard writes. */
+  public void visibleView(int dimension, int layer, MapCoverage.Bounds bounds) {
+    var request = new ViewRequest(dimension, layer, layer < 0 ? "" : viewContext, bounds);
+    if (request.equals(visibleView)) return;
+    visibleView = request;
+    for (var it = loading.entrySet().iterator(); it.hasNext();) {
+      var entry = it.next();
+      if (loadKinds.getOrDefault(entry.getKey(), GENERAL) != VISIBLE || request.contains(entry.getKey())) continue;
+      if (MapIO.cancelQueuedRead(entry.getValue())) { loadKinds.remove(entry.getKey()); it.remove(); }
+    }
   }
 
-  private MapTile get(Key key, boolean requiredParent) {
+  private int loads(int kind) {
+    int count = 0;
+    for (int flags : loadKinds.values()) if ((flags & kind) != 0) count++;
+    return count;
+  }
+
+  private MapTile get(Key key, boolean requiredParent) { return get(key, requiredParent ? PARENT : GENERAL); }
+  private MapTile get(Key key, int kind) {
+    boolean requiredParent = kind == PARENT;
     if (closed || retiring && !requiredParent) return null;
     MapTile tile = tiles.get(key);
     if (tile != null) return tile;
@@ -111,11 +141,18 @@ public final class MapCache {
     // Parent reads still proceed so existing durable work can drain.
     if (!requiredParent && parents.size() >= limit) return null;
     // Reserve cache slots for in-flight loads, even if every resident tile is dirty.
-    if (loading.containsKey(key) || loading.size() >= 16) return null;
+    if (loading.containsKey(key)) {
+      loadKinds.merge(key, kind, (a, b) -> a | b);
+      return null;
+    }
+    if (loading.size() >= 16 || kind == VISIBLE && loads(VISIBLE) >= 8
+        || kind == SAMPLE && loads(SAMPLE) >= 4 || kind == PARENT && loads(PARENT) >= 4) return null;
+    // Leave room for parent maintenance while visible and sampling consumers fill their shares.
+    if ((kind == VISIBLE || kind == SAMPLE) && loading.size() - loads(PARENT) >= 12) return null;
     trim();
     if (tiles.size() + loading.size() >= limit && !evictOne()) return null;
     var future = MapIO.submit(() -> MapCodec.read(root.resolve(key.file()), key));
-    if (future != null) loading.put(key, future);
+    if (future != null) { loading.put(key, future); loadKinds.put(key, kind); }
     return null;
   }
 
@@ -256,6 +293,7 @@ public final class MapCache {
         tile.propagateRelief = false;
         refreshEdges(tile.key);
       }
+      loadKinds.remove(entry.getKey());
       it.remove();
       published++;
     }

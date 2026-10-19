@@ -453,15 +453,15 @@ public final class HudEditorScreen extends DraftEditorScreen {
     double nextY = Math.max(0, Math.min(height - dragging.height(), dragging.y() + virtualY(y) - pressY));
     if (dragging.offsetX() != null) setOffset(dragging.offsetX(), startX + offsetDirection(dragging.offsetX()) * (snap(nextX, dragging.width(), width) - dragging.x()));
     if (dragging.offsetY() != null) setOffset(dragging.offsetY(), startY + offsetDirection(dragging.offsetY()) * (snap(nextY, dragging.height(), height) - dragging.y()));
+    preview.rebuild();
   }
   private int offsetDirection(String id) {
     if (!id.startsWith("maps.")) return 1;
     int corner = preview.integer("maps.corner");
-    return id.endsWith("offsetX") ? corner % 2 == 1 ? -1 : 1 : corner >= 2 ? -1 : 1;
+    return local.luke.power.map.MinimapGeometry.offsetDirection(corner, id.endsWith("offsetX"));
   }
   private void setOffset(String id, double value) {
     Setting s = draft.get(id); s.value = new JsonPrimitive((int)Math.max(s.min, Math.min(s.max, Math.round(value))));
-    if (id.startsWith("infoHud.") || id.startsWith("activeTweaks.")) preview.rebuild();
   }
   protected boolean editorKey(char c, int key) {
     if (!previewVisible()) return false;
@@ -474,6 +474,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
       int step = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 10 : 1;
       if (element.offsetX() != null) setOffset(element.offsetX(), preview.integer(element.offsetX()) + dx * step * offsetDirection(element.offsetX()));
       if (element.offsetY() != null) setOffset(element.offsetY(), preview.integer(element.offsetY()) + dy * step * offsetDirection(element.offsetY()));
+      preview.rebuild();
     }
     return true;
   }

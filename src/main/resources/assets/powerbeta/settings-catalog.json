@@ -5849,7 +5849,7 @@
     "label": "Cave search above reference",
     "description": "Blocks searched above the camera height in Automatic mode or the selected reference height in Manual mode. Lower values keep the search close and reduce work; higher values include higher floors and require more checks. Reads loaded terrain only.",
     "min": 0,
-    "max": 32,
+    "max": 64,
     "step": 1,
     "order": 18.1
   },
@@ -5858,7 +5858,7 @@
     "group": "Terrain",
     "label": "Cave search below reference",
     "description": "Blocks searched below the camera height in Automatic mode or the selected reference height in Manual mode. Lower values keep the search close and reduce work; higher values find deeper floors and require more checks. Reads loaded terrain only.",
-    "min": 1,
+    "min": 0,
     "max": 64,
     "step": 1,
     "order": 18.2
@@ -5869,5 +5869,94 @@
     "label": "Minimap appearance",
     "description": "Edit minimap layout, terrain colors, markers, radar, waypoints and overlays in the HUD editor. Shared appearance controls also affect the World Map.",
     "order": 0.5
+  },
+  "maps.directionTextSize": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Direction text size",
+    "description": "Size of the north, east, south and west letters on the minimap.",
+    "min": 50,
+    "max": 200,
+    "step": 5,
+    "order": 14.01,
+    "unit": "%",
+    "displayPrecision": 0
+  },
+  "maps.belowTextSize": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Text size below minimap",
+    "description": "Size of coordinates, biome and time beneath the minimap. The layout reserves space for the scaled text.",
+    "min": 50,
+    "max": 200,
+    "step": 5,
+    "order": 13.1,
+    "unit": "%",
+    "displayPrecision": 0
+  },
+  "maps.minimapArrowSize": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Waypoint arrow size",
+    "description": "Size of waypoint, destination and deathpoint arrows at the minimap edge.",
+    "min": 50,
+    "max": 200,
+    "step": 5,
+    "order": 36.1,
+    "unit": "%",
+    "displayPrecision": 0
+  },
+  "maps.minimapWaypointArrows": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Waypoint edge arrows",
+    "description": "Show offscreen ordinary waypoints as arrows at the minimap edge. Destination and deathpoint arrows have separate controls.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 36.2
+  },
+  "maps.minimapDestinationArrow": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Destination edge arrow",
+    "description": "Show an offscreen destination as an arrow at the minimap edge. Independent of ordinary waypoint and deathpoint arrows.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 36.3
+  },
+  "maps.minimapDeathpointArrows": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Deathpoint edge arrows",
+    "description": "Show offscreen deathpoints as arrows at the minimap edge. Independent of ordinary waypoint and destination arrows.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 36.4
+  },
+  "maps.destinationArrowColor": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Destination arrow color",
+    "description": "Color of the destination arrow at the minimap edge.",
+    "min": 0,
+    "max": 16777215,
+    "step": 1,
+    "order": 36.5
+  },
+  "maps.destinationArrowOpacity": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Destination arrow opacity",
+    "description": "Opacity of the destination arrow at the minimap edge.",
+    "min": 0,
+    "max": 1,
+    "step": 0.01,
+    "order": 36.6,
+    "unit": "%",
+    "displayDivisor": 0.01,
+    "displayPrecision": 0
   }
 }

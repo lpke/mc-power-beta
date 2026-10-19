@@ -33,4 +33,16 @@ class HudEditorSectionsTest {
     assertEquals("Culling statistics", HudEditorSections.group(setting("entityculling:config.f3InfoYOffset")));
     assertEquals("Music", HudEditorSections.group(setting("power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset")));
   }
+  @Test void minimapTextAndArrowControlsStayWithTheirRelatedInformation() {
+    for (String field : List.of("directionTextSize", "belowTextSize"))
+      assertEquals("Information", HudEditorSections.group(setting("maps." + field)));
+    for (String field : List.of("minimapArrowSize", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity")) {
+      var setting = setting("maps." + field);
+      assertTrue(HudEditorSettings.contains(setting));
+      assertFalse(HudEditorSections.position(setting));
+      assertEquals("Waypoints", HudEditorSections.group(setting));
+      assertEquals("minimap", HudEditorSettings.tab(setting, 0));
+      assertFalse(setting.description.contains("Also affects the World Map"));
+    }
+  }
 }

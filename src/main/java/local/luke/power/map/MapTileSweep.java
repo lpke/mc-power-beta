@@ -4,6 +4,18 @@ package local.luke.power.map;
 public final class MapTileSweep {
   public record Cell(int x, int z) {}
   private MapTileSweep() {}
+  /** The fallback/minimap coverage is bounded to1024 tiles, including very thin windows. */
+  public static java.util.List<Cell> nearest(MapCoverage.Bounds bounds, int centerX, int centerZ) {
+    if (bounds.count() > 1024) throw new IllegalArgumentException("Unbounded map coverage");
+    var cells = new java.util.ArrayList<Cell>((int)Math.max(0, bounds.count()));
+    for (int z = bounds.minZ(); z <= bounds.maxZ(); z++)
+      for (int x = bounds.minX(); x <= bounds.maxX(); x++) cells.add(new Cell(x, z));
+    cells.sort(java.util.Comparator.comparingLong(cell -> {
+      long dx = (long)cell.x - centerX, dz = (long)cell.z - centerZ;
+      return dx * dx + dz * dz;
+    }));
+    return cells;
+  }
   public static Cell cell(long index) {
     if (index < 0) throw new IllegalArgumentException("Negative sweep index");
     if (index == 0) return new Cell(0, 0);

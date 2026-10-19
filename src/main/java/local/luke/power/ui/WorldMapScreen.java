@@ -41,6 +41,11 @@ public final class WorldMapScreen extends UiScreen {
     return height;
   }
 
+  /** Read-only interest for tick-owned sampling; only the currently loaded dimension/layer qualifies. */
+  public MapProjection samplingView(int dimension, int layer) {
+    return this.dimension == dimension && this.layer == layer ? projection() : null;
+  }
+
   private MapProjection projection() {
     return new MapProjection(
         view.x, view.z, view.scale, 0, top(), width, Math.max(1, bottom() - top()), 0);

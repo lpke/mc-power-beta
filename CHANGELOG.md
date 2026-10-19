@@ -2,21 +2,21 @@
 
 ## [Unreleased]
 
-## [3.0.0] - 2026-10-19
+## [3.0.0] - 2026-10-20
 
 - Add a shared minimap and explored world map with persistent surface and cave terrain, texture colors, relief shading, shallow water, entity radar, chunk and slime overlays, recent paths and deathpoints.
 - Keep minimap movement and rotation smooth on every frame, with a terrain update-rate control. World-map panning follows the pointer at the video frame rate.
 - Choose world-map detail from physical game-window pixels, preserve available terrain while preparing another resolution, and offer automatic-detail and smoothing controls for sharper zooming on high-resolution windows.
-- Continue bounded map sampling while the world map is open, including when paused, with separate column, upload and time budgets. Explain lower and higher performance settings in tooltips, and stop unneeded map background work when its features are disabled.
-- Edit minimap position, size, zoom, terrain, compass, radar and markers together in the HUD editor, with a live map preview and isolated drafts. Temporarily hide the toast preview while editing the minimap or second info cluster.
-- Customize shared player markers and recent-path color and opacity. Use an embossed red player arrow by default and place square-map compass letters closer to its edges.
-- Limit cave searches to adjustable levels above and below an exact reference height, with tighter defaults and separate terrain caches for each search window.
-- Save colored waypoints in persistent named sets. Add a set dropdown, clearer creation, reverse cycling, shared row highlights and a width limit on wide screens.
-- Stabilize world waypoint labels with the current camera transform and subpixel positioning. Add an independent in-world waypoint visibility binding and optional map, radar, grid, cave and destination bindings.
+- Prioritize visible map tiles and near-player minimap gaps without interrupting durable writes. Continue bounded map sampling while the world map is open, including when paused, with separate column, upload and time budgets. Explain lower and higher performance settings in tooltips, and stop unneeded map background work when its features are disabled.
+- Edit minimap position, size, zoom, terrain, compass, radar and markers together in the HUD editor, with a live map preview that follows dragging immediately and isolated drafts. Add separate direction/text/arrow sizes and waypoint, destination and deathpoint edge-arrow switches, plus destination arrow color. Temporarily hide the toast preview while editing the minimap or second info cluster.
+- Customize shared player markers and recent-path color and opacity. Use an embossed red player arrow by default and use a solid shaded minimap border with smoothly positioned compass letters. Default minimap zoom to 1 and recent paths to Off.
+- Limit cave searches to adjustable levels above and below an exact reference height, with matching 0–64 ranges, 10 above/10 below defaults and separate terrain caches for each search window.
+- Save colored waypoints in persistent named sets. Add a set dropdown, clearer creation, reverse cycling, shared row highlights and a narrower content limit on wide screens.
+- Stabilize world waypoint labels without camera bobbing, keep distant labels visible when looking directly toward them and retain subpixel positioning. Add an independent in-world waypoint visibility binding and optional map, radar, grid, cave and destination bindings.
 - Simplify world-map controls, move Center and Go to beneath the scale, and let the scale line be dragged temporarily for comparison. Save visible-map screenshots in the instance screenshots folder with short-lived confirmation.
 - Add destination clearing and a four-second confirmed waypoint deletion to the map context menu. Remove waypoint initials and unnecessary map headings and help text.
-- Group movement and map key bindings by purpose. Related controls and settings jump to the exact highlighted row in its normal tab, with Back and Escape returning to the previous view.
-- Combine paired color and opacity controls in the color picker, retain saved values and show nonopaque percentages beside the hex color. Use American English throughout settings and help.
+- Group movement and map key bindings by purpose. Related controls and settings jump to the exact highlighted row in its normal tab, with Back and Escape returning to the previous view. Clicking the active tab accepts its position and clears the highlight.
+- Combine paired color and opacity controls in the color picker, retain saved values and show nonopaque percentages beside the hex color. Add synchronized color-wheel and RGBA tabs, spaced sliders and a larger square preview. Use American English throughout settings and help.
 - Add modern sprinting on foot through the per-world `allow_sprinting` rule, off in every defaults base. Keep speed, activation, sprint jumping, surface particles, knockback, stamina and combat preferences global.
 - Carry an active ground Toggle sprint into Creative or permitted survival flight. Add optional dynamic FOV for ground, Creative, Spectator and freecam sprinting, all disabled by default.
 - Keep right-clicking an existing boat with a boat item from placing another boat while preserving boarding.

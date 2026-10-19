@@ -46,7 +46,11 @@
     "sprint.creativeFov": false,
     "sprint.spectatorFov": false,
     "sprint.freecamFov": false,
-    "rule.allow_sprinting": false
+    "rule.allow_sprinting": false,
+    "maps.zoom": 1,
+    "maps.footsteps": false,
+    "maps.caveAbove": 10,
+    "maps.caveBelow": 10
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -235,7 +239,11 @@
     "sprint.creativeFov": false,
     "sprint.spectatorFov": false,
     "sprint.freecamFov": false,
-    "rule.allow_sprinting": false
+    "rule.allow_sprinting": false,
+    "maps.zoom": 1,
+    "maps.footsteps": false,
+    "maps.caveAbove": 10,
+    "maps.caveBelow": 10
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -385,6 +393,10 @@
     "sprint.creativeFov": false,
     "sprint.spectatorFov": false,
     "sprint.freecamFov": false,
-    "rule.allow_sprinting": false
+    "rule.allow_sprinting": false,
+    "maps.zoom": 1,
+    "maps.footsteps": false,
+    "maps.caveAbove": 10,
+    "maps.caveBelow": 10
   }
 }

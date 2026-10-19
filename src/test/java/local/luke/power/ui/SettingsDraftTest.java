@@ -67,7 +67,9 @@ class SettingsDraftTest {
         "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
         "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight",
         "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks", "lightOverlay", "footsteps",
-        "pathColor", "pathOpacity", "playerIcon", "playerColor", "playerOpacity", "playerSize");
+        "pathColor", "pathOpacity", "playerIcon", "playerColor", "playerOpacity", "playerSize",
+        "directionTextSize", "belowTextSize", "minimapArrowSize", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows",
+        "destinationArrowColor", "destinationArrowOpacity");
     var source = included.stream().map(id -> setting("maps." + id, "[1]")).toList();
     var draft = new SettingsDraft(source, HudEditorSettings::contains);
     assertEquals(source.size(), draft.settings().size());
@@ -82,6 +84,22 @@ class SettingsDraftTest {
     for (String id : List.of("minimap", "worldMap", "hudEditor", "caveMode", "caveTop", "caveAbove", "caveBelow", "roofSize", "worldWaypoints",
         "deathpoints", "keepOldDeaths", "pauseMap", "columnsPerTick", "cacheTiles", "uploadsPerFrame", "refreshSeconds", "updateRate", "radarLimit"))
       assertFalse(HudEditorSettings.contains(setting("maps." + id, "[]")), id);
+  }
+  @Test void refreshedMinimapPositionDraftMovesImmediatelyWithoutChangingLiveSettingsOrParent() {
+    var source = new local.luke.power.map.MapSettings();
+    var x = new Setting("maps.offsetX", "maps", "Interface", "Minimap", "X", "", Setting.Kind.INTEGER,
+        new JsonPrimitive(6), new JsonPrimitive(6), 0, 500, 1, List.of(), false);
+    var y = new Setting("maps.offsetY", "maps", "Interface", "Minimap", "Y", "", Setting.Kind.INTEGER,
+        new JsonPrimitive(6), new JsonPrimitive(6), 0, 500, 1, List.of(), false);
+    var draft = new SettingsDraft(List.of(x, y), HudEditorSettings::contains);
+    var before = local.luke.power.map.MinimapGeometry.layout(HudPreview.minimapDraft(draft, source, true), 640, 360, false);
+    draft.checkpoint(); draft.get(x.id).value = new JsonPrimitive(26); draft.get(y.id).value = new JsonPrimitive(14);
+    var moved = local.luke.power.map.MinimapGeometry.layout(HudPreview.minimapDraft(draft, source, true), 640, 360, false);
+    assertEquals(-20, moved.x() - before.x()); assertEquals(8, moved.y() - before.y());
+    assertEquals(6, source.offsetX); assertEquals(6, source.offsetY);
+    assertEquals(6, x.value.getAsInt()); assertEquals(6, y.value.getAsInt());
+    draft.undo();
+    assertEquals(before, local.luke.power.map.MinimapGeometry.layout(HudPreview.minimapDraft(draft, source, true), 640, 360, false));
   }
   @Test void toastOnlyHidesForMinimapAndTheSecondHumanNumberedCluster() {
     assertTrue(HudEditorSettings.suppressesToast("minimap"));

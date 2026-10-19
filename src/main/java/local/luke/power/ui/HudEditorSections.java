@@ -25,10 +25,10 @@ final class HudEditorSections {
     if (id.startsWith("maps.")) {
       if (position(s)) return "Position";
       if (field.equals("hideWithDebug")) return "Visibility";
-      if (Set.of("coordinates", "biome", "clock", "compass").contains(field)) return "Information";
+      if (Set.of("coordinates", "biome", "clock", "compass", "directionTextSize", "belowTextSize").contains(field)) return "Information";
       if (Set.of("colourMode", "heightShading", "slopeShading", "caveLighting").contains(field)) return "Terrain";
       if (Set.of("radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight").contains(field)) return "Entity radar";
-      if (field.startsWith("waypoint")) return "Waypoints";
+      if (field.startsWith("waypoint") || field.startsWith("minimap") || field.startsWith("destinationArrow")) return "Waypoints";
       if (Set.of("chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity").contains(field)) return "Overlays";
       return "Appearance";
     }

@@ -17,8 +17,8 @@ public final class MapMath {
       if (context == null) throw new IllegalArgumentException("Invalid map context");
       if (!context.isEmpty()) {
         var match = CAVE_CONTEXT.matcher(context);
-        if (layer < 0 || !match.matches() || Integer.parseInt(match.group(1)) > 32
-            || Integer.parseInt(match.group(2)) < 1 || Integer.parseInt(match.group(2)) > 64)
+        if (layer < 0 || !match.matches() || Integer.parseInt(match.group(1)) > 64
+            || Integer.parseInt(match.group(2)) > 64)
           throw new IllegalArgumentException("Invalid map context");
       }
       if (dimension < -1024

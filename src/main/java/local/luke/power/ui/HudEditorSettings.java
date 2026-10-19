@@ -19,6 +19,7 @@ public final class HudEditorSettings {
   private static final Set<String> MAP_APPEARANCE = Set.of(
       "rotate", "circular", "hideWithDebug", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
       "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
+      "directionTextSize", "belowTextSize", "minimapArrowSize", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity",
       "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight",
       "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity",
       "playerColor", "playerOpacity", "playerSize");

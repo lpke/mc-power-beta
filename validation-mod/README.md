@@ -8,6 +8,13 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- After `new-world`, `release-300-rerelease` checks active-tab highlight clearing,
+  native minimap drag/release and Cancel, RGBA/wheel draft transfer and native release
+  ownership at 320×180 and 640×360, minimap arrow policy and defaults. It also invokes
+  the actual camera setup across walking phases and compares nearby/800m waypoint
+  labels with bobbing on/off. Optional phases: `ui`, `hud`, `colors`, `camera`, `defaults`.
+  Focus the muted disposable client first; preferences and native camera state restore.
+
 - After `new-world`, `release-300 ui` checks the actual Related control/setting
   navigation and retained HUD draft, minimap appearance Undo/Cancel/Done and temporary
   toast suppression, nested RGB/opacity editing for every stored color type, World Map

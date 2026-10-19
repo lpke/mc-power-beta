@@ -1,9 +1,9 @@
 package local.luke.power.ui;
 
-/** Shared drawing and hit-test bounds, capped to the Options screen's 16:9 content area. */
+/** Shared drawing and hit-test bounds keep waypoint controls compact and centered. */
 record WaypointListLayout(int left, int width, int listTop, int listBottom) {
   static WaypointListLayout at(int width, int height) {
-    int span = Math.max(1, Math.min(width, height * 16 / 9) - 16);
+    int span = Math.max(1, Math.min(600, Math.min(width, height * 16 / 9) - 16));
     return new WaypointListLayout((width - span) / 2, span, 72, Math.max(72, height - 55));
   }
 

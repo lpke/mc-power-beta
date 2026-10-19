@@ -528,7 +528,16 @@
   coarse-to-fine fallback images separate so unknown fine cells cannot retain coarse
   coverage. Publish only completed disk reads within the render budget; sampling,
   parent merges and writes stay tick-owned. Exact cave windows use versioned cache
-  contexts; retain legacy cave files and existing surface paths.
+  contexts; retain legacy cave files and existing surface paths. Both cave ranges use
+  0–64 with defaults 10/10. Keep partially sampled columns when reprioritizing.
+  Cancel only obsolete queued view-only reads, reserving worker admission for native
+  sampling and parent maintenance; durable writes and FIFO flush barriers retain order.
+  Minimap live rendering and HUD hit/drag bounds share geometry and cached paired
+  offsets. World waypoint projection removes only the native bob transform from the
+  actual per-eye matrix; retain hurt, portal, third-person and detached camera poses.
+  Reject behind/near-plane points without culling distant waypoint labels at the terrain
+  far plane. Color-wheel/RGBA tabs share one local RGB/opacity draft and retain native
+  drag release ownership even when mouse polling observes the release early.
 - Ground sprinting uses the per-world `allow_sprinting` rule, off in both creation
   presets and every defaults base. Speed, activation, stamina, combat and FOV tuning
   stay global. Retain legacy `sprint.enabled` data inert; never use it to grant a
