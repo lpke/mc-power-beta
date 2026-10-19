@@ -51,7 +51,7 @@ def update(instance, stage=None):
         raise RuntimeError('Expected exactly one installed Power Beta JAR')
     protected = protected_files(instance)
     files = ['.minecraft/mods/' + new_name, 'PACK-MANIFEST.json', 'README.md',
-             'CHANGELOG.md', 'COMPONENTS.json', 'LICENSE.txt']
+             'CHANGELOG.md', 'COMPONENTS.json', 'LICENSE.txt', 'logo.svg']
     files.extend(str(p.relative_to(stage)) for p in sorted((stage / 'screenshots').glob('*.png')))
     obsolete = {'UPSTREAMS.md', str(existing[0].relative_to(instance))} - set(files)
     obsolete.update(str(p.relative_to(instance)) for p in (instance / 'licenses').rglob('*') if p.is_file())

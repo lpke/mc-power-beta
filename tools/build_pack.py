@@ -8,6 +8,10 @@ def export_markdown(source,target):
  text=(ROOT/source).read_text()
  base='https://github.com/lpke/mc-power-beta/blob/main/'
  text=text.replace('(docs/screenshots/','(screenshots/')
+ for quote in ['"', "'"]:
+  text=text.replace('src='+quote+'docs/screenshots/','src='+quote+'screenshots/')
+  text=text.replace('src='+quote+'docs/logo.svg'+quote,'src='+quote+'logo.svg'+quote)
+ text=text.replace('(docs/logo.svg)','(logo.svg)')
  text=text.replace('(docs/','('+base+'docs/').replace('(AGENTS.md)','('+base+'AGENTS.md)')
  text=text.replace('(music-assets.md)','('+base+'docs/music-assets.md)').replace('(LICENSE)','(LICENSE.txt)')
  target.write_text(text)
@@ -29,6 +33,7 @@ def main():
  if stage.exists():shutil.rmtree(stage)
  shutil.copytree(ROOT/'pack',stage)
  shutil.copytree(ROOT/'docs/screenshots',stage/'screenshots')
+ shutil.copy2(ROOT/'docs/logo.svg',stage/'logo.svg')
  mods=stage/'.minecraft/mods';mods.mkdir(parents=True)
  manifest=json.loads((ROOT/'vendor/manifest.json').read_text());installed=[]
  platform={'smoothbeta','stationapi','entityculling','glassnetworking','retroauth','stapi-fast-intro'}

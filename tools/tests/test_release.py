@@ -7,6 +7,7 @@ import zipfile
 from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from release_data import changelog, pack_version, sha256
+import build_pack
 import update_artifacts as updater
 
 
@@ -19,6 +20,27 @@ class ReleaseNotesTest(unittest.TestCase):
                     good.replace('## [Unreleased]', ''), good.replace('1.1.0', '0.1.0')]:
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 changelog(bad)
+
+
+class ExportReadmeTest(unittest.TestCase):
+    def test_images_resolve_to_bundled_files_and_document_links_remain_online(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'README.md').write_text(
+                '# <img src="docs/logo.svg"> Power Beta\n'
+                '[<img src="docs/screenshots/map.png">](docs/screenshots/map.png)\n'
+                "<img src='docs/screenshots/hud.png'>\n"
+                '[Recovery](docs/recovery.md)\n')
+            target = root / 'export.md'
+            with patch.object(build_pack, 'ROOT', root):
+                build_pack.export_markdown('README.md', target)
+            exported = target.read_text()
+            self.assertIn('src="logo.svg"', exported)
+            self.assertIn('src="screenshots/map.png"', exported)
+            self.assertIn("src='screenshots/hud.png'", exported)
+            self.assertIn('](screenshots/map.png)', exported)
+            self.assertIn('](https://github.com/lpke/mc-power-beta/blob/main/docs/recovery.md)', exported)
+            self.assertNotIn('src="docs/', exported)
 
 
 class UpdateTest(unittest.TestCase):
@@ -43,7 +65,7 @@ class UpdateTest(unittest.TestCase):
                 (folder / '.minecraft/mods' / name).write_bytes(bytes([i]))
             mods.append({'file': name, 'sha256': sha256(self.stage / '.minecraft/mods' / name), 'enabled': True})
         (self.stage / 'PACK-MANIFEST.json').write_text(json.dumps({'version': '1.0.1', 'mods': mods}))
-        for name in ['README.md', 'CHANGELOG.md', 'COMPONENTS.json', 'LICENSE.txt']:
+        for name in ['README.md', 'CHANGELOG.md', 'COMPONENTS.json', 'LICENSE.txt', 'logo.svg']:
             (self.stage / name).write_text('new ' + name)
             (self.instance / name).write_text('old ' + name)
         (self.instance / '.minecraft/config').mkdir()
@@ -56,23 +78,26 @@ class UpdateTest(unittest.TestCase):
         self.assertFalse((self.instance / 'UPSTREAMS.md').exists())
         self.assertEqual('1.0.1', result['version'])
         self.assertEqual('untouched', (self.instance / '.minecraft/config/power-beta.json').read_text())
+        self.assertEqual('new logo.svg', (self.instance / 'logo.svg').read_text())
         with zipfile.ZipFile(result['backup']) as backup:
             self.assertEqual(self.original, backup.read('.minecraft/mods/' + self.old.name))
 
     def test_partial_failure_rolls_back_new_and_existing_files(self):
         copy = updater.atomic_copy
-        calls = 0
+        failed = False
         def interrupted(source, target):
-            nonlocal calls
-            calls += 1
-            if calls == 3:
-                raise OSError('simulated interrupted update')
+            nonlocal failed
             copy(source, target)
+            if target.name == 'logo.svg' and not failed:
+                failed = True
+                raise OSError('simulated interrupted update')
         with patch.object(updater, 'atomic_copy', interrupted), self.assertRaises(OSError):
             updater.update(self.instance, self.stage)
+        self.assertTrue(failed)
         self.assertEqual(self.original, self.old.read_bytes())
         self.assertFalse((self.instance / '.minecraft/mods' / self.new.name).exists())
         self.assertEqual('old README.md', (self.instance / 'README.md').read_text())
+        self.assertEqual('old logo.svg', (self.instance / 'logo.svg').read_text())
         self.assertTrue((self.instance / 'UPSTREAMS.md').exists())
 
     def test_dependency_mismatch_and_running_client_stop_before_backup(self):
