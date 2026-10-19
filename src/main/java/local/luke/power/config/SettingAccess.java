@@ -35,7 +35,7 @@ public final class SettingAccess {
     String id = setting.id;
     if (id.startsWith("rules.")) return null;
     if (id.equals("keys.powerbeta.sprint") || id.startsWith("sprint.")
-        && !java.util.Set.of("sprint.creativeFov", "sprint.spectatorFov", "sprint.freecamFov", "sprint.fovStrength").contains(id))
+        && !java.util.Set.of("sprint.dynamicFov", "sprint.creativeFov", "sprint.spectatorFov", "sprint.freecamFov", "sprint.fovStrength").contains(id))
       return local.luke.power.rules.GameRule.ALLOW_SPRINTING;
     if (id.startsWith("worldedit.")) return local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING;
     if (id.equals("visual.spectatorFullBright")

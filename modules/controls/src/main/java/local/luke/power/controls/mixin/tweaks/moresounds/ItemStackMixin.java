@@ -1,10 +1,6 @@
 package local.luke.power.controls.mixin.tweaks.moresounds;
 
 import local.luke.power.controls.ControlFeatures;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
@@ -28,27 +24,13 @@ public abstract class ItemStackMixin {
     @Unique
     private static final Random random = new Random();
 
-    @Inject(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;increaseStat(Lnet/minecraft/stat/Stat;I)V", shift = At.Shift.AFTER))
-    public void playSoundOnToolBreak(int amount, Entity entity, CallbackInfo ci) {
-        if (ControlFeatures.FEATURES_CONFIG.toolBreakSounds) {
-            if (!(entity instanceof PlayerEntity player)) return;
-
-            player.world.playSound(player, "power_controls:random.break", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @Environment(EnvType.CLIENT)
     @Inject(method = "damage", at = @At(value = "FIELD", opcode = Opcodes.PUTFIELD, target = "Lnet/minecraft/item/ItemStack;count:I", ordinal = 0, shift = At.Shift.BEFORE))
-    public void playSoundOnArmorBreak(int amount, Entity entity, CallbackInfo ci) {
-        if (ControlFeatures.FEATURES_CONFIG.armorBreakSounds) {
-            if (this.getItem() instanceof ArmorItem) {
-                if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-                    Minecraft minecraft = (Minecraft) FabricLoader.getInstance().getGameInstance();
-                    PlayerEntity player = minecraft.player;
-                    player.world.playSound(player, "power_controls:random.break", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
-                }
-            }
-        }
+    public void playSoundOnBreak(int amount, Entity entity, CallbackInfo ci) {
+        if (!(entity instanceof PlayerEntity player)) return;
+        boolean enabled = this.getItem() instanceof ArmorItem
+                ? ControlFeatures.FEATURES_CONFIG.armorBreakSounds
+                : ControlFeatures.FEATURES_CONFIG.toolBreakSounds;
+        if (enabled)
+            player.world.playSound(player, "power_controls:random.break", 1.0f, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
     }
 }

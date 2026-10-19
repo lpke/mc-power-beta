@@ -8,6 +8,16 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- After `new-world`, `release-300-exact-frames` compares both border shapes pixel-for-pixel
+  against reference atlas operations at four sizes and two scales. `release-300 refinement`
+  also checks stationary visible updates behind missing tiles with one upload per frame.
+  `release-300-ui-polish`, `release-300-waypoint-polish`, `release-300-sprint-polish`
+  and `release-300-extra-sounds` check native picker modals, pause shortcuts, waypoint
+  actions/drafts/commands, mode-owned stamina/FOV/HUD, and successful action sound events.
+  `release-300-freecam-commands` checks native chat selection/edit/undo, denied rules
+  and camera-ray navigation in a restored loaded chunk. These checks restore settings
+  and use only the muted disposable world.
+
 - After `new-world`, `release-300-rerelease` checks active-tab highlight clearing,
   native minimap drag/release and Cancel, RGBA/wheel draft transfer and native release
   ownership at 320×180 and 640×360, minimap arrow policy and defaults. It also invokes

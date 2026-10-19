@@ -9,7 +9,7 @@ import static local.luke.power.rules.GameRule.*;
 class CommandPermissionsTest {
   private void world(RuleSet rules) { CommandPermissions.context(() -> new CommandPermissions.Context("world", false, rules)); }
   @Test void eachPermissionUnlocksOnlyItsOwnedActions() {
-    List<String> commands = List.of("give", "summon", "kill", "killall", "ride", "heal", "god", "repair", "clear", "spawn", "tp", "warp", "spawnpoint", "setworldspawn", "time", "weather", "remove", "butcher", "up", "thru");
+    List<String> commands = List.of("give", "summon", "kill", "killall", "ride", "heal", "god", "repair", "clear", "spawn", "tp", "waypoint", "spawnpoint", "setworldspawn", "time", "weather", "remove", "butcher", "up", "thru");
     for (GameRule enabled : GameRule.values()) {
       RuleSet rules = new RuleSet(); if (!enabled.access()) continue;
       rules.set(enabled, true); world(rules);
@@ -19,10 +19,10 @@ class CommandPermissionsTest {
   @Test void safeUtilitiesAndSubcommandsRemainAvailableWithoutAccess() {
     world(new RuleSet());
     for (String command : List.of("help", "hat", "difficulty", "death", "clock", "seed", "gamerule", "calc")) assertTrue(CommandPermissions.allowed(command), command);
-    for (String text : List.of("time query daytime", "time get", "warp set home", "warp list", "clear @s stone 0", "repair help")) {
+    for (String text : List.of("time query daytime", "time get", "waypoint add home", "wp list", "way remove home", "clear @s stone 0", "repair help")) {
       String[] args = text.split(" "); assertTrue(CommandPermissions.denial(args[0], args).isEmpty(), text);
     }
-    for (String text : List.of("time set day", "time add 5", "warp tp home", "clear", "clear @s stone 1", "repair")) {
+    for (String text : List.of("time set day", "time add 5", "way teleport home", "clear", "clear @s stone 1", "repair")) {
       String[] args = text.split(" "); assertFalse(CommandPermissions.denial(args[0], args).isEmpty(), text);
     }
   }
@@ -49,6 +49,8 @@ class CommandPermissionsTest {
   @Test void aliasesSharePolicyAndWorldChangesDoNotInheritPermissions() {
     world(RuleSet.cheats()); assertTrue(CommandPermissions.allowed("/teleport"));
     world(new RuleSet()); assertFalse(CommandPermissions.allowed("tp")); assertFalse(CommandPermissions.allowed("TELEPORT"));
+    assertEquals("waypoint", CommandPermissions.canonical("way"));
+    assertEquals("waypoint", CommandPermissions.canonical("wp"));
     assertEquals("gamemode", CommandPermissions.canonical("gm"));
     assertEquals("toggledownfall", CommandPermissions.canonical("weather"));
   }

@@ -14,6 +14,6 @@ public final class BetaSounds {
     } catch (IOException e) { throw new IllegalStateException(e); }
   }
   public static boolean contains(String id) {
-    return VANILLA.contains(id) || id.startsWith("power_controls:");
+    return VANILLA.contains(id) || id.startsWith("power_controls:") || ExtraSounds.contains(id);
   }
 }

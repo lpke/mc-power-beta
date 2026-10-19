@@ -63,11 +63,12 @@ public final class DeathInventoryScreen extends UiScreen {
     if (Bindings.matches(minecraft.options.inventoryKey, button - 100)) { minecraft.setScreen(null); return; }
     if (button != 0) return;
     int x = left(), y = top();
-    if (inside(mx, my, x, y + 170, 80, 18)) { minecraft.setScreen(null); return; }
+    if (inside(mx, my, x, y + 170, 80, 18)) { click(); minecraft.setScreen(null); return; }
     if (!canRecover()) return;
     int index = hit(mx, my);
     boolean all = inside(mx, my, x + 84, y + 170, 92, 18);
     if (!all && (index < 0 || !remaining.contains(index))) return;
+    click();
     try {
       if (all) DeathTracker.recover(minecraft, record); else DeathTracker.recover(minecraft, record, index);
       remaining = new HashSet<>(journal.remaining(record.id));

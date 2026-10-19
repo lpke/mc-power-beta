@@ -38,7 +38,7 @@ public final class CommandsLibraryChecks {
         var json = com.google.gson.JsonParser.parseString(java.nio.file.Files.readString(path)).getAsJsonObject();
         test("world identity and teleport permission persist across restart", () -> {
           check(json.get("world").getAsString().equals(CommandContext.world(mc)), "world identity changed");
-          check(!CommandPermissions.allowed("warp"), "teleport permission lost");
+          check(!CommandPermissions.allowed("waypoint"), "teleport permission lost");
         });
         AccessRules.restore(mc, local.luke.power.rules.RuleSet.read(json.getAsJsonObject("rules"), new local.luke.power.rules.RuleSet()));
         local.luke.power.world.WorldRuleChanges.save(mc);

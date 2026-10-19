@@ -3,7 +3,7 @@ package local.luke.power.ui;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
-/** Shared Save/Discard/Cancel dialog for editors whose draft has not reached the parent. */
+/** Shared Save/Discard/Keep editing dialog for drafts that have not reached their parent. */
 final class DraftExitPrompt {
   private boolean active;
   boolean active() { return active; }
@@ -47,7 +47,7 @@ final class DraftExitPrompt {
       GL11.glDisable(GL11.GL_LIGHTING);
       screen.rectangle(0, 0, screen.width, screen.height, 0xc0000000);
       screen.centeredText(screen.fit(title, screen.width - 24), screen.height / 2 - 16, 0xffffff);
-      String[] labels = {"Save", "Discard", "Cancel"};
+      String[] labels = {"Save", "Discard", "Keep editing"};
       for (int i = 0; i < labels.length; i++)
         screen.button(labels[i], buttonX(screen, i), screen.height / 2 + 8, buttonWidth(screen), 20, x, y, true);
     } finally { GL11.glPopAttrib(); }

@@ -302,10 +302,14 @@ public final class Release300Checks {
           Setting color = setting(options, id), opacity = ColorSettings.opacity(color, options.session().settings());
           JsonElement old = color.value.deepCopy(), alpha = opacity == null ? null : opacity.value.deepCopy();
           var picker = new ColourScreen(options, color, opacity, () -> {}); open(mc, picker, 640, 360);
-          ((TextInput)get(picker, "hex")).setText("#224466");
+          check(((Number)get(picker, "tab")).intValue() == 0, "Color wheel is not the default tab");
+          ((TextInput)get(picker, "hex")).setText(ColorSettings.rgb(color) == 0x224466 ? "#335577" : "#224466");
+          call(picker, "parse");
           if (opacity != null) ((Setting)get(picker, "localOpacity")).parse(opacity.max <= 1 ? ".35" : "35");
           key(picker, Keyboard.KEY_ESCAPE);
-          check(color.value.equals(old) && (opacity == null || opacity.value.equals(alpha)), "nested Cancel changed " + id);
+          check(mc.currentScreen == picker && (boolean)call(get(picker, "exit"), "active"), "dirty color Escape missed confirmation");
+          click(picker, picker.width / 2, picker.height / 2 + 18, 0);
+          check(mc.currentScreen == options && color.value.equals(old) && (opacity == null || opacity.value.equals(alpha)), "nested Discard changed " + id);
           picker = new ColourScreen(options, color, opacity, () -> {}); open(mc, picker, 640, 360);
           ((TextInput)get(picker, "hex")).setText("#224466");
           if (opacity != null) {
@@ -339,7 +343,8 @@ public final class Release300Checks {
         click(world, w / 2, h / 2, 1);
         check((boolean)get(world, "context"), "right click did not open map context");
         var actions = (List<?>)call(world, "contextActions");
-        check(actions.containsAll(List.of("Copy coordinates", "Teleport", "Center here", "Set destination")), "context actions incomplete");
+        check(actions.containsAll(List.of("Copy coordinates", "Set destination")) && !actions.contains("Center here"), "world map context actions disagree");
+        check(actions.contains("Teleport") == Maps.canTeleport(mc, (Waypoint)get(world, "target")), "world map context ignores teleport permission");
         key(world, Keyboard.KEY_ESCAPE); check(!(boolean)get(world, "context") && mc.currentScreen == world, "Escape closed map instead of context");
         Waypoint destination = MapKeys.newWaypoint(); destination.x += 3;
         set(world, "target", destination); call(world, "contextAction", new Class<?>[]{String.class}, "Set destination");

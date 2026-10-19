@@ -11,6 +11,8 @@ public final class HudEditorSettings {
   static final String ITEM_FADE = HUD + "hotbarItemSelectionFadeTime";
   static final String TOAST = "power_controls:userinterface.hideAchievementToast";
   static final String COLOURS = "interface.colours";
+  private static final Set<String> RETIRED = Set.of("maps.heightShading", "maps.slopeShading", "maps.caveLighting",
+      "sprint.creativeFov", "sprint.spectatorFov");
   private static final Set<String> LEGACY_DEBUG = Set.of("power_compat:config.overlayAdditionsYOffset", "entityculling:config.f3InfoYOffset",
       "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");
   private static final Set<String> GROUPS = Set.of("HUD layout", "Combined HUD position",
@@ -25,13 +27,13 @@ public final class HudEditorSettings {
       "playerColor", "playerOpacity", "playerSize");
   private HudEditorSettings() {}
   public static boolean mapAppearance(String id) {
-    return id.startsWith("maps.") && (MAP_APPEARANCE.contains(id.substring(5)) || id.startsWith("maps.playerIcon"));
+    return !RETIRED.contains(id) && id.startsWith("maps.") && (MAP_APPEARANCE.contains(id.substring(5)) || id.startsWith("maps.playerIcon"));
   }
   static boolean suppressesToast(String selection) {
     return selection.equals("minimap") || selection.equals("cluster.1");
   }
   public static boolean contains(Setting s) {
-    if (LEGACY_DEBUG.contains(s.id)) return false;
+    if (LEGACY_DEBUG.contains(s.id) || RETIRED.contains(s.id)) return false;
     if (s.id.startsWith("maps.")) return mapAppearance(s.id);
     if (s.id.startsWith("activeTweaks.") && s.id.endsWith("Messages")) return false;
     return s.id.equals(COLOURS) || s.id.equals(TOAST) || s.id.equals(ENTRY) || s.id.startsWith("infoHud.")
@@ -67,7 +69,7 @@ public final class HudEditorSettings {
     return switch (id) { case "chat" -> "Chat"; case "tweaks" -> "Active tweaks"; case "version" -> "Version label"; default -> "F3 information"; };
   }
   private static boolean internalLogo(Setting s) { return s.id.equals("logo.selectedPreset") || s.id.equals("logo.retroBase"); }
-  public static boolean internal(Setting s) { return internalLogo(s) || s.id.equals("interface.autoApply") || s.id.equals("interface.debugPresets") || s.id.equals("interface.debugRightOrder") || s.id.equals(COLOURS) || s.id.equals("infoHud.selectedCluster") || LEGACY_DEBUG.contains(s.id); }
+  public static boolean internal(Setting s) { return RETIRED.contains(s.id) || internalLogo(s) || s.id.equals("interface.autoApply") || s.id.equals("interface.debugPresets") || s.id.equals("interface.debugRightOrder") || s.id.equals(COLOURS) || s.id.equals("infoHud.selectedCluster") || LEGACY_DEBUG.contains(s.id); }
   public static boolean lettering(Setting s) {
     return s.id.startsWith("logo.logo.") || s.id.startsWith("logo.blocks.") || s.id.equals("logo.presets") || s.id.equals("logo.swatches") || internalLogo(s);
   }

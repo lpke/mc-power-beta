@@ -50,7 +50,19 @@
     "maps.zoom": 1,
     "maps.footsteps": false,
     "maps.caveAbove": 10,
-    "maps.caveBelow": 10
+    "maps.caveBelow": 10,
+    "audio.seedPlantingSounds": true,
+    "audio.hoeTillingSounds": true,
+    "audio.bucketSounds": true,
+    "audio.boneMealSounds": true,
+    "interface.pauseToolsPosition": 0,
+    "interface.pauseMapButton": true,
+    "interface.pauseWaypointsButton": true,
+    "power_controls:userinterface.photoModeConfig.enablePhotoModeButton": true,
+    "maps.circular": true,
+    "maps.destinationArrowColor": 5609983,
+    "maps.waypointTextSize": 75,
+    "maps.waypointDistanceScaling": true
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -243,7 +255,18 @@
     "maps.zoom": 1,
     "maps.footsteps": false,
     "maps.caveAbove": 10,
-    "maps.caveBelow": 10
+    "maps.caveBelow": 10,
+    "audio.seedPlantingSounds": false,
+    "audio.hoeTillingSounds": false,
+    "audio.bucketSounds": false,
+    "audio.boneMealSounds": false,
+    "interface.pauseToolsPosition": 0,
+    "interface.pauseMapButton": false,
+    "interface.pauseWaypointsButton": false,
+    "maps.circular": true,
+    "maps.destinationArrowColor": 5609983,
+    "maps.waypointTextSize": 75,
+    "maps.waypointDistanceScaling": true
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -397,6 +420,17 @@
     "maps.zoom": 1,
     "maps.footsteps": false,
     "maps.caveAbove": 10,
-    "maps.caveBelow": 10
+    "maps.caveBelow": 10,
+    "audio.seedPlantingSounds": false,
+    "audio.hoeTillingSounds": false,
+    "audio.bucketSounds": false,
+    "audio.boneMealSounds": false,
+    "interface.pauseToolsPosition": 0,
+    "interface.pauseMapButton": false,
+    "interface.pauseWaypointsButton": false,
+    "maps.circular": true,
+    "maps.destinationArrowColor": 5609983,
+    "maps.waypointTextSize": 75,
+    "maps.waypointDistanceScaling": true
   }
 }

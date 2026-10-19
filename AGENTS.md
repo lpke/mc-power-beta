@@ -168,7 +168,7 @@
   Opposing inputs cancel; stopping movement resets Toggle sprint.
 - WorldEdit selection/query commands use the reported camera position and current-view
   ray in Spectator/freecam. Keep rays loaded-terrain-only and separate from interaction
-  targets; freecam does not permit world mutations, navigation or inventory actions.
+  targets; explicit WorldEdit commands may edit or navigate with their normal individual permissions while freecam remains active. Physical world/inventory interactions remain blocked.
 - The locally ridden boat or minecart bypasses render frustum/occlusion culling only while
   that player owns the view. Keep other entities, visibility preferences, saved flags
   and physics unchanged; normal culling resumes immediately on dismount.
@@ -546,6 +546,9 @@
   Preserve native land collision, fluids, vehicles, flight and multiplayer authority.
   Modern defaults use a 1.3 speed multiplier, 0.2 horizontal jump impulse and native
   terrain dust with modern particle movement. Optional stamina/combat rules persist
-  in player NBT without changing the world rule. Each movement mode publishes
-  sprint state for its independent FOV preference; render code never polls keys.
+  in player NBT without changing the world rule. Ground, Creative and Spectator share sprint FOV enablement/amount; freecam retains its independent preference. Creative and every flight mode bypass stamina without resetting its saved state. Survival stamina icons follow native HUD geometry and avoid armor. Each movement mode publishes
+  sprint state; render code never polls keys.
   Boat interaction consumes a held boat's placement fallback without skipping native boarding.
+
+- Minimap frames use the retained reference atlas and seam-aware square/circle UVs through the native texture manager; keep frame mesh allocation off steady-state frames. In-world symbols stay anchored while aimed labels expand. Viewport updates must rotate missing tiles and admit bounded reloads before ready-first painting, without starving initial fill.
+- Waypoint abbreviations are optional stable per-waypoint data; preserve empty sets and legacy warp NBT. Shared destination color/opacity applies to maps, edge arrows and world labels. Color pickers confirm dirty exits and retain isolated RGB/opacity/swatches. Pause shortcuts initialize missing base values once with verified backups. Extra sounds use verified official assets and successful native action events only.

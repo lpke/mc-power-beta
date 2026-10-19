@@ -37,6 +37,7 @@ public abstract class DebugHudMixin {
     try { original.call(delta, focused, mx, my); }
     finally { DebugOverlay.capturing = false; }
     local.luke.power.hud.InfoHud.render(minecraft);
+    local.luke.power.sprint.SprintStaminaHud.render(minecraft);
     local.luke.power.map.Minimap.render(minecraft, delta);
     local.luke.power.map.WaypointMarkers.render(minecraft);
     if (!minecraft.options.debugHud) return;

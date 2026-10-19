@@ -10,16 +10,20 @@ import net.minecraft.util.math.Vec3d;
 /** A selection-only ray from the current view, without replacing the interaction target. */
 final class SelectionTarget {
   private SelectionTarget() {}
-  static Pos find(Minecraft mc) {
-    Vec3d start, direction;
+  static Vec3d origin(Minecraft mc) {
+    return DetachedCamera.isActive()
+        ? Vec3d.createCached(DetachedCamera.x(), DetachedCamera.y(), DetachedCamera.z())
+        : mc.player.method_931(1);
+  }
+  static Vec3d direction(Minecraft mc) {
     if (DetachedCamera.isActive()) {
-      start = Vec3d.createCached(DetachedCamera.x(), DetachedCamera.y(), DetachedCamera.z());
       double pitch = Math.toRadians(DetachedCamera.pitch()), yaw = Math.toRadians(DetachedCamera.yaw());
-      direction = Vec3d.createCached(Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
-    } else {
-      start = mc.player.method_931(1);
-      direction = mc.player.method_926(1);
+      return Vec3d.createCached(Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
     }
+    return mc.player.method_926(1);
+  }
+  static Pos find(Minecraft mc) {
+    Vec3d start = origin(mc), direction = direction(mc);
     double reach = mc.interactionManager.method_1715();
     for (Pos p : BlockRay.cells(start.x, start.y, start.z, direction.x, direction.y, direction.z, reach))
       if (!p.valid() || !mc.world.method_239(p.x(), p.y(), p.z())) return null;

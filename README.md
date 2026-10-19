@@ -26,7 +26,7 @@ improvements and optional tweaks in one searchable Options menu.
 - Creative and spectator modes, a mode picker, configurable reach, flight speed, drift and sprint, and adjustable spectator speed.
 - Creative item categories and a survival inventory view. Shift-click for full stacks, middle-drag to fill slots, and use a destroy slot or clear the inventory.
 - WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
-- Commands with completion, editable history and help, including teleportation, saved warps, world spawn, time, weather, spawning and item commands.
+- Commands with completion, editable history and help, including teleportation, saved waypoints, world spawn, time, weather, spawning and item commands.
 - Chat selection, copy/paste, cursor navigation, scrolling, configurable history and fade time, and preserved color across wrapped lines.
 - Death records with locations, causes and original inventory layouts. View lost items and recover them when the world allows it, including crafting inputs. Independent keep-inventory rule.
 - Free camera with adjustable speed, drag, collisions and separate player movement; free look, cinematic camera, field of view, adjustable third-person distance and front view.
@@ -80,7 +80,7 @@ Options changes global preferences. The Game rules tab changes the open singlepl
 world; from the main menu it edits Survival defaults and Cheat defaults for future
 worlds. Custom world creation lets you adjust those rules before starting. There is
 no shared Cheats switch or layer of world overrides. Turning a permission off hides
-its tools and controls while keeping saved items, warps and history.
+its tools and controls while keeping saved items, waypoints and history.
 
 Use `/gamerule <rule> [value]` to read or change a world rule. Both `fire_spread`
 and `doFireTick`, for example, refer to the same rule. `/gamerule help` lists the
@@ -105,7 +105,9 @@ Press **M** for the world map, **B** to create a waypoint and **U** to manage wa
 Drag the map to pan, scroll to zoom around the pointer, press **Home** to center,
 and right-click for waypoint, destination, coordinate and teleport actions. **G** opens
 coordinate navigation. Hold **Z** to enlarge the minimap; **I** and **O** change its zoom.
-All gameplay bindings can be changed in Controls.
+All gameplay bindings can be changed in Controls. `/waypoint` also adds, removes, lists
+and teleports to saved waypoints; `/way` and `/wp` are aliases. Teleporting uses the
+same world permission as the menus.
 
 Options > Map contains map switches, caves, waypoints and performance settings.
 Terrain updates per second controls sampling work; minimap movement, rotation and
@@ -137,8 +139,10 @@ activation uses Ctrl or a forward double tap, with modern acceleration, jump boo
 dust and sprint-hit knockback. Sprint stamina and combat contains optional stamina,
 recharge delays and combat limits that can balance it without adding a hunger system.
 These preferences apply across worlds that allow sprinting. Ground sprinting stays disabled in
-multiplayer. Sprint FOV effects have separate settings for ground, Creative,
-Spectator and freecam movement, and all default off. Their shared strength is in Camera > View.
+multiplayer. Ground, Creative and Spectator sprint share dynamic FOV and its amount in
+Gameplay > Sprinting; freecam has its own FOV preference. All start off. Creative and
+flight never consume stamina. Depleted Survival stamina appears as ten gold lightning
+icons beside the hotbar.
 
 ## Install
 

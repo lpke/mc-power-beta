@@ -51,7 +51,7 @@ final class DeathInventoryChecks {
         mc.player.inventory.armor[3] = tagged(306, 1, 11, "existing-helmet");
         var screen = open(mc, death, 320, 240); String before = inventory(mc); byte[] journal = Files.readAllBytes(path(mc));
         var output = ChatChecks.record(() -> bulk(screen));
-        check(output.stream().anyMatch(t -> t.contains("occupied") && t.contains("cancelled")), "missing conflict warning");
+        check(output.stream().anyMatch(t -> t.contains("occupied") && t.contains("canceled")), "missing conflict warning");
         check(before.equals(inventory(mc)) && Arrays.equals(journal, Files.readAllBytes(path(mc))), "conflict changed inventory or claim");
         mc.player.inventory.armor[3] = null; mc.player.inventory.main[0] = tagged(35, 1, 5, "saved-main");
         before = inventory(mc); click(screen, 0, 0);
@@ -89,16 +89,22 @@ final class DeathInventoryChecks {
         properties.allAllowed(true);
         clear(mc); mc.player.inventory.main[8] = tagged(35, 7, 5, "individual"); mc.player.inventory.main[20] = tagged(267, 1, 83, "remaining");
         mc.player.inventory.armor[3] = tagged(310, 1, 27, "remaining-helmet"); record(mc, "Individual fixture"); var death = latest(mc); clear(mc);
-        var screen = open(mc, death, 320, 240); click(screen, 8, 0); stack(mc.player.inventory.main[8], 35, 7, 5, "individual");
+        var screen = open(mc, death, 320, 240); int sounds = Release240Checks.clicks;
+        click(screen, 8, 0); check(Release240Checks.clicks == sounds + 1, "individual recovery omitted native click");
+        stack(mc.player.inventory.main[8], 35, 7, 5, "individual");
         String after = inventory(mc); click(screen, 8, 0); check(after.equals(inventory(mc)), "repeat GUI click duplicated stack");
         check(DeathTracker.journal(mc).state(death.id).equals("partial"), "partial state missing");
         properties.allAllowed(false); click(screen, 20, 0); check(after.equals(inventory(mc)), "cheats disable did not immediately lock viewer");
         properties.allAllowed(true);
         SettingsSnapshot.render(mc, screen, 320, 240, reports.resolve("partial-320.png"));
-        bulk(screen);
+        sounds = Release240Checks.clicks; bulk(screen);
+        check(Release240Checks.clicks == sounds + 1, "Recover all omitted native click");
         stack(mc.player.inventory.main[8], 35, 7, 5, "individual"); stack(mc.player.inventory.main[20], 267, 1, 83, "remaining");
         stack(mc.player.inventory.armor[3], 310, 1, 27, "remaining-helmet");
-        screen = open(mc, death, 640, 420); after = inventory(mc); click(screen, 39, 0); check(after.equals(inventory(mc)), "completed viewer allowed recovery"); mc.setScreen(null);
+        screen = open(mc, death, 640, 420); after = inventory(mc); click(screen, 39, 0); check(after.equals(inventory(mc)), "completed viewer allowed recovery");
+        sounds = Release240Checks.clicks;
+        ((ScreenInput)(Object)screen).power$click((screen.width - 176) / 2 + 20, (screen.height - 210) / 2 + 200, 0);
+        check(mc.currentScreen == null && Release240Checks.clicks == sounds + 1, "Close omitted native click or left the viewer open");
       });
       test("feature disable and player change close the viewer without recovering", () -> {
         var death = latest(mc); var screen = open(mc, death, 320, 240); String before = inventory(mc);

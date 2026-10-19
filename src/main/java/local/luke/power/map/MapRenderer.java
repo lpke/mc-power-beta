@@ -438,10 +438,17 @@ public final class MapRenderer {
                 style.color(), style.scale(), style.opacity());
             continue;
           }
-          diamond(p.x(), p.y(), point.colour, mini ? 2.5 : 4);
-          if (s.waypointNames && !mini)
-            mc.textRenderer.drawWithShadow(
-                point.name, (int) p.x() + 5, (int) p.y() - 4, point.colour);
+          int waypointColor = WaypointSymbols.color(point, s);
+          double waypointOpacity = WaypointSymbols.opacity(point, s);
+          if (waypointOpacity <= 0) continue;
+          WaypointSymbols.draw(mc, point, p.x(), p.y(), mini ? point.death ? 4 : 2.5 : 4.5,
+              waypointColor, waypointOpacity);
+          if (s.waypointNames && !point.death) {
+            String text = mini ? point.abbreviation() : MinimapArrows.destination(point)
+                ? point.x + "," + point.y + "," + point.z : point.name;
+            label(mc, view, circle, text, (int)p.x() + (mini ? 7 : 9), (int)p.y() - 4,
+                (int)Math.round(waypointOpacity * 255) << 24 | waypointColor);
+          }
         }
       if (s.radar && dimension == Maps.dimension())
         for (var entity : Maps.radar()) {

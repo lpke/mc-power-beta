@@ -47,6 +47,7 @@ public final class PowerBeta {
         if (local.luke.power.light.LightConfig.current().enabled) local.luke.power.light.LightConfig.toggle();
       });
       local.luke.power.death.DeathCommands.register();
+      local.luke.power.map.WaypointCommands.register();
       local.luke.power.commands.GameRuleCommand.register();
       local.luke.power.input.TweakIndicators.register(
           local.luke.power.input.TweakIndicators.Tweak.CINEMATIC_CAMERA,

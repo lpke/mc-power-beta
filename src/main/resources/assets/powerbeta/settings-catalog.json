@@ -2501,12 +2501,10 @@
   },
   "power_controls:userinterface.photoModeConfig.enablePhotoModeButton": {
     "page": "Interface",
-    "group": "General",
+    "group": "Pause menu",
     "label": "Photo mode button",
-    "description": "Enables the Photo Mode button in game menu",
-    "default": true,
-    "restart": false,
-    "order": 3
+    "description": "Show a painting button for photo mode in the pause menu.",
+    "order": 1
   },
   "power_compat:config.PARTICLES_CONFIG.disableAllParticles": {
     "page": "Video",
@@ -5554,7 +5552,7 @@
     "page": "Gameplay",
     "group": "Sprinting",
     "label": "Dynamic sprint FOV",
-    "description": "Smoothly widen the world view while sprinting on foot, using modern speed-based FOV. Does not affect the held-item projection.",
+    "description": "Smoothly widen the view while sprinting on foot or in Creative/Spectator flight. Uses Sprint FOV amount and preserves the transition between ground and flight. Freecam has its own independent preference.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5591,14 +5589,14 @@
     "order": 21
   },
   "sprint.fovStrength": {
-    "page": "Camera",
-    "group": "View",
-    "label": "Sprint FOV strength",
-    "description": "Shared strength of enabled ground, Creative, Spectator and freecam sprint FOV effects. Zero keeps the normal field of view.",
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Sprint FOV amount",
+    "description": "Strength of ground and Creative/Spectator flight sprint FOV. Lower values reduce the view change; 100% uses the modern speed response. Freecam is independent.",
     "min": 0.0,
     "max": 100.0,
     "step": 5.0,
-    "order": 22,
+    "order": 18.5,
     "unit": "%"
   },
   "maps.updateRate": {
@@ -5939,8 +5937,8 @@
   "maps.destinationArrowColor": {
     "page": "Interface",
     "group": "Minimap",
-    "label": "Destination arrow color",
-    "description": "Color of the destination arrow at the minimap edge.",
+    "label": "Destination color",
+    "description": "Color of the destination on the minimap, world map, edge arrow and in-world label. Opacity applies to all four views.",
     "min": 0,
     "max": 16777215,
     "step": 1,
@@ -5958,5 +5956,98 @@
     "unit": "%",
     "displayDivisor": 0.01,
     "displayPrecision": 0
+  },
+  "audio.seedPlantingSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Seed planting sounds",
+    "description": "Play crop planting sounds after planting seeds in singleplayer. Uses the Blocks sound volume.",
+    "order": 9,
+    "default": false
+  },
+  "audio.hoeTillingSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Hoe tilling sounds",
+    "description": "Use modern hoe sounds after tilling soil in singleplayer. Uses the Blocks sound volume.",
+    "order": 10,
+    "default": false
+  },
+  "audio.bucketSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Bucket sounds",
+    "description": "Play water and lava bucket sounds and cow milking sounds in singleplayer. Uses Blocks or Passive creatures volume.",
+    "order": 11,
+    "default": false
+  },
+  "audio.boneMealSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Bone meal sounds",
+    "description": "Play bone meal sounds after fertilizing plants in singleplayer. Uses the Blocks sound volume.",
+    "order": 12,
+    "default": false
+  },
+  "interface.pauseToolsPosition": {
+    "page": "Interface",
+    "group": "Pause menu",
+    "label": "Tool buttons position",
+    "description": "Place the photo, map and waypoint buttons together in the pause menu.",
+    "min": 0,
+    "max": 8,
+    "step": 1,
+    "order": 0,
+    "choices": [
+      "Above Back to game",
+      "Top left",
+      "Top center",
+      "Top right",
+      "Middle left",
+      "Middle right",
+      "Bottom left",
+      "Bottom center",
+      "Bottom right"
+    ]
+  },
+  "interface.pauseMapButton": {
+    "page": "Interface",
+    "group": "Pause menu",
+    "label": "Map button",
+    "description": "Show a map item button in the pause menu while the World Map is enabled.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 2
+  },
+  "interface.pauseWaypointsButton": {
+    "page": "Interface",
+    "group": "Pause menu",
+    "label": "Waypoints button",
+    "description": "Show a diamond button for saved waypoints in the pause menu.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 3
+  },
+  "maps.waypointTextSize": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "In-world waypoint size",
+    "description": "Size of in-world waypoint icons, abbreviations and distance labels. Smaller values keep markers compact; larger values make distant labels easier to read.",
+    "order": 20,
+    "min": 50,
+    "max": 150,
+    "step": 5,
+    "unit": "%",
+    "default": 75
+  },
+  "maps.waypointDistanceScaling": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "Scale distant waypoint labels",
+    "description": "Gradually reduce distant world labels to 65% of their selected size. Looking at a marker expands its abbreviation into its full name.",
+    "order": 21,
+    "default": true
   }
 }

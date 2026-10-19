@@ -10,6 +10,8 @@ public final class MenuPreferences {
   public static final class Values {
     public boolean autoApply = true;
     public boolean pauseToOptions, blinkingChatCursor = true;
+    public int pauseToolsPosition;
+    public boolean pauseMapButton = true, pauseWaypointsButton = true;
     public boolean blinkingUiCursor = true;
     public boolean hidePowerBetaVersion;
     public boolean debugTimeOfDay, useFeetYCoordinates = true;
@@ -23,6 +25,8 @@ public final class MenuPreferences {
     public List<String> colours = new ArrayList<>();
 
     public void validate() {
+      if (pauseToolsPosition < 0 || pauseToolsPosition >= PauseToolsLayout.POSITIONS.size())
+        throw new IllegalArgumentException("Invalid pause tool button position");
       if (colours == null || colours.size() > 16)
         throw new IllegalArgumentException("Save up to 16 colors");
       colours.forEach(LightSettings::rgb);
@@ -39,6 +43,8 @@ public final class MenuPreferences {
 
   private static Values current = load();
   private static Boolean pausePreview;
+  private static Integer pauseToolsPreview;
+  private static Boolean pauseMapPreview, pauseWaypointsPreview;
   private static Boolean blinkPreview, uiBlinkPreview;
   private static String debugColorPreview;
   private static Boolean debugTimePreview;
@@ -81,6 +87,12 @@ public final class MenuPreferences {
   public static void previewPause(boolean enabled) {
     pausePreview = enabled;
   }
+  public static int pauseToolsPosition() { return pauseToolsPreview == null ? current.pauseToolsPosition : pauseToolsPreview; }
+  public static boolean pauseMapButton() { return pauseMapPreview == null ? current.pauseMapButton : pauseMapPreview; }
+  public static boolean pauseWaypointsButton() { return pauseWaypointsPreview == null ? current.pauseWaypointsButton : pauseWaypointsPreview; }
+  public static void previewPauseTools(int position) { pauseToolsPreview = position; }
+  public static void previewPauseMap(boolean enabled) { pauseMapPreview = enabled; }
+  public static void previewPauseWaypoints(boolean enabled) { pauseWaypointsPreview = enabled; }
 
   public static boolean blinkingUiCursor() { return uiBlinkPreview == null ? current.blinkingUiCursor : uiBlinkPreview; }
   public static void previewUiBlink(boolean enabled) { uiBlinkPreview = enabled; syncPresentation(); }

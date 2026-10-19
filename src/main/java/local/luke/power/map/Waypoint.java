@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public final class Waypoint {
   public String id, name = "Waypoint", set = "Default";
+  public String abbreviation = "";
 
   public Waypoint() {
     this(UUID.randomUUID().toString());
@@ -22,6 +23,11 @@ public final class Waypoint {
       throw new IllegalArgumentException("Invalid waypoint ID");
     text(name, 64);
     text(set, 48);
+    if (abbreviation != null && !abbreviation.isEmpty()
+        && (abbreviation.codePointCount(0, abbreviation.length()) > 4
+            || abbreviation.codePoints().anyMatch(c -> Character.isWhitespace(c) || Character.isSpaceChar(c) || Character.isISOControl(c)
+                || Character.getType(c) == Character.FORMAT || Character.getType(c) == Character.SURROGATE || c == 167)))
+      throw new IllegalArgumentException("Use up to 4 printable abbreviation characters, without spaces");
     if (Math.abs((long) x) > MapMath.BORDER
         || Math.abs((long) z) > MapMath.BORDER
         || y < 0
@@ -46,6 +52,7 @@ public final class Waypoint {
     result.id = id;
     result.name = name;
     result.set = set;
+    result.abbreviation = abbreviation;
     result.x = x;
     result.y = y;
     result.z = z;
@@ -70,6 +77,14 @@ public final class Waypoint {
         && (global
             || settings.waypointDistance == 0
             || distance(px, pz) <= settings.waypointDistance);
+  }
+
+  /** An empty optional value follows the current name, including legacy saved waypoints. */
+  public String abbreviation() {
+    if (abbreviation != null && !abbreviation.isEmpty()) return abbreviation;
+    if (name == null || name.isBlank()) return "?";
+    String plain = name.strip();
+    return plain.substring(0, plain.offsetByCodePoints(0, 1)).toUpperCase(java.util.Locale.ROOT);
   }
 
   public String coordinates() {

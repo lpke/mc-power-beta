@@ -11,7 +11,6 @@ class WaypointListLayoutTest {
       assertTrue(layout.width() <= size[1] * 16 / 9 - 16);
       assertTrue(layout.width() <= 600);
       assertTrue(layout.searchWidth() <= 400);
-      assertTrue(layout.actionWidth() <= 150);
       assertTrue(layout.left() >= 8);
       assertTrue(layout.right() <= size[0] - 8);
       assertTrue(layout.searchWidth() >= 100);
@@ -20,9 +19,9 @@ class WaypointListLayoutTest {
       assertEquals(layout.right(), layout.filterX() + layout.filterWidth());
       assertEquals(layout.createX() - 4, layout.left() + layout.setWidth());
       assertEquals(layout.right(), layout.createX() + layout.createWidth());
-      assertTrue(layout.actionWidth() >= 70);
-      assertTrue(layout.actionX(3) + layout.actionWidth() <= layout.right());
       assertTrue(layout.listBottom() > layout.listTop());
+      assertEquals(size[1] - 32, layout.listBottom());
+      assertTrue(layout.sortWidth() >= 96, "Sort: Distance fits without crowding search");
       for (int count : new int[] {1, 12, 8192}) {
         int visible = layout.setRows(size[1], count);
         assertTrue(visible > 0 && visible <= count);
@@ -38,7 +37,6 @@ class WaypointListLayoutTest {
       assertEquals(600, wide.width());
       assertEquals(normal.searchWidth(), wide.searchWidth());
       assertEquals(normal.setWidth(), wide.setWidth());
-      assertEquals(normal.actionWidth(), wide.actionWidth());
       assertTrue(wide.left() > normal.left());
       assertEquals(size[0], wide.left() * 2 + wide.width(), 1);
     }

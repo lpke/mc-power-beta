@@ -89,7 +89,7 @@ class MapRenderingTest {
   }
 
   @Test
-  void smallerLevelsAverageAlreadyShadedPixelsAndKeepRawColorMode() {
+  void smallerLevelsAverageShadedPixelsAndIgnoreRetiredShadingSwitches() {
     var tile = new MapTile(new MapMath.Key(0, -1, 0, 0, 0));
     for (int z = 0; z < 4; z++)
       for (int x = 0; x < 4; x++) tile.put(z * 64 + x, 0x808080, 0x606060, 64 + z % 2, 15, 1, 0);
@@ -107,7 +107,7 @@ class MapRenderingTest {
     settings.heightShading = false;
     assertEquals(0xff000000 | expected, parent.color(0, settings));
     settings.slopeShading = false;
-    assertEquals(0xff808080, parent.color(0, settings));
+    assertEquals(0xff000000 | expected, parent.color(0, settings));
     assertFalse(parent.merge(tile));
   }
 

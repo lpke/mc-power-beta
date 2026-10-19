@@ -9,7 +9,7 @@ import org.lwjgl.opengl.GL11;
 
 /** Projection uses the current world render matrices, including freecam, FOV and third person. */
 public final class WaypointMarkers {
-  private record Label(float x, float y, String text, int color) {}
+  private record Label(float x, float y, String text, int color, Waypoint point, double distance) {}
 
   private static final FloatBuffer MODEL = BufferUtils.createFloatBuffer(16),
       PROJECTION = BufferUtils.createFloatBuffer(16);
@@ -21,7 +21,7 @@ public final class WaypointMarkers {
   private static boolean captureBob;
   private static boolean eligible(Minecraft mc) {
     return MapConfig.current().worldWaypoints && mc.world != null && mc.player != null
-        && !mc.options.hideHud && mc.currentScreen == null && Maps.waypoints() != null && !Maps.points().isEmpty();
+        && !mc.options.hideHud && (mc.currentScreen == null || mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen) && Maps.waypoints() != null && !Maps.points().isEmpty();
   }
   public static void beginCamera(Minecraft mc) {
     CAMERA.reset();
@@ -53,28 +53,35 @@ public final class WaypointMarkers {
     }
     GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, PROJECTION);
     GL11.glGetInteger(GL11.GL_VIEWPORT, VIEWPORT);
+    double cx = bx, cy = by, cz = bz;
+    if (local.luke.power.input.RenderedView.valid(mc.world, camera)) {
+      cx = local.luke.power.input.RenderedView.x();
+      cy = local.luke.power.input.RenderedView.y();
+      cz = local.luke.power.input.RenderedView.z();
+    } else if (local.luke.power.input.DetachedCamera.isActive()) {
+      cx = local.luke.power.input.DetachedCamera.x();
+      cy = local.luke.power.input.DetachedCamera.y();
+      cz = local.luke.power.input.DetachedCamera.z();
+    }
     for (Waypoint p : Maps.points()) {
       if (LABELS.size() >= 256) break;
-      if (!p.visible(
-          Maps.dimension(), store.selectedSet(), store.allSets(), Maps.x(), Maps.z(), settings))
-        continue;
+      if (p.death && !settings.deathpoints) continue;
+      if (MinimapArrows.destination(p)) {
+        if (!p.enabled || p.dimension != Maps.dimension()) continue;
+      } else if (!p.visible(Maps.dimension(), store.selectedSet(), store.allSets(), Maps.x(), Maps.z(), settings)) continue;
       var projected = WaypointProjection.project(p.x + .5 - bx, p.y + 1 - by,
           p.z + .5 - bz, MODEL, PROJECTION);
       if (projected == null) continue;
-      String text =
-          (settings.waypointNames ? p.name : "◆")
-              + (settings.waypointDistances
-                  ? " " + Math.round(p.distance(Maps.x(), Maps.z())) + "m"
-                  : "");
-      LABELS.add(
-          new Label(
-              (float) ((VIEWPORT.get(0) + projected.x() * VIEWPORT.get(2)) / mc.displayWidth),
-              (float) (1 - (VIEWPORT.get(1) + projected.y() * VIEWPORT.get(3)) / mc.displayHeight), text, p.colour));
+      double dx = p.x + .5 - cx, dy = p.y + 1 - cy, dz = p.z + .5 - cz;
+      LABELS.add(new Label(
+          (float)((VIEWPORT.get(0) + projected.x() * VIEWPORT.get(2)) / mc.displayWidth),
+          (float)(1 - (VIEWPORT.get(1) + projected.y() * VIEWPORT.get(3)) / mc.displayHeight),
+          p.name, WaypointSymbols.color(p, settings), p, Math.sqrt(dx * dx + dy * dy + dz * dz)));
     }
   }
 
   public static void render(Minecraft mc) {
-    if (world != mc.world || mc.options.hideHud || mc.currentScreen != null) return;
+    if (world != mc.world || mc.options.hideHud || mc.currentScreen != null && !(mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen)) return;
     var size = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
     int w = size.method_1857(), h = size.method_1858();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -88,14 +95,37 @@ public final class WaypointMarkers {
       GL11.glEnable(GL11.GL_ALPHA_TEST);
       GL11.glAlphaFunc(GL11.GL_GREATER, 0.01f);
       GL11.glColor4f(1, 1, 1, 1);
-      for (Label label : LABELS)
-        if (label.x > 0 && label.x < 1 && label.y > 0 && label.y < 1)
-          {
-            GL11.glPushMatrix();
-            GL11.glTranslated(label.x * w - mc.textRenderer.getWidth(label.text) / 2d, label.y * h, 0);
-            mc.textRenderer.drawWithShadow(label.text, 0, 0, label.color);
-            GL11.glPopMatrix();
+      Label aimed = null;
+      double closest = 81;
+      for (Label label : LABELS) {
+        if (WaypointSymbols.opacity(label.point, MapConfig.current()) <= 0) continue;
+        double dx = (label.x - .5) * w, dy = (label.y - .5) * h;
+        double distance = dx * dx + dy * dy;
+        if (distance < closest) { closest = distance; aimed = label; }
+      }
+      var settings = MapConfig.current();
+      for (Label label : LABELS) {
+        if (label.x <= 0 || label.x >= 1 || label.y <= 0 || label.y >= 1) continue;
+        double opacity = WaypointSymbols.opacity(label.point, settings);
+        if (opacity <= 0) continue;
+        var content = WaypointLabel.of(label.point, settings, label == aimed, label.distance,
+            label.point.distance(Maps.x(), Maps.z()));
+        double scale = content.scale();
+        GL11.glPushMatrix();
+        try {
+          GL11.glTranslated(label.x * w, label.y * h, 0);
+          GL11.glScaled(scale, scale, 1);
+          WaypointSymbols.draw(mc, label.point, 0, 0, 4.5, label.color, opacity);
+          int color = (int)Math.round(opacity * 255) << 24 | label.color;
+          if (!content.name().isEmpty()) mc.textRenderer.drawWithShadow(content.name(), 9, -4, color);
+          if (!content.distance().isEmpty()) {
+            int distanceWidth = mc.textRenderer.getWidth(content.distance());
+            int distanceX = MinimapArrows.destination(label.point)
+                ? 9 + (mc.textRenderer.getWidth(content.name()) - distanceWidth) / 2 : -distanceWidth / 2;
+            mc.textRenderer.drawWithShadow(content.distance(), distanceX, 7, color);
           }
+        } finally { GL11.glPopMatrix(); }
+      }
     } finally {
       GL11.glPopAttrib();
     }

@@ -4,6 +4,10 @@ import java.util.*;
 
 public final class AudioSettings {
   public boolean redstonePlacementSound = true;
+  public boolean seedPlantingSounds = false;
+  public boolean hoeTillingSounds = false;
+  public boolean bucketSounds = false;
+  public boolean boneMealSounds = false;
   public enum MusicMode {
     VANILLA,
     ALPHA_BETA_SURVIVAL,
@@ -136,6 +140,10 @@ public final class AudioSettings {
           : "hostile";
     }
     if (id.startsWith("step.")
+        || id.equals("item.crop.plant")
+        || id.equals("item.hoe.till")
+        || id.startsWith("item.bucket.")
+        || id.equals("item.bone_meal.use")
         || id.startsWith("dig.")
         || id.startsWith("tile.")
         || id.startsWith("fire.")

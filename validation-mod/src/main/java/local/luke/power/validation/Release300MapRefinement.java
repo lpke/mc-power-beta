@@ -104,9 +104,30 @@ public final class Release300MapRefinement {
       }
       int fineFrames = settle(mc, canvas, buffer, panned, dimension, settings, 0);
       int knownPixel = canvas.rgb(32, 64);
-      color(knownPixel, FINE, "surveyed fine terrain did not replace its coarse aggregate");
+      color(knownPixel, 0x38d5a1, "surveyed fine terrain did not replace its coarse aggregate");
       int[] unknownPixels = {canvas.rgb(96, 48), canvas.rgb(96, 64), canvas.rgb(112, 80)};
       for (int pixel : unknownPixels) color(pixel, BACKGROUND, "unexplored fine terrain retained coarse/frame-copy pixels after settling");
+      Object active = field(WorldMapBuffer.class, "active").get(buffer);
+      var change = active.getClass().getDeclaredMethod("changed", MapMath.Key.class);
+      change.setAccessible(true);
+      int missing = 0;
+      var visibleKey = new MapMath.Key(dimension, -1, 0, 1, 0);
+      for (var key : fineLoads.keySet()) {
+        if (key.equals(visibleKey) || missing >= 12) continue;
+        resident.remove(key); loading.put(key, new CompletableFuture<>());
+        change.invoke(active, key); missing++;
+      }
+      var replacement = new MapTile(visibleKey);
+      for (int z = 24; z <= 40; z++) for (int x = 72; x <= 88; x++)
+        replacement.put(MapMath.index(x, z), 0x4679e1, 0x4679e1, 64, 15, 1, 0);
+      resident.put(visibleKey, persisted(replacement)); change.invoke(active, visibleKey);
+      int changedFrames = 0;
+      for (; changedFrames < 8; changedFrames++) {
+        frame(mc, canvas, buffer, panned, dimension, settings, 1);
+        if (canvas.rgb(32, 64) == 0x4b85ff) break;
+      }
+      color(canvas.rgb(32, 64), 0x4b85ff, "stationary visible update stalled behind missing tiles with one upload per frame");
+      log("300 STATIONARY visible-update frames=" + (changedFrames + 1) + " missing-prefix=" + missing + " uploads-per-frame=1");
       check(MapIO.submitted() == submissions, "synthetic refinement submitted real map storage work");
       check(GL11.glGetError() == GL11.GL_NO_ERROR, "native refinement pixel check produced an OpenGL error");
       log("300 REFINEMENT coarseLevel=6 fineLevel=0 panWhilePending=true coarseFrames=" + coarseFrames
@@ -156,11 +177,15 @@ public final class Release300MapRefinement {
   }
   private static void frame(Minecraft mc, Canvas canvas, WorldMapBuffer buffer, MapProjection view,
       int dimension, MapSettings settings) throws Exception {
+    frame(mc, canvas, buffer, view, dimension, settings, 16);
+  }
+  private static void frame(Minecraft mc, Canvas canvas, WorldMapBuffer buffer, MapProjection view,
+      int dimension, MapSettings settings, int uploads) throws Exception {
     canvas.bind(); MapRenderer.beginFrame(1);
     // This 256px offscreen target intentionally sits below Beta's minimum GUI window.
     // Its known 2x projection owns the physical scale, independently of ScreenScaler's clamp.
     field(MapRenderer.class, "pixelsPerUnit").setDouble(null, 2);
-    MapRenderer.uploadBudget(16);
+    MapRenderer.uploadBudget(uploads);
     check(buffer.draw(mc, view, dimension, -1, settings), "native WorldMapBuffer fell back instead of rendering");
   }
   private static String hex(int value) { return String.format(Locale.ROOT, "#%06X", value & 0xffffff); }

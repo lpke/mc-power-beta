@@ -251,8 +251,9 @@ final class Release300RereleaseChecks {
         JsonElement before = color.value.deepCopy(), oldAlpha = alpha.value.deepCopy(), oldSwatches = swatches.value.deepCopy();
         int[] accepted = {0};
         var picker = new ColourScreen(options, color, alpha, () -> accepted[0]++, swatches); open(mc, picker, size);
+        check(((Number)get(picker, "tab")).intValue() == 0, "Color wheel is not the default tab");
         ((TextInput)get(picker, "hex")).setText("#2468AC"); call(picker, "parse");
-        tab(picker, 1); check(((Number)get(picker, "color")).intValue() == 0x2468ac, "wheel discarded RGBA hex");
+        tab(picker, 0); check(((Number)get(picker, "color")).intValue() == 0x2468ac, "wheel discarded RGBA hex");
         slider(picker, 3, .35);
         check(Math.abs(ColorSettings.opacityPercent((Setting)get(picker, "localOpacity")) - 35) < 1, "wheel opacity did not edit local alpha");
         Object bounds = call(picker, "wheelBounds");
@@ -260,23 +261,25 @@ final class Release300RereleaseChecks {
         click(picker, x, y, 0); release(picker, x, y);
         int selected = ((Number)get(picker, "color")).intValue();
         check(selected != 0x2468ac && ((TextInput)get(picker, "hex")).text().equalsIgnoreCase(ColorSettings.hex(selected)), "wheel selection failed to update shared hex");
-        tab(picker, 0); check(((Number)get(picker, "color")).intValue() == selected, "RGBA discarded wheel selection");
+        tab(picker, 1); check(((Number)get(picker, "color")).intValue() == selected, "RGBA discarded wheel selection");
         slider(picker, 0, .8);
         selected = ((Number)get(picker, "color")).intValue();
-        tab(picker, 1);
+        tab(picker, 0);
         check(((Number)get(picker, "color")).intValue() == selected
             && ((TextInput)get(picker, "hex")).text().equalsIgnoreCase(ColorSettings.hex(selected)), "RGBA slider and wheel disagree");
         check(Math.abs(ColorSettings.opacityPercent((Setting)get(picker, "localOpacity")) - 35) < 1, "tab switch discarded local alpha");
         check(field(ColourScreen.class, "PREVIEW").getInt(null) == 36
             && number(picker, "tabsY") - number(picker, "previewY") == 42
             && number(picker, "bodyTop") < number(picker, "bodyBottom"), "small color layout lost 36px preview/body");
-        draw(mc, picker); tab(picker, 0); draw(mc, picker);
+        draw(mc, picker); tab(picker, 1); draw(mc, picker);
         click(picker, picker.width / 2 + 52, picker.height - 18, 0);
+        check(mc.currentScreen == picker && (boolean)call(get(picker, "exit"), "active"), "dirty color Cancel missed confirmation");
+        click(picker, picker.width / 2, picker.height / 2 + 18, 0);
         check(mc.currentScreen == options && accepted[0] == 0 && color.value.equals(before)
             && alpha.value.equals(oldAlpha) && swatches.value.equals(oldSwatches), "color Cancel published RGB, alpha or swatches");
         picker = new ColourScreen(options, color, alpha, () -> accepted[0]++, swatches); open(mc, picker, size);
-        tab(picker, 1); ((TextInput)get(picker, "hex")).setText("#13579B"); call(picker, "parse");
-        slider(picker, 3, .42); tab(picker, 0); key(picker, Keyboard.KEY_RETURN);
+        tab(picker, 0); ((TextInput)get(picker, "hex")).setText("#13579B"); call(picker, "parse");
+        slider(picker, 3, .42); tab(picker, 1); key(picker, Keyboard.KEY_RETURN);
         check(mc.currentScreen == options && accepted[0] == 1 && ColorSettings.rgb(color) == 0x13579b
             && Math.abs(ColorSettings.opacityPercent(alpha) - 42) < 1, "Done did not accept shared hex and alpha together");
       } finally { options.session().discard(); }

@@ -1,13 +1,8 @@
 package local.luke.power.controls.mixin.tweaks.photomode;
 
-import local.luke.power.controls.ControlFeatures;
-import local.luke.power.controls.tweaks.photomode.PhotoModeScreen;
-import local.luke.power.controls.util.gui.CustomButtonWidget;
 import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -31,15 +26,5 @@ public class GameMenuScreenMixin extends Screen {
         // Remove the empty vanilla row while retaining the normal button spacing.
         if (statistics != null) options.y = statistics.y + 24;
         if (quit != null) quit.y = options.y + 24;
-        if (ControlFeatures.USER_INTERFACE_CONFIG.photoModeConfig.enablePhotoModeButton)
-            this.buttons.add(new CustomButtonWidget(20, options.x + 204, options.y,
-                    20, 20, new ItemStack(Item.PAINTING)));
-    }
-
-    @Inject(method = "buttonClicked", at = @At("HEAD"))
-    private void onActionPerformed(ButtonWidget button, CallbackInfo ci) {
-        if (button.id == 20) {
-            minecraft.setScreen(new PhotoModeScreen(this));
-        }
     }
 }

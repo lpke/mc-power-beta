@@ -272,7 +272,7 @@ public final class ModernCommandChecks {
                     "spawnpoint",
                     "setworldspawn",
                     "gamemode",
-                    "warp")) run(mc, "/help " + command);
+                    "waypoint")) run(mc, "/help " + command);
           });
       test(
           "permission rules and aliases fail closed without changing world or inventory",

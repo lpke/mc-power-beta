@@ -20,7 +20,7 @@ public final class ActiveTweaks {
   }
   public static void render(Minecraft mc) {
     if (mc.world == null || mc.player == null || mc.player.dead || mc.player.health <= 0
-        || mc.options.hideHud || mc.currentScreen != null) return;
+        || mc.options.hideHud || mc.currentScreen != null && !(mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen)) return;
     StatusSettings settings = StatusConfig.current();
     List<String> lines = lines(settings);
     if (lines.isEmpty()) return;

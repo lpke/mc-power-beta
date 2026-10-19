@@ -24,6 +24,12 @@ public final class WorldMapScreen extends UiScreen {
   private String message = "";
   private MapSettings styleSource, worldStyle;
 
+  public WorldMapScreen() {}
+  public WorldMapScreen(Waypoint point) {
+    view.x = point.x + .5; view.z = point.z + .5;
+    dimension = point.dimension;
+  }
+
   private MapSettings worldStyle() {
     if (styleSource != MapConfig.current()) {
       styleSource = MapConfig.current();
@@ -83,7 +89,9 @@ public final class WorldMapScreen extends UiScreen {
       actions.add(saved ? "Edit waypoint" : "Create waypoint");
       if (saved) actions.add(System.nanoTime() < deleteUntil ? "Confirm delete?" : "Delete waypoint");
     }
-    actions.addAll(List.of("Copy coordinates", "Teleport", "Center here", "Set destination"));
+    actions.add("Copy coordinates");
+    if (Maps.canTeleport(minecraft, target)) actions.add("Teleport");
+    actions.add("Set destination");
     return actions;
   }
 
@@ -103,7 +111,6 @@ public final class WorldMapScreen extends UiScreen {
       case "Teleport" -> {
         if (Maps.canTeleport(minecraft, target)) { Maps.teleport(minecraft, target); minecraft.setScreen(null); }
       }
-      case "Center here" -> { view.x = target.x + .5; view.z = target.z + .5; }
       case "Set destination" -> { Maps.destination(target); minecraft.setScreen(null); }
     }
   }

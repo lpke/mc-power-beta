@@ -70,6 +70,12 @@ public final class Validation {
       else if (command.equals("release-253")) Release253Checks.run(mc);
       else if (command.startsWith("release-260 ")) Release260Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-261 ")) Release261Checks.run(mc,command.substring(12));
+      else if (command.equals("release-300-freecam-commands")) Release300FreecamCommandsChecks.run(mc);
+      else if (command.equals("release-300-exact-frames")) Release300FrameChecks.run(mc);
+      else if (command.equals("release-300-sprint-polish")) Release300SprintPolishChecks.run(mc);
+      else if (command.equals("release-300-ui-polish")) Release300UiPolishChecks.check(mc);
+      else if (command.equals("release-300-waypoint-polish")) Release300WaypointPolishChecks.run(mc);
+      else if (command.equals("release-300-extra-sounds")) Release300ExtraSoundsChecks.run(mc);
       else if (command.equals("release-300-rerelease") || command.startsWith("release-300-rerelease "))
         Release300RereleaseChecks.run(mc, command.substring("release-300-rerelease".length()).trim());
       else if (command.startsWith("release-300 ")) Release300Checks.run(mc,command.substring(12));

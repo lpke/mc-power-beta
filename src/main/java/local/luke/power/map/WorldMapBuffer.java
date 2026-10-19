@@ -23,7 +23,7 @@ public final class WorldMapBuffer {
     long sweepCount;
     final ArrayDeque<MapMath.Key> requests = new ArrayDeque<>();
     final ArrayDeque<MapMath.Key> resident = new ArrayDeque<>();
-    final LinkedHashSet<MapMath.Key> changed = new LinkedHashSet<>();
+    final MapRefreshQueue changed = new MapRefreshQueue();
     final Consumer<MapMath.Key> listener = this::changed;
     final MapCache source;
     final int dimension, layer;
@@ -105,9 +105,12 @@ public final class WorldMapBuffer {
       else { cursor = completed = 0; visibleArea = 0; changed.clear(); }
     }
 
-    void paint(Minecraft mc, MapSettings settings, long deadline) {
+    void paint(Minecraft mc, MapSettings settings, MapProjection requested, long deadline) {
       if (resident.isEmpty() && requests.isEmpty() && cursor >= sweepCount && changed.isEmpty()) return;
       bind();
+      changed.requestMissing(k -> source.peek(k) != null, source::visible);
+      boolean updatesFirst = changed.updatesFirst(!resident.isEmpty() || !requests.isEmpty() || cursor < sweepCount);
+      if (updatesFirst) paintChanges(mc, settings, requested, deadline, 2);
       // Show nearby terrain at the requested detail before issuing more disk reads.
       for (int i = 0; i < 16 && !resident.isEmpty() && System.nanoTime() < deadline; i++) {
         if (source.peek(resident.peekFirst()) == null) { resident.removeFirst(); continue; }
@@ -136,9 +139,14 @@ public final class WorldMapBuffer {
           visibleArea += Math.max(0, x1 - x0) * Math.max(0, z1 - z0);
         } else requests.addLast(key);
       }
-      var iterator = changed.iterator();
-      for (int i = 0; i < 8 && iterator.hasNext() && System.nanoTime() < deadline; i++) {
-        if (paintTile(iterator.next(), mc, settings)) iterator.remove();
+      paintChanges(mc, settings, requested, deadline, updatesFirst ? 6 : 8);
+    }
+
+    void paintChanges(Minecraft mc, MapSettings settings, MapProjection requested, long deadline, int maximum) {
+      for (int i = 0; i < maximum && !changed.isEmpty() && System.nanoTime() < deadline; i++) {
+        var key = changed.take(k -> source.peek(k) != null, requested);
+        if (key == null) break;
+        if (!paintTile(key, mc, settings)) { changed.add(key); break; }
       }
     }
 
@@ -278,8 +286,8 @@ public final class WorldMapBuffer {
       var filling = pending != null ? pending : active;
       if (filling != null) source.visibleView(dimension, layer, filling.bounds);
       source.publish(4, deadline);
-      if (pending != null) pending.paint(mc, settings, deadline);
-      else if (active != null) active.paint(mc, settings, deadline);
+      if (pending != null) pending.paint(mc, settings, view, deadline);
+      else if (active != null) active.paint(mc, settings, view, deadline);
       if (pending != null && pending.ready() && pending.contains(view)) {
         spare = active;
         active = pending; pending = null;

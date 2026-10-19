@@ -15,6 +15,14 @@ public final class AudioBackend implements Backend {
     add("redstonePlacementSound", "Extra sounds", "Redstone placement sound", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.redstonePlacementSound), new JsonPrimitive(new AudioSettings().redstonePlacementSound),
         "Play the stone placement sound when placing redstone dust. Uses the Blocks sound volume.", List.of());
+    extra("seedPlantingSounds", "Seed planting sounds", s.seedPlantingSounds,
+        "Play crop planting sounds after planting seeds in singleplayer. Uses the Blocks sound volume.");
+    extra("hoeTillingSounds", "Hoe tilling sounds", s.hoeTillingSounds,
+        "Use modern hoe sounds after tilling soil in singleplayer. Uses the Blocks sound volume.");
+    extra("bucketSounds", "Bucket sounds", s.bucketSounds,
+        "Play water and lava bucket sounds and cow milking sounds in singleplayer. Uses Blocks or Passive creatures volume.");
+    extra("boneMealSounds", "Bone meal sounds", s.boneMealSounds,
+        "Play bone meal sounds after fertilizing plants in singleplayer. Uses the Blocks sound volume.");
     add(
         "master",
         "Volume",
@@ -223,6 +231,11 @@ public final class AudioBackend implements Backend {
     s.add(b, b.entries);
   }
 
+  private void extra(String key, String label, boolean value, String description) {
+    add(key, "Extra sounds", label, Setting.Kind.BOOLEAN, new JsonPrimitive(value),
+        new JsonPrimitive(false), description, List.of());
+  }
+
   public String id() {
     return "audio";
   }
@@ -252,6 +265,10 @@ public final class AudioBackend implements Backend {
       } else
         switch (key) {
           case "redstonePlacementSound" -> s.redstonePlacementSound = v.getAsBoolean();
+          case "seedPlantingSounds" -> s.seedPlantingSounds = v.getAsBoolean();
+          case "hoeTillingSounds" -> s.hoeTillingSounds = v.getAsBoolean();
+          case "bucketSounds" -> s.bucketSounds = v.getAsBoolean();
+          case "boneMealSounds" -> s.boneMealSounds = v.getAsBoolean();
           case "exclusions" -> { }
           case "presetTrackPool" -> { }
           case "preset" -> s.preset = v.getAsString();

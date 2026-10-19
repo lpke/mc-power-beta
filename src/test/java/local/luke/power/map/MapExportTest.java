@@ -50,6 +50,8 @@ class MapExportTest {
     var settings = new MapSettings();
     settings.heightShading = false;
     settings.slopeShading = false;
+    // Retired shading preferences remain readable, but exports always use the shaded terrain.
+    int shadedGreen = 0xff24e14f;
     for (int border : new int[] {-MapMath.BORDER, MapMath.BORDER}) {
       var key = MapMath.key(0, -1, 0, border < 0 ? border : border - 1, 0);
       var tile = new MapTile(key);
@@ -67,8 +69,11 @@ class MapExportTest {
       var image =
           ImageIO.read(
               root.resolve("exports").resolve(status.substring("Exported ".length())).toFile());
-      assertEquals(0xff22cc44, image.getRGB(border < 0 ? 104 : 96, 50));
+      assertEquals(200, image.getWidth()); assertEquals(100, image.getHeight());
+      assertEquals(shadedGreen, image.getRGB(border < 0 ? 104 : 96, 50));
+      assertEquals(shadedGreen, image.getRGB(border < 0 ? 120 : 80, 50));
       assertEquals(0, image.getRGB(border < 0 ? 96 : 104, 50));
+      assertEquals(0, image.getRGB(border < 0 ? 0 : 199, 50));
     }
     cache.finish();
   }

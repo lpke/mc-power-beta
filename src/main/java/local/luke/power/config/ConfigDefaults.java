@@ -34,6 +34,8 @@ public final class ConfigDefaults {
       if (PowerConfig.problem().isEmpty()) {
         initializeGameplay(game);
         initializeMaps(game);
+        initializeExtraSounds(game);
+        initializePauseTools(game);
       }
     }
   }
@@ -44,6 +46,36 @@ public final class ConfigDefaults {
     maps.add("minimap", DefaultBases.value("maps.minimap", new JsonPrimitive(true)));
     try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
       PowerConfig.put("maps", maps);
+      transaction.commit();
+    }
+  }
+
+  private static void initializeExtraSounds(Path game) throws IOException {
+    JsonObject audio = PowerConfig.section("audio");
+    boolean changed = false;
+    for (String key : java.util.List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds")) {
+      if (audio.has(key)) continue;
+      audio.add(key, DefaultBases.value("audio." + key, new JsonPrimitive(false)));
+      changed = true;
+    }
+    if (!changed) return;
+    try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
+      PowerConfig.put("audio", audio);
+      transaction.commit();
+    }
+  }
+
+  private static void initializePauseTools(Path game) throws IOException {
+    JsonObject menu = PowerConfig.section("interface");
+    boolean changed = false;
+    for (String key : java.util.List.of("pauseMapButton", "pauseWaypointsButton")) {
+      if (menu.has(key)) continue;
+      menu.add(key, DefaultBases.value("interface." + key, new JsonPrimitive(true)));
+      changed = true;
+    }
+    if (!changed) return;
+    try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
+      PowerConfig.put("interface", menu);
       transaction.commit();
     }
   }

@@ -313,7 +313,11 @@
       "gapMinSeconds": 100,
       "gapMaxSeconds": 350,
       "redstonePlacementSound": true,
-      "menuControls": true
+      "menuControls": true,
+      "seedPlantingSounds": true,
+      "hoeTillingSounds": true,
+      "bucketSounds": true,
+      "boneMealSounds": true
     },
     "visual": {
       "softRain": true,
@@ -767,7 +771,10 @@
         "usedMemory",
         "allocatedMemory",
         "java"
-      ]
+      ],
+      "pauseToolsPosition": 0,
+      "pauseMapButton": true,
+      "pauseWaypointsButton": true
     },
     "death": {
       "enabled": true,
@@ -1007,7 +1014,7 @@
       "minimap": true,
       "worldMap": true,
       "rotate": true,
-      "circular": false,
+      "circular": true,
       "hideWithDebug": true,
       "size": 108,
       "corner": 1,
@@ -1072,8 +1079,10 @@
       "minimapWaypointArrows": true,
       "minimapDestinationArrow": true,
       "minimapDeathpointArrows": true,
-      "destinationArrowColor": 16768853,
-      "destinationArrowOpacity": 1
+      "destinationArrowColor": 5609983,
+      "destinationArrowOpacity": 1,
+      "waypointTextSize": 75,
+      "waypointDistanceScaling": true
     },
     "sprint": {
       "activation": 0,

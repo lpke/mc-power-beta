@@ -29,6 +29,8 @@ public final class ColourScreen extends UiScreen {
   private final List<String> colors;
   private final List<String> originalColors;
   private final Setting localOpacity;
+  private final ColorPickerSnapshot original;
+  private final DraftExitPrompt exit = new DraftExitPrompt();
   private final double[] scrollPositions = new double[2];
   private ColorWheel.Hsv hsv;
   private int color, dragging = -1, tab;
@@ -68,6 +70,7 @@ public final class ColourScreen extends UiScreen {
     if (colors == null) this.colors.addAll(MenuPreferences.current().colours);
     else colors.value.getAsJsonArray().forEach(value -> this.colors.add(value.getAsString()));
     originalColors = List.copyOf(this.colors);
+    original = new ColorPickerSnapshot(color, ColorSettings.opacityPercent(localOpacity), this.colors);
   }
 
   public net.minecraft.client.gui.screen.Screen parentScreen() { return parent; }
@@ -76,7 +79,7 @@ public final class ColourScreen extends UiScreen {
   private int left() { return (width - span()) / 2; }
   private int span() { return Math.min(340, width - 24); }
   private int bodyWidth() { return span() - 10; }
-  private int previewY() { return 28; }
+  private int previewY() { return 34; }
   private int tabsY() { return previewY() + PREVIEW + 6; }
   private int tabWidth() { return (span() - 4) / 2; }
   private int bodyTop() { return tabsY() + 24; }
@@ -84,20 +87,20 @@ public final class ColourScreen extends UiScreen {
   private int bodyY() { return bodyTop() - (int)scroll; }
   private int wheelDiameter() { return Math.min(112, Math.max(48, bodyBottom() - bodyTop())); }
   private int[] controls() {
-    return tab == 0 ? opacity == null ? RGB_CONTROLS : RGBA_CONTROLS
+    return tab == 1 ? opacity == null ? RGB_CONTROLS : RGBA_CONTROLS
         : opacity == null ? WHEEL_CONTROLS : WHEEL_ALPHA_CONTROLS;
   }
-  private int sectionHeight() { return tab == 0 ? controls().length * ROW - 4 : wheelDiameter(); }
+  private int sectionHeight() { return tab == 1 ? controls().length * ROW - 4 : wheelDiameter(); }
   private int hexY() { return bodyY() + sectionHeight() + 8; }
   private int saveY() { return hexY() + 24; }
   private int swatchY() { return saveY() + 24; }
   private int columns() { return Math.max(1, Math.min(16, bodyWidth() / 22)); }
   private int sliderY(int channel) {
-    return tab == 0 ? bodyY() + channel * ROW
+    return tab == 1 ? bodyY() + channel * ROW
         : bodyY() + (wheelDiameter() - (controls().length * ROW - 4)) / 2 + (channel == ALPHA ? ROW : 0);
   }
-  private int labelX() { return tab == 0 ? left() : left() + wheelDiameter() + 12; }
-  private int controlX() { return labelX() + (tab == 0 ? 48 : 64); }
+  private int labelX() { return tab == 1 ? left() : left() + wheelDiameter() + 12; }
+  private int controlX() { return labelX() + (tab == 1 ? 48 : 64); }
   private int controlWidth() { return left() + bodyWidth() - controlX(); }
   private ColorWheel.Bounds wheelBounds() {
     double radius = wheelDiameter() / 2d;
@@ -114,6 +117,15 @@ public final class ColourScreen extends UiScreen {
   public void removed() { Keyboard.enableRepeatEvents(false); stopGesture(); inline.cancel(); TextDrag.cancel(); }
 
   private void stopGesture() { dragging = -1; scrollbar.release(); }
+  private boolean changed() {
+    boolean invalid = false;
+    try { LightSettings.rgb(hex.text()); } catch (IllegalArgumentException e) { invalid = true; }
+    return original.changed(color, ColorSettings.opacityPercent(localOpacity), colors, invalid);
+  }
+  private void leave() {
+    stopGesture(); inline.cancel(); hex.focused = false;
+    exit.leave(changed(), () -> minecraft.setScreen(parent));
+  }
 
   private void parse() {
     try { color = LightSettings.rgb(hex.text()); hsv = ColorWheel.fromRgb(color, hsv); error = ""; }
@@ -167,13 +179,14 @@ public final class ColourScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int button) {
     if (!Display.isActive() || minecraft.currentScreen != this) { stopGesture(); return; }
+    if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent))) return;
     if (dragging >= 0 || inline.press(x, y, button)) return;
     if (button != 0 && button != 1) return;
     if (button == 0) for (int i = 0; i < 2; i++) {
       if (inside(x, y, left() + i * (tabWidth() + 4), tabsY(), tabWidth(), 18)) { selectTab(i); return; }
     }
     if (button == 0 && inside(x, y, width / 2 - 102, height - 28, 100, 20)) { click(); save(); return; }
-    if (button == 0 && inside(x, y, width / 2 + 2, height - 28, 100, 20)) { click(); minecraft.setScreen(parent); return; }
+    if (button == 0 && inside(x, y, width / 2 + 2, height - 28, 100, 20)) { click(); leave(); return; }
     if (button == 0 && scrollbar.press(track(), x, y)) {
       hex.focused = false;
       scroll = scrollbar.drag(track(), y, true);
@@ -181,7 +194,7 @@ public final class ColourScreen extends UiScreen {
     }
     boolean body = inBody(x, y);
     if (body) {
-      if (button == 0 && tab == 1 && wheelBounds().contains(x, y)) {
+      if (button == 0 && tab == 0 && wheelBounds().contains(x, y)) {
         hex.focused = false; dragging = WHEEL; drag(x, y); return;
       }
       for (int i : controls()) {
@@ -224,13 +237,13 @@ public final class ColourScreen extends UiScreen {
 
   @Override
   protected void mouseReleased(int x, int y, int button) {
-    if (button == 0) { if (Display.isActive() && minecraft.currentScreen == this) drag(x, y); stopGesture(); }
+    if (button == 0) { if (!exit.active() && Display.isActive() && minecraft.currentScreen == this) drag(x, y); stopGesture(); }
     super.mouseReleased(x, y, button);
   }
 
   public void onMouseEvent() {
     super.onMouseEvent();
-    if (minecraft.currentScreen != this || !Display.isActive()) { stopGesture(); return; }
+    if (minecraft.currentScreen != this || !Display.isActive() || exit.active()) { stopGesture(); return; }
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
     if (dragging >= 0) { drag(x, y); return; }
@@ -263,8 +276,9 @@ public final class ColourScreen extends UiScreen {
   }
 
   protected void keyPressed(char c, int key) {
+    if (exit.key(key)) return;
     if (inline.key(c, key)) return;
-    if (key == Keyboard.KEY_ESCAPE) { minecraft.setScreen(parent); return; }
+    if (key == Keyboard.KEY_ESCAPE) { leave(); return; }
     if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { save(); return; }
     if (hex.focused) { hex.key(c, key); parse(); }
   }
@@ -331,6 +345,8 @@ public final class ColourScreen extends UiScreen {
   }
 
   public void render(int mx, int my, float delta) {
+    int pointerX = mx, pointerY = my;
+    if (exit.active()) { mx = my = -1000; }
     if (!Display.isActive()) { stopGesture(); inline.cancel(); TextDrag.cancel(); }
     if (dragging >= 0) {
       if (Mouse.isButtonDown(0)) drag(Mouse.getX() * width / minecraft.displayWidth,
@@ -343,12 +359,12 @@ public final class ColourScreen extends UiScreen {
     int previewX = (width - PREVIEW) / 2;
     fill(previewX - 1, previewY() - 1, previewX + PREVIEW + 1, previewY() + PREVIEW + 1, 0xffaaaaaa);
     colorSwatch(color, ColorSettings.opacityPercent(localOpacity), previewX, previewY(), PREVIEW, PREVIEW);
-    tabButton("RGBA", left(), tabsY(), tabWidth(), mx, my, tab == 0);
-    tabButton("Color wheel", left() + tabWidth() + 4, tabsY(), tabWidth(), mx, my, tab == 1);
+    tabButton("Color wheel", left(), tabsY(), tabWidth(), mx, my, tab == 0);
+    tabButton("RGBA", left() + tabWidth() + 4, tabsY(), tabWidth(), mx, my, tab == 1);
     inline.beginFrame();
     int listMouseY = inBody(mx, my) ? my : Integer.MIN_VALUE;
     clip(left() - 1, bodyTop(), bodyWidth() + 2, Math.max(0, bodyBottom() - bodyTop()));
-    if (tab == 1) renderWheel();
+    if (tab == 0) renderWheel();
     for (int i : controls()) renderControl(i, mx, listMouseY);
     input(hex, left(), hexY(), bodyWidth() - 108, mx, listMouseY, "#RRGGBB");
     button("Copy", left() + bodyWidth() - 104, hexY() - 1, 50, 20, mx, listMouseY, true);
@@ -370,5 +386,6 @@ public final class ColourScreen extends UiScreen {
     if (!tip.isEmpty()) tooltip(tip, mx, my);
     if (!error.isEmpty()) tooltip(fit(error, span()), left(), height - 44);
     inline.renderError(this);
+    exit.render(this, "Save color changes?", pointerX, pointerY);
   }
 }

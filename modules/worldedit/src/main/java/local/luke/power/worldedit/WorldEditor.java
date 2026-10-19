@@ -86,7 +86,6 @@ public final class WorldEditor {
   }
   public static boolean commandAvailable(Minecraft mc, String name) {
     return localPlayer(mc)
-        && (!freecam() || local.luke.power.worldedit.chat.CommandAccess.owner(name) == null)
         && local.luke.power.worldedit.chat.CommandAccess.allowed(name);
   }
   public static boolean available(Minecraft mc) {
@@ -136,7 +135,7 @@ public final class WorldEditor {
       return;
     }
     if (editor != null && !mc.paused) {
-      if (!available(mc)) editor.engine.cancel();
+      if (!localPlayer(mc) || !permitted(mc)) editor.engine.cancel();
       // Rollbacks must progress after a mode change or master toggle.
       editor.engine.tick(settings.blocksPerTick);
     }
@@ -163,7 +162,6 @@ public final class WorldEditor {
     }
     if (!commandAvailable(mc, name)) {
       message(mc, !localPlayer(mc) ? "A live local singleplayer world is required."
-          : freecam() ? "Leave freecam before changing the world or moving the player."
           : local.luke.power.worldedit.chat.CommandAccess.requirement(name) + " Change it in Options > Game rules.");
       return true;
     }

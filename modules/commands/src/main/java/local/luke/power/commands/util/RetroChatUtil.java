@@ -68,7 +68,6 @@ public class RetroChatUtil {
     commands.add(new Hat());
     commands.add(new KillAll());
     commands.add(new Kill());
-    commands.add(new Warp());
     commands.add(new WhoAmI());
   }
 

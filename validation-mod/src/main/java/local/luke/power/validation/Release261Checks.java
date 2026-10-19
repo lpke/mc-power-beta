@@ -278,7 +278,7 @@ public final class Release261Checks {
   private static void cadence(Minecraft mc) throws Exception {
     var original = MapConfig.copy();
     try {
-      for (int rate : new int[] {1, 5, 20})
+      for (int rate : new int[] {1, 5, 10, 20})
         test(
             "native sampler refreshes at " + rate + " Hz within its column budget",
             () -> {

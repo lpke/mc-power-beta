@@ -483,6 +483,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private boolean highlighting() { return selected.equals("layout") && !highlightedElement.isEmpty(); }
   protected void settingClicked(Setting setting) { clearHighlight(); if (reorder.active()) reorder.clearSelection(); }
   protected void renderControl(Setting s, int y, int mx, int my) {
+    if (s.id.equals(highlightedSetting)) fill(controlsLeft() + 2, y - 1, controlsRight() - 9, y + 19, 0x403d4c18);
     super.renderControl(s, y, mx, my);
     if (s.id.equals(highlightedSetting)) {
       int l = controlsLeft() + 2, r = controlsRight() - 9;

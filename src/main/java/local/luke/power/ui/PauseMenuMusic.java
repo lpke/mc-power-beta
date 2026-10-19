@@ -19,6 +19,7 @@ public final class PauseMenuMusic extends UiScreen {
   public boolean visible() {
     return AudioConfig.current().showMenuControls(minecraft.currentScreen instanceof net.minecraft.client.gui.screen.TitleScreen);
   }
+  public MenuMusicLayout bounds() { return visible() ? bounds : null; }
 
   private int controlsX() {
     return bounds.x() + (bounds.width() - (BUTTON_STEP * 3 + BUTTON_WIDTH)) / 2;

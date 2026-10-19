@@ -28,7 +28,13 @@ public final class SprintState {
       boolean sprintKey,
       boolean onGround,
       boolean collision) {
-    stamina = Math.max(0, Math.min(s.capacity, stamina));
+    tick(s, eligible, forward, sprintKey, onGround, collision, true);
+  }
+
+  public void tick(SprintSettings s, boolean eligible, float forward, boolean sprintKey,
+      boolean onGround, boolean collision, boolean usesStamina) {
+    boolean staminaEnabled = s.stamina && usesStamina;
+    if (usesStamina) stamina = Math.max(0, Math.min(s.capacity, stamina));
     if (doubleTap > 0) doubleTap--;
     boolean pressed = sprintKey && !keyWasDown,
         forwardDown = forward >= .8f,
@@ -46,7 +52,7 @@ public final class SprintState {
     boolean can =
         eligible
             && (!s.noSprintInCombat || combatTicks == 0)
-            && (!s.stamina || !exhausted && stamina > 0);
+            && (!staminaEnabled || !exhausted && stamina > 0);
     if (!can || forward <= 0 || collision) {
       sprinting = false;
       latched = false;
@@ -60,7 +66,7 @@ public final class SprintState {
       tapped = false;
       doubleTap = 0;
     }
-    if (s.stamina) {
+    if (staminaEnabled) {
       if (sprinting) {
         stamina = Math.max(0, stamina - s.drain / 20);
         rechargeTicks = (int) Math.ceil(s.rechargeDelay * 20);
@@ -75,14 +81,18 @@ public final class SprintState {
       }
       if (exhausted && stamina + 1e-9 >= s.capacity * s.restartStamina / 100 && stamina > 0)
         exhausted = false;
-    } else exhausted = false;
+    } else if (usesStamina) exhausted = false;
     keyWasDown = sprintKey;
     forwardWasDown = forwardDown;
     if (combatTicks > 0) combatTicks--;
   }
 
   public void jump(SprintSettings s) {
-    if (s.stamina && sprinting) {
+    jump(s, true);
+  }
+
+  public void jump(SprintSettings s, boolean usesStamina) {
+    if (usesStamina && s.stamina && sprinting) {
       stamina = Math.max(0, stamina - s.jumpCost);
       if (stamina == 0) {
         sprinting = false;

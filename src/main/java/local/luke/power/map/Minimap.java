@@ -58,7 +58,7 @@ public final class Minimap {
         || mc.world == null
         || mc.player == null
         || mc.options.hideHud
-        || mc.currentScreen != null) return;
+        || mc.currentScreen != null && !(mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen)) return;
     MapRenderer.beginFrame(delta);
     var screen = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
     var frame =
@@ -141,7 +141,7 @@ public final class Minimap {
         GL11.glEnable(GL11.GL_TEXTURE_2D);
         MapRenderer.player(bounds.x() + bounds.size() / 2d, bounds.y() + bounds.size() / 2d, 0, s);
       }
-      border(bounds, s.circular);
+      MinimapBorder.draw(mc, bounds, s.circular);
       GL11.glEnable(GL11.GL_TEXTURE_2D);
       GL11.glColor4f(1, 1, 1, 1);
       if (s.compass) {
@@ -165,45 +165,6 @@ public final class Minimap {
       GL11.glTranslated(x, y, 0); GL11.glScaled(scale, scale, 1);
       mc.textRenderer.drawWithShadow(text, 0, 0, 0xffffff);
     } finally { GL11.glPopMatrix(); }
-  }
-
-  /** Filled four-pixel bands keep the frame solid at every physical GUI scale. */
-  private static void border(Layout bounds, boolean circular) {
-    GL11.glDisable(GL11.GL_TEXTURE_2D);
-    GL11.glDisable(GL11.GL_ALPHA_TEST);
-    for (var band : MinimapGeometry.border()) {
-      if (circular) {
-        double cx = bounds.x() + bounds.size() / 2d, cy = bounds.y() + bounds.size() / 2d;
-        double inner = bounds.size() / 2d + band.inner(), outer = bounds.size() / 2d + band.outer();
-        GL11.glBegin(GL11.GL_QUADS);
-        for (int side = 0; side < 128; side++) {
-          double a = side * Math.PI / 64, b = (side + 1) * Math.PI / 64;
-          borderColor(Math.cos((a + b) / 2) + Math.sin((a + b) / 2) < 0 ? band.light() : band.dark());
-          GL11.glVertex2d(cx + Math.cos(a) * inner, cy + Math.sin(a) * inner);
-          GL11.glVertex2d(cx + Math.cos(a) * outer, cy + Math.sin(a) * outer);
-          GL11.glVertex2d(cx + Math.cos(b) * outer, cy + Math.sin(b) * outer);
-          GL11.glVertex2d(cx + Math.cos(b) * inner, cy + Math.sin(b) * inner);
-        }
-        GL11.glEnd();
-      } else {
-        double l = bounds.x() - band.outer(), t = bounds.y() - band.outer();
-        double r = bounds.x() + bounds.size() + band.outer(), b = bounds.y() + bounds.size() + band.outer();
-        double il = bounds.x() - band.inner(), it = bounds.y() - band.inner();
-        double ir = bounds.x() + bounds.size() + band.inner(), ib = bounds.y() + bounds.size() + band.inner();
-        GL11.glBegin(GL11.GL_QUADS);
-        borderColor(band.light());
-        quad(l, t, r, t, ir, it, il, it); quad(l, t, il, it, il, ib, l, b);
-        borderColor(band.dark());
-        quad(l, b, il, ib, ir, ib, r, b); quad(r, t, r, b, ir, ib, ir, it);
-        GL11.glEnd();
-      }
-    }
-  }
-  private static void borderColor(int rgb) {
-    GL11.glColor4ub((byte)(rgb >> 16), (byte)(rgb >> 8), (byte)rgb, (byte)255);
-  }
-  private static void quad(double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3) {
-    GL11.glVertex2d(x0, y0); GL11.glVertex2d(x1, y1); GL11.glVertex2d(x2, y2); GL11.glVertex2d(x3, y3);
   }
 
   private static int currentBiome() {

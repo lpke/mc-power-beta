@@ -82,7 +82,7 @@ class SettingsLayoutTest {
   }
 
   @Test void mapAppearanceBelongsToTheHudWhileSamplingControlsStayInMap() {
-    for (String name : List.of("zoom", "colourMode", "heightShading", "slopeShading", "caveLighting", "radar",
+    for (String name : List.of("zoom", "colourMode", "radar",
         "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight",
         "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks",
         "lightOverlay", "footsteps", "pathColor", "pathOpacity", "playerIcon", "playerColor", "playerOpacity", "playerSize")) {

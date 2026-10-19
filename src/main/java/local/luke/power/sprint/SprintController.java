@@ -68,7 +68,8 @@ public final class SprintController {
       state.cancel(key);
     }
     state.tick(
-        settings, eligible, player.field_161.field_2533, key, player.field_1623, player.field_1624);
+        settings, eligible, player.field_161.field_2533, key, player.field_1623, player.field_1624,
+        usesStamina(player));
     SprintView.publish(SprintView.Kind.GROUND, state.sprinting, settings.speed / 100);
   }
 
@@ -84,7 +85,12 @@ public final class SprintController {
       entity.velocityX += SprintState.jumpX(entity.yaw);
       entity.velocityZ += SprintState.jumpZ(entity.yaw);
     }
-    ((SprintPlayer) entity).power$sprint().jump(SprintConfig.current());
+    ((SprintPlayer) entity).power$sprint().jump(SprintConfig.current(), usesStamina((ClientPlayerEntity)entity));
+  }
+
+  public static boolean usesStamina(ClientPlayerEntity player) {
+    return !DetachedCamera.isActive() && player instanceof PlayerMode mode && !mode.power$creative()
+        && !mode.power$spectator() && !mode.power$flying();
   }
 
   public static void combat(Entity entity) {
@@ -139,13 +145,14 @@ public final class SprintController {
       if (DetachedCamera.isActive()) {
         if (settings.freecamFov) ratio = SprintView.ratio(SprintView.Kind.FREECAM);
       } else if (mc.player instanceof PlayerMode mode && mode.power$flying()) {
-        if (mode.power$spectator() && settings.spectatorFov)
+        if (mode.power$spectator() && settings.dynamicFov)
           ratio = SprintView.ratio(SprintView.Kind.SPECTATOR);
-        else if (!mode.power$spectator() && settings.creativeFov)
+        else if (!mode.power$spectator() && settings.dynamicFov)
           ratio = SprintView.ratio(SprintView.Kind.CREATIVE);
       } else if (settings.dynamicFov) ratio = SprintView.ratio(SprintView.Kind.GROUND);
     } else SprintView.publish(SprintView.Kind.GROUND, false, 1);
-    double target = 1 + (ratio - 1) * .5 * settings.fovStrength / 100;
+    double strength = DetachedCamera.isActive() ? 1 : settings.fovStrength / 100;
+    double target = 1 + (ratio - 1) * .5 * strength;
     fov += (Math.max(1, Math.min(1.5, target)) - fov) * .5;
     if (Math.abs(fov - 1) < 1e-5) fov = 1;
   }

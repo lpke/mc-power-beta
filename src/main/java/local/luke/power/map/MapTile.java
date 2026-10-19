@@ -44,11 +44,9 @@ public final class MapTile {
   public int color(int i, MapSettings s) {
     if (!known(i)) return 0;
     int rgb =
-        s.slopeShading
-            ? (s.colourMode == 0 ? reliefAccurate[i] : reliefVanilla[i])
-            : (s.colourMode == 0 ? accurate[i] : vanilla[i]);
-    double shade = s.heightShading ? Math.max(.9, Math.min(1, height(i) / 63d)) : 1;
-    if (s.caveLighting && key.layer() != -1) shade *= .35 + light(i) * .65 / 15;
+        s.colourMode == 0 ? reliefAccurate[i] : reliefVanilla[i];
+    double shade = Math.max(.9, Math.min(1, height(i) / 63d));
+    if (key.layer() != -1) shade *= .35 + light(i) * .65 / 15;
     return 0xff000000 | MapMath.shade(rgb, shade);
   }
 

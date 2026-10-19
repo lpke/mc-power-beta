@@ -32,7 +32,7 @@ import java.util.Random;
 
 @Environment(EnvType.CLIENT)
 @Mixin(InGameHud.class)
-public abstract class InGameHudMixin extends DrawContext {
+public abstract class InGameHudMixin extends DrawContext implements local.luke.power.ui.StatusHudLayout {
 
     @Shadow private Minecraft minecraft;
     @Shadow private List messages;
@@ -63,6 +63,17 @@ public abstract class InGameHudMixin extends DrawContext {
     @Unique private boolean overlayVisibility = true;
     @Unique private int xOffsetOverlay = 0;
     @Unique private int yOffsetOverlay = 0;
+
+    public int power$statusRight() { return scaledWidth / 2 + 91 + xOffsetHotbar; }
+    public int power$statusY() {
+        return scaledHeight - 32 + yOffsetHotbar
+            + (Config.hudpositions.hudPositioningSystem.ordinal() != 0
+                && Config.hudpositions.putStatusBarIconsBelowHotbar ? 33 : 0);
+    }
+    public int power$armorX() { return scaledWidth / 2 + 10 + xOffsetArmor; }
+    public int power$armorY() { return scaledHeight - 32 + yOffsetArmor; }
+    public boolean power$armorVisible() { return armorVisibility; }
+    public boolean power$hotbarVisible() { return hotbarVisibility; }
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     public void powerHud_render(float tickDelta, boolean screenOpen, int mouseX, int mouseY, CallbackInfo ci) {

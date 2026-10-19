@@ -77,7 +77,7 @@ public final class Release252Checks {
           command(mc,"//shift 2 forward");
           check(editor.pos1.equals(p.add(detached?0:-2,0,detached?2:0)),"selection direction differs from view");
           command(mc,"//chunk");check(editor.pos1.x()==((p.x()>>4)<<4)&&editor.pos1.z()==((p.z()>>4)<<4),"wrong camera chunk");
-          check(!detached||!WorldEditor.commandAvailable(mc,"set"),"freecam grants world writes");
+          check(WorldEditor.commandAvailable(mc,"set"),"permitted WorldEdit command blocked by view ownership");
           active(false);
         }
         CreativeVehicleChecks.mode(mc,"SPECTATOR");mc.player.method_1341(32.5,109,35.5,180,0);

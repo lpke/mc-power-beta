@@ -2,13 +2,13 @@ package local.luke.power.map;
 
 /** Global preferences only. Explored terrain and waypoints live in separate world data. */
 public final class MapSettings {
-  public boolean minimap = true, worldMap = true, rotate = true, circular, hideWithDebug = true;
+  public boolean minimap = true, worldMap = true, rotate = true, circular = true, hideWithDebug = true;
   public int size = 108, corner = 1, offsetX = 6, offsetY = 6;
   public double opacity = 1, zoom = 1;
   public boolean coordinates = true, biome = true, clock, compass = true;
   public int directionTextSize = 100, belowTextSize = 100, minimapArrowSize = 100;
   public boolean minimapWaypointArrows = true, minimapDestinationArrow = true, minimapDeathpointArrows = true;
-  public int destinationArrowColor = 0xffdf55;
+  public int destinationArrowColor = 0x5599ff;
   public double destinationArrowOpacity = 1;
   public int colourMode, caveMode = 1, caveTop = 64, roofSize = 3;
   public int caveAbove = 10, caveBelow = 10;
@@ -26,6 +26,8 @@ public final class MapSettings {
       waypointNames = true,
       waypointDistances = true;
   public int waypointDistance = 1000;
+  public int waypointTextSize = 75;
+  public boolean waypointDistanceScaling = true;
   public boolean deathpoints = true, keepOldDeaths = true;
   public boolean chunkGrid, slimeChunks, lightOverlay, footsteps, pauseMap;
   public int columnsPerTick = 512,
@@ -35,6 +37,7 @@ public final class MapSettings {
       updateRate = 20;
 
   public void validate() {
+    range(waypointTextSize, 50, 150);
     range(size, 64, 240);
     range(corner, 0, 3);
     range(offsetX, 0, 500);

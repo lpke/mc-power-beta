@@ -180,4 +180,69 @@ class WaypointsTest {
     decoded.sets.add("new empty");
     assertThrows(IllegalArgumentException.class, () -> WaypointStore.encode(decoded));
   }
+  @Test void optionalAbbreviationsRoundTripAndLegacyNamesRemainAutomatic() throws Exception {
+    String legacy = "{\"format\":1,\"waypoints\":[{\"id\":\"legacy\",\"name\":\"Home base\",\"set\":\"Default\"}]}";
+    var old = WaypointStore.decode(legacy.getBytes(StandardCharsets.UTF_8));
+    Waypoint point = old.waypoints.get(0);
+    assertEquals("", point.abbreviation);
+    assertEquals("H", point.abbreviation());
+    point.name = "Village"; assertEquals("V", point.abbreviation());
+    point.abbreviation = "V2"; point.death = true; point.created = 1234;
+    var restored = WaypointStore.decode(WaypointStore.encode(old)).waypoints.get(0);
+    assertEquals("V2", restored.abbreviation()); assertTrue(restored.death); assertEquals(1234, restored.created);
+    assertEquals("legacy", restored.id); assertEquals("Default", restored.set);
+    restored.name = "Changed"; assertEquals("V2", restored.copy().abbreviation());
+    restored.abbreviation = ""; restored.name = "🌲 Trees"; assertEquals("🌲", restored.abbreviation());
+    assertEquals("legacy", old.waypoints.get(0).id);
+    String numeric = legacy.replace("\"name\":\"Home base\"", "\"name\":\"Home base\",\"abbreviation\":12");
+    assertThrows(java.io.IOException.class, () -> WaypointStore.decode(numeric.getBytes(StandardCharsets.UTF_8)));
+  }
+  @Test void invalidAbbreviationsProtectTheOriginalStoreData() throws Exception {
+    var point = new Waypoint();
+    for (String invalid : List.of("ABCDE", "A B", " ", "§c", "\n", "\u0000", "\u200B", "\uD800")) {
+      point.abbreviation = invalid; assertThrows(IllegalArgumentException.class, point::validate, invalid);
+    }
+    point.abbreviation = "🌲🌲🌲🌲"; assertDoesNotThrow(point::validate);
+    var data = new WaypointStore.Data(); data.waypoints.add(point);
+    String invalid = new String(WaypointStore.encode(data), StandardCharsets.UTF_8).replace("🌲🌲🌲🌲", "ABCDE");
+    assertThrows(java.io.IOException.class, () -> WaypointStore.decode(invalid.getBytes(StandardCharsets.UTF_8)));
+  }
+  @Test void movingOneWaypointPreservesItsIdentityAndOtherSetsAcrossRestart() throws Exception {
+    var store = store(); store.createSet("Builds"); store.select("Default");
+    Waypoint first = new Waypoint(); first.name = "Home"; first.abbreviation = "H1"; first.death = true; first.enabled = false; first.created = 42;
+    Waypoint other = new Waypoint(); other.name = "Village"; other.set = "Builds";
+    store.put(first); store.put(other); long before = store.revision();
+    store.move(first.id, "Builds");
+    assertEquals(before + 1, store.revision());
+    Waypoint moved = store.points().stream().filter(p -> p.id.equals(first.id)).findFirst().orElseThrow();
+    assertEquals("Builds", moved.set); assertEquals("H1", moved.abbreviation); assertTrue(moved.death); assertFalse(moved.enabled); assertEquals(42, moved.created);
+    assertEquals("Default", store.selectedSet()); assertEquals(2, store.points().size());
+    assertEquals("Village", store.points().stream().filter(p -> p.id.equals(other.id)).findFirst().orElseThrow().name);
+    store.select("Builds"); store.remove(other.id); store.remove(first.id);
+    assertTrue(store.sets().contains("Builds")); store.put(moved);
+    long revision = store.revision(); store.move(first.id, "Builds"); assertEquals(revision, store.revision());
+    assertThrows(IllegalArgumentException.class, () -> store.move(first.id, "Missing"));
+    assertThrows(IllegalArgumentException.class, () -> store.move("missing", "Builds"));
+    store.finish(); assertEquals("H1", store().points().stream().filter(p -> p.id.equals(first.id)).findFirst().orElseThrow().abbreviation);
+  }
+  @Test void commandNamesResolveInTheSelectedViewAndIdsDisambiguateWithoutChangingData() throws Exception {
+    var store = store(); Waypoint first = new Waypoint(); first.name = "Home";
+    Waypoint other = new Waypoint(); other.name = "Home"; other.set = "Builds";
+    store.put(first); store.put(other);
+    assertEquals(first.id, WaypointCommands.find(store, "HOME").id);
+    assertEquals(other.id, WaypointCommands.find(store, other.id).id);
+    store.allSets(true); assertThrows(IllegalArgumentException.class, () -> WaypointCommands.find(store, "Home"));
+    assertThrows(IllegalArgumentException.class, () -> WaypointCommands.find(store, "Missing"));
+    assertEquals(2, store.points().size());
+  }
+
+  @Test void changingALegacyPointSetRetainsItsNowEmptyOriginalSet() throws Exception {
+    String legacy = "{\"format\":1,\"waypoints\":[{\"id\":\"legacy\",\"name\":\"Home\",\"set\":\"Original set\"}]}";
+    Files.writeString(root.resolve("waypoints.json"), legacy);
+    var store = store(); Waypoint point = store.points().get(0); point.set = "New set"; store.put(point);
+    store.remove(point.id); store.select("Default");
+    assertTrue(store.sets().containsAll(List.of("Original set", "New set")));
+    store.finish(); assertTrue(store().sets().containsAll(List.of("Original set", "New set")));
+  }
+
 }

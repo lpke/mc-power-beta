@@ -12,14 +12,8 @@ public final class MinimapGeometry {
   public record Label(String text, double x, double y, double scale) {}
   public record Frame(Layout layout, Box bounds, List<Label> labels) {}
   public record Point(double x, double y) {}
-  public record Band(int outer, int inner, int light, int dark) {}
-  private static final List<Band> BANDS = List.of(
-      new Band(4, 3, 0x141414, 0x141414),
-      new Band(3, 1, 0x858585, 0x424242),
-      new Band(1, 0, 0x202020, 0x202020));
   private MinimapGeometry() {}
 
-  public static List<Band> border() { return BANDS; }
   public static int informationHeight(MapSettings settings) {
     int rows = (settings.coordinates ? 1 : 0) + (settings.biome ? 1 : 0) + (settings.clock ? 1 : 0);
     return rows == 0 ? 0 : BORDER + 2 + (int)Math.ceil(rows * 10 * settings.belowTextSize / 100d);

@@ -134,26 +134,59 @@ public final class WaypointStore {
     revision++;
   }
 
+  /** Editor validation runs before accepting any linked shared preferences. */
+  public void validatePut(Waypoint point) {
+    requireReady(); point.validate();
+    Waypoint previous = data.waypoints.stream().filter(p -> p.id.equals(point.id)).findFirst().orElse(null);
+    if (previous == null && data.waypoints.size() >= MAX_POINTS) throw new IllegalArgumentException("Waypoint limit reached");
+    if (data.sets.size() + missingSets(previous == null ? "Default" : previous.set, point.set).size() > MAX_POINTS)
+      throw new IllegalArgumentException("Waypoint set limit reached");
+  }
+
   public void put(Waypoint point) {
-    requireReady();
-    point.validate();
+    validatePut(point);
     int index = -1;
     for (int i = 0; i < data.waypoints.size(); i++)
       if (data.waypoints.get(i).id.equals(point.id)) {
         index = i;
         break;
       }
-    if (index < 0) {
-      if (data.waypoints.size() >= MAX_POINTS)
-        throw new IllegalArgumentException("Waypoint limit reached");
-      data.waypoints.add(point.copy());
-    } else data.waypoints.set(index, point.copy());
+    rememberSets(index < 0 ? "Default" : data.waypoints.get(index).set, point.set);
+    if (index < 0) data.waypoints.add(point.copy());
+    else data.waypoints.set(index, point.copy());
     revision++;
+  }
+
+  private List<String> missingSets(String... names) {
+    List<String> added = new ArrayList<>();
+    for (String name : names) if (!name.equals("Default")
+        && data.sets.stream().noneMatch(set -> set.equalsIgnoreCase(name))
+        && added.stream().noneMatch(set -> set.equalsIgnoreCase(name))) added.add(name);
+    return added;
+  }
+
+  private void rememberSets(String... names) {
+    List<String> added = missingSets(names);
+    if (data.sets.size() + added.size() > MAX_POINTS) throw new IllegalArgumentException("Waypoint set limit reached");
+    data.sets.addAll(added);
+  }
+
+  /** Moving retains both named sets while preserving the point identity. */
+  public void move(String id, String set) {
+    requireReady();
+    String target = sets().stream().filter(s -> s.equals(set)).findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Waypoint set not found"));
+    Waypoint point = data.waypoints.stream().filter(p -> p.id.equals(id)).findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("Waypoint not found"));
+    if (point.set.equals(target)) return;
+    rememberSets(point.set, target);
+    Waypoint moved = point.copy(); moved.set = target; put(moved);
   }
 
   public void remove(String id) {
     requireReady();
-    if (data.waypoints.removeIf(p -> p.id.equals(id))) revision++;
+    Waypoint point = data.waypoints.stream().filter(p -> p.id.equals(id)).findFirst().orElse(null);
+    if (point != null) { rememberSets(point.set); data.waypoints.removeIf(p -> p.id.equals(id)); revision++; }
   }
 
   public void death(int x, int y, int z, int dimension, boolean keepOld) {
@@ -276,6 +309,13 @@ public final class WaypointStore {
           JsonParser.parseString(new String(bytes, StandardCharsets.UTF_8)).getAsJsonObject();
       if (!object.has("format") || !object.has("waypoints"))
         throw new IllegalArgumentException("Missing waypoint format or list");
+      for (JsonElement entry : object.getAsJsonArray("waypoints")) {
+        if (entry.isJsonObject() && entry.getAsJsonObject().has("abbreviation")) {
+          JsonElement abbreviation = entry.getAsJsonObject().get("abbreviation");
+          if (!abbreviation.isJsonNull() && (!abbreviation.isJsonPrimitive() || !abbreviation.getAsJsonPrimitive().isString()))
+            throw new IllegalArgumentException("Invalid waypoint abbreviation");
+        }
+      }
       Data data = JSON.fromJson(object, Data.class);
       data.validate();
       return data;

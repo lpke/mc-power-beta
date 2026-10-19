@@ -38,7 +38,7 @@ public final class SpawnPoint implements Command {
     s.sendFeedback("/spawnpoint [targets] [x y z] [angle]");
     s.sendFeedback(
         "Set an Overworld respawn point without a bed. Sleeping in a bed replaces it. Inventory and"
-            + " warps stay unchanged.");
+            + " waypoints stay unchanged.");
   }
 
   public String[] suggestion(SharedCommandSource s, int n, String input, String total) {

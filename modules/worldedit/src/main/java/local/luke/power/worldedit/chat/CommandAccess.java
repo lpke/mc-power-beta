@@ -25,7 +25,7 @@ public final class CommandAccess {
   }
   public static boolean allowed(String name) {
     GameRule owner = owner(name);
-    return owner == null || !local.luke.power.input.DetachedCamera.isActive() && CommandPermissions.allowed(owner);
+    return owner == null || CommandPermissions.allowed(owner);
   }
   public static String requirement(String name) {
     GameRule owner = owner(name);

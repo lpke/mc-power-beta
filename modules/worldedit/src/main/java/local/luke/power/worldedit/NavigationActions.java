@@ -80,6 +80,11 @@ public final class NavigationActions {
   }
 
   private Pos feet() {
+    if (local.luke.power.input.DetachedCamera.isActive()) {
+      var pose = local.luke.power.input.ReportedPosition.current(mc.player, mc.player.x,
+          mc.player.boundingBox.minY, mc.player.z, mc.player.yaw, mc.player.pitch);
+      return new Pos((int)Math.floor(pose.x()), (int)Math.floor(pose.y()), (int)Math.floor(pose.z()));
+    }
     return new Pos(
         (int) Math.floor(mc.player.x),
         (int) Math.floor(mc.player.boundingBox.minY + .00001),
@@ -88,7 +93,7 @@ public final class NavigationActions {
 
   private Pos trace(boolean through) {
     // Use Beta's crosshair origin and direction, including its float trig rounding.
-    Vec3d start = mc.player.method_931(1F), look = mc.player.method_926(1F);
+    Vec3d start = SelectionTarget.origin(mc), look = SelectionTarget.direction(mc);
     Vec3d end = start.add(look.x * 256, look.y * 256, look.z * 256);
     boolean hit = false;
     for (Pos p : BlockRay.cells(start.x, start.y, start.z, look.x, look.y, look.z, 256)) {

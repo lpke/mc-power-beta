@@ -20,6 +20,7 @@ public final class CommandPermissions {
     return switch (command) {
       case "gm" -> "gamemode";
       case "teleport" -> "tp";
+      case "way", "wp" -> "waypoint";
       case "weather" -> "toggledownfall";
       default -> command;
     };
@@ -30,7 +31,7 @@ public final class CommandPermissions {
       case "give" -> ALLOW_ITEM_SPAWNING;
       case "summon", "kill", "killall", "ride", "remove", "rem", "rement", "butcher" -> ALLOW_ENTITY_CONTROL;
       case "heal", "god", "clear", "repair" -> ALLOW_SURVIVAL_ASSISTANCE;
-      case "tp", "spawn", "warp", "up", "ceil", "ascend", "descend", "unstuck", "thru", "jumpto" -> ALLOW_TELEPORTATION;
+      case "tp", "spawn", "waypoint", "up", "ceil", "ascend", "descend", "unstuck", "thru", "jumpto" -> ALLOW_TELEPORTATION;
       case "spawnpoint", "setworldspawn" -> ALLOW_SPAWN_EDITING;
       case "time" -> ALLOW_TIME_EDITING;
       case "toggledownfall" -> ALLOW_WEATHER_EDITING;
@@ -43,7 +44,7 @@ public final class CommandPermissions {
   }
   public static boolean allowed(String name) { return denial(name).isEmpty(); }
   public static boolean available(String name) {
-    return Set.of("time", "warp", "clear", "gamemode").contains(canonical(name)) || allowed(name);
+    return Set.of("time", "waypoint", "clear", "gamemode").contains(canonical(name)) || allowed(name);
   }
   public static String modeDenial(String mode) {
     if (mode.equals("survival")) return "";
@@ -64,12 +65,12 @@ public final class CommandPermissions {
   }
   public static boolean readOnly(String name, String[] args) {
     if (args.length == 1 || args.length == 2 && args[1].equalsIgnoreCase("help")) {
-      // Bare /clear, /time, /warp and similar commands can have active defaults.
+      // Bare /clear, /time, /waypoint and similar commands can have active defaults.
       if (args.length == 2) return true;
     }
     return switch (canonical(name)) {
       case "time" -> args.length > 1 && Set.of("query", "get").contains(args[1].toLowerCase(Locale.ROOT));
-      case "warp" -> args.length == 1 || args.length > 1 && Set.of("list", "set", "add", "remove", "delete").contains(args[1].toLowerCase(Locale.ROOT));
+      case "waypoint" -> args.length == 1 || args.length > 1 && Set.of("list", "add", "remove").contains(args[1].toLowerCase(Locale.ROOT));
       case "clear" -> args.length == 4 && args[3].equals("0");
       default -> false;
     };

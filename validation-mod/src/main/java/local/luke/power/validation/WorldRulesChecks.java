@@ -65,7 +65,7 @@ final class WorldRulesChecks {
       });
       test("each access permission grants only its own command family", () -> {
         List<String> commands = List.of("give", "summon", "kill", "killall", "ride", "remove", "butcher",
-            "heal", "god", "clear", "repair", "tp", "teleport", "spawn", "warp", "up", "thru",
+            "heal", "god", "clear", "repair", "tp", "teleport", "spawn", "waypoint", "up", "thru",
             "spawnpoint", "setworldspawn", "time", "weather");
         for (GameRule allowed : GameRule.values()) if (allowed.access()) {
           var rules = new RuleSet(); rules.set(allowed, true); AccessRules.restore(mc, rules);
@@ -79,10 +79,10 @@ final class WorldRulesChecks {
       });
       test("safe subcommands retain help and data while their mutations are blocked", () -> {
         AccessRules.restore(mc, new RuleSet());
-        for (String[] args : List.of(new String[]{"time","query"}, new String[]{"warp","list"},
-            new String[]{"warp","set","fixture"}, new String[]{"clear","264","0","0"}))
+        for (String[] args : List.of(new String[]{"time","query"}, new String[]{"waypoint","list"},
+            new String[]{"waypoint","add","fixture"}, new String[]{"clear","264","0","0"}))
           check(CommandPermissions.denial(args[0], args).isEmpty(), "safe subcommand denied " + Arrays.toString(args));
-        check(!CommandPermissions.denial("warp", new String[]{"warp","fixture"}).isEmpty(), "warp travel allowed");
+        check(!CommandPermissions.denial("waypoint", new String[]{"waypoint","teleport","fixture"}).isEmpty(), "waypoint travel allowed");
         check(!CommandPermissions.denial("time", new String[]{"time","set","day"}).isEmpty(), "time edit allowed");
         check(ChatChecks.submit(mc, "/difficulty normal").stream().noneMatch(s -> s.startsWith("§c")), "difficulty gated");
       });

@@ -6,6 +6,7 @@ import java.util.TreeSet;
 import local.luke.power.audio.AudioConfig;
 import local.luke.power.audio.AudioSettings.MenuControlsPosition;
 import local.luke.power.ui.PauseMenuMusic;
+import local.luke.power.ui.PauseMenuTools;
 import net.minecraft.class_525;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -17,11 +18,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = {class_525.class, net.minecraft.client.gui.screen.TitleScreen.class}, priority = 800)
 public class PauseMusicMixin extends Screen {
   @Unique private final PauseMenuMusic power$music = new PauseMenuMusic();
+  @Unique private final PauseMenuTools power$tools = new PauseMenuTools();
   @Unique private final Map<ButtonWidget, Integer> power$buttonY = new IdentityHashMap<>();
 
   @Inject(method = "init", at = @At("TAIL"))
   private void power$init(CallbackInfo ci) {
     power$music.init(minecraft, width, height);
+    power$tools.init(minecraft, width, height);
+    power$tools.configure(this, buttons, (Object)this instanceof class_525);
     power$buttonY.clear();
   }
 
@@ -36,6 +40,19 @@ public class PauseMusicMixin extends Screen {
         bottom = Math.max(bottom, button.y + 20);
       }
     }
+    int toolsSpace = power$tools.reserveAboveBack();
+    if (toolsSpace > 0 && (Object)this instanceof class_525) {
+      for (Object object : buttons) {
+        ButtonWidget back = (ButtonWidget)object;
+        if (back.id != 4) continue;
+        // Leave the default toolbar between the title and Back to game when space permits.
+        int shift = Math.min(Math.max(0, 52 + toolsSpace - back.y), Math.max(0, height - 16 - bottom));
+        for (Object entry : buttons) ((ButtonWidget)entry).y += shift;
+        top += shift; bottom += shift;
+        break;
+      }
+    }
+    top -= toolsSpace;
     var position = AudioConfig.current().menuControlsPosition;
     boolean narrowSide = width / 2 - 112 < 180
         && (position == MenuControlsPosition.MIDDLE_LEFT || position == MenuControlsPosition.MIDDLE_RIGHT);
@@ -61,12 +78,14 @@ public class PauseMusicMixin extends Screen {
           needed -= close;
         }
       }
-      int shift = Math.min(needed, Math.max(0, top - 48));
+      int minimumTop = toolsSpace > 0 && (Object)this instanceof class_525 ? 52 : 48;
+      int shift = Math.min(needed, Math.max(0, top - minimumTop));
       for (Object object : buttons) ((ButtonWidget) object).y -= shift;
       top -= shift;
       bottom -= shift;
     }
     power$music.layout(top, bottom);
+    power$tools.layout(buttons, power$music.bounds());
   }
 
   @Inject(method = "render", at = @At("HEAD"))
@@ -77,11 +96,13 @@ public class PauseMusicMixin extends Screen {
   @Inject(method = "render", at = @At("TAIL"))
   private void power$render(int x, int y, float delta, CallbackInfo ci) {
     power$music.render(x, y, delta);
+    power$tools.render(x, y, delta);
   }
 
   @Override
   protected void mouseClicked(int x, int y, int button) {
     power$layout();
+    if (power$tools.press(x, y, button)) return;
     if (power$music.press(x, y, button)) return;
     if ((Object) this instanceof net.minecraft.client.gui.screen.TitleScreen && minecraft.world == null
         && (button == 0 || button == 1) && local.luke.power.ui.TitlePreview.hitTest.contains(x, y, width)) {

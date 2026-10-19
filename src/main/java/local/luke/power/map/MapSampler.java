@@ -24,12 +24,14 @@ public final class MapSampler {
   private World world;
   private String context = "";
   private Chunk current;
+  private MapSamplingFocus focus;
   private int column,
       centerX = Integer.MIN_VALUE,
       centerZ,
       layer = Integer.MIN_VALUE,
       paletteRevision;
   private long ticks;
+  private long lastRebuild;
   public int columnsLastTick;
   public long nanosLastTick;
 
@@ -89,7 +91,25 @@ public final class MapSampler {
       nanosLastTick = System.nanoTime() - start;
       return;
     }
-    if (centerX != cx || centerZ != cz || queue.isEmpty() && current == null) rebuild(cx, cz);
+    var mapView = mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen screen
+        ? screen.samplingView(world.dimension.id, selectedLayer) : null;
+    int radius = Math.min(16, local.luke.power.controls.util.ModOptions.getRenderDistanceChunks());
+    var nextFocus = MapSamplingFocus.of(mapView, cx, cz, radius);
+    if (centerX != cx || centerZ != cz || !nextFocus.equals(focus)
+        || queue.isEmpty() && current == null || mapView != null && ticks - lastRebuild >= 20) {
+      focus = nextFocus;
+      lastRebuild = ticks;
+      rebuild(cx, cz);
+    }
+    boolean admitted = false;
+    // Live nearby terrain must refresh even while the peripheral survey is unfinished.
+    for (int dz = -1; dz <= 1; dz++) for (int dx = -1; dx <= 1; dx++) {
+      var near = new Chunk(cx + dx, cz + dz);
+      if (!near.equals(current) && due(near) && !queue.contains(near)
+          && loaded(world, near.x, near.z) != null) {
+        queue.addLast(near); admitted = true;
+      }
+    }
     int changes = 0;
     for (var it = dirty.iterator(); it.hasNext() && changes < 16; ) {
       Chunk changed = it.next();
@@ -101,21 +121,11 @@ public final class MapSampler {
       queue.remove(changed);
       queue.addFirst(changed);
     }
-    // Revisit unsurveyed nearby chunks before distant invalidations. In an open map, the
-    // visible center wins, provided it is already loaded in this same dimension/layer.
-    var priorities = new ArrayList<Chunk>();
-    if (mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen screen) {
-      var view = screen.samplingView(world.dimension.id, selectedLayer);
-      if (view != null) near(priorities, (int)Math.floor(view.x) >> 4, (int)Math.floor(view.z) >> 4, cx, cz);
-    }
-    near(priorities, cx, cz, cx, cz);
-    for (int i = priorities.size() - 1; i >= 0; i--) {
-      var focus = priorities.get(i);
-      if (due(focus) && !focus.equals(current)) { queue.remove(focus); queue.addFirst(focus); }
-    }
-    if (current != null && !queue.isEmpty()) {
-      int nextPriority = priorities.indexOf(queue.peekFirst()), currentPriority = priorities.indexOf(current);
-      if (nextPriority >= 0 && (currentPriority < 0 || nextPriority < currentPriority)) park();
+    if (changes > 0 || admitted) {
+      order(cx, cz);
+      if (current != null && !queue.isEmpty() && priority(cx, cz).compare(queue.peek(), current) < 0) {
+        park(); order(cx, cz);
+      }
     }
     boolean mapOpen = mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen;
     int maxColumns = mapOpen ? settings.mapOpenColumns : settings.columnsPerTick;
@@ -162,18 +172,6 @@ public final class MapSampler {
         >= MapConfig.current().refreshSeconds * 20L;
   }
 
-  private void near(List<Chunk> target, int x, int z, int playerX, int playerZ) {
-    var nearby = new ArrayList<Chunk>(9);
-    for (int dz = -1; dz <= 1; dz++) for (int dx = -1; dx <= 1; dx++) {
-      var chunk = new Chunk(x + dx, z + dz);
-      if (Math.abs((long)chunk.x - playerX) > 16 || Math.abs((long)chunk.z - playerZ) > 16
-          || target.contains(chunk) || !due(chunk) || loaded(world, chunk.x, chunk.z) == null) continue;
-      nearby.add(chunk);
-    }
-    nearby.sort(Comparator.comparingInt(c -> (c.x - x) * (c.x - x) + (c.z - z) * (c.z - z)));
-    target.addAll(nearby);
-  }
-
   private void park() {
     if (column > 0) progress.put(chunkKey(current.x, current.z), column);
     queue.remove(current);
@@ -196,10 +194,21 @@ public final class MapSampler {
         if (ticks - last >= MapConfig.current().refreshSeconds * 20L
             && loaded(world, px, pz) != null) chunks.add(new Chunk(px, pz));
       }
-    chunks.sort(
-        Comparator.comparingLong((Chunk c) -> sampled.containsKey(chunkKey(c.x, c.z)) ? 1 : 0)
-            .thenComparingInt(c -> (c.x - cx) * (c.x - cx) + (c.z - cz) * (c.z - cz)));
     queue.addAll(chunks);
+    order(cx, cz);
+  }
+
+  private void order(int cx, int cz) {
+    var chunks = new ArrayList<>(queue);
+    chunks.sort(priority(cx, cz));
+    queue.clear(); queue.addAll(chunks);
+  }
+
+  private Comparator<Chunk> priority(int cx, int cz) {
+    return Comparator.comparingInt((Chunk c) -> focus.tier(c.x, c.z, cx, cz,
+        sampled.containsKey(chunkKey(c.x, c.z))))
+        .thenComparingLong(c -> sampled.getOrDefault(chunkKey(c.x, c.z), Long.MIN_VALUE / 2))
+        .thenComparingLong(c -> focus.distance(c.x, c.z, cx, cz));
   }
 
   private static long chunkKey(int x, int z) {

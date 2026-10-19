@@ -12,6 +12,15 @@ public final class InterfaceBackend implements Backend {
     List<Setting> settings = new ArrayList<>(List.of(
             new Setting("interface.autoApply", "interface", "Interface", "General", "Auto apply", "", Setting.Kind.BOOLEAN,
                 new JsonPrimitive(MenuPreferences.current().autoApply), new JsonPrimitive(true), 0, 1, 1, List.of(), false),
+            new Setting("interface.pauseToolsPosition", "interface", "Interface", "Pause menu", "Tool buttons position",
+                "Place the photo, map and waypoint buttons together in the pause menu.", Setting.Kind.CHOICE,
+                new JsonPrimitive(MenuPreferences.pauseToolsPosition()), new JsonPrimitive(0), 0, 8, 1, local.luke.power.ui.PauseToolsLayout.POSITIONS, false),
+            new Setting("interface.pauseMapButton", "interface", "Interface", "Pause menu", "Map button",
+                "Show a map item button in the pause menu while the World Map is enabled.", Setting.Kind.BOOLEAN,
+                new JsonPrimitive(MenuPreferences.pauseMapButton()), new JsonPrimitive(true), 0, 1, 1, List.of(), false),
+            new Setting("interface.pauseWaypointsButton", "interface", "Interface", "Pause menu", "Waypoints button",
+                "Show a diamond button for saved waypoints in the pause menu.", Setting.Kind.BOOLEAN,
+                new JsonPrimitive(MenuPreferences.pauseWaypointsButton()), new JsonPrimitive(true), 0, 1, 1, List.of(), false),
             new Setting("interface.debugPresets", "interface", "Interface", "Debug (F3) info", "F3 presets", "", Setting.Kind.LIST,
                 MenuPreferences.current().debugPresets, new JsonArray(), 0, 0, 1, List.of(), false),
             new Setting("interface.debugOrder", "interface", "Interface", "Debug (F3) info", "Info order",
@@ -80,7 +89,12 @@ public final class InterfaceBackend implements Backend {
           ? local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder")) : MenuPreferences.debugOrder(),
           values.containsKey("interface.debugRightOrder") ? local.luke.power.ui.DebugOrder.read(values.get("interface.debugRightOrder")) : MenuPreferences.debugRightOrder());
     for (var e : values.entrySet()) {
-      if (e.getKey().equals("interface.debugPresets")) {
+      if (e.getKey().equals("interface.pauseToolsPosition")) {
+        int position;
+        try { position = e.getValue().getAsBigDecimal().intValueExact(); }
+        catch (RuntimeException failure) { throw new IllegalArgumentException("Invalid pause tool button position"); }
+        if (position < 0 || position >= local.luke.power.ui.PauseToolsLayout.POSITIONS.size()) throw new IllegalArgumentException("Invalid pause tool button position");
+      } else if (e.getKey().equals("interface.debugPresets")) {
         local.luke.power.ui.DebugPresets.checked(e.getValue());
       } else if ((e.getKey().equals("interface.debugOrder") || e.getKey().equals("interface.debugRightOrder"))) {
         local.luke.power.ui.DebugOrder.read(e.getValue());
@@ -98,7 +112,7 @@ public final class InterfaceBackend implements Backend {
         }
       } else if (e.getKey().equals("interface.debugTextColor")) {
         local.luke.power.light.LightSettings.rgb(e.getValue().getAsString());
-      } else if ((!e.getKey().equals("interface.autoApply") && !e.getKey().equals("interface.hidePowerBetaVersion") && !e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
+      } else if ((!e.getKey().equals("interface.autoApply") && !e.getKey().equals("interface.hidePowerBetaVersion") && !e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.pauseMapButton") && !e.getKey().equals("interface.pauseWaypointsButton") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
           || !e.getValue().isJsonPrimitive() || !e.getValue().getAsJsonPrimitive().isBoolean())
         throw new IllegalArgumentException("Invalid interface preference");
     }
@@ -110,6 +124,9 @@ public final class InterfaceBackend implements Backend {
 
   public void preview(Map<String, JsonElement> values) {
     validate(values);
+    if (values.containsKey("interface.pauseToolsPosition")) MenuPreferences.previewPauseTools(values.get("interface.pauseToolsPosition").getAsInt());
+    if (values.containsKey("interface.pauseMapButton")) MenuPreferences.previewPauseMap(values.get("interface.pauseMapButton").getAsBoolean());
+    if (values.containsKey("interface.pauseWaypointsButton")) MenuPreferences.previewPauseWaypoints(values.get("interface.pauseWaypointsButton").getAsBoolean());
     if (values.containsKey("interface.debugOrder")) MenuPreferences.previewDebugOrder(local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder")));
     if (values.containsKey("interface.debugRightOrder")) MenuPreferences.previewDebugRightOrder(local.luke.power.ui.DebugOrder.read(values.get("interface.debugRightOrder")));
     if (values.containsKey("interface.debugTextSize")) MenuPreferences.previewDebugSize(values.get("interface.debugTextSize").getAsDouble());
@@ -133,6 +150,9 @@ public final class InterfaceBackend implements Backend {
   public void apply(Map<String, JsonElement> values) throws Exception {
     validate(values);
     MenuPreferences.update(v -> {
+      if (values.containsKey("interface.pauseToolsPosition")) v.pauseToolsPosition = values.get("interface.pauseToolsPosition").getAsInt();
+      if (values.containsKey("interface.pauseMapButton")) v.pauseMapButton = values.get("interface.pauseMapButton").getAsBoolean();
+      if (values.containsKey("interface.pauseWaypointsButton")) v.pauseWaypointsButton = values.get("interface.pauseWaypointsButton").getAsBoolean();
       if (values.containsKey("interface.autoApply")) v.autoApply = values.get("interface.autoApply").getAsBoolean();
       if (values.containsKey("interface.debugPresets")) v.debugPresets = local.luke.power.ui.DebugPresets.checked(values.get("interface.debugPresets"));
       if (values.containsKey("interface.debugOrder")) v.debugOrder = local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder"));
