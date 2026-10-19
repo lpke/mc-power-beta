@@ -64,7 +64,7 @@ class SettingsDraftTest {
   }
   @Test void minimapDraftIncludesEveryAppearanceControlAndUndoKeepsOptionsUntouched() {
     List<String> included = List.of("rotate", "circular", "hideWithDebug", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
-        "coordinates", "biome", "clock", "compass", "colourMode",
+        "coordinates", "biome", "clock", "compass", "colourMode", "caveLighting",
         "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight",
         "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks", "lightOverlay", "footsteps",
         "pathColor", "pathOpacity", "playerIcon", "playerColor", "playerOpacity", "playerSize",
@@ -81,12 +81,12 @@ class SettingsDraftTest {
     draft.undo();
     assertEquals(before, draft.snapshot());
     assertFalse(draft.changed());
-    for (String id : List.of("heightShading", "slopeShading", "caveLighting", "minimap", "worldMap", "hudEditor", "caveMode", "caveTop", "caveAbove", "caveBelow", "roofSize", "worldWaypoints",
+    for (String id : List.of("heightShading", "slopeShading", "minimap", "worldMap", "hudEditor", "caveMode", "caveTop", "caveAbove", "caveBelow", "roofSize", "worldWaypoints", "worldMapWaypointSize", "waypointBobbing",
         "deathpoints", "keepOldDeaths", "pauseMap", "columnsPerTick", "cacheTiles", "uploadsPerFrame", "refreshSeconds", "updateRate", "radarLimit"))
       assertFalse(HudEditorSettings.contains(setting("maps." + id, "[]")), id);
   }
   @Test void retiredShadingAndFlightFovValuesKeepMetadataButNeverBecomeEditorRows() {
-    for (String id : List.of("maps.heightShading", "maps.slopeShading", "maps.caveLighting", "sprint.creativeFov", "sprint.spectatorFov")) {
+    for (String id : List.of("maps.heightShading", "maps.slopeShading", "sprint.creativeFov", "sprint.spectatorFov")) {
       var setting = setting(id, "[]");
       assertTrue(HudEditorSettings.internal(setting));
       assertFalse(HudEditorSettings.contains(setting));

@@ -8,7 +8,7 @@ public final class MapSettings {
   public boolean coordinates = true, biome = true, clock, compass = true;
   public int directionTextSize = 100, belowTextSize = 100, minimapArrowSize = 100;
   public boolean minimapWaypointArrows = true, minimapDestinationArrow = true, minimapDeathpointArrows = true;
-  public int destinationArrowColor = 0x5599ff;
+  public int destinationArrowColor = 0x00ecff;
   public double destinationArrowOpacity = 1;
   public int colourMode, caveMode = 1, caveTop = 64, roofSize = 3;
   public int caveAbove = 10, caveBelow = 10;
@@ -27,6 +27,7 @@ public final class MapSettings {
       waypointDistances = true;
   public int waypointDistance = 1000;
   public int waypointTextSize = 75;
+  public int worldMapWaypointSize = 85, waypointBobbing;
   public boolean waypointDistanceScaling = true;
   public boolean deathpoints = true, keepOldDeaths = true;
   public boolean chunkGrid, slimeChunks, lightOverlay, footsteps, pauseMap;
@@ -38,6 +39,8 @@ public final class MapSettings {
 
   public void validate() {
     range(waypointTextSize, 50, 150);
+    range(worldMapWaypointSize, 50, 150);
+    range(waypointBobbing, 0, 1);
     range(size, 64, 240);
     range(corner, 0, 3);
     range(offsetX, 0, 500);

@@ -23,7 +23,7 @@ public abstract class ChatMixin extends Screen {
     boolean prefix =
         input.startsWith("/")
             && !input.contains(" ")
-            && CommandCatalog.SINGLE.stream().anyMatch(n -> n.startsWith(input.substring(1)));
+            && CommandCatalog.SINGLE.stream().anyMatch(n -> local.luke.power.chat.ChatCompletion.startsWith(n, input.substring(1)));
     if (CommandCatalog.owns(input) || prefix) {
       if (key == Keyboard.KEY_TAB) {
         text =

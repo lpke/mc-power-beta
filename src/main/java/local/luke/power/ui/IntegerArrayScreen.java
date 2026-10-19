@@ -166,6 +166,6 @@ public final class IntegerArrayScreen extends UiScreen {
     button("Defaults", left() + 104, height - 54, 76, 20, mx, my, true);
     button("Done", width / 2 - 102, height - 28, 100, 20, mx, my, error.isEmpty());
     button("Cancel", width / 2 + 2, height - 28, 100, 20, mx, my, true);
-    if (!tip.isEmpty()) tooltip(tip, mx, my);
+    if (dragging < 0 && !tip.isEmpty()) tooltip(tip, mx, my);
   }
 }

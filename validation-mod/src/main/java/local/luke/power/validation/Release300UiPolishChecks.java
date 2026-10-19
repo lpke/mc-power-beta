@@ -37,7 +37,7 @@ public final class Release300UiPolishChecks {
       test("retired map shading and per-mode flight FOV settings cannot become visible rows", () -> {
         var options = new PowerOptionsScreen(null); mc.setScreen(options);
         try {
-          for (String id : List.of("maps.heightShading", "maps.slopeShading", "maps.caveLighting", "sprint.creativeFov", "sprint.spectatorFov")) {
+          for (String id : List.of("maps.heightShading", "maps.slopeShading", "sprint.creativeFov", "sprint.spectatorFov")) {
             var setting = options.session().settings().stream().filter(s -> s.id.equals(id)).findFirst().orElseThrow();
             Validation.check(HudEditorSettings.internal(setting) && !HudEditorSettings.contains(setting), "retired row remains editable: " + id);
             for (Object row : (List<?>)get(options, "rows"))

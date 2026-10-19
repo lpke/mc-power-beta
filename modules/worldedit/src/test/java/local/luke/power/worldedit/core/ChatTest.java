@@ -38,6 +38,13 @@ class ChatTest {
     assertFalse(CommandCatalog.complete("//set moving_").contains("//set moving_piston"));
   }
 
+  @Test void completionIgnoresCommandArgumentAndBlockStateCase() {
+    assertTrue(CommandCatalog.complete("//HE").contains("//help"));
+    assertTrue(CommandCatalog.complete("//SET STO").contains("//SET stone"));
+    assertTrue(CommandCatalog.complete("//MOVE 3 NO").contains("//MOVE 3 north"));
+    assertTrue(CommandCatalog.complete("//SET oak_stairs[FA").contains("//SET oak_stairs[facing=east]"));
+  }
+
   @Test
   void ordinaryChatIsNotClaimed() {
     assertFalse(CommandCatalog.owns("hello"));

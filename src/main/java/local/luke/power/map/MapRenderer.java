@@ -369,12 +369,22 @@ public final class MapRenderer {
 
   private static void label(
       Minecraft mc, MapProjection view, boolean circle, String text, int x, int y, int color) {
-    int width = mc.textRenderer.getWidth(text);
+    label(mc, view, circle, text, x, y, 1, color);
+  }
+
+  private static void label(Minecraft mc, MapProjection view, boolean circle, String text,
+      double x, double y, double scale, int color) {
+    double width = mc.textRenderer.getWidth(text) * scale, height = 8 * scale;
     if (view.contains(x, y, circle)
         && view.contains(x + width, y, circle)
-        && view.contains(x, y + 8, circle)
-        && view.contains(x + width, y + 8, circle))
-      mc.textRenderer.drawWithShadow(text, x, y, color);
+        && view.contains(x, y + height, circle)
+        && view.contains(x + width, y + height, circle)) {
+      GL11.glPushMatrix();
+      try {
+        GL11.glTranslated(x, y, 0); GL11.glScaled(scale, scale, 1);
+        mc.textRenderer.drawWithShadow(text, 0, 0, color);
+      } finally { GL11.glPopMatrix(); }
+    }
   }
 
   public static void markers(
@@ -420,13 +430,15 @@ public final class MapRenderer {
       if (s.waypoints && store != null)
         for (var point : Maps.points()) {
           if (waypointCount >= 512) break;
+          if (point.death && !s.deathpoints) continue;
           if (MinimapArrows.destination(point)) {
             if (!point.enabled || point.dimension != dimension) continue;
           } else if (!point.visible(
               dimension, store.selectedSet(), store.allSets(), Maps.x(), Maps.z(), s)) continue;
           var p = view.screen(point.x + .5, point.z + .5);
           waypointCount++;
-          if (!view.contains(p.x(), p.y(), circle, 6)) {
+          double markerScale = mini ? 1 : s.worldMapWaypointSize / 100d;
+          if (!view.contains(p.x(), p.y(), circle, Math.max(6, 6 * markerScale))) {
             var style = MinimapArrows.style(point, s, mini);
             if (!style.visible()) continue;
             var edge = view.edge(p, circle, style.inset());
@@ -441,13 +453,14 @@ public final class MapRenderer {
           int waypointColor = WaypointSymbols.color(point, s);
           double waypointOpacity = WaypointSymbols.opacity(point, s);
           if (waypointOpacity <= 0) continue;
-          WaypointSymbols.draw(mc, point, p.x(), p.y(), mini ? point.death ? 4 : 2.5 : 4.5,
+          WaypointSymbols.draw(mc, point, p.x(), p.y(), mini ? point.death ? 4 : 2.5 : 4.5 * markerScale,
               waypointColor, waypointOpacity);
-          if (s.waypointNames && !point.death) {
-            String text = mini ? point.abbreviation() : MinimapArrows.destination(point)
+          if (!mini && point.death || s.waypointNames && !point.death) {
+            String text = point.death ? WaypointTimes.compact(point.created)
+                : mini ? point.abbreviation() : MinimapArrows.destination(point)
                 ? point.x + "," + point.y + "," + point.z : point.name;
-            label(mc, view, circle, text, (int)p.x() + (mini ? 7 : 9), (int)p.y() - 4,
-                (int)Math.round(waypointOpacity * 255) << 24 | waypointColor);
+            label(mc, view, circle, text, p.x() + (mini ? 7 : 9 * markerScale), p.y() - 4 * markerScale,
+                markerScale, (int)Math.round(waypointOpacity * 255) << 24 | (point.death ? 0xff5555 : waypointColor));
           }
         }
       if (s.radar && dimension == Maps.dimension())

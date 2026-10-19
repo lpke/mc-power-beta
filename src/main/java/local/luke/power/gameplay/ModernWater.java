@@ -16,11 +16,14 @@ public final class ModernWater {
   public static boolean eligible(Entity entity) {
     if (!GameplayConfig.current().modernWaterMovement || !(entity instanceof ClientPlayerEntity player)
         || player.world == null || player.world.isRemote || player.dead || player.health <= 0
-        || player.field_1595 != null || !(player instanceof PlayerMode mode) || mode.power$spectator() || mode.power$flying()) return false;
+        || player.field_1595 != null || player.method_943() || DetachedCamera.isActive()
+        || !(player instanceof PlayerMode mode) || mode.power$spectator() || mode.power$flying()) return false;
     Minecraft mc=client();
     return mc!=null && mc.player==player && mc.world==player.world;
   }
   public static boolean push(ClientPlayerEntity player) {
+    SwimState swim=((SwimPlayer)player).power$swim();
+    swim.waterDepth=0;
     var box=player.boundingBox;var world=player.world;
     if (!Double.isFinite(box.minX)||!Double.isFinite(box.minY)||!Double.isFinite(box.minZ)
         ||!Double.isFinite(box.maxX)||!Double.isFinite(box.maxY)||!Double.isFinite(box.maxZ)) return false;
@@ -48,6 +51,25 @@ public final class ModernWater {
       }
       player.velocityX+=x;player.velocityY+=y;player.velocityZ+=z;
     }
+    swim.waterDepth=depth;
     return wet;
+  }
+
+  /** LivingEntity.aiStep settles motion before refreshing controls and applying Jump. */
+  public static void livingStep(Entity entity) {
+    if (!(entity instanceof ClientPlayerEntity player) || !(player instanceof SwimPlayer owner))return;
+    SwimState state=owner.power$swim();
+    if(state.waterJumpTicks>0)state.waterJumpTicks--;
+    if(player.field_161==null || !player.field_161.field_2535)state.waterJumpTicks=0;
+    if(!eligible(player) || !player.method_1334())return;
+    player.velocityX=SwimState.settled(player.velocityX);
+    player.velocityY=SwimState.settled(player.velocityY);
+    player.velocityZ=SwimState.settled(player.velocityZ);
+  }
+
+  public static boolean shallowJump(Entity entity) {
+    if(!eligible(entity) || !entity.field_1623 || !entity.method_1334())return false;
+    double depth=((SwimPlayer)entity).power$swim().waterDepth;
+    return depth>0 && depth<=.4;
   }
 }

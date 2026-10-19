@@ -36,7 +36,10 @@ public final class WaypointEditorScreen extends UiScreen {
   public void removed() { Keyboard.enableRepeatEvents(false); TextDrag.cancel(); }
   private int left() { return (width - span()) / 2; }
   private int span() { return Math.min(360, width - 20); }
-  private int row(int index) { return 32 + index * 25 - scroll; }
+  private int row(int index) {
+    int display = index == ABBREVIATION ? 1 : index > 0 && index < ABBREVIATION ? index + 1 : index;
+    return 32 + display * 25 - scroll;
+  }
   private int dimensionWidth() { return Math.max(68, (span() - 96) / 2); }
   private int fieldLeft(int index) { return left() + 72 + (index == 5 ? dimensionWidth() + 4 : 0); }
   private int fieldWidth(int index) { return span() - 96 - (index == 5 ? dimensionWidth() + 4 : 0); }
@@ -105,9 +108,11 @@ public final class WaypointEditorScreen extends UiScreen {
     if (key == Keyboard.KEY_ESCAPE) { leave(); return; }
     if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { click(); save(); return; }
     if (key == Keyboard.KEY_TAB) {
-      int index = 0;
-      for (int i = 0; i < fields.size(); i++) if (fields.get(i).focused) { index = (i + 1) % fields.size(); break; }
-      if (index == 1) index++;
+      var editable = List.of(0, ABBREVIATION, 2, 3, 4, 5, 6);
+      int index = editable.get(0);
+      for (int i = 0; i < editable.size(); i++) if (fields.get(editable.get(i)).focused) {
+        index = editable.get((i + 1) % editable.size()); break;
+      }
       fields.forEach(field -> field.focused = false); fields.get(index).focused = true; return;
     }
     for (int i = 0; i < fields.size(); i++) if (i != 1) fields.get(i).key(c, key);
@@ -161,8 +166,7 @@ public final class WaypointEditorScreen extends UiScreen {
     for (int i = 0; i < fields.size(); i++) {
       text(labels[i], left(), row(i) + 5, 0xcccccc);
       if (i == 1) {
-        button(fit(fields.get(i).text(), fieldWidth(i) - 18), fieldLeft(i), row(i), fieldWidth(i), 18, hoverX, hoverY, true);
-        chevron(fieldLeft(i) + fieldWidth(i) - 10, row(i) + 7, true, 0xffcccccc);
+        WaypointSetDropdown.button(this, fields.get(i).text(), fieldLeft(i), row(i), fieldWidth(i), hoverX, hoverY, true, selectingSet);
       } else input(fields.get(i), fieldLeft(i), row(i), fieldWidth(i), hoverX, hoverY, i == ABBREVIATION ? "Automatic" : "");
       if (i == 5) button(fit(dimensionName(), dimensionWidth() - 6), left() + 72, row(i), dimensionWidth(), 18, hoverX, hoverY, true);
       button("R", left() + span() - 20, row(i), 20, 18, hoverX, hoverY, true);
@@ -176,12 +180,9 @@ public final class WaypointEditorScreen extends UiScreen {
     button("Cancel", left() + span() / 2 + 2, height - 26, span() / 2 - 2, 20, hoverX, hoverY, true);
     if (selectingSet) {
       var sets = sets(); int left = fieldLeft(1), top = setTop(), width = fieldWidth(1);
-      fill(left - 1, top - 1, left + width + 1, top + setRows() * 20 + 1, 0xffaaaaaa);
-      for (int i = 0; i < setRows(); i++) {
-        int index = i + setScroll, y = top + i * 20;
-        fill(left, y, left + width, y + 20, inside(mx, my, left, y, width, 20) || index == setIndex ? 0xff454545 : 0xff252525);
-        text(fit(index < sets.size() ? sets.get(index) : "New set...", width - 12), left + 6, y + 6, 0xffffff);
-      }
+      var labels = new ArrayList<>(sets); labels.add("New set...");
+      WaypointSetDropdown.render(this, labels, sets.indexOf(fields.get(1).text()), setIndex, setScroll,
+          left, top, width, setRows(), mx, my);
     }
     exit.render(this, "Save waypoint changes?", mx, my); setDialog.render(this, mx, my);
   }

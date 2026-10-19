@@ -19,7 +19,7 @@ class CommandPermissionsTest {
   @Test void safeUtilitiesAndSubcommandsRemainAvailableWithoutAccess() {
     world(new RuleSet());
     for (String command : List.of("help", "hat", "difficulty", "death", "clock", "seed", "gamerule", "calc")) assertTrue(CommandPermissions.allowed(command), command);
-    for (String text : List.of("time query daytime", "time get", "waypoint add home", "wp list", "way remove home", "clear @s stone 0", "repair help")) {
+    for (String text : List.of("time query daytime", "time get", "waypoint add home", "wp list", "way remove home", "waypoint dest", "wp destination 1 64 2", "way DEST 1 64 2", "clear @s stone 0", "repair help")) {
       String[] args = text.split(" "); assertTrue(CommandPermissions.denial(args[0], args).isEmpty(), text);
     }
     for (String text : List.of("time set day", "time add 5", "way teleport home", "clear", "clear @s stone 1", "repair")) {

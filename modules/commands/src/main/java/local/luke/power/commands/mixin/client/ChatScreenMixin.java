@@ -89,8 +89,9 @@ public abstract class ChatScreenMixin extends Screen {
         var editor = power$editor();
         if (key == Keyboard.KEY_TAB && suggestions.length > 0 && !editor.selected()) {
             ensureChosenIsInRange();
-            if (chatWidgetsAvailable) { ChatWidgetAccess.complete(suggestions[chosen]); text = getText(); }
-            else setText(getText() + suggestions[chosen]);
+            String token = power$completionToken(suggestions[chosen]);
+            if (chatWidgetsAvailable) { ChatWidgetAccess.completeToken(token); text = getText(); }
+            else { editor.completeToken(token); setText(editor.text()); }
             resetValues(); suggestionInput = power$input(); return true;
         }
         boolean ctrl = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
@@ -99,6 +100,35 @@ public abstract class ChatScreenMixin extends Screen {
             adjustChosenSuggestion(key); return true;
         }
         return false;
+    }
+
+    @Unique private String power$completionToken(String suffix) {
+        String input = power$input();
+        int start = input.lastIndexOf(' ') + 1;
+        String completed = input.substring(start) + suffix;
+        if (start == 0) {
+            for (Command command : RetroChatUtil.commands)
+                if (("/" + command.name()).equalsIgnoreCase(completed)) return "/" + command.name();
+            for (String command : vanillaNoOPCommands)
+                if (("/" + command).equalsIgnoreCase(completed)) return "/" + command;
+            return completed;
+        }
+        String[] words = input.split(" ");
+        int parameter = input.endsWith(" ") ? words.length : words.length - 1;
+        String name = words[0].substring(1);
+        Command command = RetroChatUtil.commands.stream().filter(c -> c.name().equalsIgnoreCase(name)).findFirst().orElse(null);
+        if (command == null) return completed;
+        // Query full choices only on Tab. Keep native player and saved-name spelling.
+        String prefix = command.name().equals("give") && parameter == 2 && completed.contains(":")
+            ? completed.substring(0, completed.indexOf(':') + 1).toLowerCase(java.util.Locale.ROOT) : "";
+        try {
+            SharedCommandSource source = new SharedCommandSource(minecraft.player);
+            for (String choice : command.suggestion(source, parameter, prefix, input.substring(0, start) + prefix)) {
+                String token = prefix + choice;
+                if (token.equalsIgnoreCase(completed)) return token;
+            }
+        } catch (RuntimeException ignored) {}
+        return completed;
     }
 
     @Inject(method = "keyPressed", at = @At("TAIL"))
@@ -159,12 +189,12 @@ public abstract class ChatScreenMixin extends Screen {
 
                 if (mc.world.isRemote && !ClientCommands.mp_rc) {
                     suggestions = vanillaNoOPCommands.stream()
-                            .filter(s -> s.startsWith(currentWord.substring(1)))
+                            .filter(s -> local.luke.power.chat.ChatCompletion.startsWith(s, currentWord.substring(1)))
                             .map(s -> s.substring(power$input().length() - 1))
                             .toArray(String[]::new);
                 } else {
                     suggestions = RetroChatUtil.commands.stream()
-                            .filter(c -> c.name().startsWith(currentWord.substring(1)))
+                            .filter(c -> local.luke.power.chat.ChatCompletion.startsWith(c.name(), currentWord.substring(1)))
                             .filter(c -> !ClientCommands.disabled_commands.contains(c.name()))
                             .filter(c -> local.luke.power.commands.util.CommandAccess.available(c, new SharedCommandSource(mc.player)))
                             .map(c -> c.name().substring(power$input().length() - 1))
@@ -172,7 +202,7 @@ public abstract class ChatScreenMixin extends Screen {
                 }
             } else {
                 Command command = RetroChatUtil.commands.stream()
-                        .filter(c -> c.name().equals(sections[0].substring(1)))
+                        .filter(c -> c.name().equalsIgnoreCase(sections[0].substring(1)))
                         .filter(c -> local.luke.power.commands.util.CommandAccess.available(c, new SharedCommandSource(mc.player)))
                         .findFirst().orElse(null);
                 if (command != null && (!command.disableInSingleplayer() || mc.world.isRemote)) {
@@ -210,7 +240,7 @@ public abstract class ChatScreenMixin extends Screen {
         try {
             AtomicBoolean valid = new AtomicBoolean(false);
             RetroChatUtil.commands.stream().forEach(a -> {
-                if (a.name().equals(s) && local.luke.power.commands.util.CommandAccess.available(a, new SharedCommandSource(minecraft.player))) {
+                if (a.name().equalsIgnoreCase(s) && local.luke.power.commands.util.CommandAccess.available(a, new SharedCommandSource(minecraft.player))) {
                     if (!minecraft.world.isRemote) {
                         valid.set(true);
                     } else {

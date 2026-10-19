@@ -60,9 +60,12 @@
     "interface.pauseWaypointsButton": true,
     "power_controls:userinterface.photoModeConfig.enablePhotoModeButton": true,
     "maps.circular": true,
-    "maps.destinationArrowColor": 5609983,
+    "maps.destinationArrowColor": 60671,
     "maps.waypointTextSize": 75,
-    "maps.waypointDistanceScaling": true
+    "maps.waypointDistanceScaling": true,
+    "maps.worldMapWaypointSize": 85,
+    "maps.waypointBobbing": 0,
+    "sprint.rechargeStill": 7.5
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -264,9 +267,12 @@
     "interface.pauseMapButton": false,
     "interface.pauseWaypointsButton": false,
     "maps.circular": true,
-    "maps.destinationArrowColor": 5609983,
+    "maps.destinationArrowColor": 60671,
     "maps.waypointTextSize": 75,
-    "maps.waypointDistanceScaling": true
+    "maps.waypointDistanceScaling": true,
+    "maps.worldMapWaypointSize": 85,
+    "maps.waypointBobbing": 0,
+    "sprint.rechargeStill": 7.5
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -429,8 +435,11 @@
     "interface.pauseMapButton": false,
     "interface.pauseWaypointsButton": false,
     "maps.circular": true,
-    "maps.destinationArrowColor": 5609983,
+    "maps.destinationArrowColor": 60671,
     "maps.waypointTextSize": 75,
-    "maps.waypointDistanceScaling": true
+    "maps.waypointDistanceScaling": true,
+    "maps.worldMapWaypointSize": 85,
+    "maps.waypointBobbing": 0,
+    "sprint.rechargeStill": 7.5
   }
 }

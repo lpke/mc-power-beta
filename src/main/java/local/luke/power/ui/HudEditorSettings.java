@@ -11,7 +11,7 @@ public final class HudEditorSettings {
   static final String ITEM_FADE = HUD + "hotbarItemSelectionFadeTime";
   static final String TOAST = "power_controls:userinterface.hideAchievementToast";
   static final String COLOURS = "interface.colours";
-  private static final Set<String> RETIRED = Set.of("maps.heightShading", "maps.slopeShading", "maps.caveLighting",
+  private static final Set<String> RETIRED = Set.of("maps.heightShading", "maps.slopeShading",
       "sprint.creativeFov", "sprint.spectatorFov");
   private static final Set<String> LEGACY_DEBUG = Set.of("power_compat:config.overlayAdditionsYOffset", "entityculling:config.f3InfoYOffset",
       "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");

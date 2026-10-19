@@ -26,6 +26,7 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     }
     @Inject(method = "init", at = @At("RETURN"))
     private void onInit(CallbackInfo ci) {
+        local.luke.power.chat.ChatSelection.history.context(null, false);
         text = initialMessage;
         initialMessage = "";
         textField = new TextFieldWidget(this, textRenderer, 2, height - 14, width - 2, height - 2, text);
@@ -41,7 +42,14 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     }
     @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
     private void power$edit(char character, int key, CallbackInfo ci) {
+        var selection = local.luke.power.chat.ChatSelection.history;
+        selection.context(minecraft.currentScreen, org.lwjgl.opengl.Display.isActive());
+        if (local.luke.power.input.Chord.modifier(key) != 0) { ci.cancel(); return; }
         editor.sync(textField.getText());
+        if (key == Keyboard.KEY_C && local.luke.power.ui.TextEditing.control() && selection.selected()) {
+            local.luke.power.ui.TextEditing.copy(selection.text()); ci.cancel(); return;
+        }
+        selection.clear();
         if (completion.test(character, key)) { ci.cancel(); return; }
         boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
         boolean ctrl = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
@@ -78,6 +86,10 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     }
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void power$click(int x, int y, int button, CallbackInfo ci) {
+        if (button == 0 && local.luke.power.chat.ChatSelection.history.click(this, x, y)) {
+            local.luke.power.ui.TextDrag.cancel(); editor.position(editor.cursor(), false);
+            power$sync(); ci.cancel(); return;
+        }
         if (button == 0 && y >= height - 14 && y < height - 2) {
             editor.sync(textField.getText());
             int left = 4 + textRenderer.getWidth("> ");
@@ -89,6 +101,20 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     @Override public void onMouseEvent() {
         int cursor = editor.cursor(), start = editor.start(), end = editor.end();
         super.onMouseEvent();
+        var selection = local.luke.power.chat.ChatSelection.history;
+        selection.context(minecraft.currentScreen, org.lwjgl.opengl.Display.isActive());
+        if (org.lwjgl.input.Mouse.getEventButton() != 0 || !org.lwjgl.input.Mouse.getEventButtonState())
+            selection.move(this, org.lwjgl.input.Mouse.getEventX() * width / minecraft.displayWidth,
+                height - org.lwjgl.input.Mouse.getEventY() * height / minecraft.displayHeight - 1,
+                org.lwjgl.input.Mouse.getEventButton() == 0);
         if (cursor != editor.cursor() || start != editor.start() || end != editor.end()) power$sync();
+    }
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void power$historyFocus(CallbackInfo ci) {
+        local.luke.power.chat.ChatSelection.history.context(minecraft.currentScreen, org.lwjgl.opengl.Display.isActive());
+    }
+    @Inject(method = "removed", at = @At("HEAD"))
+    private void power$historyClosed(CallbackInfo ci) {
+        local.luke.power.chat.ChatSelection.history.context(null, false);
     }
 }

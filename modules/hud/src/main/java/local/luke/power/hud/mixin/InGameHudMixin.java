@@ -81,6 +81,9 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
 
         scaledWidth = screenScaler.getScaledWidth();
         scaledHeight = screenScaler.getScaledHeight();
+        local.luke.power.chat.ChatSelection.history.begin(
+            minecraft.currentScreen instanceof ChatScreen && org.lwjgl.opengl.Display.isActive()
+                ? minecraft.currentScreen : null);
         ModHelper.configUpdated = false;
         int mode = Config.hudpositions.hudPositioningSystem.ordinal();
         var simple = Config.hudpositions.SIMPLE_HUD_POSITION_CONFIG;
@@ -540,6 +543,24 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
         } else {
             return original.call(instance, i);
         }
+    }
+
+    @WrapOperation(method = "render", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow(Ljava/lang/String;III)V"),
+        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/InGameHud;messages:Ljava/util/List;")))
+    private void powerHud_selectChat(TextRenderer renderer, String text, int x, int y, int color, Operation<Void> original) {
+        var selection = local.luke.power.chat.ChatSelection.history;
+        int row = selection.line(text, renderer, x, scaledHeight - 48 + y, renderer::getWidth);
+        if (row >= 0) {
+            int start = selection.start(row), end = selection.end(row);
+            if (start >= 0 && end > start) fill(selection.x(row, start), y - 1, selection.x(row, end), y + 8, 0xFF345C91);
+        }
+        original.call(renderer, text, x, y, color);
+    }
+
+    @Inject(method = "render", at = @At("RETURN"))
+    private void powerHud_finishChatSelection(float delta, boolean open, int x, int y, CallbackInfo ci) {
+        local.luke.power.chat.ChatSelection.history.end();
     }
 
     @ModifyConstant(

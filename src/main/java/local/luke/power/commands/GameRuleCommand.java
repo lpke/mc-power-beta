@@ -44,7 +44,7 @@ public final class GameRuleCommand {
       GameRule rule = words.length > 1 ? GameRule.find(words[1]) : null;
       if (rule != null) values.addAll(rule.integer() ? List.of("0", "100") : List.of("true", "false"));
     }
-    return values.stream().filter(v -> v.startsWith(prefix)).sorted().map(v -> v.substring(prefix.length())).toArray(String[]::new);
+    return values.stream().filter(v -> local.luke.power.chat.ChatCompletion.startsWith(v, prefix)).sorted().map(v -> v.substring(prefix.length())).toArray(String[]::new);
   }
   public static void execute(Minecraft mc, String[] args) throws Exception {
     if (mc.world == null || mc.world.isRemote) throw new IllegalArgumentException("Game rules belong to the server. Open a singleplayer world to edit local rules.");

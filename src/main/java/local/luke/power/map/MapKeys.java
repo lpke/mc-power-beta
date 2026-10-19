@@ -97,11 +97,14 @@ public final class MapKeys {
   }
 
   public static Waypoint newWaypoint() {
+    Minecraft mc = (Minecraft)net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
+    var pose = mc.player == null ? null : local.luke.power.input.ReportedPosition.current(mc.player,
+        mc.player.x, mc.player.boundingBox.minY, mc.player.z, mc.player.yaw, mc.player.pitch);
     Waypoint p = new Waypoint();
-    p.x = (int) Math.floor(Maps.x());
-    p.y = Math.max(0, Math.min(127, (int) Math.floor(Maps.y())));
-    p.z = (int) Math.floor(Maps.z());
-    p.dimension = Maps.dimension();
+    p.x = (int) Math.floor(MapMath.bounded(pose == null ? Maps.x() : pose.x(), -MapMath.BORDER, MapMath.BORDER));
+    p.y = Math.max(0, Math.min(127, (int) Math.floor(pose == null ? Maps.y() : pose.y())));
+    p.z = (int) Math.floor(MapMath.bounded(pose == null ? Maps.z() : pose.z(), -MapMath.BORDER, MapMath.BORDER));
+    p.dimension = mc.world == null ? Maps.dimension() : mc.world.dimension.id;
     if (Maps.waypoints() != null) p.set = Maps.waypoints().selectedSet();
     return p;
   }

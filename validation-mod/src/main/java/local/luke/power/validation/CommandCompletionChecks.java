@@ -39,6 +39,21 @@ final class CommandCompletionChecks {
         ((ChatInput)s).power$type('\t', Keyboard.KEY_TAB);
         check(text(s).equals("//help"), "single match did not complete");
       });
+      for (String[] completion : new String[][] {{"/GA", "memode"}, {"/GAMEMODE CR", "eative"},
+          {"//HE", "lp"}, {"//SET STO", "ne"}, {"/GAMERULE ALLOW_FL", "ight"}})
+        test("mixed-case completion: " + completion[0], () -> {
+          ChatScreen s = new ChatScreen(); mc.setScreen(s); seed(s, completion[0]);
+          ((ChatInput)s).power$type('\0', Keyboard.KEY_F8);
+          String[] choices = (String[])field(s, "suggestions");
+          check(java.util.Arrays.asList(choices).contains(completion[1]), java.util.Arrays.toString(choices));
+        });
+      for (String[] completion : new String[][] {{"/WEAT", "/weather"}, {"/WEATHER RA", "/WEATHER rain"},
+          {"/GAMEMODE CR", "/GAMEMODE creative"}, {"//HE", "//help"}})
+        test("Tab restores the selected token's native spelling: " + completion[0], () -> {
+          ChatScreen s = new ChatScreen(); mc.setScreen(s); seed(s, completion[0]);
+          ((ChatInput)s).power$type('\t', Keyboard.KEY_TAB);
+          check(text(s).equals(completion[1]), text(s));
+        });
     } finally { rules.allAllowed(cheats); mc.setScreen(null); }
     log("COMMAND COMPLETION FAILURES " + failures);
   }

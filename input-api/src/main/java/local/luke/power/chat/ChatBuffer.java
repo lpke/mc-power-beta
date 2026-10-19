@@ -81,6 +81,14 @@ public final class ChatBuffer {
     replace(suffix.substring(0, Math.min(room, suffix.length())));
     browsing = false; history = 0;
   }
+  /** A selected suggestion supplies the native spelling of the whole current token. */
+  public void completeToken(String value) {
+    if (selected()) return;
+    int from = cursor;
+    while (from > 0 && !Character.isWhitespace(text.charAt(from - 1))) from--;
+    position(from, false);
+    complete(value);
+  }
   /** The visible range always contains the cursor, including at either end. */
   public View view(int width, ToIntFunction<String> measure) {
     int from = Math.min(viewStart, cursor);

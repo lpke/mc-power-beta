@@ -46,7 +46,7 @@ public final class MapTile {
     int rgb =
         s.colourMode == 0 ? reliefAccurate[i] : reliefVanilla[i];
     double shade = Math.max(.9, Math.min(1, height(i) / 63d));
-    if (key.layer() != -1) shade *= .35 + light(i) * .65 / 15;
+    if (s.caveLighting && key.layer() != -1) shade *= .35 + light(i) * .65 / 15;
     return 0xff000000 | MapMath.shade(rgb, shade);
   }
 

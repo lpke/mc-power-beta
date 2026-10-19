@@ -91,12 +91,12 @@ public final class BlockStates {
     int comma = prefix.lastIndexOf(',');
     String keep = prefix.substring(0, comma + 1), tail = prefix.substring(comma + 1);
     Set<String> used = new HashSet<>();
-    for (String s : keep.split(",")) if (s.contains("=")) used.add(s.substring(0, s.indexOf('=')));
+    for (String s : keep.split(",")) if (s.contains("=")) used.add(s.substring(0, s.indexOf('=')).toLowerCase(java.util.Locale.ROOT));
     List<String> choices = new ArrayList<>();
     properties(id).forEach((name, property) -> {
       if (!used.contains(name)) for (String value : property.values.keySet()) {
         String entry = name + "=" + value;
-        if (entry.startsWith(tail)) choices.add(keep + entry + "]");
+        if (local.luke.power.chat.ChatCompletion.startsWith(entry, tail)) choices.add(keep + entry + "]");
       }
     });
     return choices.stream().sorted().toList();

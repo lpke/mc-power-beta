@@ -7,7 +7,7 @@ class SprintPolishTest {
   private SprintSettings settings() {
     var settings = new SprintSettings();
     settings.stamina = true; settings.activation = 1; settings.doubleTap = false;
-    settings.capacity = 10; settings.drain = 10; settings.recharge = 4;
+    settings.capacity = 10; settings.drain = 10; settings.recharge = settings.rechargeStill = 4;
     settings.rechargeDelay = 1; settings.restartStamina = 50; settings.jumpCost = 4;
     return settings;
   }
@@ -106,12 +106,40 @@ class SprintPolishTest {
     for (int height : new int[]{48, 180, 360}) for (int armorY : new int[]{0, height - 9})
       for (int baseline : new int[]{-50, -32, 0, height - 9, height + 20}) {
         int y = StaminaIcons.y(251, baseline, true, 170, armorY, height);
-        assertTrue(y >= 0 && y + 9 <= height, "icon row leaves screen");
-        assertTrue(y + 9 <= armorY || y >= armorY + 9,
+        assertTrue(y >= 1 && y + 10 <= height, "full capped icon row leaves screen");
+        assertTrue(y + 10 <= armorY || y - 1 >= armorY + 9,
             "screen clamp overlaps armor: height=" + height + " armor=" + armorY + " baseline=" + baseline + " y=" + y);
       }
-    assertEquals(0, StaminaIcons.y(251, -100, false, 170, 0, 180));
-    assertEquals(171, StaminaIcons.y(251, 500, false, 170, 0, 180));
+    assertEquals(1, StaminaIcons.y(251, -100, false, 170, 0, 180));
+    assertEquals(170, StaminaIcons.y(251, 500, false, 170, 0, 180));
     assertEquals(0, StaminaIcons.y(251, 0, false, 170, 0, 0));
+  }
+
+  @Test void lightningHasBorderCapsAndOnlyNonzeroThresholdsMarkAnIcon() {
+    assertFalse(StaminaIcons.bolt(5, -1)); assertTrue(StaminaIcons.border(5, -1));
+    assertFalse(StaminaIcons.bolt(1, 9)); assertTrue(StaminaIcons.border(1, 9));
+    assertEquals(-1, StaminaIcons.restartIcon(0));
+    assertEquals(-1, StaminaIcons.restartIcon(Double.NaN));
+    assertEquals(0, StaminaIcons.restartIcon(.1)); assertEquals(1, StaminaIcons.restartIcon(20));
+    assertEquals(9, StaminaIcons.restartIcon(100));
+  }
+
+  @Test void stationaryAndMovingRecoveryUseIndependentRatesWithSharedDelayCombatAndOwnership() {
+    var settings = settings(); settings.rechargeDelay = 0;
+    settings.capacity = 100; settings.recharge = 4; settings.rechargeStill = 6;
+    var moving = new SprintState(); var still = new SprintState();
+    moving.stamina = still.stamina = 0; moving.exhausted = still.exhausted = true;
+    for (int tick = 0; tick < 20; tick++) {
+      moving.tick(settings, true, 0, false, true, false, true, true);
+      still.tick(settings, true, 0, false, true, false, true, false);
+    }
+    assertEquals(4, moving.stamina, 1e-9); assertEquals(6, still.stamina, 1e-9);
+    moving.combatTicks = still.combatTicks = 2;
+    moving.tick(settings, true, 0, false, true, false, true, true);
+    still.tick(settings, true, 0, false, true, false, true, false);
+    assertEquals(4, moving.stamina, 1e-9); assertEquals(6, still.stamina, 1e-9);
+    still.tick(settings, true, 0, false, true, false, false, false);
+    assertEquals(6, still.stamina, 1e-9, "flight/Creative never recover the saved reserve");
+    settings.rechargeStill = Double.NaN; assertThrows(IllegalArgumentException.class, settings::validate);
   }
 }

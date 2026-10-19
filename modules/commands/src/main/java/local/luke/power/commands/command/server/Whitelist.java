@@ -77,7 +77,7 @@ public class Whitelist implements Command {
             ArrayList<String> output = new ArrayList<>();
             for (String option : options)
             {
-                if (option.startsWith(currentInput))
+                if (local.luke.power.chat.ChatCompletion.startsWith(option, currentInput))
                 {
                     output.add(option.substring(currentInput.length()));
                 }

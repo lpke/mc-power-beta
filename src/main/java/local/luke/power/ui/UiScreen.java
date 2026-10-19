@@ -243,7 +243,7 @@ public abstract class UiScreen extends Screen {
   }
 
   protected void tooltip(String message, int mx, int my) {
-    int max = Math.min(width - 20, 280);
+    int max = Math.max(1, Math.min(width - 20, 280));
     java.util.List<String> lines = new java.util.ArrayList<>();
     for (String paragraph : message.split("\n")) {
       String line = "";
@@ -251,6 +251,12 @@ public abstract class UiScreen extends Screen {
         if (!line.isEmpty() && textRenderer.getWidth(line + " " + word) > max) {
           lines.add(line);
           line = "";
+        }
+        while (word.length() > 1 && textRenderer.getWidth(word) > max) {
+          int end = 1;
+          while (end < word.length() && textRenderer.getWidth(word.substring(0, end + 1)) <= max) end++;
+          lines.add(word.substring(0, end));
+          word = word.substring(end);
         }
         line += (line.isEmpty() ? "" : " ") + word;
       }

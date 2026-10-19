@@ -18,6 +18,7 @@ public final class ChatWidgetAccess {
         editor().set(text); sync();
     }
     public static void complete(String suffix) { editor().complete(suffix); sync(); }
+    public static void completeToken(String value) { editor().completeToken(value); sync(); }
     private static void sync() {
         var editor = ChatScreenVariables.editor;
         if (ChatScreenVariables.textField != null) ChatScreenVariables.textField.setText(editor.text());

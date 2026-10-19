@@ -82,7 +82,7 @@ class SprintStateTest {
     s.stamina = true;
     s.capacity = 10;
     s.drain = 10;
-    s.recharge = 2;
+    s.recharge = s.rechargeStill = 2;
     s.rechargeDelay = 1;
     s.restartStamina = 50;
     var state = new SprintState();

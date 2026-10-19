@@ -95,6 +95,30 @@ public final class WorldMapScreen extends UiScreen {
     return actions;
   }
 
+  private Waypoint hoveredWaypoint(int x, int y) {
+    var settings = MapConfig.current();
+    var store = Maps.waypoints();
+    if (!settings.waypoints || store == null) return null;
+    var projection = projection();
+    Waypoint closest = null;
+    double limit = Math.max(7, settings.worldMapWaypointSize * .063);
+    int count = 0;
+    for (Waypoint point : Maps.points()) {
+      if (count >= 512) break;
+      if (point.dimension != dimension || point.death && !settings.deathpoints) continue;
+      if (MinimapArrows.destination(point)) {
+        if (!point.enabled) continue;
+      } else if (!point.visible(dimension, store.selectedSet(), store.allSets(), Maps.x(), Maps.z(), settings)) continue;
+      count++;
+      if (WaypointSymbols.opacity(point, settings) <= 0) continue;
+      var marker = projection.screen(point.x + .5, point.z + .5);
+      if (!projection.contains(marker.x(), marker.y(), false, Math.max(6, settings.worldMapWaypointSize * .06))) continue;
+      double distance = Math.hypot(marker.x() - x, marker.y() - y);
+      if (distance < limit || closest == null && distance <= limit) { limit = distance; closest = point; }
+    }
+    return closest;
+  }
+
   private void contextAction(String action) {
     if (action.equals("Delete waypoint")) { deleteUntil = System.nanoTime() + 4_000_000_000L; return; }
     context = false;
@@ -269,14 +293,8 @@ public final class WorldMapScreen extends UiScreen {
       MapTile tile = Maps.cache().peek(MapMath.key(dimension, layer, 0, target.x, target.z));
       if (tile != null && tile.known(MapMath.index(target.x, target.z)))
         target.y = Math.min(127, tile.height(MapMath.index(target.x, target.z)) + 1);
-      for (Waypoint point : Maps.points())
-        if (point.dimension == dimension) {
-          var screen = projection().screen(point.x + .5, point.z + .5);
-          if (Math.hypot(screen.x() - x, screen.y() - y) <= 7) {
-            target = point.copy();
-            break;
-          }
-        }
+      Waypoint hovered = hoveredWaypoint(x, y);
+      if (hovered != null) target = hovered.copy();
       dragging = false;
       context = true;
       contextX = Math.max(0, Math.min(width - 142, x));
@@ -351,7 +369,7 @@ public final class WorldMapScreen extends UiScreen {
     if (minecraft.world != null && minecraft.world.isRemote)
       input(serverMap, 8, 4, Math.min(180, width / 3), mx, my, "Map name");
     var cursor = bounded(projection().world(mx, my));
-    String readout = (int) Math.floor(cursor.x()) + ", " + (int) Math.floor(cursor.y());
+    String cursorHeight = "?", cursorBiome = "";
     if (Maps.cache() != null) {
       MapTile tile =
           Maps.cache()
@@ -364,14 +382,18 @@ public final class WorldMapScreen extends UiScreen {
                       (int) Math.floor(cursor.y())));
       if (tile != null) {
         int i = MapMath.index((int) Math.floor(cursor.x()), (int) Math.floor(cursor.y()));
-        if (tile.known(i))
-          readout += " · Y " + tile.height(i) + " · " + MapPalette.biome(tile.biome(i));
+        if (tile.known(i)) {
+          cursorHeight = Integer.toString(tile.height(i));
+          cursorBiome = " · " + MapPalette.biome(tile.biome(i));
+        }
       }
     }
+    String readout = (int)Math.floor(cursor.x()) + ", " + cursorHeight + ", "
+        + (int)Math.floor(cursor.y()) + cursorBiome;
     int blocks = (int) Math.max(1, Math.round(80 / view.scale));
     boolean separateReadout = width < 640 || minecraft.world != null && minecraft.world.isRemote;
     int readoutY = separateReadout ? 29 : 9;
-    int readoutWidth = separateReadout ? width - 16 : Math.max(40, width - 520);
+    int readoutWidth = separateReadout ? width - 16 : Math.max(40, width - 160);
     readout = fit(readout, readoutWidth);
     overlay(readout, (width - textRenderer.getWidth(readout)) / 2, readoutY, 0xffffff);
     int barX = width - 106 + (int) scaleDx, barY = scaleY() + (int) scaleDy;
@@ -397,6 +419,19 @@ public final class WorldMapScreen extends UiScreen {
     String status = MapScreenshot.status();
     if (status.isEmpty()) status = message.isEmpty() ? Maps.error() : message;
     if (!status.isEmpty()) overlay(fit(status, width - 16), 8, readoutY + 20, 0xffdd99);
+    if (!context && !dragging && !scaleDragging && !overControls(mx, my)) {
+      Waypoint hovered = hoveredWaypoint(mx, my);
+      if (hovered != null) {
+        String caption = hovered.death ? WaypointTimes.detail(hovered.created) : hovered.name;
+        caption += "\n" + hovered.x + ", " + hovered.y + ", " + hovered.z;
+        if (minecraft.player != null && dimension == Maps.dimension()) {
+          double dx = hovered.x + .5 - minecraft.player.x, dy = hovered.y - minecraft.player.boundingBox.minY,
+              dz = hovered.z + .5 - minecraft.player.z;
+          caption += "\n" + Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz)) + "m";
+        }
+        tooltip(caption, mx, my);
+      }
+    }
   }
 
   public boolean shouldPause() {

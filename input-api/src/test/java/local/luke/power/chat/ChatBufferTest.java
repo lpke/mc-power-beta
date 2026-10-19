@@ -29,6 +29,14 @@ class ChatBufferTest {
     b.set("//set stone  tail"); b.position(8, false); b.complete("one");
     assertEquals("//set stone  tail", b.text());
   }
+  @Test void tokenCompletionRestoresNativeSpellingAndKeepsUnrelatedText() {
+    ChatBuffer b = new ChatBuffer(100); b.set("/weather RAIN  20"); b.position(11, false);
+    b.completeToken("rain"); assertEquals("/weather rain  20", b.text()); assertEquals(13, b.cursor());
+    b.set("/WEAT"); b.completeToken("/weather"); assertEquals("/weather", b.text());
+    b.set("/weather "); b.completeToken("rain"); assertEquals("/weather rain", b.text());
+    b.all(); b.completeToken("clear"); assertEquals("/weather rain", b.text());
+    b.reset(""); b.history(List.of("/WEAT"), true); b.completeToken("/weather"); assertFalse(b.browsing());
+  }
   @Test void viewportAndHitTestingShareCharacterWidths() {
     ChatBuffer b = new ChatBuffer(100); b.set("abcdefghij");
     var v = b.view(25, s -> s.length() * 6);

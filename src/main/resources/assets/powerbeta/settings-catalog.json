@@ -4867,7 +4867,7 @@
     "page": "Gameplay",
     "group": "Interaction",
     "label": "Modern water movement",
-    "description": "Gentler sinking and modern current response, especially in shallow or mixed currents. Hold Sneak to descend. Keeps normal swimming speed and Beta's upright player model and collision size. Players only, in singleplayer; flight and riding keep their own movement.",
+    "description": "Use modern player-only water currents and movement in singleplayer. With Allow sprinting enabled for the world, sprint underwater to swim faster, steer dives by looking and fit one-block passages. Ordinary swimming keeps normal speed. Other fluids, vehicles and mobs keep their native behavior.",
     "default": true,
     "order": 40
   },
@@ -5103,7 +5103,7 @@
     "page": "Interface",
     "group": "Minimap",
     "label": "Cave light shading",
-    "description": "Shade cave floors using their sampled native block light. Also affects the World Map.",
+    "description": "Shade cave floors using their sampled native block light. Turn off to show dark caves at full map brightness. Also affects the World Map; it never changes lighting in the world.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5488,8 +5488,8 @@
   "sprint.recharge": {
     "page": "Gameplay",
     "group": "Sprint stamina and combat",
-    "label": "Stamina recovered per second",
-    "description": "Stamina recovered per second after the recovery delay, while not sprinting.",
+    "label": "Recovery per second while moving",
+    "description": "Stamina recovered each second while walking, strafing or moving without sprinting, after the recovery delay. Lower values prolong recovery; higher values restore stamina sooner. Combat recovery follows its separate setting.",
     "min": 0.1,
     "max": 100.0,
     "step": 0.5,
@@ -5503,7 +5503,7 @@
     "min": 0.0,
     "max": 60.0,
     "step": 0.5,
-    "order": 13,
+    "order": 14,
     "unit": "s"
   },
   "sprint.combatTime": {
@@ -5514,18 +5514,18 @@
     "min": 0.0,
     "max": 120.0,
     "step": 0.5,
-    "order": 14,
+    "order": 15,
     "unit": "s"
   },
   "sprint.restartStamina": {
     "page": "Gameplay",
     "group": "Sprint stamina and combat",
     "label": "Restart threshold",
-    "description": "Percentage of full stamina required to sprint again after exhaustion.",
+    "description": "Percentage of full stamina required to sprint again after exhaustion. A pale notch on a stamina icon marks the restart threshold when it is above zero.",
     "min": 0.0,
     "max": 100.0,
     "step": 5.0,
-    "order": 15,
+    "order": 16,
     "unit": "%"
   },
   "sprint.jumpCost": {
@@ -5536,7 +5536,7 @@
     "min": 0.0,
     "max": 100.0,
     "step": 1.0,
-    "order": 16
+    "order": 17
   },
   "sprint.rechargeInCombat": {
     "page": "Gameplay",
@@ -5546,7 +5546,7 @@
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
-    "order": 17
+    "order": 18
   },
   "sprint.dynamicFov": {
     "page": "Gameplay",
@@ -5938,11 +5938,12 @@
     "page": "Interface",
     "group": "Minimap",
     "label": "Destination color",
-    "description": "Color of the destination on the minimap, world map, edge arrow and in-world label. Opacity applies to all four views.",
+    "description": "Color of destination markers on the minimap, World Map and in the world, including edge arrows. Also affects the HUD minimap preview.",
     "min": 0,
     "max": 16777215,
     "step": 1,
-    "order": 36.5
+    "order": 36.5,
+    "default": 60671
   },
   "maps.destinationArrowOpacity": {
     "page": "Interface",
@@ -6024,7 +6025,7 @@
     "page": "Interface",
     "group": "Pause menu",
     "label": "Waypoints button",
-    "description": "Show a diamond button for saved waypoints in the pause menu.",
+    "description": "Show a compass item button for saved waypoints in the pause menu.",
     "min": 0,
     "max": 1,
     "step": 1,
@@ -6049,5 +6050,43 @@
     "description": "Gradually reduce distant world labels to 65% of their selected size. Looking at a marker expands its abbreviation into its full name.",
     "order": 21,
     "default": true
+  },
+  "sprint.rechargeStill": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Recovery per second while still",
+    "description": "Stamina recovered each second without movement, after the recovery delay. Lower values prolong recovery; higher values restore stamina sooner. The default is faster than moving recovery. Combat recovery follows its separate setting.",
+    "min": 0.1,
+    "max": 100,
+    "step": 0.5,
+    "order": 13,
+    "default": 7.5
+  },
+  "maps.waypointBobbing": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "In-world marker bobbing",
+    "description": "Fixed to screen removes walking view bobbing from waypoint projection. Fixed to world lets the camera bob naturally around markers attached to their world positions. Both follow camera movement smoothly.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 22,
+    "choices": [
+      "Fixed to screen",
+      "Fixed to world"
+    ],
+    "default": 0
+  },
+  "maps.worldMapWaypointSize": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "World Map waypoint size",
+    "description": "Size of waypoint, destination and deathpoint icons and their labels on the World Map. Lower values keep the map compact; higher values make markers easier to read. Minimap and in-world sizes are separate.",
+    "min": 50,
+    "max": 150,
+    "step": 5,
+    "unit": "%",
+    "order": 23,
+    "default": 85
   }
 }

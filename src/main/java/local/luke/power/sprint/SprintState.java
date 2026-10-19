@@ -33,6 +33,11 @@ public final class SprintState {
 
   public void tick(SprintSettings s, boolean eligible, float forward, boolean sprintKey,
       boolean onGround, boolean collision, boolean usesStamina) {
+    tick(s, eligible, forward, sprintKey, onGround, collision, usesStamina, forward != 0);
+  }
+
+  public void tick(SprintSettings s, boolean eligible, float forward, boolean sprintKey,
+      boolean onGround, boolean collision, boolean usesStamina, boolean moving) {
     boolean staminaEnabled = s.stamina && usesStamina;
     if (usesStamina) stamina = Math.max(0, Math.min(s.capacity, stamina));
     if (doubleTap > 0) doubleTap--;
@@ -72,7 +77,7 @@ public final class SprintState {
         rechargeTicks = (int) Math.ceil(s.rechargeDelay * 20);
       } else if (rechargeTicks > 0) rechargeTicks--;
       else if (combatTicks == 0 || s.rechargeInCombat)
-        stamina = Math.min(s.capacity, stamina + s.recharge / 20);
+        stamina = Math.min(s.capacity, stamina + (moving ? s.recharge : s.rechargeStill) / 20);
       if (stamina <= 0) {
         exhausted = true;
         sprinting = false;

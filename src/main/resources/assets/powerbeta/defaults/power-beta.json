@@ -1079,10 +1079,12 @@
       "minimapWaypointArrows": true,
       "minimapDestinationArrow": true,
       "minimapDeathpointArrows": true,
-      "destinationArrowColor": 5609983,
+      "destinationArrowColor": 60671,
       "destinationArrowOpacity": 1,
       "waypointTextSize": 75,
-      "waypointDistanceScaling": true
+      "waypointDistanceScaling": true,
+      "worldMapWaypointSize": 85,
+      "waypointBobbing": 0
     },
     "sprint": {
       "activation": 0,
@@ -1106,7 +1108,8 @@
       "creativeFov": false,
       "spectatorFov": false,
       "freecamFov": false,
-      "fovStrength": 100
+      "fovStrength": 100,
+      "rechargeStill": 7.5
     }
   }
 }

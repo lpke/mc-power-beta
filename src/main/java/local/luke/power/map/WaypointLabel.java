@@ -5,7 +5,8 @@ public record WaypointLabel(String name, String distance, double scale) {
   public static WaypointLabel of(Waypoint point, MapSettings settings, boolean aimed,
       double cameraDistance, double horizontalDistance) {
     String name = MinimapArrows.destination(point) ? point.x + "," + point.y + "," + point.z
-        : point.death || !settings.waypointNames ? "" : aimed ? point.name : point.abbreviation();
+        : point.death ? aimed ? WaypointTimes.detail(point.created) : ""
+        : !settings.waypointNames ? "" : aimed ? point.name : point.abbreviation();
     String distance = settings.waypointDistances ? Math.round(horizontalDistance) + "m" : "";
     if (!Double.isFinite(cameraDistance)) cameraDistance = Double.MAX_VALUE;
     double response = !settings.waypointDistanceScaling ? 1

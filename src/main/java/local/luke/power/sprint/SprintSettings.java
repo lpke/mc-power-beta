@@ -10,6 +10,7 @@ public final class SprintSettings {
   public double capacity = 100,
       drain = 10,
       recharge = 5,
+      rechargeStill = 7.5,
       rechargeDelay = 2,
       combatTime = 8,
       restartStamina = 20;
@@ -25,6 +26,7 @@ public final class SprintSettings {
     finite(capacity, 1, 1000);
     finite(drain, .1, 100);
     finite(recharge, .1, 100);
+    finite(rechargeStill, .1, 100);
     finite(rechargeDelay, 0, 60);
     finite(combatTime, 0, 120);
     finite(restartStamina, 0, 100);

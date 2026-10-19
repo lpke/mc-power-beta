@@ -21,7 +21,7 @@ class WaypointLabelTest {
     assertEquals("38m", WaypointLabel.of(point, settings, true, 64, 37.6).distance());
   }
 
-  @Test void destinationsAlwaysUseTheirCoordinatesAndDeathsNeverAcquireANameFromAiming() {
+  @Test void destinationsUseCoordinatesAndAimedDeathsShowTheirDeathTimeIndependentlyOfNames() {
     var destination = new Waypoint(); destination.id = "temporary-destination";
     destination.name = "Destination"; destination.abbreviation = "D";
     destination.x = -120; destination.y = 64; destination.z = 300;
@@ -31,7 +31,8 @@ class WaypointLabelTest {
       settings.waypointNames = names;
       assertEquals("-120,64,300", WaypointLabel.of(destination, settings, aimed, 200, 123.4).name());
       var label = WaypointLabel.of(death, settings, aimed, 200, 123.4);
-      assertEquals("", label.name()); assertEquals("123m", label.distance());
+      assertEquals(aimed ? WaypointTimes.detail(death.created) : "", label.name());
+      assertEquals("123m", label.distance());
     }
     settings.waypointDistances = false;
     assertEquals("", WaypointLabel.of(death, settings, true, 200, 123.4).distance());

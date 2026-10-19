@@ -42,7 +42,7 @@ public final class ClientCommandsBridge implements ModInitializer {
                       case "suggestion" -> {
                         String input = (String) args[3];
                         yield CommandCatalog.complete(input).stream()
-                            .filter(v -> v.startsWith(input))
+                            .filter(v -> local.luke.power.chat.ChatCompletion.startsWith(v, input))
                             .map(v -> v.substring(input.length()))
                             .toArray(String[]::new);
                       }

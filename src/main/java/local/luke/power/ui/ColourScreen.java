@@ -383,7 +383,7 @@ public final class ColourScreen extends UiScreen {
     scrollbar.render(this, track());
     button("Done", width / 2 - 102, height - 28, 100, 20, mx, my, true);
     button("Cancel", width / 2 + 2, height - 28, 100, 20, mx, my, true);
-    if (!tip.isEmpty()) tooltip(tip, mx, my);
+    if (dragging < 0 && !tip.isEmpty()) tooltip(tip, mx, my);
     if (!error.isEmpty()) tooltip(fit(error, span()), left(), height - 44);
     inline.renderError(this);
     exit.render(this, "Save color changes?", pointerX, pointerY);

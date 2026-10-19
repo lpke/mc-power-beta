@@ -39,6 +39,7 @@ public final class Maps {
   private static int radarSize, radarStyle;
   private static List<Waypoint> points = List.of();
   private static Waypoint destination;
+  private static boolean destinationArrivalArmed;
   private static MapSettings radarPreview;
 
   /** The HUD supplies an isolated snapshot; entity reads still happen only on ticks. */
@@ -69,6 +70,7 @@ public final class Maps {
   }
 
   public static void destination(Waypoint point) {
+    destinationArrivalArmed = false;
     destination = point == null ? null : point.copy();
     if (destination != null) {
       destination.id = "temporary-destination";
@@ -77,6 +79,14 @@ public final class Maps {
       destination.enabled = true;
     }
     pointsRevision = Long.MIN_VALUE;
+  }
+
+  private static void updateDestination() {
+    if (destination != null && destination.dimension == dimension) {
+      double distance = destination.distance(x, z);
+      if (distance >= 2) destinationArrivalArmed = true;
+      else if (destinationArrivalArmed) destination(null);
+    }
   }
 
   public static List<Radar> radar() {
@@ -229,8 +239,7 @@ public final class Maps {
     x = MapMath.bounded(pose.x(), -MapMath.BORDER, MapMath.BORDER);
     y = pose.y(); z = MapMath.bounded(pose.z(), -MapMath.BORDER, MapMath.BORDER);
     yaw = pose.yaw(); dimension = mc.world.dimension.id;
-    if (destination != null && destination.dimension == dimension && destination.distance(x, z) < 2)
-      destination(null);
+    updateDestination();
 
     if (activity.terrain()) {
       if (palette == null) palette = new MapPalette();
@@ -403,6 +412,7 @@ public final class Maps {
     points = List.of();
     pointsRevision = Long.MIN_VALUE;
     destination = null;
+    destinationArrivalArmed = false;
     radarPreview = null;
     DEATHS.clear();
   }

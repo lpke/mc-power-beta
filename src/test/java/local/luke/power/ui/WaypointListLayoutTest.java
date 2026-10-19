@@ -9,7 +9,7 @@ class WaypointListLayoutTest {
       var layout = WaypointListLayout.at(size[0], size[1]);
       assertEquals(size[0], layout.left() * 2 + layout.width(), 1);
       assertTrue(layout.width() <= size[1] * 16 / 9 - 16);
-      assertTrue(layout.width() <= 600);
+      assertTrue(layout.width() <= 480);
       assertTrue(layout.searchWidth() <= 400);
       assertTrue(layout.left() >= 8);
       assertTrue(layout.right() <= size[0] - 8);
@@ -19,6 +19,10 @@ class WaypointListLayoutTest {
       assertEquals(layout.right(), layout.filterX() + layout.filterWidth());
       assertEquals(layout.createX() - 4, layout.left() + layout.setWidth());
       assertEquals(layout.right(), layout.createX() + layout.createWidth());
+      assertTrue(layout.newX() >= layout.left());
+      assertEquals(layout.newX() + layout.footerWidth() + 4, layout.doneX());
+      assertTrue(layout.doneX() + layout.footerWidth() <= layout.right());
+      assertTrue(layout.footerWidth() >= 140, "New waypoint fits beside Done");
       assertTrue(layout.listBottom() > layout.listTop());
       assertEquals(size[1] - 32, layout.listBottom());
       assertTrue(layout.sortWidth() >= 96, "Sort: Distance fits without crowding search");
@@ -34,7 +38,7 @@ class WaypointListLayoutTest {
     var normal = WaypointListLayout.at(640, 360);
     for (int[] size : new int[][] {{800,600}, {1720,720}, {1920,540}, {2560,1080}}) {
       var wide = WaypointListLayout.at(size[0], size[1]);
-      assertEquals(600, wide.width());
+      assertEquals(480, wide.width());
       assertEquals(normal.searchWidth(), wide.searchWidth());
       assertEquals(normal.setWidth(), wide.setWidth());
       assertTrue(wide.left() > normal.left());
@@ -45,6 +49,6 @@ class WaypointListLayoutTest {
   @Test void shortAndPortraitWindowsStillRespectTheirAvailableContentArea() {
     assertEquals(304, WaypointListLayout.at(320, 240).width());
     assertEquals(304, WaypointListLayout.at(1280, 180).width());
-    assertEquals(524, WaypointListLayout.at(540, 960).width());
+    assertEquals(480, WaypointListLayout.at(540, 960).width());
   }
 }

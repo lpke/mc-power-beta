@@ -30,7 +30,7 @@ public final class DeathCommands {
             }
             if (index == 1 || index == 2 && !((String)args[3]).startsWith("/death log"))
               DeathTracker.journal(mc).records().forEach(r -> choices.add(r.id));
-            yield choices.stream().filter(v -> v.startsWith(prefix)).map(v -> v.substring(prefix.length())).toArray(String[]::new);
+            yield choices.stream().filter(v -> local.luke.power.chat.ChatCompletion.startsWith(v, prefix)).map(v -> v.substring(prefix.length())).toArray(String[]::new);
           }
           case "toString" -> "Death command";
           case "hashCode" -> System.identityHashCode(proxy);

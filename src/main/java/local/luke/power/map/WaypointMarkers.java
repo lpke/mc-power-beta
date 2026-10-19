@@ -25,7 +25,8 @@ public final class WaypointMarkers {
   }
   public static void beginCamera(Minecraft mc) {
     CAMERA.reset();
-    captureBob = eligible(mc) && !local.luke.power.input.DetachedCamera.isActive();
+    captureBob = eligible(mc) && MapConfig.current().waypointBobbing == 0
+        && !local.luke.power.input.DetachedCamera.isActive();
   }
   public static void beforeBob() {
     if (captureBob) { GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, MODEL); CAMERA.before(MODEL); }
@@ -47,7 +48,7 @@ public final class WaypointMarkers {
         by = camera.field_1638 + (camera.y - camera.field_1638) * delta,
         bz = camera.field_1639 + (camera.z - camera.field_1639) * delta;
     GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, MODEL);
-    if (!local.luke.power.input.DetachedCamera.isActive()) {
+    if (settings.waypointBobbing == 0 && !local.luke.power.input.DetachedCamera.isActive()) {
       CAMERA.apply(MODEL, UNBOBBED);
       for (int i = 0; i < 16; i++) MODEL.put(i, UNBOBBED.get(i));
     }

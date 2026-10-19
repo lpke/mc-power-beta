@@ -25,6 +25,14 @@ public class SprintPhysicsMixin {
     original.call(entity, side, forward, SprintController.acceleration(entity, acceleration));
   }
 
+  @WrapOperation(method="method_945",at=@At(value="INVOKE",
+      target="Lnet/minecraft/entity/LivingEntity;move(DDD)V"))
+  private void power$collision(LivingEntity entity,double x,double y,double z,Operation<Void> original) {
+    double startX=entity.x,startZ=entity.z;
+    original.call(entity,x,y,z);
+    SprintController.moved(entity,entity.x-startX,entity.z-startZ);
+  }
+
   @Inject(method = "method_944", at = @At("TAIL"))
   private void power$sprintJump(CallbackInfo ci) {
     SprintController.jumped((LivingEntity) (Object) this);

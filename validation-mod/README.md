@@ -105,6 +105,12 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 
 - After `new-world`, `water-253` compares actual player ticks and displacement
   with modern water response, including currents, bindings, modes and live changes.
+- `swimming-300` checks official 1.21.1 water/land sprint equations against native
+  ticks, all four water-setting/rule combinations, pitch/Jump/descend, one-block
+  tunnels, surface starts and exits, forced crouch, revocation, save/reload,
+  native player/armor model rendering, particles and unloaded-terrain checks.
+  Focus the muted disposable client first. The fixture restores its scene blocks,
+  player, keys, world rules and preferences; it never saves global settings.
 - After `new-world`, `release-253` exercises native Creative boat/cart press and
   held-use paths, quick clicks, native item preservation, Survival use, ridden-boat
   frustum/occlusion rendering and cape alignment. Run `release-252` for cart and
@@ -368,6 +374,17 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   assigns M and prepares a stone wall for physical input. Use `state`, `mined`, `off`,
   `menu` and `focus` to check actual held attacks, tool wear and cancellation. Test both
   chord release orders and held keys across focus changes in the disposable window.
+- `release-300-chat-break [all|chat|break]`: native wrapped/scrolled history selection,
+  Ctrl+C and independent chat input; rapid Creative presses, held-repeat delays and
+  unsupported, Survival and multiplayer cooldowns. Focus the disposable client first.
+  The break fixture needs three empty blocks above and beside the player.
+  `physical-setup` saves state and places three stones along the native view ray.
+  Send two real left-button press/release pairs less than 200 ms apart, then run
+  `physical-state` to check native dispatch and one break per press. Always finish
+  with `physical-cleanup` to restore blocks, player state, mode, inventory and rules.
+  `chat-physical-setup` selects a native history line and saves chat/clipboard state.
+  Send a real left or right Ctrl+C press/release sequence, run `chat-physical-state`,
+  then `chat-physical-cleanup`. Setup also prints GUI coordinates for a real selection drag.
 - `command-completion`: arrow selection, immediate Tab completion and subsequent
   typing for WorldEdit and singleplayer commands.
 - `chat-wrap`: all chat colors, repeated wraps, color changes, resets, plain text

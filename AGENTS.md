@@ -346,7 +346,9 @@
 - Modern water movement is a global player-only singleplayer preference, enabled
   only in Power Beta defaults. Keep native collision, limb interpolation, other
   fluids, mobs, vehicles and flight; see `docs/water-movement.md`. Bound current
-  sampling to loaded terrain. Retain normal swimming speed; do not add sprint-swimming.
+  sampling to loaded terrain. Ordinary water keeps normal swimming speed. Modern sprint
+  swimming additionally requires allow_sprinting; retain compact/crouched collision until
+  there is space to stand, Beta-normalized saved positions and render-scoped player/armor poses.
 - Boat riders suppress lateral cape rotations only while rendering, retaining native
   pitch motion and restoring ordinary cape response immediately on dismount.
 - Cape limits change only rendered cape angles, leaving player interpolation and movement
@@ -533,8 +535,8 @@
   Cancel only obsolete queued view-only reads, reserving worker admission for native
   sampling and parent maintenance; durable writes and FIFO flush barriers retain order.
   Minimap live rendering and HUD hit/drag bounds share geometry and cached paired
-  offsets. World waypoint projection removes only the native bob transform from the
-  actual per-eye matrix; retain hurt, portal, third-person and detached camera poses.
+  offsets. Fixed-to-screen world waypoint projection removes only the native bob transform from the
+  actual per-eye matrix; Fixed to world retains it. Preserve hurt, portal, third-person and detached camera poses in both modes.
   Reject behind/near-plane points without culling distant waypoint labels at the terrain
   far plane. Color-wheel/RGBA tabs share one local RGB/opacity draft and retain native
   drag release ownership even when mouse polling observes the release early.

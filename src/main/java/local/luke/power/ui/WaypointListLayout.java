@@ -3,7 +3,7 @@ package local.luke.power.ui;
 /** Shared drawing and hit-test bounds keep waypoint controls compact and centered. */
 record WaypointListLayout(int left, int width, int listTop, int listBottom) {
   static WaypointListLayout at(int width, int height) {
-    int span = Math.max(1, Math.min(600, Math.min(width, height * 16 / 9) - 16));
+    int span = Math.max(1, Math.min(480, Math.min(width, height * 16 / 9) - 16));
     return new WaypointListLayout((width - span) / 2, span, 72, Math.max(72, height - 32));
   }
 
@@ -16,5 +16,8 @@ record WaypointListLayout(int left, int width, int listTop, int listBottom) {
   int createWidth() { return Math.min(92, Math.max(72, width / 4)); }
   int createX() { return right() - createWidth(); }
   int setWidth() { return width - createWidth() - 4; }
+  int footerWidth() { return Math.min(150, (width - 4) / 2); }
+  int newX() { return left + (width - footerWidth() * 2 - 4) / 2; }
+  int doneX() { return newX() + footerWidth() + 4; }
   int setRows(int height, int count) { return Math.min(count, Math.max(1, (height - 76) / 20)); }
 }

@@ -106,7 +106,9 @@ Drag the map to pan, scroll to zoom around the pointer, press **Home** to center
 and right-click for waypoint, destination, coordinate and teleport actions. **G** opens
 coordinate navigation. Hold **Z** to enlarge the minimap; **I** and **O** change its zoom.
 All gameplay bindings can be changed in Controls. `/waypoint` also adds, removes, lists
-and teleports to saved waypoints; `/way` and `/wp` are aliases. Teleporting uses the
+and teleports to saved waypoints; `/way` and `/wp` are aliases. `/waypoint dest [x y z]`
+sets a destination, using the current camera position when coordinates are omitted.
+Teleporting uses the
 same world permission as the menus.
 
 Options > Map contains map switches, caves, waypoints and performance settings.
@@ -142,7 +144,13 @@ These preferences apply across worlds that allow sprinting. Ground sprinting sta
 multiplayer. Ground, Creative and Spectator sprint share dynamic FOV and its amount in
 Gameplay > Sprinting; freecam has its own FOV preference. All start off. Creative and
 flight never consume stamina. Depleted Survival stamina appears as ten gold lightning
-icons beside the hotbar.
+icons beside the hotbar. Their pale notch marks the recovery threshold after exhaustion.
+Stationary and moving stamina recovery have separate rates.
+
+With Modern water movement and Allow sprinting enabled together, sprint underwater
+to swim using a low pose, look-directed dives and modern speed and strokes. The low
+collision box fits one-block passages. Leaving swimming keeps the player crouched or
+low until there is room to stand. Creative and flight still bypass stamina.
 
 ## Install
 

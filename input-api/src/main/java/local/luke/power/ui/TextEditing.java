@@ -28,7 +28,7 @@ public final class TextEditing {
     else if (key == Keyboard.KEY_BACK || key == Keyboard.KEY_DELETE) editor.delete(key == Keyboard.KEY_BACK ? -1 : 1, ctrl);
     else if (!ctrl) editor.write(String.valueOf(character), allowed);
   }
-  private static boolean copy(String value) {
+  public static boolean copy(String value) {
     try { Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(value), null); return true; }
     catch (RuntimeException e) { return false; }
   }

@@ -21,6 +21,7 @@
     "ChatCaptureMixin",
     "ChatLinesAccess",
     "ChatInput",
+    "CreativePressCapture",
     "PlayerSleepAccess",
     "PlacementSoundCaptureMixin",
     "CullingThreadChecks",

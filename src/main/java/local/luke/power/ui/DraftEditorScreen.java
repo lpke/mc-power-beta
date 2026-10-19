@@ -347,7 +347,7 @@ abstract class DraftEditorScreen extends UiScreen {
     for (Footer f : footer()) button(fit(f.label, f.width - 8), f.x, height - 29, f.width, 20, mx, my, f.enabled);
     String help = hoverHelp(mx, my);
     if (!help.isBlank()) { tip = help; hoverId = "editor:" + help; }
-    if (hover.ready(!modal() && Display.isActive() ? hoverId : "") && !tip.isBlank()) tooltip(tip, mx, my);
+    if (hover.ready(slider == null && !modal() && Display.isActive() ? hoverId : "") && !tip.isBlank()) tooltip(tip, mx, my);
     inline.renderError(this);
     if (resetPrompt) {
       GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_DEPTH_BUFFER_BIT);

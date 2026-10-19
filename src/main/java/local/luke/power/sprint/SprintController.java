@@ -1,6 +1,8 @@
 package local.luke.power.sprint;
 
 import local.luke.power.input.*;
+import local.luke.power.gameplay.ModernSwimming;
+import local.luke.power.gameplay.ModernWater;
 import local.luke.power.rules.GameRule;
 import local.luke.power.rules.WorldRules;
 import net.fabricmc.loader.api.FabricLoader;
@@ -13,6 +15,7 @@ import org.lwjgl.opengl.Display;
 public final class SprintController {
   private static float previousFov = 1, fov = 1;
   private static Object owner;
+  private static boolean minorCollision;
 
   private SprintController() {}
 
@@ -44,6 +47,7 @@ public final class SprintController {
         && player.world == mc.world
         && player.health > 0
         && !player.dead
+        && !player.method_943()
         && player.field_1595 == null
         && mc.currentScreen == null
         && !mc.paused
@@ -52,35 +56,52 @@ public final class SprintController {
         && player instanceof PlayerMode mode
         && !mode.power$flying()
         && !mode.power$spectator()
-        && !player.method_1334()
+        && (!player.method_1334() || ModernSwimming.canSprint(player))
+        && (!ModernSwimming.compact(player) || ModernSwimming.canSprint(player))
         && !player.method_1335()
-        && !player.method_1373();
+        && (!player.method_1373() || ModernSwimming.canSprint(player));
   }
 
   /** Runs after native input refresh and before the native jump/travel calls. */
   public static void movement(ClientPlayerEntity player) {
+    ModernSwimming.prepareInput(player);
     SprintState state = ((SprintPlayer) player).power$sprint();
     var settings = SprintConfig.current();
     boolean eligible = eligible(player);
     boolean key = Bindings.down("powerbeta.sprint");
     if (player != owner) {
       owner = player;
+      minorCollision = false;
       state.cancel(key);
     }
+    boolean water = ModernSwimming.canSprint(player);
+    float forward = player.field_161.field_2533;
+    boolean moving = Math.abs(forward) > 1e-4 || Math.abs(player.field_161.field_2532) > 1e-4
+        || player.velocityX * player.velocityX + player.velocityZ * player.velocityZ > 1e-6
+        || !player.field_1623 && player.velocityY * player.velocityY > 1e-6
+        || ModernWater.eligible(player) && player.method_1334()
+            && (player.field_161.field_2535 || player.field_161.field_2536);
     state.tick(
-        settings, eligible, player.field_161.field_2533, key, player.field_1623, player.field_1624,
-        usesStamina(player));
+        settings, eligible, water && forward > 0 ? 1 : forward, key, player.field_1623 || water,
+        player.field_1624 && !minorCollision && !water, usesStamina(player), moving);
+    ModernSwimming.tick(player);
     SprintView.publish(SprintView.Kind.GROUND, state.sprinting, settings.speed / 100);
   }
 
   public static float acceleration(Entity player, float value) {
-    return active(player)
+    return active(player) && !player.method_1334()
         ? SprintState.acceleration(value, player.field_1623, SprintConfig.current())
         : value;
   }
 
+  public static void moved(Entity entity,double x,double z) {
+    if (entity!=mc().player || !(entity instanceof ClientPlayerEntity player))return;
+    minorCollision=player.field_1624&&SprintCollision.minor(player.field_161.field_2532,
+        player.field_161.field_2533,player.yaw,x,z);
+  }
+
   public static void jumped(Entity entity) {
-    if (!active(entity)) return;
+    if (!active(entity) || entity.method_1334() && !ModernWater.shallowJump(entity)) return;
     if (SprintConfig.current().jumpBoost) {
       entity.velocityX += SprintState.jumpX(entity.yaw);
       entity.velocityZ += SprintState.jumpZ(entity.yaw);
@@ -162,6 +183,7 @@ public final class SprintController {
     if (allowed(mc)) return;
     if (mc.player instanceof SprintPlayer player)
       player.power$sprint().cancel(false);
+    if (mc.player != null) ModernSwimming.cancel(mc.player);
     SprintView.publish(SprintView.Kind.GROUND, false, 1);
     if (!DetachedCamera.isActive()
         && !(mc.player instanceof PlayerMode mode && mode.power$flying()))
@@ -174,6 +196,7 @@ public final class SprintController {
 
   public static void reset() {
     owner = null;
+    minorCollision = false;
     previousFov = fov = 1;
     SprintView.publish(SprintView.Kind.GROUND, false, 1);
   }

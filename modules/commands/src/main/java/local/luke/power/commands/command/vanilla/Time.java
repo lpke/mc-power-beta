@@ -73,7 +73,7 @@ public class Time implements Command {
         n == 1
             ? local.luke.power.permissions.CommandPermissions.allowed("time") ? List.of("set", "add", "query") : List.of("query")
             : n == 2
-                ? total.contains("query") ? List.of("daytime", "gametime", "day") : PRESETS.keySet()
+                ? total.toLowerCase(Locale.ROOT).contains("query") ? List.of("daytime", "gametime", "day") : PRESETS.keySet()
                 : List.of());
   }
 }

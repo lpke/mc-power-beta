@@ -6,12 +6,7 @@ public final class CommandSuggestions {
   private CommandSuggestions() {}
 
   public static String[] suffix(String input, Collection<String> choices) {
-    return choices.stream()
-        .distinct()
-        .filter(v -> v.startsWith(input))
-        .map(v -> v.substring(input.length()))
-        .sorted()
-        .toArray(String[]::new);
+    return local.luke.power.chat.ChatCompletion.suffixes(input, choices);
   }
 
   public static String[] targets(SharedCommandSource source, String input) {

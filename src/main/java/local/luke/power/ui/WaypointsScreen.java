@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-/** Waypoint actions use the row's context menu; the footer only leaves the list. */
+/** Waypoint actions use the row's context menu; creation and Done share the footer. */
 public final class WaypointsScreen extends UiScreen {
   private static final int ROW = 28, EYE = 18, MENU_ROW = 18;
   private final Screen parent;
@@ -60,12 +60,21 @@ public final class WaypointsScreen extends UiScreen {
     Comparator<Waypoint> order = sort == 0 ? Comparator.comparing(p -> p.name.toLowerCase(Locale.ROOT))
         : sort == 1 ? Comparator.comparingDouble(p -> p.distance(Maps.x(), Maps.z()))
         : Comparator.comparingLong((Waypoint p) -> p.created).reversed();
-    cachedRows = store.points().stream().filter(p -> (store.allSets() || p.set.equals(store.selectedSet()))
-        && (p.name + " " + p.abbreviation() + " " + p.set + " " + p.coordinates()).toLowerCase(Locale.ROOT).contains(query))
-        .sorted(order.thenComparing(p -> p.id)).toList();
+    var points = store.points();
+    var scores = new HashMap<String, Integer>();
+    for (Waypoint point : points) scores.put(point.id, WaypointSearch.score(query, point));
+    cachedRows = points.stream().filter(p -> (store.allSets() || p.set.equals(store.selectedSet()))
+        && scores.get(p.id) != FuzzySearch.NONE)
+        .sorted(Comparator.comparingInt((Waypoint point) -> scores.get(point.id)).thenComparing(order).thenComparing(p -> p.id)).toList();
     return cachedRows;
   }
   private Waypoint selected() { return rows().stream().filter(p -> p.id.equals(selected)).findFirst().orElse(null); }
+  private boolean selectedAt(int x, int y) {
+    if (!inside(x, y, left(), 72, span() - 8, rowBottom() - 72)) return false;
+    int index = (y - 72 + scroll) / ROW;
+    var points = rows();
+    return index < points.size() && points.get(index).id.equals(selected);
+  }
   private List<String> moveSets() {
     Waypoint point = selected();
     if (point == null) return List.of();
@@ -148,9 +157,13 @@ public final class WaypointsScreen extends UiScreen {
       fitMenu();
       if (button == 0 && inside(x, y, contextX, contextY, menuWidth(), menuRows() * MENU_ROW)) {
         click(); contextAction(contextActions().get(contextScroll + (y - contextY) / MENU_ROW));
-      } else context = moving = false;
+      } else {
+        context = moving = false;
+        if (!selectedAt(x, y)) selected = "";
+      }
       return;
     }
+    if (!selectedAt(x, y)) selected = "";
     var store = Maps.waypoints();
     if (selectingSet) {
       if (store == null || !store.ready()) { selectingSet = false; return; }
@@ -160,10 +173,17 @@ public final class WaypointsScreen extends UiScreen {
       } else selectingSet = false;
       return;
     }
-    if (button == 0 && inside(x, y, width / 2 - 75, height - 26, 150, 20)) { click(); minecraft.setScreen(parent); return; }
-    if (button == 0) { search.focused = inside(x, y, left(), 27, layout().searchWidth(), 18); search.click(x, button); }
+    if (button == 0 && inside(x, y, layout().doneX(), height - 26, layout().footerWidth(), 20)) { click(); minecraft.setScreen(parent); return; }
+    if (inside(x, y, left(), 27, layout().searchWidth(), 18)) {
+      search.focused = true; search.click(x, button);
+      if (button == 1 && Boolean.TRUE.equals(local.luke.power.controls.ControlFeatures.USER_INTERFACE_CONFIG.clearTextFieldWithRightClick)) {
+        search.setText(""); search.selectAll(); scroll = 0;
+      }
+      return;
+    }
+    if (button == 0) search.focused = false;
     if (store == null || !store.ready()) return;
-    if (button == 0 && inside(x, y, left(), 4, 100, 18)) { click(); minecraft.setScreen(new WaypointEditorScreen(this, MapKeys.newWaypoint())); return; }
+    if (button == 0 && inside(x, y, layout().newX(), height - 26, layout().footerWidth(), 20)) { click(); minecraft.setScreen(new WaypointEditorScreen(this, MapKeys.newWaypoint())); return; }
     if (inside(x, y, layout().sortX(), 27, layout().sortWidth(), 18)) { click(); sort = Math.floorMod(sort + (button == 1 ? -1 : 1), 3); return; }
     if (inside(x, y, layout().filterX(), 27, layout().filterWidth(), 18)) { click(); store.allSets(!store.allSets()); scroll = 0; return; }
     if (inside(x, y, layout().createX(), 49, layout().createWidth(), 18) && button == 0) { click(); beginNewSet(); return; }
@@ -201,11 +221,10 @@ public final class WaypointsScreen extends UiScreen {
     renderBackground(); titleBar("Waypoints");
     var store = Maps.waypoints(); boolean ready = store != null && store.ready();
     int hoverX = modal() ? -1000 : mx, hoverY = modal() ? -1000 : my;
-    button("New waypoint", left(), 4, 100, 18, hoverX, hoverY, ready);
     input(search, left(), 27, layout().searchWidth(), hoverX, hoverY, "Search waypoints");
     button("Sort: " + new String[]{"Name", "Distance", "Newest"}[sort], layout().sortX(), 27, layout().sortWidth(), 18, hoverX, hoverY, ready);
     button(ready && store.allSets() ? "All sets" : "This set", layout().filterX(), 27, layout().filterWidth(), 18, hoverX, hoverY, ready);
-    button(fit("Set: " + (store == null ? "Default" : store.selectedSet()), layout().setWidth() - 8), left(), 49, layout().setWidth(), 18, hoverX, hoverY, ready);
+    WaypointSetDropdown.button(this, "Set: " + (store == null ? "Default" : store.selectedSet()), left(), 49, layout().setWidth(), hoverX, hoverY, ready, selectingSet);
     button("New set", layout().createX(), 49, layout().createWidth(), 18, hoverX, hoverY, ready);
     List<Waypoint> rows = rows(); scroll = (int)Math.max(0, Math.min(track().maximum(), bar.drag(track(), my, Mouse.isButtonDown(0))));
     clip(left(), 72, span(), Math.max(0, rowBottom() - 72));
@@ -213,24 +232,24 @@ public final class WaypointsScreen extends UiScreen {
       int y = 72 + i * ROW - scroll; if (y + ROW <= 72 || y >= rowBottom()) continue;
       Waypoint p = rows.get(i);
       if (p.id.equals(selected)) fill(left() + 2, y + 1, left() + span() - 8, y + ROW - 1, 0x604e7294);
+      else if (inside(hoverX, hoverY, left(), y, span() - 8, ROW)) fill(left() + 2, y + 1, left() + span() - 8, y + ROW - 1, 0x90000000);
       iconButton(p.enabled ? "eye" : "eyeClosed", left() + 6, y + 5, EYE, EYE, hoverX, hoverY, true, p.enabled);
-      int nameWidth = Math.max(20, span() / 2 - 36);
+      String details = fit("§f" + p.coordinates() + " §7· " + MapDimensions.name(p.dimension) + " · " + Math.round(p.distance(Maps.x(), Maps.z())) + "m", span() / 2 - 12);
+      int detailsX = layout().right() - 12 - textRenderer.getWidth(details);
+      int nameWidth = Math.max(20, detailsX - left() - 38);
       text(fit(p.name, nameWidth), left() + 30, y + 4, p.enabled ? p.colour : 0x777777);
-      text(fit(p.coordinates() + " · " + MapDimensions.name(p.dimension) + " · " + Math.round(p.distance(Maps.x(), Maps.z())) + "m", span() / 2 - 12), left() + span() / 2, y + 4, 0xcccccc);
-      text(fit(p.set + (p.global ? " · Always show" : ""), span() - 42), left() + 30, y + 15, 0x999999);
+      text(details, detailsX, y + (ROW - 8) / 2, 0xeeeeee);
+      text(fit(p.set + (p.global ? " · Always show" : ""), nameWidth), left() + 30, y + 15, 0x999999);
     }
     unclip(); bar.render(this, track());
     if (rows.isEmpty()) text(ready ? "No matching waypoints" : "Waypoints are loading or protected", left() + 4, 80, 0xaaaaaa);
-    button("Done", width / 2 - 75, height - 26, 150, 20, hoverX, hoverY, true);
+    button("New waypoint", layout().newX(), height - 26, layout().footerWidth(), 20, hoverX, hoverY, ready);
+    button("Done", layout().doneX(), height - 26, layout().footerWidth(), 20, hoverX, hoverY, true);
     if (!error.isEmpty()) tooltip(error, left(), height - 40);
     if (selectingSet && ready) {
       var sets = store.sets(); int count = layout().setRows(height, sets.size());
-      fill(left(), 69, left() + layout().setWidth(), 69 + count * 20, 0xff252525);
-      for (int i = 0; i < count && i + setScroll < sets.size(); i++) {
-        int index = i + setScroll, y = 69 + i * 20;
-        if (inside(mx, my, left(), y, layout().setWidth(), 20) || index == setIndex) fill(left(), y, left() + layout().setWidth(), y + 20, 0x90000000);
-        text(fit(sets.get(index), layout().setWidth() - 12), left() + 6, y + 6, sets.get(index).equals(store.selectedSet()) ? 0xffffff : 0xcccccc);
-      }
+      WaypointSetDropdown.render(this, sets, sets.indexOf(store.selectedSet()), setIndex, setScroll,
+          left(), 69, layout().setWidth(), count, mx, my);
     }
     if (context) {
       var actions = contextActions(); fitMenu(actions); int count = menuRows(actions);

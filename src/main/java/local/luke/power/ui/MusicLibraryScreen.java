@@ -10,6 +10,7 @@ import org.lwjgl.input.Mouse;
 
 /** Embedded Audio panel. Edits belong to the surrounding Options session. */
 public final class MusicLibraryScreen extends UiScreen {
+  public boolean draggingSlider() { return dragging != null || draggingGroup != null; }
   public record State(
       boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed, String presetFilter, Set<String> initialized, boolean hideExcluded) {
     public State(boolean queue, String folder, String query, int trackScroll, int queueScroll, String lastFolder, Set<String> collapsed, String presetFilter, Set<String> initialized) {

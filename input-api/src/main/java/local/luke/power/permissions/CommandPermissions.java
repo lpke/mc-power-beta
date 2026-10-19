@@ -70,7 +70,7 @@ public final class CommandPermissions {
     }
     return switch (canonical(name)) {
       case "time" -> args.length > 1 && Set.of("query", "get").contains(args[1].toLowerCase(Locale.ROOT));
-      case "waypoint" -> args.length == 1 || args.length > 1 && Set.of("list", "add", "remove").contains(args[1].toLowerCase(Locale.ROOT));
+      case "waypoint" -> args.length == 1 || args.length > 1 && Set.of("list", "add", "remove", "dest", "destination").contains(args[1].toLowerCase(Locale.ROOT));
       case "clear" -> args.length == 4 && args[3].equals("0");
       default -> false;
     };

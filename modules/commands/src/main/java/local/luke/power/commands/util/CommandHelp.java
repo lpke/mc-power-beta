@@ -32,7 +32,7 @@ public final class CommandHelp {
           Map.entry("summon", "Spawn a Beta entity"),
           Map.entry("kill", "Kill selected entities, or yourself"),
           Map.entry("ride", "Mount or dismount an entity"),
-          Map.entry("waypoint", "Add, remove, list or visit saved waypoints; aliases /way and /wp"),
+          Map.entry("waypoint", "Save, list or visit waypoints and set temporary destinations; aliases /way and /wp"),
           Map.entry("way", "Alias for /waypoint"),
           Map.entry("wp", "Alias for /waypoint"),
           Map.entry("god", "Toggle invulnerability"),

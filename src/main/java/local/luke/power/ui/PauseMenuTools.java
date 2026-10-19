@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 public final class PauseMenuTools extends UiScreen {
   private enum Tool { PHOTO, MAP, WAYPOINTS }
   private final ItemRenderer renderer = new ItemRenderer();
-  private final ItemStack[] icons = {new ItemStack(321, 1, 0), new ItemStack(358, 1, 0)};
+  private final ItemStack[] icons = {new ItemStack(321, 1, 0), new ItemStack(358, 1, 0), new ItemStack(345, 1, 0)};
   private final List<Tool> included = new ArrayList<>();
   private Screen parent;
   private PauseToolsLayout.Box bounds;
@@ -81,16 +81,11 @@ public final class PauseMenuTools extends UiScreen {
       button("", x, y, 20, 20, mx, my, true);
       GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS); GL11.glPushMatrix();
       try {
-        if (tool == Tool.WAYPOINTS) {
-          GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING); GL11.glDisable(GL11.GL_CULL_FACE);
-          local.luke.power.map.WaypointSymbols.diamond(x + 10, y + 10, 5, 0xffcc33, 1);
-        } else {
         GL11.glPushMatrix();
         try { GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); }
         finally { GL11.glPopMatrix(); }
         GL11.glColor4f(1, 1, 1, 1); GL11.glEnable(32826);
         renderer.method_1487(minecraft.textRenderer, minecraft.textureManager, icons[tool.ordinal()], x + 2, y + 2);
-        }
       } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); }
       if (inside(mx, my, x, y, 20, 20)) hover = switch (tool) { case PHOTO -> "Photo mode"; case MAP -> "Map"; case WAYPOINTS -> "Waypoints"; };
     }

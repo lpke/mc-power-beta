@@ -104,7 +104,7 @@ public final class CreativeCommands {
                                 ? List.of("survival", "creative", "spectator")
                                 : index == 2 ? List.of("@s", "@p", "@a") : List.of();
                         yield choices.stream()
-                            .filter(v -> v.startsWith(prefix))
+                            .filter(v -> local.luke.power.chat.ChatCompletion.startsWith(v, prefix))
                             .map(v -> v.substring(prefix.length()))
                             .toArray(String[]::new);
                       }

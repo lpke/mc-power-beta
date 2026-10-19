@@ -20,7 +20,7 @@ public class ParameterSuggestUtil {
         String modId = "";
         if (!autofillingModId)
         {
-            modId = currentInput.split(":")[0];
+            modId = currentInput.split(":", -1)[0];
         }
 
         HashSet<String> outputs = new HashSet<>();
@@ -28,19 +28,19 @@ public class ParameterSuggestUtil {
         {
             if (autofillingModId)
             {
-                if (id.namespace.toString().startsWith(currentInput))
+                if (local.luke.power.chat.ChatCompletion.startsWith(id.namespace.toString(), currentInput))
                 {
                     outputs.add(id.namespace.toString().substring(currentInput.length()) + ":");
                 }
             }
             else
             {
-                if (id.namespace.toString().equals(modId))
+                if (id.namespace.toString().equalsIgnoreCase(modId))
                 {
-                    String[] segments = currentInput.split(":");
+                    String[] segments = currentInput.split(":", -1);
                     if (segments.length > 1)
                     {
-                        if (id.path.startsWith(segments[1]))
+                        if (local.luke.power.chat.ChatCompletion.startsWith(id.path, segments[1]))
                         {
                             outputs.add(id.path.substring(segments[1].length()));
                         }
@@ -68,7 +68,7 @@ public class ParameterSuggestUtil {
 
                 // Filter and return names that start with the current input
                 return playerNames.stream()
-                        .filter(a -> a.startsWith(currentInput))
+                        .filter(a -> local.luke.power.chat.ChatCompletion.startsWith(a, currentInput))
                         .map(b -> b.substring(currentInput.length()))
                         .toArray(String[]::new);
             }
