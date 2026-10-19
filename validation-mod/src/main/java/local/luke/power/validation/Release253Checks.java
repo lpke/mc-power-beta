@@ -33,6 +33,7 @@ public final class Release253Checks {
     if(mc.player.field_1595!=null)mc.player.method_1376(null);
     for(Entity e:vehicles(mc)){e.markDead();e.method_1340(140,110,140);}
   }
+  private static void movePlaced(Minecraft mc){for(Entity vehicle:vehicles(mc))vehicle.method_1340(X+8,Y+1,Z+8);}
   private static void tick(Minecraft mc)throws Exception{
     var access=(Client253Access)mc;access.power$ticks(access.power$ticks()+1);
     access.power$lastTick(System.currentTimeMillis());mc.field_2778=true;mc.paused=true;mc.tick();
@@ -77,7 +78,7 @@ public final class Release253Checks {
           CreativeVehicleChecks.mode(mc,"CREATIVE");prepare(mc,333);String before=DeathItems.encode(mc.player.inventory.main[0]);
           event(mc,true);check(vehicles(mc).size()==1,"initial click did not place exactly one boat");
           for(int i=0;i<40;i++)tick(mc);check(vehicles(mc).size()==1,"held click spawned extra boats");
-          for(int click=0;click<3;click++){event(mc,false);event(mc,true);check(vehicles(mc).size()==click+2,"quick click lost or repeated");}
+          for(int click=0;click<3;click++){movePlaced(mc);event(mc,false);event(mc,true);check(vehicles(mc).size()==click+2,"quick click lost or repeated");}
           event(mc,false);check(before.equals(DeathItems.encode(mc.player.inventory.main[0])),"Creative changed count or native data");
         });
       }
@@ -89,7 +90,7 @@ public final class Release253Checks {
         check(before.equals(DeathItems.encode(mc.player.inventory.main[0])),"Creative changed minecart item");
       });
       test("Survival keeps native held use and consumption; ordinary Creative block use repeats",()->{
-        CreativeVehicleChecks.mode(mc,"SURVIVAL");prepare(mc,333);event(mc,true);for(int i=0;i<8;i++)tick(mc);event(mc,false);
+        CreativeVehicleChecks.mode(mc,"SURVIVAL");prepare(mc,333);event(mc,true);for(int i=0;i<8;i++){movePlaced(mc);tick(mc);}event(mc,false);
         check(vehicles(mc).size()>1&&mc.player.inventory.main[0].count==8-vehicles(mc).size(),"Survival repeat/consumption changed");
         CreativeVehicleChecks.mode(mc,"CREATIVE");prepare(mc,4);mc.world.method_154(X+3,Y,Z,1,0);mc.field_2823=new class_27(X+3,Y,Z,1,Vec3d.createCached(X+3.5,Y+1,Z+.5));
         aim(mc,X+3.5,Y+1,Z+.5);event(mc,true);aim(mc,X+3.5,Y+2,Z+.5);
@@ -100,7 +101,7 @@ public final class Release253Checks {
         CreativeVehicleChecks.mode(mc,"CREATIVE");prepare(mc,333);event(mc,true);
         mc.setScreen(new net.minecraft.class_525());for(int i=0;i<6;i++)tick(mc);mc.setScreen(null);
         for(int i=0;i<6;i++)tick(mc);check(vehicles(mc).size()==1,"menu resumed held vehicle placement");
-        mc.field_2778=false;event(mc,false);event(mc,true);event(mc,false);
+        movePlaced(mc);mc.field_2778=false;event(mc,false);event(mc,true);event(mc,false);
         check(vehicles(mc).size()==2,"new click after menu lost");
       });
       retire(mc);mc.paused=paused;

@@ -15,12 +15,15 @@ final class HudEditorSections {
   private HudEditorSections() {}
   private static String field(Setting s) { return s.id.substring(s.id.lastIndexOf('.') + 1); }
   static boolean position(Setting s) {
+    if (s.id.startsWith("maps.")) return Set.of("corner", "offsetX", "offsetY").contains(field(s));
     return (s.id.equals("interface.debugOrder") || s.id.equals("interface.debugRightOrder")) || OFFSETS.contains(s.id)
         || s.id.startsWith(HudPreview.NATIVE) && NATIVE_POSITION.contains(field(s))
         || (s.id.startsWith("infoHud.clusters.") || s.id.startsWith("activeTweaks.")) && ANCHOR_POSITION.contains(field(s));
   }
   static String group(Setting s) {
     String id = s.id, field = field(s);
+    if (id.startsWith("maps.")) return position(s) ? "Position"
+        : Set.of("coordinates", "biome", "clock", "compass").contains(field) ? "Information" : "Appearance";
     if (HudEditorSettings.itemNames(s)) return "Item names";
     if (s.group.equals("Chat")) return "Chat history";
     if (Set.of(HudEditorSettings.HUD + "disableCrosshair", HudEditorSettings.HUD + "drawXboxXAndYButtons", HudEditorSettings.TOAST).contains(id)) return "Visibility";

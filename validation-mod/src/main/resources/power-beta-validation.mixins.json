@@ -38,7 +38,8 @@
     "Item173Capture",
     "Debug174Capture",
     "FreecamMotionCapture",
-    "Explosion210Capture"
+    "Explosion210Capture",
+    "SprintParticleCapture"
   ],
   "injectors": {
     "defaultRequire": 1

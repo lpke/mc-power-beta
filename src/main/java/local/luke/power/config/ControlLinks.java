@@ -24,6 +24,14 @@ public final class ControlLinks {
     link("powerbeta.debugGraph", "", "", "Toggle the performance graph and show the debug overlay.");
     link("key.fog", "video.fogCycle", "", "Cycle the configured render distances. Shift reverses the cycle.");
     link("Auto-walk (toggle)", "tweaks.autoWalkHoldToWalk", "", "Start or stop walking forward. Player forward/back input stops it. Focus loss stops it only when configured. Freecam controls the camera while your player keeps walking. Inventories keep walking when Inventory while moving is on.");
+    link("powerbeta.map", "maps.worldMap", "maps.worldMap", "Open the world map. Drag to pan, scroll to zoom, and right-click to manage a waypoint.");
+    link("powerbeta.waypoint", "maps.waypoints", "", "Create a waypoint at the reported camera position.");
+    link("powerbeta.waypoints", "maps.waypoints", "", "Search and manage waypoint sets.");
+    link("powerbeta.enlargeMap", "maps.size", "maps.minimap", "Hold to enlarge the minimap.");
+    link("powerbeta.mapZoomIn", "maps.zoom", "maps.minimap", "Zoom the minimap in.");
+    link("powerbeta.mapZoomOut", "maps.zoom", "maps.minimap", "Zoom the minimap out.");
+    link("powerbeta.minimap", "maps.minimap", "", "Show or hide the minimap.");
+    link("powerbeta.sprint", "sprint.enabled", "sprint.enabled", "Sprint forward using the selected activation and stamina rules.");
     link("powerbeta.infoHud", "infoHud.enabled", "", "Toggle all custom HUD clusters together. Each cluster keeps its contents, appearance and F3 visibility preference.");
     // These settings are live toggle states, not feature-availability switches.
     link("power_beta.clickMining", "tweaks.clickMining", "", "Temporarily invert Continuous click mining until the next press or world exit.");
@@ -96,6 +104,8 @@ public final class ControlLinks {
     if (setting.kind == Setting.Kind.KEY) return false;
     if (setting.id.equals(link.setting) || setting.id.equals(link.featureGate)) return true;
     String family = switch (link.setting) {
+      case "sprint.enabled" -> "sprint.";
+      case "maps.worldMap", "maps.waypoints", "maps.minimap", "maps.zoom", "maps.size" -> "maps.";
       case "lightOverlay.enabled" -> "lightOverlay.";
       case "infoHud.enabled" -> "infoHud.";
       case "tweaks.placement.enabled" -> "tweaks.placement.";

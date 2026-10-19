@@ -17,6 +17,7 @@ public final class GameplayKeys {
   public static final KeyBinding INFO_HUD = new KeyBinding("powerbeta.infoHud", Keyboard.KEY_F4);
   public static final KeyBinding COMMANDS = new KeyBinding("powerbeta.openCommands", Keyboard.KEY_SLASH);
   public static final KeyBinding GRAPH = new KeyBinding("powerbeta.debugGraph", Keyboard.KEY_F3);
+  public static final KeyBinding SPRINT = new KeyBinding("powerbeta.sprint", Keyboard.KEY_LCONTROL);
   private static boolean graph;
   public static boolean graph() { return graph; }
   public static void debugText() { graph = false; }
@@ -26,6 +27,9 @@ public final class GameplayKeys {
     event.keyBindings.add(INFO_HUD);
     event.keyBindings.add(COMMANDS);
     event.keyBindings.add(GRAPH);
+    event.keyBindings.add(SPRINT);
+    event.keyBindings.addAll(local.luke.power.map.MapKeys.all());
+    Bindings.onMousePress("powerbeta.mapActions", key -> local.luke.power.map.MapKeys.press((Minecraft)FabricLoader.getInstance().getGameInstance(), key));
     Bindings.onMousePress("powerbeta.lightOverlay", GameplayKeys::toggleLight);
     Bindings.onMousePress("powerbeta.infoHud", GameplayKeys::toggleInfoHud);
     Bindings.onMousePress("powerbeta.interface", GameplayKeys::interfaceKey);
@@ -51,6 +55,7 @@ public final class GameplayKeys {
     if (event.environment != KeyStateChangedEvent.Environment.IN_GAME || !Keyboard.getEventKeyState() || Keyboard.isRepeatEvent()) return;
     toggleLight(Keyboard.getEventKey());
     toggleInfoHud(Keyboard.getEventKey());
+    local.luke.power.map.MapKeys.press((Minecraft)FabricLoader.getInstance().getGameInstance(), Keyboard.getEventKey());
     interfaceKey(Keyboard.getEventKey());
   }
 

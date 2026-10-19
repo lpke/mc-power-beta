@@ -146,11 +146,12 @@ public abstract class UiScreen extends Screen {
 
   protected void colourButton(String hex, int x, int y, int w, int mx, int my) {
     button("", x, y, w, 18, mx, my, true);
-    String label = fit(hex, Math.max(5, w - 26));
-    int start = x + Math.max(3, (w - textRenderer.getWidth(label) - 16) / 2);
+    String label = w >= 44 ? fit(hex, w - 26) : "";
+    int total = label.isEmpty() ? 12 : textRenderer.getWidth(label) + 16;
+    int start = x + Math.max(3, (w - total) / 2);
     fill(start, y + 3, start + 12, y + 15, 0xff000000);
     fill(start + 1, y + 4, start + 11, y + 14, 0xff000000 | Integer.parseInt(hex.replace("#", ""), 16));
-    text(label, start + 16, y + 5, inside(mx, my, x, y, w, 18) ? 0xffffa0 : 0xe0e0e0);
+    if (!label.isEmpty()) text(label, start + 16, y + 5, inside(mx, my, x, y, w, 18) ? 0xffffa0 : 0xe0e0e0);
   }
 
   protected void slider(String label, int x, int y, int w, int mx, int my, double fraction) {

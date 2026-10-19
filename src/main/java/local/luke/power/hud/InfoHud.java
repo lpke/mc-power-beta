@@ -26,7 +26,8 @@ public final class InfoHud {
     boolean camera = DetachedCamera.isActive();
     if (detached != camera) { detached = camera; ticks = 0; biomeX = Integer.MIN_VALUE; }
     if (!settings.enabled) ticks = 0;
-    if (!settings.enabled && !MenuPreferences.debugTimeOfDay()) return;
+    if (!settings.enabled && !MenuPreferences.debugTimeOfDay()
+        && !local.luke.power.map.MapConfig.current().clock) return;
     long daylight = ((WorldCycles)mc.world.method_262()).power$daylightTime();
     time = HudText.time(daylight);
     if (!settings.enabled || ticks++ % 4 != 0) return;

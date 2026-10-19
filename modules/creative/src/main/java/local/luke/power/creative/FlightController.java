@@ -21,6 +21,8 @@ public final class FlightController {
     lastJump = -100;
     jumpDown = true;
     sprinting = false;
+    local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.CREATIVE, false, 1);
+    local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.SPECTATOR, false, 1);
     sprint.reset(local.luke.power.input.Bindings.down(Keys.SPRINT));
   }
 
@@ -31,6 +33,8 @@ public final class FlightController {
     }
     if (!ClientRuntime.moving(mc)) {
       sprinting = false;
+      local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.CREATIVE, false, 1);
+      local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.SPECTATOR, false, 1);
       sprint.reset(local.luke.power.input.Bindings.down(Keys.SPRINT));
       lastJump = -100;
       jumpDown = local.luke.power.input.Bindings.down(mc.options.jumpKey);
@@ -58,6 +62,10 @@ public final class FlightController {
                     || (movementKey(mc, mc.options.leftKey) != movementKey(mc, mc.options.rightKey))
                     || (movementKey(mc, mc.options.jumpKey) != movementKey(mc, mc.options.sneakKey))),
             Modes.spectator(mc.player) ? Config.current().spectatorSprintToggle : Config.current().sprintToggle);
+    local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.CREATIVE,
+        sprinting && !Modes.spectator(mc.player), Config.current().sprintMultiplier / 100.0);
+    local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.SPECTATOR,
+        sprinting && Modes.spectator(mc.player), Config.current().spectatorSprintMultiplier / 100.0);
   }
 
   private static boolean movementKey(Minecraft mc, Object key) {

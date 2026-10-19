@@ -29,7 +29,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
 
   public HudEditorScreen(PowerOptionsScreen parent, String settingId) {
     super(parent, new SettingsDraft(parent.session().settings(), HudEditorSettings::contains));
-    preview = new HudPreview(draft);
+    preview = new HudPreview(draft,parent.session().settings().stream().filter(s->s.id.equals("maps.minimap")).findFirst().map(s->s.value.getAsBoolean()).orElse(false));
     reorder = new DebugReorder(draft, id -> {
       highlightedSetting = "";
       var line = DebugLines.find(id);
@@ -144,6 +144,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected String controlGroup(Setting s) { return HudEditorSections.group(s); }
   protected String groupKey(String group) { return selected + "/" + group; }
   protected List<Setting> controls() {
+    if (selected.equals("minimap")) return HudEditorSections.order(draft.settings().stream()
+        .filter(s -> s.id.startsWith("maps.")).toList());
     if (reorder != null && reorder.active()) return HudEditorSections.order(editingDraft().settings().stream()
         .filter(s -> s.group.equals("Debug (F3) info") && !HudEditorSettings.internal(s)).toList());
     if (selected.equals("layout")) return HudEditorSections.order(List.of(draft.get(HudEditorSettings.ENTRY),
@@ -179,7 +181,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
     List<String> ids = new ArrayList<>(); ids.add("layout");
     if (preview.mode() == 1) ids.add("combined"); else for (int i = 0; i < 5; i++) ids.add("native." + i);
     for (int i = 0; i < 4; i++) ids.add("cluster." + i);
-    ids.addAll(List.of("chat", "tweaks", "version", "debug")); return ids;
+    ids.addAll(List.of("minimap", "chat", "tweaks", "version", "debug")); return ids;
   }
   private String selectedLabel() { return selectionLabel(selected); }
   private String selectionLabel(String id) {
@@ -420,8 +422,13 @@ public final class HudEditorScreen extends DraftEditorScreen {
     if (dragging == null) return;
     double nextX = Math.max(0, Math.min(width - dragging.width(), dragging.x() + virtualX(x) - pressX));
     double nextY = Math.max(0, Math.min(height - dragging.height(), dragging.y() + virtualY(y) - pressY));
-    if (dragging.offsetX() != null) setOffset(dragging.offsetX(), startX + snap(nextX, dragging.width(), width) - dragging.x());
-    if (dragging.offsetY() != null) setOffset(dragging.offsetY(), startY + snap(nextY, dragging.height(), height) - dragging.y());
+    if (dragging.offsetX() != null) setOffset(dragging.offsetX(), startX + offsetDirection(dragging.offsetX()) * (snap(nextX, dragging.width(), width) - dragging.x()));
+    if (dragging.offsetY() != null) setOffset(dragging.offsetY(), startY + offsetDirection(dragging.offsetY()) * (snap(nextY, dragging.height(), height) - dragging.y()));
+  }
+  private int offsetDirection(String id) {
+    if (!id.startsWith("maps.")) return 1;
+    int corner = preview.integer("maps.corner");
+    return id.endsWith("offsetX") ? corner % 2 == 1 ? -1 : 1 : corner >= 2 ? -1 : 1;
   }
   private void setOffset(String id, double value) {
     Setting s = draft.get(id); s.value = new JsonPrimitive((int)Math.max(s.min, Math.min(s.max, Math.round(value))));
@@ -436,8 +443,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
     if (element != null) {
       draft.checkpoint();
       int step = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 10 : 1;
-      if (element.offsetX() != null) setOffset(element.offsetX(), preview.integer(element.offsetX()) + dx * step);
-      if (element.offsetY() != null) setOffset(element.offsetY(), preview.integer(element.offsetY()) + dy * step);
+      if (element.offsetX() != null) setOffset(element.offsetX(), preview.integer(element.offsetX()) + dx * step * offsetDirection(element.offsetX()));
+      if (element.offsetY() != null) setOffset(element.offsetY(), preview.integer(element.offsetY()) + dy * step * offsetDirection(element.offsetY()));
     }
     return true;
   }

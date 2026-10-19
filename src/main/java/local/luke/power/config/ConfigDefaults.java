@@ -31,7 +31,20 @@ public final class ConfigDefaults {
       catch (RuntimeException failure) {
         PowerConfig.recovery(defaults, failure.getMessage()); DefaultBases.reload();
       }
-      if (PowerConfig.problem().isEmpty()) initializeGameplay(game);
+      if (PowerConfig.problem().isEmpty()) {
+        initializeGameplay(game);
+        initializeMaps(game);
+      }
+    }
+  }
+
+  private static void initializeMaps(Path game) throws IOException {
+    JsonObject maps = PowerConfig.section("maps");
+    if (maps.has("minimap")) return;
+    maps.add("minimap", DefaultBases.value("maps.minimap", new JsonPrimitive(true)));
+    try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
+      PowerConfig.put("maps", maps);
+      transaction.commit();
     }
   }
 

@@ -141,7 +141,14 @@
     "PortalContactAccessor",
     "DebugGraphMixin",
     "MenuBackgroundMixin",
-    "MenuListBackgroundMixin"
+    "MenuListBackgroundMixin",
+    "MapConnectionMixin",
+    "SprintPlayerMixin",
+    "SprintInputMixin",
+    "SprintPhysicsMixin",
+    "SprintCombatMixin",
+    "MapTerrainUpdatesMixin",
+    "BoatInteractionMixin"
   ],
   "injectors": {
     "defaultRequire": 1

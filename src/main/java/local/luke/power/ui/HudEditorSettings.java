@@ -15,7 +15,7 @@ public final class HudEditorSettings {
       "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");
   private static final Set<String> GROUPS = Set.of("HUD layout", "Combined HUD position",
       "Hotbar position", "Hearts position", "Armor position", "Oxygen position",
-      "Overlay message position", "Version label", "Debug (F3) info", "Custom HUD info", "Active tweaks HUD", "General HUD", "Chat");
+      "Overlay message position", "Version label", "Debug (F3) info", "Custom HUD info", "Active tweaks HUD", "General HUD", "Chat", "Minimap");
   private HudEditorSettings() {}
   public static boolean contains(Setting s) {
     if (LEGACY_DEBUG.contains(s.id)) return false;
@@ -33,6 +33,7 @@ public final class HudEditorSettings {
   }
   static boolean itemNames(Setting s) { return s.id.equals(ITEM_NAMES) || s.id.equals(ITEM_FADE); }
   public static String tab(Setting s, int mode) {
+    if (s.id.startsWith("maps.")) return "minimap";
     if (s.id.startsWith("infoHud.")) return "cluster." + (s.id.startsWith("infoHud.clusters.") ? s.id.substring("infoHud.clusters.".length(), "infoHud.clusters.".length() + 1) : "0");
     if (s.id.startsWith("activeTweaks.")) return "tweaks";
     if (!view(s).isEmpty()) return view(s);
@@ -44,6 +45,7 @@ public final class HudEditorSettings {
     return itemNames(s) ? "native.4" : "layout";
   }
   public static String tabLabel(String id) {
+    if (id.equals("minimap")) return "Minimap";
     if (id.equals("layout")) return "General";
     if (id.equals("combined")) return "Combined HUD";
     if (id.startsWith("native.")) return HudPreview.NAMES[Integer.parseInt(id.substring(7))];

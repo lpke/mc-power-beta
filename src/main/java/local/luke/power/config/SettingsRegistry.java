@@ -24,6 +24,8 @@ public final class SettingsRegistry {
     AudioBackend.register(s, mc);
     VisualBackend.register(s, mc);
     LightBackend.register(s);
+    MapBackend.register(s);
+    SprintBackend.register(s);
     InterfaceBackend.register(s);
     StatusBackend.register(s);
     InfoHudBackend.register(s);

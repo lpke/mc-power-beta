@@ -27,6 +27,7 @@ public class ClientMixin {
   }
   @Inject(method = "stop", at = @At("HEAD"))
   private void power$quit(CallbackInfo ci) {
+    local.luke.power.map.Maps.leave();
     power$resetTweaks();
     try { local.luke.power.storage.PowerConfig.flushPending(); }
     catch (java.io.IOException e) { PowerBeta.LOG.error("Could not save inactive tweaks before shutdown", e); }

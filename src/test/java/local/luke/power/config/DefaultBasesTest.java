@@ -68,6 +68,41 @@ class DefaultBasesTest {
       assertEquals(enabled,PowerConfig.section("gameplay").get("boatPlacementFacing").getAsBoolean());
     }
   }
+  @Test void minimapUsesItsInitialBaseAndSurvivesBaseChangesRollbackAndRestart() throws Exception {
+    ConfigDefaults.prepare(game);
+    for (var base : DefaultBases.Base.values()) {
+      JsonObject old = PowerConfig.document();
+      var settings = old.getAsJsonObject("settings");
+      settings.getAsJsonObject("defaults").addProperty("base", base.id);
+      settings.getAsJsonObject("maps").remove("minimap");
+      settings.getAsJsonObject("maps").addProperty("retainedUnknown", "unchanged");
+      PowerConfig.write(old);
+      byte[] original = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      boolean enabled = base == DefaultBases.Base.POWER_BETA;
+      JsonObject expected = old.deepCopy();
+      expected.getAsJsonObject("settings").getAsJsonObject("maps").addProperty("minimap", enabled);
+      assertEquals(expected, PowerConfig.document());
+      try (var dirs = Files.list(game.resolve("power-beta-data/settings-backups"))) {
+        assertTrue(dirs.anyMatch(dir -> {
+          try { return Arrays.equals(original, Files.readAllBytes(dir.resolve("file-0"))) && Files.exists(dir.resolve("complete.json")); }
+          catch (Exception e) { return false; }
+        }));
+      }
+      DefaultBases.use(enabled ? DefaultBases.Base.BETA : DefaultBases.Base.POWER_BETA, game);
+      byte[] saved = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      assertArrayEquals(saved, Files.readAllBytes(PowerConfig.path()));
+      try (var transaction = FileTransaction.begin(game, List.of(PowerConfig.path()))) {
+        JsonObject maps = PowerConfig.section("maps");
+        maps.addProperty("minimap", !enabled);
+        PowerConfig.put("maps", maps);
+      }
+      ConfigDefaults.prepare(game);
+      assertArrayEquals(saved, Files.readAllBytes(PowerConfig.path()));
+      assertEquals(enabled, PowerConfig.section("maps").get("minimap").getAsBoolean());
+    }
+  }
   @Test void waterMovementUsesItsInitialBaseAndSurvivesBaseChangesRollbackAndRestart() throws Exception {
     ConfigDefaults.prepare(game);
     for(var base:DefaultBases.Base.values()) {

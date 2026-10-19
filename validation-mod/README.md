@@ -8,6 +8,21 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `release-260 menus` checks Map/HUD routing, isolated drafts, preview rollback and
+  sprint defaults. After `new-world`, `map` checks loaded-only sampling, native
+  terrain edits, caves and GL restoration; `sprint` compares actual native travel,
+  jump impulses, cancellation and stamina NBT. Prefix every phase with
+  `release-260 `. Use `save`, restart and `saved` for waypoint/stamina persistence;
+  `open` and `state` support physical map/HUD input and bounded-cache checks.
+  `boats` verifies that using a held boat on empty or occupied boats preserves native
+  interaction and the held item in Survival and Creative.
+  `ui` checks pointer closure, context ownership, coordinate validation and border
+  export; `effects` checks native dust, combat knockback and independent sprint FOV.
+  `lifecycle` checks actual Nether travel and retained data while maps are disabled;
+  `textures` switches native texture packs and verifies restored map colours.
+  `perf` measures bounded sampling, radar and drawing during repeated traversal.
+  `native` and `raw` select GUI mouse helpers for physical map gestures.
+
 - After `new-world`, `release-251 boats` checks native item placement with the fix
   off/on, both steering and speed settings, source/flowing-water blocks, cardinal
   and diagonal bearings, first-tick interpolation, actual mounted forward movement,

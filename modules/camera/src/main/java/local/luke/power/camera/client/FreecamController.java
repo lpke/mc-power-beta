@@ -66,6 +66,8 @@ public class FreecamController {
         if (!eligible) sprintLatched = false;
         else if (toggle && pressed && !sprintDown) sprintLatched = !sprintLatched;
         sprintDown = pressed;
+        local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.FREECAM,
+                eligible && (toggle ? sprintLatched : pressed), multiplier);
         return (float)(local.luke.power.camera.FreecamConfig.config.speed * (eligible && (toggle ? sprintLatched : pressed) ? multiplier : 1));
     }
 
@@ -93,6 +95,7 @@ public class FreecamController {
         velocityX = velocityY = velocityZ = 0;
         accelerationX = accelerationY = accelerationZ = 0;
         sprintLatched = false;
+        local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.FREECAM, false, 1);
         sprintDown = local.luke.power.input.Bindings.down("power_creative.sprint");
         this.allowPlayerMovement = false;
         clearMovementInput();

@@ -21,6 +21,8 @@ improvements and optional tweaks in one searchable Options menu.
 
 - One searchable Options menu with categories, linked settings, tooltips, live previews, reset controls, automatic saving and optional Apply/Cancel editing.
 - Configurable keyboard and mouse bindings, Ctrl/Shift/Alt chords, conflict detection and a shared view for resolving overlapping bindings.
+- A persistent world map and HUD minimap with surface and cave layers, terrain shading, entity radar, waypoints, deathpoints, chunk and slime overlays, recent paths and PNG export.
+- Optional modern sprinting on foot, with stamina and combat limits, sprint jumping and surface particles. Separate optional sprint FOV effects for ground sprinting and each flight mode. All start off.
 - Creative and spectator modes, a mode picker, configurable reach, flight speed, drift and sprint, and adjustable spectator speed.
 - Creative item categories and a survival inventory view. Shift-click for full stacks, middle-drag to fill slots, and use a destroy slot or clear the inventory.
 - WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
@@ -54,7 +56,7 @@ improvements and optional tweaks in one searchable Options menu.
 - Optional equipment durability and defence changes, mob drops, sheep punching for wool, grass hoeing for seeds, squid milking and food-waste prevention.
 - Older block textures, softer rain and snow, low fire, redstone power numbers, leaf rendering, particle controls, camera shake and fog options.
 - Light-level overlays, configurable active-tweak indicators and toggle messages, hotbar item names, HUD positioning, crosshair and vignette controls.
-- An interactive HUD editor with dragging, anchors, snapping and undo. Arrange native HUD elements, four custom info clusters, active tweaks, version labels and F3 information with texture-pack previews.
+- An interactive HUD editor with dragging, anchors, snapping and undo. Arrange the minimap, native HUD elements, four custom info clusters, active tweaks, version labels and F3 information with texture-pack previews.
 - Expanded F3 information for coordinates, facing, biome, day, play time, slime chunks, light, music and culling, with shared text colour and layout.
 - Paint custom block lettering for the title screen, preview it in 3D and save presets. Choose panorama backgrounds for the title screen or all main-menu screens. Achievement display options include recovery controls for missing achievements.
 - Configurable autosaving, focus-loss pausing, raw mouse input and network options. Optional tall-grass and dead-bush generation controls for new terrain.
@@ -90,12 +92,40 @@ Settings save automatically by default. Right-click Apply to use manual editing;
 leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
 edits stay in the draft until you create the world.
 
-Version 2.1.0 supports configuration formats 3, 4, 5 and 6, converting older formats
-to 6 with a verified backup. World rules use format 3 and support formats 1, 2 and
+Version 2.6.0 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
+with a verified backup. World rules use format 3 and support formats 1, 2 and
 Power Beta's earlier world settings. Existing worlds retain their rules and item
 protection. Old footwear-specific crop protection needs an explicit trampling choice. Conflicting old permissions or unsupported formats stop conversion
 and show recovery guidance. Keep a full instance backup before upgrading; world
 folders alone do not include global preferences, music libraries or recovery history.
+
+## Maps and sprinting
+
+Press **M** for the world map, **B** to create a waypoint and **U** to manage waypoints.
+Drag the map to pan, scroll to zoom around the pointer, press **Home** to centre,
+and right-click for waypoint, destination, coordinate and teleport actions. **G** opens
+coordinate navigation. Hold **Z** to enlarge the minimap; **I** and **O** change its zoom.
+All gameplay bindings can be changed in Controls.
+
+Options > Map contains terrain, caves, radar, waypoint and performance settings.
+Its layout button opens the minimap section of the HUD editor for position, size,
+shape, opacity, rotation and information. These edits use the same Done, Undo and
+Cancel controls as the rest of the HUD. Power Beta defaults show the minimap;
+Refined Beta and Beta defaults leave it hidden.
+
+Explored terrain and waypoints are stored in `power-beta-data/maps`, separately
+from preferences and inventory recovery. Map sampling reads loaded terrain only.
+PNG export saves the visible terrain, up to 4096 pixels on the longer side, in the
+map's `exports` folder. In multiplayer, name each server map in the map screen when
+the server has multiple worlds. Teleportation requires a local singleplayer world's
+teleport permission and the player's view. Maps do not grant access permissions.
+
+Options > Gameplay > Sprinting enables singleplayer ground sprinting. The default
+activation uses Ctrl or a forward double tap, with modern acceleration, jump boost,
+dust and sprint-hit knockback. Sprint stamina and combat contains optional stamina,
+recharge delays and combat limits that can balance it without adding a hunger system. Ground sprinting stays disabled in
+multiplayer. Sprint FOV effects have separate settings for ground, Creative,
+Spectator and freecam movement, and all default off. Their shared strength is in Camera > View.
 
 ## Install
 
@@ -138,6 +168,8 @@ You are welcome to fork it and adapt it to your needs under the AGPL license.
 [BHCreative](https://github.com/paulevsGitch/BHCreative),
 [Tweakeroo](https://github.com/maruohon/tweakeroo),
 [WorldEdit](https://github.com/EngineHub/WorldEdit),
+[Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap),
+[Xaero's World Map](https://modrinth.com/mod/xaeros-world-map),
 [Better Than Adventure](https://github.com/Better-than-Adventure),
 [OmniLook](https://github.com/rhysdh540/Omnilook),
 [UniTweaks](https://github.com/danygames2014/UniTweaks),

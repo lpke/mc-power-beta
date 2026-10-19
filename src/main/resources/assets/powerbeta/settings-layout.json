@@ -56,7 +56,17 @@
     "Armor position",
     "Oxygen position",
     "Overlay message position",
-    "Version label"
+    "Version label",
+    "Minimap"
+  ],
+  "Map": [
+    "Minimap",
+    "World map",
+    "Terrain",
+    "Entity radar",
+    "Waypoints",
+    "Overlays",
+    "Performance"
   ],
   "Camera": [
     "View",
@@ -113,6 +123,8 @@
     "Player damage"
   ],
   "Gameplay": [
+    "Sprinting",
+    "Sprint stamina and combat",
     "Death records",
     "Interaction",
     "Fall damage",

@@ -160,6 +160,14 @@ public final class NativeBackend implements Backend {
       if (k.translationKey.equals("powerbeta.debugGraph")) label = "Performance graph";
       if (k.translationKey.equals("powerbeta.lightOverlay")) label = "Light overlay (toggle)";
       if (k.translationKey.equals("powerbeta.infoHud")) label = "Custom HUD info (toggle)";
+      if (k.translationKey.equals("powerbeta.map")) label = "World map";
+      if (k.translationKey.equals("powerbeta.waypoint")) label = "Create waypoint";
+      if (k.translationKey.equals("powerbeta.waypoints")) label = "Waypoint list";
+      if (k.translationKey.equals("powerbeta.enlargeMap")) label = "Enlarge minimap (hold)";
+      if (k.translationKey.equals("powerbeta.mapZoomIn")) label = "Minimap zoom in";
+      if (k.translationKey.equals("powerbeta.mapZoomOut")) label = "Minimap zoom out";
+      if (k.translationKey.equals("powerbeta.minimap")) label = "Minimap (toggle)";
+      if (k.translationKey.equals("powerbeta.sprint")) label = "Sprint on foot";
       entries.add(
           new Setting(
               key,
@@ -188,6 +196,13 @@ public final class NativeBackend implements Backend {
   private static int defaultKey(KeyBinding k) {
     return switch (k.translationKey) {
       case "powerbeta.lightOverlay" -> Keyboard.KEY_F7;
+      case "powerbeta.map" -> Keyboard.KEY_M;
+      case "powerbeta.waypoint" -> Keyboard.KEY_B;
+      case "powerbeta.waypoints" -> Keyboard.KEY_U;
+      case "powerbeta.enlargeMap" -> Keyboard.KEY_Z;
+      case "powerbeta.mapZoomIn" -> Keyboard.KEY_I;
+      case "powerbeta.mapZoomOut" -> Keyboard.KEY_O;
+      case "powerbeta.sprint" -> Keyboard.KEY_LCONTROL;
       case "key.forward" -> Keyboard.KEY_W;
       case "key.back" -> Keyboard.KEY_S;
       case "key.left" -> Keyboard.KEY_A;

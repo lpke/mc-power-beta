@@ -500,3 +500,22 @@
   12 chunks in clear daytime Forest terrain with a visible mob for the dynamic entity-ID
   tag preview, without loading a second world in menus. Preview toggles never change
   settings, and editor selection/scroll memory stays separate from drafts.
+
+- Map sampling stays on the game thread and reads loaded native/flattened chunks only.
+  Minimap and world map share versioned tiles, mip levels and bounded CPU/GPU caches.
+  Compression, image decoding, exports and durable writes use immutable requests on
+  the bounded map worker. Corrupt/future terrain and waypoint data remain protected.
+  Keep world/server identity, dimensions and cave layers separate; terrain edits and
+  texture changes invalidate loaded samples. Map navigation never moves the player
+  or loads terrain. Teleport actions use the existing local permission and command.
+  Map preferences use PowerConfig; minimap presentation belongs to the HUD draft,
+  with a link from the Map tab. Initialise a missing minimap enablement once from
+  the selected base with a verified backup; later Use as base changes never alter it
+  on restart. Preserve waypoints while features are disabled.
+- Ground sprinting is a global singleplayer preference, off in every defaults base.
+  Preserve native land collision, fluids, vehicles, flight and multiplayer authority.
+  Modern defaults use a 1.3 speed multiplier, 0.2 horizontal jump impulse and native
+  terrain dust with modern particle movement. Optional stamina/combat rules persist
+  in player NBT without changing global enablement. Each movement mode publishes
+  sprint state for its independent FOV preference; render code never polls keys.
+  Boat interaction consumes a held boat's placement fallback without skipping native boarding.

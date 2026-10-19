@@ -21,6 +21,7 @@ public final class PowerOptionsScreen extends UiScreen {
           "Audio",
           "Controls",
           "Interface",
+          "Map",
           "Camera",
           "Movement",
           "Inventory",
@@ -40,7 +41,7 @@ public final class PowerOptionsScreen extends UiScreen {
   public List<String> visiblePages() { return pages; }
 
   private static final int[] ICONS = {
-    58, 20, 2256, 280, 323, 345, 301, 54, 45, 2, 271, 339, 260, 61, 265, 331, 340
+    58, 20, 2256, 280, 323, 358, 345, 301, 54, 45, 2, 271, 339, 260, 61, 265, 331, 340
   };
 
   private record Row(String group, Setting setting, int y, int height, boolean separator) {
@@ -118,6 +119,13 @@ public final class PowerOptionsScreen extends UiScreen {
   private List<String> sectionKeys = List.of();
 
   public PowerOptionsScreen(Screen parent) { this(parent, false); }
+
+  public static void openMap(net.minecraft.client.Minecraft mc, Screen parent) {
+    PowerOptionsScreen screen = new PowerOptionsScreen(parent);
+    screen.page = "Map"; screen.search.setText(""); screen.relatedIds = List.of();
+    screen.conflictIds = List.of(); screen.changedOnly = false; screen.scroll = 0;
+    mc.setScreen(screen);
+  }
 
   public PowerOptionsScreen(Screen parent, boolean directPause) {
     this.parent = parent;
@@ -761,7 +769,7 @@ public final class PowerOptionsScreen extends UiScreen {
           return;
         }
         if (x < mainControlLeft(r) || x >= controlEnd(s)) return;
-        if (s.id.equals(HudEditorSettings.ENTRY) || HudEditorSettings.lettering(s) || ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
+        if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || HudEditorSettings.lettering(s) || ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
         else if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0 && s.slider()) {
             dragging = s;
@@ -831,8 +839,8 @@ public final class PowerOptionsScreen extends UiScreen {
       var editor = new HudEditorScreen(this, s.id);
       minecraft.setScreen(editor); editor.beginReorder(); return;
     }
-    if (s.id.equals(HudEditorSettings.ENTRY)) {
-      minecraft.setScreen(new HudEditorScreen(this, s.id));
+    if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor")) {
+      minecraft.setScreen(new HudEditorScreen(this, s.id.equals("maps.hudEditor") ? "maps.size" : s.id));
       return;
     }
     if (HudEditorSettings.lettering(s)) {
@@ -1013,7 +1021,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private String value(Setting s) {
     if (s.id.equals("interface.debugOrder")) return "Reorder";
-    if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("logo.logo.lines")) return "Edit...";
+    if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || s.id.equals("logo.logo.lines")) return "Edit...";
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) return local.luke.power.input.PanoramaCatalog.label(s.value.getAsString());
     if (s.id.equals("audio.preset")) return new MusicEdits(this).name(s.value.getAsString());

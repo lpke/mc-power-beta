@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-10-19
+
+- Add a shared minimap and explored world map with persistent surface and cave terrain, zooming, panning, terrain shading, entity radar, chunk and slime overlays, recent paths and PNG exports.
+- Save coloured waypoints in named sets, show them on maps and in the world, record deathpoints and offer teleportation through the world's existing teleport permission.
+- Add a Map options tab and minimap position, size and appearance controls in the HUD editor, with isolated drafts and a direct link from Map settings.
+- Add optional modern sprinting on foot, disabled in every defaults base, with sprint jumping, surface particles, sprint-hit knockback and configurable stamina and combat restrictions.
+- Add optional dynamic FOV for sprinting on foot, Creative flight, Spectator flight and freecam, all disabled by default.
+- Keep right-clicking an existing boat with a boat item from also placing a second boat, while preserving normal boarding.
+
 ## [2.5.3] - 2026-10-19
 
 - Place one boat or minecart per right-click in Creative, without repeated placement while holding the button.

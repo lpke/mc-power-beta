@@ -67,6 +67,7 @@ public final class Validation {
       else if (command.startsWith("release-251 ")) Release251BoatChecks.run(mc,command.substring(12));
       else if (command.equals("water-253")) Water253Checks.run(mc);
       else if (command.equals("release-253")) Release253Checks.run(mc);
+      else if (command.startsWith("release-260 ")) Release260Checks.run(mc,command.substring(12));
       else if (command.equals("release-252")) Release252Checks.run(mc);
       else if (command.startsWith("release-242 ")) Release242Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-241 ")) Release241Checks.run(mc,command.substring(12));

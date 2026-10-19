@@ -1,0 +1,262 @@
+package local.luke.power.map;
+
+import com.google.gson.*;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.security.*;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
+
+/**
+ * Independent world data. Drafts never mutate the store; a revision survives saves of older
+ * snapshots.
+ */
+public final class WaypointStore {
+  public static final int MAX_POINTS = 8192;
+  private static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
+
+  public static final class Data {
+    public int format = 1;
+    public String selectedSet = "Default";
+    public boolean allSets;
+    public List<Waypoint> waypoints = new ArrayList<>();
+
+    public void validate() {
+      if (format != 1)
+        throw new IllegalArgumentException(
+            "Unsupported waypoint format " + format + "; original retained");
+      Waypoint.text(selectedSet, 48);
+      if (waypoints == null || waypoints.size() > MAX_POINTS)
+        throw new IllegalArgumentException("Too many waypoints");
+      Set<String> ids = new HashSet<>();
+      for (Waypoint point : waypoints) {
+        if (point == null) throw new IllegalArgumentException("Invalid waypoint");
+        point.validate();
+        if (!ids.add(point.id)) throw new IllegalArgumentException("Duplicate waypoint ID");
+      }
+    }
+  }
+
+  private final Path file;
+  private final Consumer<String> errors;
+  private CompletableFuture<Loaded> loading;
+  private CompletableFuture<byte[]> saving;
+
+  private record Loaded(Data data, byte[] digest) {}
+
+  private Data data = new Data();
+  private byte[] digest;
+  private long revision, saved, savingRevision;
+  private int retryDelay;
+  private boolean ready, blocked;
+
+  public WaypointStore(Path root, Consumer<String> errors) {
+    file = root.resolve("waypoints.json");
+    this.errors = errors;
+  }
+
+  public boolean ready() {
+    return ready && !blocked;
+  }
+
+  public boolean dirty() {
+    return saved != revision;
+  }
+
+  public long revision() {
+    return revision;
+  }
+
+  public boolean contains(String id) {
+    return data.waypoints.stream().anyMatch(p -> p.id.equals(id));
+  }
+
+  public List<Waypoint> points() {
+    return data.waypoints.stream().map(Waypoint::copy).toList();
+  }
+
+  public String selectedSet() {
+    return data.selectedSet;
+  }
+
+  public boolean allSets() {
+    return data.allSets;
+  }
+
+  public List<String> sets() {
+    var sets = new TreeSet<String>();
+    sets.add("Default");
+    sets.add(data.selectedSet);
+    data.waypoints.forEach(p -> sets.add(p.set));
+    return List.copyOf(sets);
+  }
+
+  public void select(String set) {
+    requireReady();
+    Waypoint.text(set, 48);
+    data.selectedSet = set;
+    revision++;
+  }
+
+  public void allSets(boolean value) {
+    requireReady();
+    data.allSets = value;
+    revision++;
+  }
+
+  public void put(Waypoint point) {
+    requireReady();
+    point.validate();
+    int index = -1;
+    for (int i = 0; i < data.waypoints.size(); i++)
+      if (data.waypoints.get(i).id.equals(point.id)) {
+        index = i;
+        break;
+      }
+    if (index < 0) {
+      if (data.waypoints.size() >= MAX_POINTS)
+        throw new IllegalArgumentException("Waypoint limit reached");
+      data.waypoints.add(point.copy());
+    } else data.waypoints.set(index, point.copy());
+    revision++;
+  }
+
+  public void remove(String id) {
+    requireReady();
+    if (data.waypoints.removeIf(p -> p.id.equals(id))) revision++;
+  }
+
+  public void death(int x, int y, int z, int dimension, boolean keepOld) {
+    death(x, y, z, dimension, keepOld, System.currentTimeMillis());
+  }
+
+  public void death(int x, int y, int z, int dimension, boolean keepOld, long time) {
+    requireReady();
+    if (!keepOld) data.waypoints.removeIf(p -> p.death);
+    Waypoint point = new Waypoint();
+    point.name = "Death " + new java.text.SimpleDateFormat("MM-dd HH:mm").format(new Date(time));
+    point.created = time;
+    point.x = x;
+    point.y = Math.max(0, Math.min(127, y));
+    point.z = z;
+    point.dimension = dimension;
+    point.death = true;
+    point.colour = 0xff5555;
+    point.set = data.selectedSet;
+    point.global = true;
+    put(point);
+  }
+
+  private void requireReady() {
+    if (!ready())
+      throw new IllegalStateException("Waypoints are loading or protected after a storage error");
+  }
+
+  public void tick() {
+    if (blocked) return;
+    if (!ready) {
+      if (loading == null)
+        loading =
+            MapIO.submit(
+                () -> {
+                  if (!Files.exists(file)) return new Loaded(new Data(), null);
+                  if (Files.size(file) > 8 * 1024 * 1024)
+                    throw new IOException("Waypoint file too large");
+                  byte[] bytes = Files.readAllBytes(file);
+                  return new Loaded(decode(bytes), hash(bytes));
+                });
+      if (loading == null || !loading.isDone()) return;
+      try {
+        Loaded loaded = loading.join();
+        data = loaded.data;
+        digest = loaded.digest;
+        ready = true;
+      } catch (RuntimeException e) {
+        blocked = true;
+        errors.accept("Waypoints retained without changes: " + MapCache.reason(e));
+      }
+      return;
+    }
+    if (saving != null && saving.isDone()) {
+      try {
+        digest = saving.join();
+        saved = savingRevision;
+      } catch (RuntimeException e) {
+        errors.accept("Waypoints could not be saved: " + MapCache.reason(e));
+        retryDelay = 200;
+      }
+      saving = null;
+    }
+    if (retryDelay > 0) {
+      retryDelay--;
+      return;
+    }
+    if (saving == null && dirty()) {
+      byte[] bytes = encode(data), expected = digest == null ? null : digest.clone();
+      saving =
+          MapIO.submit(
+              () -> {
+                byte[] original = Files.exists(file) ? Files.readAllBytes(file) : null;
+                if (!Arrays.equals(expected, original == null ? null : hash(original)))
+                  throw new IOException(
+                      "Waypoint file changed outside this client; original retained");
+                if (original != null) {
+                  decode(original);
+                  MapFiles.replace(file.resolveSibling("waypoints.previous.json"), original);
+                }
+                MapFiles.replace(file, bytes);
+                return hash(bytes);
+              });
+      if (saving != null) savingRevision = revision;
+    }
+  }
+
+  public void finish() {
+    retryDelay = 0;
+    for (int i = 0; i < 8; i++) {
+      tick();
+      if (loading != null && !loading.isDone())
+        try {
+          loading.join();
+        } catch (RuntimeException ignored) {
+        }
+      if (saving != null)
+        try {
+          saving.join();
+        } catch (RuntimeException ignored) {
+        }
+      else if (blocked || ready && !dirty() || retryDelay > 0) break;
+      else MapIO.awaitQueued();
+    }
+    tick();
+  }
+
+  public static byte[] encode(Data data) {
+    data.validate();
+    return (JSON.toJson(data) + "\n").getBytes(StandardCharsets.UTF_8);
+  }
+
+  public static Data decode(byte[] bytes) throws IOException {
+    try {
+      JsonObject object =
+          JsonParser.parseString(new String(bytes, StandardCharsets.UTF_8)).getAsJsonObject();
+      if (!object.has("format") || !object.has("waypoints"))
+        throw new IllegalArgumentException("Missing waypoint format or list");
+      Data data = JSON.fromJson(object, Data.class);
+      data.validate();
+      return data;
+    } catch (RuntimeException e) {
+      throw new IOException("Invalid waypoint data: " + e.getMessage(), e);
+    }
+  }
+
+  public static byte[] hash(byte[] bytes) {
+    try {
+      return MessageDigest.getInstance("SHA-256").digest(bytes);
+    } catch (NoSuchAlgorithmException e) {
+      throw new AssertionError(e);
+    }
+  }
+}

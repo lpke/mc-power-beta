@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 2.5.3",
+    "default": "Power Beta 2.6.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -4872,5 +4872,743 @@
     "description": "Gentler sinking and modern current response, especially in shallow or mixed currents. Hold Sneak to descend. Keeps normal swimming speed and Beta's upright player model and collision size. Players only, in singleplayer; flight and riding keep their own movement.",
     "default": true,
     "order": 40
+  },
+  "maps.minimap": {
+    "page": "Map",
+    "group": "Minimap",
+    "label": "Show minimap",
+    "description": "Show nearby explored terrain in the HUD. Appearance and position are edited in the HUD editor.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 0
+  },
+  "maps.worldMap": {
+    "page": "Map",
+    "group": "World map",
+    "label": "World map",
+    "description": "Allow opening the explored world map with its binding.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 1
+  },
+  "maps.rotate": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Rotate with camera",
+    "description": "Rotate the minimap so the current viewing direction points up.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 2
+  },
+  "maps.circular": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Circular minimap",
+    "description": "Clip the map to a circle instead of a square.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 3
+  },
+  "maps.hideWithDebug": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Hide with F3",
+    "description": "Hide the minimap while debug information is visible.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 4
+  },
+  "maps.size": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Minimap size",
+    "description": "Width and height in GUI pixels. Clamped to the available screen.",
+    "min": 64.0,
+    "max": 240.0,
+    "step": 1.0,
+    "order": 5
+  },
+  "maps.corner": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Minimap corner",
+    "description": "Screen corner used by the minimap offsets.",
+    "min": 0.0,
+    "max": 3.0,
+    "step": 1.0,
+    "order": 6,
+    "choices": [
+      "Top left",
+      "Top right",
+      "Bottom left",
+      "Bottom right"
+    ]
+  },
+  "maps.offsetX": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Horizontal inset",
+    "description": "GUI pixels inward from the selected screen edge.",
+    "min": 0.0,
+    "max": 500.0,
+    "step": 1.0,
+    "order": 7
+  },
+  "maps.offsetY": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Vertical inset",
+    "description": "GUI pixels inward from the selected screen edge.",
+    "min": 0.0,
+    "max": 500.0,
+    "step": 1.0,
+    "order": 8
+  },
+  "maps.opacity": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Minimap opacity",
+    "description": "Opacity of minimap terrain and background.",
+    "min": 0.1,
+    "max": 1.0,
+    "step": 0.05,
+    "order": 9,
+    "unit": "%",
+    "displayDivisor": 0.01,
+    "displayPrecision": 0
+  },
+  "maps.zoom": {
+    "page": "Map",
+    "group": "Minimap",
+    "label": "Minimap zoom",
+    "description": "GUI pixels per block. The zoom bindings also change this value.",
+    "min": 0.25,
+    "max": 4.0,
+    "step": 0.25,
+    "order": 10
+  },
+  "maps.coordinates": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Coordinates",
+    "description": "Display the camera position beneath the minimap.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 11
+  },
+  "maps.biome": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Biome name",
+    "description": "Display the current biome beneath the minimap.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 12
+  },
+  "maps.clock": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Time of day",
+    "description": "Display the world's daylight clock beneath the minimap.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 13
+  },
+  "maps.compass": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Compass letters",
+    "description": "Show north, east, south and west around the minimap.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 14
+  },
+  "maps.colourMode": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Terrain colours",
+    "description": "Texture colours use block textures and biome tints. Map colours use native Beta map materials.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 15,
+    "choices": [
+      "Textures",
+      "Native map"
+    ]
+  },
+  "maps.caveMode": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Cave mapping",
+    "description": "Automatic maps the floor beneath a solid roof and in the Nether. Manual uses the selected ceiling.",
+    "min": 0.0,
+    "max": 2.0,
+    "step": 1.0,
+    "order": 16,
+    "choices": [
+      "Surface",
+      "Automatic",
+      "Manual"
+    ]
+  },
+  "maps.caveTop": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Manual cave ceiling",
+    "description": "Highest Y searched by manual cave maps. Cave data is separated into eight-block layers.",
+    "min": 1.0,
+    "max": 127.0,
+    "step": 1.0,
+    "order": 17
+  },
+  "maps.roofSize": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Automatic roof width",
+    "description": "Width of the solid roof check around the camera. Larger checks avoid cave mode beneath a single tree.",
+    "min": 1.0,
+    "max": 5.0,
+    "step": 1.0,
+    "order": 18
+  },
+  "maps.heightShading": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Height shading",
+    "description": "Shade terrain according to its elevation.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 19
+  },
+  "maps.slopeShading": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Slope shading",
+    "description": "Shade changes in height to make slopes readable.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 20
+  },
+  "maps.caveLighting": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Cave light shading",
+    "description": "Shade cave floors using their sampled native block light.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 21
+  },
+  "maps.radar": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Entity radar",
+    "description": "Show nearby entities already known to the client. Never loads terrain or requests entities.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 22
+  },
+  "maps.players": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Players",
+    "description": "Show other loaded players as white markers.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 23
+  },
+  "maps.hostile": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Hostile mobs",
+    "description": "Show loaded hostile mobs as red markers.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 24
+  },
+  "maps.animals": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Animals",
+    "description": "Show loaded animals and water creatures as yellow markers.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 25
+  },
+  "maps.items": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Dropped items",
+    "description": "Show loaded dropped items as small red markers.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 26
+  },
+  "maps.otherEntities": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Other entities",
+    "description": "Show other loaded entities as purple markers.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 27
+  },
+  "maps.entityNames": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Entity names",
+    "description": "Show names beside nearby radar markers.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 28
+  },
+  "maps.entityHeights": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Height arrows",
+    "description": "Mark entities substantially above or below the camera.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 29
+  },
+  "maps.radarHeight": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Vertical radar range",
+    "description": "Maximum height difference in blocks for radar markers.",
+    "min": 1.0,
+    "max": 128.0,
+    "step": 1.0,
+    "order": 30
+  },
+  "maps.radarLimit": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Entity checks per tick",
+    "description": "Bounded number of loaded entities considered each tick.",
+    "min": 16.0,
+    "max": 1024.0,
+    "step": 16.0,
+    "order": 31
+  },
+  "maps.waypoints": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "Map waypoints",
+    "description": "Show enabled waypoints on both maps. Saved data remains when disabled.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 32
+  },
+  "maps.worldWaypoints": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "In-world waypoints",
+    "description": "Show waypoint labels and distances in the world view.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 33
+  },
+  "maps.waypointNames": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "Waypoint names",
+    "description": "Show names beside waypoint markers.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 34
+  },
+  "maps.waypointDistances": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "Waypoint distances",
+    "description": "Show the horizontal distance to waypoint markers.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 35
+  },
+  "maps.waypointDistance": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "Waypoint range",
+    "description": "Maximum marker distance. Zero is unlimited. Always show on a waypoint ignores this limit within its dimension and set.",
+    "min": 0.0,
+    "max": 1000000.0,
+    "step": 100.0,
+    "order": 36
+  },
+  "maps.deathpoints": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "Death waypoints",
+    "description": "Record a waypoint at each local player's death, independently of death-item recovery.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 37
+  },
+  "maps.keepOldDeaths": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "Keep older deathpoints",
+    "description": "Retain previous death waypoints when a new death is recorded.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 38
+  },
+  "maps.chunkGrid": {
+    "page": "Map",
+    "group": "Overlays",
+    "label": "Chunk grid",
+    "description": "Draw native sixteen-block chunk boundaries.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 39
+  },
+  "maps.slimeChunks": {
+    "page": "Map",
+    "group": "Overlays",
+    "label": "Slime chunks",
+    "description": "Highlight Beta slime chunks. Available only with a local world's actual seed.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 40
+  },
+  "maps.lightOverlay": {
+    "page": "Map",
+    "group": "Overlays",
+    "label": "Low-light shading",
+    "description": "Highlight sampled block light below eight. Cave maps are most useful for this overlay.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 41
+  },
+  "maps.footsteps": {
+    "page": "Map",
+    "group": "Overlays",
+    "label": "Recent path",
+    "description": "Show a bounded recent path for this visit. Dimension changes start a new path.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 42
+  },
+  "maps.pauseMap": {
+    "page": "Map",
+    "group": "World map",
+    "label": "Pause in map menus",
+    "description": "Pause singleplayer in the world map and waypoint menus. Multiplayer remains server-owned.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 43
+  },
+  "maps.columnsPerTick": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Terrain columns per tick",
+    "description": "Maximum columns sampled per game tick, also limited by a short time budget. Reads loaded terrain only.",
+    "min": 32.0,
+    "max": 4096.0,
+    "step": 32.0,
+    "order": 44
+  },
+  "maps.cacheTiles": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Cached map tiles",
+    "description": "Maximum shared resident terrain tiles, including coarse zoom levels. Larger values use more memory.",
+    "min": 64.0,
+    "max": 1024.0,
+    "step": 32.0,
+    "order": 45
+  },
+  "maps.uploadsPerFrame": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Texture uploads per frame",
+    "description": "Maximum map tiles uploaded to the GPU per rendered frame.",
+    "min": 1.0,
+    "max": 16.0,
+    "step": 1.0,
+    "order": 46
+  },
+  "maps.refreshSeconds": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Terrain revisit interval",
+    "description": "Seconds before revisiting a sampled chunk to detect edits. New chunks are sampled first.",
+    "min": 1.0,
+    "max": 60.0,
+    "step": 1.0,
+    "order": 47
+  },
+  "sprint.enabled": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Sprinting",
+    "description": "Allow modern sprinting on foot in singleplayer. Disabled by default in every base. Uses native collision, surfaces and held-item behavior.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 0
+  },
+  "sprint.activation": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Sprint activation",
+    "description": "Modern starts while the key is held and keeps sprinting until movement stops. Hold requires the key; Toggle uses press edges.",
+    "min": 0.0,
+    "max": 2.0,
+    "step": 1.0,
+    "order": 1,
+    "choices": [
+      "Modern",
+      "Hold",
+      "Toggle"
+    ]
+  },
+  "sprint.doubleTap": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Double-tap forward",
+    "description": "Start sprinting by pressing forward twice while grounded, as in modern Minecraft.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 2
+  },
+  "sprint.doubleTapTicks": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Double-tap interval",
+    "description": "Maximum game ticks between forward presses. Modern Minecraft uses seven ticks.",
+    "min": 1.0,
+    "max": 20.0,
+    "step": 1.0,
+    "order": 3
+  },
+  "sprint.jumpBoost": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Sprint jump boost",
+    "description": "Add the modern 0.2-block horizontal impulse when jumping while sprinting.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 4
+  },
+  "sprint.particles": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Sprint particles",
+    "description": "Kick up the native surface texture while sprinting on solid ground. Water and lava do not produce sprint dust.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 5
+  },
+  "sprint.sprintKnockback": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Sprint attack knockback",
+    "description": "Apply modern extra sprint-hit knockback and the attacker's movement slowdown after a successful hit.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 6
+  },
+  "sprint.speed": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Sprint speed",
+    "description": "Movement speed relative to ordinary walking. Modern Minecraft uses 130 percent on the ground and in the air.",
+    "min": 100.0,
+    "max": 200.0,
+    "step": 5.0,
+    "order": 7,
+    "unit": "%"
+  },
+  "sprint.stamina": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Use stamina",
+    "description": "Drain stamina while sprinting. Exhaustion blocks another sprint until the restart threshold is recovered. Stored with the player.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 8
+  },
+  "sprint.noSprintInCombat": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Block sprinting in combat",
+    "description": "Stop sprinting while the combat timer is active after dealing or receiving entity damage.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 9
+  },
+  "sprint.capacity": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Stamina capacity",
+    "description": "Maximum stamina held by the player.",
+    "min": 1.0,
+    "max": 1000.0,
+    "step": 10.0,
+    "order": 10
+  },
+  "sprint.drain": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Stamina used per second",
+    "description": "Stamina drained each second while sprinting.",
+    "min": 0.1,
+    "max": 100.0,
+    "step": 0.5,
+    "order": 11
+  },
+  "sprint.recharge": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Stamina recovered per second",
+    "description": "Stamina recovered per second after the recovery delay, while not sprinting.",
+    "min": 0.1,
+    "max": 100.0,
+    "step": 0.5,
+    "order": 12
+  },
+  "sprint.rechargeDelay": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Recovery delay",
+    "description": "Seconds after sprinting stops before stamina can recover.",
+    "min": 0.0,
+    "max": 60.0,
+    "step": 0.5,
+    "order": 13,
+    "unit": "s"
+  },
+  "sprint.combatTime": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Combat duration",
+    "description": "Seconds after the last successful entity hit before combat ends. Environmental damage does not start combat.",
+    "min": 0.0,
+    "max": 120.0,
+    "step": 0.5,
+    "order": 14,
+    "unit": "s"
+  },
+  "sprint.restartStamina": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Restart threshold",
+    "description": "Percentage of full stamina required to sprint again after exhaustion.",
+    "min": 0.0,
+    "max": 100.0,
+    "step": 5.0,
+    "order": 15,
+    "unit": "%"
+  },
+  "sprint.jumpCost": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Sprint jump stamina cost",
+    "description": "Additional stamina spent on a sprint jump. Zero keeps ordinary modern sprint-jump behavior.",
+    "min": 0.0,
+    "max": 100.0,
+    "step": 1.0,
+    "order": 16
+  },
+  "sprint.rechargeInCombat": {
+    "page": "Gameplay",
+    "group": "Sprint stamina and combat",
+    "label": "Recover stamina in combat",
+    "description": "Allow stamina recovery while the combat timer is active. Off by default.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 17
+  },
+  "sprint.dynamicFov": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Dynamic sprint FOV",
+    "description": "Smoothly widen the world view while sprinting on foot, using modern speed-based FOV. Does not affect the held-item projection.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 18
+  },
+  "sprint.creativeFov": {
+    "page": "Creative",
+    "group": "Flight",
+    "label": "Dynamic Creative sprint FOV",
+    "description": "Widen the view only while Creative flight is actually sprinting. Off by default.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 19
+  },
+  "sprint.spectatorFov": {
+    "page": "Creative",
+    "group": "Spectator",
+    "label": "Dynamic Spectator sprint FOV",
+    "description": "Widen the view only while Spectator flight is actually sprinting. Off by default.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 20
+  },
+  "sprint.freecamFov": {
+    "page": "Camera",
+    "group": "Free camera",
+    "label": "Dynamic freecam sprint FOV",
+    "description": "Widen the detached camera view only while its flight is actually sprinting. Off by default.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 21
+  },
+  "sprint.fovStrength": {
+    "page": "Camera",
+    "group": "View",
+    "label": "Sprint FOV strength",
+    "description": "Shared strength of enabled ground, Creative, Spectator and freecam sprint FOV effects. Zero keeps the normal field of view.",
+    "min": 0.0,
+    "max": 100.0,
+    "step": 5.0,
+    "order": 22,
+    "unit": "%"
   }
 }

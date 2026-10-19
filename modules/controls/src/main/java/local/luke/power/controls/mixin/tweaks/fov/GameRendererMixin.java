@@ -47,6 +47,7 @@ public abstract class GameRendererMixin {
     @Unique
     public float getFovMultiplier(float partialTicks, boolean isHand, float originalValue) {
         fov = isHand ? originalValue : originalValue + ModOptions.getFovOffsetInDegrees();
+        if (!isHand) fov *= local.luke.power.input.SprintView.fov(partialTicks);
 
         if (local.luke.power.input.Bindings.down(KeyBindingListener.zoom) && client.currentScreen == null) {
             if (!zoomedIn) {

@@ -27,10 +27,11 @@ final class HudPreview {
   private final InfoHudSettings.Cluster[] clusters = new InfoHudSettings.Cluster[4];
   private StatusSettings status;
   private boolean sampledItem;
+  private final boolean minimapEnabled;
   boolean suppressDebug, showToast = true, showChat = true, showTweaks = true;
   private final DebugPreview debugPreview;
-  HudPreview(SettingsDraft draft) {
-    this.draft = draft;
+  HudPreview(SettingsDraft draft,boolean minimapEnabled) {
+    this.draft = draft;this.minimapEnabled=minimapEnabled;
     debugPreview = new DebugPreview(draft);
     for (int id : new int[]{1, 3, 5, 45, 50, 257, 267, 260, 345})
       samples.add(ItemCatalogue.resolve(ItemCatalogue.Domain.ITEM, Integer.toString(id)));
@@ -168,6 +169,15 @@ final class HudPreview {
     }
     if (scenario == 2 && background && bool("power_controls:userinterface.disableDebugEntityIdTags")) EntityTagPreview.draw(screen, mc, width, height);
     if (scenario == 2 && !suppressDebug) debug(screen, mc, width);
+    var map = new local.luke.power.map.MapSettings();
+    populate(map, "maps.");
+    map.minimap=minimapEnabled;
+    boolean mapVisible=local.luke.power.map.Minimap.visible(map,scenario==2);
+    var frame=local.luke.power.map.Minimap.frame(mc,map,width,height,false,true);
+    if(mapVisible)local.luke.power.map.Minimap.drawFrame(mc,map,frame,true);
+    var mini=frame.bounds();
+    elements.add(new Element("minimap", "Minimap", mini.x(), mini.y(), mini.width(), mini.height(),
+        "maps.offsetX", "maps.offsetY",!mapVisible));
     for (Element element : elements) if (!element.id.equals("layout") && element.id.equals(selected) && !element.hidden) {
       int x = (int)element.x - 2, y = (int)element.y - 2, r = (int)Math.ceil(element.x + element.width) + 2, b = (int)Math.ceil(element.y + element.height) + 2;
       screen.rectangle(x, y, r, y + 1, 0xffffff66); screen.rectangle(x, b - 1, r, b, 0xffffff66);

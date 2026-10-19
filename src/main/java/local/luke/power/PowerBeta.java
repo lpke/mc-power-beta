@@ -21,6 +21,8 @@ public final class PowerBeta {
     local.luke.power.light.LightOverlay.tick(mc);
     local.luke.power.render.RenderControls.tick(mc);
     local.luke.power.hud.InfoHud.tick(mc);
+    local.luke.power.map.Maps.tick(mc);
+    local.luke.power.sprint.SprintController.tick(mc);
     local.luke.power.mining.VeinMining.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
@@ -38,6 +40,7 @@ public final class PowerBeta {
           () -> local.luke.power.visual.VisualConfig.current().thirdPersonDistance,
           local.luke.power.controls.util.ModOptions::isFrontViewEnabled);
       local.luke.power.input.TweakLifecycle.register("interface", () -> {
+        local.luke.power.sprint.SprintController.reset();
         local.luke.power.mining.VeinMining.reset();
         mc.options.cinematicMode = false;
         local.luke.power.render.RenderControls.reset(mc);
@@ -57,9 +60,11 @@ public final class PowerBeta {
       });
       local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
       local.luke.power.input.Bindings.availability(id ->
-          !id.equals("power_creative.picker") && !id.equals("power_creative.modifier")
+          local.luke.power.map.MapKeys.available(id)
+              && (!id.equals("powerbeta.sprint") || local.luke.power.sprint.SprintConfig.current().enabled && mc.world != null && !mc.world.isRemote)
+              && (!id.equals("power_creative.picker") && !id.equals("power_creative.modifier")
               || (local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE)
-                  || local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE)));
+                  || local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE))));
       local.luke.power.video.VideoConfig.current();
       try {
         ConfigAudit.write(mc);
