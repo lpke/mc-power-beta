@@ -17,6 +17,7 @@ import local.luke.power.creative.inventory.interfaces.CreativePlayer;
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity implements CreativePlayer, ModePlayer {
   @Unique private boolean power$spectator;
+  @Unique private boolean power$restoringFlight;
   @Unique private int power$flightOverride = -1;
 
   public int power_flightOverride() { return power$flightOverride; }
@@ -51,6 +52,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     boolean next = power$spectator || flying && Modes.flightAvailable(this);
     // Repeated checks and loading a grounded player must leave native movement untouched.
     if (next == creative_isFlying()) return;
+    if (!power$restoringFlight)
+      local.luke.power.creative.FlightController.flightChanged((PlayerEntity) (Object) this, next);
     dataTracker.setData(CreativeInventory.IS_FLYING_ID, CreativeInventory.toByte(next));
     if (!next) velocityY = 0;
     fallDistance = 0;
@@ -137,7 +140,10 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     updateFromBB = power$spectator;
     int flightOverride = tag.containsKey("PowerBetaFlightOverride") ? tag.getInt("PowerBetaFlightOverride") : -1;
     power$flightOverride = flightOverride >= -1 && flightOverride <= 1 ? flightOverride : -1;
-    creative_setFlying(power$spectator || tag.getBoolean("Flying") && Modes.flightAvailable(this));
+    power$restoringFlight = true;
+    try {
+      creative_setFlying(power$spectator || tag.getBoolean("Flying") && Modes.flightAvailable(this));
+    } finally { power$restoringFlight = false; }
     try {
       power$previous = GameMode.valueOf(tag.getString("PowerBetaPreviousGameMode"));
     } catch (IllegalArgumentException ignored) {

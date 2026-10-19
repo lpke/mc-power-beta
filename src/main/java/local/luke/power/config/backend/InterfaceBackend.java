@@ -26,7 +26,7 @@ public final class InterfaceBackend implements Backend {
             new Setting("interface.hidePowerBetaVersion", "interface", "Interface", "Title screen", "Hide Power Beta version",
                 "Hide the Power Beta version beside the Minecraft version on the title screen.", Setting.Kind.BOOLEAN,
                 new JsonPrimitive(MenuPreferences.hidePowerBetaVersion()), new JsonPrimitive(false), 0, 1, 1, List.of(), false),
-            new Setting("interface.colours", "interface", "Interface", "General HUD", "Saved colours", "", Setting.Kind.LIST,
+            new Setting("interface.colours", "interface", "Interface", "General HUD", "Saved colors", "", Setting.Kind.LIST,
                 Catalog.JSON.toJsonTree(MenuPreferences.current().colours), new JsonArray(), 0, 16, 1, List.of(), false),
             new Setting(
                 "interface.pauseToOptions",
@@ -56,8 +56,8 @@ public final class InterfaceBackend implements Backend {
             new Setting("interface.debugTimeOfDay", "interface", "Interface", "Debug (F3) info", "Time of day",
                 "Show the world's daylight time in F3, using a 12-hour clock.", Setting.Kind.BOOLEAN,
                 new JsonPrimitive(MenuPreferences.debugTimeOfDay()), new JsonPrimitive(false), 0, 1, 1, List.of(), false),
-            new Setting("interface.debugTextColor", "interface", "Interface", "Debug (F3) info", "Text colour",
-                "Colour of all F3 debug text.", Setting.Kind.TEXT,
+            new Setting("interface.debugTextColor", "interface", "Interface", "Debug (F3) info", "Text color",
+                "Color of all F3 debug text.", Setting.Kind.TEXT,
                 new JsonPrimitive(MenuPreferences.debugTextColor()), new JsonPrimitive("#FFFFFF"), 0, 0, 1, List.of(), false)));
     for (var line : local.luke.power.ui.DebugLines.values()) if (line.ownsSetting())
       settings.add(new Setting(line.setting(), "interface", "Interface", "Debug (F3) info", line.label,
@@ -91,9 +91,9 @@ public final class InterfaceBackend implements Backend {
         var line = local.luke.power.ui.DebugLines.find(e.getKey().substring("interface.debugLines.".length()));
         if (line == null || !line.ownsSetting() || !e.getValue().isJsonPrimitive() || !e.getValue().getAsJsonPrimitive().isBoolean()) throw new IllegalArgumentException("Invalid F3 line visibility.");
       } else if (e.getKey().equals("interface.colours")) {
-        if (!e.getValue().isJsonArray() || e.getValue().getAsJsonArray().size() > 16) throw new IllegalArgumentException("Save up to 16 colours");
+        if (!e.getValue().isJsonArray() || e.getValue().getAsJsonArray().size() > 16) throw new IllegalArgumentException("Save up to 16 colors");
         for (JsonElement value : e.getValue().getAsJsonArray()) {
-          if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString()) throw new IllegalArgumentException("Invalid saved colour");
+          if (!value.isJsonPrimitive() || !value.getAsJsonPrimitive().isString()) throw new IllegalArgumentException("Invalid saved color");
           local.luke.power.light.LightSettings.rgb(value.getAsString());
         }
       } else if (e.getKey().equals("interface.debugTextColor")) {

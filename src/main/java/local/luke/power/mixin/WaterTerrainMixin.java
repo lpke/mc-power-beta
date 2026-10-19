@@ -30,7 +30,7 @@ public class WaterTerrainMixin implements WaterTerrainSection {
         try { original.call(); }
         finally {
           field_244[0] = opaqueEmpty; field_244[1] = translucentEmpty;
-          // Deep water can have zero native skylight yet a daylight-dependent clear colour.
+          // Deep water can have zero native skylight yet a daylight-dependent clear color.
           field_223 = true;
         }
       }

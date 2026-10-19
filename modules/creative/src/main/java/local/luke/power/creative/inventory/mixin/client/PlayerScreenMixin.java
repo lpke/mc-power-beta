@@ -180,7 +180,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       }
 
       this.blit(posX + 173, posY + 138, 176, 32, 25, 24);
-      // Grow the catalogue upward; hotbar, side tabs and destroy slot keep their coordinates.
+      // Grow the catalog upward; hotbar, side tabs and destroy slot keep their coordinates.
       this.blit(posX, posY - CreativeGrid.EXTRA_HEIGHT, 0, 0, this.containerWidth, 139);
       this.blit(posX, posY + 139 - CreativeGrid.EXTRA_HEIGHT, 0, 121, this.containerWidth, 18);
       for (int y = 157 - CreativeGrid.EXTRA_HEIGHT; y < 140; y++)

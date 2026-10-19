@@ -22,12 +22,21 @@ public final class WaypointStore {
     public String selectedSet = "Default";
     public boolean allSets;
     public List<Waypoint> waypoints = new ArrayList<>();
+    public List<String> sets = new ArrayList<>();
 
     public void validate() {
       if (format != 1)
         throw new IllegalArgumentException(
             "Unsupported waypoint format " + format + "; original retained");
       Waypoint.text(selectedSet, 48);
+      if (sets == null || sets.size() > MAX_POINTS)
+        throw new IllegalArgumentException("Too many waypoint sets");
+      Set<String> names = new HashSet<>();
+      for (String set : sets) {
+        Waypoint.text(set, 48);
+        if (!names.add(set.toLowerCase(Locale.ROOT)))
+          throw new IllegalArgumentException("Duplicate waypoint set");
+      }
       if (waypoints == null || waypoints.size() > MAX_POINTS)
         throw new IllegalArgumentException("Too many waypoints");
       Set<String> ids = new HashSet<>();
@@ -69,6 +78,10 @@ public final class WaypointStore {
     return revision;
   }
 
+  public boolean needsMaintenance() {
+    return !blocked && (!ready && loading != null || saving != null || dirty());
+  }
+
   public boolean contains(String id) {
     return data.waypoints.stream().anyMatch(p -> p.id.equals(id));
   }
@@ -89,8 +102,23 @@ public final class WaypointStore {
     var sets = new TreeSet<String>();
     sets.add("Default");
     sets.add(data.selectedSet);
+    sets.addAll(data.sets);
     data.waypoints.forEach(p -> sets.add(p.set));
     return List.copyOf(sets);
+  }
+
+  /** Empty named sets remain available after selection changes, deletion and restart. */
+  public void createSet(String name) {
+    requireReady();
+    Waypoint.text(name, 48);
+    if (sets().stream().anyMatch(set -> set.equalsIgnoreCase(name)))
+      throw new IllegalArgumentException("A set with that name already exists");
+    if (data.sets.size() >= MAX_POINTS)
+      throw new IllegalArgumentException("Waypoint set limit reached");
+    data.sets.add(name);
+    data.selectedSet = name;
+    data.allSets = false;
+    revision++;
   }
 
   public void select(String set) {
@@ -154,9 +182,13 @@ public final class WaypointStore {
       throw new IllegalStateException("Waypoints are loading or protected after a storage error");
   }
 
-  public void tick() {
+  public void tick() { tick(true); }
+
+  /** Disabled displays may finish existing edits without starting a fresh store read. */
+  public void tick(boolean allowLoad) {
     if (blocked) return;
     if (!ready) {
+      if (loading == null && !allowLoad) return;
       if (loading == null)
         loading =
             MapIO.submit(

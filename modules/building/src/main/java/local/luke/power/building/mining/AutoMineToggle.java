@@ -1,6 +1,6 @@
 package local.luke.power.building.mining;
 
-/** A cancelled action requires a fresh press, including after focus/menu changes. */
+/** A canceled action requires a fresh press, including after focus/menu changes. */
 public final class AutoMineToggle {
   private boolean active, wasDown;
   public void update(boolean down, boolean eligible) {

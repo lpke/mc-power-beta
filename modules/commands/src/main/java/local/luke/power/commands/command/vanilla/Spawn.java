@@ -9,7 +9,7 @@ public final class Spawn implements Command {
     if (args.length != 1) { manual(source); return; }
     var player = EntityTargets.player(source);
     if (local.luke.power.input.InteractionState.carryingContainer)
-      throw new IllegalArgumentException("Place your carried container before travelling to spawn.");
+      throw new IllegalArgumentException("Place your carried container before traveling to spawn.");
     if (player.dimensionId != 0) {
       if (!Teleport.switchDimensions(source, "minecraft:overworld"))
         throw new IllegalArgumentException("Return to the Overworld before using /spawn.");

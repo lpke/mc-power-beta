@@ -64,7 +64,8 @@ public final class MapCodec {
               header.readInt(),
               header.readInt(),
               header.readInt(),
-              header.readInt());
+              header.readInt(),
+              expected.context());
     } catch (IllegalArgumentException e) {
       throw new IOException("Invalid map coordinates", e);
     }

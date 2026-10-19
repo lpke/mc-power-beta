@@ -121,45 +121,45 @@ public final class Release252Checks {
       });
       keys.put(42,(byte)1);CreativeVehicleChecks.mode(mc,"SURVIVAL");
       find(original,DRAG).parse("true");find(original,EQUIP).parse("true");original.preview(true);
-      test("one held Shift-drag equips and removes all four native armour pieces with full item data",()->{
+      test("one held Shift-drag equips and removes all four native armor pieces with full item data",()->{
         clear(mc);var screen=inventory(mc);for(int i=0;i<4;i++)screen.container.method_2084(9+i).setStack(armor(i));var before=contents(mc);
         press(screen,9);for(int i=1;i<4;i++)drag(screen,9+i);release(screen,12);
-        for(int i=0;i<4;i++)check(screen.container.method_2084(5+i).hasStack(),"armour not equipped: "+i);
+        for(int i=0;i<4;i++)check(screen.container.method_2084(5+i).hasStack(),"armor not equipped: "+i);
         check(contents(mc).equals(before)&&mc.player.inventory.getCursorStack()==null,"equip lost native data/counts");
         press(screen,5);for(int i=1;i<4;i++)drag(screen,5+i);release(screen,8);
-        for(int i=0;i<4;i++)check(!screen.container.method_2084(5+i).hasStack(),"armour not removed: "+i);
+        for(int i=0;i<4;i++)check(!screen.container.method_2084(5+i).hasStack(),"armor not removed: "+i);
         check(contents(mc).equals(before)&&mc.player.inventory.getCursorStack()==null,"unequip lost native data/counts");
       });
-      test("armour clicks retain held cursor data, oversized leftovers, pumpkin limits and occupied destinations",()->{
+      test("armor clicks retain held cursor data, oversized leftovers, pumpkin limits and occupied destinations",()->{
         clear(mc);var screen=inventory(mc);var held=DeathChecks.tagged(4,7,0,"held");mc.player.inventory.setCursorStack(held);String data=DeathItems.encode(held);
         screen.container.method_2084(9).setStack(armor(0));var before=contents(mc);press(screen,9);release(screen,9);
         check(mc.player.inventory.getCursorStack()==held&&DeathItems.encode(held).equals(data)&&contents(mc).equals(before),"held cursor changed");
         clear(mc);screen=inventory(mc);var oversized=armor(1);oversized.count=3;screen.container.method_2084(9).setStack(oversized);
         screen.container.method_2084(10).setStack(DeathChecks.tagged(86,64,0,"pumpkins"));before=contents(mc);
         press(screen,9);drag(screen,10);release(screen,10);
-        check(screen.container.method_2084(6).getStack().count==1&&screen.container.method_2084(9).getStack().count==2,"armour slot limit/oversized leftovers changed");
+        check(screen.container.method_2084(6).getStack().count==1&&screen.container.method_2084(9).getStack().count==2,"armor slot limit/oversized leftovers changed");
         check(screen.container.method_2084(5).getStack().count==1&&screen.container.method_2084(10).getStack().count==63,"pumpkin split changed");
         check(contents(mc).equals(before)&&mc.player.inventory.getCursorStack()==null,"split lost counts or NBT");
         var occupied=screen.container.method_2084(5).getStack();screen.container.method_2084(11).setStack(armor(0));before=contents(mc);
         press(screen,11);release(screen,11);check(screen.container.method_2084(5).getStack()==occupied&&contents(mc).equals(before),"occupied helmet was replaced");
       });
-      test("disabled drag, full inventory, cancellation and Spectator leave armour protected",()->{
+      test("disabled drag, full inventory, cancellation and Spectator leave armor protected",()->{
         clear(mc);var screen=inventory(mc);for(int i=0;i<4;i++)screen.container.method_2084(9+i).setStack(armor(i));
         find(original,DRAG).parse("false");original.preview(true);press(screen,9);drag(screen,10);release(screen,10);
         check(screen.container.method_2084(5).hasStack()&&!screen.container.method_2084(6).hasStack(),"disabled drag equipped another piece");
         find(original,DRAG).parse("true");original.preview(true);press(screen,10);((InventoryDrag)screen).power$cancelItemDrag();drag(screen,11);release(screen,11);
-        check(!screen.container.method_2084(7).hasStack(),"cancelled drag restarted while held");
+        check(!screen.container.method_2084(7).hasStack(),"canceled drag restarted while held");
         find(original,EQUIP).parse("false");original.preview(true);clear(mc);screen=inventory(mc);
         screen.container.method_2084(9).setStack(armor(0));screen.container.method_2084(10).setStack(armor(1));var disabled=contents(mc);
         press(screen,9);drag(screen,10);release(screen,10);
-        check(!screen.container.method_2084(5).hasStack()&&!screen.container.method_2084(6).hasStack()&&contents(mc).equals(disabled),"disabled armour shortcut still equipped");
+        check(!screen.container.method_2084(5).hasStack()&&!screen.container.method_2084(6).hasStack()&&contents(mc).equals(disabled),"disabled armor shortcut still equipped");
         find(original,EQUIP).parse("true");original.preview(true);
         clear(mc);screen=inventory(mc);for(int i=9;i<45;i++)screen.container.method_2084(i).setStack(new ItemStack(4,64,0));
         screen.container.method_2084(5).setStack(armor(0));var before=contents(mc);press(screen,5);drag(screen,6);release(screen,6);
-        check(screen.container.method_2084(5).hasStack()&&contents(mc).equals(before),"full inventory lost armour");
-        CreativeVehicleChecks.mode(mc,"SPECTATOR");before=contents(mc);press(screen,5);release(screen,5);check(contents(mc).equals(before),"Spectator moved armour");
+        check(screen.container.method_2084(5).hasStack()&&contents(mc).equals(before),"full inventory lost armor");
+        CreativeVehicleChecks.mode(mc,"SPECTATOR");before=contents(mc);press(screen,5);release(screen,5);check(contents(mc).equals(before),"Spectator moved armor");
       });
-      test("native callbacks cannot make an armour transfer overwrite changed slots or a new owner",()->{
+      test("native callbacks cannot make an armor transfer overwrite changed slots or a new owner",()->{
         CreativeVehicleChecks.mode(mc,"SURVIVAL");
         for(String change:List.of("source","destination","owner")){
           clear(mc);var screen=inventory(mc);var source=screen.container.method_2084(9);var target=screen.container.method_2084(5);
@@ -167,7 +167,7 @@ public final class Release252Checks {
           callbackHandler=screen.container;callbackSlot=9;
           callback=()->{if(change.equals("source"))source.setStack(inserted);else if(change.equals("destination"))target.setStack(inserted);else mc.player.container=null;};
           try{press(screen,9);}finally{callback=null;callbackHandler=null;mc.player.container=screen.container;}
-          check(mc.player.inventory.getCursorStack()!=null&&DeathItems.encode(mc.player.inventory.getCursorStack()).equals(before),"callback changed picked armour "+change);
+          check(mc.player.inventory.getCursorStack()!=null&&DeathItems.encode(mc.player.inventory.getCursorStack()).equals(before),"callback changed picked armor "+change);
           check(change.equals("destination")?target.getStack()==inserted:!target.hasStack(),"callback destination overwritten "+change);
           if(change.equals("source"))check(source.getStack()==inserted,"callback source overwritten");
           release(screen,9);

@@ -59,7 +59,7 @@ final class AudioPreviousChecks {
       case "paused" -> {
         AudioController.playNow(first); AudioController.playNow(second); AudioController.pause(); previous(mc);
         check(AudioController.currentTrackId().equals(first), "paused track treated as a gap");
-        intactQueue(); log("PASS Previous on a paused track retains its existing behaviour");
+        intactQueue(); log("PASS Previous on a paused track retains its existing behavior");
       }
       case "preview" -> {
         AudioController.playNow(first); AudioController.playNow(second); AudioController.previewSound(first); previous(mc);

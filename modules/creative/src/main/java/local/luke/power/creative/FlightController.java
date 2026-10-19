@@ -5,15 +5,20 @@ import local.luke.power.creative.config.Config;
 import local.luke.power.creative.flight.FlightPhysics;
 import local.luke.power.creative.flight.FlightSprint;
 import local.luke.power.input.MovementOwnership;
+import local.luke.power.input.SprintView;
+import local.luke.power.rules.GameRule;
+import local.luke.power.rules.WorldRules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.living.player.AbstractClientPlayer;
 import net.minecraft.entity.living.player.PlayerEntity;
+import net.minecraft.level.Level;
 
 public final class FlightController {
   private static int lastJump = -100, ticks;
   private static boolean jumpDown, sprinting;
   private static final FlightSprint sprint = new FlightSprint();
   private static PlayerEntity owner;
+  private static Level ownerWorld;
 
   private FlightController() {}
 
@@ -26,9 +31,26 @@ public final class FlightController {
     sprint.reset(local.luke.power.input.Bindings.down(Keys.SPRINT));
   }
 
+  /** Called before the native flight flag changes, while ground sprint is still published. */
+  public static void flightChanged(PlayerEntity player, boolean flying) {
+    Minecraft mc = ClientRuntime.minecraft();
+    if (mc == null || owner != player || mc.player != player
+        || ownerWorld != mc.level || player.level != mc.level) return;
+    boolean pressed = local.luke.power.input.Bindings.down(Keys.SPRINT);
+    boolean inherit = flying && ClientRuntime.active(mc) && !Modes.spectator(player)
+        && Modes.canEnableFlight(player) && !player.isSleeping()
+        && WorldRules.enabled(player.level.getProperties(), GameRule.ALLOW_SPRINTING)
+        && SprintView.active(SprintView.Kind.GROUND);
+    sprint.takeoff(inherit, pressed);
+    sprinting = false;
+    SprintView.publish(SprintView.Kind.CREATIVE, false, 1);
+    SprintView.publish(SprintView.Kind.SPECTATOR, false, 1);
+  }
+
   public static void tick(Minecraft mc) {
-    if (owner != mc.player) {
+    if (owner != mc.player || ownerWorld != mc.level) {
       owner = mc.player;
+      ownerWorld = mc.level;
       reset();
     }
     if (!ClientRuntime.moving(mc)) {

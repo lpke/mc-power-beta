@@ -25,7 +25,7 @@ final class Release150InteractionChecks {
     var gameplay=GameplayConfig.copy();var session=SettingsRegistry.open(mc);List<Entity> created=new ArrayList<>();
     try {
       properties.allAllowed(true);CreativeVehicleChecks.mode(mc,"CREATIVE");
-      test("actual catalogue Shift-click obeys item and live bucket limits with both mouse buttons",()->{
+      test("actual catalog Shift-click obeys item and live bucket limits with both mouse buttons",()->{
         keys.put(42,(byte)1);
         for(int width:new int[]{320,640})for(boolean buckets:new boolean[]{false,true}) {
           find(session,"power_compat:config.STACK_SIZE_CONFIG.stackableEmptyBuckets").parse(Boolean.toString(buckets));session.preview(true);
@@ -38,9 +38,9 @@ final class Release150InteractionChecks {
             var held=new ItemStack(264,3,0);mc.player.inventory.setCursorStack(held);
             ((ScreenInput)(Object)screen).power$click((width-176)/2+16,(420-166)/2-20+22,button);
             int total=Arrays.stream(mc.player.inventory.main).filter(Objects::nonNull).mapToInt(s->s.count).sum();
-            check(total==item[1],"catalogue count id="+item[0]+" count="+total);
+            check(total==item[1],"catalog count id="+item[0]+" count="+total);
             var result=Arrays.stream(mc.player.inventory.main).filter(Objects::nonNull).findFirst().orElseThrow();
-            check(DeathChecks.tag(result).getString("catalogue").equals("preserve") && result.getDamage()==template.getDamage(),"catalogue item data changed");
+            check(DeathChecks.tag(result).getString("catalogue").equals("preserve") && result.getDamage()==template.getDamage(),"catalog item data changed");
             check(mc.player.inventory.getCursorStack()==held && held.count==3 && template.count==1,"cursor/template changed");
           }
         }

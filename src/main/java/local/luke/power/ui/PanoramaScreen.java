@@ -8,7 +8,7 @@ import local.luke.power.input.PanoramaRenderer;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-/** Panorama choices use the parent settings session's apply behaviour. */
+/** Panorama choices use the parent settings session's apply behavior. */
 public final class PanoramaScreen extends UiScreen {
   private final PowerOptionsScreen parent;
   private final Setting setting;

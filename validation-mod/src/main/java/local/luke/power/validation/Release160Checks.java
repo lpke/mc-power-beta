@@ -57,7 +57,7 @@ final class Release160Checks {
         check(!org.lwjgl.opengl.Display.isActive() && AutoWalk.isWalking(), "requires unfocused auto-walk");
         mc.player.method_136(mc.options.forwardKey.code, true);
         mc.player.method_136(mc.options.forwardKey.code, false);
-        check(AutoWalk.isWalking(), "a background movement event cancelled auto-walk");
+        check(AutoWalk.isWalking(), "a background movement event canceled auto-walk");
         log("PASS background movement event preserves auto-walk");
       }
       case "hud-key", "hud-chord", "hud-mouse" -> {
@@ -294,7 +294,7 @@ final class Release160Checks {
         item.damage(null,2); check(((ItemHealthAccessor)item).power$health()==3,"ordinary damage suppressed");
         var method=Entity.class.getDeclaredMethod("method_1332");method.setAccessible(true);
         boolean remote=mc.world.isRemote; mc.world.isRemote=true;
-        try { method.invoke(item); check(item.dead,"client changed server-owned lava behaviour"); }
+        try { method.invoke(item); check(item.dead,"client changed server-owned lava behavior"); }
         finally { mc.world.isRemote=remote; item.markDead(); }
       });
       test("lava setting leaves fire blocks dangerous", () -> {

@@ -55,7 +55,7 @@ final class Release151RenderChecks {
           if ((pixels.get(i)&255)==255 && (pixels.get(i+1)&255)==255 && (pixels.get(i+2)&255)==255) white++;
         check(white > 50, "opaque white text is dull: " + color + " white pixels=" + white);
       }
-      log("PASS F3, active tweaks and chat colours render opaque white pixels");
+      log("PASS F3, active tweaks and chat colors render opaque white pixels");
     } finally {
       StatusConfig.preview(old); MenuPreferences.previewDebugColor(MenuPreferences.current().debugTextColor);
       GL11.glPopMatrix(); GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPopMatrix();

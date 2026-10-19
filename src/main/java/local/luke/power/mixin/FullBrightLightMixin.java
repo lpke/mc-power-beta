@@ -30,7 +30,7 @@ public class FullBrightLightMixin {
   @Inject(method = "method_1784", at = @At("HEAD"), cancellable = true)
   private void power$blockLight(int x, int y, int z, int emission, CallbackInfoReturnable<Float> cir) {
     if (!RenderControls.renderingFullBright()) return;
-    // Smooth lighting samples inside neighbouring opaque blocks for corner shadows.
+    // Smooth lighting samples inside neighboring opaque blocks for corner shadows.
     var view = (net.minecraft.world.BlockView)this;
     int id = view.getBlockId(x, y, z);
     cir.setReturnValue(id != 0 && net.minecraft.block.Block.field_1939[id] && emission == 0 ? .2f : 1f);

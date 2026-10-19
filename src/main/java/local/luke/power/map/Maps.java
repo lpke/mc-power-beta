@@ -21,7 +21,7 @@ public final class Maps {
       double y,
       double z,
       String name,
-      int colour,
+      int color,
       boolean item,
       double previousX,
       double previousY,
@@ -30,7 +30,7 @@ public final class Maps {
 
   public record Step(double x, double z, int dimension) {}
 
-  private static final MapPalette PALETTE = new MapPalette();
+  private static MapPalette palette;
   private static final DeathpointQueue DEATHS = new DeathpointQueue();
   private static final ArrayDeque<Step> PATH = new ArrayDeque<>();
   private static List<Radar> radar = List.of();
@@ -39,6 +39,10 @@ public final class Maps {
   private static int radarSize, radarStyle;
   private static List<Waypoint> points = List.of();
   private static Waypoint destination;
+  private static MapSettings radarPreview;
+
+  /** The HUD supplies an isolated snapshot; entity reads still happen only on ticks. */
+  public static void previewRadar(MapSettings settings) { radarPreview = settings; }
   private static MapCache cache;
   private static WaypointStore waypoints;
   private static MapSampler sampler;
@@ -47,7 +51,7 @@ public final class Maps {
   private static double x, y, z;
   private static float yaw;
   private static int dimension, layer, ticks, entityCursor;
-  private static boolean wasDead;
+  private static boolean wasDead, explicitWaypoints, minimapActive;
   private static long lastError;
 
   private Maps() {}
@@ -162,97 +166,133 @@ public final class Maps {
     }
   }
 
-  public static void tick(Minecraft mc) {
-    if (mc.world == null || mc.player == null) {
-      if (cache != null) leave();
-      world = null;
-      return;
+  /** Explicit waypoint actions can open their store even while all display features are off. */
+  public static WaypointStore ensureWaypoints(Minecraft mc) {
+    if (mc.world == null || mc.player == null) return null;
+    explicitWaypoints = true;
+    // World transitions are prepared on ticks, where leaving may finish durable work.
+    if (world != mc.world || identity.isEmpty()) return null;
+    if (waypoints == null) waypoints = new WaypointStore(directory(identity), Maps::error);
+    waypoints.tick();
+    return waypoints;
+  }
+
+  private static boolean waypointScreen(net.minecraft.client.gui.screen.Screen screen) {
+    for (int depth = 0; screen != null && depth < 8; depth++) {
+      if (screen instanceof local.luke.power.ui.WaypointsScreen
+          || screen instanceof local.luke.power.ui.WaypointEditorScreen) return true;
+      screen = screen instanceof local.luke.power.ui.ColourScreen color ? color.parentScreen() : null;
     }
-    String next =
-        mc.world.isRemote ? "server:" + server + "/" + submap : "world:" + CommandContext.world(mc);
-    if (!next.equals(identity) || cache == null) {
+    return false;
+  }
+
+  private static void prepareWorld(Minecraft mc) {
+    String next = mc.world.isRemote ? "server:" + server + "/" + submap : "world:" + CommandContext.world(mc);
+    if (!next.equals(identity)) {
       leave();
       identity = next;
       error = "";
-      Path root = directory(next);
-      cache = new MapCache(root, MapConfig.current().cacheTiles, Maps::error);
-      waypoints = new WaypointStore(root, Maps::error);
-      sampler = new MapSampler(PALETTE);
       wasDead = false;
-      points = List.of();
-      pointsRevision = Long.MIN_VALUE;
     }
     if (world != mc.world) {
       world = mc.world;
       PATH.clear();
-      radar = List.of();
-      radarScan.clear();
-      entityCursor = 0;
+      clearRadar();
     }
-    var pose =
-        ReportedPosition.current(
-            mc.player,
-            mc.player.x,
-            mc.player.boundingBox.minY,
-            mc.player.z,
-            mc.player.yaw,
-            mc.player.pitch);
+  }
+
+  private static void clearRadar() {
+    radar = List.of(); radarScan.clear(); entityCursor = 0;
+  }
+
+  public static void tick(Minecraft mc) {
+    if (mc.world == null || mc.player == null) {
+      if (!identity.isEmpty() || cache != null || waypoints != null) leave();
+      world = null;
+      return;
+    }
+    prepareWorld(mc);
+    MapSettings settings = MapConfig.current();
+    explicitWaypoints = waypointScreen(mc.currentScreen);
+    MapActivity activity = MapActivity.of(settings, explicitWaypoints);
+    if (!(mc.currentScreen instanceof local.luke.power.ui.HudEditorScreen)) radarPreview = null;
+    MapSettings radarSettings = radarPreview == null ? settings : radarPreview;
+    boolean radarEnabled = activity.terrain() && MapActivity.of(radarSettings, false).radar();
+    if (minimapActive && !settings.minimap) MinimapBuffer.clear();
+    minimapActive = settings.minimap;
+    if (!activity.terrain()) retireTerrain();
+    if (!radarEnabled) clearRadar();
+    if (!activity.path()) PATH.clear();
+    var pose = ReportedPosition.current(mc.player, mc.player.x, mc.player.boundingBox.minY,
+        mc.player.z, mc.player.yaw, mc.player.pitch);
     if (!pose.finite()) return;
     x = MapMath.bounded(pose.x(), -MapMath.BORDER, MapMath.BORDER);
-    y = pose.y();
-    z = MapMath.bounded(pose.z(), -MapMath.BORDER, MapMath.BORDER);
-    yaw = pose.yaw();
-    dimension = mc.world.dimension.id;
-    MapSettings settings = MapConfig.current();
+    y = pose.y(); z = MapMath.bounded(pose.z(), -MapMath.BORDER, MapMath.BORDER);
+    yaw = pose.yaw(); dimension = mc.world.dimension.id;
     if (destination != null && destination.dimension == dimension && destination.distance(x, z) < 2)
       destination(null);
-    PALETTE.tick(mc);
-    cache.limit(settings.cacheTiles);
-    cache.tick();
-    waypoints.tick();
+
+    if (activity.terrain()) {
+      if (palette == null) palette = new MapPalette();
+      if (cache == null) cache = new MapCache(directory(identity), settings.cacheTiles, Maps::error);
+      cache.resume();
+      if (sampler == null) sampler = new MapSampler(palette);
+      palette.tick(mc);
+      cache.limit(settings.cacheTiles);
+      // The live cave context also serves a map screen switched from Surface to Caves.
+      cache.viewContext(MapSampler.window(settings, y).context());
+      cache.tick();
+      layer = MapSampler.layer(mc, x, y, z);
+      sampler.tick(mc, cache, layer, x, y, z);
+    }
+
     boolean dead = mc.player.dead || mc.player.health <= 0;
-    if (dead && !wasDead && settings.deathpoints) {
-      try {
-        DEATHS.capture(
-            (int) Math.floor(mc.player.x),
-            (int) Math.floor(mc.player.boundingBox.minY),
-            (int) Math.floor(mc.player.z),
-            dimension,
-            settings.keepOldDeaths);
-      } catch (RuntimeException e) {
-        error("Death waypoint could not be recorded: " + e.getMessage());
+    if (activity.waypoints() && waypoints == null)
+      waypoints = new WaypointStore(directory(identity), Maps::error);
+    if (waypoints != null) {
+      // Existing edits still finish if their display is disabled during an asynchronous save.
+      if (activity.waypoints() || waypoints.needsMaintenance()) waypoints.tick(activity.waypoints());
+      if (dead && !wasDead && settings.deathpoints) {
+        try {
+          DEATHS.capture((int)Math.floor(mc.player.x), (int)Math.floor(mc.player.boundingBox.minY),
+              (int)Math.floor(mc.player.z), dimension, settings.keepOldDeaths);
+        } catch (RuntimeException e) { error("Death waypoint could not be recorded: " + e.getMessage()); }
+      }
+      try { DEATHS.flush(waypoints); }
+      catch (RuntimeException e) { error("Death waypoint could not be recorded: " + e.getMessage()); }
+      if (activity.waypoints() && (pointsRevision != waypoints.revision() || pointsRevision == Long.MIN_VALUE)) {
+        var snapshot = new ArrayList<>(waypoints.points());
+        if (destination != null) snapshot.add(0, destination);
+        points = List.copyOf(snapshot);
+        pointsRevision = waypoints.ready() ? waypoints.revision() : Long.MIN_VALUE;
       }
     }
     wasDead = dead;
-    try {
-      DEATHS.flush(waypoints);
-    } catch (RuntimeException e) {
-      error("Death waypoint could not be recorded: " + e.getMessage());
-    }
-    if (pointsRevision != waypoints.revision() || pointsRevision == Long.MIN_VALUE) {
-      var snapshot = new ArrayList<>(waypoints.points());
-      if (destination != null) snapshot.add(0, destination);
-      points = List.copyOf(snapshot);
-      pointsRevision = waypoints.ready() ? waypoints.revision() : Long.MIN_VALUE;
-    }
-    layer = MapSampler.layer(mc, x, y, z);
-    if (settings.minimap || settings.worldMap) sampler.tick(mc, cache, layer, x, y, z);
-    if (settings.radar) radar(mc, settings);
-    else {
-      radar = List.of();
-      radarScan.clear();
-      entityCursor = 0;
-    }
-    if (settings.footsteps && ticks % 10 == 0 && !dead) {
+    if (radarEnabled) radar(mc, radarSettings);
+    else clearRadar();
+    if (activity.path() && ticks % 10 == 0 && !dead) {
       Step last = PATH.peekLast();
-      if (last == null
-          || last.dimension() != dimension
-          || Math.hypot(last.x() - x, last.z() - z) >= 1) {
+      if (last == null || last.dimension() != dimension || Math.hypot(last.x() - x, last.z() - z) >= 1) {
         PATH.addLast(new Step(x, z, dimension));
         while (PATH.size() > 512) PATH.removeFirst();
       }
-    }
+    } else if (!activity.path()) PATH.clear();
     ticks++;
+  }
+
+  private static void retireTerrain() {
+    // Terrain callbacks become inert immediately; only existing durable work may continue.
+    sampler = null;
+    palette = null;
+    layer = -1;
+    if (cache == null) return;
+    cache.retire();
+    cache.tick();
+    if (cache.releaseIfIdle()) {
+      cache = null;
+      MapRenderer.clear();
+      MinimapBuffer.clear();
+    }
   }
 
   private static void radar(Minecraft mc, MapSettings settings) {
@@ -287,23 +327,23 @@ public final class Maps {
           || entity.dead
           || Math.abs(entity.y - y) > settings.radarHeight
           || Math.hypot(entity.x - x, entity.z - z) > 256) continue;
-      int colour;
+      int color;
       boolean item = entity instanceof net.minecraft.class_142;
       if (entity instanceof PlayerEntity) {
         if (!settings.players) continue;
-        colour = 0xffffff;
+        color = 0xffffff;
       } else if (entity instanceof class_65) {
         if (!settings.hostile) continue;
-        colour = 0xff6655;
+        color = 0xff6655;
       } else if (entity instanceof class_258 || entity instanceof WaterCreatureEntity) {
         if (!settings.animals) continue;
-        colour = 0xffff55;
+        color = 0xffff55;
       } else if (item) {
         if (!settings.items) continue;
-        colour = 0xff5555;
+        color = 0xff5555;
       } else {
         if (!settings.otherEntities) continue;
-        colour = 0xcc66ff;
+        color = 0xcc66ff;
       }
       String name =
           entity instanceof PlayerEntity p ? p.name : net.minecraft.class_206.method_734(entity);
@@ -314,7 +354,7 @@ public final class Maps {
               entity.y,
               entity.z,
               name,
-              colour,
+              color,
               item,
               entity.prevX,
               entity.prevY,
@@ -354,6 +394,8 @@ public final class Maps {
     cache = null;
     waypoints = null;
     sampler = null;
+    explicitWaypoints = false;
+    minimapActive = false;
     identity = "";
     PATH.clear();
     radar = List.of();
@@ -361,6 +403,7 @@ public final class Maps {
     points = List.of();
     pointsRevision = Long.MIN_VALUE;
     destination = null;
+    radarPreview = null;
     DEATHS.clear();
   }
 

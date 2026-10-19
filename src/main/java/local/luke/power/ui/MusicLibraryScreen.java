@@ -223,7 +223,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private MusicFilters.Layout filters() {
     if (span() < 380) {
       String label = folderSelected() ? "Folder" : switch (folder) {
-        case "active" -> "Active"; case "custom" -> "All folders"; case "favourites" -> "Favourites";
+        case "active" -> "Active"; case "custom" -> "All folders"; case "favourites" -> "Favorites";
         case "presets" -> "Preset"; default -> "Everything";
       };
       boolean selector = folderSelected() || folder.equals("presets");
@@ -744,9 +744,9 @@ public final class MusicLibraryScreen extends UiScreen {
             case "active" -> "The pool allowed by your soundtrack, folders and world/menu rules. Excluded tracks remain visible.";
             case "" -> "All available built-in and custom music.";
             case "custom" -> "All tracks found in your music folders.";
-            case "favourites" -> "Tracks you have starred. Favourites do not change automatic rotation.";
+            case "favourites" -> "Tracks you have starred. Favorites do not change automatic rotation.";
             case "presets" -> "Browse a saved preset without loading or changing it.";
-            case "cycle" -> "Choose Active, Everything, Favourites, Preset, All folders or Folder.";
+            case "cycle" -> "Choose Active, Everything, Favorites, Preset, All folders or Folder.";
             default -> "Tracks in the selected folder and its subfolders.";
           };
       }
@@ -810,7 +810,7 @@ public final class MusicLibraryScreen extends UiScreen {
       if(hover){
         if(!queue&&inside(mx,listMouseY,left(),y+3,20,18))tip="Include in automatic rotation. Preview and queue work even when excluded.";
         else if(!presetsOpen&&inside(mx,listMouseY,volumeX(),cy,layout.volumeWidth(),18))tip=parent.valueEditor.editing(row) ? parent.valueEditor.help() : "Track volume; music and master volumes also apply.\n\nRange: 0 to 100%.\n\nRight-click to enter an exact value.";
-        else if(!presetsOpen&&inside(mx,listMouseY,layout.favouriteX(),cy,bw,18))tip=edits.favourites().contains(id)?"Remove from favourites":"Add to favourites";
+        else if(!presetsOpen&&inside(mx,listMouseY,layout.favouriteX(),cy,bw,18))tip=edits.favourites().contains(id)?"Remove from favorites":"Add to favorites";
         else if(inside(mx,listMouseY,layout.playX(),cy,bw,18))tip="Play or pause this track";
         else if(!queue&&inside(mx,listMouseY,layout.previewX(),cy,bw,18))tip="Preview without changing the current track; click again to stop.";
         else if(!presetsOpen&&inside(mx,listMouseY,layout.queueX(),cy,bw,18))tip=queue?"Remove this request":"Add to the end of the queue";
@@ -841,7 +841,7 @@ public final class MusicLibraryScreen extends UiScreen {
                 ? Mp3Converter.status()
                 : AudioController.status();
     if (!trackStatusVisible()) text(fit(status, span() - (conversionVisible() ? 92 : 0)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
-    if (!tip.isEmpty() && (key.endsWith(":volume") || key.endsWith(":include") || key.endsWith(":favourite") || key.startsWith("group:")))
+    if (!tip.isEmpty() && (key.endsWith(":volume") || key.endsWith(":include") || key.endsWith(":favorite") || key.startsWith("group:")))
       tip = local.luke.power.config.Tooltips.paragraphs(tip, presetsOpen
           ? "Saved in this preset. Loading a preset applies it across worlds."
           : "Global music setting. Shared across worlds and menus.");

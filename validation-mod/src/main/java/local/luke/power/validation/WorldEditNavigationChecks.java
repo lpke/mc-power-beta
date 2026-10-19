@@ -18,7 +18,7 @@ final class WorldEditNavigationChecks {
     try {
       rules.allAllowed(true);
       var enabled = settings.copy();  WorldEditor.preview(enabled);
-      test("culling reads loaded terrain without generating chunks or cancelling unloads", () -> {
+      test("culling reads loaded terrain without generating chunks or canceling unloads", () -> {
         var cache = (local.luke.power.mixin.CullingChunkCacheAccessor)mc.world.method_259();
         var before = new HashMap<>(cache.power$loadedChunks());
         Object provider = Class.forName("dev.tr7zw.entityculling.Provider").getConstructor().newInstance();
@@ -34,7 +34,7 @@ final class WorldEditNavigationChecks {
         int key = before.keySet().iterator().next(); var loaded = before.get(key); boolean alreadyQueued = queued.contains(key);
         try {
           queued.add(key); read.invoke(provider,loaded.field_962*16,100,loaded.field_963*16);
-          check(queued.contains(key),"culling cancelled a scheduled chunk unload");
+          check(queued.contains(key),"culling canceled a scheduled chunk unload");
         } finally { if(!alreadyQueued) queued.remove(key); }
       });
       Validation.backgroundChunkReads.set(0);

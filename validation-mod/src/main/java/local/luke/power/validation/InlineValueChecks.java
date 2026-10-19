@@ -108,7 +108,7 @@ final class InlineValueChecks {
         }
         options.init(mc,640,420);
       });
-      test("library volumes edit in place without changing neighbours or row width",()->{
+      test("library volumes edit in place without changing neighbors or row width",()->{
         field(options,"relatedIds",List.of());field(options,"page","Audio");search(options,"");
         field(options,"libraryOpen",true);
         var library=(MusicLibraryScreen)field(options,"library");library.showTrack("music:calm1.ogg");
@@ -133,7 +133,7 @@ final class InlineValueChecks {
         check(((IntegerArrayDraft)field(screen,"draft")).get(0)==31,"fog draft not committed");
         press(screen,x+8,78,1);text(entry,"99");commit(screen,entry);
         check(((IntegerArrayDraft)field(screen,"draft")).get(0)==31,"invalid fog value changed draft");
-        key(screen,Keyboard.KEY_ESCAPE);check(mc.currentScreen==screen,"Escape exited instead of cancelling draft");
+        key(screen,Keyboard.KEY_ESCAPE);check(mc.currentScreen==screen,"Escape exited instead of canceling draft");
         key(screen,Keyboard.KEY_ESCAPE);check(mc.currentScreen==options,"second Escape did not return");
       });
       options.session().discard();

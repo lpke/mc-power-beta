@@ -31,8 +31,8 @@ public final class CreativeCommands {
           state.power_flightOverride(-1);
           Config.flight(enabled);
         } else state.power_flightOverride(enabled ? 1 : 0);
-        mc.player.creative_setFlying(enabled && mc.player.vehicle == null);
         FlightController.reset();
+        mc.player.creative_setFlying(enabled && mc.player.vehicle == null);
         mc.overlay.addChatMessage("§7Flight " + (enabled ? "enabled" : "disabled") + ".§r");
         return true;
       }

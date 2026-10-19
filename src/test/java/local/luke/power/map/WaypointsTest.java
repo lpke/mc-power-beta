@@ -147,4 +147,37 @@ class WaypointsTest {
     point.x = Integer.MIN_VALUE;
     assertThrows(IllegalArgumentException.class, point::validate);
   }
+  @Test void emptyNamedSetsSurviveSwitchingWaypointDeletionAndRestart() throws Exception {
+    var store = store();
+    store.createSet("Builds");
+    store.createSet("Exploration");
+    store.select("Default");
+    assertEquals(List.of("Builds", "Default", "Exploration"), store.sets());
+    var point = new Waypoint();
+    point.set = "Builds";
+    store.put(point);
+    store.remove(point.id);
+    long revision = store.revision();
+    assertThrows(IllegalArgumentException.class, () -> store.createSet("builds"));
+    assertThrows(IllegalArgumentException.class, () -> store.createSet(" "));
+    assertEquals(revision, store.revision());
+    store.finish();
+    var restarted = store();
+    assertEquals(List.of("Builds", "Default", "Exploration"), restarted.sets());
+    assertEquals("Default", restarted.selectedSet());
+    assertTrue(restarted.points().isEmpty());
+  }
+  @Test void formatOneWithoutExplicitSetsKeepsExistingSelectionAndPointSets() throws Exception {
+    String legacy = "{\"format\":1,\"selectedSet\":\"Existing empty\",\"waypoints\":[]}";
+    var decoded = WaypointStore.decode(legacy.getBytes(StandardCharsets.UTF_8));
+    assertTrue(decoded.sets.isEmpty());
+    assertEquals("Existing empty", decoded.selectedSet);
+    decoded.sets.add("New empty");
+    var restored = WaypointStore.decode(WaypointStore.encode(decoded));
+    assertEquals(List.of("New empty"), restored.sets);
+    assertEquals("Existing empty", restored.selectedSet);
+    assertTrue(restored.waypoints.isEmpty());
+    decoded.sets.add("new empty");
+    assertThrows(IllegalArgumentException.class, () -> WaypointStore.encode(decoded));
+  }
 }

@@ -3,7 +3,7 @@ package local.luke.power.recipes.gui;
 public class AMIRarityIcons {
 
     public static final boolean[][] NONE = new boolean[][] {
-            new boolean[] {}, // So I don't have to do extra checks. Optimisation/lazy code.
+            new boolean[] {}, // So I don't have to do extra checks. Optimization/lazy code.
     };
     public static final boolean[][] BAD = new boolean[][] {
             new boolean[] { false, true, false, false, false, false, false, false, false, false, true, false },

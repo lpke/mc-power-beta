@@ -60,7 +60,7 @@ public final class WaterLighting {
       // Native side lighting and roofs remain authoritative. Only recover light
       // lost along a water column, using the dimension's current day/night table.
       sky = Math.max(sky, nativeSky);
-      // Track water above roofs too: removing a roof must invalidate the clear colour
+      // Track water above roofs too: removing a roof must invalidate the clear color
       // even if the water has already reduced native skylight to zero below it.
       result[y] = (byte)((water ? sky | (sky > nativeSky ? 16 : 0) : nativeSky) | (waterAbove ? 32 : 0));
     }

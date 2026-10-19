@@ -49,7 +49,7 @@ final class TitleAlignmentChecks {
             }
             check(right>=left,"logo pixels missing");
             check(Math.abs(left+right+1-image.getWidth())<=2,
-                "visible lettering is off centre: "+left+".."+right+" / "+image.getWidth());
+                "visible lettering is off center: "+left+".."+right+" / "+image.getWidth());
             log("LOGO PIXELS style "+current+" GUI "+size[0]+" bounds "+left+".."+right);
           }
         });
@@ -57,7 +57,7 @@ final class TitleAlignmentChecks {
     } finally {
       style.value=original;session.save(Path.of("."));
       var after=local.luke.power.storage.PowerConfig.section("title");after.remove("style");
-      check(after.equals(titleConfig),"title checks changed retro customisation");
+      check(after.equals(titleConfig),"title checks changed retro customization");
     }
     log("TITLE ALIGNMENT FAILURES "+failures);
   }

@@ -26,7 +26,7 @@ public final class PanoramaCatalog {
       }
       entries.add(new Entry("glacier", "Glacier", "glacier", "glacier"));
       return List.copyOf(entries);
-    } catch (IOException | RuntimeException e) { throw new IllegalStateException("Cannot load panorama catalogue", e); }
+    } catch (IOException | RuntimeException e) { throw new IllegalStateException("Cannot load panorama catalog", e); }
   }
   private static List<Entry> unique() {
     Map<String, Entry> scenes = new LinkedHashMap<>();

@@ -4,7 +4,7 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.*;
 
-/** A north-up terrain buffer separates tick-owned colours from the final frame-owned transform. */
+/** A north-up terrain buffer separates tick-owned colors from the final frame-owned transform. */
 public final class MinimapBuffer {
   private static int framebuffer, texture, side, coverage, maximum;
   private static boolean failed, pending;
@@ -12,7 +12,8 @@ public final class MinimapBuffer {
   private static MapSettings sourceSettings, opaqueSettings;
   private static long generation, refreshed;
   private static int style, dimension, layer;
-  private static double centreX, centreZ, scale;
+  private static String context = "";
+  private static double centerX, centerZ, scale;
 
   private MinimapBuffer() {}
 
@@ -44,8 +45,9 @@ public final class MinimapBuffer {
             || scale != pixelScale
             || dimension != Maps.dimension()
             || layer != Maps.layer()
-            || Math.abs(view.x - centreX) + radius >= coverage / (2 * pixelScale)
-            || Math.abs(view.z - centreZ) + radius >= coverage / (2 * pixelScale);
+            || !context.equals(Maps.layer() < 0 ? "" : Maps.cache().viewContext())
+            || Math.abs(view.x - centerX) + radius >= coverage / (2 * pixelScale)
+            || Math.abs(view.z - centerZ) + radius >= coverage / (2 * pixelScale);
     long now = System.nanoTime();
     if (outside
         || nextStyle != style
@@ -59,10 +61,10 @@ public final class MinimapBuffer {
     GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
     GL11.glColor4d(1, 1, 1, settings.opacity);
     double half = side / (2 * scale);
-    var a = view.screen(centreX - half, centreZ - half);
-    var b = view.screen(centreX + half, centreZ - half);
-    var c = view.screen(centreX + half, centreZ + half);
-    var d = view.screen(centreX - half, centreZ + half);
+    var a = view.screen(centerX - half, centerZ - half);
+    var b = view.screen(centerX + half, centerZ - half);
+    var c = view.screen(centerX + half, centerZ + half);
+    var d = view.screen(centerX - half, centerZ + half);
     MapRenderer.polygon(
         view.clip(
             List.of(
@@ -138,23 +140,25 @@ public final class MinimapBuffer {
       GL11.glOrtho(0, side, side, 0, -1, 1);
       GL11.glMatrixMode(GL11.GL_MODELVIEW);
       GL11.glLoadIdentity();
-      centreX = Math.floor(x);
-      centreZ = Math.floor(z);
+      centerX = Math.floor(x);
+      centerZ = Math.floor(z);
       scale = pixelScale;
       dimension = Maps.dimension();
       layer = Maps.layer();
+      context = layer < 0 ? "" : Maps.cache().viewContext();
       source = Maps.cache();
       coverage = painted;
       if (sourceSettings != settings) {
         sourceSettings = settings;
-        opaqueSettings = MapConfig.copy();
+        opaqueSettings = local.luke.power.config.Catalog.JSON.fromJson(
+            local.luke.power.config.Catalog.JSON.toJson(settings), MapSettings.class);
         opaqueSettings.opacity = 1;
       }
       MapRenderer.terrain(
           source,
           new MapProjection(
-              centreX,
-              centreZ,
+              centerX,
+              centerZ,
               scale,
               (side - coverage) / 2d,
               (side - coverage) / 2d,

@@ -4,7 +4,7 @@ package local.luke.power.map;
 final class MapRelief {
   private MapRelief() {}
 
-  static int colour(int rgb, int height, int north, int northwest, int dimension) {
+  static int color(int rgb, int height, int north, int northwest, int dimension) {
     double vertical = height - north, diagonal = height - northwest;
     double direct = 0;
     if (vertical >= 0) {
@@ -20,7 +20,7 @@ final class MapRelief {
         | channel(rgb, ambient + (dimension == -1 ? 0 : .2));
   }
 
-  private static int channel(int colour, double light) {
-    return Math.min(255, Math.max(0, (int) ((colour & 255) * light)));
+  private static int channel(int color, double light) {
+    return Math.min(255, Math.max(0, (int) ((color & 255) * light)));
   }
 }

@@ -32,7 +32,7 @@ public final class ItemCatalogue {
       Entry entry=entry(domain,id,-1);entries.put(entry.value(),entry);
     }
     if(domain == Domain.FILTER) {
-      // The creative catalogue already owns supported metadata variants, including modded items.
+      // The creative catalog already owns supported metadata variants, including modded items.
       try {
         Class<?> tabs=Class.forName("local.luke.power.creative.inventory.registry.TabRegistry");
         int count=(int)tabs.getMethod("getTabsCount").invoke(null);

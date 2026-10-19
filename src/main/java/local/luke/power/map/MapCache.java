@@ -18,8 +18,13 @@ public final class MapCache {
   private int limit;
   private int retryTicks;
   private boolean writeFailed;
-  private boolean closed;
+  private boolean closed, retiring;
   private long generation;
+  private String viewContext = "";
+  private final Set<Consumer<Key>> listeners = new LinkedHashSet<>();
+
+  public void listen(Consumer<Key> listener) { listeners.add(listener); }
+  public void unlisten(Consumer<Key> listener) { listeners.remove(listener); }
 
   private record Save(long revision, CompletableFuture<Void> future) {}
 
@@ -54,16 +59,52 @@ public final class MapCache {
     return List.copyOf(tiles.values());
   }
 
+  /** Stop new view requests while already queued durable work drains in bounded ticks. */
+  public void retire() {
+    if (retiring || closed) return;
+    retiring = true;
+    writeFailed = false;
+    retryTicks = 0;
+  }
+
+  public void resume() { if (!closed) retiring = false; }
+  public boolean retiring() { return retiring; }
+
+  public boolean idle() {
+    return loading.isEmpty() && saving.isEmpty() && parents.isEmpty()
+        && tiles.values().stream().noneMatch(MapTile::dirty);
+  }
+
+  public boolean releaseIfIdle() {
+    if (!retiring || !idle()) return false;
+    closed = true;
+    tiles.clear();
+    listeners.clear();
+    return true;
+  }
+
+  public String viewContext() { return viewContext; }
+
+  /** Switching cave windows selects another namespace without draining the shared cache. */
+  public void viewContext(String context) {
+    new Key(0, 0, 0, 0, 0, context);
+    if (!viewContext.equals(context)) { viewContext = context; generation++; }
+  }
+
+  public Key viewKey(Key key) {
+    return key.layer() < 0 || !key.context().isEmpty() ? key : key.withContext(viewContext);
+  }
+
   public MapTile peek(Key key) {
-    return tiles.get(key);
+    return closed || retiring ? null : tiles.get(viewKey(key));
   }
 
   public MapTile get(Key key) {
-    return get(key, false);
+    return get(viewKey(key), false);
   }
 
   private MapTile get(Key key, boolean requiredParent) {
-    if (closed) return null;
+    if (closed || retiring && !requiredParent) return null;
     MapTile tile = tiles.get(key);
     if (tile != null) return tile;
     // Panning cannot build an unbounded backlog of migrated/seam-repaired leaves.
@@ -79,7 +120,7 @@ public final class MapCache {
   }
 
   public boolean canSample() {
-    return parents.size() < limit;
+    return !closed && !retiring && parents.size() < limit;
   }
 
   public void changed(MapTile tile) {
@@ -92,15 +133,16 @@ public final class MapCache {
 
   private void queueParent(MapTile tile) {
     generation++;
+    for (var listener : listeners) listener.accept(tile.key);
     if (tile.key.level() < MAX_LEVEL) parents.put(tile.key, tile.copy());
   }
 
   private boolean refresh(MapTile tile) {
     return tile.refreshRelief(
         (x, z) -> {
-          MapTile neighbour = tiles.get(key(tile.key.dimension(), tile.key.layer(), 0, x, z));
+          MapTile neighbor = tiles.get(key(tile.key.dimension(), tile.key.layer(), 0, x, z, tile.key.context()));
           int i = index(x, z);
-          return neighbour != null && neighbour.known(i) ? neighbour.height(i) : -1;
+          return neighbor != null && neighbor.known(i) ? neighbor.height(i) : -1;
         });
   }
 
@@ -110,18 +152,21 @@ public final class MapCache {
         if (dx == 0 && dz == 0) continue;
         if (Math.abs((long) key.x() + dx) > BORDER / SIZE + 1
             || Math.abs((long) key.z() + dz) > BORDER / SIZE + 1) continue;
-        MapTile neighbour =
-            tiles.get(new Key(key.dimension(), key.layer(), 0, key.x() + dx, key.z() + dz));
-        if (neighbour == null || neighbour.readOnly) continue;
-        if (dx == 0) for (int x = 0; x < SIZE; x++) neighbour.invalidateReliefPixel(x);
-        else if (dz == 0) for (int z = 1; z < SIZE; z++) neighbour.invalidateReliefPixel(z * SIZE);
-        else neighbour.invalidateReliefPixel(0);
-        if (refresh(neighbour)) queueParent(neighbour);
+        MapTile neighbor =
+            tiles.get(new Key(key.dimension(), key.layer(), 0, key.x() + dx, key.z() + dz, key.context()));
+        if (neighbor == null || neighbor.readOnly) continue;
+        if (dx == 0) for (int x = 0; x < SIZE; x++) neighbor.invalidateReliefPixel(x);
+        else if (dz == 0) for (int z = 1; z < SIZE; z++) neighbor.invalidateReliefPixel(z * SIZE);
+        else neighbor.invalidateReliefPixel(0);
+        if (refresh(neighbor)) queueParent(neighbor);
       }
   }
 
   public void tick() {
+    if (closed) return;
     drain();
+    // Preserve failed dirty snapshots without retrying disabled functionality forever.
+    if (retiring && writeFailed) return;
     int work = 0;
     for (Key key : new ArrayList<>(parents.keySet())) {
       if (work++ >= 4) break;
@@ -164,7 +209,20 @@ public final class MapCache {
   }
 
   private void drain() {
+    drainReads(16, Long.MAX_VALUE);
+    drainSaves();
+  }
+
+  /** Publish completed immutable reads on the owning game/render thread, without advancing a tick. */
+  public int publish(int maximum, long deadline) {
+    if (closed || retiring || maximum <= 0) return 0;
+    return drainReads(Math.min(4, maximum), deadline);
+  }
+
+  private int drainReads(int maximum, long deadline) {
+    int published = 0;
     for (var it = loading.entrySet().iterator(); it.hasNext(); ) {
+      if (published >= maximum || System.nanoTime() >= deadline) break;
       var entry = it.next();
       if (!entry.getValue().isDone()) continue;
       MapTile tile;
@@ -182,24 +240,29 @@ public final class MapCache {
         // Reconcile resident seams as either side arrives, without requesting new terrain.
         if (tile.key.z() > -BORDER / SIZE - 1
             && tiles.containsKey(
-                new Key(tile.key.dimension(), tile.key.layer(), 0, tile.key.x(), tile.key.z() - 1)))
+                new Key(tile.key.dimension(), tile.key.layer(), 0, tile.key.x(), tile.key.z() - 1, tile.key.context())))
           for (int x = 0; x < SIZE; x++) tile.invalidateReliefPixel(x);
         if (tile.key.x() > -BORDER / SIZE - 1
             && tiles.containsKey(
-                new Key(tile.key.dimension(), tile.key.layer(), 0, tile.key.x() - 1, tile.key.z())))
+                new Key(tile.key.dimension(), tile.key.layer(), 0, tile.key.x() - 1, tile.key.z(), tile.key.context())))
           for (int z = 0; z < SIZE; z++) tile.invalidateReliefPixel(z * SIZE);
         if (tile.key.x() > -BORDER / SIZE - 1
             && tile.key.z() > -BORDER / SIZE - 1
             && tiles.containsKey(
                 new Key(
-                    tile.key.dimension(), tile.key.layer(), 0, tile.key.x() - 1, tile.key.z() - 1)))
+                    tile.key.dimension(), tile.key.layer(), 0, tile.key.x() - 1, tile.key.z() - 1, tile.key.context())))
           tile.invalidateReliefPixel(0);
         if (refresh(tile) || tile.propagateRelief) queueParent(tile);
         tile.propagateRelief = false;
         refreshEdges(tile.key);
       }
       it.remove();
+      published++;
     }
+    return published;
+  }
+
+  private void drainSaves() {
     for (var it = saving.entrySet().iterator(); it.hasNext(); ) {
       var entry = it.next();
       if (!entry.getValue().future.isDone()) continue;
@@ -239,6 +302,7 @@ public final class MapCache {
     int attempts = 0;
     retryTicks = 0;
     writeFailed = false;
+    retiring = false;
     while (attempts++ < Math.max(1024, limit * (MAX_LEVEL + 2))) {
       tick();
       if (writeFailed) {

@@ -45,7 +45,7 @@ public final class AudioBackend implements Backend {
         Catalog.JSON.toJsonTree(s.disabledTracks), new JsonArray(), "Excluded music identifiers.", List.of());
     add("groupVolumes", "Music data", "Music group volumes", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.groupVolumes), new JsonObject(), "Volume multipliers for music groups.", List.of());
-    add("favourites", "Music data", "Favourite tracks", Setting.Kind.LIST,
+    add("favourites", "Music data", "Favorite tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.favourites), new JsonArray(), "Starred music tracks.", List.of());
     add(
         "musicMode",

@@ -291,7 +291,7 @@ final class Release210Checks {
           setting.value = original; options.changed(setting);
         } finally { MenuPreferences.update(v -> v.autoApply = auto); }
       });
-      test("title styles render official logos and retain retro customisation", () -> {
+      test("title styles render official logos and retain retro customization", () -> {
         ConfigSession session = SettingsRegistry.open(mc);
         Setting style = find(session, "logo.style");
         check(style.kind == Setting.Kind.CHOICE && style.choices.size() == 5 && style.defaultValue.getAsInt() == 0, "style choices/default");

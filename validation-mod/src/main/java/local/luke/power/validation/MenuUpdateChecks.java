@@ -208,7 +208,7 @@ public final class MenuUpdateChecks {
           clickScreen(video, number(video, "actionX", 1) + 4, video.height - 20, 1);
         });
     test(
-        "pause preference and colour swatches save independently",
+        "pause preference and color swatches save independently",
         () -> {
           Setting pause = find(video.session(), "interface.pauseToOptions");
           pause.value = new JsonPrimitive(true);
@@ -237,7 +237,7 @@ public final class MenuUpdateChecks {
           video.session().discard();
         });
     test(
-        "colour picker previews locally and cancels safely",
+        "color picker previews locally and cancels safely",
         () -> {
           Setting colour = find(video.session(), "lightOverlay.lowColor");
           String old = colour.value.getAsString();
@@ -245,12 +245,12 @@ public final class MenuUpdateChecks {
           mc.setScreen(picker);
           ((TextInput) field(picker, "hex")).setText("#123456");
           call(picker, "parse");
-          check(colour.value.getAsString().equals(old), "colour changed before Done");
+          check(colour.value.getAsString().equals(old), "color changed before Done");
           picker.render(0, 0, 0);
           clickScreen(picker, picker.width / 2 + 5, picker.height - 20, 0);
           check(
               mc.currentScreen == video && colour.value.getAsString().equals(old),
-              "Cancel changed colour");
+              "Cancel changed color");
         });
     ConfigSession restore = SettingsRegistry.open(mc);
     for (Setting v : restore.settings()) v.value = find(before, v.id).value.deepCopy();

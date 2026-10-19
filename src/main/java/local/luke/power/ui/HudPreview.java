@@ -19,16 +19,17 @@ final class HudPreview {
   static final String NATIVE = "power_hud:hudpositions.";
   static final String SIMPLE = NATIVE + "SIMPLE_HUD_POSITION_CONFIG.";
   static final String[] PARTS = {"HOTBAR", "HEARTS", "ARMOR", "OXYGEN", "OVERLAY_MESSAGE"};
-  static final String[] NAMES = {"Hotbar", "Hearts", "Armour", "Oxygen", "Messages"};
+  static final String[] NAMES = {"Hotbar", "Hearts", "Armor", "Oxygen", "Messages"};
   private final SettingsDraft draft;
   private final List<Element> elements = new ArrayList<>();
   private final ItemIcons icons = new ItemIcons();
   private final List<ItemCatalogue.Entry> samples = new ArrayList<>();
   private final InfoHudSettings.Cluster[] clusters = new InfoHudSettings.Cluster[4];
   private StatusSettings status;
+  private local.luke.power.map.MapSettings map;
   private boolean sampledItem;
   private final boolean minimapEnabled;
-  boolean suppressDebug, showToast = true, showChat = true, showTweaks = true;
+  boolean suppressDebug, suppressToast, showToast = true, showChat = true, showTweaks = true;
   private final DebugPreview debugPreview;
   HudPreview(SettingsDraft draft,boolean minimapEnabled) {
     this.draft = draft;this.minimapEnabled=minimapEnabled;
@@ -40,6 +41,9 @@ final class HudPreview {
   void rebuild() {
     for (int i = 0; i < 4; i++) { clusters[i] = new InfoHudSettings.Cluster(); populate(clusters[i], "infoHud.clusters." + i + "."); }
     status = new StatusSettings(); populate(status, "activeTweaks.");
+    map = local.luke.power.map.MapConfig.copy();
+    populate(map, "maps.");
+    map.minimap = minimapEnabled;
   }
   int integer(String id) { return draft.get(id).value.getAsInt(); }
   boolean bool(String id) { return draft.get(id).value.getAsBoolean(); }
@@ -53,6 +57,9 @@ final class HudPreview {
   }
   void draw(UiScreen screen, Minecraft mc, int width, int height, int scenario, String selected) { draw(screen, mc, width, height, scenario, selected, false); }
   void draw(UiScreen screen, Minecraft mc, int width, int height, int scenario, String selected, boolean background) {
+    draw(screen, mc, width, height, scenario, selected, background, 1);
+  }
+  void draw(UiScreen screen, Minecraft mc, int width, int height, int scenario, String selected, boolean background, float delta) {
     elements.clear();
     if (!sampledItem) {
       sampledItem = true;
@@ -111,7 +118,7 @@ final class HudPreview {
       screen.text("Inventory", 99, height - 24, 0xffffff);
       elements.add(new Element("controller", "Controller prompts", 10, height - 30, 145, 20, null, null));
     }
-    if (showToast && bool(HudEditorSettings.TOAST)) {
+    if (showToast && !suppressToast && bool(HudEditorSettings.TOAST)) {
       int x = width - 160;
       texture(screen, mc, "/achievement/bg.png", x, 0, 96, 202, 160, 32);
       screen.text("Achievement get!", x + 30, 7, 0xffff00);
@@ -169,12 +176,10 @@ final class HudPreview {
     }
     if (scenario == 2 && background && bool("power_controls:userinterface.disableDebugEntityIdTags")) EntityTagPreview.draw(screen, mc, width, height);
     if (scenario == 2 && !suppressDebug) debug(screen, mc, width);
-    var map = new local.luke.power.map.MapSettings();
-    populate(map, "maps.");
-    map.minimap=minimapEnabled;
     boolean mapVisible=local.luke.power.map.Minimap.visible(map,scenario==2);
-    var frame=local.luke.power.map.Minimap.frame(mc,map,width,height,false,true);
-    if(mapVisible)local.luke.power.map.Minimap.drawFrame(mc,map,frame,true);
+    boolean sampleMap = mc.world == null || mc.player == null || local.luke.power.map.Maps.cache() == null;
+    var frame=local.luke.power.map.Minimap.frame(mc,map,width,height,false,sampleMap);
+    if(mapVisible)local.luke.power.map.Minimap.drawFrame(mc,map,frame,true,delta);
     var mini=frame.bounds();
     elements.add(new Element("minimap", "Minimap", mini.x(), mini.y(), mini.width(), mini.height(),
         "maps.offsetX", "maps.offsetY",!mapVisible));

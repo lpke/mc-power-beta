@@ -33,7 +33,7 @@ final class WaterTerrainChecks {
       }
       mc.player.method_1340(40.5,105.62,40.5);mc.player.prevY=mc.player.y;
       mc.field_2807=mc.player;RenderedView.clear();CameraEnvironment.updateLighting(mc);
-      test("terrain retains native geometry and both light colours in a single VBO",()->{
+      test("terrain retains native geometry and both light colors in a single VBO",()->{
         long before=WaterTerrain.secondPasses();build(section);
         check(WaterTerrain.secondPasses()==before+1,"water section did not calculate both endpoints");
         check(section.field_223,"day/night changes would leave compensated deep water stale");
@@ -75,7 +75,7 @@ final class WaterTerrainChecks {
       test("shader uses the selected percentage and keeps attribute state isolated",()->{
         Object shader=Class.forName("net.mine_diver.smoothbeta.client.render.Shaders").getMethod("getTerrainShader").invoke(null);
         int program=(int)shader.getClass().getMethod("getProgramRef").invoke(shader);
-        check(GL20.glGetAttribLocation(program,"PowerWaterColor")==5,"extra colour attribute not bound");
+        check(GL20.glGetAttribLocation(program,"PowerWaterColor")==5,"extra color attribute not bound");
         int location=GL20.glGetUniformLocation(program,"PowerWaterBrightness");check(location>=0,"water uniform absent");
         for(int value:new int[]{100,75,50,25,0}) {
           s.underwaterDarknessOutside=value;VisualConfig.preview(s);CameraEnvironment.updateLighting(mc);
@@ -86,7 +86,7 @@ final class WaterTerrainChecks {
         }
         var enabled=BufferUtils.createIntBuffer(4);
         GL20.glGetVertexAttrib(5,GL20.GL_VERTEX_ATTRIB_ARRAY_ENABLED,enabled);
-        check(enabled.get(0)==0,"water colour attribute leaked out of terrain rendering");
+        check(enabled.get(0)==0,"water color attribute leaked out of terrain rendering");
       });
       test("night, roof and terrain edits rebuild endpoints together",()->{
         mc.world.field_202=11;build(section);ByteBuffer night=read(section,0);
@@ -96,7 +96,7 @@ final class WaterTerrainChecks {
           for(int y=94;y<=110;y++)mc.world.method_205(class_56.SKY,x,y,z,0);
         }
         mc.world.field_202=0;long before=WaterTerrain.secondPasses();build(section);
-        check(WaterTerrain.secondPasses()==before,"roofed section unnecessarily calculated a second light colour");
+        check(WaterTerrain.secondPasses()==before,"roofed section unnecessarily calculated a second light color");
         ByteBuffer roof=read(section,0);
         for(int p=0;p<roof.limit();p+=32)for(int c=0;c<4;c++)check(roof.get(p+20+c)==roof.get(p+28+c),"roof brightened");
         mc.world.method_154(36,96,36,0,0);build(section);

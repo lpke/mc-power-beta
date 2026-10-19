@@ -46,6 +46,7 @@ public final class Validation {
 
   public static void tick(Minecraft mc) {
     Forest241Capture.tick(mc);
+    Release300Checks.observe(mc);
     try { Release241Checks.observe(mc); } catch (Throwable failure) { try { log("FAIL native 2.4.1 observer "+failure); } catch (Exception ignored) {} }
     Release151SphereChecks.observe(mc);
     WebsiteMotion.tick(mc);
@@ -69,6 +70,7 @@ public final class Validation {
       else if (command.equals("release-253")) Release253Checks.run(mc);
       else if (command.startsWith("release-260 ")) Release260Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-261 ")) Release261Checks.run(mc,command.substring(12));
+      else if (command.startsWith("release-300 ")) Release300Checks.run(mc,command.substring(12));
       else if (command.equals("release-252")) Release252Checks.run(mc);
       else if (command.startsWith("release-242 ")) Release242Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-241 ")) Release241Checks.run(mc,command.substring(12));

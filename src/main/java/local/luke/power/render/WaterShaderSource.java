@@ -5,7 +5,7 @@ public final class WaterShaderSource {
   private WaterShaderSource() {}
   public static String extend(String source) {
     if (source == null || !source.contains("vertexColor = Color;"))
-      throw new IllegalStateException("Unsupported terrain shader: missing vertex colour assignment");
+      throw new IllegalStateException("Unsupported terrain shader: missing vertex color assignment");
     int versionEnd = source.indexOf('\n');
     if (versionEnd < 0 || !source.startsWith("#version"))
       throw new IllegalStateException("Unsupported terrain shader: missing GLSL version");

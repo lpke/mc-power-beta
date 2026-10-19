@@ -36,7 +36,7 @@ final class Menu240Checks {
       check(max<150_000_000L,"logo click waited for durable I/O: "+max/1e6+"ms");check(local.luke.power.input.PanoramaRenderer.animationTicks()>=clock,"panorama clock reset");PowerConfig.flushPending();
       log("TITLE CLICK MAX "+max/1e6+"ms with durable writer stalled");
     });
-    test("Interface groups, defaults, retro Customise and screenshot rows follow the requested order",()->{
+    test("Interface groups, defaults, retro Customize and screenshot rows follow the requested order",()->{
       var options=new PowerOptionsScreen(null);open(mc,options,640,420);set(options,"page","Interface");UiChecks.search(options,"");
       ((Set<?>)get(options,"collapsed")).clear();call(options,"layout");
       var rows=(List<?>)get(options,"rows");List<String> main=new ArrayList<>();
@@ -47,7 +47,7 @@ final class Menu240Checks {
       var style=setting(options.session(),"logo.style");style.value=new JsonPrimitive(0);call(options,"layout");
       Object row=((List<?>)get(options,"rows")).stream().filter(r->{try{return call(r,"setting")==style;}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
       int y=n(options,"top")+n(row,"y")+8;set(options,"scroll",Math.max(0,n(row,"y")-40d));y=n(options,"top")+n(row,"y")-((Number)get(options,"scroll")).intValue()+8;
-      shot(mc,options,"interface-wide",640,420);click(options,((Number)call(options,"controlLeft",row)).intValue()+12,y,0);check(mc.currentScreen instanceof TitleLetteringScreen,"Customise did not open title painter");
+      shot(mc,options,"interface-wide",640,420);click(options,((Number)call(options,"controlLeft",row)).intValue()+12,y,0);check(mc.currentScreen instanceof TitleLetteringScreen,"Customize did not open title painter");
       check(!style.choices.get(0).contains("customisable"),"old retro suffix remains");
       for(String id:List.of("power_controls:userinterface.panoramaConfig.onlyTitleScreen","interface.hidePowerBetaVersion"))check(!setting(options.session(),id).defaultValue.getAsBoolean(),"wrong new default "+id);
       check(setting(options.session(),"power_environment:config.WEATHER_CONFIG.sleepOnlyResetsWeatherWhenRaining").defaultValue.getAsBoolean(),"sleep default not On");

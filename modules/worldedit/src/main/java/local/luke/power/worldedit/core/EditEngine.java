@@ -150,7 +150,7 @@ public final class EditEngine {
   public void cancel() {
     if (job != null) {
       job.rollback = true;
-      job.failure = "Edit cancelled.";
+      job.failure = "Edit canceled.";
     }
   }
 

@@ -32,24 +32,24 @@ final class Release111Checks {
     }
     if (action.equals("saved")) {
       check(MenuPreferences.blinkingChatCursor(),"blink lost on restart");
-      check(MenuPreferences.debugTextColor().equals("#55FF55"),"colour lost on restart");
+      check(MenuPreferences.debugTextColor().equals("#55FF55"),"color lost on restart");
       log("PASS presentation settings survived restart");return;
     }
     failures=0;
     test("steady cursor and white debug text defaults",()->{
       var s=SettingsRegistry.open(mc);
       check(find(s,"interface.blinkingChatCursor").defaultValue.getAsBoolean(),"blink default");
-      check(find(s,"interface.debugTextColor").defaultValue.getAsString().equals("#FFFFFF"),"colour default");
+      check(find(s,"interface.debugTextColor").defaultValue.getAsString().equals("#FFFFFF"),"color default");
       for(int t=0;t<24;t++) check(InterfaceState.cursorVisible(t),"default cursor blinks");
     });
-    test("presentation previews cancel together and invalid colours fail",()->{
+    test("presentation previews cancel together and invalid colors fail",()->{
       var s=SettingsRegistry.open(mc);
       find(s,"interface.blinkingChatCursor").parse("true");find(s,"interface.debugTextColor").parse("#55FF55");s.preview();
       check(!InterfaceState.cursorVisible(6)&&InterfaceState.debugTextColor==0x55FF55,"preview missing");
       s.discard();check(InterfaceState.cursorVisible(6)&&InterfaceState.debugTextColor==0xFFFFFF,"Cancel failed");
       var bad=SettingsRegistry.open(mc);find(bad,"interface.debugTextColor").parse("bad");
       boolean rejected=false;try{bad.preview();}catch(IllegalArgumentException expected){rejected=true;}
-      check(rejected&&InterfaceState.debugTextColor==0xFFFFFF,"invalid colour accepted");
+      check(rejected&&InterfaceState.debugTextColor==0xFFFFFF,"invalid color accepted");
     });
     test("world rules keep short labels and remain editable independently of permissions",()->{
       var s=SettingsRegistry.open(mc);

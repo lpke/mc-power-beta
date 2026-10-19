@@ -248,7 +248,7 @@ public final class AudioPresetChecks {
               check(!(boolean) call(panel, "editing"), "Discard failed");
             });
         test(
-            "favourites and library row controls are distinct and reversible",
+            "favorites and library row controls are distinct and reversible",
             () -> {
               library.showTrack("music:calm1.ogg");
               options.render(-1, -1, 0);
@@ -276,10 +276,10 @@ public final class AudioPresetChecks {
               field(options, "hoverTicks", 20);
               click(options, geometry.favouriteX() + 5, y);
               options.render(geometry.favouriteX() + 5, y, 0);
-              check((int) field(options, "hoverTicks") >= 20, "favourite reset the tooltip delay");
+              check((int) field(options, "hoverTicks") >= 20, "favorite reset the tooltip delay");
               check(AudioConfig.current().favourites.contains("music:calm1.ogg"), "star missed");
               filter(library, "favourites");
-              check(((List<?>) field(library, "tracks")).size() == 1, "favourites filter failed");
+              check(((List<?>) field(library, "tracks")).size() == 1, "favorites filter failed");
               options.session().discard();
               check(
                   AudioConfig.current().presets.isEmpty()

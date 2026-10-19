@@ -90,14 +90,6 @@ public final class ComponentBackend implements Backend {
               : List.of();
       if ((name.equals("sprintToggle") || name.equals("spectatorSprintToggle")) || name.equals("freeLookToggle"))
         choices = List.of("Hold", "Toggle");
-      if (name.equals("flexible.overlayColor")) {
-        kind = Setting.Kind.CHOICE;
-        choices = List.of("Blue", "Cyan", "Orange", "Green");
-      }
-      if (id.equals("worldedit") && name.equals("color")) {
-        kind = Setting.Kind.CHOICE;
-        choices = List.of("Cyan", "Green", "Orange", "Purple");
-      }
       if (name.equals("hotbar.selectedRow")) {
         kind = Setting.Kind.CHOICE;
         choices = List.of("Top", "Middle", "Bottom");
@@ -110,8 +102,7 @@ public final class ComponentBackend implements Backend {
       double[] bounds = bounds(name, id);
       String description =
           t == List.class ? "Item IDs separated by commas, for example 1, 44:2." : "";
-      entries.add(
-          Catalog.setting(
+      Setting setting = Catalog.setting(
               key,
               id,
               page,
@@ -125,7 +116,10 @@ public final class ComponentBackend implements Backend {
               bounds[1],
               bounds[2],
               choices,
-              false));
+              false);
+      if (name.equals("flexible.overlayColor")) setting.validator(candidateColor -> local.luke.power.ui.ColorValue.Palette.FLEXIBLE.validate(candidateColor.getAsBigDecimal().intValueExact()));
+      if (id.equals("worldedit") && name.equals("color")) setting.validator(candidateColor -> local.luke.power.ui.ColorValue.Palette.WORLD_EDIT.validate(candidateColor.getAsBigDecimal().intValueExact()));
+      entries.add(setting);
     }
   }
 
@@ -154,7 +148,7 @@ public final class ComponentBackend implements Backend {
       case "obsidianBreakingSpeed" -> new double[] {0, 100, 1};
       case "autoWalkHoldMillis" -> new double[] {100, 3000, 50};
       case "attemptsPerTick" -> new double[] {1, 16, 1};
-      case "overlayColor", "color" -> new double[] {0, 3, 1};
+      case "overlayColor", "color" -> new double[] {0, 0x1ffffff, 1};
       case "overlayOpacity" -> new double[] {10, 90, 10};
       case "opacity" -> new double[] {10, 100, 10};
       case "selectedRow" -> new double[] {0, 2, 1};

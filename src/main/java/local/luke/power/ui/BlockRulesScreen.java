@@ -6,7 +6,7 @@ import local.luke.power.config.Setting;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-/** Block/tool rules and title palettes use independent drafts and the common catalogue. */
+/** Block/tool rules and title palettes use independent drafts and the common catalog. */
 public final class BlockRulesScreen extends UiScreen {
   private final PowerOptionsScreen parent;
   private final Setting setting;

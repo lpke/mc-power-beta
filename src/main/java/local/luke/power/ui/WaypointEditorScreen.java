@@ -6,13 +6,13 @@ import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-/** Waypoint fields remain private until Done, including changes from the nested colour picker. */
+/** Waypoint fields remain private until Done, including changes from the nested color picker. */
 public final class WaypointEditorScreen extends UiScreen {
   private final Screen parent;
   private final Waypoint initial;
   private final List<TextInput> fields;
   private final DraftExitPrompt exit = new DraftExitPrompt();
-  private final String[] labels = {"Name", "Set", "X", "Y", "Z", "Dimension", "Colour"};
+  private final String[] labels = {"Name", "Set", "X", "Y", "Z", "Dimension", "Color"};
   private boolean enabled, global;
   private String error = "";
   private int scroll;
@@ -104,8 +104,13 @@ public final class WaypointEditorScreen extends UiScreen {
   }
 
   private void save() {
+    var store = Maps.waypoints();
+    if (store == null || !store.ready()) {
+      error = "Waypoints are loading or protected after a storage error.";
+      return;
+    }
     try {
-      Maps.waypoints().put(value());
+      store.put(value());
       minecraft.setScreen(parent);
     } catch (RuntimeException e) {
       error =
@@ -190,7 +195,7 @@ public final class WaypointEditorScreen extends UiScreen {
                 "maps",
                 "Map",
                 "Waypoints",
-                "Colour",
+                "Color",
                 "",
                 local.luke.power.config.Setting.Kind.TEXT,
                 new com.google.gson.JsonPrimitive(fields.get(6).text()),

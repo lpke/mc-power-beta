@@ -2,6 +2,7 @@ package local.luke.power.ui;
 
 import java.util.*;
 import local.luke.power.config.Setting;
+import local.luke.power.config.ColorSettings;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -44,14 +45,16 @@ abstract class DraftEditorScreen extends UiScreen {
   protected boolean toolbarClick(int x, int y, int button) { return false; }
   protected void previewClick(int x, int y, int button) {}
   protected void settingClicked(Setting setting) {}
+  protected boolean hasRelatedControl(Setting setting) { return false; }
+  protected void relatedControl(Setting setting) {}
   protected void stopGesture() {}
   protected void finishGesture(int x, int y, int button) {}
   protected boolean editorKey(char c, int key) { return false; }
   protected String label(Setting s) { return s.label; }
   protected String display(Setting s) { return s.display(); }
   protected boolean usesSlider(Setting s) { return s.slider(); }
-  protected void resetValue(Setting s) { s.reset(); }
-  protected boolean atDefault(Setting s) { return s.value.equals(s.defaultValue); }
+  protected void resetValue(Setting s) { ColorSettings.reset(s, editingDraft().settings()); }
+  protected boolean atDefault(Setting s) { return ColorSettings.atDefault(s, editingDraft().settings()); }
   protected boolean resettable(Setting s) { return false; }
   protected String controlGroup(Setting s) { return ""; }
   protected String groupKey(String group) { return group; }
@@ -59,7 +62,7 @@ abstract class DraftEditorScreen extends UiScreen {
   protected List<Setting> positionSettings() { return List.of(); }
   protected List<Setting> allResetSettings() { return draft.settings(); }
   protected String resetSubject() { return "Selected"; }
-  protected void reset() { controls().forEach(Setting::reset); }
+  protected void reset() { controls().forEach(this::resetValue); }
   protected void resetFinished() {}
   protected void afterEdit() {}
   protected SettingsDraft editingDraft() { return draft; }
@@ -78,12 +81,14 @@ abstract class DraftEditorScreen extends UiScreen {
   protected boolean modal() { return exit.active() || resetPrompt; }
   protected int controlX() { return controlsLeft() + controlsSpan() / 2; }
   protected int controlWidth() { return controlsSpan() / 2 - 10; }
-  protected int controlWidth(Setting s) { return controlWidth() - (resettable(s) ? 24 : 0); }
+  protected int controlX(Setting s) { return controlX() + (hasRelatedControl(s) ? 22 : 0); }
+  protected int controlWidth(Setting s) { return controlWidth() - (resettable(s) ? 24 : 0) - (hasRelatedControl(s) ? 22 : 0); }
   private int resetX() { return controlX() + controlWidth() - 20; }
   private record ControlRow(Setting setting, String heading, int y, int height) {}
   private List<ControlRow> controlRows() {
     List<ControlRow> rows = new ArrayList<>(); String previous = ""; int y = 0;
     for (Setting setting : controls()) {
+      if (ColorSettings.hiddenOpacity(setting, editingDraft().settings())) continue;
       String group = controlGroup(setting);
       if (!group.isEmpty() && !group.equals(previous)) { rows.add(new ControlRow(null, group, y, SettingsGroup.HEIGHT)); y += SettingsGroup.HEIGHT; }
       if (group.isEmpty() || !collapsed.contains(groupKey(group))) {
@@ -135,19 +140,18 @@ abstract class DraftEditorScreen extends UiScreen {
   protected void edit(Setting s, int direction, int y) {
     editingDraft().checkpoint(); error = "";
     click();
-    if (s.kind == Setting.Kind.BOOLEAN || s.kind == Setting.Kind.CHOICE) { s.cycle(direction); valueChanged(s); }
-    else if (ColourScreen.accepts(s)) {
+    if (ColourScreen.accepts(s)) {
       Setting colours = editingDraft().settings().stream().filter(value -> value.id.equals(HudEditorSettings.COLOURS)).findFirst().orElse(null);
-      minecraft.setScreen(colours == null ? new ColourScreen(this, s, () -> valueChanged(s))
-          : new ColourScreen(this, s, () -> valueChanged(s), colours));
+      minecraft.setScreen(new ColourScreen(this, s, ColorSettings.opacity(s, editingDraft().settings()), () -> valueChanged(s), colours));
     }
+    else if (s.kind == Setting.Kind.BOOLEAN || s.kind == Setting.Kind.CHOICE) { s.cycle(direction); valueChanged(s); }
     else if (s.numeric() || s.kind == Setting.Kind.TEXT)
-      openInline(s, () -> valueChanged(s), controlX(), y, controlWidth(s));
+      openInline(s, () -> valueChanged(s), controlX(s), y, controlWidth(s));
     else minecraft.setScreen(new ValueScreen(s, this, () -> valueChanged(s)));
   }
   private void slide(int x) {
     if (slider == null) return;
-    slider.slide((x - controlX() - 4d) / Math.max(1, controlWidth(slider) - 8)); valueChanged(slider);
+    slider.slide((x - controlX(slider) - 4d) / Math.max(1, controlWidth(slider) - 8)); valueChanged(slider);
   }
   protected void keyPressed(char c, int key) {
     if (exit.key(key)) return;
@@ -254,6 +258,10 @@ abstract class DraftEditorScreen extends UiScreen {
         Setting s = row.setting;
         settingClicked(s);
         if (x < controlX()) continue;
+        if (hasRelatedControl(s) && x < controlX(s)) {
+          if (button == 0) { stopGesture(); inline.cancel(); click(); relatedControl(s); }
+          return;
+        }
         if (resettable(s) && x >= resetX()) {
           if (button == 0 && inside(x, y, resetX(), rowY, 20, 18) && !atDefault(s)) {
             editingDraft().checkpoint(); error = ""; resetValue(s); valueChanged(s);
@@ -261,8 +269,8 @@ abstract class DraftEditorScreen extends UiScreen {
           }
           return;
         }
-        if (x >= controlX() + controlWidth(s)) return;
-        if (button == 0 && usesSlider(s)) { editingDraft().checkpoint(); slider = s; slide(x); }
+        if (x >= controlX(s) + controlWidth(s)) return;
+        if (button == 0 && usesSlider(s) && !ColourScreen.accepts(s)) { editingDraft().checkpoint(); slider = s; slide(x); }
         else edit(s, button == 1 ? -1 : 1, rowY);
         break;
       }
@@ -285,11 +293,12 @@ abstract class DraftEditorScreen extends UiScreen {
     super.mouseReleased(x, y, button);
   }
   protected void renderControl(Setting s, int y, int mx, int my) {
-    int w = controlWidth(s);
-    if (inline.editing(s)) inline.render(this, controlX(), y, w, mx, my, controlsTop(), controlsBottom());
-    else if (ColourScreen.accepts(s)) colourButton(s.value.getAsString(), controlX(), y, w, mx, my);
-    else if (usesSlider(s)) slider(fit(display(s), w - 8), controlX(), y, w, mx, my, (s.value.getAsDouble() - s.min) / Math.max(.0001, s.max - s.min));
-    else button(fit(display(s), w - 8), controlX(), y, w, 18, mx, my, true);
+    int x = controlX(s), w = controlWidth(s);
+    if (hasRelatedControl(s)) iconButton("controls", controlX(), y, 20, mx, my, true, false);
+    if (inline.editing(s)) inline.render(this, x, y, w, mx, my, controlsTop(), controlsBottom());
+    else if (ColourScreen.accepts(s)) colourButton(ColorSettings.hex(s), ColorSettings.opacityPercent(s, editingDraft().settings()), x, y, w, mx, my);
+    else if (usesSlider(s)) slider(fit(display(s), w - 8), x, y, w, mx, my, (s.value.getAsDouble() - s.min) / Math.max(.0001, s.max - s.min));
+    else button(fit(display(s), w - 8), x, y, w, 18, mx, my, true);
     if (resettable(s)) button("R", resetX(), y, 20, 18, mx, my, !atDefault(s));
   }
   public void render(int mx, int my, float delta) {
@@ -324,6 +333,7 @@ abstract class DraftEditorScreen extends UiScreen {
           tip = inline.editing(s) ? inline.help() : local.luke.power.config.Tooltips.paragraphs(label(s),
               local.luke.power.config.Tooltips.setting(s, s.numeric() ? "Right-click to enter an exact value." : ""));
         }
+        if (hasRelatedControl(s) && inside(mx, listMouseY, controlX(), y, 20, 18)) { tip = "Related control"; hoverId += ".related"; }
         if (resettable(s) && inside(mx, listMouseY, resetX(), y, 20, 18)) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
       }
       if (sticky != null) {

@@ -46,7 +46,7 @@ final class LowFireChecks {
       }
       check(coloured > 1000 && changed < 100, "texture changed: pixels=" + coloured + " mismatch=" + changed);
       check(mc.player.health == health && mc.player.fire == fire, "rendering changed fire damage");
-      log("LOW FIRE pixel comparison coloured=" + coloured + " mismatches=" + changed);
+      log("LOW FIRE pixel comparison colored=" + coloured + " mismatches=" + changed);
     });
     test("Apply persists low fire", () -> {
       var current = VisualConfig.copy(); current.lowFire = false; VisualConfig.preview(current);

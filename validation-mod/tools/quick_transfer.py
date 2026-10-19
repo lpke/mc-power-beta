@@ -68,7 +68,7 @@ class Transfers(Inputs):
                 else: self.shift(False); time.sleep(.05); self.shift(True)
                 self.left(True); time.sleep(.03); self.left(False); self.shift(False)
                 time.sleep(.1); self.verify(False)
-                print('PASS cancelled matching transfer', helper, cancellation, flush=True)
+                print('PASS canceled matching transfer', helper, cancellation, flush=True)
 
 
 def main():

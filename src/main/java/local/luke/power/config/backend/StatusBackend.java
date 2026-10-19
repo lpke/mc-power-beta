@@ -18,7 +18,7 @@ public final class StatusBackend implements Backend {
         case "enabled" -> "Show active tweaks";
         case "offsetX" -> "Horizontal offset";
         case "offsetY" -> "Vertical offset";
-        case "textColor" -> "Text colour";
+        case "textColor" -> "Text color";
         case "opacity" -> "Text opacity";
         case "autoWalk" -> "Auto-walk";
         case "autoMine" -> "Auto-mine";
@@ -26,10 +26,10 @@ public final class StatusBackend implements Backend {
       };
       String help = switch (name) {
         case "enabled" -> "List active temporary tweaks on the HUD, one per line. Hidden in menus and when the HUD is hidden.";
-        case "position" -> "Anchor the list to a corner, edge or centre of the screen. Bottom anchors grow upward.";
+        case "position" -> "Anchor the list to a corner, edge or center of the screen. Bottom anchors grow upward.";
         case "offsetX" -> "Move right with positive values, left with negative values. Uses scaled GUI pixels.";
         case "offsetY" -> "Move down with positive values, up with negative values. Uses scaled GUI pixels.";
-        case "textColor" -> "Colour of every entry. Opacity controls transparency separately.";
+        case "textColor" -> "Color and opacity of every entry.";
         case "opacity" -> "Text visibility from transparent at 0% to solid at 100%.";
         case "placementRestriction" -> "Show the current restriction rule while fast placement and its restriction are enabled.";
         case "freeLook" -> "Show while free look is latched on in Toggle mode. Hold mode is omitted.";
@@ -45,8 +45,8 @@ public final class StatusBackend implements Backend {
       entries.add(new Setting("activeTweaks." + name, "activeTweaks", "Interface", "Active tweaks HUD",
           label, help, kind, Catalog.JSON.toJsonTree(field.get(current)), Catalog.JSON.toJsonTree(field.get(defaults)),
           offset ? -4096 : 0, offset ? 4096 : name.equals("opacity") ? 100 : name.equals("position") ? 8 : 1,
-          1, name.equals("position") ? List.of("Top left", "Top centre", "Top right", "Middle left",
-              "Centre", "Middle right", "Bottom left", "Bottom centre", "Bottom right") : List.of(), false));
+          1, name.equals("position") ? List.of("Top left", "Top center", "Top right", "Middle left",
+              "Center", "Middle right", "Bottom left", "Bottom center", "Bottom right") : List.of(), false));
     }
     session.add(new StatusBackend(), entries);
   }

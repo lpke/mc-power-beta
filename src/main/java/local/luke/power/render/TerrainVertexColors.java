@@ -2,7 +2,7 @@ package local.luke.power.render;
 
 import java.nio.ByteBuffer;
 
-/** Adds one colour to SmoothBeta's 28-byte vertex; position, UV, alpha and normals stay native. */
+/** Adds one color to SmoothBeta's 28-byte vertex; position, UV, alpha and normals stay native. */
 public final class TerrainVertexColors {
   public static final int NATIVE_STRIDE = 28, STRIDE = 32, COLOR = 20, WATER_COLOR = 28;
   private TerrainVertexColors() {}
@@ -16,7 +16,7 @@ public final class TerrainVertexColors {
     if (nativeData.limit() != clearData.limit()) return false;
     boolean reverse = nativeData.order() != clearData.order();
     for (int p = 0; p < nativeData.limit(); p += NATIVE_STRIDE) {
-      // Models may vary between calls. Never attach colours to unrelated geometry.
+      // Models may vary between calls. Never attach colors to unrelated geometry.
       for (int j = 0; j < COLOR; j += 4)
         if (nativeData.getInt(p + j) != value(clearData, p + j, reverse)) return false;
       if (nativeData.get(p + 23) != clearData.get(p + 23)

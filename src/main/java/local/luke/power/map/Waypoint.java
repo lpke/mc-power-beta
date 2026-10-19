@@ -30,7 +30,7 @@ public final class Waypoint {
         || dimension > 1024
         || colour < 0
         || colour > 0xffffff
-        || created < 0) throw new IllegalArgumentException("Invalid waypoint position or colour");
+        || created < 0) throw new IllegalArgumentException("Invalid waypoint position or color");
   }
 
   public static void text(String value, int limit) {

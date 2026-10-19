@@ -62,4 +62,31 @@ class SettingsDraftTest {
     session.settings().get(1).value = JsonParser.parseString("[2]");
     assertDoesNotThrow(session::validate); assertEquals(0, writes[0]);
   }
+  @Test void minimapDraftIncludesEveryAppearanceControlAndUndoKeepsOptionsUntouched() {
+    List<String> included = List.of("rotate", "circular", "hideWithDebug", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
+        "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
+        "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight",
+        "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks", "lightOverlay", "footsteps",
+        "pathColor", "pathOpacity", "playerIcon", "playerColor", "playerOpacity", "playerSize");
+    var source = included.stream().map(id -> setting("maps." + id, "[1]")).toList();
+    var draft = new SettingsDraft(source, HudEditorSettings::contains);
+    assertEquals(source.size(), draft.settings().size());
+    var before = draft.snapshot();
+    draft.checkpoint();
+    draft.settings().forEach(s -> s.value = JsonParser.parseString("[2]"));
+    assertTrue(draft.changed());
+    assertTrue(source.stream().allMatch(s -> s.value.toString().equals("[1]")));
+    draft.undo();
+    assertEquals(before, draft.snapshot());
+    assertFalse(draft.changed());
+    for (String id : List.of("minimap", "worldMap", "hudEditor", "caveMode", "caveTop", "caveAbove", "caveBelow", "roofSize", "worldWaypoints",
+        "deathpoints", "keepOldDeaths", "pauseMap", "columnsPerTick", "cacheTiles", "uploadsPerFrame", "refreshSeconds", "updateRate", "radarLimit"))
+      assertFalse(HudEditorSettings.contains(setting("maps." + id, "[]")), id);
+  }
+  @Test void toastOnlyHidesForMinimapAndTheSecondHumanNumberedCluster() {
+    assertTrue(HudEditorSettings.suppressesToast("minimap"));
+    assertTrue(HudEditorSettings.suppressesToast("cluster.1"));
+    for (String selected : List.of("layout", "cluster.0", "cluster.2", "cluster.3", "debug", "tweaks"))
+      assertFalse(HudEditorSettings.suppressesToast(selected), selected);
+  }
 }

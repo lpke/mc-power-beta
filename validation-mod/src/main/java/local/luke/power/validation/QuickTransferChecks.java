@@ -80,7 +80,7 @@ final class QuickTransferChecks {
           c.method_2084(27).setStack(item(4,7,0,"same"));c.method_2084(28).setStack(item(4,13,0,"same"));
           mc.player.inventory.setCursorStack(item(4,5,0,"same"));click(screen,27);release(screen,27);
           if(replace)mc.player.inventory.setCursorStack(item(4,5,0,"same"));else((InventoryDrag)screen).power$cancelItemDrag();
-          click(screen,27);release(screen,27);check(c.method_2084(28).getStack().count==13,"cancelled gesture transferred remaining items");
+          click(screen,27);release(screen,27);check(c.method_2084(28).getStack().count==13,"canceled gesture transferred remaining items");
         }
       });
       test("distinct custom names stay separate during native Shift-click insertion",()->{
@@ -219,7 +219,7 @@ final class QuickTransferChecks {
         try {check(!(boolean)eligible.invoke(null,mc,furnace),"vanilla server furnace batch admitted");}
         finally {mc.world.isRemote=false;}
         mc.player.closeScreen();mc.setScreen(new class_585(mc.player));
-        check(!(boolean)eligible.invoke(null,mc,((ContainerScreen)mc.currentScreen).container),"player crafting/catalogue admitted");
+        check(!(boolean)eligible.invoke(null,mc,((ContainerScreen)mc.currentScreen).container),"player crafting/catalog admitted");
       });
       test("ordinary left and right drags remain immediate and preserve counts and native data",()->{
         keys.put(42,(byte)0);var mouse=mouseButtons();
@@ -259,7 +259,7 @@ final class QuickTransferChecks {
               ((ScreenInput)screen).power$release(p[0],p[1],-1);
               check(cursorBefore.equals(encoded(mc.player.inventory.getCursorStack())),"drag replaced changed cursor "+button);
               check(slotBefore.equals(DeathItems.encode(c.method_2084(0).getStack())),"drag replaced changed slot "+button);
-              check(c.method_2084(2).getStack()==null,"cancelled drag restarted "+button);
+              check(c.method_2084(2).getStack()==null,"canceled drag restarted "+button);
             }
             mouse.put(button,(byte)0);((ScreenInput)screen).power$release(p[0],p[1],button);
           }

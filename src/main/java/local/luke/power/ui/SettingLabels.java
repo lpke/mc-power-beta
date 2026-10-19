@@ -2,7 +2,7 @@ package local.luke.power.ui;
 
 import local.luke.power.config.Setting;
 
-/** Contextual labels leave the stored catalogue and ordinary rows unchanged. */
+/** Contextual labels leave the stored catalog and ordinary rows unchanged. */
 public final class SettingLabels {
   private static final String CLUSTER = "infoHud.clusters.";
   private SettingLabels() {}

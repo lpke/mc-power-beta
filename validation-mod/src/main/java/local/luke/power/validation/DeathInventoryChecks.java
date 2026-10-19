@@ -34,7 +34,7 @@ final class DeathInventoryChecks {
         log("PASS restart preserves original positions and partial claims; survival bulk recovery only returns remaining stacks");
         return;
       }
-      test("survival restores original hotbar, main, armour and cursor fallback with native data", () -> {
+      test("survival restores original hotbar, main, armor and cursor fallback with native data", () -> {
         clear(mc);
         mc.player.inventory.main[8] = tagged(35, 7, 5, "hotbar"); mc.player.inventory.main[20] = tagged(267, 1, 83, "tool");
         mc.player.inventory.armor[3] = tagged(310, 1, 27, "helmet"); mc.player.inventory.armor[0] = tagged(313, 1, 41, "boots");
@@ -45,7 +45,7 @@ final class DeathInventoryChecks {
         stack(mc.player.inventory.armor[3], 310, 1, 27, "helmet"); stack(mc.player.inventory.armor[0], 313, 1, 41, "boots");
         stack(mc.player.inventory.main[0], 264, 3, 0, "cursor"); check(mc.player.inventory.getCursorStack() == null, "cursor restored as a held stack");
       });
-      test("conflicting main and armour slots cancel all recovery and print a warning", () -> {
+      test("conflicting main and armor slots cancel all recovery and print a warning", () -> {
         clear(mc); mc.player.inventory.main[0] = tagged(35, 7, 5, "saved-main");
         mc.player.inventory.armor[3] = tagged(310, 1, 27, "saved-helmet"); record(mc, "Conflict fixture"); var death = latest(mc); clear(mc);
         mc.player.inventory.armor[3] = tagged(306, 1, 11, "existing-helmet");

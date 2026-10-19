@@ -57,7 +57,7 @@ public final class SettingAccess {
         && !setting.id.endsWith("hudPositioningSystem")) {
       int mode = session.settings().stream().filter(s -> s.id.equals("power_hud:hudpositions.hudPositioningSystem"))
           .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(1);
-      if (mode == 0) return "Choose Combined or Separate in HUD positioning to customise the HUD.";
+      if (mode == 0) return "Choose Combined or Separate in HUD positioning to customize the HUD.";
       if (setting.id.contains(".SIMPLE_HUD_POSITION_CONFIG.") && mode != 1)
         return "Choose Combined in HUD positioning to move the whole HUD together.";
       if (setting.id.contains(".ADVANCED_HUD_POSITIONS_CONFIG.") && mode != 2)

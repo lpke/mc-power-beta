@@ -84,8 +84,8 @@ public class CharacterUtils {
     }
 
     /**
-     * Custom function for converting an JWJGL colour into minecraft's weird ARGB system.
-     * Uses AWT's Colour class because LWJGL's one doesn't exist on server, so it saves me a headache.
+     * Custom function for converting an JWJGL color into minecraft's weird ARGB system.
+     * Uses AWT's Color class because LWJGL's one doesn't exist on server, so it saves me a headache.
      */
     public static int getIntFromColour(Color colour) {
         return ((colour.getAlpha() & 255) << 24) | ((colour.getRed() & 255) << 16) | ((colour.getGreen() & 255) << 8) | (colour.getBlue() & 255);
@@ -196,7 +196,7 @@ public class CharacterUtils {
     }
 
     /**
-     * Processes string colours. I think. I have no idea, honestly.
+     * Processes string colors. I think. I have no idea, honestly.
      */
     public static String getRenderableString(String string, int maxPixelWidth, boolean flag, TextRenderer textRenderer) {
         StringBuilder var4 = new StringBuilder();

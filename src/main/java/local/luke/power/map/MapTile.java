@@ -41,7 +41,7 @@ public final class MapTile {
     return biomes[i] & 255;
   }
 
-  public int colour(int i, MapSettings s) {
+  public int color(int i, MapSettings s) {
     if (!known(i)) return 0;
     int rgb =
         s.slopeShading
@@ -53,22 +53,22 @@ public final class MapTile {
   }
 
   public boolean put(
-      int i, int colour, int nativeColour, int height, int light, int block, int biome) {
+      int i, int color, int nativeColor, int height, int light, int block, int biome) {
     if (readOnly) return false;
-    if (accurate[i] == colour
-        && vanilla[i] == nativeColour
+    if (accurate[i] == color
+        && vanilla[i] == nativeColor
         && height(i) == height
         && light(i) == light
         && blocks[i] == block
         && biome(i) == biome) return false;
-    accurate[i] = colour;
-    vanilla[i] = nativeColour;
+    accurate[i] = color;
+    vanilla[i] = nativeColor;
     heights[i] = (byte) height;
     lights[i] = (byte) light;
     blocks[i] = block;
     biomes[i] = (byte) biome;
-    reliefAccurate[i] = colour;
-    reliefVanilla[i] = nativeColour;
+    reliefAccurate[i] = color;
+    reliefVanilla[i] = nativeColor;
     invalidateRelief(i);
     revision++;
     return true;
@@ -94,17 +94,17 @@ public final class MapTile {
     if (key.level() == 0 && !readOnly) dirtyRelief.set(0, PIXELS);
   }
 
-  /** Reads neighbouring cached heights only, never native terrain or disk. */
-  boolean refreshRelief(Heights neighbours) {
+  /** Reads neighboring cached heights only, never native terrain or disk. */
+  boolean refreshRelief(Heights neighbors) {
     if (readOnly || key.level() != 0) return false;
     boolean changed = false;
     for (int i = dirtyRelief.nextSetBit(0); i >= 0; i = dirtyRelief.nextSetBit(i + 1)) {
       if (!known(i)) continue;
       int x = i % SIZE, z = i / SIZE, h = height(i);
-      int north = adjacent(x, z - 1, h, neighbours);
-      int northwest = adjacent(x - 1, z - 1, h, neighbours);
-      int a = MapRelief.colour(accurate[i], h, north, northwest, key.dimension());
-      int v = MapRelief.colour(vanilla[i], h, north, northwest, key.dimension());
+      int north = adjacent(x, z - 1, h, neighbors);
+      int northwest = adjacent(x - 1, z - 1, h, neighbors);
+      int a = MapRelief.color(accurate[i], h, north, northwest, key.dimension());
+      int v = MapRelief.color(vanilla[i], h, north, northwest, key.dimension());
       if (reliefAccurate[i] != a || reliefVanilla[i] != v) {
         reliefAccurate[i] = a;
         reliefVanilla[i] = v;
@@ -116,12 +116,12 @@ public final class MapTile {
     return changed;
   }
 
-  private int adjacent(int x, int z, int fallback, Heights neighbours) {
+  private int adjacent(int x, int z, int fallback, Heights neighbors) {
     if (x >= 0 && z >= 0) {
       int i = z * SIZE + x;
       return known(i) ? height(i) : fallback;
     }
-    int value = neighbours == null ? -1 : neighbours.at((int) key.minX() + x, (int) key.minZ() + z);
+    int value = neighbors == null ? -1 : neighbors.at((int) key.minX() + x, (int) key.minZ() + z);
     return value < 0 ? fallback : value;
   }
 

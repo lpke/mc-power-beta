@@ -45,7 +45,7 @@ public final class Minimap {
               ? "Forest"
               : Maps.layer() < 0
                   ? MapPalette.biome(currentBiome())
-                  : "Cave · Y " + (Maps.layer() * 8 + 7));
+                  : "Cave · Y " + (settings.caveMode == 2 ? settings.caveTop : (int) Math.floor(Maps.y())));
     if (settings.clock)
       lines.add(preview ? "12:00" : local.luke.power.hud.InfoHud.timeLine().replace("Time: ", ""));
     int left = layout.x - 2, right = layout.x + layout.size + 2, y = layout.y + layout.size + 3;
@@ -129,8 +129,9 @@ public final class Minimap {
     drawFrame(mc, s, frame, preview, 1);
   }
 
-  private static void drawFrame(
+  public static void drawFrame(
       Minecraft mc, MapSettings s, Frame frame, boolean preview, float delta) {
+    if (preview) { MapRenderer.beginFrame(delta); Maps.previewRadar(s); }
     Layout bounds = frame.layout;
     var pose = Maps.framePose(mc, delta);
     double angle = s.rotate ? Math.toRadians(-pose.yaw() - 180) : 0;
@@ -145,7 +146,7 @@ public final class Minimap {
       GL11.glEnable(GL11.GL_BLEND);
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glAlphaFunc(GL11.GL_GREATER, 0);
-      if (Maps.cache() != null && !preview) {
+      if (Maps.cache() != null && mc.world != null && mc.player != null) {
         if (!MinimapBuffer.draw(mc, view, s))
           MapRenderer.terrain(
               Maps.cache(),
@@ -156,7 +157,7 @@ public final class Minimap {
               s,
               !mc.world.isRemote,
               mc.world.getSeed());
-        MapRenderer.markers(mc, view, Maps.dimension(), s.circular, true);
+        MapRenderer.markers(mc, view, Maps.dimension(), s.circular, true, s);
       } else {
         // A fixed sample never starts world sampling, disk I/O or another world in the HUD editor.
         GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -165,16 +166,16 @@ public final class Minimap {
           for (int x = 0; x < bounds.size; x += 4) {
             if (!view.contains(bounds.x + x + 2, bounds.y + z + 2, s.circular)) continue;
             double river = Math.sin(z * .08) * 12 + bounds.size * .55;
-            int colour =
+            int color =
                 Math.abs(x - river) < 7
                     ? 0x4167ab
                     : MapMath.shade(
                         x > bounds.size * .75 ? 0x77756c : 0x6b913e,
                         .85 + Math.sin(x * .09 + z * .06) * .13);
             GL11.glColor4ub(
-                (byte) (colour >> 16),
-                (byte) (colour >> 8),
-                (byte) colour,
+                (byte) (color >> 16),
+                (byte) (color >> 8),
+                (byte) color,
                 (byte) Math.round(s.opacity * 255));
             double px = bounds.x + x, py = bounds.y + z;
             GL11.glVertex2d(px, py);
@@ -184,7 +185,7 @@ public final class Minimap {
           }
         GL11.glEnd();
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        MapRenderer.arrow(bounds.x + bounds.size / 2d, bounds.y + bounds.size / 2d, 0, 0xffffff);
+        MapRenderer.player(bounds.x + bounds.size / 2d, bounds.y + bounds.size / 2d, 0, s);
       }
       GL11.glDisable(GL11.GL_TEXTURE_2D);
       for (int ring = 2; ring >= 0; ring--) {
@@ -211,8 +212,10 @@ public final class Minimap {
       if (s.compass)
         for (int i = 0; i < 4; i++) {
           double a = i * Math.PI / 2 + angle;
-          int tx = (int) (bounds.x + bounds.size / 2d + Math.sin(a) * (bounds.size / 2d - 6)) - 2;
-          int ty = (int) (bounds.y + bounds.size / 2d - Math.cos(a) * (bounds.size / 2d - 6)) - 4;
+          double distance = bounds.size / 2d - 6;
+          if (!s.circular) distance /= Math.max(Math.abs(Math.sin(a)), Math.abs(Math.cos(a)));
+          int tx = (int) (bounds.x + bounds.size / 2d + Math.sin(a) * distance) - 2;
+          int ty = (int) (bounds.y + bounds.size / 2d - Math.cos(a) * distance) - 4;
           mc.textRenderer.drawWithShadow(new String[] {"N", "E", "S", "W"}[i], tx, ty, 0xffffff);
         }
       for (Label label : frame.labels)

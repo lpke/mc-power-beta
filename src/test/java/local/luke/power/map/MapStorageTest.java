@@ -8,6 +8,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class MapStorageTest {
+  @Test void framePublicationIsBoundedAndDoesNotAdvanceDurableMaintenance() throws Exception {
+    var cache = new MapCache(root, 64, message -> fail(message));
+    for (int x = 0; x < 16; x++) cache.get(new MapMath.Key(0, -1, 0, x, 0));
+    MapIO.awaitQueued();
+    assertEquals(0, cache.publish(4, System.nanoTime() - 1));
+    assertEquals(0, cache.size());
+    assertEquals(4, cache.publish(100, Long.MAX_VALUE));
+    assertEquals(4, cache.size());
+    assertEquals(12, cache.pending());
+    cache.retire();
+    assertEquals(0, cache.publish(4, Long.MAX_VALUE));
+    cache.finish();
+  }
   @TempDir Path root;
 
   private MapTile tile(int x, int z) {
@@ -15,6 +28,93 @@ class MapStorageTest {
     for (int i = 0; i < 4096; i++)
       if (i % 3 == 0) tile.put(i, 0x558844 + i, 0x777777, 1 + i % 127, i % 16, 1 + i % 96, i % 14);
     return tile;
+  }
+
+  @Test
+  void caveContextSurvivesCodecParentWorkAndCacheViewChanges() throws Exception {
+    String first = CaveWindow.at(64, 2, 8).context(), second = CaveWindow.at(65, 2, 8).context();
+    var key = new MapMath.Key(0, 8, 0, 0, 0, first);
+    var old = new MapTile(key);
+    old.put(4095, 0x808080, 0x808080, 63, 15, 1, 0);
+    var otherHeight = new MapTile(key.withContext(second));
+    otherHeight.put(4095, 0x334455, 0x334455, 120, 15, 1, 0);
+    var southeast = new MapTile(new MapMath.Key(0, 8, 0, 1, 1, first));
+    southeast.put(0, 0x808080, 0x808080, 64, 15, 1, 0);
+    byte[] bytes = MapCodec.encode(old);
+    assertEquals(2, java.nio.ByteBuffer.wrap(bytes).getInt(4));
+    assertEquals(old.key, MapCodec.decode(bytes, old.key).key);
+    for (MapTile tile : List.of(old, otherHeight, southeast)) MapCodec.write(root.resolve(tile.key.file()), tile);
+    var errors = new ArrayList<String>();
+    var cache = new MapCache(root, 8, errors::add);
+    cache.viewContext(first);
+    assertEquals(old.key, cache.viewKey(new MapMath.Key(0, 8, 0, 0, 0)));
+    cache.get(old.key); MapIO.awaitQueued(); cache.tick();
+    cache.viewContext(second);
+    assertEquals(otherHeight.key, cache.viewKey(new MapMath.Key(0, 8, 0, 0, 0)));
+    assertEquals(old.key, cache.viewKey(old.key));
+    assertEquals(new MapMath.Key(0, -1, 0, 0, 0), cache.viewKey(new MapMath.Key(0, -1, 0, 0, 0)));
+    cache.get(otherHeight.key); MapIO.awaitQueued(); cache.tick();
+    cache.get(southeast.key); MapIO.awaitQueued(); cache.tick();
+    int expected = MapRelief.color(0x808080, 64, 64, 63, 0);
+    assertEquals(expected, cache.peek(southeast.key).reliefAccurate[0]);
+    cache.finish();
+    assertEquals(List.of(), errors);
+    assertEquals(first, MapCodec.read(root.resolve(southeast.key.file()), southeast.key).key.context());
+    assertEquals(expected, MapCodec.read(root.resolve(southeast.key.file()), southeast.key).reliefAccurate[0]);
+    assertEquals(0x808080, MapCodec.read(root.resolve(old.key.file()), old.key).accurate[4095]);
+    assertEquals(0x334455, MapCodec.read(root.resolve(otherHeight.key.file()), otherHeight.key).accurate[4095]);
+    assertTrue(Files.exists(root.resolve(southeast.key.parent().file())));
+    assertTrue(cache.size() <= 8);
+  }
+
+  @Test
+  void disablingTerrainDrainsExistingDurableWorkWithoutAcceptingNewRequests() throws Exception {
+    var errors = new ArrayList<String>();
+    var cache = new MapCache(root, 8, errors::add);
+    var key = new MapMath.Key(0, -1, 0, 0, 0);
+    cache.get(key); MapIO.awaitQueued(); cache.tick();
+    MapTile tile = cache.get(key);
+    assertNotNull(tile);
+    tile.put(0, 0x123456, 0x654321, 64, 15, 1, 0);
+    cache.changed(tile);
+    cache.retire();
+    assertTrue(cache.retiring()); assertFalse(cache.canSample());
+    long requests = MapIO.submitted();
+    assertNull(cache.get(new MapMath.Key(0, -1, 0, 40, 40)));
+    assertEquals(requests, MapIO.submitted());
+    assertFalse(cache.releaseIfIdle(), "Dirty exploration must remain owned until durable");
+    for (int tick = 0; tick < 512 && !cache.idle(); tick++) {
+      cache.tick(); MapIO.awaitQueued();
+    }
+    assertTrue(cache.idle());
+    assertTrue(cache.releaseIfIdle());
+    assertEquals(0, cache.size());
+    assertEquals(List.of(), errors);
+    assertEquals(0x123456, MapCodec.read(root.resolve(key.file()), key).accurate[0]);
+    assertTrue(Files.exists(root.resolve(key.parent().file())));
+    assertNull(cache.get(key));
+  }
+
+  @Test
+  void disabledWaypointMaintenanceDoesNotStartFreshReadsAndStillSavesExistingEdits() {
+    var errors = new ArrayList<String>();
+    var store = new WaypointStore(root, errors::add);
+    long requests = MapIO.submitted();
+    store.tick(false);
+    assertEquals(requests, MapIO.submitted());
+    assertFalse(store.needsMaintenance());
+    assertFalse(store.ready());
+    store.tick(); MapIO.awaitQueued(); store.tick(false);
+    assertTrue(store.ready());
+    assertFalse(store.needsMaintenance());
+    Waypoint point = new Waypoint(); point.name = "Retained while hidden";
+    store.put(point);
+    assertTrue(store.needsMaintenance());
+    store.tick(false); MapIO.awaitQueued(); store.tick(false);
+    assertFalse(store.needsMaintenance());
+    assertFalse(store.dirty());
+    assertTrue(store.contains(point.id));
+    assertEquals(List.of(), errors);
   }
 
   @Test
@@ -142,7 +242,7 @@ class MapStorageTest {
     northwest.put(4095, 0x808080, 0x808080, 63, 15, 1, 0);
     var southeast = new MapTile(new MapMath.Key(0, -1, 0, 1, 1));
     southeast.put(0, 0x808080, 0x808080, 64, 15, 1, 0);
-    int expected = MapRelief.colour(0x808080, 64, 64, 63, 0);
+    int expected = MapRelief.color(0x808080, 64, 64, 63, 0);
     for (boolean reverse : new boolean[] {false, true}) {
       Path folder = root.resolve(reverse ? "reverse" : "forward");
       for (var tile : List.of(northwest, southeast))
@@ -269,7 +369,7 @@ class MapStorageTest {
     assertTrue(parent.merge(child));
     assertTrue(parent.known(0));
     assertEquals(0, parent.block(0));
-    assertEquals(0xff000000, parent.colour(0, new MapSettings()));
+    assertEquals(0xff000000, parent.color(0, new MapSettings()));
   }
 
   @Test

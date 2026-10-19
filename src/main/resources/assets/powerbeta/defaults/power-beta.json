@@ -552,7 +552,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 2.6.1"
+        "customVersionText": "Power Beta 3.0.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -1052,7 +1052,20 @@
       "cacheTiles": 256,
       "uploadsPerFrame": 4,
       "refreshSeconds": 5,
-      "updateRate": 20
+      "updateRate": 20,
+      "caveAbove": 2,
+      "caveBelow": 8,
+      "pathColor": 16777113,
+      "pathOpacity": 0.7,
+      "playerColor": 15809596,
+      "playerOpacity": 1,
+      "playerIcon": 0,
+      "playerSize": 100,
+      "automaticDetail": true,
+      "mapSmoothing": false,
+      "mapOpenColumns": 1024,
+      "mapOpenUploads": 8,
+      "mapOpenBudget": 2
     },
     "sprint": {
       "activation": 0,

@@ -163,7 +163,7 @@ public final class CommandsLibraryChecks {
               options.render(-1, -1, 0);
               check(
                   options.session().settings().stream().anyMatch(ColourScreen::accepts),
-                  "no colour options");
+                  "no color options");
             });
         search(options, "");
         field(options, "page", "Audio");

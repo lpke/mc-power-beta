@@ -24,12 +24,12 @@ public final class LightBackend implements Backend {
         "Block light ignores daylight, useful for lighting builds. Combined includes current daylight and weather.");
     add(entries, current, defaults, "spawnableOnly", "Spawnable surfaces only", Setting.Kind.BOOLEAN, 0, 1, 1,
         "Require Beta's solid spawn support and two clear blocks above. Light alone does not guarantee or prevent every mob spawn.");
-    add(entries, current, defaults, "greenFrom", "Colour threshold", Setting.Kind.INTEGER, 0, 16, 1,
-        "Values below this use the low-light colour; values at or above use the high-light colour. Beta's usual cutoff is 8.");
-    add(entries, current, defaults, "lowColor", "Low-light colour", Setting.Kind.TEXT, 0, 0, 1,
-        "RGB hex colour for values below the threshold, such as #FF5555 for red.");
-    add(entries, current, defaults, "highColor", "High-light colour", Setting.Kind.TEXT, 0, 0, 1,
-        "RGB hex colour for values at or above the threshold, such as #55FF55 for green.");
+    add(entries, current, defaults, "greenFrom", "Color threshold", Setting.Kind.INTEGER, 0, 16, 1,
+        "Values below this use the low-light color; values at or above use the high-light color. Beta's usual cutoff is 8.");
+    add(entries, current, defaults, "lowColor", "Low-light color", Setting.Kind.TEXT, 0, 0, 1,
+        "RGB hex color for values below the threshold, such as #FF5555 for red.");
+    add(entries, current, defaults, "highColor", "High-light color", Setting.Kind.TEXT, 0, 0, 1,
+        "RGB hex color for values at or above the threshold, such as #55FF55 for green.");
     add(entries, current, defaults, "textSize", "Number size", Setting.Kind.DECIMAL, .2, .9, .05,
         "Width of a two-digit number in blocks. Numbers sit flat on the top face and remain hidden behind walls.");
     session.add(backend, entries);

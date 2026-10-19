@@ -23,7 +23,7 @@ public final class MapCoverage {
     return bounds;
   }
 
-  private static Bounds bounds(MapProjection view, boolean circle, int level) {
+  public static Bounds bounds(MapProjection view, boolean circle, int level) {
     double cos = Math.abs(Math.cos(view.angle)), sin = Math.abs(Math.sin(view.angle));
     double dx = (circle ? view.width : cos * view.width + sin * view.height) / 2 / view.scale;
     double dz = (circle ? view.height : sin * view.width + cos * view.height) / 2 / view.scale;

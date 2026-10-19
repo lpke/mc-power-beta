@@ -77,7 +77,7 @@ public final class DeathItems {
     for (int index : indices) {
       int slot = record.slots.get(index);
       if (slot != 40 && next[slot] != null)
-        throw new IllegalArgumentException("Saved inventory slot " + (slot + 1) + " is occupied. Recovery cancelled; no items changed.");
+        throw new IllegalArgumentException("Saved inventory slot " + (slot + 1) + " is occupied. Recovery canceled; no items changed.");
     }
     // Reserve original positions before splitting stacks above the current item limit.
     for (int index : indices) {
@@ -94,17 +94,17 @@ public final class DeathItems {
             insert(next, slot, item, Math.min(1, nativeSlot.getMaxItemCount())); accepted = true; break;
           }
         }
-        if (!accepted) throw new IllegalArgumentException("Saved equipment no longer fits its original slot. Recovery cancelled; no items changed.");
+        if (!accepted) throw new IllegalArgumentException("Saved equipment no longer fits its original slot. Recovery canceled; no items changed.");
       } else if (slot >= 41) {
         var nativeSlot = container.method_2084(slot - 40);
-        if (!nativeSlot.canInsert(item)) throw new IllegalArgumentException("Saved crafting item no longer fits its original slot. Recovery cancelled; no items changed.");
+        if (!nativeSlot.canInsert(item)) throw new IllegalArgumentException("Saved crafting item no longer fits its original slot. Recovery canceled; no items changed.");
         insert(next, slot, item, nativeSlot.getMaxItemCount());
       }
     }
     for (ItemStack item : items) {
       for (int i = 0; i < 36 && item.count > 0; i++) if (next[i] != null) insert(next, i, item, inventory.getMaxCountPerStack());
       for (int i = 0; i < 36 && item.count > 0; i++) if (next[i] == null) insert(next, i, item, inventory.getMaxCountPerStack());
-      if (item.count > 0) throw new IllegalArgumentException("Not enough inventory space. Recovery cancelled; no items changed.");
+      if (item.count > 0) throw new IllegalArgumentException("Not enough inventory space. Recovery canceled; no items changed.");
     }
     return next;
   }

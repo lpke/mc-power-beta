@@ -28,7 +28,7 @@ public final class VideoBackend implements Backend {
           {
             "grass",
             "Detailed grass sides",
-            "Blend biome-coloured grass over the sides of grass blocks."
+            "Blend biome-colored grass over the sides of grass blocks."
           },
           {
             "clouds",

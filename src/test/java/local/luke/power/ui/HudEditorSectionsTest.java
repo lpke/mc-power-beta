@@ -28,8 +28,8 @@ class HudEditorSectionsTest {
   @Test void groupingKeepsStableOrderWithinSectionsAndOffsetsBesideTheirProvider() {
     var content = setting("infoHud.clusters.0.fps"); var x = setting("infoHud.clusters.0.offsetX");
     var visible = setting("infoHud.clusters.0.enabled"); var y = setting("infoHud.clusters.0.offsetY");
-    var colour = setting("infoHud.clusters.0.textColor");
-    assertEquals(List.of(visible, x, y, colour, content), HudEditorSections.order(List.of(content, x, visible, y, colour)));
+    var color = setting("infoHud.clusters.0.textColor");
+    assertEquals(List.of(visible, x, y, color, content), HudEditorSections.order(List.of(content, x, visible, y, color)));
     assertEquals("Culling statistics", HudEditorSections.group(setting("entityculling:config.f3InfoYOffset")));
     assertEquals("Music", HudEditorSections.group(setting("power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset")));
   }

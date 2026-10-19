@@ -14,12 +14,19 @@ public final class SprintView {
   }
 
   private static final double[] ratios = {1, 1, 1, 1};
+  private static final boolean[] active = new boolean[Kind.values().length];
   private static DoubleUnaryOperator fov = delta -> 1;
 
   private SprintView() {}
 
   public static void publish(Kind kind, boolean active, double ratio) {
+    SprintView.active[kind.ordinal()] = active;
     ratios[kind.ordinal()] = active && Double.isFinite(ratio) ? Math.max(1, ratio) : 1;
+  }
+
+  /** Activity remains explicit when a sprint preference uses normal movement speed. */
+  public static boolean active(Kind kind) {
+    return active[kind.ordinal()];
   }
 
   public static double ratio(Kind kind) {

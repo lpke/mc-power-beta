@@ -28,7 +28,7 @@ public final class LightSettings {
 
   public static int rgb(String value) {
     if (value == null || !value.matches("#?[0-9a-fA-F]{6}"))
-      throw new IllegalArgumentException("Use a six-digit RGB colour, such as #FF5555");
+      throw new IllegalArgumentException("Use a six-digit RGB color, such as #FF5555");
     return Integer.parseInt(value.startsWith("#") ? value.substring(1) : value, 16);
   }
 

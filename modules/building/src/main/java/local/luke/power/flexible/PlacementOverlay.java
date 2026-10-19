@@ -9,7 +9,6 @@ import org.lwjgl.opengl.GL11;
 
 /** All GL changes are restored, including exceptional exits. */
 public final class PlacementOverlay {
-  private static final int[] COLORS = {0x487BFF, 0x33DDEE, 0xFFA040, 0x55DD77};
   private static final double[][][] REGIONS = {
     {{.25, .25}, {.75, .25}, {.75, .75}, {.25, .75}},
     {{0, 0}, {.25, .25}, {.25, .75}, {0, 1}},
@@ -64,7 +63,7 @@ public final class PlacementOverlay {
       if (settings.showOverlay && FlexiblePlacement.modes().grid()) {
         for (int i = 0; i < REGIONS.length; i++) {
           color(
-              i == plan.part().ordinal() ? COLORS[settings.overlayColor] : 0xEEEEEE,
+              i == plan.part().ordinal() ? local.luke.power.ui.ColorValue.Palette.FLEXIBLE.rgb(settings.overlayColor) : 0xEEEEEE,
               i == plan.part().ordinal() ? settings.overlayOpacity / 100f : .12f);
           GL11.glBegin(GL11.GL_QUADS);
           for (double[] uv : REGIONS[i]) vertex(face, forward, uv[0], uv[1], plane, hit);

@@ -8,6 +8,46 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- After `new-world`, `release-300 ui` checks the actual Related control/setting
+  navigation and retained HUD draft, minimap appearance Undo/Cancel/Done and temporary
+  toast suppression, nested RGB/opacity editing for every stored color type, World Map
+  context actions, Waypoints modal ownership and native screenshot output. Individual
+  phases are `navigation`, `hud`, `colors` and `map`. Captures use 1280x720 and, when
+  the isolated display is large enough, 5120x2160. Resize and repeat `map` if the wide
+  check reports SKIP. Reports stay in `power-beta-data/reports/release-300`; the native
+  map screenshot also stays in the clone's `screenshots` folder.
+  `caves` checks native loaded-column floors, thick ceilings, exact same-layer height
+  namespaces and surveyed void, restoring every edited block. `sprint` checks real
+  Creative/Survival takeoff, held/released sprint keys at 100% ground speed, actual
+  flight displacement, `/fly` reset order, movement/menu cancellation and denied flight.
+  `background` checks independent minimap/World Map buffer release, immediately inert
+  sampling/palette/radar/path, bounded dirty-cache retirement, zero accepted worker tasks
+  across fresh all-off ticks, independent world/death waypoint storage and explicit
+  Waypoints loading. It polls once per native tick and restores the original screen and
+  preferences after `RELEASE300 BACKGROUND COMPLETE`; `COMMAND DONE` only confirms
+  dispatch. `background-stop` restores immediately. `state` includes this phase and the
+  accepted-task counter. Captures temporarily use consistent native/enhanced GUI scale
+  2 and restore it without saving; test actual scale 4 separately at the native window.
+  `map-interactions` checks scale-line native pointer offsets/release ownership, the first
+  destination Clear hit target, four-second waypoint deletion confirmation and notice expiry.
+  It shadows waypoint state and restores it before any store save. `map-interactions focus-arm`
+  leaves a scale drag armed; move focus physically away, then run `map-interactions focus-check`.
+  `map-interactions paused` observes real native ticks until paused world time remains fixed
+  while terrain sampling progresses; wait for `RELEASE300 MAP PAUSED COMPLETE`.
+  `map-interactions stop` restores an armed interaction screen without verification.
+  For native 5K drag timing, open the map, run `framecap 60` then `pan-start`, perform
+  a continuous physical left drag, release and run `pan-check`. Repeat at `framecap 125`.
+  The 1024-frame in-memory ring reports actual map render FPS, native tick rate, distinct
+  view-update Hz and median/p95 frame/change intervals; CSV/JSON are written only by
+  `pan-check`. It asserts view updates exceed 20 Hz and distinguishes slow full-map
+  rendering from tick-bound panning. `framecap restore` restores the original in-memory
+  cap. No cap command saves preferences. `state` reports the OpenGL vendor/renderer.
+  Prefix these commands with `release-300 `.
+  Focus the muted isolated client first. Keys, settings, player data and world rules
+  restore afterward. `state` prints read-only map/cache/worker/sprint metrics;
+  `open map|hud|waypoints` leaves the requested UI open, and `capture NAME` saves its
+  current logical size at 2x resolution when the isolated display has room.
+
 - After `new-world`, `release-261 terrain` checks native shallow/deep water, glass,
   ice and thin/full snow in loaded columns. `cadence` checks 1/5/20 Hz sampling,
   periodic native edits and column budgets using disposable caches. `pose` checks
@@ -36,7 +76,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   `ui` checks pointer closure, context ownership, coordinate validation and border
   export; `effects` checks native dust, combat knockback and independent sprint FOV.
   `lifecycle` checks actual Nether travel and retained data while maps are disabled;
-  `textures` switches native texture packs and verifies restored map colours.
+  `textures` switches native texture packs and verifies restored map colors.
   `perf` measures bounded sampling, radar and drawing during repeated traversal.
   `native` and `raw` select GUI mouse helpers for physical map gestures.
 
@@ -54,7 +94,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   inventory regressions. Use only the muted disposable clone.
 - After `new-world`, `release-252` checks Spectator/freecam selection and targeting,
   unchanged access rules, moving ridden-cart rendering across culling samples with
-  either speed, native armour Shift-drags, cursor/NBT/count preservation, slot limits,
+  either speed, native armor Shift-drags, cursor/NBT/count preservation, slot limits,
   full inventories, disabled gestures and cancellation.
 
 - `release-250 setup` checks the fresh first-launch chooser and one-time save.
@@ -96,15 +136,15 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   without overlays or image edits for the HUD asset.
 
 - `release-230 refinements` checks native title clicks through every preset/style, reverse cycling and retained retro data; inline custom version text; a continuous panorama clock; and pixel-identical native dirt headers/footers.
-- `hud-responsive-230 layout`, `ghosts` and `drafts` cover responsive splits, the background switch, delayed tooltips, disabled-cluster outlines and dragging, individual resets with Undo, and nested colour isolation with automatic/manual Apply and Save/Discard. Use an isolated display and client of at least 3440×1920 for the large captures.
+- `hud-responsive-230 layout`, `ghosts` and `drafts` cover responsive splits, the background switch, delayed tooltips, disabled-cluster outlines and dragging, individual resets with Undo, and nested color isolation with automatic/manual Apply and Save/Discard. Use an isolated display and client of at least 3440×1920 for the large captures.
 - `hud-responsive-230 forest` prepares an anonymous forest-biome scene for a clean native-renderer background capture. Use a muted disposable instance at 2560×1440; keep the HUD hidden and first-person view. Capture only the scene, never menus or fixture output.
 - `release-230 menus` checks native/raw pointer preservation through menu returns in windowed/fullscreen modes, native music-button and status-link dispatch, complete HUD selector coverage, shared group collapse/expand, all four reset scopes through the Undo button, audited HUD previews and modal input. Run on the isolated display after `set native.music 1`, retaining Master volume zero and the muted null output.
-- `release-230 check` exercises HUD dragging and every editor tab, greyscale dropdown pixels, paint/erase strokes, filtered instant brush selection, swatches, inline rotations, individual appearance resets, divider resizing, preset save/load/removal, undo, draft warnings, Apply/Discard and main-menu panorama backgrounds. It captures narrow and wide screens under `reports/editors-230`. Run `save`, restart, then `saved` for editor persistence.
+- `release-230 check` exercises HUD dragging and every editor tab, grayscale dropdown pixels, paint/erase strokes, filtered instant brush selection, swatches, inline rotations, individual appearance resets, divider resizing, preset save/load/removal, undo, draft warnings, Apply/Discard and main-menu panorama backgrounds. It captures narrow and wide screens under `reports/editors-230`. Run `save`, restart, then `saved` for editor persistence.
 - `light-performance-230` compares batched light numbers against the previous native font renderer at all four rotations, checks pixel differences and records median/p95 draw timings for 2,048 labels. Run `overlay-setup`, `overlay-check` and `toggle-saves` for native light sampling, GL restoration and deferred writes under a stalled disk. Use a muted disposable world.
 
 - `release-220`: flight units/order/defaults, retired switches, settings/library searches, in-group divider geometry at narrow/wide sizes, reported command origins, mode-aware camera collisions and solid/translucent head draws. Run after `new-world`.
 - `release-211`: daytime and nighttime bed respawn, native sleeping and bed occupancy, HUD order, merged panorama settings, live preview, immediate selection and manual Back/Escape. Run after `new-world`. Then use `title` and `release-211-editor` for the native Select world > Edit route, dirty-exit confirmation, durable saves, preserved world name/player data and future-format recovery UI.
-- `title-alignment`: captures every title style at narrow, wide and odd GUI widths, measures the rendered lettering against the screen centre and verifies retro customisation is preserved. Requires a muted disposable client at least 1280×840 pixels.
+- `title-alignment`: captures every title style at narrow, wide and odd GUI widths, measures the rendered lettering against the screen center and verifies retro customization is preserved. Requires a muted disposable client at least 1280×840 pixels.
 - `release-210`: world-rule sliders/defaults, retired globals, HUD group visibility, Creative/Survival/Spectator `/fly`, native non-flight gravity/jumping/walking, permission revocation, saved native flight data, sleep thresholds, immediate panorama selection, official texture uploads, all title styles and narrow/wide picker screenshots. Run after `new-world`.
 - `release-202`: camera/leaf reset defaults and actual saved-world Creative badges,
   including old cheats, Spectator-only and unsupported metadata without changing saves.
@@ -127,7 +167,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   real Shift-double-click gestures with native/raw input, both release orders,
   cancellation and matching-item conservation. Use the isolated muted Xvfb clone.
 
-- `water-terrain`: inspect GPU colour endpoints, 1000 crossings without queued builds or
+- `water-terrain`: inspect GPU color endpoints, 1000 crossings without queued builds or
   uploads, slider preview/Cancel, shader uniforms, night/roofs and native terrain edits,
   including torch-lit deep water at dawn and roof changes below native light's reach.
 
@@ -199,7 +239,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   custom collision boxes, chunk movement/removal and resumable merging with changing
   native NBT. Run after `new-world`. `release-151 fast` and `release-151 slow`
   compare dense-item ticks, explosion work and bounded merging up to 8,192 items.
-  `release-151 text` checks the loaded F3, status and chat colours through actual
+  `release-151 text` checks the loaded F3, status and chat colors through actual
   glyph pixels; run immediately after launch. `release-151 light` checks full-bright
   occlusion samples and unchanged simulation light. Use `release-151 save`, restart,
   then `release-151 saved` to verify the two new settings persist.
@@ -218,7 +258,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   share row geometry across narrow and wide layouts.
 
 - `world-settings-check`: difficulty transactions, scope notes, permission-gated rows/tabs,
-  command exemptions, input priority and Peaceful behaviour. Run after `new-world`.
+  command exemptions, input priority and Peaceful behavior. Run after `new-world`.
   `world-settings-create` creates four disposable saves through the real creation UI,
   checking the initial Creative/Survival mode against the rules preset, resize, save/reload
   and isolation from the previous world's mode or later rule edits.
@@ -251,7 +291,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   Run after `new-world`; restart and run `death-checks saved` after `new-world`.
   Run `death-checks rollback` last for partial-write rollback and failure shutdown.
   Restart, load the same save and run `death-checks retry` to recover through the inventory GUI once.
-  `death-checks inventory` checks original slots, armour, overflow, occupied slots,
+  `death-checks inventory` checks original slots, armor, overflow, occupied slots,
   native NBT, locked viewer inputs, individual/bulk claims, live permission changes,
   decimal IDs, chronological logs and narrow/wide screenshots. Restart and run
   `death-checks inventory-saved` after `new-world` for slot and partial-claim persistence.
@@ -277,7 +317,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   undo/redo, invalid hands and cheats. Run after `new-world`.
 - `worldedit-navigation`: repeated jumps across chunk boundaries up to 255 blocks,
   real world rendering, safe cancellation, chunk comparator contracts and culling
-  reads without chunk generation or cancelled unloads. Run after `new-world`.
+  reads without chunk generation or canceled unloads. Run after `new-world`.
 - `death-crafting`: four crafting-input snapshots, normal drops, native data,
   original-slot GUI recovery, locked views, conflicts, overflow and narrow/wide UI.
   Restart, run `new-world`, then `death-crafting saved` for partial-claim persistence.
@@ -290,7 +330,7 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   `release-110-pick` checks redstone in creative and survival. `release-110-flight`,
   `release-110-freecam` and `release-110-state` support physical movement and clipboard
   checks. Test both sprint-key release orders, focus loss and menus.
-- `release-111`: cursor/colour defaults, preview, Cancel/Apply and world override groups.
+- `release-111`: cursor/color defaults, preview, Cancel/Apply and world override groups.
   Restart and run `release-111-saved` for persistence. `release-111-debug-on`, then
   `release-111-debug` checks facing, music and platform rows for overlaps.
   Include `release-110-spectator` in physical sprint checks for every axis.
@@ -313,16 +353,16 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   chord release orders and held keys across focus changes in the disposable window.
 - `command-completion`: arrow selection, immediate Tab completion and subsequent
   typing for WorldEdit and singleplayer commands.
-- `chat-wrap`: all chat colours, repeated wraps, colour changes, resets, plain text
+- `chat-wrap`: all chat colors, repeated wraps, color changes, resets, plain text
   and the WorldEdit cheats warning. Run after `new-world`.
 - `freecam-culling`: entity/block entity visibility, repeated toggles, player movement,
   setting disable, preserved culling preferences and world exit. Run after `new-world`.
-- `creative-borders`: compare catalogue row pixels and the destroy-slot junction
+- `creative-borders`: compare catalog row pixels and the destroy-slot junction
   at narrow and wide GUI sizes; screenshots go under `reports/creative-borders`.
 - `creative-drops`: click outside the diamond tab at narrow and wide GUI sizes;
   check whole-stack and single-item drops, damage/NBT, hotbar pickup, UI borders,
   view/category tabs, destroy-slot borders and closure without duplication.
-- `creative-paint`: middle-button previews and release in catalogue, inventory,
+- `creative-paint`: middle-button previews and release in catalog, inventory,
   armor, chest, crafting table, furnace and dispenser; stack limits, damage/NBT,
   incompatible/output slots, cancellation and ordinary clicks. Run after `new-world`.
   Restart, load the same save and run `creative-paint saved`. Run `rollback` last
@@ -340,13 +380,13 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   inspect `dump`, then restore false.
 - `audit`, `roundtrip`, `screens`: schema, save/restore and multi-resolution checks.
 - `settings-snapshot NAME`: capture all sixteen tabs, their complete row order,
-  catalogue and PNGs under `power-beta-data/reports/settings-review/NAME`. Use a
+  catalog and PNGs under `power-beta-data/reports/settings-review/NAME`. Use a
   disposable client window at least 1280 x 840 pixels. Captures include every
   scroll position at 640 x 420 GUI size and the first view at 320 x 240.
   Capture `before` in a world before updating the clone, then `settings-review`
   checks retained IDs, defaults, ranges, row coverage, binding groups and links.
 - `new-world`, then `indicators-hud` and `indicators-creative`: live HUD states,
-  inclusion/Cancel, eight catalogue rows, hotbar transfers and recipe tooltips.
+  inclusion/Cancel, eight catalog rows, hotbar transfers and recipe tooltips.
   `indicators-menu` checks title controls and layout. `indicators-mix`, `indicators-world`
   or `indicators-custom` starts a track; wait for playback, then `indicators-exit` and
   `indicators-playing` or `indicators-stopped`. `indicators-exit-paused` and
@@ -381,9 +421,9 @@ captures, and normal gameplay rendering after capture.
 ## Release 1.5 checks
 
 - `release-150` checks settings, item merging and native item data, explosion
-  protection, TNT breaking, normal/fast leaf decay across modes, catalogue
+  protection, TNT breaking, normal/fast leaf decay across modes, catalog
   transfer, entity visibility, full bright and `/spawn`.
-- `interaction-150` checks actual catalogue Shift-clicks, stack settings, native
+- `interaction-150` checks actual catalog Shift-clicks, stack settings, native
   item data and 4,096-item merging with conservation and save checks.
 - `release-150 spawn-dimension` checks returning from the Nether.
 - `release-150 save` and `release-150 saved` check settings across a restart.
@@ -417,7 +457,7 @@ captures, and normal gameplay rendering after capture.
   feature. `scroll` records native scrolling or setting tooltips for short groups.
   `page N` exposes the remaining settings pages for modal screenshots. `pan` moves
   the player view; `freecam` flies the detached camera out from the castle. `stop`
-  ends the current motion. `creative N` and `creative survival` open catalogue
+  ends the current motion. `creative N` and `creative survival` open catalog
   categories and the survival inventory. `music-all` and `music-presets` open the
   corresponding native library views.
 - `gallery-action` stages gameplay recordings for the five `placement MODE`
@@ -512,7 +552,7 @@ underwater/fire/block overlay draws, full-bright restoration, unsaved nested dra
 and final tooltip ordering over slots/cursor stacks in both creative inventory views.
 Run in a muted disposable world with the test window focused.
 
-`release-173 fog` checks native OpenGL fog colour/distance underwater with full bright,
+`release-173 fog` checks native OpenGL fog color/distance underwater with full bright,
 fog-density and photo-mode controls, toggle restoration, and unchanged lava/cloud fog.
 Use `fog-scene`, `fog-bright`, `fog-native` and `fog-above` for a submerged/above-water
 comparison with distant markers. These scene commands change the disposable world.
@@ -536,3 +576,5 @@ for press/release, cycling, remaps, focus/menu/world cancellation and held movem
   fist-equivalent drops, mode/server exclusions, mining penalties and precise flight
   response entry through right-click editors. `save`, restart, then `saved` verify
   the leaf preference and fractional values in all six flight response settings.
+
+- `release-300 refinement` checks native coarse-to-fine pixels after panning while fine data is pending, with no world sampling or map file work.

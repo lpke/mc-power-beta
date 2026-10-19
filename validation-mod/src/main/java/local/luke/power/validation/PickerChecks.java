@@ -34,7 +34,7 @@ final class PickerChecks {
     byte[] config=Files.readAllBytes(local.luke.power.storage.PowerConfig.path());
     var inventory=mc.player.inventory.main.clone();int[] counts=Arrays.stream(inventory).mapToInt(s->s==null?0:s.count).toArray();
     try {
-      test("catalogue includes alternate block IDs, metadata and technical names",()->{
+      test("catalog includes alternate block IDs, metadata and technical names",()->{
         var blocks=ItemCatalogue.entries(ItemCatalogue.Domain.BLOCK);
         for(int id:new int[]{8,9,10,11,43,51,61,62,63,68,73,74,75,76,93,94})
           check(blocks.stream().anyMatch(e->e.id()==id && e.technical().contains("ID: "+id)),"missing state "+id);

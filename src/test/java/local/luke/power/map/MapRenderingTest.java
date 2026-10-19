@@ -77,19 +77,19 @@ class MapRenderingTest {
 
   @Test
   void reliefHasCrispDirectionalEdgesAndCoolAmbientShadows() {
-    int flat = MapRelief.colour(0x808080, 64, 64, 64, 0);
-    int lit = MapRelief.colour(0x808080, 65, 64, 64, 0);
-    int shadow = MapRelief.colour(0x808080, 64, 65, 65, 0);
+    int flat = MapRelief.color(0x808080, 64, 64, 64, 0);
+    int lit = MapRelief.color(0x808080, 65, 64, 64, 0);
+    int shadow = MapRelief.color(0x808080, 64, 65, 65, 0);
     assertEquals(0x89_8d_95, flat);
     assertEquals(0xa2_a6_ae, lit);
     assertEquals(0x4d_51_59, shadow);
-    assertNotEquals(lit, MapRelief.colour(0x808080, 65, 64, 65, 0));
-    int nether = MapRelief.colour(0x808080, 64, 65, 65, -1);
+    assertNotEquals(lit, MapRelief.color(0x808080, 65, 64, 65, 0));
+    int nether = MapRelief.color(0x808080, 64, 65, 65, -1);
     assertEquals(0x59_40_40, nether);
   }
 
   @Test
-  void smallerLevelsAverageAlreadyShadedPixelsAndKeepRawColourMode() {
+  void smallerLevelsAverageAlreadyShadedPixelsAndKeepRawColorMode() {
     var tile = new MapTile(new MapMath.Key(0, -1, 0, 0, 0));
     for (int z = 0; z < 4; z++)
       for (int x = 0; x < 4; x++) tile.put(z * 64 + x, 0x808080, 0x606060, 64 + z % 2, 15, 1, 0);
@@ -105,21 +105,21 @@ class MapRenderingTest {
     assertEquals(expected, parent.reliefAccurate[0]);
     var settings = new MapSettings();
     settings.heightShading = false;
-    assertEquals(0xff000000 | expected, parent.colour(0, settings));
+    assertEquals(0xff000000 | expected, parent.color(0, settings));
     settings.slopeShading = false;
-    assertEquals(0xff808080, parent.colour(0, settings));
+    assertEquals(0xff808080, parent.color(0, settings));
     assertFalse(parent.merge(tile));
   }
 
   @Test
-  void cachedNeighbourHeightRepairsSeamsWithoutSamplingWorld() {
+  void cachedNeighborHeightRepairsSeamsWithoutSamplingWorld() {
     var tile = new MapTile(new MapMath.Key(0, -1, 0, 0, 0));
     tile.put(0, 0x808080, 0x808080, 65, 15, 1, 0);
     tile.refreshRelief((x, z) -> 64);
-    assertEquals(MapRelief.colour(0x808080, 65, 64, 64, 0), tile.reliefAccurate[0]);
+    assertEquals(MapRelief.color(0x808080, 65, 64, 64, 0), tile.reliefAccurate[0]);
     tile.invalidateRelief(0);
     tile.refreshRelief((x, z) -> 66);
-    assertEquals(MapRelief.colour(0x808080, 65, 66, 66, 0), tile.reliefAccurate[0]);
+    assertEquals(MapRelief.color(0x808080, 65, 66, 66, 0), tile.reliefAccurate[0]);
     assertFalse(
         tile.refreshRelief(
             (x, z) -> {

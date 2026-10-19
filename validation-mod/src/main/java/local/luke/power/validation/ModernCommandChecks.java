@@ -144,7 +144,7 @@ public final class ModernCommandChecks {
             run(mc, "/give @s 35:2 3");
             run(mc, "/give @s 35:3 4");
             run(mc, "/clear @s 35:2");
-            check(count(mc, 35) == 4, "metadata filter removed other colours");
+            check(count(mc, 35) == 4, "metadata filter removed other colors");
             run(mc, "/clear");
             check(
                 count(mc, 1) == 0 && count(mc, 35) == 0,
@@ -230,7 +230,7 @@ public final class ModernCommandChecks {
                 run(mc, "/seed").get(0).contains(Long.toString(mc.world.getSeed())), "seed wrong");
           });
       test(
-          "help is coloured complete scroll-aware and emitted once without WE prefixes",
+          "help is colored complete scroll-aware and emitted once without WE prefixes",
           () -> {
             scrolling.set(hud, true);
             var all = run(mc, "/help");

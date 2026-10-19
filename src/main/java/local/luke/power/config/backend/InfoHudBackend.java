@@ -9,8 +9,8 @@ import local.luke.power.storage.PowerConfig;
 
 public final class InfoHudBackend implements Backend {
   private static final String PREFIX = "infoHud.";
-  private static final List<String> POSITIONS = List.of("Top left", "Top centre", "Top right", "Middle left",
-      "Centre", "Middle right", "Bottom left", "Bottom centre", "Bottom right");
+  private static final List<String> POSITIONS = List.of("Top left", "Top center", "Top right", "Middle left",
+      "Center", "Middle right", "Bottom left", "Bottom center", "Bottom right");
 
   public static void register(ConfigSession session) throws Exception {
     var entries = new ArrayList<Setting>();
@@ -30,7 +30,7 @@ public final class InfoHudBackend implements Backend {
         case "offsetX" -> "Horizontal offset";
         case "offsetY" -> "Vertical offset";
         case "textSize" -> "Text size";
-        case "textColor" -> "Text colour";
+        case "textColor" -> "Text color";
         case "opacity" -> "Text opacity";
         case "hideWithDebug" -> "Hide when F3 is open";
         case "day" -> "Day count";
@@ -40,11 +40,11 @@ public final class InfoHudBackend implements Backend {
       };
       String help = "Info cluster " + (i + 1) + ". " + switch (name) {
         case "enabled" -> "Show this cluster when custom HUD info is on.";
-        case "position" -> "Anchor the cluster to a screen edge or centre. Each line aligns to this anchor.";
+        case "position" -> "Anchor the cluster to a screen edge or center. Each line aligns to this anchor.";
         case "offsetX" -> "Move right with positive values, left with negative values. Uses GUI pixels.";
         case "offsetY" -> "Move down with positive values, up with negative values. Uses GUI pixels.";
         case "textSize" -> "Text scale relative to the normal HUD font. 1 is the normal size.";
-        case "textColor" -> "Choose the text colour. Opacity controls transparency separately.";
+        case "textColor" -> "Choose the text color and opacity.";
         case "opacity" -> "Text visibility from transparent at 0% to solid at 100%.";
         case "hideWithDebug" -> "Hide this cluster while the F3 debug menu is open.";
         case "coordinates" -> "Show block coordinates using Use feet Y coordinates. Freecam and spectator always use the base of the head.";

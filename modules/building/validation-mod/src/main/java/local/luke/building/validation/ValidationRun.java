@@ -596,7 +596,7 @@ public final class ValidationRun {
         place(mc, -1, 101, 0, 5, .5, .5);
         check(
             id(mc, 0, 101, 0) == 44 && count(mc) == 64,
-            "disabled restores native adjacent behaviour");
+            "disabled restores native adjacent behavior");
       }
       case 30 -> {
         stack(mc, 44, 1);

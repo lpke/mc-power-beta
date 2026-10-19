@@ -14,7 +14,7 @@ public abstract class ConfigHandlerBase {
     public final String id;
 
     /**
-     * The name of the category. Supports colour codes. White by default.
+     * The name of the category. Supports color codes. White by default.
      * Maximum length of 50.
      */
     public String name;
@@ -22,7 +22,7 @@ public abstract class ConfigHandlerBase {
     public String nameKey;
 
     /**
-     * Description of the category. Do not use colour codes. This is greyed out for legibility.
+     * Description of the category. Do not use color codes. This is grayed out for legibility.
      * Maximum length of 100.
      */
     public String description;

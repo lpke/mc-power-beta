@@ -6,7 +6,7 @@ import local.luke.power.config.Setting;
 /** Presentation groups and the explicit boundary of a position-only reset. */
 final class HudEditorSections {
   private static final List<String> GROUPS = List.of("Visibility", "Layout", "Position", "Appearance",
-      "Item names", "Chat history", "Coordinates", "Information", "World information", "Culling statistics", "Music");
+      "Terrain", "Entity radar", "Waypoints", "Overlays", "Item names", "Chat history", "Coordinates", "Information", "World information", "Culling statistics", "Music");
   private static final Set<String> OFFSETS = Set.of("power_compat:config.overlayAdditionsYOffset",
       "entityculling:config.f3InfoYOffset", "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");
   private static final Set<String> NATIVE_POSITION = Set.of("horizontalPosition", "verticalPosition",
@@ -22,8 +22,16 @@ final class HudEditorSections {
   }
   static String group(Setting s) {
     String id = s.id, field = field(s);
-    if (id.startsWith("maps.")) return position(s) ? "Position"
-        : Set.of("coordinates", "biome", "clock", "compass").contains(field) ? "Information" : "Appearance";
+    if (id.startsWith("maps.")) {
+      if (position(s)) return "Position";
+      if (field.equals("hideWithDebug")) return "Visibility";
+      if (Set.of("coordinates", "biome", "clock", "compass").contains(field)) return "Information";
+      if (Set.of("colourMode", "heightShading", "slopeShading", "caveLighting").contains(field)) return "Terrain";
+      if (Set.of("radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight").contains(field)) return "Entity radar";
+      if (field.startsWith("waypoint")) return "Waypoints";
+      if (Set.of("chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity").contains(field)) return "Overlays";
+      return "Appearance";
+    }
     if (HudEditorSettings.itemNames(s)) return "Item names";
     if (s.group.equals("Chat")) return "Chat history";
     if (Set.of(HudEditorSettings.HUD + "disableCrosshair", HudEditorSettings.HUD + "drawXboxXAndYButtons", HudEditorSettings.TOAST).contains(id)) return "Visibility";

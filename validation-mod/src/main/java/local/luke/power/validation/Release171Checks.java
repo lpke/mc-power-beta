@@ -62,7 +62,7 @@ final class Release171Checks {
       log("PASS native frames preserve spectator/freecam third person and ghost");return;
     }
     if(action.equals("normal-perspective")) {
-      check(!mc.options.thirdPerson,"normal in-block camera behaviour changed");log("PASS normal in-block first-person reset remains");return;
+      check(!mc.options.thirdPerson,"normal in-block camera behavior changed");log("PASS normal in-block first-person reset remains");return;
     }
     if(action.equals("head-result")){check(GhostProbe.samples>400 && GhostProbe.changed>400,"head did not draw visible skin pixels");log(GhostProbe.details+" samples="+GhostProbe.samples+" changed="+GhostProbe.changed);GhostProbe.save();return;}
     if(action.equals("head-probe")){GhostProbe.capture=true;return;}

@@ -11,7 +11,7 @@ publishing the new inventory array. Records are checksummed and never pruned.
 The journal flush runs on a worker. The game continues while it writes, then
 commits the swap on a later tick only if the same player still owns the unchanged
 inventory. Inventory edits, menus, lost focus and world exits cancel pending swaps.
-Rapid requests are processed in order with a bounded queue. A cancelled request
+Rapid requests are processed in order with a bounded queue. A canceled request
 can leave a recovery record even though its swap was never applied.
 At 64 MiB, swapping stops until the journal is archived and the game restarted.
 
@@ -50,7 +50,7 @@ world. Individual and bulk GUI recovery share durable per-stack claims.
 
 The Game rules setting Keep inventory on death defaults off for Survival and on
 for the Cheat preset. It is independent of recovery permissions. The rule keeps main
-inventory, armour, the held cursor and player crafting inputs through respawn.
+inventory, armor, the held cursor and player crafting inputs through respawn.
 Dead-player NBT includes a complete native snapshot for restart safety. Death
 records retain their item snapshots but mark every stack recovered, with the log
 label Recovered (kept). The keep rule works even when death records are disabled.

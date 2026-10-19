@@ -1,6 +1,6 @@
 package local.luke.power.creative.inventory;
 
-/** The extra catalogue row grows upward without moving the player's hotbar. */
+/** The extra catalog row grows upward without moving the player's hotbar. */
 public final class CreativeGrid {
   public static final int ROWS = 8, CAPACITY = ROWS * 8, EXTRA_HEIGHT = 20, SCROLL_TRAVEL = 127;
   public static final int DESTROY_WIDTH = 22, DESTROY_TOP = 137;

@@ -54,10 +54,11 @@ public final class MapExport {
     MapSettings style =
         Catalog.JSON.fromJson(
             Catalog.JSON.toJson(settings), MapSettings.class);
+    String context = layer < 0 ? "" : cache.viewContext();
     Map<MapMath.Key, MapTile> snapshot = new HashMap<>();
     for (int z = lowZ; z <= highZ; z++)
       for (int x = lowX; x <= highX; x++) {
-        var key = new MapMath.Key(dimension, layer, level, x, z);
+        var key = new MapMath.Key(dimension, layer, level, x, z, context);
         MapTile tile = cache.peek(key);
         if (tile != null) snapshot.put(key, tile.copy());
       }
@@ -71,7 +72,7 @@ public final class MapExport {
               BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
               for (int ty = lowZ; ty <= highZ; ty++)
                 for (int tx = lowX; tx <= highX; tx++) {
-                  var key = new MapMath.Key(dimension, layer, level, tx, ty);
+                  var key = new MapMath.Key(dimension, layer, level, tx, ty, context);
                   MapTile tile = snapshot.get(key);
                   if (tile == null) tile = MapCodec.read(root.resolve(key.file()), key);
                   int x0 = Math.max(0, (int) Math.floor((key.minX() - minX) * outputScale)),
@@ -90,7 +91,7 @@ public final class MapExport {
                       int ix = (int) Math.floor((wx - key.minX()) / (1 << level)),
                           iz = (int) Math.floor((wz - key.minZ()) / (1 << level));
                       if (ix >= 0 && ix < 64 && iz >= 0 && iz < 64)
-                        image.setRGB(px, py, tile.colour(iz * 64 + ix, style));
+                        image.setRGB(px, py, tile.color(iz * 64 + ix, style));
                     }
                 }
               ByteArrayOutputStream bytes = new ByteArrayOutputStream();

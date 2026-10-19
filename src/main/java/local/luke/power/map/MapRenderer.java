@@ -35,6 +35,31 @@ public final class MapRenderer {
     pixelsPerUnit = (double) mc.displayWidth / scaled.method_1857();
   }
 
+  public static void uploadBudget(int uploads) { remaining = uploads; }
+
+  /** Returns zero until an immutable disk result and an upload slot are available. */
+  static int tile(MapCache source, Key key, MapSettings settings, boolean local, long seed) {
+    if (source != cache) { clear(); cache = source; }
+    key = source.viewKey(key);
+    MapTile tile = source.get(key);
+    if (tile == null) return 0;
+    int style = Objects.hash(settings.style(), settings.chunkGrid, settings.slimeChunks,
+        settings.lightOverlay, seed, local, settings.mapSmoothing);
+    Texture texture = TEXTURES.get(key);
+    if (texture == null || texture.owner != tile || texture.revision != tile.revision || texture.style != style) {
+      if (remaining <= 0) return 0;
+      remaining--;
+      texture = upload(tile, texture, settings, style, local, seed);
+      TEXTURES.put(key, texture);
+      while (TEXTURES.size() > settings.cacheTiles) {
+        var it = TEXTURES.values().iterator();
+        GL11.glDeleteTextures(it.next().id);
+        it.remove();
+      }
+    }
+    return texture.id;
+  }
+
   public static boolean pending() {
     return pending;
   }
@@ -108,10 +133,10 @@ public final class MapRenderer {
               settings.slimeChunks,
               settings.lightOverlay,
               seed,
-              local);
+              local, settings.mapSmoothing);
       for (int z = minZ; z <= maxZ; z++)
         for (int x = minX; x <= maxX; x++) {
-          Key key = new Key(dimension, layer, level, x, z);
+          Key key = source.viewKey(new Key(dimension, layer, level, x, z));
           double wx = key.minX(), wz = key.minZ();
           var a = view.screen(wx, wz);
           var b = view.screen(wx + span, wz);
@@ -145,6 +170,8 @@ public final class MapRenderer {
             pending = true;
           if (texture == null) continue;
           GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture.id);
+          GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
+              settings.mapSmoothing ? GL11.GL_LINEAR : GL11.GL_NEAREST);
           polygon(polygon);
         }
       while (TEXTURES.size() > settings.cacheTiles) {
@@ -163,25 +190,26 @@ public final class MapRenderer {
     int id = previous == null ? GL11.glGenTextures() : previous.id;
     BUFFER.clear();
     for (int i = 0; i < PIXELS; i++) {
-      int colour = tile.colour(i, s);
-      if (colour != 0) {
+      int color = tile.color(i, s);
+      if (color != 0) {
         int x = (int) tile.key.minX() + ((i % SIZE) << tile.key.level()),
             z = (int) tile.key.minZ() + ((i / SIZE) << tile.key.level());
         if (s.slimeChunks && local && tile.key.dimension() == 0 && slime(seed, x >> 4, z >> 4))
-          colour = 0xff000000 | mix(colour, 0x44e855, .28);
-        if (s.lightOverlay && tile.light(i) < 8) colour = 0xff000000 | mix(colour, 0xf44736, .35);
+          color = 0xff000000 | mix(color, 0x44e855, .28);
+        if (s.lightOverlay && tile.light(i) < 8) color = 0xff000000 | mix(color, 0xf44736, .35);
         if (s.chunkGrid && tile.key.level() <= 2 && ((x & 15) == 0 || (z & 15) == 0))
-          colour = 0xff000000 | shade(colour, .55);
+          color = 0xff000000 | shade(color, .55);
       }
       BUFFER
-          .put((byte) (colour >> 16))
-          .put((byte) (colour >> 8))
-          .put((byte) colour)
-          .put((byte) (colour >>> 24));
+          .put((byte) (color >> 16))
+          .put((byte) (color >> 8))
+          .put((byte) color)
+          .put((byte) (color >>> 24));
     }
     BUFFER.flip();
     GL11.glBindTexture(GL11.GL_TEXTURE_2D, id);
-    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+    GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER,
+        s.mapSmoothing ? GL11.GL_LINEAR : GL11.GL_NEAREST);
     GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
     GL11.glTexParameteri(
         GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE);
@@ -232,11 +260,11 @@ public final class MapRenderer {
     GL11.glColor4f(1, 1, 1, 1);
   }
 
-  private static void diamond(double x, double y, int colour, double size) {
+  private static void diamond(double x, double y, int color, double size) {
     GL11.glDisable(GL11.GL_TEXTURE_2D);
     for (int outline = 1; outline >= 0; outline--) {
       double r = size + outline * .8;
-      int rgb = outline == 1 ? 0 : colour;
+      int rgb = outline == 1 ? 0 : color;
       GL11.glColor4ub((byte) (rgb >> 16), (byte) (rgb >> 8), (byte) rgb, (byte) 255);
       GL11.glBegin(GL11.GL_QUADS);
       GL11.glVertex2d(x, y - r);
@@ -249,7 +277,7 @@ public final class MapRenderer {
     GL11.glColor4f(1, 1, 1, 1);
   }
 
-  public static void arrow(double x, double y, double angle, int colour) {
+  public static void arrow(double x, double y, double angle, int color) {
     GL11.glPushMatrix();
     GL11.glTranslated(x, y, 0);
     GL11.glRotated(Math.toDegrees(angle), 0, 0, 1);
@@ -258,7 +286,7 @@ public final class MapRenderer {
       GL11.glPushMatrix();
       double scale = outline == 1 ? 1.3 : 1;
       GL11.glScaled(scale, scale, 1);
-      int rgb = outline == 1 ? 0 : colour;
+      int rgb = outline == 1 ? 0 : color;
       GL11.glColor4ub((byte) (rgb >> 16), (byte) (rgb >> 8), (byte) rgb, (byte) 255);
       GL11.glBegin(GL11.GL_TRIANGLES);
       GL11.glVertex2d(0, -5);
@@ -275,19 +303,73 @@ public final class MapRenderer {
     GL11.glPopMatrix();
   }
 
+  /** Two shaded faces give the default arrow its raised center seam at every UI scale. */
+  public static void player(double x, double y, double angle, MapSettings settings) {
+    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+    GL11.glPushMatrix();
+    try {
+      GL11.glTranslated(x, y, 0);
+      GL11.glRotated(Math.toDegrees(angle), 0, 0, 1);
+      GL11.glScaled(settings.playerSize / 100d, settings.playerSize / 100d, 1);
+      GL11.glDisable(GL11.GL_TEXTURE_2D);
+      GL11.glEnable(GL11.GL_BLEND);
+      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      for (int outline = 1; outline >= 0; outline--) {
+        GL11.glPushMatrix();
+        double size = outline == 1 ? 1.25 : 1;
+        GL11.glScaled(size, size, 1);
+        int rgb = outline == 1 ? 0x191919 : settings.playerColor;
+        if (settings.playerIcon == 3) {
+          color(rgb, settings.playerOpacity);
+          GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+          GL11.glVertex2d(0, 0);
+          for (int i = 0; i <= 16; i++) {
+            double a = i * Math.PI / 8;
+            GL11.glVertex2d(Math.cos(a) * 3.5, Math.sin(a) * 3.5);
+          }
+          GL11.glEnd();
+        } else {
+          double base = settings.playerIcon == 2 ? 4 : 2;
+          GL11.glBegin(GL11.GL_TRIANGLES);
+          color(outline == 0 && settings.playerIcon == 0 ? shade(rgb, 1.25) : rgb, settings.playerOpacity);
+          GL11.glVertex2d(0, -5);
+          GL11.glVertex2d(0, base);
+          GL11.glVertex2d(-3.5, 4);
+          color(outline == 0 && settings.playerIcon == 0 ? shade(rgb, .65) : rgb, settings.playerOpacity);
+          GL11.glVertex2d(0, -5);
+          GL11.glVertex2d(3.5, 4);
+          GL11.glVertex2d(0, base);
+          GL11.glEnd();
+        }
+        GL11.glPopMatrix();
+      }
+    } finally {
+      GL11.glPopMatrix();
+      GL11.glPopAttrib();
+    }
+  }
+
+  private static void color(int rgb, double alpha) {
+    GL11.glColor4d((rgb >> 16 & 255) / 255d, (rgb >> 8 & 255) / 255d, (rgb & 255) / 255d, alpha);
+  }
+
   private static void label(
-      Minecraft mc, MapProjection view, boolean circle, String text, int x, int y, int colour) {
+      Minecraft mc, MapProjection view, boolean circle, String text, int x, int y, int color) {
     int width = mc.textRenderer.getWidth(text);
     if (view.contains(x, y, circle)
         && view.contains(x + width, y, circle)
         && view.contains(x, y + 8, circle)
         && view.contains(x + width, y + 8, circle))
-      mc.textRenderer.drawWithShadow(text, x, y, colour);
+      mc.textRenderer.drawWithShadow(text, x, y, color);
   }
 
   public static void markers(
       Minecraft mc, MapProjection view, int dimension, boolean circle, boolean mini) {
-    MapSettings s = MapConfig.current();
+    markers(mc, view, dimension, circle, mini, MapConfig.current());
+  }
+
+  public static void markers(
+      Minecraft mc, MapProjection view, int dimension, boolean circle, boolean mini, MapSettings s) {
     var pose = Maps.framePose(mc, delta);
     var store = Maps.waypoints();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -299,7 +381,8 @@ public final class MapRenderer {
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       if (s.footsteps) {
         GL11.glDisable(GL11.GL_TEXTURE_2D);
-        GL11.glColor4f(1, 1, .6f, .7f);
+        GL11.glColor4d((s.pathColor >> 16 & 255) / 255d,
+            (s.pathColor >> 8 & 255) / 255d, (s.pathColor & 255) / 255d, s.pathOpacity);
         GL11.glBegin(GL11.GL_LINES);
         Maps.Step previous = null;
         for (var step : Maps.path()) {
@@ -339,14 +422,6 @@ public final class MapRenderer {
             continue;
           }
           diamond(p.x(), p.y(), point.colour, mini ? 2.5 : 4);
-          if (!mini && !point.name.isEmpty()) {
-            String initial = point.name.substring(0, 1);
-            mc.textRenderer.drawWithShadow(
-                initial,
-                (int) p.x() - mc.textRenderer.getWidth(initial) / 2,
-                (int) p.y() - 4,
-                0xffffff);
-          }
           if (s.waypointNames && !mini)
             mc.textRenderer.drawWithShadow(
                 point.name, (int) p.x() + 5, (int) p.y() - 4, point.colour);
@@ -360,7 +435,7 @@ public final class MapRenderer {
                   MapMotion.position(
                       entity.previousZ(), entity.z(), Maps.radarDelta(entity, delta)));
           if (!view.contains(p.x(), p.y(), circle, 2)) continue;
-          diamond(p.x(), p.y(), entity.colour(), entity.item() ? .7 : 1.3);
+          diamond(p.x(), p.y(), entity.color(), entity.item() ? .7 : 1.3);
           if (s.entityHeights && Math.abs(entity.y() - Maps.y()) > 3)
             label(
                 mc,
@@ -369,10 +444,10 @@ public final class MapRenderer {
                 entity.y() > Maps.y() ? "+" : "-",
                 (int) p.x() + 2,
                 (int) p.y() - 4,
-                entity.colour());
+                entity.color());
           if (s.entityNames)
             label(
-                mc, view, circle, entity.name(), (int) p.x() + 3, (int) p.y() + 3, entity.colour());
+                mc, view, circle, entity.name(), (int) p.x() + 3, (int) p.y() + 3, entity.color());
         }
       if (dimension == Maps.dimension()) {
         var p = view.screen(pose.x(), pose.z());
@@ -380,7 +455,7 @@ public final class MapRenderer {
           GL11.glPushMatrix();
           GL11.glTranslated(p.x(), p.y(), 0);
           if (mini) GL11.glScaled(.55, .55, 1);
-          arrow(0, 0, Math.toRadians(pose.yaw() + 180) + view.angle, mini ? 0xffffff : 0xf13c3c);
+          player(0, 0, Math.toRadians(pose.yaw() + 180) + view.angle, s);
           GL11.glPopMatrix();
         }
       }

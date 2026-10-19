@@ -261,7 +261,7 @@ final class DeathChecks {
     PlayerInventory failing = new PlayerInventory(mc.player) {
       private int writes;
       @Override public void setStack(int slot, ItemStack stack) {
-        super.setStack(slot, stack); if (++writes == 38) throw new IllegalStateException("Injected partial main and armour write");
+        super.setStack(slot, stack); if (++writes == 38) throw new IllegalStateException("Injected partial main and armor write");
       }
     };
     failing.armor[0] = tagged(313, 1, 47, "rollback-boots"); var boots = failing.armor[0];
@@ -269,7 +269,7 @@ final class DeathChecks {
     try {
       try { DeathTracker.recover(mc, record); throw new AssertionError("failure injection was not reached"); }
       catch (java.io.IOException expected) {}
-      check(before.equals(DeathItems.inventory(DeathItems.snapshot(failing))) && failing.armor[0] == boots, "rollback changed inventory or armour ownership");
+      check(before.equals(DeathItems.inventory(DeathItems.snapshot(failing))) && failing.armor[0] == boots, "rollback changed inventory or armor ownership");
       check(DeathTracker.journal(mc).state(record.id).equals("available"), "rollback kept claim");
       check(!DeathTracker.recoveryDenial(mc).isEmpty(), "failure did not stop recovery");
       log("PASS partial recovery rolled back, retained journal and disabled recovery until restart");

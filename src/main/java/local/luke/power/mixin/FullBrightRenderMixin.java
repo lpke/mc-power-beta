@@ -23,7 +23,7 @@ public class FullBrightRenderMixin {
   @Shadow private boolean field_2330;
   @Shadow private Minecraft field_2349;
 
-  // Enclose StationAPI's fog hooks too, so colour and distance use the same material.
+  // Enclose StationAPI's fog hooks too, so color and distance use the same material.
   @WrapMethod(method = "method_1842")
   private void power$fogDistance(int pass, float delta, Operation<Void> original) {
     RenderControls.beginFog(!field_2330);

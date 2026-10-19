@@ -33,7 +33,7 @@ public final class CommandHelp {
     for (String name : List.of("undo", "redo")) add(name, "[steps]", "Restore blocks from edit history.");
     add("clearhistory", "", "Forget undo and redo history."); add("cancel", "", "Cancel the current edit and finish rollback."); add("status", "", "Show edit progress and undo count.");
     add("toggleplace", "", "Switch placement origin between player and selection.");
-    for (String name : List.of("sphere", "hsphere")) add(name, "[-r] <pattern> <radius>", "Build a sphere; -r raises its centre.");
+    for (String name : List.of("sphere", "hsphere")) add(name, "[-r] <pattern> <radius>", "Build a sphere; -r raises its center.");
     for (String name : List.of("cyl", "hcyl")) add(name, "<pattern> <radius> [height]", "Build a cylinder.");
     add("drain", "<radius>", "Remove nearby water and lava."); add("replacenear", "<radius> <mask> <pattern>", "Replace nearby blocks.");
     add("removenear", "<mask> <radius>", "Remove matching nearby blocks.");

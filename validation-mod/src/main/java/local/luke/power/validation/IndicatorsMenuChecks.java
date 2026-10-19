@@ -94,7 +94,7 @@ final class IndicatorsMenuChecks {
               mc.player.inventory.setCursorStack(null);
               ((ScreenInput)screen).power$click(x+8+(i%8)*18+8,y-20+14+(i/8)*18+8,0);
               ItemStack actual=mc.player.inventory.getCursorStack(),expected=items.get(i);
-              check(actual!=null && actual.itemId==expected.itemId && actual.getDamage()==expected.getDamage(),"wrong catalogue item " + i + " at " + size[0]);
+              check(actual!=null && actual.itemId==expected.itemId && actual.getDamage()==expected.getDamage(),"wrong catalog item " + i + " at " + size[0]);
             }
             mc.player.inventory.main[0]=null;
             ItemStack held=mc.player.inventory.getCursorStack().clone();

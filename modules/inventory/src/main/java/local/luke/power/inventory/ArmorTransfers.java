@@ -12,7 +12,7 @@ import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 
-/** Equip through ordinary clicks, including the native one-item armour-slot limit. */
+/** Equip through ordinary clicks, including the native one-item armor-slot limit. */
 public final class ArmorTransfers {
     private ArmorTransfers() {}
 

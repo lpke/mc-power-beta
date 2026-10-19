@@ -16,9 +16,22 @@ public final class HudEditorSettings {
   private static final Set<String> GROUPS = Set.of("HUD layout", "Combined HUD position",
       "Hotbar position", "Hearts position", "Armor position", "Oxygen position",
       "Overlay message position", "Version label", "Debug (F3) info", "Custom HUD info", "Active tweaks HUD", "General HUD", "Chat", "Minimap");
+  private static final Set<String> MAP_APPEARANCE = Set.of(
+      "rotate", "circular", "hideWithDebug", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
+      "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
+      "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight",
+      "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity",
+      "playerColor", "playerOpacity", "playerSize");
   private HudEditorSettings() {}
+  public static boolean mapAppearance(String id) {
+    return id.startsWith("maps.") && (MAP_APPEARANCE.contains(id.substring(5)) || id.startsWith("maps.playerIcon"));
+  }
+  static boolean suppressesToast(String selection) {
+    return selection.equals("minimap") || selection.equals("cluster.1");
+  }
   public static boolean contains(Setting s) {
     if (LEGACY_DEBUG.contains(s.id)) return false;
+    if (s.id.startsWith("maps.")) return mapAppearance(s.id);
     if (s.id.startsWith("activeTweaks.") && s.id.endsWith("Messages")) return false;
     return s.id.equals(COLOURS) || s.id.equals(TOAST) || s.id.equals(ENTRY) || s.id.startsWith("infoHud.")
         || s.id.startsWith("activeTweaks.") && !s.id.endsWith("Messages")

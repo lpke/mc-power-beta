@@ -28,7 +28,7 @@ public final class DebugPresets {
         } else if (entry.getKey().equals("interface.debugTextSize")) {
           if (!p.isNumber() || !Double.isFinite(p.getAsDouble()) || p.getAsDouble() < .5 || p.getAsDouble() > 3) throw new IllegalArgumentException("Invalid F3 text size.");
         } else if (entry.getKey().equals("interface.debugTextColor")) {
-          if (!p.isString()) throw new IllegalArgumentException("Invalid F3 text colour.");
+          if (!p.isString()) throw new IllegalArgumentException("Invalid F3 text color.");
           local.luke.power.light.LightSettings.rgb(p.getAsString());
         } else if (!p.isBoolean()) throw new IllegalArgumentException("Invalid F3 visibility.");
       }

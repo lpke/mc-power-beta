@@ -24,7 +24,7 @@ public final class MenuPreferences {
 
     public void validate() {
       if (colours == null || colours.size() > 16)
-        throw new IllegalArgumentException("Save up to 16 colours");
+        throw new IllegalArgumentException("Save up to 16 colors");
       colours.forEach(LightSettings::rgb);
       LightSettings.rgb(debugTextColor);
       new DebugColumns(debugOrder, debugRightOrder);

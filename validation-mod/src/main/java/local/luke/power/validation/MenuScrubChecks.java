@@ -28,7 +28,7 @@ final class MenuScrubChecks {
               var bounds=(MenuMusicLayout)field(panel,"bounds");var scrub=field(panel,"scrub");
               check((boolean)field(scrub,"available"),"scrubber absent");
               int x=(int)field(scrub,"barX"),w=(int)field(scrub,"barWidth"),y=(int)field(scrub,"top");
-              check(Math.abs(2*x+w-screen.width)<=1,"track off centre");
+              check(Math.abs(2*x+w-screen.width)<=1,"track off center");
               check(x>=bounds.x()&&x+w+40<=bounds.x()+bounds.width(),"timestamp clipped");
               check(!panel.press(x-1,y+8,0)&&!panel.press(x+w,y+8,0),"outside track captures seek");
               check(panel.press(x,y+8,0)&&panel.press(x+w-1,y+8,0),"track endpoints miss seek");

@@ -168,21 +168,21 @@ final class HudResponsive230Checks {
       }
       check(checked.size()>100,"HUD setting audit incomplete");check(live(mc).equals(before)&&Arrays.equals(bytes,Files.readAllBytes(PowerConfig.path())),"individual resets changed live settings");
     });
-    test("auto/manual apply, nested colours, Done, Escape Save and Discard keep drafts isolated",()->{
+    test("auto/manual apply, nested colors, Done, Escape Save and Discard keep drafts isolated",()->{
       for(boolean automatic:new boolean[]{false,true})for(boolean commit:new boolean[]{false,true}){
         MenuPreferences.update(v->v.autoApply=automatic);
         var options=new PowerOptionsScreen(null);open(mc,options,640,420);var hud=new HudEditorScreen(options,HudEditorSettings.ENTRY);open(mc,hud,640,420);var values=draft(hud);var before=live(mc);byte[] bytes=Files.readAllBytes(PowerConfig.path());
         var toggle=values.get("power_hud:config.disableCrosshair");int y=expose(mc,hud,toggle);click(hud,n(hud,"controlX")+8,y+7,0);
         var pending=values.snapshot();select(hud,"debug");var colour=values.get("interface.debugTextColor");
         for(boolean accept:new boolean[]{false,true}){
-          y=expose(mc,hud,colour);click(hud,n(hud,"controlX")+8,y+7,0);check(mc.currentScreen instanceof ColourScreen,"colour picker did not open");var picker=(ColourScreen)mc.currentScreen;
+          y=expose(mc,hud,colour);click(hud,n(hud,"controlX")+8,y+7,0);check(mc.currentScreen instanceof ColourScreen,"color picker did not open");var picker=(ColourScreen)mc.currentScreen;
           ((TextInput)get(picker,"hex")).setText("#224466");click(picker,n(picker,"left")+8,n(picker,"top")+122,0);
           check(live(mc).equals(before)&&Arrays.equals(bytes,Files.readAllBytes(PowerConfig.path())),"saving a swatch wrote live state");
           if(accept)click(picker,picker.width/2-52,picker.height-18,0);else key(picker,Keyboard.KEY_ESCAPE);
-          check(mc.currentScreen==hud,"colour picker did not return to HUD");
-          if(!accept)check(values.get("interface.colours").value.equals(pending.get("interface.colours")),"colour Cancel retained swatches");
+          check(mc.currentScreen==hud,"color picker did not return to HUD");
+          if(!accept)check(values.get("interface.colours").value.equals(pending.get("interface.colours")),"color Cancel retained swatches");
         }
-        check(values.get("interface.colours").value.getAsJsonArray().toString().contains("#224466"),"colour Done lost the local swatch");
+        check(values.get("interface.colours").value.getAsJsonArray().toString().contains("#224466"),"color Done lost the local swatch");
         check(live(mc).equals(before)&&Arrays.equals(bytes,Files.readAllBytes(PowerConfig.path()))&&options.session().changes()==0,"HUD draft changed live or parent settings");
         if(automatic&&commit)footer(hud,"Done");else{
           key(hud,Keyboard.KEY_ESCAPE);check((boolean)call(get(hud,"exit"),"active"),"Escape skipped its warning");click(hud,hud.width/2+(commit?-80:0),hud.height/2+18,0);

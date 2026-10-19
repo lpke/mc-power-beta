@@ -121,7 +121,7 @@ public final class Release253Checks {
                 &&!(boolean)boat.getClass().getMethod("isOutOfCamera").invoke(boat),"ridden boat was culled");
             for(float delta:new float[]{0,.25f,.5f,.75f,1}){render(mc,delta);check(renderedBoats.contains(boat),"boat flickered on rendered frame");}
           }
-          check(Math.hypot(boat.x-startX,boat.z-startZ)>.05,"boat never travelled");check(boat.field_1622==flag,"saved frustum flag changed");
+          check(Math.hypot(boat.x-startX,boat.z-startZ)>.05,"boat never traveled");check(boat.field_1622==flag,"saved frustum flag changed");
           var hidden=VisualConfig.copy();hidden.hideEntities=true;hidden.hideVehicles=true;VisualConfig.preview(hidden);render(mc,.5f);
           check(!renderedBoats.contains(boat),"hidden vehicles preference ignored");VisualConfig.preview(visual);
           var view=mc.field_2807;mc.field_2807=null;check(!RiddenVehicle.visible(boat),"other view inherited override");mc.field_2807=view;

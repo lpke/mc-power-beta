@@ -130,10 +130,10 @@ final class Mining170Checks {
         mc.world.method_200(X,Y-1,Z,87);mc.world.method_200(X,Y,Z,51);mc.world.method_200(X+1,Y,Z,5);
         AccessRules.set(mc, local.luke.power.rules.GameRule.FIRE_SPREAD, false);GameplayConfig.preview(options);
         for(int i=0;i<100;i++)Block.BLOCKS[51].method_1602(mc.world,X,Y,Z,new Random(i));
-        check(mc.world.getBlockId(X+1,Y,Z)==5,"disabled fire consumed neighbour");check(mc.world.method_1778(X,Y,Z)>0,"fire age stopped");
+        check(mc.world.getBlockId(X+1,Y,Z)==5,"disabled fire consumed neighbor");check(mc.world.method_1778(X,Y,Z)>0,"fire age stopped");
         AccessRules.set(mc, local.luke.power.rules.GameRule.FIRE_SPREAD, true);GameplayConfig.preview(options);
         for(int i=0;i<500 && mc.world.getBlockId(X+1,Y,Z)==5;i++)Block.BLOCKS[51].method_1602(mc.world,X,Y,Z,new Random(i));
-        check(mc.world.getBlockId(X+1,Y,Z)!=5,"enabled fire never consumed neighbour");
+        check(mc.world.getBlockId(X+1,Y,Z)!=5,"enabled fire never consumed neighbor");
       });
       test("temporary click mining leaves saved preference alone and resets with lifecycle",()->{
         var saved=local.luke.power.building.config.Config.current().copy();

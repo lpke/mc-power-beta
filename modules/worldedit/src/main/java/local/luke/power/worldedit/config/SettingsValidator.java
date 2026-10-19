@@ -4,6 +4,7 @@ public final class SettingsValidator {
   private SettingsValidator() {}
 
   public static void validate(Settings s) {
+    local.luke.power.ui.ColorValue.Palette.WORLD_EDIT.validate(s.color);
     if (s.wandItem < 1
         || s.wandItem > 32767
         || s.blockLimit < 1
@@ -12,8 +13,6 @@ public final class SettingsValidator {
         || s.blocksPerTick > 8192
         || s.historySize < 1
         || s.historySize > 100
-        || s.color < 0
-        || s.color > 3
         || s.opacity < 10
         || s.opacity > 100
         || s.lineWidth < 1

@@ -85,7 +85,7 @@ final class Release150Checks {
         var protectedItem = item(mc,4,64,0,20,110,20); created.add(protectedItem);
         mc.world.method_187(null,20,110,20,4);
         check(!protectedItem.dead && protectedItem.field_564.count == 64, "explosion deleted protected stack");
-        check(Double.isFinite(protectedItem.velocityX) && Double.isFinite(protectedItem.velocityY), "centre blast generated NaN");
+        check(Double.isFinite(protectedItem.velocityX) && Double.isFinite(protectedItem.velocityY), "center blast generated NaN");
         protectedItem.damage(null,10); check(protectedItem.dead, "ordinary damage was blocked");
         AccessRules.set(mc, local.luke.power.rules.GameRule.EXPLOSIONS_DESTROY_ITEMS, true); GameplayConfig.preview(s);
         var normal = item(mc,4,1,0,20.5,110,20); created.add(normal);
@@ -124,7 +124,7 @@ final class Release150Checks {
           }
         } finally { enabled.set(fast,before); }
       });
-      test("catalogue transfer respects limits NBT cursor and capacity", () -> {
+      test("catalog transfer respects limits NBT cursor and capacity", () -> {
         CreativeVehicleChecks.mode(mc,"CREATIVE");
         var transfer=Class.forName("local.luke.power.creative.InventoryActions").getMethod("catalogueStack",net.minecraft.entity.player.PlayerEntity.class,ItemStack.class);
         Arrays.fill(mc.player.inventory.main,null);
@@ -132,7 +132,7 @@ final class Release150Checks {
         var template=new ItemStack(4,1,0); DeathChecks.tag(template).putString("test","catalogue");
         transfer.invoke(null,mc.player,template);
         check(mc.player.inventory.main[0].count==64 && DeathChecks.tag(mc.player.inventory.main[0]).getString("test").equals("catalogue"),"stack or NBT lost");
-        check(mc.player.inventory.getCursorStack()==held && template.count==1,"cursor or catalogue changed");
+        check(mc.player.inventory.getCursorStack()==held && template.count==1,"cursor or catalog changed");
         transfer.invoke(null,mc.player,new ItemStack(257,1,37));
         check(mc.player.inventory.main[1].count==1 && mc.player.inventory.main[1].getDamage()==37,"tool limit/damage");
         for(int i=0;i<36;i++) mc.player.inventory.main[i]=new ItemStack(4,64,0);

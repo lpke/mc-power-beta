@@ -14,25 +14,25 @@ final class ChatWrapChecks {
     var world = AccessRules.of(mc.world.method_262());
     boolean cheats = world.allAllowed();
     try {
-      for (char code : "0123456789abcdefABCDEF".toCharArray()) test("chat wraps colour " + code, () -> {
-        checkMessage(mc, messages, "§" + code + "Coloured chat continues over several lines. ".repeat(5));
+      for (char code : "0123456789abcdefABCDEF".toCharArray()) test("chat wraps color " + code, () -> {
+        checkMessage(mc, messages, "§" + code + "Colored chat continues over several lines. ".repeat(5));
         check(messages.size() >= 3, "message did not wrap repeatedly");
         for (var line : messages) check(line.text.startsWith("§" + code), line.text);
       });
-      test("chat preserves colour changes, resets and boundary codes", () -> {
+      test("chat preserves color changes, resets and boundary codes", () -> {
         checkMessage(mc, messages, "§e[WE] §c" + "Red ".repeat(40) + "§a" + "Green ".repeat(40)
             + "§r" + "White ".repeat(40));
         String full = "§c" + "W".repeat(40) + "§a" + "W".repeat(50);
         checkMessage(mc, messages, full);
-        check(messages.get(messages.size() - 2).text.startsWith("§a"), "boundary colour lost");
+        check(messages.get(messages.size() - 2).text.startsWith("§a"), "boundary color lost");
       });
       test("plain chat and subsequent messages stay unchanged", () -> {
         checkMessage(mc, messages, "Plain chat ".repeat(30));
         for (var line : messages) check(!line.text.contains("§"), line.text);
         mc.inGameHud.addChatMessage("Short plain message");
-        check(messages.get(0).text.equals("Short plain message"), "colour leaked between messages");
+        check(messages.get(0).text.equals("Short plain message"), "color leaked between messages");
       });
-      test("WorldEdit permission warning retains its colour on every wrapped line", () -> {
+      test("WorldEdit permission warning retains its color on every wrapped line", () -> {
         world.allAllowed(false); messages.clear();
         var result = ChatChecks.submit(mc, "//set stone");
         check(result.size() == 1 && result.get(0).contains("Requires allow_world_editing"), result.toString());
@@ -59,7 +59,7 @@ final class ChatWrapChecks {
     var expectedText = new StringBuilder(); var expectedColours = new StringBuilder();
     append(text, expectedText, expectedColours);
     check(visible.toString().equals(expectedText.toString()), "wrapping lost or duplicated text");
-    check(colours.toString().equals(expectedColours.toString()), "wrapping changed character colours");
+    check(colours.toString().equals(expectedColours.toString()), "wrapping changed character colors");
   }
 
   private static void append(String text, StringBuilder visible, StringBuilder colours) {

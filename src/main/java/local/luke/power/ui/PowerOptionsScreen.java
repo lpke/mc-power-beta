@@ -50,11 +50,14 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private record View(String page, double scroll, double sideScroll, String query,
-      boolean changedOnly, List<String> conflicts, List<String> related, String relatedLabel, Set<String> collapsed,
+      boolean changedOnly, List<String> conflicts, String highlighted, Set<String> collapsed,
       boolean showDisabled, int selected, boolean libraryOpen, MusicLibraryScreen.State library) {}
   private final Deque<View> history = new ArrayDeque<>();
-  private List<String> relatedIds = List.of();
-  private String relatedLabel = "";
+  private String highlightedId = "";
+  private String focusAnchorId = "";
+  private double focusAnchorScroll, focusAnchorSideScroll;
+  private record EditorReturn(Screen screen, View view, List<View> history) {}
+  private EditorReturn editorReturn;
 
   private static View rememberedView;
   private static List<View> rememberedHistory = List.of();
@@ -106,8 +109,9 @@ public final class PowerOptionsScreen extends UiScreen {
   }
   private int origin() { return (width - uiWidth()) / 2; }
   private int right() { return origin() + uiWidth(); }
-  private int footerY() { return height - (uiWidth() < (controls() || video() || directPause ? 700 : 470) ? 51 : 28); }
-  private int resetX() { return origin() + 8 + (directPause ? 50 : 0); }
+  private boolean pauseActions() { return directPause && editorReturn == null; }
+  private int footerY() { return height - (uiWidth() < (controls() || video() || pauseActions() ? 700 : 470) ? 51 : 28); }
+  private int resetX() { return origin() + 8 + (pauseActions() ? 50 : 0); }
   private int changesX() { return resetX() + 94; }
   private int changesEnd() { return footerY() < height - 28 ? right() - 8 : (controls() || video() ? disabledX() : actionX(0)) - 4; }
   private int actionWidth() { return uiWidth() < 470 ? 54 : 66; }
@@ -122,8 +126,9 @@ public final class PowerOptionsScreen extends UiScreen {
 
   public static void openMap(net.minecraft.client.Minecraft mc, Screen parent) {
     PowerOptionsScreen screen = new PowerOptionsScreen(parent);
-    screen.page = "Map"; screen.search.setText(""); screen.relatedIds = List.of();
+    screen.page = "Map"; screen.search.setText(""); screen.highlightedId = "";
     screen.conflictIds = List.of(); screen.changedOnly = false; screen.scroll = 0;
+    screen.history.clear(); screen.libraryOpen = false;
     mc.setScreen(screen);
   }
 
@@ -144,7 +149,7 @@ public final class PowerOptionsScreen extends UiScreen {
     screen.creationRules = draft;
     screen.session = local.luke.power.config.backend.CreationRulesBackend.open(draft);
     screen.page = "Game rules"; screen.search.setText(""); screen.changedOnly = false;
-    screen.conflictIds = List.of(); screen.relatedIds = List.of(); screen.history.clear();
+    screen.conflictIds = List.of(); screen.highlightedId = ""; screen.history.clear();
     screen.collapsed.clear(); screen.scroll = 0; screen.sideScroll = 0; screen.libraryOpen = false;
     mc.setScreen(screen);
   }
@@ -155,7 +160,7 @@ public final class PowerOptionsScreen extends UiScreen {
     screen.savedWorldName = world.name();
     screen.session = local.luke.power.config.backend.SavedWorldBackend.open(world);
     screen.page = "Game rules"; screen.search.setText(""); screen.changedOnly = false;
-    screen.conflictIds = List.of(); screen.relatedIds = List.of(); screen.history.clear();
+    screen.conflictIds = List.of(); screen.highlightedId = ""; screen.history.clear();
     screen.collapsed.clear(); screen.scroll = 0; screen.sideScroll = 0; screen.libraryOpen = false;
     mc.setScreen(screen);
   }
@@ -198,7 +203,7 @@ public final class PowerOptionsScreen extends UiScreen {
     PowerOptionsScreen screen = new PowerOptionsScreen(parent);
     screen.page = "Audio";
     screen.search.setText(""); screen.changedOnly = false;
-    screen.conflictIds = List.of(); screen.relatedIds = List.of(); screen.history.clear();
+    screen.conflictIds = List.of(); screen.highlightedId = ""; screen.history.clear();
     screen.libraryState = null; screen.libraryOpen = true;
     mc.setScreen(screen);
     if (screen.library == null) return;
@@ -236,14 +241,14 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private View view() {
     return new View(page, scroll, sideScroll, search.text(), changedOnly, conflictIds,
-        relatedIds, relatedLabel, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state());
+        highlightedId, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state());
   }
 
   private void rememberPosition() {
     if (isolatedRules()) return;
     rememberedView = view();
     rememberedHistory = List.copyOf(history);
-    if (!changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty() && search.text().isBlank()) {
+    if (!changedOnly && conflictIds.isEmpty() && search.text().isBlank()) {
       rememberedPage = page;
       positions.put(page, scroll);
       rememberedSideScroll = sideScroll;
@@ -306,54 +311,91 @@ public final class PowerOptionsScreen extends UiScreen {
     selected = -1;
   }
   private void back() {
+    if (editorReturn != null && history.size() <= 1) { returnToEditor(); return; }
     if (history.isEmpty()) return;
     restore(history.pop());
     layout();
   }
   private void restore(View view) {
+    focusAnchorId = "";
     page = view.page; scroll = view.scroll; sideScroll = view.sideScroll;
     search.setText(view.query); search.selectAll(); search.focused = false;
-    changedOnly = view.changedOnly; conflictIds = view.conflicts; relatedIds = view.related; relatedLabel = view.relatedLabel;
+    changedOnly = view.changedOnly; conflictIds = view.conflicts; highlightedId = view.highlighted;
     collapsed.clear(); collapsed.addAll(view.collapsed);
     showDisabled = view.showDisabled; selected = view.selected;
     libraryOpen = view.libraryOpen; libraryState = view.library;
     if (library != null) library.restore(libraryState);
   }
-  private void linkedControls(Setting setting) {
-    List<Setting> bindings = ControlLinks.controls(session, setting);
-    if (bindings.isEmpty()) return;
-    rememberPosition(); pushView();
-    page = "Controls";
-    libraryOpen = false;
-    relatedIds = bindings.stream().map(s -> s.id).toList();
-    relatedLabel = setting.label;
-    conflictIds = List.of(); changedOnly = false; search.setText(""); scroll = 0;
+  /** Visit Controls without publishing or replacing the isolated editor draft. */
+  void openRelatedControl(Screen editor, Setting setting) {
+    Setting target = ControlLinks.controls(session, setting).stream().findFirst().orElse(null);
+    if (target == null) return;
+    editorReturn = new EditorReturn(editor, view(), List.copyOf(history));
+    history.clear();
+    openSetting(target);
+    minecraft.setScreen(this);
+  }
+  private void returnToEditor() {
+    EditorReturn destination = editorReturn;
+    if (destination == null) return;
+    editorReturn = null;
+    restore(destination.view);
+    history.clear(); history.addAll(destination.history);
     layout();
+    minecraft.setScreen(destination.screen);
+  }
+  private void closeOptions() {
+    if (editorReturn != null) returnToEditor();
+    else minecraft.setScreen(exitTarget);
+  }
+
+  private void linkedControls(Setting setting) {
+    ControlLinks.controls(session, setting).stream().findFirst().ifPresent(this::openSetting);
   }
   private void related(Setting key) {
     Setting target = ControlLinks.related(session, key);
-    if (target == null) return;
+    if (target != null) openSetting(target);
+  }
+  private HudEditorScreen openHudSetting(String id) {
+    if (editorReturn != null && editorReturn.screen instanceof HudEditorScreen editor) {
+      if (!id.equals(HudEditorSettings.ENTRY)) editor.focusSetting(id);
+      returnToEditor();
+      return editor;
+    }
+    HudEditorScreen editor = new HudEditorScreen(this, id);
+    minecraft.setScreen(editor);
+    return editor;
+  }
+  private void openSetting(Setting target) {
+    if (HudEditorSettings.contains(target) && !target.id.equals(HudEditorSettings.ENTRY)) {
+      openHudSetting(target.id);
+      return;
+    }
     rememberPosition();
     pushView();
-    relatedIds = ControlLinks.settings(session, key).stream().map(s -> s.id).toList();
     page = target.page;
     libraryOpen = false;
-    conflictIds = List.of();
-    changedOnly = false;
-    search.setText("");
+    conflictIds = List.of(); changedOnly = false; search.setText("");
+    collapsed.remove(page + "/" + target.group);
+    highlightedId = target.id;
+    if (target.kind == Setting.Kind.KEY && !ControlLinks.enabled(session, target)) showDisabled = true;
     scroll = 0;
+    focusAnchorId = target.id;
+    focusAnchorScroll = scroll;
+    focusAnchorSideScroll = sideScroll;
     layout();
   }
 
   private void openGroup(Setting setting) {
-    if (HudEditorSettings.contains(setting) && !setting.id.equals(HudEditorSettings.ENTRY)) { minecraft.setScreen(new HudEditorScreen(this, setting.id)); return; }
+    if (HudEditorSettings.contains(setting) && !setting.id.equals(HudEditorSettings.ENTRY)) { openHudSetting(setting.id); return; }
     rememberPosition();
     pushView();
     page = setting.page;
     libraryOpen = false;
     search.setText("");
     changedOnly = false;
-    conflictIds = relatedIds = List.of();
+    conflictIds = List.of();
+    highlightedId = "";
     collapsed.remove(page + "/" + setting.group);
     scroll = 0;
     layout();
@@ -362,14 +404,18 @@ public final class PowerOptionsScreen extends UiScreen {
     layout();
   }
 
+  private boolean settingChanged(Setting setting) {
+    return ColorSettings.linked(setting, session.settings()).stream().anyMatch(Setting::changed);
+  }
+
   private boolean filtered() {
-    return changedOnly || !relatedIds.isEmpty() || !conflictIds.isEmpty();
+    return changedOnly || !conflictIds.isEmpty();
   }
 
   private List<Setting> resetTargets() {
-    List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
+    List<String> listed = conflictIds;
     return session.settings().stream()
-        .filter(s -> changedOnly ? s.changed() : listed.isEmpty() ? s.page.equals(page) : listed.contains(s.id))
+        .filter(s -> changedOnly ? settingChanged(s) : listed.isEmpty() ? s.page.equals(page) : listed.contains(s.id))
         .filter(this::selectedPreset)
         .filter(s -> SettingAccess.visible(session, s) && SettingAccess.reason(session, s).isEmpty())
         .toList();
@@ -401,7 +447,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private boolean audio() {
-    return page.equals("Audio") && search.text().isBlank() && !changedOnly && conflictIds.isEmpty() && relatedIds.isEmpty();
+    return page.equals("Audio") && search.text().isBlank() && !changedOnly && conflictIds.isEmpty();
   }
 
   private boolean video() {
@@ -429,6 +475,11 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private void layout() {
     if (session == null) return;
+    boolean revealTarget = !focusAnchorId.isEmpty() && focusAnchorId.equals(highlightedId)
+        && search.text().isBlank() && !filtered()
+        && Double.compare(scroll, focusAnchorScroll) == 0
+        && Double.compare(sideScroll, focusAnchorSideScroll) == 0;
+    if (!revealTarget) focusAnchorId = "";
     pages = PAGES.stream().filter(p -> p.equals("Defaults") && !isolatedRules() || session.settings().stream()
         .anyMatch(s -> s.page.equals(p) && SettingAccess.visible(session, s))).toList();
     if (!pages.contains(page) && !pages.isEmpty()) {
@@ -444,7 +495,7 @@ public final class PowerOptionsScreen extends UiScreen {
     int hudMode = session.settings().stream().filter(s -> s.id.equals(HudEditorSettings.ENTRY))
         .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(1);
     Map<String, List<Setting>> groups = new LinkedHashMap<>();
-    List<String> listed = conflictIds.isEmpty() ? relatedIds : conflictIds;
+    List<String> listed = conflictIds;
     List<Setting> candidates = listed.isEmpty() ? SettingsLayout.ordered(session.settings()) : listed.stream()
         .map(id -> session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElse(null))
         .filter(Objects::nonNull).toList();
@@ -454,11 +505,12 @@ public final class PowerOptionsScreen extends UiScreen {
             && !s.id.startsWith("audio.sound.music:")).toList();
     if (!query.isEmpty() && listed.isEmpty()) {
       for (Setting s : candidates) scores.put(s.id, FuzzySearch.score(query, s.label, s.description + " " + s.group + " " + s.page
+          + (ColorSettings.opacity(s, session.settings()) != null ? " color opacity transparency" : "")
           + (HudEditorSettings.contains(s) ? " HUD editor " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode)) : "")));
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
     }
     for (Setting s : candidates) {
-      if (s.backend.equals("defaults") || HudEditorSettings.internal(s)) continue;
+      if (s.backend.equals("defaults") || HudEditorSettings.internal(s) || ColorSettings.hiddenOpacity(s, session.settings())) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
           && (HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY)
               || HudEditorSettings.lettering(s))) continue;
@@ -468,7 +520,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (s.group.equals("Music data")) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty() && (s.group.equals("Track rotation") || s.id.startsWith("audio.sound.music:"))) continue;
       if (listed.isEmpty() && s.kind == Setting.Kind.KEY && !showDisabled && !ControlLinks.enabled(session, s)) continue;
-      if ((!changedOnly || s.changed()) && (!listed.isEmpty() || (query.isEmpty()
+      if ((!changedOnly || settingChanged(s)) && (!listed.isEmpty() || (query.isEmpty()
           ? changedOnly || s.page.equals(page)
           : scores.getOrDefault(s.id, FuzzySearch.NONE) < FuzzySearch.NONE)))
         groups.computeIfAbsent(query.isEmpty() && !changedOnly ? s.group
@@ -495,9 +547,32 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     rows = next;
     sectionKeys = rows.stream().filter(Row::heading).map(r -> sectionKey(r.group)).toList();
+    if (revealTarget) {
+      boolean found = false;
+      for (int i = 0; i < rows.size(); i++) {
+        Row row = rows.get(i);
+        if (row.setting == null || !row.setting.id.equals(focusAnchorId)) continue;
+        selected = i;
+        int viewport = Math.max(0, bottom() - top());
+        scroll = SettingFocus.scroll(row.y, row.height, viewport, contentHeight(), SettingsGroup.HEIGHT);
+        // Tiny layouts may fit a complete setting without also fitting its heading.
+        scroll = Math.max(scroll, row.y + row.height - viewport);
+        found = true;
+        break;
+      }
+      if (found) {
+        int tabY = pages.indexOf(page) * 22;
+        if (tabY < sideScroll) sideScroll = tabY;
+        else if (tabY + 22 > sideScroll + bottom() - 24) sideScroll = tabY + 22 - (bottom() - 24);
+      } else focusAnchorId = "";
+    }
     scroll = Math.max(0, Math.min(scroll, Math.max(0, y - (bottom() - top()))));
     sideScroll =
         Math.max(0, Math.min(sideScroll, Math.max(0, pages.size() * 22 - (bottom() - 24))));
+    if (!focusAnchorId.isEmpty()) {
+      focusAnchorScroll = scroll;
+      focusAnchorSideScroll = sideScroll;
+    }
   }
 
   public void tick() {
@@ -638,9 +713,9 @@ public final class PowerOptionsScreen extends UiScreen {
     if (canClear() && inside(x, y, clearSearchX(), 27, 18, 20)) {
       click();
       if (libraryVisible()) { library.clearQuery(); return; }
-      if (!history.isEmpty() && (!conflictIds.isEmpty() || !relatedIds.isEmpty())) { back(); return; }
+      if (!history.isEmpty() && !conflictIds.isEmpty()) { back(); return; }
       conflictIds = List.of();
-      relatedIds = List.of();
+      highlightedId = "";
       search.setText("");
       search.selectAll();
       scroll = 0;
@@ -657,7 +732,7 @@ public final class PowerOptionsScreen extends UiScreen {
         rememberPosition();
         click();
         history.clear();
-        relatedIds = List.of();
+        if (!acceptLocation) highlightedId = "";
         page = pages.get(index);
         conflictIds = List.of();
         changedOnly = false;
@@ -667,6 +742,7 @@ public final class PowerOptionsScreen extends UiScreen {
         if (page.equals("Audio")) closeLibrary();
         selected = -1;
         layout();
+        if (editorReturn != null) editorReturn = new EditorReturn(editorReturn.screen, view(), List.of());
       }
       return;
     }
@@ -743,15 +819,16 @@ public final class PowerOptionsScreen extends UiScreen {
           return;
         }
         selected = i;
+        highlightedId = "";
         Setting s = r.setting;
         if (!SettingAccess.reason(session, s).isEmpty()) return;
         int controlY = ry + SettingRows.buttonOffset(span());
         if (y < controlY) return;
         if (!s.id.equals(HudEditorSettings.ENTRY) && x >= right() - 34) {
           click();
-          s.reset();
+          ColorSettings.reset(s, session.settings());
           if (s.id.equals("interface.debugOrder")) session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).forEach(Setting::reset);
-          changed(s);
+          changed(ColorSettings.linked(s, session.settings()), false);
           return;
         }
         if (s.kind == Setting.Kind.KEY && !conflicts(s).isEmpty() && x >= controlLeft(r) - 12 && x < controlLeft(r)) {
@@ -769,7 +846,7 @@ public final class PowerOptionsScreen extends UiScreen {
           return;
         }
         if (x < mainControlLeft(r) || x >= controlEnd(s)) return;
-        if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || HudEditorSettings.lettering(s) || ItemEditors.accepts(s)) activate(s, button == 1 ? -1 : 1);
+        if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || HudEditorSettings.lettering(s) || ItemEditors.accepts(s) || ColorSettings.accepts(s)) activate(s, button == 1 ? -1 : 1);
         else if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0 && s.slider()) {
             dragging = s;
@@ -796,7 +873,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (button != 0) return;
     if (video() && minecraft.world != null && inside(x, y, disabledX(), height - 28, 90, 20)) { click(); hidden = true; return; }
-    if (directPause && inside(x, y, origin() + 8, footerY(), 46, 20)) {
+    if (pauseActions() && inside(x, y, origin() + 8, footerY(), 46, 20)) {
       if (MenuPreferences.current().autoApply && session.changes() > 0) save(false, false);
       click(); exitTarget = new net.minecraft.class_525();
       if (session.changes() > 0) confirmClose = true; else minecraft.setScreen(exitTarget);
@@ -814,7 +891,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if ((session.changes() > 0 || changedOnly) && inside(x, y, changesX(), footerY(), changesEnd - changesX(), 20)) {
       click();
       conflictIds = List.of();
-      relatedIds = List.of();
+      highlightedId = "";
       changedOnly = !changedOnly;
       search.setText("");
       scroll = 0;
@@ -823,6 +900,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (inside(x, y, actionX(0), height - 28, actionWidth(), 20)) {
       click();
+      if (editorReturn != null) { returnToEditor(); return; }
       if (session.changes() > 0) confirmClose = true;
       else minecraft.setScreen(parent);
       return;
@@ -836,11 +914,10 @@ public final class PowerOptionsScreen extends UiScreen {
     error = "";
     click();
     if (s.id.equals("interface.debugOrder")) {
-      var editor = new HudEditorScreen(this, s.id);
-      minecraft.setScreen(editor); editor.beginReorder(); return;
+      openHudSetting(s.id).beginReorder(); return;
     }
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor")) {
-      minecraft.setScreen(new HudEditorScreen(this, s.id.equals("maps.hudEditor") ? "maps.size" : s.id));
+      openHudSetting(s.id.equals("maps.hudEditor") ? "maps.size" : s.id);
       return;
     }
     if (HudEditorSettings.lettering(s)) {
@@ -862,7 +939,13 @@ public final class PowerOptionsScreen extends UiScreen {
       minecraft.setScreen(ItemEditors.screen(this, s));
       return;
     }
-    if (s.numeric() && !s.slider() || s.kind == Setting.Kind.TEXT && !ColourScreen.accepts(s)) {
+    if (ColorSettings.accepts(s)) {
+      Setting swatches = session.settings().stream().filter(value -> value.id.equals("interface.colours")).findFirst().orElse(null);
+      minecraft.setScreen(new ColourScreen(this, s, ColorSettings.opacity(s, session.settings()),
+          () -> changed(ColorSettings.linked(s, session.settings()), false), swatches));
+      return;
+    }
+    if (s.numeric() && !s.slider() || s.kind == Setting.Kind.TEXT) {
       Row row = rows.stream().filter(r -> r.setting == s).findFirst().orElseThrow();
       int y = top() + row.y - (int) scroll + SettingRows.buttonOffset(span());
       valueEditor.begin(s, s, () -> changed(s), mainControlLeft(row), y,
@@ -877,7 +960,6 @@ public final class PowerOptionsScreen extends UiScreen {
               new IntegerArrayDraft.Rules(2, 32, 16, true), "Distance", "chunks"));
         else if (s.id.equals("audio.musicDirectories") || s.id.equals("audio.menuDirectories"))
           minecraft.setScreen(new FolderScreen(this, s));
-        else if (ColourScreen.accepts(s)) minecraft.setScreen(new ColourScreen(this, s));
         else minecraft.setScreen(new ValueScreen(this, s));
       }
       default -> {
@@ -899,7 +981,7 @@ public final class PowerOptionsScreen extends UiScreen {
         savedRestart = false;
         error = "Saved. Restart the game for marked changes.";
         confirmClose = false;
-      } else if (close) minecraft.setScreen(exitTarget);
+      } else if (close) closeOptions();
       layout();
     } catch (Exception e) {
       PowerBeta.LOG.error("Settings save failed; restoring previous values", e);
@@ -968,6 +1050,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (key == Keyboard.KEY_ESCAPE) {
       if (libraryVisible()) { library.back(this::closeLibrary); return; }
       if (!history.isEmpty()) { back(); return; }
+      if (editorReturn != null) { returnToEditor(); return; }
       if (!conflictIds.isEmpty()) { conflictIds = List.of(); scroll = positions.getOrDefault(page, 0d); layout(); return; }
       if (search.focused) {
         search.focused = false;
@@ -991,7 +1074,7 @@ public final class PowerOptionsScreen extends UiScreen {
       search.key(c, key);
       if (!before.equals(search.text())) {
         conflictIds = List.of();
-        relatedIds = List.of();
+        highlightedId = "";
         scroll = 0;
         selected = -1;
         layout();
@@ -999,6 +1082,7 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (key == Keyboard.KEY_DOWN || key == Keyboard.KEY_UP || key == Keyboard.KEY_TAB) {
+      highlightedId = "";
       int dir = key == Keyboard.KEY_UP ? -1 : 1;
       for (int attempt = 0; attempt < Math.max(1, rows.size()); attempt++) {
         selected = Math.floorMod(selected + dir, Math.max(1, rows.size()));
@@ -1020,6 +1104,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private String value(Setting s) {
+    if (ColorSettings.accepts(s)) return ColorSettings.label(s, session.settings());
     if (s.id.equals("interface.debugOrder")) return "Reorder";
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || s.id.equals("logo.logo.lines")) return "Edit...";
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
@@ -1148,7 +1233,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (libraryVisible() || !history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
-        !conflictIds.isEmpty() ? "Conflicting bindings" : !relatedIds.isEmpty() ? controls() ? "Related controls for \"" + relatedLabel + "\"" : "Related settings"
+        !conflictIds.isEmpty() ? "Conflicting bindings"
         : changedOnly ? "Search changed settings..." : "Search all settings...");
     if (canClear()) button("x", clearSearchX(), 27, 18, 20, mx, my, true);
     boolean expandSections = libraryVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
@@ -1201,6 +1286,13 @@ public final class PowerOptionsScreen extends UiScreen {
       String lock = SettingAccess.reason(session, s);
       boolean editable = lock.isEmpty();
       boolean hover = inside(mx, listMouseY, left(), y, span(), row.height) && listMouseY >= top() && listMouseY < bottom();
+      if (s.id.equals(highlightedId)) {
+        fill(left() - 2, y, right() - 12, y + row.height, 0x403d4c18);
+        fill(left() - 2, y, right() - 12, y + 1, 0xffffff66);
+        fill(left() - 2, y + row.height - 1, right() - 12, y + row.height, 0xffffff66);
+        fill(left() - 2, y, left() - 1, y + row.height, 0xffffff66);
+        fill(right() - 13, y, right() - 12, y + row.height, 0xffffff66);
+      }
       if (hover) fill(left() - 2, y, right() - 12, y + row.height, 0x60000000);
       boolean narrow = row.height == 40;
       int cy = y + SettingRows.buttonOffset(span()),
@@ -1212,36 +1304,37 @@ public final class PowerOptionsScreen extends UiScreen {
           label,
           left() + 3 + indent,
           y + SettingRows.labelOffset(span()),
-          s.changed() ? 0xffdd88 : 0xc4c4c4);
+          settingChanged(s) ? 0xffdd88 : 0xc4c4c4);
       if (s.restart) text("*", left() + 6 + indent + textRenderer.getWidth(label),
           y + SettingRows.labelOffset(span()), 0xe8a0a0);
       List<Setting> conflicts = conflicts(s);
-      boolean numeric = s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL;
+      boolean numeric = s.numeric() && !ColorSettings.accepts(s);
       int valueEnd = controlEnd(s);
       if (editable && valueEditor.editing(s))
         valueEditor.render(this, controlLeft, cy, valueEnd - controlLeft, mx, listMouseY, rowsTop, bottom());
+      else if (editable && ColorSettings.accepts(s)) colourButton(ColorSettings.hex(s), ColorSettings.opacityPercent(s, session.settings()),
+          controlLeft, cy, valueEnd - controlLeft, mx, listMouseY);
       else if (s.slider() && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
           (s.value.getAsDouble() - s.min) / Math.max(0.000001, s.max - s.min));
-      else if (editable && ColourScreen.accepts(s)) colourButton(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY);
       else if (s.kind == Setting.Kind.KEY && editable) button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, true,
           local.luke.power.input.Chord.decode(s.value.getAsInt()).key() == 0 ? 0x999999 : -1);
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, editable);
-      boolean defaultValue = s.value.equals(s.defaultValue) && (!s.id.equals("interface.debugOrder")
+      boolean defaultValue = ColorSettings.atDefault(s, session.settings()) && (!s.id.equals("interface.debugOrder")
           || session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).allMatch(value -> value.value.equals(value.defaultValue)));
       if (!s.id.equals(HudEditorSettings.ENTRY)) button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !defaultValue);
-      if (customise(s)) button("Customise", controlLeft(row), cy, 62, 18, mx, listMouseY, editable);
+      if (customise(s)) button("Customize", controlLeft(row), cy, 62, 18, mx, listMouseY, editable);
       else if (controlLeft > controlLeft(row)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, listMouseY, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
         if (!editable) tip = Tooltips.setting(s, lock);
-        else if (!s.id.equals(HudEditorSettings.ENTRY) && mx >= right() - 34) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
+        else if (!s.id.equals(HudEditorSettings.ENTRY) && mx >= right() - 34) { tip = ColorSettings.accepts(s) ? "Reset color" + (ColorSettings.opacity(s, session.settings()) == null ? "" : " and opacity") + " to Defaults" : "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
         else if (!conflicts.isEmpty() && inside(mx, listMouseY, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
-          tip = customise(s) ? "Paint and customise the retro title lettering." : soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
+          tip = customise(s) ? "Paint and customize the retro title lettering." : soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = Tooltips.setting(s, valueEditor.editing(s) ? valueEditor.help()
             : ItemEditors.accepts(s) ? "Choose from the item or block list."
             : numeric && mx >= controlLeft ? s.slider() ? "Right-click to enter an exact value." : "Click to enter an exact value." : "");
@@ -1282,10 +1375,10 @@ public final class PowerOptionsScreen extends UiScreen {
       text(fit(session.changes() + (session.changes() == 1 ? " unsaved change" : " unsaved changes"), changesEnd - changesX() - 2),
           changesX(), footerY() + 6, hover || changedOnly ? 0xffffa0 : 0xffdd88);
     }
-    if (directPause) button("Menu", origin() + 8, footerY(), 46, 20, mx, my, true);
+    if (pauseActions()) button("Menu", origin() + 8, footerY(), 46, 20, mx, my, true);
     if (video()) button("Hide options", disabledX(), height - 28, 90, 20, mx, my, minecraft.world != null);
     if (controls()) button(showDisabled ? "Hide Disabled" : "Show Disabled", disabledX(), height - 28, 90, 20, mx, my, true);
-    button("Cancel", actionX(0), height - 28, actionWidth(), 20, mx, my, true);
+    button(editorReturn == null ? "Cancel" : "Back", actionX(0), height - 28, actionWidth(), 20, mx, my, true);
     button(MenuPreferences.current().autoApply ? "Auto apply" : "Apply", actionX(1), height - 28, actionWidth(), 20, mx, my, true);
     if (inside(mx, my, actionX(1), height - 28, actionWidth(), 20)) {
       tip = "Save changes without closing. Right-click to " + (MenuPreferences.current().autoApply ? "disable" : "enable") + " auto-apply: settings apply as you change them.";

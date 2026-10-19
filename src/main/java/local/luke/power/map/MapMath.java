@@ -4,11 +4,23 @@ package local.luke.power.map;
 public final class MapMath {
   public static final int SIZE = 64, PIXELS = SIZE * SIZE, MAX_LEVEL = 14;
   public static final int BORDER = 32000000;
+  private static final java.util.regex.Pattern CAVE_CONTEXT =
+      java.util.regex.Pattern.compile("cave-v2/a([0-9]{1,2})-b([0-9]{1,2})/p[0-7]");
 
   private MapMath() {}
 
-  public record Key(int dimension, int layer, int level, int x, int z) {
+  public record Key(int dimension, int layer, int level, int x, int z, String context) {
+    public Key(int dimension, int layer, int level, int x, int z) {
+      this(dimension, layer, level, x, z, "");
+    }
     public Key {
+      if (context == null) throw new IllegalArgumentException("Invalid map context");
+      if (!context.isEmpty()) {
+        var match = CAVE_CONTEXT.matcher(context);
+        if (layer < 0 || !match.matches() || Integer.parseInt(match.group(1)) > 32
+            || Integer.parseInt(match.group(2)) < 1 || Integer.parseInt(match.group(2)) > 64)
+          throw new IllegalArgumentException("Invalid map context");
+      }
       if (dimension < -1024
           || dimension > 1024
           || layer < -1
@@ -33,17 +45,25 @@ public final class MapMath {
     }
 
     public Key parent() {
-      return new Key(dimension, layer, level + 1, Math.floorDiv(x, 2), Math.floorDiv(z, 2));
+      return new Key(dimension, layer, level + 1, Math.floorDiv(x, 2), Math.floorDiv(z, 2), context);
+    }
+
+    public Key withContext(String context) {
+      return this.context.equals(context) ? this : new Key(dimension, layer, level, x, z, context);
     }
 
     public String file() {
-      return "d" + dimension + "/l" + layer + "/z" + level + "/" + x + "." + z + ".pbmap";
+      return (context.isEmpty() ? "" : context + "/") + "d" + dimension + "/l" + layer + "/z" + level + "/" + x + "." + z + ".pbmap";
     }
   }
 
   public static Key key(int dimension, int layer, int level, int x, int z) {
     int span = SIZE << level;
     return new Key(dimension, layer, level, Math.floorDiv(x, span), Math.floorDiv(z, span));
+  }
+
+  public static Key key(int dimension, int layer, int level, int x, int z, String context) {
+    return key(dimension, layer, level, x, z).withContext(context);
   }
 
   public static int index(int x, int z) {
@@ -89,7 +109,7 @@ public final class MapMath {
         | (int) ((a & 255) * (1 - p) + (b & 255) * p);
   }
 
-  /** Cursor-centred zoom keeps the block beneath the pointer fixed. */
+  /** Cursor-centered zoom keeps the block beneath the pointer fixed. */
   public static final class View {
     public double x, z, scale = 1;
 
@@ -98,12 +118,12 @@ public final class MapMath {
       this.z = z;
     }
 
-    public double worldX(double screen, double centre) {
-      return x + (screen - centre) / scale;
+    public double worldX(double screen, double center) {
+      return x + (screen - center) / scale;
     }
 
-    public double worldZ(double screen, double centre) {
-      return z + (screen - centre) / scale;
+    public double worldZ(double screen, double center) {
+      return z + (screen - center) / scale;
     }
 
     public void zoom(double multiplier, double dx, double dz) {

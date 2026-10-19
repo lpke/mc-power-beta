@@ -685,7 +685,7 @@
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableShiftClickingItemsIntoArmorSlots": {
     "page": "Inventory",
     "group": "Quick transfer",
-    "label": "Shift-click to equip armour",
+    "label": "Shift-click to equip armor",
     "description": "",
     "default": true,
     "restart": false
@@ -2081,7 +2081,7 @@
     "page": "Crafting",
     "group": "Recipes",
     "label": "Allow tool repair in crafting grid",
-    "description": "Combine two matching tools, shears, swords or armour pieces anywhere in the grid. Produces one item with their remaining durability plus a 10% bonus, capped at full durability.",
+    "description": "Combine two matching tools, shears, swords or armor pieces anywhere in the grid. Produces one item with their remaining durability plus a 10% bonus, capped at full durability.",
     "default": true,
     "restart": true
   },
@@ -2137,7 +2137,7 @@
     "page": "Crafting",
     "group": "Modern",
     "label": "Wool redyeing",
-    "description": "Combine 1 wool of any colour and 1 dye anywhere in the grid to make 1 wool in that dye colour.",
+    "description": "Combine 1 wool of any color and 1 dye anywhere in the grid to make 1 wool in that dye color.",
     "default": true,
     "restart": true
   },
@@ -2223,7 +2223,7 @@
     "page": "Crafting",
     "group": "Obtainable",
     "label": "Craftable cobwebs",
-    "description": "Arrange 5 string in an X, with one in each corner and one in the centre, to make 1 cobweb.",
+    "description": "Arrange 5 string in an X, with one in each corner and one in the center, to make 1 cobweb.",
     "default": true,
     "restart": true
   },
@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 2.6.1",
+    "default": "Power Beta 3.0.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -3296,8 +3296,8 @@
   "visual.swapEquipment": {
     "page": "Inventory",
     "group": "Clicking",
-    "label": "Swap tools and armour",
-    "description": "Click matching tools or armour with different durability to swap them. Singleplayer only; slot restrictions still apply.",
+    "label": "Swap tools and armor",
+    "description": "Click matching tools or armor with different durability to swap them. Singleplayer only; slot restrictions still apply.",
     "default": true
   },
   "tweaks.autoWalkHoldToWalk": {
@@ -3515,12 +3515,12 @@
   "keys.Auto-walk (toggle)": {
     "page": "Controls",
     "group": "Movement",
-    "order": 7
+    "order": 8
   },
   "keys.Fake sneak (toggle)": {
     "page": "Controls",
     "group": "Movement",
-    "order": 8,
+    "order": 9,
     "label": "Fake sneak (toggle)"
   },
   "keys.key.inventory": {
@@ -3617,8 +3617,8 @@
   },
   "keys.key.fog": {
     "page": "Controls",
-    "group": "Camera",
-    "order": 4,
+    "group": "Rendering",
+    "order": 2,
     "label": "Cycle render distance"
   },
   "keys.Toggle Freecam": {
@@ -3741,30 +3741,30 @@
   "keys.playerList": {
     "page": "Controls",
     "group": "Interface",
-    "order": 1
+    "order": 2
   },
   "keys.key.power_controls.hide_hud": {
     "page": "Controls",
     "group": "Interface",
-    "order": 2,
+    "order": 3,
     "label": "Hide HUD"
   },
   "keys.key.power_controls.debug_hud": {
     "page": "Controls",
     "group": "Interface",
-    "order": 3,
+    "order": 4,
     "label": "Debug HUD"
   },
   "keys.key.power_controls.toggle_fullscreen": {
     "page": "Controls",
     "group": "Interface",
-    "order": 4,
+    "order": 5,
     "label": "Toggle fullscreen"
   },
   "keys.powerbeta.infoHud": {
     "page": "Controls",
     "group": "Interface",
-    "order": 5
+    "order": 7
   },
   "keys.key.power_controls.take_screenshot": {
     "page": "Controls",
@@ -3962,8 +3962,8 @@
   "interface.debugTextColor": {
     "page": "Interface",
     "group": "Debug (F3) info",
-    "label": "Text colour",
-    "description": "Colour of all F3 debug text.",
+    "label": "Text color",
+    "description": "Color of all F3 debug text.",
     "order": 0
   },
   "visual.damageCameraShake": {
@@ -4742,7 +4742,7 @@
     "page": "Interface",
     "group": "Title screen",
     "label": "Title style",
-    "description": "Choose customisable retro block lettering or an original Beta, Java Edition or modern Minecraft logo. Your retro customisation is retained.",
+    "description": "Choose customizable retro block lettering or an original Beta, Java Edition or modern Minecraft logo. Your retro customization is retained.",
     "default": 0,
     "order": 0
   },
@@ -4983,7 +4983,7 @@
     "displayPrecision": 0
   },
   "maps.zoom": {
-    "page": "Map",
+    "page": "Interface",
     "group": "Minimap",
     "label": "Minimap zoom",
     "description": "GUI pixels per block. The zoom bindings also change this value.",
@@ -5033,10 +5033,10 @@
     "order": 14
   },
   "maps.colourMode": {
-    "page": "Map",
-    "group": "Terrain",
-    "label": "Terrain colours",
-    "description": "Texture colours use block textures and biome tints. Map colours use native Beta map materials.",
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Terrain colors",
+    "description": "Texture colors use block textures and biome tints. Map colors use native Beta map materials. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5050,7 +5050,7 @@
     "page": "Map",
     "group": "Terrain",
     "label": "Cave mapping",
-    "description": "Automatic maps the floor beneath a solid roof and in the Nether. Manual uses the selected ceiling.",
+    "description": "Surface maps the top terrain. Automatic switches to a finite cave window around the camera beneath a solid roof and in the Nether. Manual centers that window on the selected reference height. Cave checks use only loaded terrain.",
     "min": 0.0,
     "max": 2.0,
     "step": 1.0,
@@ -5064,8 +5064,8 @@
   "maps.caveTop": {
     "page": "Map",
     "group": "Terrain",
-    "label": "Manual cave ceiling",
-    "description": "Highest Y searched by manual cave maps. Cave data is separated into eight-block layers.",
+    "label": "Manual cave reference height",
+    "description": "Reference Y for the manual cave window. The above and below limits apply around this height. Lower values select deeper floors; higher values select higher floors. Previously mapped cave windows stay separate.",
     "min": 1.0,
     "max": 127.0,
     "step": 1.0,
@@ -5075,127 +5075,127 @@
     "page": "Map",
     "group": "Terrain",
     "label": "Automatic roof width",
-    "description": "Width of the solid roof check around the camera. Larger checks avoid cave mode beneath a single tree.",
+    "description": "Width of the solid-roof check around the camera. Lower values need fewer checks and enter cave mode beneath smaller roofs; higher values avoid cave mode beneath isolated trees but require more checks.",
     "min": 1.0,
     "max": 5.0,
     "step": 1.0,
     "order": 18
   },
   "maps.heightShading": {
-    "page": "Map",
-    "group": "Terrain",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Height shading",
-    "description": "Shade terrain according to its elevation.",
+    "description": "Shade terrain according to its elevation. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 19
   },
   "maps.slopeShading": {
-    "page": "Map",
-    "group": "Terrain",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Slope shading",
-    "description": "Shade changes in height to make slopes readable.",
+    "description": "Shade changes in height to make slopes readable. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 20
   },
   "maps.caveLighting": {
-    "page": "Map",
-    "group": "Terrain",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Cave light shading",
-    "description": "Shade cave floors using their sampled native block light.",
+    "description": "Shade cave floors using their sampled native block light. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 21
   },
   "maps.radar": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Entity radar",
-    "description": "Show nearby entities already known to the client. Never loads terrain or requests entities.",
+    "description": "Show nearby entities already known to the client. Never loads terrain or requests entities. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 22
   },
   "maps.players": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Players",
-    "description": "Show other loaded players as white markers.",
+    "description": "Show other loaded players as white markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 23
   },
   "maps.hostile": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Hostile mobs",
-    "description": "Show loaded hostile mobs as red markers.",
+    "description": "Show loaded hostile mobs as red markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 24
   },
   "maps.animals": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Animals",
-    "description": "Show loaded animals and water creatures as yellow markers.",
+    "description": "Show loaded animals and water creatures as yellow markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 25
   },
   "maps.items": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Dropped items",
-    "description": "Show loaded dropped items as small red markers.",
+    "description": "Show loaded dropped items as small red markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 26
   },
   "maps.otherEntities": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Other entities",
-    "description": "Show other loaded entities as purple markers.",
+    "description": "Show other loaded entities as purple markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 27
   },
   "maps.entityNames": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Entity names",
-    "description": "Show names beside nearby radar markers.",
+    "description": "Show names beside nearby radar markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 28
   },
   "maps.entityHeights": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Height arrows",
-    "description": "Mark entities substantially above or below the camera.",
+    "description": "Mark entities substantially above or below the camera. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 29
   },
   "maps.radarHeight": {
-    "page": "Map",
-    "group": "Entity radar",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Vertical radar range",
-    "description": "Maximum height difference in blocks for radar markers.",
+    "description": "Maximum height difference in blocks for radar markers. Also affects the World Map.",
     "min": 1.0,
     "max": 128.0,
     "step": 1.0,
@@ -5205,17 +5205,17 @@
     "page": "Map",
     "group": "Performance",
     "label": "Entity checks per tick",
-    "description": "Bounded number of loaded entities considered each tick.",
+    "description": "Maximum loaded entities checked per game tick and retained as radar markers. Lower values reduce work and may show fewer entities or refresh them later; higher values give fuller radar coverage and cost more CPU time.",
     "min": 16.0,
     "max": 1024.0,
     "step": 16.0,
     "order": 31
   },
   "maps.waypoints": {
-    "page": "Map",
-    "group": "Waypoints",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Map waypoints",
-    "description": "Show enabled waypoints on both maps. Saved data remains when disabled.",
+    "description": "Show enabled waypoints on both maps. Saved data remains when disabled. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5232,30 +5232,30 @@
     "order": 33
   },
   "maps.waypointNames": {
-    "page": "Map",
-    "group": "Waypoints",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Waypoint names",
-    "description": "Show names beside waypoint markers.",
+    "description": "Show names beside waypoint markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 34
   },
   "maps.waypointDistances": {
-    "page": "Map",
-    "group": "Waypoints",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Waypoint distances",
-    "description": "Show the horizontal distance to waypoint markers.",
+    "description": "Show the horizontal distance to waypoint markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 35
   },
   "maps.waypointDistance": {
-    "page": "Map",
-    "group": "Waypoints",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Waypoint range",
-    "description": "Maximum marker distance. Zero is unlimited. Always show on a waypoint ignores this limit within its dimension and set.",
+    "description": "Maximum marker distance. Zero is unlimited. Always show on a waypoint ignores this limit within its dimension and set. Also affects the World Map.",
     "min": 0.0,
     "max": 1000000.0,
     "step": 100.0,
@@ -5282,40 +5282,40 @@
     "order": 38
   },
   "maps.chunkGrid": {
-    "page": "Map",
-    "group": "Overlays",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Chunk grid",
-    "description": "Draw native sixteen-block chunk boundaries.",
+    "description": "Draw native sixteen-block chunk boundaries. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 39
   },
   "maps.slimeChunks": {
-    "page": "Map",
-    "group": "Overlays",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Slime chunks",
-    "description": "Highlight Beta slime chunks. Available only with a local world's actual seed.",
+    "description": "Highlight Beta slime chunks. Available only with a local world's actual seed. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 40
   },
   "maps.lightOverlay": {
-    "page": "Map",
-    "group": "Overlays",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Low-light shading",
-    "description": "Highlight sampled block light below eight. Cave maps are most useful for this overlay.",
+    "description": "Highlight sampled block light below eight. Cave maps are most useful for this overlay. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
     "order": 41
   },
   "maps.footsteps": {
-    "page": "Map",
-    "group": "Overlays",
+    "page": "Interface",
+    "group": "Minimap",
     "label": "Recent path",
-    "description": "Show a bounded recent path for this visit. Dimension changes start a new path.",
+    "description": "Show a bounded recent path for this visit. Dimension changes start a new path. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5335,7 +5335,7 @@
     "page": "Map",
     "group": "Performance",
     "label": "Terrain columns per tick",
-    "description": "Maximum columns sampled per game tick, also limited by a short time budget. Reads loaded terrain only.",
+    "description": "Maximum terrain columns sampled per game tick during normal play. Lower values reduce background work; higher values fill nearby terrain faster and can reduce frame rate. Reads loaded terrain only and also obeys a short time budget.",
     "min": 32.0,
     "max": 4096.0,
     "step": 32.0,
@@ -5345,7 +5345,7 @@
     "page": "Map",
     "group": "Performance",
     "label": "Cached map tiles",
-    "description": "Maximum shared resident terrain tiles, including coarse zoom levels. Larger values use more memory.",
+    "description": "Maximum terrain tiles kept in memory, including coarser zoom levels and uploaded textures. Lower values use less memory but reread and upload tiles more often; higher values keep panning smoother at a higher CPU and graphics memory cost.",
     "min": 64.0,
     "max": 1024.0,
     "step": 32.0,
@@ -5355,7 +5355,7 @@
     "page": "Map",
     "group": "Performance",
     "label": "Texture uploads per frame",
-    "description": "Maximum map tiles uploaded to the GPU per rendered frame.",
+    "description": "Maximum map tiles uploaded per rendered frame during normal play. Lower values reduce graphics work per frame; higher values show ready terrain sooner and can cause frame-time spikes.",
     "min": 1.0,
     "max": 16.0,
     "step": 1.0,
@@ -5365,7 +5365,7 @@
     "page": "Map",
     "group": "Performance",
     "label": "Terrain revisit interval",
-    "description": "Seconds before revisiting a sampled chunk to detect edits. New chunks are sampled first.",
+    "description": "Seconds between checks of already sampled terrain for edits. Lower values catch block changes sooner but do more background work; higher values reduce work but leave changed terrain outdated longer. New terrain is sampled first.",
     "min": 1.0,
     "max": 60.0,
     "step": 1.0,
@@ -5605,10 +5605,269 @@
     "page": "Map",
     "group": "Performance",
     "label": "Terrain updates per second",
-    "description": "Set the terrain update rate per second. Map movement and rotation follow every rendered frame. Lower values reduce background work.",
+    "description": "Terrain update passes per second. Lower values reduce background work and refresh the map less often; higher values keep terrain changes more current at a higher CPU cost. Map movement and rotation still follow every rendered frame.",
     "min": 1.0,
     "max": 20.0,
     "step": 1.0,
     "order": 43.5
+  },
+  "keys.powerbeta.sprint": {
+    "page": "Controls",
+    "group": "Movement",
+    "label": "Sprint on foot",
+    "order": 7
+  },
+  "keys.powerbeta.openCommands": {
+    "page": "Controls",
+    "group": "Interface",
+    "label": "Open commands",
+    "order": 1
+  },
+  "keys.powerbeta.debugGraph": {
+    "page": "Controls",
+    "group": "Interface",
+    "label": "Performance graph",
+    "order": 6
+  },
+  "keys.powerbeta.map": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "World map",
+    "order": 0
+  },
+  "keys.powerbeta.minimap": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Minimap (toggle)",
+    "order": 1
+  },
+  "keys.powerbeta.enlargeMap": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Enlarge minimap (hold)",
+    "order": 2
+  },
+  "keys.powerbeta.mapZoomIn": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Minimap zoom in",
+    "order": 3
+  },
+  "keys.powerbeta.mapZoomOut": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Minimap zoom out",
+    "order": 4
+  },
+  "keys.powerbeta.waypoint": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Create waypoint",
+    "order": 5
+  },
+  "keys.powerbeta.waypoints": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Waypoint list",
+    "order": 6
+  },
+  "keys.powerbeta.toggleWorldWaypoints": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "In-world waypoints (toggle)",
+    "order": 7
+  },
+  "keys.powerbeta.toggleMapWaypoints": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Map waypoints (toggle)",
+    "order": 8
+  },
+  "keys.powerbeta.toggleMapRadar": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Entity radar (toggle)",
+    "order": 9
+  },
+  "keys.powerbeta.toggleMapCaves": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Cycle cave mapping",
+    "order": 10
+  },
+  "keys.powerbeta.toggleMapGrid": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Chunk grid (toggle)",
+    "order": 11
+  },
+  "keys.powerbeta.clearMapDestination": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Clear map destination",
+    "order": 12
+  },
+  "keys.powerbeta.mapSettings": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Map settings",
+    "order": 13
+  },
+  "keys.powerbeta.mapZoomReset": {
+    "page": "Controls",
+    "group": "Maps",
+    "label": "Reset minimap zoom",
+    "order": 14
+  },
+  "maps.pathColor": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Path color",
+    "description": "Color of the recent path. Also affects the World Map.",
+    "min": 0,
+    "max": 16777215,
+    "step": 1,
+    "order": 42.1
+  },
+  "maps.pathOpacity": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Path opacity",
+    "description": "Opacity of the recent path. Also affects the World Map.",
+    "min": 0,
+    "max": 1,
+    "step": 0.01,
+    "unit": "%",
+    "displayDivisor": 0.01,
+    "displayPrecision": 0,
+    "order": 42.2
+  },
+  "maps.playerIcon": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Player marker",
+    "description": "Shape of the marker for your current camera position. Also affects the World Map.",
+    "min": 0,
+    "max": 3,
+    "step": 1,
+    "choices": [
+      "Embossed arrow",
+      "Flat arrow",
+      "Triangle",
+      "Dot"
+    ],
+    "order": 14.1
+  },
+  "maps.playerColor": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Player marker color",
+    "description": "Color of your camera-position marker. Also affects the World Map.",
+    "min": 0,
+    "max": 16777215,
+    "step": 1,
+    "order": 14.2
+  },
+  "maps.playerOpacity": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Player marker opacity",
+    "description": "Opacity of your camera-position marker. Also affects the World Map.",
+    "min": 0,
+    "max": 1,
+    "step": 0.01,
+    "unit": "%",
+    "displayDivisor": 0.01,
+    "displayPrecision": 0,
+    "order": 14.3
+  },
+  "maps.playerSize": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Player marker size",
+    "description": "Scale of your camera-position marker. Lower values cover less terrain; higher values make the marker easier to see. Also affects the World Map.",
+    "min": 50,
+    "max": 200,
+    "step": 5,
+    "unit": "%",
+    "displayPrecision": 0,
+    "order": 14.4
+  },
+  "maps.automaticDetail": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Automatic world map detail",
+    "description": "Choose World Map detail from zoom and physical game-window pixels. On uses coarser tiles only when finer detail is smaller than a screen pixel. Off requests individual block detail at every zoom, taking longer to fill distant views. The minimap and the compatibility renderer retain automatic detail to bound memory use.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 43.2
+  },
+  "maps.mapSmoothing": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Smooth map textures",
+    "description": "On blends neighboring map pixels for a softer view. Off keeps crisp pixels and uses simpler texture filtering. Does not change terrain sampling.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 21.1
+  },
+  "maps.mapOpenColumns": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Map-open terrain columns per tick",
+    "description": "Maximum terrain columns sampled per game tick while the World Map is open. Lower values spread work over more ticks; higher values fill the map faster and can reduce frame rate. Reads loaded terrain only and also obeys the map-open time budget.",
+    "min": 32,
+    "max": 8192,
+    "step": 32,
+    "order": 48
+  },
+  "maps.mapOpenUploads": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Map-open texture uploads per frame",
+    "description": "Maximum map tiles uploaded per rendered frame while the World Map is open. Lower values reduce graphics work per frame; higher values show ready terrain sooner and can cause frame-time spikes.",
+    "min": 1,
+    "max": 32,
+    "step": 1,
+    "order": 49
+  },
+  "maps.mapOpenBudget": {
+    "page": "Map",
+    "group": "Performance",
+    "label": "Map-open work budget (ms)",
+    "description": "Time allowed for terrain sampling per game tick, and for map-image preparation per rendered frame, while the World Map is open. Lower values leave more time for smooth frames; higher values fill the map sooner but can reduce frame rate. Image preparation runs more often at higher frame caps.",
+    "min": 0.5,
+    "max": 8,
+    "step": 0.5,
+    "order": 50
+  },
+  "maps.caveAbove": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Cave search above reference",
+    "description": "Blocks searched above the camera height in Automatic mode or the selected reference height in Manual mode. Lower values keep the search close and reduce work; higher values include higher floors and require more checks. Reads loaded terrain only.",
+    "min": 0,
+    "max": 32,
+    "step": 1,
+    "order": 18.1
+  },
+  "maps.caveBelow": {
+    "page": "Map",
+    "group": "Terrain",
+    "label": "Cave search below reference",
+    "description": "Blocks searched below the camera height in Automatic mode or the selected reference height in Manual mode. Lower values keep the search close and reduce work; higher values find deeper floors and require more checks. Reads loaded terrain only.",
+    "min": 1,
+    "max": 64,
+    "step": 1,
+    "order": 18.2
+  },
+  "maps.hudEditor": {
+    "page": "Map",
+    "group": "Minimap",
+    "label": "Minimap appearance",
+    "description": "Edit minimap layout, terrain colors, markers, radar, waypoints and overlays in the HUD editor. Shared appearance controls also affect the World Map.",
+    "order": 0.5
   }
 }

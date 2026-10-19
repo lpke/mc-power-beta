@@ -31,7 +31,7 @@ public class ClientFixesMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public String getRefMapperConfig() {
-        return null; // null = default behaviour
+        return null; // null = default behavior
     }
 
     @Override

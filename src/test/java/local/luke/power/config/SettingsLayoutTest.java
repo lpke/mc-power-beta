@@ -48,6 +48,7 @@ class SettingsLayoutTest {
   @Test void movedSharedSprintAndFogSettingsRetainBindingLinks() {
     ConfigSession session = new ConfigSession();
     Setting sprint = setting("keys.power_creative.sprint", "Controls", "Key bindings");
+    Setting activation = setting("creative.sprintToggle", "Creative", "Flight");
     Setting multiplier = setting("creative.sprintMultiplier", "Creative", "Flight");
     Setting fog = setting("keys.key.fog", "Controls", "Key bindings");
     Setting distances = setting("video.fogCycle", "Video", "Rendering");
@@ -58,11 +59,47 @@ class SettingsLayoutTest {
       public void validate(Map<String, com.google.gson.JsonElement> values) {}
       public void apply(Map<String, com.google.gson.JsonElement> values) {}
     };
-    session.add(backend, List.of(sprint, multiplier, fog, distances, distance));
-    assertTrue(ControlLinks.controls(session, multiplier).contains(sprint));
+    session.add(backend, List.of(sprint, activation, multiplier, fog, distances, distance));
+    assertEquals(List.of(sprint), ControlLinks.controls(session, activation));
+    assertTrue(ControlLinks.controls(session, multiplier).isEmpty());
     assertEquals(distances, ControlLinks.related(session, fog));
-    assertTrue(ControlLinks.settings(session, fog).contains(distance));
+    assertEquals(List.of(distances), ControlLinks.settings(session, fog));
+    assertTrue(ControlLinks.controls(session, distance).isEmpty());
   }
+  @Test void gameplayMapAndInterfaceBindingsHaveSpecificGroups() {
+    Map<String, List<String>> groups = Map.of(
+        "Movement", List.of("powerbeta.sprint", "key.forward", "key.back", "key.left", "key.right", "key.jump", "key.sneak", "Auto-walk (toggle)", "Fake sneak (toggle)", "key.power_controls.dismount"),
+        "Maps", List.of("powerbeta.map", "powerbeta.minimap", "powerbeta.waypoint", "powerbeta.waypoints", "powerbeta.enlargeMap", "powerbeta.mapZoomIn", "powerbeta.mapZoomOut", "powerbeta.toggleWorldWaypoints", "powerbeta.toggleMapWaypoints", "powerbeta.toggleMapRadar", "powerbeta.toggleMapCaves", "powerbeta.toggleMapGrid", "powerbeta.clearMapDestination", "powerbeta.mapSettings", "powerbeta.mapZoomReset"),
+        "Interface", List.of("powerbeta.openCommands", "powerbeta.debugGraph", "powerbeta.infoHud", "key.chat", "playerList"));
+    groups.forEach((group, keys) -> {
+      assertTrue(SettingsLayout.groups("Controls").contains(group));
+      for (String key : keys) {
+        Setting row = setting("keys." + key, "Controls", "Key bindings");
+        assertEquals("Controls", row.page, key);
+        assertEquals(group, row.group, key);
+      }
+    });
+  }
+
+  @Test void mapAppearanceBelongsToTheHudWhileSamplingControlsStayInMap() {
+    for (String name : List.of("zoom", "colourMode", "heightShading", "slopeShading", "caveLighting", "radar",
+        "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight",
+        "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks",
+        "lightOverlay", "footsteps", "pathColor", "pathOpacity", "playerIcon", "playerColor", "playerOpacity", "playerSize")) {
+      Setting row = setting("maps." + name, "Map", "Terrain");
+      assertEquals("Interface", row.page, name);
+      assertEquals("Minimap", row.group, name);
+      assertTrue(local.luke.power.ui.HudEditorSettings.contains(row), name);
+      assertEquals("maps." + name, row.id);
+    }
+    for (String name : List.of("caveMode", "caveTop", "roofSize", "caveAbove", "caveBelow", "automaticDetail", "mapSmoothing",
+        "radarLimit", "columnsPerTick", "cacheTiles", "uploadsPerFrame", "refreshSeconds", "updateRate", "mapOpenColumns", "mapOpenUploads", "mapOpenBudget")) {
+      Setting row = setting("maps." + name, "Map", "Terrain");
+      assertEquals("Map", row.page, name);
+      assertFalse(local.luke.power.ui.HudEditorSettings.contains(row), name);
+    }
+  }
+
   @Test void initialCollapsesAreIndependentCopiesAndFollowTheRequestedGroups() {
     var initial = SettingsLayout.initiallyCollapsed();
     assertFalse(initial.contains("Interface/"));

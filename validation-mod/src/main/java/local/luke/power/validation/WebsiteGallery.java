@@ -106,7 +106,7 @@ final class WebsiteGallery {
       mc.player.field_161.field_2536=false;
       mc.field_2823=new class_27(x+2,y-1,z,1,Vec3d.createCached(x+2.5,y,z+.5));
       ContainerCarry.click(mc,1);
-      check(!ContainerCarry.carrying(),"place gallery chest before travelling");
+      check(!ContainerCarry.carrying(),"place gallery chest before traveling");
     }
     if(mc.player.dead||mc.player.health<=0||mc.player.field_1041>0)mc.method_2122(true,0);
     if(mc.player.method_943())mc.player.method_497(true,true,false);

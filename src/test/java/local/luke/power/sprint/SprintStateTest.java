@@ -148,7 +148,7 @@ class SprintStateTest {
       state.tick(s, false, 1, false, true, false);
       assertFalse(state.sprinting);
       state.tick(s, true, 1, false, true, false);
-      assertFalse(state.sprinting, "Restoring permission must not restore a cancelled toggle");
+      assertFalse(state.sprinting, "Restoring permission must not restore a canceled toggle");
       assertEquals(oldEnabled, s.enabled);
     }
   }

@@ -116,9 +116,9 @@ final class WaterLandingChecks {
     });
     test("lava, dry falls and other damage retain their normal behavior", () -> {
       configure(true); mc.world.method_200(0, FLOOR + 1, 0, 11);
-      impact(mc, mc.player, .5, FLOOR + 3.01, -4); check(mc.player.health < 20, "lava cancelled fall damage");
+      impact(mc, mc.player, .5, FLOOR + 3.01, -4); check(mc.player.health < 20, "lava canceled fall damage");
       water(mc, 0); reset(mc.player, .5, FLOOR + 1); mc.player.damage(null, 2);
-      check(mc.player.health == 18, "water cancelled an attack");
+      check(mc.player.health == 18, "water canceled an attack");
       mc.world.method_200(0, FLOOR + 1, 0, 0);
       impact(mc, mc.player, .5, FLOOR + 3.01, -4); check(mc.player.health < 20, "dry fall gave immunity");
     });

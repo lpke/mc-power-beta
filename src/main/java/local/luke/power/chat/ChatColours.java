@@ -1,6 +1,6 @@
 package local.luke.power.chat;
 
-/** Beta treats every complete section-sign pair as a colour, including reset codes. */
+/** Beta treats every complete section-sign pair as a color, including reset codes. */
 public final class ChatColours {
   private ChatColours() {}
 

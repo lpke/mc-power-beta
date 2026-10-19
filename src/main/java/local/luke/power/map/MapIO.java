@@ -4,6 +4,7 @@ import java.util.concurrent.*;
 
 /** A shared bounded worker never reads native world/entity/GL objects. */
 public final class MapIO {
+  private static final java.util.concurrent.atomic.AtomicLong SUBMITTED = new java.util.concurrent.atomic.AtomicLong();
   private static final ThreadPoolExecutor WORKER =
       new ThreadPoolExecutor(
           1,
@@ -31,6 +32,7 @@ public final class MapIO {
               result.completeExceptionally(e);
             }
           });
+      SUBMITTED.incrementAndGet();
     } catch (RejectedExecutionException e) {
       return null;
     }
@@ -52,6 +54,8 @@ public final class MapIO {
     }
     barrier.join();
   }
+
+  public static long submitted() { return SUBMITTED.get(); }
 
   public static int queued() {
     return WORKER.getQueue().size();

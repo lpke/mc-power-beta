@@ -9,7 +9,7 @@ public final class DeathRecord {
   public long date;
   public boolean kept;
   public List<String> items = new ArrayList<>();
-  /** Main 0..35, armour 36..39, held cursor 40, crafting inputs 41..44. */
+  /** Main 0..35, armor 36..39, held cursor 40, crafting inputs 41..44. */
   public List<Integer> slots = new ArrayList<>();
 
   void validate() {

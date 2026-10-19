@@ -21,7 +21,7 @@ final class UnderwaterFogChecks {
     check(RenderControls.fullBright()==value,"full bright did not toggle; focus the test window");
   }
   private static void fluid(Minecraft mc,int id) {
-    // Clear neighbours first so lava cannot react with water left by another case.
+    // Clear neighbors first so lava cannot react with water left by another case.
     for(int x=30;x<=34;x++)for(int z=30;z<=34;z++)for(int y=109;y<=114;y++)mc.world.method_154(x,y,z,0,0);
     for(int x=31;x<=33;x++)for(int z=31;z<=33;z++)for(int y=110;y<=113;y++)mc.world.method_154(x,y,z,id,0);
     mc.player.method_1340(32.5,111.62,32.5);
@@ -70,7 +70,7 @@ final class UnderwaterFogChecks {
         check(mc.player.isInFluid(Material.WATER),"water camera not submerged");fog.invoke(renderer,1,1F);
         check(GL11.glGetInteger(GL11.GL_FOG_MODE)==GL11.GL_EXP && Math.abs(GL11.glGetFloat(GL11.GL_FOG_DENSITY)-.1F)<.00001,"native water fog changed");
       });
-      test("full bright uses air fog colour/distance underwater and respects density/photo controls",()->{
+      test("full bright uses air fog color/distance underwater and respects density/photo controls",()->{
         bright(true);RenderControls.beginRender();
         try {
         for(int density:new int[]{0,100,200})for(float multiplier:new float[]{1,2})for(int pass:new int[]{-1,0,1}){
@@ -80,7 +80,7 @@ final class UnderwaterFogChecks {
           fluid(mc,9);colour.invoke(renderer,1F);fog.invoke(renderer,pass,1F);
           check(GL11.glGetInteger(GL11.GL_FOG_MODE)==GL11.GL_LINEAR,"water retained exponential fog");
           check(GL11.glGetFloat(GL11.GL_FOG_START)==start && GL11.glGetFloat(GL11.GL_FOG_END)==end,"water ignored configured distance");
-          check(Arrays.equals(air,colour()),"fog colour air="+Arrays.toString(air)+" water="+Arrays.toString(colour())+" density="+density+" pass="+pass+" fields="+field(renderer,"field_2346")+","+field(renderer,"field_2347")+","+field(renderer,"field_2348"));
+          check(Arrays.equals(air,colour()),"fog color air="+Arrays.toString(air)+" water="+Arrays.toString(colour())+" density="+density+" pass="+pass+" fields="+field(renderer,"field_2346")+","+field(renderer,"field_2347")+","+field(renderer,"field_2348"));
           check(mc.player.isInFluid(Material.WATER),"fog changed actual fluid state");
           check((float)field(renderer,"field_2350")==128F,"fog multiplier leaked into renderer distance");
         }

@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 public final class SelectionRenderer {
-  private static final int[] COLORS = {0x66DDFF, 0x66FF88, 0xFFA040, 0xDD88FF};
 
   public static void render(Minecraft mc, float delta) {
     var e = WorldEditor.current();
@@ -30,7 +29,7 @@ public final class SelectionRenderer {
       GL11.glDepthMask(false);
       if (s.throughWalls) GL11.glDisable(GL11.GL_DEPTH_TEST);
       GL11.glLineWidth(s.lineWidth);
-      int c = COLORS[s.color];
+      int c = local.luke.power.ui.ColorValue.Palette.WORLD_EDIT.rgb(s.color);
       GL11.glColor4f(
           (c >> 16 & 255) / 255f, (c >> 8 & 255) / 255f, (c & 255) / 255f, s.opacity / 100f);
       if (e.pos1 != null && e.pos2 != null) box(e.region());

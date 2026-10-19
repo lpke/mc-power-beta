@@ -142,7 +142,7 @@ public final class Mp3Converter {
             busy = false;
             revision++;
             status =
-                (cancelled ? "Cancelled. " : "")
+                (cancelled ? "Canceled. " : "")
                     + completed
                     + " converted"
                     + (failed == 0 ? "" : "; " + failed + " failed: " + reason);
@@ -199,7 +199,7 @@ public final class Mp3Converter {
               || Files.size(log) > 1024 * 1024) {
             process.destroyForcibly();
             throw new IOException(
-                cancelled ? "Cancelled" : "Conversion exceeded its time or size limit");
+                cancelled ? "Canceled" : "Conversion exceeded its time or size limit");
           }
         }
         if (cancelled

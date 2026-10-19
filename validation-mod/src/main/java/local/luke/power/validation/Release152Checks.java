@@ -202,7 +202,7 @@ final class Release152Checks {
         check(!InventoryLook.outsideGui(mc, new ChatScreen(), 0, 0), "chat permits looking");
         check(!InventoryLook.outsideGui(mc, new class_585(mc.player) {}, 0, 0), "unknown subclass permits looking");
       });
-      test("creative catalogue, category tabs, view tabs and destroy GUI exclude looking", () -> {
+      test("creative catalog, category tabs, view tabs and destroy GUI exclude looking", () -> {
         CreativeVehicleChecks.mode(mc, "CREATIVE");
         for (int[] size : new int[][] {{320, 240}, {640, 420}}) {
           Screen screen = new class_585(mc.player); mc.setScreen(screen); screen.init(mc, size[0], size[1]);

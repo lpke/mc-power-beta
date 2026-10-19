@@ -9,7 +9,7 @@ public @interface ConfigCategory {
 
     /**
      * The name you want to have on the button to access your category and at the top while it's open. Supports translation keys.
-     * @return a string, supports colour codes.
+     * @return a string, supports color codes.
      */
     String name();
 
@@ -22,7 +22,7 @@ public @interface ConfigCategory {
 
     /**
      * The description shown to users in the scroll menu. ~30 chars max is recommended. Supports translation keys.
-     * @return a string, supports colour codes.
+     * @return a string, supports color codes.
      */
     String description() default "";
 
@@ -34,7 +34,7 @@ public @interface ConfigCategory {
     String descriptionKey() default "";
 
     /**
-     * The comment shown inside config files. Can be as long as you want, and supports newlines. Does NOT support colour codes.
+     * The comment shown inside config files. Can be as long as you want, and supports newlines. Does NOT support color codes.
      * If blank, description is shown instead.
      */
     String comment() default "";

@@ -7,7 +7,7 @@ improvements and optional tweaks in one searchable Options menu.
 
 | Unified options menu | Creative mode |
 | --- | --- |
-| [<img src="docs/screenshots/unified-menu.png" width="480" alt="Searchable options with settings grouped by category">](docs/screenshots/unified-menu.png) | [<img src="docs/screenshots/creative-inventory.png" width="480" alt="Creative catalogue above a snowy mountain valley">](docs/screenshots/creative-inventory.png) |
+| [<img src="docs/screenshots/unified-menu.png" width="480" alt="Searchable options with settings grouped by category">](docs/screenshots/unified-menu.png) | [<img src="docs/screenshots/creative-inventory.png" width="480" alt="Creative catalog above a snowy mountain valley">](docs/screenshots/creative-inventory.png) |
 
 | WorldEdit | Isometric screenshots |
 | --- | --- |
@@ -21,26 +21,26 @@ improvements and optional tweaks in one searchable Options menu.
 
 - One searchable Options menu with categories, linked settings, tooltips, live previews, reset controls, automatic saving and optional Apply/Cancel editing.
 - Configurable keyboard and mouse bindings, Ctrl/Shift/Alt chords, conflict detection and a shared view for resolving overlapping bindings.
-- A persistent world map and HUD minimap with surface and cave layers, terrain shading, entity radar, waypoints, deathpoints, chunk and slime overlays, recent paths and PNG export.
+- A persistent world map and HUD minimap with surface and cave layers, terrain shading, entity radar, waypoints, deathpoints, chunk and slime overlays, recent paths and screenshots.
 - Optional modern sprinting on foot, enabled per world, with global stamina and combat limits, sprint jumping and surface particles. Separate optional sprint FOV effects for ground sprinting and each flight mode. All start off.
 - Creative and spectator modes, a mode picker, configurable reach, flight speed, drift and sprint, and adjustable spectator speed.
 - Creative item categories and a survival inventory view. Shift-click for full stacks, middle-drag to fill slots, and use a destroy slot or clear the inventory.
 - WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
 - Commands with completion, editable history and help, including teleportation, saved warps, world spawn, time, weather, spawning and item commands.
-- Chat selection, copy/paste, cursor navigation, scrolling, configurable history and fade time, and preserved colour across wrapped lines.
+- Chat selection, copy/paste, cursor navigation, scrolling, configurable history and fade time, and preserved color across wrapped lines.
 - Death records with locations, causes and original inventory layouts. View lost items and recover them when the world allows it, including crafting inputs. Independent keep-inventory rule.
 - Free camera with adjustable speed, drag, collisions and separate player movement; free look, cinematic camera, field of view, adjustable third-person distance and front view.
 - Isometric captures with rotation, scale and mirroring, custom-resolution screenshots, clipboard copying and photo mode.
 - Fully lit rendering with a full-bright hotkey and optional automatic spectator lighting. Mob spawning and simulated light remain unchanged.
 - Entity visibility controls for items, mobs, players, vehicles, projectiles and TNT. Entity and block-entity culling skips hidden rendering work.
 - Dropped-item merging and global TNT work limits available before loading a struggling world. Separate world rules control TNT and explosion damage to dropped items.
-- Music libraries, custom tracks and folders, era selections, favourites, inclusion filters, per-track and per-folder volume, queues and saved presets.
+- Music libraries, custom tracks and folders, era selections, favorites, inclusion filters, per-track and per-folder volume, queues and saved presets.
 - Music previews, seeking and playback controls in Options and the pause menu, with separate sound categories, ambience controls and optional extra interaction sounds.
 - Flexible block placement with offset, adjacent, rotation, reverse and into-face modes, target overlays and destination previews.
 - Fast placement with placement restrictions, item filters, orientation retention and slab rules. Complete slabs through adjacent faces.
 - Container previews and carrying that preserves contents, including double chests. Optional inventory access in Nether portals.
 - Quick inventory transfers, bulk crafting, drag distribution, double-click collection, held-stack Shift-double-click transfers, scroll transfers, number-key hotbar swaps and stack dropping.
-- Direct tool and armour swapping, Shift-click and right-click equipping, hotbar row swapping with previews, and optional use of the four crafting inputs as storage.
+- Direct tool and armor swapping, Shift-click and right-click equipping, hotbar row swapping with previews, and optional use of the four crafting inputs as storage.
 - Movement while compatible inventories are open, auto-walk, auto-mine, continuous click mining, step assist, edge protection and fence jumping.
 - Faster boats and minecarts, boat steering and collision protection, boat elevators, minecart boosters and optional faster obsidian mining.
 - Optional water landings and bucket clutches, including flowing water. Empty buckets stack to 16; doors and signs have optional modern stack limits.
@@ -50,17 +50,17 @@ improvements and optional tweaks in one searchable Options menu.
 - World rules for monsters, animals, dungeon spawners and sleep ambushes. Global spawn limits, light thresholds, group sizes and despawning preferences, including saddled-pig preservation.
 - Sleep controls for night skipping or acceleration, a per-world sleeping percentage, wake-on-click and respawn-only beds; configurable rain, thunder, snow height and weather timing.
 - Fast leaf decay, creative sapling drops, persistent placed leaves, leaf apple drops, dead-bush sticks, shears harvesting, log rotation and farmland protection.
-- Sign editing and dye colouring, unsupported and glued trapdoors, blocked-chest opening, stackable chests, fence connections and pressure plates on fences.
-- Optional gold-tool silk touch, hoe fortune, sword looting, fishing luck, gold-armour abilities, fire-curing golden apples and water-absorbing sponges.
+- Sign editing and dye coloring, unsupported and glued trapdoors, blocked-chest opening, stackable chests, fence connections and pressure plates on fences.
+- Optional gold-tool silk touch, hoe fortune, sword looting, fishing luck, gold-armor abilities, fire-curing golden apples and water-absorbing sponges.
 - Independent creeper and ghast block-damage rules, global explosion drop chance, TNT ignition and defusing, snowballs that extinguish fire, fire spread between entities and flaming arrows.
-- Optional equipment durability and defence changes, mob drops, sheep punching for wool, grass hoeing for seeds, squid milking and food-waste prevention.
+- Optional equipment durability and defense changes, mob drops, sheep punching for wool, grass hoeing for seeds, squid milking and food-waste prevention.
 - Older block textures, softer rain and snow, low fire, redstone power numbers, leaf rendering, particle controls, camera shake and fog options.
 - Light-level overlays, configurable active-tweak indicators and toggle messages, hotbar item names, HUD positioning, crosshair and vignette controls.
 - An interactive HUD editor with dragging, anchors, snapping and undo. Arrange the minimap, native HUD elements, four custom info clusters, active tweaks, version labels and F3 information with texture-pack previews.
-- Expanded F3 information for coordinates, facing, biome, day, play time, slime chunks, light, music and culling, with shared text colour and layout.
+- Expanded F3 information for coordinates, facing, biome, day, play time, slime chunks, light, music and culling, with shared text color and layout.
 - Paint custom block lettering for the title screen, preview it in 3D and save presets. Choose panorama backgrounds for the title screen or all main-menu screens. Achievement display options include recovery controls for missing achievements.
 - Configurable autosaving, focus-loss pausing, raw mouse input and network options. Optional tall-grass and dead-bush generation controls for new terrain.
-- Fixes for rendering, lighting, item and block drops, mining, boats, stairs, fences, liquids, mob behaviour, sleeping, multiplayer jitter and legacy client behaviour.
+- Fixes for rendering, lighting, item and block drops, mining, boats, stairs, fences, liquids, mob behavior, sleeping, multiplayer jitter and legacy client behavior.
 
 The Power Beta defaults start with fixes, performance improvements and common inventory conveniences on.
 Survival worlds start with game-changing command permissions off. New-world
@@ -92,7 +92,7 @@ Settings save automatically by default. Right-click Apply to use manual editing;
 leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
 edits stay in the draft until you create the world.
 
-Version 2.6.1 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
+Version 3.0.0 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
 with a verified backup. World rules use format 3 and support formats 1, 2 and
 Power Beta's earlier world settings. Existing worlds retain their rules and item
 protection. Old footwear-specific crop protection needs an explicit trampling choice. Conflicting old permissions or unsupported formats stop conversion
@@ -102,26 +102,30 @@ folders alone do not include global preferences, music libraries or recovery his
 ## Maps and sprinting
 
 Press **M** for the world map, **B** to create a waypoint and **U** to manage waypoints.
-Drag the map to pan, scroll to zoom around the pointer, press **Home** to centre,
+Drag the map to pan, scroll to zoom around the pointer, press **Home** to center,
 and right-click for waypoint, destination, coordinate and teleport actions. **G** opens
 coordinate navigation. Hold **Z** to enlarge the minimap; **I** and **O** change its zoom.
 All gameplay bindings can be changed in Controls.
 
-Options > Map contains terrain, caves, radar, waypoint and performance settings.
-Terrain updates per second controls sampling work; minimap movement and rotation
-follow every rendered frame. Relief stays visible when zooming out.
-Its layout button opens the minimap section of the HUD editor for position, size,
-shape, opacity, rotation and information. These edits use the same Done, Undo and
+Options > Map contains map switches, caves, waypoints and performance settings.
+Terrain updates per second controls sampling work; minimap movement, rotation and
+world-map panning follow every rendered frame. World-map detail follows physical
+window pixels, with separate automatic-detail and smoothing controls.
+Its appearance button opens the minimap section of the HUD editor for position,
+size, zoom, colors, radar, overlays and information. Shared appearance controls also
+affect the world map. These edits use the same Done, Undo and
 Cancel controls as the rest of the HUD. Power Beta defaults show the minimap;
-Refined Beta and Beta defaults leave it hidden.
+Refined Beta and Beta defaults leave it hidden. Turning both maps off stops terrain,
+radar and path work after pending terrain saves finish. Independently enabled world
+waypoints and deathpoints retain their storage.
 
 Explored terrain and waypoints are stored in `power-beta-data/maps`, separately
 from preferences and inventory recovery. Map sampling reads loaded terrain only.
 Terrain format 2 reads format 1 and retains a verified `.v1.bak` before replacing
 an older tile. Previously explored areas gain the new distant relief as their
 detailed tiles are read again.
-PNG export saves the visible terrain, up to 4096 pixels on the longer side, in the
-map's `exports` folder. In multiplayer, name each server map in the map screen when
+Screenshot saves the visible map at window resolution in the instance's
+`screenshots` folder. In multiplayer, name each server map in the map screen when
 the server has multiple worlds. Teleportation requires a local singleplayer world's
 teleport permission and the player's view. Maps do not grant access permissions.
 

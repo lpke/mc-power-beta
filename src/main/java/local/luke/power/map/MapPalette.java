@@ -13,7 +13,7 @@ import net.minecraft.block.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.World;
 
-/** Texture averaging is worker-owned. Native colour hooks are sampled only by the game thread. */
+/** Texture averaging is worker-owned. Native color hooks are sampled only by the game thread. */
 public final class MapPalette {
   private static final String[] BIOMES = {
     "Unknown",
@@ -32,7 +32,7 @@ public final class MapPalette {
     "Sky"
   };
   private String pack;
-  private int[] colours = new int[256];
+  private int[] colors = new int[256];
   private CompletableFuture<int[]> loading;
   private int revision;
 
@@ -53,10 +53,10 @@ public final class MapPalette {
     String next = mc.options.skin == null ? "Default" : mc.options.skin;
     if (loading != null && loading.isDone()) {
       try {
-        colours = loading.join();
+        colors = loading.join();
         revision++;
       } catch (RuntimeException e) {
-        local.luke.power.PowerBeta.LOG.warn("Map texture colours unavailable", e);
+        local.luke.power.PowerBeta.LOG.warn("Map texture colors unavailable", e);
       }
       loading = null;
     }
@@ -133,18 +133,18 @@ public final class MapPalette {
   }
 
   /** ARGB before terrain lighting. Beta's animated fluids have no static atlas pigment. */
-  int surfaceColour(Block block, World world, int x, int y, int z) {
+  int surfaceColor(Block block, World world, int x, int y, int z) {
     if (block.field_1900 == Material.WATER) return 0xbf386bc7;
     if (block.field_1900 == Material.LAVA) return 0xfff36b12;
     int texture = block.method_1626(world, x, y, z, 1);
-    int base = texture >= 0 && texture < colours.length ? colours[texture] : 0;
-    int colour;
+    int base = texture >= 0 && texture < colors.length ? colors[texture] : 0;
+    int color;
     if (base == 0) {
-      colour = nativeColour(block, world, x, y, z);
+      color = nativeColor(block, world, x, y, z);
       base = 0xff000000;
     } else {
       int tint = block.method_1600(world, x, y, z);
-      colour =
+      color =
           ((base >> 16 & 255) * (tint >> 16 & 255) / 255) << 16
               | ((base >> 8 & 255) * (tint >> 8 & 255) / 255) << 8
               | (base & 255) * (tint & 255) / 255;
@@ -154,20 +154,20 @@ public final class MapPalette {
     // would otherwise turn a glass roof into a solid white patch. Ice is translucent.
     if (block.id == Block.GLASS.id) alpha = Math.min(alpha, 96);
     else if (block.id == 79) alpha = Math.min(alpha, 160);
-    return alpha << 24 | colour;
+    return alpha << 24 | color;
   }
 
-  public static int nativeColour(Block block, World world, int x, int y, int z) {
-    int colour = block.field_1900.field_973.field_2752;
+  public static int nativeColor(Block block, World world, int x, int y, int z) {
+    int color = block.field_1900.field_973.field_2752;
     if (block.id == Block.GRASS.id || block.field_1900 == Material.LEAVES)
-      colour = block.method_1600(world, x, y, z);
+      color = block.method_1600(world, x, y, z);
     if (block.id == 35)
-      colour =
+      color =
           new int[] {
                 0xeeeeee, 0xe08222, 0xb24bc4, 0x6699d8, 0xd7c23b, 0x68ac32, 0xd28099, 0x444444,
                 0x999999, 0x337788, 0x793eb4, 0x334c99, 0x65482c, 0x456020, 0xa2322a, 0x202020
               }
               [world.method_1778(x, y, z) & 15];
-    return colour == 0 ? 0x777777 : colour;
+    return color == 0 ? 0x777777 : color;
   }
 }

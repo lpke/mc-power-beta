@@ -62,7 +62,7 @@
   Slider movement, pointer selection, dragging and silent group chevrons stay quiet.
 - Reset values depend on the user's Defaults base: Power Beta, Refined Beta 1.7.3
   or Beta 1.7.3. Power Beta keeps the `power_beta` ID; the retired `power_beta_full`
-  ID is an alias, never a reason to reload settings. Keep the backend/catalogue
+  ID is an alias, never a reason to reload settings. Keep the backend/catalog
   fallback values stable so changes to one base do not change another. Power Beta's
   explicit overrides and fresh-install JSON must agree. Never copy personal controls,
   paths, music libraries, HUD layouts or world IDs into defaults. Ore vein mining
@@ -75,7 +75,7 @@
   or recovery data. Saved music, title and F3 presets remain user data. Keep reset
   controls in every editor consistent with the selected base. Existing installations
   skip the first-launch chooser; fresh exports keep setupComplete false until chosen.
-- `settings-layout.json` owns tab/group order; catalogue `order` values arrange
+- `settings-layout.json` owns tab/group order; catalog `order` values arrange
   settings inside groups. Presentation metadata applies to every adapter without
   changing storage IDs. Keep the flight sprint binding shared; Creative, Spectator and freecam own separate sprint preferences.
   The focus-loss pause preference is `power_controls:general.pauseOnLostFocus`.
@@ -94,7 +94,7 @@
   stack until release; hidden hover coordinates must never drive the player model.
   Restore the originating position inside the native grab transition, without a
   second warp. Restore on release, lost focus, screen/world changes or lost eligibility;
-  holding the button must not restart a cancelled drag. Leave events and polling to
+  holding the button must not restart a canceled drag. Leave events and polling to
   unrelated screens, including photo mode. Right-click looking must not drop items.
   Dispatch complete mouse batches before changing capture. Preserve each drag's
   press coordinates/deltas, send final motion through the native camera renderer,
@@ -137,7 +137,7 @@
   drafts, and keep temporary errors outside row layout.
 - Shift-double-click transfers matching native item data from the clicked inventory,
   leaving the held cursor stack untouched. Use normal item/slot limits and native
-  multiplayer transfers. Exclude outputs, hidden catalogue and read-only slots. Cancel
+  multiplayer transfers. Exclude outputs, hidden catalog and read-only slots. Cancel
   pending gestures on cursor/container/focus changes and keep gathering, dragging,
   wheel transfers and crafting from claiming the same gesture.
   Measure double-click intervals using native event timestamps, not frame processing
@@ -151,12 +151,12 @@
   Keep old carry-journal formats recoverable. See `docs/recovery.md`.
 - Compact buttons must retain all four texture borders. Check narrow GUI sizes,
   sticky headings, clipping and click targets, not only a wide screenshot.
-  Creative catalogue rows grow upward; hotbar and survival slots never move.
-  The final catalogue row and hotbar use the same 22-pixel origin spacing as survival.
+  Creative catalog rows grow upward; hotbar and survival slots never move.
+  The final catalog row and hotbar use the same 22-pixel origin spacing as survival.
   Leaving spectator keeps the current position, including inside solid blocks.
 - Creative middle-click dragging previews compatible, writable slots and commits
   together on release. Use normal item and slot limits; preserve cursor damage/NBT.
-  Never paint hidden catalogue slots, survival, spectator or multiplayer inventories.
+  Never paint hidden catalog slots, survival, spectator or multiplayer inventories.
   Cancel on focus loss, screen/container changes, lost Creative access or cursor changes.
 - `TweakIndicators` exposes live module state across mappings. HUD inclusion is
   separate from gameplay settings. Do not infer active auto-walk/free look from
@@ -172,17 +172,17 @@
 - The locally ridden boat or minecart bypasses render frustum/occlusion culling only while
   that player owns the view. Keep other entities, visibility preferences, saved flags
   and physics unchanged; normal culling resumes immediately on dismount.
-- Armour Shift-drags share the inventory gesture cancellation boundary and native
+- Armor Shift-drags share the inventory gesture cancellation boundary and native
   clicks, keep cursor/NBT/count ownership, visit each source once and exclude custom
-  containers, catalogue/output and read-only slots.
+  containers, catalog/output and read-only slots.
 - Boat placement facing is a global Fixes preference, independent of speed, steering
   and world permissions. Set the new boat's current/previous yaw before native spawn;
   preserve placement eligibility, item use, existing boats and multiplayer authority.
-  Initialise a missing preference once from the selected base with a verified backup,
+  Initialize a missing preference once from the selected base with a verified backup,
   so later Use as base changes cannot alter it on restart.
 - Chat editing shares a buffer across input and completion. History keeps arrow
   ownership until editing or explicit completion; rendering must not change text.
-  Wrapped chat keeps the last Beta colour code from the preceding line.
+  Wrapped chat keeps the last Beta color code from the preceding line.
   Help and completion share command availability. Group WorldEdit under //help,
   retain aliases, and keep per-command help free of gameplay changes.
   Every new command must appear in /help and completion, with /<command> help
@@ -294,7 +294,7 @@
 - Optional redstone textures use four-pixel wires with shaded edges and six-pixel
   junctions; the power number panel occupies one quarter of a block.
 - Isometric captures use the actual renderer chunk grid and Beta's 128-block
-  height. Centre both horizontal axes on the camera's chunk; never use camera Y
+  height. Center both horizontal axes on the camera's chunk; never use camera Y
   for Z or infer capture size from the obsolete four-step distance option.
 
 - Entity visibility changes only rendering. Full bright overrides float shading only
@@ -322,16 +322,20 @@
 - Reject incomplete skin-provider responses so the next provider can supply the
   texture. Keep bundled fallback skin paths out of the HTTP downloader.
 - Custom HUD clusters keep stable IDs and independent content, anchors, offsets,
-  colour, size, opacity and F3 visibility. Sample world data on ticks and use the
+  color, size, opacity and F3 visibility. Sample world data on ticks and use the
   daylight clock. Native HUD previews and Cancel update positions immediately.
   F3 and custom HUD location data follow freecam while detached, including facing,
   biome, chunk and block light. HUD queries must not load chunks or move the player.
-  F3 providers share debug text layout/colour and capture only that block, never chat
+  F3 providers share debug text layout/color and capture only that block, never chat
   or other HUD text. F3 and custom HUD share the eye/feet preference; freecam and
   Spectator always report the native head base. Freecam collision uses that same
   lower bound. Third-person ghost heads use the current skin dimensions, draw only
   head/hat and support free look without moving the player. Spectator third-person
   cameras bypass terrain clipping; their head marker stays visible inside blocks.
+- Paired color and opacity controls keep their original storage IDs and types, share
+  one picker draft and reset/Undo boundary, and hide only the paired opacity row.
+  `ColorValue` preserves legacy palette indices 0–3; custom palette colors use
+  `0x1000000 | RGB`, including black and RGB values 1–3.
 - Preserve free-look offsets through explicit perspective changes and retain the
   chosen perspective when free look ends.
 - Photo-mode drags own the button from its originating press through release. Widget
@@ -351,7 +355,7 @@
   Convert old item protections from frozen evidence, never from changing live settings.
 - Music-library collapse/expand-all acts on groups in the current view, including search,
   without changing inclusion, volume, presets or queues. Menu scrub tracks reserve equal
-  space on either side so the track itself stays centred with the menu.
+  space on either side so the track itself stays centered with the menu.
 
 - Hotbar swaps flush immutable recovery bytes on a worker before publication on the
   game thread. Prepare selected preview rows while held; only a validated, durable
@@ -391,7 +395,7 @@
   Full bright uses normal terrain fog underwater, preserving fog-distance controls and
   native water physics, lava fog and cloud fog. Disabling it restores native water fog.
   The water-material override is scoped to fog rendering on its owning thread, including
-  StationAPI's colour hooks; it must not affect other fluid queries.
+  StationAPI's color hooks; it must not affect other fluid queries.
 
 - Creation starts in Survival for the Survival preset, Creative for Cheats and the
   selected valid mode for Custom. Initial mode selection is silent; later changes keep
@@ -414,13 +418,13 @@
 - Water fog and FOV use the current rendered camera pose, including third person, free look
   and freecam. Resolve perspective after capturing that pose; preserve photo projection,
   stereo and zoom. Inside/outside water darkness affects rendering only. Terrain retains native
-  and water-clear vertex colours in one 32-byte vertex, with one shader uniform choosing
+  and water-clear vertex colors in one 32-byte vertex, with one shader uniform choosing
   brightness. After the first opt-in prepares existing meshes, surface crossings and
   slider previews must never queue terrain rebuilds. Day/night updates must also include
   compensated deep water whose native skylight is zero.
   Roof and water-column edits must invalidate dependent meshes below native light's reach,
   using the existing bounded render grid and update queue without loading terrain.
-  Calculate the second colour only for affected sections; bound scratch memory and preserve
+  Calculate the second color only for affected sections; bound scratch memory and preserve
   geometry, normals, alpha, native update scheduling and world light arrays.
   Detached flight admits auto-walk independently of manual camera keys and keeps animation
   interpolation current when the player is stationary.
@@ -433,7 +437,7 @@
 
 - The panorama picker groups variants of the same captured scene. Preserve legacy version IDs and texture paths. Its single selection also updates the retained enable flag, and its live preview shares the title renderer.
 
-- In-group dividers use catalogue `separatorAfter` on the preceding setting; they share row geometry and never act as headings or input targets.
+- In-group dividers use catalog `separatorAfter` on the preceding setting; they share row geometry and never act as headings or input targets.
 - Flight speed percentages share the modern Creative baseline; freecam stores its original speed units and only converts the display. Shared motion maths retain frame-owned freecam timing. Config format 7 converts legacy response rates to 0–5 drift and retires sprint/classic switches.
 
 - Flight acceleration and deceleration use independent 0–5 response controls on all axes.
@@ -488,7 +492,7 @@
   retain their existing controls. Preview coordinates retain the window aspect ratio in both split
   orientations. Only the selected hidden info cluster has an empty outline and hit
   target; selection never enables it. Preview
-  backgrounds are cached captures, never a second live world. Nested colour swatches
+  backgrounds are cached captures, never a second live world. Nested color swatches
   stay in the HUD draft and share its Undo, Done and Discard boundary.
 - Info-cluster previews use the gameplay formatter, clipping, anchors and renderer.
   F3 rows in both columns use stable IDs, individual visibility and a bounded saved order
@@ -508,15 +512,23 @@
   Keep world/server identity, dimensions and cave layers separate; terrain edits and
   texture changes invalidate loaded samples. Terrain format 2 reads format 1; verify
   the original tile backup before upgrading. Bake directional relief before reducing
-  map levels; reconcile cached neighbour seams without sampling new terrain. Map
+  map levels; reconcile cached neighbor seams without sampling new terrain. Map
   movement is frame-owned; sampling cadence, worker queues and texture uploads stay
   bounded. Buffer padding must not select terrain detail or request extra tiles.
   Map navigation never moves the player
   or loads terrain. Teleport actions use the existing local permission and command.
   Map preferences use PowerConfig; minimap presentation belongs to the HUD draft,
-  with a link from the Map tab. Initialise a missing minimap enablement once from
+  with a link from the Map tab. Initialize a missing minimap enablement once from
   the selected base with a verified backup; later Use as base changes never alter it
   on restart. Preserve waypoints while features are disabled.
+  Disabled views perform no sampling, radar, path or cache preparation; finish only
+  previously queued durable work before releasing idle caches. Independent world
+  waypoints/deathpoints and explicit waypoint actions retain only their own storage.
+  World Map detail uses physical window pixels and bounded paired surfaces. Keep
+  coarse-to-fine fallback images separate so unknown fine cells cannot retain coarse
+  coverage. Publish only completed disk reads within the render budget; sampling,
+  parent merges and writes stay tick-owned. Exact cave windows use versioned cache
+  contexts; retain legacy cave files and existing surface paths.
 - Ground sprinting uses the per-world `allow_sprinting` rule, off in both creation
   presets and every defaults base. Speed, activation, stamina, combat and FOV tuning
   stay global. Retain legacy `sprint.enabled` data inert; never use it to grant a

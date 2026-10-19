@@ -1,6 +1,6 @@
 package local.luke.power.worldedit.chat;
 
-/** Colour only editor output. Player chat and third-party messages pass through untouched. */
+/** Color only editor output. Player chat and third-party messages pass through untouched. */
 public final class ChatFormat {
   private ChatFormat() {}
   public static String info(String text) {

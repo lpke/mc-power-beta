@@ -21,10 +21,11 @@ public final class MapSampler {
   private final MapPalette palette;
   private final MapCadence cadence = new MapCadence();
   private World world;
+  private String context = "";
   private Chunk current;
   private int column,
-      centreX = Integer.MIN_VALUE,
-      centreZ,
+      centerX = Integer.MIN_VALUE,
+      centerZ,
       layer = Integer.MIN_VALUE,
       paletteRevision;
   private long ticks;
@@ -36,9 +37,9 @@ public final class MapSampler {
   }
 
   public void invalidate(int x, int z, int maxX, int maxZ) {
-    if (centreX == Integer.MIN_VALUE) return;
-    int x0 = Math.max(centreX - 16, x >> 4), x1 = Math.min(centreX + 16, maxX >> 4);
-    int z0 = Math.max(centreZ - 16, z >> 4), z1 = Math.min(centreZ + 16, maxZ >> 4);
+    if (centerX == Integer.MIN_VALUE) return;
+    int x0 = Math.max(centerX - 16, x >> 4), x1 = Math.min(centerX + 16, maxX >> 4);
+    int z0 = Math.max(centerZ - 16, z >> 4), z1 = Math.min(centerZ + 16, maxZ >> 4);
     for (int cx = x0; cx <= x1; cx++)
       for (int cz = z0; cz <= z1; cz++) {
         if (dirty.size() >= 1089) return;
@@ -56,10 +57,25 @@ public final class MapSampler {
   public void tick(Minecraft mc, MapCache cache, int selectedLayer, double x, double y, double z) {
     long start = System.nanoTime();
     columnsLastTick = 0;
-    // Refresh seconds use the game clock, independently of the sampling rate or
-    // temporary cache backpressure.
+    MapSettings settings = MapConfig.current();
+    CaveWindow window = selectedLayer < 0 ? null : window(settings, y);
+    String selectedContext = window == null ? "" : window.context();
+    cache.viewContext(window(settings, y).context());
+    if (world != mc.world || layer != selectedLayer || !context.equals(selectedContext)
+        || paletteRevision != palette.revision()) {
+      world = mc.world;
+      layer = selectedLayer;
+      context = selectedContext;
+      sampled.clear();
+      queue.clear();
+      dirty.clear();
+      current = null;
+      centerX = Integer.MIN_VALUE;
+      paletteRevision = palette.revision();
+    }
+    // Refresh seconds use the game clock, independently of sampling rate and backpressure.
     ticks++;
-    if (!cadence.tick(MapConfig.current().updateRate)) {
+    if (!cadence.tick(settings.updateRate)) {
       nanosLastTick = 0;
       return;
     }
@@ -69,17 +85,7 @@ public final class MapSampler {
       nanosLastTick = System.nanoTime() - start;
       return;
     }
-    if (world != mc.world || layer != selectedLayer || paletteRevision != palette.revision()) {
-      world = mc.world;
-      layer = selectedLayer;
-      sampled.clear();
-      queue.clear();
-      dirty.clear();
-      current = null;
-      centreX = Integer.MIN_VALUE;
-      paletteRevision = palette.revision();
-    }
-    if (centreX != cx || centreZ != cz || queue.isEmpty() && current == null) rebuild(cx, cz);
+    if (centerX != cx || centerZ != cz || queue.isEmpty() && current == null) rebuild(cx, cz);
     // Always revisit the camera's chunk on time, even during a long first exploration.
     Chunk focus = new Chunk(cx, cz);
     if (ticks - sampled.getOrDefault(chunkKey(cx, cz), Long.MIN_VALUE / 2)
@@ -98,11 +104,13 @@ public final class MapSampler {
       queue.remove(changed);
       queue.addFirst(changed);
     }
-    MapSettings settings = MapConfig.current();
+    boolean mapOpen = mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen;
+    int maxColumns = mapOpen ? settings.mapOpenColumns : settings.columnsPerTick;
+    long timeBudget = mapOpen ? (long)(settings.mapOpenBudget * 1_000_000) : 1_500_000L;
     var touched = new LinkedHashMap<Key, MapTile>();
     int attempts = 0;
-    while (columnsLastTick < settings.columnsPerTick && attempts++ < settings.columnsPerTick + 64) {
-      if (System.nanoTime() - start >= 1500000L) break;
+    while (columnsLastTick < maxColumns && attempts++ < maxColumns + 64) {
+      if (System.nanoTime() - start >= timeBudget) break;
       if (current == null) {
         current = queue.poll();
         column = 0;
@@ -114,14 +122,14 @@ public final class MapSampler {
         continue;
       }
       int bx = current.x * 16 + (column & 15), bz = current.z * 16 + (column >> 4);
-      MapTile tile = cache.get(key(world.dimension.id, layer, 0, bx, bz));
+      MapTile tile = cache.get(key(world.dimension.id, layer, 0, bx, bz, context));
       if (tile == null) {
         queue.addLast(current);
         current = null;
         continue;
       }
       long before = tile.revision;
-      sample(world, chunk, tile, bx, bz, layer < 0 ? 127 : Math.min(127, layer * 8 + 7));
+      sample(world, chunk, tile, bx, bz, window);
       if (tile.revision != before) touched.put(tile.key, tile);
       columnsLastTick++;
       column++;
@@ -136,8 +144,8 @@ public final class MapSampler {
   }
 
   private void rebuild(int cx, int cz) {
-    centreX = cx;
-    centreZ = cz;
+    centerX = cx;
+    centerZ = cz;
     queue.clear();
     current = null;
     int radius = Math.min(16, local.luke.power.controls.util.ModOptions.getRenderDistanceChunks());
@@ -159,13 +167,17 @@ public final class MapSampler {
     return (long) x << 32 | (z & 0xffffffffL);
   }
 
-  private void sample(World world, class_43 chunk, MapTile tile, int x, int z, int top) {
-    int lx = x & 15, lz = z & 15, y = top;
-    if (tile.key.layer() >= 0) {
-      // Skip the ceiling, then map the first solid floor below a navigable air space.
-      while (y > 0 && solid(chunk.method_859(lx, y, lz))) y--;
+  private void sample(World world, class_43 chunk, MapTile tile, int x, int z, CaveWindow window) {
+    int lx = x & 15, lz = z & 15;
+    int bottom = window == null ? 0 : window.bottom();
+    int y = window == null ? 127 : window.floor(
+        py -> solid(chunk.method_859(lx, py, lz)),
+        py -> visible(chunk.method_859(lx, py, lz)));
+    y = CaveWindow.descend(y, bottom, py -> !visible(chunk.method_859(lx, py, lz)));
+    if (y < bottom) {
+      tile.put(index(x, z), 0, 0, 0, 0, 0, 0);
+      return;
     }
-    while (y > 0 && !visible(chunk.method_859(lx, y, lz))) y--;
     int id = chunk.method_859(lx, y, lz);
     if (id <= 0 || id >= Block.BLOCKS.length || Block.BLOCKS[id] == null) {
       // A surveyed void column must replace its old floor and propagate to distant zooms.
@@ -175,47 +187,44 @@ public final class MapSampler {
     int surfaceY = y;
     // Thin snow contributes its white pigment without raising the terrain by a
     // whole block. The full snow block keeps its actual height.
-    int terrainY = id == 78 ? Math.max(0, y - 1) : y;
+    int terrainY = id == 78 ? Math.max(bottom, y - 1) : y;
     double r = 0, g = 0, b = 0, nr = 0, ng = 0, nb = 0, remaining = 1;
     int waterOpacity = 0;
     // Descend only within this already-loaded column. Both the 128-block world
-    // height and eight distinct transparent surfaces bound the extra work.
-    for (int surfaces = 0; surfaces < 8 && y >= 0 && remaining > .01; surfaces++) {
-      while (y >= 0 && !visible(chunk.method_859(lx, y, lz))) y--;
-      if (y < 0) break;
+    // height, selected cave window and eight transparent surfaces bound the extra work.
+    for (int surfaces = 0; surfaces < 8 && y >= bottom && remaining > .01; surfaces++) {
+      y = CaveWindow.descend(y, bottom, py -> !visible(chunk.method_859(lx, py, lz)));
+      if (y < bottom) break;
       int layerId = chunk.method_859(lx, y, lz);
       Block surface = Block.BLOCKS[layerId];
-      int colour = palette.surfaceColour(surface, world, x, y, z);
-      int nativeColour = MapPalette.nativeColour(surface, world, x, y, z);
-      double alpha = (colour >>> 24) / 255.0;
+      int color = palette.surfaceColor(surface, world, x, y, z);
+      int nativeColor = MapPalette.nativeColor(surface, world, x, y, z);
+      double alpha = (color >>> 24) / 255.0;
       double lightThroughWater = (9 + Math.max(0, 15 - waterOpacity)) / 24.0;
       double weight = remaining * alpha * lightThroughWater;
-      r += (colour >> 16 & 255) * weight;
-      g += (colour >> 8 & 255) * weight;
-      b += (colour & 255) * weight;
-      nr += (nativeColour >> 16 & 255) * weight;
-      ng += (nativeColour >> 8 & 255) * weight;
-      nb += (nativeColour & 255) * weight;
+      r += (color >> 16 & 255) * weight;
+      g += (color >> 8 & 255) * weight;
+      b += (color & 255) * weight;
+      nr += (nativeColor >> 16 & 255) * weight;
+      ng += (nativeColor >> 8 & 255) * weight;
+      nb += (nativeColor & 255) * weight;
       remaining *= 1 - alpha;
       if (remaining <= .01) break;
       // A continuous body of water has one top surface. Its depth attenuates
       // light reaching the seabed instead of repeatedly painting opaque blue.
-      int depth = 1;
-      y--;
-      while (y >= 0 && chunk.method_859(lx, y, lz) == layerId) {
-        depth++;
-        y--;
-      }
+      int bodyTop = y;
+      y = CaveWindow.descend(y - 1, bottom, py -> chunk.method_859(lx, py, lz) == layerId);
+      int depth = bodyTop - y;
       if (surface.field_1900 == Material.WATER || layerId == 79)
         waterOpacity = Math.min(15, waterOpacity + depth * 3);
     }
-    int colour = rgb(r, g, b), nativeColour = rgb(nr, ng, nb);
+    int color = rgb(r, g, b), nativeColor = rgb(nr, ng, nb);
     int light = world.method_164(class_56.BLOCK, x, Math.min(127, surfaceY + 1), z);
     var biome = world.method_1781().method_1787(x, z);
     tile.put(
         index(x, z),
-        colour,
-        nativeColour,
+        color,
+        nativeColor,
         terrainY,
         light,
         id,
@@ -249,12 +258,17 @@ public final class MapSampler {
             || id == 78);
   }
 
+  public static CaveWindow window(MapSettings settings, double cameraY) {
+    return CaveWindow.at(settings.caveMode == 2 ? settings.caveTop : cameraY, settings.caveAbove, settings.caveBelow);
+  }
+
   public static int layer(Minecraft mc, double x, double y, double z) {
     MapSettings s = MapConfig.current();
     if (s.caveMode == 0) return -1;
-    if (s.caveMode == 2) return Math.min(15, s.caveTop / 8);
-    int top = Math.max(1, Math.min(127, (int) Math.floor(y) + 2));
-    if (mc.world.dimension.id == -1) return top / 8;
+    CaveWindow window = window(s, y);
+    if (s.caveMode == 2) return window.layer();
+    int top = window.top();
+    if (mc.world.dimension.id == -1) return window.layer();
     int half = s.roofSize / 2;
     for (int dz = -half; dz <= half; dz++)
       for (int dx = -half; dx <= half; dx++) {
@@ -269,6 +283,6 @@ public final class MapSampler {
           }
         if (!roof) return -1;
       }
-    return top / 8;
+    return window.layer();
   }
 }

@@ -173,7 +173,7 @@ public final class Release261Checks {
         for (int y = FLOOR - 7; y < 128; y++) mc.world.method_154(x, y, z, 0, 0);
         mc.world.method_154(x, FLOOR, z, 1, 0);
       }
-    // Two-block patches remain legible in screenshots; the tests sample their centres.
+    // Two-block patches remain legible in screenshots; the tests sample their centers.
     for (int dx = 0; dx < 2; dx++)
       for (int dz = 0; dz < 2; dz++) {
         water(mc, X + 1 + dx, Z + 2 + dz, 1);
@@ -222,12 +222,13 @@ public final class Release261Checks {
             MapTile.class,
             int.class,
             int.class,
-            int.class);
+            CaveWindow.class);
     sample.setAccessible(true);
     var chunk = MapSampler.loaded(mc.world, X >> 4, Z >> 4);
     check(chunk != null, "loaded column source vanished");
+    // A null cave window scans the full surface column, as the original 127 ceiling did.
     for (int x = X; x < X + 16; x++)
-      for (int z = Z; z < Z + 16; z++) sample.invoke(sampler, mc.world, chunk, tile, x, z, 127);
+      for (int z = Z; z < Z + 16; z++) sample.invoke(sampler, mc.world, chunk, tile, x, z, (CaveWindow)null);
     return tile;
   }
 
@@ -245,18 +246,18 @@ public final class Release261Checks {
           flat.slopeShading = flat.heightShading = flat.caveLighting = false;
           for (int style = 0; style <= 1; style++) {
             flat.colourMode = style;
-            int shallow = tile.colour(MapMath.index(X + 1, Z + 2), flat);
-            int deep = tile.colour(MapMath.index(X + 4, Z + 2), flat);
+            int shallow = tile.color(MapMath.index(X + 1, Z + 2), flat);
+            int deep = tile.color(MapMath.index(X + 4, Z + 2), flat);
             check(
                 brightness(shallow) > brightness(deep),
                 "deep water did not attenuate floor, style=" + style);
             check(
-                tile.colour(MapMath.index(X + 7, Z + 2), flat)
-                    != tile.colour(MapMath.index(X + 7, Z + 6), flat),
+                tile.color(MapMath.index(X + 7, Z + 2), flat)
+                    != tile.color(MapMath.index(X + 7, Z + 6), flat),
                 "glass hid floor pigment");
             check(
-                tile.colour(MapMath.index(X + 10, Z + 2), flat)
-                    != tile.colour(MapMath.index(X + 10, Z + 6), flat),
+                tile.color(MapMath.index(X + 10, Z + 2), flat)
+                    != tile.color(MapMath.index(X + 10, Z + 6), flat),
                 "ice hid floor pigment");
           }
           check(
@@ -320,7 +321,7 @@ public final class Release261Checks {
                   } else if (completed != null && completed > first) second = completed;
                   if (tick % 8 == 0) Thread.sleep(1);
                 }
-                check(first >= 0 && second > first, "centre chunk never completed two samples");
+                check(first >= 0 && second > first, "center chunk never completed two samples");
                 check(
                     second - first >= 40 && second - first <= 40 + 12 * (20 / rate),
                     "refresh interval changed with update rate: " + (second - first));

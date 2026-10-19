@@ -127,7 +127,7 @@ final class Editor230Checks {
         int menuRows=number(hud,"selectorRows");
         for(int py=51*2;py<(51+menuRows*20)*2;py++)for(int px=number(hud,"left")*2;px<number(hud,"right")*2;px++) {
           int pixel=menu.getRGB(px,py),r=(pixel>>16)&255,g=(pixel>>8)&255,b=pixel&255;
-          check(Math.abs(r-g)<=1&&Math.abs(g-b)<=1,"HUD dropdown contains coloured pixels");
+          check(Math.abs(r-g)<=1&&Math.abs(g-b)<=1,"HUD dropdown contains colored pixels");
         }
         key(hud,Keyboard.KEY_ESCAPE);check(!(boolean)get(hud,"selecting"),"Escape did not close element menu");
         int before=number(hud,"controlsBottom"),x=number(hud,"left")+10;

@@ -6,7 +6,7 @@ public interface HasToolTip {
 
     /**
      * The tooltip to show, can be multiline by adding another element onto the list.
-     * @return a List of colour-enabled strings to use as a tooltip.
+     * @return a List of color-enabled strings to use as a tooltip.
      */
     List<String> getTooltip();
 

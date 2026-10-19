@@ -122,7 +122,7 @@ public final class NavigationActions {
   private void teleport(Pos to, boolean flight) {
     if (!WorldEditor.commandAvailable(mc, "tp") || !navigation.clear(to))
       throw new IllegalArgumentException(
-          "Destination or player state changed; teleport cancelled.");
+          "Destination or player state changed; teleport canceled.");
     if (flight && !CreativeAccess.fly(mc.player))
       throw new IllegalArgumentException("Could not enable creative flight.");
     mc.player.method_1341(to.x() + .5, to.y(), to.z() + .5, mc.player.yaw, mc.player.pitch);

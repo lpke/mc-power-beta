@@ -43,7 +43,7 @@ public final class DebugOrder {
   public static List<String> visible(List<String> rows, Predicate<String> enabled) {
     return rows.stream().filter(id -> id.isEmpty() || enabled.test(id)).toList();
   }
-  /** A centre drop on a gap replaces it; an edge drop inserts a new row. */
+  /** A center drop on a gap replaces it; an edge drop inserts a new row. */
   public static List<String> move(List<String> source, String id, int row, boolean insert, Predicate<String> enabled) {
     if (id.isEmpty() || !source.contains(id)) throw new IllegalArgumentException("Select an F3 line to move.");
     List<String> next = new ArrayList<>(source);

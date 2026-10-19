@@ -2,22 +2,25 @@
 
 ## [Unreleased]
 
-## [2.6.1] - 2026-10-19
+## [3.0.0] - 2026-10-19
 
-- Smooth minimap movement and rotation on every rendered frame, with a terrain update-rate slider in Map performance settings.
-- Give maps sharper terrain contours, clearer shallow water and translucent glass and ice. Add a grey minimap frame, outlined markers and a full-window world map with compact controls.
-- Preserve terrain detail longer when zooming out, with physical-resolution detail selection, relief retained in smaller map levels and smooth cursor-centred zooming.
-- Make ground sprinting a per-world `allow_sprinting` game rule, off by default. Keep speed, activation, stamina, combat and FOV preferences global; disabling the rule stops ground sprinting immediately.
-- Upgrade terrain storage to format 2 while reading format 1 and keeping verified original tile backups. Configuration format 7 still supports 3–6; world-rule format 3 still supports 1, 2 and earlier world metadata.
-
-## [2.6.0] - 2026-10-19
-
-- Add a shared minimap and explored world map with persistent surface and cave terrain, zooming, panning, terrain shading, entity radar, chunk and slime overlays, recent paths and PNG exports.
-- Save coloured waypoints in named sets, show them on maps and in the world, record deathpoints and offer teleportation through the world's existing teleport permission.
-- Add a Map options tab and minimap position, size and appearance controls in the HUD editor, with isolated drafts and a direct link from Map settings.
-- Add optional modern sprinting on foot, disabled in every defaults base, with sprint jumping, surface particles, sprint-hit knockback and configurable stamina and combat restrictions.
-- Add optional dynamic FOV for sprinting on foot, Creative flight, Spectator flight and freecam, all disabled by default.
-- Keep right-clicking an existing boat with a boat item from also placing a second boat, while preserving normal boarding.
+- Add a shared minimap and explored world map with persistent surface and cave terrain, texture colors, relief shading, shallow water, entity radar, chunk and slime overlays, recent paths and deathpoints.
+- Keep minimap movement and rotation smooth on every frame, with a terrain update-rate control. World-map panning follows the pointer at the video frame rate.
+- Choose world-map detail from physical game-window pixels, preserve available terrain while preparing another resolution, and offer automatic-detail and smoothing controls for sharper zooming on high-resolution windows.
+- Continue bounded map sampling while the world map is open, including when paused, with separate column, upload and time budgets. Explain lower and higher performance settings in tooltips, and stop unneeded map background work when its features are disabled.
+- Edit minimap position, size, zoom, terrain, compass, radar and markers together in the HUD editor, with a live map preview and isolated drafts. Temporarily hide the toast preview while editing the minimap or second info cluster.
+- Customize shared player markers and recent-path color and opacity. Use an embossed red player arrow by default and place square-map compass letters closer to its edges.
+- Limit cave searches to adjustable levels above and below an exact reference height, with tighter defaults and separate terrain caches for each search window.
+- Save colored waypoints in persistent named sets. Add a set dropdown, clearer creation, reverse cycling, shared row highlights and a width limit on wide screens.
+- Stabilize world waypoint labels with the current camera transform and subpixel positioning. Add an independent in-world waypoint visibility binding and optional map, radar, grid, cave and destination bindings.
+- Simplify world-map controls, move Center and Go to beneath the scale, and let the scale line be dragged temporarily for comparison. Save visible-map screenshots in the instance screenshots folder with short-lived confirmation.
+- Add destination clearing and a four-second confirmed waypoint deletion to the map context menu. Remove waypoint initials and unnecessary map headings and help text.
+- Group movement and map key bindings by purpose. Related controls and settings jump to the exact highlighted row in its normal tab, with Back and Escape returning to the previous view.
+- Combine paired color and opacity controls in the color picker, retain saved values and show nonopaque percentages beside the hex color. Use American English throughout settings and help.
+- Add modern sprinting on foot through the per-world `allow_sprinting` rule, off in every defaults base. Keep speed, activation, sprint jumping, surface particles, knockback, stamina and combat preferences global.
+- Carry an active ground Toggle sprint into Creative or permitted survival flight. Add optional dynamic FOV for ground, Creative, Spectator and freecam sprinting, all disabled by default.
+- Keep right-clicking an existing boat with a boat item from placing another boat while preserving boarding.
+- Terrain format 2 reads format 1 and preserves verified originals when upgrading. Configuration format 7 supports formats 3–6; world-rule format 3 supports formats 1, 2 and earlier world metadata. Existing surface maps, waypoints and legacy cave files remain intact.
 
 ## [2.5.3] - 2026-10-19
 
@@ -30,7 +33,7 @@
 
 - Use WorldEdit selection and query commands from Spectator or freecam, including current-view block targeting and camera-relative selection directions. Existing access rules still protect world changes.
 - Keep the ridden minecart visible when looking backwards, with normal or faster minecart movement.
-- Shift-drag across armour pieces to equip or remove them, preserving native item data and slot limits.
+- Shift-drag across armor pieces to equip or remove them, preserving native item data and slot limits.
 
 ## [2.5.1] - 2026-10-19
 
@@ -72,7 +75,7 @@
 - Reorder individual F3 information lines by dragging them in the HUD preview, leave blank rows between them, control each line's visibility and change the text size.
 - HUD previews share the in-game info-cluster formatting, show chat with its native cursor, and mark hidden clusters only while selected. Background previews start off and include a clear daytime forest scene captured at 12 chunks.
 - Find HUD settings under their editor sections in search, edit individual results directly, and open the matching editor section from its heading.
-- Reorganise Interface settings into General, Title screen and Screenshots, with a Customise button beside Retro titles. Editor controls share inline editing, individual resets and native click sounds.
+- Reorganize Interface settings into General, Title screen and Screenshots, with a Customize button beside Retro titles. Editor controls share inline editing, individual resets and native click sounds.
 - Show the current Power Beta version beside Minecraft's title-screen version, with an option to hide it, and remove blocking settings saves when cycling logos.
 - Rename worlds inline with verified metadata backups, show each world's name in its editor, and keep panorama world selections translucent.
 - Enlarge the achievement map on larger screens and return to the pause menu with Done or Escape.
@@ -81,7 +84,7 @@
 ## [2.3.0] - 2026-10-17
 
 - Adapt the HUD editor to wide and portrait screens, combine normal and underwater previews, and keep crosshair, achievement and controller options under General.
-- Add a forest preview background, outlines for hidden info clusters, individual resets and delayed tooltips. Keep nested colour swatches in the editor draft until Done or Save.
+- Add a forest preview background, outlines for hidden info clusters, individual resets and delayed tooltips. Keep nested color swatches in the editor draft until Done or Save.
 
 - Share collapsible Options groups with the HUD editor. Reset all HUD settings, all positions or only the selected element, with Undo for every reset.
 - Preview selected item names only when enabled, using their shared message position. Bring item-name controls, crosshair, chat, controller prompts and achievement toasts into the HUD editor.
@@ -89,7 +92,7 @@
 - Preserve the cursor position between main-menu screens and restore clickable title-screen music controls alongside logo cycling.
 - Simplify the HUD editor to one top selector, group related settings and rename custom info clusters. Select preview elements before dragging, and reset positioning separately from visibility, styling and content.
 - Use the Game sounds setting name in category and individual-sound volume tooltips.
-- Use greyscale colours in the HUD element dropdown and add individual default-reset buttons for title rotation and appearance controls.
+- Use grayscale colors in the HUD element dropdown and add individual default-reset buttons for title rotation and appearance controls.
 - Keep panorama motion continuous across title and main-menu screens, and restore native dirt headers and footers on scrolling lists.
 - Refine title painting with left-click paint, right-click erase, filtered one-click brush selection, block previews and saved swatches. Add live rotation sliders, inline editing, animation replay and taller controls when space allows.
 - Click the title logo to cycle retro lettering, saved presets and official styles; right-click cycles backwards while preserving the custom retro draft.
@@ -127,14 +130,14 @@
 
 ## [2.1.1] - 2026-10-16
 
-- Set bed respawn points during the day with sleeping enabled, while retaining native sleeping and multiplayer behaviour.
+- Set bed respawn points during the day with sleeping enabled, while retaining native sleeping and multiplayer behavior.
 - Add Edit game rules to the saved-world Edit menu, with verified metadata backups and checks for changed or unsupported data.
 - Combine panorama controls into one choice with the original dirt background as the default. Show one option per distinct scene while preserving saved selections from older versions.
 - Preview panoramas live in the picker. Apply selections immediately, retain the selection marker and leave with Back or Escape.
-- Use the clean release 1.0 images for the Beta 1.8.1 panorama, removing its purple seam while keeping its name and saved selections. Centre the panorama picker buttons and search field.
+- Use the clean release 1.0 images for the Beta 1.8.1 panorama, removing its purple seam while keeping its name and saved selections. Center the panorama picker buttons and search field.
 - Adjust panorama blur directly in the picker, sharing the same setting and preview as the main settings list.
 - Return to Select world when pressing Escape in the world Edit menu.
-- Centre Beta, 2017 and 2020 title lettering and their Java Edition subtitles using the visible texture bounds. Keep the already-centred modern style and custom retro title.
+- Center Beta, 2017 and 2020 title lettering and their Java Edition subtitles using the visible texture bounds. Keep the already-centered modern style and custom retro title.
 - Remove the panorama picker's search field and give its choices more space.
 - Group Active tweaks HUD inclusion switches below its display controls, and move Full bright messages below Brightness.
 
@@ -142,7 +145,7 @@
 
 - Restore native walking, jumping, falling and bobbing whenever flight is off. Entering Creative silently restores its flight ability, and flight tooltips explain their speed and drift baselines.
 - Apply title panorama choices immediately when clicked, with a single Cancel button.
-- Add Title style choices for the official Beta, 2017 Java Edition, 2020 Java Edition and modern logos. Keep customisable retro lettering as the default and preserve its customisation between styles.
+- Add Title style choices for the official Beta, 2017 Java Edition, 2020 Java Edition and modern logos. Keep customizable retro lettering as the default and preserve its customization between styles.
 - Add allow_sleep while retaining bed respawn points when sleeping is disabled. Use a 0–100% sleeping slider and rename sleep_ambushes to sleep_nightmares, retaining the old command aliases.
 - Add world rules for ghast explosion fire, lightning strike fire and explosion block drop chance. Default ghast fire on, lightning fire off and block drops to 100%. Remove the global rain-disabling setting; weather uses its world cycle rule.
 - Add /fly and allow_flight for flight outside Creative. Creative can toggle its flight ability independently of its inventory and protection; Spectator keeps its own flight.
@@ -170,7 +173,7 @@
 - Add separate player and mob crop-trampling rules, both off in new-world presets. Move lava and cactus damage to dropped items into world rules with vanilla defaults.
 - Show explosion block drops as a 0–100% slider, defaulting to 100%, and craft six stairs at a time.
 - Enable flint-and-steel TNT priming, punch-to-defuse TNT, original far-distance fog, larger chicken hitboxes, grass/fire recipes, gold equipment abilities, the gold-block sponge ritual, sponge absorption, trapdoor glue, entity ignition and returned-fireball ghast kills by default.
-- Default lightning fire off, tick the world during accelerated sleep and allow clicking to wake. Default stacked chests, sign dye colours and vignette off.
+- Default lightning fire off, tick the world during accelerated sleep and allow clicking to wake. Default stacked chests, sign dye colors and vignette off.
 - Keep freecam and Spectator out of front view regardless of HUD visibility. Freecam leaves the HUD visible by default.
 - Configuration format 5 converts formats 3 and 4 with verified backups. World-rule format 2 converts format 1 and older world settings, preserving existing rule values and item protection. Conditional footwear protection requires an explicit trampling choice before converting its world.
 
@@ -270,18 +273,18 @@
 - Keep auto-walk active when focus is lost, with an optional setting to cancel it instead.
 - Fix HUD positioning previews, screen-edge placement, visibility and food-preview alignment. Show which positioning controls apply to each mode.
 - Add an optional 12-hour daylight clock to F3, including frozen daylight. Off by default.
-- Add four custom HUD info clusters in Interface, with independent content, anchors, offsets, text size, colour, opacity and F3 visibility. Choose coordinates, facing, biome, time, day count, chunk coordinates and frame rate.
+- Add four custom HUD info clusters in Interface, with independent content, anchors, offsets, text size, color, opacity and F3 visibility. Choose coordinates, facing, biome, time, day count, chunk coordinates and frame rate.
 - Restore the inventory cursor to its exact starting position after right-click looking, with both native and raw mouse input.
 - Match the section collapse button to the search-clear button and separate its inward chevrons.
 - Preserve quick inventory-look gestures without losing their cursor origin or camera movement.
 - Add an unbound hotkey for toggling all custom HUD clusters together while preserving their individual settings and F3 visibility.
 - Show HUD coordinates as comma-separated values, with the facing axis and compass direction alongside them when enabled.
-- Keep background movement-key events and focus transitions from cancelling auto-walk when focus-loss cancellation is off.
+- Keep background movement-key events and focus transitions from canceling auto-walk when focus-loss cancellation is off.
 - Keep auto-walk moving while an inventory is open and the game loses focus.
 - Preserve cursor position and camera movement through consecutive fast inventory drags, including movement immediately after release.
 - Restore custom skins when the first skin provider returns an incomplete profile, and prevent bundled fallback skins from crashing the texture downloader.
 - Restore photo-mode mouse panning and rotation, and preserve quick drags, slider changes and time restoration through resizing.
-- Centre the menu music scrub track above and below the menu.
+- Center the menu music scrub track above and below the menu.
 - Keep the scroll position when accepting a settings search destination by clicking its current tab.
 - Remove padding before positive facing axes in custom HUD coordinates.
 - Add optional cactus protection for dropped items. Off by default.
@@ -312,7 +315,7 @@
 - Add an option to protect dropped items from explosions.
 - Add optional TNT work limits to spread large chains across ticks and help reload struggling worlds. Pending TNT keeps its saved fuse.
 - Stop creative TNT breaking from dropping blocks, and add an option to suppress saplings while leaves decay in creative.
-- Shift-click creative catalogue items to transfer one full stack into the inventory, respecting item and stacking limits.
+- Shift-click creative catalog items to transfer one full stack into the inventory, respecting item and stacking limits.
 - Enable Auto apply by default for new settings profiles, and move death-record settings into Gameplay.
 - Make Next end music previews and resume the previous track without consuming the queue. Right-click the song label to open the queue, or the top of Audio when the queue is empty.
 - Prevent rapid music-preview cancellation from stopping the sound streaming thread, and keep first-time audio previews from saving settings.
@@ -327,7 +330,7 @@
 
 ## [1.4.3] - 2026-10-11
 
-- Restore text buttons and show the death number and timestamp in the saved inventory view, without the held label or armour-panel black bar.
+- Restore text buttons and show the death number and timestamp in the saved inventory view, without the held label or armor-panel black bar.
 - Save and recover the four player crafting inputs in their original positions, and drop them once on normal deaths.
 - Prevent crashes after long-distance WorldEdit jumps by keeping background culling out of chunk generation and fixing chunk sorting.
 
@@ -340,7 +343,7 @@
 ## [1.4.1] - 2026-10-11
 
 - Default lost-item chat notices to off and allow death recovery in survival with cheats.
-- Save original inventory and armour positions, restore them when available, and show deaths in an inventory view locked without cheats.
+- Save original inventory and armor positions, restore them when available, and show deaths in an inventory view locked without cheats.
 - Allow one-time recovery of individual saved stacks with cheats, sharing recovery claims with /death recover.
 
 ## [1.4.0] - 2026-10-11
@@ -368,7 +371,7 @@
 
 ## [1.2.1] - 2026-10-10
 
-- Preserve chat colours when messages wrap onto another line.
+- Preserve chat colors when messages wrap onto another line.
 - Show entities and block entities during freecam, then resume normal culling when freecam ends.
 
 ## [1.2.0] - 2026-10-10
@@ -379,12 +382,12 @@
 - Add an optional Low fire texture setting that lowers on-screen flames, off by default.
 - Add separate camera shake controls for all damage and fire damage, both on by default.
 - Add Auto-mine with an unbound toggle hotkey to hold the normal attack and block-breaking action.
-- Fix dropping carried items outside the creative catalogue, preserving whole-stack and single-item drops.
+- Fix dropping carried items outside the creative catalog, preserving whole-stack and single-item drops.
 
 ## [1.1.1] - 2026-10-09
 
 - Keep the chat cursor visible by default, with optional blinking.
-- Add an F3 text colour setting, defaulting to white, and prevent overlapping debug rows.
+- Add an F3 text color setting, defaulting to white, and prevent overlapping debug rows.
 - Group world cycle and spawning switches under World overrides.
 - Apply flight sprint in every direction, including sideways and vertical movement, in creative, spectator and freecam.
 
@@ -400,7 +403,7 @@
 
 ## [1.0.1] - 2026-10-08
 
-- Fix isometric capture bounds and centring with custom render distances.
+- Fix isometric capture bounds and centering with custom render distances.
 
 ## [1.0.0] - 2026-10-08
 

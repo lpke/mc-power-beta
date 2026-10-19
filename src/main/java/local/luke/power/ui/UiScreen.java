@@ -145,13 +145,32 @@ public abstract class UiScreen extends Screen {
   }
 
   protected void colourButton(String hex, int x, int y, int w, int mx, int my) {
+    colourButton(hex, 100, x, y, w, mx, my);
+  }
+
+  protected void colourButton(String hex, double opacity, int x, int y, int w, int mx, int my) {
     button("", x, y, w, 18, mx, my, true);
-    String label = w >= 44 ? fit(hex, w - 26) : "";
+    String label = w >= 44 ? fit(local.luke.power.config.ColorSettings.label(hex, opacity), w - 26) : "";
     int total = label.isEmpty() ? 12 : textRenderer.getWidth(label) + 16;
     int start = x + Math.max(3, (w - total) / 2);
     fill(start, y + 3, start + 12, y + 15, 0xff000000);
-    fill(start + 1, y + 4, start + 11, y + 14, 0xff000000 | Integer.parseInt(hex.replace("#", ""), 16));
+    int rgb;
+    try { rgb = local.luke.power.light.LightSettings.rgb(hex); }
+    catch (IllegalArgumentException invalidDraft) { rgb = 0x777777; }
+    colorSwatch(rgb, opacity, start + 1, y + 4, 10, 10);
     if (!label.isEmpty()) text(label, start + 16, y + 5, inside(mx, my, x, y, w, 18) ? 0xffffa0 : 0xe0e0e0);
+  }
+
+  protected void colorSwatch(int rgb, double opacity, int x, int y, int w, int h) {
+    double alpha = Math.max(0, Math.min(1, opacity / 100));
+    if (alpha == 1) { fill(x, y, x + w, y + h, 0xff000000 | rgb); return; }
+    for (int dy = 0; dy < h; dy += 4) for (int dx = 0; dx < w; dx += 4) {
+      int background = ((dx / 4 + dy / 4) & 1) == 0 ? 0x888888 : 0xcccccc;
+      int color = 0xff000000;
+      for (int shift = 0; shift <= 16; shift += 8)
+        color |= (int)Math.round((rgb >> shift & 255) * alpha + (background >> shift & 255) * (1 - alpha)) << shift;
+      fill(x + dx, y + dy, x + Math.min(w, dx + 4), y + Math.min(h, dy + 4), color);
+    }
   }
 
   protected void slider(String label, int x, int y, int w, int mx, int my, double fraction) {

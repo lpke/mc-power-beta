@@ -43,14 +43,14 @@ public final class LightInventoryChecks {
           check(a.count==1&&b.count==1&&a.getDamage()==3&&b.getDamage()==27,"count/durability changed");
         });
       }
-      test("armour slot swaps matching durability variants",()->{
+      test("armor slot swaps matching durability variants",()->{
         Slot helmet=(Slot)mc.player.playerContainer.slots.get(5);
         ItemStack a=new ItemStack(306,1,3),b=new ItemStack(306,1,20);
         helmet.setStack(a);mc.player.inventory.setCursorStack(b);
         mc.player.playerContainer.onSlotClick(5,0,false,mc.player);
         check(helmet.getStack()==b&&mc.player.inventory.getCursorStack()==a,"helmet swap failed");
       });
-      test("armour slot still rejects wrong item type",()->{
+      test("armor slot still rejects wrong item type",()->{
         Slot helmet=(Slot)mc.player.playerContainer.slots.get(5);
         ItemStack a=helmet.getStack(),b=new ItemStack(267,1,15);mc.player.inventory.setCursorStack(b);
         mc.player.playerContainer.onSlotClick(5,0,false,mc.player);
@@ -65,7 +65,7 @@ public final class LightInventoryChecks {
           check(output.getStack()==a&&mc.player.inventory.getCursorStack()==b,"result slot changed");
         } finally {output.setStack(saved);}
       });
-      test("Beta bows have no durability and retain vanilla behaviour",()->{
+      test("Beta bows have no durability and retain vanilla behavior",()->{
         ItemStack a=new ItemStack(261,1,0),b=new ItemStack(261,1,0);
         check(!a.isDamageable(),"unexpected bow durability in Beta");
         slot.setStack(a);mc.player.inventory.setCursorStack(b);
@@ -77,7 +77,7 @@ public final class LightInventoryChecks {
         mc.player.playerContainer.onSlotClick(36,0,false,mc.player);
         check(slot.getStack().count==50&&mc.player.inventory.getCursorStack()==null,"ordinary merge changed");
       });
-      test("disabled equipment swapping restores vanilla behaviour",()->{
+      test("disabled equipment swapping restores vanilla behavior",()->{
         settings.swapEquipment=false;VisualConfig.preview(settings);
         ItemStack a=new ItemStack(267,1,3),b=new ItemStack(267,1,7);slot.setStack(a);mc.player.inventory.setCursorStack(b);
         mc.player.playerContainer.onSlotClick(36,0,false,mc.player);

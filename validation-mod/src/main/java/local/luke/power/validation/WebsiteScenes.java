@@ -74,7 +74,7 @@ final class WebsiteScenes {
     if(action.equals("gold-glass-break")) {mc.interactionManager.method_1716(x,y,z,2);return;}
     if(action.equals("light")) {
       Release150Gallery.run(mc,"light");
-      // This fixture's original chamber is centred at 960,38,576.
+      // This fixture's original chamber is centered at 960,38,576.
       x=960;y=38;z=576;mc.player.inventory.main[0]=new ItemStack(50,64,0);mc.player.inventory.selectedSlot=0;
       mc.options.hideHud=false;return;
     }

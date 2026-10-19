@@ -61,7 +61,7 @@ final class HudMenu230Checks {
         }
         check(checked>10,"volume fixture did not find sound controls");
       });
-      test("native and raw mouse helpers preserve the actual pointer across menus and centre only on capture release",()->{
+      test("native and raw mouse helpers preserve the actual pointer across menus and center only on capture release",()->{
         for(boolean raw:new boolean[]{false,true}){
           mc.field_2767=raw?(net.minecraft.class_596)Class.forName("local.luke.power.controls.tweaks.rawinput.RawMouseHelper")
               .getConstructor(java.awt.Component.class).newInstance(mc.canvas):new net.minecraft.class_596(mc.canvas);
@@ -81,7 +81,7 @@ final class HudMenu230Checks {
             }
             mc.field_2767.method_1970();check(Mouse.isGrabbed(),"capture failed");
             mc.field_2767.method_1971();check(!Mouse.isGrabbed(),"capture was not released");
-            Mouse.poll();check(Mouse.getX()==Display.getWidth()/2&&Mouse.getY()==Display.getHeight()/2,"gameplay capture release did not centre");
+            Mouse.poll();check(Mouse.getX()==Display.getWidth()/2&&Mouse.getY()==Display.getHeight()/2,"gameplay capture release did not center");
           }
         }
       });

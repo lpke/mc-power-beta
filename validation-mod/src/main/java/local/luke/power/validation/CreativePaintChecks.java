@@ -66,7 +66,7 @@ final class CreativePaintChecks {
       }
       if (action.equals("rollback")) { rollback(); return; }
       for(int[] size:new int[][]{{320,240},{640,420}}) {
-        test("catalogue previews are read-only; normal limits and hidden slots, width " + size[0], () -> {
+        test("catalog previews are read-only; normal limits and hidden slots, width " + size[0], () -> {
           for(int[] item:new int[][]{{35,64,5},{332,16,0},{267,1,83},{325,1,0},{326,1,0},{327,1,0},{335,1,0}}) {
             var screen=player(false,size[0],size[1]);
             ItemStack cursor=tagged(item[0],1,item[2],"catalogue"); mc.player.inventory.setCursorStack(cursor);

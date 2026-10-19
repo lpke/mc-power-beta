@@ -52,7 +52,7 @@ public final class ChatChecks {
       var upper = submit(mc, "//HELP 2");
       Validation.test("uppercase command executes once", () -> Validation.check(upper.stream().filter(s -> s.contains("World editing") && s.contains("2/")).count() == 1, upper.toString()));
       var invalid = submit(mc, "//set");
-      Validation.test("command error is coloured", () -> Validation.check(invalid.size() == 1 && invalid.get(0).contains("\u00a7c"), invalid.toString()));
+      Validation.test("command error is colored", () -> Validation.check(invalid.size() == 1 && invalid.get(0).contains("\u00a7c"), invalid.toString()));
       // Native history must still contain the latest submission.
       mc.setScreen(new ChatScreen());
       ((ChatInput)mc.currentScreen).power$type('\0', Keyboard.KEY_UP);

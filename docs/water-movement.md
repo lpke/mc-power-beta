@@ -25,7 +25,7 @@ does not add sprint-swimming, look-directed swimming, crawling, enchantments,
 status effects, land sprinting or new fluids.
 Native travel still owns collision response, stepping out of water, fall-distance
 handling and limb interpolation. Native water blocks still supply flow vectors.
-The scan checks loaded terrain, including the neighbour margin needed by those
+The scan checks loaded terrain, including the neighbor margin needed by those
 flow calculations, and visits at most 64 cells. It never loads chunks.
 
 Flight, Spectator, mounted players, other entities and multiplayer retain their

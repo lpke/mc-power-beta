@@ -87,10 +87,10 @@ final class Release211Checks {
             for(int[] size:new int[][]{{320,240},{640,420}}) {
               picker.init(mc,size[0],size[1]); field(picker,"scroll",0d);
               int left=(int)call(picker,"left"), span=(int)call(picker,"span");
-              check(Math.abs(left*2+span-size[0])<=1,"panorama buttons are not centred");
+              check(Math.abs(left*2+span-size[0])<=1,"panorama buttons are not centered");
               check(PanoramaCatalog.folder("b1_8_1").equals(PanoramaCatalog.folder("1_0")),"classic panorama source");
               selectPanorama(picker,"b1_8_1");
-              check(choice.value.getAsString().equals("b1_8_1"),"right edge of centred button did not select");
+              check(choice.value.getAsString().equals("b1_8_1"),"right edge of centered button did not select");
               SettingsSnapshot.render(mc,picker,size[0],size[1],Path.of("power-beta-data/reports/211/panorama-classic-"+apply+"-"+size[0]+".png"));
               field(picker,"scroll",0d);
               SettingsSnapshot.render(mc,picker,size[0],size[1],Path.of("power-beta-data/reports/211/panorama-"+apply+"-"+size[0]+".png"));
