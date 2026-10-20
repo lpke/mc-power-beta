@@ -47,7 +47,7 @@ public final class PlayerChat {
       if (mc.world != null && mc.player != null)
         for (String text : ChatNotes.history()) if (!text.startsWith("/")) display(mc, "<You> " + text, true);
     }
-    if (!ChatNotes.error().isEmpty() && !ChatNotes.error().equals(reportedError)) {
+    if (mc.world != null && !ChatNotes.error().isEmpty() && !ChatNotes.error().equals(reportedError)) {
       reportedError = ChatNotes.error(); local.luke.power.PowerBeta.LOG.error(reportedError);
       if (mc.inGameHud != null) mc.inGameHud.addChatMessage("\u00a7c" + reportedError);
     }
