@@ -577,6 +577,8 @@
   formats. Preserve unsupported template documents for review while unrelated
   preferences remain readable. Use RuleDefaults for selected-base targets and
   acknowledged revisions; strict RuleSet readers still reject incompatible values.
+  Advance RuleDefaults.REVISION and RELEASE whenever creation-rule schemas or
+  predefined rule defaults change, so customized templates receive the new review.
   Reset and Keep require conditional, backed-up PowerConfig section replacement.
 - Saved local chat messages are user data, separate from ordinary transcript limits.
   Never persist server transcripts or send restored notes to the network. Commands
