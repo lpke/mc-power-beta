@@ -115,7 +115,13 @@ public final class RadarIcons {
 
   public static boolean draw(Minecraft mc, RadarIconSource source, MapProjection view,
       boolean circle, double x, double y, double heightDifference, MapSettings settings, Batch batch) {
-    if (source == null || unavailable || !MapKeys.iconsHeld(mc)
+    return draw(mc, source, view, circle, x, y, heightDifference, settings, batch, MapKeys.iconsHeld(mc));
+  }
+
+  static boolean draw(Minecraft mc, RadarIconSource source, MapProjection view,
+      boolean circle, double x, double y, double heightDifference, MapSettings settings, Batch batch,
+      boolean enabled) {
+    if (source == null || unavailable || !enabled
         || !GLContext.getCapabilities().GL_EXT_framebuffer_object) return false;
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {

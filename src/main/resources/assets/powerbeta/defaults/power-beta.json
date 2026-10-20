@@ -564,7 +564,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 3.2.1"
+        "customVersionText": "Power Beta 3.2.2"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -1111,7 +1111,7 @@
       "directionTextOpacity": 1,
       "minimapArrowOpacity": 1,
       "radarPlayersColor": 16777215,
-      "radarHostileColor": 16737877,
+      "radarHostileColor": 16728110,
       "radarAnimalsColor": 16777045,
       "radarItemsColor": 13395711,
       "radarVehiclesColor": 45567,
@@ -1131,14 +1131,15 @@
       "radarChickenColor": -1,
       "radarSquidColor": -1,
       "radarWolfColor": -1,
-      "radarIconSize": 50,
+      "radarIconSize": 75,
       "zoomSteps": [
         0.25,
         0.5,
         1.25,
         2.5,
         4
-      ]
+      ],
+      "worldMapRadarIcons": false
     },
     "sprint": {
       "activation": 0,

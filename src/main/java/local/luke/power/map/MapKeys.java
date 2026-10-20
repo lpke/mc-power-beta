@@ -62,6 +62,13 @@ public final class MapKeys {
     return Bindings.down(RADAR_ICONS);
   }
 
+  public static boolean iconsShown(Minecraft mc, boolean minimap, MapSettings settings) {
+    return settings.radar && (iconsHeld(mc) || !minimap && settings.worldMapRadarIcons
+        && mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen
+        && mc.world != null && mc.player != null && !mc.player.dead && mc.player.health > 0
+        && Display.isActive());
+  }
+
   /** Mutates only the caller's snapshot; the input dispatcher queues it once afterward. */
   static boolean change(String id, MapSettings settings) {
     if (!available(id, settings)) return false;

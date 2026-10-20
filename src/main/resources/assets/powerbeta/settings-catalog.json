@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 3.2.1",
+    "default": "Power Beta 3.2.2",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6486,7 +6486,7 @@
     "page": "Map",
     "group": "Entity radar",
     "label": "Mob icon size",
-    "description": "Size of entity heads while holding Show entity icons, on both maps. Lower values leave more map visible; higher values make faces easier to recognize. Squid heads are normalized to the same height as other mobs.",
+    "description": "Size of entity heads on both maps. Lower values leave more map visible; higher values make faces easier to recognize. The World Map can keep heads visible with its Mobs toggle; the minimap uses the hold key. Squid heads are normalized to other mobs.",
     "min": 10,
     "max": 200,
     "step": 5,
@@ -6500,5 +6500,12 @@
     "label": "Minimap zoom steps",
     "description": "Choose exact zoom levels for the Zoom in and Zoom out bindings. Levels run from lowest to highest and wrap around at either end. This does not change the current zoom until a zoom binding is pressed.",
     "order": 1.2
+  },
+  "maps.worldMapRadarIcons": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "World map mob heads",
+    "description": "Keep entity heads visible on the World Map without holding the mob-icons key. The minimap still uses its hold key. Entity radar must be enabled.",
+    "order": 8.4
   }
 }

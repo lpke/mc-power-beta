@@ -76,6 +76,7 @@ public final class SprintController {
     }
     boolean water = ModernSwimming.canSprint(player);
     float forward = player.field_161.field_2533;
+    inheritLanding(player);
     boolean moving = Math.abs(forward) > 1e-4 || Math.abs(player.field_161.field_2532) > 1e-4
         || player.velocityX * player.velocityX + player.velocityZ * player.velocityZ > 1e-6
         || !player.field_1623 && player.velocityY * player.velocityY > 1e-6
@@ -86,6 +87,15 @@ public final class SprintController {
         player.field_1624 && !minorCollision && !water, usesStamina(player), moving);
     ModernSwimming.tick(player);
     SprintView.publish(SprintView.Kind.GROUND, state.sprinting, settings.speed / 100);
+  }
+
+  private static void inheritLanding(ClientPlayerEntity player) {
+    if (!SprintView.consumeLanding(player, player.world)) return;
+    boolean water = ModernSwimming.canSprint(player);
+    float forward = player.field_161.field_2533;
+    ((SprintPlayer)player).power$sprint().land(SprintConfig.current(), eligible(player),
+        water && forward > 0 ? 1 : forward, Bindings.down("powerbeta.sprint"),
+        player.field_1624 && !minorCollision && !water, usesStamina(player));
   }
 
   public static float acceleration(Entity player, float value) {
@@ -156,6 +166,8 @@ public final class SprintController {
     previousFov = fov;
     var settings = SprintConfig.current();
     double ratio = 1;
+    // Automatic landing occurs after input/travel. Publish its handoff before this tick's FOV.
+    if (mc.player != null) inheritLanding(mc.player);
     if (mc.player instanceof SprintPlayer player && (mc.world == null || !eligible(mc.player)))
       player.power$sprint().cancel(Bindings.down("powerbeta.sprint"));
     SprintView.publish(
@@ -181,6 +193,7 @@ public final class SprintController {
   /** Clear only ground sprint when its rule is revoked, including while a menu pauses ticks. */
   public static void rulesChanged(Minecraft mc) {
     if (allowed(mc)) return;
+    SprintView.clearLanding();
     if (mc.player instanceof SprintPlayer player)
       player.power$sprint().cancel(false);
     if (mc.player != null) ModernSwimming.cancel(mc.player);
@@ -195,6 +208,7 @@ public final class SprintController {
   }
 
   public static void reset() {
+    SprintView.clearLanding();
     owner = null;
     minorCollision = false;
     previousFov = fov = 1;

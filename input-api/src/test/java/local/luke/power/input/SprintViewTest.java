@@ -6,7 +6,22 @@ import org.junit.jupiter.api.Test;
 
 class SprintViewTest {
   @AfterEach void resetPublishedStates() {
+    SprintView.clearLanding();
     for (var kind : SprintView.Kind.values()) SprintView.publish(kind, false, 1);
+  }
+
+  @Test void landingIsConsumedOnceAndNeverFollowsAnotherPlayerOrWorld() {
+    Object player = new Object(), world = new Object();
+    SprintView.landed(player, world);
+    assertTrue(SprintView.consumeLanding(player, world));
+    assertFalse(SprintView.consumeLanding(player, world));
+    SprintView.landed(player, world);
+    assertFalse(SprintView.consumeLanding(player, new Object()));
+    assertFalse(SprintView.consumeLanding(player, world));
+    SprintView.landed(player, world);
+    assertFalse(SprintView.consumeLanding(new Object(), world));
+    SprintView.landed(player, world); SprintView.clearLanding();
+    assertFalse(SprintView.consumeLanding(player, world));
   }
 
   @Test void activeSprintAtNormalSpeedRemainsDistinctFromInactive() {

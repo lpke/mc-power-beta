@@ -84,8 +84,9 @@
     "maps.radarOtherColor": 45567,
     "maps.minimapWaypointTextSize": 70,
     "maps.minimapWaypointSize": 90,
-    "maps.radarIconSize": 50,
-    "activeTweaks.freecam": true
+    "maps.radarIconSize": 75,
+    "activeTweaks.freecam": true,
+    "maps.radarHostileColor": 16728110
   },
   "beta": {
     "activeTweaks.enabled": false,

@@ -42,7 +42,7 @@ public final class WorldMapScreen extends UiScreen {
     if (settingsPanel != null) settingsPanel.removed();
     settingsPanel = null; panelPress = false; minimapHit = null; minimapStyleSource = null;
     if (!MapConfig.current().minimap) MinimapBuffer.clear();
-    if (!MapConfig.current().worldMap) closeMap();
+    if (optionsOwner != null || !MapConfig.current().worldMap) closeMap();
   }
   private void toggleSettings() {
     if (settingsPanel != null) { settingsPanel.requestPanelClose(this::closeSettings); return; }
@@ -56,12 +56,15 @@ public final class WorldMapScreen extends UiScreen {
   }
   private void requestClose() {
     if (settingsPanel == null) closeMap();
-    else settingsPanel.requestPanelClose(() -> { closeSettings(); closeMap(); });
+    else settingsPanel.requestPanelClose(() -> { closeSettings(); if (minecraft.currentScreen == this) closeMap(); });
   }
   public void tick() { if (settingsPanel != null) settingsPanel.tick(); }
   public boolean capturingBinding() { return settingsPanel != null && settingsPanel.capturingBinding(); }
   public void requestScreenshot() { screenshot = true; }
-  public boolean radarIconsAllowed() { return !coordinates.active() && settingsPanel == null && !context; }
+  public boolean radarIconsAllowed() {
+    return !coordinates.active() && !serverMap.focused && !context
+        && (settingsPanel == null || settingsPanel.radarIconsAllowed());
+  }
   private boolean panelOwns(int x) { return settingsPanel != null && (settingsPanel.panelModal() || panelPress || x < mapLeft()); }
   private void drawMinimap(float delta) {
     minimapHit = null;
@@ -137,11 +140,12 @@ public final class WorldMapScreen extends UiScreen {
     if (controls == null || controlsLeft != mapLeft() || controlsWidth != mapWidth() || controlsHeight != height
         || controlsLayer != layer || controlsDimension != dimension || controlsSettings != panel || controlsStyle != style) {
       String[] labels = {style.lightOverlay ? "Light: On" : "Light: Off", style.slimeChunks ? "Slime: On" : "Slime: Off",
+          style.worldMapRadarIcons ? "Mobs: On" : "Mobs: Off",
           style.footsteps ? "Recent path: On" : "Recent path: Off", "Waypoints", panel ? "Close settings" : "Settings",
           layer < 0 ? "Caves" : "Surface", MapDimensions.name(dimension), "Center", "Go to", "Close"};
       int bottomWidth = 12;
-      for (int i = 3; i < 7; i++) bottomWidth += textRenderer.getWidth(labels[i]) + 12;
-      if (bottomWidth > mapWidth() - 16) labels[4] = "Settings";
+      for (int i = 4; i < 8; i++) bottomWidth += textRenderer.getWidth(labels[i]) + 12;
+      if (bottomWidth > mapWidth() - 16) labels[5] = "Settings";
       controls = WorldMapControls.at(mapLeft(), mapWidth(), height, labels, textRenderer::getWidth);
       controlsLeft = mapLeft(); controlsWidth = mapWidth(); controlsHeight = height;
       controlsLayer = layer; controlsDimension = dimension; controlsSettings = panel; controlsStyle = style;
@@ -260,6 +264,7 @@ public final class WorldMapScreen extends UiScreen {
 
   protected void keyPressed(char c, int key) {
     if (coordinates.key(this,c,key)) return;
+    if (radarIconsAllowed() && local.luke.power.input.Bindings.matches(MapKeys.RADAR_ICONS, key)) return;
     if (settingsPanel != null) { settingsPanel.keyPressed(c, key); return; }
     if (context) {
       if (key == Keyboard.KEY_ESCAPE) context = false;
@@ -312,6 +317,7 @@ public final class WorldMapScreen extends UiScreen {
     String id = switch(action) {
       case LIGHT -> "maps.lightOverlay";
       case SLIME -> "maps.slimeChunks";
+      case MOBS -> "maps.worldMapRadarIcons";
       case PATH -> "maps.footsteps";
       default -> throw new IllegalArgumentException("Unknown map overlay");
     };
@@ -321,6 +327,7 @@ public final class WorldMapScreen extends UiScreen {
     switch(action) {
       case LIGHT -> settings.lightOverlay = !settings.lightOverlay;
       case SLIME -> settings.slimeChunks = !settings.slimeChunks;
+      case MOBS -> settings.worldMapRadarIcons = !settings.worldMapRadarIcons;
       case PATH -> settings.footsteps = !settings.footsteps;
       default -> throw new IllegalArgumentException("Unknown map overlay");
     }
@@ -330,7 +337,7 @@ public final class WorldMapScreen extends UiScreen {
   private void controlAction(WorldMapControls.Action action) {
     click();
     switch(action) {
-      case LIGHT, SLIME, PATH -> toggleOverlay(action);
+      case LIGHT, SLIME, MOBS, PATH -> toggleOverlay(action);
       case WAYPOINTS -> minecraft.setScreen(new WaypointsScreen(this));
       case SETTINGS -> toggleSettings();
       case LAYER -> layer = layer < 0 ? MapSampler.window(MapConfig.current(),Maps.y()).layer() : -1;

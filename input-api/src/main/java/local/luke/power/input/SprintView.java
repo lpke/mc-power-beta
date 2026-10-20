@@ -16,6 +16,7 @@ public final class SprintView {
   private static final double[] ratios = {1, 1, 1, 1};
   private static final boolean[] active = new boolean[Kind.values().length];
   private static DoubleUnaryOperator fov = delta -> 1;
+  private static Object landingPlayer, landingWorld;
 
   private SprintView() {}
 
@@ -32,6 +33,20 @@ public final class SprintView {
   public static double ratio(Kind kind) {
     return ratios[kind.ordinal()];
   }
+
+  /** One game-thread handoff between movement modules, scoped to the same player and world. */
+  public static void landed(Object player, Object world) {
+    landingPlayer = player;
+    landingWorld = world;
+  }
+
+  public static boolean consumeLanding(Object player, Object world) {
+    boolean inherit = player != null && world != null && landingPlayer == player && landingWorld == world;
+    clearLanding();
+    return inherit;
+  }
+
+  public static void clearLanding() { landingPlayer = landingWorld = null; }
 
   public static void configure(DoubleUnaryOperator provider) {
     fov = java.util.Objects.requireNonNull(provider);

@@ -8,6 +8,18 @@ public final class SprintState {
   private boolean keyWasDown, forwardWasDown, latched, tapped;
   private int doubleTap;
 
+  /** Continue an already-active flight gesture; normal tick validation still owns permission/stamina. */
+  public void land(SprintSettings settings, boolean eligible, float forward, boolean sprintKey,
+      boolean collision, boolean usesStamina) {
+    cancel(sprintKey);
+    sprinting = tapped = canSprint(settings, eligible, usesStamina) && forward >= .8f && !collision;
+  }
+
+  private boolean canSprint(SprintSettings settings, boolean eligible, boolean usesStamina) {
+    return eligible && (!settings.noSprintInCombat || combatTicks == 0)
+        && (!settings.stamina || !usesStamina || !exhausted && stamina > 0);
+  }
+
   public void cancel(boolean keyDown) {
     sprinting = false;
     latched = false;
@@ -54,10 +66,7 @@ public final class SprintState {
       latched = !(latched || tapped);
       tapped = false;
     }
-    boolean can =
-        eligible
-            && (!s.noSprintInCombat || combatTicks == 0)
-            && (!staminaEnabled || !exhausted && stamina > 0);
+    boolean can = canSprint(s, eligible, usesStamina);
     if (!can || forward <= 0 || collision) {
       sprinting = false;
       latched = false;

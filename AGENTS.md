@@ -597,7 +597,9 @@
   use queued modifier state during keyboard dispatch; mouse selection uses physical polling.
   Test fast Ctrl+C with either release order and overlapping left/right modifiers. Drag
   autoscroll runs from the chat screen tick so paused singleplayer chat keeps working.
-- Entity radar head icons are hold-only, upright orthographic native head models. Build at
+- Entity radar heads are upright orthographic native head models. Minimap icons are hold-only;
+  the World Map can also retain heads through its own Mobs preference. Sidebar text editors,
+  modals and binding capture retain keyboard ownership. Build at
   most one new icon and resolve at most one source texture per native frame, shared by both
   map views and stereo eyes. Use bounded caches, invalidate on texture reload, and retain
   dot fallback for pending/unsupported entities. Do not read entities on workers or modify

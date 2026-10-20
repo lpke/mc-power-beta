@@ -24,6 +24,7 @@ public final class MapSettings {
   public boolean heightShading = true, slopeShading = true, caveLighting = true;
   public boolean radar = true, players = true, hostile = true, animals = true, items, otherEntities = true;
   public boolean entityNames, entityHeights = true;
+  public boolean worldMapRadarIcons;
   public int radarPlayersColor = 0xffffff, radarHostileColor = 0xff6655,
       radarAnimalsColor = 0xffff55, radarItemsColor = 0xff5555,
       radarVehiclesColor = 0xcc66ff, radarProjectilesColor = 0xcc66ff,

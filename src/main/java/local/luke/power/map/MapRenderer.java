@@ -450,6 +450,7 @@ public final class MapRenderer {
         GL11.glColor4f(1, 1, 1, 1);
       }
       int waypointCount = 0;
+      boolean showIcons = MapKeys.iconsShown(mc, mini, s);
       if (s.waypoints && store != null)
         for (var point : Maps.points()) {
           if (waypointCount >= 512) break;
@@ -499,7 +500,7 @@ public final class MapRenderer {
           if (!view.contains(p.x(), p.y(), circle, 2)) continue;
           double dy = MapMotion.position(entity.previousY(), entity.y(), Maps.radarDelta(entity, delta)) - pose.y();
           int color = MapLighting.radarColor(entity.color(s), dy, s);
-          boolean icon = RadarIcons.draw(mc, entity.icon(), view, circle, p.x(), p.y(), dy, s, heads);
+          boolean icon = RadarIcons.draw(mc, entity.icon(), view, circle, p.x(), p.y(), dy, s, heads, showIcons);
           if (!icon) diamond(p.x(), p.y(), color, entity.item() ? .7 : 1.3);
           double radius = icon ? RadarIcons.radius(entity.icon(), s) : 1.3;
           if (s.entityHeights && Math.abs(dy) > 3) {

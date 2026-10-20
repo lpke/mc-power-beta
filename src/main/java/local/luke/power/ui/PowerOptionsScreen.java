@@ -97,6 +97,7 @@ public final class PowerOptionsScreen extends UiScreen {
     setting.value = new JsonPrimitive(!setting.value.getAsBoolean()); changed(setting);
   }
   boolean panelModal() { return capture != null || confirmClose || confirmReset; }
+  boolean radarIconsAllowed() { return !panelModal() && !valueEditor.active() && !search.focused; }
   void panelCancelGesture() {
     capture = null; captureModifier = 0; dragging = null; contentBar.release(); sidebarBar.release();
     valueEditor.cancel(); hoverDelay.clear(); TextDrag.cancel();
@@ -395,6 +396,7 @@ public final class PowerOptionsScreen extends UiScreen {
     selected = -1;
   }
   private void back() {
+    if (mapOwner != null && history.size() == 1) { closeOptions(); return; }
     if (editorReturn != null && history.size() <= 1) { returnToEditor(); return; }
     if (history.isEmpty()) return;
     restore(history.pop());

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [3.2.2] - 2026-10-21
+
+- Continue sprinting when leaving flight while moving forward, with normal ground-sprint permissions, stamina and combat checks.
+- Keep mob heads visible with a World Map Mobs toggle, and allow the hold key while map settings are open. The minimap retains its hold-only behavior.
+- Return directly to Options when leaving the minimap settings sidebar opened from its Edit button.
+- Simplify the minimap zoom-step editor with one row of actions and less header text.
+- Set Power Beta defaults to 75% mob icons and a brighter red hostile-mob color.
+
 ## [3.2.1] - 2026-10-21
 
 - Preview every Extra sounds option, including eating, shearing, breakage and chest sounds. Refresh water and lava bucket sounds from current official Minecraft assets.

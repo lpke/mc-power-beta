@@ -1,5 +1,13 @@
 # Runtime checks
 
+- After `new-world`, `release-322 ui` checks direct Options return, manual drafts and
+  the single-row zoom footer. Use `sidebar-prepare`, physical Tab hold, `sidebar-held`,
+  physical release and `sidebar-released` for sidebar input and the world-only Mobs lock.
+  For both `flight-creative` and `flight-survival`, hold W, tap left Ctrl, run `land`,
+  wait for native ground collision, then `land-check`. Release W and run `stopped`.
+  These phases edit only the disposable test world.
+  After saving Mobs On and restarting the clone, `release-322 lock-read` checks persistence.
+
 Build after the root JAR with `./gradlew -p validation-mod --no-daemon build`.
 Install the resulting validation JAR only in a disposable Power Beta clone.
 Fixtures can replace settings and edit worlds. They are never part of the export.

@@ -5,6 +5,36 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class SprintStateTest {
+  @Test void landingRetainsEachActivationUntilMovementStopsWithoutRepeatingTheHeldPress() {
+    for (int activation = 0; activation <= 2; activation++) {
+      var settings = settings(); settings.activation = activation;
+      var state = new SprintState(); state.land(settings,true,1,true,false,true);
+      state.tick(settings, true, 1, true, false, false);
+      assertTrue(state.sprinting);
+      for (int i=0;i<20;i++) state.tick(settings,true,1,false,true,false);
+      assertTrue(state.sprinting);
+      if (activation == 2) { state.tick(settings,true,1,true,true,false); assertFalse(state.sprinting); }
+      state.tick(settings,true,0,false,true,false);
+      state.tick(settings,true,1,false,true,false);
+      assertFalse(state.sprinting);
+    }
+  }
+
+  @Test void landingCannotBypassPermissionCollisionCombatOrExhaustion() {
+    var settings = settings(); settings.stamina = settings.noSprintInCombat = true;
+    for (int blocked = 0; blocked < 4; blocked++) {
+      var state = new SprintState();
+      if (blocked == 2) state.combat(settings);
+      if (blocked == 3) { state.stamina=0;state.exhausted=true; }
+      state.land(settings,blocked!=0,1,false,blocked==1,true);
+      assertFalse(state.sprinting,"handoff must validate before FOV publication");
+      state.tick(settings,blocked!=0,1,false,true,blocked==1);
+      assertFalse(state.sprinting);
+      state.combatTicks=0;state.exhausted=false;state.stamina=100;
+      state.tick(settings,true,1,false,true,false);
+      assertFalse(state.sprinting,"blocked handoff must be consumed");
+    }
+  }
   private SprintSettings settings() {
     return new SprintSettings();
   }

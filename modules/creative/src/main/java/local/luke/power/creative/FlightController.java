@@ -23,6 +23,7 @@ public final class FlightController {
   private FlightController() {}
 
   public static void reset() {
+    SprintView.clearLanding();
     lastJump = -100;
     jumpDown = true;
     sprinting = false;
@@ -37,6 +38,10 @@ public final class FlightController {
     if (mc == null || owner != player || mc.player != player
         || ownerWorld != mc.level || player.level != mc.level) return;
     boolean pressed = local.luke.power.input.Bindings.down(Keys.SPRINT);
+    SprintView.clearLanding();
+    if (!flying && sprinting && ClientRuntime.active(mc) && !Modes.spectator(player)
+        && movementKey(mc, mc.options.forwardKey) && !movementKey(mc, mc.options.backKey))
+      SprintView.landed(player, player.level);
     boolean inherit = flying && ClientRuntime.active(mc) && !Modes.spectator(player)
         && Modes.canEnableFlight(player) && !player.isSleeping()
         && WorldRules.enabled(player.level.getProperties(), GameRule.ALLOW_SPRINTING)
@@ -54,6 +59,7 @@ public final class FlightController {
       reset();
     }
     if (!ClientRuntime.moving(mc)) {
+      SprintView.clearLanding();
       sprinting = false;
       local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.CREATIVE, false, 1);
       local.luke.power.input.SprintView.publish(local.luke.power.input.SprintView.Kind.SPECTATOR, false, 1);

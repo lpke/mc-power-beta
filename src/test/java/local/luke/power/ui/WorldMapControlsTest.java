@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class WorldMapControlsTest {
-  private static final String[] LABELS = {"Light: Off", "Slime: Off", "Recent path: Off", "Waypoints", "Settings", "Surface", "Overworld", "Center", "Go to", "Close"};
+  private static final String[] LABELS = {"Light: Off", "Slime: Off", "Mobs: Off", "Recent path: Off", "Waypoints", "Settings", "Surface", "Overworld", "Center", "Go to", "Close"};
 
   @Test void nativeAndSidecarWidthsKeepBothRowsAndRightActionsInsideTheirPane() {
     for (int[] pane : new int[][]{{0,320},{0,400},{0,640},{0,1920},{336,464},{403,557},{430,1490}}) {
@@ -25,11 +25,14 @@ class WorldMapControlsTest {
       assertEquals(pane[0]+8,waypoint.x()); assertEquals(waypoint.x(),light.x());
       assertEquals(22,waypoint.y()-light.y()); assertEquals(336,close.y());
       assertEquals(pane[0]+pane[1]-8,close.x()+close.width());
+      var slime=layout.button(WorldMapControls.Action.SLIME).bounds();
+      var mobs=layout.button(WorldMapControls.Action.MOBS).bounds();
+      assertEquals(slime.x()+slime.width()+4,mobs.x()); assertEquals(slime.y(),mobs.y());
     }
   }
 
   @Test void closeSettingsRetainsPaddingAndAWholeLeftBlockWrapsWhenNeeded() {
-    String[] labels=LABELS.clone();labels[4]="Close settings";
+    String[] labels=LABELS.clone();labels[5]="Close settings";
     var narrow=WorldMapControls.at(0,320,360,labels,s->s.length()*6);
     assertEquals(314,narrow.button(WorldMapControls.Action.WAYPOINTS).bounds().y());
     assertEquals(336,narrow.button(WorldMapControls.Action.CLOSE).bounds().y());

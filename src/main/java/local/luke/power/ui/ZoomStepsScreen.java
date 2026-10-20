@@ -30,11 +30,13 @@ public final class ZoomStepsScreen extends UiScreen {
   private int span() { return Math.min(420, width - 24); }
   private int left() { return (width - span()) / 2; }
   private int right() { return left() + span(); }
-  private int bottom() { return height - 62; }
+  private static final int TOP = 46;
+  private int bottom() { return height - 36; }
+  private ZoomStepsFooter footer() { return ZoomStepsFooter.at(left(), span(), textRenderer::getWidth); }
   private int valueX() { return left() + Math.min(90, span() / 3); }
   private int valueWidth() { return right() - 36 - valueX(); }
-  private ScrollBar.Track track() { return new ScrollBar.Track(right() - 4, 70,
-      Math.max(0, bottom() - 70), values.size() * 26, scroll); }
+  private ScrollBar.Track track() { return new ScrollBar.Track(right() - 4, TOP,
+      Math.max(0, bottom() - TOP), values.size() * 26, scroll); }
   public void init() { inline.cancel(); dragging = -1; bar.release(); Keyboard.enableRepeatEvents(true); }
   public void removed() { inline.cancel(); Keyboard.enableRepeatEvents(false); dragging = -1; bar.release(); }
   private JsonArray json() { var out = new JsonArray(); values.forEach(out::add); return out; }
@@ -66,7 +68,7 @@ public final class ZoomStepsScreen extends UiScreen {
     var entry = new Setting(setting.id + ".entry", setting.backend, setting.page, setting.group,
         "Zoom " + (index + 1), "GUI pixels per block.", Setting.Kind.DECIMAL, value, value, .25, 4, .01, List.of(), false);
     inline.begin(index, entry, () -> { checkpoint(); values.set(index, entry.value.getAsDouble()); },
-        valueX(), 70 + index * 26 - scroll, valueWidth(), 70, bottom());
+        valueX(), TOP + index * 26 - scroll, valueWidth(), TOP, bottom());
   }
   protected void keyPressed(char c, int key) {
     if (exit.key(key) || inline.key(c, key)) return;
@@ -82,8 +84,8 @@ public final class ZoomStepsScreen extends UiScreen {
     if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent.returnScreen()))) return;
     if (inline.press(x, y, button)) return;
     if (button == 0 && bar.press(track(), x, y)) { scroll = (int)bar.drag(track(), y, true); return; }
-    if (y >= 70 && y < bottom()) {
-      int i = (y - 70 + scroll) / 26, rowY = 70 + i * 26 - scroll;
+    if (y >= TOP && y < bottom()) {
+      int i = (y - TOP + scroll) / 26, rowY = TOP + i * 26 - scroll;
       if (i < 0 || i >= values.size() || y >= rowY + 18) return;
       if (inside(x, y, valueX(), rowY, valueWidth(), 18)) {
         if (button == 1) exact(i);
@@ -94,17 +96,20 @@ public final class ZoomStepsScreen extends UiScreen {
       return;
     }
     if (button != 0) return;
-    if (inside(x, y, left(), height - 54, 88, 20) && values.size() < 32) {
+    var footer = footer();
+    int action = -1;
+    for (int i = 0; i < 5; i++) if (inside(x, y, footer.x()[i], height - 28, footer.width()[i], 20)) action = i;
+    if (action == 0 && values.size() < 32) {
       click(); checkpoint(); var sorted = new TreeSet<>(values); double a = .25, b = 4, gap = -1, previous = .25;
       for (double v : sorted) { if (v - previous > gap) { gap = v - previous; a = previous; b = v; } previous = v; }
       if (4 - previous > gap) { a = previous; b = 4; }
       values.add((a + b) / 2); values.sort(Double::compare); scroll = (int)Math.min(scroll, track().maximum());
-    } else if (inside(x, y, left() + 92, height - 54, 68, 20)) {
+    } else if (action == 1) {
       click(); checkpoint(); values.clear(); setting.defaultValue.getAsJsonArray().forEach(v -> values.add(v.getAsDouble())); scroll = 0;
-    } else if (inside(x, y, left() + 164, height - 54, 58, 20) && !undo.isEmpty()) {
+    } else if (action == 2 && !undo.isEmpty()) {
       click(); values.clear(); values.addAll(undo.pop());
-    } else if (inside(x, y, width / 2 - 102, height - 28, 100, 20)) { click(); save(); }
-    else if (inside(x, y, width / 2 + 2, height - 28, 100, 20)) { click(); leave(); }
+    } else if (action == 3) { click(); save(); }
+    else if (action == 4) { click(); leave(); }
   }
   public void render(int mx, int my, float delta) {
     inline.beginFrame();
@@ -113,28 +118,26 @@ public final class ZoomStepsScreen extends UiScreen {
       if (dragging >= 0) { if (Mouse.isButtonDown(0)) slide(mx); else dragging = -1; }
       scroll = (int)Math.max(0, Math.min(track().maximum(), bar.drag(track(), my, Mouse.isButtonDown(0))));
     }
-    renderBackground(); rectangle(0, 0, width, 62, 0x70000000);
+    renderBackground(); rectangle(0, 0, width, 38, 0x70000000);
     centeredText("Minimap zoom steps", 16, 0xffffff);
-    text(fit("Zoom keys cycle these levels and wrap at either end.", span()), left(), 36, 0xaaaaaa);
     String error = error();
     if (error.isEmpty()) error = commitError;
-    text(fit(error.isEmpty() ? "Use 1 to 32 levels, lowest to highest. Right-click for exact entry." : error, span()), left(), 51, error.isEmpty() ? 0xaaaaaa : 0xff8888);
-    clip(left(), 70, span(), Math.max(0, bottom() - 70));
+    if (!error.isEmpty()) text(fit(error, span()), left(), 31, 0xff8888);
+    clip(left(), TOP, span(), Math.max(0, bottom() - TOP));
     for (int i = 0; i < values.size(); i++) {
-      int y = 70 + i * 26 - scroll;
-      if (y + 18 <= 70 || y >= bottom()) continue;
+      int y = TOP + i * 26 - scroll;
+      if (y + 18 <= TOP || y >= bottom()) continue;
       text("Zoom " + (i + 1), left(), y + 5, 0xd0d0d0);
-      if (inline.editing(i)) inline.render(this, valueX(), y, valueWidth(), mx, my, 70, bottom());
+      if (inline.editing(i)) inline.render(this, valueX(), y, valueWidth(), mx, my, TOP, bottom());
       else slider(java.math.BigDecimal.valueOf(values.get(i)).stripTrailingZeros().toPlainString() + "x", valueX(), y, valueWidth(), mx, my, (values.get(i) - .25) / 3.75);
       button("-", right() - 30, y, 20, 18, mx, my, values.size() > 1);
     }
     inline.endFrame(); unclip(); bar.render(this, track());
-    rectangle(0, height - 60, width, height, 0x70000000);
-    button("Add level", left(), height - 54, 88, 20, mx, my, values.size() < 32);
-    button("Defaults", left() + 92, height - 54, 68, 20, mx, my, true);
-    button("Undo", left() + 164, height - 54, 58, 20, mx, my, !undo.isEmpty());
-    button("Done", width / 2 - 102, height - 28, 100, 20, mx, my, error().isEmpty());
-    button("Cancel", width / 2 + 2, height - 28, 100, 20, mx, my, true);
+    rectangle(0, height - 36, width, height, 0x70000000);
+    var footer = footer();
+    boolean[] enabled = {values.size() < 32, true, !undo.isEmpty(), error().isEmpty(), true};
+    for (int i = 0; i < 5; i++) button(ZoomStepsFooter.LABELS[i], footer.x()[i], height - 28,
+        footer.width()[i], 20, mx, my, enabled[i]);
     exit.render(this, "Save zoom step changes?", mx, my);
   }
 }
