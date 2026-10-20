@@ -54,6 +54,16 @@ final class Release310Checks {
         Setting zoom = setting(panel,"maps.zoom"); zoom.value = new JsonPrimitive(1.75); panel.changed(zoom);
         check(MapConfig.current().zoom == 1.75, "map appearance did not preview");
         render(mc,map,"split-appearance",960,540);
+        Maps.cache().visibleView(Maps.dimension(),Maps.layer(),new MapCoverage.Bounds(0,100,100,100,100));
+        Object interest = field(Maps.cache(),"visibleView");
+        MinimapBuffer.clear(); MapRenderer.beginFrame(1);
+        Minimap.draw(mc,MapConfig.current(),960,540,false,true);
+        check(field(Maps.cache(),"visibleView").equals(interest),"minimap replaced/cancelled the world-map read interest");
+        Object miniSurface = MinimapHandoffChecks.staticValue(MinimapBuffer.class,"active");
+        field(miniSurface,"failed",true); MapRenderer.beginFrame(1);
+        Minimap.draw(mc,MapConfig.current(),960,540,false,true);
+        check(field(Maps.cache(),"visibleView").equals(interest),"fallback minimap replaced the world-map read interest");
+        field(miniSurface,"failed",false);
         invoke(panel,"linkedControls",new Class<?>[]{Setting.class},zoom);
         check(mc.currentScreen == map && field(panel,"mapView").equals("Controls"), "related key left split");
         check(!((String)field(panel,"highlightedId")).isEmpty(), "related key was not highlighted");

@@ -13,7 +13,7 @@ public final class MapCache {
   private final Consumer<String> errors;
   private final LinkedHashMap<Key, MapTile> tiles = new LinkedHashMap<>(64, .75f, true);
   private final Map<Key, CompletableFuture<MapTile>> loading = new LinkedHashMap<>();
-  private static final int VISIBLE = 1, SAMPLE = 2, PARENT = 4, GENERAL = 8;
+  private static final int VISIBLE = 1, SAMPLE = 2, PARENT = 4, GENERAL = 8, SECONDARY = 16;
   private final Map<Key, Integer> loadKinds = new HashMap<>();
   private ViewRequest visibleView;
   private record ViewRequest(int dimension, int layer, String context, MapCoverage.Bounds bounds) {
@@ -111,6 +111,8 @@ public final class MapCache {
 
   public MapTile get(Key key) { return get(viewKey(key), GENERAL); }
   public MapTile visible(Key key) { return get(viewKey(key), VISIBLE); }
+  /** A second visible map gets two reads without retiring the main view or taking every maintenance slot. */
+  public MapTile secondary(Key key) { return get(viewKey(key), SECONDARY); }
   public MapTile sample(Key key) { return get(viewKey(key), SAMPLE); }
 
   /** Retire only queued reads that belonged solely to the previous view. Never discard writes. */
@@ -146,9 +148,10 @@ public final class MapCache {
       return null;
     }
     if (loading.size() >= 16 || kind == VISIBLE && loads(VISIBLE) >= 8
-        || kind == SAMPLE && loads(SAMPLE) >= 4 || kind == PARENT && loads(PARENT) >= 4) return null;
+        || kind == SAMPLE && loads(SAMPLE) >= 4 || kind == SECONDARY && loads(SECONDARY) >= 2 || kind == PARENT && loads(PARENT) >= 4) return null;
     // Leave room for parent maintenance while visible and sampling consumers fill their shares.
     if ((kind == VISIBLE || kind == SAMPLE) && loading.size() - loads(PARENT) >= 12) return null;
+    if (kind == SECONDARY && loading.size() - loads(PARENT) >= 14) return null;
     trim();
     if (tiles.size() + loading.size() >= limit && !evictOne()) return null;
     var future = MapIO.submit(() -> MapCodec.read(root.resolve(key.file()), key));

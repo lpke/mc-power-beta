@@ -110,7 +110,8 @@ public final class Minimap {
               s.circular,
               s,
               !mc.world.isRemote,
-              mc.world.getSeed());
+              mc.world.getSeed(), MapRenderer.pixelsPerUnit(),
+              !(mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen));
         MapRenderer.markers(mc, view, Maps.dimension(), s.circular, true, s);
       } else {
         // A fixed sample never starts world sampling, disk I/O or another world in the HUD editor.

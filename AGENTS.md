@@ -571,6 +571,8 @@
 - World-map settings reuse the scoped Options session with the map as the active
   screen. Render, input, search, related jumps and reset targets share the same
   full-GUI viewport; nested editors return to that host without publishing drafts.
+  Secondary minimap reads retain their own bounded admission without replacing the
+  world-map interest or consuming every parent-maintenance slot.
 - Creation-template review revisions are independent of configuration and world-rule
   formats. Preserve unsupported template documents for review while unrelated
   preferences remain readable. Use RuleDefaults for selected-base targets and

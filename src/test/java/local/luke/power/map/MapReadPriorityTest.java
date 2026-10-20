@@ -18,16 +18,16 @@ class MapReadPriorityTest {
       cache.visibleView(0,-1,new MapCoverage.Bounds(0,0,7,0,0));
       for(int x=0;x<8;x++)cache.visible(key(x));
       assertEquals(8,cache.pending());
-      cache.sample(key(0));
+      cache.sample(key(0)); cache.secondary(key(1));
       Path journal=root.resolve("durable-proof");
       MapIO.submit(()->{MapFiles.replace(journal,new byte[]{4,5,6});return null;});
       cache.visibleView(0,-1,new MapCoverage.Bounds(0,100,100,0,0));
-      assertEquals(1,cache.pending(),"only the sampling-owned read must survive cancellation");
+      assertEquals(2,cache.pending(),"sampling and secondary-view reads must survive cancellation");
       cache.visible(key(100));
-      assertEquals(2,cache.pending());
+      assertEquals(3,cache.pending());
       release.countDown();MapIO.awaitQueued();cache.publish(4,Long.MAX_VALUE);
-      assertNotNull(cache.peek(key(0)));assertNotNull(cache.peek(key(100)));
-      for(int x=1;x<8;x++)assertNull(cache.peek(key(x)));
+      assertNotNull(cache.peek(key(0)));assertNotNull(cache.peek(key(1)));assertNotNull(cache.peek(key(100)));
+      for(int x=2;x<8;x++)assertNull(cache.peek(key(x)));
       assertArrayEquals(new byte[]{4,5,6},Files.readAllBytes(journal));
     } finally {release.countDown();MapIO.awaitQueued();cache.finish();}
   }
@@ -43,7 +43,9 @@ class MapReadPriorityTest {
       cache.visible(key(80));assertEquals(8,cache.pending());
       for(int x=10;x<14;x++)cache.sample(key(x));
       cache.sample(key(90));assertEquals(12,cache.pending());
-      cache.tick();assertTrue(cache.pending()>12,"parent read and dirty-save maintenance need reserved admission");
+      cache.secondary(key(20));cache.secondary(key(21));cache.secondary(key(22));
+      assertEquals(14,cache.pending(),"secondary preview must admit only two reads");
+      cache.tick();assertTrue(cache.pending()>14,"parent read and dirty-save maintenance need reserved admission");
     } finally {release.countDown();MapIO.awaitQueued();cache.finish();}
     assertEquals(0x123456,MapCodec.read(root.resolve(tile.key.file()),tile.key).accurate[0]);
     assertTrue(Files.exists(root.resolve(tile.key.parent().file())));

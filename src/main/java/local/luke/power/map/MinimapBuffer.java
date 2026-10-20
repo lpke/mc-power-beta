@@ -207,7 +207,8 @@ public final class MinimapBuffer {
             opaqueSettings,
             !mc.world.isRemote,
             mc.world.getSeed(),
-            1);
+            1,
+            !(mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen));
         generation = source.generation();
         pending = MapRenderer.pending();
         knownSamples = 0;

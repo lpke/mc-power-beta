@@ -106,12 +106,18 @@ public final class MapRenderer {
       boolean local,
       long seed,
       double pixelScale) {
+    terrain(source, view, dimension, layer, circle, settings, local, seed, pixelScale, true);
+  }
+
+  /** Secondary previews share admission without replacing or canceling the main view's reads. */
+  public static void terrain(MapCache source, MapProjection view, int dimension, int layer,
+      boolean circle, MapSettings settings, boolean local, long seed, double pixelScale, boolean ownsInterest) {
     if (source != cache) {
       clear();
       cache = source;
     }
     var coverage = MapCoverage.select(view, circle, settings.cacheTiles, pixelScale);
-    source.visibleView(dimension, layer, coverage);
+    if (ownsInterest) source.visibleView(dimension, layer, coverage);
     source.publish(4, System.nanoTime() + 250_000);
     int level = coverage.level(), span = SIZE << level;
     int minX = coverage.minX(),
@@ -164,7 +170,7 @@ public final class MapRenderer {
                       new MapProjection.Point(d.x(), d.y(), 0, 1)),
                   circle);
           if (polygon.isEmpty()) continue;
-          MapTile tile = source.visible(key);
+          MapTile tile = ownsInterest ? source.visible(key) : source.secondary(key);
           if (tile == null) {
             pending = true;
             continue;
