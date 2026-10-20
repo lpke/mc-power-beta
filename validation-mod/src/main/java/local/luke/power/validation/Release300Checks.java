@@ -384,6 +384,8 @@ public final class Release300Checks {
   }
 
   private static void caves(Minecraft mc) throws Exception {
+    MapTreeCoverChecks.run(mc);
+    MapFullBrightChecks.run(mc);
     test("native cave samples honor exact height windows, skip thick ceilings and replace missing floors with surveyed void", () -> {
       int x = ((int)Math.floor(mc.player.x) >> 4) * 16 + 4, z = ((int)Math.floor(mc.player.z) >> 4) * 16 + 4;
       var chunk = MapSampler.loaded(mc.world, x >> 4, z >> 4); check(chunk != null, "fixture column is not loaded");

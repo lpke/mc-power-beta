@@ -17,7 +17,7 @@ public final class HudEditorSettings {
       "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");
   private static final Set<String> GROUPS = Set.of("HUD layout", "Combined HUD position",
       "Hotbar position", "Hearts position", "Armor position", "Oxygen position",
-      "Overlay message position", "Version label", "Debug (F3) info", "Custom HUD info", "Active tweaks HUD", "General HUD", "Chat", "Minimap");
+      "Overlay message position", "Stamina position", "Version label", "Debug (F3) info", "Custom HUD info", "Active tweaks HUD", "General HUD", "Chat", "Minimap");
   private static final Set<String> MAP_APPEARANCE = Set.of(
       "rotate", "circular", "hideWithDebug", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
       "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
@@ -55,7 +55,7 @@ public final class HudEditorSettings {
     if (!view(s).isEmpty()) return view(s);
     if (s.group.equals("Version label")) return "version";
     if (s.group.equals("Debug (F3) info")) return "debug";
-    if (s.id.startsWith(HudPreview.SIMPLE) || itemNames(s) && mode == 1) return "combined";
+    if (s.id.startsWith(HudPreview.SIMPLE) || (itemNames(s) || s.id.contains(".STAMINA_POSITION_CONFIG.")) && mode == 1) return "combined";
     for (int i = 0; i < HudPreview.PARTS.length; i++)
       if (s.id.contains(HudPreview.PARTS[i] + "_POSITION_CONFIG")) return "native." + i;
     return itemNames(s) ? "native.4" : "layout";

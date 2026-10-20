@@ -88,6 +88,13 @@ public final class MapSettings {
   }
 
   public int style() {
-    return java.util.Objects.hash(colourMode, heightShading, slopeShading, caveLighting);
+    return style(false);
+  }
+
+  public boolean caveLighting(boolean fullBright) { return caveLighting && !fullBright; }
+
+  /** Runtime brightness changes rendered colors without changing the saved preference. */
+  public int style(boolean fullBright) {
+    return java.util.Objects.hash(colourMode, heightShading, slopeShading, caveLighting(fullBright));
   }
 }

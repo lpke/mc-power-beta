@@ -261,5 +261,10 @@
   "creative.acceleration": "Response while starting, turning or changing flight speed. 0 reaches the target immediately; 5 matches modern Creative and Spectator acceleration. Lower values respond faster without changing the configured speed. Applies horizontally and vertically.",
   "creative.spectatorAcceleration": "Response while starting, turning or changing flight speed. 0 reaches the target immediately; 5 matches modern Creative and Spectator acceleration. Lower values respond faster without changing the configured speed. Applies horizontally and vertically.",
   "power_camera:config.acceleration": "Response while starting, turning or changing flight speed. 0 reaches the target immediately; 5 matches modern Creative and Spectator acceleration. Lower values respond faster without changing the configured speed. Applies horizontally and vertically. Default 3.5 gives a quicker response similar to earlier freecam movement.",
-  "gameplay.axesSlashLeaves": "Break all leaf types faster with axes, scaled by tool material. Diamond takes about as long as a diamond shovel on sand. Keeps normal leaf drops and one normal durability hit per block. Singleplayer Survival only."
+  "gameplay.axesSlashLeaves": "Break all leaf types faster with axes, scaled by tool material. Diamond takes about as long as a diamond shovel on sand. Keeps normal leaf drops and one normal durability hit per block. Singleplayer Survival only.",
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.enableVisibility": "Shows this HUD element during gameplay.",
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.horizontalPosition": "Anchors this element to the left, center or right of the screen.",
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.horizontalPositionOffset": "Moves the element horizontally from its anchor, in GUI pixels. Negative moves left.",
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.verticalPosition": "Anchors this element to the bottom, center or top of the screen.",
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.verticalPositionOffset": "Moves the element vertically from its anchor, in GUI pixels. Negative moves up."
 }

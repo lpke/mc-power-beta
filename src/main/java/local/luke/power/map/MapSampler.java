@@ -324,11 +324,15 @@ public final class MapSampler {
         class_43 chunk = loaded(mc.world, px >> 4, pz >> 4);
         if (chunk == null) return -1;
         boolean roof = false;
-        for (int py = top; py < 128; py++)
-          if (solid(chunk.method_859(px & 15, py, pz & 15))) {
+        for (int py = top; py < 128; py++) {
+          int id = chunk.method_859(px & 15, py, pz & 15);
+          // Leaves are full render cubes in both native graphics modes, but a
+          // canopy must not turn outdoor terrain into a dark cave layer.
+          if (material(id) != Material.LEAVES && solid(id)) {
             roof = true;
             break;
           }
+        }
         if (!roof) return -1;
       }
     return window.layer();

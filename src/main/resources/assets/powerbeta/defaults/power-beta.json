@@ -91,6 +91,13 @@
           "horizontalPositionOffset": 0,
           "verticalPosition": 0,
           "verticalPositionOffset": 0
+        },
+        "STAMINA_POSITION_CONFIG": {
+          "enableVisibility": true,
+          "horizontalPosition": 1,
+          "horizontalPositionOffset": 0,
+          "verticalPosition": 0,
+          "verticalPositionOffset": 0
         }
       },
       "SIMPLE_HUD_POSITION_CONFIG": {

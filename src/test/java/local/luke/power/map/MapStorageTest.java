@@ -68,6 +68,38 @@ class MapStorageTest {
   }
 
   @Test
+  void returningUnderTreesToSurfaceDoesNotReusePendingCaveTerrainOrLighting() throws Exception {
+    var surfaceKey = new MapMath.Key(0, -1, 0, 0, 0);
+    var window = CaveWindow.at(64, 10, 10);
+    var caveKey = new MapMath.Key(0, window.layer(), 0, 0, 0, window.context());
+    var surface = new MapTile(surfaceKey);
+    surface.put(0, 0x809060, 0x809060, 78, 0, 18, 0);
+    var cave = new MapTile(caveKey);
+    cave.put(0, 0x809060, 0x809060, 60, 0, 1, 0);
+    MapCodec.write(root.resolve(surfaceKey.file()), surface);
+    MapCodec.write(root.resolve(caveKey.file()), cave);
+    var cache = new MapCache(root, 8, message -> fail(message));
+    try {
+      cache.viewContext(window.context());
+      cache.get(new MapMath.Key(0, window.layer(), 0, 0, 0));
+      cache.viewContext(CaveWindow.at(65, 10, 10).context());
+      cache.get(surfaceKey);
+      MapIO.awaitQueued(); cache.tick();
+      var settings = new MapSettings();
+      settings.heightShading = settings.slopeShading = false;
+      assertEquals(surfaceKey, cache.viewKey(surfaceKey));
+      assertEquals(18, cache.peek(surfaceKey).block(0));
+      assertEquals(78, cache.peek(surfaceKey).height(0));
+      assertEquals(surface.color(0, settings), cache.peek(surfaceKey).color(0, settings));
+      assertEquals(1, cache.peek(caveKey).block(0));
+      assertNotEquals(cache.peek(surfaceKey).color(0, settings), cache.peek(caveKey).color(0, settings));
+      cache.viewContext(window.context());
+      assertSame(cache.peek(caveKey), cache.get(new MapMath.Key(0, window.layer(), 0, 0, 0)));
+      assertEquals(18, cache.peek(surfaceKey).block(0));
+    } finally { cache.finish(); }
+  }
+
+  @Test
   void disablingTerrainDrainsExistingDurableWorkWithoutAcceptingNewRequests() throws Exception {
     var errors = new ArrayList<String>();
     var cache = new MapCache(root, 8, errors::add);

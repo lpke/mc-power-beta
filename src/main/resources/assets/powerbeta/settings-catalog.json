@@ -5073,7 +5073,7 @@
     "page": "Map",
     "group": "Terrain",
     "label": "Automatic roof width",
-    "description": "Width of the solid-roof check around the camera. Lower values need fewer checks and enter cave mode beneath smaller roofs; higher values avoid cave mode beneath isolated trees but require more checks.",
+    "description": "Width of the solid-roof check around the camera. Lower values need fewer checks and enter cave mode beneath smaller roofs; higher values require a broader roof and more checks. Leaves never count as a cave roof.",
     "min": 1.0,
     "max": 5.0,
     "step": 1.0,
@@ -5103,7 +5103,7 @@
     "page": "Interface",
     "group": "Minimap",
     "label": "Cave light shading",
-    "description": "Shade cave floors using their sampled native block light. Turn off to show dark caves at full map brightness. Also affects the World Map; it never changes lighting in the world.",
+    "description": "Shade cave floors using their sampled native block light. Turn off to show dark caves at full map brightness. Also affects the World Map. Full bright temporarily bypasses this shading without changing this preference or lighting in the world.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -6088,5 +6088,51 @@
     "unit": "%",
     "order": 23,
     "default": 85
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.enableVisibility": {
+    "page": "Interface",
+    "group": "Stamina position",
+    "label": "Visibility",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.horizontalPosition": {
+    "page": "Interface",
+    "group": "Stamina position",
+    "label": "Horizontal position",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.horizontalPositionOffset": {
+    "page": "Interface",
+    "group": "Stamina position",
+    "label": "Horizontal position offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.verticalPosition": {
+    "page": "Interface",
+    "group": "Stamina position",
+    "label": "Vertical position",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.verticalPositionOffset": {
+    "page": "Interface",
+    "group": "Stamina position",
+    "label": "Vertical position offset",
+    "description": "Use position bottom with offset -32 for Xbox",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
   }
 }

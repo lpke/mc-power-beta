@@ -102,26 +102,53 @@ class SprintPolishTest {
     assertEquals(15, StaminaIcons.y(251, -31, true, 170, 5, 180));
   }
 
-  @Test void screenClampingCannotPutStaminaBackOnTopOfArmorAtEitherEdge() {
+  @Test void ninePixelScreenClampingCannotPutStaminaBackOnTopOfArmorAtEitherEdge() {
     for (int height : new int[]{48, 180, 360}) for (int armorY : new int[]{0, height - 9})
       for (int baseline : new int[]{-50, -32, 0, height - 9, height + 20}) {
         int y = StaminaIcons.y(251, baseline, true, 170, armorY, height);
-        assertTrue(y >= 1 && y + 10 <= height, "full capped icon row leaves screen");
-        assertTrue(y + 10 <= armorY || y - 1 >= armorY + 9,
+        assertTrue(y >= 0 && y + 9 <= height, "native nine-pixel icon row leaves screen");
+        assertTrue(y + 9 <= armorY || y >= armorY + 9,
             "screen clamp overlaps armor: height=" + height + " armor=" + armorY + " baseline=" + baseline + " y=" + y);
       }
-    assertEquals(1, StaminaIcons.y(251, -100, false, 170, 0, 180));
-    assertEquals(170, StaminaIcons.y(251, 500, false, 170, 0, 180));
+    assertEquals(0, StaminaIcons.y(251, -100, false, 170, 0, 180));
+    assertEquals(171, StaminaIcons.y(251, 500, false, 170, 0, 180));
     assertEquals(0, StaminaIcons.y(251, 0, false, 170, 0, 0));
   }
 
-  @Test void lightningHasBorderCapsAndOnlyNonzeroThresholdsMarkAnIcon() {
-    assertFalse(StaminaIcons.bolt(5, -1)); assertTrue(StaminaIcons.border(5, -1));
-    assertFalse(StaminaIcons.bolt(1, 9)); assertTrue(StaminaIcons.border(1, 9));
+  @Test void lightningBorderFitsExactlyInsideNinePixelsAndOnlyNonzeroThresholdsMarkAnIcon() {
+    assertTrue(StaminaIcons.border(5, 0)); assertTrue(StaminaIcons.border(2, 8));
+    for (int p = -1; p <= 9; p++) {
+      assertFalse(StaminaIcons.border(p, -1)); assertFalse(StaminaIcons.border(p, 9));
+      assertFalse(StaminaIcons.border(-1, p)); assertFalse(StaminaIcons.border(9, p));
+    }
     assertEquals(-1, StaminaIcons.restartIcon(0));
     assertEquals(-1, StaminaIcons.restartIcon(Double.NaN));
     assertEquals(0, StaminaIcons.restartIcon(.1)); assertEquals(1, StaminaIcons.restartIcon(20));
     assertEquals(9, StaminaIcons.restartIcon(100));
+  }
+
+  @Test void lightningDrainsFromTheLeftAndRetainsTheRightmostReserveWithNativeSpacing() {
+    assertEquals(72, StaminaIcons.x(0, 0)); assertEquals(0, StaminaIcons.x(0, 9));
+    for (int icon = 1; icon < 10; icon++) assertEquals(8, StaminaIcons.x(17, icon - 1) - StaminaIcons.x(17, icon));
+    assertEquals(0xe2b32f, StaminaIcons.color(0, 2, 0, 3, 4));
+    assertEquals(0x51462e, StaminaIcons.color(1, 2, 0, 3, 4));
+    assertEquals(0xe2b32f, StaminaIcons.color(0, 1, 0, 3, 4));
+    assertEquals(0x51462e, StaminaIcons.color(0, 1, 0, 6, 4));
+    assertEquals(0xe2b32f, StaminaIcons.color(9, 20, 0, 3, 4));
+    assertEquals(0x51462e, StaminaIcons.color(9, 18, 0, 3, 4));
+  }
+
+  @Test void restartRegionDarkensOnlyDepletedReserveAndNeverChangesFilledColorsOrBorder() {
+    for (int icon = 0; icon < 10; icon++) {
+      assertEquals(icon < 4 ? 0x282317 : 0x51462e, StaminaIcons.color(icon, 0, 40, 3, 4));
+      assertEquals(0xe2b32f, StaminaIcons.color(icon, 20, 40, 3, 4));
+      assertEquals(0, StaminaIcons.color(icon, 0, 40, 5, 0));
+      assertEquals(-1, StaminaIcons.color(icon, 20, 40, 0, 0));
+    }
+    assertEquals(0xffeaa0, StaminaIcons.color(0, 20, 50, 4, 1));
+    assertEquals(0xbf8c22, StaminaIcons.color(0, 20, 50, 7, 4));
+    assertEquals(0x51462e, StaminaIcons.color(0, 0, 0, 3, 4));
+    assertEquals(0x282317, StaminaIcons.color(9, 0, 100, 3, 4));
   }
 
   @Test void stationaryAndMovingRecoveryUseIndependentRatesWithSharedDelayCombatAndOwnership() {

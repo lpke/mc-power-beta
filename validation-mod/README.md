@@ -14,6 +14,11 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   `release-300-ui-polish`, `release-300-waypoint-polish`, `release-300-sprint-polish`
   and `release-300-extra-sounds` check native picker modals, pause shortcuts, waypoint
   actions/drafts/commands, mode-owned stamina/FOV/HUD, and successful action sound events.
+  `release-300-sprint-polish` also checks native-height stamina sprites, pause visibility,
+  combined/separate HUD anchors and visibility, immediate drag/nudge behavior, preview
+  pixels with gameplay disabled, Undo and Discard. `release-300-stamina show|pause|editor`
+  temporarily arms a visible partial reserve for visual checks; `release-300-stamina restore`
+  restores settings, world rules and player mode afterward.
   `release-300-freecam-commands` checks native chat selection/edit/undo, denied rules
   and camera-ray navigation in a restored loaded chunk. These checks restore settings
   and use only the muted disposable world.
@@ -34,7 +39,9 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   check reports SKIP. Reports stay in `power-beta-data/reports/release-300`; the native
   map screenshot also stays in the clone's `screenshots` folder.
   `caves` checks native loaded-column floors, thick ceilings, exact same-layer height
-  namespaces and surveyed void, restoring every edited block. `sprint` checks real
+  namespaces and surveyed void, restoring every edited block. It also checks fast/fancy
+  native tree canopies versus solid roofs and verifies full-bright toggle/restore pixels
+  in retained minimap, World Map and HUD-preview buffers without rewriting terrain. `sprint` checks real
   Creative/Survival takeoff, held/released sprint keys at 100% ground speed, actual
   flight displacement, `/fly` reset order, movement/menu cancellation and denied flight.
   `background` checks independent minimap/World Map buffer release, immediately inert

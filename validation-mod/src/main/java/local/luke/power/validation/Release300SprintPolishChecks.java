@@ -69,7 +69,8 @@ final class Release300SprintPolishChecks {
         test("actual native modes charge stamina only for grounded Survival and preserve exhausted reserves elsewhere", () -> modes(mc, state, keys, input));
         test("ground, Creative and Spectator share dynamic-FOV strength while freecam keeps its own preference", () -> fov(mc, state));
         test("zero-stamina Creative takeoff hands published ground sprint to flight before ground cancellation", () -> handoff(mc, state, keys, input, flight));
-        test("native stamina HUD draws in gameplay/chat, skips disabled/freecam states and restores GL state", () -> hud(mc, state));
+        test("native stamina HUD draws in gameplay/chat/pause, skips other menus and restores GL state", () -> hud(mc, state));
+        Release300StaminaHudChecks.run(mc, state);
       } finally {
         // Restore native tracker flags before the surrounding field snapshots close.
         CreativeVehicleChecks.mode(mc, originalMode); call(mc.player, "power_flightOverride", new Class<?>[]{int.class}, originalOverride);
@@ -166,8 +167,10 @@ final class Release300SprintPolishChecks {
       check(mc.inGameHud instanceof StatusHudLayout, "native HUD does not expose shared status layout");
       set(mc.inGameHud, "scaledWidth", size.method_1857()); set(mc.inGameHud, "scaledHeight", size.method_1858());
       set(mc.inGameHud, "hotbarVisibility", true); set(mc.inGameHud, "xOffsetHotbar", 0); set(mc.inGameHud, "yOffsetHotbar", 0);
+      set(mc.inGameHud, "staminaVisibility", true); set(mc.inGameHud, "xOffsetStamina", 0); set(mc.inGameHud, "yOffsetStamina", 0);
       check(draw(mc, size) > 0, "eligible Survival stamina icons submitted no fragments");
       mc.setScreen(new ChatScreen()); check(draw(mc, size) > 0, "chat hid Survival stamina icons");
+      mc.setScreen(new net.minecraft.class_525()); check(draw(mc, size) > 0, "native pause screen hid Survival stamina icons");
       mc.currentScreen = new Screen() {}; check(draw(mc, size) == 0, "ordinary menu rendered stamina icons"); mc.setScreen(null);
       settings.stamina = false; SprintConfig.preview(settings); check(draw(mc, size) == 0, "disabled stamina submitted HUD fragments");
       settings.stamina = true; SprintConfig.preview(settings); FreecamPreviewChecks.active(true);
@@ -176,7 +179,7 @@ final class Release300SprintPolishChecks {
       mode(mc, "SURVIVAL", false); state.stamina = 100; check(draw(mc, size) == 0, "full stamina retained an unnecessary icon row");
     }
   }
-  private static int draw(Minecraft mc, class_564 size) throws Exception {
+  static int draw(Minecraft mc, class_564 size) throws Exception {
     int mode = GL11.glGetInteger(GL11.GL_MATRIX_MODE), query = GL15.glGenQueries();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS); GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPushMatrix(); GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPushMatrix();
     try {

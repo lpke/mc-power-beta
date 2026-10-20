@@ -519,7 +519,7 @@
   bounded. Buffer padding must not select terrain detail or request extra tiles.
   Map navigation never moves the player
   or loads terrain. Teleport actions use the existing local permission and command.
-  Map preferences use PowerConfig; minimap presentation belongs to the HUD draft,
+  Automatic cave roof checks ignore leaf material without changing sampled canopy terrain, solid roofs or cave floors. Full bright bypasses map cave-light shading through render styles, preserving saved preferences and terrain data. Map preferences use PowerConfig; minimap presentation belongs to the HUD draft,
   with a link from the Map tab. Initialize a missing minimap enablement once from
   the selected base with a verified backup; later Use as base changes never alter it
   on restart. Preserve waypoints while features are disabled.
@@ -548,7 +548,7 @@
   Preserve native land collision, fluids, vehicles, flight and multiplayer authority.
   Modern defaults use a 1.3 speed multiplier, 0.2 horizontal jump impulse and native
   terrain dust with modern particle movement. Optional stamina/combat rules persist
-  in player NBT without changing the world rule. Ground, Creative and Spectator share sprint FOV enablement/amount; freecam retains its independent preference. Creative and every flight mode bypass stamina without resetting its saved state. Survival stamina icons follow native HUD geometry and avoid armor. Each movement mode publishes
+  in player NBT without changing the world rule. Ground, Creative and Spectator share sprint FOV enablement/amount; freecam retains its independent preference. Creative and every flight mode bypass stamina without resetting its saved state. Survival stamina uses nine-pixel, black-outlined icons filled from the right, with darker depleted restart reserves. Gameplay and HUD previews share the same glyphs, palette and armor-aware placement. Combined layouts include stamina; separate layouts retain independent visibility, anchors and offsets. Keep it visible while paused alongside native status icons. Each movement mode publishes
   sprint state; render code never polls keys.
   Boat interaction consumes a held boat's placement fallback without skipping native boarding.
 

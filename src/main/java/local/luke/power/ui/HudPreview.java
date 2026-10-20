@@ -18,8 +18,8 @@ final class HudPreview {
   }
   static final String NATIVE = "power_hud:hudpositions.";
   static final String SIMPLE = NATIVE + "SIMPLE_HUD_POSITION_CONFIG.";
-  static final String[] PARTS = {"HOTBAR", "HEARTS", "ARMOR", "OXYGEN", "OVERLAY_MESSAGE"};
-  static final String[] NAMES = {"Hotbar", "Hearts", "Armor", "Oxygen", "Messages"};
+  static final String[] PARTS = {"HOTBAR", "HEARTS", "ARMOR", "OXYGEN", "OVERLAY_MESSAGE", "STAMINA"};
+  static final String[] NAMES = {"Hotbar", "Hearts", "Armor", "Oxygen", "Messages", "Stamina"};
   private final SettingsDraft draft;
   private final List<Element> elements = new ArrayList<>();
   private final ItemIcons icons = new ItemIcons();
@@ -75,7 +75,8 @@ final class HudPreview {
     }
     GL11.glEnable(GL11.GL_BLEND); GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
     GL11.glAlphaFunc(GL11.GL_GREATER, 0);
-    for (int i = 0; i < 5; i++) {
+    int armorX = 0, armorY = 0; boolean armorVisible = false;
+    for (int i = 0; i < PARTS.length; i++) {
       if (i == 4 && !bool(HudEditorSettings.ITEM_NAMES)) continue;
       String prefix = mode() == 1 ? SIMPLE : nativePrefix(i);
       if (mode() != 0 && !bool(prefix + "enableVisibility")) continue;
@@ -87,7 +88,13 @@ final class HudPreview {
         y += NativeHudLayout.yOffset(height, i, mode(), integer(prefix + "verticalPosition"),
             bool(NATIVE + "putStatusBarIconsBelowHotbar"), bool(NATIVE + "putOverlayMessagesBelowHotbar")) + integer(prefix + "verticalPositionOffset");
       }
-      if (i == 0) {
+      if (i == NativeHudLayout.ARMOUR) { armorX = x; armorY = y; armorVisible = true; }
+      if (i == NativeHudLayout.STAMINA) y = NativeHudLayout.staminaY(x, y, armorVisible, armorX, armorY, height,
+          mode() == 2 ? integer(prefix + "horizontalPositionOffset") : 0,
+          mode() == 2 ? integer(prefix + "verticalPositionOffset") : 0);
+      if (i == NativeHudLayout.STAMINA) local.luke.power.sprint.SprintStaminaHud.draw(x, y, 13,
+          local.luke.power.sprint.SprintConfig.current().restartStamina);
+      else if (i == 0) {
         texture(screen, mc, "/gui/gui.png", x, y, 0, 0, 182, 22);
         texture(screen, mc, "/gui/gui.png", x - 1, y - 1, 0, 22, 24, 22);
         for (int slot = 0; slot < samples.size(); slot++) icons.draw(screen, mc, samples.get(slot), x + 3 + slot * 20, y + 3);

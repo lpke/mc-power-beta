@@ -189,6 +189,7 @@ public final class Validation {
       else if (command.equals("release-300-chat-break") || command.startsWith("release-300-chat-break "))
         Release300ChatBreakChecks.run(mc, command.substring("release-300-chat-break".length()).trim());
       else if (command.equals("swimming-300")) Swimming300Checks.run(mc);
+      else if (command.startsWith("release-300-stamina ")) Release300StaminaHudChecks.visual(mc, command.substring("release-300-stamina ".length()).trim());
       else if (command.equals("release-300-marker-refinements")) Release300MarkerRefinementsChecks.run(mc);
       else if (command.equals("redstone-sounds")) RedstoneSoundChecks.run(mc);
       else if (command.equals("redstone-visuals")) RedstoneVisualChecks.run(mc);

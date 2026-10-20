@@ -42,11 +42,15 @@ public final class MapTile {
   }
 
   public int color(int i, MapSettings s) {
+    return color(i, s, false);
+  }
+
+  public int color(int i, MapSettings s, boolean fullBright) {
     if (!known(i)) return 0;
     int rgb =
         s.colourMode == 0 ? reliefAccurate[i] : reliefVanilla[i];
     double shade = Math.max(.9, Math.min(1, height(i) / 63d));
-    if (s.caveLighting && key.layer() != -1) shade *= .35 + light(i) * .65 / 15;
+    if (s.caveLighting(fullBright) && key.layer() != -1) shade *= .35 + light(i) * .65 / 15;
     return 0xff000000 | MapMath.shade(rgb, shade);
   }
 

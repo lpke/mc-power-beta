@@ -203,7 +203,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private int nativeIndex() { return selected.startsWith("native.") ? Integer.parseInt(selected.substring(7)) : 0; }
   private List<String> selectionIds() {
     List<String> ids = new ArrayList<>(); ids.add("layout");
-    if (preview.mode() == 1) ids.add("combined"); else for (int i = 0; i < 5; i++) ids.add("native." + i);
+    if (preview.mode() == 1) ids.add("combined"); else for (int i = 0; i < HudPreview.PARTS.length; i++) ids.add("native." + i);
     for (int i = 0; i < 4; i++) ids.add("cluster." + i);
     ids.addAll(List.of("minimap", "chat", "tweaks", "version", "debug")); return ids;
   }

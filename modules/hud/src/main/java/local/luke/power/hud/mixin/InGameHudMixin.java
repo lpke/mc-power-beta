@@ -64,6 +64,16 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
     @Unique private int xOffsetOverlay = 0;
     @Unique private int yOffsetOverlay = 0;
 
+    @Unique private int xOffsetStamina, yOffsetStamina;
+    @Unique private boolean staminaVisibility = true;
+    public int power$staminaX() { return scaledWidth / 2 + 10 + xOffsetStamina; }
+    public int power$staminaY() { return scaledHeight - 32 + yOffsetStamina; }
+    public int power$staminaOffsetX() { return Config.hudpositions.hudPositioningSystem.ordinal() == 2
+        ? Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.horizontalPositionOffset : 0; }
+    public int power$staminaOffsetY() { return Config.hudpositions.hudPositioningSystem.ordinal() == 2
+        ? Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.verticalPositionOffset : 0; }
+    public boolean power$staminaVisible() { return staminaVisibility; }
+
     public int power$statusRight() { return scaledWidth / 2 + 91 + xOffsetHotbar; }
     public int power$statusY() {
         return scaledHeight - 32 + yOffsetHotbar
@@ -134,6 +144,15 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
             Config.hudpositions.putStatusBarIconsBelowHotbar, Config.hudpositions.putOverlayMessagesBelowHotbar)
             + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : overlay.verticalPositionOffset);
         overlayVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : overlay.enableVisibility);
+        var stamina = Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG;
+        xOffsetStamina = local.luke.power.ui.NativeHudLayout.xOffset(scaledWidth, 5, mode,
+            (mode == 1 ? simple.horizontalPosition : stamina.horizontalPosition).ordinal(), 0)
+            + (mode == 0 ? 0 : mode == 1 ? simple.horizontalPositionOffset : stamina.horizontalPositionOffset);
+        yOffsetStamina = local.luke.power.ui.NativeHudLayout.yOffset(scaledHeight, 5, mode,
+            (mode == 1 ? simple.verticalPosition : stamina.verticalPosition).ordinal(),
+            Config.hudpositions.putStatusBarIconsBelowHotbar, Config.hudpositions.putOverlayMessagesBelowHotbar)
+            + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : stamina.verticalPositionOffset);
+        staminaVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : stamina.enableVisibility);
         isHotbarRaised = mode != 0 && (hotbarVertical != 0 || yOffsetHotbar < 0);
 
         local.luke.power.ui.HudElements.heartsX = xOffsetHearts;

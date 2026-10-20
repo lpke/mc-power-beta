@@ -195,7 +195,7 @@ public final class Release300MapRefinement {
     check(equal, message + "; expected=" + hex(expected) + " actual=" + hex(actual));
   }
 
-  private static final class Canvas {
+  static final class Canvas {
     final int texture = GL11.glGenTextures(), framebuffer = EXTFramebufferObject.glGenFramebuffersEXT();
     final ByteBuffer pixel = BufferUtils.createByteBuffer(4);
     Canvas() {

@@ -15,6 +15,7 @@ class HudEditorSectionsTest {
     for (String id : List.of("interface.debugOrder", "interface.debugRightOrder", "infoHud.clusters.0.position", "infoHud.clusters.3.offsetX", "activeTweaks.offsetY",
         "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.horizontalPosition",
         "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPositionOffset",
+        "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.horizontalPositionOffset",
         "power_hud:hudpositions.putStatusBarIconsBelowHotbar", "power_compat:config.overlayAdditionsYOffset",
         "entityculling:config.f3InfoYOffset", "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset"))
       assertTrue(HudEditorSections.position(setting(id)), id);
@@ -24,6 +25,18 @@ class HudEditorSectionsTest {
         "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.enableVisibility", "interface.useFeetYCoordinates",
         "entityculling:config.showF3Info", "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebug",
         "unrelated.offsetX")) assertFalse(HudEditorSections.position(setting(id)), id);
+  }
+  @Test void staminaPositionAndVisibilityBelongToTheNativeHudEditorAndFollowItsLayoutMode() {
+    String prefix = "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.";
+    for (String field : List.of("enableVisibility", "horizontalPosition", "verticalPosition", "horizontalPositionOffset", "verticalPositionOffset")) {
+      Setting value = setting(prefix + field);
+      assertTrue(HudEditorSettings.contains(value), field);
+      assertEquals("native.5", HudEditorSettings.tab(value, 0));
+      assertEquals("combined", HudEditorSettings.tab(value, 1));
+      assertEquals("native.5", HudEditorSettings.tab(value, 2));
+      assertEquals(!field.equals("enableVisibility"), HudEditorSections.position(value));
+    }
+    assertEquals("Stamina", HudEditorSettings.tabLabel("native.5"));
   }
   @Test void groupingKeepsStableOrderWithinSectionsAndOffsetsBesideTheirProvider() {
     var content = setting("infoHud.clusters.0.fps"); var x = setting("infoHud.clusters.0.offsetX");

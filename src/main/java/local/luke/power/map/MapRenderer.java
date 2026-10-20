@@ -4,6 +4,7 @@ import static local.luke.power.map.MapMath.*;
 
 import java.nio.ByteBuffer;
 import java.util.*;
+import local.luke.power.render.RenderControls;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
@@ -37,13 +38,17 @@ public final class MapRenderer {
 
   public static void uploadBudget(int uploads) { remaining = uploads; }
 
+  public static int style(MapSettings settings) {
+    return settings.style(RenderControls.fullBright());
+  }
+
   /** Returns zero until an immutable disk result and an upload slot are available. */
   static int tile(MapCache source, Key key, MapSettings settings, boolean local, long seed) {
     if (source != cache) { clear(); cache = source; }
     key = source.viewKey(key);
     MapTile tile = source.visible(key);
     if (tile == null) return 0;
-    int style = Objects.hash(settings.style(), settings.chunkGrid, settings.slimeChunks,
+    int style = Objects.hash(style(settings), settings.chunkGrid, settings.slimeChunks,
         settings.lightOverlay, seed, local, settings.mapSmoothing);
     Texture texture = TEXTURES.get(key);
     if (texture == null || texture.owner != tile || texture.revision != tile.revision || texture.style != style) {
@@ -130,7 +135,7 @@ public final class MapRenderer {
       GL11.glColor4d(1, 1, 1, settings.opacity);
       int style =
           Objects.hash(
-              settings.style(),
+              style(settings),
               settings.chunkGrid,
               settings.slimeChunks,
               settings.lightOverlay,
@@ -192,9 +197,10 @@ public final class MapRenderer {
   private static Texture upload(
       MapTile tile, Texture previous, MapSettings s, int style, boolean local, long seed) {
     int id = previous == null ? GL11.glGenTextures() : previous.id;
+    boolean fullBright = RenderControls.fullBright();
     BUFFER.clear();
     for (int i = 0; i < PIXELS; i++) {
-      int color = tile.color(i, s);
+      int color = tile.color(i, s, fullBright);
       if (color != 0) {
         int x = (int) tile.key.minX() + ((i % SIZE) << tile.key.level()),
             z = (int) tile.key.minZ() + ((i / SIZE) << tile.key.level());

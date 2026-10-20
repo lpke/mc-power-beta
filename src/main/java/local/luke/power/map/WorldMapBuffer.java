@@ -221,7 +221,7 @@ public final class WorldMapBuffer {
     if (maximum == 0) maximum = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
     var plan = MapSurfacePlan.create(view, MapRenderer.pixelsPerUnit(), maximum, settings.automaticDetail);
     if (plan == null) return false;
-    int style = Objects.hash(settings.style(), settings.chunkGrid, settings.slimeChunks,
+    int style = Objects.hash(MapRenderer.style(settings), settings.chunkGrid, settings.slimeChunks,
         settings.lightOverlay, mc.world.getSeed());
     String context = layer < 0 ? "" : Maps.cache().viewContext();
     boolean restyle = this.style != style;
