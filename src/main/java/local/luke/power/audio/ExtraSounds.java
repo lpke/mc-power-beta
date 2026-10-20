@@ -19,6 +19,10 @@ public final class ExtraSounds {
   /** Preview uses the same source and category gain as the individual-sound controls. */
   public static String previewId(String settingId) {
     return switch (settingId) {
+      case "power_controls:features.eatingSounds" -> "power_controls:random.eat";
+      case "power_controls:features.shearingSounds" -> "power_controls:entity.sheep.shear";
+      case "power_controls:features.toolBreakSounds", "power_controls:features.armorBreakSounds" -> "power_controls:random.break";
+      case "power_controls:features.moreSoundsChests" -> "power_controls:random.chestopen";
       case "audio.redstonePlacementSound" -> "step.stone";
       case "audio.seedPlantingSounds" -> "power_beta:item.crop.plant";
       case "audio.hoeTillingSounds" -> "power_beta:item.hoe.till";

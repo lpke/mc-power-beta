@@ -113,6 +113,7 @@ public final class MapRenderer {
   /** Secondary previews share admission without replacing or canceling the main view's reads. */
   public static void terrain(MapCache source, MapProjection view, int dimension, int layer,
       boolean circle, MapSettings settings, boolean local, long seed, double pixelScale, boolean ownsInterest) {
+    pending = false;
     if (source != cache) {
       clear();
       cache = source;
@@ -500,12 +501,13 @@ public final class MapRenderer {
           int color = MapLighting.radarColor(entity.color(s), dy, s);
           boolean icon = RadarIcons.draw(mc, entity.icon(), view, circle, p.x(), p.y(), dy, s, heads);
           if (!icon) diamond(p.x(), p.y(), color, entity.item() ? .7 : 1.3);
-          double radius = icon ? RadarIcons.radius(entity.icon()) : 1.3;
+          double radius = icon ? RadarIcons.radius(entity.icon(), s) : 1.3;
           if (s.entityHeights && Math.abs(dy) > 3) {
-            double cy = p.y() + (dy > 0 ? -radius - 2.2 : radius + 2.2), tip = cy + (dy > 0 ? -1 : 1);
+            double cy = p.y() + (dy > 0 ? -radius - .8 : radius + .8), tip = cy + (dy > 0 ? -1 : 1);
             if (view.contains(p.x(), tip, circle, 2)) {
               GL11.glDisable(GL11.GL_TEXTURE_2D);
-              GL11.glColor4ub((byte)(color >> 16), (byte)(color >> 8), (byte)color, (byte)180);
+              int chevron = icon ? entity.color(s) : color;
+              GL11.glColor4ub((byte)(chevron >> 16), (byte)(chevron >> 8), (byte)chevron, (byte)255);
               GL11.glBegin(GL11.GL_LINES);
               GL11.glVertex2d(p.x() - 1.5, cy); GL11.glVertex2d(p.x(), tip);
               GL11.glVertex2d(p.x(), tip); GL11.glVertex2d(p.x() + 1.5, cy);

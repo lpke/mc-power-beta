@@ -55,7 +55,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
     initialSetting = id;
   }
   void showMinimap() {
-    select("minimap"); initialSetting = ""; scroll = 0;
+    select("minimap"); clearHighlight(); initialSetting = ""; scroll = 0;
   }
   public void removed() {
     HudEditorMemory.selected = selected; HudEditorMemory.scrolls.put(selected, scroll);

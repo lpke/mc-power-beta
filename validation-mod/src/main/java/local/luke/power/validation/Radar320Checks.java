@@ -239,6 +239,7 @@ public final class Radar320Checks {
       }
       batch(mc,canvas,settings);
       pinnedRetirement(canvas);
+      iconSizes(mc,canvas,settings);
       byte[] upright=null;
       for(int rotation:new int[]{0,90}){
         bindCanvas(canvas);GL11.glClearColor(0,0,0,0);GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
@@ -267,6 +268,30 @@ public final class Radar320Checks {
     check(outer.equals(State.read()),"radar fixture leaked native graphics state");
   }
 
+  private static int iconHeight(Minecraft mc, Release300MapRefinement.Canvas canvas, MapSettings settings, int index) {
+    bindCanvas(canvas);GL11.glClearColor(0,0,0,0);GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+    check(RadarIcons.draw(mc,grid.get(index).icon(),new MapProjection(0,0,1,0,0,128,128,0),false,64,64,0,settings),"cached size sample missing");
+    var pixels=readCanvas();int lo=256,hi=-1;
+    for(int y=0;y<256;y++)for(int x=0;x<256;x++)if((pixels.get((y*256+x)*4+3)&255)>0){lo=Math.min(lo,y);hi=Math.max(hi,y);}
+    return Math.max(0,hi-lo+1);
+  }
+  private static void iconSizes(Minecraft mc, Release300MapRefinement.Canvas canvas, MapSettings settings) throws Exception {
+    var ids=new HashSet<>(textures().values());int original=settings.radarIconSize;
+    try {
+      int previous=0,half=0;
+      for(int size:new int[]{25,50,100}) {
+        settings.radarIconSize=size;int height=iconHeight(mc,canvas,settings,6);
+        check(height>previous,"head size did not grow at "+size);
+        if(size==50)half=height;
+        if(size==100)check(Math.abs(height-half*2)<=4,"50% head is not half size");
+        previous=height;
+      }
+      settings.radarIconSize=50;int squid=iconHeight(mc,canvas,settings,14);
+      check(Math.abs(squid-half)<=2,"squid is oversized relative to standard heads");
+      check(new HashSet<>(textures().values()).equals(ids),"icon size rebaked cached textures");
+      log("PASS configurable native head sizes scale pixels without rebaking; squid height="+squid+" standard="+half);
+    } finally {settings.radarIconSize=original;}
+  }
   private static void bindCanvas(Release300MapRefinement.Canvas canvas){
     canvas.bind();
     // Match the production minimap/marker GUI setup rather than the prior world render.
@@ -325,11 +350,11 @@ public final class Radar320Checks {
     GL11.glTexParameteri(GL11.GL_TEXTURE_2D,GL11.GL_TEXTURE_MAG_FILTER,GL11.GL_LINEAR);
     GL11.glTexImage2D(GL11.GL_TEXTURE_2D,0,GL11.GL_RGBA8,64,64,0,GL11.GL_RGBA,GL11.GL_UNSIGNED_BYTE,pixels);
     GL11.glBindTexture(GL11.GL_TEXTURE_2D,oldTexture);
-    var add=RadarIcons.Batch.class.getDeclaredMethod("add",int.class,double.class,double.class,double.class);add.setAccessible(true);
+    var add=RadarIcons.Batch.class.getDeclaredMethod("add",int.class,double.class,double.class,double.class,double.class);add.setAccessible(true);
     var retire=RadarIcons.class.getDeclaredMethod("retire",int.class);retire.setAccessible(true);
     var first=new RadarIcons.Batch(1);var second=new RadarIcons.Batch(1);
     try{
-      check((boolean)add.invoke(first,texture,64d,64d,1d)&&(boolean)add.invoke(second,texture,64d,64d,1d),"overlapping batches did not acquire pins");
+      check((boolean)add.invoke(first,texture,64d,64d,1d,1d)&&(boolean)add.invoke(second,texture,64d,64d,1d,1d),"overlapping batches did not acquire pins");
       check(((Map<?,?>)field(RadarIcons.class,"PINNED").get(null)).get(texture).equals(2),"shared native texture was not pinned twice");
       retire.invoke(null,texture);
       check(GL11.glIsTexture(texture),"eviction deleted a queued native texture");

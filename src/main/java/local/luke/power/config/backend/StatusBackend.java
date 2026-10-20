@@ -33,6 +33,7 @@ public final class StatusBackend implements Backend {
         case "opacity" -> "Text visibility from transparent at 0% to solid at 100%.";
         case "placementRestriction" -> "Show the current restriction rule while fast placement and its restriction are enabled.";
         case "freeLook" -> "Show while free look is latched on in Toggle mode. Hold mode is omitted.";
+        case "freecam" -> "Show while the detached camera is active.";
         case "freecamPlayerMovement" -> "Show while the detached camera allows movement of your actual player.";
         case "autoWalk" -> "Show while auto-walk is running, rather than whenever the feature is available.";
         case "autoMine" -> "Show while auto-mine is holding the attack and block-breaking action.";

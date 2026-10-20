@@ -24,7 +24,7 @@ public final class HudEditorSettings {
       "directionTextSize", "directionTextColor", "directionTextOpacity", "belowTextSize", "minimapWaypointTextSize", "minimapWaypointSize", "minimapArrowSize", "minimapArrowOpacity", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity",
       "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight", "radarDimming", "radarDimDistance",
       "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity",
-      "playerColor", "playerOpacity", "playerSize");
+      "playerColor", "playerOpacity", "playerSize", "radarIconSize");
   private HudEditorSettings() {}
   public static boolean mapAppearance(String id) {
     return !RETIRED.contains(id) && id.startsWith("maps.") && (MAP_APPEARANCE.contains(id.substring(5)) || id.startsWith("maps.playerIcon")

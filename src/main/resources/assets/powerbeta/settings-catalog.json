@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 3.2.0",
+    "default": "Power Beta 3.2.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -5253,7 +5253,7 @@
     "page": "Interface",
     "group": "Minimap",
     "label": "Waypoint range",
-    "description": "Maximum marker distance. Zero is unlimited. Always show on a waypoint ignores this limit within its dimension and set. Also affects the World Map.",
+    "description": "Maximum range of in-game waypoint markers. Also limits waypoint visibility on the minimap and World Map. Zero is unlimited. Always show on a waypoint ignores this limit within its dimension and set.",
     "min": 0.0,
     "max": 1000000.0,
     "step": 100.0,
@@ -5865,7 +5865,7 @@
     "page": "Map",
     "group": "Minimap",
     "label": "Minimap appearance",
-    "description": "Edit minimap layout, terrain colors, markers, radar, waypoints and overlays in the HUD editor. Shared appearance controls also affect the World Map.",
+    "description": "Edit the live minimap beside the World Map. Uses the HUD editor when the World Map is disabled, no world is open, or the window is too small. Shared appearance controls also affect the World Map.",
     "order": 0.5
   },
   "maps.directionTextSize": {
@@ -5897,7 +5897,7 @@
     "group": "Minimap",
     "label": "Waypoint arrow size",
     "description": "Size of waypoint, destination and deathpoint arrows at the minimap edge.",
-    "min": 50,
+    "min": 5,
     "max": 200,
     "step": 5,
     "order": 36.1,
@@ -6159,7 +6159,7 @@
     "page": "Map",
     "group": "World map",
     "label": "Map light shading radius",
-    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0–7, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
     "min": 8,
     "max": 128,
     "step": 1,
@@ -6481,5 +6481,24 @@
     "label": "Mob icons (hold)",
     "description": "Hold to replace nearby mob radar dots with upright model-head icons on either map. Dots return on release. Shares Tab with the player list by default.",
     "order": 2.5
+  },
+  "maps.radarIconSize": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Mob icon size",
+    "description": "Size of entity heads while holding Show entity icons, on both maps. Lower values leave more map visible; higher values make faces easier to recognize. Squid heads are normalized to the same height as other mobs.",
+    "min": 10,
+    "max": 200,
+    "step": 5,
+    "order": 8.5,
+    "unit": "%",
+    "displayPrecision": 0
+  },
+  "maps.zoomSteps": {
+    "page": "Map",
+    "group": "Minimap",
+    "label": "Minimap zoom steps",
+    "description": "Choose exact zoom levels for the Zoom in and Zoom out bindings. Levels run from lowest to highest and wrap around at either end. This does not change the current zoom until a zoom binding is pressed.",
+    "order": 1.2
   }
 }

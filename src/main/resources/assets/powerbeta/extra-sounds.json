@@ -261,85 +261,97 @@
       "event": "item.bucket.fill",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/fill1.ogg",
       "asset": "minecraft/sounds/item/bucket/fill1.ogg",
-      "sha1": "e28ff6368461f0a0308ced79016ea98d5feb645f",
-      "size": 10900
+      "sha1": "a8436a6aa1015791109dfce0ebc7d47399338c7f",
+      "size": 10208,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.fill",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/fill2.ogg",
       "asset": "minecraft/sounds/item/bucket/fill2.ogg",
-      "sha1": "1d69d04c669d82a75da8ea2f8a1a63ebf5fefd0f",
-      "size": 10441
+      "sha1": "21e1cc7289a188e7424f451b787257063f20a61e",
+      "size": 9574,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.fill",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/fill3.ogg",
       "asset": "minecraft/sounds/item/bucket/fill3.ogg",
-      "sha1": "556a88f3a8e8f407a94ad37b131dc8d5c3f236c0",
-      "size": 10844
+      "sha1": "7a34a4136adc49b5a656010daad587b73de65786",
+      "size": 9864,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.fill_lava",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/fill_lava1.ogg",
       "asset": "minecraft/sounds/item/bucket/fill_lava1.ogg",
-      "sha1": "840d3f489b866d6ec63e8d885469105ff65c591e",
-      "size": 9211
+      "sha1": "46c8440dcc94a4874d2926708eced9f73a13be0f",
+      "size": 9618,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.fill_lava",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/fill_lava2.ogg",
       "asset": "minecraft/sounds/item/bucket/fill_lava2.ogg",
-      "sha1": "54290ce87fb0ebac606f497ac8a12c107b74a586",
-      "size": 9211
+      "sha1": "8c9c80d0e76124c462434740a97e925546e0de11",
+      "size": 9618,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.fill_lava",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/fill_lava3.ogg",
       "asset": "minecraft/sounds/item/bucket/fill_lava3.ogg",
-      "sha1": "99125d80da85a6055d5757fe9194bee680ac9a63",
-      "size": 9278
+      "sha1": "fa66a080afaf3d8a87939789053b326e76e43323",
+      "size": 9669,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.empty",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/empty1.ogg",
       "asset": "minecraft/sounds/item/bucket/empty1.ogg",
-      "sha1": "27987b7065ef4a27106246f9d32382a0514f87b2",
-      "size": 10498
+      "sha1": "f75e57175b69ab1e6c408ab3f32160c8416a8675",
+      "size": 10813,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.empty",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/empty2.ogg",
       "asset": "minecraft/sounds/item/bucket/empty2.ogg",
-      "sha1": "a796e8907874e6ae174c30da28ff000f1cf566c3",
-      "size": 10277
+      "sha1": "270c29f3c5cbc795c36bd3e41fb9c367ab91ae0f",
+      "size": 10547,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.empty",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/empty3.ogg",
       "asset": "minecraft/sounds/item/bucket/empty3.ogg",
-      "sha1": "8dec8307dff359b0279e3e49798692309204d55e",
-      "size": 9888
+      "sha1": "ef7610b0effe7d9ae641938cc7cc317158a59b91",
+      "size": 10217,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.empty_lava",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/empty_lava1.ogg",
       "asset": "minecraft/sounds/item/bucket/empty_lava1.ogg",
-      "sha1": "3612c93dfebcedbeb22bc8283e0b85de033d081a",
-      "size": 11764
+      "sha1": "c78cf4fe10dcc6e3e47b01f7008ee8396b02d2bd",
+      "size": 10648,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.empty_lava",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/empty_lava2.ogg",
       "asset": "minecraft/sounds/item/bucket/empty_lava2.ogg",
-      "sha1": "b98e76594736052ac7ab8851d95a96b5ad7d2ce2",
-      "size": 13443
+      "sha1": "b2fa3db0c8363b9c454f9a04f93eebb11409229e",
+      "size": 12210,
+      "source": "bucketSource"
     },
     {
       "event": "item.bucket.empty_lava",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bucket/empty_lava3.ogg",
       "asset": "minecraft/sounds/item/bucket/empty_lava3.ogg",
-      "sha1": "d62e50329337eee968b1e93cce04a65aeecad27d",
-      "size": 11774
+      "sha1": "6376cabb22a0e3042b25cb7443a5a75bffe6e4a6",
+      "size": 12217,
+      "source": "bucketSource"
     },
     {
       "event": "entity.cow.milk",
@@ -441,5 +453,28 @@
       "sha1": "9f2c4bab5ed55f1714fffa223985c81babc8f6c0",
       "size": 5813
     }
-  ]
+  ],
+  "bucketSource": {
+    "version": "26.3",
+    "metadata": {
+      "id": "26.3",
+      "type": "release",
+      "url": "https://piston-meta.mojang.com/v1/packages/11f1aefe473eefba0af62e3286c33b692807b2eb/26.3.json",
+      "time": "2026-10-13T06:43:38+00:00",
+      "releaseTime": "2026-09-15T11:23:02+00:00",
+      "sha1": "11f1aefe473eefba0af62e3286c33b692807b2eb",
+      "complianceLevel": 1
+    },
+    "assetIndex": {
+      "id": "34",
+      "sha1": "e787e8afd149a4cefa89d341b91f5aed8f5d93a0",
+      "size": 597035,
+      "totalSize": 484829952,
+      "url": "https://piston-meta.mojang.com/v1/packages/e787e8afd149a4cefa89d341b91f5aed8f5d93a0/34.json"
+    },
+    "sounds": {
+      "hash": "7975165ad4a3c0cb3c05078b914eac0f2c3b5f5f",
+      "size": 635867
+    }
+  }
 }

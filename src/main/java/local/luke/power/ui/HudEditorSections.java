@@ -29,7 +29,7 @@ final class HudEditorSections {
       if (local.luke.power.config.InheritedColors.accepts(s)) return "Individual mob colors";
       if (field.startsWith("radar") && field.endsWith("Color")) return "Radar colors";
       if (Set.of("colourMode", "heightShading", "slopeShading", "caveLighting").contains(field)) return "Terrain";
-      if (Set.of("radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight", "radarDimming", "radarDimDistance").contains(field)) return "Entity radar";
+      if (Set.of("radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight", "radarDimming", "radarDimDistance", "radarIconSize").contains(field)) return "Entity radar";
       if (field.startsWith("waypoint") || field.startsWith("minimap") || field.startsWith("destinationArrow")) return "Waypoints";
       if (Set.of("chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity").contains(field)) return "Overlays";
       return "Appearance";

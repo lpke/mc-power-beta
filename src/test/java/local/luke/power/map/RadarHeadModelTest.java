@@ -50,6 +50,19 @@ class RadarHeadModelTest {
     }
   }
 
+  @Test void configuredHeadSizeDoesNotChangeCachedGeometryAndNormalizesSquidHeight() {
+    var settings = new MapSettings();
+    var creeper = new RadarIconSource("Creeper", "/mob/creeper.png", null, 0, false);
+    var squid = new RadarIconSource("Squid", "/mob/squid.png", null, 0, false);
+    assertEquals(.5, RadarIcons.iconScale(creeper, settings));
+    assertEquals(.25, RadarIcons.iconScale(squid, settings));
+    assertEquals(2.25, RadarIcons.radius(creeper, settings));
+    assertEquals(2.125, RadarIcons.radius(squid, settings));
+    settings.radarIconSize = 100;
+    assertEquals(4.5, RadarIcons.radius(creeper, settings));
+    assertEquals(8.5, RadarIcons.radius(squid));
+  }
+
   @Test void snapshotsResolveCurrentCategoryAndMobDraftColorsWithoutWaitingForAnotherTick() {
     var settings = new MapSettings();
     var snapshot = new Maps.Radar(0,0,0,"Zombie",0xff6655,false,0,0,0,0,

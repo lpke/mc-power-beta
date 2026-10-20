@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [3.2.1] - 2026-10-21
+
+- Preview every Extra sounds option, including eating, shearing, breakage and chest sounds. Refresh water and lava bucket sounds from current official Minecraft assets.
+- Prevent accumulated footstep sounds from playing rapidly after flight or fast movement. Include active freecam in the Active tweaks HUD by default.
+- Open Minimap appearance directly in the World Map settings sidebar when it fits, with the HUD editor available on smaller screens or when the World Map is disabled.
+- Animate minimap zoom smoothly and wrap zoom keys through editable, exact zoom levels, including 1.25 by default. Retain terrain while preparing zoom changes.
+- Add adjustable mob-head size on both maps, smaller default heads and normalized squid icons. Keep height chevrons closer and brighter, especially while showing heads.
+- Update Power Beta radar colors for dropped items, vehicles and other entities. Set minimap waypoint text to 70% and icons to 90%, allow edge arrows down to 5%, and clarify the waypoint-range tooltip.
+
 ## [3.2.0] - 2026-10-20
 
 - Select and copy chat history with the same translucent blue highlight as the typing row. Preserve selection through wrapping, window resizing, scrolling and new messages; scroll while dragging beyond the visible rows.

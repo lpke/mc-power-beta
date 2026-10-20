@@ -5,6 +5,7 @@ public final class MapSettings {
   public boolean minimap = true, worldMap = true, rotate = true, circular = true, hideWithDebug = true;
   public int size = 108, corner = 1, offsetX = 6, offsetY = 6;
   public double opacity = 1, zoom = 1;
+  public double[] zoomSteps = {.25, .5, 1.25, 2.5, 4};
   public boolean coordinates = true, biome = true, clock, compass = true;
   public int directionTextSize = 100, belowTextSize = 100, minimapArrowSize = 100;
   public int minimapWaypointTextSize = 100, minimapWaypointSize = 100;
@@ -33,7 +34,7 @@ public final class MapSettings {
       radarGhastColor = -1, radarZombiePigmanColor = -1,
       radarPigColor = -1, radarSheepColor = -1, radarCowColor = -1,
       radarChickenColor = -1, radarSquidColor = -1, radarWolfColor = -1;
-  public int radarHeight = 24, radarLimit = 256;
+  public int radarHeight = 24, radarLimit = 256, radarIconSize = 50;
   public boolean radarDimming = true;
   public int radarDimDistance = 24;
   public int lightRadius = 64;
@@ -63,9 +64,10 @@ public final class MapSettings {
     range(offsetY, 0, 500);
     finite(opacity, .1, 1);
     finite(zoom, .25, 4);
+    MinimapZoomSteps.validate(zoomSteps);
     range(directionTextSize, 50, 200);
     range(belowTextSize, 50, 200);
-    range(minimapArrowSize, 50, 200);
+    range(minimapArrowSize, 5, 200);
     range(minimapWaypointTextSize, 50, 200);
     range(minimapWaypointSize, 50, 200);
     range(directionTextColor, 0, 0xffffff);
@@ -88,6 +90,7 @@ public final class MapSettings {
     range(mapOpenColumns, 32, 8192);
     range(mapOpenUploads, 1, 32);
     finite(mapOpenBudget, .5, 8);
+    range(radarIconSize, 10, 200);
     range(radarHeight, 1, 128);
     for (int color : new int[] {radarPlayersColor, radarHostileColor, radarAnimalsColor,
         radarItemsColor, radarVehiclesColor, radarProjectilesColor, radarOtherColor})

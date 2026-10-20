@@ -19,5 +19,6 @@ public abstract class Radar320Capture {
   @Inject(method = "method_1844", at = @At("TAIL"))
   private void power$frame(float delta, CallbackInfo ci) {
     Radar320Checks.frame(field_2349);
+    local.luke.power.validation.Release321Checks.frame(field_2349);
   }
 }

@@ -27,6 +27,8 @@ public class FreecamController {
         local.luke.power.input.DetachedCamera.entryBodyVisibility(entryHead::hidden);
         local.luke.power.input.MovementOwnership.registerCamera(() -> isActive() && !allowPlayerMovement);
         local.luke.power.input.TweakIndicators.register(
+            local.luke.power.input.TweakIndicators.Tweak.FREECAM, () -> active ? "" : null);
+        local.luke.power.input.TweakIndicators.register(
             local.luke.power.input.TweakIndicators.Tweak.FREECAM_PLAYER_MOVEMENT,
             () -> active && allowPlayerMovement ? "" : null,
             () -> local.luke.power.camera.FreecamConfig.config.playerMovementMessages);

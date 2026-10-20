@@ -52,6 +52,45 @@ final class MinimapHandoffChecks {
       GL11.glMatrixMode(oldMatrix);EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT,oldBuffer);GL11.glPopAttrib();
     }
   }
+  @SuppressWarnings("unchecked") static void zoom(Minecraft mc) throws Exception {
+    Object oldCache=staticValue(Maps.class,"cache"),oldLayer=staticValue(Maps.class,"layer");
+    int oldBuffer=GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT), oldMatrix=GL11.glGetInteger(GL11.GL_MATRIX_MODE);
+    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);GL11.glMatrixMode(GL11.GL_PROJECTION);GL11.glPushMatrix();GL11.glMatrixMode(GL11.GL_MODELVIEW);GL11.glPushMatrix();
+    Release300MapRefinement.Canvas canvas=null;
+    try {
+      MinimapBuffer.clear();MapRenderer.clear();
+      var cache=new MapCache(Path.of("power-beta-data/reports/release-321/inert-zoom"),1024,text->{throw new AssertionError(text);});
+      var tiles=(Map<MapMath.Key,MapTile>)field(cache,"tiles");
+      var loading=(Map<MapMath.Key,CompletableFuture<MapTile>>)field(cache,"loading");
+      int dimension=Maps.dimension();for(int i=0;i<16;i++)loading.put(new MapMath.Key(dimension,0,0,10000+i,10000),new CompletableFuture<>());
+      fill(tiles,dimension,0,0x55bb44);set(Maps.class,"cache",cache);set(Maps.class,"layer",0);
+      var settings=MapConfig.copy();settings.circular=false;settings.opacity=1;settings.updateRate=20;
+      settings.heightShading=settings.slopeShading=settings.caveLighting=settings.chunkGrid=settings.slimeChunks=settings.lightOverlay=false;
+      canvas=new Release300MapRefinement.Canvas();
+      var view=new MapProjection(32,32,.26,0,0,64,64,0);
+      frame(mc,canvas,view,settings);Object old=staticValue(MinimapBuffer.class,"active");
+      view=new MapProjection(32,32,2.27,0,0,64,64,0);frame(mc,canvas,view,settings);
+      Object candidate=staticValue(MinimapBuffer.class,"preparing");check(candidate!=null,"zoom-in has no prepared surface");
+      long painted=((Number)field(candidate,"refreshed")).longValue();
+      for(int i=0;i<20;i++)frame(mc,canvas,view,settings);
+      check(((Number)field(candidate,"refreshed")).longValue()==painted,"animation repaints fixed-scale terrain every frame");
+      var animation=(MinimapZoom)staticValue(MinimapBuffer.class,"zoom");field(animation,"started",System.nanoTime()-200_000_000L);
+      frame(mc,canvas,view,settings);check(staticValue(MinimapBuffer.class,"active")!=old,"decimal target never promoted");
+      check(MinimapBuffer.displayed(view).scale==2.27,"decimal endpoint is not exact");
+      // Block wider-target preparation and move beyond the old surface padding.
+      view=new MapProjection(32,32,.25,0,0,128,128,0);MapRenderer.beginFrame(1);MapRenderer.uploadBudget(0);MinimapBuffer.draw(mc,view,settings);
+      Object retained=staticValue(MinimapBuffer.class,"active");
+      view=new MapProjection(200,32,.25,0,0,128,128,0);MapRenderer.beginFrame(1);MapRenderer.uploadBudget(0);MinimapBuffer.draw(mc,view,settings);
+      check(staticValue(MinimapBuffer.class,"active")==retained,"unprepared wider target replaced retained image");
+      check(((Number)field(retained,"centerX")).doubleValue()==200,"old coverage did not follow moving player while waiting");
+      check(MinimapBuffer.displayed(view).scale==2.27,"wider view animated before coverage was ready");
+      log("PASS retained zoom uses bounded paints, exact decimal endpoints and moving-camera coverage while target loads");
+    } finally {
+      MinimapBuffer.clear();MapRenderer.clear();set(Maps.class,"cache",oldCache);set(Maps.class,"layer",oldLayer);if(canvas!=null)canvas.close();
+      GL11.glMatrixMode(GL11.GL_MODELVIEW);GL11.glPopMatrix();GL11.glMatrixMode(GL11.GL_PROJECTION);GL11.glPopMatrix();GL11.glMatrixMode(oldMatrix);
+      EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT,oldBuffer);GL11.glPopAttrib();
+    }
+  }
   static void fill(Map<MapMath.Key,MapTile> tiles,int dimension,int layer,int color) {
     for(int x=-4;x<=4;x++)for(int z=-4;z<=4;z++) {
       var key=new MapMath.Key(dimension,layer,0,x,z);var tile=new MapTile(key);

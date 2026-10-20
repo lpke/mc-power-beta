@@ -77,7 +77,15 @@
     "maps.minimapArrowSize": 60,
     "maps.biome": false,
     "maps.directionTextSize": 75,
-    "maps.belowTextSize": 90
+    "maps.belowTextSize": 90,
+    "maps.radarItemsColor": 13395711,
+    "maps.radarVehiclesColor": 45567,
+    "maps.radarProjectilesColor": 45567,
+    "maps.radarOtherColor": 45567,
+    "maps.minimapWaypointTextSize": 70,
+    "maps.minimapWaypointSize": 90,
+    "maps.radarIconSize": 50,
+    "activeTweaks.freecam": true
   },
   "beta": {
     "activeTweaks.enabled": false,

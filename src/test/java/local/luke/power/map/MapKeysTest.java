@@ -69,10 +69,10 @@ class MapKeysTest {
     }
     settings.zoom = 3;
     MapKeys.change("powerbeta.mapZoomIn", settings); assertEquals(4, settings.zoom);
-    MapKeys.change("powerbeta.mapZoomIn", settings); assertEquals(4, settings.zoom);
+    MapKeys.change("powerbeta.mapZoomIn", settings); assertEquals(.25, settings.zoom);
     settings.zoom = .3;
     MapKeys.change("powerbeta.mapZoomOut", settings); assertEquals(.25, settings.zoom);
-    MapKeys.change("powerbeta.mapZoomOut", settings); assertEquals(.25, settings.zoom);
+    MapKeys.change("powerbeta.mapZoomOut", settings); assertEquals(4, settings.zoom);
     MapKeys.change("powerbeta.mapZoomReset", settings); assertEquals(1, settings.zoom);
     settings.minimap = false; settings.zoom = 3;
     for (String id : List.of("powerbeta.mapZoomIn", "powerbeta.mapZoomOut", "powerbeta.mapZoomReset"))

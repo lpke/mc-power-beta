@@ -101,7 +101,8 @@ public final class Minimap {
       GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glAlphaFunc(GL11.GL_GREATER, 0);
       if (Maps.cache() != null && mc.world != null && mc.player != null) {
-        if (!MinimapBuffer.draw(mc, view, s))
+        boolean buffered = MinimapBuffer.draw(mc, view, s);
+        if (!buffered)
           MapRenderer.terrain(
               Maps.cache(),
               view,
@@ -112,6 +113,7 @@ public final class Minimap {
               !mc.world.isRemote,
               mc.world.getSeed(), MapRenderer.pixelsPerUnit(),
               !(mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen));
+        if (buffered) view = MinimapBuffer.displayed(view);
         MapRenderer.markers(mc, view, Maps.dimension(), s.circular, true, s, heads);
       } else {
         // A fixed sample never starts world sampling, disk I/O or another world in the HUD editor.

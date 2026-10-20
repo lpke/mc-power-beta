@@ -4,39 +4,70 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.*;
 
-/** Two bounded surfaces keep the previous cave view visible until its replacement is prepared. */
+/** Two bounded surfaces retain terrain while a cave or zoom replacement is prepared. */
 public final class MinimapBuffer {
   private static Surface active, preparing;
   private static int maximum;
+  private static final MinimapZoom zoom = new MinimapZoom();
+  private static double requestedZoom = Double.NaN, displayedZoom = 1;
   private static MapSettings sourceSettings, opaqueSettings;
   private MinimapBuffer() {}
   public static void clear() {
     if (active != null) active.clear();
     if (preparing != null) preparing.clear();
     active = preparing = null; sourceSettings = opaqueSettings = null;
+    zoom.reset(); requestedZoom = Double.NaN;
   }
   private static boolean contextMatches(Surface surface) {
     return surface != null && surface.source == Maps.cache() && surface.dimension == Maps.dimension()
         && surface.layer == Maps.layer()
         && surface.context.equals(Maps.layer() < 0 ? "" : Maps.cache().viewContext());
   }
+  /** The marker projection uses the same display scale as the retained terrain. */
+  public static MapProjection displayed(MapProjection request) {
+    return scaled(request, displayedZoom);
+  }
+  private static MapProjection scaled(MapProjection view, double scale) {
+    return new MapProjection(view.x, view.z, scale, view.left, view.top, view.width, view.height, view.angle);
+  }
   public static boolean draw(Minecraft mc, MapProjection view, MapSettings settings) {
     if (Maps.cache() == null) return false;
     if (active != null && (active.source != Maps.cache() || active.dimension != Maps.dimension())) clear();
-    if (active == null) active = new Surface();
-    if (active.texture == 0 || contextMatches(active)) {
+    long now = System.nanoTime();
+    if (active == null) {
+      active = new Surface(); zoom.set(view.scale, now); requestedZoom = view.scale;
+    }
+    if (requestedZoom != view.scale) {
+      requestedZoom = view.scale;
+      // Wider coverage must be prepared before exposing it. Zooming in can use the old image.
+      zoom.set(view.scale < zoom.value(now) ? zoom.value(now) : view.scale, now);
+    }
+    boolean sameContext = contextMatches(active);
+    boolean sameZoom = active.texture == 0 || active.requestScale == view.scale;
+    if (active.texture == 0 || sameContext && sameZoom) {
       if (preparing != null) { preparing.clear(); preparing = null; }
       if (!active.update(mc, view, settings)) return false;
+      zoom.set(view.scale, now);
     } else {
-      if (preparing != null && !contextMatches(preparing)) { preparing.clear(); preparing = null; }
+      if (preparing != null && (!contextMatches(preparing) || preparing.requestScale != view.scale)) {
+        preparing.clear(); preparing = null;
+      }
       if (preparing == null) preparing = new Surface();
       if (!preparing.update(mc, view, settings)) return false;
-      if (!preparing.pending && preparing.knownSamples >= Math.max(1, Math.ceil(active.knownSamples * .9))) {
-        active.clear(); active = preparing; preparing = null;
+      if (sameContext && !sameZoom)
+        active.update(mc, scaled(view, active.requestScale), settings, false);
+      boolean caveReady = replacementKnown(sameContext, sameZoom, active.knownSamples, preparing.knownSamples);
+      boolean coversTransition = view.scale <= zoom.value(now) || zoom.value(now) == view.scale;
+      if (!preparing.pending && caveReady && coversTransition) {
+        active.clear(); active = preparing; preparing = null; zoom.set(view.scale, now);
       }
     }
-    active.draw(view, settings);
+    displayedZoom = zoom.value(now);
+    active.draw(scaled(view, displayedZoom), settings);
     return true;
+  }
+  static boolean replacementKnown(boolean sameContext, boolean sameZoom, int previous, int candidate) {
+    return sameContext || candidate >= (sameZoom ? Math.max(1, (int)Math.ceil(previous * .9)) : 1);
   }
   private static final class Surface {
     private int knownSamples;
@@ -46,7 +77,7 @@ public final class MinimapBuffer {
     private long generation, refreshed;
     private int style, dimension, layer;
     private String context = "";
-    private double centerX, centerZ, scale;
+    private double centerX, centerZ, scale, requestScale;
 
     private Surface() {}
 
@@ -60,6 +91,9 @@ public final class MinimapBuffer {
     }
 
     public boolean update(Minecraft mc, MapProjection view, MapSettings settings) {
+      return update(mc, view, settings, true);
+    }
+    private boolean update(Minecraft mc, MapProjection view, MapSettings settings, boolean ownsInterest) {
       if (failed || !GLContext.getCapabilities().GL_EXT_framebuffer_object) return false;
       if (maximum == 0) maximum = Math.min(2048, GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE));
       double pixelScale = view.scale * MapRenderer.pixelsPerUnit();
@@ -85,7 +119,8 @@ public final class MinimapBuffer {
           || nextStyle != style
           || ((pending || generation != Maps.cache().generation())
               && now - refreshed >= 1_000_000_000L / settings.updateRate)) {
-        if (!paint(mc, settings, target, layout.coverage(), pixelScale, view.x, view.z)) return false;
+        if (!paint(mc, settings, target, layout.coverage(), pixelScale, view.x, view.z, ownsInterest)) return false;
+        requestScale = view.scale;
         style = nextStyle;
         refreshed = now;
       }
@@ -119,7 +154,7 @@ public final class MinimapBuffer {
         int painted,
         double pixelScale,
         double x,
-        double z) {
+        double z, boolean ownsInterest) {
       int oldBuffer = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
       int oldMatrix = GL11.glGetInteger(GL11.GL_MATRIX_MODE);
       GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -208,7 +243,7 @@ public final class MinimapBuffer {
             !mc.world.isRemote,
             mc.world.getSeed(),
             1,
-            !(mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen));
+            ownsInterest && !(mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen));
         generation = source.generation();
         pending = MapRenderer.pending();
         knownSamples = 0;
@@ -218,8 +253,7 @@ public final class MinimapBuffer {
           // Fixed bounded probes, only when painting. Never read native terrain or synchronously load tiles.
           int wx = (int)Math.floor(x + sx * painted / (12 * pixelScale));
           int wz = (int)Math.floor(z + sz * painted / (12 * pixelScale));
-          int level = MapCoverage.select(new MapProjection(x, z, pixelScale, 0, 0, painted, painted, 0),
-              false, settings.cacheTiles, 1).level();
+          int level = probeLevel;
           var tile = source.peek(source.viewKey(MapMath.key(dimension, layer, level, wx, wz)));
           if (tile != null && tile.known(MapMath.index(Math.floorDiv(wx, 1 << level), Math.floorDiv(wz, 1 << level)))) knownSamples++;
         }

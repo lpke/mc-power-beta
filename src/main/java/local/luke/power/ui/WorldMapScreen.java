@@ -27,6 +27,8 @@ public final class WorldMapScreen extends UiScreen {
   private MapSettings minimapStyleSource, minimapStyle;
   private int minimapWidth, minimapHeight, minimapEntryCorner, minimapEntryX, minimapEntryY;
   private PowerOptionsScreen settingsPanel;
+  private PowerOptionsScreen optionsOwner;
+  private boolean openMinimapSettings;
   private MinimapGeometry.Box minimapHit;
   private boolean panelPress;
   private WorldMapControls controls;
@@ -40,21 +42,21 @@ public final class WorldMapScreen extends UiScreen {
     if (settingsPanel != null) settingsPanel.removed();
     settingsPanel = null; panelPress = false; minimapHit = null; minimapStyleSource = null;
     if (!MapConfig.current().minimap) MinimapBuffer.clear();
-    if (!MapConfig.current().worldMap) minecraft.setScreen(null);
+    if (!MapConfig.current().worldMap) closeMap();
   }
   private void toggleSettings() {
     if (settingsPanel != null) { settingsPanel.requestPanelClose(this::closeSettings); return; }
-    if (MapSettingsScope.panelWidth(width, height) == width) { PowerOptionsScreen.openMap(minecraft, this); return; }
+    if (optionsOwner == null && MapSettingsScope.panelWidth(width, height) == width) { PowerOptionsScreen.openMap(minecraft, this); return; }
     var entryStyle = MapConfig.current();
     minimapEntryCorner = entryStyle.corner; minimapEntryX = entryStyle.offsetX; minimapEntryY = entryStyle.offsetY;
-    settingsPanel = PowerOptionsScreen.mapPanel(this);
+    settingsPanel = optionsOwner == null ? PowerOptionsScreen.mapPanel(this) : PowerOptionsScreen.mapPanel(this, optionsOwner);
     settingsPanel.panelSize(MapSettingsScope.panelWidth(width, height));
     settingsPanel.init(minecraft, width, height);
     dragging = context = scaleDragging = false;
   }
   private void requestClose() {
-    if (settingsPanel == null) minecraft.setScreen(null);
-    else settingsPanel.requestPanelClose(() -> { closeSettings(); minecraft.setScreen(null); });
+    if (settingsPanel == null) closeMap();
+    else settingsPanel.requestPanelClose(() -> { closeSettings(); closeMap(); });
   }
   public void tick() { if (settingsPanel != null) settingsPanel.tick(); }
   public boolean capturingBinding() { return settingsPanel != null && settingsPanel.capturingBinding(); }
@@ -79,6 +81,13 @@ public final class WorldMapScreen extends UiScreen {
     minimapHit = frame.bounds();
   }
 
+  /** Borrow the Options session so manual drafts and the return position remain owned by Options. */
+  public static boolean openMinimapSettings(net.minecraft.client.Minecraft mc, PowerOptionsScreen owner, boolean enabled) {
+    if (!enabled || mc.world == null || mc.player == null || MapSettingsScope.panelWidth(owner.width, owner.height) == owner.width) return false;
+    var screen = new WorldMapScreen(); screen.optionsOwner = owner; screen.openMinimapSettings = true;
+    mc.setScreen(screen); return true;
+  }
+  private void closeMap() { minecraft.setScreen(optionsOwner == null ? null : optionsOwner.returnScreen()); }
   public WorldMapScreen() {}
   public WorldMapScreen(Waypoint point) {
     view.x = point.x + .5; view.z = point.z + .5;
@@ -202,9 +211,9 @@ public final class WorldMapScreen extends UiScreen {
         } catch (RuntimeException e) { message = "Clipboard is unavailable"; }
       }
       case "Teleport" -> {
-        if (Maps.canTeleport(minecraft, target)) { Maps.teleport(minecraft, target); minecraft.setScreen(null); }
+        if (Maps.canTeleport(minecraft, target)) { Maps.teleport(minecraft, target); closeMap(); }
       }
-      case "Set destination" -> { Maps.destination(target); minecraft.setScreen(null); }
+      case "Set destination" -> { Maps.destination(target); closeMap(); }
     }
   }
 
@@ -223,6 +232,11 @@ public final class WorldMapScreen extends UiScreen {
 
   public void init() {
     Keyboard.enableRepeatEvents(true);
+    if (openMinimapSettings) {
+      openMinimapSettings = false;
+      var entry = MapConfig.current(); minimapEntryCorner = entry.corner; minimapEntryX = entry.offsetX; minimapEntryY = entry.offsetY;
+      settingsPanel = PowerOptionsScreen.minimapPanel(this, optionsOwner);
+    }
     if (settingsPanel != null) {
       settingsPanel.panelCancelGesture();
       settingsPanel.panelSize(MapSettingsScope.panelWidth(width, height));
@@ -271,7 +285,7 @@ public final class WorldMapScreen extends UiScreen {
       return;
     }
     if (key == Keyboard.KEY_ESCAPE || local.luke.power.input.Bindings.matches(MapKeys.MAP, key)) {
-      minecraft.setScreen(null);
+      closeMap();
       return;
     }
     if (key == Keyboard.KEY_HOME || key == Keyboard.KEY_SPACE) center();
@@ -302,6 +316,7 @@ public final class WorldMapScreen extends UiScreen {
       default -> throw new IllegalArgumentException("Unknown map overlay");
     };
     if (settingsPanel != null) { settingsPanel.toggleMapSetting(id); return; }
+    if (optionsOwner != null) { optionsOwner.toggleMapSetting(id); return; }
     var settings = MapConfig.copy();
     switch(action) {
       case LIGHT -> settings.lightOverlay = !settings.lightOverlay;
@@ -440,7 +455,7 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   public void render(int mx, int my, float delta) {
-    if (!MapConfig.current().worldMap && settingsPanel == null) { minecraft.setScreen(null); return; }
+    if (!MapConfig.current().worldMap && settingsPanel == null) { closeMap(); return; }
     zoom.update(view, System.nanoTime());
     if (!Display.isActive()) {
       dragging = scaleDragging = panelPress = false; scaleDx = scaleDy = 0;

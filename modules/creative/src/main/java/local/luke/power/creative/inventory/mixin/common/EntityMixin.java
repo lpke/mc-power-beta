@@ -23,8 +23,15 @@ public class EntityMixin {
 	private void creative_fixFallSound(double e, double f, double par3, CallbackInfo info) {
 		Entity entity = Entity.class.cast(this);
 		if (!(entity instanceof PlayerEntity player)) return;
-		if (!player.creative_isCreative()) return;
-		if (!player.creative_isFlying()) return;
-		this.stepsCount = (int) (this.walkedDistance + 2);
+		if (!local.luke.power.creative.Modes.flying(player)) return;
+		this.stepsCount = (int) Math.floor(this.walkedDistance) + 1;
 	}
+    @Inject(method = "move", at = @At(value = "FIELD",
+        target = "Lnet/minecraft/entity/Entity;stepsCount:I", opcode = org.objectweb.asm.Opcodes.PUTFIELD,
+        shift = Shift.AFTER))
+    private void power$discardStepBacklog(double x, double y, double z, CallbackInfo ci) {
+        Entity entity = (Entity)(Object)this;
+        if (entity instanceof PlayerEntity player && !player.level.isRemote && player.vehicle == null)
+            stepsCount = (int)Math.floor(walkedDistance) + 1;
+    }
 }

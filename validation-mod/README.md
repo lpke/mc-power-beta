@@ -5,6 +5,18 @@ Install the resulting validation JAR only in a disposable Power Beta clone.
 Fixtures can replace settings and edit worlds. They are never part of the export.
 Mute the clone before launch and route any audio checks to a silent sink or capture device.
 
+After `new-world`, `release-321 ui` checks direct Minimap sidebar entry, narrow/disabled
+fallbacks, manual drafts, native Escape/reopen/Cancel/Apply, toolbar ownership and slider
+save boundaries. It also checks exact zoom levels, Undo, Defaults and dirty exits at narrow
+and wide sizes. `release-321 audio` checks every Extra sounds preview and full decoding of
+all twelve current bucket variants through the game's codec. Keep the clone on a silent
+sink. `release-321 steps` checks native footstep thresholds, flight, multiplayer and the
+live Freecam HUD provider. `release-321 zoom` checks exact decimal endpoints, bounded
+terrain paints and retained coverage while moving during blocked target loading.
+`release-321 zoom-write`, quit/restart, then `zoom-read` checks durable exact levels and
+restores the original preferences. `zoom-watch`, a physical Zoom in press, then
+`zoom-watch-check` records intermediate native rendered frames without per-frame I/O.
+
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 

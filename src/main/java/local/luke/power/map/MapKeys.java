@@ -72,8 +72,8 @@ public final class MapKeys {
       case "powerbeta.toggleMapRadar" -> settings.radar = !settings.radar;
       case "powerbeta.toggleMapCaves" -> settings.caveMode = (settings.caveMode + 1) % 3;
       case "powerbeta.toggleMapGrid" -> settings.chunkGrid = !settings.chunkGrid;
-      case "powerbeta.mapZoomIn" -> settings.zoom = MapMath.bounded(settings.zoom * 2, .25, 4);
-      case "powerbeta.mapZoomOut" -> settings.zoom = MapMath.bounded(settings.zoom * .5, .25, 4);
+      case "powerbeta.mapZoomIn" -> settings.zoom = MinimapZoomSteps.next(settings.zoomSteps, settings.zoom, 1);
+      case "powerbeta.mapZoomOut" -> settings.zoom = MinimapZoomSteps.next(settings.zoomSteps, settings.zoom, -1);
       case "powerbeta.mapZoomReset" -> settings.zoom = 1;
       default -> { return false; }
     }

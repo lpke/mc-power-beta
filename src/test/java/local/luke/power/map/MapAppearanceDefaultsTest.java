@@ -29,6 +29,10 @@ class MapAppearanceDefaultsTest {
       assertTrue(fresh.pauseMap && fresh.items);
       assertEquals(90, fresh.size); assertEquals(1.25, fresh.zoom);
       assertFalse(fresh.biome); assertEquals(60, fresh.minimapArrowSize);
+      assertEquals(70, fresh.minimapWaypointTextSize); assertEquals(90, fresh.minimapWaypointSize);
+      assertEquals(0xcc66ff, fresh.radarItemsColor);
+      assertEquals(0x00b1ff, fresh.radarVehiclesColor); assertEquals(0x00b1ff, fresh.radarProjectilesColor); assertEquals(0x00b1ff, fresh.radarOtherColor);
+      assertEquals(50, fresh.radarIconSize); fresh.minimapArrowSize = 5; fresh.validate();
       assertEquals(75, fresh.directionTextSize); assertEquals(90, fresh.belowTextSize);
     }
     for (var base : DefaultBases.Base.values()) {

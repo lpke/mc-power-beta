@@ -13,6 +13,8 @@ class ExtraSoundsTest {
     assertEquals("step.stone", ExtraSounds.previewId("audio.redstonePlacementSound"));
     for (String setting : List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds"))
       assertTrue(ExtraSounds.contains(ExtraSounds.previewId("audio." + setting)), setting);
+    for (String key : List.of("eatingSounds", "shearingSounds", "toolBreakSounds", "armorBreakSounds", "moreSoundsChests"))
+      assertTrue(BetaSounds.contains(ExtraSounds.previewId("power_controls:features." + key)), key);
     assertNull(ExtraSounds.previewId("audio.master"));
     var settings = new AudioSettings();
     assertFalse(settings.seedPlantingSounds || settings.hoeTillingSounds || settings.bucketSounds || settings.boneMealSounds);

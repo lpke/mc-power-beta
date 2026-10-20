@@ -51,6 +51,14 @@ public final class RadarIcons {
     return radius;
   }
 
+  public static double iconScale(RadarIconSource source, MapSettings settings) {
+    return settings.radarIconSize / 100d * (source != null && source.type().equals("Squid") ? .5 : 1);
+  }
+
+  public static double radius(RadarIconSource source, MapSettings settings) {
+    return radius(source) * iconScale(source, settings);
+  }
+
   public static void clear() {
     for (int texture : TEXTURES.values()) retire(texture);
     TEXTURES.clear(); RESOLVED.clear();
@@ -62,15 +70,15 @@ public final class RadarIcons {
 
   /** View-local deferred heads can overlap the minimap frame, as in the reference renderer. */
   public static final class Batch implements AutoCloseable {
-    private record Sprite(int texture, double x, double y, double brightness) {}
+    private record Sprite(int texture, double x, double y, double brightness, double scale) {}
     private final List<Sprite> sprites = new ArrayList<>();
     private final Set<Integer> pinned = new HashSet<>();
     private final int limit;
     public Batch(int limit) { this.limit = Math.max(0, limit); }
-    private boolean add(int texture, double x, double y, double brightness) {
+    private boolean add(int texture, double x, double y, double brightness, double scale) {
       if (sprites.size() >= limit) return false;
       if (pinned.add(texture)) PINNED.merge(texture, 1, Integer::sum);
-      sprites.add(new Sprite(texture, x, y, brightness));
+      sprites.add(new Sprite(texture, x, y, brightness, scale));
       return true;
     }
     public void paint() {
@@ -79,7 +87,7 @@ public final class RadarIcons {
         GL11.glDisable(GL11.GL_STENCIL_TEST);
         // Keep the enclosing HUD-preview scissor; only the minimap's own edge is bypassed.
         for (var sprite : sprites) paintHead(sprite.texture(), sprite.x(), sprite.y(),
-            sprite.brightness(), null, false);
+            sprite.brightness(), sprite.scale(), null, false);
       } finally { GL11.glPopAttrib(); }
     }
     @Override public void close() {
@@ -145,13 +153,13 @@ public final class RadarIcons {
       }
       double brightness = settings.radarDimming
           ? 1 - .65 * Math.min(1, Math.abs(heightDifference) / settings.radarDimDistance) : 1;
-      if (batch != null) return batch.add(texture, x, y, brightness);
-      paintHead(texture, x, y, brightness, view, circle);
+      if (batch != null) return batch.add(texture, x, y, brightness, iconScale(source, settings));
+      paintHead(texture, x, y, brightness, iconScale(source, settings), view, circle);
       return true;
     } finally { GL11.glPopAttrib(); }
   }
 
-  private static void paintHead(int texture, double x, double y, double brightness,
+  private static void paintHead(int texture, double x, double y, double brightness, double scale,
       MapProjection view, boolean circle) {
     GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING);
     GL11.glDisable(GL11.GL_CULL_FACE); GL11.glDisable(GL11.GL_FOG); GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -159,7 +167,7 @@ public final class RadarIcons {
     GL11.glEnable(GL11.GL_BLEND); GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
     GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
     GL11.glColor4d(brightness, brightness, brightness, 1);
-    double half = 15.5, lo = 1d / SIDE, hi = 1 - lo;
+    double half = 15.5 * scale, lo = 1d / SIDE, hi = 1 - lo;
     var polygon = List.of(new MapProjection.Point(x - half, y - half, lo, hi),
         new MapProjection.Point(x + half, y - half, hi, hi),
         new MapProjection.Point(x + half, y + half, hi, lo),

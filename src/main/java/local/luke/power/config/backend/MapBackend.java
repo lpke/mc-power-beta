@@ -20,7 +20,8 @@ public final class MapBackend implements Backend {
       Setting.Kind kind =
           field.getType() == boolean.class
               ? Setting.Kind.BOOLEAN
-              : field.getType() == double.class ? Setting.Kind.DECIMAL : Setting.Kind.INTEGER;
+              : field.getType().isArray() ? Setting.Kind.LIST
+                  : field.getType() == double.class ? Setting.Kind.DECIMAL : Setting.Kind.INTEGER;
       List<String> choices = new ArrayList<>();
       if (meta.has("choices")) {
         meta.getAsJsonArray("choices").forEach(v -> choices.add(v.getAsString()));

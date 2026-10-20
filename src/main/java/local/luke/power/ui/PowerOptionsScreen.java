@@ -55,6 +55,8 @@ public final class PowerOptionsScreen extends UiScreen {
       boolean changedOnly, List<String> conflicts, String highlighted, String mapView, Set<String> collapsed,
       boolean showDisabled, int selected, boolean libraryOpen, MusicLibraryScreen.State library) {}
   private WorldMapScreen mapHost;
+  private PowerOptionsScreen mapOwner;
+  private Map<String, JsonElement> mapEntry;
   private int panelWidth;
   private String mapView = "Map";
   private Runnable embeddedClose;
@@ -65,10 +67,31 @@ public final class PowerOptionsScreen extends UiScreen {
     panel.highlightedId = ""; panel.conflictIds = List.of(); panel.changedOnly = panel.libraryOpen = false;
     return panel;
   }
+  static PowerOptionsScreen mapPanel(WorldMapScreen host, PowerOptionsScreen owner) {
+    PowerOptionsScreen panel = mapPanel(host);
+    panel.mapOwner = owner; panel.session = owner.session;
+    panel.refreshMapEntry();
+    return panel;
+  }
+  static PowerOptionsScreen minimapPanel(WorldMapScreen host, PowerOptionsScreen owner) {
+    PowerOptionsScreen panel = mapPanel(host, owner);
+    panel.pushView(); panel.mapView = "Minimap"; panel.collapsed.clear();
+    return panel;
+  }
+  private void refreshMapEntry() {
+    if (mapOwner != null) mapEntry = new SettingsDraft(session.settings(), MapSettingsScope::contains).snapshot();
+  }
+  private void cancelBorrowedMap() {
+    if (!MenuPreferences.current().autoApply) {
+      for (Setting s : session.settings()) if (mapEntry.containsKey(s.id)) s.value = mapEntry.get(s.id).deepCopy();
+      try { session.preview(); } catch (Exception e) { error = e.getMessage(); return; }
+    }
+    closeOptions();
+  }
   boolean embedded() { return mapHost != null; }
   Screen returnScreen() { return embedded() ? mapHost : this; }
   private boolean inMapScope(Setting s) { return !embedded() || MapSettingsScope.contains(s); }
-  void panelSize(int span) { panelWidth = span; layout(); }
+  void panelSize(int span) { panelWidth = span; if (minecraft != null && textRenderer != null) layout(); }
   void toggleMapSetting(String id) {
     Setting setting = session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElseThrow();
     setting.value = new JsonPrimitive(!setting.value.getAsBoolean()); changed(setting);
@@ -77,7 +100,7 @@ public final class PowerOptionsScreen extends UiScreen {
   void panelCancelGesture() {
     capture = null; captureModifier = 0; dragging = null; contentBar.release(); sidebarBar.release();
     valueEditor.cancel(); hoverDelay.clear(); TextDrag.cancel();
-    if (autoSavePending) save(false, false);
+    finishContinuousChange();
   }
   void panelWheel(int wheel) {
     if (wheel == 0 || panelModal()) return;
@@ -85,12 +108,13 @@ public final class PowerOptionsScreen extends UiScreen {
   }
   void panelRelease() {
     dragging = null; contentBar.release(); sidebarBar.release();
-    if (autoSavePending) save(false, false);
+    finishContinuousChange();
   }
   void requestPanelClose(Runnable close) {
     embeddedClose = close;
     panelRelease(); valueEditor.cancel();
-    if (session != null && session.changes() > 0) confirmClose = true;
+    if (mapOwner != null) closeOptions();
+    else if (session != null && session.changes() > 0) confirmClose = true;
     else closeOptions();
   }
   void minimapAppearance(String id) {
@@ -326,6 +350,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private boolean controls() { return !embedded() && page.equals("Controls"); }
   private int disabledX() { return actionX(0) - 94; }
   private String previewId(Setting s) {
+    if (s.id.equals("power_controls:features.moreSoundsChests") && s.value.getAsInt() == 2) return "random.door_open";
     if (s.id.startsWith("audio.sound.")) return s.id.substring("audio.sound.".length());
     return switch (s.id) {
       case "power_environment:config.MUSIC_CONFIG.volumeNetherPortalAmbient" -> "portal.portal";
@@ -701,7 +726,10 @@ public final class PowerOptionsScreen extends UiScreen {
 
   String editorError() { return error; }
 
-  public void finishContinuousChange() { if (autoSavePending) save(false, false); }
+  public void finishContinuousChange() {
+    if (mapOwner != null) { mapOwner.finishContinuousChange(); if (MenuPreferences.current().autoApply && session.changes() == 0) refreshMapEntry(); }
+    else if (autoSavePending) save(false, false);
+  }
 
   public void changed(Setting setting, boolean continuous) {
     changed(List.of(setting), continuous);
@@ -709,6 +737,11 @@ public final class PowerOptionsScreen extends UiScreen {
 
   /** Preview/save a group edit once, after all draft values have been updated. */
   public void changed(Collection<Setting> settings, boolean continuous) {
+    if (mapOwner != null) {
+      mapOwner.changed(settings, continuous || dragging != null); error = mapOwner.error;
+      if (MenuPreferences.current().autoApply && session.changes() == 0) refreshMapEntry();
+      return;
+    }
     settings.forEach(session::link);
     error = "";
     try { session.preview(MenuPreferences.current().autoApply); }
@@ -994,6 +1027,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (inside(x, y, actionX(0), height - 28, actionWidth(0), 20)) {
       click();
+      if (mapOwner != null) { cancelBorrowedMap(); return; }
       if (editorReturn != null) { returnToEditor(); return; }
       if (session.changes() > 0) confirmClose = true;
       else closeOptions();
@@ -1008,12 +1042,16 @@ public final class PowerOptionsScreen extends UiScreen {
     error = "";
     click();
     if (s.id.equals("rules.review")) { reviewRules(); return; }
+    if (s.id.equals("maps.zoomSteps")) { minecraft.setScreen(new ZoomStepsScreen(this, s)); return; }
     if (s.id.equals("interface.debugOrder")) {
       openHudSetting(s.id).beginReorder(); return;
     }
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor")) {
       if (embedded()) { minimapAppearance(""); return; }
-      if (s.id.equals("maps.hudEditor")) openHudSetting("maps.size").showMinimap();
+      if (s.id.equals("maps.hudEditor")) {
+        Setting enabled = session.settings().stream().filter(v -> v.id.equals("maps.worldMap")).findFirst().orElseThrow();
+        if (!WorldMapScreen.openMinimapSettings(minecraft, this, enabled.value.getAsBoolean())) openHudSetting("maps.size").showMinimap();
+      }
       else openHudSetting(s.id);
       return;
     }
@@ -1073,6 +1111,11 @@ public final class PowerOptionsScreen extends UiScreen {
   private void save(boolean close) { save(close, true); }
 
   private void save(boolean close, boolean sound) {
+    if (mapOwner != null) {
+      if (close) { if (sound) click(); closeOptions(); }
+      else { mapOwner.save(false, sound); error = mapOwner.error; if (session.changes() == 0) refreshMapEntry(); }
+      return;
+    }
     if (sound) click();
     autoSavePending = false;
     try {
@@ -1108,6 +1151,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (confirmReset) confirmReset = false;
       else {
         try {
+          if (mapOwner != null) { cancelBorrowedMap(); return; }
           session.discard();
           closeOptions();
         } catch (Exception e) { error = "Could not restore settings: " + e.getMessage(); confirmClose = false; }
@@ -1158,7 +1202,8 @@ public final class PowerOptionsScreen extends UiScreen {
         search.focused = false;
         return;
       }
-      if (session != null && session.changes() > 0) confirmClose = true;
+      if (mapOwner != null) closeOptions();
+      else if (session != null && session.changes() > 0) confirmClose = true;
       else closeOptions();
       return;
     }
@@ -1212,6 +1257,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (ColorSettings.accepts(s)) return ColorSettings.label(s, session.settings());
     if (s.id.equals("interface.debugOrder")) return "Reorder";
     if (s.id.equals("rules.review")) return "Review...";
+    if (s.id.equals("maps.zoomSteps")) return s.value.getAsJsonArray().size() + " levels...";
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || s.id.equals("logo.logo.lines")) return "Edit...";
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) return local.luke.power.input.PanoramaCatalog.label(s.value.getAsString());
@@ -1304,7 +1350,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (dragging != null) {
       if (Mouse.isButtonDown(0)) drag(Mouse.getX());
-      else { dragging = null; if (autoSavePending) save(false, false); }
+      else { dragging = null; finishContinuousChange(); }
     }
     if (hidden) {
       button("Show options", disabledX(), height - 28, 90, 20, mx, my, true);
