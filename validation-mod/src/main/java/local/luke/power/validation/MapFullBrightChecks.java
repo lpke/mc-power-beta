@@ -42,7 +42,7 @@ final class MapFullBrightChecks {
     for(int i=0;i<32;i++) {
       canvas.bind();MapRenderer.beginFrame();field(MapRenderer.class,"pixelsPerUnit").setDouble(null,2);
       MapRenderer.uploadBudget(64);
-      check(buffer.draw(mc,view,0,8,settings),"world map buffer did not draw");
+      check(buffer.draw(mc,view,0,Maps.layer(),settings),"world map buffer did not draw");
       if(field(WorldMapBuffer.class,"active").get(buffer)!=null&&field(WorldMapBuffer.class,"pending").get(buffer)==null) {
         complete=true;break;
       }
@@ -78,10 +78,12 @@ final class MapFullBrightChecks {
       var cache=new MapCache(Path.of("power-beta-validation-memory-only-brightness"),256,message->{throw new AssertionError(message);});
       var tiles=(Map<MapMath.Key,MapTile>)field(MapCache.class,"tiles").get(cache);
       var loading=(Map<MapMath.Key,CompletableFuture<MapTile>>)field(MapCache.class,"loading").get(cache);
+      var cycles=(local.luke.power.world.WorldCycles)mc.world.method_262();long daylight=cycles.power$daylightTime();
       var buffer=new WorldMapBuffer();Release300MapRefinement.Canvas canvas=null;
       GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);GL11.glPushClientAttrib(GL11.GL_CLIENT_PIXEL_STORE_BIT);
       GL11.glMatrixMode(GL11.GL_PROJECTION);GL11.glPushMatrix();GL11.glMatrixMode(GL11.GL_MODELVIEW);GL11.glPushMatrix();
       try {
+        cycles.power$daylightTime(6000);
         mc.setScreen(null);mc.paused=false;AccessRules.restore(mc,RuleSet.cheats());CreativeVehicleChecks.mode(mc,"SURVIVAL");
         var lighting=VisualConfig.copy();lighting.spectatorFullBright=false;VisualConfig.preview(lighting);
         state.update(null,false,false,false);RenderControls.tick(mc);
@@ -130,11 +132,29 @@ final class MapFullBrightChecks {
         bright(true);CreativeVehicleChecks.mode(mc,"SPECTATOR");RenderControls.tick(mc);bright(false);
         CreativeVehicleChecks.mode(mc,"SURVIVAL");RenderControls.tick(mc);
         check(RenderControls.fullBright(),"spectator visit lost manual full bright");frame(mc,canvas,buffer,settings,bright);
+        bright(false);
+        tiles.clear();
+        for(int z=-3;z<=3;z++)for(int x=-3;x<=3;x++) {
+          var surface=new MapTile(new MapMath.Key(0,-1,0,x,z));
+          for(int i=0;i<MapMath.PIXELS;i++)surface.put(i,0x809060,0x809060,63,0,1,0);
+          surface=MapCodec.decode(MapCodec.encode(surface),surface.key);surface.readOnly=true;tiles.put(surface.key,surface);
+        }
+        field(Maps.class,"layer").setInt(null,-1);buffer.clear();MinimapBuffer.clear();MapRenderer.clear();
+        settings=MapConfig.copy();settings.caveLighting=true;MapConfig.preview(settings);settings=MapConfig.current();
+        var surface=tiles.values().iterator().next();byte[] surfaceBytes=MapCodec.encode(surface);
+        cycles.power$daylightTime(6000);frame(mc,canvas,buffer,settings,surface.color(0,settings,false,0));
+        cycles.power$daylightTime(18000);int night=surface.color(0,settings,false,mc.world.method_151(1));
+        check(night!=surface.color(0,settings,true),"nighttime surface fixture lacks contrast");
+        frame(mc,canvas,buffer,settings,night);bright(true);frame(mc,canvas,buffer,settings,surface.color(0,settings,true));
+        bright(false);frame(mc,canvas,buffer,settings,night);cycles.power$daylightTime(6000);
+        frame(mc,canvas,buffer,settings,surface.color(0,settings,false,0));
+        check(Arrays.equals(surfaceBytes,MapCodec.encode(surface)),"night/full-bright rendering rewrote surface terrain");
         check(MapIO.submitted()==submitted,"brightness redraw submitted map storage work");
         check(Arrays.equals(bytes,MapCodec.encode(reference)),"brightness redraw mutated persisted terrain");
         check(MapConfig.current().caveLighting,"brightness visits changed cave preference");
         check(GL11.glGetError()==GL11.GL_NO_ERROR,"brightness fixture left an OpenGL error");
       } finally {
+        cycles.power$daylightTime(daylight);
         buffer.clear();MinimapBuffer.clear();MapRenderer.clear();loading.clear();cache.retire();cache.releaseIfIdle();
         for(var e:mapState.entrySet())e.getKey().set(null,e.getValue());
         AccessRules.restore(mc,RuleSet.cheats());CreativeVehicleChecks.mode(mc,mode);

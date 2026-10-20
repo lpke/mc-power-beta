@@ -13,7 +13,7 @@ public final class SprintSettings {
       rechargeStill = 7.5,
       rechargeDelay = 2,
       combatTime = 8,
-      restartStamina = 20;
+      restartStamina = 30;
   public double jumpCost;
   public boolean rechargeInCombat;
   public boolean dynamicFov, creativeFov, spectatorFov, freecamFov;

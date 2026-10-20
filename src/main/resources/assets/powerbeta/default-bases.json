@@ -46,7 +46,7 @@
     "sprint.creativeFov": false,
     "sprint.spectatorFov": false,
     "sprint.freecamFov": false,
-    "rule.allow_sprinting": false,
+    "rule.allow_sprinting": true,
     "maps.zoom": 1,
     "maps.footsteps": false,
     "maps.caveAbove": 10,
@@ -64,8 +64,11 @@
     "maps.waypointTextSize": 75,
     "maps.waypointDistanceScaling": true,
     "maps.worldMapWaypointSize": 85,
-    "maps.waypointBobbing": 0,
-    "sprint.rechargeStill": 7.5
+    "maps.waypointBobbing": 1,
+    "sprint.rechargeStill": 7.5,
+    "sprint.restartStamina": 30,
+    "sprint.stamina": true,
+    "sprint.noSprintInCombat": true
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -271,8 +274,11 @@
     "maps.waypointTextSize": 75,
     "maps.waypointDistanceScaling": true,
     "maps.worldMapWaypointSize": 85,
-    "maps.waypointBobbing": 0,
-    "sprint.rechargeStill": 7.5
+    "maps.waypointBobbing": 1,
+    "sprint.rechargeStill": 7.5,
+    "sprint.restartStamina": 30,
+    "sprint.stamina": false,
+    "sprint.noSprintInCombat": false
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -439,7 +445,10 @@
     "maps.waypointTextSize": 75,
     "maps.waypointDistanceScaling": true,
     "maps.worldMapWaypointSize": 85,
-    "maps.waypointBobbing": 0,
-    "sprint.rechargeStill": 7.5
+    "maps.waypointBobbing": 1,
+    "sprint.rechargeStill": 7.5,
+    "sprint.restartStamina": 30,
+    "sprint.stamina": false,
+    "sprint.noSprintInCombat": false
   }
 }

@@ -222,7 +222,7 @@ public final class WorldMapBuffer {
     var plan = MapSurfacePlan.create(view, MapRenderer.pixelsPerUnit(), maximum, settings.automaticDetail);
     if (plan == null) return false;
     int style = Objects.hash(MapRenderer.style(settings), settings.chunkGrid, settings.slimeChunks,
-        settings.lightOverlay, mc.world.getSeed());
+        mc.world.getSeed());
     String context = layer < 0 ? "" : Maps.cache().viewContext();
     boolean restyle = this.style != style;
     if (source != Maps.cache() || this.dimension != dimension || this.layer != layer

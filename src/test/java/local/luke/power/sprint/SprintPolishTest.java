@@ -132,15 +132,16 @@ class SprintPolishTest {
     for (int icon = 1; icon < 10; icon++) assertEquals(8, StaminaIcons.x(17, icon - 1) - StaminaIcons.x(17, icon));
     assertEquals(0xe2b32f, StaminaIcons.color(0, 2, 0, 3, 4));
     assertEquals(0x51462e, StaminaIcons.color(1, 2, 0, 3, 4));
-    assertEquals(0xe2b32f, StaminaIcons.color(0, 1, 0, 3, 4));
-    assertEquals(0x51462e, StaminaIcons.color(0, 1, 0, 6, 4));
+    assertEquals(0xe2b32f, StaminaIcons.color(0, 1, 0, 6, 4));
+    assertEquals(0x51462e, StaminaIcons.color(0, 1, 0, 3, 4));
     assertEquals(0xe2b32f, StaminaIcons.color(9, 20, 0, 3, 4));
     assertEquals(0x51462e, StaminaIcons.color(9, 18, 0, 3, 4));
   }
 
   @Test void restartRegionDarkensOnlyDepletedReserveAndNeverChangesFilledColorsOrBorder() {
     for (int icon = 0; icon < 10; icon++) {
-      assertEquals(icon < 4 ? 0x282317 : 0x51462e, StaminaIcons.color(icon, 0, 40, 3, 4));
+      assertEquals(0x51462e, StaminaIcons.color(icon, 0, 40, false, 3, 4), "normal depletion must not imply exhaustion");
+      assertEquals(icon < 4 ? 0x3a3222 : 0x51462e, StaminaIcons.color(icon, 0, 40, true, 3, 4));
       assertEquals(0xe2b32f, StaminaIcons.color(icon, 20, 40, 3, 4));
       assertEquals(0, StaminaIcons.color(icon, 0, 40, 5, 0));
       assertEquals(-1, StaminaIcons.color(icon, 20, 40, 0, 0));
@@ -148,7 +149,7 @@ class SprintPolishTest {
     assertEquals(0xffeaa0, StaminaIcons.color(0, 20, 50, 4, 1));
     assertEquals(0xbf8c22, StaminaIcons.color(0, 20, 50, 7, 4));
     assertEquals(0x51462e, StaminaIcons.color(0, 0, 0, 3, 4));
-    assertEquals(0x282317, StaminaIcons.color(9, 0, 100, 3, 4));
+    assertEquals(0x3a3222, StaminaIcons.color(9, 0, 100, true, 3, 4));
   }
 
   @Test void stationaryAndMovingRecoveryUseIndependentRatesWithSharedDelayCombatAndOwnership() {

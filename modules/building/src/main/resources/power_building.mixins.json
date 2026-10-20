@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "MiningMixin",
+    "ClickMiningInputMixin",
     "ObsidianMiningMixin",
     "CameraLifecycleMixin",
     "CameraOptionsMixin",

@@ -14,7 +14,7 @@ public final class SprintStaminaHud {
     var settings = SprintConfig.current();
     if (!settings.stamina || !SprintController.allowed(mc) || mc.player == null || mc.options.hideHud
         || mc.player.health <= 0 || mc.player.dead || !SprintController.usesStamina(mc.player)
-        || mc.currentScreen != null && !(mc.currentScreen instanceof ChatScreen) && !(mc.currentScreen instanceof class_525)) return;
+        || mc.currentScreen != null && !(mc.currentScreen instanceof ChatScreen) && !(mc.currentScreen instanceof class_525) && !(mc.currentScreen instanceof net.minecraft.class_585)) return;
     var state = ((SprintPlayer)mc.player).power$sprint();
     if (state.stamina >= settings.capacity) return;
     var screen = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
@@ -27,10 +27,13 @@ public final class SprintStaminaHud {
           layout.power$staminaOffsetX(), layout.power$staminaOffsetY());
     } else if (mc.player.inventory.method_687() > 0) y -= 10;
     int units = StaminaIcons.units(state.stamina, settings.capacity);
-    draw(right - 81, y, units, settings.restartStamina);
+    draw(right - 81, y, units, settings.restartStamina, state.exhausted);
   }
   /** Shared pixel geometry and palette for gameplay and the isolated HUD preview. */
   public static void draw(int left, int y, int units, double restartPercent) {
+    draw(left, y, units, restartPercent, false);
+  }
+  public static void draw(int left, int y, int units, double restartPercent, boolean exhausted) {
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {
       GL11.glDisable(GL11.GL_TEXTURE_2D); GL11.glDisable(GL11.GL_LIGHTING);
@@ -40,7 +43,7 @@ public final class SprintStaminaHud {
       for (int i = 0; i < 10; i++) {
         int x = StaminaIcons.x(left, i);
         for (int py = 0; py < 9; py++) for (int px = 0; px < 9; px++) {
-          int color = StaminaIcons.color(i, units, restartPercent, px, py);
+          int color = StaminaIcons.color(i, units, restartPercent, exhausted, px, py);
           if (color < 0) continue;
           GL11.glColor3ub((byte)(color >> 16), (byte)(color >> 8), (byte)color);
           GL11.glVertex2i(x + px, y + py); GL11.glVertex2i(x + px + 1, y + py);

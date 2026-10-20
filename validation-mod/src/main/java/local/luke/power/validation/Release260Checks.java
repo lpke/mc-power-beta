@@ -293,15 +293,15 @@ public final class Release260Checks {
               "HUD undo failed");
         });
     test(
-        "all bases keep sprinting and every dynamic FOV effect disabled",
+        "only Power Beta enables ground sprinting; dynamic FOV remains optional",
         () -> {
           check(!new RuleSet().enabled(GameRule.ALLOW_SPRINTING)
                   && !RuleSet.cheats().enabled(GameRule.ALLOW_SPRINTING),
               "factory creation preset grants sprinting");
           for (var base : DefaultBases.Base.values()) {
             for (String scope : List.of("world", "survival", "cheats"))
-              check(!DefaultBases.value(base, "rules." + scope + ".allow_sprinting",
-                      new com.google.gson.JsonPrimitive(true)).getAsBoolean(),
+              check(DefaultBases.value(base, "rules." + scope + ".allow_sprinting",
+                      new com.google.gson.JsonPrimitive(false)).getAsBoolean() == (base == DefaultBases.Base.POWER_BETA),
                   "sprint rule defaults on in " + base + " " + scope);
             for (String field :
                 List.of("dynamicFov", "creativeFov", "spectatorFov", "freecamFov"))

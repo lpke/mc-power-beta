@@ -3131,7 +3131,7 @@
     "page": "Building",
     "group": "Mining",
     "label": "Continuous click mining",
-    "description": "Remove the delay between breaking blocks in singleplayer.",
+    "description": "Remove the delay between breaking blocks and the empty-swing penalty across air gaps in singleplayer. Native block damage, target selection, Creative held-repeat timing and multiplayer behavior stay unchanged.",
     "order": 0,
     "default": false
   },
@@ -5163,7 +5163,7 @@
     "page": "Interface",
     "group": "Minimap",
     "label": "Other entities",
-    "description": "Show other loaded entities as purple markers. Also affects the World Map.",
+    "description": "Show loaded boats, minecarts, projectiles and other entities as purple radar markers. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5182,8 +5182,8 @@
   "maps.entityHeights": {
     "page": "Interface",
     "group": "Minimap",
-    "label": "Height arrows",
-    "description": "Mark entities substantially above or below the camera. Also affects the World Map.",
+    "label": "Height chevrons",
+    "description": "Show a small chevron above or below radar dots more than three blocks away in height. Also affects items, vehicles and the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5302,8 +5302,8 @@
   "maps.lightOverlay": {
     "page": "Interface",
     "group": "Minimap",
-    "label": "Low-light shading",
-    "description": "Highlight sampled block light below eight. Cave maps are most useful for this overlay. Also affects the World Map.",
+    "label": "Spawn-light shading",
+    "description": "Shade valid spawning floors red when their block light is below eight. Predicts nighttime spawning; full bright does not change this overlay. Uses the separate Map light shading radius in Map settings. Also affects the World Map.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -6134,5 +6134,35 @@
     "min": -2048,
     "max": 2048,
     "step": 1
+  },
+  "maps.radarDimming": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Dim distant heights",
+    "description": "Dim all radar dots, including items and vehicles, with vertical distance from the camera. Nearby heights retain their normal color. Also affects the World Map.",
+    "min": 0,
+    "max": 1,
+    "step": 1,
+    "order": 29.1
+  },
+  "maps.radarDimDistance": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Height dimming distance",
+    "description": "Height difference in blocks at which radar dots reach their dimmest color. Lower values separate nearby floors more strongly; higher values keep entities bright over a larger height range. Dimming never hides markers. Also affects the World Map.",
+    "min": 1,
+    "max": 128,
+    "step": 1,
+    "order": 29.2
+  },
+  "maps.lightRadius": {
+    "page": "Map",
+    "group": "World map",
+    "label": "Map light shading radius",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "min": 8,
+    "max": 128,
+    "step": 1,
+    "order": 12
   }
 }

@@ -37,7 +37,7 @@ class WaypointRefinementsTest {
   @Test void markerSizeAndBobModeValidateAndFacetsRetainDistinctLightAndShade() {
     var settings = new MapSettings(); settings.validate();
     assertEquals(0x00ecff, settings.destinationArrowColor);
-    assertEquals(85, settings.worldMapWaypointSize); assertEquals(0, settings.waypointBobbing);
+    assertEquals(85, settings.worldMapWaypointSize); assertEquals(1, settings.waypointBobbing);
     settings.waypointBobbing = 1; settings.validate();
     settings.waypointBobbing = 2; assertThrows(IllegalArgumentException.class, settings::validate);
     settings.waypointBobbing = 0; settings.worldMapWaypointSize = 151;

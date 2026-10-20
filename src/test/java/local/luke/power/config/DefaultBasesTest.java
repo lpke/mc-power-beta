@@ -182,6 +182,25 @@ class DefaultBasesTest {
     DefaultBases.reload(); assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.current());
     assertArrayEquals(before, java.nio.file.Files.readAllBytes(PowerConfig.path()));
   }
+  @Test void newSprintDefaultsMatchFreshSetupAndKeepOtherBasesAndMissingWorldRulesOff() throws Exception {
+    ConfigDefaults.prepare(game);
+    for (var base : DefaultBases.Base.values()) {
+      boolean enabled = base == DefaultBases.Base.POWER_BETA;
+      for (String scope : List.of("survival", "cheats")) {
+        assertEquals(enabled, DefaultBases.value(base, "rules." + scope + ".allow_sprinting", new JsonPrimitive(false)).getAsBoolean());
+      }
+      for (String id : List.of("sprint.stamina", "sprint.noSprintInCombat"))
+        assertEquals(enabled, DefaultBases.value(base, id, new JsonPrimitive(false)).getAsBoolean());
+      assertEquals(30, DefaultBases.value(base, "sprint.restartStamina", new JsonPrimitive(20)).getAsInt());
+    }
+    var settings = PowerConfig.document().getAsJsonObject("settings");
+    assertTrue(settings.getAsJsonObject("sprint").get("stamina").getAsBoolean());
+    assertTrue(settings.getAsJsonObject("sprint").get("noSprintInCombat").getAsBoolean());
+    assertEquals(30, settings.getAsJsonObject("sprint").get("restartStamina").getAsInt());
+    for (String scope : List.of("survival", "cheats"))
+      assertTrue(settings.getAsJsonObject("gameRules").getAsJsonObject(scope).getAsJsonObject("values").get("allow_sprinting").getAsBoolean());
+    assertFalse(new local.luke.power.rules.RuleSet().enabled(local.luke.power.rules.GameRule.ALLOW_SPRINTING));
+  }
   @Test void existingInstallsSkipSetupAndFreshInstallsAskOnce() throws Exception {
     ConfigDefaults.prepare(game); assertTrue(DefaultBases.needsSetup());
     var state = new DefaultBases.State(); state.setupComplete = true; PowerConfig.save("defaults", state);

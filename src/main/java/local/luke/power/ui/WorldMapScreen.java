@@ -65,18 +65,20 @@ public final class WorldMapScreen extends UiScreen {
         0);
   }
 
+  public int lightLayer(int dimension) { return this.dimension == dimension ? layer : Integer.MIN_VALUE; }
+
   private int buttonWidth() {
-    return Math.min(76, (width - 24) / 5);
+    return Math.min(76, (width - 28) / 6);
   }
 
-  private int leftY() { return height - (width < 540 ? 46 : 24); }
-  private int scaleY() { return height - (width < 540 ? 66 : 44); }
+  private int leftY() { return height - (width < 600 ? 46 : 24); }
+  private int scaleY() { return height - (width < 600 ? 66 : 44); }
   private boolean overControls(int x, int y) {
     if (inside(x, y, width - 64, 4, 56, 18)
         || inside(x, y, width - 124, height - 24, 116, 18)) return true;
     if (minecraft.world != null && minecraft.world.isRemote
         && inside(x, y, 8, 4, Math.min(180, width / 3), 18)) return true;
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 6; i++)
       if (inside(x, y, 8 + i * (buttonWidth() + 2), leftY(), buttonWidth(), 18)) return true;
     return inside(x, y, width - 124, scaleY() - 16, 116, 20);
   }
@@ -258,7 +260,7 @@ public final class WorldMapScreen extends UiScreen {
       if (inside(x, y, width - 124, scaleY() - 16, 116, 20)) {
         scaleDragging = true; lastX = x; lastY = y; return;
       }
-      for (int i = 0; i < 5; i++)
+      for (int i = 0; i < 6; i++)
         if (inside(x, y, 8 + i * (buttonWidth() + 2), leftY(), buttonWidth(), 18)) {
           click();
           switch (i) {
@@ -266,7 +268,8 @@ public final class WorldMapScreen extends UiScreen {
             case 1 -> PowerOptionsScreen.openMap(minecraft, this);
             case 2 -> layer = layer < 0 ? MapSampler.window(MapConfig.current(), Maps.y()).layer() : -1;
             case 3 -> dimension = dimension == 0 ? -1 : 0;
-            case 4 -> screenshot = true;
+            case 4 -> { var settings = MapConfig.copy(); settings.lightOverlay = !settings.lightOverlay; MapConfig.queued(settings); }
+            case 5 -> screenshot = true;
           }
           return;
         }
@@ -403,7 +406,7 @@ public final class WorldMapScreen extends UiScreen {
     fill(barX + 79, barY - 2, barX + 80, barY + 2, 0xffcccccc);
     String scaleLabel = blocks + " blocks";
     text(scaleLabel, barX + (80 - textRenderer.getWidth(scaleLabel)) / 2, barY - 13, 0xcccccc);
-    String[] labels = {"Waypoints", "Settings", layer < 0 ? "Caves" : "Surface", MapDimensions.name(dimension), "Screenshot"};
+    String[] labels = {"Waypoints", "Settings", layer < 0 ? "Caves" : "Surface", MapDimensions.name(dimension), MapConfig.current().lightOverlay ? "Light: On" : "Light: Off", "Screenshot"};
     for (int i = 0; i < labels.length; i++)
       button(fit(labels[i], buttonWidth() - 6), 8 + i * (buttonWidth() + 2), leftY(), buttonWidth(), 18, mx, my, true);
     if (context) {

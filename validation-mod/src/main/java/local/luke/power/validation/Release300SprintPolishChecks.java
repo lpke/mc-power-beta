@@ -171,6 +171,7 @@ final class Release300SprintPolishChecks {
       check(draw(mc, size) > 0, "eligible Survival stamina icons submitted no fragments");
       mc.setScreen(new ChatScreen()); check(draw(mc, size) > 0, "chat hid Survival stamina icons");
       mc.setScreen(new net.minecraft.class_525()); check(draw(mc, size) > 0, "native pause screen hid Survival stamina icons");
+      mc.setScreen(new net.minecraft.class_585(mc.player)); check(draw(mc, size) > 0, "player inventory hid Survival stamina icons");
       mc.currentScreen = new Screen() {}; check(draw(mc, size) == 0, "ordinary menu rendered stamina icons"); mc.setScreen(null);
       settings.stamina = false; SprintConfig.preview(settings); check(draw(mc, size) == 0, "disabled stamina submitted HUD fragments");
       settings.stamina = true; SprintConfig.preview(settings); FreecamPreviewChecks.active(true);

@@ -255,6 +255,8 @@ public final class Maps {
       sampler.tick(mc, cache, layer, x, y, z);
     }
 
+    MapLightShading.tick(mc, radarSettings);
+
     boolean dead = mc.player.dead || mc.player.health <= 0;
     if (activity.waypoints() && waypoints == null)
       waypoints = new WaypointStore(directory(identity), Maps::error);
@@ -384,6 +386,7 @@ public final class Maps {
   }
 
   public static void leave() {
+    MapLightShading.clear();
     if (cache != null) cache.finish();
     if (waypoints != null) {
       waypoints.finish();

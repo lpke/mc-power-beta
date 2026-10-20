@@ -24,10 +24,13 @@ public final class StaminaIcons {
   public static int x(int left, int icon) { return left + (9 - icon) * 8; }
   /** Negative means transparent. Restart reserves darken only depleted pixels. */
   public static int color(int icon, int units, double restartPercent, int x, int y) {
+    return color(icon, units, restartPercent, false, x, y);
+  }
+  public static int color(int icon, int units, double restartPercent, boolean exhausted, int x, int y) {
     if (border(x, y)) return 0x000000;
     if (!bolt(x, y)) return -1;
-    boolean filled = units >= (icon + 1) * 2 || units == icon * 2 + 1 && x < 5;
-    if (!filled) return icon <= restartIcon(restartPercent) ? 0x282317 : 0x51462e;
+    boolean filled = units >= (icon + 1) * 2 || units == icon * 2 + 1 && x >= 4;
+    if (!filled) return exhausted && icon <= restartIcon(restartPercent) ? 0x3a3222 : 0x51462e;
     if (x == 4 && y == 1 || x == 3 && y == 2) return 0xffeaa0;
     return x == 7 && y == 4 || x == 3 && y == 7 ? 0xbf8c22 : 0xe2b32f;
   }

@@ -8,6 +8,15 @@ Mute the clone before launch and route any audio checks to a silent sink or capt
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
+- `creation-rules` now renders the actual Custom editor at narrow and wide sizes,
+  checks isolated drafts, preset copying and world save/reload. At the title screen,
+  `release-300-rule-editors` renders the same standalone editors at three GUI sizes,
+  including a saved test world without opening it. `release-300-mining-air` exercises native empty
+  clicks, temporary preference inversion, immediate held mining, unrelated cooldowns
+  and multiplayer authority. `release-300-map-light` checks radius and scan budgets,
+  native spawning floors, clipped overlay pixels and zero disabled survey work.
+  Run mining and map-light checks only in a loaded disposable world.
+
 - After `new-world`, `release-300-exact-frames` compares both border shapes pixel-for-pixel
   against reference atlas operations at four sizes and two scales. `release-300 refinement`
   also checks stationary visible updates behind missing tiles with one upload per frame.

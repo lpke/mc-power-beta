@@ -22,7 +22,7 @@ public final class HudEditorSettings {
       "rotate", "circular", "hideWithDebug", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
       "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
       "directionTextSize", "belowTextSize", "minimapArrowSize", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity",
-      "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight",
+      "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight", "radarDimming", "radarDimDistance",
       "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity",
       "playerColor", "playerOpacity", "playerSize");
   private HudEditorSettings() {}

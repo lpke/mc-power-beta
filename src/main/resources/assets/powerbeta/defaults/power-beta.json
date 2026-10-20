@@ -961,7 +961,7 @@
           "ghast_explosion_fire": true,
           "lightning_strike_fire": false,
           "explosion_drop_chance": 100,
-          "allow_sprinting": false
+          "allow_sprinting": true
         }
       },
       "cheats": {
@@ -1006,7 +1006,7 @@
           "ghast_explosion_fire": true,
           "lightning_strike_fire": false,
           "explosion_drop_chance": 100,
-          "allow_sprinting": false
+          "allow_sprinting": true
         }
       }
     },
@@ -1045,7 +1045,7 @@
       "hostile": true,
       "animals": true,
       "items": false,
-      "otherEntities": false,
+      "otherEntities": true,
       "entityNames": false,
       "entityHeights": true,
       "radarHeight": 24,
@@ -1091,7 +1091,10 @@
       "waypointTextSize": 75,
       "waypointDistanceScaling": true,
       "worldMapWaypointSize": 85,
-      "waypointBobbing": 0
+      "waypointBobbing": 1,
+      "radarDimming": true,
+      "radarDimDistance": 24,
+      "lightRadius": 64
     },
     "sprint": {
       "activation": 0,
@@ -1101,14 +1104,14 @@
       "particles": true,
       "sprintKnockback": true,
       "speed": 130,
-      "stamina": false,
-      "noSprintInCombat": false,
+      "stamina": true,
+      "noSprintInCombat": true,
       "capacity": 100,
       "drain": 10,
       "recharge": 5,
       "rechargeDelay": 2,
       "combatTime": 8,
-      "restartStamina": 20,
+      "restartStamina": 30,
       "jumpCost": 0,
       "rechargeInCombat": false,
       "dynamicFov": false,

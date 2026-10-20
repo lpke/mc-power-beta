@@ -47,6 +47,11 @@ final class CreationRuleChecks {
         check(((TextFieldWidget)field(creation,"field_632")).getText().equals("Custom rules fixture"),"preset cycle lost world name");
         byte[] before=Files.readAllBytes(PowerConfig.path());
         press(creation,4);var editor=(PowerOptionsScreen)mc.currentScreen;
+        for (int width : new int[]{320, 640}) {
+          editor.init(mc, width, width == 320 ? 240 : 360);
+          SettingsSnapshot.render(mc, editor, width, editor.height, Path.of("power-beta-data/reports/creation-custom-editor-" + width + ".png"));
+          check(field(editor, "library") == null, "standalone creation editor created unrelated music widgets");
+        }
         check(editor.session().settings().size()==GameRule.values().length,"creation editor exposes unrelated settings");
         var fire=WorldRulesChecks.find(editor.session(),"rules.creation.fire_spread");
         fire.parse("false");editor.changed(fire);

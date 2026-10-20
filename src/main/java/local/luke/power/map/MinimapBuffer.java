@@ -36,7 +36,7 @@ public final class MinimapBuffer {
     int target = layout.side();
     int nextStyle =
         java.util.Objects.hash(
-            MapRenderer.style(settings), settings.chunkGrid, settings.slimeChunks, settings.lightOverlay);
+            MapRenderer.style(settings), settings.chunkGrid, settings.slimeChunks);
     double radius = view.width * Math.sqrt(2) / (2 * view.scale) + 2 / pixelScale;
     boolean outside =
         source != Maps.cache()

@@ -18,16 +18,19 @@ public final class MapSettings {
   public int mapOpenColumns = 1024, mapOpenUploads = 8;
   public double mapOpenBudget = 2;
   public boolean heightShading = true, slopeShading = true, caveLighting = true;
-  public boolean radar = true, players = true, hostile = true, animals = true, items, otherEntities;
+  public boolean radar = true, players = true, hostile = true, animals = true, items, otherEntities = true;
   public boolean entityNames, entityHeights = true;
   public int radarHeight = 24, radarLimit = 256;
+  public boolean radarDimming = true;
+  public int radarDimDistance = 24;
+  public int lightRadius = 64;
   public boolean waypoints = true,
       worldWaypoints = true,
       waypointNames = true,
       waypointDistances = true;
   public int waypointDistance = 1000;
   public int waypointTextSize = 75;
-  public int worldMapWaypointSize = 85, waypointBobbing;
+  public int worldMapWaypointSize = 85, waypointBobbing = 1;
   public boolean waypointDistanceScaling = true;
   public boolean deathpoints = true, keepOldDeaths = true;
   public boolean chunkGrid, slimeChunks, lightOverlay, footsteps, pauseMap;
@@ -69,6 +72,8 @@ public final class MapSettings {
     finite(mapOpenBudget, .5, 8);
     range(radarHeight, 1, 128);
     range(radarLimit, 16, 1024);
+    range(radarDimDistance, 1, 128);
+    range(lightRadius, 8, 128);
     range(waypointDistance, 0, 1000000);
     range(columnsPerTick, 32, 4096);
     range(cacheTiles, 64, 1024);

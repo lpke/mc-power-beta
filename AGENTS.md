@@ -519,7 +519,8 @@
   bounded. Buffer padding must not select terrain detail or request extra tiles.
   Map navigation never moves the player
   or loads terrain. Teleport actions use the existing local permission and command.
-  Automatic cave roof checks ignore leaf material without changing sampled canopy terrain, solid roofs or cave floors. Full bright bypasses map cave-light shading through render styles, preserving saved preferences and terrain data. Map preferences use PowerConfig; minimap presentation belongs to the HUD draft,
+  Automatic cave roof checks ignore leaf material without changing sampled canopy terrain, solid roofs or cave floors. Nighttime surface shading uses native daylight/weather darkness and sampled block light.
+  Full bright bypasses surface and cave-light shading through render styles, preserving saved preferences and terrain data. Map preferences use PowerConfig; minimap presentation belongs to the HUD draft,
   with a link from the Map tab. Initialize a missing minimap enablement once from
   the selected base with a verified backup; later Use as base changes never alter it
   on restart. Preserve waypoints while features are disabled.
@@ -540,17 +541,25 @@
   Reject behind/near-plane points without culling distant waypoint labels at the terrain
   far plane. Color-wheel/RGBA tabs share one local RGB/opacity draft and retain native
   drag release ownership even when mouse polling observes the release early.
-- Ground sprinting uses the per-world `allow_sprinting` rule, off in both creation
-  presets and every defaults base. Speed, activation, stamina, combat and FOV tuning
+- Ground sprinting uses the per-world `allow_sprinting` rule. Power Beta creation
+  defaults enable it with stamina and combat blocking; Refined Beta and Beta keep it off.
+  Existing worlds and missing world rules retain their own values, defaulting off. Speed, activation, stamina, combat and FOV tuning
   stay global. Retain legacy `sprint.enabled` data inert; never use it to grant a
   world permission. Missing rules default off. Revocation immediately cancels ground
   sprint and its FOV, preserving flight and freecam sprint preferences and state.
   Preserve native land collision, fluids, vehicles, flight and multiplayer authority.
   Modern defaults use a 1.3 speed multiplier, 0.2 horizontal jump impulse and native
   terrain dust with modern particle movement. Optional stamina/combat rules persist
-  in player NBT without changing the world rule. Ground, Creative and Spectator share sprint FOV enablement/amount; freecam retains its independent preference. Creative and every flight mode bypass stamina without resetting its saved state. Survival stamina uses nine-pixel, black-outlined icons filled from the right, with darker depleted restart reserves. Gameplay and HUD previews share the same glyphs, palette and armor-aware placement. Combined layouts include stamina; separate layouts retain independent visibility, anchors and offsets. Keep it visible while paused alongside native status icons. Each movement mode publishes
+  in player NBT without changing the world rule. Ground, Creative and Spectator share sprint FOV enablement/amount; freecam retains its independent preference. Creative and every flight mode bypass stamina without resetting its saved state. Survival stamina uses nine-pixel, black-outlined icons filled from the right, with slightly darker depleted restart reserves only while exhausted. Gameplay and HUD previews share the same glyphs, palette and armor-aware placement. Combined layouts include stamina; separate layouts retain independent visibility, anchors and offsets. Keep it visible while paused and in the player inventory alongside native status icons. Each movement mode publishes
   sprint state; render code never polls keys.
   Boat interaction consumes a held boat's placement fallback without skipping native boarding.
 
 - Minimap frames use the retained reference atlas and seam-aware square/circle UVs through the native texture manager; keep frame mesh allocation off steady-state frames. In-world symbols stay anchored while aimed labels expand. Viewport updates must rotate missing tiles and admit bounded reloads before ready-first painting, without starving initial fill.
 - Waypoint abbreviations are optional stable per-waypoint data; preserve empty sets and legacy warp NBT. Shared destination color/opacity applies to maps, edge arrows and world labels. Color pickers confirm dirty exits and retain isolated RGB/opacity/swatches. Pause shortcuts initialize missing base values once with verified backups. Extra sounds use verified official assets and successful native action events only.
+
+- Standalone creation/saved-world rule editors do not own music widgets. Shared render,
+  tooltip and input paths must check the widget is active before accessing it.
+  Continuous mining removes only the singleplayer empty-swing cooldown at its source;
+  preserve unrelated attack delays, native damage, Creative held repeats and multiplayer.
+  Map spawn-light shading uses its own radius and bounded, tick-owned loaded-terrain
+  surveys; rendering reads snapshots and disabled maps perform no survey work.

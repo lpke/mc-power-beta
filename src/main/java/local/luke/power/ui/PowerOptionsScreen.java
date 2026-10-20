@@ -1390,7 +1390,7 @@ public final class PowerOptionsScreen extends UiScreen {
       tip = expandSections ? "Expand all sections" : "Collapse all sections";
       hoverId = "sections";
     }
-    if (hoverDelay.ready(dragging == null && !library.draggingSlider() && !confirmClose && !confirmReset ? hoverId : "") && !tip.isEmpty()) tooltip(tip, mx, my);
+    if (hoverDelay.ready(dragging == null && !(libraryVisible() && library.draggingSlider()) && !confirmClose && !confirmReset ? hoverId : "") && !tip.isEmpty()) tooltip(tip, mx, my);
     valueEditor.renderError(this);
     if (capture != null || confirmClose || confirmReset) {
       fill(0, 0, width, height, 0xc0000000);
