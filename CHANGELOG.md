@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [3.2.0] - 2026-10-20
+
+- Select and copy chat history with the same translucent blue highlight as the typing row. Preserve selection through wrapping, window resizing, scrolling and new messages; scroll while dragging beyond the visible rows.
+- Extend dark menu headers and the Options footer across the window while keeping controls within their content width. Give Auto apply enough padding in narrow map settings panels.
+- Hold the radar icon binding to replace entity dots with upright, outlined mob heads on both maps. Cache native head models with bounded work and restore dots on release.
+- Customize radar colors by entity category and individual mob, with inherited colors by default. Add minimap waypoint text/icon size, arrow opacity and direction text color controls to the shared HUD editor and live map settings.
+- Pause in map menus in Power Beta defaults. Start with a 90-pixel minimap at zoom 1.25, dropped items visible, smaller waypoint arrows and direction text, and biome names hidden. Collapse map performance controls by default.
+- Show the recorded death cause when hovering new deathpoints. Keep older deathpoints readable without inventing a cause.
+- Enter Go to coordinates in a dialog over the live world map. Group map controls into two rows with Light, Slime and Recent path toggles, and use the normal screenshot key for map captures.
+- Align waypoint footer actions to the content edges, open editing on double-click and center visibility icons. Delete named sets with confirmation while moving their waypoints safely to Default.
+- Preview extra sounds directly beside their toggles using the same controls as individual sounds.
+- Keep configuration format 7, world-rule format 3 and waypoint format 1 with their existing supported conversions. Existing settings, worlds and recovery data are preserved.
+
 ## [3.1.0] - 2026-10-20
 
 - Edit map settings beside the live world map, with a minimap preview, shared appearance controls, scoped search and related-control navigation. Keep the previous cave view visible while a new level is prepared. Preserve terrain alignment and clip it to the map pane when panning with settings open.

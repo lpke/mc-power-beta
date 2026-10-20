@@ -587,3 +587,23 @@
 - Saved local chat messages are user data, separate from ordinary transcript limits.
   Never persist server transcripts or send restored notes to the network. Commands
   remain in sent-message recall; restored notes appear only in scrollback.
+
+- Open chat uses immutable original messages and character offsets for selection, reflow
+  and copying. Insert clipboard newlines only between source messages. Preserve selection
+  and the visible scroll anchor through incoming messages and resize, clamp removed sources,
+  and test real pointer drags. History and typing-row selection share translucent paint that
+  restores blend enables, factors and current color before drawing glyphs. Keep original
+  message storage bounded by chat retention even while chat is closed. UI keyboard shortcuts
+  use queued modifier state during keyboard dispatch; mouse selection uses physical polling.
+  Test fast Ctrl+C with either release order and overlapping left/right modifiers. Drag
+  autoscroll runs from the chat screen tick so paused singleplayer chat keeps working.
+- Entity radar head icons are hold-only, upright orthographic native head models. Build at
+  most one new icon and resolve at most one source texture per native frame, shared by both
+  map views and stereo eyes. Use bounded caches, invalidate on texture reload, and retain
+  dot fallback for pending/unsupported entities. Do not read entities on workers or modify
+  native renderer models, poses or textures. Disabled radar starts no icon work.
+- Standalone dark title/footer bars span the window; constrained content stays centered.
+  Embedded map settings chrome stays within its panel. Footer geometry includes measured
+  labels and padding and is shared by rendering and input. Map coordinate dialogs retain
+  the current world-map screen and own all modal input. The normal screenshot binding
+  captures map terrain without controls, once per press.

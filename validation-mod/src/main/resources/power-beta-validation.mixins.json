@@ -41,7 +41,8 @@
     "FreecamMotionCapture",
     "Explosion210Capture",
     "SprintParticleCapture",
-    "MapPan300Capture"
+    "MapPan300Capture",
+    "Radar320Capture"
   ],
   "injectors": {
     "defaultRequire": 1

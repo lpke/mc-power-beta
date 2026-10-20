@@ -40,6 +40,7 @@
     "LinuxKeycodesMixin",
     "LinuxKeyboardMixin",
     "KeyboardNamesMixin",
+    "UiKeyboardMixin",
     "MouseBindingMixin",
     "TextureResourceMixin",
     "SkinProfileFallbackMixin",
@@ -160,7 +161,10 @@
     "SprintPhysicsMixin",
     "SprintCombatMixin",
     "MapTerrainUpdatesMixin",
-    "BoatInteractionMixin"
+    "BoatInteractionMixin",
+    "RadarFrameMixin",
+    "MapScreenshotKeyMixin",
+    "RadarTextureReloadMixin"
   ],
   "injectors": {
     "defaultRequire": 1

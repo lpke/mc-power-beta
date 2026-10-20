@@ -15,9 +15,11 @@ record WaypointListLayout(int left, int width, int listTop, int listBottom) {
   int searchWidth() { return sortX() - left - 4; }
   int createWidth() { return Math.min(92, Math.max(72, width / 4)); }
   int createX() { return right() - createWidth(); }
-  int setWidth() { return width - createWidth() - 4; }
+  int deleteWidth() { return createWidth(); }
+  int deleteX() { return createX() - deleteWidth() - 4; }
+  int setWidth() { return deleteX() - left - 4; }
   int footerWidth() { return Math.min(150, (width - 4) / 2); }
-  int newX() { return left + (width - footerWidth() * 2 - 4) / 2; }
-  int doneX() { return newX() + footerWidth() + 4; }
+  int newX() { return left; }
+  int doneX() { return right() - footerWidth(); }
   int setRows(int height, int count) { return Math.min(count, Math.max(1, (height - 76) / 20)); }
 }

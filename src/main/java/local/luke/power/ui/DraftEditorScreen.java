@@ -3,6 +3,7 @@ package local.luke.power.ui;
 import java.util.*;
 import local.luke.power.config.Setting;
 import local.luke.power.config.ColorSettings;
+import local.luke.power.config.InheritedColors;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
@@ -140,14 +141,16 @@ abstract class DraftEditorScreen extends UiScreen {
   protected void edit(Setting s, int direction, int y) {
     editingDraft().checkpoint(); error = "";
     click();
-    if (ColourScreen.accepts(s)) {
-      Setting colours = editingDraft().settings().stream().filter(value -> value.id.equals(HudEditorSettings.COLOURS)).findFirst().orElse(null);
-      minecraft.setScreen(new ColourScreen(this, s, ColorSettings.opacity(s, editingDraft().settings()), () -> valueChanged(s), colours));
-    }
+    if (InheritedColors.accepts(s)) { InheritedColors.toggle(s, editingDraft().settings()); valueChanged(s); }
+    else if (ColourScreen.accepts(s)) openColour(s);
     else if (s.kind == Setting.Kind.BOOLEAN || s.kind == Setting.Kind.CHOICE) { s.cycle(direction); valueChanged(s); }
     else if (s.numeric() || s.kind == Setting.Kind.TEXT)
       openInline(s, () -> valueChanged(s), controlX(s), y, controlWidth(s));
     else minecraft.setScreen(new ValueScreen(s, this, () -> valueChanged(s)));
+  }
+  private void openColour(Setting s) {
+    Setting colours = editingDraft().settings().stream().filter(value -> value.id.equals(HudEditorSettings.COLOURS)).findFirst().orElse(null);
+    minecraft.setScreen(new ColourScreen(this, s, ColorSettings.opacity(s, editingDraft().settings()), () -> valueChanged(s), colours));
   }
   private void slide(int x) {
     if (slider == null) return;
@@ -270,7 +273,10 @@ abstract class DraftEditorScreen extends UiScreen {
           return;
         }
         if (x >= controlX(s) + controlWidth(s)) return;
-        if (button == 0 && usesSlider(s) && !ColourScreen.accepts(s)) { editingDraft().checkpoint(); slider = s; slide(x); }
+        if (InheritedColors.accepts(s) && InheritedColorControl.at(controlX(s), controlWidth(s), InheritedColors.custom(s)).colorAt(x)) {
+          editingDraft().checkpoint(); error = ""; click(); openColour(s);
+        }
+        else if (button == 0 && usesSlider(s) && !ColourScreen.accepts(s)) { editingDraft().checkpoint(); slider = s; slide(x); }
         else edit(s, button == 1 ? -1 : 1, rowY);
         break;
       }
@@ -296,6 +302,12 @@ abstract class DraftEditorScreen extends UiScreen {
     int x = controlX(s), w = controlWidth(s);
     if (hasRelatedControl(s)) iconButton("controls", controlX(), y, 20, mx, my, true, false);
     if (inline.editing(s)) inline.render(this, x, y, w, mx, my, controlsTop(), controlsBottom());
+    else if (InheritedColors.accepts(s)) {
+      var bounds = InheritedColorControl.at(x, w, InheritedColors.custom(s));
+      button(fit(InheritedColors.label(s), bounds.modeWidth() - 8), x, y, bounds.modeWidth(), 18, mx, my, true);
+      if (bounds.colorWidth() > 0)
+        colourButton(ColorSettings.hex(s), 100, bounds.colorX(), y, bounds.colorWidth(), mx, my);
+    }
     else if (ColourScreen.accepts(s)) colourButton(ColorSettings.hex(s), ColorSettings.opacityPercent(s, editingDraft().settings()), x, y, w, mx, my);
     else if (usesSlider(s)) slider(fit(display(s), w - 8), x, y, w, mx, my, (s.value.getAsDouble() - s.min) / Math.max(.0001, s.max - s.min));
     else button(fit(display(s), w - 8), x, y, w, 18, mx, my, true);
@@ -331,7 +343,7 @@ abstract class DraftEditorScreen extends UiScreen {
         if (inside(mx, listMouseY, controlsLeft(), y, controlsSpan() - 9, 23)) {
           hoverId = s.id;
           tip = inline.editing(s) ? inline.help() : local.luke.power.config.Tooltips.paragraphs(label(s),
-              local.luke.power.config.Tooltips.setting(s, s.numeric() ? "Right-click to enter an exact value." : ""));
+              local.luke.power.config.Tooltips.setting(s, s.numeric() && !InheritedColors.accepts(s) ? "Right-click to enter an exact value." : ""));
         }
         if (hasRelatedControl(s) && inside(mx, listMouseY, controlX(), y, 20, 18)) { tip = "Related control"; hoverId += ".related"; }
         if (resettable(s) && inside(mx, listMouseY, resetX(), y, 20, 18)) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }

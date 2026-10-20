@@ -12,6 +12,7 @@ public final class MapKeys {
       WAYPOINT = new KeyBinding("powerbeta.waypoint", Keyboard.KEY_B),
       WAYPOINTS = new KeyBinding("powerbeta.waypoints", Keyboard.KEY_U),
       ENLARGE = new KeyBinding("powerbeta.enlargeMap", Keyboard.KEY_Z),
+      RADAR_ICONS = new KeyBinding("powerbeta.radarIcons", Keyboard.KEY_TAB),
       ZOOM_IN = new KeyBinding("powerbeta.mapZoomIn", Keyboard.KEY_I),
       ZOOM_OUT = new KeyBinding("powerbeta.mapZoomOut", Keyboard.KEY_O),
       TOGGLE = new KeyBinding("powerbeta.minimap", 0),
@@ -26,7 +27,7 @@ public final class MapKeys {
 
   private static final List<KeyBinding> ACTIONS = List.of(TOGGLE, ZOOM_IN, ZOOM_OUT,
       WORLD_WAYPOINTS, MAP_WAYPOINTS, RADAR, CAVES, GRID, CLEAR_DESTINATION, SETTINGS, ZOOM_RESET);
-  private static final List<KeyBinding> ALL = List.of(MAP, WAYPOINT, WAYPOINTS, ENLARGE,
+  private static final List<KeyBinding> ALL = List.of(MAP, WAYPOINT, WAYPOINTS, ENLARGE, RADAR_ICONS,
       ZOOM_IN, ZOOM_OUT, TOGGLE, WORLD_WAYPOINTS, MAP_WAYPOINTS, RADAR, CAVES, GRID,
       CLEAR_DESTINATION, SETTINGS, ZOOM_RESET);
 
@@ -43,10 +44,22 @@ public final class MapKeys {
       case "powerbeta.map" -> settings.worldMap;
       case "powerbeta.enlargeMap", "powerbeta.mapZoomIn", "powerbeta.mapZoomOut", "powerbeta.mapZoomReset" ->
           settings.minimap;
+      case "powerbeta.radarIcons" -> settings.radar && (settings.minimap || settings.worldMap);
       case "powerbeta.toggleMapWaypoints", "powerbeta.toggleMapRadar", "powerbeta.toggleMapCaves",
           "powerbeta.toggleMapGrid", "powerbeta.clearMapDestination" -> settings.minimap || settings.worldMap;
       default -> true;
     };
+  }
+
+  public static boolean iconsHeld(Minecraft mc) {
+    if (mc.world == null || mc.player == null || mc.player.dead || mc.player.health <= 0
+        || !Display.isActive()) return false;
+    if (mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen map) {
+      if (!map.radarIconsAllowed()) return false;
+    } else if (mc.currentScreen instanceof local.luke.power.ui.HudEditorScreen hud) {
+      if (!hud.radarIconsAllowed()) return false;
+    } else if (mc.currentScreen != null || mc.paused) return false;
+    return Bindings.down(RADAR_ICONS);
   }
 
   /** Mutates only the caller's snapshot; the input dispatcher queues it once afterward. */

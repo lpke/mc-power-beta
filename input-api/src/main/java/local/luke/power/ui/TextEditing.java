@@ -10,10 +10,10 @@ import org.lwjgl.input.Keyboard;
 public final class TextEditing {
   private TextEditing() {}
   public static boolean shift() {
-    return Keyboard.isCreated() && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
+    return (local.luke.power.input.KeyEventModifiers.mask(local.luke.power.input.Bindings.heldModifiers()) & local.luke.power.input.Chord.SHIFT) != 0;
   }
   public static boolean control() {
-    return Keyboard.isCreated() && (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL));
+    return (local.luke.power.input.KeyEventModifiers.mask(local.luke.power.input.Bindings.heldModifiers()) & local.luke.power.input.Chord.CTRL) != 0;
   }
   public static void key(ChatBuffer editor, char character, int key, IntPredicate allowed) {
     key(editor, character, key, control(), shift(), allowed);

@@ -121,6 +121,22 @@ public final class WaypointStore {
     revision++;
   }
 
+  /** Deleting a named set moves its members to Default without changing point data. */
+  public void deleteSet(String name) {
+    requireReady();
+    Waypoint.text(name, 48);
+    if (name.equalsIgnoreCase("Default"))
+      throw new IllegalArgumentException("The Default set cannot be deleted");
+    if (!sets().contains(name)) throw new IllegalArgumentException("Waypoint set not found");
+    data.waypoints.replaceAll(point -> {
+      if (!point.set.equals(name)) return point;
+      Waypoint moved = point.copy(); moved.set = "Default"; return moved;
+    });
+    data.sets.removeIf(name::equals);
+    if (data.selectedSet.equals(name)) data.selectedSet = "Default";
+    revision++;
+  }
+
   public void select(String set) {
     requireReady();
     Waypoint.text(set, 48);
@@ -194,6 +210,9 @@ public final class WaypointStore {
   }
 
   public void death(int x, int y, int z, int dimension, boolean keepOld, long time) {
+    death(x, y, z, dimension, keepOld, time, "");
+  }
+  public void death(int x, int y, int z, int dimension, boolean keepOld, long time, String cause) {
     requireReady();
     if (!keepOld) data.waypoints.removeIf(p -> p.death);
     Waypoint point = new Waypoint();
@@ -204,6 +223,7 @@ public final class WaypointStore {
     point.z = z;
     point.dimension = dimension;
     point.death = true;
+    point.deathCause = cause;
     point.colour = 0xff5555;
     point.set = data.selectedSet;
     point.global = true;

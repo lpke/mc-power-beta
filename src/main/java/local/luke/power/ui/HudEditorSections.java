@@ -6,7 +6,7 @@ import local.luke.power.config.Setting;
 /** Presentation groups and the explicit boundary of a position-only reset. */
 final class HudEditorSections {
   private static final List<String> GROUPS = List.of("Visibility", "Layout", "Position", "Appearance",
-      "Terrain", "Entity radar", "Waypoints", "Overlays", "Item names", "Chat history", "Coordinates", "Information", "World information", "Culling statistics", "Music");
+      "Terrain", "Entity radar", "Radar colors", "Individual mob colors", "Waypoints", "Overlays", "Item names", "Chat history", "Coordinates", "Information", "World information", "Culling statistics", "Music");
   private static final Set<String> OFFSETS = Set.of("power_compat:config.overlayAdditionsYOffset",
       "entityculling:config.f3InfoYOffset", "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");
   private static final Set<String> NATIVE_POSITION = Set.of("horizontalPosition", "verticalPosition",
@@ -25,7 +25,9 @@ final class HudEditorSections {
     if (id.startsWith("maps.")) {
       if (position(s)) return "Position";
       if (field.equals("hideWithDebug")) return "Visibility";
-      if (Set.of("coordinates", "biome", "clock", "compass", "directionTextSize", "belowTextSize").contains(field)) return "Information";
+      if (Set.of("coordinates", "biome", "clock", "compass", "directionTextSize", "directionTextColor", "directionTextOpacity", "belowTextSize").contains(field)) return "Information";
+      if (local.luke.power.config.InheritedColors.accepts(s)) return "Individual mob colors";
+      if (field.startsWith("radar") && field.endsWith("Color")) return "Radar colors";
       if (Set.of("colourMode", "heightShading", "slopeShading", "caveLighting").contains(field)) return "Terrain";
       if (Set.of("radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight", "radarDimming", "radarDimDistance").contains(field)) return "Entity radar";
       if (field.startsWith("waypoint") || field.startsWith("minimap") || field.startsWith("destinationArrow")) return "Waypoints";

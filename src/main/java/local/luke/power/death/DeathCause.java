@@ -9,7 +9,8 @@ public final class DeathCause {
   private static final ThreadLocal<Context> CURRENT = new ThreadLocal<>();
   private DeathCause() {}
   public static boolean damage(Entity victim, String cause, BooleanSupplier action) {
-    if (!(victim instanceof net.minecraft.entity.player.PlayerEntity) || !DeathConfig.current().enabled)
+    if (!(victim instanceof net.minecraft.entity.player.PlayerEntity)
+        || !DeathConfig.current().enabled && !local.luke.power.map.MapConfig.current().deathpoints)
       return action.getAsBoolean();
     Context previous = CURRENT.get(); CURRENT.set(new Context(victim, cause));
     try { return action.getAsBoolean(); }

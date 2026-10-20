@@ -16,6 +16,18 @@ public final class ExtraSounds {
     return id != null && id.startsWith("power_beta:") && EVENTS.contains(id.substring(11));
   }
 
+  /** Preview uses the same source and category gain as the individual-sound controls. */
+  public static String previewId(String settingId) {
+    return switch (settingId) {
+      case "audio.redstonePlacementSound" -> "step.stone";
+      case "audio.seedPlantingSounds" -> "power_beta:item.crop.plant";
+      case "audio.hoeTillingSounds" -> "power_beta:item.hoe.till";
+      case "audio.bucketSounds" -> "power_beta:item.bucket.fill";
+      case "audio.boneMealSounds" -> "power_beta:item.bone_meal.use";
+      default -> null;
+    };
+  }
+
   public static void play(World world, double x, double y, double z, String event) {
     // Remote actions and their sounds remain server-owned.
     if (world.isRemote) return;

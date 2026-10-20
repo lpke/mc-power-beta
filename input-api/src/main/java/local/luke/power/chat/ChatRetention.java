@@ -8,6 +8,7 @@ public final class ChatRetention<T> {
   private final Map<T, Tag> tags = new IdentityHashMap<>();
   private long sequence;
   public long group() { return ++sequence; }
+  public Long groupOf(T line) { Tag tag = tags.get(line); return tag == null ? null : tag.group; }
   public void add(T line, long group, boolean own) { tags.put(line, new Tag(group, own)); }
   public void clear() { tags.clear(); }
   public void removeOwn(List<T> lines) {

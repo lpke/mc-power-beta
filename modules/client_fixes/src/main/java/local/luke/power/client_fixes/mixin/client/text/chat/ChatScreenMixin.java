@@ -18,6 +18,7 @@ import static local.luke.power.client_fixes.client.text.chat.ChatScreenVariables
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     @Shadow protected String text;
+    @Unique private boolean power$initialized;
     @Unique private final local.luke.power.ui.TextPointer power$pointer = new local.luke.power.ui.TextPointer(editor);
 
     public ChatScreen setInitialMessage(String message) {
@@ -26,15 +27,16 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     }
     @Inject(method = "init", at = @At("RETURN"))
     private void onInit(CallbackInfo ci) {
-        local.luke.power.chat.ChatSelection.history.context(null, false);
-        CHAT_HISTORY.clear(); CHAT_HISTORY.addAll(local.luke.power.chat.ChatNotes.history());
-        text = initialMessage;
-        initialMessage = "";
+        if (!power$initialized) {
+            local.luke.power.chat.ChatSelection.history.context(null, false);
+            CHAT_HISTORY.clear(); CHAT_HISTORY.addAll(local.luke.power.chat.ChatNotes.history());
+            text = initialMessage; initialMessage = ""; editor.reset(text);
+            chatHistoryPosition = chatCursorPosition = 0; power$initialized = true;
+        } else text = editor.text();
         textField = new TextFieldWidget(this, textRenderer, 2, height - 14, width - 2, height - 2, text);
         textField.setFocused(true);
         textField.setMaxLength(100);
-        editor.reset(text);
-        chatHistoryPosition = chatCursorPosition = 0;
+
     }
     @Unique private void power$sync() {
         textField.setText(editor.text()); text = editor.text();
@@ -52,8 +54,8 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
         }
         selection.clear();
         if (completion.test(character, key)) { ci.cancel(); return; }
-        boolean shift = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
-        boolean ctrl = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
+        boolean shift = local.luke.power.ui.TextEditing.shift();
+        boolean ctrl = local.luke.power.ui.TextEditing.control();
         if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) {
             text = editor.text();
             String message = text.trim();

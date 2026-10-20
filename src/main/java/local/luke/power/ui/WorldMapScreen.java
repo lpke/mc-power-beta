@@ -14,6 +14,7 @@ public final class WorldMapScreen extends UiScreen {
   private final MapMath.View view = new MapMath.View(Maps.x(), Maps.z());
   private final MapZoom zoom = new MapZoom();
   private final TextInput serverMap = new TextInput(Maps.submap(), 48);
+  private final MapCoordinatesDialog coordinates = new MapCoordinatesDialog();
   private int dimension = Maps.dimension(), layer = Maps.layer();
   private boolean dragging, context, scaleDragging, screenshot;
   private double dragX, dragZ, scaleDx, scaleDy;
@@ -28,6 +29,10 @@ public final class WorldMapScreen extends UiScreen {
   private PowerOptionsScreen settingsPanel;
   private MinimapGeometry.Box minimapHit;
   private boolean panelPress;
+  private WorldMapControls controls;
+  private MapSettings controlsStyle;
+  private int controlsLeft = -1, controlsWidth, controlsHeight, controlsLayer, controlsDimension;
+  private boolean controlsSettings;
   private int mapLeft() { return settingsPanel == null ? 0 : MapSettingsScope.panelWidth(width, height); }
   private int mapWidth() { return Math.max(1, width - mapLeft()); }
   private double mapCenterX() { return mapLeft() + mapWidth() / 2d; }
@@ -53,6 +58,8 @@ public final class WorldMapScreen extends UiScreen {
   }
   public void tick() { if (settingsPanel != null) settingsPanel.tick(); }
   public boolean capturingBinding() { return settingsPanel != null && settingsPanel.capturingBinding(); }
+  public void requestScreenshot() { screenshot = true; }
+  public boolean radarIconsAllowed() { return !coordinates.active() && settingsPanel == null && !context; }
   private boolean panelOwns(int x) { return settingsPanel != null && (settingsPanel.panelModal() || panelPress || x < mapLeft()); }
   private void drawMinimap(float delta) {
     minimapHit = null;
@@ -115,24 +122,32 @@ public final class WorldMapScreen extends UiScreen {
 
   public int lightLayer(int dimension) { return this.dimension == dimension ? layer : Integer.MIN_VALUE; }
 
-  private int buttonWidth() {
-    return Math.max(35, Math.min(76, (mapWidth() - (settingsPanel == null ? 28 : 52)) / 6));
+  private WorldMapControls controls() {
+    var style = MapConfig.current();
+    boolean panel = settingsPanel != null;
+    if (controls == null || controlsLeft != mapLeft() || controlsWidth != mapWidth() || controlsHeight != height
+        || controlsLayer != layer || controlsDimension != dimension || controlsSettings != panel || controlsStyle != style) {
+      String[] labels = {style.lightOverlay ? "Light: On" : "Light: Off", style.slimeChunks ? "Slime: On" : "Slime: Off",
+          style.footsteps ? "Recent path: On" : "Recent path: Off", "Waypoints", panel ? "Close settings" : "Settings",
+          layer < 0 ? "Caves" : "Surface", MapDimensions.name(dimension), "Center", "Go to", "Close"};
+      int bottomWidth = 12;
+      for (int i = 3; i < 7; i++) bottomWidth += textRenderer.getWidth(labels[i]) + 12;
+      if (bottomWidth > mapWidth() - 16) labels[4] = "Settings";
+      controls = WorldMapControls.at(mapLeft(), mapWidth(), height, labels, textRenderer::getWidth);
+      controlsLeft = mapLeft(); controlsWidth = mapWidth(); controlsHeight = height;
+      controlsLayer = layer; controlsDimension = dimension; controlsSettings = panel; controlsStyle = style;
+    }
+    return controls;
   }
-
-  private int buttonWidth(int index) { return buttonWidth() + (index == 1 && settingsPanel != null ? 24 : 0); }
-  private int buttonX(int index) { return mapLeft() + 8 + index * (buttonWidth() + 2) + (index > 1 && settingsPanel != null ? 24 : 0); }
-
-  private int leftY() { return height - (mapWidth() < 660 ? 46 : 24); }
-  private int scaleY() { return height - (mapWidth() < 660 ? 66 : 44); }
+  private int scaleY() { return controls().scale().y() + 16; }
+  private WorldMapControls.Box scaleBounds() { return controls().scale().translated((int)scaleDx, (int)scaleDy); }
   private boolean overControls(int x, int y) {
-    if (inside(x, y, width - 184, height - 24, 176, 18)) return true;
+    if (controls().at(x,y) != null) return true;
     if (settingsPanel != null && minimapHit != null
         && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) return true;
     if (minecraft.world != null && minecraft.world.isRemote
         && inside(x, y, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), 18)) return true;
-    for (int i = 0; i < 6; i++)
-      if (inside(x, y, buttonX(i), leftY(), buttonWidth(i), 18)) return true;
-    return inside(x, y, width - 124, scaleY() - 16, 116, 20);
+    return scaleBounds().contains(x,y);
   }
 
   private List<String> contextActions() {
@@ -217,6 +232,7 @@ public final class WorldMapScreen extends UiScreen {
     message = "";
     context = dragging = scaleDragging = panelPress = false;
     scaleDx = scaleDy = 0;
+    controls = null; TextDrag.cancel();
   }
 
   public void removed() {
@@ -229,6 +245,7 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   protected void keyPressed(char c, int key) {
+    if (coordinates.key(this,c,key)) return;
     if (settingsPanel != null) { settingsPanel.keyPressed(c, key); return; }
     if (context) {
       if (key == Keyboard.KEY_ESCAPE) context = false;
@@ -271,15 +288,42 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   private void goTo() {
-    minecraft.setScreen(
-        new MapCoordinatesScreen(
-            this,
-            view.x,
-            view.z,
-            (x, z) -> {
-              view.x = x;
-              view.z = z;
-            }));
+    zoom.cancel(); context = dragging = scaleDragging = panelPress = false;
+    scaleDx = scaleDy = 0; serverMap.focused = false;
+    if (settingsPanel != null) settingsPanel.panelCancelGesture();
+    coordinates.open(view.x,view.z,(x,z)->{view.x=x;view.z=z;});
+  }
+
+  private void toggleOverlay(WorldMapControls.Action action) {
+    String id = switch(action) {
+      case LIGHT -> "maps.lightOverlay";
+      case SLIME -> "maps.slimeChunks";
+      case PATH -> "maps.footsteps";
+      default -> throw new IllegalArgumentException("Unknown map overlay");
+    };
+    if (settingsPanel != null) { settingsPanel.toggleMapSetting(id); return; }
+    var settings = MapConfig.copy();
+    switch(action) {
+      case LIGHT -> settings.lightOverlay = !settings.lightOverlay;
+      case SLIME -> settings.slimeChunks = !settings.slimeChunks;
+      case PATH -> settings.footsteps = !settings.footsteps;
+      default -> throw new IllegalArgumentException("Unknown map overlay");
+    }
+    MapConfig.queued(settings);
+  }
+
+  private void controlAction(WorldMapControls.Action action) {
+    click();
+    switch(action) {
+      case LIGHT, SLIME, PATH -> toggleOverlay(action);
+      case WAYPOINTS -> minecraft.setScreen(new WaypointsScreen(this));
+      case SETTINGS -> toggleSettings();
+      case LAYER -> layer = layer < 0 ? MapSampler.window(MapConfig.current(),Maps.y()).layer() : -1;
+      case DIMENSION -> dimension = dimension == 0 ? -1 : 0;
+      case CENTER -> center();
+      case GO_TO -> goTo();
+      case CLOSE -> requestClose();
+    }
   }
 
   private void createAt(double x, double z) {
@@ -295,6 +339,7 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   protected void mouseClicked(int x, int y, int button) {
+    if (coordinates.press(this,x,y,button)) return;
     if (panelOwns(x)) { panelPress = true; settingsPanel.mouseClicked(x, y, button); return; }
     if (settingsPanel != null && minimapHit != null && button == 0
         && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
@@ -310,33 +355,11 @@ public final class WorldMapScreen extends UiScreen {
       return;
     }
     if (button == 0) {
-      if (inside(x, y, width - 64, height - 24, 56, 18)) {
-        click();
-        requestClose();
-        return;
-      }
-      if (inside(x, y, width - 124, height - 24, 56, 18)) {
-        click();
-        goTo();
-        return;
-      }
-      if (inside(x, y, width - 184, height - 24, 56, 18)) { click(); center(); return; }
-      if (inside(x, y, width - 124, scaleY() - 16, 116, 20)) {
+      var control = controls().at(x,y);
+      if (control != null) { controlAction(control.action()); return; }
+      if (scaleBounds().contains(x,y)) {
         scaleDragging = true; lastX = x; lastY = y; return;
       }
-      for (int i = 0; i < 6; i++)
-        if (inside(x, y, buttonX(i), leftY(), buttonWidth(i), 18)) {
-          click();
-          switch (i) {
-            case 0 -> minecraft.setScreen(new WaypointsScreen(this));
-            case 1 -> toggleSettings();
-            case 2 -> layer = layer < 0 ? MapSampler.window(MapConfig.current(), Maps.y()).layer() : -1;
-            case 3 -> dimension = dimension == 0 ? -1 : 0;
-            case 4 -> { var settings = MapConfig.copy(); settings.lightOverlay = !settings.lightOverlay; MapConfig.queued(settings); }
-            case 5 -> screenshot = true;
-          }
-          return;
-        }
       if (minecraft.world.isRemote && inside(x, y, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), 18)) {
         serverMap.focused = true;
         serverMap.click(x, button);
@@ -373,6 +396,7 @@ public final class WorldMapScreen extends UiScreen {
   protected void mouseReleased(int x, int y, int button) {
     // Beta also dispatches pointer motion here with no button transition.
     if (button < 0) return;
+    if (coordinates.active()) return;
     if (panelPress) {
       if (settingsPanel != null) settingsPanel.panelRelease();
       panelPress = false; return;
@@ -391,6 +415,7 @@ public final class WorldMapScreen extends UiScreen {
       dragging = scaleDragging = panelPress = false; scaleDx = scaleDy = 0;
       if (settingsPanel != null) settingsPanel.panelCancelGesture();
     }
+    if (coordinates.active()) { super.onMouseEvent(); return; }
     if (panelOwns(x)) {
       settingsPanel.panelWheel(Mouse.getEventDWheel());
       super.onMouseEvent(); return;
@@ -423,7 +448,7 @@ public final class WorldMapScreen extends UiScreen {
     }
     double pointerX = Mouse.getX() * (double) width / minecraft.displayWidth;
     double pointerY = height - Mouse.getY() * (double) height / minecraft.displayHeight - 1;
-    if (dragging && !context) panTo(pointerX, pointerY);
+    if (dragging && !context && !coordinates.active()) panTo(pointerX, pointerY);
     if (scaleDragging) { scaleDx = pointerX - lastX; scaleDy = pointerY - lastY; }
     fill(0, 0, width, height, 0xff101015);
     MapRenderer.beginFrame(delta);
@@ -446,14 +471,22 @@ public final class WorldMapScreen extends UiScreen {
         MapRenderer.markers(minecraft, projection, dimension, false, false);
       } finally { GL11.glPopAttrib(); }
     }
-    if (mapLeft() == width) { settingsPanel.render(mx, my, delta); return; }
+    if (mapLeft() == width) {
+      settingsPanel.render(coordinates.active()?-1000:mx, coordinates.active()?-1000:my, delta);
+      coordinates.render(this,mx,my); return;
+    }
     drawMinimap(delta);
     if (screenshot) { screenshot = false; MapScreenshot.capture(minecraft); }
-    button("Center", width - 184, height - 24, 56, 18, mx, my, true);
-    button("Go to", width - 124, height - 24, 56, 18, mx, my, true);
-    button("Close", width - 64, height - 24, 56, 18, mx, my, true);
+    int hoverX = coordinates.active() || context ? -1000 : mx, hoverY = coordinates.active() || context ? -1000 : my;
+    for (var control : controls().buttons()) {
+      var b = control.bounds();
+      String label = fit(control.label(),b.width()-12);
+      if (control.action() == WorldMapControls.Action.SETTINGS && settingsPanel != null)
+        tabButton(label,b.x(),b.y(),b.width(),18,hoverX,hoverY,true,true);
+      else button(label,b.x(),b.y(),b.width(),18,hoverX,hoverY,true);
+    }
     if (minecraft.world != null && minecraft.world.isRemote)
-      input(serverMap, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), mx, my, "Map name");
+      input(serverMap, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), hoverX, hoverY, "Map name");
     var cursor = bounded(projection().world(mx, my));
     String cursorHeight = "?", cursorBiome = "";
     if (Maps.cache() != null) {
@@ -482,16 +515,14 @@ public final class WorldMapScreen extends UiScreen {
     int readoutWidth = separateReadout ? mapWidth() - 16 : Math.max(40, mapWidth() - 160);
     readout = fit(readout, readoutWidth);
     overlay(readout, mapLeft() + (mapWidth() - textRenderer.getWidth(readout)) / 2, readoutY, 0xffffff);
-    int barX = width - 106 + (int) scaleDx, barY = scaleY() + (int) scaleDy;
-    fill(barX - 10, barY - 16, barX + 90, barY + 4, 0x90000000);
+    var scale = scaleBounds();
+    int barX = scale.x()+18, barY = scale.y()+16;
+    fill(scale.x(),scale.y(),scale.x()+scale.width(),scale.y()+scale.height(),0x90000000);
     fill(barX, barY, barX + 80, barY + 1, 0xffcccccc);
     fill(barX, barY - 2, barX + 1, barY + 2, 0xffcccccc);
     fill(barX + 79, barY - 2, barX + 80, barY + 2, 0xffcccccc);
     String scaleLabel = blocks + " blocks";
     text(scaleLabel, barX + (80 - textRenderer.getWidth(scaleLabel)) / 2, barY - 13, 0xcccccc);
-    String[] labels = {"Waypoints", settingsPanel == null ? "Settings" : "Close settings", layer < 0 ? "Caves" : "Surface", MapDimensions.name(dimension), MapConfig.current().lightOverlay ? "Light: On" : "Light: Off", "Screenshot"};
-    for (int i = 0; i < labels.length; i++)
-      button(fit(labels[i], buttonWidth(i) - 6), buttonX(i), leftY(), buttonWidth(i), 18, mx, my, true);
     if (context) {
       var actions = contextActions();
       fill(contextX, contextY, contextX + 142, contextY + actions.size() * 18, 0xf0202020);
@@ -505,10 +536,12 @@ public final class WorldMapScreen extends UiScreen {
     String status = MapScreenshot.status();
     if (status.isEmpty()) status = message.isEmpty() ? Maps.error() : message;
     if (!status.isEmpty()) overlay(fit(status, width - 16), 8, readoutY + 20, 0xffdd99);
-    if (!context && !dragging && !scaleDragging && mx >= mapLeft() && !overControls(mx, my)) {
+    if (!context && !coordinates.active() && !dragging && !scaleDragging && mx >= mapLeft() && !overControls(mx, my)) {
       Waypoint hovered = hoveredWaypoint(mx, my);
       if (hovered != null) {
         String caption = hovered.death ? WaypointTimes.detail(hovered.created) : hovered.name;
+        String cause = MapDeathCauses.caption(hovered);
+        if (!cause.isEmpty()) caption = cause + "\n" + caption;
         caption += "\n" + hovered.x + ", " + hovered.y + ", " + hovered.z;
         if (minecraft.player != null && dimension == Maps.dimension()) {
           double dx = hovered.x + .5 - minecraft.player.x, dy = hovered.y - minecraft.player.boundingBox.minY,
@@ -518,7 +551,13 @@ public final class WorldMapScreen extends UiScreen {
         tooltip(caption, mx, my);
       }
     }
-    if (settingsPanel != null) settingsPanel.render(mx, my, delta);
+    if (!coordinates.active() && !context) {
+      var control=controls().at(mx,my);
+      if (control != null && control.action()==WorldMapControls.Action.SETTINGS && settingsPanel!=null)
+        tooltip("Close settings",mx,my);
+    }
+    if (settingsPanel != null) settingsPanel.render(coordinates.active()?-1000:mx, coordinates.active()?-1000:my, delta);
+    coordinates.render(this,mx,my);
   }
 
   public boolean shouldPause() {

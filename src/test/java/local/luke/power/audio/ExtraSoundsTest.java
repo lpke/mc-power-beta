@@ -9,6 +9,14 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 
 class ExtraSoundsTest {
+  @Test void extraSoundRowsPreviewRegisteredSoundsWithoutChangingTheirEnablement() {
+    assertEquals("step.stone", ExtraSounds.previewId("audio.redstonePlacementSound"));
+    for (String setting : List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds"))
+      assertTrue(ExtraSounds.contains(ExtraSounds.previewId("audio." + setting)), setting);
+    assertNull(ExtraSounds.previewId("audio.master"));
+    var settings = new AudioSettings();
+    assertFalse(settings.seedPlantingSounds || settings.hoeTillingSounds || settings.bucketSounds || settings.boneMealSounds);
+  }
   @Test void optionalActionsKeepOffFallbacksAndRoundTripWithGameGson() {
     var gson = new Gson();
     AudioSettings settings = gson.fromJson("{}", AudioSettings.class);

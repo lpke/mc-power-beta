@@ -28,6 +28,7 @@ public final class ControlLinks {
     link("powerbeta.waypoint", "", "", "Create a waypoint at the reported camera position.");
     link("powerbeta.waypoints", "", "", "Search and manage waypoint sets.");
     link("powerbeta.enlargeMap", "", "maps.minimap", "Hold to enlarge the minimap.");
+    link("powerbeta.radarIcons", "maps.radar", "", "Hold to replace nearby mob radar dots with upright model-head icons on either map. Dots return on release. Shares Tab with the player list by default.");
     link("powerbeta.mapZoomIn", "maps.zoom", "maps.minimap", "Zoom the minimap in.");
     link("powerbeta.mapZoomOut", "maps.zoom", "maps.minimap", "Zoom the minimap out.");
     link("powerbeta.minimap", "maps.minimap", "", "Show or hide the minimap.");

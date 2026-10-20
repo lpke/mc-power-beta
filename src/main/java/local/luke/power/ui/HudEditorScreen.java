@@ -98,6 +98,10 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private void finishReorder(boolean save) { reorder.finish(save); settingsHidden = settingsHiddenBeforeReorder && !previewHidden; preview.suppressDebug = false; clearHighlight(); controlsChanged(); }
   protected SettingsDraft editingDraft() { return reorder == null ? draft : reorder.draft(); }
   protected boolean modal() { return super.modal() || reorderExit.active() || reorder != null && reorder.prompt(); }
+  public boolean radarIconsAllowed() {
+    return selected.equals("minimap") && previewVisible() && !modal() && !inline.active()
+        && !selecting && !reorder.active();
+  }
   protected void save() { if (reorder.active()) finishReorder(true); else super.save(); }
   protected void leave() { if (reorder.active()) leaveReorder(); else super.leave(); }
   private void leaveReorder() { stopGesture(); inline.cancel(); reorderExit.leave(reorder.changed(), () -> finishReorder(false)); }

@@ -104,7 +104,6 @@ public abstract class UiScreen extends Screen {
   protected void iconButton(String icon, int x, int y, int w, int h, int mx, int my, boolean enabled, boolean active) {
     button("", x, y, w, h, mx, my, enabled);
     int color = !enabled ? 0xff777777 : icon.startsWith("eye") ? 0xffffffff : active ? icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
-    int cx = x + w / 2;
     String[] pixels = switch (icon) {
       case "eye" -> new String[]{"   ###   ", " ##   ## ", "#   #   #", "#  ###  #", "#   #   #", " ##   ## ", "   ###   "};
       case "eyeClosed" -> new String[]{"         ", "         ", "#       #", " #     # ", "  #####  ", " #  #  # ", "         "};
@@ -124,12 +123,13 @@ public abstract class UiScreen extends Screen {
       default -> new String[]{" #   #  ", "########", " #   #  ", "   #   #", "########", "   #   #", "        "};
     };
     int top = y + (h - pixels.length) / 2;
+    int left = x + (w - pixels[0].length()) / 2;
     for (int row = 0; row < pixels.length; row++)
       for (int col = 0; col < pixels[row].length(); col++) {
         char pixel = pixels[row].charAt(col);
         if (pixel == ' ') continue;
         int shade = enabled && pixel == '+' ? 0xffffcc55 : enabled && pixel == 'o' ? 0xffbbaaaa : color;
-        fill(cx - 4 + col, top + row, cx - 3 + col, top + 1 + row, shade);
+        fill(left + col, top + row, left + col + 1, top + 1 + row, shade);
       }
   }
 

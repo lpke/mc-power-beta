@@ -200,6 +200,7 @@ public final class NativeBackend implements Backend {
       case "powerbeta.waypoint" -> Keyboard.KEY_B;
       case "powerbeta.waypoints" -> Keyboard.KEY_U;
       case "powerbeta.enlargeMap" -> Keyboard.KEY_Z;
+      case "powerbeta.radarIcons" -> Keyboard.KEY_TAB;
       case "powerbeta.mapZoomIn" -> Keyboard.KEY_I;
       case "powerbeta.mapZoomOut" -> Keyboard.KEY_O;
       case "powerbeta.sprint" -> Keyboard.KEY_LCONTROL;

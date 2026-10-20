@@ -7,6 +7,9 @@ public final class MapSettings {
   public double opacity = 1, zoom = 1;
   public boolean coordinates = true, biome = true, clock, compass = true;
   public int directionTextSize = 100, belowTextSize = 100, minimapArrowSize = 100;
+  public int minimapWaypointTextSize = 100, minimapWaypointSize = 100;
+  public int directionTextColor = 0xffffff;
+  public double directionTextOpacity = 1, minimapArrowOpacity = 1;
   public boolean minimapWaypointArrows = true, minimapDestinationArrow = true, minimapDeathpointArrows = true;
   public int destinationArrowColor = 0x00ecff;
   public double destinationArrowOpacity = 1;
@@ -20,6 +23,16 @@ public final class MapSettings {
   public boolean heightShading = true, slopeShading = true, caveLighting = true;
   public boolean radar = true, players = true, hostile = true, animals = true, items, otherEntities = true;
   public boolean entityNames, entityHeights = true;
+  public int radarPlayersColor = 0xffffff, radarHostileColor = 0xff6655,
+      radarAnimalsColor = 0xffff55, radarItemsColor = 0xff5555,
+      radarVehiclesColor = 0xcc66ff, radarProjectilesColor = 0xcc66ff,
+      radarOtherColor = 0xcc66ff;
+  /** -1 uses the matching entity category color. RGB zero remains custom black. */
+  public int radarCreeperColor = -1, radarSkeletonColor = -1, radarSpiderColor = -1,
+      radarGiantColor = -1, radarZombieColor = -1, radarSlimeColor = -1,
+      radarGhastColor = -1, radarZombiePigmanColor = -1,
+      radarPigColor = -1, radarSheepColor = -1, radarCowColor = -1,
+      radarChickenColor = -1, radarSquidColor = -1, radarWolfColor = -1;
   public int radarHeight = 24, radarLimit = 256;
   public boolean radarDimming = true;
   public int radarDimDistance = 24;
@@ -53,6 +66,11 @@ public final class MapSettings {
     range(directionTextSize, 50, 200);
     range(belowTextSize, 50, 200);
     range(minimapArrowSize, 50, 200);
+    range(minimapWaypointTextSize, 50, 200);
+    range(minimapWaypointSize, 50, 200);
+    range(directionTextColor, 0, 0xffffff);
+    finite(directionTextOpacity, 0, 1);
+    finite(minimapArrowOpacity, 0, 1);
     range(destinationArrowColor, 0, 0xffffff);
     finite(destinationArrowOpacity, 0, 1);
     range(colourMode, 0, 1);
@@ -71,6 +89,13 @@ public final class MapSettings {
     range(mapOpenUploads, 1, 32);
     finite(mapOpenBudget, .5, 8);
     range(radarHeight, 1, 128);
+    for (int color : new int[] {radarPlayersColor, radarHostileColor, radarAnimalsColor,
+        radarItemsColor, radarVehiclesColor, radarProjectilesColor, radarOtherColor})
+      range(color, 0, 0xffffff);
+    for (int color : new int[] {radarCreeperColor, radarSkeletonColor, radarSpiderColor,
+        radarGiantColor, radarZombieColor, radarSlimeColor, radarGhastColor,
+        radarZombiePigmanColor, radarPigColor, radarSheepColor, radarCowColor,
+        radarChickenColor, radarSquidColor, radarWolfColor}) range(color, -1, 0xffffff);
     range(radarLimit, 16, 1024);
     range(radarDimDistance, 1, 128);
     range(lightRadius, 8, 128);
@@ -97,6 +122,37 @@ public final class MapSettings {
   }
 
   public boolean caveLighting(boolean fullBright) { return caveLighting && !fullBright; }
+
+  public int mobColor(String nativeEntityId, int categoryColor) {
+    if (nativeEntityId == null) return categoryColor;
+    int custom = switch (nativeEntityId) {
+      case "Creeper" -> radarCreeperColor;
+      case "Skeleton" -> radarSkeletonColor;
+      case "Spider" -> radarSpiderColor;
+      case "Giant" -> radarGiantColor;
+      case "Zombie" -> radarZombieColor;
+      case "Slime" -> radarSlimeColor;
+      case "Ghast" -> radarGhastColor;
+      case "PigZombie" -> radarZombiePigmanColor;
+      case "Pig" -> radarPigColor;
+      case "Sheep" -> radarSheepColor;
+      case "Cow" -> radarCowColor;
+      case "Chicken" -> radarChickenColor;
+      case "Squid" -> radarSquidColor;
+      case "Wolf" -> radarWolfColor;
+      default -> -1;
+    };
+    return custom < 0 ? categoryColor : custom;
+  }
+
+  public int radarColorStyle() {
+    return java.util.Objects.hash(radarPlayersColor, radarHostileColor, radarAnimalsColor,
+        radarItemsColor, radarVehiclesColor, radarProjectilesColor, radarOtherColor,
+        radarCreeperColor, radarSkeletonColor, radarSpiderColor, radarGiantColor,
+        radarZombieColor, radarSlimeColor, radarGhastColor, radarZombiePigmanColor,
+        radarPigColor, radarSheepColor, radarCowColor, radarChickenColor, radarSquidColor,
+        radarWolfColor);
+  }
 
   /** Runtime brightness changes rendered colors without changing the saved preference. */
   public int style(boolean fullBright) {

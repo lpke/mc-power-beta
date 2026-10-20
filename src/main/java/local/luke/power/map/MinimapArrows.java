@@ -13,6 +13,6 @@ public final class MinimapArrows {
         : point.death ? settings.minimapDeathpointArrows : settings.minimapWaypointArrows;
     return new Style(minimap && settings.waypoints && enabled,
         destination ? settings.destinationArrowColor : point.colour,
-        destination ? settings.destinationArrowOpacity : 1, settings.minimapArrowSize / 100d);
+        (destination ? settings.destinationArrowOpacity : 1) * settings.minimapArrowOpacity, settings.minimapArrowSize / 100d);
   }
 }

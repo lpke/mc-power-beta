@@ -15,6 +15,8 @@ public abstract class DeathRecordMixin {
   private void power$recordDeath(Entity attacker, CallbackInfo ci) {
     if (power$deathRecorded) return;
     power$deathRecorded = true;
+    local.luke.power.map.MapDeathCauses.capture((PlayerEntity)(Object)this,
+        local.luke.power.death.DeathCause.describe((PlayerEntity)(Object)this, attacker));
     KeepInventory.begin((PlayerEntity)(Object)this);
     DeathTracker.died((PlayerEntity)(Object)this, attacker);
     var player = (PlayerEntity)(Object)this;

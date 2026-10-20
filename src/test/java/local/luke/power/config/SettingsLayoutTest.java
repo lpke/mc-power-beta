@@ -108,7 +108,7 @@ class SettingsLayoutTest {
       assertTrue(initial.contains(page + "/" + group));
     for (String group : SettingsLayout.groups("Interface"))
       assertEquals(!Set.of("", "General", "Title screen").contains(group), initial.contains("Interface/" + group));
-    assertTrue(initial.containsAll(Set.of("Video/Entity visibility", "Video/Particles", "Audio/Individual sounds", "Advanced/Achievement recovery")));
+    assertTrue(initial.containsAll(Set.of("Video/Entity visibility", "Video/Particles", "Audio/Individual sounds", "Advanced/Achievement recovery", "Map/Performance")));
     initial.clear(); assertFalse(SettingsLayout.initiallyCollapsed().isEmpty());
   }
 

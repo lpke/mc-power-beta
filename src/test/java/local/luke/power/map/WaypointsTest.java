@@ -21,6 +21,44 @@ class WaypointsTest {
     return result;
   }
 
+  @Test void deletingNamedSetMovesMembersWithoutLosingDataAndSurvivesRestart() throws Exception {
+    var store = store(); store.createSet("Builds"); store.createSet("Exploration");
+    var point = new Waypoint(); point.name = "Nether base"; point.set = "Builds";
+    point.abbreviation = "NB"; point.dimension = -1; point.x = -113; point.y = 93;
+    point.z = 421; point.colour = 0x123456; point.global = true; point.enabled = false; point.death = true;
+    store.put(point); store.select("Builds"); store.allSets(true); store.finish();
+    byte[] original = Files.readAllBytes(root.resolve("waypoints.json"));
+    var unrelated = new Waypoint(); unrelated.set = "Exploration"; store.put(unrelated);
+    long before = store.revision(); store.deleteSet("Builds");
+    assertEquals(before + 1, store.revision());
+    assertEquals("Default", store.selectedSet()); assertTrue(store.allSets());
+    assertEquals(List.of("Default", "Exploration"), store.sets());
+    point.set = "Default";
+    assertEquals(new com.google.gson.Gson().toJson(point), new com.google.gson.Gson().toJson(store.points().get(0)));
+    assertEquals(unrelated.id, store.points().get(1).id);
+    store.finish();
+    assertArrayEquals(original, Files.readAllBytes(root.resolve("waypoints.previous.json")));
+    var restarted = store();
+    assertEquals(List.of("Default", "Exploration"), restarted.sets());
+    assertEquals(point.id, restarted.points().get(0).id);
+    assertEquals("Default", restarted.points().get(0).set);
+    assertEquals("Default", restarted.selectedSet());
+  }
+
+  @Test void deletingEmptyAndImplicitSetsProtectsDefaultAndOtherSelections() throws Exception {
+    var store = store(); store.createSet("Empty"); store.createSet("Selected");
+    store.deleteSet("Empty"); assertEquals("Selected", store.selectedSet());
+    store.select("Legacy empty set"); store.deleteSet("Legacy empty set");
+    assertEquals("Default", store.selectedSet());
+    var point = new Waypoint(); point.set = "Legacy point set"; store.put(point);
+    store.deleteSet("Legacy point set"); assertEquals("Default", store.points().get(0).set);
+    long revision = store.revision();
+    for (String set : List.of("Default", "default", "Missing"))
+      assertThrows(IllegalArgumentException.class, () -> store.deleteSet(set));
+    assertEquals(revision, store.revision());
+    store.finish(); assertEquals(List.of("Default", "Selected"), store().sets());
+  }
+
   @Test
   void isolatedDraftsPersistWithGson289AndRestart() throws Exception {
     var store = store();

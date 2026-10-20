@@ -68,7 +68,10 @@ public final class ColorSettings {
   }
 
   public static String hex(Setting color) { return hex(rgb(color)); }
-  private static boolean rawRgb(Setting color) { return color.id.equals("maps.pathColor") || color.id.equals("maps.playerColor") || color.id.equals("maps.destinationArrowColor"); }
+  private static boolean rawRgb(Setting color) {
+    return color.kind == Setting.Kind.INTEGER && color.id.startsWith("maps.")
+        && color.id.endsWith("Color");
+  }
   public static String hex(int rgb) { return String.format(Locale.ROOT, "#%06X", rgb & 0xffffff); }
 
   public static double opacityPercent(Setting color, Collection<Setting> settings) {

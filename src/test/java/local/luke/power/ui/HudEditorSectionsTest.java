@@ -47,9 +47,9 @@ class HudEditorSectionsTest {
     assertEquals("Music", HudEditorSections.group(setting("power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset")));
   }
   @Test void minimapTextAndArrowControlsStayWithTheirRelatedInformation() {
-    for (String field : List.of("directionTextSize", "belowTextSize"))
+    for (String field : List.of("directionTextSize", "directionTextColor", "directionTextOpacity", "belowTextSize"))
       assertEquals("Information", HudEditorSections.group(setting("maps." + field)));
-    for (String field : List.of("minimapArrowSize", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity")) {
+    for (String field : List.of("minimapWaypointTextSize", "minimapWaypointSize", "minimapArrowSize", "minimapArrowOpacity", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity")) {
       var setting = setting("maps." + field);
       assertTrue(HudEditorSettings.contains(setting));
       assertFalse(HudEditorSections.position(setting));
@@ -57,5 +57,9 @@ class HudEditorSectionsTest {
       assertEquals("minimap", HudEditorSettings.tab(setting, 0));
       assertFalse(setting.description.contains("Also affects the World Map"));
     }
+    assertEquals("Radar colors", HudEditorSections.group(setting("maps.radarHostileColor")));
+    assertEquals("Individual mob colors", HudEditorSections.group(setting("maps.radarZombieColor")));
+    assertTrue(HudEditorSettings.contains(setting("maps.radarZombieColor")));
+    assertTrue(HudEditorSettings.contains(setting("maps.radarOtherColor")));
   }
 }

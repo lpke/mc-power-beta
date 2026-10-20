@@ -17,11 +17,13 @@ class WaypointListLayoutTest {
       assertEquals(layout.sortX() - 4, layout.left() + layout.searchWidth());
       assertEquals(layout.filterX() - 4, layout.sortX() + layout.sortWidth());
       assertEquals(layout.right(), layout.filterX() + layout.filterWidth());
-      assertEquals(layout.createX() - 4, layout.left() + layout.setWidth());
+      assertEquals(layout.deleteX() - 4, layout.left() + layout.setWidth());
+      assertEquals(layout.createX() - 4, layout.deleteX() + layout.deleteWidth());
       assertEquals(layout.right(), layout.createX() + layout.createWidth());
-      assertTrue(layout.newX() >= layout.left());
-      assertEquals(layout.newX() + layout.footerWidth() + 4, layout.doneX());
-      assertTrue(layout.doneX() + layout.footerWidth() <= layout.right());
+      assertTrue(layout.setWidth() >= 140, "set selector retains room beside both actions");
+      assertEquals(layout.left(), layout.newX());
+      assertTrue(layout.newX() + layout.footerWidth() + 4 <= layout.doneX());
+      assertEquals(layout.right(), layout.doneX() + layout.footerWidth());
       assertTrue(layout.footerWidth() >= 140, "New waypoint fits beside Done");
       assertTrue(layout.listBottom() > layout.listTop());
       assertEquals(size[1] - 32, layout.listBottom());

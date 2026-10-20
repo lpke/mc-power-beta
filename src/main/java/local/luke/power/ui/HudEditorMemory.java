@@ -6,6 +6,6 @@ import java.util.*;
 final class HudEditorMemory {
   static String selected = "layout";
   static final Map<String, Double> scrolls = new HashMap<>();
-  static final Set<String> collapsed = new HashSet<>();
+  static final Set<String> collapsed = new HashSet<>(Set.of("minimap/Individual mob colors"));
   private HudEditorMemory() {}
 }

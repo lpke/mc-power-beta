@@ -193,6 +193,7 @@ public final class Setting {
   }
 
   public String display(JsonElement v) {
+    if (InheritedColors.accepts(this)) return v.getAsInt() < 0 ? "Inherit" : "Custom";
     if (id.equals("tweaks.obsidianBreakingSpeed"))
       return v.getAsInt() == 0 ? "Off (vanilla)" : v.getAsInt() + "%";
     if (id.equals("native.fpsLimit") && v.getAsInt() > 1000) return "Unlimited";

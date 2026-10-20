@@ -32,7 +32,7 @@ import java.util.Random;
 
 @Environment(EnvType.CLIENT)
 @Mixin(InGameHud.class)
-public abstract class InGameHudMixin extends DrawContext implements local.luke.power.ui.StatusHudLayout {
+public abstract class InGameHudMixin extends DrawContext implements local.luke.power.ui.StatusHudLayout, local.luke.power.hud.chat.OpenChatHud.Scrolling {
 
     @Shadow private Minecraft minecraft;
     @Shadow private List messages;
@@ -44,6 +44,7 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
 
     @Unique private int numberOfTurns    = 0;
     @Unique private int chatOffset       = 0;
+    @Unique private final local.luke.power.hud.chat.OpenChatHud power$chat = new local.luke.power.hud.chat.OpenChatHud();
     @Unique private int prevSelectedSlot = 0;
     @Unique private int scaledWidth    = 0;
     @Unique private int scaledHeight   = 0;
@@ -158,29 +159,7 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
         local.luke.power.ui.HudElements.heartsX = xOffsetHearts;
         local.luke.power.ui.HudElements.heartsY = yOffsetHearts;
         local.luke.power.ui.HudElements.heartsVisible = heartsVisibility;
-        if (Config.config.enableChatScroll) {
-            int chatRangeTop = 20;
 
-            if (this.minecraft.currentScreen instanceof ChatScreen) {
-                int currentWheelDegrees = Mouse.getDWheel();
-                numberOfTurns = Math.round((float)currentWheelDegrees / 120.0f);
-                chatOffset = chatOffset + numberOfTurns;
-
-                if (chatOffset < 0) {
-                    chatOffset = 0;
-                }
-
-                if (chatRangeTop < this.messages.size()) {
-                    if (this.messages.size() <= (chatRangeTop + chatOffset)) {
-                        chatOffset = this.messages.size() - chatRangeTop;
-                    }
-                } else {
-                    chatOffset = 0;
-                }
-            } else {
-                chatOffset = 0;
-            }
-        }
     }
 
     @WrapOperation(
@@ -558,37 +537,12 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
         }
     }
 
-    @WrapOperation(
-            method = "render",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Ljava/util/List;get(I)Ljava/lang/Object;"
-            )
-    )
-    public Object powerHud_renderChatOffset(List instance, int i, Operation<Void> original) {
-        if (Config.config.enableChatScroll) {
-            return original.call(instance, i + chatOffset);
-        } else {
-            return original.call(instance, i);
-        }
-    }
-
-    @WrapOperation(method = "render", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/client/font/TextRenderer;drawWithShadow(Ljava/lang/String;III)V"),
-        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/InGameHud;messages:Ljava/util/List;")))
-    private void powerHud_selectChat(TextRenderer renderer, String text, int x, int y, int color, Operation<Void> original) {
-        var selection = local.luke.power.chat.ChatSelection.history;
-        int row = selection.line(text, renderer, x, scaledHeight - 48 + y, renderer::getWidth);
-        if (row >= 0) {
-            int start = selection.start(row), end = selection.end(row);
-            if (start >= 0 && end > start) fill(selection.x(row, start), y - 1, selection.x(row, end), y + 8, 0xFF316AC5);
-        }
-        original.call(renderer, text, x, y, color);
-    }
-
     @Inject(method = "render", at = @At("RETURN"))
-    private void powerHud_finishChatSelection(float delta, boolean open, int x, int y, CallbackInfo ci) {
-        local.luke.power.chat.ChatSelection.history.end();
+    private void powerHud_openChat(float delta, boolean open, int x, int y, CallbackInfo ci) {
+        chatOffset = power$chat.render(minecraft, scaledWidth, scaledHeight, chatOffset, Config.config.enableChatScroll);
+    }
+    @Override public void power$chatScroll(int height) {
+        chatOffset = power$chat.tick(minecraft, height, chatOffset, Config.config.enableChatScroll);
     }
 
     @ModifyConstant(

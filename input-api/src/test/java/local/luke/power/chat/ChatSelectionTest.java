@@ -61,4 +61,25 @@ class ChatSelectionTest {
     assertFalse(selection.click(screen, 2, 190));
     assertFalse(selection.selected());
   }
+
+  @Test void logicalSelectionSurvivesIncomingMessagesScrollAndReflowWithoutCopyingWrapNewlines() {
+    var message=new ChatTranscript.Message("Alpha Beta Gamma");
+    var newer=new ChatTranscript.Message("New message");var layout=new ChatLayout();
+    layout.update(java.util.List.of(message),font,36,ChatSelectionTest::width);
+    paint(layout,java.util.List.of(message));
+    assertTrue(selection.click(screen,2,150-(layout.rows().size()-1)*9));
+    selection.move(screen,999,150,true);
+    assertEquals(message.plain,selection.text());
+    var source=java.util.List.of(newer,message);layout.update(source,font,24,ChatSelectionTest::width);paint(layout,source);
+    assertEquals(message.plain,selection.text());
+    selection.begin(screen);selection.messages(source);
+    var row=layout.rows().get(0);selection.line(row.message(),row.from(),row.to(),row.text(),font,2,150,ChatSelectionTest::width);selection.end();
+    assertEquals(message.plain,selection.text(),"offscreen selection lost its source");
+    selection.messages(java.util.List.of(newer));assertFalse(selection.selected(),"removed source must not copy stale data");
+  }
+  private void paint(ChatLayout layout,java.util.List<ChatTranscript.Message> source) {
+    selection.begin(screen);selection.messages(source);
+    int i=0;for(var row:layout.rows())selection.line(row.message(),row.from(),row.to(),row.text(),font,2,150-i++*9,ChatSelectionTest::width);
+    selection.end();
+  }
 }

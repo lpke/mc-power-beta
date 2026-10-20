@@ -81,6 +81,7 @@ public final class MapRenderer {
   public static void clear() {
     for (Texture t : TEXTURES.values()) GL11.glDeleteTextures(t.id);
     TEXTURES.clear();
+    RadarIcons.clear();
     cache = null;
   }
 
@@ -409,6 +410,11 @@ public final class MapRenderer {
 
   public static void markers(
       Minecraft mc, MapProjection view, int dimension, boolean circle, boolean mini, MapSettings s) {
+    markers(mc, view, dimension, circle, mini, s, null);
+  }
+
+  static void markers(Minecraft mc, MapProjection view, int dimension, boolean circle,
+      boolean mini, MapSettings s, RadarIcons.Batch heads) {
     var pose = Maps.framePose(mc, delta);
     MapLightShading.draw(mc, view, dimension, circle, mini, s);
     var store = Maps.waypoints();
@@ -469,15 +475,16 @@ public final class MapRenderer {
           int waypointColor = WaypointSymbols.color(point, s);
           double waypointOpacity = WaypointSymbols.opacity(point, s);
           if (waypointOpacity <= 0) continue;
-          double radius = mini ? point.death ? 4 : 2.5 : 4.5 * markerScale;
+          double radius = mini ? (point.death ? 4 : 2.5) * s.minimapWaypointSize / 100d : 4.5 * markerScale;
           WaypointSymbols.draw(mc, point, p.x(), p.y(), radius,
               waypointColor, waypointOpacity);
           if (point.death || s.waypointNames) {
             String text = point.death ? mini ? WaypointTimes.time(point.created) : WaypointTimes.compact(point.created)
                 : mini ? point.abbreviation() : MinimapArrows.destination(point)
                 ? point.x + "," + point.y + "," + point.z : point.name;
-            label(mc, view, circle, text, p.x() + (mini ? radius + 1.5 : 9 * markerScale), p.y() - 4 * markerScale,
-                markerScale, (int)Math.round(waypointOpacity * 255) << 24 | (point.death ? 0xff5555 : waypointColor));
+            double textScale = mini ? s.minimapWaypointTextSize / 100d : markerScale;
+            label(mc, view, circle, text, p.x() + (mini ? radius + 1.5 : 9 * markerScale), p.y() - 4 * textScale,
+                textScale, (int)Math.round(waypointOpacity * 255) << 24 | (point.death ? 0xff5555 : waypointColor));
           }
         }
       if (s.radar && dimension == Maps.dimension())
@@ -490,10 +497,12 @@ public final class MapRenderer {
                       entity.previousZ(), entity.z(), Maps.radarDelta(entity, delta)));
           if (!view.contains(p.x(), p.y(), circle, 2)) continue;
           double dy = MapMotion.position(entity.previousY(), entity.y(), Maps.radarDelta(entity, delta)) - pose.y();
-          int color = MapLighting.radarColor(entity.color(), dy, s);
-          diamond(p.x(), p.y(), color, entity.item() ? .7 : 1.3);
+          int color = MapLighting.radarColor(entity.color(s), dy, s);
+          boolean icon = RadarIcons.draw(mc, entity.icon(), view, circle, p.x(), p.y(), dy, s, heads);
+          if (!icon) diamond(p.x(), p.y(), color, entity.item() ? .7 : 1.3);
+          double radius = icon ? RadarIcons.radius(entity.icon()) : 1.3;
           if (s.entityHeights && Math.abs(dy) > 3) {
-            double cy = p.y() + (dy > 0 ? -3.5 : 3.5), tip = cy + (dy > 0 ? -1 : 1);
+            double cy = p.y() + (dy > 0 ? -radius - 2.2 : radius + 2.2), tip = cy + (dy > 0 ? -1 : 1);
             if (view.contains(p.x(), tip, circle, 2)) {
               GL11.glDisable(GL11.GL_TEXTURE_2D);
               GL11.glColor4ub((byte)(color >> 16), (byte)(color >> 8), (byte)color, (byte)180);
@@ -505,7 +514,7 @@ public final class MapRenderer {
           }
           if (s.entityNames)
             label(
-                mc, view, circle, entity.name(), (int) p.x() + 3, (int) p.y() + 3, color);
+                mc, view, circle, entity.name(), (int)Math.ceil(p.x() + radius + 2), (int)p.y() + 3, color);
         }
       if (dimension == Maps.dimension()) {
         var p = view.screen(pose.x(), pose.z());

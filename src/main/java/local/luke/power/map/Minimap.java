@@ -93,7 +93,7 @@ public final class Minimap {
         new MapProjection(
             pose.x(), pose.z(), s.zoom, bounds.x(), bounds.y(), bounds.size(), bounds.size(), angle);
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-    try {
+    try (var heads = s.radar && MapKeys.iconsHeld(mc) ? new RadarIcons.Batch(s.radarLimit) : null) {
       GL11.glDisable(GL11.GL_DEPTH_TEST);
       GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glDisable(GL11.GL_CULL_FACE);
@@ -112,7 +112,7 @@ public final class Minimap {
               !mc.world.isRemote,
               mc.world.getSeed(), MapRenderer.pixelsPerUnit(),
               !(mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen));
-        MapRenderer.markers(mc, view, Maps.dimension(), s.circular, true, s);
+        MapRenderer.markers(mc, view, Maps.dimension(), s.circular, true, s, heads);
       } else {
         // A fixed sample never starts world sampling, disk I/O or another world in the HUD editor.
         GL11.glDisable(GL11.GL_TEXTURE_2D);
@@ -143,6 +143,7 @@ public final class Minimap {
         MapRenderer.player(bounds.x() + bounds.size() / 2d, bounds.y() + bounds.size() / 2d, 0, s);
       }
       MinimapBorder.draw(mc, bounds, s.circular);
+      if (heads != null) heads.paint();
       GL11.glEnable(GL11.GL_TEXTURE_2D);
       GL11.glColor4f(1, 1, 1, 1);
       if (s.compass) {
@@ -151,7 +152,8 @@ public final class Minimap {
         for (int i = 0; i < directions.length; i++) {
           var origin = MinimapGeometry.direction(bounds, i, angle, s.circular,
               mc.textRenderer.getWidth(directions[i]), scale);
-          text(mc, directions[i], origin.x(), origin.y(), scale);
+          text(mc, directions[i], origin.x(), origin.y(), scale,
+              (int)Math.round(s.directionTextOpacity * 255) << 24 | s.directionTextColor);
         }
       }
       for (Label label : frame.labels()) text(mc, label.text(), label.x(), label.y(), label.scale());
@@ -161,11 +163,17 @@ public final class Minimap {
   }
 
   private static void text(Minecraft mc, String text, double x, double y, double scale) {
+    text(mc, text, x, y, scale, 0xffffffff);
+  }
+  private static void text(Minecraft mc, String text, double x, double y, double scale, int color) {
+    if ((color >>> 24) == 0) return;
+    GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_CURRENT_BIT);
     GL11.glPushMatrix();
     try {
+      GL11.glEnable(GL11.GL_BLEND); GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
       GL11.glTranslated(x, y, 0); GL11.glScaled(scale, scale, 1);
-      mc.textRenderer.drawWithShadow(text, 0, 0, 0xffffff);
-    } finally { GL11.glPopMatrix(); }
+      mc.textRenderer.drawWithShadow(text, 0, 0, color);
+    } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); }
   }
 
   private static int currentBiome() {

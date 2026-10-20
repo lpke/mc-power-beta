@@ -26,7 +26,18 @@ public final class Maps {
       double previousX,
       double previousY,
       double previousZ,
-      int tick) {}
+      int tick,
+      RadarKind kind,
+      String nativeType,
+      RadarIconSource icon) {
+    public Radar(double x, double y, double z, String name, int color, boolean item,
+        double previousX, double previousY, double previousZ, int tick) {
+      this(x, y, z, name, color, item, previousX, previousY, previousZ, tick, null, null, null);
+    }
+    public int color(MapSettings settings) {
+      return kind == null ? color : settings.mobColor(nativeType, kind.color(settings));
+    }
+  }
 
   public record Step(double x, double z, int dimension) {}
 
@@ -324,7 +335,8 @@ public final class Maps {
             settings.items,
             settings.otherEntities,
             settings.radarHeight,
-            settings.radarLimit);
+            settings.radarLimit,
+            settings.radarColorStyle());
     if (size != radarSize || style != radarStyle || entityCursor >= size) {
       entityCursor = 0;
       radarScan.clear();
@@ -338,24 +350,11 @@ public final class Maps {
           || entity.dead
           || Math.abs(entity.y - y) > settings.radarHeight
           || Math.hypot(entity.x - x, entity.z - z) > 256) continue;
-      int color;
+      String nativeType = net.minecraft.class_206.method_734(entity);
+      RadarKind kind = radarKind(entity, nativeType);
+      if (!kind.visible(settings)) continue;
+      int color = settings.mobColor(nativeType, kind.color(settings));
       boolean item = entity instanceof net.minecraft.class_142;
-      if (entity instanceof PlayerEntity) {
-        if (!settings.players) continue;
-        color = 0xffffff;
-      } else if (entity instanceof class_65) {
-        if (!settings.hostile) continue;
-        color = 0xff6655;
-      } else if (entity instanceof class_258 || entity instanceof WaterCreatureEntity) {
-        if (!settings.animals) continue;
-        color = 0xffff55;
-      } else if (item) {
-        if (!settings.items) continue;
-        color = 0xff5555;
-      } else {
-        if (!settings.otherEntities) continue;
-        color = 0xcc66ff;
-      }
       String name =
           entity instanceof PlayerEntity p ? p.name : net.minecraft.class_206.method_734(entity);
       if (name == null || name.isBlank()) name = "Entity";
@@ -370,7 +369,10 @@ public final class Maps {
               entity.prevX,
               entity.prevY,
               entity.prevZ,
-              ticks));
+              ticks,
+              kind,
+              nativeType,
+              RadarIconSource.capture(entity, nativeType)));
     }
     radarScan.addAll(result);
     if (radarScan.size() > settings.radarLimit) {
@@ -385,7 +387,27 @@ public final class Maps {
     }
   }
 
+  private static RadarKind radarKind(Entity entity, String nativeType) {
+    if (entity instanceof PlayerEntity) return RadarKind.PLAYERS;
+    if (nativeType != null) {
+      switch (nativeType) {
+        case "Creeper", "Skeleton", "Spider", "Giant", "Zombie", "Slime", "Ghast", "PigZombie", "Monster" -> { return RadarKind.HOSTILE; }
+        case "Pig", "Sheep", "Cow", "Chicken", "Squid", "Wolf" -> { return RadarKind.ANIMALS; }
+        case "Item" -> { return RadarKind.ITEMS; }
+        case "Boat", "Minecart" -> { return RadarKind.VEHICLES; }
+        case "Arrow", "Snowball" -> { return RadarKind.PROJECTILES; }
+      }
+    }
+    if (entity instanceof class_65) return RadarKind.HOSTILE;
+    if (entity instanceof class_258 || entity instanceof WaterCreatureEntity) return RadarKind.ANIMALS;
+    if (entity instanceof net.minecraft.class_142) return RadarKind.ITEMS;
+    if (entity instanceof net.minecraft.class_372 || entity instanceof net.minecraft.class_499
+        || entity instanceof net.minecraft.entity.projectile.FishingBobberEntity) return RadarKind.PROJECTILES;
+    return RadarKind.OTHER;
+  }
+
   public static void leave() {
+    MapDeathCauses.clear();
     MapLightShading.clear();
     if (cache != null) cache.finish();
     if (waypoints != null) {

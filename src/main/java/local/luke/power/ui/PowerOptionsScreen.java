@@ -69,6 +69,10 @@ public final class PowerOptionsScreen extends UiScreen {
   Screen returnScreen() { return embedded() ? mapHost : this; }
   private boolean inMapScope(Setting s) { return !embedded() || MapSettingsScope.contains(s); }
   void panelSize(int span) { panelWidth = span; layout(); }
+  void toggleMapSetting(String id) {
+    Setting setting = session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElseThrow();
+    setting.value = new JsonPrimitive(!setting.value.getAsBoolean()); changed(setting);
+  }
   boolean panelModal() { return capture != null || confirmClose || confirmReset; }
   void panelCancelGesture() {
     capture = null; captureModifier = 0; dragging = null; contentBar.release(); sidebarBar.release();
@@ -167,8 +171,9 @@ public final class PowerOptionsScreen extends UiScreen {
   private int resetX() { return origin() + 8 + (pauseActions() ? 50 : 0); }
   private int changesX() { return resetX() + 94; }
   private int changesEnd() { return footerY() < height - 28 ? right() - 8 : (controls() || video() ? disabledX() : actionX(0)) - 4; }
-  private int actionWidth() { return uiWidth() < 470 ? 54 : 66; }
-  private int actionX(int i) { return right() - 8 - (3 - i) * (actionWidth() + 4); }
+  private OptionsFooterLayout footerLayout() { return OptionsFooterLayout.at(uiWidth(), right(), textRenderer.getWidth("Auto apply")); }
+  private int actionWidth(int i) { return footerLayout().width(i); }
+  private int actionX(int i) { return footerLayout().x(i); }
 
   private int selected = -1, musicRevision = -1;
   private final HoverDelay hoverDelay = new HoverDelay();
@@ -327,7 +332,7 @@ public final class PowerOptionsScreen extends UiScreen {
       case "power_environment:config.MUSIC_CONFIG.volumeRainAmbient" -> "ambient.weather.rain";
       case "power_environment:config.MUSIC_CONFIG.volumeGhastAmbient" -> "mob.ghast.moan";
       case "power_environment:config.MUSIC_CONFIG.volumeCaveAmbient" -> "ambient.cave.cave";
-      default -> null;
+      default -> local.luke.power.audio.ExtraSounds.previewId(s.id);
     };
   }
   private boolean soundPreview(Setting s) { return previewId(s) != null; }
@@ -833,7 +838,7 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (page.equals("Defaults")) {
-      if (button == 0 && inside(x, y, actionX(2), height - 28, actionWidth(), 20)) save(true);
+      if (button == 0 && inside(x, y, actionX(2), height - 28, actionWidth(2), 20)) save(true);
       return;
     }
     if (musicControlsVisible() && button == 0 && y >= 52 && y < audioContentTop() - 3 && x >= left() && x < contentRight()) {
@@ -932,7 +937,9 @@ public final class PowerOptionsScreen extends UiScreen {
           return;
         }
         if (x < mainControlLeft(r) || x >= controlEnd(s)) return;
-        if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || HudEditorSettings.lettering(s) || ItemEditors.accepts(s) || ColorSettings.accepts(s)) activate(s, button == 1 ? -1 : 1);
+        if (InheritedColors.accepts(s) && InheritedColorControl.at(mainControlLeft(r), controlEnd(s) - mainControlLeft(r), InheritedColors.custom(s)).colorAt(x)) {
+          click(); openColor(s);
+        } else if (InheritedColors.accepts(s) || s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || HudEditorSettings.lettering(s) || ItemEditors.accepts(s) || ColorSettings.accepts(s)) activate(s, button == 1 ? -1 : 1);
         else if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0 && s.slider()) {
             dragging = s;
@@ -949,7 +956,7 @@ public final class PowerOptionsScreen extends UiScreen {
         return;
       }
     }
-    if (button == 1 && inside(x, y, actionX(1), height - 28, actionWidth(), 20)) {
+    if (button == 1 && inside(x, y, actionX(1), height - 28, actionWidth(1), 20)) {
       click();
       try {
         MenuPreferences.update(v -> v.autoApply = !v.autoApply);
@@ -985,15 +992,15 @@ public final class PowerOptionsScreen extends UiScreen {
       layout();
       return;
     }
-    if (inside(x, y, actionX(0), height - 28, actionWidth(), 20)) {
+    if (inside(x, y, actionX(0), height - 28, actionWidth(0), 20)) {
       click();
       if (editorReturn != null) { returnToEditor(); return; }
       if (session.changes() > 0) confirmClose = true;
       else closeOptions();
       return;
     }
-    if (inside(x, y, actionX(1), height - 28, actionWidth(), 20)) save(false);
-    if (inside(x, y, actionX(2), height - 28, actionWidth(), 20)) save(true);
+    if (inside(x, y, actionX(1), height - 28, actionWidth(1), 20)) save(false);
+    if (inside(x, y, actionX(2), height - 28, actionWidth(2), 20)) save(true);
   }
 
   private void activate(Setting s, int direction) {
@@ -1029,11 +1036,9 @@ public final class PowerOptionsScreen extends UiScreen {
       minecraft.setScreen(ItemEditors.screen(this, s));
       return;
     }
+    if (InheritedColors.accepts(s)) { InheritedColors.toggle(s, session.settings()); changed(s); return; }
     if (ColorSettings.accepts(s)) {
-      Setting swatches = session.settings().stream().filter(value -> value.id.equals("interface.colours")).findFirst().orElse(null);
-      minecraft.setScreen(new ColourScreen(returnScreen(), s, ColorSettings.opacity(s, session.settings()),
-          () -> changed(ColorSettings.linked(s, session.settings()), false), swatches));
-      return;
+      openColor(s); return;
     }
     if (s.numeric() && !s.slider() || s.kind == Setting.Kind.TEXT) {
       Row row = rows.stream().filter(r -> r.setting == s).findFirst().orElseThrow();
@@ -1057,6 +1062,12 @@ public final class PowerOptionsScreen extends UiScreen {
         changed(s);
       }
     }
+  }
+
+  private void openColor(Setting setting) {
+    Setting swatches = session.settings().stream().filter(value -> value.id.equals("interface.colours")).findFirst().orElse(null);
+    minecraft.setScreen(new ColourScreen(returnScreen(), setting, ColorSettings.opacity(setting, session.settings()),
+        () -> changed(ColorSettings.linked(setting, session.settings()), false), swatches));
   }
 
   private void save(boolean close) { save(close, true); }
@@ -1197,6 +1208,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private String value(Setting s) {
+    if (InheritedColors.accepts(s)) return InheritedColors.label(s);
     if (ColorSettings.accepts(s)) return ColorSettings.label(s, session.settings());
     if (s.id.equals("interface.debugOrder")) return "Reorder";
     if (s.id.equals("rules.review")) return "Review...";
@@ -1300,8 +1312,8 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (!embedded()) renderBackground();
     else fill(origin(), 0, right(), height, 0xc0141414);
-    fill(origin(), 0, right(), 22, 0x70000000);
-    fill(origin(), footerY() - 10, right(), height, 0x90000000);
+    fill(embedded() ? origin() : 0, 0, embedded() ? right() : width, 22, 0x70000000);
+    fill(embedded() ? origin() : 0, footerY() - 10, embedded() ? right() : width, height, 0x90000000);
     drawCenteredTextWithShadow(textRenderer, fit(savedWorldName != null ? "Game rules: " + savedWorldName
         : embedded() ? mapView.equals("Minimap") ? "Minimap appearance" : mapView.equals("Controls") ? "Map controls" : "Map settings"
         : creationRules != null ? "New world game rules" : rulesToolbar() ? "New world defaults" : "Options", uiWidth() - 24), origin() + uiWidth() / 2, 7, 0xffffff);
@@ -1315,7 +1327,7 @@ public final class PowerOptionsScreen extends UiScreen {
       defaultsPanel.init(minecraft, width, height);
       defaultsPanel.draw(confirmClose ? -1000 : mx, confirmClose ? -1000 : my, left(), span());
       if (!error.isEmpty()) text(fit(error, span()), left(), height - 44, 0xffbb88);
-      button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
+      button("Done", actionX(2), height - 28, actionWidth(2), 20, mx, my, true);
       defaultsPanel.overlay(mx, my);
       if (confirmClose) {
         fill(0, 0, width, height, 0xc0000000);
@@ -1404,10 +1416,15 @@ public final class PowerOptionsScreen extends UiScreen {
       if (s.restart) text("*", left() + 6 + indent + textRenderer.getWidth(label),
           y + SettingRows.labelOffset(span()), 0xe8a0a0);
       List<Setting> conflicts = conflicts(s);
-      boolean numeric = s.numeric() && !ColorSettings.accepts(s);
+      boolean numeric = s.numeric() && !ColorSettings.accepts(s) && !InheritedColors.accepts(s);
       int valueEnd = controlEnd(s);
       if (editable && valueEditor.editing(s))
         valueEditor.render(this, controlLeft, cy, valueEnd - controlLeft, mx, listMouseY, rowsTop, bottom());
+      else if (editable && InheritedColors.accepts(s)) {
+        var bounds = InheritedColorControl.at(controlLeft, valueEnd - controlLeft, InheritedColors.custom(s));
+        button(fit(InheritedColors.label(s), bounds.modeWidth() - 8), controlLeft, cy, bounds.modeWidth(), 18, mx, listMouseY, true);
+        if (bounds.colorWidth() > 0) colourButton(ColorSettings.hex(s), bounds.colorX(), cy, bounds.colorWidth(), mx, listMouseY);
+      }
       else if (editable && ColorSettings.accepts(s)) colourButton(ColorSettings.hex(s), ColorSettings.opacityPercent(s, session.settings()),
           controlLeft, cy, valueEnd - controlLeft, mx, listMouseY);
       else if (s.slider() && editable) slider(value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY,
@@ -1474,13 +1491,13 @@ public final class PowerOptionsScreen extends UiScreen {
     if (pauseActions()) button("Menu", origin() + 8, footerY(), 46, 20, mx, my, true);
     if (video()) button("Hide options", disabledX(), height - 28, 90, 20, mx, my, minecraft.world != null);
     if (controls()) button(showDisabled ? "Hide Disabled" : "Show Disabled", disabledX(), height - 28, 90, 20, mx, my, true);
-    button(editorReturn == null ? "Cancel" : "Back", actionX(0), height - 28, actionWidth(), 20, mx, my, true);
-    button(MenuPreferences.current().autoApply ? "Auto apply" : "Apply", actionX(1), height - 28, actionWidth(), 20, mx, my, true);
-    if (inside(mx, my, actionX(1), height - 28, actionWidth(), 20)) {
+    button(editorReturn == null ? "Cancel" : "Back", actionX(0), height - 28, actionWidth(0), 20, mx, my, true);
+    button(MenuPreferences.current().autoApply ? "Auto apply" : "Apply", actionX(1), height - 28, actionWidth(1), 20, mx, my, true);
+    if (inside(mx, my, actionX(1), height - 28, actionWidth(1), 20)) {
       tip = "Save changes without closing. Right-click to " + (MenuPreferences.current().autoApply ? "disable" : "enable") + " auto-apply: settings apply as you change them.";
       hoverId = "apply";
     }
-    button("Done", actionX(2), height - 28, actionWidth(), 20, mx, my, true);
+    button("Done", actionX(2), height - 28, actionWidth(2), 20, mx, my, true);
     if (hasSections() && inside(mx, my, sectionButtonX(), 27, 18, 20)) {
       tip = expandSections ? "Expand all sections" : "Collapse all sections";
       hoverId = "sections";

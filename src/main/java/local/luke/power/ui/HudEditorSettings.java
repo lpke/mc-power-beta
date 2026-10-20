@@ -21,13 +21,14 @@ public final class HudEditorSettings {
   private static final Set<String> MAP_APPEARANCE = Set.of(
       "rotate", "circular", "hideWithDebug", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
       "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
-      "directionTextSize", "belowTextSize", "minimapArrowSize", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity",
+      "directionTextSize", "directionTextColor", "directionTextOpacity", "belowTextSize", "minimapWaypointTextSize", "minimapWaypointSize", "minimapArrowSize", "minimapArrowOpacity", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity",
       "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight", "radarDimming", "radarDimDistance",
       "waypoints", "waypointNames", "waypointDistances", "waypointDistance", "chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity",
       "playerColor", "playerOpacity", "playerSize");
   private HudEditorSettings() {}
   public static boolean mapAppearance(String id) {
-    return !RETIRED.contains(id) && id.startsWith("maps.") && (MAP_APPEARANCE.contains(id.substring(5)) || id.startsWith("maps.playerIcon"));
+    return !RETIRED.contains(id) && id.startsWith("maps.") && (MAP_APPEARANCE.contains(id.substring(5)) || id.startsWith("maps.playerIcon")
+        || id.startsWith("maps.radar") && id.endsWith("Color"));
   }
   static boolean suppressesToast(String selection) {
     return selection.equals("minimap") || selection.equals("cluster.1");

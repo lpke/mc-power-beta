@@ -6,10 +6,10 @@ import local.luke.power.config.Catalog;
 import org.junit.jupiter.api.Test;
 
 class MapKeysTest {
-  @Test void originalBindingsKeepTheirDefaultsAndEveryNewActionIsUnboundAndCataloged() {
+  @Test void bindingsKeepTheirDefaultsWithAnIndependentTabHoldAndCatalogedActions() {
     Map<String, Integer> original = Map.of("powerbeta.map", 50, "powerbeta.waypoint", 48,
         "powerbeta.waypoints", 22, "powerbeta.enlargeMap", 44, "powerbeta.mapZoomIn", 23,
-        "powerbeta.mapZoomOut", 24, "powerbeta.minimap", 0);
+        "powerbeta.mapZoomOut", 24, "powerbeta.minimap", 0, "powerbeta.radarIcons", 15);
     Set<String> added = Set.of("powerbeta.toggleWorldWaypoints", "powerbeta.toggleMapWaypoints",
         "powerbeta.toggleMapRadar", "powerbeta.toggleMapCaves", "powerbeta.toggleMapGrid",
         "powerbeta.clearMapDestination", "powerbeta.mapSettings", "powerbeta.mapZoomReset");
@@ -20,20 +20,24 @@ class MapKeysTest {
       assertTrue(original.containsKey(key.translationKey) || added.contains(key.translationKey));
       assertFalse(Catalog.text(Catalog.metadata("keys." + key.translationKey), "label", "").isBlank());
     }
-    assertEquals(15, found.size()); assertTrue(found.containsAll(added));
+    assertEquals(16, found.size()); assertTrue(found.containsAll(added));
   }
 
   @Test void viewAvailabilityNeverClaimsHiddenZoomActionsAndKeepsRecoveryControls() {
     MapSettings settings = new MapSettings(); settings.minimap = false; settings.worldMap = false;
     for (String id : List.of("powerbeta.map", "powerbeta.enlargeMap", "powerbeta.mapZoomIn",
         "powerbeta.mapZoomOut", "powerbeta.mapZoomReset", "powerbeta.toggleMapWaypoints",
-        "powerbeta.toggleMapRadar", "powerbeta.toggleMapCaves", "powerbeta.toggleMapGrid", "powerbeta.clearMapDestination"))
+        "powerbeta.toggleMapRadar", "powerbeta.toggleMapCaves", "powerbeta.toggleMapGrid", "powerbeta.clearMapDestination", "powerbeta.radarIcons"))
       assertFalse(MapKeys.available(id, settings), id);
     for (String id : List.of("powerbeta.minimap", "powerbeta.mapSettings", "powerbeta.toggleWorldWaypoints",
         "powerbeta.waypoint", "powerbeta.waypoints", "key.forward")) assertTrue(MapKeys.available(id, settings), id);
     settings.worldMap = true;
     assertTrue(MapKeys.available("powerbeta.map", settings));
     assertTrue(MapKeys.available("powerbeta.toggleMapRadar", settings));
+    assertTrue(MapKeys.available("powerbeta.radarIcons", settings));
+    settings.radar = false;
+    assertFalse(MapKeys.available("powerbeta.radarIcons", settings));
+    settings.radar = true;
     assertFalse(MapKeys.available("powerbeta.mapZoomIn", settings));
     settings.minimap = true;
     assertTrue(MapKeys.available("powerbeta.mapZoomIn", settings));
@@ -76,5 +80,6 @@ class MapKeysTest {
     assertEquals(3, settings.zoom); assertDoesNotThrow(settings::validate);
     assertFalse(MapKeys.change("powerbeta.clearMapDestination", settings));
     assertFalse(MapKeys.change("powerbeta.mapSettings", settings));
+    assertFalse(MapKeys.change("powerbeta.radarIcons", settings));
   }
 }

@@ -5,6 +5,7 @@ import java.util.UUID;
 public final class Waypoint {
   public String id, name = "Waypoint", set = "Default";
   public String abbreviation = "";
+  public String deathCause = "";
 
   public Waypoint() {
     this(UUID.randomUUID().toString());
@@ -19,6 +20,8 @@ public final class Waypoint {
   public long created = System.currentTimeMillis();
 
   public void validate() {
+    if (deathCause != null && (deathCause.length() > 256 || deathCause.chars().anyMatch(c -> c < 32 || c == 127 || c == 167)))
+      throw new IllegalArgumentException("Invalid death cause");
     if (id == null || !id.matches("[a-zA-Z0-9-]{1,64}"))
       throw new IllegalArgumentException("Invalid waypoint ID");
     text(name, 64);
@@ -53,6 +56,7 @@ public final class Waypoint {
     result.name = name;
     result.set = set;
     result.abbreviation = abbreviation;
+    result.deathCause = deathCause;
     result.x = x;
     result.y = y;
     result.z = z;

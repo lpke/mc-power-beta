@@ -47,7 +47,7 @@
     "sprint.spectatorFov": false,
     "sprint.freecamFov": false,
     "rule.allow_sprinting": true,
-    "maps.zoom": 1,
+    "maps.zoom": 1.25,
     "maps.footsteps": false,
     "maps.caveAbove": 10,
     "maps.caveBelow": 10,
@@ -70,7 +70,14 @@
     "sprint.stamina": true,
     "sprint.noSprintInCombat": true,
     "interface.debugAxes": true,
-    "rules.cheats.allow_sprinting": true
+    "rules.cheats.allow_sprinting": true,
+    "maps.pauseMap": true,
+    "maps.size": 90,
+    "maps.items": true,
+    "maps.minimapArrowSize": 60,
+    "maps.biome": false,
+    "maps.directionTextSize": 75,
+    "maps.belowTextSize": 90
   },
   "beta": {
     "activeTweaks.enabled": false,

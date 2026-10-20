@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import local.luke.power.chat.ChatBuffer;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.GL11;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -94,7 +95,7 @@ public abstract class ChatScreenMixin extends Screen {
             else { editor.completeToken(token); setText(editor.text()); }
             resetValues(); suggestionInput = power$input(); return true;
         }
-        boolean ctrl = Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL);
+        boolean ctrl = local.luke.power.ui.TextEditing.control();
         if (!ctrl && !editor.browsing() && !editor.selected() && suggestions.length > 1
                 && (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN)) {
             adjustChosenSuggestion(key); return true;
@@ -265,27 +266,33 @@ public abstract class ChatScreenMixin extends Screen {
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     public void replace(int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        var editor = power$editor();
-        if (chatWidgetsAvailable) ChatWidgetAccess.onChange(this::refreshSuggestions);
-        if (!power$input().equals(suggestionInput)) refreshSuggestions();
-        fill(2, height - 14, width - 2, height - 2, Integer.MIN_VALUE);
-        int left = 4 + textRenderer.getWidth("> ");
-        var view = editor.view(Math.max(1, width - left - 4), textRenderer::getWidth);
-        power$viewStart = view.start();
-        String visible = editor.text().substring(view.start(), view.end());
-        int a = Math.max(view.start(), Math.min(view.end(), editor.start()));
-        int b = Math.max(view.start(), Math.min(view.end(), editor.end()));
-        if (a != b) fill(left + textRenderer.getWidth(editor.text().substring(view.start(), a)), height - 13,
-                left + textRenderer.getWidth(editor.text().substring(view.start(), b)), height - 3, 0xFF345C91);
-        drawTextWithShadow(textRenderer, "> ", 4, height - 12, 0xE0E0E0);
-        boolean invalid = editor.text().startsWith("/") && !tryMatch(editor.text().split(" ")[0].substring(1));
-        drawTextWithShadow(textRenderer, visible, left, height - 12, invalid ? 0xFC5454 : 0xE0E0E0);
-        if (!editor.selected()) renderSuggestions(mouseX, mouseY, delta);
-        if (local.luke.power.ui.InterfaceState.cursorVisible(focusedTicks)) {
-            int x = left + textRenderer.getWidth(editor.text().substring(view.start(), editor.cursor()));
-            fill(x, height - 13, x + 1, height - 3, 0xFFE0E0E0);
-        }
-        super.render(mouseX, mouseY, delta); ci.cancel();
+        GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_COLOR_BUFFER_BIT | GL11.GL_CURRENT_BIT);
+        try {
+            var editor = power$editor();
+            if (chatWidgetsAvailable) ChatWidgetAccess.onChange(this::refreshSuggestions);
+            if (!power$input().equals(suggestionInput)) refreshSuggestions();
+            fill(2, height - 14, width - 2, height - 2, Integer.MIN_VALUE);
+            GL11.glEnable(GL11.GL_BLEND);
+            GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+            int left = 4 + textRenderer.getWidth("> ");
+            var view = editor.view(Math.max(1, width - left - 4), textRenderer::getWidth);
+            power$viewStart = view.start();
+            String visible = editor.text().substring(view.start(), view.end());
+            int a = Math.max(view.start(), Math.min(view.end(), editor.start()));
+            int b = Math.max(view.start(), Math.min(view.end(), editor.end()));
+            if (a != b) local.luke.power.ui.TextSelection.background(left + textRenderer.getWidth(editor.text().substring(view.start(), a)), height - 13,
+                    left + textRenderer.getWidth(editor.text().substring(view.start(), b)), height - 4);
+            drawTextWithShadow(textRenderer, "> ", 4, height - 12, 0xE0E0E0);
+            boolean invalid = editor.text().startsWith("/") && !tryMatch(editor.text().split(" ")[0].substring(1));
+            drawTextWithShadow(textRenderer, visible, left, height - 12, invalid ? 0xFC5454 : 0xE0E0E0);
+            if (!editor.selected()) renderSuggestions(mouseX, mouseY, delta);
+            if (local.luke.power.ui.InterfaceState.cursorVisible(focusedTicks)) {
+                int x = left + textRenderer.getWidth(editor.text().substring(view.start(), editor.cursor()));
+                fill(x, height - 13, x + 1, height - 3, 0xFFE0E0E0);
+            }
+            super.render(mouseX, mouseY, delta);
+        } finally { GL11.glPopAttrib(); }
+        ci.cancel();
     }
 
     @Unique
@@ -328,6 +335,8 @@ public abstract class ChatScreenMixin extends Screen {
         int count = Math.min(suggestions.length, Math.max(1, Math.min(10, (height - 20) / 10)));
         int from = Math.max(0, Math.min(chosen - count + 1, suggestions.length - count));
         fill(x, height - 14 - 10 * count, x + listWidth, height - 14, 0xFF000000);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         for (int i = from; i < from + count; i++) {
             String label = currentWord + suggestions[i];
             while (!label.isEmpty() && textRenderer.getWidth(label) > listWidth) label = label.substring(0, label.length() - 1);

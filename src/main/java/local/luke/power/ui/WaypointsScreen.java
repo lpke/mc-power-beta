@@ -7,6 +7,7 @@ import local.luke.power.map.*;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 
 /** Waypoint actions use the row's context menu; creation and Done share the footer. */
 public final class WaypointsScreen extends UiScreen {
@@ -15,11 +16,16 @@ public final class WaypointsScreen extends UiScreen {
   private final TextInput search = new TextInput("", 128);
   private final ScrollBar bar = new ScrollBar();
   private final WaypointSetDialog setDialog = new WaypointSetDialog();
+  private final WaypointRowClicks rowClicks = new WaypointRowClicks();
   private String selected = "", error = "";
   private int scroll, sort, setScroll, setIndex;
   private boolean selectingSet, creatingSet, context, moving;
   private int contextX, contextY, contextScroll;
   private long deleteUntil;
+  private String deletingSet = "";
+  private WaypointStore deletingStore;
+  private long deletingRevision;
+  private int deletingCount;
   private List<Waypoint> cachedRows = List.of();
   private long cachedRevision = Long.MIN_VALUE;
   private WaypointStore cachedStore;
@@ -33,20 +39,38 @@ public final class WaypointsScreen extends UiScreen {
   private List<String> cachedMoveSets = List.of();
 
   public WaypointsScreen(Screen parent) { this.parent = parent; }
-  public void init() { Keyboard.enableRepeatEvents(true); }
-  public void removed() { Keyboard.enableRepeatEvents(false); TextDrag.cancel(); bar.release(); }
+  public void init() { Keyboard.enableRepeatEvents(true); rowClicks.clear(); }
+  public void tick() { if (!Display.isActive()) rowClicks.clear(); }
+  public void removed() { Keyboard.enableRepeatEvents(false); TextDrag.cancel(); bar.release(); rowClicks.clear(); }
   private WaypointListLayout layout() { return WaypointListLayout.at(width, height); }
   private int left() { return layout().left(); }
   private int span() { return layout().width(); }
   private int rowBottom() { return layout().listBottom(); }
   private ScrollBar.Track track() { return new ScrollBar.Track(layout().right() - 4, 72, rowBottom() - 72, rows().size() * ROW, scroll); }
-  private boolean modal() { return selectingSet || creatingSet || context; }
+  private boolean modal() { return selectingSet || creatingSet || context || !deletingSet.isEmpty(); }
   private void selectSet(String set) {
     Maps.waypoints().select(set); scroll = 0; selected = ""; selectingSet = false;
   }
   private void beginNewSet() {
     selectingSet = false; creatingSet = true; search.focused = false; TextDrag.cancel(); bar.release();
     setDialog.open(name -> { Maps.waypoints().createSet(name); scroll = 0; selected = ""; });
+  }
+  private void beginDeleteSet() {
+    var store = Maps.waypoints();
+    if (store == null || !store.ready() || store.selectedSet().equalsIgnoreCase("Default")) return;
+    deletingSet = store.selectedSet(); deletingStore = store; deletingRevision = store.revision();
+    deletingCount = (int)store.points().stream().filter(point -> point.set.equals(deletingSet)).count();
+    selectingSet = false; search.focused = false; TextDrag.cancel(); bar.release();
+  }
+  private void deleteSet() {
+    var store = Maps.waypoints();
+    if (store != deletingStore || !store.ready() || store.revision() != deletingRevision) {
+      error = "Waypoint sets changed. Review the set and try again.";
+    } else {
+      try { store.deleteSet(deletingSet); selected = ""; scroll = 0; error = ""; }
+      catch (IllegalArgumentException | IllegalStateException failure) { error = failure.getMessage(); }
+    }
+    deletingSet = ""; deletingStore = null;
   }
   private List<Waypoint> rows() {
     var store = Maps.waypoints();
@@ -69,11 +93,20 @@ public final class WaypointsScreen extends UiScreen {
     return cachedRows;
   }
   private Waypoint selected() { return rows().stream().filter(p -> p.id.equals(selected)).findFirst().orElse(null); }
-  private boolean selectedAt(int x, int y) {
-    if (!inside(x, y, left(), 72, span() - 8, rowBottom() - 72)) return false;
+  private Waypoint rowAt(int x, int y) {
+    if (!inside(x, y, left(), 72, span() - 8, rowBottom() - 72)) return null;
     int index = (y - 72 + scroll) / ROW;
     var points = rows();
-    return index < points.size() && points.get(index).id.equals(selected);
+    return index < points.size() ? points.get(index) : null;
+  }
+  private boolean selectedAt(int x, int y) { var point = rowAt(x, y); return point != null && point.id.equals(selected); }
+  private boolean eyeAt(int x, int y) {
+    int rowY = 72 + (y - 72 + scroll) / ROW * ROW - scroll;
+    return inside(x, y, left() + 6, rowY + 5, EYE, EYE);
+  }
+  private void rowClick(Waypoint point, long eventNanos) {
+    click();
+    if (rowClicks.press(point.id, eventNanos)) minecraft.setScreen(new WaypointEditorScreen(this, point));
   }
   private List<String> moveSets() {
     Waypoint point = selected();
@@ -129,6 +162,11 @@ public final class WaypointsScreen extends UiScreen {
     }
   }
   protected void keyPressed(char c, int key) {
+    rowClicks.clear();
+    if (!deletingSet.isEmpty()) {
+      if (key == Keyboard.KEY_ESCAPE) { deletingSet = ""; deletingStore = null; }
+      return;
+    }
     if (setDialog.key(this, c, key)) { creatingSet = setDialog.active(); return; }
     if (context) {
       if (key == Keyboard.KEY_ESCAPE) {
@@ -151,6 +189,12 @@ public final class WaypointsScreen extends UiScreen {
     search.key(c, key); scroll = 0;
   }
   protected void mouseClicked(int x, int y, int button) {
+    if (modal() || button != 0 || rowAt(x, y) == null || eyeAt(x, y)) rowClicks.clear();
+    if (!deletingSet.isEmpty()) {
+      if (button == 0 && inside(x, y, width / 2 - 112, height / 2 + 20, 108, 20)) { click(); deleteSet(); }
+      else if (button == 0 && inside(x, y, width / 2 + 4, height / 2 + 20, 108, 20)) { click(); deletingSet = ""; deletingStore = null; }
+      return;
+    }
     if (setDialog.press(this, x, y, button)) { creatingSet = setDialog.active(); return; }
     if (button != 0 && button != 1) return;
     if (context) {
@@ -187,6 +231,10 @@ public final class WaypointsScreen extends UiScreen {
     if (inside(x, y, layout().sortX(), 27, layout().sortWidth(), 18)) { click(); sort = Math.floorMod(sort + (button == 1 ? -1 : 1), 3); return; }
     if (inside(x, y, layout().filterX(), 27, layout().filterWidth(), 18)) { click(); store.allSets(!store.allSets()); scroll = 0; return; }
     if (inside(x, y, layout().createX(), 49, layout().createWidth(), 18) && button == 0) { click(); beginNewSet(); return; }
+    if (inside(x, y, layout().deleteX(), 49, layout().deleteWidth(), 18) && button == 0) {
+      if (!store.selectedSet().equalsIgnoreCase("Default")) { click(); beginDeleteSet(); }
+      return;
+    }
     if (inside(x, y, left(), 49, layout().setWidth(), 18)) {
       click(); var sets = store.sets();
       if (button == 1) selectSet(sets.get(Math.floorMod(sets.indexOf(store.selectedSet()) - 1, sets.size())));
@@ -200,22 +248,26 @@ public final class WaypointsScreen extends UiScreen {
       int index = (y - 72 + scroll) / ROW; var rows = rows();
       if (index < rows.size()) {
         Waypoint point = rows.get(index); selected = point.id;
-        int rowY = 72 + index * ROW - scroll;
-        if (button == 0 && inside(x, y, left() + 6, rowY + 5, EYE, EYE)) { click(); point.enabled = !point.enabled; store.put(point); }
+        if (button == 0 && eyeAt(x, y)) { click(); point.enabled = !point.enabled; store.put(point); }
         else if (button == 1) {
           click(); context = true; moving = false; deleteUntil = 0; contextScroll = 0; contextX = x; contextY = y;
           search.focused = false; TextDrag.cancel(); bar.release(); fitMenu();
-        } else click();
+        } else rowClick(point, Mouse.getEventNanoseconds());
       }
     }
   }
   public void onMouseEvent() {
     int wheel = Mouse.getEventDWheel();
+    if (wheel != 0) rowClicks.clear();
     if (context && wheel != 0) { contextScroll -= Integer.signum(wheel) * 3; fitMenu(); }
     else if (selectingSet && wheel != 0 && Maps.waypoints() != null) {
       int count = Maps.waypoints().sets().size(); setScroll = Math.max(0, Math.min(count - layout().setRows(height, count), setScroll - Integer.signum(wheel) * 3));
     } else if (!modal() && wheel != 0) scroll = (int)Math.max(0, Math.min(track().maximum(), scroll - Integer.signum(wheel) * 48));
     super.onMouseEvent();
+  }
+  protected void mouseReleased(int x, int y, int button) {
+    if (button == 0) { rowClicks.release(); bar.release(); }
+    super.mouseReleased(x, y, button);
   }
   public void render(int mx, int my, float delta) {
     renderBackground(); titleBar("Waypoints");
@@ -225,6 +277,7 @@ public final class WaypointsScreen extends UiScreen {
     button("Sort: " + new String[]{"Name", "Distance", "Newest"}[sort], layout().sortX(), 27, layout().sortWidth(), 18, hoverX, hoverY, ready);
     button(ready && store.allSets() ? "All sets" : "This set", layout().filterX(), 27, layout().filterWidth(), 18, hoverX, hoverY, ready);
     WaypointSetDropdown.button(this, "Set: " + (store == null ? "Default" : store.selectedSet()), left(), 49, layout().setWidth(), hoverX, hoverY, ready, selectingSet);
+    button("Delete set", layout().deleteX(), 49, layout().deleteWidth(), 18, hoverX, hoverY, ready && !store.selectedSet().equalsIgnoreCase("Default"));
     button("New set", layout().createX(), 49, layout().createWidth(), 18, hoverX, hoverY, ready);
     List<Waypoint> rows = rows(); scroll = (int)Math.max(0, Math.min(track().maximum(), bar.drag(track(), my, Mouse.isButtonDown(0))));
     clip(left(), 72, span(), Math.max(0, rowBottom() - 72));
@@ -262,6 +315,14 @@ public final class WaypointsScreen extends UiScreen {
       }
     }
     setDialog.render(this, mx, my);
+    if (!deletingSet.isEmpty()) {
+      fill(0, 0, width, height, 0xc0000000);
+      centeredText(fit("Delete set \"" + deletingSet + "\"?", width - 24), height / 2 - 26, 0xffffff);
+      centeredText(deletingCount == 0 ? "This set is empty." : deletingCount + (deletingCount == 1 ? " waypoint will move to Default." : " waypoints will move to Default."), height / 2 - 10, 0xcccccc);
+      button("Delete set", width / 2 - 112, height / 2 + 20, 108, 20, mx, my, true);
+      button("Cancel", width / 2 + 4, height / 2 + 20, 108, 20, mx, my, true);
+    } else if (!modal() && ready && store.selectedSet().equalsIgnoreCase("Default")
+        && inside(mx, my, layout().deleteX(), 49, layout().deleteWidth(), 18)) tooltip("The Default set cannot be deleted.", mx, my);
   }
   public boolean shouldPause() { return MapConfig.current().pauseMap; }
 }
