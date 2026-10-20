@@ -26,7 +26,12 @@ public abstract class CreateWorldMixin extends Screen {
   }
   @Inject(method = "init", at = @At("TAIL"))
   private void power$choices(CallbackInfo ci) {
-    if (power$draft == null) power$draft = new CreationRules(RulePresets.survival(), RulePresets.cheats());
+    if (power$draft == null) {
+      if (local.luke.power.ui.RuleDefaultsScreen.openIfNeeded(minecraft, this,
+          () -> power$draft = new CreationRules(RulePresets.survival(), RulePresets.cheats()),
+          () -> minecraft.setScreen(new net.minecraft.client.gui.screen.TitleScreen()))) return;
+      power$draft = new CreationRules(RulePresets.survival(), RulePresets.cheats());
+    }
     if (power$name != null) { field_632.setText(power$name); field_633.setText(power$seed); method_608(); }
     int left = width / 2 - 132;
     int actionY = !power$draft.problem().isEmpty() || power$draft.preset() == CreationRules.Preset.CUSTOM ? 212 : 188;

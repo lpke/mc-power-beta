@@ -66,18 +66,20 @@ public final class ConfigVersions {
       presets.add("survival", WorldRuleUpgrade210.defaults(evidence210, new RuleSet()).document());
       presets.add("cheats", WorldRuleUpgrade210.defaults(evidence210, RuleSet.cheats()).document());
       settings.add("gameRules", presets);
-    } else if (settings.has("gameRules")) {
+    }
+    if (settings.has("gameRules") && settings.get("gameRules").isJsonObject()) {
       JsonObject presets = settings.getAsJsonObject("gameRules");
       for (String name : new String[]{"survival", "cheats"}) if (presets.has(name)) {
-        JsonObject document = presets.getAsJsonObject(name);
-        int ruleVersion = RuleSet.version(document);
-        RuleSet defaults = name.equals("cheats") ? RuleSet.cheats() : new RuleSet();
-        if (ruleVersion < 3) defaults = WorldRuleUpgrade210.defaults(evidence210, defaults);
-        RuleSet.read(document, defaults); // Validate structure and unknown fields before conversion.
-        JsonObject values = WorldRuleUpgrade210.values(document.getAsJsonObject("values"), ruleVersion, evidence210);
-        presets.add(name, RuleSet.readValues(values, defaults).document());
+        try {
+          if (RuleSet.version(presets.get(name).getAsJsonObject()) < RuleSet.VERSION)
+            presets.add(name, TemplateDocuments.read(presets.get(name), name.equals("cheats"), evidence210).document());
+        } catch (RuntimeException incompatible) {
+          // Preserve the exact template for explicit review; unrelated global preferences remain usable.
+        }
       }
     }
+    // Creation templates have their own review boundary. Preserve unsupported documents
+    // verbatim so they cannot block unrelated preferences or be consumed without consent.
     validateDebugLayout(settings);
     return root;
   }

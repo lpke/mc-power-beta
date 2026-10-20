@@ -21,7 +21,7 @@ public class WorldRendererMixin {
     @Inject(at = @At("TAIL"), method = "renderEntities")
     private void freecam_cameraRenderer(Vec3d arg2, Culler f, float par3, CallbackInfo ci){
         if (entityRenderCooldown <= 0) {
-            if(Freecam.freecamController.isActive() && !client.options.thirdPerson){
+            if(Freecam.freecamController.isActive() && !client.options.thirdPerson && !local.luke.power.input.DetachedCamera.hidesEntryBody()){
                 EntityRenderDispatcher.INSTANCE.render(client.camera, par3);
             }
         }

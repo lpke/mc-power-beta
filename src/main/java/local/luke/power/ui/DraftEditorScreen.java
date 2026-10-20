@@ -128,11 +128,11 @@ abstract class DraftEditorScreen extends UiScreen {
   public void removed() { Keyboard.enableRepeatEvents(false); stopGesture(); slider = null; bar.release(); inline.cancel(); TextDrag.cancel(); }
   protected void save() {
     stopGesture(); slider = null; bar.release(); inline.cancel();
-    if (parent.acceptEditor(draft)) minecraft.setScreen(parent); else error = parent.editorError();
+    if (parent.acceptEditor(draft)) minecraft.setScreen(parent.returnScreen()); else error = parent.editorError();
   }
   protected void leave() {
     stopGesture(); slider = null; bar.release(); inline.cancel();
-    exit.leave(draft.changed(), () -> minecraft.setScreen(parent));
+    exit.leave(draft.changed(), () -> minecraft.setScreen(parent.returnScreen()));
   }
   protected void openInline(Setting s, Runnable accepted, int x, int y, int w) {
     inline.begin(s, s, accepted, x, y, w, controlsTop(), controlsBottom());
@@ -226,7 +226,7 @@ abstract class DraftEditorScreen extends UiScreen {
     return buttons;
   }
   protected void mouseClicked(int x, int y, int button) {
-    if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent))) return;
+    if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent.returnScreen()))) return;
     if (resetPrompt) {
       if (button == 0) for (ResetButton f : resetButtons()) if (inside(x, y, f.x, f.y, f.width, 20)) {
         if (f.enabled) { click(); f.action.run(); } break;

@@ -18,6 +18,11 @@ public final class ConfigSession {
     }
   }
 
+  public void removeBackend(String id) {
+    settings.removeIf(s -> s.backend.equals(id)); backends.remove(id);
+    previewed.keySet().removeIf(key -> settings.stream().noneMatch(s -> s.id.equals(key)));
+  }
+
   /** Append newly discovered options without replacing existing drafts or preview state. */
   public boolean addDiscovered(Collection<Setting> entries) {
     for (Setting setting : entries)

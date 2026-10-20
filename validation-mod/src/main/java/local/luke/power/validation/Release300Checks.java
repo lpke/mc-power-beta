@@ -550,9 +550,9 @@ public final class Release300Checks {
       var options = new PowerOptionsScreen(null); open(mc, options, 640, 360);
       var hud = new HudEditorScreen(options, "maps.zoom"); open(mc, hud, 640, 360);
       capture(mc, hud, "background-minimap-enabled", 640, 360);
-      check(((Number)getStatic(MinimapBuffer.class, "framebuffer")).intValue() != 0, "enabled minimap did not allocate its native buffer");
+      check(getStatic(MinimapBuffer.class, "active") != null, "enabled minimap did not allocate its native buffer");
       mc.setScreen(null); enabled.minimap = false; MapConfig.preview(enabled); Maps.tick(mc);
-      check(((Number)getStatic(MinimapBuffer.class, "framebuffer")).intValue() == 0, "turning minimap off retained its native buffer");
+      check(getStatic(MinimapBuffer.class, "active") == null, "turning minimap off retained its native buffer");
       check(Maps.sampler() != null && Maps.cache() != null, "turning minimap off stopped the independently enabled World Map");
       log("PASS 300 minimap buffer clears independently while World Map remains active");
       var world = new WorldMapScreen(); open(mc, world, 640, 360);

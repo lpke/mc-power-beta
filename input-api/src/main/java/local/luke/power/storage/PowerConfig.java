@@ -69,6 +69,22 @@ public final class PowerConfig {
       JsonObject root = readDocument(); root.getAsJsonObject("settings").add(id, value.deepCopy()); writeDocument(root);
     }
   }
+  /** Menu/offline maintenance only: reject stale edits and verify a durable original before replacement. */
+  public static void replaceSection(String id, JsonElement expected, JsonObject value) throws IOException {
+    flushPending();
+    synchronized (DISK) {
+      JsonObject root = readDocument();
+      JsonObject settings = root.getAsJsonObject("settings");
+      if (!java.util.Objects.equals(expected, settings.get(id)))
+        throw new IOException("Settings changed since this editor opened. Reopen it before saving.");
+      if (Files.exists(path())) backup(Files.readAllBytes(path()), ConfigVersions.version(root));
+      settings.add(id, value.deepCopy());
+      writeDocument(ConfigVersions.convert(root));
+      JsonObject verified = readDocument();
+      if (!value.equals(verified.getAsJsonObject("settings").get(id)))
+        throw new IOException("Settings replacement could not be verified. Restore the verified backup.");
+    }
+  }
   public static void write(JsonObject root) throws IOException {
     flushPending();
     synchronized (DISK) {

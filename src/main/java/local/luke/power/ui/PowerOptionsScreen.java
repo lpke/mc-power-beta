@@ -37,7 +37,8 @@ public final class PowerOptionsScreen extends UiScreen {
   private final DefaultsPanel defaultsPanel = new DefaultsPanel(this);
   private local.luke.power.rules.CreationRules creationRules;
   private String savedWorldName;
-  private boolean cheatPreset;
+  private boolean cheatPreset, ruleReviewChecked;
+  private DefaultBases.Base reviewedRulesBase;
   public List<String> visiblePages() { return pages; }
 
   private static final int[] ICONS = {
@@ -50,8 +51,55 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private record View(String page, double scroll, double sideScroll, String query,
-      boolean changedOnly, List<String> conflicts, String highlighted, Set<String> collapsed,
+      boolean changedOnly, List<String> conflicts, String highlighted, String mapView, Set<String> collapsed,
       boolean showDisabled, int selected, boolean libraryOpen, MusicLibraryScreen.State library) {}
+  private WorldMapScreen mapHost;
+  private int panelWidth;
+  private String mapView = "Map";
+  private Runnable embeddedClose;
+  static PowerOptionsScreen mapPanel(WorldMapScreen host) {
+    PowerOptionsScreen panel = new PowerOptionsScreen(host);
+    panel.mapHost = host; panel.mapView = "Map"; panel.page = "Map";
+    panel.scroll = panel.sideScroll = 0; panel.search.setText(""); panel.history.clear();
+    panel.highlightedId = ""; panel.conflictIds = List.of(); panel.changedOnly = panel.libraryOpen = false;
+    return panel;
+  }
+  boolean embedded() { return mapHost != null; }
+  Screen returnScreen() { return embedded() ? mapHost : this; }
+  private boolean inMapScope(Setting s) { return !embedded() || MapSettingsScope.contains(s); }
+  void panelSize(int span) { panelWidth = span; layout(); }
+  boolean panelModal() { return capture != null || confirmClose || confirmReset; }
+  void panelCancelGesture() {
+    capture = null; captureModifier = 0; dragging = null; contentBar.release(); sidebarBar.release();
+    valueEditor.cancel(); hoverDelay.clear(); TextDrag.cancel();
+    if (autoSavePending) save(false, false);
+  }
+  void panelWheel(int wheel) {
+    if (wheel == 0 || panelModal()) return;
+    valueEditor.cancel(); scroll -= Math.signum(wheel) * 48; layout();
+  }
+  void panelRelease() {
+    dragging = null; contentBar.release(); sidebarBar.release();
+    if (autoSavePending) save(false, false);
+  }
+  void requestPanelClose(Runnable close) {
+    embeddedClose = close;
+    panelRelease(); valueEditor.cancel();
+    if (session != null && session.changes() > 0) confirmClose = true;
+    else closeOptions();
+  }
+  void minimapAppearance(String id) {
+    pushView(); mapView = "Minimap"; page = "Map"; search.setText(""); changedOnly = false;
+    conflictIds = List.of(); highlightedId = id; scroll = 0; collapsed.clear();
+    focusAnchorId = id; focusAnchorScroll = scroll; focusAnchorSideScroll = sideScroll; layout();
+  }
+  private boolean localMapView(Setting s) {
+    return switch (mapView) {
+      case "Minimap" -> HudEditorSettings.mapAppearance(s.id);
+      case "Controls" -> s.kind == Setting.Kind.KEY;
+      default -> s.page.equals("Map") && !HudEditorSettings.mapAppearance(s.id);
+    };
+  }
   private final Deque<View> history = new ArrayDeque<>();
   private String highlightedId = "";
   private String focusAnchorId = "";
@@ -104,10 +152,11 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private static int sidebarWidth(int width) { return Math.max(90, Math.min(155, width / 4)); }
   private int uiWidth() {
+    if (embedded()) return panelWidth;
     int available = Math.min(width, height * 16 / 9);
     return isolatedRules() ? Math.min(668, Math.max(200, (available - sidebarWidth(available) - 2) * 88 / 100)) : available;
   }
-  private int origin() { return (width - uiWidth()) / 2; }
+  private int origin() { return embedded() ? 0 : (width - uiWidth()) / 2; }
   private int right() { return origin() + uiWidth(); }
   private boolean pauseActions() { return directPause && editorReturn == null; }
   private int footerY() { return height - (uiWidth() < (controls() || video() || pauseActions() ? 700 : 470) ? 51 : 28); }
@@ -218,12 +267,12 @@ public final class PowerOptionsScreen extends UiScreen {
     Keyboard.enableRepeatEvents(true);
     if (session == null)
       try {
-        session = SettingsRegistry.open(minecraft);
+        session = embedded() ? SettingsRegistry.openMap(minecraft) : SettingsRegistry.open(minecraft);
       } catch (Exception e) {
         PowerBeta.LOG.error("Could not open settings", e);
         error = "Settings could not be loaded. See the game log.";
       }
-    if (session != null && !isolatedRules()) {
+    if (session != null && !isolatedRules() && !embedded()) {
       if (library == null) { library = new MusicLibraryScreen(this); library.restore(libraryState); }
       library.init(minecraft, width, height);
     }
@@ -241,11 +290,11 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private View view() {
     return new View(page, scroll, sideScroll, search.text(), changedOnly, conflictIds,
-        highlightedId, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state());
+        highlightedId, mapView, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state());
   }
 
   private void rememberPosition() {
-    if (isolatedRules()) return;
+    if (isolatedRules() || embedded()) return;
     rememberedView = view();
     rememberedHistory = List.copyOf(history);
     if (!changedOnly && conflictIds.isEmpty() && search.text().isBlank()) {
@@ -265,7 +314,7 @@ public final class PowerOptionsScreen extends UiScreen {
     layout();
   }
 
-  private boolean controls() { return page.equals("Controls"); }
+  private boolean controls() { return !embedded() && page.equals("Controls"); }
   private int disabledX() { return actionX(0) - 94; }
   private String previewId(Setting s) {
     if (s.id.startsWith("audio.sound.")) return s.id.substring("audio.sound.".length());
@@ -304,9 +353,10 @@ public final class PowerOptionsScreen extends UiScreen {
     layout();
   }
   private int searchLeft() { return left() + (history.isEmpty() && !libraryVisible() ? 0 : 48); }
-  private void pushView() {
+  private void pushView() { pushView(view()); }
+  private void pushView(View previous) {
     if (history.size() == 32) history.removeLast();
-    history.push(view());
+    history.push(previous);
     search.focused = false;
     selected = -1;
   }
@@ -320,7 +370,7 @@ public final class PowerOptionsScreen extends UiScreen {
     focusAnchorId = "";
     page = view.page; scroll = view.scroll; sideScroll = view.sideScroll;
     search.setText(view.query); search.selectAll(); search.focused = false;
-    changedOnly = view.changedOnly; conflictIds = view.conflicts; highlightedId = view.highlighted;
+    changedOnly = view.changedOnly; conflictIds = view.conflicts; highlightedId = view.highlighted; mapView = view.mapView;
     collapsed.clear(); collapsed.addAll(view.collapsed);
     showDisabled = view.showDisabled; selected = view.selected;
     libraryOpen = view.libraryOpen; libraryState = view.library;
@@ -333,7 +383,7 @@ public final class PowerOptionsScreen extends UiScreen {
     editorReturn = new EditorReturn(editor, view(), List.copyOf(history));
     history.clear();
     openSetting(target);
-    minecraft.setScreen(this);
+    minecraft.setScreen(returnScreen());
   }
   private void returnToEditor() {
     EditorReturn destination = editorReturn;
@@ -345,7 +395,11 @@ public final class PowerOptionsScreen extends UiScreen {
     minecraft.setScreen(destination.screen);
   }
   private void closeOptions() {
-    if (editorReturn != null) returnToEditor();
+    if (embedded()) {
+      confirmClose = false;
+      Runnable close = embeddedClose; embeddedClose = null;
+      if (close != null) close.run(); else mapHost.closeSettings();
+    } else if (editorReturn != null) returnToEditor();
     else minecraft.setScreen(exitTarget);
   }
 
@@ -367,13 +421,16 @@ public final class PowerOptionsScreen extends UiScreen {
     return editor;
   }
   private void openSetting(Setting target) {
+    if (!inMapScope(target)) return;
+    if (embedded() && HudEditorSettings.mapAppearance(target.id)) { minimapAppearance(target.id); return; }
     if (HudEditorSettings.contains(target) && !target.id.equals(HudEditorSettings.ENTRY)) {
       openHudSetting(target.id);
       return;
     }
     rememberPosition();
     pushView();
-    page = target.page;
+    page = embedded() ? "Map" : target.page;
+    if (embedded()) mapView = target.kind == Setting.Kind.KEY ? "Controls" : "Map";
     libraryOpen = false;
     conflictIds = List.of(); changedOnly = false; search.setText("");
     collapsed.remove(page + "/" + target.group);
@@ -387,6 +444,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void openGroup(Setting setting) {
+    if (embedded()) { openSetting(setting); return; }
     if (HudEditorSettings.contains(setting) && !setting.id.equals(HudEditorSettings.ENTRY)) { openHudSetting(setting.id); return; }
     rememberPosition();
     pushView();
@@ -415,7 +473,8 @@ public final class PowerOptionsScreen extends UiScreen {
   private List<Setting> resetTargets() {
     List<String> listed = conflictIds;
     return session.settings().stream()
-        .filter(s -> changedOnly ? settingChanged(s) : listed.isEmpty() ? s.page.equals(page) : listed.contains(s.id))
+        .filter(this::inMapScope)
+        .filter(s -> changedOnly ? settingChanged(s) : listed.isEmpty() ? embedded() ? localMapView(s) : s.page.equals(page) : listed.contains(s.id))
         .filter(this::selectedPreset)
         .filter(s -> SettingAccess.visible(session, s) && SettingAccess.reason(session, s).isEmpty())
         .toList();
@@ -435,11 +494,11 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private int sidebar() {
-    return isolatedRules() ? 0 : sidebarWidth(uiWidth());
+    return isolatedRules() || embedded() ? 0 : sidebarWidth(uiWidth());
   }
 
   private int left() {
-    return origin() + (isolatedRules() ? 14 : sidebar() + 16);
+    return origin() + (isolatedRules() || embedded() ? 14 : sidebar() + 16);
   }
 
   private int span() {
@@ -480,7 +539,7 @@ public final class PowerOptionsScreen extends UiScreen {
         && Double.compare(scroll, focusAnchorScroll) == 0
         && Double.compare(sideScroll, focusAnchorSideScroll) == 0;
     if (!revealTarget) focusAnchorId = "";
-    pages = PAGES.stream().filter(p -> p.equals("Defaults") && !isolatedRules() || session.settings().stream()
+    pages = embedded() ? List.of("Map") : PAGES.stream().filter(p -> p.equals("Defaults") && !isolatedRules() || session.settings().stream()
         .anyMatch(s -> s.page.equals(p) && SettingAccess.visible(session, s))).toList();
     if (!pages.contains(page) && !pages.isEmpty()) {
       positions.put(page, scroll);
@@ -499,6 +558,9 @@ public final class PowerOptionsScreen extends UiScreen {
     List<Setting> candidates = listed.isEmpty() ? SettingsLayout.ordered(session.settings()) : listed.stream()
         .map(id -> session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElse(null))
         .filter(Objects::nonNull).toList();
+    candidates = candidates.stream().filter(this::inMapScope).toList();
+    if (embedded() && mapView.equals("Minimap") && query.isEmpty() && listed.isEmpty() && !changedOnly)
+      candidates = HudEditorSections.order(candidates);
     Map<String, Integer> scores = new HashMap<>();
     if (!query.isEmpty()) candidates = candidates.stream().filter(s ->
         !s.group.equals("Individual music tracks") && !s.group.equals("Track rotation")
@@ -512,7 +574,7 @@ public final class PowerOptionsScreen extends UiScreen {
     for (Setting s : candidates) {
       if (s.backend.equals("defaults") || HudEditorSettings.internal(s) || ColorSettings.hiddenOpacity(s, session.settings())) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
-          && (HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY)
+          && (!embedded() && HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY)
               || HudEditorSettings.lettering(s))) continue;
       if (!SettingAccess.visible(session, s) || !selectedPreset(s)) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
@@ -521,9 +583,9 @@ public final class PowerOptionsScreen extends UiScreen {
       if (query.isEmpty() && !changedOnly && listed.isEmpty() && (s.group.equals("Track rotation") || s.id.startsWith("audio.sound.music:"))) continue;
       if (listed.isEmpty() && s.kind == Setting.Kind.KEY && !showDisabled && !ControlLinks.enabled(session, s)) continue;
       if ((!changedOnly || settingChanged(s)) && (!listed.isEmpty() || (query.isEmpty()
-          ? changedOnly || s.page.equals(page)
+          ? changedOnly || (embedded() ? localMapView(s) : s.page.equals(page))
           : scores.getOrDefault(s.id, FuzzySearch.NONE) < FuzzySearch.NONE)))
-        groups.computeIfAbsent(query.isEmpty() && !changedOnly ? s.group
+        groups.computeIfAbsent(query.isEmpty() && !changedOnly ? embedded() && mapView.equals("Minimap") ? HudEditorSections.group(s) : s.group
             : HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY) ? "Interface / HUD editor / " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode))
             : s.group.isEmpty() ? s.page : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
     }
@@ -575,12 +637,22 @@ public final class PowerOptionsScreen extends UiScreen {
     }
   }
 
+  private boolean reviewRules() {
+    ruleReviewChecked = true; reviewedRulesBase = DefaultBases.current();
+    if (embedded() || isolatedRules() || minecraft.world != null) return false;
+    return RuleDefaultsScreen.openIfNeeded(minecraft, this, () -> {
+      session.removeBackend("rulePresets"); local.luke.power.config.backend.RulePresetBackend.register(session); layout();
+    }, () -> { page = "General"; search.setText(""); layout(); minecraft.setScreen(this); });
+  }
   public void tick() {
+    if (!page.equals("Game rules")) ruleReviewChecked = false;
+    if (page.equals("Game rules") && minecraft.currentScreen == this
+        && (!ruleReviewChecked || reviewedRulesBase != DefaultBases.current()) && reviewRules()) return;
     hoverDelay.tick();
     defaultsPanel.tick(page.equals("Defaults"));
     if (library != null) library.tick();
     int revision = local.luke.power.audio.AudioController.libraryRevision();
-    if (session != null && !isolatedRules() && revision != musicRevision) {
+    if (session != null && !isolatedRules() && !embedded() && revision != musicRevision) {
       musicRevision = revision;
       if (local.luke.power.config.backend.AudioBackend.discoverMusic(session, minecraft)) layout();
     }
@@ -651,7 +723,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (hidden || wheel == 0 || capture != null || confirmClose || confirmReset) return;
     valueEditor.cancel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
-    if (!isolatedRules() && x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
+    if (!isolatedRules() && !embedded() && x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
     else if (page.equals("Defaults")) { defaultsPanel.wheel(wheel, left(), span()); return; }
     else if (libraryVisible()) library.wheel(wheel);
     else scroll -= Math.signum(wheel) * 48;
@@ -689,7 +761,7 @@ public final class PowerOptionsScreen extends UiScreen {
         click(); chooseRulePreset(i == 1); return;
       }
     }
-    if (!isolatedRules() && button == 0 && sidebarBar.press(sidebarTrack(), x, y)) { sideScroll = sidebarBar.drag(sidebarTrack(), y, true); return; }
+    if (!isolatedRules() && !embedded() && button == 0 && sidebarBar.press(sidebarTrack(), x, y)) { sideScroll = sidebarBar.drag(sidebarTrack(), y, true); return; }
     if (!libraryVisible() && button == 0 && contentBar.press(contentTrack(), x, y)) { scroll = contentBar.drag(contentTrack(), y, true); return; }
     if (button == 0 && (libraryVisible() || !history.isEmpty()) && inside(x, y, left(), 27, 44, 20)) {
       click(); if (libraryVisible()) library.back(this::closeLibrary); else back(); return;
@@ -724,7 +796,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     search.focused = false;
     if (library != null) library.unfocus();
-    if (!isolatedRules() && button == 0 && y >= 24 && y < bottom() && x >= origin() && x < origin() + sidebar()) {
+    if (!isolatedRules() && !embedded() && button == 0 && y >= 24 && y < bottom() && x >= origin() && x < origin() + sidebar()) {
       int index = (int) ((y - 24 + sideScroll) / 22);
       if (index >= 0 && index < pages.size()) {
         boolean same = pages.get(index).equals(page);
@@ -903,7 +975,7 @@ public final class PowerOptionsScreen extends UiScreen {
       click();
       if (editorReturn != null) { returnToEditor(); return; }
       if (session.changes() > 0) confirmClose = true;
-      else minecraft.setScreen(parent);
+      else closeOptions();
       return;
     }
     if (inside(x, y, actionX(1), height - 28, actionWidth(), 20)) save(false);
@@ -914,10 +986,12 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!SettingAccess.reason(session, s).isEmpty()) return;
     error = "";
     click();
+    if (s.id.equals("rules.review")) { reviewRules(); return; }
     if (s.id.equals("interface.debugOrder")) {
       openHudSetting(s.id).beginReorder(); return;
     }
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor")) {
+      if (embedded()) { minimapAppearance(""); return; }
       openHudSetting(s.id.equals("maps.hudEditor") ? "maps.size" : s.id);
       return;
     }
@@ -942,7 +1016,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (ColorSettings.accepts(s)) {
       Setting swatches = session.settings().stream().filter(value -> value.id.equals("interface.colours")).findFirst().orElse(null);
-      minecraft.setScreen(new ColourScreen(this, s, ColorSettings.opacity(s, session.settings()),
+      minecraft.setScreen(new ColourScreen(returnScreen(), s, ColorSettings.opacity(s, session.settings()),
           () -> changed(ColorSettings.linked(s, session.settings()), false), swatches));
       return;
     }
@@ -961,7 +1035,7 @@ public final class PowerOptionsScreen extends UiScreen {
               new IntegerArrayDraft.Rules(2, 32, 16, true), "Distance", "chunks"));
         else if (s.id.equals("audio.musicDirectories") || s.id.equals("audio.menuDirectories"))
           minecraft.setScreen(new FolderScreen(this, s));
-        else minecraft.setScreen(new ValueScreen(this, s));
+        else minecraft.setScreen(new ValueScreen(s, returnScreen(), () -> changed(s)));
       }
       default -> {
         s.cycle(direction);
@@ -1009,12 +1083,13 @@ public final class PowerOptionsScreen extends UiScreen {
       else {
         try {
           session.discard();
-          minecraft.setScreen(exitTarget);
+          closeOptions();
         } catch (Exception e) { error = "Could not restore settings: " + e.getMessage(); confirmClose = false; }
       }
     } else if (inside(x, y, width / 2 - 50, cy + 24, 100, 20)) {
       confirmClose = false;
       confirmReset = false;
+      embeddedClose = null;
       exitTarget = parent;
     }
   }
@@ -1043,7 +1118,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (confirmClose || confirmReset) {
       if (key == Keyboard.KEY_ESCAPE) {
-        confirmClose = confirmReset = false; exitTarget = parent;
+        confirmClose = confirmReset = false; embeddedClose = null; exitTarget = parent;
       }
       return;
     }
@@ -1058,7 +1133,7 @@ public final class PowerOptionsScreen extends UiScreen {
         return;
       }
       if (session != null && session.changes() > 0) confirmClose = true;
-      else minecraft.setScreen(parent);
+      else closeOptions();
       return;
     }
     if ((Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) || Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))
@@ -1072,8 +1147,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (libraryVisible()) { library.keyPressed(c, key); return; }
     if (search.focused) {
       String before = search.text();
+      View searchOrigin = embedded() && before.isBlank() ? view() : null;
       search.key(c, key);
       if (!before.equals(search.text())) {
+        if (searchOrigin != null && !search.text().isBlank()) { pushView(searchOrigin); search.focused = true; }
         conflictIds = List.of();
         highlightedId = "";
         scroll = 0;
@@ -1107,6 +1184,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private String value(Setting s) {
     if (ColorSettings.accepts(s)) return ColorSettings.label(s, session.settings());
     if (s.id.equals("interface.debugOrder")) return "Reorder";
+    if (s.id.equals("rules.review")) return "Review...";
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || s.id.equals("logo.logo.lines")) return "Edit...";
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) return local.luke.power.input.PanoramaCatalog.label(s.value.getAsString());
@@ -1159,7 +1237,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void renderSidebar(int mx, int my) {
-    if (isolatedRules()) return;
+    if (isolatedRules() || embedded()) return;
     fill(origin() + sidebar() + 4, 24, origin() + sidebar() + 7, bottom(), 0x90404040);
     fill(origin() + sidebar() + 7, 24, origin() + sidebar() + 8, bottom(), 0x90000000);
     clip(origin(), 24, sidebar() + 2, bottom() - 24);
@@ -1188,7 +1266,7 @@ public final class PowerOptionsScreen extends UiScreen {
   public void render(int mx, int my, float delta) {
     valueEditor.beginFrame();
     if (!hidden && !confirmClose && !confirmReset && capture == null) {
-      if (!isolatedRules()) sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
+      if (!isolatedRules() && !embedded()) sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
       if (!libraryVisible()) scroll = contentBar.drag(contentTrack(), my, Mouse.isButtonDown(0));
     }
     // This wait belongs only to binding capture, never gameplay input.
@@ -1205,11 +1283,13 @@ public final class PowerOptionsScreen extends UiScreen {
       button("Show options", disabledX(), height - 28, 90, 20, mx, my, true);
       return;
     }
-    renderBackground();
-    fill(0, 0, width, 22, 0x70000000);
+    if (!embedded()) renderBackground();
+    else fill(origin(), 0, right(), height, 0xc0141414);
+    fill(origin(), 0, right(), 22, 0x70000000);
     fill(origin(), footerY() - 10, right(), height, 0x90000000);
     drawCenteredTextWithShadow(textRenderer, fit(savedWorldName != null ? "Game rules: " + savedWorldName
-        : creationRules != null ? "New world game rules" : rulesToolbar() ? "New world defaults" : "Options", width - 24), width / 2, 7, 0xffffff);
+        : embedded() ? mapView.equals("Minimap") ? "Minimap appearance" : mapView.equals("Controls") ? "Map controls" : "Map settings"
+        : creationRules != null ? "New world game rules" : rulesToolbar() ? "New world defaults" : "Options", uiWidth() - 24), origin() + uiWidth() / 2, 7, 0xffffff);
     if (session == null) {
       text(error, 10, 45, 0xff8888);
       button("Back", width / 2 - 50, height - 28, 100, 20, mx, my, true);
@@ -1235,7 +1315,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
         !conflictIds.isEmpty() ? "Conflicting bindings"
-        : changedOnly ? "Search changed settings..." : "Search all settings...");
+        : changedOnly ? "Search changed settings..." : embedded() ? "Search maps and controls..." : "Search all settings...");
     if (canClear()) button("x", clearSearchX(), 27, 18, 20, mx, my, true);
     boolean expandSections = libraryVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
     iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 18, 20, mx, my,

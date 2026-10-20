@@ -55,7 +55,8 @@ public final class DefaultBases {
   public static JsonElement value(Base base, String id, JsonElement powerBeta) {
     JsonObject values = OVERRIDES.getAsJsonObject(base.id);
     String lookup = id.startsWith("rules.") ? "rule." + id.substring(id.lastIndexOf('.') + 1) : id;
-    return values != null && values.has(lookup) ? values.get(lookup).deepCopy() : powerBeta.deepCopy();
+    return values != null && values.has(id) ? values.get(id).deepCopy()
+        : values != null && values.has(lookup) ? values.get(lookup).deepCopy() : powerBeta.deepCopy();
   }
   public static void use(Base base, Path game) throws Exception {
     ConfigSession session = new ConfigSession(); DefaultsBackend.register(session);
@@ -63,6 +64,7 @@ public final class DefaultBases {
     session.save(game); reload();
   }
   public static boolean load(Base base, Minecraft mc, Path game) throws Exception {
+    if (RuleDefaults.review().required()) RuleDefaults.resetLatest();
     ConfigSession session = SettingsRegistry.openDefaults(mc);
     Set<String> libraries = Set.of("audio.presets", "audio.favourites", "logo.presets", "interface.debugPresets", "interface.colours");
     for (Setting setting : session.settings()) {
@@ -72,6 +74,8 @@ public final class DefaultBases {
     session.settings().stream().filter(s -> s.id.equals("defaults.base")).forEach(s -> s.value = new JsonPrimitive(base.id));
     session.settings().stream().filter(s -> s.id.equals("defaults.setupComplete")).forEach(s -> s.value = new JsonPrimitive(true));
     boolean restart = session.restartRequired();
-    session.save(game); reload(); return restart;
+    session.save(game); reload();
+    RuleDefaults.review().commit(false);
+    return restart;
   }
 }

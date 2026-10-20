@@ -117,9 +117,13 @@ final class HudPreview {
       }
     }
     if (bool(HudEditorSettings.HUD + "disableCrosshair")) {
-      GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
-      texture(screen, mc, "/gui/icons.png", width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
-      GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      if (scenario == 2 && bool("interface.debugAxes"))
+        DebugAxes.draw(width / 2, height / 2, -35, 20, (double)mc.displayWidth / screen.width);
+      else {
+        GL11.glBlendFunc(GL11.GL_ONE_MINUS_DST_COLOR, GL11.GL_ONE_MINUS_SRC_COLOR);
+        texture(screen, mc, "/gui/icons.png", width / 2 - 7, height / 2 - 7, 0, 0, 16, 16);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+      }
       elements.add(new Element("crosshair", "Crosshair", width / 2 - 7, height / 2 - 7, 16, 16, null, null));
     }
     if (bool(HudEditorSettings.HUD + "drawXboxXAndYButtons")) {
@@ -138,8 +142,9 @@ final class HudPreview {
       elements.add(new Element("toast", "Achievement toast", x, 0, 160, 32, null, null));
     }
     if (showChat) {
-      String[] messages = {"<Player> Hello!", "<Player> Welcome back."};
-      int count = Math.min(messages.length, Math.max(0, integer(HudEditorSettings.HUD + "chatHistorySize")));
+      String[] messages = {"<Player> Hello!", "<You> Saved note."};
+      int count = Math.min(1, Math.max(0, integer(HudEditorSettings.HUD + "chatHistorySize")))
+          + Math.min(1, Math.max(0, integer(HudEditorSettings.HUD + "playerMessageHistorySize")));
       for (int i = 0; i < count; i++) {
         int y = height - 48 - i * 9;
         screen.rectangle(2, y - 1, Math.min(width - 2, 322), y + 8, 0x80000000);

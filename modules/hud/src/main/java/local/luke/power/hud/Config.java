@@ -15,13 +15,16 @@ public class Config {
     public static final Config.HudPositionsFields hudpositions = new Config.HudPositionsFields();
 
     public static class ConfigFields {
+        public ConfigFields() { local.luke.power.chat.ChatNotes.limits(() -> chatHistorySize, () -> playerMessageHistorySize); }
+        @ConfigEntry(name = "Saved player messages", description = "Keep messages you type across sessions, separately from other chat.", minLength = 1, maxLength = 5000)
+        public Integer playerMessageHistorySize = 100;
         @ConfigEntry(name = "Allow Chat Scroll")
         public Boolean enableChatScroll = true;
 
         @ConfigEntry(
                 name = "Chat History Size",
-                description = "50 = vanilla, 100 = default",
-                maxLength = 4096
+                description = "Messages from other players and the game; saved player messages have a separate limit.",
+                minLength = 1, maxLength = 5000
         )
         public Integer chatHistorySize = 100;
 

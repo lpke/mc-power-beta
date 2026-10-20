@@ -148,4 +148,13 @@ class PowerConfigTest {
     assertThrows(IllegalStateException.class,PowerConfig::document);
     assertEquals(original,Files.readString(config));
   }
+  @Test void incompatibleTemplatesArePreservedForReviewWithoutBlockingUnrelatedPreferences() throws Exception {
+    JsonObject root = new JsonObject(); root.addProperty("schemaVersion", 7);
+    JsonObject settings = new JsonObject(), templates = new JsonObject(), future = new JsonObject();
+    future.addProperty("version", 99); future.add("values", new JsonObject()); templates.add("survival", future);
+    settings.add("gameRules", templates); root.add("settings", settings); PowerConfig.write(root);
+    JsonObject other = new JsonObject(); other.addProperty("test", true); PowerConfig.put("unrelated", other);
+    assertEquals(templates, PowerConfig.section("gameRules"));
+    assertThrows(IllegalArgumentException.class, local.luke.power.rules.RulePresets::survival);
+  }
 }

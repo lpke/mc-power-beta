@@ -10,6 +10,12 @@ public final class SettingsRegistry {
     return s;
   }
 
+  public static ConfigSession openMap(Minecraft mc) throws Exception {
+    ConfigSession s = new ConfigSession();
+    NativeBackend.register(s, mc); MapBackend.register(s); InterfaceBackend.register(s);
+    return s;
+  }
+
   public static ConfigSession openDefaults(Minecraft mc) throws Exception {
     ConfigSession s = globals(mc);
     RulePresetBackend.register(s);

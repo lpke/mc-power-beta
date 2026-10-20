@@ -215,7 +215,7 @@
   Damping must give the same displacement across uneven frame intervals.
   Hide the HUD on entry only when requested, default off. Allow manual F1 changes
   during the visit and restore its entry state on every exit. Freecam and Spectator
-  never use front view, regardless of perspective style or HUD visibility. Proximity must never hide the player's body.
+  never use front view, regardless of perspective style or HUD visibility. On freecam entry, hide the stationary player only until the view first leaves its head; after that, proximity never hides it during that visit.
   Container previews use a separate interpolated, occluded ray and configured
   Creative block/entity reach in every mode, including with the HUD hidden. Reject
   unloaded terrain before raycasting; never load chunks, open inventories or change
@@ -257,6 +257,10 @@
   `python3 tools/update_artifacts.py /path/to/instance`. It refuses running clients,
   verifies a backup and checks that settings and worlds remain byte-identical.
   Configuration changes are separate, backed-up operations through `PowerConfig`.
+  When updating a user's instances, also refresh the Survival and Cheats creation
+  templates to the latest selected Defaults base using `upgradeInstance -PinstanceRuleDefaults`.
+  This operation must verify a durable backup and preserve all other preferences,
+  existing world rules, player data and recovery records.
 - Verify the final export contains seven enabled JARs and no test fixtures, accounts,
   worlds, logs or disabled mods. Keep README human-facing; add lasting implementation
   constraints here rather than another session diary.
@@ -563,3 +567,15 @@
   preserve unrelated attack delays, native damage, Creative held repeats and multiplayer.
   Map spawn-light shading uses its own radius and bounded, tick-owned loaded-terrain
   surveys; rendering reads snapshots and disabled maps perform no survey work.
+
+- World-map settings reuse the scoped Options session with the map as the active
+  screen. Render, input, search, related jumps and reset targets share the same
+  full-GUI viewport; nested editors return to that host without publishing drafts.
+- Creation-template review revisions are independent of configuration and world-rule
+  formats. Preserve unsupported template documents for review while unrelated
+  preferences remain readable. Use RuleDefaults for selected-base targets and
+  acknowledged revisions; strict RuleSet readers still reject incompatible values.
+  Reset and Keep require conditional, backed-up PowerConfig section replacement.
+- Saved local chat messages are user data, separate from ordinary transcript limits.
+  Never persist server transcripts or send restored notes to the network. Commands
+  remain in sent-message recall; restored notes appear only in scrollback.

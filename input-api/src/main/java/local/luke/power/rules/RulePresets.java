@@ -4,26 +4,24 @@ import com.google.gson.*;
 import java.io.IOException;
 import local.luke.power.storage.PowerConfig;
 
-/** Global creation templates. Readers always receive independent drafts. */
+/** Global creation templates. Always read independent drafts, including after rollback or maintenance. */
 public final class RulePresets {
-  private static RuleSet survival, cheats;
   private RulePresets() {}
-  private static void load() {
-    if (survival != null) return;
-    JsonObject value = PowerConfig.section("gameRules");
-    RuleSet s = read(value, "survival", new RuleSet());
-    RuleSet c = read(value, "cheats", RuleSet.cheats());
-    survival = s; cheats = c;
+  private static RuleSet read(String id, RuleSet defaults) {
+    JsonObject root = PowerConfig.document();
+    JsonElement section = root.getAsJsonObject("settings").get("gameRules");
+    if (section == null) return defaults;
+    if (!section.isJsonObject()) throw new IllegalArgumentException("Review creation defaults before creating a world.");
+    JsonObject templates = section.getAsJsonObject();
+    if (!templates.has(id)) return defaults;
+    JsonObject evidence = root.has("worldRuleUpgrade210") ? root.getAsJsonObject("worldRuleUpgrade210") : new JsonObject();
+    return TemplateDocuments.read(templates.get(id), id.equals("cheats"), evidence);
   }
-  private static RuleSet read(JsonObject object, String id, RuleSet defaults) {
-    return object.has(id) ? RuleSet.read(object.getAsJsonObject(id), defaults) : defaults;
-  }
-  public static synchronized RuleSet survival() { load(); return survival.copy(); }
-  public static synchronized RuleSet cheats() { load(); return cheats.copy(); }
+  public static RuleSet survival() { return read("survival", new RuleSet()); }
+  public static RuleSet cheats() { return read("cheats", RuleSet.cheats()); }
   public static synchronized void save(RuleSet s, RuleSet c) throws IOException {
-    JsonObject object = new JsonObject();
+    JsonObject object = PowerConfig.section("gameRules");
     object.add("survival", s.document()); object.add("cheats", c.document());
     PowerConfig.put("gameRules", object);
-    survival = s.copy(); cheats = c.copy();
   }
 }

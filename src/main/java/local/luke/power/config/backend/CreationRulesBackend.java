@@ -12,7 +12,7 @@ public final class CreationRulesBackend implements Backend {
   public static ConfigSession open(CreationRules draft) {
     ConfigSession session = new ConfigSession();
     CreationRulesBackend backend = new CreationRulesBackend(draft);
-    session.add(backend, RuleSettings.entries(backend.id(), "rules.creation.", draft.custom(), new RuleSet()));
+    session.add(backend, RuleSettings.entries(backend.id(), "rules.creation.", draft.custom(), RuleDefaults.latest(DefaultBases.Base.POWER_BETA, false)));
     return session;
   }
   public String id() { return "creationRules"; }

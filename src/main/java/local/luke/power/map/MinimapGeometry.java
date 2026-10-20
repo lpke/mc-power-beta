@@ -10,7 +10,13 @@ public final class MinimapGeometry {
   public record Layout(int x, int y, int size) {}
   public record Box(int x, int y, int width, int height) {}
   public record Label(String text, double x, double y, double scale) {}
-  public record Frame(Layout layout, Box bounds, List<Label> labels) {}
+  public record Frame(Layout layout, Box bounds, List<Label> labels) {
+    public Frame translated(int dx, int dy) {
+      return new Frame(new Layout(layout.x + dx, layout.y + dy, layout.size),
+          new Box(bounds.x + dx, bounds.y + dy, bounds.width, bounds.height),
+          labels.stream().map(label -> new Label(label.text, label.x + dx, label.y + dy, label.scale)).toList());
+    }
+  }
   public record Point(double x, double y) {}
   private MinimapGeometry() {}
 

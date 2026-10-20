@@ -84,6 +84,16 @@ public class GameRendererMixin {
 		GL11.glRotatef(cameraPosition.yaw, 0f, 1f, 0f);
 		GL11.glTranslatef(-(float)cameraPosition.x, -(float)cameraPosition.y, -(float)cameraPosition.z);
         if (Freecam.freecamController.firstFramePending()) lastTime = System.nanoTime();
+        if (local.luke.power.input.DetachedCamera.hidesEntryBody()) {
+            power$viewBuffer.clear();
+            GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, power$viewBuffer);
+            power$viewBuffer.get(power$view);
+            power$view[12] -= power$eyeOffset;
+            Freecam.freecamController.updateEntryHead(CameraPose.fromView(power$view,
+                    player.prevX + (player.x - player.prevX) * par1,
+                    player.prevY + (player.y - player.prevY) * par1,
+                    player.prevZ + (player.z - player.prevZ) * par1, player.yaw + 180), player, par1);
+        }
         Freecam.freecamController.frameRendered();
 		ci.cancel();
 	}

@@ -628,3 +628,5 @@ for press/release, cycling, remaps, focus/menu/world cancellation and held movem
   the leaf preference and fractional values in all six flight response settings.
 
 - `release-300 refinement` checks native coarse-to-fine pixels after panning while fine data is pending, with no world sampling or map file work.
+
+`release-310 suite` checks map sidecar scope, related navigation, color return, manual previews, resize fallback, F3 preview and template review. `release-310 notes-write` then a real restart and `release-310 notes-read` check persisted local messages. Disposable clones only.

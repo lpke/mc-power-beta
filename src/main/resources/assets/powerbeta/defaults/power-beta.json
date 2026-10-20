@@ -53,7 +53,8 @@
       "drawXboxXAndYButtons": false,
       "enableHotbarBlockRenderingFix": true,
       "enableHotbarItemSelectionTooltips": false,
-      "hotbarItemSelectionFadeTime": 40
+      "hotbarItemSelectionFadeTime": 40,
+      "playerMessageHistorySize": 100
     },
     "power_hud:hudpositions": {
       "ADVANCED_HUD_POSITIONS_CONFIG": {
@@ -563,7 +564,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 3.0.0"
+        "customVersionText": "Power Beta 3.1.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -781,7 +782,8 @@
       ],
       "pauseToolsPosition": 0,
       "pauseMapButton": true,
-      "pauseWaypointsButton": true
+      "pauseWaypointsButton": true,
+      "debugAxes": true
     },
     "death": {
       "enabled": true,
@@ -1008,6 +1010,13 @@
           "explosion_drop_chance": 100,
           "allow_sprinting": true
         }
+      },
+      "review": {
+        "format": 1,
+        "base": "power_beta",
+        "defaultsRevision": 2,
+        "rulesVersion": 3,
+        "release": "3.1.0"
       }
     },
     "bindings": {

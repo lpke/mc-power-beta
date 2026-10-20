@@ -14,7 +14,8 @@ public abstract class ScreenFullscreenMixin {
   @ModifyConstant(method = "onKeyboardEvent", constant = @Constant(intValue = 87))
   private int power$fullscreenBinding(int original) {
     if (Keyboard.isRepeatEvent()
-        || (Object)this instanceof PowerOptionsScreen options && options.capturingBinding()) return -1000;
+        || (Object)this instanceof PowerOptionsScreen options && options.capturingBinding()
+        || (Object)this instanceof local.luke.power.ui.WorldMapScreen map && map.capturingBinding()) return -1000;
     return FullscreenKey.eventCode(KeyBindingListener.toggleFullscreen);
   }
 }

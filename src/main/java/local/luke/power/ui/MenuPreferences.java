@@ -14,7 +14,7 @@ public final class MenuPreferences {
     public boolean pauseMapButton = true, pauseWaypointsButton = true;
     public boolean blinkingUiCursor = true;
     public boolean hidePowerBetaVersion;
-    public boolean debugTimeOfDay, useFeetYCoordinates = true;
+    public boolean debugAxes, debugTimeOfDay, useFeetYCoordinates = true;
     public String debugTextColor = "#FFFFFF";
     public double debugTextSize = 1;
     public List<String> debugOrder = DebugOrder.defaults();
@@ -47,7 +47,7 @@ public final class MenuPreferences {
   private static Boolean pauseMapPreview, pauseWaypointsPreview;
   private static Boolean blinkPreview, uiBlinkPreview;
   private static String debugColorPreview;
-  private static Boolean debugTimePreview;
+  private static Boolean debugTimePreview, debugAxesPreview;
   private static Boolean feetYPreview;
   private static Boolean powerVersionPreview;
   private static Double debugSizePreview;
@@ -97,6 +97,8 @@ public final class MenuPreferences {
   public static boolean blinkingUiCursor() { return uiBlinkPreview == null ? current.blinkingUiCursor : uiBlinkPreview; }
   public static void previewUiBlink(boolean enabled) { uiBlinkPreview = enabled; syncPresentation(); }
   public static boolean blinkingChatCursor() { return blinkPreview == null ? current.blinkingChatCursor : blinkPreview; }
+  public static boolean debugAxes() { return debugAxesPreview == null ? current.debugAxes : debugAxesPreview; }
+  public static void previewDebugAxes(boolean enabled) { debugAxesPreview = enabled; syncPresentation(); }
   public static boolean debugTimeOfDay() { return debugTimePreview == null ? current.debugTimeOfDay : debugTimePreview; }
   public static void previewDebugTime(boolean enabled) { debugTimePreview = enabled; }
   public static boolean useFeetYCoordinates() { return feetYPreview == null ? current.useFeetYCoordinates : feetYPreview; }
@@ -117,6 +119,7 @@ public final class MenuPreferences {
   public static void syncPresentation() {
     InterfaceState.blinkingChatCursor = blinkingChatCursor();
     InterfaceState.blinkingUiCursor = blinkingUiCursor();
+    InterfaceState.debugAxes = debugAxes();
     InterfaceState.debugTextColor = LightSettings.rgb(debugTextColor());
   }
 }

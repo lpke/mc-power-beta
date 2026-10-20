@@ -35,7 +35,7 @@ public final class ConfigDefaults {
         initializeGameplay(game);
         initializeMaps(game);
         initializeExtraSounds(game);
-        initializePauseTools(game);
+        initializeInterface(game);
       }
     }
   }
@@ -65,10 +65,10 @@ public final class ConfigDefaults {
     }
   }
 
-  private static void initializePauseTools(Path game) throws IOException {
+  private static void initializeInterface(Path game) throws IOException {
     JsonObject menu = PowerConfig.section("interface");
     boolean changed = false;
-    for (String key : java.util.List.of("pauseMapButton", "pauseWaypointsButton")) {
+    for (String key : java.util.List.of("pauseMapButton", "pauseWaypointsButton", "debugAxes")) {
       if (menu.has(key)) continue;
       menu.add(key, DefaultBases.value("interface." + key, new JsonPrimitive(true)));
       changed = true;

@@ -274,12 +274,12 @@
   "power_hud:config.chatHistorySize": {
     "page": "Interface",
     "group": "Chat",
-    "label": "Chat history size",
-    "description": "50 = vanilla, 100 = default",
+    "label": "Other chat history",
+    "description": "Number of messages from other players and the game kept in chat. Lower values keep less scrollback and use less memory; higher values keep more. Your saved messages have their own limit.",
     "default": 100,
     "restart": false,
     "min": 1,
-    "max": 10000,
+    "max": 5000,
     "step": 1,
     "control": "number"
   },
@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 3.0.0",
+    "default": "Power Beta 3.1.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6164,5 +6164,17 @@
     "max": 128,
     "step": 1,
     "order": 12
+  },
+  "power_hud:config.playerMessageHistorySize": {
+    "page": "Interface",
+    "group": "Chat",
+    "label": "Saved player messages",
+    "description": "Keep messages you type across sessions, separately from other chat. Lower values keep fewer notes; higher values keep more. Commands remain in sent-message recall. Chat can scroll through both limits combined.",
+    "default": 100,
+    "restart": false,
+    "min": 1,
+    "max": 5000,
+    "step": 1,
+    "control": "number"
   }
 }

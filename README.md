@@ -27,7 +27,7 @@ improvements and optional tweaks in one searchable Options menu.
 - Creative item categories and a survival inventory view. Shift-click for full stacks, middle-drag to fill slots, and use a destroy slot or clear the inventory.
 - WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
 - Commands with completion, editable history and help, including teleportation, saved waypoints, world spawn, time, weather, spawning and item commands.
-- Chat selection, copy/paste, cursor navigation, scrolling, configurable history and fade time, and preserved color across wrapped lines.
+- Chat selection, copy/paste, cursor navigation, scrolling and fade controls. Keep your own messages across sessions with a separate history limit from other chat.
 - Death records with locations, causes and original inventory layouts. View lost items and recover them when the world allows it, including crafting inputs. Independent keep-inventory rule.
 - Free camera with adjustable speed, drag, collisions and separate player movement; free look, cinematic camera, field of view, adjustable third-person distance and front view.
 - Isometric captures with rotation, scale and mirroring, custom-resolution screenshots, clipboard copying and photo mode.
@@ -115,6 +115,9 @@ Options > Map contains map switches, caves, waypoints and performance settings.
 Terrain updates per second controls sampling work; minimap movement, rotation and
 world-map panning follow every rendered frame. World-map detail follows physical
 window pixels, with separate automatic-detail and smoothing controls.
+On wide windows, Settings in the world map opens a sidebar beside the live map and
+minimap. Search covers map controls and minimap appearance; related-control jumps
+keep a Back action inside the sidebar. Smaller windows use the full Options screen.
 Its appearance button opens the minimap section of the HUD editor for position,
 size, zoom, colors, radar, overlays and information. Shared appearance controls also
 affect the world map. These edits use the same Done, Undo and

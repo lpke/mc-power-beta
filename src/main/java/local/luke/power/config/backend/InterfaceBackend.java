@@ -29,6 +29,9 @@ public final class InterfaceBackend implements Backend {
             new Setting("interface.debugRightOrder", "interface", "Interface", "Debug (F3) info", "Right info order", "",
                 Setting.Kind.LIST, Catalog.JSON.toJsonTree(MenuPreferences.debugRightOrder()),
                 Catalog.JSON.toJsonTree(local.luke.power.ui.DebugColumns.defaultRight()), 0, 0, 1, List.of(), false),
+            new Setting("interface.debugAxes", "interface", "Interface", "Debug (F3) info", "XYZ crosshair",
+                "Replace the crosshair with red X, green Y and blue Z axes while F3 is open in first person.", Setting.Kind.BOOLEAN,
+                new JsonPrimitive(MenuPreferences.debugAxes()), new JsonPrimitive(false), 0, 1, 1, List.of(), false),
             new Setting("interface.debugTextSize", "interface", "Interface", "Debug (F3) info", "Text size",
                 "Scale the F3 information in both columns.", Setting.Kind.DECIMAL,
                 new JsonPrimitive(MenuPreferences.debugTextSize()), new JsonPrimitive(1), .5, 3, .1, List.of(), false),
@@ -112,7 +115,7 @@ public final class InterfaceBackend implements Backend {
         }
       } else if (e.getKey().equals("interface.debugTextColor")) {
         local.luke.power.light.LightSettings.rgb(e.getValue().getAsString());
-      } else if ((!e.getKey().equals("interface.autoApply") && !e.getKey().equals("interface.hidePowerBetaVersion") && !e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.pauseMapButton") && !e.getKey().equals("interface.pauseWaypointsButton") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
+      } else if ((!e.getKey().equals("interface.debugAxes") && !e.getKey().equals("interface.autoApply") && !e.getKey().equals("interface.hidePowerBetaVersion") && !e.getKey().equals("interface.pauseToOptions") && !e.getKey().equals("interface.pauseMapButton") && !e.getKey().equals("interface.pauseWaypointsButton") && !e.getKey().equals("interface.blinkingChatCursor") && !e.getKey().equals("interface.blinkingUiCursor") && !e.getKey().equals("interface.debugTimeOfDay") && !e.getKey().equals("interface.useFeetYCoordinates"))
           || !e.getValue().isJsonPrimitive() || !e.getValue().getAsJsonPrimitive().isBoolean())
         throw new IllegalArgumentException("Invalid interface preference");
     }
@@ -127,6 +130,7 @@ public final class InterfaceBackend implements Backend {
     if (values.containsKey("interface.pauseToolsPosition")) MenuPreferences.previewPauseTools(values.get("interface.pauseToolsPosition").getAsInt());
     if (values.containsKey("interface.pauseMapButton")) MenuPreferences.previewPauseMap(values.get("interface.pauseMapButton").getAsBoolean());
     if (values.containsKey("interface.pauseWaypointsButton")) MenuPreferences.previewPauseWaypoints(values.get("interface.pauseWaypointsButton").getAsBoolean());
+    if (values.containsKey("interface.debugAxes")) MenuPreferences.previewDebugAxes(values.get("interface.debugAxes").getAsBoolean());
     if (values.containsKey("interface.debugOrder")) MenuPreferences.previewDebugOrder(local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder")));
     if (values.containsKey("interface.debugRightOrder")) MenuPreferences.previewDebugRightOrder(local.luke.power.ui.DebugOrder.read(values.get("interface.debugRightOrder")));
     if (values.containsKey("interface.debugTextSize")) MenuPreferences.previewDebugSize(values.get("interface.debugTextSize").getAsDouble());
@@ -153,6 +157,7 @@ public final class InterfaceBackend implements Backend {
       if (values.containsKey("interface.pauseToolsPosition")) v.pauseToolsPosition = values.get("interface.pauseToolsPosition").getAsInt();
       if (values.containsKey("interface.pauseMapButton")) v.pauseMapButton = values.get("interface.pauseMapButton").getAsBoolean();
       if (values.containsKey("interface.pauseWaypointsButton")) v.pauseWaypointsButton = values.get("interface.pauseWaypointsButton").getAsBoolean();
+      if (values.containsKey("interface.debugAxes")) v.debugAxes = values.get("interface.debugAxes").getAsBoolean();
       if (values.containsKey("interface.autoApply")) v.autoApply = values.get("interface.autoApply").getAsBoolean();
       if (values.containsKey("interface.debugPresets")) v.debugPresets = local.luke.power.ui.DebugPresets.checked(values.get("interface.debugPresets"));
       if (values.containsKey("interface.debugOrder")) v.debugOrder = local.luke.power.ui.DebugOrder.read(values.get("interface.debugOrder"));

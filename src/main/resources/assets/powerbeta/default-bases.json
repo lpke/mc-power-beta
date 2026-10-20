@@ -68,7 +68,9 @@
     "sprint.rechargeStill": 7.5,
     "sprint.restartStamina": 30,
     "sprint.stamina": true,
-    "sprint.noSprintInCombat": true
+    "sprint.noSprintInCombat": true,
+    "interface.debugAxes": true,
+    "rules.cheats.allow_sprinting": true
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -278,7 +280,9 @@
     "sprint.rechargeStill": 7.5,
     "sprint.restartStamina": 30,
     "sprint.stamina": false,
-    "sprint.noSprintInCombat": false
+    "sprint.noSprintInCombat": false,
+    "interface.debugAxes": false,
+    "rules.cheats.allow_sprinting": true
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -449,6 +453,8 @@
     "sprint.rechargeStill": 7.5,
     "sprint.restartStamina": 30,
     "sprint.stamina": false,
-    "sprint.noSprintInCombat": false
+    "sprint.noSprintInCombat": false,
+    "interface.debugAxes": false,
+    "rules.cheats.allow_sprinting": true
   }
 }

@@ -24,6 +24,7 @@ public class FreecamController {
         local.luke.power.input.DetachedCamera.register(this::isActive,
                 () -> cameraPosition.x, () -> cameraPosition.y, () -> cameraPosition.z,
                 () -> cameraPosition.pitch, () -> cameraPosition.yaw);
+        local.luke.power.input.DetachedCamera.entryBodyVisibility(entryHead::hidden);
         local.luke.power.input.MovementOwnership.registerCamera(() -> isActive() && !allowPlayerMovement);
         local.luke.power.input.TweakIndicators.register(
             local.luke.power.input.TweakIndicators.Tweak.FREECAM_PLAYER_MOVEMENT,
@@ -31,6 +32,16 @@ public class FreecamController {
             () -> local.luke.power.camera.FreecamConfig.config.playerMovementMessages);
     }
     private boolean active;
+    private final local.luke.power.input.HeadReveal entryHead = new local.luke.power.input.HeadReveal();
+    public void updateEntryHead(CameraPosition view, LivingEntity player, float delta) {
+        double px = player.prevX + (player.x - player.prevX) * delta;
+        double py = player.prevY + (player.y - player.prevY) * delta - player.standingEyeHeight
+            + local.luke.power.input.HeadGeometry.BASE_ABOVE_FEET;
+        double pz = player.prevZ + (player.z - player.prevZ) * delta;
+        entryHead.update(view.x - px, view.y - py, view.z - pz,
+            player.prevYaw + (player.yaw - player.prevYaw) * delta,
+            player.prevPitch + (player.pitch - player.prevPitch) * delta);
+    }
     private Boolean previousHideHud;
     private CameraPosition cameraPosition = new CameraPosition();
     private CameraPosition renderedPosition;
@@ -90,6 +101,8 @@ public class FreecamController {
             }
             if (!active) previousHideHud = null;
         }
+        if (active && !this.active) entryHead.begin();
+        if (!active) entryHead.end();
         this.active = active;
         firstFramePending = active;
         velocityX = velocityY = velocityZ = 0;

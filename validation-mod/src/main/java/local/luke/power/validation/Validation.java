@@ -69,6 +69,7 @@ public final class Validation {
       else if (command.equals("water-253")) Water253Checks.run(mc);
       else if (command.equals("release-253")) Release253Checks.run(mc);
       else if (command.startsWith("release-260 ")) Release260Checks.run(mc,command.substring(12));
+      else if (command.startsWith("release-310 ")) Release310Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-261 ")) Release261Checks.run(mc,command.substring(12));
       else if (command.equals("release-300-freecam-commands")) Release300FreecamCommandsChecks.run(mc);
       else if (command.equals("release-300-rule-editors")) RuleEditorRenderChecks.run(mc);

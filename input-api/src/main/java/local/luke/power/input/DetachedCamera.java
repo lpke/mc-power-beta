@@ -8,6 +8,9 @@ public final class DetachedCamera {
   private static BooleanSupplier active = () -> false;
   private static DoubleSupplier x = () -> 0, y = () -> 0, z = () -> 0;
   private static DoubleSupplier pitch = () -> 0, yaw = () -> 0;
+  private static BooleanSupplier hideEntryBody = () -> false;
+  public static void entryBodyVisibility(BooleanSupplier hidden) { hideEntryBody = hidden; }
+  public static boolean hidesEntryBody() { return isActive() && hideEntryBody.getAsBoolean(); }
   private DetachedCamera() {}
 
   public static void register(BooleanSupplier value) { active = value; }

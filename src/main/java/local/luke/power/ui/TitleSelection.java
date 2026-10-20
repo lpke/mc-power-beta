@@ -49,7 +49,7 @@ public final class TitleSelection {
       for (Setting setting : settings.values()) setting.validate(setting.value);
       Map<String, JsonElement> values = new LinkedHashMap<>();
       settings.forEach((id, setting) -> values.put(id, setting.value.deepCopy()));
-      backend.selectDeferred(values); error = "";
+      backend.selectDeferred(values); TitlePreview.selectionChanged(); error = "";
     } catch (Exception failure) {
       error = "Could not save title selection. Check settings recovery.";
       PowerBeta.LOG.error("Could not change title selection", failure);

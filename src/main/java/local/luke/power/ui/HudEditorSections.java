@@ -27,7 +27,7 @@ final class HudEditorSections {
       if (field.equals("hideWithDebug")) return "Visibility";
       if (Set.of("coordinates", "biome", "clock", "compass", "directionTextSize", "belowTextSize").contains(field)) return "Information";
       if (Set.of("colourMode", "heightShading", "slopeShading", "caveLighting").contains(field)) return "Terrain";
-      if (Set.of("radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight").contains(field)) return "Entity radar";
+      if (Set.of("radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight", "radarDimming", "radarDimDistance").contains(field)) return "Entity radar";
       if (field.startsWith("waypoint") || field.startsWith("minimap") || field.startsWith("destinationArrow")) return "Waypoints";
       if (Set.of("chunkGrid", "slimeChunks", "lightOverlay", "footsteps", "pathColor", "pathOpacity").contains(field)) return "Overlays";
       return "Appearance";
@@ -35,6 +35,7 @@ final class HudEditorSections {
     if (HudEditorSettings.itemNames(s)) return "Item names";
     if (s.group.equals("Chat")) return "Chat history";
     if (Set.of(HudEditorSettings.HUD + "disableCrosshair", HudEditorSettings.HUD + "drawXboxXAndYButtons", HudEditorSettings.TOAST).contains(id)) return "Visibility";
+    if (id.equals("interface.debugAxes")) return "Appearance";
     if (id.equals("interface.debugOrder")) return "Layout";
     for (var line : DebugLines.values()) if (line.setting().equals(id)) return line.culling() ? "Culling statistics" : "Information";
     if (id.equals("power_controls:userinterface.disableDebugEntityIdTags")) return "Appearance";

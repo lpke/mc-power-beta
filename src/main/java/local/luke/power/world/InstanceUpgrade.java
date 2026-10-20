@@ -14,12 +14,23 @@ public final class InstanceUpgrade {
   private InstanceUpgrade() {}
   public static void main(String[] args) throws Exception {
     if (args.length < 1 || args.length > 2) throw new IllegalArgumentException("Usage: GAME_DIRECTORY [--defaults]");
+    boolean templates = args.length == 2 && args[1].equals("--rule-defaults");
     boolean defaults = args.length == 2 && args[1].equals("--defaults");
-    if (args.length == 2 && !defaults) throw new IllegalArgumentException("Unknown option");
+    if (args.length == 2 && !defaults && !templates) throw new IllegalArgumentException("Unknown option");
     Path game = Path.of(args[0]).toRealPath();
     assertIdle(game);
     PowerConfig.configure(game.resolve("config/power-beta.json"));
     FileTransaction.recover(game);
+    if (templates) {
+      local.luke.power.config.DefaultBases.reload();
+      JsonObject before = PowerConfig.document();
+      assertIdle(game); local.luke.power.config.RuleDefaults.resetLatest(); assertIdle(game);
+      JsonObject after = PowerConfig.document();
+      before.getAsJsonObject("settings").remove("gameRules"); after.getAsJsonObject("settings").remove("gameRules");
+      if (!before.equals(after)) throw new IOException("Creation-default maintenance changed unrelated settings.");
+      System.out.println("Updated only Survival and Cheats creation templates for " + local.luke.power.config.DefaultBases.current().label + ". Verified backup retained; worlds untouched.");
+      return;
+    }
     List<Path> files = new ArrayList<>(); files.add(PowerConfig.path());
     if (Files.isDirectory(game.resolve("saves"))) try (var paths = Files.walk(game.resolve("saves"))) {
       files.addAll(paths.filter(Files::isRegularFile).filter(p -> Set.of("level.dat", "level.dat_old").contains(p.getFileName().toString())).sorted().toList());

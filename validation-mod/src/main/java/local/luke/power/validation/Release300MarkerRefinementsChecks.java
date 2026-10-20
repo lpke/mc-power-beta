@@ -65,8 +65,7 @@ final class Release300MarkerRefinementsChecks {
       try {
         // Detach existing GPU resources before either renderer sees the fixture cache.
         ((Map<?, ?>)getStatic(MapRenderer.class, "TEXTURES")).clear(); set(MapRenderer.class, "cache", null);
-        for (String name : List.of("framebuffer", "texture", "side")) set(MinimapBuffer.class, name, 0);
-        set(MinimapBuffer.class, "source", null); set(MinimapBuffer.class, "failed", false);
+        set(MinimapBuffer.class, "active", null); set(MinimapBuffer.class, "preparing", null);
         MenuPreferences.current().autoApply = false;
         mc.options.guiScale = 2; set(scales, "guiScale", 2 / 8f); set(scales, "realGuiScale", 2 / 8f);
         mc.options.hideHud = false; mc.options.thirdPerson = false; mc.options.anaglyph3d = false;

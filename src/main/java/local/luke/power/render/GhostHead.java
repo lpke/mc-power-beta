@@ -26,7 +26,7 @@ public final class GhostHead {
     var player = mc.player;
     boolean detached = DetachedCamera.isActive();
     boolean spectator = player instanceof PlayerMode mode && mode.power$spectator();
-    if (spectator && (detached || mc.options.thirdPerson)) {
+    if (spectator && (detached || mc.options.thirdPerson) && !DetachedCamera.hidesEntryBody()) {
       draw(mc, delta, player.prevX + (player.x - player.prevX) * delta,
           player.prevY + (player.y - player.prevY) * delta - player.field_1631 + HeadGeometry.BASE_ABOVE_FEET,
           player.prevZ + (player.z - player.prevZ) * delta,

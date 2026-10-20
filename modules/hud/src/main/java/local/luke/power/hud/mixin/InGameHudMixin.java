@@ -419,9 +419,18 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
                     ordinal = 2
             )
     )
-    private void powerHud_renderCursor(InGameHud instance, int x, int y, int u, int v, int width, int height, Operation<Void> original) {
+    private void powerHud_renderCursor(InGameHud instance, int x, int y, int u, int v, int width, int height, Operation<Void> original, @com.llamalad7.mixinextras.sugar.Local(argsOnly = true) float delta) {
         if (!Config.config.disableCrosshair) {
-            original.call(instance, x, y, u, v, width, height);
+            if (local.luke.power.ui.InterfaceState.debugAxes && minecraft.options.debugHud && !minecraft.options.thirdPerson) {
+                var camera = minecraft.camera;
+                float yaw = local.luke.power.input.DetachedCamera.isActive()
+                    ? local.luke.power.input.DetachedCamera.facingYaw() : camera.prevYaw + (camera.yaw - camera.prevYaw) * delta;
+                float pitch = local.luke.power.input.DetachedCamera.isActive()
+                    ? (float)local.luke.power.input.DetachedCamera.pitch() : camera.prevPitch + (camera.pitch - camera.prevPitch) * delta;
+                local.luke.power.ui.DebugAxes.draw(scaledWidth / 2, scaledHeight / 2,
+                    local.luke.power.input.CameraView.yaw(yaw + 180) - 180,
+                    local.luke.power.input.CameraView.pitch(pitch), (double)minecraft.displayWidth / scaledWidth);
+            } else original.call(instance, x, y, u, v, width, height);
         } else {
             original.call(instance, 0, 0, 0, 0, 0, 0);
         }
@@ -572,7 +581,7 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
         int row = selection.line(text, renderer, x, scaledHeight - 48 + y, renderer::getWidth);
         if (row >= 0) {
             int start = selection.start(row), end = selection.end(row);
-            if (start >= 0 && end > start) fill(selection.x(row, start), y - 1, selection.x(row, end), y + 8, 0xFF345C91);
+            if (start >= 0 && end > start) fill(selection.x(row, start), y - 1, selection.x(row, end), y + 8, 0xFF316AC5);
         }
         original.call(renderer, text, x, y, color);
     }
@@ -587,7 +596,7 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
             constant = @Constant(intValue = 50)
     )
     public int chatLog_addChatMessageLimit(int value) {
-        return Config.config.chatHistorySize;
+        return Integer.MAX_VALUE; // The shared retention boundary trims each message category after native wrapping.
     }
 
     @Inject(method = "render", at = @At("RETURN"), cancellable = true)

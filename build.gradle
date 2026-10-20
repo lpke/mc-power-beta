@@ -83,6 +83,8 @@ tasks.register('upgradeInstance', JavaExec) {
     doFirst {
         if (!project.hasProperty('instanceGame')) throw new GradleException('Supply -PinstanceGame=/path/to/.minecraft')
         args project.property('instanceGame')
+        if (project.hasProperty('instanceDefaults') && project.hasProperty('instanceRuleDefaults')) throw new GradleException('Choose one maintenance operation')
         if (project.hasProperty('instanceDefaults')) args '--defaults'
+        if (project.hasProperty('instanceRuleDefaults')) args '--rule-defaults'
     }
 }

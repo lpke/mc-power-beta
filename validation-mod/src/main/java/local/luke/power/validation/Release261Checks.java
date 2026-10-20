@@ -462,12 +462,11 @@ public final class Release261Checks {
                         check(GL11.glGetError() == GL11.GL_NO_ERROR, "native text GL error");
                       }
             }
-            var field = MinimapBuffer.class.getDeclaredField("framebuffer");
+            var field = MinimapBuffer.class.getDeclaredField("active");
             field.setAccessible(true);
-            check(field.getInt(null) != 0, "FBO path was never used");
-            var failed = MinimapBuffer.class.getDeclaredField("failed");
-            failed.setAccessible(true);
-            check(!failed.getBoolean(null), "FBO path fell back after allocation failure");
+            Object active = field.get(null); check(active != null, "FBO path was never used");
+            var failed = active.getClass().getDeclaredField("failed"); failed.setAccessible(true);
+            check(!failed.getBoolean(active), "FBO path fell back after allocation failure");
           });
     } finally {
       mc.options.guiScale = nativeScale;

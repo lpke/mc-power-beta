@@ -54,4 +54,14 @@ class MinimapGeometryTest {
         settings.clock ? List.of("32000000, 127, -32000000", "Forest", "12:00")
             : List.of("128, 64, -256", "Forest"), text -> text.length() * 6);
   }
+  @Test void translatedPreviewSharesTerrainLabelsAndHitBounds() {
+    MapSettings settings = new MapSettings();
+    var frame = MinimapGeometry.frame(settings, 560, 540, false, java.util.List.of("128, 64, -256"), text -> text.length() * 6);
+    var shifted = frame.translated(400, 7);
+    assertEquals(frame.layout().x() + 400, shifted.layout().x());
+    assertEquals(frame.bounds().y() + 7, shifted.bounds().y());
+    assertEquals(frame.bounds().width(), shifted.bounds().width());
+    assertEquals(frame.labels().get(0).x() + 400, shifted.labels().get(0).x());
+    assertEquals(frame.labels().get(0).text(), shifted.labels().get(0).text());
+  }
 }

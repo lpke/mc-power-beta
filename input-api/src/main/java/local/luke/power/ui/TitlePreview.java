@@ -17,5 +17,8 @@ public final class TitlePreview {
   public static java.util.function.IntPredicate renderableBlock = id -> false;
   public interface HitTest { boolean contains(int x, int y, int width); }
   public static HitTest hitTest = (x, y, width) -> false;
+  private static long selectionRevision;
+  public static long selectionRevision() { return selectionRevision; }
+  public static void selectionChanged() { selectionRevision++; }
   private TitlePreview() {}
 }

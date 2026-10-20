@@ -187,7 +187,7 @@ class DefaultBasesTest {
     for (var base : DefaultBases.Base.values()) {
       boolean enabled = base == DefaultBases.Base.POWER_BETA;
       for (String scope : List.of("survival", "cheats")) {
-        assertEquals(enabled, DefaultBases.value(base, "rules." + scope + ".allow_sprinting", new JsonPrimitive(false)).getAsBoolean());
+        assertEquals(enabled || scope.equals("cheats"), DefaultBases.value(base, "rules." + scope + ".allow_sprinting", new JsonPrimitive(false)).getAsBoolean());
       }
       for (String id : List.of("sprint.stamina", "sprint.noSprintInCombat"))
         assertEquals(enabled, DefaultBases.value(base, id, new JsonPrimitive(false)).getAsBoolean());
@@ -220,5 +220,25 @@ class DefaultBasesTest {
     assertTrue(DefaultBases.value(DefaultBases.Base.REFINED, "power_controls:bugfixes.miningDelayFix", new JsonPrimitive(false)).getAsBoolean());
     assertFalse(DefaultBases.value(DefaultBases.Base.BETA, "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableLeftClickDrag", yes).getAsBoolean());
     assertTrue(DefaultBases.value(DefaultBases.Base.REFINED, "power_inventory:config.MODERN_MINECRAFT_CONFIG.EnableLeftClickDrag", yes).getAsBoolean());
+  }
+  @Test void creationReviewRejectsStaleWritesAndKeepsVerifiedOriginalBackups() throws Exception {
+    ConfigDefaults.prepare(game);
+    JsonObject rules = PowerConfig.section("gameRules"); rules.remove("review");
+    rules.getAsJsonObject("survival").getAsJsonObject("values").addProperty("allow_sprinting", false);
+    PowerConfig.put("gameRules", rules);
+    byte[] original = Files.readAllBytes(PowerConfig.path());
+    var stale = RuleDefaults.review();
+    stale.commit(false);
+    assertFalse(RuleDefaults.review().required());
+    assertFalse(local.luke.power.rules.RulePresets.survival().enabled(local.luke.power.rules.GameRule.ALLOW_SPRINTING));
+    assertThrows(java.io.IOException.class, () -> stale.commit(true));
+    try (var files = Files.list(PowerConfig.path().getParent().resolve("backups"))) {
+      assertTrue(files.anyMatch(p -> { try { return Arrays.equals(original, Files.readAllBytes(p)); } catch (Exception failure) { return false; } }));
+    }
+    JsonObject before = PowerConfig.document(); RuleDefaults.resetLatest(); JsonObject after = PowerConfig.document();
+    before.getAsJsonObject("settings").remove("gameRules"); after.getAsJsonObject("settings").remove("gameRules");
+    assertEquals(before, after);
+    assertTrue(local.luke.power.rules.RulePresets.survival().enabled(local.luke.power.rules.GameRule.ALLOW_SPRINTING));
+    assertFalse(RuleDefaults.review().required());
   }
 }

@@ -27,6 +27,7 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     @Inject(method = "init", at = @At("RETURN"))
     private void onInit(CallbackInfo ci) {
         local.luke.power.chat.ChatSelection.history.context(null, false);
+        CHAT_HISTORY.clear(); CHAT_HISTORY.addAll(local.luke.power.chat.ChatNotes.history());
         text = initialMessage;
         initialMessage = "";
         textField = new TextFieldWidget(this, textRenderer, 2, height - 14, width - 2, height - 2, text);
@@ -58,8 +59,9 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
             String message = text.trim();
             if (!message.isEmpty() && (CHAT_HISTORY.isEmpty() || !CHAT_HISTORY.get(CHAT_HISTORY.size() - 1).equals(message))) {
                 CHAT_HISTORY.add(message);
-                if (CHAT_HISTORY.size() > 100) CHAT_HISTORY.remove(0);
+                if (CHAT_HISTORY.size() > local.luke.power.chat.ChatNotes.ownLimit()) CHAT_HISTORY.remove(0);
             }
+            local.luke.power.chat.ChatNotes.record(message);
             if (key == Keyboard.KEY_NUMPADENTER) {
                 if (!message.isEmpty() && !minecraft.isCommand(message)) minecraft.player.sendChatMessage(message);
                 if (minecraft.currentScreen == (Object)this) minecraft.setScreen(null);

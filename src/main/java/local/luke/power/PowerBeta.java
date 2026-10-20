@@ -17,6 +17,7 @@ public final class PowerBeta {
       if (mc.inGameHud != null)
         mc.inGameHud.addChatMessage("\u00a7cSettings could not be saved. Unsaved changes will be retried.\u00a7r");
     }
+    local.luke.power.chat.PlayerChat.tick(mc);
     local.luke.power.audio.AudioController.tick(mc);
     local.luke.power.light.LightOverlay.tick(mc);
     local.luke.power.render.RenderControls.tick(mc);
