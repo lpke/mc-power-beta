@@ -42,7 +42,7 @@ final class MapFullBrightChecks {
     for(int i=0;i<32;i++) {
       canvas.bind();MapRenderer.beginFrame();field(MapRenderer.class,"pixelsPerUnit").setDouble(null,2);
       MapRenderer.uploadBudget(64);
-      check(buffer.draw(mc,view,0,Maps.layer(),settings),"world map buffer did not draw");
+      check(buffer.draw(mc,view,0,Maps.layer(),settings,canvas.guiWidth,canvas.guiHeight),"world map buffer did not draw");
       if(field(WorldMapBuffer.class,"active").get(buffer)!=null&&field(WorldMapBuffer.class,"pending").get(buffer)==null) {
         complete=true;break;
       }

@@ -216,7 +216,8 @@ public final class WorldMapBuffer {
     source = null;
   }
 
-  public boolean draw(Minecraft mc, MapProjection view, int dimension, int layer, MapSettings settings) {
+  public boolean draw(Minecraft mc, MapProjection view, int dimension, int layer, MapSettings settings,
+      int guiWidth, int guiHeight) {
     if (failed || !GLContext.getCapabilities().GL_EXT_framebuffer_object) return false;
     if (maximum == 0) maximum = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
     var plan = MapSurfacePlan.create(view, MapRenderer.pixelsPerUnit(), maximum, settings.automaticDetail);
@@ -272,7 +273,7 @@ public final class WorldMapBuffer {
           active.draw(pending.view, false);
           pending.seeded();
         }
-        if (preserve && copyCompatible) copyDisplayed(mc, pending, oldBuffer);
+        if (preserve && copyCompatible) copyDisplayed(mc, pending, oldBuffer, view, guiWidth, guiHeight);
       }
       if (need && pending == null) {
         if (spare != null) { pending = spare; spare = null; pending.reset(plan, view); }
@@ -296,7 +297,7 @@ public final class WorldMapBuffer {
         pending.reset(plan, view);
         GL11.glDisable(GL11.GL_BLEND);
         if (active != null && active.plan.level() <= plan.level()) active.draw(pending.view, false);
-        if (copyCompatible) copyDisplayed(mc, pending, oldBuffer);
+        if (copyCompatible) copyDisplayed(mc, pending, oldBuffer, view, guiWidth, guiHeight);
       }
     } catch (RuntimeException failure) {
       clear(); failed = true;
@@ -317,21 +318,26 @@ public final class WorldMapBuffer {
     return surface != null && (surface.plan.width() != plan.width() || surface.plan.height() != plan.height());
   }
 
-  private static void copyDisplayed(Minecraft mc, Surface target, int originalFramebuffer) {
+  private static void copyDisplayed(Minecraft mc, Surface target, int originalFramebuffer,
+      MapProjection view, int guiWidth, int guiHeight) {
+    var pixels = MapPixelBounds.of(view, guiWidth, guiHeight, mc.displayWidth, mc.displayHeight);
+    if (pixels.width() == 0 || pixels.height() == 0) return;
     target.seeded();
     if (GLContext.getCapabilities().GL_EXT_framebuffer_blit) {
       EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferBlit.GL_READ_FRAMEBUFFER_EXT, originalFramebuffer);
       GL11.glReadBuffer(originalFramebuffer == 0 ? GL11.GL_BACK : EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT);
       EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferBlit.GL_DRAW_FRAMEBUFFER_EXT, target.framebuffer);
       // Independent axes correct GUI rounding at non-divisible window sizes without CPU readback.
-      EXTFramebufferBlit.glBlitFramebufferEXT(0, 0, mc.displayWidth, mc.displayHeight,
+      EXTFramebufferBlit.glBlitFramebufferEXT(pixels.x(), pixels.y(),
+          pixels.x() + pixels.width(), pixels.y() + pixels.height(),
           64, 64, target.plan.width() - 64, target.plan.height() - 64,
           GL11.GL_COLOR_BUFFER_BIT, GL11.GL_NEAREST);
-    } else if (mc.displayWidth == target.plan.width() - 128 && mc.displayHeight == target.plan.height() - 128) {
+    } else if (pixels.width() == target.plan.width() - 128 && pixels.height() == target.plan.height() - 128) {
       EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, originalFramebuffer);
       GL11.glReadBuffer(originalFramebuffer == 0 ? GL11.GL_BACK : EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, target.texture);
-      GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 64, 64, 0, 0, mc.displayWidth, mc.displayHeight);
+      GL11.glCopyTexSubImage2D(GL11.GL_TEXTURE_2D, 0, 64, 64,
+          pixels.x(), pixels.y(), pixels.width(), pixels.height());
     } else return;
     target.bind();
     GL11.glEnable(GL11.GL_SCISSOR_TEST);

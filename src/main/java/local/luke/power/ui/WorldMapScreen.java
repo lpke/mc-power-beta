@@ -429,19 +429,20 @@ public final class WorldMapScreen extends UiScreen {
       var projection = projection();
       var style = worldStyle();
       MapRenderer.uploadBudget(MapConfig.current().mapOpenUploads);
-      if (!buffer.draw(minecraft, projection, dimension, layer, style)) MapRenderer.terrain(
-          Maps.cache(),
-          projection,
-          dimension,
-          layer,
-          false,
-          style,
-          !minecraft.world.isRemote,
-          minecraft.world.getSeed());
       GL11.glPushAttrib(GL11.GL_SCISSOR_BIT);
-      clip(mapLeft(), top(), mapWidth(), bottom() - top());
-      MapRenderer.markers(minecraft, projection, dimension, false, false);
-      GL11.glPopAttrib();
+      try {
+        clip(mapLeft(), top(), mapWidth(), bottom() - top());
+        if (!buffer.draw(minecraft, projection, dimension, layer, style, width, height)) MapRenderer.terrain(
+            Maps.cache(),
+            projection,
+            dimension,
+            layer,
+            false,
+            style,
+            !minecraft.world.isRemote,
+            minecraft.world.getSeed());
+        MapRenderer.markers(minecraft, projection, dimension, false, false);
+      } finally { GL11.glPopAttrib(); }
     }
     if (mapLeft() == width) { settingsPanel.render(mx, my, delta); return; }
     drawMinimap(delta);

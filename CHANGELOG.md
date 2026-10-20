@@ -4,7 +4,7 @@
 
 ## [3.1.0] - 2026-10-20
 
-- Edit map settings beside the live world map, with a minimap preview, shared appearance controls, scoped search and related-control navigation. Keep the previous cave view visible while a new level is prepared.
+- Edit map settings beside the live world map, with a minimap preview, shared appearance controls, scoped search and related-control navigation. Keep the previous cave view visible while a new level is prepared. Preserve terrain alignment and clip it to the map pane when panning with settings open.
 - Add the modern XYZ debug crosshair, including its HUD editor preview. Enable it in Power Beta defaults.
 - Hide the stationary player on freecam entry only until the camera first leaves the head. Keep it visible for the rest of that visit.
 - Play the retro title entrance only when opening a fresh menu with that logo selected.

@@ -81,6 +81,22 @@ public final class Release300MapRefinement {
       settings.chunkGrid = settings.slimeChunks = settings.lightOverlay = false;
       settings.opacity = 1; settings.mapOpenBudget = 8;
       canvas = new Canvas();
+      boolean nativeBlit = GLContext.getCapabilities().GL_EXT_framebuffer_blit;
+      for (boolean useBlit : new boolean[]{nativeBlit, false}) {
+        Field capability = field(ContextCapabilities.class, "GL_EXT_framebuffer_blit");
+        try {
+          capability.setBoolean(GLContext.getCapabilities(), useBlit);
+          pendingPans(mc, canvas, buffer, resident, loading, dimension, settings, 0);
+          pendingPans(mc, canvas, buffer, resident, loading, dimension, settings, 48);
+        } finally { capability.setBoolean(GLContext.getCapabilities(), nativeBlit); }
+      }
+      if (nativeBlit) {
+        var odd = new Canvas(GUI, GUI, PIXELS + 1, PIXELS + 3);
+        try { pendingPans(mc, odd, buffer, resident, loading, dimension, settings, 48); }
+        finally { odd.close(); }
+      }
+      mc.displayWidth = mc.displayHeight = PIXELS;
+      fineLoads.forEach(loading::put);
       var coarseView = new MapProjection(32, 32, 1d / 128, 0, 0, GUI, GUI, 0);
       int coarseFrames = settle(mc, canvas, buffer, coarseView, dimension, settings, 6);
       int coarsePixel = canvas.rgb(64, 64);
@@ -159,6 +175,30 @@ public final class Release300MapRefinement {
     }
   }
 
+  private static void pendingPans(Minecraft mc, Canvas canvas, WorldMapBuffer buffer,
+      Map<MapMath.Key, MapTile> resident,
+      Map<MapMath.Key, CompletableFuture<MapTile>> loading, int dimension,
+      MapSettings settings, int left) throws Exception {
+    var tile = new MapTile(new MapMath.Key(dimension, -1, 0, 0, 0));
+    for (int i = 0; i < MapMath.PIXELS; i++) tile.put(i, FINE, FINE, 64, 15, 1, 0);
+    resident.put(tile.key, persisted(tile));
+    var pane = new MapProjection(32, 32, 1, left, 0, GUI - left, GUI, 0);
+    frame(mc, canvas, buffer, pane, dimension, settings);
+    var point = pane.screen(48, 32);
+    color(canvas.rgb((int)point.x(), (int)point.y()), 0x38d5a1, "pan landmark did not render");
+    resident.remove(tile.key); loading.put(tile.key, new CompletableFuture<>());
+    for (double[] center : new double[][]{{72,32},{32,72},{72,32},{32,32}}) {
+      pane = new MapProjection(center[0], center[1], 1, left, 0, GUI - left, GUI, 0);
+      frame(mc, canvas, buffer, pane, dimension, settings, 0);
+      point = pane.screen(48, 32);
+      color(canvas.rgb((int)point.x(), (int)point.y()), 0x38d5a1,
+          "same-level pan compressed outside pixels into retained map terrain");
+    }
+    buffer.clear(); MapRenderer.clear();
+    log("PASS retained pending pans left=" + left + " pixels=" + canvas.pixelWidth + "x"
+        + canvas.pixelHeight + " blit=" + GLContext.getCapabilities().GL_EXT_framebuffer_blit);
+  }
+
   private static Field field(Class<?> type, String name) throws Exception {
     Field result = type.getDeclaredField(name); result.setAccessible(true); return result;
   }
@@ -181,12 +221,13 @@ public final class Release300MapRefinement {
   }
   private static void frame(Minecraft mc, Canvas canvas, WorldMapBuffer buffer, MapProjection view,
       int dimension, MapSettings settings, int uploads) throws Exception {
+    mc.displayWidth = canvas.pixelWidth; mc.displayHeight = canvas.pixelHeight;
     canvas.bind(); MapRenderer.beginFrame(1);
     // This 256px offscreen target intentionally sits below Beta's minimum GUI window.
     // Its known 2x projection owns the physical scale, independently of ScreenScaler's clamp.
-    field(MapRenderer.class, "pixelsPerUnit").setDouble(null, 2);
+    field(MapRenderer.class, "pixelsPerUnit").setDouble(null, (double)canvas.pixelWidth / canvas.guiWidth);
     MapRenderer.uploadBudget(uploads);
-    check(buffer.draw(mc, view, dimension, -1, settings), "native WorldMapBuffer fell back instead of rendering");
+    check(buffer.draw(mc, view, dimension, -1, settings, canvas.guiWidth, canvas.guiHeight), "native WorldMapBuffer fell back instead of rendering");
   }
   private static String hex(int value) { return String.format(Locale.ROOT, "#%06X", value & 0xffffff); }
   private static void color(int actual, int expected, String message) {
@@ -198,12 +239,16 @@ public final class Release300MapRefinement {
   static final class Canvas {
     final int texture = GL11.glGenTextures(), framebuffer = EXTFramebufferObject.glGenFramebuffersEXT();
     final ByteBuffer pixel = BufferUtils.createByteBuffer(4);
-    Canvas() {
+    final int guiWidth, guiHeight, pixelWidth, pixelHeight;
+    Canvas() { this(GUI, GUI, PIXELS, PIXELS); }
+    Canvas(int guiWidth, int guiHeight, int pixelWidth, int pixelHeight) {
+      this.guiWidth = guiWidth; this.guiHeight = guiHeight;
+      this.pixelWidth = pixelWidth; this.pixelHeight = pixelHeight;
       GL13.glActiveTexture(GL13.GL_TEXTURE0);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
       GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST);
       GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
-      GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, PIXELS, PIXELS, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
+      GL11.glTexImage2D(GL11.GL_TEXTURE_2D, 0, GL11.GL_RGBA8, pixelWidth, pixelHeight, 0, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, (ByteBuffer)null);
       EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, framebuffer);
       EXTFramebufferObject.glFramebufferTexture2DEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT,
           EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT, GL11.GL_TEXTURE_2D, texture, 0);
@@ -214,12 +259,12 @@ public final class Release300MapRefinement {
     }
     void bind() {
       EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, framebuffer);
-      GL11.glViewport(0, 0, PIXELS, PIXELS);
+      GL11.glViewport(0, 0, pixelWidth, pixelHeight);
       GL11.glDisable(GL11.GL_SCISSOR_TEST); GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glColorMask(true, true, true, true);
       GL11.glClearColor((BACKGROUND >> 16 & 255) / 255f, (BACKGROUND >> 8 & 255) / 255f, (BACKGROUND & 255) / 255f, 1);
       GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
-      GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glLoadIdentity(); GL11.glOrtho(0, GUI, GUI, 0, -1, 1);
+      GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glLoadIdentity(); GL11.glOrtho(0, guiWidth, guiHeight, 0, -1, 1);
       GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glLoadIdentity();
     }
     int rgb(int x, int y) {
@@ -227,7 +272,7 @@ public final class Release300MapRefinement {
       GL11.glReadBuffer(EXTFramebufferObject.GL_COLOR_ATTACHMENT0_EXT);
       GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1); GL11.glPixelStorei(GL11.GL_PACK_ROW_LENGTH, 0);
       GL11.glPixelStorei(GL11.GL_PACK_SKIP_PIXELS, 0); GL11.glPixelStorei(GL11.GL_PACK_SKIP_ROWS, 0);
-      pixel.clear(); GL11.glReadPixels(x * 2 + 1, PIXELS - y * 2 - 2, 1, 1, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixel);
+      pixel.clear(); GL11.glReadPixels((int)((x + .5) * pixelWidth / guiWidth), pixelHeight - (int)((y + .5) * pixelHeight / guiHeight) - 1, 1, 1, GL11.GL_RGBA, GL11.GL_UNSIGNED_BYTE, pixel);
       return (pixel.get(0) & 255) << 16 | (pixel.get(1) & 255) << 8 | pixel.get(2) & 255;
     }
     void close() { GL11.glDeleteTextures(texture); EXTFramebufferObject.glDeleteFramebuffersEXT(framebuffer); }
