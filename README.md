@@ -73,7 +73,9 @@ Power Beta enables ore vein mining, faster vehicles, clearer water and a blurred
 Beta 1.8 panorama, with standard controls and modern flight response. All three
 start at GUI scale 4.
 Options > Defaults lets you load another setup or choose Use as base. Changing the
-base keeps your settings and changes what each reset button restores. Loading
+base keeps your preferences and changes what each reset button restores. Unedited
+new-world rules follow that base automatically; customized rules keep their review
+and existing worlds stay unchanged. Loading
 resets preferences and new-world templates; existing worlds and saved presets stay intact.
 
 Options changes global preferences. The Game rules tab changes the open singleplayer

@@ -1,5 +1,6 @@
 package local.luke.power.ui;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import java.util.*;
 import local.luke.power.PowerBeta;
@@ -159,7 +160,10 @@ public final class PowerOptionsScreen extends UiScreen {
   private int origin() { return embedded() ? 0 : (width - uiWidth()) / 2; }
   private int right() { return origin() + uiWidth(); }
   private boolean pauseActions() { return directPause && editorReturn == null; }
-  private int footerY() { return height - (uiWidth() < (controls() || video() || pauseActions() ? 700 : 470) ? 51 : 28); }
+  private int footerY() {
+    int actions = controls() || video() ? disabledX() : actionX(0);
+    return height - (resetX() + 92 <= actions ? 28 : 51);
+  }
   private int resetX() { return origin() + 8 + (pauseActions() ? 50 : 0); }
   private int changesX() { return resetX() + 94; }
   private int changesEnd() { return footerY() < height - 28 ? right() - 8 : (controls() || video() ? disabledX() : actionX(0)) - 4; }
@@ -637,6 +641,15 @@ public final class PowerOptionsScreen extends UiScreen {
     }
   }
 
+  void refreshRuleTemplates() {
+    if (session.settings().stream().noneMatch(s -> s.backend.equals("rulePresets")) || RuleDefaults.review().required()) return;
+    Map<String, JsonElement> drafts = new HashMap<>();
+    session.settings().stream().filter(s -> s.backend.equals("rulePresets") && s.changed())
+        .forEach(s -> drafts.put(s.id, s.value.deepCopy()));
+    session.removeBackend("rulePresets"); local.luke.power.config.backend.RulePresetBackend.register(session);
+    session.settings().forEach(s -> { if (drafts.containsKey(s.id)) s.value = drafts.get(s.id); });
+    layout();
+  }
   private boolean reviewRules() {
     ruleReviewChecked = true; reviewedRulesBase = DefaultBases.current();
     if (embedded() || isolatedRules() || minecraft.world != null) return false;
@@ -961,7 +974,8 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     int changesEnd = changesEnd();
-    if ((session.changes() > 0 || changedOnly) && inside(x, y, changesX(), footerY(), changesEnd - changesX(), 20)) {
+    if ((session.changes() > 0 || changedOnly) && changesEnd - changesX() >= 18
+        && inside(x, y, changesX(), footerY(), changesEnd - changesX(), 20)) {
       click();
       conflictIds = List.of();
       highlightedId = "";
@@ -992,7 +1006,8 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor")) {
       if (embedded()) { minimapAppearance(""); return; }
-      openHudSetting(s.id.equals("maps.hudEditor") ? "maps.size" : s.id);
+      if (s.id.equals("maps.hudEditor")) openHudSetting("maps.size").showMinimap();
+      else openHudSetting(s.id);
       return;
     }
     if (HudEditorSettings.lettering(s)) {
@@ -1451,7 +1466,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!error.isEmpty()) text(fit(error, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);
     button(filtered() ? "Reset listed..." : "Reset page...", resetX(), footerY(), 88, 20, mx, my, true);
     int changesEnd = changesEnd();
-    if (session.changes() > 0 || changedOnly) {
+    if ((session.changes() > 0 || changedOnly) && changesEnd - changesX() >= 18) {
       boolean hover = inside(mx, my, changesX(), footerY(), changesEnd - changesX(), 20);
       text(fit(session.changes() + (session.changes() == 1 ? " unsaved change" : " unsaved changes"), changesEnd - changesX() - 2),
           changesX(), footerY() + 6, hover || changedOnly ? 0xffffa0 : 0xffdd88);

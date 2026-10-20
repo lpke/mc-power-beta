@@ -371,6 +371,8 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   protected void mouseReleased(int x, int y, int button) {
+    // Beta also dispatches pointer motion here with no button transition.
+    if (button < 0) return;
     if (panelPress) {
       if (settingsPanel != null) settingsPanel.panelRelease();
       panelPress = false; return;

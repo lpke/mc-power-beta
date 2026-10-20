@@ -12,12 +12,15 @@ class WaypointRefinementsTest {
       TimeZone.setDefault(TimeZone.getTimeZone("Australia/Sydney"));
       long morning = ZonedDateTime.parse("2026-03-07T00:05:00+11:00[Australia/Sydney]").toInstant().toEpochMilli();
       assertEquals("7/3 12:05", WaypointTimes.compact(morning));
+      assertEquals("12:05", WaypointTimes.time(morning));
       assertEquals("7/3/2026 12:05 AM", WaypointTimes.detail(morning));
       long afternoon = ZonedDateTime.parse("2026-10-20T15:09:00+11:00[Australia/Sydney]").toInstant().toEpochMilli();
       assertEquals("20/10 03:09", WaypointTimes.compact(afternoon));
+      assertEquals("03:09", WaypointTimes.time(afternoon));
       assertEquals("20/10/2026 03:09 PM", WaypointTimes.detail(afternoon));
       TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
       assertEquals("6/3 01:05", WaypointTimes.compact(morning), "cached label must track timezone changes");
+      assertEquals("01:05", WaypointTimes.time(morning));
     } finally { TimeZone.setDefault(original); }
   }
 

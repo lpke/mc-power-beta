@@ -2,6 +2,9 @@ package local.luke.power.config;
 
 import com.google.gson.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import local.luke.power.rules.*;
 import local.luke.power.storage.PowerConfig;
@@ -21,7 +24,43 @@ public final class RuleDefaults {
     JsonObject meta = new JsonObject();
     meta.addProperty("format", 1); meta.addProperty("base", base.id);
     meta.addProperty("defaultsRevision", REVISION); meta.addProperty("rulesVersion", RuleSet.VERSION);
-    meta.addProperty("release", RELEASE); return meta;
+    meta.addProperty("release", RELEASE);
+    JsonObject signature = new JsonObject();
+    for (String name : List.of("survival", "cheats"))
+      signature.addProperty(name, signature(latest(base, name.equals("cheats")).values()));
+    meta.add("defaultsSignature", signature); return meta;
+  }
+  private static String signature(JsonObject values) {
+    JsonObject sorted = new JsonObject();
+    values.keySet().stream().sorted().forEach(key -> sorted.add(key, values.get(key)));
+    try {
+      return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256")
+          .digest(sorted.toString().getBytes(StandardCharsets.UTF_8)));
+    } catch (NoSuchAlgorithmException impossible) { throw new AssertionError(impossible); }
+  }
+  /** Only proven, supported defaults follow a base change. Never infer this from custom values. */
+  public static JsonObject followBase(JsonElement source, JsonObject evidence,
+      DefaultBases.Base previous, DefaultBases.Base next) {
+    if (previous == next || source == null || !source.isJsonObject()) return null;
+    JsonObject section = source.getAsJsonObject();
+    try {
+      JsonObject meta = section.has("review") ? section.getAsJsonObject("review") : null;
+      DefaultBases.Base reference = meta == null ? previous : DefaultBases.Base.read(meta.get("base").getAsString());
+      Review review = new Review(section, evidence, reference);
+      if (!review.compatible()) return null;
+      if (meta != null && meta.has("defaultsSignature")) {
+        JsonObject signatures = meta.getAsJsonObject("defaultsSignature");
+        for (String name : List.of("survival", "cheats")) {
+          JsonElement saved = signatures.get(name);
+          if (saved == null || !saved.isJsonPrimitive() || !saved.getAsJsonPrimitive().isString()
+              || !saved.getAsString().matches("[0-9a-f]{64}")
+              || !saved.getAsString().equals(signature(section.getAsJsonObject(name).getAsJsonObject("values")))) return null;
+        }
+      } else if (!review.matches) return null; // Older releases did not retain a defaults signature.
+      JsonObject replacement = section.deepCopy();
+      for (String name : List.of("survival", "cheats")) replacement.add(name, latest(next, name.equals("cheats")).document());
+      replacement.add("review", acknowledgement(next)); return replacement;
+    } catch (RuntimeException unsupported) { return null; }
   }
   public record Difference(String template, String id, String label, String current, String latest, boolean removable) {}
   public static final class Review {

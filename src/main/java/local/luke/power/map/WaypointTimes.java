@@ -11,7 +11,8 @@ import java.util.Map;
 public final class WaypointTimes {
   private static final DateTimeFormatter COMPACT = DateTimeFormatter.ofPattern("d/M hh:mm", Locale.ROOT);
   private static final DateTimeFormatter DETAIL = DateTimeFormatter.ofPattern("d/M/yyyy hh:mm a", Locale.ROOT);
-  private record Labels(ZoneId zone, String compact, String detail) {}
+  private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("hh:mm", Locale.ROOT);
+  private record Labels(ZoneId zone, String compact, String detail, String time) {}
   private static final Map<Long, Labels> CACHE = new LinkedHashMap<>();
   private WaypointTimes() {}
   private static Labels labels(long timestamp) {
@@ -19,7 +20,7 @@ public final class WaypointTimes {
     Labels labels = CACHE.get(timestamp);
     if (labels == null || !labels.zone.equals(zone)) {
       var time = Instant.ofEpochMilli(timestamp).atZone(zone);
-      labels = new Labels(zone, COMPACT.format(time), DETAIL.format(time));
+      labels = new Labels(zone, COMPACT.format(time), DETAIL.format(time), TIME.format(time));
       if (CACHE.size() >= 1024) CACHE.remove(CACHE.keySet().iterator().next());
       CACHE.put(timestamp, labels);
     }
@@ -27,4 +28,5 @@ public final class WaypointTimes {
   }
   public static String compact(long timestamp) { return labels(timestamp).compact; }
   public static String detail(long timestamp) { return labels(timestamp).detail; }
+  public static String time(long timestamp) { return labels(timestamp).time; }
 }

@@ -18,7 +18,7 @@ final class DefaultsPanel extends UiScreen {
   private final ScrollBar scrollbar = new ScrollBar();
   private double scroll;
   private static final String INTRO = "Choose what setting configuration is considered \"Default\" (used by the Reset button next to each setting).";
-  private static final String REMINDER = "Changing the base does not change your current settings.";
+  private static final String REMINDER = "Changing the base keeps your preferences. Unedited new-world rules follow the new base.";
   DefaultsPanel(PowerOptionsScreen owner) { this.owner = owner; }
   void tick(boolean active) { if (active) hoverDelay.tick(); else hoverDelay.clear(); }
   boolean modal() { return pending != null; }
@@ -69,7 +69,11 @@ final class DefaultsPanel extends UiScreen {
       if (inside(x, y, left + rowSpan - w, buttonY(rowSpan, top), w, SettingRows.BUTTON_HEIGHT)) {
         if (base != DefaultBases.current()) {
           click();
-          try { DefaultBases.use(base, FabricLoader.getInstance().getGameDir()); owner.session().settings().forEach(s -> s.refreshDefault()); }
+          try {
+            DefaultBases.use(base, FabricLoader.getInstance().getGameDir());
+            owner.session().settings().forEach(s -> s.refreshDefault());
+            owner.refreshRuleTemplates();
+          }
           catch (Exception failure) { error = failure.getMessage(); }
         }
         return true;

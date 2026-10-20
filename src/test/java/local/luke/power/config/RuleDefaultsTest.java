@@ -44,4 +44,48 @@ class RuleDefaultsTest {
     var future = new RuleDefaults.Review(section,new JsonObject(),base);
     assertTrue(future.required()); assertFalse(future.compatible());
   }
+  @Test void legacyUneditedTemplatesFollowEachBaseWithoutMutatingTheSource() {
+    for (var base : DefaultBases.Base.values()) for (var next : DefaultBases.Base.values()) {
+      var source = defaults(base); var original = source.deepCopy();
+      var replacement = RuleDefaults.followBase(source, new JsonObject(), base, next);
+      assertEquals(original, source);
+      if (base == next) { assertNull(replacement); continue; }
+      assertEquals(RuleDefaults.latest(next, false).document(), replacement.get("survival"));
+      assertEquals(RuleDefaults.latest(next, true).document(), replacement.get("cheats"));
+      assertFalse(new RuleDefaults.Review(replacement, new JsonObject(), next).required());
+    }
+  }
+  @Test void signaturesRecognizeUnchangedOldDefaultsButNeverAUserEdit() {
+    var base = DefaultBases.Base.POWER_BETA; var source = defaults(base);
+    source.add("review", RuleDefaults.acknowledgement(base));
+    source.getAsJsonObject("review").addProperty("defaultsRevision", 1);
+    source.getAsJsonObject("review").addProperty("release", "3.0.0");
+    assertNotNull(RuleDefaults.followBase(source, new JsonObject(), base, DefaultBases.Base.BETA));
+    // Key ordering is not an edit, including after Gson 2.8.9 reads a saved document.
+    JsonObject values = source.getAsJsonObject("survival").getAsJsonObject("values");
+    var sprint = values.remove("allow_sprinting"); values.add("allow_sprinting", sprint);
+    source = JsonParser.parseString(source.toString()).getAsJsonObject();
+    assertNotNull(RuleDefaults.followBase(source, new JsonObject(), base, DefaultBases.Base.BETA));
+    source.getAsJsonObject("survival").getAsJsonObject("values").addProperty("allow_sprinting", false);
+    assertNull(RuleDefaults.followBase(source, new JsonObject(), base, DefaultBases.Base.BETA));
+  }
+  @Test void customOrUnverifiableTemplatesAndFutureMetadataNeverFollowSilently() {
+    var base = DefaultBases.Base.POWER_BETA;
+    for (String fault : java.util.List.of("custom", "future", "unknown", "badSignature", "missingSignature", "futureReview", "unknownBase")) {
+      var source = defaults(base); source.add("review", RuleDefaults.acknowledgement(base));
+      var meta = source.getAsJsonObject("review");
+      switch (fault) {
+        case "custom" -> source.getAsJsonObject("cheats").getAsJsonObject("values").addProperty("allow_sleep", false);
+        case "future" -> source.getAsJsonObject("survival").addProperty("version", 99);
+        case "unknown" -> source.getAsJsonObject("survival").getAsJsonObject("values").addProperty("retired_rule", true);
+        case "badSignature" -> meta.addProperty("defaultsSignature", false);
+        case "missingSignature" -> meta.getAsJsonObject("defaultsSignature").remove("cheats");
+        case "futureReview" -> meta.addProperty("format", 99);
+        case "unknownBase" -> meta.addProperty("base", "future_base");
+      }
+      var original = source.deepCopy();
+      assertNull(RuleDefaults.followBase(source, new JsonObject(), base, DefaultBases.Base.BETA), fault);
+      assertEquals(original, source);
+    }
+  }
 }

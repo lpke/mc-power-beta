@@ -24,7 +24,7 @@ class DefaultBasesTest {
     var base = DefaultBases.class.getDeclaredField("current"); base.setAccessible(true); base.set(null, priorBase);
     var setup = DefaultBases.class.getDeclaredField("setupComplete"); setup.setAccessible(true); setup.set(null, priorSetup);
   }
-  @Test void changingBaseOnlyWritesMetadataAndRefreshesResetTargets() throws Exception {
+  @Test void changingBaseFollowsUntouchedTemplatesAndRefreshesResetTargetsWithoutChangingPreferences() throws Exception {
     ConfigDefaults.prepare(game);
     JsonObject before = PowerConfig.document().getAsJsonObject("settings").deepCopy();
     Setting setting = new Setting("power_gold:config.enableGoldSwordLooting", "test", "", "", "Looting", "", Setting.Kind.BOOLEAN,
@@ -34,7 +34,10 @@ class DefaultBasesTest {
       setting.refreshDefault();
       assertTrue(setting.value.getAsBoolean()); assertFalse(setting.changed()); assertFalse(setting.defaultValue.getAsBoolean());
       JsonObject after = PowerConfig.document().getAsJsonObject("settings").deepCopy();
-      before.remove("defaults"); after.remove("defaults"); assertEquals(before, after);
+      assertEquals(RuleDefaults.latest(DefaultBases.Base.BETA, false).document(), after.getAsJsonObject("gameRules").get("survival"));
+      assertEquals(RuleDefaults.latest(DefaultBases.Base.BETA, true).document(), after.getAsJsonObject("gameRules").get("cheats"));
+      assertFalse(RuleDefaults.review().required());
+      before.remove("defaults"); after.remove("defaults"); before.remove("gameRules"); after.remove("gameRules"); assertEquals(before, after);
       SettingsDraft nested = new SettingsDraft(List.of(setting), s -> true);
       DefaultBases.use(DefaultBases.Base.POWER_BETA, game);
       nested.settings().forEach(Setting::refreshDefault);
@@ -42,8 +45,42 @@ class DefaultBasesTest {
       assertTrue(nested.get(setting.id).value.getAsBoolean());
       DefaultBases.reload(); assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.current());
       JsonObject applied = PowerConfig.document().getAsJsonObject("settings").deepCopy();
-      applied.remove("defaults"); assertEquals(before, applied);
+      applied.remove("defaults"); applied.remove("gameRules"); assertEquals(before, applied);
     } finally { DefaultBases.use(DefaultBases.Base.POWER_BETA, game); }
+  }
+  @Test void customAndUnsupportedCreationTemplatesSurviveBaseSwitchesByteForByte() throws Exception {
+    ConfigDefaults.prepare(game);
+    for (boolean unsupported : List.of(false, true)) {
+      var section = PowerConfig.section("gameRules");
+      section.getAsJsonObject("survival").getAsJsonObject("values").addProperty("allow_sprinting", false);
+      if (unsupported) section.getAsJsonObject("cheats").addProperty("version", 99);
+      PowerConfig.put("gameRules", section);
+      DefaultBases.use(DefaultBases.Base.BETA, game);
+      DefaultBases.use(DefaultBases.Base.REFINED, game);
+      DefaultBases.use(DefaultBases.Base.POWER_BETA, game);
+      assertEquals(section, PowerConfig.section("gameRules"));
+      assertEquals(!unsupported, RuleDefaults.review().compatible());
+    }
+  }
+  @Test void automaticTemplatesHaveDurableBackupsAndRollbackWithTheBaseAcrossRestart() throws Exception {
+    ConfigDefaults.prepare(game);
+    byte[] before = Files.readAllBytes(PowerConfig.path());
+    try (var transaction = FileTransaction.begin(game, List.of(PowerConfig.path()))) {
+      DefaultBases.use(DefaultBases.Base.BETA, game);
+      ConfigDefaults.prepare(game);
+      assertEquals(DefaultBases.Base.BETA, DefaultBases.current());
+      assertFalse(RuleDefaults.review().required());
+      assertEquals(RuleDefaults.latest(DefaultBases.Base.BETA, false), local.luke.power.rules.RulePresets.survival());
+    }
+    assertArrayEquals(before, Files.readAllBytes(PowerConfig.path()));
+    ConfigDefaults.prepare(game);
+    assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.current());
+    assertFalse(RuleDefaults.review().required());
+    try (var backups = Files.walk(game.resolve("power-beta-data/settings-backups"))) {
+      assertTrue(backups.filter(Files::isRegularFile).anyMatch(path -> {
+        try { return Arrays.equals(before, Files.readAllBytes(path)); } catch (Exception failure) { return false; }
+      }));
+    }
   }
   @Test void missingBoatDirectionIsInitializedOnceAndResetBaseNeverChangesItsSavedValue() throws Exception {
     ConfigDefaults.prepare(game);

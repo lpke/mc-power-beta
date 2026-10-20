@@ -70,7 +70,8 @@
   All three flight modes default sprint activation to Toggle in every base.
   All bases start at GUI scale 4. `DefaultBases` resolves stable setting IDs against the explicit
   `default-bases.json` overrides; retain each setting's shared fallback default
-  when copying drafts. Use as base changes only reset targets, never setting values.
+  when copying drafts. Use as base changes reset targets and unedited creation
+  templates together; preserve global preferences, customized templates and unsupported data.
   Load resets global preferences and creation templates, never existing world rules
   or recovery data. Saved music, title and F3 presets remain user data. Keep reset
   controls in every editor consistent with the selected base. Existing installations

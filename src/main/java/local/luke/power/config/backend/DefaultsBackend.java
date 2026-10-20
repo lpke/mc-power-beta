@@ -26,8 +26,16 @@ public final class DefaultsBackend implements Backend {
   public void apply(Map<String, JsonElement> values) throws Exception {
     validate(values);
     DefaultBases.State state = DefaultBases.state();
+    DefaultBases.Base previous = DefaultBases.Base.read(state.base);
+    JsonObject root = PowerConfig.document();
+    JsonElement expected = root.getAsJsonObject("settings").get("gameRules");
     if (values.containsKey("defaults.base")) state.base = values.get("defaults.base").getAsString();
     if (values.containsKey("defaults.setupComplete")) state.setupComplete = values.get("defaults.setupComplete").getAsBoolean();
-    state.validate(); PowerConfig.save("defaults", state);
+    state.validate();
+    JsonObject replacement = RuleDefaults.followBase(expected,
+        root.has("worldRuleUpgrade210") ? root.getAsJsonObject("worldRuleUpgrade210") : new JsonObject(),
+        previous, DefaultBases.Base.read(state.base));
+    PowerConfig.save("defaults", state);
+    if (replacement != null) PowerConfig.replaceSection("gameRules", expected, replacement);
   }
 }

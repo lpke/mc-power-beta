@@ -224,7 +224,7 @@ final class Release300MarkerRefinementsChecks {
         && labels.contains(points.get(2).x + "," + points.get(2).y + "," + points.get(2).z), "world-map native marker labels changed: " + labels);
     capture(mc, "world-map-markers");
     labels = text(() -> mapPixels(mc, points, true, 150));
-    check(!labels.contains(DEATH_COMPACT) && labels.contains("FR"), "minimap deathpoint emitted a date label or lost abbreviations");
+    check(!labels.contains(DEATH_COMPACT) && labels.contains(WaypointTimes.time(DEATH_TIME)) && labels.contains("FR"), "minimap lost time-only death label or abbreviations");
     canvas(mc, () -> {
       var size = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
       var minimap = MapConfig.copy(); minimap.circular = minimap.rotate = false; minimap.size = 180;

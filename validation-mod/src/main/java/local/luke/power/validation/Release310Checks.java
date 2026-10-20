@@ -27,6 +27,7 @@ final class Release310Checks {
   }
   static void run(Minecraft mc, String mode) throws Exception {
     failures = 0; Files.createDirectories(REPORT);
+    if (mode.startsWith("polish")) { Polish310Checks.run(mc,mode); return; }
     if (mode.startsWith("capture-")) { MapCapture310Checks.run(mc,mode); return; }
     if (mode.equals("chat")) { Chat310Checks.run(mc); return; }
     if (mode.equals("notes-write")) { local.luke.power.chat.ChatNotes.record("Power Beta 3.1 persistent note"); PowerConfig.flushPending(); log("310 notes written"); return; }

@@ -469,13 +469,14 @@ public final class MapRenderer {
           int waypointColor = WaypointSymbols.color(point, s);
           double waypointOpacity = WaypointSymbols.opacity(point, s);
           if (waypointOpacity <= 0) continue;
-          WaypointSymbols.draw(mc, point, p.x(), p.y(), mini ? point.death ? 4 : 2.5 : 4.5 * markerScale,
+          double radius = mini ? point.death ? 4 : 2.5 : 4.5 * markerScale;
+          WaypointSymbols.draw(mc, point, p.x(), p.y(), radius,
               waypointColor, waypointOpacity);
-          if (!mini && point.death || s.waypointNames && !point.death) {
-            String text = point.death ? WaypointTimes.compact(point.created)
+          if (point.death || s.waypointNames) {
+            String text = point.death ? mini ? WaypointTimes.time(point.created) : WaypointTimes.compact(point.created)
                 : mini ? point.abbreviation() : MinimapArrows.destination(point)
                 ? point.x + "," + point.y + "," + point.z : point.name;
-            label(mc, view, circle, text, p.x() + (mini ? 7 : 9 * markerScale), p.y() - 4 * markerScale,
+            label(mc, view, circle, text, p.x() + (mini ? radius + 1.5 : 9 * markerScale), p.y() - 4 * markerScale,
                 markerScale, (int)Math.round(waypointOpacity * 255) << 24 | (point.death ? 0xff5555 : waypointColor));
           }
         }

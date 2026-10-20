@@ -5,10 +5,12 @@
 ## [3.1.0] - 2026-10-20
 
 - Edit map settings beside the live world map, with a minimap preview, shared appearance controls, scoped search and related-control navigation. Keep the previous cave view visible while a new level is prepared. Preserve terrain alignment and clip it to the map pane when panning with settings open.
+- Keep sidebar scrollbar drags active through mouse movement and fit Reset page beside the other footer actions at narrower widths.
+- Place minimap abbreviations closer to their markers and show death times without dates. Open Minimap appearance without a preselected setting highlight.
 - Add the modern XYZ debug crosshair, including its HUD editor preview. Enable it in Power Beta defaults.
 - Hide the stationary player on freecam entry only until the camera first leaves the head. Keep it visible for the rest of that visit.
 - Play the retro title entrance only when opening a fresh menu with that logo selected.
-- Review changed new-world defaults with a detailed comparison, Reset and Keep current. Handle incompatible templates without changing existing worlds. Enable sprinting in all Cheats defaults and Power Beta Survival defaults.
+- Review changed new-world defaults with a detailed comparison, Reset and Keep current. Untouched templates follow Defaults base changes automatically; customized and incompatible templates retain their review. Keep existing worlds unchanged. Enable sprinting in all Cheats defaults and Power Beta Survival defaults.
 - Save your submitted chat messages across sessions, with a separate history limit from other chat. Both limits support 1–5000 messages. Use a familiar blue text-selection highlight.
 - Keep configuration format 7 and world-rule format 3, with their existing supported conversions.
 
