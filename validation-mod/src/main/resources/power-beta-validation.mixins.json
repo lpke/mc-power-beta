@@ -42,7 +42,10 @@
     "Explosion210Capture",
     "SprintParticleCapture",
     "MapPan300Capture",
-    "Radar320Capture"
+    "Radar320Capture",
+    "Inventory330RenderMixin",
+    "Minimap330RenderMixin",
+    "Player330RenderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -61,6 +61,9 @@ public final class MapBackend implements Backend {
             1,
             List.of(),
             false));
+    entries.add(Catalog.setting("maps.worldMapEditor", "maps", "Map", "World map",
+        "World map appearance", "Edit world map settings beside a live map preview.", Setting.Kind.TEXT,
+        new com.google.gson.JsonPrimitive(""), new com.google.gson.JsonPrimitive(""), 0, 0, 1, List.of(), false));
     session.add(new MapBackend(), entries);
   }
 
@@ -75,7 +78,7 @@ public final class MapBackend implements Backend {
   private MapSettings draft(Map<String, JsonElement> values) throws Exception {
     MapSettings next = MapConfig.copy();
     for (var entry : values.entrySet()) {
-      if (entry.getKey().equals("maps.hudEditor")) continue;
+      if (entry.getKey().equals("maps.hudEditor") || entry.getKey().equals("maps.worldMapEditor")) continue;
       var field = MapSettings.class.getField(entry.getKey().substring(5));
       field.set(next, Catalog.JSON.fromJson(entry.getValue(), field.getType()));
     }

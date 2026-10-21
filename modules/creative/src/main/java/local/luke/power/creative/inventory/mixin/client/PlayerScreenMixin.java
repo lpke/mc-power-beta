@@ -37,6 +37,7 @@ import local.luke.power.creative.inventory.util.SlotUpdatePacket;
 
 @Mixin(PlayerScreen.class)
 public abstract class PlayerScreenMixin extends ContainerScreen implements CreativeDragScreen, local.luke.power.input.InventoryGui {
+  @Override public boolean power$usesCatalogWheel() { return creative_isInCreative() && !creative_normalGUI; }
   public boolean power$extraGuiSpace(int mouseX, int mouseY) {
     if (!creative_isInCreative()) return false;
     int x = (width - containerWidth) / 2, y = (height - containerHeight) / 2;
@@ -679,10 +680,11 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       creative_drag = false;
       creative_slider = 0;
       creative_rowIndex = 0;
-      Mouse.getDWheel();
+      local.luke.power.input.InventoryWheel.take(this, org.lwjgl.opengl.Display.isActive());
       return;
     }
     if (creative_drag) {
+      local.luke.power.input.InventoryWheel.take(this, org.lwjgl.opengl.Display.isActive());
       int mousePos = (int) mouseY - creative_mouseDelta;
       creative_slider = MathHelper.clamp((float) mousePos / (float) CreativeGrid.SCROLL_TRAVEL, 0.0F, 1.0F);
       creative_rowIndex = (int) ((creative_slider * creative_maxIndex) / 8.0F) << 3;
@@ -692,7 +694,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       creative_slider = (float) creative_rowIndex / creative_maxIndex;
       return;
     }
-    int wheel = Mouse.getDWheel();
+    int wheel = local.luke.power.input.InventoryWheel.take(this, org.lwjgl.opengl.Display.isActive());
     if (wheel > 0) {
       creative_rowIndex -= 8;
       if (creative_rowIndex < 0) {

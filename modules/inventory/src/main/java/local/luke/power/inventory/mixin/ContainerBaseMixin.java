@@ -525,7 +525,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 
 		if (Config.INVENTORY_TWEAKS_CONFIG.MOUSE_TWEAKS_CONFIG.SCROLL_WHEEL_CONFIG.enableScrollWheelTweaks) {
 			if (!minecraft.world.isRemote) {
-				int currentWheelDegrees = Mouse.getDWheel();
+				int currentWheelDegrees = local.luke.power.input.InventoryWheel.takeEvent(this, org.lwjgl.opengl.Display.isActive());
 				if ((0 != currentWheelDegrees)
 						&& (isLeftClickDragStarted == false)
 						&& (isRightClickDragStarted == false)

@@ -59,6 +59,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private Map<String, JsonElement> mapEntry;
   private int panelWidth;
   private String mapView = "Map";
+  private boolean mapAppearanceDestination;
   private Runnable embeddedClose;
   static PowerOptionsScreen mapPanel(WorldMapScreen host) {
     PowerOptionsScreen panel = new PowerOptionsScreen(host);
@@ -72,6 +73,13 @@ public final class PowerOptionsScreen extends UiScreen {
     panel.mapOwner = owner; panel.session = owner.session;
     panel.refreshMapEntry();
     return panel;
+  }
+  void panelEntry(boolean minimap, String setting) {
+    pushView();
+    if (minimap) {
+      mapView = "Minimap"; collapsed.clear(); highlightedId = setting;
+      focusAnchorId = setting; focusAnchorScroll = scroll; focusAnchorSideScroll = sideScroll;
+    }
   }
   static PowerOptionsScreen minimapPanel(WorldMapScreen host, PowerOptionsScreen owner) {
     PowerOptionsScreen panel = mapPanel(host, owner);
@@ -92,11 +100,17 @@ public final class PowerOptionsScreen extends UiScreen {
   Screen returnScreen() { return embedded() ? mapHost : this; }
   private boolean inMapScope(Setting s) { return !embedded() || MapSettingsScope.contains(s); }
   void panelSize(int span) { panelWidth = span; if (minecraft != null && textRenderer != null) layout(); }
+  void zoomMinimap(int wheel) {
+    Setting setting = session.settings().stream().filter(s -> s.id.equals("maps.zoom")).findFirst().orElseThrow();
+    double next = local.luke.power.map.MinimapZoom.scroll(setting.value.getAsDouble(), wheel);
+    if (next != setting.value.getAsDouble()) { setting.value = new JsonPrimitive(next); changed(setting); }
+  }
   void toggleMapSetting(String id) {
     Setting setting = session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElseThrow();
     setting.value = new JsonPrimitive(!setting.value.getAsBoolean()); changed(setting);
   }
   boolean panelModal() { return capture != null || confirmClose || confirmReset; }
+  boolean minimapWheelAllowed() { return !panelModal() && !valueEditor.active() && dragging == null; }
   boolean radarIconsAllowed() { return !panelModal() && !valueEditor.active() && !search.focused; }
   void panelCancelGesture() {
     capture = null; captureModifier = 0; dragging = null; contentBar.release(); sidebarBar.release();
@@ -164,7 +178,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private static final Map<String, Double> positions = new HashMap<>();
   private static final Set<String> rememberedCollapsed = new HashSet<>(SettingsLayout.initiallyCollapsed());
   private static double rememberedSideScroll;
-  private static boolean showDisabled;
+  private static boolean showDisabled, searchThisTab;
   private List<String> conflictIds = List.of();
   private final Screen parent;
   private Screen exitTarget;
@@ -371,9 +385,28 @@ public final class PowerOptionsScreen extends UiScreen {
   }
   private boolean customise(Setting s) { return s.id.equals("logo.style") && s.value.getAsInt() == 0; }
   private boolean canClear() { return libraryVisible() ? library.hasQuery() : !search.text().isBlank() || filtered(); }
-  private int sectionButtonX() { return right() - 32; }
-  private int clearSearchX() { return sectionButtonX() - 22; }
-  private int searchWidth() { return (canClear() ? clearSearchX() : sectionButtonX()) - 4 - searchLeft(); }
+  private boolean searchScopeVisible() {
+    return !embedded() && !isolatedRules() && editorReturn == null && !libraryVisible()
+        && !filtered() && !page.equals("Defaults");
+  }
+  private int sectionButtonX() { return right() - 34; }
+  private int searchScopeX() { return sectionButtonX() - 24; }
+  private int clearSearchX() { return (searchScopeVisible() ? searchScopeX() : sectionButtonX()) - 24; }
+  private int searchWidth() { return (canClear() ? clearSearchX() : searchScopeVisible() ? searchScopeX() : sectionButtonX()) - 4 - searchLeft(); }
+  private boolean mapAppearanceAvailable() {
+    boolean enabled = session.settings().stream().filter(s -> s.id.equals("maps.worldMap"))
+        .anyMatch(s -> s.value.getAsBoolean());
+    return !embedded() && editorReturn == null && WorldMapScreen.canOpenSettings(minecraft, this, enabled);
+  }
+  private boolean openMapAppearance(String id) {
+    return mapAppearanceAvailable() && WorldMapScreen.openSettings(minecraft, this, true, true, id);
+  }
+  private String searchPage(Setting s) {
+    return OptionsSearchScope.page(s, embedded() || mapAppearanceDestination);
+  }
+  private String searchGroup(Setting s, int hudMode) {
+    return OptionsSearchScope.group(s, hudMode, embedded() || mapAppearanceDestination);
+  }
   private String sectionKey(String group) {
     return !search.text().isBlank() || changedOnly ? "filtered/" + group.replace(" / ", "/") : page + "/" + group;
   }
@@ -459,6 +492,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private void openSetting(Setting target) {
     if (!inMapScope(target)) return;
     if (embedded() && HudEditorSettings.mapAppearance(target.id)) { minimapAppearance(target.id); return; }
+    if (HudEditorSettings.mapAppearance(target.id) && openMapAppearance(target.id)) return;
     if (HudEditorSettings.contains(target) && !target.id.equals(HudEditorSettings.ENTRY)) {
       openHudSetting(target.id);
       return;
@@ -481,6 +515,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private void openGroup(Setting setting) {
     if (embedded()) { openSetting(setting); return; }
+    if (HudEditorSettings.mapAppearance(setting.id) && openMapAppearance("")) return;
     if (HudEditorSettings.contains(setting) && !setting.id.equals(HudEditorSettings.ENTRY)) { openHudSetting(setting.id); return; }
     rememberPosition();
     pushView();
@@ -584,6 +619,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (capture != null && !SettingAccess.visible(session, capture)) { capture = null; captureModifier = 0; }
     if (dragging != null && !SettingAccess.visible(session, dragging)) dragging = null;
+    mapAppearanceDestination = mapAppearanceAvailable();
     String query = search.text().strip().toLowerCase(Locale.ROOT);
     int cluster = session.settings().stream().filter(s -> s.id.equals("infoHud.selectedCluster"))
         .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(0);
@@ -594,7 +630,9 @@ public final class PowerOptionsScreen extends UiScreen {
     List<Setting> candidates = listed.isEmpty() ? SettingsLayout.ordered(session.settings()) : listed.stream()
         .map(id -> session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElse(null))
         .filter(Objects::nonNull).toList();
-    candidates = candidates.stream().filter(this::inMapScope).toList();
+    candidates = candidates.stream().filter(this::inMapScope)
+        .filter(s -> !s.id.equals("maps.worldMapEditor") || mapAppearanceDestination)
+        .filter(s -> query.isEmpty() || !searchScopeVisible() || !searchThisTab || searchPage(s).equals(page)).toList();
     if (embedded() && mapView.equals("Minimap") && query.isEmpty() && listed.isEmpty() && !changedOnly)
       candidates = HudEditorSections.order(candidates);
     Map<String, Integer> scores = new HashMap<>();
@@ -622,8 +660,7 @@ public final class PowerOptionsScreen extends UiScreen {
           ? changedOnly || (embedded() ? localMapView(s) : s.page.equals(page))
           : scores.getOrDefault(s.id, FuzzySearch.NONE) < FuzzySearch.NONE)))
         groups.computeIfAbsent(query.isEmpty() && !changedOnly ? embedded() && mapView.equals("Minimap") ? HudEditorSections.group(s) : s.group
-            : HudEditorSettings.contains(s) && !s.id.equals(HudEditorSettings.ENTRY) ? "Interface / HUD editor / " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode))
-            : s.group.isEmpty() ? s.page : s.page + " / " + s.group, k -> new ArrayList<>()).add(s);
+            : searchGroup(s, hudMode), k -> new ArrayList<>()).add(s);
     }
     List<Row> next = new ArrayList<>();
     int y = 0, rowHeight = SettingRows.height(span());
@@ -832,10 +869,13 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (button == 0 && hasSections() && inside(x, y, sectionButtonX(), 27, 18, 20)) {
+    if (button == 0 && searchScopeVisible() && inside(x, y, searchScopeX(), 27, 20, 20)) {
+      click(); searchThisTab = !searchThisTab; scroll = 0; selected = -1; layout(); return;
+    }
+    if (button == 0 && hasSections() && inside(x, y, sectionButtonX(), 27, 20, 20)) {
       click(); toggleSections(); return;
     }
-    if (canClear() && inside(x, y, clearSearchX(), 27, 18, 20)) {
+    if (canClear() && inside(x, y, clearSearchX(), 27, 20, 20)) {
       click();
       if (libraryVisible()) { library.clearQuery(); return; }
       if (!history.isEmpty() && !conflictIds.isEmpty()) { back(); return; }
@@ -974,7 +1014,7 @@ public final class PowerOptionsScreen extends UiScreen {
         if (x < mainControlLeft(r) || x >= controlEnd(s)) return;
         if (InheritedColors.accepts(s) && InheritedColorControl.at(mainControlLeft(r), controlEnd(s) - mainControlLeft(r), InheritedColors.custom(s)).colorAt(x)) {
           click(); openColor(s);
-        } else if (InheritedColors.accepts(s) || s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || HudEditorSettings.lettering(s) || ItemEditors.accepts(s) || ColorSettings.accepts(s)) activate(s, button == 1 ? -1 : 1);
+        } else if (InheritedColors.accepts(s) || s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || s.id.equals("maps.worldMapEditor") || HudEditorSettings.lettering(s) || ItemEditors.accepts(s) || ColorSettings.accepts(s)) activate(s, button == 1 ? -1 : 1);
         else if (s.kind == Setting.Kind.INTEGER || s.kind == Setting.Kind.DECIMAL) {
           if (button == 0 && s.slider()) {
             dragging = s;
@@ -1047,6 +1087,9 @@ public final class PowerOptionsScreen extends UiScreen {
     if (s.id.equals("maps.zoomSteps")) { minecraft.setScreen(new ZoomStepsScreen(this, s)); return; }
     if (s.id.equals("interface.debugOrder")) {
       openHudSetting(s.id).beginReorder(); return;
+    }
+    if (s.id.equals("maps.worldMapEditor")) {
+      WorldMapScreen.openSettings(minecraft, this, true, false, ""); return;
     }
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor")) {
       if (embedded()) { minimapAppearance(""); return; }
@@ -1260,7 +1303,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (s.id.equals("interface.debugOrder")) return "Reorder";
     if (s.id.equals("rules.review")) return "Review...";
     if (s.id.equals("maps.zoomSteps")) return s.value.getAsJsonArray().size() + " levels...";
-    if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || s.id.equals("logo.logo.lines")) return "Edit...";
+    if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || s.id.equals("maps.worldMapEditor") || s.id.equals("logo.logo.lines")) return "Edit...";
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) return local.luke.power.input.PanoramaCatalog.label(s.value.getAsString());
     if (s.id.equals("audio.preset")) return new MusicEdits(this).name(s.value.getAsString());
@@ -1390,10 +1433,12 @@ public final class PowerOptionsScreen extends UiScreen {
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
         !conflictIds.isEmpty() ? "Conflicting bindings"
-        : changedOnly ? "Search changed settings..." : embedded() ? "Search maps and controls..." : "Search all settings...");
-    if (canClear()) button("x", clearSearchX(), 27, 18, 20, mx, my, true);
+        : changedOnly ? "Search changed settings..." : embedded() ? "Search maps and controls..."
+        : searchScopeVisible() && searchThisTab ? "Search settings in this tab..." : "Search all settings...");
+    if (canClear()) iconButton("remove", clearSearchX(), 27, 20, 20, mx, my, true, false);
+    if (searchScopeVisible()) button(searchThisTab ? "T" : "A", searchScopeX(), 27, 20, 20, mx, my, true);
     boolean expandSections = libraryVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
-    iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 18, 20, mx, my,
+    iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 20, 20, mx, my,
         hasSections(), false);
     if (rulesToolbar()) {
       if (creationRules == null) {
@@ -1546,10 +1591,16 @@ public final class PowerOptionsScreen extends UiScreen {
       hoverId = "apply";
     }
     button("Done", actionX(2), height - 28, actionWidth(2), 20, mx, my, true);
-    if (hasSections() && inside(mx, my, sectionButtonX(), 27, 18, 20)) {
+    if (hasSections() && inside(mx, my, sectionButtonX(), 27, 20, 20)) {
       tip = expandSections ? "Expand all sections" : "Collapse all sections";
       hoverId = "sections";
     }
+    if (searchScopeVisible() && inside(mx, my, searchScopeX(), 27, 20, 20)) {
+      tip = searchThisTab ? "Searching only this tab. Click to search all settings."
+          : "Searching all settings. Click to search only this tab.";
+      hoverId = "searchScope";
+    }
+    if (canClear() && inside(mx, my, clearSearchX(), 27, 20, 20)) { tip = "Clear search"; hoverId = "clearSearch"; }
     if (hoverDelay.ready(dragging == null && !(libraryVisible() && library.draggingSlider()) && !confirmClose && !confirmReset ? hoverId : "") && !tip.isEmpty()) tooltip(tip, mx, my);
     valueEditor.renderError(this);
     if (capture != null || confirmClose || confirmReset) {

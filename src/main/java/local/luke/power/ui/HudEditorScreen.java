@@ -98,6 +98,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private void finishReorder(boolean save) { reorder.finish(save); settingsHidden = settingsHiddenBeforeReorder && !previewHidden; preview.suppressDebug = false; clearHighlight(); controlsChanged(); }
   protected SettingsDraft editingDraft() { return reorder == null ? draft : reorder.draft(); }
   protected boolean modal() { return super.modal() || reorderExit.active() || reorder != null && reorder.prompt(); }
+  public boolean minimapRadarActive() { return previewVisible() && preview.minimapRadarActive(scenario == 2); }
   public boolean radarIconsAllowed() {
     return selected.equals("minimap") && previewVisible() && !modal() && !inline.active()
         && !selecting && !reorder.active();
@@ -114,6 +115,16 @@ public final class HudEditorScreen extends DraftEditorScreen {
     int wheel = Mouse.getEventDWheel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+    if (wheel != 0 && org.lwjgl.opengl.Display.isActive() && !Mouse.isGrabbed()
+        && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !modal() && !selecting && !inline.active() && !reorder.active()
+        && dragging == null && !divider.dragging() && previewVisible()
+        && inside(x, y, previewLeft(), previewTop(), previewSpan(), previewBottom() - previewTop())
+        && preview.minimapContains(virtualX(x), virtualY(y))) {
+      Setting zoom = draft.get("maps.zoom");
+      double next = local.luke.power.map.MinimapZoom.scroll(zoom.value.getAsDouble(), wheel);
+      if (next != zoom.value.getAsDouble()) { draft.checkpoint(); zoom.value = new JsonPrimitive(next); afterEdit(); }
+      return;
+    }
     if (!modal() && previewVisible() && reorder.active() && wheel != 0) reorder.wheel(wheel, x, y);
     super.onMouseEvent();
   }

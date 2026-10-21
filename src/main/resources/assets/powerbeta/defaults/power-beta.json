@@ -564,7 +564,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 3.2.2"
+        "customVersionText": "Power Beta 3.3.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -1139,7 +1139,9 @@
         2.5,
         4
       ],
-      "worldMapRadarIcons": false
+      "worldMapRadarIcons": false,
+      "showInInventory": true,
+      "radarRange": 8
     },
     "sprint": {
       "activation": 0,

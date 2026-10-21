@@ -23,7 +23,12 @@ public final class Radar320Checks {
       "Creeper","Skeleton","Zombie","Spider","Slime","Giant","Ghast","PigZombie","Squid"};
   private static MapSettings before;
   private static Screen screen;
-  private static Object originalRadar;
+  private static Object originalRadar, originalWorldRadar;
+  private static Object tracking() throws Exception { return field(Maps.class,"RADAR").get(null); }
+  private static Field snapshot(String name) throws Exception { return field(tracking().getClass(),name); }
+  private static void radar(Object mini,Object full) throws Exception {
+    Object tracker=tracking();snapshot("minimapSnapshot").set(tracker,mini);snapshot("worldMapSnapshot").set(tracker,full);
+  }
   private static java.util.List<Maps.Radar> grid;
   private static Set<Integer> previousIds = Set.of(), releasedIds = Set.of();
   private static int frames, heldFrames, generated, peakNew, peakSize;
@@ -52,7 +57,7 @@ public final class Radar320Checks {
   }
   public static void observe(Minecraft mc) {
     if(!armed)return;
-    try { field(Maps.class,"radar").set(null,grid); }
+    try { radar(grid,grid); }
     catch(Throwable error){failFrame("tick snapshot publication",error);}
   }
   /** Call from a validation-only outer renderer TAIL injection after the production frame HEAD. */
@@ -128,7 +133,7 @@ public final class Radar320Checks {
   private static void prepare(Minecraft mc) throws Exception {
     check(!armed&&mc.world!=null&&mc.player!=null,"load a disposable world and finish any prior radar fixture");
     Files.createDirectories(REPORT);before=MapConfig.copy();screen=mc.currentScreen;
-    originalRadar=field(Maps.class,"radar").get(null);
+    originalRadar=snapshot("minimapSnapshot").get(tracking()); originalWorldRadar=snapshot("worldMapSnapshot").get(tracking());
     var settings=MapConfig.copy();settings.minimap=settings.worldMap=settings.radar=true;
     settings.players=settings.hostile=settings.animals=settings.items=settings.otherEntities=true;
     settings.entityNames=true;settings.entityHeights=false;settings.radarDimming=false;
@@ -370,7 +375,7 @@ public final class Radar320Checks {
     } finally{first.close();second.close();if(GL11.glIsTexture(texture))GL11.glDeleteTextures(texture);}
   }
   private static void finish(Minecraft mc) throws Exception {
-    armed=false;field(Maps.class,"radar").set(null,originalRadar);MapConfig.preview(before);mc.setScreen(screen);
+    armed=false;radar(originalRadar,originalWorldRadar);MapConfig.preview(before);mc.setScreen(screen);
     check(frameFailures==0,"radar frame observer failures="+frameFailures);
     log("RADAR COMPLETE frames="+frames+" generated="+generated+" failures="+frameFailures);
   }

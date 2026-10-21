@@ -609,3 +609,16 @@
   labels and padding and is shared by rendering and input. Map coordinate dialogs retain
   the current world-map screen and own all modal input. The normal screenshot binding
   captures map terrain without controls, once per press.
+
+- Entity radar uses loaded chunk sections with bounded discovery and separately capped
+  minimap/world-map selections. Refresh tracked entities every tick; entity-count churn
+  must not restart discovery or delay publication. Minimap radar respects EntityVisibility;
+  only an actually open World Map bypasses that filter. Chunk cursors must not retain
+  unloaded terrain. Horizontal range is capped by the terrain render distance.
+- Inventory minimaps render after screen dimming and before container panels. Pointer
+  wheel zoom only owns terrain inside the visible minimap and outside every InventoryGui
+  panel/control. HUD preview wheel edits remain in its draft; sidebar edits reuse the
+  Options session; gameplay snapshots use the queued PowerConfig writer.
+- Options search scope is visit-independent session state, restricted to ordinary Options.
+  Search breadcrumbs and tab filtering use the actual available editor destination; map
+  sidebars and isolated rules editors retain their own fixed search scopes.

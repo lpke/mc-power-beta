@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ClientMixin {
   @ModifyVariable(method = "setScreen", at = @At("HEAD"), argsOnly = true)
   private net.minecraft.client.gui.screen.Screen power$firstSetup(net.minecraft.client.gui.screen.Screen screen) {
+    local.luke.power.input.InventoryWheel.clear();
     Minecraft mc = (Minecraft)(Object)this;
     return screen instanceof net.minecraft.client.gui.screen.TitleScreen && mc.world == null
         && local.luke.power.storage.PowerConfig.problem().isEmpty()
@@ -23,6 +24,7 @@ public class ClientMixin {
   @Inject(method = "method_2115", at = @At("HEAD"))
   private void power$leaveWorld(net.minecraft.world.World world, String message,
       net.minecraft.entity.player.PlayerEntity player, CallbackInfo ci) {
+    local.luke.power.input.InventoryWheel.clear();
     if (world == null) power$resetTweaks();
   }
   @Inject(method = "stop", at = @At("HEAD"))
@@ -34,6 +36,7 @@ public class ClientMixin {
   }
   @org.spongepowered.asm.mixin.Unique
   private void power$resetTweaks() {
+    local.luke.power.input.InventoryWheel.clear();
     try { local.luke.power.input.TweakLifecycle.reset(); }
     catch (RuntimeException e) { PowerBeta.LOG.error("Could not clear every active tweak", e); }
   }
@@ -45,6 +48,7 @@ public class ClientMixin {
   @Inject(method = "tick", at = @At("HEAD"))
   private void power$bindings(CallbackInfo ci) {
     Minecraft mc = (Minecraft)(Object)this;
+    local.luke.power.input.InventoryWheel.context(mc.currentScreen, org.lwjgl.opengl.Display.isActive());
     local.luke.power.input.KeyConfig.load();
     if (mc.options != null) local.luke.power.input.Bindings.register(mc.options.allKeys);
   }

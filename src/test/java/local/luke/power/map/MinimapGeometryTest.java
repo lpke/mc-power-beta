@@ -5,6 +5,17 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class MinimapGeometryTest {
+  @Test void wheelOwnershipIncludesOnlyVisibleTerrainAndExcludesCircleCornersAndLabels() {
+    var box = new MinimapGeometry.Layout(20, 30, 90);
+    assertTrue(MinimapGeometry.contains(box, true, 65, 75));
+    assertFalse(MinimapGeometry.contains(box, true, 20, 30));
+    assertTrue(MinimapGeometry.contains(box, false, 20, 30));
+    assertFalse(MinimapGeometry.contains(box, false, 110, 75));
+    assertFalse(MinimapGeometry.contains(box, true, 65, 125));
+    var translated = new MinimapGeometry.Layout(420, 30, 90);
+    assertTrue(MinimapGeometry.contains(translated, true, 465, 75));
+    assertFalse(MinimapGeometry.contains(translated, true, 65, 75));
+  }
   @Test void insetsMoveBothTheMapAndItsHitBoundsInEveryCorner() {
     var settings = new MapSettings();
     for (int corner = 0; corner < 4; corner++) {

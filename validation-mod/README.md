@@ -652,3 +652,8 @@ for press/release, cycling, remaps, focus/menu/world cancellation and held movem
 `release-310 suite` checks map sidecar scope, related navigation, color return, manual previews, resize fallback, F3 preview and template review. `release-310 notes-write` then a real restart and `release-310 notes-read` check persisted local messages. Disposable clones only.
 
 `release-310 polish` checks sidebar motion/release ownership, footer widths, the unhighlighted Minimap launcher and automatic untouched template changes with draft preservation. For a real pointer test, run `release-310 polish-scroll-arm`, drag the thumb at the physical coordinates written to `reports/release-310/scroll.json`, then `release-310 polish-scroll-held` while holding. Release outside the sidebar and run `release-310 polish-scroll-release` to verify cleanup and map ownership.
+
+`release-330 ui` checks search scope/routes, sidebar source returns, shared manual drafts,
+conditional World Map appearance and zoom Undo. `release-330 inventories` checks native
+player, chest, crafting, dispenser and furnace minimaps, panel wheel ownership and the
+observed dimming/minimap/container draw order. Use only the muted disposable clone.

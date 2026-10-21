@@ -24,7 +24,7 @@ final class HudEditorSections {
     String id = s.id, field = field(s);
     if (id.startsWith("maps.")) {
       if (position(s)) return "Position";
-      if (field.equals("hideWithDebug")) return "Visibility";
+      if (field.equals("hideWithDebug") || field.equals("showInInventory")) return "Visibility";
       if (Set.of("coordinates", "biome", "clock", "compass", "directionTextSize", "directionTextColor", "directionTextOpacity", "belowTextSize").contains(field)) return "Information";
       if (local.luke.power.config.InheritedColors.accepts(s)) return "Individual mob colors";
       if (field.startsWith("radar") && field.endsWith("Color")) return "Radar colors";

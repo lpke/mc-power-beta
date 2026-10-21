@@ -15,6 +15,10 @@ public abstract class MenuBackgroundMixin extends net.minecraft.client.gui.Drawa
   @Shadow protected Minecraft minecraft;
   @Shadow public int width;
   @Shadow public int height;
+  @Inject(method = "renderBackground(I)V", at = @At("TAIL"))
+  private void power$inventoryMinimap(int ignored, CallbackInfo ci) {
+    local.luke.power.map.Minimap.renderInventory(minecraft, local.luke.power.map.Minimap.frameDelta());
+  }
   @Inject(method = "renderBackgroundTexture", at = @At("HEAD"), cancellable = true)
   private void power$panorama(int ignored, CallbackInfo ci) {
     if (!MenuPanorama.enabled(minecraft)) return;

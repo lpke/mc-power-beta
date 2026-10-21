@@ -28,6 +28,8 @@ final class HudPreview {
   private StatusSettings status;
   private local.luke.power.map.MapSettings map;
   private boolean sampledItem;
+  private local.luke.power.map.MinimapGeometry.Layout minimapLayout;
+  private boolean minimapVisible;
   private final boolean minimapEnabled;
   boolean suppressDebug, suppressToast, showToast = true, showChat = true, showTweaks = true;
   private final DebugPreview debugPreview;
@@ -193,9 +195,11 @@ final class HudPreview {
     if (scenario == 2 && background && bool("power_controls:userinterface.disableDebugEntityIdTags")) EntityTagPreview.draw(screen, mc, width, height);
     if (scenario == 2 && !suppressDebug) debug(screen, mc, width);
     boolean mapVisible=local.luke.power.map.Minimap.visible(map,scenario==2);
+    minimapVisible = mapVisible;
     boolean sampleMap = mc.world == null || mc.player == null || local.luke.power.map.Maps.cache() == null;
     var frame=local.luke.power.map.Minimap.frame(mc,map,width,height,false,sampleMap);
     if(mapVisible)local.luke.power.map.Minimap.drawFrame(mc,map,frame,true,delta);
+    minimapLayout = frame.layout();
     var mini=frame.bounds();
     elements.add(new Element("minimap", "Minimap", mini.x(), mini.y(), mini.width(), mini.height(),
         "maps.offsetX", "maps.offsetY",!mapVisible));
@@ -204,6 +208,11 @@ final class HudPreview {
       screen.rectangle(x, y, r, y + 1, 0xffffff66); screen.rectangle(x, b - 1, r, b, 0xffffff66);
       screen.rectangle(x, y, x + 1, b, 0xffffff66); screen.rectangle(r - 1, y, r, b, 0xffffff66);
     }
+  }
+  boolean minimapRadarActive(boolean debug) { return local.luke.power.map.Minimap.visible(map, debug); }
+  boolean minimapContains(double x, double y) {
+    return minimapVisible && minimapLayout != null
+        && local.luke.power.map.MinimapGeometry.contains(minimapLayout, map.circular, x, y);
   }
   InfoHudSettings.Cluster cluster(int index) {
     return clusters[index];

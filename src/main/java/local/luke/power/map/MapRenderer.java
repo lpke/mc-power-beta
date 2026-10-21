@@ -490,7 +490,7 @@ public final class MapRenderer {
           }
         }
       if (s.radar && dimension == Maps.dimension())
-        for (var entity : Maps.radar()) {
+        for (var entity : Maps.radar(mini)) {
           var p =
               view.screen(
                   MapMotion.position(

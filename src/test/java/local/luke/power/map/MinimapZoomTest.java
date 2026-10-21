@@ -5,6 +5,18 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 
 class MinimapZoomTest {
+  @Test void fineWheelTargetsClampAndKeysChooseTheAdjacentConfiguredStep() {
+    double target = MinimapZoom.scroll(1.25, 120);
+    assertEquals(1.375, target, 1e-12);
+    assertEquals(1.25, MinimapZoom.scroll(target, -120), 1e-12);
+    assertEquals(.25, MinimapZoom.scroll(.25, -120));
+    assertEquals(4, MinimapZoom.scroll(4, 120));
+    assertEquals(1.25, MinimapZoom.scroll(1.25, 0));
+    assertTrue(MinimapZoom.scroll(1.25, 60) > 1.25 && MinimapZoom.scroll(1.25, 60) < target);
+    double[] steps = {.25, .5, 1.25, 2.5, 4};
+    assertEquals(2.5, MinimapZoomSteps.next(steps, target, 1));
+    assertEquals(1.25, MinimapZoomSteps.next(steps, target, -1));
+  }
   @Test void customDecimalStepsWrapFromExactAndUnlistedTargets() {
     double[] steps = {.25, .5, 1.25, 2.5, 4};
     assertEquals(.25, MinimapZoomSteps.next(steps, 4, 1));

@@ -70,6 +70,7 @@ public final class Validation {
       else if (command.equals("release-253")) Release253Checks.run(mc);
       else if (command.startsWith("release-260 ")) Release260Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-321 ")) Release321Checks.run(mc,command.substring(12));
+      else if (command.startsWith("release-330 ")) Release330Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-322 ")) Release322Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-320 ")) Release320Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-310 ")) Release310Checks.run(mc,command.substring(12));

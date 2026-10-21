@@ -28,7 +28,9 @@ public final class WorldMapScreen extends UiScreen {
   private int minimapWidth, minimapHeight, minimapEntryCorner, minimapEntryX, minimapEntryY;
   private PowerOptionsScreen settingsPanel;
   private PowerOptionsScreen optionsOwner;
-  private boolean openMinimapSettings;
+  private boolean openSettings, openMinimapSettings;
+  private String initialSetting = "";
+  private MinimapGeometry.Layout minimapLayout;
   private MinimapGeometry.Box minimapHit;
   private boolean panelPress;
   private WorldMapControls controls;
@@ -61,11 +63,12 @@ public final class WorldMapScreen extends UiScreen {
   public void tick() { if (settingsPanel != null) settingsPanel.tick(); }
   public boolean capturingBinding() { return settingsPanel != null && settingsPanel.capturingBinding(); }
   public void requestScreenshot() { screenshot = true; }
+  public boolean minimapRadarActive() { return settingsPanel != null && mapWidth() >= 200; }
   public boolean radarIconsAllowed() {
     return !coordinates.active() && !serverMap.focused && !context
         && (settingsPanel == null || settingsPanel.radarIconsAllowed());
   }
-  private boolean panelOwns(int x) { return settingsPanel != null && (settingsPanel.panelModal() || panelPress || x < mapLeft()); }
+  private boolean panelOwns(int x) { return settingsPanel != null && (settingsPanel.panelModal() || panelPress || !dragging && !scaleDragging && x < mapLeft()); }
   private void drawMinimap(float delta) {
     minimapHit = null;
     if (settingsPanel == null || mapWidth() < 200) return;
@@ -81,13 +84,22 @@ public final class WorldMapScreen extends UiScreen {
     var style = minimapStyle;
     var frame = Minimap.frame(minecraft, style, mapWidth(), height, false, false).translated(mapLeft(), 0);
     Minimap.drawFrame(minecraft, style, frame, true, delta);
-    minimapHit = frame.bounds();
+    minimapHit = frame.bounds(); minimapLayout = frame.layout();
   }
 
   /** Borrow the Options session so manual drafts and the return position remain owned by Options. */
   public static boolean openMinimapSettings(net.minecraft.client.Minecraft mc, PowerOptionsScreen owner, boolean enabled) {
-    if (!enabled || mc.world == null || mc.player == null || MapSettingsScope.panelWidth(owner.width, owner.height) == owner.width) return false;
-    var screen = new WorldMapScreen(); screen.optionsOwner = owner; screen.openMinimapSettings = true;
+    return openSettings(mc, owner, enabled, true, "");
+  }
+  public static boolean canOpenSettings(net.minecraft.client.Minecraft mc, PowerOptionsScreen owner, boolean enabled) {
+    return enabled && mc.world != null && mc.player != null
+        && MapSettingsScope.panelWidth(owner.width, owner.height) != owner.width;
+  }
+  public static boolean openSettings(net.minecraft.client.Minecraft mc, PowerOptionsScreen owner,
+      boolean enabled, boolean minimap, String setting) {
+    if (!canOpenSettings(mc, owner, enabled)) return false;
+    var screen = new WorldMapScreen(); screen.optionsOwner = owner;
+    screen.openSettings = true; screen.openMinimapSettings = minimap; screen.initialSetting = setting;
     mc.setScreen(screen); return true;
   }
   private void closeMap() { minecraft.setScreen(optionsOwner == null ? null : optionsOwner.returnScreen()); }
@@ -139,13 +151,13 @@ public final class WorldMapScreen extends UiScreen {
     boolean panel = settingsPanel != null;
     if (controls == null || controlsLeft != mapLeft() || controlsWidth != mapWidth() || controlsHeight != height
         || controlsLayer != layer || controlsDimension != dimension || controlsSettings != panel || controlsStyle != style) {
-      String[] labels = {style.lightOverlay ? "Light: On" : "Light: Off", style.slimeChunks ? "Slime: On" : "Slime: Off",
-          style.worldMapRadarIcons ? "Mobs: On" : "Mobs: Off",
-          style.footsteps ? "Recent path: On" : "Recent path: Off", "Waypoints", panel ? "Close settings" : "Settings",
+      String[] labels = {style.lightOverlay ? "Spawnable: On" : "Spawnable: Off",
+          style.worldMapRadarIcons ? "Mobs: On" : "Mobs: Off", style.slimeChunks ? "Slime: On" : "Slime: Off",
+          style.chunkGrid ? "Chunks: On" : "Chunks: Off", style.footsteps ? "Path: On" : "Path: Off", "Waypoints", panel ? "Close settings" : "Settings",
           layer < 0 ? "Caves" : "Surface", MapDimensions.name(dimension), "Center", "Go to", "Close"};
       int bottomWidth = 12;
-      for (int i = 4; i < 8; i++) bottomWidth += textRenderer.getWidth(labels[i]) + 12;
-      if (bottomWidth > mapWidth() - 16) labels[5] = "Settings";
+      for (int i = 5; i < 9; i++) bottomWidth += textRenderer.getWidth(labels[i]) + 12;
+      if (bottomWidth > mapWidth() - 16) labels[6] = "Settings";
       controls = WorldMapControls.at(mapLeft(), mapWidth(), height, labels, textRenderer::getWidth);
       controlsLeft = mapLeft(); controlsWidth = mapWidth(); controlsHeight = height;
       controlsLayer = layer; controlsDimension = dimension; controlsSettings = panel; controlsStyle = style;
@@ -236,10 +248,11 @@ public final class WorldMapScreen extends UiScreen {
 
   public void init() {
     Keyboard.enableRepeatEvents(true);
-    if (openMinimapSettings) {
-      openMinimapSettings = false;
+    if (openSettings) {
+      openSettings = false;
       var entry = MapConfig.current(); minimapEntryCorner = entry.corner; minimapEntryX = entry.offsetX; minimapEntryY = entry.offsetY;
-      settingsPanel = PowerOptionsScreen.minimapPanel(this, optionsOwner);
+      settingsPanel = PowerOptionsScreen.mapPanel(this, optionsOwner);
+      settingsPanel.panelEntry(openMinimapSettings, initialSetting);
     }
     if (settingsPanel != null) {
       settingsPanel.panelCancelGesture();
@@ -317,6 +330,7 @@ public final class WorldMapScreen extends UiScreen {
     String id = switch(action) {
       case LIGHT -> "maps.lightOverlay";
       case SLIME -> "maps.slimeChunks";
+      case CHUNKS -> "maps.chunkGrid";
       case MOBS -> "maps.worldMapRadarIcons";
       case PATH -> "maps.footsteps";
       default -> throw new IllegalArgumentException("Unknown map overlay");
@@ -327,6 +341,7 @@ public final class WorldMapScreen extends UiScreen {
     switch(action) {
       case LIGHT -> settings.lightOverlay = !settings.lightOverlay;
       case SLIME -> settings.slimeChunks = !settings.slimeChunks;
+      case CHUNKS -> settings.chunkGrid = !settings.chunkGrid;
       case MOBS -> settings.worldMapRadarIcons = !settings.worldMapRadarIcons;
       case PATH -> settings.footsteps = !settings.footsteps;
       default -> throw new IllegalArgumentException("Unknown map overlay");
@@ -337,7 +352,7 @@ public final class WorldMapScreen extends UiScreen {
   private void controlAction(WorldMapControls.Action action) {
     click();
     switch(action) {
-      case LIGHT, SLIME, MOBS, PATH -> toggleOverlay(action);
+      case LIGHT, SLIME, MOBS, CHUNKS, PATH -> toggleOverlay(action);
       case WAYPOINTS -> minecraft.setScreen(new WaypointsScreen(this));
       case SETTINGS -> toggleSettings();
       case LAYER -> layer = layer < 0 ? MapSampler.window(MapConfig.current(),Maps.y()).layer() : -1;
@@ -442,8 +457,14 @@ public final class WorldMapScreen extends UiScreen {
       settingsPanel.panelWheel(Mouse.getEventDWheel());
       super.onMouseEvent(); return;
     }
+    int wheel = Mouse.getEventDWheel();
+    if (wheel != 0 && Display.isActive() && !Mouse.isGrabbed() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !context && !dragging && !scaleDragging && settingsPanel != null
+        && settingsPanel.minimapWheelAllowed() && minimapLayout != null
+        && MinimapGeometry.contains(minimapLayout, minimapStyle.circular, x, y)) {
+      settingsPanel.zoomMinimap(wheel); return;
+    }
     if (!context
-        && !overControls(x, y)
+        && (scaleDragging || !overControls(x, y))
         && Mouse.getEventDWheel() != 0
         && y >= top()
         && y < bottom())

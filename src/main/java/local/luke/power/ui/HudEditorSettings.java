@@ -19,7 +19,7 @@ public final class HudEditorSettings {
       "Hotbar position", "Hearts position", "Armor position", "Oxygen position",
       "Overlay message position", "Stamina position", "Version label", "Debug (F3) info", "Custom HUD info", "Active tweaks HUD", "General HUD", "Chat", "Minimap");
   private static final Set<String> MAP_APPEARANCE = Set.of(
-      "rotate", "circular", "hideWithDebug", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
+      "rotate", "circular", "hideWithDebug", "showInInventory", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
       "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
       "directionTextSize", "directionTextColor", "directionTextOpacity", "belowTextSize", "minimapWaypointTextSize", "minimapWaypointSize", "minimapArrowSize", "minimapArrowOpacity", "minimapWaypointArrows", "minimapDestinationArrow", "minimapDeathpointArrows", "destinationArrowColor", "destinationArrowOpacity",
       "radar", "players", "hostile", "animals", "items", "otherEntities", "entityNames", "entityHeights", "radarHeight", "radarDimming", "radarDimDistance",

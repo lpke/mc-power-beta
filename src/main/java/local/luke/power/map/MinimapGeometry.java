@@ -20,6 +20,13 @@ public final class MinimapGeometry {
   public record Point(double x, double y) {}
   private MinimapGeometry() {}
 
+  /** Only terrain inside the frame owns zoom input, excluding labels and circle corners. */
+  public static boolean contains(Layout layout, boolean circular, double x, double y) {
+    double dx = x - layout.x, dy = y - layout.y;
+    if (dx < 0 || dy < 0 || dx >= layout.size || dy >= layout.size) return false;
+    double radius = layout.size / 2d;
+    return !circular || (dx - radius) * (dx - radius) + (dy - radius) * (dy - radius) <= radius * radius;
+  }
   public static int informationHeight(MapSettings settings) {
     int rows = (settings.coordinates ? 1 : 0) + (settings.biome ? 1 : 0) + (settings.clock ? 1 : 0);
     return rows == 0 ? 0 : BORDER + 2 + (int)Math.ceil(rows * 10 * settings.belowTextSize / 100d);

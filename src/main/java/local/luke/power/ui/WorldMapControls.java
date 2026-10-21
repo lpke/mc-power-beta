@@ -5,7 +5,7 @@ import java.util.function.ToIntFunction;
 
 /** Bottom map controls keep their measured drawing and pointer bounds together. */
 record WorldMapControls(List<Button> buttons, Box scale) {
-  enum Action { LIGHT, SLIME, MOBS, PATH, WAYPOINTS, SETTINGS, LAYER, DIMENSION, CENTER, GO_TO, CLOSE }
+  enum Action { LIGHT, MOBS, SLIME, CHUNKS, PATH, WAYPOINTS, SETTINGS, LAYER, DIMENSION, CENTER, GO_TO, CLOSE }
   record Box(int x, int y, int width, int height) {
     boolean contains(int px, int py) { return px >= x && py >= y && px < x + width && py < y + height; }
     boolean intersects(Box other) { return x < other.x + other.width && x + width > other.x && y < other.y + other.height && y + height > other.y; }
@@ -18,20 +18,28 @@ record WorldMapControls(List<Button> buttons, Box scale) {
     labels = labels.clone();
     int[] sizes = Arrays.stream(labels).mapToInt(label -> Math.max(42, measure.applyAsInt(label) + 12)).toArray();
     int available = Math.max(1, width - 16);
-    if (total(sizes, 0, 4) > available) {
-      labels[3] = labels[3].replace("Recent path", "Path");
-      sizes[3] = Math.max(42, measure.applyAsInt(labels[3]) + 12);
-    }
-    fit(sizes, 0, 4, available); fit(sizes, 4, 8, available); fit(sizes, 8, 11, available);
-    int bottomWidth = total(sizes, 4, 8), rightWidth = total(sizes, 8, 11);
+    fit(sizes, 5, 9, available); fit(sizes, 9, 12, available);
+    int bottomWidth = total(sizes, 5, 9), rightWidth = total(sizes, 9, 12);
     int rightY = height - 24, leftY = rightY - (bottomWidth + rightWidth + 8 <= available ? 0 : 22);
+    var toggleRows = new ArrayList<int[]>();
+    int start = 0, used = 0;
+    for (int i = 0; i < 5; i++) {
+      if (i > start && used + 4 + sizes[i] > available) {
+        toggleRows.add(new int[]{start, i}); start = i; used = 0;
+      }
+      used += (i == start ? 0 : 4) + sizes[i];
+    }
+    toggleRows.add(new int[]{start, 5});
     var buttons = new ArrayList<Button>();
-    row(buttons, labels, sizes, 0, 4, left + 8, leftY - 22);
-    row(buttons, labels, sizes, 4, 8, left + 8, leftY);
-    row(buttons, labels, sizes, 8, 11, left + width - 8 - rightWidth, rightY);
+    for (int i = 0; i < toggleRows.size(); i++) {
+      int[] range = toggleRows.get(i);
+      row(buttons, labels, sizes, range[0], range[1], left + 8, leftY - (toggleRows.size() - i) * 22);
+    }
+    row(buttons, labels, sizes, 5, 9, left + 8, leftY);
+    row(buttons, labels, sizes, 9, 12, left + width - 8 - rightWidth, rightY);
     Box scale = new Box(left + width - 124, rightY - 36, 116, 20);
     for (Button button : buttons) if (button.bounds.intersects(scale)) {
-      scale = new Box(scale.x, leftY - 46, scale.width, scale.height); break;
+      scale = new Box(scale.x, leftY - toggleRows.size() * 22 - 24, scale.width, scale.height); break;
     }
     return new WorldMapControls(List.copyOf(buttons), scale);
   }

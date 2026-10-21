@@ -101,6 +101,8 @@ public final class InventoryLook {
       // rendering too, for smooth looking and to avoid capturing over an unread release.
       // Keyboard input stays in the normal tick path. All clicks use the normal handler.
       while (mc.currentScreen == screen && Mouse.next()) screen.onMouseEvent();
+      // Wheel consumers use queued events. Do not leave their old aggregate for the next screen.
+      if (mc.currentScreen == screen) Mouse.getDWheel();
       finishEvents();
     }
     // Discard polling deltas: they include cursor warps and movement outside the drag.

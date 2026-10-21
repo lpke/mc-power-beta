@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 3.2.2",
+    "default": "Power Beta 3.3.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -5202,8 +5202,8 @@
   "maps.radarLimit": {
     "page": "Map",
     "group": "Performance",
-    "label": "Entity checks per tick",
-    "description": "Maximum loaded entities checked per game tick and retained as radar markers. Lower values reduce work and may show fewer entities or refresh them later; higher values give fuller radar coverage and cost more CPU time.",
+    "label": "Entity radar limit",
+    "description": "Maximum markers tracked per map view. Lower values reduce tracking and drawing work; higher values retain more nearby entities. Discovery checks loaded chunk sections in bounded turns so entity bursts cannot stall the radar.",
     "min": 16.0,
     "max": 1024.0,
     "step": 16.0,
@@ -6159,7 +6159,7 @@
     "page": "Map",
     "group": "World map",
     "label": "Map light shading radius",
-    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0–7, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
     "min": 8,
     "max": 128,
     "step": 1,
@@ -6507,5 +6507,30 @@
     "label": "World map mob heads",
     "description": "Keep entity heads visible on the World Map without holding the mob-icons key. The minimap still uses its hold key. Entity radar must be enabled.",
     "order": 8.4
+  },
+  "maps.showInInventory": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Show in inventories",
+    "description": "Keep the minimap visible behind inventory panels without dimming it. Scroll over its terrain to zoom precisely; inventory panels and slots keep their normal mouse controls.",
+    "order": -1
+  },
+  "maps.radarRange": {
+    "page": "Map",
+    "group": "Entity radar",
+    "label": "Horizontal radar range",
+    "description": "Maximum horizontal entity radar range in chunks, capped by the terrain render distance regardless of this value. Lower values inspect fewer nearby chunks and reduce radar work; higher values cover a wider area. Applies to the minimap and World Map.",
+    "min": 1,
+    "max": 32,
+    "step": 1,
+    "order": 8.5,
+    "unit": "chunks"
+  },
+  "maps.worldMapEditor": {
+    "page": "Map",
+    "group": "World map",
+    "label": "World map appearance",
+    "description": "Edit Map settings beside a live World Map and minimap. Available with the World Map enabled in a sufficiently wide game window.",
+    "order": 1.1
   }
 }

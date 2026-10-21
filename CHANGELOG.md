@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [3.3.0] - 2026-10-21
+
+- Keep the minimap visible above inventory dimming and below container panels. Scroll over the minimap to zoom smoothly and precisely in inventories, the HUD editor and map settings previews.
+- Limit entity radar by horizontal range, capped at render distance. Discover entities through bounded loaded-chunk scans and keep tracked markers moving smoothly during large entity bursts.
+- Respect hidden entity categories on the minimap without spending time tracking them. The open World Map retains its independent radar view.
+- Search all Options settings or only the current tab with a remembered search-scope toggle. Follow accurate HUD editor paths and open minimap appearance results directly beside the World Map when it fits.
+- Open World map appearance directly from Options with live previews and reliable return navigation. Add a Chunks toggle, clearer Spawnable and Path labels, and keep map zoom working while dragging the scale.
+- Give search clear, scope and section buttons consistent square bounds and centered icons.
+
 ## [3.2.2] - 2026-10-21
 
 - Continue sprinting when leaving flight while moving forward, with normal ground-sprint permissions, stamina and combat checks.

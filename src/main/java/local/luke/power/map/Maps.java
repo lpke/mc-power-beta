@@ -6,12 +6,7 @@ import java.util.*;
 import local.luke.power.commands.CommandContext;
 import local.luke.power.input.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.class_258;
-import net.minecraft.class_65;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.WaterCreatureEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
 /** One session supplies both views. It owns no simulation or player inventory state. */
@@ -44,10 +39,8 @@ public final class Maps {
   private static MapPalette palette;
   private static final DeathpointQueue DEATHS = new DeathpointQueue();
   private static final ArrayDeque<Step> PATH = new ArrayDeque<>();
-  private static List<Radar> radar = List.of();
-  private static final List<Radar> radarScan = new ArrayList<>();
+  private static final RadarTracking RADAR = new RadarTracking();
   private static long pointsRevision = Long.MIN_VALUE;
-  private static int radarSize, radarStyle;
   private static List<Waypoint> points = List.of();
   private static Waypoint destination;
   private static boolean destinationArrivalArmed;
@@ -62,7 +55,7 @@ public final class Maps {
   private static String identity = "", server = "", submap = "Default", error = "";
   private static double x, y, z;
   private static float yaw;
-  private static int dimension, layer, ticks, entityCursor;
+  private static int dimension, layer, ticks;
   private static boolean wasDead, explicitWaypoints, minimapActive;
   private static long lastError;
 
@@ -101,7 +94,11 @@ public final class Maps {
   }
 
   public static List<Radar> radar() {
-    return radar;
+    return RADAR.snapshot(true);
+  }
+
+  public static List<Radar> radar(boolean minimap) {
+    return RADAR.snapshot(minimap);
   }
 
   public static float radarDelta(Radar entity, float delta) {
@@ -223,7 +220,7 @@ public final class Maps {
   }
 
   private static void clearRadar() {
-    radar = List.of(); radarScan.clear(); entityCursor = 0;
+    RADAR.clear();
   }
 
   public static void tick(Minecraft mc) {
@@ -236,9 +233,14 @@ public final class Maps {
     MapSettings settings = MapConfig.current();
     explicitWaypoints = waypointScreen(mc.currentScreen);
     MapActivity activity = MapActivity.of(settings, explicitWaypoints);
-    if (!(mc.currentScreen instanceof local.luke.power.ui.HudEditorScreen)) radarPreview = null;
+    boolean fullRadar = mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen;
+    boolean previewRadar = mc.currentScreen instanceof local.luke.power.ui.HudEditorScreen hud && hud.minimapRadarActive()
+        || mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen map && map.minimapRadarActive();
+    if (!previewRadar) radarPreview = null;
     MapSettings radarSettings = radarPreview == null ? settings : radarPreview;
-    boolean radarEnabled = activity.terrain() && MapActivity.of(radarSettings, false).radar();
+    boolean miniRadar = Minimap.radarActive(mc, radarSettings) || previewRadar;
+    boolean radarEnabled = activity.terrain() && radarSettings.radar
+        && (miniRadar || fullRadar) && MapActivity.of(radarSettings, false).radar();
     if (minimapActive && !settings.minimap) MinimapBuffer.clear();
     minimapActive = settings.minimap;
     if (!activity.terrain()) retireTerrain();
@@ -290,7 +292,7 @@ public final class Maps {
       }
     }
     wasDead = dead;
-    if (radarEnabled) radar(mc, radarSettings);
+    if (radarEnabled) RADAR.tick(mc, radarSettings, miniRadar, fullRadar, ticks, x, y, z);
     else clearRadar();
     if (activity.path() && ticks % 10 == 0 && !dead) {
       Step last = PATH.peekLast();
@@ -315,95 +317,6 @@ public final class Maps {
       MapRenderer.clear();
       MinimapBuffer.clear();
     }
-  }
-
-  private static void radar(Minecraft mc, MapSettings settings) {
-    List<Radar> result = new ArrayList<>();
-    List<?> entities = mc.world.field_198;
-    int size = entities.size();
-    if (size == 0) {
-      radar = List.of();
-      radarScan.clear();
-      entityCursor = 0;
-      return;
-    }
-    int style =
-        Objects.hash(
-            settings.players,
-            settings.hostile,
-            settings.animals,
-            settings.items,
-            settings.otherEntities,
-            settings.radarHeight,
-            settings.radarLimit,
-            settings.radarColorStyle());
-    if (size != radarSize || style != radarStyle || entityCursor >= size) {
-      entityCursor = 0;
-      radarScan.clear();
-      radarSize = size;
-      radarStyle = style;
-    }
-    int end = Math.min(size, entityCursor + settings.radarLimit);
-    for (int n = entityCursor; n < end; n++) {
-      Entity entity = (Entity) entities.get(n);
-      if (entity == mc.player
-          || entity.dead
-          || Math.abs(entity.y - y) > settings.radarHeight
-          || Math.hypot(entity.x - x, entity.z - z) > 256) continue;
-      String nativeType = net.minecraft.class_206.method_734(entity);
-      RadarKind kind = radarKind(entity, nativeType);
-      if (!kind.visible(settings)) continue;
-      int color = settings.mobColor(nativeType, kind.color(settings));
-      boolean item = entity instanceof net.minecraft.class_142;
-      String name =
-          entity instanceof PlayerEntity p ? p.name : net.minecraft.class_206.method_734(entity);
-      if (name == null || name.isBlank()) name = "Entity";
-      result.add(
-          new Radar(
-              entity.x,
-              entity.y,
-              entity.z,
-              name,
-              color,
-              item,
-              entity.prevX,
-              entity.prevY,
-              entity.prevZ,
-              ticks,
-              kind,
-              nativeType,
-              RadarIconSource.capture(entity, nativeType)));
-    }
-    radarScan.addAll(result);
-    if (radarScan.size() > settings.radarLimit) {
-      radarScan.sort(Comparator.comparingDouble(p -> Math.hypot(p.x() - x, p.z() - z)));
-      radarScan.subList(settings.radarLimit, radarScan.size()).clear();
-    }
-    entityCursor = end;
-    if (entityCursor == size) {
-      radar = List.copyOf(radarScan);
-      radarScan.clear();
-      entityCursor = 0;
-    }
-  }
-
-  private static RadarKind radarKind(Entity entity, String nativeType) {
-    if (entity instanceof PlayerEntity) return RadarKind.PLAYERS;
-    if (nativeType != null) {
-      switch (nativeType) {
-        case "Creeper", "Skeleton", "Spider", "Giant", "Zombie", "Slime", "Ghast", "PigZombie", "Monster" -> { return RadarKind.HOSTILE; }
-        case "Pig", "Sheep", "Cow", "Chicken", "Squid", "Wolf" -> { return RadarKind.ANIMALS; }
-        case "Item" -> { return RadarKind.ITEMS; }
-        case "Boat", "Minecart" -> { return RadarKind.VEHICLES; }
-        case "Arrow", "Snowball" -> { return RadarKind.PROJECTILES; }
-      }
-    }
-    if (entity instanceof class_65) return RadarKind.HOSTILE;
-    if (entity instanceof class_258 || entity instanceof WaterCreatureEntity) return RadarKind.ANIMALS;
-    if (entity instanceof net.minecraft.class_142) return RadarKind.ITEMS;
-    if (entity instanceof net.minecraft.class_372 || entity instanceof net.minecraft.class_499
-        || entity instanceof net.minecraft.entity.projectile.FishingBobberEntity) return RadarKind.PROJECTILES;
-    return RadarKind.OTHER;
   }
 
   public static void leave() {
@@ -432,8 +345,7 @@ public final class Maps {
     minimapActive = false;
     identity = "";
     PATH.clear();
-    radar = List.of();
-    radarScan.clear();
+    clearRadar();
     points = List.of();
     pointsRevision = Long.MIN_VALUE;
     destination = null;

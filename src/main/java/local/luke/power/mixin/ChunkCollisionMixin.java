@@ -12,9 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /** Keep collision queries out of dense item/TNT lists without changing other queries. */
 @Mixin(class_43.class)
-public class ChunkCollisionMixin implements CollisionCandidates.ChunkAccess {
+public class ChunkCollisionMixin implements CollisionCandidates.ChunkAccess, local.luke.power.map.RadarChunkAccess {
   @Shadow public List[] field_965;
   @Unique private List<Entity>[] power$colliders;
+  @Override public List<Entity>[] power$radarEntities() { return power$colliders; }
   @Unique @SuppressWarnings("unchecked")
   private List<Entity>[] power$sections() {
     if (power$colliders == null) {

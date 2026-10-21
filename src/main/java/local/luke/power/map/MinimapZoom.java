@@ -7,6 +7,12 @@ public final class MinimapZoom {
   private long started;
   private boolean initialized;
 
+  /** Wheel targets use finer, non-wrapping increments than configurable key steps. */
+  public static double scroll(double target, int wheel) {
+    if (wheel == 0) return target;
+    double turns = Math.max(-8, Math.min(8, wheel / 120d));
+    return Math.max(.25, Math.min(4, target * Math.pow(1.1, turns)));
+  }
   public void reset() { initialized = false; }
   public double value(long now) {
     if (!initialized) return 1;

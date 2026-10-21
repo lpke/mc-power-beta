@@ -126,6 +126,7 @@
     "TntMotionMixin",
     "TntMotionRenderMixin",
     "FlattenedCollisionMixin",
+    "FlattenedRadarMixin",
     "TorchShovelInventoryMixin",
     "AxesSlashLeavesInventoryMixin",
     "TorchShovelMiningMixin",
@@ -164,7 +165,8 @@
     "BoatInteractionMixin",
     "RadarFrameMixin",
     "MapScreenshotKeyMixin",
-    "RadarTextureReloadMixin"
+    "RadarTextureReloadMixin",
+    "InventoryMinimapInputMixin"
   ],
   "injectors": {
     "defaultRequire": 1

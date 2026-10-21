@@ -15,7 +15,10 @@ public abstract class InventoryLookScreenMixin {
 
   @Inject(method = "onMouseEvent", at = @At("HEAD"), cancellable = true)
   private void power$lookClick(CallbackInfo ci) {
-    if (InventoryLook.mouseEvent(minecraft, (Screen)(Object)this)) ci.cancel();
+    if (InventoryLook.mouseEvent(minecraft, (Screen)(Object)this)) {
+      local.luke.power.input.InventoryWheel.finishEvent(this, false);
+      ci.cancel();
+    }
   }
 
   @Inject(method = "tickInput", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Keyboard;next()Z", ordinal = 0))

@@ -8,6 +8,42 @@ import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
 
 public final class Minimap {
+  private static float frameDelta = 1;
+  public static void frameDelta(float delta) { frameDelta = delta; }
+  public static float frameDelta() { return frameDelta; }
+  public static boolean radarActive(Minecraft mc, MapSettings settings) {
+    return mc.world != null && mc.player != null && !mc.options.hideHud
+        && visible(settings, mc.options.debugHud)
+        && (mc.currentScreen == null || mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen
+            || settings.showInInventory && mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen);
+  }
+  public static boolean inventoryVisible(Minecraft mc) {
+    return mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen
+        && MapConfig.current().showInInventory && MapConfig.current().minimap
+        && mc.world != null && mc.player != null && !mc.options.hideHud
+        && visible(MapConfig.current(), mc.options.debugHud);
+  }
+  public static void renderInventory(Minecraft mc, float delta) {
+    if (inventoryVisible(mc) && Maps.cache() != null) {
+      MapRenderer.beginFrame(delta);
+      var resolution = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
+      var settings = MapConfig.current();
+      drawFrame(mc, settings, frame(mc, settings, resolution.method_1857(), resolution.method_1858(), false, false), false, delta);
+    }
+  }
+  public static boolean inventoryWheel(Minecraft mc, int x, int y, int wheel) {
+    if (wheel == 0 || !inventoryVisible(mc) || !org.lwjgl.opengl.Display.isActive()
+        || org.lwjgl.input.Mouse.isGrabbed() || org.lwjgl.input.Mouse.isButtonDown(0)
+        || org.lwjgl.input.Mouse.isButtonDown(1)
+        || !(mc.currentScreen instanceof local.luke.power.input.InventoryGui gui)
+        || gui.power$containsGuiSpace(x, y)) return false;
+    var settings = MapConfig.current();
+    if (!MinimapGeometry.contains(MinimapGeometry.layout(settings, mc.currentScreen.width,
+        mc.currentScreen.height, false), settings.circular, x, y)) return false;
+    var copy = MapConfig.copy(); copy.zoom = MinimapZoom.scroll(copy.zoom, wheel);
+    if (copy.zoom != settings.zoom) MapConfig.queued(copy);
+    return true;
+  }
   public static boolean visible(MapSettings settings, boolean debug) {
     return settings.minimap && (!debug || !settings.hideWithDebug);
   }
