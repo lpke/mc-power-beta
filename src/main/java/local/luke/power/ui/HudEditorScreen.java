@@ -397,6 +397,16 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected void stopGesture() { dragging = null; divider.stop(); if (reorder != null) reorder.cancelDrag(); }
   protected void mouseClicked(int x, int y, int button) {
     if (reorderExit.click(this, x, y, button, () -> finishReorder(true), () -> finishReorder(false))) return;
+    if (button == 1 && !modal() && !selecting && !inline.active() && !reorder.active()
+        && dragging == null && !divider.dragging() && previewVisible()
+        && inside(x, y, previewLeft(), previewTop(), previewSpan(), previewBottom() - previewTop())
+        && preview.minimapContains(virtualX(x), virtualY(y))) {
+      Setting zoom = draft.get("maps.zoom");
+      var map = local.luke.power.map.MapConfig.current();
+      double next = local.luke.power.map.MinimapZoomSteps.reset(map.zoomSteps, map.zoomDefault);
+      if (next != zoom.value.getAsDouble()) { draft.checkpoint(); zoom.value = new JsonPrimitive(next); afterEdit(); }
+      click(); return;
+    }
     if (!modal() && !selecting && button == 0 && panelToggleAt(x, y)) { toggleSettings(); return; }
     if (!modal() && !selecting && button == 0 && previewToggleAt(x, y)) { togglePreview(); return; }
     if (reorder.active() && !modal() && !selecting

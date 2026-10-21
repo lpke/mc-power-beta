@@ -12,7 +12,9 @@ public final class InventorySideSlots {
   @FunctionalInterface public interface Fill { void draw(int left, int top, int right, int bottom, int color); }
   public static void frame(Fill fill, int x, int y, int height, boolean destroyAbove) {
     int left = x - WIDTH, top = y + top(destroyAbove), bottom = y + height;
-    fill.draw(left + 1, top, x + 4, bottom, 0xff000000);
+    fill.draw(left + 1, top, x + 4, bottom, 0xffc6c6c6);
+    // The upper edge joins the native panel; only the lower edge continues into it.
+    fill.draw(left + 1, top, x, top + 1, 0xff000000);
     fill.draw(left, top + 1, x + 4, bottom - 1, 0xff000000);
     fill.draw(left + 1, top + 1, x + 4, bottom - 1, 0xffc6c6c6);
     fill.draw(left + 2, top + 1, x + 3, top + 3, 0xffffffff);

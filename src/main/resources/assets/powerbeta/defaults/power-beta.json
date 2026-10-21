@@ -1141,6 +1141,7 @@
       "radarSquidColor": -1,
       "radarWolfColor": -1,
       "radarIconSize": 75,
+      "zoomDefault": 1.25,
       "zoomSteps": [
         0.25,
         0.5,
@@ -1219,6 +1220,7 @@
       "enabled": true,
       "inventory": false,
       "pauseMenu": true,
+      "buttonStyle": 0,
       "craftingOpen": false,
       "furnaceOpen": false,
       "craftingFilter": false,

@@ -36,6 +36,29 @@ public final class SavedCreativeHotbars {
   }
   public static String problem() { return problem; }
   public static String[] snapshot(int row) { return data == null ? new String[9] : data.bar(row); }
+  /** Editing only owns saved user data and is independent of the player's current mode. */
+  public static boolean editable(Minecraft mc) {
+    return data != null && PowerConfig.problem().isEmpty() && mc != null && mc.world != null && mc.player != null
+        && !mc.world.isRemote && WorldCompatibility.ready(mc.world) && mc.player.world == mc.world
+        && CommandPermissions.allowed(GameRule.ALLOW_CREATIVE_MODE);
+  }
+  public static SavedCreativeHotbarsData editorSnapshot() {
+    if (data == null) throw new IllegalStateException(problem);
+    return SavedCreativeHotbarsData.read(data.json());
+  }
+  public static void acceptEdit(Minecraft mc, SavedCreativeHotbarsData original, SavedCreativeHotbarsData next) throws IOException {
+    if (!editable(mc)) throw new IOException("Creative access is required to edit saved hotbars.");
+    if (!data.json().equals(original.json())) throw new IOException("Saved hotbars changed. Reopen this editor before saving.");
+    // Native decoder validation applies only to changed cells. Unavailable saved items remain opaque.
+    for (int row = 0; row < 9; row++) {
+      String[] before = original.bar(row), after = next.bar(row);
+      for (int slot = 0; slot < 9; slot++) if (after[slot] != null && !Objects.equals(before[slot], after[slot])) DeathItems.decode(after[slot]);
+    }
+    var stored = PowerConfig.document().getAsJsonObject("settings").get("savedCreativeHotbars");
+    var expected = stored == null ? SavedCreativeHotbarsData.empty() : SavedCreativeHotbarsData.read(stored.getAsJsonObject());
+    if (!expected.json().equals(original.json())) throw new IOException("Saved hotbars changed. Reopen this editor before saving.");
+    PowerConfig.replaceSection("savedCreativeHotbars", stored, next.json()); data = next;
+  }
   public static boolean eligible(Minecraft mc) {
     return InventoryToolsConfig.current().creativeHotbars && data != null && PowerConfig.problem().isEmpty()
         && mc != null && mc.world != null && mc.player != null && !mc.world.isRemote && WorldCompatibility.ready(mc.world)

@@ -6,6 +6,7 @@ public final class SettingAccess {
   private SettingAccess() {}
 
   public static boolean visible(ConfigSession session, Setting setting) {
+    if (setting.id.equals("inventoryTools.protectedSlots")) return false;
     if (setting.id.startsWith("logo.logo.") || setting.id.startsWith("logo.blocks.")) {
       int style = session.settings().stream().filter(s -> s.id.equals("logo.style"))
           .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(0);
@@ -37,7 +38,7 @@ public final class SettingAccess {
     if (id.equals("keys.powerbeta.sprint") || id.startsWith("sprint.")
         && !java.util.Set.of("sprint.dynamicFov", "sprint.creativeFov", "sprint.spectatorFov", "sprint.freecamFov", "sprint.fovStrength").contains(id))
       return local.luke.power.rules.GameRule.ALLOW_SPRINTING;
-    if (java.util.Set.of("inventoryTools.creativeHotbars", "keys.powerbeta.saveCreativeHotbar", "keys.powerbeta.loadCreativeHotbar").contains(id))
+    if (java.util.Set.of("inventoryTools.creativeHotbars", "inventoryTools.hotbarEditor", "keys.powerbeta.saveCreativeHotbar", "keys.powerbeta.loadCreativeHotbar").contains(id))
       return local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE;
     if (id.startsWith("worldedit.")) return local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING;
     if (id.equals("visual.spectatorFullBright")

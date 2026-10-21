@@ -52,6 +52,9 @@ public final class InventoryToolsBackend implements Backend {
           Catalog.JSON.toJsonTree(field.get(defaults)), key.equals("restockThreshold") ? 1 : 0,
           key.equals("restockThreshold") ? 64 : key.equals("toolDurabilityReserve") ? 100 : 1, 1, List.of(), false));
     }
+    entries.add(new Setting("inventoryTools.hotbarEditor", "inventoryTools", "Inventory", "Saved Creative hotbars",
+        "Edit saved hotbars", "Edit saved Creative hotbars without changing your inventory. Requires Creative access in a singleplayer world.",
+        Setting.Kind.TEXT, new JsonPrimitive("Edit"), new JsonPrimitive("Edit"), 0, 0, 1, List.of(), false));
     session.add(new InventoryToolsBackend(), entries);
   }
   public String id() { return "inventoryTools"; }
@@ -59,6 +62,7 @@ public final class InventoryToolsBackend implements Backend {
   private InventoryToolsSettings draft(Map<String, JsonElement> values) throws ReflectiveOperationException {
     var next = InventoryToolsConfig.copy();
     for (var entry : values.entrySet()) {
+      if (entry.getKey().equals("inventoryTools.hotbarEditor")) continue;
       if (!entry.getKey().startsWith("inventoryTools.")) throw new IllegalArgumentException("Unknown inventory setting");
       var field = InventoryToolsSettings.class.getField(entry.getKey().substring("inventoryTools.".length()));
       field.set(next, Catalog.JSON.fromJson(entry.getValue(), field.getGenericType()));

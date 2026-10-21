@@ -105,6 +105,14 @@ public final class PowerOptionsScreen extends UiScreen {
     double next = local.luke.power.map.MinimapZoom.scroll(setting.value.getAsDouble(), wheel);
     if (next != setting.value.getAsDouble()) { setting.value = new JsonPrimitive(next); changed(setting); }
   }
+  void resetMinimapZoom() {
+    Setting zoom = session.settings().stream().filter(s -> s.id.equals("maps.zoom")).findFirst().orElseThrow();
+    Setting steps = session.settings().stream().filter(s -> s.id.equals("maps.zoomSteps")).findFirst().orElseThrow();
+    Setting reset = session.settings().stream().filter(s -> s.id.equals("maps.zoomDefault")).findFirst().orElseThrow();
+    double[] levels = Catalog.JSON.fromJson(steps.value, double[].class);
+    zoom.value = new JsonPrimitive(local.luke.power.map.MinimapZoomSteps.reset(levels, reset.value.getAsDouble()));
+    changed(zoom);
+  }
   void toggleMapSetting(String id) {
     Setting setting = session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElseThrow();
     setting.value = new JsonPrimitive(!setting.value.getAsBoolean()); changed(setting);
@@ -541,8 +549,14 @@ public final class PowerOptionsScreen extends UiScreen {
     layout();
   }
 
+  private List<Setting> rowSettings(Setting setting) {
+    String paired = setting.id.equals("inventoryTools.preferredItems") ? "inventoryTools.protectedSlots"
+        : setting.id.equals("maps.zoomSteps") ? "maps.zoomDefault" : "";
+    return paired.isEmpty() ? ColorSettings.linked(setting, session.settings())
+        : session.settings().stream().filter(value -> value == setting || value.id.equals(paired)).toList();
+  }
   private boolean settingChanged(Setting setting) {
-    return ColorSettings.linked(setting, session.settings()).stream().anyMatch(Setting::changed);
+    return rowSettings(setting).stream().anyMatch(Setting::changed);
   }
 
   private boolean filtered() {
@@ -556,6 +570,7 @@ public final class PowerOptionsScreen extends UiScreen {
         .filter(s -> changedOnly ? settingChanged(s) : listed.isEmpty() ? embedded() ? localMapView(s) : s.page.equals(page) : listed.contains(s.id))
         .filter(this::selectedPreset)
         .filter(s -> SettingAccess.visible(session, s) && SettingAccess.reason(session, s).isEmpty())
+        .flatMap(s -> rowSettings(s).stream()).distinct()
         .toList();
   }
 
@@ -999,9 +1014,9 @@ public final class PowerOptionsScreen extends UiScreen {
         if (y < controlY) return;
         if (!s.id.equals(HudEditorSettings.ENTRY) && x >= right() - 34) {
           click();
-          ColorSettings.reset(s, session.settings());
+          rowSettings(s).forEach(Setting::reset);
           if (s.id.equals("interface.debugOrder")) session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).forEach(Setting::reset);
-          changed(ColorSettings.linked(s, session.settings()), false);
+          changed(rowSettings(s), false);
           return;
         }
         if (s.kind == Setting.Kind.KEY && !conflicts(s).isEmpty() && x >= controlLeft(r) - 12 && x < controlLeft(r)) {
@@ -1090,6 +1105,12 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!SettingAccess.reason(session, s).isEmpty()) return;
     error = "";
     click();
+    if (s.id.equals("inventoryTools.hotbarEditor")) {
+      if (!local.luke.power.inventory.tools.SavedCreativeHotbars.editable(minecraft)) {
+        error = "Editing saved hotbars requires Creative access in a singleplayer world."; return;
+      }
+      minecraft.setScreen(new SavedHotbarsScreen(this)); return;
+    }
     if (s.id.equals("inventoryTools.preferredItems") || s.id.equals("inventoryTools.protectedSlots")) {
       minecraft.setScreen(new SortingPreferencesScreen(this, session, () -> changed(
           session.settings().stream().filter(value -> value.id.equals("inventoryTools.preferredItems")
@@ -1313,6 +1334,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private String value(Setting s) {
     if (InheritedColors.accepts(s)) return InheritedColors.label(s);
     if (ColorSettings.accepts(s)) return ColorSettings.label(s, session.settings());
+    if (s.id.equals("inventoryTools.preferredItems")) return "Edit...";
     if (s.id.equals("interface.debugOrder")) return "Reorder";
     if (s.id.equals("rules.review")) return "Review...";
     if (s.id.equals("maps.zoomSteps")) return s.value.getAsJsonArray().size() + " levels...";
@@ -1540,7 +1562,8 @@ public final class PowerOptionsScreen extends UiScreen {
           local.luke.power.input.Chord.decode(s.value.getAsInt()).key() == 0 ? 0x999999 : -1);
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, editable);
-      boolean defaultValue = ColorSettings.atDefault(s, session.settings()) && (!s.id.equals("interface.debugOrder")
+      boolean defaultValue = rowSettings(s).stream().allMatch(value -> value == s || value.value.equals(value.defaultValue))
+          && ColorSettings.atDefault(s, session.settings()) && (!s.id.equals("interface.debugOrder")
           || session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).allMatch(value -> value.value.equals(value.defaultValue)));
       if (!s.id.equals(HudEditorSettings.ENTRY)) button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !defaultValue);
       if (customise(s)) button("Customize", controlLeft(row), cy, 62, 18, mx, listMouseY, editable);

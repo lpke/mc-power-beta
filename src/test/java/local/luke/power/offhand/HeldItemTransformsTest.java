@@ -14,11 +14,43 @@ class HeldItemTransformsTest {
       pose.translate(0, -.3f, 0); pose.scale(1.5f, 1.5f, 1.5f);
       pose.rotate(50, 0, 1, 0); pose.rotate(335, 0, 0, 1); pose.translate(-.9375f, -.0625f, 0);
       for (float x : new float[]{0, 1}) for (float y : new float[]{0, 1}) for (float z : new float[]{0, -1 / 16f})
-        assertArrayEquals(kind == ROD ? new double[]{.5 - x, y - .5, -z - 1 / 32.0}
-            : new double[]{x - .5, y - .5, z + 1 / 32.0}, pose.point(x, y, z), EPSILON);
+        assertArrayEquals(kind == GENERATED ? new double[]{x - .5, y - .5, z + 1 / 32.0}
+            : new double[]{.5 - x, y - .5, -z - 1 / 32.0}, pose.point(x, y, z), EPSILON);
     }
     var block = new Matrix(); HeldItemTransforms.normalizeNative(block, BLOCK);
     assertArrayEquals(new double[]{.5, -.5, .5}, block.point(.5, -.5, .5), EPSILON);
+  }
+
+  @Test void handheldTexturePixelsMatchModernModelCoordinatesInBothHandsAndViews() {
+    for (var kind : new HeldItemTransforms.Kind[]{HANDHELD, BOW})
+      for (boolean firstPerson : new boolean[]{true, false}) for (int side : new int[]{-1, 1}) {
+        var actual = new Matrix(); HeldItemTransforms.display(actual, kind, firstPerson, side);
+        HeldItemTransforms.normalizeNative(actual, kind);
+        // Beta's actual baked quad: model X = 1-U, model Y = 1-V.
+        actual.translate(0, -.3f, 0); actual.scale(1.5f, 1.5f, 1.5f);
+        actual.rotate(50, 0, 1, 0); actual.rotate(335, 0, 0, 1); actual.translate(-.9375f, -.0625f, 0);
+
+        // Independent reference: official display JSON applied to centered modern
+        // generated geometry. Its texture U increases with model X on both faces.
+        var modern = new Matrix();
+        if (firstPerson) {
+          modern.translate(side * 1.13f / 16, 3.2f / 16, 1.13f / 16);
+          modern.rotate(-90, 0, 1, 0); modern.rotate(25, 0, 0, 1); modern.scale(.68f, .68f, .68f);
+        } else if (kind == HANDHELD) {
+          modern.translate(0, 4f / 16, .5f / 16);
+          modern.rotate(-90, 0, 1, 0); modern.rotate(55, 0, 0, 1); modern.scale(.85f, .85f, .85f);
+        } else {
+          modern.translate(-side / 16f, -2f / 16, 2.5f / 16);
+          modern.rotate(-80, 1, 0, 0); modern.rotate(side < 0 ? 280 : 260, 0, 1, 0);
+          modern.rotate(-40, 0, 0, 1); modern.scale(.9f, .9f, .9f);
+        }
+        // Include diagonal handle/tip pixels and the opposite corners. A centered
+        // bounding-box test alone cannot detect the native sprite's reversed U.
+        for (double u : new double[]{1.5 / 16, 14.5 / 16}) for (double v : new double[]{1.5 / 16, 14.5 / 16})
+          for (double z : new double[]{0, -1 / 16.0})
+            assertArrayEquals(modern.point(u - .5, .5 - v, -z - 1 / 32.0),
+                actual.point(1 - u, 1 - v, z), EPSILON, kind + " texel orientation");
+      }
   }
 
   @Test void fishingAttachmentUsesTheSameRenderedTipThroughEquipAndIndependentSwing() {

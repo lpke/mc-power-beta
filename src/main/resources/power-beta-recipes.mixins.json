@@ -9,6 +9,7 @@
     "RecipeNativeBackgroundMixin",
     "RecipePlayerInitMixin",
     "RecipeTableBackgroundMixin",
+    "RecipeTooltipMixin",
     "RecipeWheelMixin",
     "ShapedRecipeAccessor",
     "ShapelessRecipeAccessor"

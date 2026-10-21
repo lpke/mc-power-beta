@@ -43,12 +43,19 @@ public final class InventoryToolsOverlay extends UiScreen {
     second.visible = showSecond && !modal; second.text = storage ? "D" : "H";
     place(sort, InventoryToolsLayout.sort(width, height, panelWidth, panelHeight, offset(), showSecond));
     place(second, InventoryToolsLayout.second(width, height, panelWidth, panelHeight, offset()));
-    sort.active = SortingSlots.eligible(minecraft); second.active = storage ? SortingSlots.eligible(minecraft) : SavedCreativeHotbars.eligible(minecraft);
+    // Keep header appearance stable while a carried stack temporarily blocks an action.
+    sort.active = true; second.active = true;
     if (modal && (!Display.isActive() || !SavedCreativeHotbars.eligible(minecraft))) close();
     if (modal) {
       InventoryPanels.extra(host, SavedCreativeHotbars.MODAL_OWNER, List.of(new InventoryPanels.Rect(0, 0, width, height)));
       InventoryPanels.modal(host, SavedCreativeHotbars.MODAL_OWNER, true);
     }
+  }
+  public InventoryToolsLayout.Rect recipeButtonBounds() {
+    boolean second = host != null && host.getClass() != class_585.class
+        ? InventoryToolsConfig.current().depositMatching : host != null && hotbars();
+    var anchor = InventoryToolsLayout.sort(width, height, panelWidth, panelHeight, offset(), second);
+    return new InventoryToolsLayout.Rect(anchor.x() - 16, anchor.y(), 14, 14);
   }
   private void place(Header button, InventoryToolsLayout.Rect rect) { button.x = rect.x(); button.y = rect.y(); button.rect = rect; }
   public boolean press(int x, int y, int mouseButton) {
@@ -78,6 +85,7 @@ public final class InventoryToolsOverlay extends UiScreen {
     click();
     if (button == sort) SortingActions.sort(minecraft, local.luke.power.ui.TextEditing.shift());
     else if (host.getClass() == class_585.class) {
+      if (!SavedCreativeHotbars.eligible(minecraft)) return true;
       NativeInventoryPlan.cancel();
       if (host instanceof InventoryDrag drag) drag.power$cancelItemDrag();
       if (host instanceof CreativePaint paint) paint.power$cancelCreativePaint();
@@ -119,10 +127,9 @@ public final class InventoryToolsOverlay extends UiScreen {
   }
   public void render(int x, int y, float delta) {
     if (!modal) {
-      if (sort != null && sort.visible && sort.rect.contains(x, y)) foregroundTooltip("Sort storage. Hotbar, equipment and crafting slots stay separate.", x, y);
+      if (sort != null && sort.visible && sort.rect.contains(x, y)) foregroundTooltip("Sort", x, y);
       else if (second != null && second.visible && second.rect.contains(x, y)) foregroundTooltip(host.getClass() == class_585.class
-          ? SavedCreativeHotbars.problem().isEmpty() ? "Save and load nine Creative hotbars." : SavedCreativeHotbars.problem()
-          : "Deposit main-storage items matching this container's original contents.", x, y);
+          ? "Hotbars" : "Deposit", x, y);
       return;
     }
     var box = InventoryToolsLayout.modal(width, height, offset());

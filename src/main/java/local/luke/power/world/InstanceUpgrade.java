@@ -60,11 +60,7 @@ public final class InstanceUpgrade {
         fresh.getAsJsonObject("settings").getAsJsonObject("defaults").addProperty("setupComplete", true);
         // Saved libraries and hotbars are user data, independent of resettable preferences.
         JsonObject oldSettings = converted.getAsJsonObject("settings"), freshSettings = fresh.getAsJsonObject("settings");
-        if (oldSettings.has("savedCreativeHotbars")) freshSettings.add("savedCreativeHotbars", oldSettings.get("savedCreativeHotbars").deepCopy());
-        for (String[] field : new String[][]{{"audio", "presets"}, {"audio", "favourites"}, {"logo", "presets"}, {"interface", "debugPresets"}}) {
-          if (oldSettings.has(field[0]) && oldSettings.getAsJsonObject(field[0]).has(field[1]))
-            freshSettings.getAsJsonObject(field[0]).add(field[1], oldSettings.getAsJsonObject(field[0]).get(field[1]).deepCopy());
-        }
+        preserveSavedData(oldSettings, freshSettings);
         // Keep immutable conversion evidence for worlds imported after this maintenance pass.
         for (String key : List.of("legacyWorldRules", "worldRuleUpgrade", "worldRuleUpgrade210"))
           if (converted.has(key)) fresh.add(key, converted.get(key).deepCopy());
@@ -83,6 +79,15 @@ public final class InstanceUpgrade {
       System.out.println("Verified configuration schema " + local.luke.power.storage.ConfigVersions.CURRENT
           + ", world-rule format " + RuleSet.VERSION + ", metadata files " + planned.size()
           + ", preferences " + (defaults ? "pack defaults with retained FOV, GUI scale and frame limit" : "preserved"));
+    }
+  }
+  static void preserveSavedData(JsonObject oldSettings, JsonObject freshSettings) {
+    // Keep opaque unsupported formats too. A defaults reset never owns user libraries.
+    for (String section : List.of("savedCreativeHotbars", "sortingLayouts"))
+      if (oldSettings.has(section)) freshSettings.add(section, oldSettings.get(section).deepCopy());
+    for (String[] field : new String[][]{{"audio", "presets"}, {"audio", "favourites"}, {"logo", "presets"}, {"interface", "debugPresets"}}) {
+      if (oldSettings.has(field[0]) && oldSettings.getAsJsonObject(field[0]).has(field[1]))
+        freshSettings.getAsJsonObject(field[0]).add(field[1], oldSettings.getAsJsonObject(field[0]).get(field[1]).deepCopy());
     }
   }
   private static void assertIdle(Path game) throws IOException {

@@ -4,6 +4,12 @@ import java.util.*;
 import local.luke.power.config.*;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import local.luke.power.inventory.tools.SortingLayoutsData;
+import local.luke.power.inventory.tools.SortingProtectionDrag;
+import local.luke.power.storage.PowerConfig;
+import com.google.gson.*;
 
 /** A settings-only slot diagram. It never reads or edits a gameplay inventory. */
 public final class SortingPreferencesScreen extends UiScreen {
@@ -15,6 +21,12 @@ public final class SortingPreferencesScreen extends UiScreen {
   private final Map<Integer, ItemCatalogue.Entry> icons = new HashMap<>();
   private final ItemIcons renderer = new ItemIcons();
   private final DraftExitPrompt exit = new DraftExitPrompt();
+  private final SortingProtectionDrag drag = new SortingProtectionDrag();
+  private final TextInput presetName = new TextInput("", 64);
+  private final JsonElement originalPresets;
+  private SortingLayoutsData presets;
+  private int presetIndex;
+  private String presetProblem = "";
   private int selected = 9;
   private String error = "";
 
@@ -25,6 +37,9 @@ public final class SortingPreferencesScreen extends UiScreen {
     for (var value : protectedSetting.value.getAsJsonArray()) protectedSlots.add(value.getAsInt());
     for (var entry : preferredSetting.value.getAsJsonObject().entrySet())
       preferredItems.put(Integer.parseInt(entry.getKey()), entry.getValue().getAsString());
+    originalPresets = PowerConfig.document().getAsJsonObject("settings").get("sortingLayouts");
+    try { presets = SortingLayoutsData.read(originalPresets == null ? new JsonObject() : originalPresets.getAsJsonObject()); }
+    catch (RuntimeException unsupported) { presetProblem = Objects.toString(unsupported.getMessage(), "Sorting presets are unavailable"); }
     refreshIcons();
   }
   private static Setting setting(ConfigSession session, String id) {
@@ -37,14 +52,52 @@ public final class SortingPreferencesScreen extends UiScreen {
     } catch (IllegalArgumentException unavailable) { /* Retain unavailable preferences until explicitly changed. */ }
   }
   private int left() { return (width - 198) / 2; }
-  private int gridTop() { return Math.max(54, (height - 170) / 2); }
-  private int controlsTop() { return gridTop() + 72; }
+  private int gridTop() { return Math.max(38, (height - 250) / 2); }
+  private int controlsTop() { return gridTop() + 68; }
   private boolean changed() {
-    return !Catalog.JSON.toJsonTree(protectedSlots).equals(protectedSetting.value)
+    return presetChanged() || !Catalog.JSON.toJsonTree(protectedSlots).equals(protectedSetting.value)
         || !Catalog.JSON.toJsonTree(preferredItems).equals(preferredSetting.value);
+  }
+  private boolean presetChanged() {
+    return presets != null && !presets.json().equals(SortingLayoutsData.read(originalPresets == null ? new JsonObject() : originalPresets.getAsJsonObject()).json());
+  }
+  private int slotAt(int x, int y) {
+    return inside(x, y, left(), gridTop(), 198, 66) ? 9 + (y - gridTop()) / 22 * 9 + (x - left()) / 22 : -1;
+  }
+  @Override public void onMouseEvent() {
+    super.onMouseEvent();
+    if (!Display.isActive() || exit.active()) { drag.cancel(); return; }
+    int x = Mouse.getEventX() * width / minecraft.displayWidth;
+    int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+    drag.move(slotAt(x, y), this::paint);
+  }
+  private void paint(int slot, boolean protect) { if (protect) protectedSlots.add(slot); else protectedSlots.remove(slot); }
+  @Override protected void mouseReleased(int x, int y, int button) {
+    if (Display.isActive() && !exit.active()) drag.release(slotAt(x, y), button, this::paint); else drag.cancel();
+  }
+  private void presetAction(int action) {
+    if (presets == null) { error = presetProblem; return; }
+    drag.cancel();
+    try {
+      if (action == 0) { if (presets.size() > 0) presetIndex = (presetIndex + 1) % presets.size(); }
+      else if (action == 1) {
+        presets = presets.save(presetName.text(), Catalog.JSON.toJsonTree(protectedSlots), Catalog.JSON.toJsonTree(preferredItems));
+        presetIndex = presets.size() - 1; presetName.setText(""); presetName.focused = false;
+      } else if (presets.size() > 0 && action == 2) {
+        var preset = presets.preset(presetIndex);
+        // Validate the complete preset before replacing either part of the local draft.
+        SortingLayoutsData.layout(preset.get("protectedSlots"), preset.get("preferredItems"));
+        protectedSlots.clear(); preferredItems.clear();
+        for (var value : preset.getAsJsonArray("protectedSlots")) protectedSlots.add(value.getAsInt());
+        for (var entry : preset.getAsJsonObject("preferredItems").entrySet()) preferredItems.put(Integer.parseInt(entry.getKey()), entry.getValue().getAsString());
+        refreshIcons();
+      } else if (presets.size() > 0 && action == 3) { presets = presets.delete(presetIndex); presetIndex = Math.max(0, Math.min(presetIndex, presets.size() - 1)); }
+      error = "";
+    } catch (RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Invalid sorting preset"); }
   }
   private void done() {
     try {
+      drag.cancel();
       // Unknown saved items survive a visit. Validate only new or changed selections.
       for (var entry : preferredItems.entrySet()) {
         var original = preferredSetting.value.getAsJsonObject().get(Integer.toString(entry.getKey()));
@@ -54,11 +107,13 @@ public final class SortingPreferencesScreen extends UiScreen {
       var locked = Catalog.JSON.toJsonTree(protectedSlots);
       var preferred = Catalog.JSON.toJsonTree(preferredItems);
       protectedSetting.validate(locked); preferredSetting.validate(preferred);
+      SortingLayoutsData.layout(locked, preferred);
+      if (presetChanged()) PowerConfig.replaceSection("sortingLayouts", originalPresets, presets.json());
       protectedSetting.value = locked; preferredSetting.value = preferred;
       accepted.run(); minecraft.setScreen(parent);
-    } catch (RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Invalid sorting layout"); }
+    } catch (java.io.IOException | RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Invalid sorting layout"); }
   }
-  private void discard() { minecraft.setScreen(parent); }
+  private void discard() { drag.cancel(); minecraft.setScreen(parent); }
   private void chooseItem() {
     minecraft.setScreen(new ItemPickerScreen(this, "Preferred item for slot " + (selected - 8),
         ItemCatalogue.Domain.FILTER, preferredItems.containsKey(selected) ? List.of(preferredItems.get(selected)) : List.of(),
@@ -66,25 +121,37 @@ public final class SortingPreferencesScreen extends UiScreen {
   }
   @Override protected void keyPressed(char character, int key) {
     if (exit.key(key)) return;
-    if (key == Keyboard.KEY_ESCAPE) exit.leave(changed(), this::discard);
+    if (presetName.focused) {
+      if (key == Keyboard.KEY_ESCAPE) { presetName.focused = false; presetName.setText(""); }
+      else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { click(); presetAction(1); }
+      else presetName.key(character, key);
+      return;
+    }
+    if (key == Keyboard.KEY_ESCAPE) { drag.cancel(); exit.leave(changed(), this::discard); }
     else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) done();
   }
   @Override protected void mouseClicked(int x, int y, int button) {
     if (exit.click(this, x, y, button, this::done, this::discard)) return;
     if (button != 0 && button != 1) return;
     if (inside(x, y, left(), gridTop(), 198, 66)) {
-      selected = 9 + (y - gridTop()) / 22 * 9 + (x - left()) / 22;
-      click();
-      if (button == 1) toggleProtected();
+      presetName.focused = false;
+      selected = slotAt(x, y);
+      click(); drag.begin(selected, button, protectedSlots.contains(selected));
       return;
     }
     if (button != 0) return;
     int top = controlsTop();
+    if (inside(x, y, left(), top + 82, 148, 18) && presets != null) { presetName.focused = true; presetName.click(x, button); return; }
+    presetName.focused = false;
+    if (inside(x, y, left(), top + 62, 110, 18)) { click(); presetAction(0); return; }
+    if (inside(x, y, left() + 114, top + 62, 40, 18)) { click(); presetAction(2); return; }
+    if (inside(x, y, left() + 158, top + 62, 40, 18)) { click(); presetAction(3); return; }
+    if (inside(x, y, left() + 152, top + 82, 46, 18)) { click(); presetAction(1); return; }
     if (inside(x, y, left(), top, 198, 18)) { click(); toggleProtected(); }
-    else if (inside(x, y, left(), top + 22, 148, 18) && !protectedSlots.contains(selected)) { click(); chooseItem(); }
-    else if (inside(x, y, left() + 152, top + 22, 46, 18) && preferredItems.containsKey(selected)) {
+    else if (inside(x, y, left(), top + 20, 148, 18) && !protectedSlots.contains(selected)) { click(); chooseItem(); }
+    else if (inside(x, y, left() + 152, top + 20, 46, 18) && preferredItems.containsKey(selected)) {
       click(); preferredItems.remove(selected); refreshIcons();
-    } else if (inside(x, y, left(), top + 44, 198, 18)) {
+    } else if (inside(x, y, left(), top + 40, 198, 18)) {
       click(); protectedSlots.clear(); preferredItems.clear();
       for (var value : protectedSetting.defaultValue.getAsJsonArray()) protectedSlots.add(value.getAsInt());
       for (var entry : preferredSetting.defaultValue.getAsJsonObject().entrySet())
@@ -97,10 +164,12 @@ public final class SortingPreferencesScreen extends UiScreen {
     if (!protectedSlots.remove(selected)) protectedSlots.add(selected);
   }
   @Override public void render(int mouseX, int mouseY, float delta) {
+    if (!Display.isActive() || exit.active()) drag.cancel();
+    else if (drag.button() >= 0 && Mouse.isButtonDown(drag.button())) drag.move(slotAt(mouseX, mouseY), this::paint);
     int pointerX = mouseX, pointerY = mouseY;
     if (exit.active()) { mouseX = -1; mouseY = -1; }
     renderBackground(); titleBar("Sorting layout");
-    drawCenteredTextWithShadow(textRenderer, "Main storage", width / 2, gridTop() - 16, 0xdddddd);
+    if (!error.isEmpty()) drawCenteredTextWithShadow(textRenderer, fit(error, width - 24), width / 2, gridTop() - 12, 0xffaaaa);
     String tooltip = "";
     for (int slot = 9; slot < 36; slot++) {
       int x = left() + (slot - 9) % 9 * 22, y = gridTop() + (slot - 9) / 9 * 22;
@@ -112,17 +181,23 @@ public final class SortingPreferencesScreen extends UiScreen {
       else if (preferredItems.containsKey(slot)) text("?", x + 8, y + 7, 0xffbb66);
       if (locked) text("x", x + 15, y + 2, 0xff8888);
       if (inside(mouseX, mouseY, x, y, 22, 22)) tooltip = "Slot " + (slot - 8)
-          + (locked ? "\nProtected from sorting and deposit." : "\nClick to select. Right-click to protect.")
+          + (locked ? "\nProtected from sorting and deposit." : "\nClick to select. Right-click to protect. Drag across slots to protect or unprotect.")
           + (preferredItems.containsKey(slot) ? "\nPreferred: " + (item == null ? preferredItems.get(slot) : item.name()) : "");
     }
     int top = controlsTop();
     button("Slot " + (selected - 8) + ": " + (protectedSlots.contains(selected) ? "Protected" : "Sortable"), left(), top, 198, 18, mouseX, mouseY, true);
-    button("Choose preferred item", left(), top + 22, 148, 18, mouseX, mouseY, !protectedSlots.contains(selected));
-    button("Clear", left() + 152, top + 22, 46, 18, mouseX, mouseY, preferredItems.containsKey(selected));
-    button("Reset layout", left(), top + 44, 198, 18, mouseX, mouseY, true);
+    button("Choose preferred item", left(), top + 20, 148, 18, mouseX, mouseY, !protectedSlots.contains(selected));
+    button("Clear", left() + 152, top + 20, 46, 18, mouseX, mouseY, preferredItems.containsKey(selected));
+    button("Reset layout", left(), top + 40, 198, 18, mouseX, mouseY, true);
+    button(presets == null ? "Presets unavailable" : presets.size() == 0 ? "No presets" : fit(presets.preset(presetIndex).get("name").getAsString(), 102), left(), top + 62, 110, 18, mouseX, mouseY, presets != null && presets.size() > 0);
+    button("Load", left() + 114, top + 62, 40, 18, mouseX, mouseY, presets != null && presets.size() > 0);
+    button("Delete", left() + 158, top + 62, 40, 18, mouseX, mouseY, presets != null && presets.size() > 0);
+    input(presetName, left(), top + 82, 148, mouseX, mouseY, "New preset name");
+    button("Save", left() + 152, top + 82, 46, 18, mouseX, mouseY, presets != null && !presetName.text().isBlank());
+    if (presets == null && inside(mouseX, mouseY, left(), top + 62, 198, 40)) tooltip = presetProblem;
     button("Done", width / 2 - 80, height - 28, 76, 20, mouseX, mouseY, true);
     button("Discard", width / 2 + 4, height - 28, 76, 20, mouseX, mouseY, true);
-    if (!error.isEmpty()) drawCenteredTextWithShadow(textRenderer, fit(error, width - 24), width / 2, height - 41, 0xffaaaa);
+    if (!error.isEmpty() && mouseY >= 22 && mouseY < gridTop()) tooltip = error;
     if (!tooltip.isEmpty()) foregroundTooltip(tooltip, mouseX, mouseY);
     exit.render(this, "Save sorting layout?", pointerX, pointerY);
   }

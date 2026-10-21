@@ -40,6 +40,7 @@ final class Polish400Checks {
     check(Display.getWidth() >= 1280 && Display.getHeight() >= 720, "resize the disposable client to at least 1280x720");
     failures = 0; Files.createDirectories(REPORT); PowerConfig.flushPending();
     var recipeDocument = PowerConfig.section("recipeBook");
+    var mapDocument = PowerConfig.section("maps"); var mapSettings = local.luke.power.map.MapConfig.copy(); boolean hiddenHud = mc.options.hideHud;
     var recipeSettings = RecipeBookConfig.copy(); var offhandSettings = OffhandConfig.copy();
     var toolSettings = InventoryToolsConfig.copy(); var rules = AccessRules.copy(mc);
     var previousScreen = mc.currentScreen; var previousContainer = mc.player.container;
@@ -81,7 +82,7 @@ final class Polish400Checks {
         for (boolean survivalView : creativeMode ? new boolean[]{false, true} : new boolean[]{true})
           for (int[] size : new int[][]{{320,240},{640,360}}) {
             var recipe = RecipeBookConfig.copy(); recipe.enabled = recipe.inventory = recipe.pauseMenu = true;
-            recipe.craftingOpen = false; recipe.craftingFilter = false; RecipeBookConfig.preview(recipe);
+            recipe.buttonStyle = 0; recipe.craftingOpen = false; recipe.craftingFilter = false; RecipeBookConfig.preview(recipe);
             var screen = new class_585(mc.player); screen.container = new class_277(inventory);
             mc.currentScreen = screen; mc.player.container = screen.container; screen.init(mc, size[0], size[1]); screens.add(screen);
             if (creativeMode) field(screen, "creative_normalGUI", survivalView);
@@ -116,12 +117,38 @@ final class Polish400Checks {
               } finally {InventoryWheel.clear(); inventory.setCursorStack(null); Offhand.set(inventory,DeathItems.decode(before));}
 
             });
+            if (!creativeMode && size[0] == 640) test("POLISH400 minimap reset owns pointer and preserves carried item", () -> {
+              var map = local.luke.power.map.MapConfig.copy(); map.minimap = map.showInInventory = true;
+              map.zoom = 4; map.zoomDefault = .5; map.corner = 1; map.size = 90; map.offsetX = map.offsetY = 6;
+              mc.options.hideHud = false; local.luke.power.map.MapConfig.preview(map);
+              var bounds = local.luke.power.map.Minimap.layout(map,screen.width,screen.height,false);
+              int px = (int)(bounds.x()+bounds.size()/2), py = (int)(bounds.y()+bounds.size()/2);
+              var carried = DeathChecks.tagged(264,3,0,"minimap-reset"); inventory.setCursorStack(carried);
+              try {
+                check(((InventoryGui)(Object)screen).power$ownsPointerControl(px,py),"minimap did not block inventory-looking capture");
+                check(local.luke.power.map.Minimap.inventoryReset(mc,px,py),"free-pointer minimap did not claim reset");
+                check(local.luke.power.map.MapConfig.current().zoom==.5,"minimap ignored selected default step");
+                check(inventory.getCursorStack()==carried&&carried.count==3,"minimap reset changed a held item");
+              } finally { inventory.setCursorStack(null); local.luke.power.map.MapConfig.preview(mapSettings); mc.options.hideHud=hiddenHud; }
+            });
             if (!creativeMode) test("POLISH400 native recipe toggle " + size[0], () -> {
               var book = RecipeBooks.book(screen); check(book != null && book.enabled() && !book.layout().open(), "recipe book did not start closed");
               var toggle = book.layout().toggle(false, 2); var input = (ScreenInput)(Object)screen;
               input.power$click(toggle.x()+8,toggle.y()+8,0); input.power$release(toggle.x()+8,toggle.y()+8,0);
               check(book.layout().open(), "native recipe button did not open its panel"); warm(book);
               if (size[0] == 640) capture(mc, screen, "survival-book-open-640", manifest);
+              if (size[0] == 640) {
+                int hoverX = book.layout().inventoryX() + 8 + 8;
+                int hoverY = book.layout().inventoryY() + 84 + 8;
+                SettingsSnapshot.render(mc,screen,screen.width,screen.height,REPORT.resolve("survival-book-tooltip-640.png"),hoverX,hoverY);
+                manifest.add("survival-book-tooltip-640.png");
+              }
+              book.toggle(); var subtle = RecipeBookConfig.copy(); subtle.buttonStyle = 1; RecipeBookConfig.preview(subtle); book.tick();
+              capture(mc, screen, "survival-subtle-"+size[0], manifest);
+              var small = (InventoryPanels.Rect)call(book,"toggleBounds");
+              input.power$click(small.x()+7,small.y()+7,0); input.power$release(small.x()+7,small.y()+7,0);
+              check(book.layout().open(), "Subtle recipe button did not open its panel");
+
             });
             var book = RecipeBooks.book(screen); if (book != null) book.removed(); InventoryPanels.remove(screen);
           }
@@ -139,6 +166,13 @@ final class Polish400Checks {
         var editor = new SortingPreferencesScreen(previousScreen,session,() -> {}); mc.currentScreen = editor;
         editor.init(mc,size[0],size[1]); screens.add(editor); capture(mc,editor,"sorting-layout-"+size[0],manifest);
         check(session.changes() == 0, "sorting layout rendering published a draft");
+        var hotbars = new SavedHotbarsScreen(previousScreen); mc.currentScreen = hotbars; hotbars.init(mc,size[0],size[1]); screens.add(hotbars);
+        capture(mc,hotbars,"saved-hotbars-editor-"+size[0],manifest);
+        var options = new PowerOptionsScreen(previousScreen); mc.currentScreen = options; options.init(mc,size[0],size[1]); screens.add(options);
+        var zoomSetting = options.session().settings().stream().filter(setting -> setting.id.equals("maps.zoomSteps")).findFirst().orElseThrow();
+        var zoomEditor = new ZoomStepsScreen(options,zoomSetting); mc.currentScreen = zoomEditor; zoomEditor.init(mc,size[0],size[1]); screens.add(zoomEditor);
+        capture(mc,zoomEditor,"zoom-default-editor-"+size[0],manifest);
+
       }
       for (var action : new WorldSnapshots.Action[]{WorldSnapshots.Action.BACKUP,WorldSnapshots.Action.DUPLICATE}) {
         var operation = new WorldOperationScreen(previousScreen,"polish-fixture","Polish fixture",action);
@@ -155,7 +189,8 @@ final class Polish400Checks {
       inventory.main = main; inventory.armor = armor; inventory.selectedSlot = selected;
       inventory.setCursorStack(cursor); Offhand.set(inventory,offhand);
       RecipeBookConfig.preview(recipeSettings); OffhandConfig.preview(offhandSettings); InventoryToolsConfig.preview(toolSettings);
-      PowerConfig.saveDeferred("recipeBook",recipeDocument); PowerConfig.flushPending();
+      PowerConfig.saveDeferred("recipeBook",recipeDocument); local.luke.power.map.MapConfig.preview(mapSettings); mc.options.hideHud=hiddenHud;
+      PowerConfig.saveDeferred("maps",mapDocument); PowerConfig.flushPending();
       } finally {
       try {
         CreativeVehicleChecks.mode(mc,mode);
@@ -182,7 +217,7 @@ final class Polish400Checks {
   }
   private static void warm(RecipeBookOverlay book) throws Exception {
     for(int tick=0;tick<720;tick++) { book.tick(); var model=field(book,"model");
-      if(model!=null && (int)field(model,"cursor")>=((List<?>)field(model,"recipes")).size())break;
+      if(model!=null && (int)field(field(model,"availability"),"cursor")>=((List<?>)field(model,"recipes")).size())break;
     }
     field(book,"ticks",0);
   }

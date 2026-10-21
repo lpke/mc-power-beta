@@ -97,6 +97,28 @@ final class SavedHotbars400Checks {
         check(!SavedCreativeHotbars.save(mc, 0) && !SavedCreativeHotbars.load(mc, 0), "disabled feature admitted");
         check(Arrays.equals(preset, SavedCreativeHotbars.snapshot(0)), "rejected action changed user data");
       });
+      test("Survival preset editing stays separate from inventory and Creative loading", () -> {
+        prepare(mc, state); CreativeVehicleChecks.mode(mc, "SURVIVAL");
+        var settings = InventoryToolsConfig.copy(); settings.creativeHotbars = false; InventoryToolsConfig.preview(settings);
+        var before = SavedCreativeHotbars.editorSnapshot();
+        PowerConfig.save("savedCreativeHotbars", before.json());
+        String inventory = state.snapshot();
+        var next = before.with(3, preset("survival-preset-editor"));
+        check(SavedCreativeHotbars.editable(mc) && !SavedCreativeHotbars.eligible(mc), "editor inherited the gameplay mode/toggle gate");
+        SavedCreativeHotbars.acceptEdit(mc, before, next);
+        check(next.json().equals(SavedCreativeHotbarsData.read(PowerConfig.section("savedCreativeHotbars")).json()), "edited presets were not durably retained");
+        check(inventory.equals(state.snapshot()) && !SavedCreativeHotbars.load(mc, 3), "preset editing changed inventory or admitted Survival loading");
+        boolean staleRejected = false;
+        try { SavedCreativeHotbars.acceptEdit(mc, before, before); } catch (java.io.IOException expected) { staleRejected = true; }
+        check(staleRejected && next.json().equals(SavedCreativeHotbars.editorSnapshot().json()), "stale editor overwrote saved presets");
+        AccessRules.set(mc, GameRule.ALLOW_CREATIVE_MODE, false);
+        try {
+          check(!SavedCreativeHotbars.editable(mc), "editor retained revoked Creative access");
+          boolean denied = false;
+          try { SavedCreativeHotbars.acceptEdit(mc, next, next.with(3, new String[9])); } catch (java.io.IOException expected) { denied = true; }
+          check(denied && next.json().equals(SavedCreativeHotbars.editorSnapshot().json()) && inventory.equals(state.snapshot()), "revocation changed presets or inventory");
+        } finally { AccessRules.set(mc, GameRule.ALLOW_CREATIVE_MODE, true); }
+      });
     } finally {
       NativeInventoryPlan.cancel(); field.set(null, originalData);
       try { PowerConfig.save("savedCreativeHotbars", originalDocument); }

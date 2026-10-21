@@ -98,8 +98,9 @@ public final class HeldItemTransforms {
 
   static void normalizeNative(Pose pose, Kind kind) {
     if (kind == Kind.BLOCK) return; // Native block inventory geometry is already centered.
-    // The rod's unchanged Beta sprite has reversed X UVs; modern handheld_rod expects the opposite face.
-    if (kind == Kind.ROD) pose.rotate(180, 0, 1, 0);
+    // Native sprite U runs opposite model X. Modern handheld models use U as X;
+    // turn the centered sprite to that face before applying their display frame.
+    if (kind == Kind.HANDHELD || kind == Kind.BOW || kind == Kind.ROD) pose.rotate(180, 0, 1, 0);
     // Center the 0..1 sprite and its -1/16..0 extrusion, then undo class_556's baked hand pose.
     pose.translate(-.5f, -.5f, 1 / 32f);
     pose.translate(.9375f, .0625f, 0);

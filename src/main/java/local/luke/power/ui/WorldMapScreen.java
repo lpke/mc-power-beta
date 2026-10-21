@@ -378,6 +378,11 @@ public final class WorldMapScreen extends UiScreen {
   protected void mouseClicked(int x, int y, int button) {
     if (coordinates.press(this,x,y,button)) return;
     if (panelOwns(x)) { panelPress = true; settingsPanel.mouseClicked(x, y, button); return; }
+    if (settingsPanel != null && minimapHit != null && button == 1 && settingsPanel.minimapWheelAllowed()
+        && !context && !dragging && !scaleDragging
+        && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
+      click(); settingsPanel.resetMinimapZoom(); return;
+    }
     if (settingsPanel != null && minimapHit != null && button == 0
         && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
       click(); settingsPanel.minimapAppearance(""); return;

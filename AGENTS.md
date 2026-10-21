@@ -165,7 +165,9 @@
   protected inventory and external native owners before and after callbacks. Roll
   back only owned bytes; restore derived recipe output only after every input was
   restored. Fuel is never a recipe ingredient. Unknown recipe subclasses need an
-  explicit display provider. Saved Creative hotbars remain user data outside defaults.
+  explicit display provider. Recipe availability publishes completed display snapshots;
+  cached craftability never authorizes an inventory write. Saved Creative hotbars and
+  sorting layout presets remain user data outside defaults and instance-default resets.
   Fast placement waits for queued partial-stack refills as well as empty hands,
   including the handoff to a durable inventory plan.
 - Held-item lighting uses render-only terrain endpoints and the existing 32-byte

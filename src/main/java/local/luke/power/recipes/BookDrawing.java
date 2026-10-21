@@ -3,18 +3,21 @@ package local.luke.power.recipes;
 import java.util.*;
 import local.luke.power.ui.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
 import org.lwjgl.opengl.GL11;
 
 /** Native item/font rendering with pinned recipe-book textures. */
-public final class BookDrawing extends DrawableHelper {
+public final class BookDrawing extends UiScreen {
   private static final String ROOT="/assets/powerbeta/textures/recipes/";
   private static final java.nio.FloatBuffer ITALIC=org.lwjgl.BufferUtils.createFloatBuffer(16)
       .put(new float[]{1,0,0,0,-.25f,1,0,0,0,0,1,0,1,0,0,1}).flip();
   private final ItemRenderer renderer=new ItemRenderer();
+  public void subtleButton(Minecraft mc,int x,int y,int mx,int my) {
+    GL11.glEnable(GL11.GL_TEXTURE_2D);GL11.glDisable(GL11.GL_LIGHTING);GL11.glDisable(GL11.GL_DEPTH_TEST);
+    minecraft=mc;textRenderer=mc.textRenderer;button("R",x,y,14,14,mx,my,true);
+  }
   public void image(Minecraft mc,String name,int x,int y,int width,int height) {
     image(mc,name,x,y,width,height,0,0,width,height,width,height);
   }

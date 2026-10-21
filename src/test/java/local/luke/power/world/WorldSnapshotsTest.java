@@ -173,6 +173,56 @@ class WorldSnapshotsTest {
     String second = WorldRuleFiles.read(run(WorldSnapshots.Action.DUPLICATE).path().resolve("level.dat")).getCompound("Data").getString("PowerBetaCommandWorldId");
     assertNotEquals(first, second);
   }
+  @Test void duplicateOpensAndBacksUpAfterOriginalWorldAndExternalDataAreRemoved() throws Exception {
+    writeMetadata(world.resolve("DIM-1/level.dat"), id, "Original", 0);
+    Files.createDirectories(world.resolve("data")); Files.writeString(world.resolve("data/map_7.dat"), "native map bytes");
+    Files.createDirectories(world.resolve("players"));
+    NbtCompound player = new NbtCompound(); player.putString("warps", "saved player warps");
+    try (OutputStream out = Files.newOutputStream(world.resolve("players/Player.dat"))) { NbtIo.writeCompressed(player, out); }
+    byte[] playerBytes = Files.readAllBytes(world.resolve("players/Player.dat"));
+    Files.createDirectories(maps(id)); Files.writeString(maps(id).resolve("waypoints.json"), "saved waypoints");
+    Files.writeString(maps(id).resolve("tiles"), "explored map tiles");
+    Path deaths = game.resolve("power-beta-data/deaths/owned.journal"); death(deaths, id, false);
+    Path inventory = game.resolve("power-beta-data/inventory-recovery/prepared.journal");
+    journal(inventory, 0x4c504b48, ("{\"format\":1,\"phase\":\"prepared\",\"world\":\"" + id + "\"}").getBytes(StandardCharsets.UTF_8));
+    Path settings = game.resolve("power-beta-data/settings-backups/source-save"); Files.createDirectories(settings);
+    Files.writeString(settings.resolve("complete.json"), "{\"saves/Original/level.dat\":\"file-0\"}");
+    Files.writeString(settings.resolve("file-0"), "original metadata evidence");
+
+    Path copy = run(WorldSnapshots.Action.DUPLICATE).path();
+    String copyId = WorldRuleFiles.read(copy.resolve("level.dat")).getCompound("Data").getString("PowerBetaCommandWorldId");
+    assertFalse(Files.isSameFile(world.resolve("region/r.0.0.mcr"), copy.resolve("region/r.0.0.mcr")));
+    assertFalse(Files.isSameFile(maps(id).resolve("tiles"), maps(copyId).resolve("tiles")));
+    Files.writeString(world.resolve("region/r.0.0.mcr"), "later original terrain");
+    Files.writeString(maps(id).resolve("tiles"), "later original exploration");
+    assertEquals("native region bytes", Files.readString(copy.resolve("region/r.0.0.mcr")));
+    assertEquals("explored map tiles", Files.readString(maps(copyId).resolve("tiles")));
+    for (Path root : List.of(world, maps(id), deaths, inventory, settings)) {
+      try (var paths = Files.walk(root)) { for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) Files.delete(path); }
+    }
+
+    // The provenance manifest still names the original ID. Opening and discovering
+    // data must use only the duplicate's metadata and its own copied map directory.
+    JsonObject provenance = JsonParser.parseString(Files.readString(copy.resolve("power-beta-copy.json"))).getAsJsonObject();
+    assertEquals(id, provenance.getAsJsonArray("worldIds").get(0).getAsString());
+    WorldRuleFiles.beforeOpen(game, copy.getFileName().toString());
+    var owner = WorldOwnedData.owner(copy); assertEquals(Set.of(copyId), owner.ids());
+    var external = WorldOwnedData.discover(game, owner);
+    assertEquals(List.of(maps(copyId)), external.files().stream().map(WorldOwnedData.External::path).toList());
+    for (String file : List.of("level.dat", "level.dat_old", "DIM-1/level.dat", "DIM-1/level.dat_old"))
+      assertEquals(copyId, WorldRuleFiles.read(copy.resolve(file)).getCompound("Data").getString("PowerBetaCommandWorldId"));
+    assertArrayEquals(playerBytes, Files.readAllBytes(copy.resolve("players/Player.dat")));
+    var access = new SavedWorldAccess(game, copy.getFileName().toString(), () -> true);
+    var backup = WorldSnapshots.execute(access, WorldSnapshots.Action.BACKUP, "Independent copy", () -> false, QUIET, NORMAL);
+    try (ZipFile zip = new ZipFile(backup.path().toFile())) {
+      assertEquals("native region bytes", new String(zip.getInputStream(zip.getEntry("world/region/r.0.0.mcr")).readAllBytes(), StandardCharsets.UTF_8));
+      assertArrayEquals(playerBytes, zip.getInputStream(zip.getEntry("world/players/Player.dat")).readAllBytes());
+      assertNotNull(zip.getEntry("world/data/map_7.dat"));
+      assertNotNull(zip.getEntry("external/power-beta-data/maps/" + maps(copyId).getFileName() + "/waypoints.json"));
+      assertNull(zip.getEntry("external/power-beta-data/deaths/owned.journal"));
+      assertNull(zip.getEntry("external/power-beta-data/inventory-recovery/prepared.journal"));
+    }
+  }
   @Test void missingPrimaryIsCreatedFromVerifiedPreviousMetadataWithoutTouchingOriginal() throws Exception {
     Files.delete(world.resolve("level.dat")); var before = originals();
     var result = run(WorldSnapshots.Action.DUPLICATE);

@@ -11,21 +11,24 @@ import org.lwjgl.input.Mouse;
 /** Isolated exact zoom levels, accepted together into the owning Options session. */
 public final class ZoomStepsScreen extends UiScreen {
   private final PowerOptionsScreen parent;
-  private final Setting setting;
+  private final Setting setting, defaultSetting;
   private final SettingsDraft draft;
-  private final com.google.gson.JsonElement original;
   private String commitError = "";
   private final List<Double> values = new ArrayList<>();
-  private final Deque<List<Double>> undo = new ArrayDeque<>();
+  private record Snapshot(List<Double> values, int selection) {}
+  private final Deque<Snapshot> undo = new ArrayDeque<>();
+  private int defaultSelection;
+  private final Snapshot originalState;
   private final InlineValueEditor inline = new InlineValueEditor();
   private final DraftExitPrompt exit = new DraftExitPrompt();
   private final ScrollBar bar = new ScrollBar();
   private int scroll, dragging = -1;
   public ZoomStepsScreen(PowerOptionsScreen parent, Setting setting) {
     this.parent = parent;
-    draft = new SettingsDraft(List.of(setting), s -> true); this.setting = draft.get(setting.id);
-    original = setting.value.deepCopy();
+    draft = new SettingsDraft(parent.session().settings(), s -> s.id.equals(setting.id) || s.id.equals("maps.zoomDefault"));
+    this.setting = draft.get(setting.id); defaultSetting = draft.get("maps.zoomDefault");
     setting.value.getAsJsonArray().forEach(v -> values.add(v.getAsDouble()));
+    defaultSelection = nearest(defaultSetting.value.getAsDouble()); originalState = snapshot();
   }
   private int span() { return Math.min(420, width - 24); }
   private int left() { return (width - span()) / 2; }
@@ -33,6 +36,13 @@ public final class ZoomStepsScreen extends UiScreen {
   private static final int TOP = 46;
   private int bottom() { return height - 36; }
   private ZoomStepsFooter footer() { return ZoomStepsFooter.at(left(), span(), textRenderer::getWidth); }
+  private int defaultIndex() { return defaultSelection; }
+  private int nearest(double target) {
+    int nearest = 0;
+    for (int i = 1; i < values.size(); i++) if (Math.abs(values.get(i) - target) < Math.abs(values.get(nearest) - target)) nearest = i;
+    return nearest;
+  }
+  private Snapshot snapshot() { return new Snapshot(List.copyOf(values), defaultSelection); }
   private int valueX() { return left() + Math.min(90, span() / 3); }
   private int valueWidth() { return right() - 36 - valueX(); }
   private ScrollBar.Track track() { return new ScrollBar.Track(right() - 4, TOP,
@@ -46,18 +56,19 @@ public final class ZoomStepsScreen extends UiScreen {
   }
   private void checkpoint() {
     commitError = "";
-    if (undo.isEmpty() || !undo.peek().equals(values)) {
+    if (undo.isEmpty() || !undo.peek().equals(snapshot())) {
       if (undo.size() == 64) undo.removeLast();
-      undo.push(List.copyOf(values));
+      undo.push(snapshot());
     }
   }
   private void save() {
     if (!error().isEmpty()) return;
     setting.value = json();
+    defaultSetting.value = new JsonPrimitive(values.get(defaultIndex()));
     if (parent.acceptEditor(draft)) minecraft.setScreen(parent.returnScreen());
     else commitError = parent.editorError();
   }
-  private void leave() { dragging = -1; bar.release(); inline.cancel(); exit.leave(!json().equals(original), () -> minecraft.setScreen(parent.returnScreen())); }
+  private void leave() { dragging = -1; bar.release(); inline.cancel(); exit.leave(!snapshot().equals(originalState), () -> minecraft.setScreen(parent.returnScreen())); }
   private void slide(int x) {
     if (dragging < 0 || dragging >= values.size()) return;
     double t = Math.max(0, Math.min(1, (x - valueX() - 4d) / Math.max(1, valueWidth() - 8)));
@@ -87,11 +98,14 @@ public final class ZoomStepsScreen extends UiScreen {
     if (y >= TOP && y < bottom()) {
       int i = (y - TOP + scroll) / 26, rowY = TOP + i * 26 - scroll;
       if (i < 0 || i >= values.size() || y >= rowY + 18) return;
-      if (inside(x, y, valueX(), rowY, valueWidth(), 18)) {
+      if (button == 0 && inside(x, y, left(), rowY, 18, 18)) {
+        click(); checkpoint(); defaultSelection = i;
+      } else if (inside(x, y, valueX(), rowY, valueWidth(), 18)) {
         if (button == 1) exact(i);
         else if (button == 0) { checkpoint(); dragging = i; slide(x); }
       } else if (button == 0 && values.size() > 1 && inside(x, y, right() - 30, rowY, 20, 18)) {
-        click(); checkpoint(); values.remove(i);
+        click(); checkpoint(); double selectedValue = values.get(defaultSelection); values.remove(i);
+        if (i < defaultSelection) defaultSelection--; else if (i == defaultSelection) defaultSelection = nearest(selectedValue);
       }
       return;
     }
@@ -103,11 +117,11 @@ public final class ZoomStepsScreen extends UiScreen {
       click(); checkpoint(); var sorted = new TreeSet<>(values); double a = .25, b = 4, gap = -1, previous = .25;
       for (double v : sorted) { if (v - previous > gap) { gap = v - previous; a = previous; b = v; } previous = v; }
       if (4 - previous > gap) { a = previous; b = 4; }
-      values.add((a + b) / 2); values.sort(Double::compare); scroll = (int)Math.min(scroll, track().maximum());
+      double selectedValue = values.get(defaultSelection); values.add((a + b) / 2); values.sort(Double::compare); defaultSelection = values.indexOf(selectedValue); scroll = (int)Math.min(scroll, track().maximum());
     } else if (action == 1) {
-      click(); checkpoint(); values.clear(); setting.defaultValue.getAsJsonArray().forEach(v -> values.add(v.getAsDouble())); scroll = 0;
+      click(); checkpoint(); values.clear(); setting.defaultValue.getAsJsonArray().forEach(v -> values.add(v.getAsDouble())); defaultSelection = nearest(defaultSetting.defaultValue.getAsDouble()); scroll = 0;
     } else if (action == 2 && !undo.isEmpty()) {
-      click(); values.clear(); values.addAll(undo.pop());
+      click(); Snapshot previous = undo.pop(); values.clear(); values.addAll(previous.values()); defaultSelection = previous.selection();
     } else if (action == 3) { click(); save(); }
     else if (action == 4) { click(); leave(); }
   }
@@ -127,7 +141,8 @@ public final class ZoomStepsScreen extends UiScreen {
     for (int i = 0; i < values.size(); i++) {
       int y = TOP + i * 26 - scroll;
       if (y + 18 <= TOP || y >= bottom()) continue;
-      text("Zoom " + (i + 1), left(), y + 5, 0xd0d0d0);
+      button(i == defaultIndex() ? "*" : "", left(), y, 18, 18, mx, my, true);
+      text("Zoom " + (i + 1), left() + 23, y + 5, 0xd0d0d0);
       if (inline.editing(i)) inline.render(this, valueX(), y, valueWidth(), mx, my, TOP, bottom());
       else slider(java.math.BigDecimal.valueOf(values.get(i)).stripTrailingZeros().toPlainString() + "x", valueX(), y, valueWidth(), mx, my, (values.get(i) - .25) / 3.75);
       button("-", right() - 30, y, 20, 18, mx, my, values.size() > 1);
@@ -138,6 +153,10 @@ public final class ZoomStepsScreen extends UiScreen {
     boolean[] enabled = {values.size() < 32, true, !undo.isEmpty(), error().isEmpty(), true};
     for (int i = 0; i < 5; i++) button(ZoomStepsFooter.LABELS[i], footer.x()[i], height - 28,
         footer.width()[i], 20, mx, my, enabled[i]);
+    if (!exit.active() && dragging < 0 && !inline.active() && mx >= left() && mx < left() + 18 && my >= TOP && my < bottom()) {
+      int i = (my - TOP + scroll) / 26;
+      if (i < values.size() && (my - TOP + scroll) % 26 < 18) foregroundTooltip("Use this level for right-click reset", mx, my);
+    }
     exit.render(this, "Save zoom step changes?", mx, my);
   }
 }

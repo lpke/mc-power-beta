@@ -44,6 +44,21 @@ public final class Minimap {
     if (copy.zoom != settings.zoom) MapConfig.queued(copy);
     return true;
   }
+  public static boolean inventoryContains(Minecraft mc, int x, int y) {
+    return inventoryVisible(mc) && MinimapGeometry.contains(MinimapGeometry.layout(MapConfig.current(),
+        mc.currentScreen.width, mc.currentScreen.height, false), MapConfig.current().circular, x, y);
+  }
+  public static boolean inventoryReset(Minecraft mc, int x, int y) {
+    if (!inventoryContains(mc, x, y) || !org.lwjgl.opengl.Display.isActive()
+        || org.lwjgl.input.Mouse.isGrabbed() || org.lwjgl.input.Mouse.isButtonDown(0)
+        || local.luke.power.input.InventoryPanels.modal(mc.currentScreen)
+        || !(mc.currentScreen instanceof local.luke.power.input.InventoryGui gui)
+        || gui.power$containsGuiSpace(x, y)) return false;
+    var copy = MapConfig.copy(); copy.zoom = MinimapZoomSteps.reset(copy.zoomSteps, copy.zoomDefault);
+    if (copy.zoom != MapConfig.current().zoom) MapConfig.queued(copy);
+    mc.soundManager.method_2009("random.click", 1, 1);
+    return true;
+  }
   public static boolean visible(MapSettings settings, boolean debug) {
     return settings.minimap && (!debug || !settings.hideWithDebug);
   }

@@ -16,7 +16,8 @@ public final class InventoryLook {
 
   public static boolean outsideGui(Minecraft mc, Screen screen, int x, int y) {
     return Config.current().inventoryMouseLook && InventoryMovement.allows(mc, screen)
-        && screen instanceof InventoryGui gui && !gui.power$containsGuiSpace(x, y);
+        && screen instanceof InventoryGui gui && !gui.power$containsGuiSpace(x, y)
+        && !gui.power$ownsPointerControl(x, y);
   }
 
   public static boolean active() { return DRAG.active(); }

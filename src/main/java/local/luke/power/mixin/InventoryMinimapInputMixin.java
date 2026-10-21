@@ -17,12 +17,20 @@ public abstract class InventoryMinimapInputMixin {
   @Shadow protected Minecraft minecraft;
   @Shadow public int width;
   @Shadow public int height;
+  @Unique private boolean power$resetPress;
   @Inject(method = "onMouseEvent", at = @At("HEAD"), cancellable = true)
   private void power$minimapWheel(CallbackInfo ci) {
     if (!((Object)this instanceof ContainerScreen) || minecraft.currentScreen != (Object)this) return;
     int wheel = Mouse.getEventDWheel();
-    boolean claimed = wheel != 0 && Minimap.inventoryWheel(minecraft, Mouse.getEventX() * width / minecraft.displayWidth,
-        height - Mouse.getEventY() * height / minecraft.displayHeight - 1, wheel);
+    int x = Mouse.getEventX() * width / minecraft.displayWidth;
+    int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+    if (!org.lwjgl.opengl.Display.isActive()) power$resetPress = false;
+    boolean claimed = Mouse.getEventButton() == 1 && !Mouse.getEventButtonState() && power$resetPress;
+    if (Mouse.getEventButton() == 1 && !Mouse.getEventButtonState()) power$resetPress = false;
+    if (Mouse.getEventButton() == 1 && Mouse.getEventButtonState() && Minimap.inventoryReset(minecraft, x, y)) {
+      power$resetPress = claimed = true;
+    }
+    if (!claimed) claimed = wheel != 0 && Minimap.inventoryWheel(minecraft, x, y, wheel);
     InventoryWheel.event(this, org.lwjgl.opengl.Display.isActive() && !Mouse.isGrabbed(), wheel, claimed);
     if (claimed) ci.cancel();
   }

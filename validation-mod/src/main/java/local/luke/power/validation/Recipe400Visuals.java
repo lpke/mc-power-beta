@@ -92,7 +92,7 @@ final class Recipe400Visuals {
   private static RecipeBookOverlay open(Minecraft mc,Screen screen,int width,int height,List<Screen> screens)throws Exception {
     screens.add(screen);mc.currentScreen=screen;if(screen instanceof ContainerScreen container)mc.player.container=container.container;
     screen.init(mc,width,height);var book=RecipeBooks.book(screen);check(book!=null&&book.enabled(),"recipe overlay missing from native screen");
-    for(int i=0;i<720;i++){book.tick();var model=field(book,"model");if((int)field(model,"cursor")>=((List<?>)field(model,"recipes")).size())break;}
+    for(int i=0;i<720;i++){book.tick();var model=field(book,"model");if((int)field(field(model,"availability"),"cursor")>=((List<?>)field(model,"recipes")).size())break;}
     field(book,"ticks",0);return book;
   }
   private static void capture(Minecraft mc,Screen screen,String name,List<String> manifest)throws Exception {

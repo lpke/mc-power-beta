@@ -5,6 +5,16 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 
 class MinimapZoomTest {
+  @Test void resetUsesTheChosenStepAndOldPreferencesStartAtOneAndAQuarter() {
+    double[] steps = {.25, .5, 1.25, 2.5, 4};
+    assertEquals(1.25, MinimapZoomSteps.reset(steps, 1.25));
+    assertEquals(2.5, MinimapZoomSteps.reset(steps, 2.5));
+    assertEquals(.5, MinimapZoomSteps.reset(new double[]{.5, 2.5}, 1.25));
+    assertEquals(.5, MinimapZoomSteps.reset(new double[]{.5, 2}, 1.25));
+    assertEquals(1.25, new Gson().fromJson("{}", MapSettings.class).zoomDefault);
+    var saved = new MapSettings(); saved.zoomDefault = 2.5;
+    assertEquals(2.5, new Gson().fromJson(new Gson().toJson(saved), MapSettings.class).zoomDefault);
+  }
   @Test void fineWheelTargetsClampAndKeysChooseTheAdjacentConfiguredStep() {
     double target = MinimapZoom.scroll(1.25, 120);
     assertEquals(1.375, target, 1e-12);

@@ -26,4 +26,14 @@ public final class MinimapZoomSteps {
     for (int i = steps.length - 1; i >= 0; i--) if (steps[i] < target - 1e-9) return steps[i];
     return steps[steps.length - 1];
   }
+
+  /** A removed/edited default follows the nearest remaining configured step. */
+  public static int defaultIndex(double[] steps, double target) {
+    validate(steps);
+    int nearest = 0;
+    for (int i = 1; i < steps.length; i++)
+      if (Math.abs(steps[i] - target) < Math.abs(steps[nearest] - target)) nearest = i;
+    return nearest;
+  }
+  public static double reset(double[] steps, double target) { return steps[defaultIndex(steps, target)]; }
 }

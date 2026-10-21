@@ -20,6 +20,7 @@ public abstract class InventoryToolsContainerMixin extends Screen implements Inv
     power$inventoryTools = new InventoryToolsOverlay();
     power$inventoryTools.attach(minecraft, this, width, height, backgroundWidth, backgroundHeight, buttons);
   }
+  public InventoryToolsLayout.Rect power$recipeButtonBounds() { return power$inventoryTools == null ? null : power$inventoryTools.recipeButtonBounds(); }
   public boolean power$inventoryToolsModal() { return power$inventoryTools != null && power$inventoryTools.modal(); }
   @Inject(method = "render", at = @At("HEAD"))
   private void power$toolsPrepare(int x, int y, float delta, CallbackInfo ci) { if (power$inventoryTools != null) power$inventoryTools.prepare(); }

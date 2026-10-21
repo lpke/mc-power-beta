@@ -6494,11 +6494,21 @@
     "unit": "%",
     "displayPrecision": 0
   },
+  "maps.zoomDefault": {
+    "page": "Map",
+    "group": "Minimap",
+    "label": "Default minimap zoom",
+    "description": "Choose the right-click reset level inside Minimap zoom steps.",
+    "min": 0.25,
+    "max": 4,
+    "step": 0.01,
+    "order": 1.3
+  },
   "maps.zoomSteps": {
     "page": "Map",
     "group": "Minimap",
     "label": "Minimap zoom steps",
-    "description": "Choose exact zoom levels for the Zoom in and Zoom out bindings. Levels run from lowest to highest and wrap around at either end. This does not change the current zoom until a zoom binding is pressed.",
+    "description": "Choose exact zoom levels for the Zoom in and Zoom out bindings. Levels run from lowest to highest and wrap around at either end. The starred level is used when right-clicking the minimap. This does not change the current zoom until a zoom binding or reset is used.",
     "order": 1.2
   },
   "maps.worldMapRadarIcons": {
@@ -6591,6 +6601,11 @@
     "group": "Hands",
     "order": 0
   },
+  "recipeBook.buttonStyle": {
+    "page": "Gameplay",
+    "group": "Recipe book",
+    "order": 3
+  },
   "keys.powerbeta.restock": {
     "page": "Controls",
     "group": "Inventory",
@@ -6662,6 +6677,10 @@
     "label": "Sorting layout",
     "description": "Choose protected storage slots and preferred items. Sorting only moves existing items and keeps the hotbar, armor, offhand and crafting slots separate.",
     "order": 3
+  },
+  "inventoryTools.hotbarEditor": {
+    "label": "Edit saved hotbars",
+    "order": 1
   },
   "inventoryTools.protectedSlots": {
     "label": "Protected storage slots",
