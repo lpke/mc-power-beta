@@ -13,7 +13,8 @@
     "InGameHudMixin",
     "InteractionManagerMixin",
     "WorldAccessor",
-    "MinecraftMixin"
+    "MinecraftMixin",
+    "SoundManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

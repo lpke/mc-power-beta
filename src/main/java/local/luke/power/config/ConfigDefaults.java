@@ -36,7 +36,24 @@ public final class ConfigDefaults {
         initializeMaps(game);
         initializeExtraSounds(game);
         initializeInterface(game);
+        initializeModernFeatures(game);
       }
+    }
+  }
+
+  /** Freeze new feature values once against the selected base, with one verified backup. */
+  private static void initializeModernFeatures(Path game) throws IOException {
+    java.util.Map<String, JsonObject> changed = new java.util.LinkedHashMap<>();
+    for (String id : java.util.List.of("offhand.enabled", "recipeBook.enabled", "subtitles.enabled", "heldLight.enabled", "inventoryTools.sorting", "inventoryTools.depositMatching", "inventoryTools.creativeHotbars", "inventoryTools.restock", "inventoryTools.toolSwitch", "worldTools.backup", "worldTools.duplicate", "worldTools.recreate")) {
+      int split = id.indexOf('.'); String section = id.substring(0, split), key = id.substring(split + 1);
+      JsonObject values = changed.computeIfAbsent(section, PowerConfig::section);
+      if (!values.has(key)) values.add(key, DefaultBases.value(id, new JsonPrimitive(false)));
+    }
+    changed.entrySet().removeIf(e -> e.getValue().equals(PowerConfig.section(e.getKey())));
+    if (changed.isEmpty()) return;
+    try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
+      for (var entry : changed.entrySet()) PowerConfig.put(entry.getKey(), entry.getValue());
+      transaction.commit();
     }
   }
 

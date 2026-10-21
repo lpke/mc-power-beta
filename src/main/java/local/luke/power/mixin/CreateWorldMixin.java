@@ -18,6 +18,8 @@ public abstract class CreateWorldMixin extends Screen {
   @Unique private int power$difficulty = WorldDifficulty.DEFAULT;
   @Unique private CreationRules power$draft;
   @Unique private String power$name, power$seed;
+  @Unique private boolean power$recreated;
+  @Unique private WorldRecreation.Draft power$recreation;
   @Unique private static final String[] POWER_DIFFICULTIES = {"Peaceful", "Easy", "Normal", "Hard"};
 
   @Inject(method = "init", at = @At("HEAD"))
@@ -28,9 +30,12 @@ public abstract class CreateWorldMixin extends Screen {
   private void power$choices(CallbackInfo ci) {
     if (power$draft == null) {
       if (local.luke.power.ui.RuleDefaultsScreen.openIfNeeded(minecraft, this,
-          () -> power$draft = new CreationRules(RulePresets.survival(), RulePresets.cheats()),
+          this::power$initializeDraft,
           () -> minecraft.setScreen(new net.minecraft.client.gui.screen.TitleScreen()))) return;
-      power$draft = new CreationRules(RulePresets.survival(), RulePresets.cheats());
+      power$initializeDraft();
+    }
+    if (power$recreation != null) {
+      power$name = power$recreation.name(); power$seed = Long.toString(power$recreation.seed()); power$recreation = null;
     }
     if (power$name != null) { field_632.setText(power$name); field_633.setText(power$seed); method_608(); }
     int left = width / 2 - 132;
@@ -45,6 +50,14 @@ public abstract class CreateWorldMixin extends Screen {
     if (power$draft.preset() == CreationRules.Preset.CUSTOM) {
       buttons.add(new ButtonWidget(4, left, 188, 264, 20, "Edit game rules"));
     }
+  }
+  @Unique private void power$initializeDraft() {
+    power$draft = new CreationRules(RulePresets.survival(), RulePresets.cheats());
+    WorldRecreation.Draft recreated = WorldRecreation.take(this);
+    if (recreated == null) return;
+    power$draft.custom(recreated.rules()); power$draft.cycle(-1);
+    power$difficulty = recreated.difficulty(); power$recreation = recreated;
+    power$recreated = true;
   }
   @Unique private String power$rulesLabel() {
     return "Game rules: " + switch (power$draft.preset()) { case SURVIVAL -> "Survival"; case CHEATS -> "Cheats"; case CUSTOM -> "Custom"; };
@@ -87,7 +100,8 @@ public abstract class CreateWorldMixin extends Screen {
   }
   @WrapOperation(method = "buttonClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;method_2120(Ljava/lang/String;Ljava/lang/String;J)V"))
   private void power$create(Minecraft mc, String folder, String name, long seed, Operation<Void> original) {
-    WorldCreation.withRules(power$difficulty, power$draft.rules(), () -> original.call(mc, folder, name, seed));
+    long chosenSeed = power$recreated ? WorldRecreation.exactSeed(field_633.getText(), seed) : seed;
+    WorldCreation.withRules(power$difficulty, power$draft.rules(), () -> original.call(mc, folder, name, chosenSeed));
     if (mc.world != null && mc.player != null && !mc.world.isRemote) {
       try {
         Class<?> modes = Class.forName("local.luke.power.creative.Modes"), type = Class.forName("local.luke.power.creative.api.GameMode");

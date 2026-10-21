@@ -86,7 +86,19 @@
     "maps.minimapWaypointSize": 90,
     "maps.radarIconSize": 75,
     "activeTweaks.freecam": true,
-    "maps.radarHostileColor": 16728110
+    "maps.radarHostileColor": 16728110,
+    "offhand.enabled": true,
+    "worldTools.backup": true,
+    "worldTools.duplicate": true,
+    "worldTools.recreate": true,
+    "subtitles.enabled": true,
+    "inventoryTools.sorting": true,
+    "inventoryTools.depositMatching": true,
+    "inventoryTools.creativeHotbars": true,
+    "inventoryTools.toolSwitch": true,
+    "heldLight.enabled": true,
+    "inventoryTools.restock": false,
+    "recipeBook.enabled": false
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -298,7 +310,19 @@
     "sprint.stamina": false,
     "sprint.noSprintInCombat": false,
     "interface.debugAxes": false,
-    "rules.cheats.allow_sprinting": true
+    "rules.cheats.allow_sprinting": true,
+    "offhand.enabled": false,
+    "worldTools.backup": false,
+    "worldTools.duplicate": false,
+    "worldTools.recreate": false,
+    "subtitles.enabled": false,
+    "inventoryTools.sorting": false,
+    "inventoryTools.depositMatching": false,
+    "inventoryTools.creativeHotbars": false,
+    "inventoryTools.toolSwitch": false,
+    "heldLight.enabled": false,
+    "inventoryTools.restock": false,
+    "recipeBook.enabled": false
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -471,6 +495,18 @@
     "sprint.stamina": false,
     "sprint.noSprintInCombat": false,
     "interface.debugAxes": false,
-    "rules.cheats.allow_sprinting": true
+    "rules.cheats.allow_sprinting": true,
+    "offhand.enabled": false,
+    "worldTools.backup": false,
+    "worldTools.duplicate": false,
+    "worldTools.recreate": false,
+    "subtitles.enabled": false,
+    "inventoryTools.sorting": false,
+    "inventoryTools.depositMatching": false,
+    "inventoryTools.creativeHotbars": false,
+    "inventoryTools.toolSwitch": false,
+    "heldLight.enabled": false,
+    "inventoryTools.restock": false,
+    "recipeBook.enabled": false
   }
 }

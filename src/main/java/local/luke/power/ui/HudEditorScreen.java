@@ -27,6 +27,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   private String initialSetting = "";
   private double pressX, pressY;
   private int startX, startY;
+  private boolean shiftedDrag, dragMoved;
 
   public HudEditorScreen(PowerOptionsScreen parent, String settingId) {
     super(parent, new SettingsDraft(parent.session().settings(), HudEditorSettings::contains));
@@ -186,6 +187,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   protected String groupKey(String group) { return selected + "/" + group; }
   protected List<Setting> controls() {
+    if (selected.equals("subtitles")) return HudEditorSections.order(draft.settings().stream().filter(s -> s.id.startsWith("subtitles.")).toList());
     if (selected.equals("minimap")) return HudEditorSections.order(draft.settings().stream()
         .filter(s -> s.id.startsWith("maps.")).toList());
     if (reorder != null && reorder.active()) return HudEditorSections.order(editingDraft().settings().stream()
@@ -223,7 +225,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
     List<String> ids = new ArrayList<>(); ids.add("layout");
     if (preview.mode() == 1) ids.add("combined"); else for (int i = 0; i < HudPreview.PARTS.length; i++) ids.add("native." + i);
     for (int i = 0; i < 4; i++) ids.add("cluster." + i);
-    ids.addAll(List.of("minimap", "chat", "tweaks", "version", "debug")); return ids;
+    ids.addAll(List.of("minimap", "subtitles", "chat", "tweaks", "version", "debug")); return ids;
   }
   private String selectedLabel() { return selectionLabel(selected); }
   private String selectionLabel(String id) {
@@ -378,7 +380,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
       if (element.offsetX() != null || element.offsetY() != null) {
         draft.checkpoint(); dragging = element; pressX = virtualX(x); pressY = virtualY(y);
         startX = element.offsetX() == null ? 0 : preview.integer(element.offsetX());
-        startY = element.offsetY() == null ? 0 : preview.integer(element.offsetY());
+        startY = element.offsetY() == null ? 0 : preview.movementOffsetY(element.offsetY());
+        shiftedDrag = element.offsetY() != null && startY != preview.integer(element.offsetY()); dragMoved = false;
       }
       return;
     }
@@ -467,6 +470,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   private void move(int x, int y) {
     if (dragging == null) return;
+    if (shiftedDrag && !dragMoved && virtualX(x) == pressX && virtualY(y) == pressY) return;
+    dragMoved = true;
     double nextX = Math.max(0, Math.min(width - dragging.width(), dragging.x() + virtualX(x) - pressX));
     double nextY = Math.max(0, Math.min(height - dragging.height(), dragging.y() + virtualY(y) - pressY));
     if (dragging.offsetX() != null) setOffset(dragging.offsetX(), startX + offsetDirection(dragging.offsetX()) * (snap(nextX, dragging.width(), width) - dragging.x()));
@@ -490,8 +495,9 @@ public final class HudEditorScreen extends DraftEditorScreen {
     if (element != null) {
       draft.checkpoint();
       int step = Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT) ? 10 : 1;
+      int verticalOffset = element.offsetY() == null ? 0 : preview.movementOffsetY(element.offsetY());
       if (element.offsetX() != null) setOffset(element.offsetX(), preview.integer(element.offsetX()) + dx * step * offsetDirection(element.offsetX()));
-      if (element.offsetY() != null) setOffset(element.offsetY(), preview.integer(element.offsetY()) + dy * step * offsetDirection(element.offsetY()));
+      if (element.offsetY() != null) setOffset(element.offsetY(), verticalOffset + dy * step * offsetDirection(element.offsetY()));
       preview.rebuild();
     }
     return true;

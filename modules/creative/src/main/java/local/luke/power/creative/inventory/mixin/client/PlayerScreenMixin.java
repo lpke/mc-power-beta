@@ -140,6 +140,11 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     RenderHelper.disableLighting();
     GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
+    var hands = (local.luke.power.inventory.OffhandInventory<?>)(Object)this.minecraft.player.inventory;
+    if (hands.power$offhandEnabled() || hands.power$offhandStack() != null) {
+      this.minecraft.textureManager.bindTexture(this.minecraft.textureManager.getTextureId("/gui/inventory.png"));
+      this.blit(posX + 76, posY + 61, 7, 83, 18, 18);
+    }
     creative_destroySlot(posX, posY);
 
     int tabX = (int) mouseX - posX - 173;
@@ -484,6 +489,10 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
 
   @Override
   protected void mouseClicked(int mouseX, int mouseY, int button) {
+    if (local.luke.power.input.InventoryPanels.modal(this)) {
+      super.mouseClicked(mouseX, mouseY, button);
+      return;
+    }
     if (local.luke.power.input.Bindings.matches(minecraft.options.inventoryKey, button - 100)) {
       minecraft.player.closeContainer();
       return;

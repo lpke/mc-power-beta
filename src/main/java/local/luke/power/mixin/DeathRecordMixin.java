@@ -14,6 +14,7 @@ public abstract class DeathRecordMixin {
   @Inject(method = "method_938", at = @At("HEAD"))
   private void power$recordDeath(Entity attacker, CallbackInfo ci) {
     if (power$deathRecorded) return;
+    local.luke.power.inventory.InventoryActions.cancel();
     power$deathRecorded = true;
     local.luke.power.map.MapDeathCauses.capture((PlayerEntity)(Object)this,
         local.luke.power.death.DeathCause.describe((PlayerEntity)(Object)this, attacker));
@@ -21,6 +22,11 @@ public abstract class DeathRecordMixin {
     DeathTracker.died((PlayerEntity)(Object)this, attacker);
     var player = (PlayerEntity)(Object)this;
     if (!player.world.isRemote && !KeepInventory.kept(player)) {
+      var offhand = local.luke.power.offhand.Offhand.get(player.inventory);
+      if (offhand != null) {
+        local.luke.power.offhand.Offhand.set(player.inventory, null);
+        player.method_509(offhand, true);
+      }
       for (int i = 1; i <= 4; i++) {
         var slot = player.playerContainer.method_2084(i); var item = slot.getStack();
         if (item != null) { slot.setStack(null); player.method_509(item, true); }

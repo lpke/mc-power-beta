@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "local.luke.power.inventory.tools.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "InventoryToolsContainerMixin",
+    "InventoryToolsMouseMixin",
+    "InventoryToolsPlayerMixin",
+    "RestockUseMixin",
+    "SavedCreativeControlKeysMixin",
+    "SavedCreativeHotbarKeysMixin",
+    "SortingDoubleChestAccessor",
+    "ToolMiningMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

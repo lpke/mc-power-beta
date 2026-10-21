@@ -50,13 +50,15 @@ public final class SlabMerge {
     Block full = Block.BLOCKS[43];
     if (!w.canSpawnEntity(full.method_1624(w, x, y, z))) return false;
     if (!w.method_201(x, y, z, 43, stack.getDamage())) return false;
-    w.method_150(
+    try (var ignored = local.luke.power.input.SoundCaptionContext.push("subtitles.block.generic.place")) {
+      w.method_150(
         x + .5,
         y + .5,
         z + .5,
         full.field_1926.method_1978(),
         (full.field_1926.method_1976() + 1) / 2,
-        full.field_1926.method_1977() * .8f);
+          full.field_1926.method_1977() * .8f);
+    }
     --stack.count;
     return true;
   }

@@ -204,6 +204,7 @@ public final class NativeBackend implements Backend {
       case "powerbeta.mapZoomIn" -> Keyboard.KEY_I;
       case "powerbeta.mapZoomOut" -> Keyboard.KEY_O;
       case "powerbeta.sprint" -> Keyboard.KEY_LCONTROL;
+      case "powerbeta.swapHands", "powerbeta.restock", "powerbeta.recipeBook", "powerbeta.sortInventory", "powerbeta.depositMatching", "powerbeta.saveCreativeHotbar", "powerbeta.loadCreativeHotbar" -> 0;
       case "key.forward" -> Keyboard.KEY_W;
       case "key.back" -> Keyboard.KEY_S;
       case "key.left" -> Keyboard.KEY_A;

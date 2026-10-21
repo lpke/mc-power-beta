@@ -18,6 +18,13 @@ public final class GameplayKeys {
   public static final KeyBinding COMMANDS = new KeyBinding("powerbeta.openCommands", Keyboard.KEY_SLASH);
   public static final KeyBinding GRAPH = new KeyBinding("powerbeta.debugGraph", Keyboard.KEY_F3);
   public static final KeyBinding SPRINT = new KeyBinding("powerbeta.sprint", Keyboard.KEY_LCONTROL);
+  public static final KeyBinding SWAP_HANDS = new KeyBinding("powerbeta.swapHands", 0);
+  public static final KeyBinding RESTOCK = new KeyBinding("powerbeta.restock", 0);
+  public static final KeyBinding RECIPE_BOOK = new KeyBinding("powerbeta.recipeBook", 0);
+  public static final KeyBinding SORT_INVENTORY = new KeyBinding("powerbeta.sortInventory", 0);
+  public static final KeyBinding DEPOSIT_MATCHING = new KeyBinding("powerbeta.depositMatching", 0);
+  public static final KeyBinding SAVE_HOTBAR = new KeyBinding("powerbeta.saveCreativeHotbar", 0);
+  public static final KeyBinding LOAD_HOTBAR = new KeyBinding("powerbeta.loadCreativeHotbar", 0);
   private static boolean graph;
   public static boolean graph() { return graph; }
   public static void debugText() { graph = false; }
@@ -28,11 +35,15 @@ public final class GameplayKeys {
     event.keyBindings.add(COMMANDS);
     event.keyBindings.add(GRAPH);
     event.keyBindings.add(SPRINT);
+    event.keyBindings.add(SWAP_HANDS);
+    event.keyBindings.add(RESTOCK);
+    event.keyBindings.addAll(java.util.List.of(RECIPE_BOOK, SORT_INVENTORY, DEPOSIT_MATCHING, SAVE_HOTBAR, LOAD_HOTBAR));
     event.keyBindings.addAll(local.luke.power.map.MapKeys.all());
     Bindings.onMousePress("powerbeta.mapActions", key -> local.luke.power.map.MapKeys.press((Minecraft)FabricLoader.getInstance().getGameInstance(), key));
     Bindings.onMousePress("powerbeta.lightOverlay", GameplayKeys::toggleLight);
     Bindings.onMousePress("powerbeta.infoHud", GameplayKeys::toggleInfoHud);
     Bindings.onMousePress("powerbeta.interface", GameplayKeys::interfaceKey);
+    Bindings.onMousePress("powerbeta.inventory", GameplayKeys::inventoryKey);
   }
 
   private static void toggleInfoHud(int key) {
@@ -57,6 +68,17 @@ public final class GameplayKeys {
     toggleInfoHud(Keyboard.getEventKey());
     local.luke.power.map.MapKeys.press((Minecraft)FabricLoader.getInstance().getGameInstance(), Keyboard.getEventKey());
     interfaceKey(Keyboard.getEventKey());
+    inventoryKey(Keyboard.getEventKey());
+  }
+
+  private static void inventoryKey(int code) {
+    Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
+    if (mc.currentScreen == null && Display.isActive() && Bindings.matches(RECIPE_BOOK, code))
+      local.luke.power.recipes.RecipeBooks.press(mc, code);
+    if (mc.currentScreen == null && Display.isActive() && Bindings.matches(RESTOCK, code))
+      local.luke.power.inventory.tools.InventoryAutomation.toggleRestock(mc);
+    if (mc.currentScreen == null && Display.isActive() && Bindings.matches(SWAP_HANDS, code))
+      local.luke.power.offhand.Offhand.swap(mc);
   }
 
   private static void interfaceKey(int code) {

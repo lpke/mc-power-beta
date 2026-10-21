@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-10-21
+
+- Add a searchable recipe book for crafting and smelting, with recipe categories, craftable filtering, ingredient ghosts and safe recipe placement. Use it in supported inventories or only from the pause menu. It starts off in every defaults base.
+- Add an optional offhand slot, hand-swap binding, held-item rendering and native item use. Preserve offhand items through saving, death, respawn and permitted recovery.
+- Light nearby terrain smoothly while holding a light-emitting block or lava bucket, including in the offhand. This changes rendering without changing world light or spawning.
+- Add automatic tool selection and optional hotbar restocking, with durability controls and checks for native item data, mining targets and manual input. Restocking starts off and its toggle is unbound.
+- Sort native inventories and transfer items matching chest contents with compact controls and configurable bindings. Keep hotbars, equipment, crafting inputs and custom inventories protected.
+- Save nine Creative hotbars and load them through a menu or configurable held-key shortcuts. Saved hotbars remain separate from settings defaults.
+- Back up, duplicate and recreate saved worlds from the world menu. Verify copied files before publishing them and give duplicated worlds independent map and recovery identities.
+- Show directional sound subtitles with configurable duration, visibility and HUD placement. Captions remain available when game audio is muted.
+- Integrate the new features with searchable Options, selected defaults, shared input ownership and HUD drafts. Power Beta enables them except the recipe book and automatic restocking; Beta and Refined Beta leave them off.
+- Keep configuration format 7 with support for formats 3–6. World-rule format 4 supports formats 1–3 and earlier metadata; verified upgrades retain existing world rules and prevent older clients from dropping new inventory ownership.
+
 ## [3.3.0] - 2026-10-21
 
 - Keep the minimap visible above inventory dimming and below container panels. Scroll over the minimap to zoom smoothly and precisely in inventories, the HUD editor and map settings previews.

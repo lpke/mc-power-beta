@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class ContainerBindingMixin extends net.minecraft.client.gui.screen.Screen {
   @org.spongepowered.asm.mixin.injection.Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
   private void power$closeWithMouse(int x, int y, int button, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+    if (local.luke.power.input.InventoryPanels.modal(this)) return;
     if (Bindings.matches(minecraft.options.inventoryKey, button - 100)) {
       minecraft.player.closeScreen();
       ci.cancel();

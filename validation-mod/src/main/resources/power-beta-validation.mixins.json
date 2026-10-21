@@ -5,6 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "ValidationMixin",
+    "HeldLight400Capture",
+    "Input400Capture",
     "GhostHeadCapture",
     "OutlineCapture",
     "AudioPreloadMixin",

@@ -1,6 +1,10 @@
 package local.luke.power.fastplace;
 
 import java.io.IOException;
+import local.luke.power.inventory.HandUse;
+import local.luke.power.inventory.OffhandInventory;
+import local.luke.power.inventory.InventoryActions;
+import local.luke.power.inventory.InventoryRefills;
 import local.luke.power.fastplace.config.Settings;
 import net.minecraft.class_212;
 import net.minecraft.class_27;
@@ -21,7 +25,20 @@ public final class FastPlace {
   private static boolean toggleDown, releaseRequired, useDown;
   private static int placedThisTick;
 
+  static { InventoryRefills.onReplaced((inventory, hand, original, replacement) -> {
+    if (session != null && session.sourceStack == original && session.offhand == (hand == HandUse.Hand.OFF)
+        && session.handRevision == HandUse.manualRevision() && replacement instanceof ItemStack stack
+        && stack.itemId == session.itemId && stack.getDamage() == session.damage
+        && (session.nativeItem == null || session.nativeItem.equals(nativeItem(stack)))) {
+      session.sourceStack = stack;
+    }
+  }); }
   private FastPlace() {}
+
+  private static boolean waitingRefill(Minecraft mc) {
+    return session != null && mc.player != null && InventoryRefills.waiting(mc.player.inventory,
+        session.offhand ? HandUse.Hand.OFF : HandUse.Hand.MAIN, session.sourceStack);
+  }
 
   public static Settings settings() {
     return local.luke.power.building.config.Config.current().placement.copy();
@@ -77,7 +94,7 @@ public final class FastPlace {
     }
     toggleDown = toggle;
     if (session != null
-        && !sameItem(mc.player.inventory.getSelectedItem(), mc.player.inventory.selectedSlot))
+        && (session.handRevision!=HandUse.manualRevision()||!sameItem(held(mc), mc.player.inventory.selectedSlot) && !waitingRefill(mc)))
       interrupt();
   }
 
@@ -148,26 +165,52 @@ public final class FastPlace {
               stack.getDamage(),
               slot,
               target.expectedBlock() == 43 && target.previousId() == 44);
+      session.offhand = HandUse.hand(mc.player.inventory) == HandUse.Hand.OFF;
+      session.nativeItem = nativeItem(stack);
+      session.sourceStack = stack;
+      session.handRevision = HandUse.manualRevision();
       placedThisTick++;
     }
   }
 
+  public static boolean observingFirst() { return session == null && !releaseRequired; }
+
+  @SuppressWarnings("unchecked") private static ItemStack held(Minecraft mc) {
+    return session != null && session.offhand
+        ? ((OffhandInventory<ItemStack>)(Object)mc.player.inventory).power$offhandStack()
+        : mc.player.inventory.getSelectedItem();
+  }
+
+  private static String nativeItem(ItemStack stack) {
+    if (stack == null) return "";
+    try {
+      var copy = stack.clone(); copy.count = 1;
+      var bytes = new java.io.ByteArrayOutputStream();
+      net.minecraft.nbt.NbtIo.write(copy.writeNbt(new net.minecraft.nbt.NbtCompound()), new java.io.DataOutputStream(bytes));
+      return java.util.Base64.getEncoder().encodeToString(bytes.toByteArray());
+    } catch (RuntimeException failure) { throw new IllegalStateException("Unsafe placement item", failure); }
+  }
+
   private static boolean sameItem(ItemStack stack, int slot) {
     return stack != null
+        && (session.sourceStack == null || session.sourceStack == stack)
         && stack.count > 0
         && stack.itemId == session.itemId
         && stack.getDamage() == session.damage
-        && slot == session.slot;
+        && slot == session.slot
+        && (session.nativeItem == null || session.nativeItem.equals(nativeItem(stack)));
   }
 
   public static void placeBatch(Minecraft mc) {
+    if(session!=null&&(session.handRevision!=HandUse.manualRevision()||session.offhand&&(mc.player==null||!((OffhandInventory<?>)(Object)mc.player.inventory).power$offhandEnabled()))) { interrupt();return; }
     if (session == null
         || !useDown
         || !local.luke.power.building.config.Config.current().placement.enabled
         || !canOperate(mc)) return;
     while (placedThisTick < local.luke.power.building.config.Config.current().placement.attemptsPerTick) {
-      ItemStack stack = mc.player.inventory.getSelectedItem();
+      ItemStack stack = held(mc);
       if (!sameItem(stack, mc.player.inventory.selectedSlot) || !eligible(mc, stack)) {
+        if (waitingRefill(mc)) break;
         interrupt();
         break;
       }
@@ -202,7 +245,11 @@ public final class FastPlace {
       float yaw = player.yaw;
       int count = stack.count;
       boolean success;
-      try {
+      var lease = InventoryActions.begin(mc.world, player, player.container, player.inventory, "fast_place", false);
+      if (lease == null) break;
+      boolean offhand = session.offhand;
+      try (HandUse ignored = HandUse.begin(player.inventory, offhand ? HandUse.Hand.OFF : HandUse.Hand.MAIN, false)) {
+        if (!lease.valid(mc.world, mc.player, player.container, mc.player.inventory) || held(mc) != stack) break;
         if (local.luke.power.building.config.Config.current().placement.rememberOrientation
             && !Compatibility.flexibleModifiersActive()) player.yaw = session.yaw;
         success =
@@ -216,16 +263,26 @@ public final class FastPlace {
                 hit.field_1987);
       } finally {
         player.yaw = yaw;
+        InventoryActions.finish(lease);
       }
-      if (stack.count <= 0 && player.inventory.getSelectedItem() == stack)
-        player.inventory.main[player.inventory.selectedSlot] = null;
-      else if (stack.count != count) mc.field_2818.field_2342.method_1863();
+      if (stack.count <= 0 && held(mc) == stack) {
+        if (offhand) {
+          @SuppressWarnings("unchecked") var hands = (OffhandInventory<ItemStack>)(Object)player.inventory;
+          hands.power$offhandStack(null); player.inventory.markDirty();
+        } else player.inventory.main[player.inventory.selectedSlot] = null;
+      }
+      else if (stack.count != count) {
+        if(offhand)((OffhandInventory<?>)(Object)player.inventory).power$offhandChanged();
+        else mc.field_2818.field_2342.method_1863();
+      }
       // Opening a screen can clear session during the call.
       if (session == null || !canOperate(mc)) break;
       if (!success || !target.changedAsExpected(mc.world)) break;
       session.placed(target.position());
       placedThisTick++;
-      mc.player.method_500();
+      try (HandUse ignored = HandUse.begin(player.inventory, offhand ? HandUse.Hand.OFF : HandUse.Hand.MAIN, false)) {
+        mc.player.method_500();
+      }
     }
   }
 }

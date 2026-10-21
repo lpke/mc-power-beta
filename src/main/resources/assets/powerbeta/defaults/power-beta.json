@@ -99,6 +99,13 @@
           "horizontalPositionOffset": 0,
           "verticalPosition": 0,
           "verticalPositionOffset": 0
+        },
+        "OFFHAND_POSITION_CONFIG": {
+          "enableVisibility": true,
+          "horizontalPosition": 1,
+          "horizontalPositionOffset": 0,
+          "verticalPosition": 0,
+          "verticalPositionOffset": 0
         }
       },
       "SIMPLE_HUD_POSITION_CONFIG": {
@@ -564,7 +571,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 3.3.0"
+        "customVersionText": "Power Beta 4.0.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -923,7 +930,7 @@
     },
     "gameRules": {
       "survival": {
-        "version": 3,
+        "version": 4,
         "values": {
           "allow_creative_mode": false,
           "allow_death_recovery": false,
@@ -968,7 +975,7 @@
         }
       },
       "cheats": {
-        "version": 3,
+        "version": 4,
         "values": {
           "allow_creative_mode": true,
           "allow_death_recovery": true,
@@ -1015,9 +1022,9 @@
       "review": {
         "format": 1,
         "base": "power_beta",
-        "defaultsRevision": 2,
-        "rulesVersion": 3,
-        "release": "3.1.0"
+        "defaultsRevision": 3,
+        "rulesVersion": 4,
+        "release": "4.0.0"
       }
     },
     "bindings": {
@@ -1167,6 +1174,50 @@
       "freecamFov": false,
       "fovStrength": 100,
       "rechargeStill": 7.5
+    },
+    "offhand": {
+      "enabled": true
+    },
+    "worldTools": {
+      "backup": true,
+      "duplicate": true,
+      "recreate": true
+    },
+    "subtitles": {
+      "enabled": true,
+      "position": 8,
+      "offsetX": -1,
+      "offsetY": -30,
+      "textSize": 1,
+      "backgroundOpacity": 80,
+      "displaySeconds": 3,
+      "hideWithDebug": false,
+      "showInInventory": true
+    },
+    "inventoryTools": {
+      "sorting": true,
+      "depositMatching": true,
+      "creativeHotbars": true,
+      "toolSwitch": true,
+      "restock": false,
+      "restockBeforeEmpty": true,
+      "restockOtherHotbar": false,
+      "restockTools": true,
+      "toolsFromInventory": true,
+      "restockThreshold": 6,
+      "toolDurabilityReserve": 1
+    },
+    "heldLight": {
+      "enabled": true
+    },
+    "recipeBook": {
+      "enabled": false,
+      "inventory": true,
+      "pauseMenu": false,
+      "craftingOpen": false,
+      "furnaceOpen": false,
+      "craftingFilter": false,
+      "furnaceFilter": false
     }
   }
 }

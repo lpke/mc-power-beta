@@ -83,13 +83,15 @@ public final class SlabPairs {
     z = pair.position.z();
     Block block = Block.BLOCKS[43];
     if (!w.method_201(x, y, z, 43, stack.getDamage())) return false;
-    w.method_150(
+    try (var ignored = local.luke.power.input.SoundCaptionContext.push("subtitles.block.generic.place")) {
+      w.method_150(
         x + .5,
         y + .5,
         z + .5,
         block.field_1926.method_1978(),
         (block.field_1926.method_1976() + 1) / 2,
-        block.field_1926.method_1977() * .8f);
+          block.field_1926.method_1977() * .8f);
+    }
     if (!pair.creative) stack.count -= pair.cost;
     return true;
   }

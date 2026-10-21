@@ -113,8 +113,9 @@ final class Release222Checks {
         live.discard();screen.session().discard();mc.setScreen(null);
         var restored=SettingsRegistry.open(mc);for(String id:RESPONSE)check(find(restored,id).value.equals(find(restored,id).defaultValue),"Cancel changed response "+id);restored.discard();
       });
-      test("leaf setting defaults off, obeys Apply/Cancel and leaves tools untouched",()->{
-        var session=SettingsRegistry.open(mc);var setting=find(session,"gameplay.axesSlashLeaves");check(!setting.defaultValue.getAsBoolean(),"leaf default on");
+      test("leaf setting uses selected defaults, obeys Apply/Cancel and leaves tools untouched",()->{
+        var session=SettingsRegistry.open(mc);var setting=find(session,"gameplay.axesSlashLeaves");
+        check(setting.defaultValue.equals(local.luke.power.config.DefaultBases.value(setting.id,new com.google.gson.JsonPrimitive(false))),"leaf default differs from selected base");
         check(setting.page.equals("Gameplay")&&setting.group.equals("Blocks"),"leaf setting placement");
         var held=mc.player.method_502();String before=local.luke.power.death.DeathItems.encode(held);
         setting.parse("false");session.preview(true);check(GameplayConfig.current().axesSlashLeaves,"manual leaf draft changed live mining");session.discard();

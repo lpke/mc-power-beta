@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 3.3.0",
+    "default": "Power Beta 4.0.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6159,7 +6159,7 @@
     "page": "Map",
     "group": "World map",
     "label": "Map light shading radius",
-    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0–7, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
     "min": 8,
     "max": 128,
     "step": 1,
@@ -6532,5 +6532,111 @@
     "label": "World map appearance",
     "description": "Edit Map settings beside a live World Map and minimap. Available with the World Map enabled in a sufficiently wide game window.",
     "order": 1.1
+  },
+  "keys.powerbeta.swapHands": {
+    "page": "Controls",
+    "group": "Inventory",
+    "label": "Swap hands",
+    "default": 0,
+    "order": 10
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OFFHAND_POSITION_CONFIG.enableVisibility": {
+    "page": "Interface",
+    "group": "Offhand position",
+    "label": "Visibility",
+    "description": "",
+    "default": true,
+    "restart": false
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OFFHAND_POSITION_CONFIG.horizontalPosition": {
+    "page": "Interface",
+    "group": "Offhand position",
+    "label": "Horizontal position",
+    "description": "",
+    "default": 1,
+    "restart": false
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OFFHAND_POSITION_CONFIG.horizontalPositionOffset": {
+    "page": "Interface",
+    "group": "Offhand position",
+    "label": "Horizontal position offset",
+    "description": "",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OFFHAND_POSITION_CONFIG.verticalPosition": {
+    "page": "Interface",
+    "group": "Offhand position",
+    "label": "Vertical position",
+    "description": "",
+    "default": 0,
+    "restart": false
+  },
+  "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OFFHAND_POSITION_CONFIG.verticalPositionOffset": {
+    "page": "Interface",
+    "group": "Offhand position",
+    "label": "Vertical position offset",
+    "description": "Use position bottom with offset -32 for Xbox",
+    "default": 0,
+    "restart": false,
+    "min": -2048,
+    "max": 2048,
+    "step": 1
+  },
+  "offhand.enabled": {
+    "page": "Inventory",
+    "group": "Hands",
+    "order": 0
+  },
+  "keys.powerbeta.restock": {
+    "page": "Controls",
+    "group": "Inventory",
+    "label": "Automatic restocking (toggle)",
+    "default": 0,
+    "order": 11
+  },
+  "keys.powerbeta.recipeBook": {
+    "page": "Controls",
+    "group": "Inventory",
+    "label": "Recipe book",
+    "default": 0,
+    "order": 12
+  },
+  "keys.powerbeta.sortInventory": {
+    "page": "Controls",
+    "group": "Inventory",
+    "label": "Sort inventory",
+    "default": 0,
+    "order": 12
+  },
+  "keys.powerbeta.depositMatching": {
+    "page": "Controls",
+    "group": "Inventory",
+    "label": "Deposit matching items",
+    "default": 0,
+    "order": 12
+  },
+  "keys.powerbeta.saveCreativeHotbar": {
+    "page": "Controls",
+    "group": "Inventory",
+    "label": "Save Creative hotbar (hold)",
+    "default": 0,
+    "order": 12
+  },
+  "keys.powerbeta.loadCreativeHotbar": {
+    "page": "Controls",
+    "group": "Inventory",
+    "label": "Load Creative hotbar (hold)",
+    "default": 0,
+    "order": 12
+  },
+  "subtitles.backgroundOpacity": {
+    "unit": "%"
+  },
+  "subtitles.displaySeconds": {
+    "unit": "s"
   }
 }

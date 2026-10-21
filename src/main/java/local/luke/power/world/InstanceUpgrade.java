@@ -13,7 +13,7 @@ import net.minecraft.nbt.*;
 public final class InstanceUpgrade {
   private InstanceUpgrade() {}
   public static void main(String[] args) throws Exception {
-    if (args.length < 1 || args.length > 2) throw new IllegalArgumentException("Usage: GAME_DIRECTORY [--defaults]");
+    if (args.length < 1 || args.length > 2) throw new IllegalArgumentException("Usage: GAME_DIRECTORY [--defaults|--rule-defaults]");
     boolean templates = args.length == 2 && args[1].equals("--rule-defaults");
     boolean defaults = args.length == 2 && args[1].equals("--defaults");
     if (args.length == 2 && !defaults && !templates) throw new IllegalArgumentException("Unknown option");
@@ -31,21 +31,22 @@ public final class InstanceUpgrade {
       System.out.println("Updated only Survival and Cheats creation templates for " + local.luke.power.config.DefaultBases.current().label + ". Verified backup retained; worlds untouched.");
       return;
     }
-    List<Path> files = new ArrayList<>(); files.add(PowerConfig.path());
-    if (Files.isDirectory(game.resolve("saves"))) try (var paths = Files.walk(game.resolve("saves"))) {
-      files.addAll(paths.filter(Files::isRegularFile).filter(p -> Set.of("level.dat", "level.dat_old").contains(p.getFileName().toString())).sorted().toList());
+    List<Path> worlds = new ArrayList<>();
+    if (Files.isDirectory(game.resolve("saves"))) try (var paths = Files.list(game.resolve("saves"))) {
+      worlds.addAll(paths.filter(Files::isDirectory).sorted().toList());
     }
-    try (FileTransaction transaction = FileTransaction.begin(game, files)) {
+    var originals = new LinkedHashMap<Path, byte[]>();
+    var planned = new LinkedHashMap<Path, byte[]>();
+    // Reject unsupported data in every world before publishing any converted metadata.
+    for (Path world : worlds) {
+      SavedWorldAccess.requireOpenable(game, world.getFileName().toString());
+      OwnedMetadataTransaction.recover(game, world);
+      var upgrade = WorldRuleFiles.planUpgrade(world);
+      originals.putAll(upgrade.originals()); planned.putAll(upgrade.planned());
+    }
+    try (FileTransaction transaction = FileTransaction.begin(game, List.of(PowerConfig.path()));
+        OwnedMetadataTransaction metadata = planned.isEmpty() ? null : OwnedMetadataTransaction.begin(game, originals, planned)) {
       JsonObject converted = PowerConfig.document();
-      Map<Path, byte[]> planned = new LinkedHashMap<>();
-      Map<Path, RuleSet> expected = new LinkedHashMap<>();
-      for (Path path : files.subList(1, files.size())) {
-        NbtCompound root = WorldRuleFiles.read(path);
-        RuleSet rules = WorldRuleData.read(root.getCompound("Data"));
-        WorldRuleData.write(root.getCompound("Data"), rules);
-        ByteArrayOutputStream out = new ByteArrayOutputStream(); NbtIo.writeCompressed(root, out);
-        planned.put(path, out.toByteArray()); expected.put(path, rules);
-      }
       if (defaults) {
         JsonObject fresh;
         try (var in = InstanceUpgrade.class.getResourceAsStream("/assets/powerbeta/defaults/power-beta.json")) {
@@ -57,18 +58,28 @@ public final class InstanceUpgrade {
         for (String key : List.of("fov", "guiScale", "gui_scale", "fpsLimit", "framerate_limit"))
           if (previous != null && previous.has(key)) nativeDefaults.add(key, previous.get(key).deepCopy());
         fresh.getAsJsonObject("settings").getAsJsonObject("defaults").addProperty("setupComplete", true);
+        // Saved libraries and hotbars are user data, independent of resettable preferences.
+        JsonObject oldSettings = converted.getAsJsonObject("settings"), freshSettings = fresh.getAsJsonObject("settings");
+        if (oldSettings.has("savedCreativeHotbars")) freshSettings.add("savedCreativeHotbars", oldSettings.get("savedCreativeHotbars").deepCopy());
+        for (String[] field : new String[][]{{"audio", "presets"}, {"audio", "favourites"}, {"logo", "presets"}, {"interface", "debugPresets"}}) {
+          if (oldSettings.has(field[0]) && oldSettings.getAsJsonObject(field[0]).has(field[1]))
+            freshSettings.getAsJsonObject(field[0]).add(field[1], oldSettings.getAsJsonObject(field[0]).get(field[1]).deepCopy());
+        }
         // Keep immutable conversion evidence for worlds imported after this maintenance pass.
         for (String key : List.of("legacyWorldRules", "worldRuleUpgrade", "worldRuleUpgrade210"))
           if (converted.has(key)) fresh.add(key, converted.get(key).deepCopy());
         assertIdle(game); PowerConfig.write(fresh);
       }
-      for (var entry : planned.entrySet()) {
-        assertIdle(game); FileTransaction.atomicWrite(entry.getKey(), entry.getValue());
-        if (!Arrays.equals(entry.getValue(), Files.readAllBytes(entry.getKey()))
-            || !WorldRuleData.read(WorldRuleFiles.read(entry.getKey()).getCompound("Data")).equals(expected.get(entry.getKey())))
-          throw new IOException("World metadata verification failed: " + entry.getKey().getFileName());
+      assertIdle(game);
+      if (metadata != null) metadata.apply();
+      for (var entry : originals.entrySet()) {
+        byte[] expected = planned.getOrDefault(entry.getKey(), entry.getValue());
+        if (!Arrays.equals(expected, Files.readAllBytes(entry.getKey())))
+          throw new IOException("World metadata changed during maintenance.");
       }
-      assertIdle(game); transaction.commit();
+      assertIdle(game);
+      if (metadata != null) metadata.commit();
+      transaction.commit();
       System.out.println("Verified configuration schema " + local.luke.power.storage.ConfigVersions.CURRENT
           + ", world-rule format " + RuleSet.VERSION + ", metadata files " + planned.size()
           + ", preferences " + (defaults ? "pack defaults with retained FOV, GUI scale and frame limit" : "preserved"));

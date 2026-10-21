@@ -2,6 +2,8 @@ package local.luke.power.mixin;
 
 import local.luke.power.render.RenderControls;
 import local.luke.power.render.WaterLighting;
+import local.luke.power.render.WaterTerrain;
+import local.luke.power.render.HeldLighting;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -12,11 +14,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class FullBrightLightMixin {
   @ModifyReturnValue(method = "method_1782", at = @At("RETURN"))
   private float power$waterLight(float shade, int x, int y, int z) {
-    return RenderControls.renderingFullBright() ? shade : WaterLighting.shade(power$lightWorld(), x, y, z, shade);
+    if (RenderControls.renderingFullBright() || WaterTerrain.neutral()) return shade;
+    shade = WaterLighting.shade(power$lightWorld(), x, y, z, shade);
+    WaterTerrain.observe(shade, 1);
+    return HeldLighting.shade(power$lightWorld(), x, y, z, shade, 1);
   }
   @ModifyReturnValue(method = "method_1784", at = @At("RETURN"))
   private float power$waterBlockLight(float shade, int x, int y, int z, int emission) {
-    return RenderControls.renderingFullBright() ? shade : WaterLighting.shade(power$lightWorld(), x, y, z, shade);
+    if (RenderControls.renderingFullBright() || WaterTerrain.neutral()) return shade;
+    shade = WaterLighting.shade(power$lightWorld(), x, y, z, shade);
+    if (!WaterTerrain.observing() && !HeldLighting.shading(power$lightWorld())) return shade;
+    float neutral = power$neutral(x, y, z, emission);
+    WaterTerrain.observe(shade, neutral);
+    return HeldLighting.shade(power$lightWorld(), x, y, z, shade, neutral);
   }
   @org.spongepowered.asm.mixin.Unique
   private net.minecraft.world.World power$lightWorld() {
@@ -25,14 +35,18 @@ public class FullBrightLightMixin {
   }
   @Inject(method = "method_1782", at = @At("HEAD"), cancellable = true)
   private void power$light(int x, int y, int z, CallbackInfoReturnable<Float> cir) {
-    if (RenderControls.renderingFullBright()) cir.setReturnValue(1f);
+    if (RenderControls.renderingFullBright() || WaterTerrain.neutral()) cir.setReturnValue(1f);
   }
   @Inject(method = "method_1784", at = @At("HEAD"), cancellable = true)
   private void power$blockLight(int x, int y, int z, int emission, CallbackInfoReturnable<Float> cir) {
-    if (!RenderControls.renderingFullBright()) return;
+    if (!RenderControls.renderingFullBright() && !WaterTerrain.neutral()) return;
+    cir.setReturnValue(power$neutral(x, y, z, emission));
+  }
+  @org.spongepowered.asm.mixin.Unique
+  private float power$neutral(int x, int y, int z, int emission) {
     // Smooth lighting samples inside neighboring opaque blocks for corner shadows.
     var view = (net.minecraft.world.BlockView)this;
     int id = view.getBlockId(x, y, z);
-    cir.setReturnValue(id != 0 && net.minecraft.block.Block.field_1939[id] && emission == 0 ? .2f : 1f);
+    return id != 0 && net.minecraft.block.Block.field_1939[id] && emission == 0 ? .2f : 1f;
   }
 }

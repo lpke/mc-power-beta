@@ -45,6 +45,7 @@
     "General",
     "Title screen",
     "Pause menu",
+    "World menu",
     "Screenshots",
     "Isometric screenshots",
     "Chat",
@@ -58,9 +59,11 @@
     "Armor position",
     "Oxygen position",
     "Stamina position",
+    "Offhand position",
     "Overlay message position",
     "Version label",
-    "Minimap"
+    "Minimap",
+    "Subtitles"
   ],
   "Map": [
     "Minimap",
@@ -93,7 +96,12 @@
     "Dropping",
     "Hotbar swapping",
     "Crafting result",
-    "Stack sizes"
+    "Stack sizes",
+    "Hands",
+    "Automatic restocking",
+    "Automatic tool switching",
+    "Sorting",
+    "Saved Creative hotbars"
   ],
   "Building": [
     "Fast placement",
@@ -144,7 +152,8 @@
     "Explosion and fire",
     "Fast leaf decay",
     "World generation",
-    "Older mechanics"
+    "Older mechanics",
+    "Recipe book"
   ],
   "Crafting": [
     "Recipes",

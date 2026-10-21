@@ -45,6 +45,7 @@ public final class Validation {
   }
 
   public static void tick(Minecraft mc) {
+    HeldLight400Checks.tick(mc);
     Forest241Capture.tick(mc);
     Release300Checks.observe(mc);
     try { Release241Checks.observe(mc); } catch (Throwable failure) { try { log("FAIL native 2.4.1 observer "+failure); } catch (Exception ignored) {} }
@@ -70,6 +71,18 @@ public final class Validation {
       else if (command.equals("release-253")) Release253Checks.run(mc);
       else if (command.startsWith("release-260 ")) Release260Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-321 ")) Release321Checks.run(mc,command.substring(12));
+      else if (command.startsWith("inventory-tools-400 ")) InventoryTools400Checks.run(mc,command.substring(20));
+      else if (command.startsWith("inventory-400 ")) Inventory400Checks.run(mc,command.substring(14));
+      else if (command.startsWith("subtitles-400 ")) Subtitles400Checks.run(mc,command.substring(14));
+      else if (command.startsWith("held-light-400 ")) HeldLight400Checks.run(mc,command.substring(15));
+      else if (command.startsWith("world-tools-400 ")) WorldTools400Checks.run(mc,command.substring(16));
+      else if (command.startsWith("auto-tools-400 ")) AutoTools400Checks.run(mc,command.substring(15));
+      else if (command.equals("saved-hotbars-400")) SavedHotbars400Checks.run(mc);
+      else if (command.equals("death-restoration-400")) DeathRestoration400Checks.run(mc);
+      else if (command.startsWith("settings-400 ")) HudSettings400Checks.run(mc,command.substring(13));
+      else if (command.startsWith("input-400 ")) Input400Checks.run(mc,command.substring(10));
+      else if (command.startsWith("offhand-actions-400 ")) OffhandActions400Checks.run(mc,command.substring(20));
+      else if (command.startsWith("recipe-400 ")) Recipe400Checks.run(mc,command.substring(11));
       else if (command.startsWith("release-330 ")) Release330Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-322 ")) Release322Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-320 ")) Release320Checks.run(mc,command.substring(12));

@@ -59,7 +59,7 @@ class WorldRuleUpgradeTest {
     JsonObject source = json("{\"schemaVersion\":4,\"settings\":{\"gameRules\":{\"survival\":{\"version\":1,\"values\":{\"mob_crop_trampling\":true}}}}}");
     JsonObject preset = ConfigVersions.convert(source).getAsJsonObject("settings").getAsJsonObject("gameRules").getAsJsonObject("survival");
     RuleSet rules = RuleSet.read(preset, new RuleSet());
-    assertEquals(3, preset.get("version").getAsInt());
+    assertEquals(RuleSet.VERSION, preset.get("version").getAsInt());
     assertTrue(rules.enabled(MOB_CROP_TRAMPLING));
     assertFalse(rules.enabled(PLAYER_CROP_TRAMPLING));
     assertTrue(rules.enabled(LAVA_DESTROYS_ITEMS));

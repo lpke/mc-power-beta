@@ -17,7 +17,7 @@ public final class HudEditorSettings {
       "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebugYOffset");
   private static final Set<String> GROUPS = Set.of("HUD layout", "Combined HUD position",
       "Hotbar position", "Hearts position", "Armor position", "Oxygen position",
-      "Overlay message position", "Stamina position", "Version label", "Debug (F3) info", "Custom HUD info", "Active tweaks HUD", "General HUD", "Chat", "Minimap");
+      "Overlay message position", "Stamina position", "Offhand position", "Version label", "Debug (F3) info", "Custom HUD info", "Active tweaks HUD", "General HUD", "Chat", "Minimap");
   private static final Set<String> MAP_APPEARANCE = Set.of(
       "rotate", "circular", "hideWithDebug", "showInInventory", "size", "corner", "offsetX", "offsetY", "opacity", "zoom",
       "coordinates", "biome", "clock", "compass", "colourMode", "heightShading", "slopeShading", "caveLighting",
@@ -35,6 +35,7 @@ public final class HudEditorSettings {
   }
   public static boolean contains(Setting s) {
     if (LEGACY_DEBUG.contains(s.id) || RETIRED.contains(s.id)) return false;
+    if (s.id.startsWith("subtitles.")) return true;
     if (s.id.startsWith("maps.")) return mapAppearance(s.id);
     if (s.id.startsWith("activeTweaks.") && s.id.endsWith("Messages")) return false;
     return s.id.equals(COLOURS) || s.id.equals(TOAST) || s.id.equals(ENTRY) || s.id.startsWith("infoHud.")
@@ -50,18 +51,20 @@ public final class HudEditorSettings {
   }
   static boolean itemNames(Setting s) { return s.id.equals(ITEM_NAMES) || s.id.equals(ITEM_FADE); }
   public static String tab(Setting s, int mode) {
+    if (s.id.startsWith("subtitles.")) return "subtitles";
     if (s.id.startsWith("maps.")) return "minimap";
     if (s.id.startsWith("infoHud.")) return "cluster." + (s.id.startsWith("infoHud.clusters.") ? s.id.substring("infoHud.clusters.".length(), "infoHud.clusters.".length() + 1) : "0");
     if (s.id.startsWith("activeTweaks.")) return "tweaks";
     if (!view(s).isEmpty()) return view(s);
     if (s.group.equals("Version label")) return "version";
     if (s.group.equals("Debug (F3) info")) return "debug";
-    if (s.id.startsWith(HudPreview.SIMPLE) || (itemNames(s) || s.id.contains(".STAMINA_POSITION_CONFIG.")) && mode == 1) return "combined";
+    if (s.id.startsWith(HudPreview.SIMPLE) || (itemNames(s) || (s.id.contains(".STAMINA_POSITION_CONFIG.") || s.id.contains(".OFFHAND_POSITION_CONFIG."))) && mode == 1) return "combined";
     for (int i = 0; i < HudPreview.PARTS.length; i++)
       if (s.id.contains(HudPreview.PARTS[i] + "_POSITION_CONFIG")) return "native." + i;
     return itemNames(s) ? "native.4" : "layout";
   }
   public static String tabLabel(String id) {
+    if (id.equals("subtitles")) return "Subtitles";
     if (id.equals("minimap")) return "Minimap";
     if (id.equals("layout")) return "General";
     if (id.equals("combined")) return "Combined HUD";

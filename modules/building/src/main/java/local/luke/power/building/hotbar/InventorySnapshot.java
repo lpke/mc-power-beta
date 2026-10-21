@@ -21,12 +21,13 @@ final class InventorySnapshot {
       if (item == null) continue;
       if (item.count <= 0 || unique.put(item, Boolean.TRUE) != null)
         throw new IOException("Invalid or shared inventory stack");
-      data[i] = encode(item.writeNbt(new NbtCompound()));
-      ItemStack restored = new ItemStack(decode(data[i]));
+      data[i] = stackBytes(item);
+      NbtCompound saved = decode(data[i]);
+      ItemStack restored = new ItemStack(saved); restored.count = saved.getInt("PowerBetaFullCount");
       if (restored.count != item.count
           || restored.itemId != item.itemId
           || restored.getDamage() != item.getDamage()
-          || !Arrays.equals(data[i], encode(restored.writeNbt(new NbtCompound()))))
+          || !Arrays.equals(data[i], stackBytes(restored)))
         throw new IOException("A stack cannot be backed up without changing its data");
       rollback[i] = restored;
     }
@@ -46,9 +47,14 @@ final class InventorySnapshot {
   boolean matches(ItemStack[] live) throws IOException {
     if (!InventoryRows.identical(live, references)) return false;
     for (int i = 0; i < live.length; i++)
-      if (live[i] != null && !Arrays.equals(data[i], encode(live[i].writeNbt(new NbtCompound()))))
+      if (live[i] != null && !Arrays.equals(data[i], stackBytes(live[i])))
         return false;
     return true;
+  }
+
+  private static byte[] stackBytes(ItemStack item) throws IOException {
+    NbtCompound tag = item.writeNbt(new NbtCompound()); tag.putInt("PowerBetaFullCount", item.count);
+    return encode(tag);
   }
 
   void verify(ItemStack[] live) throws IOException {

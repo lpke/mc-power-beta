@@ -17,6 +17,8 @@ public final class PowerBeta {
       if (mc.inGameHud != null)
         mc.inGameHud.addChatMessage("\u00a7cSettings could not be saved. Unsaved changes will be retried.\u00a7r");
     }
+    local.luke.power.inventory.tools.InventoryAutomation.tick(mc);
+    local.luke.power.subtitles.Subtitles.tick(mc);
     local.luke.power.chat.PlayerChat.tick(mc);
     local.luke.power.audio.AudioController.tick(mc);
     local.luke.power.light.LightOverlay.tick(mc);
@@ -41,6 +43,9 @@ public final class PowerBeta {
           () -> local.luke.power.visual.VisualConfig.current().thirdPersonDistance,
           local.luke.power.controls.util.ModOptions::isFrontViewEnabled);
       local.luke.power.input.TweakLifecycle.register("interface", () -> {
+        local.luke.power.subtitles.Subtitles.leave();
+        local.luke.power.inventory.NativeInventoryPlan.cancel();
+        local.luke.power.inventory.tools.InventoryAutomation.clear();
         local.luke.power.sprint.SprintController.reset();
         local.luke.power.mining.VeinMining.reset();
         mc.options.cinematicMode = false;
@@ -63,6 +68,7 @@ public final class PowerBeta {
       local.luke.power.permissions.CommandPermissions.context(() -> local.luke.power.commands.CommandContext.current(mc));
       local.luke.power.input.Bindings.availability(id ->
           local.luke.power.map.MapKeys.available(id)
+              && local.luke.power.inventory.tools.InventoryFeatureKeys.available(mc, id)
               && (!id.equals("powerbeta.sprint") || local.luke.power.sprint.SprintController.allowed(mc))
               && (!id.equals("power_creative.picker") && !id.equals("power_creative.modifier")
               || (local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE)

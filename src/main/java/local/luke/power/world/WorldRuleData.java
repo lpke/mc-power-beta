@@ -17,7 +17,7 @@ public final class WorldRuleData {
     requireType(tag, "version", 3);
     int version = tag.getInt("version");
     if (version < 1 || version > RuleSet.VERSION)
-      throw new IllegalArgumentException("World game rules version " + version + " is unsupported. Supported versions: 1, 2, " + RuleSet.VERSION + ". Open with a compatible release or restore a backup.");
+      throw new IllegalArgumentException("World game rules version " + version + " is unsupported. Supported versions: 1 through " + RuleSet.VERSION + ". Open with a compatible release or restore a backup.");
     JsonObject values = new JsonObject();
     for (Object value : tag.values()) {
       NbtElement entry = (NbtElement) value;

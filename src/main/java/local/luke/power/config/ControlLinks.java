@@ -18,6 +18,13 @@ public final class ControlLinks {
     link("key.jump", "", "", "Jump, swim upward or ascend while flying.");
     link("key.sneak", "", "", "Sneak at ledges or descend while flying.");
     link("key.drop", "", "", "Drop one item from the selected hotbar slot.");
+    link("powerbeta.recipeBook", "recipeBook.enabled", "", "Open the recipe book or toggle it in an eligible inventory. Search fields and modal windows keep keyboard ownership.");
+    link("powerbeta.sortInventory", "inventoryTools.sorting", "", "Sort the supported open inventory. Hold Shift to sort player storage instead. Excludes hotbar, equipment and crafting slots.");
+    link("powerbeta.depositMatching", "inventoryTools.depositMatching", "", "Deposit matching main-storage items into the supported open chest or dispenser.");
+    link("powerbeta.saveCreativeHotbar", "inventoryTools.creativeHotbars", "", "Hold with a hotbar number to save one of nine Creative hotbars. Saved presets stay outside defaults resets.");
+    link("powerbeta.loadCreativeHotbar", "inventoryTools.creativeHotbars", "", "Hold with a hotbar number to load one of nine Creative hotbars. Requires singleplayer Creative access.");
+    link("powerbeta.restock", "inventoryTools.restock", "", "Toggle automatic item refilling in singleplayer Survival.");
+    link("powerbeta.swapHands", "offhand.enabled", "", "Swap the selected hotbar item with the offhand in singleplayer. In your inventory, swap the hovered writable slot instead.");
     link("key.inventory", "", "", "Open or close your inventory.");
     link("key.chat", "", "", "Open chat to write a message or command.");
     link("powerbeta.openCommands", "", "", "Open chat with / ready to enter a command.");

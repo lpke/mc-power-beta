@@ -15,9 +15,9 @@ import org.lwjgl.opengl.GL11;
 
 /** Pause-only item shortcuts share native UI sounds and the final relocated menu geometry. */
 public final class PauseMenuTools extends UiScreen {
-  private enum Tool { PHOTO, MAP, WAYPOINTS }
+  private enum Tool { PHOTO, MAP, WAYPOINTS, RECIPES }
   private final ItemRenderer renderer = new ItemRenderer();
-  private final ItemStack[] icons = {new ItemStack(321, 1, 0), new ItemStack(358, 1, 0), new ItemStack(345, 1, 0)};
+  private final ItemStack[] icons = {new ItemStack(321, 1, 0), new ItemStack(358, 1, 0), new ItemStack(345, 1, 0), new ItemStack(340, 1, 0)};
   private final List<Tool> included = new ArrayList<>();
   private Screen parent;
   private PauseToolsLayout.Box bounds;
@@ -36,6 +36,7 @@ public final class PauseMenuTools extends UiScreen {
     if (ControlFeatures.USER_INTERFACE_CONFIG.photoModeConfig.enablePhotoModeButton) included.add(Tool.PHOTO);
     if (MenuPreferences.pauseMapButton() && MapKeys.available("powerbeta.map")) included.add(Tool.MAP);
     if (MenuPreferences.pauseWaypointsButton()) included.add(Tool.WAYPOINTS);
+    if (local.luke.power.recipes.RecipeBooks.pauseAvailable(minecraft)) included.add(Tool.RECIPES);
   }
   public int reserveAboveBack() {
     include();
@@ -65,6 +66,7 @@ public final class PauseMenuTools extends UiScreen {
       if (!inside(x, y, bounds.x() + i * PauseToolsLayout.STEP, bounds.y(), 20, 20)) continue;
       click();
       switch (included.get(i)) {
+        case RECIPES -> local.luke.power.recipes.RecipeBooks.openViewer(minecraft, parent);
         case PHOTO -> minecraft.setScreen(new PhotoModeScreen(parent));
         case MAP -> minecraft.setScreen(new WorldMapScreen());
         case WAYPOINTS -> { Maps.ensureWaypoints(minecraft); minecraft.setScreen(new WaypointsScreen(parent)); }
@@ -87,7 +89,7 @@ public final class PauseMenuTools extends UiScreen {
         GL11.glColor4f(1, 1, 1, 1); GL11.glEnable(32826);
         renderer.method_1487(minecraft.textRenderer, minecraft.textureManager, icons[tool.ordinal()], x + 2, y + 2);
       } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); }
-      if (inside(mx, my, x, y, 20, 20)) hover = switch (tool) { case PHOTO -> "Photo mode"; case MAP -> "Map"; case WAYPOINTS -> "Waypoints"; };
+      if (inside(mx, my, x, y, 20, 20)) hover = switch (tool) { case PHOTO -> "Photo mode"; case MAP -> "Map"; case WAYPOINTS -> "Waypoints"; case RECIPES -> "Recipe book"; };
     }
     if (!hover.isEmpty()) tooltip(hover, mx, my);
   }

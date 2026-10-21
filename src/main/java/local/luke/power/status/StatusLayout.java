@@ -2,6 +2,8 @@ package local.luke.power.status;
 
 /** Nine anchors, with one shared edge for every line and bounded GUI-pixel offsets. */
 public record StatusLayout(int x, int y, int alignment) {
+  public record Bounds(int x, int y, int width, int height) {}
+  public Bounds bounds(int contentWidth, int rows) { return new Bounds(x, y, contentWidth, rows * 10); }
   public static StatusLayout at(int width, int height, int contentWidth, int rows, StatusSettings s) {
     int column = s.position % 3, row = s.position / 3;
     int contentHeight = rows * 10;

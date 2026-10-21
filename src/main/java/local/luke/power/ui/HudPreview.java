@@ -18,14 +18,15 @@ final class HudPreview {
   }
   static final String NATIVE = "power_hud:hudpositions.";
   static final String SIMPLE = NATIVE + "SIMPLE_HUD_POSITION_CONFIG.";
-  static final String[] PARTS = {"HOTBAR", "HEARTS", "ARMOR", "OXYGEN", "OVERLAY_MESSAGE", "STAMINA"};
-  static final String[] NAMES = {"Hotbar", "Hearts", "Armor", "Oxygen", "Messages", "Stamina"};
+  static final String[] PARTS = {"HOTBAR", "HEARTS", "ARMOR", "OXYGEN", "OVERLAY_MESSAGE", "STAMINA", "OFFHAND"};
+  static final String[] NAMES = {"Hotbar", "Hearts", "Armor", "Oxygen", "Messages", "Stamina", "Offhand"};
   private final SettingsDraft draft;
   private final List<Element> elements = new ArrayList<>();
   private final ItemIcons icons = new ItemIcons();
   private final List<ItemCatalogue.Entry> samples = new ArrayList<>();
   private final InfoHudSettings.Cluster[] clusters = new InfoHudSettings.Cluster[4];
   private StatusSettings status;
+  private double subtitleDisplacement;
   private local.luke.power.map.MapSettings map;
   private boolean sampledItem;
   private local.luke.power.map.MinimapGeometry.Layout minimapLayout;
@@ -52,6 +53,14 @@ final class HudPreview {
     return copy;
   }
   int integer(String id) { return draft.get(id).value.getAsInt(); }
+  int movementOffsetY(String id) {
+    int value = integer(id);
+    return id.equals("subtitles.offsetY") && local.luke.power.subtitles.SubtitleLayout.defaultPosition(subtitleSettings())
+        ? (int)Math.round(value + subtitleDisplacement) : value;
+  }
+  private local.luke.power.subtitles.SubtitleSettings subtitleSettings() {
+    var settings = local.luke.power.subtitles.SubtitleConfig.copy(); populate(settings, "subtitles."); return settings;
+  }
   boolean bool(String id) { return draft.get(id).value.getAsBoolean(); }
   String string(String id) { return draft.get(id).value.getAsString(); }
   int mode() { return integer(HudEditorSettings.ENTRY); }
@@ -84,19 +93,26 @@ final class HudPreview {
       if (mode() != 0 && !bool(prefix + "enableVisibility")) continue;
       String message = samples.get(0).name(); int textWidth = mc.textRenderer.getWidth(message);
       int x = NativeHudLayout.baseX(width, i, textWidth), y = NativeHudLayout.baseY(height, i);
-      int w = i == 0 ? 182 : i == 4 ? textWidth : 81, h = i == 0 ? 22 : 9;
+      int w = i == 0 ? 182 : i == 4 ? textWidth : i == NativeHudLayout.OFFHAND ? 29 : 81, h = i == 0 ? 22 : i == NativeHudLayout.OFFHAND ? 24 : 9;
       if (mode() != 0) {
         x += NativeHudLayout.xOffset(width, i, mode(), integer(prefix + "horizontalPosition"), textWidth) + integer(prefix + "horizontalPositionOffset");
         y += NativeHudLayout.yOffset(height, i, mode(), integer(prefix + "verticalPosition"),
             bool(NATIVE + "putStatusBarIconsBelowHotbar"), bool(NATIVE + "putOverlayMessagesBelowHotbar")) + integer(prefix + "verticalPositionOffset");
       }
+      if (i == NativeHudLayout.OFFHAND && mode() < 2 && x < 0)
+        x = NativeHudLayout.baseX(width, 0, 0) + 182
+            + NativeHudLayout.xOffset(width, 0, mode(), integer(prefix + "horizontalPosition"), 0)
+            + (mode() == 0 ? 0 : integer(prefix + "horizontalPositionOffset"));
       if (i == NativeHudLayout.ARMOUR) { armorX = x; armorY = y; armorVisible = true; }
       if (i == NativeHudLayout.STAMINA) y = NativeHudLayout.staminaY(x, y, armorVisible, armorX, armorY, height,
           mode() == 2 ? integer(prefix + "horizontalPositionOffset") : 0,
           mode() == 2 ? integer(prefix + "verticalPositionOffset") : 0);
       if (i == NativeHudLayout.STAMINA) local.luke.power.sprint.SprintStaminaHud.draw(x, y, 13,
           local.luke.power.sprint.SprintConfig.current().restartStamina);
-      else if (i == 0) {
+      else if (i == NativeHudLayout.OFFHAND) {
+        local.luke.power.offhand.OffhandHud.frame(mc, x, y, x >= width / 2);
+        icons.draw(screen, mc, samples.get(4), x + (x >= width / 2 ? 10 : 3), y + 4);
+      } else if (i == 0) {
         texture(screen, mc, "/gui/gui.png", x, y, 0, 0, 182, 22);
         texture(screen, mc, "/gui/gui.png", x - 1, y - 1, 0, 22, 24, 22);
         for (int slot = 0; slot < samples.size(); slot++) icons.draw(screen, mc, samples.get(slot), x + 3 + slot * 20, y + 3);
@@ -173,6 +189,7 @@ final class HudPreview {
           textWidth * state.textSize, rows * 10 * state.textSize, prefix + "offsetX", prefix + "offsetY", !visible));
     }
     StatusSettings status = status();
+    StatusLayout.Bounds tweaksBounds = null;
     if (showTweaks && status.enabled && status.opacity > 0) {
       List<String> lines = new ArrayList<>();
       for (var tweak : local.luke.power.input.TweakIndicators.Tweak.values()) if (status.includes(tweak))
@@ -181,10 +198,19 @@ final class HudPreview {
       if (!lines.isEmpty()) {
         int textWidth = lines.stream().mapToInt(mc.textRenderer::getWidth).max().orElse(1);
         var layout = StatusLayout.at(width, height, textWidth, lines.size(), status);
+        tweaksBounds = layout.bounds(textWidth, lines.size());
         for (int row = 0; row < lines.size(); row++) screen.text(lines.get(row), layout.lineX(textWidth, mc.textRenderer.getWidth(lines.get(row))), layout.y() + row * 10, status.argb());
         elements.add(new Element("tweaks", "Active tweaks", layout.x(), layout.y(), textWidth, lines.size() * 10, "activeTweaks.offsetX", "activeTweaks.offsetY"));
       }
     }
+    var subtitleSettings = subtitleSettings();
+    var subtitleBase = local.luke.power.subtitles.SubtitleLayout.preview(subtitleSettings, width, height, mc.textRenderer::getWidth);
+    var subtitles = subtitleBase.avoidActiveTweaks(subtitleSettings, tweaksBounds);
+    subtitleDisplacement = subtitles.y() - subtitleBase.y();
+    boolean subtitlesVisible = subtitleSettings.enabled && (!subtitleSettings.hideWithDebug || scenario != 2);
+    if (subtitlesVisible) local.luke.power.subtitles.SubtitleRenderer.draw(mc, subtitles);
+    elements.add(new Element("subtitles", "Subtitles", subtitles.x(), subtitles.y(), subtitles.width(), subtitles.height(),
+        "subtitles.offsetX", "subtitles.offsetY", !subtitlesVisible));
     String versionPrefix = "power_controls:userinterface.versionTextConfig.";
     if (scenario != 2 && bool(versionPrefix + "showVersionTextIngame")) {
       String version = bool(versionPrefix + "enableCustomVersionText") ? string(versionPrefix + "customVersionText") : "Minecraft Beta 1.7.3";

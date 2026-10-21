@@ -56,13 +56,16 @@ class SavedWorldRulesTest {
     assertEquals("SURVIVAL", data.getCompound("Player").getString("PowerBetaGameMode"));
     assertEquals("untouched", data.getCompound("Player").getString("NativeInventoryData"));
     assertArrayEquals(previous, Files.readAllBytes(old));
-    try (var files = Files.walk(game.resolve("power-beta-data/settings-backups"))) {
-      var manifests = files.filter(p -> p.getFileName().toString().equals("complete.json")).toList();
+    try (var files = Files.walk(game.resolve("power-beta-data/world-metadata-backups"))) {
+      var manifests = files.filter(p -> p.getFileName().toString().equals("transaction.json")).toList();
       assertEquals(2, manifests.size());
       assertTrue(manifests.stream().anyMatch(p -> {
         try {
           JsonObject manifest = JsonParser.parseString(Files.readString(p)).getAsJsonObject();
-          return Arrays.equals(original, Files.readAllBytes(p.getParent().resolve(manifest.get("saves/Example/level.dat").getAsString())));
+          assertEquals("complete", manifest.get("state").getAsString());
+          JsonObject entry = manifest.getAsJsonArray("files").get(0).getAsJsonObject();
+          assertEquals("saves/Example/level.dat", entry.get("path").getAsString());
+          return Arrays.equals(original, Files.readAllBytes(p.getParent().resolve(entry.get("before").getAsString())));
         } catch (Exception e) { throw new RuntimeException(e); }
       }));
     }

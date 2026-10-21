@@ -1,6 +1,8 @@
 package local.luke.power.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import local.luke.power.render.TerrainVertexColors;
 import net.mine_diver.smoothbeta.client.render.VboPool;
 import org.lwjgl.opengl.GL11;
@@ -23,8 +25,13 @@ public class WaterVboPoolMixin {
   private void power$bindColor(CallbackInfo ci) {
     GL20.glEnableVertexAttribArray(5);
     GL20.glVertexAttribPointer(5, 4, GL11.GL_UNSIGNED_BYTE, true, TerrainVertexColors.STRIDE, (long)TerrainVertexColors.WATER_COLOR);
+    GL20.glEnableVertexAttribArray(6);
+    GL20.glVertexAttribPointer(6, 1, GL11.GL_UNSIGNED_BYTE, false, TerrainVertexColors.STRIDE, (long)TerrainVertexColors.LIGHT_META);
   }
 
-  @Inject(method = "drawAll", at = @At("RETURN"))
-  private void power$unbindColor(CallbackInfo ci) { GL20.glDisableVertexAttribArray(5); }
+  @WrapMethod(method = "drawAll")
+  private void power$unbindColor(Operation<Void> original) {
+    try { original.call(); }
+    finally { GL20.glDisableVertexAttribArray(5); GL20.glDisableVertexAttribArray(6); }
+  }
 }

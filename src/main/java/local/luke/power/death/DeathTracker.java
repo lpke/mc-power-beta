@@ -82,38 +82,35 @@ public final class DeathTracker {
       throw new IllegalArgumentException("These items have already been recovered.");
     var player = mc.player; var world = mc.world; var inventory = player.inventory;
     var container = player.playerContainer;
-    var crafting = ((net.minecraft.class_277)container).field_1124;
-    var grid = ((local.luke.power.mixin.DeathCraftingAccessor)crafting).power$deathStacks();
-    var output = container.method_2084(0).getStack();
-    var original = inventory.main; var originalArmor = inventory.armor; var before = DeathItems.snapshot(inventory, container);
+    var before = DeathItems.snapshot(inventory, container);
     String beforeData = DeathItems.inventory(before);
     var after = DeathItems.plan(inventory, player.playerContainer, record, indices);
     String afterData = DeathItems.inventory(after);
     boolean pending = false;
+    var lease = local.luke.power.inventory.InventoryActions.begin(world, player, player.container, inventory, "death_recovery", true);
+    if (lease == null) throw new IOException("Death recovery could not acquire inventory ownership");
+    DeathInventoryRestore restoration;
+    try {
+      restoration = new DeathInventoryRestore(player, () -> mc.player == player && mc.world == world
+          && lease.valid(mc.world, mc.player, player.container, player.inventory));
+    } catch (IOException | RuntimeException failure) {
+      local.luke.power.inventory.InventoryActions.finish(lease); throw failure;
+    }
     try {
       data.recovery(record.id, indices, beforeData, afterData); pending = true;
-      if (mc.player != player || mc.world != world || player.inventory != inventory || inventory.main != original
-          || inventory.armor != originalArmor || player.playerContainer != container
-          || ((net.minecraft.class_277)container).field_1124 != crafting
-          || !beforeData.equals(DeathItems.inventory(DeathItems.snapshot(inventory, container))) || !recoveryDenial(mc).isEmpty())
+      if (!beforeData.equals(DeathItems.inventory(DeathItems.snapshot(inventory, container))) || !recoveryDenial(mc).isEmpty())
         throw new IOException("Inventory ownership changed before recovery");
-      for (int i = 0; i < 40; i++) inventory.setStack(i, after[i]);
-      for (int i = 0; i < 4; i++) container.method_2084(i + 1).setStack(after[41 + i]);
-      if (inventory.main != original || inventory.armor != originalArmor || mc.player != player || mc.world != world
-          || player.inventory != inventory || player.playerContainer != container || !recoveryDenial(mc).isEmpty()
-          || ((net.minecraft.class_277)container).field_1124 != crafting
-          || !afterData.equals(DeathItems.inventory(DeathItems.snapshot(inventory, container))))
+      restoration.publish(after, inventory.selectedSlot);
+      if (!recoveryDenial(mc).isEmpty())
         throw new IOException("Inventory changed during recovery");
-      inventory.markDirty(); data.finish(record.id, true);
+      data.finish(record.id, true);
     } catch (Exception e) {
       recoveryFailed = true;
-      System.arraycopy(before, 0, original, 0, 36); System.arraycopy(before, 36, originalArmor, 0, 4);
-      // Restore the backing grid without repeating a failing recipe callback.
-      System.arraycopy(before, 41, grid, 0, 4); container.method_2084(0).setStack(output);
-      inventory.main = original; inventory.armor = originalArmor; inventory.markDirty();
-      if (pending) try { data.finish(record.id, false); } catch (IOException failure) { e.addSuppressed(failure); }
-      PowerBeta.LOG.error("Death recovery rolled back; disabled until restart. Journal: {}", journalPath, e);
-      throw new IOException("Recovery failed and was rolled back. Keep the journal and restart before retrying.", e);
-    }
+      boolean restored = restoration.rollback(e);
+      if (pending && restored) try { data.finish(record.id, false); } catch (IOException failure) { e.addSuppressed(failure); }
+      PowerBeta.LOG.error("Death recovery failed; disabled until restart. Complete rollback: {}. Journal: {}", restored, journalPath, e);
+      throw new IOException(restored ? "Recovery failed and was rolled back. Keep the journal and restart before retrying."
+          : "Recovery lost inventory ownership. The claim remains blocked; keep the journal and world backup.", e);
+    } finally { local.luke.power.inventory.InventoryActions.finish(lease); }
   }
 }

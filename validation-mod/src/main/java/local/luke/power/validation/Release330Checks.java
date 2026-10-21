@@ -88,27 +88,38 @@ final class Release330Checks {
   private static Object getStatic(Class<?> c,String n)throws Exception{var f=c.getDeclaredField(n);f.setAccessible(true);return f.get(null);}
   private static void inventories(Minecraft mc)throws Exception{
     var before=MapConfig.copy();boolean debug=mc.options.debugHud,hidden=mc.options.hideHud;int oldScale=mc.options.guiScale;mc.options.guiScale=2;
-    var settings=MapConfig.copy();settings.minimap=settings.showInInventory=true;settings.hideWithDebug=false;settings.size=90;settings.corner=1;settings.offsetX=settings.offsetY=6;MapConfig.preview(settings);mc.options.debugHud=mc.options.hideHud=false;
-    Screen[] screens={new class_585(mc.player),new class_264(mc.player.inventory,new ChestInventory()),new class_516(mc.player.inventory,mc.world,(int)mc.player.x,(int)mc.player.y,(int)mc.player.z),new class_235(mc.player.inventory,new class_137()),new class_524(mc.player.inventory,new class_138())};
+    String mode=Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player).toString();
     try{
+      mc.setScreen(null);CreativeVehicleChecks.mode(mc,"SURVIVAL");
+      var settings=MapConfig.copy();settings.minimap=settings.showInInventory=true;settings.hideWithDebug=false;settings.size=90;settings.corner=1;settings.offsetX=settings.offsetY=6;MapConfig.preview(settings);mc.options.debugHud=mc.options.hideHud=false;
+      Screen[] screens={new class_585(mc.player),new class_264(mc.player.inventory,new ChestInventory()),new class_516(mc.player.inventory,mc.world,(int)mc.player.x,(int)mc.player.y,(int)mc.player.z),new class_235(mc.player.inventory,new class_137()),new class_524(mc.player.inventory,new class_138())};
       Inventory330Capture.valid=true; Inventory330Capture.frames=0;
       for(Screen screen:screens){
         open(mc,screen,640,360);check(Minimap.inventoryVisible(mc),"inventory minimap missing for "+screen.getClass());
         var geometry=MinimapGeometry.layout(settings,640,360,false);double old=MapConfig.current().zoom;
-        check(Minimap.inventoryWheel(mc,geometry.x()+geometry.size()/2,geometry.y()+geometry.size()/2,120),"inventory wheel not consumed");check(MapConfig.current().zoom>old,"inventory wheel did not zoom");
+        int mx=geometry.x()+geometry.size()/2,my=geometry.y()+geometry.size()/2;
+        check(Minimap.inventoryWheel(mc,mx,my,120),"inventory wheel not consumed screen="+screen.getClass().getName()
+            +" mode="+Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player)
+            +" grabbed="+org.lwjgl.input.Mouse.isGrabbed()+" left="+org.lwjgl.input.Mouse.isButtonDown(0)
+            +" right="+org.lwjgl.input.Mouse.isButtonDown(1)+" active="+org.lwjgl.opengl.Display.isActive()
+            +" gui="+((local.luke.power.input.InventoryGui)screen).power$containsGuiSpace(mx,my)+" point="+mx+","+my);
+        check(MapConfig.current().zoom>old,"inventory wheel did not zoom");
         check(!Minimap.inventoryWheel(mc,320,180,120),"inventory panel wheel stolen");
         SettingsSnapshot.render(mc,screen,640,360,REPORT.resolve("inventory-"+screen.getClass().getSimpleName()+".png"));
         check(Inventory330Capture.frames>0&&Inventory330Capture.valid,"minimap draw order not between dimming and panels for "+screen.getClass());
       }
-      String mode=Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player).toString();
       CreativeVehicleChecks.mode(mc,"CREATIVE");
       var creative=new class_585(mc.player);open(mc,creative,640,360);
       SettingsSnapshot.render(mc,creative,640,360,REPORT.resolve("inventory-creative.png"));
-      check(Inventory330Capture.valid,"Creative minimap layer order");CreativeVehicleChecks.mode(mc,mode);
+      check(Inventory330Capture.valid,"Creative minimap layer order");
       settings=MapConfig.copy();settings.showInInventory=false;MapConfig.preview(settings);check(!Minimap.inventoryVisible(mc),"inventory setting ignored");
       double old=settings.zoom;check(!Minimap.inventoryWheel(mc,580,50,120)&&MapConfig.current().zoom==old,"disabled inventory minimap consumed wheel");
       Validation.log("RELEASE330 INVENTORY PASS player/chest/crafting/dispenser/furnace: dim < minimap < panels; wheel respects GUI; disabled inactive");
-    }finally{mc.setScreen(null);MapConfig.preview(before);mc.options.debugHud=debug;mc.options.hideHud=hidden;mc.options.guiScale=oldScale;}
+    }finally{
+      mc.setScreen(null);
+      try{CreativeVehicleChecks.mode(mc,mode);}
+      finally{MapConfig.preview(before);mc.options.debugHud=debug;mc.options.hideHud=hidden;mc.options.guiScale=oldScale;}
+    }
   }
 
 

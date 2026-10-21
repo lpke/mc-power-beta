@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "package": "local.luke.power.offhand.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "OffhandBowMixin",
+    "OffhandContainerKeysMixin",
+    "OffhandContainerMixin",
+    "OffhandEntityUseMixin",
+    "OffhandFirstPersonMixin",
+    "OffhandFishingMixin",
+    "OffhandFishingRendererMixin",
+    "OffhandInventoryMixin",
+    "OffhandMapMixin",
+    "OffhandModelMixin",
+    "OffhandNativeUseMixin",
+    "OffhandPlayerDataMixin",
+    "OffhandPlayerPointerMixin",
+    "OffhandPlayerRendererMixin",
+    "OffhandScreenMixin",
+    "OffhandUseMixin",
+    "OffhandWorldEffectsMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

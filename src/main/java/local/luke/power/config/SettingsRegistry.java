@@ -30,6 +30,7 @@ public final class SettingsRegistry {
     AudioBackend.register(s, mc);
     VisualBackend.register(s, mc);
     LightBackend.register(s);
+    local.luke.power.heldlight.HeldLightBackend.register(s);
     MapBackend.register(s);
     SprintBackend.register(s);
     InterfaceBackend.register(s);
@@ -41,6 +42,11 @@ public final class SettingsRegistry {
     DeathBackend.register(s);
     GameplayBackend.register(s);
     VeinBackend.register(s);
+    local.luke.power.offhand.OffhandBackend.register(s);
+    local.luke.power.inventory.tools.InventoryToolsBackend.register(s);
+    local.luke.power.recipes.RecipeBookBackend.register(s);
+    local.luke.power.subtitles.SubtitlesBackend.register(s);
+    local.luke.power.world.WorldToolsBackend.register(s);
     s.settings().forEach(ItemSettings::attach);
     return s;
   }

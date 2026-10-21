@@ -21,6 +21,22 @@ class DeathJournalTest {
     DeathRecord saved = gson.fromJson(gson.toJson(death("1")), DeathRecord.class);
     assertEquals(-12, saved.x); assertEquals(-1, saved.dimension); assertEquals(List.of("native-item-nbt"), saved.items);
   }
+  @Test void offhandAppendsWithoutReinterpretingHistoricalCraftingSlots() throws Exception {
+    Path path=temp.resolve("offhand.journal");DeathJournal journal=new DeathJournal(path);
+    DeathRecord old=death("1");old.slots=List.of(44);journal.death(old);
+    DeathRecord added=death("2");added.slotLayout=2;added.slots=List.of(45);journal.death(added);
+    DeathJournal restarted=new DeathJournal(path);
+    assertEquals(0,restarted.records().get(0).slotLayout);assertEquals(List.of(44),restarted.records().get(0).slots);
+    assertEquals(2,restarted.records().get(1).slotLayout);assertEquals(List.of(45),restarted.records().get(1).slots);
+    restarted.recovery("2",List.of(0),"before46","after46");restarted.finish("2",true);
+    assertEquals("recovered",new DeathJournal(path).state("2"));
+  }
+  @Test void futureSlotLayoutsCannotWriteOrClaimItems() {
+    DeathRecord future=death("1");future.slotLayout=3;
+    assertThrows(IllegalArgumentException.class,future::validate);
+    DeathRecord old=death("1");old.slots=List.of(45);
+    assertThrows(IllegalArgumentException.class,old::validate);
+  }
   @Test void restartKeepsSequentialDecimalIdsAndRecoveryClaims() throws Exception {
     Path path = temp.resolve("deaths.journal"); DeathJournal journal = new DeathJournal(path);
     for (int i = 1; i <= 37; i++) journal.death(death(journal.nextId()));

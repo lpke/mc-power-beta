@@ -11,8 +11,8 @@ import local.luke.power.storage.PowerConfig;
 
 /** One defaults target and one acknowledged revision for every future-world entry point. */
 public final class RuleDefaults {
-  public static final int REVISION = 2;
-  public static final String RELEASE = "3.1.0";
+  public static final int REVISION = 3;
+  public static final String RELEASE = "4.0.0";
   private RuleDefaults() {}
   public static RuleSet latest(DefaultBases.Base base, boolean cheats) {
     RuleSet rules = cheats ? RuleSet.cheats() : new RuleSet();

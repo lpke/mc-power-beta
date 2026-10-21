@@ -7,7 +7,7 @@ public final class MovementScreens {
   private static Predicate<Object> policy = screen -> false;
   private MovementScreens() {}
   public static void register(Predicate<Object> value) { policy = value; }
-  public static boolean allows(Object screen) { return screen != null && policy.test(screen); }
+  public static boolean allows(Object screen) { return screen != null && !InventoryTextInput.active(screen) && policy.test(screen); }
 
   public static boolean keyboardDown(Object binding) {
     return binding instanceof Binding b && movementKey(b.power$code()) && Bindings.down(binding);

@@ -18,7 +18,7 @@ final class HudEditorSections {
     if (s.id.startsWith("maps.")) return Set.of("corner", "offsetX", "offsetY").contains(field(s));
     return (s.id.equals("interface.debugOrder") || s.id.equals("interface.debugRightOrder")) || OFFSETS.contains(s.id)
         || s.id.startsWith(HudPreview.NATIVE) && NATIVE_POSITION.contains(field(s))
-        || (s.id.startsWith("infoHud.clusters.") || s.id.startsWith("activeTweaks.")) && ANCHOR_POSITION.contains(field(s));
+        || (s.id.startsWith("infoHud.clusters.") || s.id.startsWith("activeTweaks.") || s.id.startsWith("subtitles.")) && ANCHOR_POSITION.contains(field(s));
   }
   static String group(Setting s) {
     String id = s.id, field = field(s);
@@ -46,8 +46,8 @@ final class HudEditorSections {
     if (id.equals("interface.useFeetYCoordinates") || id.equals("power_hud:config.coordinateDisplay")) return "Coordinates";
     if (id.equals(HudEditorSettings.ENTRY) || field.startsWith("put")) return "Layout";
     if (position(s)) return "Position";
-    if (Set.of("textColor", "textSize", "opacity", "debugTextColor", "debugTextSize").contains(field)) return "Appearance";
-    if (Set.of("enabled", "enableVisibility", "hideWithDebug", "showVersionTextIngame").contains(field)) return "Visibility";
+    if (Set.of("textColor", "textSize", "opacity", "debugTextColor", "debugTextSize", "backgroundOpacity").contains(field)) return "Appearance";
+    if (Set.of("enabled", "enableVisibility", "hideWithDebug", "showInInventory", "showVersionTextIngame").contains(field)) return "Visibility";
     return s.group.equals("Debug (F3) info") ? "World information" : "Information";
   }
   static List<Setting> order(Collection<Setting> values) {

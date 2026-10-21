@@ -46,6 +46,7 @@ public final class InventoryActions {
     if (all && Config.current().shiftClearsInventory) {
       Arrays.fill(p.inventory.main, null);
       Arrays.fill(p.inventory.armor, null);
+      ((local.luke.power.inventory.OffhandInventory<?>)(Object)p.inventory).power$offhandStack(null);
       if (p.playerContainer instanceof net.minecraft.container.PlayerContainer container) {
         for (int i = 0; i < container.craftingInv.getInventorySize(); i++)
           container.craftingInv.setItem(i, null);

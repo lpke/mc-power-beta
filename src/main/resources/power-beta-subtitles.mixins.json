@@ -1,0 +1,28 @@
+{
+  "required": true,
+  "package": "local.luke.power.subtitles.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "BlockHitCaptionMixin",
+    "BlockPlaceCaptionMixin",
+    "BobberCaptionMixin",
+    "BucketCaptionMixin",
+    "ButtonCaptionMixin",
+    "CreeperCaptionMixin",
+    "EggCaptionMixin",
+    "HoeCaptionMixin",
+    "LavaCaptionMixin",
+    "LavaItemCaptionMixin",
+    "LeverCaptionMixin",
+    "LivingCaptionMixin",
+    "PressurePlateCaptionMixin",
+    "SkeletonCaptionMixin",
+    "SnowballCaptionMixin",
+    "SoundCaptionMixin",
+    "TorchBurnoutCaptionMixin",
+    "WorldSoundCaptionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

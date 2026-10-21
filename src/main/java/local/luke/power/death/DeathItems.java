@@ -35,6 +35,7 @@ public final class DeathItems {
   }
 
   public static void capture(net.minecraft.entity.player.PlayerEntity player, DeathRecord record) throws IOException {
+    record.slotLayout = 2;
     record.items = new ArrayList<>(); record.slots = new ArrayList<>();
     IdentityHashMap<ItemStack, Boolean> references = new IdentityHashMap<>();
     ItemStack[] items = snapshot(player.inventory, player.playerContainer);
@@ -56,9 +57,10 @@ public final class DeathItems {
   /** Cursor 40, then the player's four crafting inputs 41..44. The recipe output is not owned. */
   public static ItemStack[] snapshot(PlayerInventory inventory, net.minecraft.inventory.Container container) throws IOException {
     if (!(container instanceof net.minecraft.class_277)) throw new IOException("Player crafting slots unavailable");
-    ItemStack[] result = Arrays.copyOf(snapshot(inventory), 45);
+    ItemStack[] result = Arrays.copyOf(snapshot(inventory), 46);
     result[40] = inventory.getCursorStack();
     for (int i = 0; i < 4; i++) result[41 + i] = container.method_2084(i + 1).getStack();
+    result[45] = local.luke.power.offhand.Offhand.get(inventory);
     return result;
   }
 
@@ -95,10 +97,13 @@ public final class DeathItems {
           }
         }
         if (!accepted) throw new IllegalArgumentException("Saved equipment no longer fits its original slot. Recovery canceled; no items changed.");
-      } else if (slot >= 41) {
+      } else if (slot >= 41 && slot <= 44) {
         var nativeSlot = container.method_2084(slot - 40);
         if (!nativeSlot.canInsert(item)) throw new IllegalArgumentException("Saved crafting item no longer fits its original slot. Recovery canceled; no items changed.");
         insert(next, slot, item, nativeSlot.getMaxItemCount());
+      } else if (slot == 45) {
+        // Recovery restores ownership even when offhand use/insertion is disabled.
+        insert(next, slot, item, inventory.getMaxCountPerStack());
       }
     }
     for (ItemStack item : items) {

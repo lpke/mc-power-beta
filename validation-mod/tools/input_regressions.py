@@ -26,7 +26,9 @@ class Inputs:
         assert not self.game.is_relative_to(normal), 'Use a disposable clone outside the normal instance list'
         assert display != os.environ.get('DISPLAY'), 'Use a separate Xvfb display'
         processes = subprocess.check_output(['ps', '-eo', 'comm,args'], text=True).splitlines()
-        assert any(line.split()[:3] == ['Xvfb', 'Xvfb', display] for line in processes), 'Display must belong to Xvfb'
+        assert any(len(parts := line.split()) >= 3 and parts[0] == 'Xvfb'
+                   and Path(parts[1]).name == 'Xvfb' and parts[2] == display
+                   for line in processes), 'Display must belong to Xvfb'
         assert (game / 'power-beta-validation.log').exists(), 'Validation fixture is not installed/running'
         document = json.loads((game / 'config/power-beta.json').read_text())
         assert document['settings']['audio']['master'] == 0, 'Mute the disposable clone first'

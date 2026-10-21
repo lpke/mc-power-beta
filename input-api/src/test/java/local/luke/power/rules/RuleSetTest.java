@@ -34,7 +34,7 @@ class RuleSetTest {
     assertTrue(rules.enabled(KEEP_INVENTORY)); assertTrue(rules.enabled(EXPLOSIONS_DESTROY_ITEMS));
   }
   @Test void badTypesUnknownNamesAndVersionsAreRejectedWithoutChangingInput() {
-    for (String source : new String[]{"{\"version\":4,\"values\":{}}", "{\"version\":\"1\",\"values\":{}}",
+    for (String source : new String[]{"{\"version\":" + (RuleSet.VERSION + 1) + ",\"values\":{}}", "{\"version\":\"1\",\"values\":{}}",
         "{\"version\":1,\"values\":{\"fire_spread\":\"false\"}}", "{\"version\":1,\"values\":{\"fire_spread\":0}}",
         "{\"version\":1,\"values\":{\"players_sleeping_percentage\":-1}}", "{\"version\":1,\"values\":{\"players_sleeping_percentage\":1.5}}",
         "{\"version\":1,\"values\":{\"players_sleeping_percentage\":2147483648}}", "{\"version\":1,\"values\":{\"doFireTick\":true}}",

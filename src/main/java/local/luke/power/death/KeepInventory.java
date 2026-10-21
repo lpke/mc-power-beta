@@ -26,14 +26,23 @@ public final class KeepInventory {
     if (previous == null || saved == null) return;
     if (mc.world == null || mc.world.isRemote || mc.player == null || mc.player == previous || !mc.player.name.equals(previous.name))
       throw new IllegalStateException("Kept inventory ownership changed during respawn");
+    var replacement = mc.player; var world = mc.world; var source = previous.inventory;
+    var main = source.main; var armor = source.armor; var container = previous.playerContainer;
+    var crafting = ((net.minecraft.class_277)container).field_1124;
+    var grid = ((local.luke.power.mixin.DeathCraftingAccessor)crafting).power$deathStacks();
     try {
-      saved.restore(mc.player);
-      Arrays.fill(previous.inventory.main, null); Arrays.fill(previous.inventory.armor, null); previous.inventory.setCursorStack(null);
-      for (int i = 1; i <= 4; i++) previous.playerContainer.method_2084(i).setStack(null);
-      ((KeptPlayer)previous).power$keptInventory(null); ((KeptPlayer)mc.player).power$keptInventory(null);
+      saved.restore(replacement, () -> mc.player == replacement && mc.world == world
+          && previous.inventory == source && source.main == main && source.armor == armor
+          && previous.playerContainer == container && ((net.minecraft.class_277)container).field_1124 == crafting
+          && ((local.luke.power.mixin.DeathCraftingAccessor)crafting).power$deathStacks() == grid && saved.matches(previous));
+      Arrays.fill(main, null); Arrays.fill(armor, null); source.setCursorStack(null);
+      local.luke.power.offhand.Offhand.set(source, null);
+      // The retired player's inputs have transferred. Do not run recipe callbacks a second time.
+      Arrays.fill(grid, null);
+      ((KeptPlayer)previous).power$keptInventory(null); ((KeptPlayer)replacement).power$keptInventory(null);
     } catch (IOException e) {
       // Keep a durable snapshot on the new player even if a third-party slot callback fails.
-      ((KeptPlayer)mc.player).power$keptInventory(saved);
+      ((KeptPlayer)replacement).power$keptInventory(saved);
       PowerBeta.LOG.error("Kept inventory transfer failed; snapshot retained on player", e);
       throw new IllegalStateException("Could not restore kept inventory; keep the world backup", e);
     }

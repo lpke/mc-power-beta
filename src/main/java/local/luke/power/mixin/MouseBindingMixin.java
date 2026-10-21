@@ -22,6 +22,7 @@ public class MouseBindingMixin {
       power$mouseEvent = event;
       power$mouseConsumed = false;
       Minecraft mc = (Minecraft)(Object)this;
+      if (button == 1 && Mouse.getEventButtonState()) local.luke.power.offhand.OffhandUse.newPress(mc);
       if (button >= 0 && Mouse.getEventButtonState() && mc.field_2778 && mc.currentScreen == null
           && mc.player != null && Bindings.claimsMouse(button - 100)) {
         power$mouseConsumed = true;
@@ -38,7 +39,9 @@ public class MouseBindingMixin {
       var held = mc.player.inventory.getSelectedItem();
       // The event path still handles every press. Creative keeps the item, so
       // Beta's separate held-button path would otherwise place another vehicle.
-      if (held != null && (held.getItem() instanceof class_483 || held.getItem() instanceof class_381)) return false;
+      if (!local.luke.power.offhand.Offhand.enabled(mc.player)
+          && held != null && (held.getItem() instanceof class_483 || held.getItem() instanceof class_381)
+          || local.luke.power.offhand.OffhandUse.heldVehicle(mc)) return false;
     }
     return button == 0 && AttackInput.held()
         || !Bindings.claimsMouse(button - 100) && original.call(button);

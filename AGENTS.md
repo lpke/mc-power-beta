@@ -33,8 +33,8 @@
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
   track and preset IDs. Global schema 7 supports conversion from schemas 3, 4, 5 and 6 through
-  `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 3
-  supports formats 1 and 2 and pre-rule metadata through `rules/LegacyWorldRules`, `WorldRuleUpgrade210` and `WorldRuleData`.
+  `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 4
+  supports formats 1, 2 and 3 and pre-rule metadata through `rules/LegacyWorldRules`, `WorldRuleUpgrade210` and `WorldRuleData`.
   Preserve frozen legacy evidence for worlds converted later. Use these helpers when
   updating an instance; never widen conflicting permissions or reset unsupported data.
   Validate converted values and verify durable backups before replacing originals.
@@ -150,6 +150,26 @@
   never touch inventory slots. WorldEdit and carrying suppress StationAPI block
   callbacks only inside their scoped transaction to avoid drops and slab merging.
   Keep old carry-journal formats recoverable. See `docs/recovery.md`.
+- Offhand keeps the native 36 main and four armor slots unchanged; its logical
+  recovery slot is 45 after cursor and crafting inputs. Disabled offhand retains
+  contents for extraction. Format-4 metadata must be durably verified across primary,
+  previous and dimension files before any new inventory ownership is enabled.
+  Wrap the complete world-load path: the capture module replaces native loading
+  with a cancellable HEAD hook, so native TAIL injections alone are insufficient.
+- Recipe placement, sorting, refills, automatic tools and saved Creative hotbars
+  share inventory leases and immutable worker-flushed plans. Validate the whole
+  protected inventory and external native owners before and after callbacks. Roll
+  back only owned bytes; restore derived recipe output only after every input was
+  restored. Fuel is never a recipe ingredient. Unknown recipe subclasses need an
+  explicit display provider. Saved Creative hotbars remain user data outside defaults.
+- Held-item lighting uses render-only terrain endpoints and the existing 32-byte
+  vertex. Never change world light, material opacity or spawning. Bound endpoint
+  preparation to loaded render sections; freeze and prepare the physical source
+  before synchronous image capture. Freecam movement never moves that source.
+- Subtitles use the same position and yaw basis as the active sound listener,
+  including freecam. Muted audio still admits registered captions without starting
+  the sound engine, reading terrain or consuming sound-pool randomness. UI and music
+  never create guessed captions; semantic scopes apply once and remain thread-local.
 - Compact buttons must retain all four texture borders. Check narrow GUI sizes,
   sticky headings, clipping and click targets, not only a wide screenshot.
   Creative catalog rows grow upward; hotbar and survival slots never move.

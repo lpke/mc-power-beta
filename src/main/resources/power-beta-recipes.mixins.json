@@ -1,0 +1,19 @@
+{
+  "required": true,
+  "package": "local.luke.power.recipes.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "RecipeContainerMixin",
+    "RecipeFurnaceAccessor",
+    "RecipeFurnaceBackgroundMixin",
+    "RecipeNativeBackgroundMixin",
+    "RecipePlayerInitMixin",
+    "RecipeTableBackgroundMixin",
+    "RecipeWheelMixin",
+    "ShapedRecipeAccessor",
+    "ShapelessRecipeAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

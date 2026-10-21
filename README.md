@@ -22,7 +22,7 @@ improvements and optional tweaks in one searchable Options menu.
 - One searchable Options menu with categories, linked settings, tooltips, live previews, reset controls, automatic saving and optional Apply/Cancel editing.
 - Configurable keyboard and mouse bindings, Ctrl/Shift/Alt chords, conflict detection and a shared view for resolving overlapping bindings.
 - A persistent world map and HUD minimap with surface and cave layers, terrain shading, entity radar, waypoints, deathpoints, chunk and slime overlays, recent paths and screenshots.
-- Optional modern sprinting on foot, enabled per world, with global stamina and combat limits, sprint jumping and surface particles. Separate optional sprint FOV effects for ground sprinting and each flight mode. All start off.
+- Optional modern sprinting on foot, enabled per world, with global stamina and combat limits, sprint jumping and surface particles. Separate optional sprint FOV effects for ground sprinting and each flight mode. Power Beta enables sprinting with stamina and combat limits; Beta and Refined Beta leave it off.
 - Creative and spectator modes, a mode picker, configurable reach, flight speed, drift and sprint, and adjustable spectator speed.
 - Creative item categories and a survival inventory view. Shift-click for full stacks, middle-drag to fill slots, and use a destroy slot or clear the inventory.
 - WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
@@ -41,6 +41,10 @@ improvements and optional tweaks in one searchable Options menu.
 - Container previews and carrying that preserves contents, including double chests. Optional inventory access in Nether portals.
 - Quick inventory transfers, bulk crafting, drag distribution, double-click collection, held-stack Shift-double-click transfers, scroll transfers, number-key hotbar swaps and stack dropping.
 - Direct tool and armor swapping, Shift-click and right-click equipping, hotbar row swapping with previews, and optional use of the four crafting inputs as storage.
+- Optional offhand inventory and native item use, automatic tool selection, hotbar restocking, inventory sorting and transfers matching chest contents. Save and load nine Creative hotbars.
+- Searchable crafting and smelting recipe book with categories, craftable filtering and ingredient placement. Choose inventory access or a pause-menu viewer; the recipe book starts off.
+- Smooth held-item lighting that changes rendering only, and directional sound subtitles with placement controls in the HUD editor.
+- Verified saved-world backups, duplication with independent world ownership, and recreation from the original seed and rules.
 - Movement while compatible inventories are open, auto-walk, auto-mine, continuous click mining, step assist, edge protection and fence jumping.
 - Faster boats and minecarts, boat steering and collision protection, boat elevators, minecart boosters and optional faster obsidian mining.
 - Optional water landings and bucket clutches, including flowing water. Empty buckets stack to 16; doors and signs have optional modern stack limits.
@@ -94,12 +98,28 @@ Settings save automatically by default. Right-click Apply to use manual editing;
 leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
 edits stay in the draft until you create the world.
 
-Version 3.0.0 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
-with a verified backup. World rules use format 3 and support formats 1, 2 and
+Version 4.0.0 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
+with a verified backup. World rules use format 4 and support formats 1, 2, 3 and
 Power Beta's earlier world settings. Existing worlds retain their rules and item
 protection. Old footwear-specific crop protection needs an explicit trampling choice. Conflicting old permissions or unsupported formats stop conversion
 and show recovery guidance. Keep a full instance backup before upgrading; world
 folders alone do not include global preferences, music libraries or recovery history.
+
+The recipe book and automatic restocking start off in every defaults base. The other
+4.0.0 additions start on in Power Beta and off in Beta and Refined Beta. Set their
+unbound shortcuts in Controls. Disabling offhand retains its contents for removal;
+saved Creative hotbars are user data and survive loading defaults.
+
+The recipe book reads the installed Beta crafting and smelting registries, including
+enabled custom recipes. Beta recipes are available without an advancement unlock
+system. Recipes from extensions with custom matching logic need a display provider
+before the book can safely place their ingredients.
+
+Saved-world backups appear in `backups/power-beta`. They include the save and known
+world-owned map and recovery files, with a verified manifest. Duplication copies
+terrain, players and maps under a new identity; recovery claims stay with the original.
+Recreate opens a fresh creation draft with the seed, difficulty and rules, without
+copying terrain or player inventories. World operations require an unloaded world.
 
 ## Maps and sprinting
 

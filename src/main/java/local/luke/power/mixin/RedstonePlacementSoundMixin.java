@@ -3,6 +3,7 @@ package local.luke.power.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import local.luke.power.audio.AudioConfig;
+import local.luke.power.input.SoundCaptionContext;
 import net.minecraft.block.Block;
 import net.minecraft.class_183;
 import net.minecraft.world.World;
@@ -17,8 +18,10 @@ public abstract class RedstonePlacementSoundMixin {
     boolean placed = original.call(world, x, y, z, block);
     if (placed && world.getBlockId(x, y, z) == block && AudioConfig.current().redstonePlacementSound) {
       var sound = Block.STONE.field_1926;
-      world.method_150(x + .5, y + .5, z + .5,
-          sound.method_1978(), (sound.method_1976() + 1) / 2, sound.method_1977() * .8f);
+      try (var ignored = SoundCaptionContext.push("subtitles.block.generic.place")) {
+        world.method_150(x + .5, y + .5, z + .5,
+            sound.method_1978(), (sound.method_1976() + 1) / 2, sound.method_1977() * .8f);
+      }
     }
     return placed;
   }

@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 public final class WorldLoadGuard {
   private static String pending;
   private WorldLoadGuard() {}
+  public static void block(String reason) { pending = reason; }
   public static boolean allow(String folder) {
     if (!PowerConfig.problem().isEmpty()) { pending = PowerConfig.problem(); return false; }
     try { WorldRuleFiles.beforeOpen(FabricLoader.getInstance().getGameDir(), folder); return true; }

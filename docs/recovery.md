@@ -8,6 +8,13 @@ recover data lost with the disk itself.
 Each accepted swap appends native NBT to
 `.minecraft/power-beta-data/hotbar-backups/<world-and-player-id>.journal` before
 publishing the new inventory array. Records are checksummed and never pruned.
+New journals use `world-<world-and-player-id>.journal`, keyed by the stable saved
+world ID and player. Their NBT records include `OwnershipVersion: 2` and `WorldId`.
+Renaming a world keeps its journal; duplicated worlds receive independent records.
+Older name-and-seed journals stay unchanged and remain readable by the same recovery
+tool. Keep them when investigating older swaps; they cannot always be assigned to
+one world when old copies shared a name and seed.
+
 The journal flush runs on a worker. The game continues while it writes, then
 commits the swap on a later tick only if the same player still owns the unchanged
 inventory. Inventory edits, menus, lost focus and world exits cancel pending swaps.
@@ -24,7 +31,8 @@ python3 modules/building/scripts/hotbar_recovery.py FILE.journal --extract -1 --
 ```
 
 Extraction refuses to overwrite files. `-1` selects the last complete valid
-record. Inspect `MainBefore`, `MainAfter`, `Armor`, `World` and `Player` with an NBT
+record. Inspect `MainBefore`, `MainAfter`, `Armor`, `World`, `WorldId` when present,
+and `Player` with an NBT
 editor. Restore only missing stacks into a copied save while Minecraft is closed;
 replacing the whole inventory could erase later gameplay.
 
@@ -34,6 +42,30 @@ Carry journals live in the world's `data` directory. They preserve original bloc
 NBT, removal/placement intent and completed-transfer archives. Never delete a held
 or failed transaction record. Each chest half has its own inventory. A replay mismatch must stop and preserve evidence rather
 than overwrite a changed block or inventory.
+
+## Inventory plans
+
+Offhand swaps, recipe placement, sorting, restocking, tool changes and saved Creative
+hotbar loads use `.minecraft/power-beta-data/inventory-recovery`. Each checksummed
+journal is scoped to the stable world ID and player. Prepared records contain full
+native before/after item data, protected player slots and external container snapshots.
+The worker flushes immutable bytes before a game tick can publish any slot changes.
+Canceled preparations can leave records even though no inventory change occurred.
+
+Publication rechecks the player, world, screen, handler, slot ownership and full item
+data. A detected callback failure restores only changes still owned by the plan and
+stops this action family. Derived crafting output is restored only after all owned
+inputs are restored. Foreign changes remain intact. Keep the world and journal if
+the game reports a stopped inventory action; inspect their before/after records on
+copies rather than replaying a whole snapshot over later gameplay. At 64 MiB, archive
+the journal with the game closed and restart before using these actions again.
+
+Offhand ownership uses separate versioned player data. World-rule format 4 prevents
+older Power Beta versions from opening these saves and silently losing that slot.
+The format upgrade verifies and backs up primary, previous and dimension metadata
+without changing gameplay rules. Keep `world-metadata-backups` if an upgrade is
+interrupted. A changed file that no longer matches the transaction is preserved and
+requires recovery instead of being overwritten.
 
 ## Death records
 
@@ -50,7 +82,7 @@ world. Individual and bulk GUI recovery share durable per-stack claims.
 
 The Game rules setting Keep inventory on death defaults off for Survival and on
 for the Cheat preset. It is independent of recovery permissions. The rule keeps main
-inventory, armor, the held cursor and player crafting inputs through respawn.
+inventory, armor, the offhand, the held cursor and player crafting inputs through respawn.
 Dead-player NBT includes a complete native snapshot for restart safety. Death
 records retain their item snapshots but mark every stack recovered, with the log
 label Recovered (kept). The keep rule works even when death records are disabled.

@@ -37,6 +37,8 @@ public final class SettingAccess {
     if (id.equals("keys.powerbeta.sprint") || id.startsWith("sprint.")
         && !java.util.Set.of("sprint.dynamicFov", "sprint.creativeFov", "sprint.spectatorFov", "sprint.freecamFov", "sprint.fovStrength").contains(id))
       return local.luke.power.rules.GameRule.ALLOW_SPRINTING;
+    if (java.util.Set.of("inventoryTools.creativeHotbars", "keys.powerbeta.saveCreativeHotbar", "keys.powerbeta.loadCreativeHotbar").contains(id))
+      return local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE;
     if (id.startsWith("worldedit.")) return local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING;
     if (id.equals("visual.spectatorFullBright")
         || id.startsWith("creative.spectator") || id.equals("creative.showSpectatorSpeed")) return local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE;

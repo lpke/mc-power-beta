@@ -7,23 +7,25 @@ import net.mine_diver.smoothbeta.client.render.gl.VertexBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.World;
 
-/** One section's scratch data, reused on the render thread. GPU geometry is never duplicated. */
+/** Shared native/water/neutral capture. Two reusable packed stages; one final GPU upload per stage. */
 public final class WaterTerrain {
   private static final int MAX_BYTES = 4 * 1024 * 1024;
+  private static final int BASE = 0, CLEAR = 1, NEUTRAL = 2;
   private static final Slot[] slots = {new Slot(), new Slot()};
   private static ByteBuffer packed;
   private static World owner;
-  private static Thread thread;
-  private static boolean prepared, building, clearPass, affected, waterColumn, overflow, uploading;
-  private static int count;
-  private static long sections, secondPasses, mismatches;
+  private static Thread thread, meshThread;
+  private static boolean prepared, building, affected, waterColumn, overflow, uploading;
+  private static boolean held, baseDiffers, clearDiffers, clearRan, mismatch, neutralComplete;
+  private static int count, phase, meshDepth, buildingDepth;
+  private static long sections, secondPasses, neutralPasses, mismatches, neutralStarted, maxNeutralNanos;
   private WaterTerrain() {}
 
   public static void reset() {
     owner = null; prepared = false;
-    // No world or native buffer references survive a world exit.
     for (Slot slot : slots) { slot.buffer = null; slot.data = null; }
     packed = null;
+    HeldLighting.reset();
   }
 
   public static void prepare(Minecraft mc) {
@@ -32,90 +34,136 @@ public final class WaterTerrain {
     var s = VisualConfig.current();
     if (!prepared && mc.world != null && (s.underwaterDarkness < 100 || s.underwaterDarknessOutside < 100)) {
       prepared = true;
-      // Only the first opt-in needs endpoints added to already-built terrain.
-      // Surface crossings, slider changes and Cancel subsequently update a uniform.
       if (!changedWorld && mc.worldRenderer instanceof WaterTerrainUpdates updates) updates.power$prepareWaterColors();
     }
   }
 
-  public static boolean begin() {
-    if (building || !prepared || !RenderControls.rendering() || RenderControls.fullBright()) return false;
-    thread = Thread.currentThread(); building = true; clearPass = affected = waterColumn = overflow = false; count = 0;
-    sections++;
+  // Covers EVERY native mesh build, even when endpoint capture is disabled.
+  // Fixed-function held lighting must never become a source-dependent baked mesh color.
+  public static void beginMesh() {
+    if (meshDepth == 0) meshThread = Thread.currentThread();
+    meshDepth++;
+  }
+  public static void endMesh() { if (--meshDepth == 0) meshThread = null; }
+  public static boolean meshing() { return meshDepth > 0 && meshThread == Thread.currentThread(); }
+
+  public static boolean begin(boolean captureHeld) {
+    if (building || (!prepared && !captureHeld) || !RenderControls.rendering() || RenderControls.fullBright()) return false;
+    thread = Thread.currentThread(); building = true; buildingDepth = meshDepth;
+    phase = BASE; held = captureHeld;
+    affected = waterColumn = overflow = baseDiffers = clearDiffers = clearRan = mismatch = neutralComplete = false;
+    count = 0; sections++;
     return true;
   }
 
-  private static boolean current() { return building && thread == Thread.currentThread(); }
-  public static boolean detecting() { return current() && !clearPass; }
-  public static int buildDarkness(int fallback) { return current() ? clearPass ? 0 : 100 : fallback; }
-  public static void affected() { if (current()) affected = true; }
-  public static void waterColumn() { if (current()) waterColumn = true; }
+  private static boolean current() { return building && thread == Thread.currentThread() && meshDepth == buildingDepth; }
+  public static boolean neutral() { return current() && phase == NEUTRAL; }
+  public static boolean observing() { return current() && held && phase != NEUTRAL; }
+  public static boolean detecting() { return current() && prepared && phase == BASE; }
+  public static int buildDarkness(int fallback) { return current() ? phase == CLEAR ? 0 : 100 : fallback; }
+  public static void affected() { if (detecting()) affected = true; }
+  public static void waterColumn() { if (current() && phase != NEUTRAL) waterColumn = true; }
   public static boolean dependsOnWaterColumn() { return waterColumn; }
   public static boolean prepared() { return prepared; }
+
+  public static void observe(float shade, float neutralShade) {
+    if (!current() || !held || shade == neutralShade) return;
+    if (phase == BASE) baseDiffers = true;
+    else if (phase == CLEAR) clearDiffers = true;
+  }
+
   public static boolean secondPass() {
     if (!affected || overflow || count == 0) return false;
-    clearPass = true; secondPasses++;
+    phase = CLEAR; clearRan = true; secondPasses++;
     return true;
   }
 
-  /** Intercepts uploads only; native block renderers still own geometry and AO. */
+  public static boolean neutralPass() {
+    if (!held || overflow) return false;
+    if (clearRan) for (int i = 0; i < count; i++) if (!slots[i].waterSeen) badMatch();
+    if (mismatch) return false;
+    if (!baseDiffers || clearRan && !clearDiffers) {
+      for (int i = 0; i < count; i++) {
+        if (!baseDiffers) TerrainVertexColors.reuseNative(slots[i].data);
+        else TerrainVertexColors.reuseWater(slots[i].data);
+      }
+      neutralComplete = true;
+      return false;
+    }
+    phase = NEUTRAL; neutralPasses++; neutralStarted = System.nanoTime();
+    return true;
+  }
+
+  public static boolean complete() {
+    if (phase == NEUTRAL) {
+      maxNeutralNanos = Math.max(maxNeutralNanos, System.nanoTime() - neutralStarted);
+      for (int i = 0; i < count; i++) if (!slots[i].neutralSeen) badMatch();
+      neutralComplete = !mismatch;
+    }
+    if (mismatch || overflow) for (int i = 0; i < count; i++) TerrainVertexColors.clearNeutral(slots[i].data);
+    return held && !mismatch && !overflow && (neutralComplete || count == 0);
+  }
+
+  /** Native block renderers still own geometry, tint and ambient occlusion. */
   public static boolean upload(VertexBuffer buffer, ByteBuffer data) {
     if (uploading) return false;
     if (current()) {
-      if (!clearPass && !overflow && data.limit() <= MAX_BYTES && count < slots.length) {
+      if (phase == BASE && !overflow && data.limit() <= MAX_BYTES && count < slots.length) {
         Slot slot = slots[count++];
-        slot.buffer = buffer; slot.merged = false;
-        slot.data = capacity(slot.data, data.limit());
-        slot.data.clear(); slot.data.put(data.duplicate().position(0)); slot.data.flip();
+        slot.buffer = buffer; slot.published = slot.waterSeen = slot.neutralSeen = false;
+        slot.data = capacity(slot.data, TerrainVertexColors.outputSize(data.limit()));
+        TerrainVertexColors.pack(data, null, slot.data);
         return true;
       }
-      if (clearPass) {
+      if (phase != BASE) {
         for (int i = 0; i < count; i++) {
           Slot slot = slots[i];
-          if (slot.buffer != buffer || slot.merged) continue;
-          boolean matches = publish(buffer, slot.data, data);
-          slot.merged = true;
-          if (!matches) mismatches++;
+          if (slot.buffer != buffer || (phase == CLEAR ? slot.waterSeen : slot.neutralSeen)) continue;
+          boolean matches;
+          if (phase == CLEAR) { matches = TerrainVertexColors.water(slot.data, data); slot.waterSeen = true; }
+          else { matches = TerrainVertexColors.neutral(slot.data, data); slot.neutralSeen = true; }
+          if (!matches) badMatch();
           return true;
         }
-        // Ignore a new, non-deterministic pass. The original pass flags and data win.
-        mismatches++;
+        badMatch();
         return true;
       }
-      overflow = true;
-      // Flush earlier stages before an unusually large/multi-upload model.
-      flush();
+      overflow = true; flush();
     }
-    publish(buffer, data, null);
+    publishNative(buffer, data);
     return true;
   }
 
+  private static void badMatch() { mismatch = true; mismatches++; }
   private static void flush() {
     for (int i = 0; i < count; i++) {
       Slot slot = slots[i];
-      if (!slot.merged) { publish(slot.buffer, slot.data, null); slot.merged = true; }
+      if (!slot.published) { publish(slot.buffer, slot.data); slot.published = true; }
     }
   }
 
   public static void end() {
-    try { flush(); }
+    try {
+      if (held && !neutralComplete) for (int i = 0; i < count; i++) TerrainVertexColors.clearNeutral(slots[i].data);
+      flush();
+    }
     finally {
       for (Slot slot : slots) slot.buffer = null;
-      building = clearPass = false; thread = null; count = 0;
+      building = false; thread = null; count = 0;
     }
   }
 
-  private static boolean publish(VertexBuffer buffer, ByteBuffer nativeData, ByteBuffer clearData) {
+  private static void publishNative(VertexBuffer buffer, ByteBuffer nativeData) {
     int size = TerrainVertexColors.outputSize(nativeData.limit());
-    // Normal sections retain a bounded reusable buffer. Exceptional models use a temporary one.
     ByteBuffer output = size <= MAX_BYTES * 2 ? (packed = capacity(packed, size)) : direct(size);
-    boolean matches = TerrainVertexColors.pack(nativeData, clearData, output);
+    TerrainVertexColors.pack(nativeData, null, output);
+    publish(buffer, output);
+  }
+  private static void publish(VertexBuffer buffer, ByteBuffer output) {
     uploading = true;
     try { buffer.upload(output); }
     finally { uploading = false; }
-    return matches;
   }
-
   private static ByteBuffer capacity(ByteBuffer old, int size) {
     if (old != null && old.capacity() >= size) return old;
     return direct(Math.max(1024, Integer.highestOneBit(Math.max(1, size - 1)) << 1));
@@ -123,6 +171,13 @@ public final class WaterTerrain {
   private static ByteBuffer direct(int bytes) { return ByteBuffer.allocateDirect(bytes).order(ByteOrder.nativeOrder()); }
   public static long sections() { return sections; }
   public static long secondPasses() { return secondPasses; }
+  public static long neutralPasses() { return neutralPasses; }
   public static long mismatches() { return mismatches; }
-  private static final class Slot { VertexBuffer buffer; ByteBuffer data; boolean merged; }
+  public static long maxNeutralNanos() { return maxNeutralNanos; }
+  public static long retainedBytes() {
+    long total = packed == null ? 0 : packed.capacity();
+    for (Slot slot : slots) if (slot.data != null) total += slot.data.capacity();
+    return total;
+  }
+  private static final class Slot { VertexBuffer buffer; ByteBuffer data; boolean published, waterSeen, neutralSeen; }
 }

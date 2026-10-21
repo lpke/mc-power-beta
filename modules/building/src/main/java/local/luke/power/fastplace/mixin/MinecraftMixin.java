@@ -41,33 +41,6 @@ public abstract class MinecraftMixin {
     if (FastPlace.suppressVanilla((Minecraft) (Object) this, button)) ci.cancel();
   }
 
-  @WrapOperation(
-      method = "method_2107",
-      at =
-          @At(
-              value = "INVOKE",
-              target =
-                  "Lnet/minecraft/client/InteractionManager;method_1713(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;IIII)Z"))
-  private boolean fastplace$first(
-      InteractionManager manager,
-      PlayerEntity player,
-      World world,
-      ItemStack stack,
-      int x,
-      int y,
-      int z,
-      int face,
-      Operation<Boolean> original) {
-    Minecraft mc = (Minecraft) (Object) this;
-    PlacementTarget target =
-        FastPlace.eligible(mc, stack) ? PlacementTarget.at(world, stack, x, y, z, face) : null;
-    int slot = player.inventory.selectedSlot;
-    float yaw = player.yaw;
-    boolean result = original.call(manager, player, world, stack, x, y, z, face);
-    FastPlace.firstPlacement(mc, stack, slot, face, yaw, target, result);
-    return result;
-  }
-
   @Inject(method = "setScreen", at = @At("HEAD"))
   private void fastplace$screen(Screen screen, CallbackInfo ci) {
     if (screen != null) FastPlace.interrupt();

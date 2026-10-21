@@ -122,9 +122,44 @@ public class Config {
 
         @ConfigCategory(name = "Advanced Stamina Bar Position Config")
         public StaminaPositionConfig STAMINA_POSITION_CONFIG = new StaminaPositionConfig();
+
+        @ConfigCategory(name = "Offhand Position Config")
+        public OffhandPositionConfig OFFHAND_POSITION_CONFIG = new OffhandPositionConfig();
     }
 
     public static class StaminaPositionConfig {
+        @ConfigEntry(
+                name = "Enable Visibility"
+        )
+        public Boolean enableVisibility = true;
+
+        @ConfigEntry(
+                name = "Horizontal Position"
+        )
+        public ScreenPositionHorizontalEnum horizontalPosition = ScreenPositionHorizontalEnum.CENTERED;
+
+        @ConfigEntry(
+                name = "Horizontal Position Offset",
+                minLength = -32000,
+                maxLength = 32000
+        )
+        public Integer horizontalPositionOffset = 0;
+
+        @ConfigEntry(
+                name = "Vertical Position"
+        )
+        public ScreenPositionVerticalEnum verticalPosition = ScreenPositionVerticalEnum.BOTTOM;
+
+        @ConfigEntry(
+                name = "Vertical Position Offset",
+                description = "Use position bottom with offset -32 for Xbox",
+                minLength = -32000,
+                maxLength = 32000
+        )
+        public Integer verticalPositionOffset = 0;
+    }
+
+    public static class OffhandPositionConfig {
         @ConfigEntry(
                 name = "Enable Visibility"
         )

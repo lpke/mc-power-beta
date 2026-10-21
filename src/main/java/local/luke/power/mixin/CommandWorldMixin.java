@@ -13,6 +13,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class CommandWorldMixin
     implements CommandWorld {
   @Unique private String power$commandId = UUID.randomUUID().toString();
+  @Unique private boolean power$inventoryReady;
+
+  public boolean power$inventoryReady() { return power$inventoryReady; }
+  public void power$inventoryReady(boolean ready) { power$inventoryReady = ready; }
 
   public String power$commandWorldId() {
     return power$commandId;

@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import paulscode.sound.SoundSystem;
 import local.luke.power.camera.Freecam;
 import local.luke.power.camera.util.CameraPosition;
+import local.luke.power.input.AudioListenerPose;
 
 @Mixin(SoundManager.class)
 public class SoundManagerMixin {
@@ -20,13 +21,11 @@ public class SoundManagerMixin {
     @Shadow private static boolean started;
 
     @Shadow private GameOptions gameOptions;
-    // WIP doesn't work
-
     @Inject(at = @At("HEAD"), method = "updateListenerPosition", cancellable = true)
     public void freecam_updateListenerPosition(LivingEntity player, float scale, CallbackInfo ci) {
-        if (started && gameOptions.soundVolume != 0.0F && Freecam.freecamController.isActive()) {
+        if (Freecam.freecamController.isActive() && (AudioListenerPose.interested() || started && gameOptions.soundVolume != 0.0F)) {
             CameraPosition relativeCameraPosition = Freecam.freecamController.getCameraPosition();
-            float var3 = relativeCameraPosition.yaw;
+            float var3 = relativeCameraPosition.yaw - 180F;
             double var4 = relativeCameraPosition.x;
             double var6 = relativeCameraPosition.y;
             double var8 = relativeCameraPosition.z;
@@ -38,8 +37,11 @@ public class SoundManagerMixin {
             float var15 = 0.0F;
             float var16 = 1.0F;
             float var17 = 0.0F;
-            soundSystem.setListenerPosition((float)var4, (float)var6, (float)var8);
-            soundSystem.setListenerOrientation(var12, var13, var14, var15, var16, var17);
+            if (player != null) AudioListenerPose.publish(player.world, var4, var6, var8, var12, var14);
+            if (started && gameOptions.soundVolume != 0.0F) {
+                soundSystem.setListenerPosition((float)var4, (float)var6, (float)var8);
+                soundSystem.setListenerOrientation(var12, var13, var14, var15, var16, var17);
+            }
             ci.cancel();
         }
     }

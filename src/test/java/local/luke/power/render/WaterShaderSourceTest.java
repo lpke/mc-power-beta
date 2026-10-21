@@ -9,7 +9,10 @@ class WaterShaderSourceTest {
     String extended=WaterShaderSource.extend(source);
     assertTrue(extended.startsWith("#version 150\n"));
     assertTrue(extended.contains("in vec4 PowerWaterColor;"));
-    assertTrue(extended.contains("mix(Color, PowerWaterColor, PowerWaterBrightness)"));
+    assertTrue(extended.contains("mix(Color.rgb, powerWater, PowerWaterBrightness)"));
+    assertTrue(extended.contains("vertexColor = vec4(powerColor, Color.a)"));
+    assertTrue(extended.contains("Position - PowerHeldSourceRegion"));
+    assertTrue(extended.contains("max(powerColor, powerNeutral"));
     assertTrue(extended.contains("gl_Position = ProjMat * position;"));
   }
   @Test void rejectsIncompatibleShaderInsteadOfSilentlyReadingWrongVertexData() {

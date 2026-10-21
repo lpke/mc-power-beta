@@ -66,6 +66,14 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
     @Unique private int yOffsetOverlay = 0;
 
     @Unique private int xOffsetStamina, yOffsetStamina;
+    @Unique private int xOffsetOffhand, yOffsetOffhand;
+    @Unique private boolean offhandVisibility = true;
+    public int power$offhandX() {
+        int x = scaledWidth / 2 - 120 + xOffsetOffhand;
+        return Config.hudpositions.hudPositioningSystem.ordinal() < 2 && x < 0 ? scaledWidth / 2 + 91 + xOffsetHotbar : x;
+    }
+    public int power$offhandY() { return scaledHeight - 23 + yOffsetOffhand; }
+    public boolean power$offhandVisible() { return offhandVisibility; }
     @Unique private boolean staminaVisibility = true;
     public int power$staminaX() { return scaledWidth / 2 + 10 + xOffsetStamina; }
     public int power$staminaY() { return scaledHeight - 32 + yOffsetStamina; }
@@ -154,6 +162,14 @@ public abstract class InGameHudMixin extends DrawContext implements local.luke.p
             Config.hudpositions.putStatusBarIconsBelowHotbar, Config.hudpositions.putOverlayMessagesBelowHotbar)
             + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : stamina.verticalPositionOffset);
         staminaVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : stamina.enableVisibility);
+        var offhand = Config.hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OFFHAND_POSITION_CONFIG;
+        xOffsetOffhand = local.luke.power.ui.NativeHudLayout.xOffset(scaledWidth, 6, mode,
+            (mode == 1 ? simple.horizontalPosition : offhand.horizontalPosition).ordinal(), 0)
+            + (mode == 0 ? 0 : mode == 1 ? simple.horizontalPositionOffset : offhand.horizontalPositionOffset);
+        yOffsetOffhand = local.luke.power.ui.NativeHudLayout.yOffset(scaledHeight, 6, mode,
+            (mode == 1 ? simple.verticalPosition : offhand.verticalPosition).ordinal(), false, false)
+            + (mode == 0 ? 0 : mode == 1 ? simple.verticalPositionOffset : offhand.verticalPositionOffset);
+        offhandVisibility = mode == 0 || (mode == 1 ? simple.enableVisibility : offhand.enableVisibility);
         isHotbarRaised = mode != 0 && (hotbarVertical != 0 || yOffsetHotbar < 0);
 
         local.luke.power.ui.HudElements.heartsX = xOffsetHearts;

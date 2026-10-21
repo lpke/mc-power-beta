@@ -25,6 +25,23 @@ terrain paints and retained coverage while moving during blocked target loading.
 restores the original preferences. `zoom-watch`, a physical Zoom in press, then
 `zoom-watch-check` records intermediate native rendered frames without per-frame I/O.
 
+
+4.0.0 native checks, after `new-world`:
+
+- `recipe-400 registry`, `crafting-native`, `furnace-native` and `visual` check native recipes, metadata, safe placement and wide/narrow UI captures. Run `furnace-rollback` last because it deliberately exercises failure shutdown.
+- `inventory-400 native` checks offhand full data, death snapshots, journal-lock failure, slow durable writes and callback rollback. Run `persist-start`, quit and restart the disposable client, load the same world, then run `persist-finish` for process persistence.
+- `inventory-tools-400 native` checks sorting, matching transfers and native slot ownership. `modal` checks Creative and recipe-modal input exclusion.
+- `auto-tools-400 native` exercises tool selection, borrowed shovels, vein ownership, main/offhand restocking and cancellation through real native callbacks.
+- `subtitles-400 native` checks muted sound events, native/freecam directional bases, lifecycle clearing and bounded event bursts.
+- `saved-hotbars-400` checks all nine native rows, slow durable loading and foreign/permission cancellation. `death-restoration-400` checks owned rollback, foreign callbacks, pending claims and kept-player transfer.
+- `settings-400 native` exercises actual Options resets in all three bases, nested HUD drafts, Undo/Discard/Apply, saved-hotbar retention and subtitle renderer visibility. It captures narrow and wide controls for review. `placement` checks default subtitle avoidance and the first drag/nudge plus Undo.
+- `input-400 prepare CASE`, `state`, `check-held`, `check-repeat`, `check-partial`, `check` and `stop` support OS-driven Save/Load, repeat/release-order, row-priority and offhand checks. The fixture observes real production handlers without calling them. Preserve ownership until `stop`; it restores temporary bindings, inventory and saved user data.
+- `offhand-actions-400 native` checks actual bow, ammunition, fishing, food, placement, bucket and map ownership through Minecraft's use pipeline. `visual` captures normal first/third-person frames and map equip transitions; wait until `status` reports completion. `stop` restores the captured state. Its temporary maps use memory-only storage and never allocate saved map IDs.
+- `held-light-400 start` runs timed native renderer phases and writes captures and CPU/GPU measurements. Keep the disposable window focused until `status` reports completion. The fixture waits only for its own stereo texture reload. `capture-pair` runs a bounded multi-tile cold/warm pair; `capture-cold` and `capture-warm` check capture ownership.
+- At the title screen, `world-tools-400 native` checks actual menu visibility, verified backup/copy, concurrency, unsupported data and symlink refusal. `create`, then `created`, opens its recreated test world; `cleanup` removes only files bearing that run's token.
+
+Inspect failure counts as well as `COMMAND DONE`. Keep ownership records until fixture cleanup completes.
+
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 
@@ -657,3 +674,11 @@ for press/release, cycling, remaps, focus/menu/world cancellation and held movem
 conditional World Map appearance and zoom Undo. `release-330 inventories` checks native
 player, chest, crafting, dispenser and furnace minimaps, panel wheel ownership and the
 observed dimming/minimap/container draw order. Use only the muted disposable clone.
+
+`input-400` prepares and observes real Save/Load hotbar and offhand bindings without
+invoking their actions. With a muted disposable client and a world open, run
+`python3 validation-mod/tools/modern_inventory.py --test-root /path/to/test-root --game /path/to/test-root/clone/.minecraft --pid JAVA_PID --window X_WINDOW_ID --display :95 --suite all`.
+The driver verifies the Java process, game directory, isolated Xvfb display and
+window before sending input. It covers both release orders, repeat suppression,
+existing row/scroll priority, Creative hover swaps, text ownership and mouse
+slot/header/outside guards. Every case restores its captured settings and inventory.

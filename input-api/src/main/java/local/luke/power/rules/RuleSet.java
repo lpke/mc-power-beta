@@ -5,7 +5,7 @@ import java.util.*;
 
 /** Owned mutable values. Copies never inherit later changes from their source. */
 public final class RuleSet {
-  public static final int VERSION = 3;
+  public static final int VERSION = 4;
   private final EnumMap<GameRule, JsonPrimitive> values = new EnumMap<>(GameRule.class);
 
   public RuleSet() {
@@ -54,7 +54,7 @@ public final class RuleSet {
       if (version < 1 || version > VERSION) throw new IllegalArgumentException();
       return version;
     } catch (RuntimeException e) {
-      throw new IllegalArgumentException("Unsupported game rules version. Supported versions: 1, 2, 3. Original data is preserved.", e);
+      throw new IllegalArgumentException("Unsupported game rules version. Supported versions: 1 through " + VERSION + ". Original data is preserved.", e);
     }
   }
   public static JsonObject upgradeValues(JsonObject source, int version) {

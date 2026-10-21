@@ -30,6 +30,7 @@ public final class Hotbars {
     return mc != null
         && mc.world != null
         && !mc.world.isRemote
+        && ((local.luke.power.input.WorldIdentity)mc.world.method_262()).power$inventoryReady()
         && mc.player != null
         && mc.player.world == mc.world
         && mc.player.health > 0

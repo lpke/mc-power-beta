@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import local.luke.power.input.RenderedView;
 import local.luke.power.render.CameraEnvironment;
 import local.luke.power.render.RenderControls;
+import local.luke.power.render.HeldLighting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.class_555;
 import net.minecraft.block.Material;
@@ -74,7 +75,7 @@ public class FullBrightRenderMixin {
   private void power$render(float delta, long end, Operation<Void> original) {
     RenderedView.clear();
     RenderControls.beginRender(false);
-    try { original.call(delta, end); }
+    try { HeldLighting.frame(field_2349, delta); original.call(delta, end); }
     finally { RenderControls.endRender(); RenderedView.clear(); }
   }
 }

@@ -44,8 +44,8 @@ public final class DeathInventoryScreen extends UiScreen {
   private int displayedSlot(int index) {
     return record.slots.get(index);
   }
-  private int slotX(int slot) { return slot < 36 ? 8 + slot % 9 * 18 : slot < 40 ? 8 : slot == 40 ? 144 : 88 + (slot - 41) % 2 * 18; }
-  private int slotY(int slot) { return slot < 9 ? 142 : slot < 36 ? 84 + (slot / 9 - 1) * 18 : slot < 40 ? 8 + (39 - slot) * 18 : slot == 40 ? 36 : 26 + (slot - 41) / 2 * 18; }
+  private int slotX(int slot) { return slot == 45 ? 77 : slot < 36 ? 8 + slot % 9 * 18 : slot < 40 ? 8 : slot == 40 ? 144 : 88 + (slot - 41) % 2 * 18; }
+  private int slotY(int slot) { return slot == 45 ? 62 : slot < 9 ? 142 : slot < 36 ? 84 + (slot / 9 - 1) * 18 : slot < 40 ? 8 + (39 - slot) * 18 : slot == 40 ? 36 : 26 + (slot - 41) / 2 * 18; }
   private int hit(int mx, int my) {
     for (int i = 0; i < items.length; i++) {
       int slot = displayedSlot(i);
@@ -93,6 +93,7 @@ public final class DeathInventoryScreen extends UiScreen {
       // Cursor items have no lasting inventory position, so show them separately.
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, minecraft.textureManager.getTextureId("/gui/inventory.png"));
       drawTexture(x + 143, y + 35, 7, 83, 18, 18);
+      if (record.slotLayout == 2) drawTexture(x + 76, y + 61, 7, 83, 18, 18);
       drawCenteredTextWithShadow(textRenderer, "Death " + record.id, width / 2, y - 25, 0xffffff);
       drawCenteredTextWithShadow(textRenderer, date, width / 2, y - 13, 0xaaaaaa);
       GL11.glPushMatrix(); GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); GL11.glPopMatrix();
@@ -116,7 +117,7 @@ public final class DeathInventoryScreen extends UiScreen {
         ItemStack item = items[hovered];
         String name = TranslationStorage.getInstance().get(item.getTranslationKey() + ".name");
         String status = !remaining.contains(hovered) ? "Already recovered" : recover ? "Click to recover this stack" : "Locked";
-        tooltip(item.count + "x " + name + "\n" + status, mx, my);
+        tooltip(item.count + "x " + name + (displayedSlot(hovered)==45?"\nOffhand":"") + "\n" + status, mx, my);
       } else if (inside(mx, my, x, y + 170, 80, 18)) tooltip("Close", mx, my);
       else if (inside(mx, my, x + 84, y + 170, 92, 18)) {
         String denial = DeathTracker.recoveryDenial(minecraft);

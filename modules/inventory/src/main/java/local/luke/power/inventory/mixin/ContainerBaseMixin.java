@@ -182,6 +182,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 
 	@Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
 	protected void powerInventory_mouseClicked(int mouseX, int mouseY, int button, CallbackInfo ci) {
+		if (local.luke.power.input.InventoryPanels.modal(this) || local.luke.power.input.InventoryPanels.contains(this, mouseX, mouseY)) { power$cancelItemDrag(); ci.cancel(); return; }
 		isLeftClickDragMouseTweaksStarted = false;
 		Slot clickedSlot = this.getSlotAt(mouseX, mouseY);
 		if (!powerInventory$eligible()) { power$cancelItemDrag(); ci.cancel(); return; }
@@ -492,7 +493,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 		super.mouseClicked(mouseX, mouseY, button);
 		if (button == 0 || button == 1) {
 			Slot var4 = this.getSlotAt(mouseX, mouseY);
-			int var5 = (this.width - this.backgroundWidth) / 2;
+			int var5 = (this.width - this.backgroundWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this);
 			int var6 = (this.height - this.backgroundHeight) / 2;
 			boolean var7 = mouseX < var5 || mouseY < var6 || mouseX >= var5 + this.backgroundWidth || mouseY >= var6 + this.backgroundHeight;
 			int var8 = -1;
@@ -514,6 +515,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	@Inject(method = "mouseReleased", at = @At("RETURN"), cancellable = true)
 	private void powerInventory_mouseReleasedOrSlotChanged(int mouseX, int mouseY, int button, CallbackInfo ci) {
 		slot = this.getSlotAt(mouseX, mouseY);
+		if (local.luke.power.input.InventoryPanels.modal(this) || local.luke.power.input.InventoryPanels.contains(this, mouseX, mouseY)) { power$cancelItemDrag(); return; }
 		if (!powerInventory$eligible()) { power$cancelItemDrag(); return; }
 		powerInventory$shiftDouble.move(slot);
 		powerInventory$gatherDouble.move(slot);
@@ -1175,10 +1177,18 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 				if (  (null != this.container.slots)
 				   && (10 <= this.container.slots.size())
 				) {
+					int hotbar = -1;
+					for (Object entry : this.container.slots) {
+						Slot candidate = (Slot)entry;
+						SlotAccessor access = (SlotAccessor)candidate;
+						if (access.powerInventory$inventory() == this.minecraft.player.inventory
+						    && access.powerInventory$index() == keyCode - Keyboard.KEY_1) { hotbar = candidate.id; break; }
+					}
+					if (hotbar < 0 || hotbar == slot.id) return;
 					if (this.minecraft.player.inventory.getCursorStack() == null) {
 						this.minecraft.interactionManager.clickSlot(this.container.syncId, slot.id, 0, false, this.minecraft.player);
 					}
-					this.minecraft.interactionManager.clickSlot(this.container.syncId, (this.container.slots.size() - 10) + keyCode - 1, 0, false, this.minecraft.player);
+					this.minecraft.interactionManager.clickSlot(this.container.syncId, hotbar, 0, false, this.minecraft.player);
 					this.minecraft.interactionManager.clickSlot(this.container.syncId, slot.id, 0, false, this.minecraft.player);
 				}
 			}
