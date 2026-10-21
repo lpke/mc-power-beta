@@ -87,6 +87,9 @@ public final class Validation {
       else if (command.equals("sorting-401")) Sorting401Checks.run(mc);
       else if (command.equals("recipe-401")) Recipe401Checks.run(mc);
       else if (command.equals("recipe-402")) Recipe402Checks.run(mc);
+      else if (command.equals("commands-403")) Commands403Checks.run(mc);
+      else if (command.equals("sorting-403")) Sorting403Checks.run(mc);
+      else if (command.startsWith("controls-403 ")) Controls403Checks.run(mc,command.substring(13));
       else if (command.equals("sorting-layer-402")) SortingLayer402Checks.run(mc);
       else if (command.equals("container-offhand-402")) ContainerOffhand402Checks.run(mc);
       else if (command.equals("command-names-402")) CommandNames402Checks.run(mc);

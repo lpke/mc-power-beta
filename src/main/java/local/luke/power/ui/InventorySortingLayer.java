@@ -29,10 +29,7 @@ public final class InventorySortingLayer {
     this.mc = mc; this.host = host; player = mc.player; world = mc.world; container = host.container;
     repeat = Keyboard.areRepeatEventsEnabled();
     var session = new ConfigSession(); InventoryToolsBackend.register(session);
-    var editor = new SortingPreferencesScreen(host, session, () -> {
-      try { session.save(PowerConfig.path().getParent().getParent()); }
-      catch (Exception failure) { throw new IllegalStateException("Sorting layout could not be saved", failure); }
-    });
+    var editor = new SortingPreferencesScreen(host, session, () -> {}, true);
     navigate(editor);
     InventoryPanels.extra(host, OWNER, java.util.List.of(new InventoryPanels.Rect(0, 0, host.width, host.height)));
     InventoryPanels.modal(host, OWNER, true); InventoryTextInput.focus(host, true);

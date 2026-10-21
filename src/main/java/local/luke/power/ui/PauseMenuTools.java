@@ -68,7 +68,7 @@ public final class PauseMenuTools extends UiScreen {
       switch (included.get(i)) {
         case RECIPES -> local.luke.power.recipes.RecipeBooks.openViewer(minecraft, parent);
         case PHOTO -> minecraft.setScreen(new PhotoModeScreen(parent));
-        case MAP -> minecraft.setScreen(new WorldMapScreen());
+        case MAP -> minecraft.setScreen(new WorldMapScreen(parent));
         case WAYPOINTS -> { Maps.ensureWaypoints(minecraft); minecraft.setScreen(new WaypointsScreen(parent)); }
       }
       return true;

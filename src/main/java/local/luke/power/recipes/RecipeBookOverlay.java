@@ -42,14 +42,14 @@ public final class RecipeBookOverlay {
   public boolean enabled() {
     var state=RecipeBookConfig.current();
     return mc.player!=null&&mc.world!=null&&state.enabled&&(standalone?state.pauseMenu:state.inventory)
-        &&!(context.width==2&&mc.player instanceof PlayerMode mode&&mode.power$creativeInventory());
+        &&!(context.width==2&&screen instanceof InventoryGui gui&&gui.power$usesCatalogWheel());
   }
   public RecipeBookLayout layout(){
     int overhang=!standalone&&mc.player!=null&&local.luke.power.offhand.Offhand.visible(mc.player)
         &&local.luke.power.offhand.OffhandContainers.slot(context.handler,mc.player.inventory)!=null?22:0;
     return new RecipeBookLayout(screen.width,screen.height,open&&enabled(),standalone,overhang);
   }
-  public boolean replacesNative(){return enabled()&&open&&layout().narrow();}
+  public boolean replacesNative(){return enabled()&&open&&layout().narrow()&&!InventoryPanels.modalOther(screen,this);}
   public boolean rendersCarried(){return !standalone&&enabled()&&open&&!InventoryPanels.modalOther(screen,this);}
   private boolean subtle(){return RecipeBookConfig.current().buttonStyle==1;}
   private boolean buttonVisible(){return !standalone&&RecipeBookConfig.current().inventoryButton;}

@@ -3,6 +3,7 @@ package local.luke.power.ui;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.util.*;
+import net.minecraft.client.gui.screen.Screen;
 import local.luke.power.map.*;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -11,6 +12,7 @@ import org.lwjgl.opengl.GL11;
 
 /** Full map navigation only changes the view. Panning never loads native terrain. */
 public final class WorldMapScreen extends UiScreen {
+  private Screen parent;
   private final MapMath.View view = new MapMath.View(Maps.x(), Maps.z());
   private final MapZoom zoom = new MapZoom();
   private final TextInput serverMap = new TextInput(Maps.submap(), 48);
@@ -102,8 +104,9 @@ public final class WorldMapScreen extends UiScreen {
     screen.openSettings = true; screen.openMinimapSettings = minimap; screen.initialSetting = setting;
     mc.setScreen(screen); return true;
   }
-  private void closeMap() { minecraft.setScreen(optionsOwner == null ? null : optionsOwner.returnScreen()); }
+  private void closeMap() { minecraft.setScreen(optionsOwner == null ? parent : optionsOwner.returnScreen()); }
   public WorldMapScreen() {}
+  public WorldMapScreen(Screen parent) { this.parent = parent; }
   public WorldMapScreen(Waypoint point) {
     view.x = point.x + .5; view.z = point.z + .5;
     dimension = point.dimension;

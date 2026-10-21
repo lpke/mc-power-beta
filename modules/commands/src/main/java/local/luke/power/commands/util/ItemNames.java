@@ -6,6 +6,7 @@ import java.util.*;
 public final class ItemNames {
   private final Map<String, Integer> identifiers = new TreeMap<>();
   private final Map<String, Map<Integer, List<String>>> paths = new TreeMap<>();
+  private final Set<String> registeredPaths;
 
   public ItemNames(Map<String, Integer> registered) {
     registered.forEach((name, id) -> {
@@ -15,6 +16,7 @@ public final class ItemNames {
       paths.computeIfAbsent(path, ignored -> new TreeMap<>())
           .computeIfAbsent(id, ignored -> new ArrayList<>()).add(identifier);
     });
+    registeredPaths = Set.copyOf(paths.keySet());
   }
 
   public int resolve(String name) {
@@ -28,6 +30,15 @@ public final class ItemNames {
       throw new IllegalArgumentException("Ambiguous item '" + name + "'. Use " + choices + ".");
     }
     return matches.keySet().iterator().next();
+  }
+
+  public void alias(String displayName, int id) {
+    String path = displayName.trim().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "_")
+        .replaceAll("^_+|_+$", "");
+    if (path.isEmpty() || registeredPaths.contains(path) || displayName.startsWith("tile.") || displayName.startsWith("item.")) return;
+    var choices = identifiers.entrySet().stream().filter(entry -> entry.getValue() == id)
+        .map(Map.Entry::getKey).toList();
+    if (!choices.isEmpty()) paths.computeIfAbsent(path, ignored -> new TreeMap<>()).put(id, new ArrayList<>(choices));
   }
 
   public String[] suggest(String input) {

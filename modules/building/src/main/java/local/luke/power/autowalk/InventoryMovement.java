@@ -31,7 +31,9 @@ public final class InventoryMovement {
   }
 
   public static boolean eligible(Minecraft mc, Screen screen) {
-    return supports(screen) && mc.world != null && !mc.world.isRemote && mc.player != null
+    return supports(screen) && !local.luke.power.input.InventoryTextInput.active(screen)
+        && !local.luke.power.input.InventoryPanels.modal(screen)
+        && mc.world != null && !mc.world.isRemote && mc.player != null
         && mc.player.world == mc.world && mc.player.health > 0 && !mc.player.dead
         && !mc.player.method_943();
   }

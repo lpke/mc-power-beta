@@ -155,7 +155,7 @@ public abstract class ChatScreenMixin extends Screen {
         if (power$input().endsWith(" "))
             currentWord = "";
 
-        if (suggestions.length > 1) {
+        if (suggestions.length > 0) {
             calculateTextWidthPixelsBeforeCurrentWord(sections);
         }
     }
@@ -301,9 +301,7 @@ public abstract class ChatScreenMixin extends Screen {
             if (suggestions.length > 0) {
                 ensureChosenIsInRange();
                 renderChosenSuggestion();
-                if (suggestions.length > 1) {
-                    renderMultipleSuggestions();
-                }
+                renderMultipleSuggestions();
             }
         } catch (Exception e) {
             e.printStackTrace();

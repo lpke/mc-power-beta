@@ -58,8 +58,29 @@ public final class MapKeys {
       if (!map.radarIconsAllowed()) return false;
     } else if (mc.currentScreen instanceof local.luke.power.ui.HudEditorScreen hud) {
       if (!hud.radarIconsAllowed()) return false;
+    } else if (mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen) {
+      if (!inventoryIconsAllowed(mc)) return false;
     } else if (mc.currentScreen != null || mc.paused) return false;
     return Bindings.down(RADAR_ICONS);
+  }
+
+  private static boolean inventoryIconsAllowed(Minecraft mc) {
+    var screen = (net.minecraft.client.gui.screen.container.ContainerScreen)mc.currentScreen;
+    if (!local.luke.power.offhand.OffhandContainers.supported(screen)
+        || local.luke.power.input.InventoryTextInput.active(screen)
+        || local.luke.power.input.InventoryPanels.modal(screen) || org.lwjgl.input.Mouse.isGrabbed()) return false;
+    int code = RADAR_ICONS.code;
+    if (code == Keyboard.KEY_ESCAPE || code >= -100 && code <= -98) return false;
+    for (Object entry : mc.options.allKeys) if (entry != RADAR_ICONS
+        && entry instanceof local.luke.power.input.Binding binding && binding.power$code() == code && Bindings.down(entry)) {
+      var metadata = local.luke.power.config.Catalog.metadata("keys." + binding.power$id());
+      if (metadata.has("group") && metadata.get("group").getAsString().equals("Inventory")
+          || binding.power$id().matches("key.power_controls.hotbar_[1-9]")) return false;
+    }
+    if (local.luke.power.input.MovementScreens.allows(screen))
+      for (Object key : java.util.List.of(mc.options.forwardKey, mc.options.backKey, mc.options.leftKey, mc.options.rightKey, mc.options.jumpKey))
+        if (key instanceof local.luke.power.input.Binding binding && binding.power$code() == code && Bindings.down(key)) return false;
+    return true;
   }
 
   public static boolean iconsShown(Minecraft mc, boolean minimap, MapSettings settings) {

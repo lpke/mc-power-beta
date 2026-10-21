@@ -36,6 +36,9 @@ restores the original preferences. `zoom-watch`, a physical Zoom in press, then
 4.0.2 checks, after `new-world`:
 
 - `sorting-layer-402` checks the inventory settings overlay, nested item selection, draft save/discard, protected preferred-item clearing, native input ownership and narrow/wide captures.
+- `commands-403` checks live Wooden Planks aliases, the last partial/complete suggestion row and native Tab completion without executing a command.
+- `sorting-403` checks immediate hotkey layout/preset publication, slot double-clicks, the Item/Clear/Reset row, ordinary menu drafts and Escape returning to the same native container. Captures and a native render observer verify that modal layers skip the underlying inventory.
+- Run `controls-403 open`, hold W and Tab in the disposable window, then run `controls-403 check` and release both keys. It checks actual held movement during recipe search, inventory mob-head priority, compact glyph bounds, both Creative Survival recipe-button styles, hidden Creative hotbars and pause-menu map/photo returns. `controls-403 cancel` restores an unfinished setup.
 - `recipe-402` checks right-click ingredient removal, capacity refusal, native item data, output callbacks and stale-plan cancellation.
 - `container-offhand-402` checks offhand geometry and native ownership across every Beta container, transfers, disabled extraction and narrow/wide captures.
 - `command-names-402` checks live registry parsing and completion for plain and explicitly qualified item/block names, preserving inventory and settings.

@@ -157,8 +157,9 @@ public class PhotoModeScreen extends Screen {
     @Override
     protected void keyPressed(char character, int keyCode) {
         if (keyCode == Keyboard.KEY_ESCAPE) {
-            this.minecraft.setScreen(null);
-            this.minecraft.lockMouse();
+            this.minecraft.setScreen(this.previousScreen);
+            if (this.previousScreen == null) this.minecraft.lockMouse();
+            return;
         }
 
         // Controls via keyboard

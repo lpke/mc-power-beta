@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [4.0.3] - 2026-10-22
+
+- Align the chest offhand frame with the native bottom border, retaining native hotbar item and click positions.
+- Open preferred-item selection by double-clicking a sorting slot. Use one Item, Clear and Reset row with balanced spacing and hover guidance for protection.
+- Apply hotkey sorting-layout edits immediately, including presets, without Done or discard warnings. Keep menu-opened layouts as drafts until saved.
+- Hide the underlying inventory, player model and Creative tabs while sorting and saved-hotbar layers are open. Escape returns to the same inventory and container.
+- Lower compact button letters by one pixel and shorten them while keeping a clear row above the bottom bevel.
+- Keep movement keys out of recipe searches, and show recipe-book controls in Creative's Survival inventory view with working shifted panels.
+- Suggest display names such as wooden_planks alongside plain item IDs in commands. Keep the suggestion list visible down to its final match, including a fully typed item name.
+- Allow the minimap mob-heads hold key in supported inventories, with text fields, modal layers and conflicting inventory controls taking priority.
+- Return to the pause menu when closing its map or photo-mode view with Escape.
+
 ## [4.0.2] - 2026-10-22
 
 - Open the sorting layout editor over your inventory with a new unassigned shortcut. Keep the native container open through layout edits, preferred-item selection and custom IDs, with isolated drafts and saved presets.

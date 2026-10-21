@@ -186,7 +186,7 @@ final class SortingLayer402Checks {
   private static Object read(Object object, String name) throws Exception { return field(object, name).get(object); }
   private static void write(Object object, String name, Object value) throws Exception { field(object, name).set(object, value); }
   private static String bytes(ItemStack stack) throws Exception { return stack == null ? null : DeathItems.encode(stack); }
-  private static final class State implements AutoCloseable {
+  static final class State implements AutoCloseable {
     final Minecraft mc;
     final Screen originalScreen;
     final net.minecraft.inventory.Container originalContainer;

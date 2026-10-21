@@ -47,7 +47,8 @@
     "Radar320Capture",
     "Inventory330RenderMixin",
     "Minimap330RenderMixin",
-    "Player330RenderMixin"
+    "Player330RenderMixin",
+    "Inventory403RenderCapture"
   ],
   "injectors": {
     "defaultRequire": 1

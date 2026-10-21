@@ -6,6 +6,31 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ItemNamesTest {
+  @Test void displayNamesCompleteAndResolveWithoutNamespaces() {
+    var translated = new ItemNames(Map.of("minecraft:planks", 5));
+    translated.alias("Wooden Planks", 5);
+    assertArrayEquals(new String[]{"den_planks"}, translated.suggest("woo"));
+    assertArrayEquals(new String[]{"s"}, translated.suggest("wooden_plank"));
+    assertArrayEquals(new String[]{""}, translated.suggest("wooden_planks"));
+    assertEquals(5, translated.resolve("WOODEN_PLANKS"));
+    assertEquals(5, translated.resolve("planks"));
+    assertEquals(5, translated.resolve("minecraft:planks"));
+  }
+  @Test void displayAliasesKeepCollisionsAndUnknownTranslationKeysSafe() {
+    var translated = new ItemNames(Map.of("minecraft:planks", 5, "example:boards", 500));
+    translated.alias("Wooden Planks", 5); translated.alias("Wooden Planks", 500);
+    var error = assertThrows(IllegalArgumentException.class, () -> translated.resolve("wooden_planks"));
+    assertTrue(error.getMessage().contains("minecraft:planks"));
+    assertTrue(error.getMessage().contains("example:boards"));
+    translated.alias("tile.wood.name", 5);
+    assertArrayEquals(new String[0], translated.suggest("tile_"));
+  }
+  @Test void registeredPathsKeepPriorityOverAnotherItemsTranslatedAlias() {
+    var indexed = new ItemNames(Map.of("minecraft:tall_grass", 31, "power_creative_inventory:fern", 500));
+    indexed.alias("Fern", 31);
+    assertEquals(500, indexed.resolve("fern"));
+    assertEquals(31, indexed.resolve("minecraft:tall_grass"));
+  }
   private final ItemNames names = new ItemNames(Map.of(
       "minecraft:dirt", 3,
       "minecraft:diamond_shovel", 277,

@@ -176,9 +176,14 @@
   Fast placement waits for queued partial-stack refills as well as empty hands,
   including the handoff to a durable inventory plan.
   Sorting-layout overlays keep the native screen and container open through nested
-  settings pages. Draft edits never touch inventory; only explicit saves publish
-  settings and presets. Sorting and matching deposit ignore their retired enable
+  settings pages and queue immutable settings/preset changes immediately. Menu-opened
+  editors retain their isolated drafts and explicit saves. Neither edits inventory.
+  Modal sorting and saved-hotbar layers skip native inventory/model/tab rendering;
+  Escape restores the same host. Slot double-clicks use native event timestamps and
+  cancel on painting, focus loss or navigation. Sorting and matching deposit ignore their retired enable
   fields; button visibility never gates an action or its unassigned-by-default key.
+  Chest offhand frames use the actual texture height, one below its declared GUI
+  height, while item positions remain tied to native hotbar slots.
   Recipe removal returns one input per occupied ingredient through the same durable
   plan and output guard as placement. Reject stale/manual grids and preflight capacity.
 - Held-item lighting uses render-only terrain endpoints and the existing 32-byte

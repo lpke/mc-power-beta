@@ -7,4 +7,5 @@ public interface InventoryToolsHost {
   boolean power$inventoryToolsModal();
   default boolean power$openSortingLayout() { return false; }
   default void power$inventoryToolsWheel(int delta) {}
+  default boolean power$drawInventoryTools(int x, int y, float delta) { return false; }
 }

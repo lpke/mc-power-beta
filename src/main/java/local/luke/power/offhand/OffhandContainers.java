@@ -43,6 +43,11 @@ public final class OffhandContainers {
     throw new IllegalArgumentException("The native hotbar is missing");
   }
 
+  /** Chest draws 17 + rows * 18 + 96 pixels, one less than its declared height. */
+  public static int frameHeight(ContainerScreen screen, int height) {
+    return screen.getClass() == class_264.class ? height - 1 : height;
+  }
+
   public static PlayerInventory owner(Container container) {
     if (!supported(container)) return null;
     PlayerInventory owner = null;

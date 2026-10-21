@@ -6,6 +6,7 @@
     "InventoryToolsContainerMixin",
     "InventoryToolsMouseMixin",
     "InventoryToolsPlayerMixin",
+    "InventoryToolsPlayerRenderMixin",
     "RestockUseMixin",
     "SavedCreativeControlKeysMixin",
     "SavedCreativeHotbarKeysMixin",

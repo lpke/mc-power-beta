@@ -25,7 +25,7 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
   @Override public boolean power$sideSlotGuiSpace(int px, int py) {
     if (!power$sideSlotVisible()) return false;
     int x = (width - backgroundWidth) / 2 + InventoryPanels.offset(this), y = (height - backgroundHeight) / 2;
-    return InventorySideSlots.contains(px, py, x, y, backgroundHeight,
+    return InventorySideSlots.contains(px, py, x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight),
         OffhandContainers.hotbarY(container, minecraft.player.inventory), false);
   }
 
@@ -49,7 +49,7 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
     minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId("/gui/inventory.png"));
     int x = (width - backgroundWidth) / 2 + InventoryPanels.offset(this), y = (height - backgroundHeight) / 2;
     int hotbarY = OffhandContainers.hotbarY(container, minecraft.player.inventory);
-    InventorySideSlots.frame(this::fill, x, y, backgroundHeight, hotbarY, false);
+    InventorySideSlots.frame(this::fill, x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight), hotbarY, false);
     GL11.glColor4f(1, 1, 1, 1);
     drawTexture(x + InventorySideSlots.OFFHAND_X - 1, y + hotbarY - 1, 7, 141, 18, 18);
   }

@@ -57,6 +57,8 @@ public record ItemArgument(Item item, int metadata) {
       Item item = ItemRegistry.INSTANCE.get(identifier);
       if (item != null) registered.put(identifier.toString(), item.id);
     }
-    return new ItemNames(registered);
+    ItemNames names = new ItemNames(registered);
+    for (Item item : Item.ITEMS) if (item != null) names.alias(item.getTranslatedName(), item.id);
+    return names;
   }
 }

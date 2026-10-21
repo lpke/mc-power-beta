@@ -110,7 +110,9 @@ Automatic restocking and automatic tools start off. Power Beta enables offhand a
 the recipe book; the book starts in the pause menu. Sorting and depositing matching
 items are always available, with separate buttons and unbound shortcuts in Controls.
 Hiding either button keeps its shortcut available. The Sorting layout shortcut opens
-the editor over an inventory without closing its container.
+the editor without closing its container. Shortcut-opened layouts apply changes
+immediately; Escape returns to the inventory. Double-click a slot to choose its
+preferred item. Layouts opened from Options retain Done and Discard.
 
 Offhand appears beside the hotbar in inventories, chests, furnaces, crafting tables
 and dispensers. Disabling it retains its contents for removal. Saved Creative

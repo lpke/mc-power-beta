@@ -25,4 +25,9 @@ public final class SortingLayoutPresets {
     PowerConfig.replaceSection("sortingLayouts", expected, next);
     current = next.deepCopy();
   }
+  public static void queued(JsonElement expected, JsonObject next) {
+    if (!Objects.equals(current, expected)) throw new IllegalStateException("Sorting presets changed. Reopen this editor.");
+    SortingLayoutsData.read(next);
+    PowerConfig.saveDeferred("sortingLayouts", next); current = next.deepCopy();
+  }
 }

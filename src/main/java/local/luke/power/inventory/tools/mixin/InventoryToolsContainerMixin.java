@@ -38,6 +38,16 @@ public abstract class InventoryToolsContainerMixin extends Screen implements Inv
   public boolean power$inventoryToolsModal() { return power$inventoryTools != null && power$inventoryTools.modal(); }
   public boolean power$openSortingLayout() { return power$inventoryTools != null && power$inventoryTools.openSortingLayout(); }
   public void power$inventoryToolsWheel(int delta) { if (power$inventoryTools != null) power$inventoryTools.wheel(delta); }
+  public boolean power$drawInventoryTools(int x, int y, float delta) {
+    if (power$inventoryTools == null) return false;
+    power$inventoryTools.prepare();
+    if (!power$inventoryTools.modal()) return false;
+    power$inventoryTools.render(x, y, delta); return true;
+  }
+  @WrapMethod(method = "render")
+  private void power$hideInventoryUnderTools(int x, int y, float delta, Operation<Void> original) {
+    if (!power$drawInventoryTools(x, y, delta)) original.call(x, y, delta);
+  }
   @Inject(method = "render", at = @At("HEAD"))
   private void power$toolsPrepare(int x, int y, float delta, CallbackInfo ci) { if (power$inventoryTools != null) power$inventoryTools.prepare(); }
   @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/container/ContainerScreen;drawBackground(F)V", shift = At.Shift.AFTER))

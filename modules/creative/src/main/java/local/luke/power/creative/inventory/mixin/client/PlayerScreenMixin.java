@@ -133,7 +133,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     this.minecraft.textureManager.bindTexture(texture);
 
-    int posX = (this.width - this.containerWidth) / 2;
+    int posX = (this.width - this.containerWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this);
     int posY = (this.height - this.containerHeight) / 2;
     this.blit(posX + 173, posY + 138, 176, 32, 25, 24);
 
@@ -170,7 +170,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       return;
     }
 
-    int posX = (this.width - this.containerWidth) / 2;
+    int posX = (this.width - this.containerWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this);
     int posY = (this.height - this.containerHeight) / 2;
 
     int texture =
@@ -351,7 +351,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
   @Unique
   private void creative_destroyTooltip() {
     if (!creative_isInCreative() || !local.luke.power.creative.config.Config.current().destroySlot) return;
-    int x = (width - containerWidth) / 2, y = (height - containerHeight) / 2;
+    int x = (width - containerWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this), y = (height - containerHeight) / 2;
     if (local.luke.power.creative.config.Config.current().shiftClearsInventory
         && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
         && mouseX >= x - 18
@@ -463,7 +463,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       creative_mouseScroll();
 
       this.renderBackground();
-      int posX = (this.width - this.containerWidth) / 2;
+      int posX = (this.width - this.containerWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this);
       int posY = (this.height - this.containerHeight) / 2;
       this.renderContainerBackground(delta);
 
@@ -523,7 +523,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     }
     if (power$creativePaintClick(mouseX, mouseY, button)) return;
     if (creative_isInCreative()) {
-      int posX = (this.width - this.containerWidth) / 2;
+      int posX = (this.width - this.containerWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this);
       int posY = (this.height - this.containerHeight) / 2;
 
       if (local.luke.power.creative.config.Config.current().destroySlot
