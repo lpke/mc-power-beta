@@ -4,6 +4,19 @@ import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.opengl.GL11;
 
 public abstract class UiScreen extends Screen {
+  private java.util.function.Consumer<Screen> layerNavigation;
+  public final void layerNavigation(java.util.function.Consumer<Screen> navigation) { layerNavigation = navigation; }
+  protected final boolean inLayer() { return layerNavigation != null; }
+  protected final void showScreen(Screen screen) {
+    if (layerNavigation == null) minecraft.setScreen(screen); else layerNavigation.accept(screen);
+  }
+  public final void layerPress(int x, int y, int button) { mouseClicked(x, y, button); }
+  public final void layerRelease(int x, int y, int button) { mouseReleased(x, y, button); }
+  public final void layerKey(char character, int key) { keyPressed(character, key); }
+  public void layerWheel(int wheel) {}
+  @Override public void renderBackground() {
+    if (inLayer()) fill(0, 0, width, height, 0xa0000000); else super.renderBackground();
+  }
   protected void click() { minecraft.soundManager.method_2009("random.click", 1, 1); }
   protected void titleBar(String title) {
     fill(0, 0, width, 22, 0x70000000);

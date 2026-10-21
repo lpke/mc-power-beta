@@ -6,6 +6,7 @@ import local.luke.power.input.*;
 import local.luke.power.inventory.tools.mixin.SortingDoubleChestAccessor;
 import local.luke.power.mixin.DeathSlotAccessor;
 import local.luke.power.offhand.OffhandSlotInventory;
+import local.luke.power.offhand.OffhandContainers;
 import local.luke.power.world.WorldCompatibility;
 import net.minecraft.*;
 import net.minecraft.client.Minecraft;
@@ -46,11 +47,17 @@ public final class SortingSlots {
       throw new IOException("This inventory layout is unsupported.");
     Map<Integer, Slot> main = new TreeMap<>(), storage = new TreeMap<>(); Inventory storageOwner = null;
     Set<Integer> allMain = new HashSet<>();
+    var offhand = OffhandContainers.slot(handler, mc.player.inventory);
     for (Object entry : handler.slots) {
       if (!(entry instanceof Slot slot)) throw new IOException("Unsupported native slot entry.");
       var access = (DeathSlotAccessor)(Object)slot;
       Inventory owner = access.power$deathInventory(); int index = access.power$deathIndex();
       if (slot.id < 0 || slot.id >= handler.slots.size() || handler.method_2084(slot.id) != slot) throw new IOException("Aliased native slot IDs.");
+      if (slot == offhand) {
+        if (!(owner instanceof OffhandSlotInventory hand) || hand.owner() != mc.player.inventory || index != 0)
+          throw new IOException("Unsupported offhand ownership.");
+        continue;
+      }
       if (owner == mc.player.inventory && index >= 0 && index < 36) {
         if (slot.getClass() != Slot.class || !allMain.add(index)) throw new IOException("Custom or aliased player storage slots.");
         if (index >= 9) main.put(index, slot);
@@ -62,10 +69,9 @@ public final class SortingSlots {
       }
     }
     if (main.size() != 27 || allMain.size() != 36 || screen != class_585.class && (storageOwner == null || storage.size() != storageOwner.size()
-        || handler.slots.size() != storage.size() + 36))
+        || handler.slots.size() != storage.size() + 36 + (offhand == null ? 0 : 1)))
       throw new IOException("The native storage region is incomplete.");
-    if (screen == class_585.class && (handler.slots.size() != 45 && handler.slots.size() != 46
-        || handler.slots.size() == 46 && !(((DeathSlotAccessor)(Object)handler.method_2084(45)).power$deathInventory() instanceof OffhandSlotInventory)))
+    if (screen == class_585.class && handler.slots.size() != 45 + (offhand == null ? 0 : 1))
       throw new IOException("This player inventory has unsupported custom slots.");
     return new Regions(new ArrayList<>(main.values()), new ArrayList<>(storage.values()));
   }

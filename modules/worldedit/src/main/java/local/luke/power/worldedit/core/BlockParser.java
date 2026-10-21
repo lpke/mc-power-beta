@@ -51,6 +51,8 @@ public final class BlockParser {
     state("birch_leaves", 18, 2);
     state("spruce_sapling", 6, 1);
     state("birch_sapling", 6, 2);
+    state("tall_grass", 31, 1);
+    state("fern", 31, 2);
   }
 
   public java.util.List<String> names() {
@@ -203,7 +205,7 @@ public final class BlockParser {
   }
 
   public BlockValue block(String text) {
-    String v = text.toLowerCase(Locale.ROOT).replace("minecraft:", "");
+    String v = normalizeName(text);
     Map<String, String> states = Map.of();
     int bracket = v.indexOf('[');
     if (bracket >= 0) {
@@ -282,7 +284,7 @@ public final class BlockParser {
         continue;
       }
       BlockValue v = block(token);
-      String name = token.toLowerCase(Locale.ROOT).replace("minecraft:", "");
+      String name = normalizeName(token);
       int bracket = name.indexOf('[');
       String base = bracket < 0 ? name : name.substring(0, bracket);
       boolean exact = base.equals("hand") || base.contains(":") || (defaultMeta.containsKey(base) && !base.contains("torch"));
@@ -290,6 +292,18 @@ public final class BlockParser {
       result = result.or(b -> b.id == v.id && (b.meta & bits) == (v.meta & bits));
     }
     return invert ? result.negate() : result;
+  }
+
+  private static String normalizeName(String text) {
+    String name = text.toLowerCase(Locale.ROOT);
+    if (name.startsWith("minecraft:")) return name.substring("minecraft:".length());
+    String creative = "power_creative_inventory:";
+    if (name.startsWith(creative)) {
+      String path = name.substring(creative.length());
+      String base = path.split("[:\\[]", 2)[0];
+      if (base.equals("tall_grass") || base.equals("fern")) return path;
+    }
+    return name;
   }
 
   public static int integer(String s, int min, int max, String label) {

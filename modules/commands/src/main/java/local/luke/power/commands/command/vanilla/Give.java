@@ -2,14 +2,10 @@ package local.luke.power.commands.command.vanilla;
 
 import static local.luke.power.commands.util.ParameterSuggestUtil.suggestItemIdentifier;
 
-import java.util.Optional;
 import local.luke.power.commands.api.Command;
 import local.luke.power.commands.util.SharedCommandSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.modificationstation.stationapi.api.registry.ItemRegistry;
-import net.modificationstation.stationapi.api.util.Identifier;
 
 public class Give implements Command {
 
@@ -29,20 +25,11 @@ public class Give implements Command {
   }
 
   public static int nameToItemId(String n) {
-    String name = n.replace("_", "");
-    for (int i = 0; i < Item.ITEMS.length; i++) {
-      if (Item.ITEMS[i] == null) continue;
-      String translatedName = Item.ITEMS[i].getTranslatedName().replace(" ", ""); // Remove spaces
-      if (translatedName.equalsIgnoreCase(name)) {
-        return i;
-      }
-    }
-    return -1;
+    return local.luke.power.commands.util.ItemArgument.nameToItemId(n);
   }
 
   public static int identifierToItemId(String n) {
-    Optional<Item> item = ItemRegistry.INSTANCE.getOrEmpty(Identifier.of(n));
-    return item.map(itemBase -> itemBase.id).orElse(-1);
+    return local.luke.power.commands.util.ItemArgument.identifierToItemId(n);
   }
 
   @Override
@@ -91,7 +78,7 @@ public class Give implements Command {
   public void manual(SharedCommandSource s) {
     s.sendFeedback("/give <targets> <item> [count=1] [metadata]");
     s.sendFeedback(
-        "Names, minecraft:item names and Beta numeric IDs are accepted. Full inventories drop the"
+        "Use plain names such as dirt or fern, full identifiers, or Beta numeric IDs. Full inventories drop the"
             + " extra items nearby.");
   }
 

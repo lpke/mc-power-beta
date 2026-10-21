@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [4.0.2] - 2026-10-22
+
+- Open the sorting layout editor over your inventory with a new unassigned shortcut. Keep the native container open through layout edits, preferred-item selection and custom IDs, with isolated drafts and saved presets.
+- Put Sorting layout first in Sorting settings, followed by item order and button visibility. Remove the redundant sorting and deposit enable switches, keep both actions available through unassigned hotkeys, and link each button setting to its shortcut.
+- Clear a slot's preferred item with right-click while retaining its protected state. Keep layout tooltips short and preserve drag painting for protection.
+- Make compact inventory button letters lighter, darken their upper and left bevels slightly, and balance dropdown padding and selection highlights across sorting presets, waypoint sets and the HUD editor.
+- Accept and suggest plain item names in /give, /clear and /id, and plain block names in WorldEdit. Keep explicit namespaces, numeric IDs, metadata and block states available; report ambiguous item names without silently choosing another item.
+- Right-click a placed crafting recipe to return one batch of ingredients to your inventory. Clear the last batch, preserve native item data and decline safely when there is no capacity. Recipes without a placed batch retain their variant chooser.
+- Show the offhand beside the hotbar in single and double chests, crafting tables, furnaces and dispensers, including chest minecarts. Keep native slots and shift-transfers separate from the offhand and align its frame, click area and recipe-book spacing.
+
 ## [4.0.1] - 2026-10-21
 
 - Open and use your inventory in Spectator. Worlds allowing Creative use the remembered Creative inventory views; other worlds use Survival. Move, craft, remove and drop items while the inventory is open, while world interaction and closed-inventory dropping stay blocked.

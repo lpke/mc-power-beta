@@ -28,7 +28,7 @@ public class Id implements Command {
     commandSource.sendFeedback("Usage: /id {item name/id}");
     commandSource.sendFeedback("Info: get the ID number of a given item");
     commandSource.sendFeedback(
-        "item name: use the translated item name without spaces, or with '_' instead");
+        "Use a plain name such as dirt or fern, a full identifier, or a Beta numeric ID.");
   }
 
   @Override

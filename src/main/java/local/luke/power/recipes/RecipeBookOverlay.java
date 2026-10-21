@@ -1,6 +1,7 @@
 package local.luke.power.recipes;
 
 import java.util.*;
+import local.luke.power.recipes.planner.RecipeStack;
 import local.luke.power.input.*;
 import local.luke.power.input.InventoryPanels.Rect;
 import local.luke.power.ui.TextInput;
@@ -27,6 +28,11 @@ public final class RecipeBookOverlay {
   private int popupX,popupY;
   private RecipeDefinition ghost,detail,lastUnavailable,lastRecipe;
   private String message="";
+  private RecipeDefinition placedRecipe;
+  private Object placedWorld,placedPlayer;
+  private List<ItemStack> placedInputs=List.of();
+  private List<RecipeStack> placedGrid=List.of();
+  private RecipeStack placedOutput;
   public RecipeBookOverlay(Screen screen,Minecraft mc,RecipeContext context,boolean standalone) {
     this.screen=screen;this.mc=mc;this.context=context;this.standalone=standalone;
     var state=RecipeBookConfig.current();boolean furnace=context.kind==RecipeDefinition.Kind.FURNACE;
@@ -39,7 +45,8 @@ public final class RecipeBookOverlay {
         &&!(context.width==2&&mc.player instanceof PlayerMode mode&&mode.power$creativeInventory());
   }
   public RecipeBookLayout layout(){
-    int overhang=!standalone&&screen.getClass()==net.minecraft.class_585.class&&local.luke.power.offhand.Offhand.visible(mc.player)?22:0;
+    int overhang=!standalone&&mc.player!=null&&local.luke.power.offhand.Offhand.visible(mc.player)
+        &&local.luke.power.offhand.OffhandContainers.slot(context.handler,mc.player.inventory)!=null?22:0;
     return new RecipeBookLayout(screen.width,screen.height,open&&enabled(),standalone,overhang);
   }
   public boolean replacesNative(){return enabled()&&open&&layout().narrow();}
@@ -83,8 +90,8 @@ public final class RecipeBookOverlay {
   private void state(){if(!standalone)RecipeBookConfig.state(context.kind==RecipeDefinition.Kind.FURNACE,open,filter);refreshGeometry();}
   private void releaseInput(){search.focused=false;popup=List.of();InventoryPanels.modal(screen,this,detail!=null&&!standalone);if(!InventoryPanels.modalOther(screen,this))InventoryTextInput.focus(screen,false);}
   private void closeInput(){detail=null;releaseInput();}
-  public void removed(){generation++;closeInput();InventoryPanels.update(screen,0,List.of());}
-  public void kind(RecipeDefinition.Kind kind){generation++;context=RecipeContext.viewer(mc,kind);category=page=0;ghost=null;detail=null;lastRecipe=null;popup=List.of();model=null;filter=false;tick();}
+  public void removed(){generation++;clearPlacement();closeInput();InventoryPanels.update(screen,0,List.of());}
+  public void kind(RecipeDefinition.Kind kind){generation++;clearPlacement();context=RecipeContext.viewer(mc,kind);category=page=0;ghost=null;detail=null;lastRecipe=null;popup=List.of();model=null;filter=false;tick();}
   /** Native containers draw buttons before slots, carried stacks and item tooltips. */
   public void renderInventoryButton(int mx,int my) {
     if(!enabled()||!buttonVisible()||InventoryPanels.modalOther(screen,this))return;
@@ -122,7 +129,7 @@ public final class RecipeBookOverlay {
         boolean same=variants.size()>1&&variants.stream().allMatch(value->value.output.itemId==recipe.output.itemId&&value.output.getDamage()==recipe.output.getDamage());
         if(same)draw.item(mc,recipe.output,r.x()+5,r.y()+5,1,false);
         draw.item(mc,recipe.output,r.x()+(same?3:4),r.y()+(same?3:4),1,false);
-        if(r.contains(mx,my))tooltip=recipe.name+(variants.size()>1?"\nRight-click for more":"")+(!writable()?"\nView recipe":"");
+        if(r.contains(mx,my))tooltip=recipe.name+(removable(recipe)?"\nRight-click to remove 1":variants.size()>1?"\nRight-click for more":"")+(!writable()?"\nView recipe":"");
       }
       int pages=Math.max(1,(groups.size()+19)/20);
       if(pages>1){if(page>0)arrow(l.previous(),"page_backward",mx,my);if(page+1<pages)arrow(l.next(),"page_forward",mx,my);
@@ -154,7 +161,29 @@ public final class RecipeBookOverlay {
     GL11.glPushMatrix();
     try{GL11.glTranslatef(0,0,400);draw.item(mc,carried,mx-8,my-8,1,true);}finally{GL11.glPopMatrix();}
   }
-  private RecipeDefinition cycling(List<RecipeDefinition> values){return values.get((ticks/30)%values.size());}
+  private RecipeDefinition cycling(List<RecipeDefinition> values){
+    if(placedRecipe!=null&&values.contains(placedRecipe)&&removable(placedRecipe))return placedRecipe;
+    return values.get((ticks/30)%values.size());
+  }
+  private void clearPlacement(){placedRecipe=null;placedWorld=placedPlayer=null;placedInputs=List.of();placedGrid=List.of();placedOutput=null;}
+  private void rememberPlacement(RecipeDefinition recipe) {
+    clearPlacement();if(context.kind!=RecipeDefinition.Kind.CRAFTING)return;
+    try {
+      List<ItemStack> inputs=new ArrayList<>();List<RecipeStack> grid=new ArrayList<>();
+      for(var slot:context.inputs){inputs.add(slot.getStack());grid.add(RecipeNative.stack(slot.getStack()));}
+      if(grid.stream().allMatch(Objects::isNull))return;
+      placedInputs=Collections.unmodifiableList(inputs);placedGrid=Collections.unmodifiableList(grid);
+      placedOutput=RecipeNative.stack(context.output.getStack());placedWorld=mc.world;placedPlayer=mc.player;placedRecipe=recipe;
+    }catch(java.io.IOException failure){throw new IllegalStateException("Placed recipe snapshot could not be retained",failure);}
+  }
+  private boolean removable(RecipeDefinition recipe) {
+    if(recipe!=placedRecipe||!writable()||mc.world!=placedWorld||mc.player!=placedPlayer||context.inputs.size()!=placedInputs.size())return false;
+    try {
+      for(int i=0;i<context.inputs.size();i++)if(context.inputs.get(i).getStack()!=placedInputs.get(i)
+          ||!Objects.equals(RecipeNative.stack(context.inputs.get(i).getStack()),placedGrid.get(i)))return false;
+      return placedOutput!=null&&Objects.equals(RecipeNative.stack(context.output.getStack()),placedOutput);
+    }catch(java.io.IOException failure){return false;}
+  }
   private boolean writable(){return !standalone&&context.writable(mc);}
   private int[] tabIcons(int tab){if(tab==0)return new int[]{345};if(context.kind==RecipeDefinition.Kind.FURNACE)return switch(tab){case 1->new int[]{320};case 2->new int[]{1};default->new int[]{265};};
     return switch(tab){case 1->new int[]{45};case 2->new int[]{331};case 3->new int[]{258,283};default->new int[]{327,260};};}
@@ -203,7 +232,7 @@ public final class RecipeBookOverlay {
         int gy=recipe.kind==RecipeDefinition.Kind.FURNACE?1:recipe.shaped?n/recipe.width+oy:n/3;
         draw.item(mc,icons.get((ticks/30)%icons.size()),r.x()+2+7*gx,r.y()+2+7*gy,.375f,false);
       }
-      if(r.contains(mx,my))tooltip=recipe.name;
+      if(r.contains(mx,my))tooltip=recipe.name+(removable(recipe)?"\nRight-click to remove 1":"");
     }return tooltip;
   }
   private Rect detailBounds(){return standalone?layout().detail():new Rect(Math.max(4,(screen.width-146)/2),Math.max(4,(screen.height-104)/2),146,104);}
@@ -225,7 +254,7 @@ public final class RecipeBookOverlay {
   public boolean mouse(int x,int y,int button) {
     if(!enabled()||InventoryPanels.modalOther(screen,this))return false;var l=layout();
     if(detail!=null&&!standalone){detail=null;click();refreshGeometry();return true;}
-    if(!popup.isEmpty()){if(button==0)for(int i=0;i<popup.size();i++)if(popupCell(i).contains(x,y)){var value=popup.get(i);popup=List.of();choose(value);refreshGeometry();return true;}popup=List.of();refreshGeometry();return true;}
+    if(!popup.isEmpty()){if(button==0||button==1)for(int i=0;i<popup.size();i++)if(popupCell(i).contains(x,y)){var value=popup.get(i);popup=List.of();if(button==0)choose(value);else if(removable(value))remove(value);refreshGeometry();return true;}popup=List.of();refreshGeometry();return true;}
     if(buttonVisible()&&toggleBounds().contains(x,y)){if(button==0)toggle();return true;}
     if(!open)return nativeClick(x,y);
     if(l.search().contains(x,y)||l.magnifier().contains(x,y)){if(button==0){if(!search.focused)generation++;search.focused=true;if(l.search().contains(x,y))search.click(x,button);refreshGeometry();}return true;}
@@ -234,14 +263,14 @@ public final class RecipeBookOverlay {
     int[] tabs=tabs();for(int i=0;i<tabs.length;i++)if(l.tab(i).contains(x,y)){if(button==0){generation++;category=tabs[i];page=0;click();rebuild();}return true;}
     if(l.previous().contains(x,y)&&page>0){if(button==0){generation++;page--;click();}return true;}
     if(l.next().contains(x,y)&&(page+1)*20<groups.size()){if(button==0){generation++;page++;click();}return true;}
-    for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){var variants=groups.get(page*20+i);if(button==1&&variants.size()>1){click();openPopup(variants,l.cell(i));}else if(button==0)choose(cycling(variants));return true;}
+    for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){var variants=groups.get(page*20+i);var recipe=cycling(variants);if(button==1&&removable(recipe))remove(recipe);else if(button==1&&variants.size()>1){click();openPopup(variants,l.cell(i));}else if(button==0)choose(recipe);return true;}
     if(owns(x,y))return true;return nativeClick(x,y);
   }
   private boolean nativeClick(int x,int y) {
     var l=layout();List<net.minecraft.screen.slot.Slot> crafting=new ArrayList<>(context.inputs);crafting.add(context.output);
     if(context.kind==RecipeDefinition.Kind.FURNACE&&!context.inputs.isEmpty())crafting.add(context.handler.method_2084(1));
     for(var slot:crafting)if(new Rect(l.inventoryX()+slot.x-1,l.inventoryY()+slot.y-1,18,18).contains(x,y)) {
-      ghost=null;lastUnavailable=null;lastRecipe=null;break;
+      ghost=null;lastUnavailable=null;lastRecipe=null;clearPlacement();break;
     }
     message="";generation++;return false;
   }
@@ -256,7 +285,9 @@ public final class RecipeBookOverlay {
     try {
       var result=RecipeFills.fillResult(mc,context,recipe,maximum,()->enabled()&&mc.currentScreen==screen&&token==generation
           &&!InventoryPanels.modal(screen)&&!search.focused&&org.lwjgl.opengl.Display.isActive(),unavailable->{
-        ghost=unavailable?recipe:null;lastUnavailable=unavailable?recipe:null;if(!unavailable&&layout().narrow()){open=false;state();}
+        ghost=unavailable?recipe:null;lastUnavailable=unavailable?recipe:null;
+        if(unavailable)clearPlacement();else rememberPlacement(recipe);
+        if(!unavailable&&layout().narrow()){open=false;state();}
       });
       if(result!=RecipeFills.Result.ACCEPTED){
         message=switch(result){
@@ -268,6 +299,22 @@ public final class RecipeBookOverlay {
         if(result==RecipeFills.Result.NO_SPACE)ghost=recipe;
       }
     }catch(Exception failure){message="Recipe could not be placed safely";}
+  }
+  private void remove(RecipeDefinition recipe) {
+    if(!removable(recipe))return;
+    click();message="";search.focused=false;popup=List.of();refreshGeometry();int token=++generation;
+    try {
+      var result=RecipeFills.removeResult(mc,context,recipe,()->enabled()&&mc.currentScreen==screen&&token==generation
+          &&!InventoryPanels.modal(screen)&&!search.focused&&org.lwjgl.opengl.Display.isActive(),ignored->{
+        ghost=null;lastUnavailable=null;rememberPlacement(recipe);
+      });
+      if(result!=RecipeFills.Result.ACCEPTED)message=switch(result){
+        case NO_SPACE->"Not enough inventory space";
+        case BUSY->"Another inventory action is pending";
+        case RECOVERY_REQUIRED->"Inventory actions are stopped. Preserve inventory recovery files";
+        default->"Recipe removal is unavailable";
+      };
+    }catch(Exception failure){message="Recipe could not be removed safely";}
   }
   public void toggle() {generation++;open=!open;closeInput();message="";click();state();if(open)tick();}
   public void scroll(int x,int y,int amount) {

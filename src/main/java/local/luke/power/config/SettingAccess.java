@@ -6,7 +6,7 @@ public final class SettingAccess {
   private SettingAccess() {}
 
   public static boolean visible(ConfigSession session, Setting setting) {
-    if (setting.id.equals("inventoryTools.protectedSlots")) return false;
+    if (java.util.Set.of("inventoryTools.protectedSlots", "inventoryTools.sorting", "inventoryTools.depositMatching").contains(setting.id)) return false;
     if (setting.id.startsWith("logo.logo.") || setting.id.startsWith("logo.blocks.")) {
       int style = session.settings().stream().filter(s -> s.id.equals("logo.style"))
           .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(0);

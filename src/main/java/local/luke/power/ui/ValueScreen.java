@@ -56,14 +56,14 @@ public final class ValueScreen extends UiScreen {
     }
     if (b != 0) return;
     if (inside(x, y, width / 2 - 102, height - 28, 100, 20)) save();
-    if (inside(x, y, width / 2 + 2, height - 28, 100, 20)) minecraft.setScreen(returnTo);
+    if (inside(x, y, width / 2 + 2, height - 28, 100, 20)) showScreen(returnTo);
   }
 
   private void save() {
     try {
       setting.parse(input.text());
       accepted.run();
-      minecraft.setScreen(returnTo);
+      showScreen(returnTo);
     } catch (RuntimeException e) {
       error = e.getMessage() == null ? "Invalid value" : e.getMessage();
       errorUntil = System.nanoTime() + 4_000_000_000L;
@@ -72,7 +72,7 @@ public final class ValueScreen extends UiScreen {
 
   protected void keyPressed(char c, int key) {
     if (key == Keyboard.KEY_ESCAPE) {
-      minecraft.setScreen(returnTo);
+      showScreen(returnTo);
       return;
     }
     if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) {

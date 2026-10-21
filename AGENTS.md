@@ -5,6 +5,8 @@
 - Java 21 and Python 3. Run `python3 tools/build_pack.py` from this directory.
   It builds sequentially, runs unit tests and exports a clean Prism ZIP. Do not run
   Loom builds concurrently; their mapping caches are shared.
+  Add `--offline` when all pinned Gradle dependencies are cached to avoid remote
+  metadata checks; the same option is available in `tools/build_utilities.py`.
 - `src/` owns the Options UI, config adapters, audio, overlays and integration.
   `modules/creative`, `building` and `worldedit` have their own builds.
   Other modules use `source-build/modules.json`; their original Gradle files are
@@ -160,6 +162,9 @@
   Reserve their width beside an open recipe book; gameplay slots are not modal
   panel bounds. Scope native outside-click redirection to the originating slot,
   player and world, retaining the inventory gesture dispatch path.
+  Every native inventory-bearing container appends its own offhand transport slot;
+  recovery still uses logical slot 45. Native transfer ranges exclude that appended
+  slot, and frame drawing and input derive their Y position from the actual hotbar.
 - Recipe placement, sorting, refills, automatic tools and saved Creative hotbars
   share inventory leases and immutable worker-flushed plans. Validate the whole
   protected inventory and external native owners before and after callbacks. Roll
@@ -170,6 +175,12 @@
   sorting layout presets remain user data outside defaults and instance-default resets.
   Fast placement waits for queued partial-stack refills as well as empty hands,
   including the handoff to a durable inventory plan.
+  Sorting-layout overlays keep the native screen and container open through nested
+  settings pages. Draft edits never touch inventory; only explicit saves publish
+  settings and presets. Sorting and matching deposit ignore their retired enable
+  fields; button visibility never gates an action or its unassigned-by-default key.
+  Recipe removal returns one input per occupied ingredient through the same durable
+  plan and output guard as placement. Reject stale/manual grids and preflight capacity.
 - Held-item lighting uses render-only terrain endpoints and the existing 32-byte
   vertex. Never change world light, material opacity or spawning. Bound endpoint
   preparation to loaded render sections; freeze and prepare the physical source

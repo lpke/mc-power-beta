@@ -3,12 +3,9 @@ package local.luke.power.commands.util;
 import local.luke.power.commands.ClientCommands;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.modificationstation.stationapi.api.registry.ItemRegistry;
-import net.modificationstation.stationapi.api.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 
 public class ParameterSuggestUtil {
     public static String[] suggestItemIdentifier(String currentInput)
@@ -16,39 +13,7 @@ public class ParameterSuggestUtil {
         if (!FabricLoader.getInstance().isModLoaded("station-registry-api-v0"))
             return new String[0];
 
-        boolean autofillingModId = !currentInput.contains(":");
-        String modId = "";
-        if (!autofillingModId)
-        {
-            modId = currentInput.split(":", -1)[0];
-        }
-
-        HashSet<String> outputs = new HashSet<>();
-        for (Identifier id : ItemRegistry.INSTANCE.getIds())
-        {
-            if (autofillingModId)
-            {
-                if (local.luke.power.chat.ChatCompletion.startsWith(id.namespace.toString(), currentInput))
-                {
-                    outputs.add(id.namespace.toString().substring(currentInput.length()) + ":");
-                }
-            }
-            else
-            {
-                if (id.namespace.toString().equalsIgnoreCase(modId))
-                {
-                    String[] segments = currentInput.split(":", -1);
-                    if (segments.length > 1)
-                    {
-                        if (local.luke.power.chat.ChatCompletion.startsWith(id.path, segments[1]))
-                        {
-                            outputs.add(id.path.substring(segments[1].length()));
-                        }
-                    }
-                }
-            }
-        }
-        return outputs.toArray(new String[0]);
+        return ItemArgument.suggestNames(currentInput);
     }
 
     public static String[] suggestPlayerName(String currentInput) {

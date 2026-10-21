@@ -42,6 +42,7 @@ public abstract class QuickInsertMixin {
         for (boolean empty : new boolean[]{false, true}) {
             for (int i = reverse ? end - 1 : start; i >= start && i < end && stack.count > 0; i += reverse ? -1 : 1) {
                 Slot slot = (Slot) slots.get(i);
+                if (slot instanceof local.luke.power.inventory.PlayerSideSlot) continue;
                 ItemStack existing = slot.getStack();
                 if ((existing == null) != empty || !slot.canInsert(stack)) continue;
                 if (!empty && (!stack.isStackable() || !InventoryStacks.same(stack, existing))) continue;

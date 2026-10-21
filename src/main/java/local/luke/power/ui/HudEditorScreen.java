@@ -422,10 +422,11 @@ public final class HudEditorScreen extends DraftEditorScreen {
       if (!controls && !footer) { leaveReorder(); return; }
     }
     if (selecting && !modal()) {
-      int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows, cellWidth = selectorPopupWidth() / columns;
+      int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows;
       int top = 51;
       if (button == 0 && inside(x, y, left(), top, selectorPopupWidth(), rows * 20)) {
-        int index = (x - left()) / cellWidth * rows + (y - top) / 20;
+        int column = Math.min(columns - 1, (x - left()) * columns / selectorPopupWidth());
+        int index = column * rows + (y - top) / 20;
         if (index < selectionIds().size()) { click(); select(selectionIds().get(index)); }
       }
       selecting = false; return;
@@ -459,17 +460,15 @@ public final class HudEditorScreen extends DraftEditorScreen {
       } finally { GL11.glPopAttrib(); }
     }
     if (!selecting || modal()) return;
-    int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows, cellWidth = selectorPopupWidth() / columns;
+    int rows = selectorRows(), columns = (selectionIds().size() + rows - 1) / rows;
     int top = 51; List<String> ids = selectionIds();
     fill(left() - 2, top - 2, left() + selectorPopupWidth() + 2, top + rows * 20 + 2, 0xff777777);
     fill(left() - 1, top - 1, left() + selectorPopupWidth() + 1, top + rows * 20 + 1, 0xff181818);
     for (int i = 0; i < ids.size(); i++) {
       String id = ids.get(i), label = selectionLabel(id);
-      int px = left() + i / rows * cellWidth, py = top + i % rows * 20;
-      boolean hover = inside(x, y, px, py, cellWidth, 20);
-      if (hover || i == popupIndex) fill(px, py, px + cellWidth - 1, py + 19, 0xff3c3c3c);
-      if (id.equals(selected)) fill(px + 2, py + 3, px + 4, py + 16, 0xff268bff);
-      text(fit(label, cellWidth - 17), px + 9, py + 6, hover || id.equals(selected) ? 0xffffff : 0xcccccc);
+      int column = i / rows, px = left() + column * selectorPopupWidth() / columns, py = top + i % rows * 20;
+      int cellWidth = left() + (column + 1) * selectorPopupWidth() / columns - px;
+      WaypointSetDropdown.row(this, label, px, py, cellWidth, x, y, id.equals(selected), i == popupIndex);
     }
   }
 

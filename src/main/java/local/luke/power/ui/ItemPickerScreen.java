@@ -79,7 +79,7 @@ public final class ItemPickerScreen extends UiScreen {
         domain==ItemCatalogue.Domain.FILTER?"Enter an item ID or identifier. Numeric IDs can include metadata, such as 35:4.":"Enter a numeric ID or a registered identifier, such as minecraft:stone.",
         Setting.Kind.TEXT,empty,empty,0,0,1,List.of(),false);
     entry.validator(v->resolve(v.getAsString()));
-    minecraft.setScreen(new ValueScreen(entry,options.instant()?parent:this,()->{
+    showScreen(new ValueScreen(entry,options.instant()?parent:this,()->{
       var chosen=resolve(entry.value.getAsString());
       if(catalogue.stream().noneMatch(e->e.value().equals(chosen.value())))catalogue.add(chosen);
       if(!multiple)selected.clear();selected.add(chosen.value());filter();error="";if(options.instant())accepted.accept(List.copyOf(selected));
@@ -87,11 +87,11 @@ public final class ItemPickerScreen extends UiScreen {
   }
   private void save(){
     if(!multiple && selected.isEmpty())return;
-    try{for(String value:selected)resolve(value);accepted.accept(List.copyOf(selected));minecraft.setScreen(parent);}
+    try{for(String value:selected)resolve(value);accepted.accept(List.copyOf(selected));showScreen(parent);}
     catch(IllegalArgumentException e){error=Objects.toString(e.getMessage(),"Invalid selection");}
   }
   private void leave(){
-    scrollbar.release();exitPrompt.leave(!options.instant() && !selected.equals(original),()->minecraft.setScreen(parent));
+    scrollbar.release();exitPrompt.leave(!options.instant() && !selected.equals(original),()->showScreen(parent));
   }
   protected void keyPressed(char c,int key){
     if(exitPrompt.key(key))return;
@@ -99,9 +99,10 @@ public final class ItemPickerScreen extends UiScreen {
     if(key==Keyboard.KEY_RETURN || key==Keyboard.KEY_NUMPADENTER){save();return;}
     String before=search.text();search.key(c,key);if(!before.equals(search.text())){scroll=0;filter();}
   }
-  public void onMouseEvent(){super.onMouseEvent();int wheel=Mouse.getEventDWheel();if(!exitPrompt.active() && wheel!=0)scroll=(int)Math.max(0,Math.min(track().maximum(),scroll-Math.signum(wheel)*24));}
+  public void onMouseEvent(){super.onMouseEvent();layerWheel(Mouse.getEventDWheel());}
+  @Override public void layerWheel(int wheel){if(!exitPrompt.active() && wheel!=0)scroll=(int)Math.max(0,Math.min(track().maximum(),scroll-Math.signum(wheel)*24));}
   protected void mouseClicked(int x,int y,int button){
-    if(exitPrompt.click(this,x,y,button,this::save,()->minecraft.setScreen(parent)))return;
+    if(exitPrompt.click(this,x,y,button,this::save,()->showScreen(parent)))return;
     if(button!=0 && button!=1)return;
     search.focused=inside(x,y,left(),38,span()-96,18);
     if(search.focused){search.click(x,button);return;}

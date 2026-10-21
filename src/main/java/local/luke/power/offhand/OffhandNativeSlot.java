@@ -9,9 +9,13 @@ import net.minecraft.screen.slot.Slot;
 public final class OffhandNativeSlot extends Slot implements PlayerSideSlot {
   private final PlayerInventory owner;
   public OffhandNativeSlot(PlayerInventory owner) {
-    super(new OffhandSlotInventory(owner), 0, InventorySideSlots.OFFHAND_X, InventorySideSlots.OFFHAND_Y);
+    this(owner, InventorySideSlots.OFFHAND_Y);
+  }
+  public OffhandNativeSlot(PlayerInventory owner, int hotbarY) {
+    super(new OffhandSlotInventory(owner), 0, InventorySideSlots.OFFHAND_X, hotbarY);
     this.owner = owner;
   }
+  public PlayerInventory owner() { return owner; }
   @Override public boolean canInsert(ItemStack stack) {
     return Offhand.enabled(owner.player)
         && !(owner.player instanceof local.luke.power.input.PlayerMode mode && !mode.power$inventoryEditable());

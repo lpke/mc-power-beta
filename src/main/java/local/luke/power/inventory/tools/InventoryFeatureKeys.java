@@ -9,8 +9,9 @@ public final class InventoryFeatureKeys {
     return switch (id) {
       case "powerbeta.swapHands" -> local.luke.power.offhand.OffhandInput.available(mc);
       case "powerbeta.restock", "powerbeta.toolSwitch" -> InventoryAutomation.survival(mc);
-      case "powerbeta.sortInventory" -> InventoryToolsConfig.current().sorting && SortingSlots.eligible(mc) && local.luke.power.offhand.OffhandInput.container(mc);
-      case "powerbeta.depositMatching" -> InventoryToolsConfig.current().depositMatching && SortingSlots.eligible(mc) && local.luke.power.offhand.OffhandInput.container(mc)
+      case "powerbeta.sortingLayout" -> local.luke.power.ui.InventorySortingLayer.available(mc);
+      case "powerbeta.sortInventory" -> SortingSlots.eligible(mc) && local.luke.power.offhand.OffhandInput.container(mc);
+      case "powerbeta.depositMatching" -> SortingSlots.eligible(mc) && local.luke.power.offhand.OffhandInput.container(mc)
           && (mc.currentScreen.getClass() == net.minecraft.class_264.class || mc.currentScreen.getClass() == net.minecraft.class_235.class);
       case "powerbeta.saveCreativeHotbar", "powerbeta.loadCreativeHotbar" -> SavedCreativeHotbars.eligible(mc);
       case "powerbeta.recipeBook" -> recipeBook(mc);

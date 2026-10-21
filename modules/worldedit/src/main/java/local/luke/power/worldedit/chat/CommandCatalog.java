@@ -181,6 +181,16 @@ public final class CommandCatalog {
     if (token.startsWith("!", start)) start++;
     String keep = input.substring(0, space + 1) + token.substring(0, start);
     String prefix = token.substring(start).toLowerCase(Locale.ROOT);
-    return choices.stream().filter(n -> n.startsWith(prefix)).sorted().map(n -> keep + n).toList();
+    if (choices == BLOCKS && prefix.startsWith("minecraft:")) {
+      keep += "minecraft:";
+      prefix = prefix.substring("minecraft:".length());
+    } else if (choices == BLOCKS && prefix.startsWith("power_creative_inventory:")) {
+      keep += "power_creative_inventory:";
+      prefix = prefix.substring("power_creative_inventory:".length());
+      choices = List.of("tall_grass", "fern");
+    }
+    final String completionPrefix = prefix;
+    final String completionStart = keep;
+    return choices.stream().filter(n -> n.startsWith(completionPrefix)).sorted().map(n -> completionStart + n).toList();
   }
 }

@@ -12,6 +12,7 @@ public class ClientMixin {
   private void power$inventoryThread(CallbackInfo ci) {
     local.luke.power.inventory.InventoryActions.initializeGameThread();
     local.luke.power.inventory.tools.SavedCreativeHotbars.initialize();
+    local.luke.power.inventory.tools.SortingLayoutPresets.initialize();
     local.luke.power.subtitles.Subtitles.initialize();
   }
   @Inject(method = "run", remap = false, at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/Display;update()V", shift = At.Shift.AFTER, remap = false))

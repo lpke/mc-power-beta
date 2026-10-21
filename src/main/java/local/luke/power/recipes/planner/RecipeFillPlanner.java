@@ -9,6 +9,21 @@ public final class RecipeFillPlanner {
     public Plan(List<RecipeStack> main,RecipeStack offhand,List<RecipeStack> grid,int amount,boolean ghost){this(main,offhand,grid,amount,ghost,null);}
     public Plan { main=Collections.unmodifiableList(new ArrayList<>(main));grid=Collections.unmodifiableList(new ArrayList<>(grid)); }
   }
+  /** Return one native item per occupied ingredient without rearranging the remaining grid. */
+  public static Plan removeOne(List<RecipeStack> originalMain,RecipeStack originalOffhand,List<RecipeStack> originalGrid,
+      int selected,boolean offhandWritable,boolean matches) {
+    if(originalMain.size()!=36||originalGrid.isEmpty()||originalGrid.size()>9||selected<0||selected>8)
+      throw new IllegalArgumentException("Unsupported recipe inventory layout");
+    if(!matches||originalGrid.stream().allMatch(Objects::isNull))return null;
+    ReturnState returns=new ReturnState(originalMain,originalOffhand,selected,offhandWritable);
+    List<RecipeStack> grid=new ArrayList<>(originalGrid);int remaining=Integer.MAX_VALUE;
+    for(int i=0;i<grid.size();i++) {
+      RecipeStack stack=grid.get(i);if(stack==null)continue;
+      if(!returns.insert(stack.count(1)))return null;
+      grid.set(i,stack.count(stack.count()-1));remaining=Math.min(remaining,stack.count()-1);
+    }
+    return new Plan(returns.main,returns.offhand,grid,remaining,false);
+  }
   public static Plan plan(List<RecipeStack> originalMain,RecipeStack originalOffhand,List<RecipeStack> originalGrid,
       List<RecipeIngredient> cells,int selected,boolean offhandWritable,boolean matches,boolean maximum) {
     return plan(originalMain,originalOffhand,originalGrid,cells,selected,offhandWritable,matches,maximum,null);

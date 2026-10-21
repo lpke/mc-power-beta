@@ -38,6 +38,10 @@ class BlockStatesTest {
     assertThrows(IllegalArgumentException.class, () -> parser.pattern("rail[shape=east_west]],stone"));
   }
   @Test void propertyNamesAndValuesComplete() {
+    assertTrue(CommandCatalog.complete("//set di").contains("//set dirt"));
+    assertTrue(CommandCatalog.complete("//set fe").contains("//set fern"));
+    assertTrue(CommandCatalog.complete("//set minecraft:di").contains("//set minecraft:dirt"));
+    assertTrue(CommandCatalog.complete("//set power_creative_inventory:fe").contains("//set power_creative_inventory:fern"));
     assertTrue(CommandCatalog.complete("//set rail[sh").contains("//set rail[shape=east_west]"));
     assertTrue(CommandCatalog.complete("//set powered_rail[shape=east_west,pow").contains("//set powered_rail[shape=east_west,powered=true]"));
     assertTrue(CommandCatalog.complete("//replace redstone_torch[lit=f").contains("//replace redstone_torch[lit=false]"));

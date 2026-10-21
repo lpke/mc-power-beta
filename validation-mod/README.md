@@ -33,6 +33,13 @@ restores the original preferences. `zoom-watch`, a physical Zoom in press, then
 - `recipe-401` reproduces empty-offhand swapping with the book open, native dropping during a prepared fill, subsequent crafting and accurate capacity/busy/recovery feedback. Run in actual Survival. Its final controlled callback-failure check verifies rollback and failure shutdown.
 - `held-light-400 mining` checks rendered lighting while breaking a real block with an offhand torch, including section seams and separate refresh/preparation budgets. Keep the muted clone focused until `held-light-400 status` reports completion.
 
+4.0.2 checks, after `new-world`:
+
+- `sorting-layer-402` checks the inventory settings overlay, nested item selection, draft save/discard, protected preferred-item clearing, native input ownership and narrow/wide captures.
+- `recipe-402` checks right-click ingredient removal, capacity refusal, native item data, output callbacks and stale-plan cancellation.
+- `container-offhand-402` checks offhand geometry and native ownership across every Beta container, transfers, disabled extraction and narrow/wide captures.
+- `command-names-402` checks live registry parsing and completion for plain and explicitly qualified item/block names, preserving inventory and settings.
+
 4.0.0 native checks, after `new-world`:
 
 - `recipe-400 registry`, `crafting-native`, `furnace-native` and `visual` check native recipes, metadata, safe placement and wide/narrow UI captures. Run `furnace-rollback` last because it deliberately exercises failure shutdown.

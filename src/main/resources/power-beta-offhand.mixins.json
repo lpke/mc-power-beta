@@ -4,8 +4,10 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "OffhandBowMixin",
+    "OffhandChestTransferMixin",
     "OffhandContainerKeysMixin",
     "OffhandContainerMixin",
+    "OffhandContainerScreenMixin",
     "OffhandEntityUseMixin",
     "OffhandFirstPersonMixin",
     "OffhandFishingMixin",

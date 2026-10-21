@@ -9,8 +9,8 @@ final class WaypointSetDropdown {
   static void button(UiScreen screen, String label, int x, int y, int width,
       int mx, int my, boolean enabled, boolean open) {
     screen.button("", x, y, width, 18, mx, my, enabled);
-    screen.text(screen.fit(label, width - 24), x + 5, y + 5, enabled ? 0xe0e0e0 : 0xa0a0a0);
-    screen.chevron(x + width - 13, y + 7, open, 0xffdddddd);
+    screen.text(screen.fit(label, width - 25), x + 6, y + 5, enabled ? 0xe0e0e0 : 0xa0a0a0);
+    screen.chevron(x + width - 11, y + 7, open, 0xffdddddd);
   }
 
   static void render(UiScreen screen, List<String> labels, int selected, int focus, int scroll,
@@ -19,11 +19,14 @@ final class WaypointSetDropdown {
     screen.rectangle(x - 1, y - 1, x + width + 1, y + rows * 20 + 1, 0xff181818);
     for (int i = 0; i < rows && i + scroll < labels.size(); i++) {
       int index = i + scroll, top = y + i * 20;
-      String label = labels.get(index);
-      boolean hover = screen.inside(mx, my, x, top, width, 20), active = index == selected;
-      if (hover || index == focus) screen.rectangle(x, top, x + width - 1, top + 19, 0xff3c3c3c);
-      if (active) screen.rectangle(x + 2, top + 3, x + 4, top + 16, 0xff268bff);
-      screen.text(screen.fit(label, width - 17), x + 9, top + 6, hover || active ? 0xffffff : 0xcccccc);
+      row(screen, labels.get(index), x, top, width, mx, my, index == selected, index == focus);
     }
+  }
+  static void row(UiScreen screen, String label, int x, int top, int width, int mx, int my,
+      boolean selected, boolean focused) {
+    boolean hover = screen.inside(mx, my, x, top, width, 20);
+    if (hover || focused) screen.rectangle(x, top, x + width, top + 20, 0xff3c3c3c);
+    if (selected) screen.rectangle(x + 2, top + 4, x + 4, top + 16, 0xff268bff);
+    screen.text(screen.fit(label, width - 18), x + 9, top + 6, hover || selected ? 0xffffff : 0xcccccc);
   }
 }

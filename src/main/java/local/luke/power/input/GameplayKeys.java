@@ -23,6 +23,7 @@ public final class GameplayKeys {
   public static final KeyBinding RESTOCK = new KeyBinding("powerbeta.restock", 0);
   public static final KeyBinding RECIPE_BOOK = new KeyBinding("powerbeta.recipeBook", 0);
   public static final KeyBinding SORT_INVENTORY = new KeyBinding("powerbeta.sortInventory", 0);
+  public static final KeyBinding SORTING_LAYOUT = new KeyBinding("powerbeta.sortingLayout", 0);
   public static final KeyBinding DEPOSIT_MATCHING = new KeyBinding("powerbeta.depositMatching", 0);
   public static final KeyBinding SAVE_HOTBAR = new KeyBinding("powerbeta.saveCreativeHotbar", 0);
   public static final KeyBinding LOAD_HOTBAR = new KeyBinding("powerbeta.loadCreativeHotbar", 0);
@@ -39,7 +40,7 @@ public final class GameplayKeys {
     event.keyBindings.add(SWAP_HANDS);
     event.keyBindings.add(RESTOCK);
     event.keyBindings.add(TOOL_SWITCH);
-    event.keyBindings.addAll(java.util.List.of(RECIPE_BOOK, SORT_INVENTORY, DEPOSIT_MATCHING, SAVE_HOTBAR, LOAD_HOTBAR));
+    event.keyBindings.addAll(java.util.List.of(RECIPE_BOOK, SORT_INVENTORY, SORTING_LAYOUT, DEPOSIT_MATCHING, SAVE_HOTBAR, LOAD_HOTBAR));
     event.keyBindings.addAll(local.luke.power.map.MapKeys.all());
     Bindings.onMousePress("powerbeta.mapActions", key -> local.luke.power.map.MapKeys.press((Minecraft)FabricLoader.getInstance().getGameInstance(), key));
     Bindings.onMousePress("powerbeta.lightOverlay", GameplayKeys::toggleLight);

@@ -43,7 +43,7 @@ improvements and optional tweaks in one searchable Options menu.
 - Quick inventory transfers, bulk crafting, drag distribution, double-click collection, held-stack Shift-double-click transfers, scroll transfers, number-key hotbar swaps and stack dropping.
 - Direct tool and armor swapping, Shift-click and right-click equipping, hotbar row swapping with previews, and optional use of the four crafting inputs as storage.
 - Optional offhand inventory and native item use, automatic tool selection, hotbar restocking, inventory sorting and transfers matching chest contents. Save and load nine Creative hotbars.
-- Searchable crafting and smelting recipe book with categories, craftable filtering and ingredient placement. Choose inventory access or a pause-menu viewer; the recipe book starts off.
+- Searchable crafting and smelting recipe book with categories, craftable filtering and ingredient placement. Choose inventory access or a pause-menu viewer; Power Beta starts with the pause-menu viewer.
 - Smooth held-item lighting that changes rendering only, and directional sound subtitles with placement controls in the HUD editor.
 - Verified saved-world backups, duplication with independent world ownership, and recreation from the original seed and rules.
 - Movement while compatible inventories are open, auto-walk, auto-mine, continuous click mining, step assist, edge protection and fence jumping.
@@ -106,15 +106,22 @@ protection. Old footwear-specific crop protection needs an explicit trampling ch
 and show recovery guidance. Keep a full instance backup before upgrading; world
 folders alone do not include global preferences, music libraries or recovery history.
 
-The recipe book and automatic restocking start off in every defaults base. The other
-4.0.0 additions start on in Power Beta and off in Beta and Refined Beta. Set their
-unbound shortcuts in Controls. Disabling offhand retains its contents for removal;
-saved Creative hotbars are user data and survive loading defaults.
+Automatic restocking and automatic tools start off. Power Beta enables offhand and
+the recipe book; the book starts in the pause menu. Sorting and depositing matching
+items are always available, with separate buttons and unbound shortcuts in Controls.
+Hiding either button keeps its shortcut available. The Sorting layout shortcut opens
+the editor over an inventory without closing its container.
+
+Offhand appears beside the hotbar in inventories, chests, furnaces, crafting tables
+and dispensers. Disabling it retains its contents for removal. Saved Creative
+hotbars are user data and survive loading defaults.
 
 The recipe book reads the installed Beta crafting and smelting registries, including
 enabled custom recipes. Beta recipes are available without an advancement unlock
 system. Recipes from extensions with custom matching logic need a display provider
 before the book can safely place their ingredients.
+Right-click a recipe you placed to return one batch of ingredients to your inventory.
+Removing the last batch clears the crafting grid.
 
 Saved-world backups appear in `backups/power-beta`. They include the save and known
 world-owned map and recovery files, with a verified manifest. Duplication copies

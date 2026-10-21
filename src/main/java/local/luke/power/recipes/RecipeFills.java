@@ -54,6 +54,27 @@ public final class RecipeFills {
     var plan=RecipeFillPlanner.plan(main,off,grid,cells,mc.player.inventory.selectedSlot,Offhand.enabled(mc.player),matching,maximum,originalOutput);
     if(plan==null)return Result.NO_SPACE;
     if(!plan.ghost()&&!valid(recipe,context,plan.grid()))return Result.UNAVAILABLE;
+    return publish(mc,context,recipe,main,off,grid,originalOutput,plan,false,eligible,selected);
+  }
+  /** Only the displayed, already placed crafting recipe may return one batch of inputs. */
+  public static Result removeResult(Minecraft mc,RecipeContext context,RecipeDefinition recipe,
+      BooleanSupplier eligible,java.util.function.Consumer<Boolean> selected)throws IOException {
+    if(NativeInventoryPlan.failed())return Result.RECOVERY_REQUIRED;
+    if(context.kind!=RecipeDefinition.Kind.CRAFTING||recipe.kind!=context.kind||!context.writable(mc)
+        ||!eligible.getAsBoolean())return Result.UNAVAILABLE;
+    List<RecipeStack> main=new ArrayList<>(),grid=new ArrayList<>();
+    for(ItemStack item:mc.player.inventory.main)main.add(RecipeNative.stack(item));
+    for(var slot:context.inputs)grid.add(RecipeNative.stack(slot.getStack()));
+    if(!valid(recipe,context,grid)||!Objects.equals(encode(context.output.getStack()),encode(recipe.output)))return Result.UNAVAILABLE;
+    RecipeStack off=RecipeNative.stack(Offhand.get(mc.player.inventory));
+    var plan=RecipeFillPlanner.removeOne(main,off,grid,mc.player.inventory.selectedSlot,Offhand.enabled(mc.player),true);
+    if(plan==null)return Result.NO_SPACE;
+    return publish(mc,context,recipe,main,off,grid,null,plan,true,eligible,selected);
+  }
+  private static Result publish(Minecraft mc,RecipeContext context,RecipeDefinition recipe,List<RecipeStack> main,
+      RecipeStack off,List<RecipeStack> grid,RecipeStack originalOutput,RecipeFillPlanner.Plan plan,boolean removal,
+      BooleanSupplier eligible,java.util.function.Consumer<Boolean> selected)throws IOException {
+    String remainingOutput=removal?craftingOutput(context,plan.grid()):null;
     RecipeOutputGuard output=new RecipeOutputGuard(mc,context);
     List<NativeInventoryPlan.Change> changes=new ArrayList<>();
     for(int i=0;i<36;i++)if(!Objects.equals(main.get(i),plan.main().get(i)))
@@ -65,21 +86,35 @@ public final class RecipeFills {
     Runnable committed=()->{
       try {
         List<RecipeStack> actual=new ArrayList<>();for(var slot:context.inputs)actual.add(RecipeNative.stack(slot.getStack()));
-        if(!actual.equals(plan.grid())||!output.matches()||!plan.ghost()&&!valid(recipe,context,actual))
+        if(!actual.equals(plan.grid())||!output.matches()||!removal&&!plan.ghost()&&!valid(recipe,context,actual))
           throw new IOException("Recipe changed during native publication");
         if(context.kind==RecipeDefinition.Kind.FURNACE&&!Objects.equals(RecipeNative.stack(context.output.getStack()),plan.output()))
           throw new IOException("Furnace output changed during native publication");
-        if(!plan.ghost()&&context.kind==RecipeDefinition.Kind.CRAFTING
+        if(removal&&!Objects.equals(encode(context.output.getStack()),remainingOutput))
+          throw new IOException("Native recipe result changed during removal");
+        if(!removal&&!plan.ghost()&&context.kind==RecipeDefinition.Kind.CRAFTING
             &&!Objects.equals(encode(context.output.getStack()),encode(recipe.output)))throw new IOException("Native recipe result changed during filling");
         selected.accept(plan.ghost());
       }catch(IOException failure){throw new IllegalStateException("Recipe fill requires recovery",failure);}
     };
     if(changes.isEmpty()){if(!eligible.getAsBoolean())return Result.UNAVAILABLE;committed.run();return Result.ACCEPTED;}
-    if(NativeInventoryPlan.submit(mc,"recipe_fill",true,changes,()->context.writable(mc)&&eligible.getAsBoolean()&&output.matches(),committed,output::restore))return Result.ACCEPTED;
+    if(NativeInventoryPlan.submit(mc,removal?"recipe_remove":"recipe_fill",true,changes,()->context.writable(mc)&&eligible.getAsBoolean()&&output.matches(),committed,output::restore))return Result.ACCEPTED;
     if(NativeInventoryPlan.failed())return Result.RECOVERY_REQUIRED;
     return NativeInventoryPlan.busy()||local.luke.power.inventory.InventoryActions.busy()?Result.BUSY:Result.UNAVAILABLE;
   }
   private static String encode(ItemStack stack)throws IOException{return stack==null?null:DeathItems.encode(stack);}
+  private static String craftingOutput(RecipeContext context,List<RecipeStack> grid)throws IOException {
+    class_159 scratch=scratch(context,grid);
+    for(Object object:class_148.method_538().method_541())if(object instanceof class_160 nativeRecipe&&nativeRecipe.method_2072(scratch))
+      return encode(nativeRecipe.method_2074(scratch));
+    return null;
+  }
+  private static class_159 scratch(RecipeContext context,List<RecipeStack> grid)throws IOException {
+    Container callbacks=new Container(){@Override public boolean method_2094(net.minecraft.entity.player.PlayerEntity player){return false;}};
+    class_159 scratch=new class_159(callbacks,context.width,context.height);
+    for(int i=0;i<grid.size();i++)scratch.setStack(i,RecipeNative.nativeStack(grid.get(i)));
+    return scratch;
+  }
   public static boolean valid(RecipeDefinition recipe,RecipeContext context,List<RecipeStack> grid)throws IOException {
     if(context.kind==RecipeDefinition.Kind.FURNACE) {
       if(grid.size()!=1||grid.get(0)==null)return false;
@@ -89,9 +124,7 @@ public final class RecipeFills {
       catch(ReflectiveOperationException failure){throw new IOException("Native smelting adapter unavailable",failure);}
       return Objects.equals(encode(result),encode(recipe.output));
     }
-    Container callbacks=new Container(){@Override public boolean method_2094(net.minecraft.entity.player.PlayerEntity player){return false;}};
-    class_159 scratch=new class_159(callbacks,context.width,context.height);
-    for(int i=0;i<grid.size();i++)scratch.setStack(i,RecipeNative.nativeStack(grid.get(i)));
+    class_159 scratch=scratch(context,grid);
     for(Object object:class_148.method_538().method_541())if(object instanceof class_160 nativeRecipe&&nativeRecipe.method_2072(scratch))
       return nativeRecipe==recipe.nativeRecipe&&Objects.equals(encode(nativeRecipe.method_2074(scratch)),encode(recipe.output));
     return false;

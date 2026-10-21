@@ -36,6 +36,8 @@ public abstract class InventoryToolsContainerMixin extends Screen implements Inv
         (height - backgroundHeight) / 2 + top, right - left, bottom - top);
   }
   public boolean power$inventoryToolsModal() { return power$inventoryTools != null && power$inventoryTools.modal(); }
+  public boolean power$openSortingLayout() { return power$inventoryTools != null && power$inventoryTools.openSortingLayout(); }
+  public void power$inventoryToolsWheel(int delta) { if (power$inventoryTools != null) power$inventoryTools.wheel(delta); }
   @Inject(method = "render", at = @At("HEAD"))
   private void power$toolsPrepare(int x, int y, float delta, CallbackInfo ci) { if (power$inventoryTools != null) power$inventoryTools.prepare(); }
   @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/container/ContainerScreen;drawBackground(F)V", shift = At.Shift.AFTER))
@@ -51,7 +53,7 @@ public abstract class InventoryToolsContainerMixin extends Screen implements Inv
   }
   @WrapMethod(method = "mouseReleased")
   private void power$toolsRelease(int x, int y, int button, Operation<Void> original) {
-    if (power$inventoryTools == null || !power$inventoryTools.release(button)) original.call(x, y, button);
+    if (power$inventoryTools == null || !power$inventoryTools.release(x, y, button)) original.call(x, y, button);
   }
   @WrapMethod(method = "keyPressed")
   private void power$toolsKey(char c, int key, Operation<Void> original) {

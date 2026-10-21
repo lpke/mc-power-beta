@@ -4,7 +4,9 @@ public final class InventoryToolsSettings {
   public boolean sortDescending;
   public java.util.List<Integer> protectedSlots = new java.util.ArrayList<>();
   public java.util.Map<Integer, String> preferredItems = new java.util.LinkedHashMap<>();
-  public boolean sorting, depositMatching, creativeHotbars, restock, toolSwitch;
+  // Retained for old configuration snapshots; sorting and deposit no longer have enable switches.
+  public boolean sorting, depositMatching;
+  public boolean creativeHotbars, restock, toolSwitch;
   public boolean sortingButton = true, depositMatchingButton = true, creativeHotbarsButton = true;
   public boolean restockBeforeEmpty = true, restockOtherHotbar, restockTools = true, toolsFromInventory = true;
   public int restockThreshold = 6, toolDurabilityReserve = 1;

@@ -5,13 +5,20 @@ public final class InventorySideSlots {
   public static final int WIDTH = 22, OFFHAND_X = -17, OFFHAND_Y = 142;
   public static final int DESTROY_Y = 120;
   private InventorySideSlots() {}
-  public static int top(boolean destroyAbove) { return destroyAbove ? 115 : 137; }
+  public static int top(boolean destroyAbove) { return top(OFFHAND_Y, destroyAbove); }
+  public static int top(int hotbarY, boolean destroyAbove) { return hotbarY - (destroyAbove ? 27 : 5); }
   public static boolean contains(int px, int py, int x, int y, int height, boolean destroyAbove) {
-    return px >= x - WIDTH && px < x + 4 && py >= y + top(destroyAbove) && py < y + height;
+    return contains(px, py, x, y, height, OFFHAND_Y, destroyAbove);
+  }
+  public static boolean contains(int px, int py, int x, int y, int height, int hotbarY, boolean destroyAbove) {
+    return px >= x - WIDTH && px < x + 4 && py >= y + top(hotbarY, destroyAbove) && py < y + height;
   }
   @FunctionalInterface public interface Fill { void draw(int left, int top, int right, int bottom, int color); }
   public static void frame(Fill fill, int x, int y, int height, boolean destroyAbove) {
-    int left = x - WIDTH, top = y + top(destroyAbove), bottom = y + height;
+    frame(fill, x, y, height, OFFHAND_Y, destroyAbove);
+  }
+  public static void frame(Fill fill, int x, int y, int height, int hotbarY, boolean destroyAbove) {
+    int left = x - WIDTH, top = y + top(hotbarY, destroyAbove), bottom = y + height;
     fill.draw(left + 1, top, x + 4, bottom, 0xffc6c6c6);
     // The upper edge joins the native panel; only the lower edge continues into it.
     fill.draw(left + 1, top, x, top + 1, 0xff000000);

@@ -34,13 +34,12 @@ public final class OffhandInput {
         || !(mc.currentScreen instanceof ContainerScreen screen) || !(screen instanceof OffhandSlotPicker)
         || InventoryTextInput.active(screen) || InventoryPanels.modal(screen) || mc.player.inventory.getCursorStack() != null
         || screen.container == null || screen.container != mc.player.container || mc.player.inventory.main.length != 36 || mc.player.inventory.armor.length != 4) return false;
-    Class<?> type = screen.getClass(), handler = screen.container.getClass();
-    boolean nativeHandler = type == class_585.class && handler == class_277.class && screen.container == mc.player.playerContainer
-        || type == class_264.class && handler == class_506.class || type == class_235.class && handler == class_407.class
-        || type == class_516.class && handler == class_196.class || type == class_524.class && handler == class_337.class;
-    int slots = screen.container.slots.size();
-    if (!nativeHandler || slots < 36 || slots > 128 || type == class_585.class && slots != 45 && slots != 46
-        || type == class_516.class && slots != 46 || type == class_524.class && slots != 39) return false;
+    Class<?> type = screen.getClass();
+    int slots = screen.container.slots.size() - (OffhandContainers.slot(screen.container, mc.player.inventory) == null ? 0 : 1);
+    if (!OffhandContainers.supported(screen) || OffhandContainers.owner(screen.container) != mc.player.inventory
+        || slots < 36 || slots > 128 || type == class_585.class && (screen.container != mc.player.playerContainer || slots != 45)
+        || type == class_516.class && slots != 46 || type == class_524.class && slots != 39
+        || type == class_235.class && slots != 45 || type == class_264.class && slots != 63 && slots != 90) return false;
     try { if (!screen.container.method_2094(mc.player)) return false; } catch (RuntimeException unavailable) { return false; }
     try { var book = RecipeBooks.book(screen); return book == null || !book.replacesNative(); }
     catch (RuntimeException unsupported) { return false; }

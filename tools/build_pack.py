@@ -17,18 +17,19 @@ def export_markdown(source,target):
  target.write_text(text)
 def main():
  version=pack_version();release_notes()
- parser=argparse.ArgumentParser();parser.add_argument('--skip-build',action='store_true');args=parser.parse_args()
+ parser=argparse.ArgumentParser();parser.add_argument('--skip-build',action='store_true');parser.add_argument('--offline',action='store_true',help='Use cached Gradle dependencies');args=parser.parse_args()
+ offline=['--offline'] if args.offline else []
  build_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
  build_clean=not subprocess.check_output(['git','status','--porcelain'],cwd=ROOT,text=True).strip()
  for entry in json.loads((ROOT/'vendor/libraries/manifest.json').read_text()):
   source=ROOT/entry['file']
   assert hashlib.sha256(source.read_bytes()).hexdigest()==entry['sha256'],f'Library changed: {source.name}'
  if not args.skip_build:
-  subprocess.run(['bash','./gradlew','-p','input-api','--no-daemon','build'],cwd=ROOT,check=True)
+  subprocess.run(['bash','./gradlew','-p','input-api','--no-daemon',*offline,'build'],cwd=ROOT,check=True)
   for component in ['creative','building','worldedit']:
-   subprocess.run(['bash','./gradlew','--no-daemon','build'],cwd=ROOT/'modules'/component,check=True)
-  subprocess.run(['python3','tools/build_utilities.py'],cwd=ROOT,check=True)
-  subprocess.run(['bash','./gradlew','--no-daemon','build'],cwd=ROOT,check=True)
+   subprocess.run(['bash','./gradlew','--no-daemon',*offline,'build'],cwd=ROOT/'modules'/component,check=True)
+  subprocess.run(['python3','tools/build_utilities.py',*offline],cwd=ROOT,check=True)
+  subprocess.run(['bash','./gradlew','--no-daemon',*offline,'build'],cwd=ROOT,check=True)
  out=ROOT/'dist';out.mkdir(exist_ok=True);stage=out/'Power Beta'
  if stage.exists():shutil.rmtree(stage)
  shutil.copytree(ROOT/'pack',stage)

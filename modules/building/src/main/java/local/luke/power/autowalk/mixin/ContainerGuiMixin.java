@@ -15,7 +15,8 @@ public abstract class ContainerGuiMixin extends Screen implements InventoryGui {
   public boolean power$containsGuiSpace(int x, int y) {
     int left = (width - backgroundWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this), top = (height - backgroundHeight) / 2;
     if (x >= left && x < left + backgroundWidth && y >= top && y < top + backgroundHeight
-        || power$extraGuiSpace(x, y) || local.luke.power.input.InventoryPanels.contains(this, x, y)) return true;
+        || power$extraGuiSpace(x, y) || power$sideSlotGuiSpace(x, y)
+        || local.luke.power.input.InventoryPanels.contains(this, x, y)) return true;
     for (Object value : buttons) {
       if (value instanceof ButtonWidget button && button.visible
           && x >= button.x && x < button.x + ((ButtonGuiAccessor)button).power$guiWidth()

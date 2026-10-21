@@ -46,9 +46,10 @@ class ModernFeatureIntegrationTest {
       assertEquals(expected, DefaultBases.value(base, id, new JsonPrimitive(!expected)).getAsBoolean(), base + " " + id);
     }
   }
-  @Test void allSevenNewControlsHaveUnboundCatalogDefaultsAndExactRelatedSettings() {
+  @Test void inventoryControlsHaveUnboundCatalogDefaultsAndExactRelatedSettings() {
     Map<String, String> pairs = Map.of("swapHands", "offhand.enabled", "restock", "inventoryTools.restock",
-        "recipeBook", "recipeBook.enabled", "sortInventory", "inventoryTools.sorting", "depositMatching", "inventoryTools.depositMatching",
+        "recipeBook", "recipeBook.enabled", "sortInventory", "inventoryTools.sortingButton", "depositMatching", "inventoryTools.depositMatchingButton",
+        "sortingLayout", "inventoryTools.preferredItems",
         "saveCreativeHotbar", "inventoryTools.creativeHotbars", "loadCreativeHotbar", "inventoryTools.creativeHotbars");
     var session = new ConfigSession(); var entries = new ArrayList<Setting>();
     entries.add(row("rules.world.allow_creative_mode", false));

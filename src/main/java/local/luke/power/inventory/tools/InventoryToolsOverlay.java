@@ -23,11 +23,25 @@ public final class InventoryToolsOverlay extends UiScreen {
   private Header sort, second;
   private boolean modal;
   private int modalVisit;
+  private local.luke.power.ui.InventorySortingLayer sortingLayer;
   private final ItemStack[][] preview = new ItemStack[9][9];
   private final boolean[][] missing = new boolean[9][9];
   private final String[] rowErrors = new String[9];
   private final ItemRenderer items = new ItemRenderer();
-  public boolean modal() { return modal; }
+  public boolean modal() { return modal || sortingLayer != null && sortingLayer.active(); }
+  public boolean openSortingLayout() {
+    if (!local.luke.power.ui.InventorySortingLayer.available(minecraft)) return false;
+    try {
+      NativeInventoryPlan.cancel();
+      if (host instanceof InventoryDrag drag) drag.power$cancelItemDrag();
+      if (host instanceof CreativePaint paint) paint.power$cancelCreativePaint();
+      sortingLayer = new local.luke.power.ui.InventorySortingLayer(minecraft, (net.minecraft.client.gui.screen.container.ContainerScreen)host);
+      click(); prepare(); return true;
+    } catch (RuntimeException | ReflectiveOperationException failure) {
+      SortingActions.feedback(minecraft, java.util.Objects.toString(failure.getMessage(), "Sorting layout is unavailable")); return false;
+    }
+  }
+  public void wheel(int delta) { if (sortingLayer != null && sortingLayer.active()) sortingLayer.wheel(delta); }
   public void attach(Minecraft mc, Screen host, int width, int height, int panelWidth, int panelHeight, List<ButtonWidget> buttons) {
     init(mc, width, height); this.host = host; this.panelWidth = panelWidth; this.panelHeight = panelHeight;
     sort = new Header(195400); second = new Header(195401); buttons.add(sort); buttons.add(second); prepare();
@@ -37,12 +51,13 @@ public final class InventoryToolsOverlay extends UiScreen {
       && minecraft.player instanceof PlayerMode mode && mode.power$creativeInventory(); }
   public void prepare() {
     if (sort == null) return;
+    if (sortingLayer != null) { sortingLayer.prepare(); if (!sortingLayer.active()) sortingLayer = null; }
     boolean base = SortingSlots.screen(host) && minecraft.world != null && !minecraft.world.isRemote
         && !(host instanceof InventoryGui gui && gui.power$usesCatalogWheel()) && !InventoryPanels.modalOther(host, SavedCreativeHotbars.MODAL_OWNER);
     boolean storage = host.getClass() != class_585.class;
     var settings = InventoryToolsConfig.current();
-    boolean showSecond = base && (storage ? settings.depositMatching && settings.depositMatchingButton : hotbars() && settings.creativeHotbarsButton);
-    sort.visible = base && settings.sorting && settings.sortingButton && !modal;
+    boolean showSecond = base && (storage ? settings.depositMatchingButton : hotbars() && settings.creativeHotbarsButton);
+    sort.visible = base && settings.sortingButton && !modal;
     second.visible = showSecond && !modal; second.text = storage ? "D" : "H";
     var header = InventoryToolsLayout.header(width, height, panelWidth, panelHeight, offset(), sort.visible, second.visible, false);
     if (sort.visible) place(sort, header.sort());
@@ -61,6 +76,10 @@ public final class InventoryToolsOverlay extends UiScreen {
   }
   private void place(Header button, InventoryToolsLayout.Rect rect) { button.x = rect.x(); button.y = rect.y(); button.rect = rect; }
   public boolean press(int x, int y, int mouseButton) {
+    if (sortingLayer != null && sortingLayer.active()) {
+      if (mouseButton >= 0 && mouseButton < 16) ownedButtons |= 1 << mouseButton;
+      sortingLayer.press(x, y, mouseButton); return true;
+    }
     boolean wasModal = modal;
     if (wasModal && mouseButton >= 0 && mouseButton < 16) ownedButtons |= 1 << mouseButton;
     prepare();
@@ -100,11 +119,21 @@ public final class InventoryToolsOverlay extends UiScreen {
     return true;
   }
   public boolean release(int mouseButton) {
+    var picker = (local.luke.power.offhand.OffhandSlotPicker)host;
+    return release(picker.power$offhandPointerX(), picker.power$offhandPointerY(), mouseButton);
+  }
+  public boolean release(int x, int y, int mouseButton) {
     boolean owned = mouseButton >= 0 && mouseButton < 16 && (ownedButtons & 1 << mouseButton) != 0;
     if (mouseButton >= 0 && mouseButton < 16) ownedButtons &= ~(1 << mouseButton);
+    if (sortingLayer != null && sortingLayer.active()) {
+      sortingLayer.release(x, y, mouseButton);
+      return true;
+    }
     return modal || owned;
   }
   public boolean key(char c, int key) {
+    if (sortingLayer != null && sortingLayer.active()) { sortingLayer.key(c, key); return true; }
+    if (!Keyboard.isRepeatEvent() && Bindings.matches("powerbeta.sortingLayout", key)) return openSortingLayout();
     if (modal) {
       if (key == Keyboard.KEY_ESCAPE || Bindings.matches(minecraft.options.inventoryKey, key)) close();
       else if (SavedCreativeHotbars.key(minecraft, key)) refresh();
@@ -112,8 +141,8 @@ public final class InventoryToolsOverlay extends UiScreen {
     }
     if (SavedCreativeHotbars.key(minecraft, key)) return true;
     if (Keyboard.isRepeatEvent()) return false;
-    if (Bindings.matches("powerbeta.sortInventory", key) && InventoryToolsConfig.current().sorting && SortingSlots.eligible(minecraft)) { SortingActions.sortAtPointer(minecraft); return true; }
-    if (Bindings.matches("powerbeta.depositMatching", key) && InventoryToolsConfig.current().depositMatching && SortingSlots.eligible(minecraft)) { SortingActions.depositMatching(minecraft); return true; }
+    if (Bindings.matches("powerbeta.sortInventory", key) && SortingSlots.eligible(minecraft)) { SortingActions.sortAtPointer(minecraft); return true; }
+    if (Bindings.matches("powerbeta.depositMatching", key) && SortingSlots.eligible(minecraft)) { SortingActions.depositMatching(minecraft); return true; }
     return false;
   }
   private void refresh() {
@@ -127,6 +156,7 @@ public final class InventoryToolsOverlay extends UiScreen {
     }
   }
   public void close() {
+    if (sortingLayer != null) { sortingLayer.close(); sortingLayer = null; }
     NativeInventoryPlan.cancel(); hideModal();
   }
   private void hideModal() {
@@ -134,6 +164,7 @@ public final class InventoryToolsOverlay extends UiScreen {
     if (host != null) { InventoryPanels.removeExtra(host, SavedCreativeHotbars.MODAL_OWNER); InventoryPanels.modal(host, SavedCreativeHotbars.MODAL_OWNER, false); }
   }
   public void render(int x, int y, float delta) {
+    if (sortingLayer != null && sortingLayer.active()) { sortingLayer.render(x, y, delta); return; }
     if (!modal) {
       if (sort != null && sort.visible && sort.rect.contains(x, y)) foregroundTooltip("Sort", x, y);
       else if (second != null && second.visible && second.rect.contains(x, y)) foregroundTooltip(host.getClass() == class_585.class

@@ -20,7 +20,8 @@ public final class CraftingGridTransfer {
         || player.world == null || player.world.isRemote || player.dead || player.health <= 0
         || player.container != container || player.inventory.getCursorStack() != null) return false;
     if (container.getClass() != class_196.class || sourceId < 10 || sourceId >= 46
-        || container.slots.size() != 46 || !container.method_2094(player)) return false;
+        || container.slots.size() != 46 + (local.luke.power.offhand.OffhandContainers.slot(container, player.inventory) == null ? 0 : 1)
+        || !container.method_2094(player)) return false;
     Slot source = container.method_2084(sourceId);
     ItemStack stack = source.getStack();
     if (stack == null || stack.count <= 0 || stack.count > stack.getMaxCount()) return false;
