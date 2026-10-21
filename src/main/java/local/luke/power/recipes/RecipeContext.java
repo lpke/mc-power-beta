@@ -41,7 +41,7 @@ public final class RecipeContext {
     return !readOnly&&slots&&mc.currentScreen instanceof ContainerScreen screen&&screen.container==handler
         &&mc.world!=null&&!mc.world.isRemote&&mc.player!=null&&mc.player.world==mc.world&&mc.player.container==handler
         &&mc.player.health>0&&!mc.player.dead&&mc.field_2807==mc.player&&!DetachedCamera.isActive()
-        &&!InteractionState.carryingContainer&&!(mc.player instanceof PlayerMode mode&&mode.power$spectator())
+        &&!InteractionState.carryingContainer&&!(mc.player instanceof PlayerMode mode&&!mode.power$inventoryEditable())
         &&mc.player.inventory.getCursorStack()==null&&handler.method_2094(mc.player)
         &&local.luke.power.world.WorldCompatibility.ready(mc.world);
   }

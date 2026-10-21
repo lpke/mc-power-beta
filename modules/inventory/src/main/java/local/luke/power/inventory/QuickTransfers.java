@@ -18,7 +18,7 @@ public final class QuickTransfers {
     public static boolean eligible(Minecraft mc, ScreenHandler handler) {
         if (mc.player == null || mc.world == null || mc.player.health <= 0 || mc.player.dead
                 || mc.player.currentScreenHandler != handler || !handler.canUse(mc.player)
-                || mc.player instanceof PlayerMode mode && mode.power$spectator()) return false;
+                || mc.player instanceof PlayerMode mode && !mode.power$inventoryEditable()) return false;
         if (mc.world.isRemote && handler.getClass() == FurnaceScreenHandler.class) return false;
         return handler.getClass() == GenericContainerScreenHandler.class
                 || handler.getClass() == FurnaceScreenHandler.class

@@ -14,6 +14,7 @@ import net.minecraft.item.ItemStack;
 
 /** Recipe clicks prepare complete immutable plans; native slots publish only after durable recovery. */
 public final class RecipeFills {
+  public enum Result { ACCEPTED, NO_SPACE, UNAVAILABLE, BUSY, RECOVERY_REQUIRED }
   private RecipeFills() {}
   public static boolean craftable(Minecraft mc,RecipeContext context,RecipeDefinition recipe)throws IOException {
     var cells=recipe.layout(context.width,context.height);if(cells==null||recipe.kind!=context.kind)return false;
@@ -36,8 +37,13 @@ public final class RecipeFills {
   }
   public static boolean fill(Minecraft mc,RecipeContext context,RecipeDefinition recipe,boolean maximum,
       BooleanSupplier eligible,java.util.function.Consumer<Boolean> selected)throws IOException {
-    if(!context.writable(mc)||recipe.kind!=context.kind)return false;
-    var cells=recipe.layout(context.width,context.height);if(cells==null)return false;
+    return fillResult(mc,context,recipe,maximum,eligible,selected)==Result.ACCEPTED;
+  }
+  public static Result fillResult(Minecraft mc,RecipeContext context,RecipeDefinition recipe,boolean maximum,
+      BooleanSupplier eligible,java.util.function.Consumer<Boolean> selected)throws IOException {
+    if(NativeInventoryPlan.failed())return Result.RECOVERY_REQUIRED;
+    if(!context.writable(mc)||recipe.kind!=context.kind||!eligible.getAsBoolean())return Result.UNAVAILABLE;
+    var cells=recipe.layout(context.width,context.height);if(cells==null)return Result.UNAVAILABLE;
     List<RecipeStack> main=new ArrayList<>(),grid=new ArrayList<>();
     for(ItemStack item:mc.player.inventory.main)main.add(RecipeNative.stack(item));
     for(var slot:context.inputs)grid.add(RecipeNative.stack(slot.getStack()));
@@ -46,8 +52,8 @@ public final class RecipeFills {
     boolean matching=context.crafting!=null&&recipe.nativeRecipe!=null&&recipe.nativeRecipe.method_2072(context.crafting);
     if(context.kind==RecipeDefinition.Kind.FURNACE)matching=grid.get(0)!=null&&cells.get(0).accepts(grid.get(0));
     var plan=RecipeFillPlanner.plan(main,off,grid,cells,mc.player.inventory.selectedSlot,Offhand.enabled(mc.player),matching,maximum,originalOutput);
-    if(plan==null)return false;
-    if(!plan.ghost()&&!valid(recipe,context,plan.grid()))return false;
+    if(plan==null)return Result.NO_SPACE;
+    if(!plan.ghost()&&!valid(recipe,context,plan.grid()))return Result.UNAVAILABLE;
     RecipeOutputGuard output=new RecipeOutputGuard(mc,context);
     List<NativeInventoryPlan.Change> changes=new ArrayList<>();
     for(int i=0;i<36;i++)if(!Objects.equals(main.get(i),plan.main().get(i)))
@@ -68,8 +74,10 @@ public final class RecipeFills {
         selected.accept(plan.ghost());
       }catch(IOException failure){throw new IllegalStateException("Recipe fill requires recovery",failure);}
     };
-    if(changes.isEmpty()){if(eligible.getAsBoolean())committed.run();return true;}
-    return NativeInventoryPlan.submit(mc,"recipe_fill",true,changes,()->context.writable(mc)&&eligible.getAsBoolean()&&output.matches(),committed,output::restore);
+    if(changes.isEmpty()){if(!eligible.getAsBoolean())return Result.UNAVAILABLE;committed.run();return Result.ACCEPTED;}
+    if(NativeInventoryPlan.submit(mc,"recipe_fill",true,changes,()->context.writable(mc)&&eligible.getAsBoolean()&&output.matches(),committed,output::restore))return Result.ACCEPTED;
+    if(NativeInventoryPlan.failed())return Result.RECOVERY_REQUIRED;
+    return NativeInventoryPlan.busy()||local.luke.power.inventory.InventoryActions.busy()?Result.BUSY:Result.UNAVAILABLE;
   }
   private static String encode(ItemStack stack)throws IOException{return stack==null?null:DeathItems.encode(stack);}
   public static boolean valid(RecipeDefinition recipe,RecipeContext context,List<RecipeStack> grid)throws IOException {

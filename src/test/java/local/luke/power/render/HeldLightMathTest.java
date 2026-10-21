@@ -4,6 +4,18 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class HeldLightMathTest {
+  @Test void terrainPreparationNeverDropsAnEstablishedSourceButStillFencesColdActivation() {
+    float strength = 0;
+    for (int frame = 0; frame < 20; frame++) strength = HeldLightMath.advanceStrength(strength, .016f, false);
+    assertEquals(0, strength);
+    for (int frame = 0; frame < 7; frame++) strength = HeldLightMath.advanceStrength(strength, .016f, true);
+    assertEquals(1, strength);
+    for (boolean ready : new boolean[]{false, false, true, false, true}) {
+      strength = HeldLightMath.advanceStrength(strength, .016f, ready);
+      assertEquals(1, strength);
+    }
+    assertEquals(0, HeldLightMath.advanceStrength(0, .016f, false));
+  }
   @Test void boundedPreparationTouchesAtMost27AndInfluenceAtMost8Sections() {
     for(double radius:new double[]{HeldLightMath.RADIUS,HeldLightMath.PREPARE_RADIUS}) {
       int maximum=radius==HeldLightMath.RADIUS?2:3;

@@ -32,7 +32,7 @@ public abstract class OffhandScreenMixin extends ContainerScreen {
   }
   @Inject(method="drawBackground",at=@At("TAIL"))
   private void power$frame(float delta,CallbackInfo ci) {
-    if(!Offhand.visible(minecraft.player)||minecraft.player instanceof local.luke.power.input.PlayerMode mode&&mode.power$creative())return;
+    if(!Offhand.visible(minecraft.player)||minecraft.player instanceof local.luke.power.input.PlayerMode mode&&mode.power$creativeInventory())return;
     GL11.glColor4f(1,1,1,1);minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId("/gui/inventory.png"));
     int x=(width-backgroundWidth)/2+local.luke.power.input.InventoryPanels.offset(this), y=(height-backgroundHeight)/2;
     InventorySideSlots.frame(this::fill,x,y,backgroundHeight,false);

@@ -14,6 +14,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class PlayerMixin {
     @Inject(method = "dropSelectedItem", at = @At("HEAD"), cancellable = true)
     private void powerInventory_dropSelectedItem(CallbackInfo ci) {
+        if ((Object) this instanceof local.luke.power.input.PlayerMode mode
+                && mode.power$spectator() && !mode.power$inventoryEditable()) {
+            ci.cancel();
+            return;
+        }
         if (!Config.INVENTORY_TWEAKS_CONFIG.MODERN_MINECRAFT_CONFIG.LCtrlStackDrop) {
             return;
         }

@@ -23,8 +23,7 @@ public final class InventoryFeatureKeys {
         || local.luke.power.input.InteractionState.carryingContainer) return false;
     var settings = local.luke.power.recipes.RecipeBookConfig.current(); if (!settings.enabled) return false;
     if (mc.currentScreen == null) {
-      boolean creative = mc.player instanceof local.luke.power.input.PlayerMode mode && mode.power$creative();
-      return settings.inventory && !creative || settings.pauseMenu;
+      return settings.inventory && local.luke.power.recipes.RecipeBooks.inventoryAvailable(mc) || settings.pauseMenu;
     }
     if (!(mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen)
         || org.lwjgl.input.Mouse.isGrabbed() || local.luke.power.input.InventoryTextInput.active(mc.currentScreen)

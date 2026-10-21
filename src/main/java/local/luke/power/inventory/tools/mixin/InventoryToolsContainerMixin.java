@@ -21,9 +21,27 @@ public abstract class InventoryToolsContainerMixin extends Screen implements Inv
     power$inventoryTools.attach(minecraft, this, width, height, backgroundWidth, backgroundHeight, buttons);
   }
   public InventoryToolsLayout.Rect power$recipeButtonBounds() { return power$inventoryTools == null ? null : power$inventoryTools.recipeButtonBounds(); }
+  public InventoryToolsLayout.Rect power$inventoryToolsPlayerArea() {
+    if (minecraft.player == null) return null;
+    var screen = (ContainerScreen)(Object)this;
+    int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = Integer.MIN_VALUE, bottom = Integer.MIN_VALUE;
+    for (Object entry : screen.container.slots) if (entry instanceof net.minecraft.screen.slot.Slot slot) {
+      var access = (local.luke.power.mixin.DeathSlotAccessor)(Object)slot;
+      if (access.power$deathInventory() != minecraft.player.inventory || access.power$deathIndex() < 0 || access.power$deathIndex() >= 36) continue;
+      left = Math.min(left, slot.x - 1); top = Math.min(top, slot.y - 1);
+      right = Math.max(right, slot.x + 17); bottom = Math.max(bottom, slot.y + 17);
+    }
+    return left == Integer.MAX_VALUE ? null : new InventoryToolsLayout.Rect(
+        (width - backgroundWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this) + left,
+        (height - backgroundHeight) / 2 + top, right - left, bottom - top);
+  }
   public boolean power$inventoryToolsModal() { return power$inventoryTools != null && power$inventoryTools.modal(); }
   @Inject(method = "render", at = @At("HEAD"))
   private void power$toolsPrepare(int x, int y, float delta, CallbackInfo ci) { if (power$inventoryTools != null) power$inventoryTools.prepare(); }
+  @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/container/ContainerScreen;drawBackground(F)V", shift = At.Shift.AFTER))
+  private void power$headerBehindItems(int x, int y, float delta, CallbackInfo ci) {
+    if (power$inventoryTools != null) power$inventoryTools.renderHeader();
+  }
   @Inject(method = "render", at = @At("TAIL"))
   private void power$toolsRender(int x, int y, float delta, CallbackInfo ci) { if (power$inventoryTools != null) power$inventoryTools.render(x, y, delta); }
   // The overlay owns dispatch before native gesture guards cancel clicks inside shared panels.

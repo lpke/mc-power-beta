@@ -6,6 +6,7 @@ import local.luke.power.death.DeathItems;
 import local.luke.power.input.*;
 import local.luke.power.inventory.NativeInventoryPlan;
 import local.luke.power.ui.UiScreen;
+import local.luke.power.ui.CompactInventoryButton;
 import net.minecraft.class_585;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -21,6 +22,7 @@ public final class InventoryToolsOverlay extends UiScreen {
   private int panelWidth, panelHeight, ownedButtons;
   private Header sort, second;
   private boolean modal;
+  private int modalVisit;
   private final ItemStack[][] preview = new ItemStack[9][9];
   private final boolean[][] missing = new boolean[9][9];
   private final String[] rowErrors = new String[9];
@@ -28,21 +30,23 @@ public final class InventoryToolsOverlay extends UiScreen {
   public boolean modal() { return modal; }
   public void attach(Minecraft mc, Screen host, int width, int height, int panelWidth, int panelHeight, List<ButtonWidget> buttons) {
     init(mc, width, height); this.host = host; this.panelWidth = panelWidth; this.panelHeight = panelHeight;
-    sort = new Header(195400, 14); second = new Header(195401, 14); buttons.add(sort); buttons.add(second); prepare();
+    sort = new Header(195400); second = new Header(195401); buttons.add(sort); buttons.add(second); prepare();
   }
   private int offset() { return InventoryPanels.offset(host); }
   private boolean hotbars() { return host.getClass() == class_585.class && InventoryToolsConfig.current().creativeHotbars
-      && minecraft.player instanceof PlayerMode mode && mode.power$creative(); }
+      && minecraft.player instanceof PlayerMode mode && mode.power$creativeInventory(); }
   public void prepare() {
     if (sort == null) return;
     boolean base = SortingSlots.screen(host) && minecraft.world != null && !minecraft.world.isRemote
         && !(host instanceof InventoryGui gui && gui.power$usesCatalogWheel()) && !InventoryPanels.modalOther(host, SavedCreativeHotbars.MODAL_OWNER);
     boolean storage = host.getClass() != class_585.class;
-    boolean showSecond = base && (storage ? InventoryToolsConfig.current().depositMatching : hotbars());
-    sort.visible = base && InventoryToolsConfig.current().sorting && !modal;
+    var settings = InventoryToolsConfig.current();
+    boolean showSecond = base && (storage ? settings.depositMatching && settings.depositMatchingButton : hotbars() && settings.creativeHotbarsButton);
+    sort.visible = base && settings.sorting && settings.sortingButton && !modal;
     second.visible = showSecond && !modal; second.text = storage ? "D" : "H";
-    place(sort, InventoryToolsLayout.sort(width, height, panelWidth, panelHeight, offset(), showSecond));
-    place(second, InventoryToolsLayout.second(width, height, panelWidth, panelHeight, offset()));
+    var header = InventoryToolsLayout.header(width, height, panelWidth, panelHeight, offset(), sort.visible, second.visible, false);
+    if (sort.visible) place(sort, header.sort());
+    if (second.visible) place(second, header.second());
     // Keep header appearance stable while a carried stack temporarily blocks an action.
     sort.active = true; second.active = true;
     if (modal && (!Display.isActive() || !SavedCreativeHotbars.eligible(minecraft))) close();
@@ -52,10 +56,8 @@ public final class InventoryToolsOverlay extends UiScreen {
     }
   }
   public InventoryToolsLayout.Rect recipeButtonBounds() {
-    boolean second = host != null && host.getClass() != class_585.class
-        ? InventoryToolsConfig.current().depositMatching : host != null && hotbars();
-    var anchor = InventoryToolsLayout.sort(width, height, panelWidth, panelHeight, offset(), second);
-    return new InventoryToolsLayout.Rect(anchor.x() - 16, anchor.y(), 14, 14);
+    prepare();
+    return InventoryToolsLayout.header(width, height, panelWidth, panelHeight, offset(), sort.visible, second.visible, true).recipe();
   }
   private void place(Header button, InventoryToolsLayout.Rect rect) { button.x = rect.x(); button.y = rect.y(); button.rect = rect; }
   public boolean press(int x, int y, int mouseButton) {
@@ -67,13 +69,16 @@ public final class InventoryToolsOverlay extends UiScreen {
       if (mouseButton >= 0 && mouseButton < 16) ownedButtons |= 1 << mouseButton;
       if (mouseButton != 0) return true;
       var box = InventoryToolsLayout.modal(width, height, offset());
-      if (new InventoryToolsLayout.Rect(box.x() + 8, box.y() + 202, box.width() - 16, 18).contains(x, y)) { click(); close(); return true; }
-      int row = (y - box.y() - 32) / 18;
-      if (y >= box.y() + 32 && row >= 0 && row < 9) {
-        if (new InventoryToolsLayout.Rect(box.x() + box.width() - 82, box.y() + 32 + row * 18, 36, 16).contains(x, y)) {
+      if (new InventoryToolsLayout.Rect(box.x() + 8, box.y() + InventoryToolsLayout.MODAL_BACK_TOP, box.width() - 16, 18).contains(x, y)) { click(); close(); return true; }
+      int row = (y - box.y() - InventoryToolsLayout.MODAL_ROW_TOP) / 18;
+      if (y >= box.y() + InventoryToolsLayout.MODAL_ROW_TOP && row >= 0 && row < 9) {
+        if (new InventoryToolsLayout.Rect(box.x() + box.width() - 82, box.y() + InventoryToolsLayout.MODAL_ROW_TOP + row * 18, 36, 16).contains(x, y)) {
           click(); if (SavedCreativeHotbars.save(minecraft, row)) refresh();
-        } else if (new InventoryToolsLayout.Rect(box.x() + box.width() - 42, box.y() + 32 + row * 18, 36, 16).contains(x, y) && rowErrors[row].isEmpty()) {
-          click(); SavedCreativeHotbars.load(minecraft, row);
+        } else if (new InventoryToolsLayout.Rect(box.x() + box.width() - 42, box.y() + InventoryToolsLayout.MODAL_ROW_TOP + row * 18, 36, 16).contains(x, y) && rowErrors[row].isEmpty()) {
+          click(); int visit = modalVisit;
+          SavedCreativeHotbars.load(minecraft, row, () -> {
+            if (modal && modalVisit == visit && minecraft.currentScreen == host) hideModal();
+          });
         }
       }
       return true;
@@ -89,7 +94,7 @@ public final class InventoryToolsOverlay extends UiScreen {
       NativeInventoryPlan.cancel();
       if (host instanceof InventoryDrag drag) drag.power$cancelItemDrag();
       if (host instanceof CreativePaint paint) paint.power$cancelCreativePaint();
-      modal = true; InventoryPanels.modal(host, SavedCreativeHotbars.MODAL_OWNER, true); refresh(); prepare();
+      modal = true; modalVisit++; InventoryPanels.modal(host, SavedCreativeHotbars.MODAL_OWNER, true); refresh(); prepare();
     }
     else SortingActions.depositMatching(minecraft);
     return true;
@@ -107,7 +112,7 @@ public final class InventoryToolsOverlay extends UiScreen {
     }
     if (SavedCreativeHotbars.key(minecraft, key)) return true;
     if (Keyboard.isRepeatEvent()) return false;
-    if (Bindings.matches("powerbeta.sortInventory", key) && InventoryToolsConfig.current().sorting && SortingSlots.eligible(minecraft)) { SortingActions.sort(minecraft, local.luke.power.ui.TextEditing.shift()); return true; }
+    if (Bindings.matches("powerbeta.sortInventory", key) && InventoryToolsConfig.current().sorting && SortingSlots.eligible(minecraft)) { SortingActions.sortAtPointer(minecraft); return true; }
     if (Bindings.matches("powerbeta.depositMatching", key) && InventoryToolsConfig.current().depositMatching && SortingSlots.eligible(minecraft)) { SortingActions.depositMatching(minecraft); return true; }
     return false;
   }
@@ -122,7 +127,10 @@ public final class InventoryToolsOverlay extends UiScreen {
     }
   }
   public void close() {
-    modal = false; NativeInventoryPlan.cancel();
+    NativeInventoryPlan.cancel(); hideModal();
+  }
+  private void hideModal() {
+    modal = false; modalVisit++;
     if (host != null) { InventoryPanels.removeExtra(host, SavedCreativeHotbars.MODAL_OWNER); InventoryPanels.modal(host, SavedCreativeHotbars.MODAL_OWNER, false); }
   }
   public void render(int x, int y, float delta) {
@@ -133,14 +141,14 @@ public final class InventoryToolsOverlay extends UiScreen {
       return;
     }
     var box = InventoryToolsLayout.modal(width, height, offset());
-    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
+    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS); GL11.glPushMatrix();
     try {
+      // Native player previews retain depth. Keep every dialog item in front of that layer.
+      GL11.glTranslatef(0, 0, 300);
       GL11.glDisable(GL11.GL_LIGHTING); GL11.glDisable(GL11.GL_DEPTH_TEST);
       fill(0, 0, width, height, 0xa0000000); fill(box.x(), box.y(), box.x() + box.width(), box.y() + box.height(), 0xf0202020);
-      drawCenteredTextWithShadow(textRenderer, "Creative hotbars", box.x() + box.width() / 2, box.y() + 7, 0xffffff);
-      text(fit("Load replaces the nine hotbar slots.", box.width() - 12), box.x() + 6, box.y() + 20, 0xaaaaaa);
       for (int row = 0; row < 9; row++) {
-        int top = box.y() + 32 + row * 18;
+        int top = box.y() + InventoryToolsLayout.MODAL_ROW_TOP + row * 18;
         for (int slot = 0; slot < 9; slot++) {
           int left = box.x() + 16 + slot * 16;
           fill(left, top, left + 16, top + 16, 0xff101010);
@@ -149,28 +157,34 @@ public final class InventoryToolsOverlay extends UiScreen {
       GL11.glPushMatrix(); GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); GL11.glPopMatrix();
       GL11.glEnable(32826);
       for (int row = 0; row < 9; row++) for (int slot = 0; slot < 9; slot++) {
-          int left = box.x() + 16 + slot * 16, top = box.y() + 32 + row * 18;
+          int left = box.x() + 16 + slot * 16, top = box.y() + InventoryToolsLayout.MODAL_ROW_TOP + row * 18;
           ItemStack item = preview[row][slot];
           if (item != null) { items.method_1487(minecraft.textRenderer, minecraft.textureManager, item, left, top); items.method_1488(minecraft.textRenderer, minecraft.textureManager, item, left, top); }
       }
       GL11.glDisable(GL11.GL_LIGHTING); GL11.glDisable(GL11.GL_DEPTH_TEST);
       String hoverError = "";
       for (int row = 0; row < 9; row++) {
-        int top = box.y() + 32 + row * 18; text(Integer.toString(row + 1), box.x() + 4, top + 4, 0xcccccc);
+        int top = box.y() + InventoryToolsLayout.MODAL_ROW_TOP + row * 18; text(Integer.toString(row + 1), box.x() + 4, top + 4, 0xcccccc);
         for (int slot = 0; slot < 9; slot++) if (missing[row][slot]) text("?", box.x() + 21 + slot * 16, top + 4, 0xffbb66);
         button("Save", box.x() + box.width() - 82, top, 36, 16, x, y, SavedCreativeHotbars.eligible(minecraft));
         button("Load", box.x() + box.width() - 42, top, 36, 16, x, y, rowErrors[row].isEmpty() && SavedCreativeHotbars.eligible(minecraft));
         if (!rowErrors[row].isEmpty() && y >= top && y < top + 18) hoverError = rowErrors[row];
       }
-      button("Back", box.x() + 8, box.y() + 202, box.width() - 16, 18, x, y, true);
+      button("Back", box.x() + 8, box.y() + InventoryToolsLayout.MODAL_BACK_TOP, box.width() - 16, 18, x, y, true);
       if (!hoverError.isEmpty()) foregroundTooltip(hoverError, x, y);
-    } finally { GL11.glPopAttrib(); }
+    } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); }
+  }
+  public void renderHeader() {
+    if (sort != null) sort.draw();
+    if (second != null) second.draw();
   }
   private final class Header extends ButtonWidget {
     InventoryToolsLayout.Rect rect = new InventoryToolsLayout.Rect(0, 0, 0, 0);
-    Header(int id, int width) { super(id, 0, 0, width, 14, "S"); }
-    @Override public void render(Minecraft mc, int x, int y) {
-      if (visible) InventoryToolsOverlay.this.button(text, rect.x(), rect.y(), rect.width(), rect.height(), x, y, active);
+    Header(int id) { super(id, 0, 0, InventoryToolsLayout.BUTTON_SIZE, InventoryToolsLayout.BUTTON_SIZE, "S"); }
+    // Native Screen.render runs after item tooltips. These widgets retain input ownership only.
+    @Override public void render(Minecraft mc, int x, int y) {}
+    void draw() {
+      if (visible) CompactInventoryButton.draw(minecraft, text, rect.x(), rect.y(), active);
     }
   }
 }

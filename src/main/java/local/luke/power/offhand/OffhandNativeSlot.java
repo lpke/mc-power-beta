@@ -14,6 +14,6 @@ public final class OffhandNativeSlot extends Slot implements PlayerSideSlot {
   }
   @Override public boolean canInsert(ItemStack stack) {
     return Offhand.enabled(owner.player)
-        && !(owner.player instanceof local.luke.power.input.PlayerMode mode && mode.power$spectator());
+        && !(owner.player instanceof local.luke.power.input.PlayerMode mode && !mode.power$inventoryEditable());
   }
 }

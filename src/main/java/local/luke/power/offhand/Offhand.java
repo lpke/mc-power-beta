@@ -27,9 +27,16 @@ public final class Offhand {
     return player!=null&&player.world!=null&&!player.world.isRemote&&(enabled(player)||get(player.inventory)!=null);
   }
   public static boolean playable(Minecraft mc) {
+    return usable(mc) && !(mc.player instanceof PlayerMode mode && mode.power$spectator());
+  }
+  /** Manual slot swaps may operate in Spectator's owned inventory, never in the world. */
+  public static boolean inventoryPlayable(Minecraft mc) {
+    return usable(mc) && !(mc.player instanceof PlayerMode mode && !mode.power$inventoryEditable());
+  }
+  private static boolean usable(Minecraft mc) {
     return mc != null && enabled(mc.player) && mc.world == mc.player.world && mc.player.health > 0 && !mc.player.dead
         && mc.field_2807 == mc.player && !DetachedCamera.isActive() && !InteractionState.carryingContainer
-        && !(mc.player instanceof PlayerMode mode && mode.power$spectator()) && mc.interactionManager != null;
+        && mc.interactionManager != null;
   }
   public static ItemStack stack(PlayerEntity player, HandUse.Hand hand) {
     return hand == HandUse.Hand.OFF ? get(player.inventory) : player.inventory.main[player.inventory.selectedSlot];
@@ -52,8 +59,7 @@ public final class Offhand {
         ()->local.luke.power.offhand.OffhandInput.available(mc)&&mc.currentScreen==null,OffhandRenderer::changed);
   }
   public static boolean swapSlot(Minecraft mc,net.minecraft.screen.slot.Slot slot) {
-    if(!playable(mc)||slot==null||mc.player.inventory.getCursorStack()!=null
-        ||slot.id<0||slot.id>=mc.player.container.slots.size()||mc.player.container.method_2084(slot.id)!=slot)return false;
+    if(!OffhandInput.swapEligible(mc,slot))return false;
     var access=(local.luke.power.mixin.DeathSlotAccessor)slot;
     if(access.power$deathInventory() instanceof OffhandSlotInventory)return false;
     ItemStack source=slot.getStack(),off=get(mc.player.inventory);
@@ -63,6 +69,6 @@ public final class Offhand {
     if(NativeInventoryPlan.cancelPending(mc,"swap_offhand_slot"))return true;
     return NativeInventoryPlan.submit(mc,"swap_offhand_slot",true,java.util.List.of(
         NativeInventoryPlan.Change.slot(slot,off),NativeInventoryPlan.Change.offhand(mc.player.inventory,source)),
-        ()->OffhandInput.swapEligible(mc,slot),OffhandRenderer::changed);
+        ()->OffhandInput.swapOwner(mc,slot),OffhandRenderer::changed);
   }
 }

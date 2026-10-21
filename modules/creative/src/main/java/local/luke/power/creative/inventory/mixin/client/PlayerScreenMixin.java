@@ -1,6 +1,8 @@
 package local.luke.power.creative.inventory.mixin.client;
 
 import java.util.List;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import local.luke.power.creative.inventory.CreativeGrid;
 import local.luke.power.input.InventorySideSlots;
 import net.minecraft.block.Block;
@@ -88,6 +90,11 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
 
   public PlayerScreenMixin(Container container) {
     super(container);
+  }
+
+  @WrapMethod(method = "renderContainerBackground")
+  private void power$inventoryPreview(float delta, Operation<Void> original) {
+    local.luke.power.creative.inventory.InventoryPreview.render(() -> original.call(delta));
   }
 
   @Inject(method = "<init>(Lnet/minecraft/entity/living/player/PlayerEntity;)V", at = @At("TAIL"))
@@ -427,7 +434,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
 
   @Unique
   private boolean creative_isInCreative() {
-    return minecraft.player.creative_isCreative();
+    return local.luke.power.creative.Modes.creativeInventory(minecraft.player);
   }
 
   @Unique

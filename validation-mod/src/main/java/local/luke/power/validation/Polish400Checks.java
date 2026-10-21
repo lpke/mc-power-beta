@@ -148,7 +148,26 @@ final class Polish400Checks {
               var small = (InventoryPanels.Rect)call(book,"toggleBounds");
               input.power$click(small.x()+7,small.y()+7,0); input.power$release(small.x()+7,small.y()+7,0);
               check(book.layout().open(), "Subtle recipe button did not open its panel");
-
+              var shownTools = InventoryToolsConfig.copy(); var shownBook = RecipeBookConfig.copy();
+              var key = local.luke.power.input.GameplayKeys.RECIPE_BOOK;
+              int originalCode = key.code; var modifiers = Bindings.modifiers();
+              try {
+                book.toggle();
+                var hiddenTools = InventoryToolsConfig.copy(); hiddenTools.sortingButton = hiddenTools.creativeHotbarsButton = hiddenTools.depositMatchingButton = false;
+                InventoryToolsConfig.preview(hiddenTools);
+                var hiddenBook = RecipeBookConfig.copy(); hiddenBook.inventoryButton = false; RecipeBookConfig.preview(hiddenBook); book.tick();
+                ((InventoryToolsHost)(Object)screen).power$recipeButtonBounds();
+                check(input.power$buttons().stream().filter(b -> b.id == 195400 || b.id == 195401).noneMatch(b -> b.visible), "hidden compact buttons remained visible");
+                check(InventoryToolsConfig.current().sorting && RecipeBookConfig.current().enabled && book.enabled(), "hiding buttons disabled their features");
+                var hidden = (InventoryPanels.Rect)call(book,"toggleBounds");
+                check(hidden.width() == 0 && hidden.height() == 0 && !book.owns(small.x()+2,small.y()+2), "hidden recipe button retained mouse ownership");
+                key.code = Keyboard.KEY_F12; var plain = new HashMap<>(modifiers); plain.remove("powerbeta.recipeBook"); Bindings.configure(plain); Bindings.register(minecraftKeys(mc));
+                check(book.key('\0', Keyboard.KEY_F12) && book.layout().open(), "hidden recipe button disabled its hotkey");
+                capture(mc,screen,"inventory-buttons-hidden-"+size[0],manifest);
+              } finally {
+                key.code = originalCode; Bindings.configure(modifiers); Bindings.register(minecraftKeys(mc));
+                InventoryToolsConfig.preview(shownTools); RecipeBookConfig.preview(shownBook); book.tick();
+              }
             });
             var book = RecipeBooks.book(screen); if (book != null) book.removed(); InventoryPanels.remove(screen);
           }
@@ -225,6 +244,7 @@ final class Polish400Checks {
     SettingsSnapshot.render(mc,screen,screen.width,screen.height,REPORT.resolve(name+".png"));
     manifest.add(name+".png logical="+screen.width+"x"+screen.height);
   }
+  private static Object[] minecraftKeys(Minecraft mc) { return mc.options.allKeys; }
   private static Field declared(Class<?> owner,String name)throws Exception {var result=owner.getDeclaredField(name);result.setAccessible(true);return result;}
   private static Field playerField(Minecraft mc,String name)throws Exception {
     for(Class<?> type=mc.player.getClass();type!=null;type=type.getSuperclass())try{return declared(type,name);}catch(NoSuchFieldException absent){}

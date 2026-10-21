@@ -87,6 +87,6 @@ public final class GatherStacks {
     private static boolean eligible(Minecraft mc, ScreenHandler handler) {
         return mc.world != null && mc.player != null && !mc.player.dead && mc.player.health > 0
                 && mc.player.currentScreenHandler == handler && handler.canUse(mc.player)
-                && !(mc.player instanceof PlayerMode mode && mode.power$spectator());
+                && !(mc.player instanceof PlayerMode mode && !mode.power$inventoryEditable());
     }
 }

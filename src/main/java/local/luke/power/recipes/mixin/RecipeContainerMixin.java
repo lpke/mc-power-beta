@@ -29,6 +29,8 @@ public abstract class RecipeContainerMixin extends Screen implements RecipeBookH
   private int power$nativeOffset(int width){return width+2*InventoryPanels.offset(this);}
   @ModifyExpressionValue(method="render",at=@At(value="INVOKE",target="Lnet/minecraft/entity/player/PlayerInventory;getCursorStack()Lnet/minecraft/item/ItemStack;",ordinal=0))
   private ItemStack power$deferCarried(ItemStack stack){var book=power$recipeBook();return book!=null&&book.rendersCarried()?null:stack;}
+  @Inject(method="render",at=@At(value="INVOKE",target="Lnet/minecraft/client/gui/screen/container/ContainerScreen;drawBackground(F)V",shift=At.Shift.AFTER))
+  private void power$buttonBehindItems(int x,int y,float delta,CallbackInfo ci){var book=power$recipeBook();if(book!=null)book.renderInventoryButton(x,y);}
   @WrapMethod(method="render")
   private void power$render(int x,int y,float delta,Operation<Void> original){var book=power$recipeBook();
     if(book!=null&&book.replacesNative()){

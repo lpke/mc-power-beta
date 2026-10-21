@@ -178,6 +178,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     if (power$spectator) ci.cancel();
   }
 
+  @Inject(method = "dropSelectedItem", at = @At("HEAD"), cancellable = true)
+  private void power$dropSelectedItem(CallbackInfo ci) {
+    if (power$spectator && !Modes.spectatorInventory(this)) ci.cancel();
+  }
+
   @Inject(
       method = "initDataTracker",
       at =

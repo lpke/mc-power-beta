@@ -17,6 +17,9 @@ public final class InventorySideSlots {
     fill.draw(left + 1, top, x, top + 1, 0xff000000);
     fill.draw(left, top + 1, x + 4, bottom - 1, 0xff000000);
     fill.draw(left + 1, top + 1, x + 4, bottom - 1, 0xffc6c6c6);
+    // Continue the native panel's white left bevel into the horizontal extension.
+    // Clearing its black edge alone leaves a gray break above the white ledge.
+    fill.draw(x, top, x + 3, top + 1, 0xffffffff);
     fill.draw(left + 2, top + 1, x + 3, top + 3, 0xffffffff);
     fill.draw(left + 1, top + 2, left + 3, bottom - 3, 0xffffffff);
     fill.draw(left + 2, bottom - 3, x + 4, bottom - 1, 0xff555555);

@@ -20,7 +20,7 @@ public final class HeldLight400Checks {
   private static Task task;
   private HeldLight400Checks() {}
   private enum Phase {
-    BASELINE(0), MAIN(14), OFFHAND_ONLY(15), BOTH_HANDS(15), OFFHAND_DISABLED(0), EMPTY(0), LAVA(15),
+    BASELINE(0), MAIN(14), OFFHAND_ONLY(15), OFFHAND_MINING(14), BOTH_HANDS(15), OFFHAND_DISABLED(0), EMPTY(0), LAVA(15),
     MOVING(14), FREECAM_FIXED(14), FREECAM_PLAYER_MOVING(14), FREECAM_MOVING(14), STEREO(14), FULL_BRIGHT(0),
     WATER_NATIVE_OFF(0), WATER_CLEAR_OFF(0), WATER_CLEAR_ON(14), WATER_MID_ON(14), WATER_NATIVE_ON(14),
     PREVIEW_OFF(0), CANCEL(14), COLD_CAPTURE_BASE(0), COLD_CAPTURE(14), WARM_CAPTURE(14), FINAL_DISABLED(0);
@@ -29,7 +29,7 @@ public final class HeldLight400Checks {
     boolean moving(){return this==MOVING||this==FREECAM_PLAYER_MOVING||this==FREECAM_MOVING;}
     boolean water(){return name().startsWith("WATER_");}
     boolean dormant(){return emission==0;}
-    int warmup(){return this==BASELINE?80:30;}
+    int warmup(){return this==BASELINE?80:this==OFFHAND_MINING?60:30;}
     String file(){return name().toLowerCase(Locale.ROOT).replace('_','-');}
   }
 
@@ -40,12 +40,12 @@ public final class HeldLight400Checks {
       check(task!=null,"start the phased fixture first");
       task.jump=command.equals("capture-cold")?Phase.COLD_CAPTURE_BASE:Phase.WARM_CAPTURE;return;
     }
-    check(command.equals("start")||command.equals("capture-pair"),"use held-light-400 start|capture-pair|status|stop|capture-cold|capture-warm");
+    check(command.equals("start")||command.equals("capture-pair")||command.equals("mining"),"use held-light-400 start|capture-pair|mining|status|stop|capture-cold|capture-warm");
     check(task==null,"held-light fixture already running");
-    Task next=new Task(mc);next.capturePair=command.equals("capture-pair");task=next;
+    Task next=new Task(mc);next.capturePair=command.equals("capture-pair");next.miningOnly=command.equals("mining");task=next;
     try {
       check(next.currentReload()==null,"finish the current resource reload before starting");
-      next.checkShader();next.scene.build();next.expectReload();next.begin(Phase.BASELINE);log("HELD LIGHT 400 START "+next.root);
+      next.checkShader();next.scene.build();next.expectReload();next.begin(next.miningOnly?Phase.OFFHAND_MINING:Phase.BASELINE);log("HELD LIGHT 400 START "+next.root);
     }
     catch(Throwable failure){next.fail(failure);finish("failed");}
   }
@@ -62,7 +62,7 @@ public final class HeldLight400Checks {
   public static void beforeFrame(Minecraft mc) {
     if(task==null||task.inCapture||task.failure!=null||task.expectedReload!=null)return;
     try {
-      task.frameActive=true;task.frameAdmissions=HeldLighting.captures();task.frameLightHash=task.scene.lightHash();
+      task.frameActive=true;task.frameAdmissions=HeldLighting.captures();task.frameRefreshes=HeldLighting.refreshes();task.frameLightHash=task.scene.lightHash();
       task.frames.beforeFrame(task.measuring()?task.samples:null);
     }catch(Throwable failure){task.fail(failure);}
   }
@@ -103,8 +103,8 @@ public final class HeldLight400Checks {
     HeldLight400Frames.Samples samples;
     ConfigSession preview,brightnessPreview;
     int phaseTicks;
-    long phaseStarted,requests,admissions,neutrals,waters,mismatches,frameAdmissions,frameLightHash;
-    boolean advance,frameActive,inCapture,capturePair;
+    long phaseStarted,requests,admissions,neutrals,waters,mismatches,frameAdmissions,frameRefreshes,frameLightHash;
+    boolean advance,frameActive,inCapture,capturePair,miningOnly;
     Object expectedReload;
     long reloadStarted,stalePauseStarted;
     boolean reloadLogged;
@@ -180,13 +180,14 @@ public final class HeldLight400Checks {
       boolean stereoChanged=mc.options.anaglyph3d!=(phase==Phase.STEREO);
       scene.stereo(phase==Phase.STEREO);if(stereoChanged)expectReload();
       scene.bright(phase==Phase.FULL_BRIGHT);
-      scene.water(100);scene.offhandEnabled(true);scene.enabled(!phase.dormant()||phase==Phase.FULL_BRIGHT);scene.hands(50,0);scene.basePose();
+      scene.creative();scene.water(100);scene.offhandEnabled(true);scene.enabled(!phase.dormant()||phase==Phase.FULL_BRIGHT);scene.hands(50,0);scene.basePose();
       switch(phase) {
         case BASELINE -> {
           brightnessPreview=SettingsRegistry.open(mc);find(brightnessPreview,"native.brightness").parse("0");brightnessPreview.preview(true);
           scene.enabled(false);scene.hands(50,0);
         }
         case OFFHAND_ONLY -> scene.hands(0,89);
+        case OFFHAND_MINING -> scene.mining();
         case BOTH_HANDS -> scene.hands(50,89);
         case OFFHAND_DISABLED -> {scene.enabled(true);scene.hands(0,89);scene.offhandEnabled(false);}
         case EMPTY -> {scene.enabled(true);scene.hands(0,0);}
@@ -215,6 +216,7 @@ public final class HeldLight400Checks {
       check(System.nanoTime()-phaseStarted<25_000_000_000L,"phase did not receive enough native frames within 25 seconds");
       if(jump!=null){Phase next=jump;jump=null;begin(next);return;}
       if(advance){
+        if(miningOnly){finish("passed");return;}
         if(capturePair&&phase==Phase.BASELINE){begin(Phase.COLD_CAPTURE_BASE);return;}
         int next=phase.ordinal()+1;if(next==Phase.values().length){finish("passed");return;}begin(Phase.values()[next]);return;
       }
@@ -222,10 +224,12 @@ public final class HeldLight400Checks {
       if(phase==Phase.MOVING||phase==Phase.FREECAM_PLAYER_MOVING) scene.pose(scene.x+.5+Math.sin(phaseTicks*.09)*2,scene.floor+1,scene.z-2.5,0,10,false);
       else if(phase.water())scene.waterPose();else scene.basePose();
       if(phase==Phase.FREECAM_MOVING)FreecamPreviewChecks.pose(scene.x+3+Math.sin(phaseTicks*.07)*2,scene.floor+4,scene.z+7,15,-20);
+      if(phase==Phase.OFFHAND_MINING&&phaseTicks==phase.warmup()+1)scene.mine();
     }
     void frame(Minecraft client,float delta) throws Exception {
       check(client==mc&&mc.world==scene.world,"rendered a different world");
-      check(HeldLighting.captures()-frameAdmissions<=1,"ordinary frame or stereo eyes admitted more than one held mesh");
+      long refreshed=HeldLighting.refreshes()-frameRefreshes;
+      check(refreshed<=8&&HeldLighting.captures()-frameAdmissions-refreshed<=1,"ordinary frame or stereo eyes exceeded new-mesh or existing-endpoint refresh budgets");
       check(scene.lightHash()==frameLightHash,"native integer light samples changed during rendering");
       check(HeldLighting.emission()==phase.emission,"source emission expected="+phase.emission+" actual="+HeldLighting.emission());
       float strength=(float)staticField(HeldLighting.class,"strength");
@@ -243,6 +247,7 @@ public final class HeldLight400Checks {
       }
       check(WaterTerrain.retainedBytes()<=24L*1024*1024,"held/water retained scratch exceeds 24 MiB");
       if(!measuring())return;
+      if(phase==Phase.OFFHAND_MINING&&phaseTicks>phase.warmup())scene.miningEndpoints();
       samples.frames++;samples.minimumStrength=Math.min(samples.minimumStrength,strength);samples.maximumStrength=Math.max(samples.maximumStrength,strength);
       if(samples.frames<SAMPLE_FRAMES)return;
       samples.requests=HeldLighting.requests()-requests;samples.admissions=HeldLighting.captures()-admissions;

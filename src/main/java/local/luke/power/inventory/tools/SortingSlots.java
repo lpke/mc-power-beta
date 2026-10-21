@@ -30,7 +30,7 @@ public final class SortingSlots {
     return mc != null && mc.player != null && mc.world != null && !mc.world.isRemote && WorldCompatibility.ready(mc.world)
         && mc.player.world == mc.world && mc.player.health > 0 && !mc.player.dead && mc.field_2807 == mc.player
         && !DetachedCamera.isActive() && !InteractionState.carryingContainer && Display.isActive() && !Mouse.isGrabbed()
-        && !(mc.player instanceof PlayerMode mode && mode.power$spectator()) && screen(mc.currentScreen)
+        && !(mc.player instanceof PlayerMode mode && !mode.power$inventoryEditable()) && screen(mc.currentScreen)
         && !(mc.currentScreen instanceof InventoryGui gui && gui.power$usesCatalogWheel())
         && !InventoryTextInput.active(mc.currentScreen) && !InventoryPanels.modal(mc.currentScreen) && mc.player.inventory.getCursorStack() == null;
   }

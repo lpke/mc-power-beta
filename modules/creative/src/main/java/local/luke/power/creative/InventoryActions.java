@@ -9,8 +9,8 @@ public final class InventoryActions {
 
   /** Insert at most one item-limit stack, merging matching slots before filling empty ones. */
   public static boolean catalogueStack(PlayerEntity player, net.minecraft.item.ItemStack template) {
-    if (player == null || player.level.isRemote || !player.creative_isCreative()
-        || Modes.spectator(player) || !local.luke.power.rules.WorldRules.enabled(player.level.getProperties(), local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE) || template == null) return false;
+    if (player == null || player.level.isRemote || !Modes.creativeInventory(player)
+        || !local.luke.power.rules.WorldRules.enabled(player.level.getProperties(), local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE) || template == null) return false;
     var inventory = player.inventory;
     var incoming = template.copy();
     incoming.count = Math.min(incoming.getMaxStackSize(), inventory.getMaxStackSize());
@@ -41,7 +41,7 @@ public final class InventoryActions {
   }
 
   public static boolean destroy(PlayerEntity p, boolean all) {
-    if (p == null || p.level.isRemote || !p.creative_isCreative() || !Config.current().destroySlot)
+    if (p == null || p.level.isRemote || !Modes.creativeInventory(p) || !Config.current().destroySlot)
       return false;
     if (all && Config.current().shiftClearsInventory) {
       Arrays.fill(p.inventory.main, null);

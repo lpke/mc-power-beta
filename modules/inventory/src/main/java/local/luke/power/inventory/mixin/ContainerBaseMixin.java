@@ -87,7 +87,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 
 	@Unique private boolean powerInventory$eligible() {
 		return minecraft.world != null && minecraft.player != null && !minecraft.player.dead
-				&& !(minecraft.player instanceof local.luke.power.input.PlayerMode mode && mode.power$spectator())
+				&& !(minecraft.player instanceof local.luke.power.input.PlayerMode mode && !mode.power$inventoryEditable())
 				&& minecraft.player.health > 0 && minecraft.currentScreen == (Object) this
 				&& minecraft.player.currentScreenHandler == container && org.lwjgl.opengl.Display.isActive();
 	}
@@ -1151,6 +1151,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 		// may therefore arrive here after the matching first click has already started.
 		if (keyCode != Keyboard.KEY_LSHIFT && keyCode != Keyboard.KEY_RSHIFT) powerInventory$shiftDouble.clear();
 		powerInventory$gatherDouble.clear();
+		if (!powerInventory$eligible()) { power$cancelItemDrag(); return; }
 		if (this.slot == null) {
 			return;
 		}

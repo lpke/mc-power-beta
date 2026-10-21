@@ -29,8 +29,8 @@ public final class Subtitles {
   public static boolean enabled() { return SubtitleConfig.current().enabled; }
   public static synchronized void clear() { owner++; PENDING.clear(); STATE.clear(); listener = null; }
   public static void tick(Minecraft mc) {
-    context(mc.world);
     if (!enabled()) return;
+    context(mc.world);
     drain(now(), false);
   }
   public static void leave() { context(null); }

@@ -11,6 +11,21 @@ public final class Modes {
     return player instanceof ModePlayer p && p.power_isSpectator();
   }
 
+  /** Admit only the local player's own native inventory, never a world container. */
+  public static boolean spectatorInventory(Object player) {
+    Minecraft mc = ClientRuntime.minecraft();
+    return spectator(player) && ClientRuntime.local(mc) && mc.player == player
+        && mc.viewEntity == mc.player && !ClientRuntime.freecam()
+        && mc.currentScreen != null
+        && mc.currentScreen.getClass() == net.minecraft.client.gui.screen.container.PlayerScreen.class
+        && mc.player.container == mc.player.playerContainer
+        && ((net.minecraft.client.gui.screen.container.PlayerScreen)mc.currentScreen).container == mc.player.playerContainer;
+  }
+
+  public static boolean creativeInventory(Object player) {
+    return player instanceof ModePlayer mode && mode.power$creativeInventory();
+  }
+
   public static boolean protectedPlayer(Object player) {
     return player instanceof PlayerEntity p && (p.creative_isCreative() || spectator(p));
   }

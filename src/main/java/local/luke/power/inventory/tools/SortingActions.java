@@ -11,6 +11,17 @@ import net.minecraft.screen.slot.Slot;
 
 public final class SortingActions {
   private SortingActions() {}
+  public static boolean sortAtPointer(Minecraft mc) {
+    if (mc == null || mc.currentScreen == null || mc.displayWidth <= 0 || mc.displayHeight <= 0) return false;
+    return sortAt(mc, org.lwjgl.input.Mouse.getX() * mc.currentScreen.width / mc.displayWidth,
+        mc.currentScreen.height - org.lwjgl.input.Mouse.getY() * mc.currentScreen.height / mc.displayHeight - 1);
+  }
+  /** A hotkey follows the player region; every other pointer position targets the open container. */
+  public static boolean sortAt(Minecraft mc, int x, int y) {
+    if (mc == null || !(mc.currentScreen instanceof InventoryToolsHost host)) return false;
+    var player = host.power$inventoryToolsPlayerArea();
+    return sort(mc, player != null && player.contains(x, y));
+  }
   public static boolean sort(Minecraft mc) { return sort(mc, false); }
   public static boolean sort(Minecraft mc, boolean playerStorage) {
     if (!InventoryToolsConfig.current().sorting || !SortingSlots.eligible(mc)) return false;

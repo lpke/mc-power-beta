@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class BlockHitCaptionMixin {
   @WrapOperation(method = "method_1721", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;method_2015(Ljava/lang/String;FFFFF)V"))
   private void power$hit(SoundManager sound, String id, float x, float y, float z, float volume, float pitch, Operation<Void> original) {
+    if (!SoundCaptionContext.enabled()) { original.call(sound, id, x, y, z, volume, pitch); return; }
     try (var ignored = SoundCaptionContext.push("subtitles.block.generic.hit")) { original.call(sound, id, x, y, z, volume, pitch); }
   }
 }

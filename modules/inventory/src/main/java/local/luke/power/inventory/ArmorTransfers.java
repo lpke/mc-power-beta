@@ -58,6 +58,6 @@ public final class ArmorTransfers {
         return mc.currentScreen instanceof InventoryScreen && handler.getClass() == PlayerScreenHandler.class
                 && mc.world != null && mc.player != null && mc.player.world == mc.world
                 && !mc.player.dead && mc.player.health > 0 && mc.player.currentScreenHandler == handler
-                && !(mc.player instanceof PlayerMode mode && mode.power$spectator()) && handler.canUse(mc.player);
+                && !(mc.player instanceof PlayerMode mode && !mode.power$inventoryEditable()) && handler.canUse(mc.player);
     }
 }

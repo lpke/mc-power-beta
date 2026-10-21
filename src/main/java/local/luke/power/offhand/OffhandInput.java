@@ -17,8 +17,8 @@ import org.lwjgl.opengl.Display;
 public final class OffhandInput {
   private OffhandInput() {}
   public static boolean available(Minecraft mc) {
-    if (!Offhand.playable(mc) || !Display.isActive() || mc.player.inventory.getCursorStack() != null) return false;
-    if (mc.currentScreen == null) return mc.field_2778 && !mc.paused && mc.player.container == mc.player.playerContainer;
+    if (!Offhand.inventoryPlayable(mc) || !Display.isActive() || mc.player.inventory.getCursorStack() != null) return false;
+    if (mc.currentScreen == null) return Offhand.playable(mc) && mc.field_2778 && !mc.paused && mc.player.container == mc.player.playerContainer;
     return hovered(mc) != null;
   }
   public static Slot hovered(Minecraft mc) {
@@ -30,7 +30,7 @@ public final class OffhandInput {
     if (mc == null || mc.world == null || mc.player == null || mc.world.isRemote || !WorldCompatibility.ready(mc.world)
         || mc.player.world != mc.world || mc.player.health <= 0 || mc.player.dead || mc.field_2807 != mc.player
         || DetachedCamera.isActive() || InteractionState.carryingContainer || !Display.isActive() || Mouse.isGrabbed()
-        || mc.player instanceof PlayerMode mode && mode.power$spectator()
+        || mc.player instanceof PlayerMode mode && !mode.power$inventoryEditable()
         || !(mc.currentScreen instanceof ContainerScreen screen) || !(screen instanceof OffhandSlotPicker)
         || InventoryTextInput.active(screen) || InventoryPanels.modal(screen) || mc.player.inventory.getCursorStack() != null
         || screen.container == null || screen.container != mc.player.container || mc.player.inventory.main.length != 36 || mc.player.inventory.armor.length != 4) return false;
@@ -78,12 +78,16 @@ public final class OffhandInput {
     } catch (java.io.IOException | RuntimeException unsupported) { return null; }
   }
   public static boolean swapEligible(Minecraft mc, Slot slot) {
-    if (!Offhand.playable(mc) || !container(mc) || slot == null || slot.id < 0
-        || slot.id >= mc.player.container.slots.size() || mc.player.container.method_2084(slot.id) != slot) return false;
+    if (!swapOwner(mc, slot)) return false;
     try {
       ItemStack source = slot.getStack(), offhand = Offhand.get(mc.player.inventory);
       return (source != null || offhand != null) && (source == null || slot.canInsert(source))
           && (offhand == null || slot.canInsert(offhand) && offhand.count <= Math.min(offhand.getMaxCount(), slot.getMaxItemCount()));
     } catch (RuntimeException unavailable) { return false; }
+  }
+  /** Slot contents change between the two writes of a durable swap. Ownership must stay stable. */
+  public static boolean swapOwner(Minecraft mc, Slot slot) {
+    return Offhand.inventoryPlayable(mc) && container(mc) && slot != null && slot.id >= 0
+        && slot.id < mc.player.container.slots.size() && mc.player.container.method_2084(slot.id) == slot;
   }
 }

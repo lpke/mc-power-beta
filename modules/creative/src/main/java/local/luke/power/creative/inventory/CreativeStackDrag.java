@@ -23,7 +23,7 @@ public final class CreativeStackDrag {
   public boolean allowed(Minecraft mc, ContainerScreen screen, Container container) {
     return !failed && ClientRuntime.local(mc) && Display.isActive()
         && mc.currentScreen == screen && mc.player.container == container
-        && mc.player.creative_isCreative()
+        && local.luke.power.creative.Modes.creativeInventory(mc.player)
         && WorldRules.enabled(mc.level.getProperties(), GameRule.ALLOW_CREATIVE_MODE)
         && container.canUse(mc.player);
   }

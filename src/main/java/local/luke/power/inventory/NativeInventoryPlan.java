@@ -114,6 +114,7 @@ public final class NativeInventoryPlan {
   }
 
   public static boolean busy() { return pending != null; }
+  public static boolean failed() { return failed; }
   public static boolean ownsAction(Minecraft mc, String action) {
     return pending != null && !pending.cancelled && pending.lease.action.equals(action) && pending.owns(mc);
   }
@@ -150,7 +151,7 @@ public final class NativeInventoryPlan {
   }
 
   private static boolean creative(Minecraft mc) {
-    return mc.player instanceof PlayerMode mode && mode.power$creative()
+    return mc.player instanceof PlayerMode mode && mode.power$creativeInventory()
         && local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE);
   }
   private static void fail(Minecraft mc, Throwable failure) {

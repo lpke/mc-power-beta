@@ -63,7 +63,7 @@ public final class SavedCreativeHotbars {
     return InventoryToolsConfig.current().creativeHotbars && data != null && PowerConfig.problem().isEmpty()
         && mc != null && mc.world != null && mc.player != null && !mc.world.isRemote && WorldCompatibility.ready(mc.world)
         && mc.player.world == mc.world && mc.field_2807 == mc.player && mc.player.health > 0 && !mc.player.dead
-        && mc.player instanceof PlayerMode mode && mode.power$creative() && !mode.power$spectator()
+        && mc.player instanceof PlayerMode mode && mode.power$creativeInventory()
         && CommandPermissions.allowed(GameRule.ALLOW_CREATIVE_MODE) && !DetachedCamera.isActive() && !InteractionState.carryingContainer
         && Display.isActive() && (mc.currentScreen == null ? mc.field_2778 && !mc.paused : !Mouse.isGrabbed()) && !InventoryTextInput.active(mc.currentScreen)
         && !InventoryPanels.modalOther(mc.currentScreen, MODAL_OWNER)
@@ -86,13 +86,16 @@ public final class SavedCreativeHotbars {
     } catch (IOException | RuntimeException failure) { SortingActions.feedback(mc, failure.getMessage()); return false; }
   }
   public static boolean load(Minecraft mc, int row) {
+    return load(mc, row, () -> {});
+  }
+  public static boolean load(Minecraft mc, int row, Runnable loaded) {
     if (!eligible(mc)) { unavailable(mc); return false; }
     try {
       String[] items = data.bar(row); List<NativeInventoryPlan.Change> changes = new ArrayList<>();
       for (int i = 0; i < 9; i++) changes.add(NativeInventoryPlan.Change.main(mc.player.inventory, i, items[i] == null ? null : DeathItems.decode(items[i])));
       if (!HotbarRows.cancel()) throw new IOException("Inventory row controls could not be canceled safely. No inventory changed.");
       return NativeInventoryPlan.submit(mc, "creative_hotbar_load", true, changes, () -> eligible(mc),
-          () -> message(mc, "Hotbar " + (row + 1) + " loaded."), true);
+          () -> { message(mc, "Hotbar " + (row + 1) + " loaded."); loaded.run(); }, true);
     } catch (IOException | RuntimeException failure) { SortingActions.feedback(mc, "Preset retained. " + failure.getMessage()); return false; }
   }
   public static boolean key(Minecraft mc, int key) {

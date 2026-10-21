@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [4.0.1] - 2026-10-21
+
+- Open and use your inventory in Spectator. Worlds allowing Creative use the remembered Creative inventory views; other worlds use Survival. Move, craft, remove and drop items while the inventory is open, while world interaction and closed-inventory dropping stay blocked.
+- Separate sorting presets from slot controls, choose presets from a dropdown, and accept preferred items with one click.
+- Use smaller, lighter inventory action buttons and connect the offhand/destroy extension cleanly to the native panel bevel.
+- Hide inventory action buttons independently while keeping their features and hotkeys available. Simplify the Creative hotbar popup.
+- Avoid unnecessary subtitle tick bookkeeping and semantic processing while subtitles are off.
+- Fix swaps into an empty offhand incorrectly stopping inventory transactions, and give accurate recipe-placement feedback for pending or stopped actions.
+- Keep held-item lighting stable while breaking blocks, including with a torch in the offhand.
+- Keep chest action buttons above item slots and draw item tooltips over inventory controls.
+- Make the sort hotkey target player storage when pointing over your inventory, or the open container everywhere else. Sort buttons retain their existing targets.
+- Show crafting recipes immediately when opening the pause-menu book, return to inventory after loading a Creative hotbar, and keep player-model depth out of hotbar previews.
+
 ## [4.0.0] - 2026-10-21
 
 - Add a searchable recipe book for crafting and smelting, with recipe categories, craftable filtering, ingredient ghosts and safe recipe placement. Use it in supported inventories or only from the pause menu. Power Beta enables the pause-menu book by default and leaves the inventory button optional.

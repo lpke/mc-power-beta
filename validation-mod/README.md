@@ -26,11 +26,18 @@ restores the original preferences. `zoom-watch`, a physical Zoom in press, then
 `zoom-watch-check` records intermediate native rendered frames without per-frame I/O.
 
 
+4.0.1 native checks, after `new-world`:
+
+- `spectator-inventory-401` checks Creative permission switching, native item data, offhand, crafting, open-inventory dropping and closed/world restrictions. It captures the inventory views and restores fixture state.
+- `sorting-401` checks preset dropdown input, draft isolation and instant preferred-item selection at narrow and wide sizes, with native captures.
+- `recipe-401` reproduces empty-offhand swapping with the book open, native dropping during a prepared fill, subsequent crafting and accurate capacity/busy/recovery feedback. Run in actual Survival. Its final controlled callback-failure check verifies rollback and failure shutdown.
+- `held-light-400 mining` checks rendered lighting while breaking a real block with an offhand torch, including section seams and separate refresh/preparation budgets. Keep the muted clone focused until `held-light-400 status` reports completion.
+
 4.0.0 native checks, after `new-world`:
 
 - `recipe-400 registry`, `crafting-native`, `furnace-native` and `visual` check native recipes, metadata, safe placement and wide/narrow UI captures. Run `furnace-rollback` last because it deliberately exercises failure shutdown.
 - `inventory-400 native` checks offhand full data, death snapshots, journal-lock failure, slow durable writes and callback rollback. Run `persist-start`, quit and restart the disposable client, load the same world, then run `persist-finish` for process persistence.
-- `inventory-tools-400 native` checks sorting, matching transfers and native slot ownership. `modal` checks Creative and recipe-modal input exclusion.
+- `inventory-tools-400 native` checks sorting, pointer-selected hotkey targets, matching transfers and native slot ownership. `headers` captures single/double chests at narrow and wide sizes, verifies button clearance and checks that native item tooltips cover the controls. `modal` checks Creative and recipe-modal input exclusion.
 - `auto-tools-400 native` exercises tool selection, borrowed shovels, vein ownership, main/offhand restocking and cancellation through real native callbacks.
 - `subtitles-400 native` checks muted sound events, native/freecam directional bases, lifecycle clearing and bounded event bursts.
 - `saved-hotbars-400` checks all nine native rows, slow durable loading and foreign/permission cancellation. `death-restoration-400` checks owned rollback, foreign callbacks, pending claims and kept-player transfer.

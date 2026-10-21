@@ -33,12 +33,15 @@ public abstract class InventoryToolsMouseMixin {
         || !OffhandInput.container(minecraft)) return;
     int x = Mouse.getEventX() * width / minecraft.displayWidth, y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
     var picker = (OffhandSlotPicker)(Object)this; picker.power$offhandPointer(x, y);
-    var slot = OffhandInput.pick(minecraft, x, y); if (slot == null) return;
+    var slot = OffhandInput.pick(minecraft, x, y);
     int code = button - 100;
     if (Bindings.matches("powerbeta.swapHands", code) && OffhandInput.swapEligible(minecraft, slot)) Offhand.swapSlot(minecraft, slot);
-    else if (Bindings.matches("powerbeta.sortInventory", code) && InventoryToolsConfig.current().sorting && SortingSlots.eligible(minecraft))
-      SortingActions.sort(minecraft, local.luke.power.ui.TextEditing.shift());
-    else if (Bindings.matches("powerbeta.depositMatching", code) && InventoryToolsConfig.current().depositMatching && SortingSlots.eligible(minecraft))
+    else if (Bindings.matches("powerbeta.sortInventory", code) && InventoryToolsConfig.current().sorting && SortingSlots.eligible(minecraft)) {
+      if (InventoryPanels.contains(this, x, y) || picker.power$offhandWidgetAt(x, y)
+          || local.luke.power.recipes.RecipeBooks.owns(minecraft.currentScreen, x, y)) return;
+      SortingActions.sortAt(minecraft, x, y);
+    }
+    else if (slot != null && Bindings.matches("powerbeta.depositMatching", code) && InventoryToolsConfig.current().depositMatching && SortingSlots.eligible(minecraft))
       SortingActions.depositMatching(minecraft);
     else return;
     power$ownedMouseButtons.set(button); ci.cancel();

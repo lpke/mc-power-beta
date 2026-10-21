@@ -40,6 +40,8 @@ final class HeldLight400Scene {
   private final FullBrightState brightness;
   private final Map<Field,Object> brightState=new LinkedHashMap<>();
   private final Object cameraPose;
+  private final Set<Object> existingEntities=Collections.newSetFromMap(new IdentityHashMap<>());
+  private boolean mined;
 
   HeldLight400Scene(Minecraft mc) throws Exception {
     check(mc.world!=null&&mc.player!=null&&!mc.world.isRemote&&mc.player.world==mc.world,"load a disposable singleplayer world");
@@ -66,6 +68,7 @@ final class HeldLight400Scene {
     Object camera=Class.forName("local.luke.power.camera.Freecam").getField("freecamController").get(null);
     Object pose=camera.getClass().getMethod("getCameraPosition").invoke(camera);
     cameraPose=pose.getClass().getMethod("clone").invoke(pose);
+    existingEntities.addAll(world.field_198);
   }
 
   void build() throws Exception {
@@ -100,6 +103,30 @@ final class HeldLight400Scene {
     Offhand.set(mc.player.inventory,offId==0?null:new ItemStack(offId,1,0));mc.player.inventory.markDirty();
   }
   void basePose() { pose(x+.5,floor+1,z-2.5,0,10,true); }
+  void creative() throws Exception {
+    CreativeVehicleChecks.mode(mc,"CREATIVE");mc.player.getClass().getMethod("creative_setFlying",boolean.class).invoke(mc.player,true);
+  }
+  void mining() throws Exception {CreativeVehicleChecks.mode(mc,"SURVIVAL");hands(278,50);mined=false;}
+  void mine() throws Exception {
+    check(!mined&&world.getBlockId(x,floor+2,z+2)==35,"owned mining probe is missing");
+    ItemStack torch=Offhand.get(mc.player.inventory),tool=mc.player.inventory.main[slot];
+    String before=local.luke.power.death.DeathItems.encode(torch);
+    check(mc.interactionManager.method_1716(x,floor+2,z+2,1)&&world.getBlockId(x,floor+2,z+2)==0,"native successful block break did not remove the probe");
+    mined=true;
+    check(Offhand.get(mc.player.inventory)==torch&&before.equals(local.luke.power.death.DeathItems.encode(torch)),"native mining changed the physical offhand source");
+    check(mc.player.inventory.main[slot]==tool&&tool.getDamage()>0,"native Survival break did not wear the main-hand pickaxe");
+  }
+  void miningEndpoints() throws Exception {
+    var sections=(net.minecraft.class_66[])field(mc.worldRenderer,"field_1809");
+    int width=(int)field(mc.worldRenderer,"field_1810"),height=(int)field(mc.worldRenderer,"field_1811"),depth=(int)field(mc.worldRenderer,"field_1812");
+    for(int cx=Math.floorDiv(x-1,16);cx<=Math.floorDiv(x+1,16);cx++)
+      for(int cy=Math.floorDiv(floor+1,16);cy<=Math.floorDiv(floor+3,16);cy++) {
+        int cz=Math.floorDiv(z+2,16),index=(Math.floorMod(cz,depth)*height+cy)*width+Math.floorMod(cx,width);
+        var section=sections[index];
+        check(section!=null&&section.field_229==world&&section.field_231==cx*16&&section.field_232==cy*16&&section.field_233==cz*16,"mining affected a missing render section");
+        check(((WaterTerrainSection)section).power$heldLightReady()||section.field_244[0]&&section.field_244[1],"native break discarded an established held-light endpoint");
+      }
+  }
   void waterPose() { pose(x+6.5,floor+1.1,z+3.5,180,5,true); }
   void pose(double bx,double feet,double bz,float yaw,float pitch,boolean settle) {
     double previousX=mc.player.x,previousY=mc.player.y,previousZ=mc.player.z;
@@ -132,6 +159,8 @@ final class HeldLight400Scene {
     HeldLighting.reset();HeldLightConfig.preview(held);OffhandConfig.preview(offhand);VisualConfig.preview(visual);
     if(mc.world!=world||mc.player!=player) throw new IllegalStateException("world or player changed; global previews restored, original scene and player require clone cleanup");
     FreecamPreviewChecks.active(false);
+    if(mined&&world.getBlockId(x,floor+2,z+2)==0)world.method_154(x,floor+2,z+2,35,5);
+    for(Object entity:new ArrayList<>(world.field_198))if(entity instanceof net.minecraft.class_142 drop&&!existingEntities.contains(entity))drop.markDead();
     // Remove owned water before its glass enclosure. Never overwrite unexpected replacement blocks.
     for(boolean water:new boolean[]{true,false}) for(var entry:blocks.entrySet()) {
       var pos=entry.getKey();var block=entry.getValue();if((block.id==9)!=water)continue;

@@ -73,7 +73,14 @@ final class Recipe400Visuals {
       ghost(furnaceBook,266);capture(mc,furnaceScreen,"furnace-ghost-640",manifest);
 
       mc.player.container=previousContainer;var viewer=new RecipeBookViewerScreen(previousScreen);
-      var viewerBook=open(mc,viewer,640,360,screens);capture(mc,viewer,"viewer-all-640",manifest);
+      var filtered=RecipeBookConfig.copy();filtered.craftingFilter=true;RecipeBookConfig.preview(filtered);
+      screens.add(viewer);mc.currentScreen=viewer;viewer.init(mc,640,360);var viewerBook=RecipeBooks.book(viewer);
+      test("pause viewer populates initial Crafting without inheriting the inventory filter",()->{
+        check(viewerBook!=null&&viewerBook.enabled()&&!((List<?>)field(viewerBook,"groups")).isEmpty(),"initial selected Crafting tab is blank");
+        check(!(boolean)field(viewerBook,"filter")&&RecipeBookConfig.current().craftingFilter,"viewer changed or inherited the saved inventory filter");
+        check(!NativeInventoryPlan.busy()&&mc.player.container==previousContainer,"viewer opened a handler or queued inventory work");
+      });
+      capture(mc,viewer,"viewer-all-640",manifest);
       var detail=recipes(viewerBook).stream().filter(recipe->recipe.kind==RecipeDefinition.Kind.CRAFTING&&recipe.output.itemId==278).findFirst().orElseThrow();
       field(viewerBook,"detail",detail);viewerBook.tick();capture(mc,viewer,"viewer-detail-640",manifest);
       check(!NativeInventoryPlan.busy(),"visual capture unexpectedly queued an inventory transaction");

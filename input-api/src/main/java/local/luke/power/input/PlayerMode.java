@@ -4,5 +4,8 @@ package local.luke.power.input;
 public interface PlayerMode {
   boolean power$creative();
   boolean power$spectator();
+  /** Inventory-only capabilities. These must never authorize physical world interaction. */
+  default boolean power$inventoryEditable() { return !power$spectator(); }
+  default boolean power$creativeInventory() { return power$creative(); }
   default boolean power$flying() { return false; }
 }

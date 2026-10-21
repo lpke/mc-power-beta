@@ -30,13 +30,13 @@ public final class RecipeBookOverlay {
   public RecipeBookOverlay(Screen screen,Minecraft mc,RecipeContext context,boolean standalone) {
     this.screen=screen;this.mc=mc;this.context=context;this.standalone=standalone;
     var state=RecipeBookConfig.current();boolean furnace=context.kind==RecipeDefinition.Kind.FURNACE;
-    open=standalone||(furnace?state.furnaceOpen:state.craftingOpen);filter=furnace?state.furnaceFilter:state.craftingFilter;
+    open=standalone||(furnace?state.furnaceOpen:state.craftingOpen);filter=!standalone&&(furnace?state.furnaceFilter:state.craftingFilter);
     refreshGeometry();
   }
   public boolean enabled() {
     var state=RecipeBookConfig.current();
     return mc.player!=null&&mc.world!=null&&state.enabled&&(standalone?state.pauseMenu:state.inventory)
-        &&!(context.width==2&&mc.player instanceof PlayerMode mode&&mode.power$creative());
+        &&!(context.width==2&&mc.player instanceof PlayerMode mode&&mode.power$creativeInventory());
   }
   public RecipeBookLayout layout(){
     int overhang=!standalone&&screen.getClass()==net.minecraft.class_585.class&&local.luke.power.offhand.Offhand.visible(mc.player)?22:0;
@@ -45,15 +45,21 @@ public final class RecipeBookOverlay {
   public boolean replacesNative(){return enabled()&&open&&layout().narrow();}
   public boolean rendersCarried(){return !standalone&&enabled()&&open&&!InventoryPanels.modalOther(screen,this);}
   private boolean subtle(){return RecipeBookConfig.current().buttonStyle==1;}
+  private boolean buttonVisible(){return !standalone&&RecipeBookConfig.current().inventoryButton;}
   private Rect toggleBounds(){
+    if(!buttonVisible())return new Rect(0,0,0,0);
     var l=layout();
     if(subtle()&&screen instanceof local.luke.power.inventory.tools.InventoryToolsHost host) {
       var bounds=host.power$recipeButtonBounds();
       if(bounds!=null)return new Rect(bounds.x()+l.offset()-InventoryPanels.offset(screen),bounds.y(),bounds.width(),bounds.height());
     }
-    return subtle()?new Rect(l.inventoryX()+140,l.inventoryY()+5,14,14):l.toggle(context.kind==RecipeDefinition.Kind.FURNACE,context.width);
+    if(subtle()) {
+      var bounds=local.luke.power.inventory.tools.InventoryToolsLayout.header(screen.width,screen.height,176,166,l.offset(),false,false,true).recipe();
+      return new Rect(bounds.x(),bounds.y(),bounds.width(),bounds.height());
+    }
+    return l.toggle(context.kind==RecipeDefinition.Kind.FURNACE,context.width);
   }
-  public boolean owns(int x,int y){var l=layout();return enabled()&&(toggleBounds().contains(x,y)
+  public boolean owns(int x,int y){var l=layout();return enabled()&&(buttonVisible()&&toggleBounds().contains(x,y)
       ||open&&(l.narrow()||l.background().contains(x,y)||l.tabs(tabs().length).contains(x,y)||standalone&&l.detail().contains(x,y)||!popup.isEmpty()||detail!=null&&!standalone));}
   public void tick() {
     if(!enabled()){generation++;closeInput();InventoryPanels.update(screen,0,List.of());return;}
@@ -67,7 +73,7 @@ public final class RecipeBookOverlay {
   private void refreshGeometry() {
     if(!enabled()){InventoryPanels.update(screen,0,List.of());return;}
     var l=layout();List<Rect> bounds=new ArrayList<>();
-    if(!standalone)bounds.add(toggleBounds());
+    if(buttonVisible())bounds.add(toggleBounds());
     if(open){if(l.narrow())bounds.add(new Rect(0,0,screen.width,screen.height));else{bounds.add(l.background());bounds.add(l.tabs(tabs().length));if(standalone)bounds.add(l.detail());}}
     InventoryPanels.update(screen,l.offset(),bounds);
     boolean modal=!popup.isEmpty()||detail!=null&&!standalone;InventoryPanels.modal(screen,this,modal);
@@ -79,6 +85,16 @@ public final class RecipeBookOverlay {
   private void closeInput(){detail=null;releaseInput();}
   public void removed(){generation++;closeInput();InventoryPanels.update(screen,0,List.of());}
   public void kind(RecipeDefinition.Kind kind){generation++;context=RecipeContext.viewer(mc,kind);category=page=0;ghost=null;detail=null;lastRecipe=null;popup=List.of();model=null;filter=false;tick();}
+  /** Native containers draw buttons before slots, carried stacks and item tooltips. */
+  public void renderInventoryButton(int mx,int my) {
+    if(!enabled()||!buttonVisible()||InventoryPanels.modalOther(screen,this))return;
+    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);GL11.glPushMatrix();
+    try {
+      var toggle=toggleBounds();
+      if(subtle())draw.subtleButton(mc,toggle.x(),toggle.y(),mx,my);
+      else draw.image(mc,toggle.contains(mx,my)?"button_highlighted":"button",toggle.x(),toggle.y(),20,18);
+    }finally{GL11.glPopMatrix();GL11.glPopAttrib();}
+  }
   public void render(int mx,int my) {
     if(!enabled()||InventoryPanels.modalOther(screen,this))return;
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);GL11.glPushMatrix();
@@ -86,7 +102,10 @@ public final class RecipeBookOverlay {
       GL11.glTranslatef(0,0,180);GL11.glEnable(GL11.GL_BLEND);GL11.glBlendFunc(GL11.GL_SRC_ALPHA,GL11.GL_ONE_MINUS_SRC_ALPHA);
       var l=layout();
       String toggleTooltip=null;
-      if(!standalone){var toggle=toggleBounds();if(subtle())draw.subtleButton(mc,toggle.x(),toggle.y(),mx,my);else draw.image(mc,toggle.contains(mx,my)?"button_highlighted":"button",toggle.x(),toggle.y(),20,18);if(toggle.contains(mx,my))toggleTooltip="Recipe book";}
+      if(buttonVisible()){
+        if(replacesNative())renderInventoryButton(mx,my);
+        if(toggleBounds().contains(mx,my))toggleTooltip="Recipe book";
+      }
       if(!open){if(!standalone)renderGhost(mx,my,l);if(toggleTooltip!=null)draw.tooltip(mc,toggleTooltip,mx,my,screen.width,screen.height);return;}
       draw.image(mc,"recipe_book",l.x(),l.y(),147,166,1,1,147,166,256,256);
       if(standalone){var b=l.detail();draw.nativePanel(mc,b.x(),b.y(),b.width(),b.height());draw.rectangle(b.x()-2,b.y()+4,6,b.height()-8,0xffc6c6c6);}
@@ -207,7 +226,7 @@ public final class RecipeBookOverlay {
     if(!enabled()||InventoryPanels.modalOther(screen,this))return false;var l=layout();
     if(detail!=null&&!standalone){detail=null;click();refreshGeometry();return true;}
     if(!popup.isEmpty()){if(button==0)for(int i=0;i<popup.size();i++)if(popupCell(i).contains(x,y)){var value=popup.get(i);popup=List.of();choose(value);refreshGeometry();return true;}popup=List.of();refreshGeometry();return true;}
-    if(!standalone&&toggleBounds().contains(x,y)){if(button==0)toggle();return true;}
+    if(buttonVisible()&&toggleBounds().contains(x,y)){if(button==0)toggle();return true;}
     if(!open)return nativeClick(x,y);
     if(l.search().contains(x,y)||l.magnifier().contains(x,y)){if(button==0){if(!search.focused)generation++;search.focused=true;if(l.search().contains(x,y))search.click(x,button);refreshGeometry();}return true;}
     search.focused=false;refreshGeometry();
@@ -235,11 +254,19 @@ public final class RecipeBookOverlay {
     if(lastUnavailable==recipe&&model.current()&&!model.available(recipe)){generation++;return;}
     lastRecipe=recipe;int token=++generation;
     try {
-      boolean accepted=RecipeFills.fill(mc,context,recipe,maximum,()->enabled()&&mc.currentScreen==screen&&token==generation
+      var result=RecipeFills.fillResult(mc,context,recipe,maximum,()->enabled()&&mc.currentScreen==screen&&token==generation
           &&!InventoryPanels.modal(screen)&&!search.focused&&org.lwjgl.opengl.Display.isActive(),unavailable->{
         ghost=unavailable?recipe:null;lastUnavailable=unavailable?recipe:null;if(!unavailable&&layout().narrow()){open=false;state();}
       });
-      if(!accepted){message="Not enough inventory space";ghost=recipe;}
+      if(result!=RecipeFills.Result.ACCEPTED){
+        message=switch(result){
+          case NO_SPACE->"Not enough inventory space";
+          case BUSY->"Another inventory action is pending";
+          case RECOVERY_REQUIRED->"Inventory actions are stopped. Preserve inventory recovery files";
+          default->"Recipe placement is unavailable";
+        };
+        if(result==RecipeFills.Result.NO_SPACE)ghost=recipe;
+      }
     }catch(Exception failure){message="Recipe could not be placed safely";}
   }
   public void toggle() {generation++;open=!open;closeInput();message="";click();state();if(open)tick();}

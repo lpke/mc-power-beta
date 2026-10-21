@@ -25,6 +25,7 @@ improvements and optional tweaks in one searchable Options menu.
 - Optional modern sprinting on foot, enabled per world, with global stamina and combat limits, sprint jumping and surface particles. Separate optional sprint FOV effects for ground sprinting and each flight mode. Power Beta enables sprinting with stamina and combat limits; Beta and Refined Beta leave it off.
 - Creative and spectator modes, a mode picker, configurable reach, flight speed, drift and sprint, and adjustable spectator speed.
 - Creative item categories and a survival inventory view. Shift-click for full stacks, middle-drag to fill slots, and use a destroy slot or clear the inventory.
+- Spectator inventory access uses the Creative views when permitted, otherwise Survival, with crafting and inventory-only item dropping.
 - WorldEdit selections, outlines, fills, replacement, copying, pasting, shapes, undo and redo, with configurable work budgets and history.
 - Commands with completion, editable history and help, including teleportation, saved waypoints, world spawn, time, weather, spawning and item commands.
 - Chat selection, copy/paste, cursor navigation, scrolling and fade controls. Keep your own messages across sessions with a separate history limit from other chat.
@@ -217,6 +218,7 @@ You are welcome to fork it and adapt it to your needs under the AGPL license.
 
 [BHCreative](https://github.com/paulevsGitch/BHCreative),
 [Tweakeroo](https://github.com/maruohon/tweakeroo),
+[Inventory Profiles Next](https://codeberg.org/Inventory-Profiles-Next-Mod/IPN),
 [WorldEdit](https://github.com/EngineHub/WorldEdit),
 [Xaero's Minimap](https://modrinth.com/mod/xaeros-minimap),
 [Xaero's World Map](https://modrinth.com/mod/xaeros-world-map),

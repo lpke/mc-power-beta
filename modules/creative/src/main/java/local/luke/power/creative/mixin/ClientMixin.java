@@ -74,7 +74,7 @@ public abstract class ClientMixin {
     Minecraft mc = (Minecraft) (Object) this;
     if (ClientRuntime.local(mc)
         && Modes.spectator(mc.player)
-        && (key == mc.options.inventoryKey.key || key == mc.options.dropKey.key)) return 0;
+        && key == mc.options.dropKey.key && !Modes.spectatorInventory(mc.player)) return 0;
     return key;
   }
 

@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.0.0",
+    "default": "Power Beta 4.0.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6604,6 +6604,18 @@
   "recipeBook.buttonStyle": {
     "page": "Gameplay",
     "group": "Recipe book",
+    "order": 4
+  },
+  "recipeBook.enabled": {
+    "order": 0
+  },
+  "recipeBook.inventory": {
+    "order": 1
+  },
+  "recipeBook.inventoryButton": {
+    "order": 2
+  },
+  "recipeBook.pauseMenu": {
     "order": 3
   },
   "keys.powerbeta.restock": {
@@ -6680,6 +6692,24 @@
   },
   "inventoryTools.hotbarEditor": {
     "label": "Edit saved hotbars",
+    "order": 2
+  },
+  "inventoryTools.sorting": {
+    "order": 0
+  },
+  "inventoryTools.sortingButton": {
+    "order": 1
+  },
+  "inventoryTools.depositMatching": {
+    "order": 2
+  },
+  "inventoryTools.depositMatchingButton": {
+    "order": 2.5
+  },
+  "inventoryTools.creativeHotbars": {
+    "order": 0
+  },
+  "inventoryTools.creativeHotbarsButton": {
     "order": 1
   },
   "inventoryTools.protectedSlots": {

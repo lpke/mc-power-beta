@@ -113,6 +113,33 @@ public final class Subtitles400Checks {
         Subtitles.tick(mc); mc.soundManager.method_2013(mc.player, 1);
         check(Subtitles.pending() == 0 && keys(mc).isEmpty(), "world departure retained a pending cue");
       });
+      test("disabled subtitles skip context locks, listener updates and sound queues", () -> {
+        var disabled = SubtitleConfig.copy(); disabled.enabled = false; SubtitleConfig.preview(disabled);
+        check(!AudioListenerPose.interested() && !SoundCaptionContext.enabled(), "disabled subtitles retained listener or semantic work");
+        var locked = new java.util.concurrent.CountDownLatch(1);
+        var release = new java.util.concurrent.CountDownLatch(1);
+        var holder = new Thread(() -> {
+          synchronized (Subtitles.class) {
+            locked.countDown();
+            try { release.await(500, java.util.concurrent.TimeUnit.MILLISECONDS); }
+            catch (InterruptedException interrupted) { Thread.currentThread().interrupt(); }
+          }
+        }, "subtitle-disabled-fixture");
+        holder.start();
+        try {
+          check(locked.await(1, java.util.concurrent.TimeUnit.SECONDS), "fixture did not acquire subtitle monitor");
+          long start = System.nanoTime();
+          // Null is deliberate: disabled ticks must not even read the world argument.
+          Subtitles.tick(null);
+          check(System.nanoTime() - start < 100_000_000, "disabled tick waited on subtitle processing");
+          for (int i = 0; i < 1000; i++) sound(mc, "step.stone", mc.player.x, mc.player.y, mc.player.z, 1);
+          mc.soundManager.method_2013(mc.player, .5F);
+          check(Subtitles.pending() == 0 && state().positionCount() == 0 && listener() == null,
+              "disabled sound burst created captions or listener state");
+        } finally { release.countDown(); holder.join(1000); }
+        check(!holder.isAlive(), "subtitle fixture worker did not stop");
+        disabled.enabled = true; SubtitleConfig.preview(disabled); reset(mc);
+      });
       test("native sound bursts obey pending and position caps", () -> {
         reset(mc); long dropped = Subtitles.dropped();
         for (int i = 0; i < 2000; i++) sound(mc, "step.stone", mc.player.x + i / 1000D, mc.player.y, mc.player.z, 1);

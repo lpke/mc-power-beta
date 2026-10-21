@@ -11,7 +11,8 @@ public final class RecipeBookBackend implements Backend {
     RecipeBookSettings value=RecipeBookConfig.current();
     session.add(new RecipeBookBackend(),List.of(
         entry("enabled","Recipe book","Browse registered crafting and smelting recipes. Beta recipes are available immediately. Local recipe filling preserves native item data.",value.enabled,false),
-        entry("inventory","Show in inventories","Show the recipe-book button in the player inventory, crafting table and furnace. Turn this off for a pause-menu-only viewer.",value.inventory,true),
+        entry("inventory","Use in inventories","Use the recipe book in the player inventory, crafting table and furnace, through its button or hotkey. Turn this off for a pause-menu-only viewer.",value.inventory,true),
+        entry("inventoryButton","Show inventory button","Show the recipe-book button in inventories. Hiding it keeps the inventory recipe book and its hotkey available.",value.inventoryButton,true),
         entry("pauseMenu","Show in pause menu","Open the same recipe book as a read-only viewer from the pause menu.",value.pauseMenu,false),
         new Setting("recipeBook.buttonStyle","recipeBook","Gameplay","Recipe book","Button style",
             "Modern uses the recipe-book icon. Subtle places a small R beside the inventory sorting button.",Setting.Kind.CHOICE,
@@ -34,7 +35,7 @@ public final class RecipeBookBackend implements Backend {
         if(style<0||style>1)throw new IllegalArgumentException("Choose Modern or Subtle");
         next.buttonStyle=style;continue;
       }
-      if(!Set.of("enabled","inventory","pauseMenu").contains(key)||!entry.getValue().isJsonPrimitive()
+      if(!Set.of("enabled","inventory","inventoryButton","pauseMenu").contains(key)||!entry.getValue().isJsonPrimitive()
           ||!entry.getValue().getAsJsonPrimitive().isBoolean())throw new IllegalArgumentException("Choose On or Off");
       RecipeBookSettings.class.getField(key).setBoolean(next,entry.getValue().getAsBoolean());
     }

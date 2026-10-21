@@ -8,14 +8,19 @@ public final class RecipeBooks {
   private RecipeBooks() {}
   public static RecipeBookOverlay book(Object screen){return screen instanceof RecipeBookHost host?host.power$recipeBook():null;}
   public static boolean owns(Object screen,int x,int y){var book=book(screen);return book!=null&&book.owns(x,y);}
+  /** Choose the entry screen before it opens; this query never authorizes inventory writes. */
+  public static boolean inventoryAvailable(Minecraft mc) {
+    return !(mc.player instanceof local.luke.power.input.PlayerMode mode)
+        || !mode.power$creative() && !(mode.power$spectator() && !mc.world.isRemote
+            && local.luke.power.permissions.CommandPermissions.allowed(local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE));
+  }
   public static boolean press(Minecraft mc,int code) {
     if(!local.luke.power.input.Bindings.matches("powerbeta.recipeBook",code)||org.lwjgl.input.Keyboard.isRepeatEvent()
         ||mc.world==null||mc.player==null||mc.currentScreen!=null||mc.player.dead||mc.player.health<=0
         ||!org.lwjgl.opengl.Display.isActive()||local.luke.power.input.DetachedCamera.isActive()
         ||local.luke.power.input.InteractionState.carryingContainer)return false;
     var state=RecipeBookConfig.current();if(!state.enabled)return false;
-    boolean creative=mc.player instanceof local.luke.power.input.PlayerMode mode&&mode.power$creative();
-    if(state.inventory&&!creative){RecipeBookConfig.state(false,true,state.craftingFilter);mc.setScreen(new net.minecraft.class_585(mc.player));return true;}
+    if(state.inventory&&inventoryAvailable(mc)){RecipeBookConfig.state(false,true,state.craftingFilter);mc.setScreen(new net.minecraft.class_585(mc.player));return true;}
     if(pauseAvailable(mc)){openViewer(mc,null);return true;}return false;
   }
   public static boolean pauseAvailable(Minecraft mc){var state=RecipeBookConfig.current();return state.enabled&&state.pauseMenu&&mc.world!=null&&mc.player!=null;}

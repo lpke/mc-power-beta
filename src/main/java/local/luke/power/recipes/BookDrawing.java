@@ -15,8 +15,7 @@ public final class BookDrawing extends UiScreen {
       .put(new float[]{1,0,0,0,-.25f,1,0,0,0,0,1,0,1,0,0,1}).flip();
   private final ItemRenderer renderer=new ItemRenderer();
   public void subtleButton(Minecraft mc,int x,int y,int mx,int my) {
-    GL11.glEnable(GL11.GL_TEXTURE_2D);GL11.glDisable(GL11.GL_LIGHTING);GL11.glDisable(GL11.GL_DEPTH_TEST);
-    minecraft=mc;textRenderer=mc.textRenderer;button("R",x,y,14,14,mx,my,true);
+    CompactInventoryButton.draw(mc,"R",x,y,true);
   }
   public void image(Minecraft mc,String name,int x,int y,int width,int height) {
     image(mc,name,x,y,width,height,0,0,width,height,width,height);

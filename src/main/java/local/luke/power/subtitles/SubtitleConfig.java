@@ -5,7 +5,7 @@ import local.luke.power.input.*;
 import local.luke.power.storage.PowerConfig;
 
 public final class SubtitleConfig {
-  private static SubtitleSettings current = load();
+  private static volatile SubtitleSettings current = load();
   private SubtitleConfig() {}
   private static SubtitleSettings load() {
     SubtitleSettings value;

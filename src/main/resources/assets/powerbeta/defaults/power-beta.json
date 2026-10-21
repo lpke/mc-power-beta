@@ -571,7 +571,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.0.0"
+        "customVersionText": "Power Beta 4.0.1"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -1201,6 +1201,9 @@
       "sorting": true,
       "depositMatching": true,
       "creativeHotbars": true,
+      "sortingButton": true,
+      "depositMatchingButton": true,
+      "creativeHotbarsButton": true,
       "toolSwitch": false,
       "restock": false,
       "restockBeforeEmpty": true,
@@ -1219,6 +1222,7 @@
     "recipeBook": {
       "enabled": true,
       "inventory": false,
+      "inventoryButton": true,
       "pauseMenu": true,
       "buttonStyle": 0,
       "craftingOpen": false,

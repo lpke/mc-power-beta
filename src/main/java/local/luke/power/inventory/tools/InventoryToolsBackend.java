@@ -14,6 +14,9 @@ public final class InventoryToolsBackend implements Backend {
       String key = field.getName();
       String label = switch (key) {
         case "sorting" -> "Inventory sorting";
+        case "sortingButton" -> "Show sorting button";
+        case "depositMatchingButton" -> "Show deposit button";
+        case "creativeHotbarsButton" -> "Show saved hotbars button";
         case "sortDescending" -> "Reverse item order";
         case "protectedSlots" -> "Protected storage slots";
         case "preferredItems" -> "Sorting layout";
@@ -32,7 +35,10 @@ public final class InventoryToolsBackend implements Backend {
         case "sortDescending" -> "Sort higher item IDs first. Preferred slot items and protected slots keep their positions.";
         case "protectedSlots" -> "Keep selected main-storage slots untouched by sorting and Deposit matching. Configure them in the sorting layout.";
         case "preferredItems" -> "Choose protected slots and preferred items in a main-storage layout. Preferences move only existing items, preserving all native data.";
-        case "sorting" -> "Show sorting controls for native player storage, chests and dispensers in singleplayer. Keeps the hotbar, armor, offhand and crafting slots separate.";
+        case "sorting" -> "Sort native player storage, chests and dispensers in singleplayer. Keeps the hotbar, armor, offhand and crafting slots separate.";
+        case "sortingButton" -> "Show the S button in supported inventories. Hiding it keeps the sorting hotkey available.";
+        case "depositMatchingButton" -> "Show the D button in supported chests and dispensers. Hiding it keeps the deposit hotkey available.";
+        case "creativeHotbarsButton" -> "Show the H button in the player inventory. Hiding it keeps saved hotbars and their hotkeys available.";
         case "depositMatching" -> "Deposit main-storage items that match the chest or dispenser's original contents, including all native item data.";
         case "creativeHotbars" -> "Save nine hotbar presets and load them in singleplayer Creative. Disabling keeps saved presets.";
         case "restock" -> "Refill the hand after native item use or a successful break consumes its item. Manual drops and menu edits never trigger refilling. Singleplayer Survival only.";
@@ -44,8 +50,8 @@ public final class InventoryToolsBackend implements Backend {
         case "toolsFromInventory" -> "Allow tools from the three main-storage rows to swap into the selected hotbar slot. Off only selects tools already in the hotbar.";
         default -> "Do not automatically choose tools with this many durability uses left or fewer. Lower values use tools longer; higher values protect them earlier. Zero allows the final use.";
       };
-      String group = key.equals("sorting") || key.equals("depositMatching") || key.equals("sortDescending") || key.equals("protectedSlots") || key.equals("preferredItems") ? "Sorting"
-          : key.equals("creativeHotbars") ? "Saved Creative hotbars" : key.startsWith("tool") ? "Automatic tool switching" : "Automatic restocking";
+      String group = Set.of("sorting", "sortingButton", "depositMatching", "depositMatchingButton", "sortDescending", "protectedSlots", "preferredItems").contains(key) ? "Sorting"
+          : key.startsWith("creativeHotbars") ? "Saved Creative hotbars" : key.startsWith("tool") ? "Automatic tool switching" : "Automatic restocking";
       boolean numeric = field.getType() == int.class;
       entries.add(new Setting("inventoryTools." + key, "inventoryTools", "Inventory", group, label, help,
           numeric ? Setting.Kind.INTEGER : field.getType() == boolean.class ? Setting.Kind.BOOLEAN : Setting.Kind.LIST, Catalog.JSON.toJsonTree(field.get(current)),

@@ -26,6 +26,8 @@ public final class SortingPreferencesScreen extends UiScreen {
   private final JsonElement originalPresets;
   private SortingLayoutsData presets;
   private int presetIndex;
+  private boolean choosingPreset;
+  private int presetFocus, presetScroll;
   private String presetProblem = "";
   private int selected = 9;
   private String error = "";
@@ -52,8 +54,23 @@ public final class SortingPreferencesScreen extends UiScreen {
     } catch (IllegalArgumentException unavailable) { /* Retain unavailable preferences until explicitly changed. */ }
   }
   private int left() { return (width - 198) / 2; }
-  private int gridTop() { return Math.max(38, (height - 250) / 2); }
+  private int gridTop() { return Math.max(32, (height - 254) / 2); }
   private int controlsTop() { return gridTop() + 68; }
+  private int presetsTop() { return controlsTop() + 70; }
+  private int presetRows() { return Math.min(presets.size(), Math.max(1, (presetsTop() - 28) / 20)); }
+  private int presetMenuTop() { return presetsTop() - presetRows() * 20 - 4; }
+  private List<String> presetLabels() {
+    var labels = new ArrayList<String>();
+    for (int i = 0; i < presets.size(); i++) labels.add(presets.preset(i).get("name").getAsString());
+    return labels;
+  }
+  private void revealPreset() {
+    presetScroll = Math.max(0, Math.min(presetScroll, presets.size() - presetRows()));
+    if (presetFocus < presetScroll) presetScroll = presetFocus;
+    if (presetFocus >= presetScroll + presetRows()) presetScroll = presetFocus - presetRows() + 1;
+  }
+  @Override public void init() { Keyboard.enableRepeatEvents(true); }
+  @Override public void removed() { Keyboard.enableRepeatEvents(false); drag.cancel(); TextDrag.cancel(); }
   private boolean changed() {
     return presetChanged() || !Catalog.JSON.toJsonTree(protectedSlots).equals(protectedSetting.value)
         || !Catalog.JSON.toJsonTree(preferredItems).equals(preferredSetting.value);
@@ -67,20 +84,24 @@ public final class SortingPreferencesScreen extends UiScreen {
   @Override public void onMouseEvent() {
     super.onMouseEvent();
     if (!Display.isActive() || exit.active()) { drag.cancel(); return; }
+    if (choosingPreset) {
+      int wheel = Mouse.getEventDWheel();
+      if (wheel != 0) presetScroll = Math.max(0, Math.min(presets.size() - presetRows(), presetScroll - Integer.signum(wheel)));
+      return;
+    }
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
     drag.move(slotAt(x, y), this::paint);
   }
   private void paint(int slot, boolean protect) { if (protect) protectedSlots.add(slot); else protectedSlots.remove(slot); }
   @Override protected void mouseReleased(int x, int y, int button) {
-    if (Display.isActive() && !exit.active()) drag.release(slotAt(x, y), button, this::paint); else drag.cancel();
+    if (Display.isActive() && !exit.active() && !choosingPreset) drag.release(slotAt(x, y), button, this::paint); else drag.cancel();
   }
   private void presetAction(int action) {
     if (presets == null) { error = presetProblem; return; }
     drag.cancel();
     try {
-      if (action == 0) { if (presets.size() > 0) presetIndex = (presetIndex + 1) % presets.size(); }
-      else if (action == 1) {
+      if (action == 1) {
         presets = presets.save(presetName.text(), Catalog.JSON.toJsonTree(protectedSlots), Catalog.JSON.toJsonTree(preferredItems));
         presetIndex = presets.size() - 1; presetName.setText(""); presetName.focused = false;
       } else if (presets.size() > 0 && action == 2) {
@@ -117,10 +138,22 @@ public final class SortingPreferencesScreen extends UiScreen {
   private void chooseItem() {
     minecraft.setScreen(new ItemPickerScreen(this, "Preferred item for slot " + (selected - 8),
         ItemCatalogue.Domain.FILTER, preferredItems.containsKey(selected) ? List.of(preferredItems.get(selected)) : List.of(),
-        false, values -> { preferredItems.put(selected, values.get(0)); refreshIcons(); error = ""; }));
+        false, new ItemPickerScreen.Options(true, entry -> true),
+        values -> { preferredItems.put(selected, values.get(0)); refreshIcons(); error = ""; }));
   }
   @Override protected void keyPressed(char character, int key) {
     if (exit.key(key)) return;
+    if (choosingPreset) {
+      if (key == Keyboard.KEY_ESCAPE) choosingPreset = false;
+      else if (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN) {
+        presetFocus = Math.floorMod(presetFocus + (key == Keyboard.KEY_UP ? -1 : 1), presets.size()); revealPreset();
+      } else if (key == Keyboard.KEY_HOME || key == Keyboard.KEY_END) {
+        presetFocus = key == Keyboard.KEY_HOME ? 0 : presets.size() - 1; revealPreset();
+      } else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) {
+        click(); presetIndex = presetFocus; choosingPreset = false;
+      }
+      return;
+    }
     if (presetName.focused) {
       if (key == Keyboard.KEY_ESCAPE) { presetName.focused = false; presetName.setText(""); }
       else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { click(); presetAction(1); }
@@ -133,6 +166,13 @@ public final class SortingPreferencesScreen extends UiScreen {
   @Override protected void mouseClicked(int x, int y, int button) {
     if (exit.click(this, x, y, button, this::done, this::discard)) return;
     if (button != 0 && button != 1) return;
+    if (choosingPreset) {
+      if (button == 0 && inside(x, y, left(), presetMenuTop(), 198, presetRows() * 20)) {
+        presetIndex = presetScroll + (y - presetMenuTop()) / 20; click();
+      }
+      choosingPreset = false;
+      return;
+    }
     if (inside(x, y, left(), gridTop(), 198, 66)) {
       presetName.focused = false;
       selected = slotAt(x, y);
@@ -141,12 +181,17 @@ public final class SortingPreferencesScreen extends UiScreen {
     }
     if (button != 0) return;
     int top = controlsTop();
-    if (inside(x, y, left(), top + 82, 148, 18) && presets != null) { presetName.focused = true; presetName.click(x, button); return; }
+    if (inside(x, y, left(), presetsTop() + 20, 148, 18) && presets != null) { presetName.focused = true; presetName.click(x, button); return; }
     presetName.focused = false;
-    if (inside(x, y, left(), top + 62, 110, 18)) { click(); presetAction(0); return; }
-    if (inside(x, y, left() + 114, top + 62, 40, 18)) { click(); presetAction(2); return; }
-    if (inside(x, y, left() + 158, top + 62, 40, 18)) { click(); presetAction(3); return; }
-    if (inside(x, y, left() + 152, top + 82, 46, 18)) { click(); presetAction(1); return; }
+    if (inside(x, y, left(), presetsTop(), 110, 18)) {
+      if (presets != null && presets.size() > 0) {
+        click(); drag.cancel(); choosingPreset = true; presetFocus = presetIndex; revealPreset();
+      }
+      return;
+    }
+    if (inside(x, y, left() + 114, presetsTop(), 40, 18)) { click(); presetAction(2); return; }
+    if (inside(x, y, left() + 158, presetsTop(), 40, 18)) { click(); presetAction(3); return; }
+    if (inside(x, y, left() + 152, presetsTop() + 20, 46, 18)) { click(); presetAction(1); return; }
     if (inside(x, y, left(), top, 198, 18)) { click(); toggleProtected(); }
     else if (inside(x, y, left(), top + 20, 148, 18) && !protectedSlots.contains(selected)) { click(); chooseItem(); }
     else if (inside(x, y, left() + 152, top + 20, 46, 18) && preferredItems.containsKey(selected)) {
@@ -164,10 +209,10 @@ public final class SortingPreferencesScreen extends UiScreen {
     if (!protectedSlots.remove(selected)) protectedSlots.add(selected);
   }
   @Override public void render(int mouseX, int mouseY, float delta) {
-    if (!Display.isActive() || exit.active()) drag.cancel();
+    if (!Display.isActive() || exit.active()) { drag.cancel(); choosingPreset = false; }
     else if (drag.button() >= 0 && Mouse.isButtonDown(drag.button())) drag.move(slotAt(mouseX, mouseY), this::paint);
     int pointerX = mouseX, pointerY = mouseY;
-    if (exit.active()) { mouseX = -1; mouseY = -1; }
+    if (exit.active() || choosingPreset) { mouseX = -1; mouseY = -1; }
     renderBackground(); titleBar("Sorting layout");
     if (!error.isEmpty()) drawCenteredTextWithShadow(textRenderer, fit(error, width - 24), width / 2, gridTop() - 12, 0xffaaaa);
     String tooltip = "";
@@ -189,16 +234,19 @@ public final class SortingPreferencesScreen extends UiScreen {
     button("Choose preferred item", left(), top + 20, 148, 18, mouseX, mouseY, !protectedSlots.contains(selected));
     button("Clear", left() + 152, top + 20, 46, 18, mouseX, mouseY, preferredItems.containsKey(selected));
     button("Reset layout", left(), top + 40, 198, 18, mouseX, mouseY, true);
-    button(presets == null ? "Presets unavailable" : presets.size() == 0 ? "No presets" : fit(presets.preset(presetIndex).get("name").getAsString(), 102), left(), top + 62, 110, 18, mouseX, mouseY, presets != null && presets.size() > 0);
-    button("Load", left() + 114, top + 62, 40, 18, mouseX, mouseY, presets != null && presets.size() > 0);
-    button("Delete", left() + 158, top + 62, 40, 18, mouseX, mouseY, presets != null && presets.size() > 0);
-    input(presetName, left(), top + 82, 148, mouseX, mouseY, "New preset name");
-    button("Save", left() + 152, top + 82, 46, 18, mouseX, mouseY, presets != null && !presetName.text().isBlank());
-    if (presets == null && inside(mouseX, mouseY, left(), top + 62, 198, 40)) tooltip = presetProblem;
+    WaypointSetDropdown.button(this, presets == null ? "Presets unavailable" : presets.size() == 0 ? "No presets" : presets.preset(presetIndex).get("name").getAsString(),
+        left(), presetsTop(), 110, mouseX, mouseY, presets != null && presets.size() > 0, choosingPreset);
+    button("Load", left() + 114, presetsTop(), 40, 18, mouseX, mouseY, presets != null && presets.size() > 0);
+    button("Delete", left() + 158, presetsTop(), 40, 18, mouseX, mouseY, presets != null && presets.size() > 0);
+    input(presetName, left(), presetsTop() + 20, 148, mouseX, mouseY, "New preset name");
+    button("Save", left() + 152, presetsTop() + 20, 46, 18, mouseX, mouseY, presets != null && !presetName.text().isBlank());
+    if (presets == null && inside(mouseX, mouseY, left(), presetsTop(), 198, 40)) tooltip = presetProblem;
     button("Done", width / 2 - 80, height - 28, 76, 20, mouseX, mouseY, true);
     button("Discard", width / 2 + 4, height - 28, 76, 20, mouseX, mouseY, true);
     if (!error.isEmpty() && mouseY >= 22 && mouseY < gridTop()) tooltip = error;
     if (!tooltip.isEmpty()) foregroundTooltip(tooltip, mouseX, mouseY);
+    if (choosingPreset) WaypointSetDropdown.render(this, presetLabels(), presetIndex, presetFocus, presetScroll,
+        left(), presetMenuTop(), 198, presetRows(), pointerX, pointerY);
     exit.render(this, "Save sorting layout?", pointerX, pointerY);
   }
 }

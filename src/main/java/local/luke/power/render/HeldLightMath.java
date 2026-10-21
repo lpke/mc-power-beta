@@ -5,6 +5,11 @@ public final class HeldLightMath {
   public static final double RADIUS = 7.75, PREPARE_RADIUS = 15.75;
   private HeldLightMath() {}
 
+  /** Cold meshes fence activation; later terrain updates must not darken already prepared meshes. */
+  public static float advanceStrength(float strength, float elapsed, boolean ready) {
+    return ready ? Math.min(1, strength + elapsed * 10) : strength;
+  }
+
   public static double sectionDistanceSquared(double x, double y, double z, int sx, int sy, int sz) {
     double dx = Math.max(Math.max(sx - x, x - (sx + 16.0)), 0);
     double dy = Math.max(Math.max(sy - y, y - (sy + 16.0)), 0);

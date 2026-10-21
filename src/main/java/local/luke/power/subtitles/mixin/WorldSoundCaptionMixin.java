@@ -27,11 +27,13 @@ public abstract class WorldSoundCaptionMixin {
   }
   @WrapOperation(method = "method_1152", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/SoundManager;method_2015(Ljava/lang/String;FFFFF)V"))
   private void power$blockBreak(SoundManager manager, String id, float x, float y, float z, float volume, float pitch, Operation<Void> original) {
+    if (!SoundCaptionContext.enabled()) { original.call(manager, id, x, y, z, volume, pitch); return; }
     try (var ignored = SoundCaptionContext.push("subtitles.block.generic.break")) { original.call(manager, id, x, y, z, volume, pitch); }
   }
   @WrapOperation(method = "method_1152", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;method_150(DDDLjava/lang/String;FF)V"))
   private void power$worldEvent(World world, double x, double y, double z, String id, float volume, float pitch, Operation<Void> original,
       PlayerEntity player, int event, int eventX, int eventY, int eventZ, int data) {
+    if (!SoundCaptionContext.enabled()) { original.call(world, x, y, z, id, volume, pitch); return; }
     String caption = switch (event) {
       case 1000, 1002 -> "subtitles.block.dispenser.dispense";
       case 1001 -> "subtitles.block.dispenser.fail";

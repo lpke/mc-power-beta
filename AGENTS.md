@@ -174,6 +174,9 @@
   vertex. Never change world light, material opacity or spawning. Bound endpoint
   preparation to loaded render sections; freeze and prepare the physical source
   before synchronous image capture. Freecam movement never moves that source.
+  Retain established light strength across terrain rebuilds, and regenerate existing
+  endpoints in the source's at-most-eight influence sections separately from bounded
+  first-time preparation. Mining must not toggle the light off between meshes.
 - Subtitles use the same position and yaw basis as the active sound listener,
   including freecam. Muted audio still admits registered captions without starting
   the sound engine, reading terrain or consuming sound-pool randomness. UI and music
@@ -187,6 +190,12 @@
   together on release. Use normal item and slot limits; preserve cursor damage/NBT.
   Never paint hidden catalog slots, survival, spectator or multiplayer inventories.
   Cancel on focus loss, screen/container changes, lost Creative access or cursor changes.
+- Spectator inventory capabilities apply only to the local player's exact native
+  inventory screen and owned player container. Creative permission selects its
+  inventory views without changing actual mode. Keep crafting, gestures and manual
+  inventory tools available there; world interaction, background automation and
+  closed-inventory dropping remain blocked. Scope the inventory player model to
+  its renderer so opening inventory never reveals the Spectator body in the world.
 - `TweakIndicators` exposes live module state across mappings. HUD inclusion is
   separate from gameplay settings. Do not infer active auto-walk/free look from
   feature availability or poll action keys while rendering.

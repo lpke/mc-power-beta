@@ -12,6 +12,7 @@ public abstract class SpectatorRendererMixin {
   @Inject(method = "method_341", at = @At("HEAD"), cancellable = true)
   private void power$hide(
       PlayerEntity player, double x, double y, double z, float yaw, float delta, CallbackInfo ci) {
-    if (Modes.spectator(player)) ci.cancel();
+    if (Modes.spectator(player) && !(local.luke.power.creative.inventory.InventoryPreview.active()
+        && Modes.spectatorInventory(player))) ci.cancel();
   }
 }

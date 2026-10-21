@@ -15,13 +15,13 @@ public final class HeldLighting {
   private static final FloatBuffer uniformCurve = BufferUtils.createFloatBuffer(16);
   private static World owner;
   private static double x, y, z;
-  private static int emission, admitted, captureDepth;
+  private static int emission, admitted, refreshed, captureDepth;
   private static float strength;
-  private static long lastFrame, requested, captures;
+  private static long lastFrame, requested, captures, refreshes;
   private HeldLighting() {}
 
   public static void reset() {
-    owner = null; emission = admitted = captureDepth = 0; strength = 0; lastFrame = 0;
+    owner = null; emission = admitted = refreshed = captureDepth = 0; strength = 0; lastFrame = 0;
   }
 
   public static void frame(Minecraft mc, float delta) {
@@ -32,7 +32,7 @@ public final class HeldLighting {
     if (captureDepth != 0) return;
     long now = System.nanoTime();
     float elapsed = lastFrame == 0 ? 0 : Math.min(.05f, Math.max(0, (now - lastFrame) / 1_000_000_000f));
-    lastFrame = now; admitted = 0;
+    lastFrame = now; admitted = refreshed = 0;
     if (mc == null || mc.world == null || mc.player == null || mc.player.world != mc.world
         || mc.player.dead || mc.player.health <= 0 || !HeldLightConfig.current().enabled || RenderControls.fullBright()) {
       owner = null; emission = 0; strength = 0; return;
@@ -56,7 +56,7 @@ public final class HeldLighting {
     uniformCurve.clear(); uniformCurve.put(curve).flip();
     boolean ready = prepare && mc.worldRenderer instanceof WaterTerrainUpdates updates
         && updates.power$prepareHeldLight(owner, x, y, z);
-    strength = ready ? Math.min(1, strength + elapsed * 10) : 0;
+    strength = HeldLightMath.advanceStrength(strength, elapsed, ready);
   }
 
   /** Freeze the physical source and finish its loaded influence meshes before the first image tile. */
@@ -85,12 +85,23 @@ public final class HeldLighting {
         ? Math.min(15, Math.max(0, Block.field_1943[id])) : 0;
   }
 
-  /** One admission per ordinary frame, or at most the 27-section interest set for a synchronous capture. */
+  /** One new admission per frame, plus bounded existing-endpoint refreshes; captures admit at most 27. */
   public static boolean admit(World world, int sx, int sy, int sz) {
-    if (owner != world || emission == 0 || admitted >= (captureDepth == 0 ? 1 : 27)
+    return admit(world, sx, sy, sz, false);
+  }
+
+  /** Refresh only the at-most-eight loaded sections in the physical source's actual influence. */
+  public static boolean admit(World world, int sx, int sy, int sz, boolean prepared) {
+    if (owner != world || emission == 0
         || !RenderControls.rendering() || RenderControls.fullBright()
         || HeldLightMath.sectionDistanceSquared(x, y, z, sx, sy, sz) >= HeldLightMath.PREPARE_RADIUS * HeldLightMath.PREPARE_RADIUS)
       return false;
+    if (captureDepth == 0 && prepared && strength > 0
+        && HeldLightMath.sectionDistanceSquared(x, y, z, sx, sy, sz) < HeldLightMath.RADIUS * HeldLightMath.RADIUS) {
+      if (refreshed >= 8) return false;
+      refreshed++; refreshes++; captures++; return true;
+    }
+    if (admitted >= (captureDepth == 0 ? 1 : 27)) return false;
     admitted++; captures++; return true;
   }
 
@@ -118,4 +129,5 @@ public final class HeldLighting {
   public static void requested() { requested++; }
   public static long requests() { return requested; }
   public static long captures() { return captures; }
+  public static long refreshes() { return refreshes; }
 }

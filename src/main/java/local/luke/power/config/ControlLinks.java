@@ -19,7 +19,7 @@ public final class ControlLinks {
     link("key.sneak", "", "", "Sneak at ledges or descend while flying.");
     link("key.drop", "", "", "Drop one item from the selected hotbar slot.");
     link("powerbeta.recipeBook", "recipeBook.enabled", "", "Open the recipe book or toggle it in an eligible inventory. Search fields and modal windows keep keyboard ownership.");
-    link("powerbeta.sortInventory", "inventoryTools.sorting", "", "Sort the supported open inventory. Hold Shift to sort player storage instead. Excludes hotbar, equipment and crafting slots.");
+    link("powerbeta.sortInventory", "inventoryTools.sorting", "", "Sort player storage when pointing over your inventory; otherwise sort the open chest or dispenser. Excludes hotbar, equipment and crafting slots.");
     link("powerbeta.depositMatching", "inventoryTools.depositMatching", "", "Deposit matching main-storage items into the supported open chest or dispenser.");
     link("powerbeta.saveCreativeHotbar", "inventoryTools.creativeHotbars", "", "Hold with a hotbar number to save one of nine Creative hotbars. Saved presets stay outside defaults resets.");
     link("powerbeta.loadCreativeHotbar", "inventoryTools.creativeHotbars", "", "Hold with a hotbar number to load one of nine Creative hotbars. Requires singleplayer Creative access.");
