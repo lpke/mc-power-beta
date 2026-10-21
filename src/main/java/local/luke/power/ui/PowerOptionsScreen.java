@@ -119,7 +119,15 @@ public final class PowerOptionsScreen extends UiScreen {
   }
   void panelWheel(int wheel) {
     if (wheel == 0 || panelModal()) return;
-    valueEditor.cancel(); scroll -= Math.signum(wheel) * 48; layout();
+    valueEditor.cancel(); scrollViewport(wheel, false);
+  }
+  private void scrollViewport(int wheel, boolean sidebar) {
+    if (sidebar) sideScroll = Math.max(0, Math.min(sidebarTrack().maximum(), sideScroll - Math.signum(wheel) * 44));
+    else scroll = Math.max(0, Math.min(contentTrack().maximum(), scroll - Math.signum(wheel) * 48));
+    // A viewport move releases a related-setting reveal without rebuilding the setting rows.
+    if (Double.compare(scroll, focusAnchorScroll) != 0 || Double.compare(sideScroll, focusAnchorSideScroll) != 0)
+      focusAnchorId = "";
+    hoverDelay.clear();
   }
   void panelRelease() {
     dragging = null; contentBar.release(); sidebarBar.release();
@@ -813,11 +821,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (hidden || wheel == 0 || capture != null || confirmClose || confirmReset) return;
     valueEditor.cancel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
-    if (!isolatedRules() && !embedded() && x < origin() + sidebar() + 8) sideScroll -= Math.signum(wheel) * 44;
+    if (!isolatedRules() && !embedded() && x < origin() + sidebar() + 8) scrollViewport(wheel, true);
     else if (page.equals("Defaults")) { defaultsPanel.wheel(wheel, left(), span()); return; }
     else if (libraryVisible()) library.wheel(wheel);
-    else scroll -= Math.signum(wheel) * 48;
-    layout();
+    else scrollViewport(wheel, false);
   }
 
   protected void mouseClicked(int x, int y, int button) {
@@ -1083,6 +1090,12 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!SettingAccess.reason(session, s).isEmpty()) return;
     error = "";
     click();
+    if (s.id.equals("inventoryTools.preferredItems") || s.id.equals("inventoryTools.protectedSlots")) {
+      minecraft.setScreen(new SortingPreferencesScreen(this, session, () -> changed(
+          session.settings().stream().filter(value -> value.id.equals("inventoryTools.preferredItems")
+              || value.id.equals("inventoryTools.protectedSlots")).toList(), false)));
+      return;
+    }
     if (s.id.equals("rules.review")) { reviewRules(); return; }
     if (s.id.equals("maps.zoomSteps")) { minecraft.setScreen(new ZoomStepsScreen(this, s)); return; }
     if (s.id.equals("interface.debugOrder")) {

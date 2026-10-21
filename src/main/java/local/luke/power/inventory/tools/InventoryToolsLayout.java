@@ -8,11 +8,11 @@ public final class InventoryToolsLayout {
   private InventoryToolsLayout() {}
   public static Rect sort(int width, int height, int panelWidth, int panelHeight, int offset, boolean second) {
     int right = (width + panelWidth) / 2 + offset;
-    return new Rect(right - (second ? 86 : 34), Math.max(2, (height - panelHeight) / 2 - 20), 34, 18);
+    return new Rect(right - (second ? 36 : 20), (height - panelHeight) / 2 + 5, 14, 14);
   }
   public static Rect second(int width, int height, int panelWidth, int panelHeight, int offset) {
     int right = (width + panelWidth) / 2 + offset;
-    return new Rect(right - 50, Math.max(2, (height - panelHeight) / 2 - 20), 50, 18);
+    return new Rect(right - 20, (height - panelHeight) / 2 + 5, 14, 14);
   }
   public static Rect modal(int width, int height, int offset) {
     int span = Math.min(258, width - 16), tall = Math.min(224, height - 8);

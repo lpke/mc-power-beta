@@ -1,6 +1,8 @@
 package local.luke.power.offhand.mixin;
 
 import local.luke.power.input.*;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import local.luke.power.offhand.*;
 import local.luke.power.mixin.ButtonBoundsAccessor;
 import net.minecraft.*;
@@ -29,6 +31,13 @@ public abstract class OffhandContainerKeysMixin extends net.minecraft.client.gui
   }
   @Inject(method="render",at=@At("HEAD"))
   private void power$pointer(int x,int y,float delta,CallbackInfo ci){power$pointerX=x;power$pointerY=y;}
+  @WrapMethod(method="mouseClicked")
+  private void power$sideSlotInside(int x,int y,int button,Operation<Void> original) {
+    Slot slot=power$offhandSlotAt(x,y);
+    try (var scope=OffhandSlotClick.begin(minecraft,(ContainerScreen)(Object)this,slot,x,y,button)) {
+      original.call(x,y,button);
+    }
+  }
   @Inject(method="keyPressed",at=@At("HEAD"),cancellable=true)
   private void power$swap(char character,int key,CallbackInfo ci) {
     if(Keyboard.isRepeatEvent()||!Bindings.matches("powerbeta.swapHands",key))return;

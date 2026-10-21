@@ -23,6 +23,7 @@ public final class ControlLinks {
     link("powerbeta.depositMatching", "inventoryTools.depositMatching", "", "Deposit matching main-storage items into the supported open chest or dispenser.");
     link("powerbeta.saveCreativeHotbar", "inventoryTools.creativeHotbars", "", "Hold with a hotbar number to save one of nine Creative hotbars. Saved presets stay outside defaults resets.");
     link("powerbeta.loadCreativeHotbar", "inventoryTools.creativeHotbars", "", "Hold with a hotbar number to load one of nine Creative hotbars. Requires singleplayer Creative access.");
+    link("powerbeta.toolSwitch", "inventoryTools.toolSwitch", "", "Toggle automatic tool switching in singleplayer Survival.");
     link("powerbeta.restock", "inventoryTools.restock", "", "Toggle automatic item refilling in singleplayer Survival.");
     link("powerbeta.swapHands", "offhand.enabled", "", "Swap the selected hotbar item with the offhand in singleplayer. In your inventory, swap the hovered writable slot instead.");
     link("key.inventory", "", "", "Open or close your inventory.");

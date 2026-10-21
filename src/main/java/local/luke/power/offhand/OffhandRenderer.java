@@ -33,6 +33,9 @@ public final class OffhandRenderer {
     float difference = swing - previousSwing; if (difference < 0) difference++;
     return previousSwing + difference * delta;
   }
+  public static float equip(PlayerEntity player, float delta) {
+    return owner == player && world == player.world ? previousEquip + (equip - previousEquip) * delta : 0;
+  }
   public static void tick(Minecraft mc) {
     if (owner != mc.player || world != mc.world) reset(mc.player, mc.world);
     previousEquip = equip; previousSwing = swing;
@@ -75,18 +78,11 @@ public final class OffhandRenderer {
         map(mc, maps, item, side, swing, equip);
         return;
       }
-      float root = (float)Math.sin(Math.sqrt(swing) * Math.PI), arc = (float)Math.sin(swing * Math.PI);
-      GL11.glTranslatef(side * (-root * .4f + .56f),
-          (float)Math.sin(Math.sqrt(swing) * Math.PI * 2) * .2f - .52f - (1 - equip) * .6f, -.72f - arc * .2f);
-      GL11.glRotatef(side * 45, 0, 1, 0);
-      GL11.glRotatef(side * -20 * (float)Math.sin(swing * swing * Math.PI), 0, 1, 0);
-      GL11.glRotatef(side * -20 * root, 0, 0, 1); GL11.glRotatef(-80 * root, 1, 0, 0);
+      HeldItemTransforms.firstPersonHand(side, swing, equip);
       int tint = Item.ITEMS[item.itemId].method_440(item.getDamage());
       GL11.glColor4f(brightness * (tint >> 16 & 255) / 255f,
           brightness * (tint >> 8 & 255) / 255f, brightness * (tint & 255) / 255f, 1);
-      GL11.glScalef(.4f,.4f,.4f);
-      if (item.getItem().method_449()) GL11.glRotatef(180,0,1,0);
-      renderer.method_1862(mc.player,item);
+      HeldItemTransforms.render(mc.player, renderer, item, true, side);
     } finally { GL11.glPopMatrix(); }
   }
   /** Modern one-handed map placement, with Beta's native map pixels and markers. */

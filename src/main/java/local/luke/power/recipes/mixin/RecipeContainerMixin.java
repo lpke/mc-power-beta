@@ -37,8 +37,9 @@ public abstract class RecipeContainerMixin extends Screen implements RecipeBookH
     }else original.call(x,y,delta);
     if(book!=null)book.render(x,y);
   }
-  @Inject(method="mouseClicked",at=@At("HEAD"),cancellable=true)
-  private void power$mouse(int x,int y,int button,CallbackInfo ci){var book=power$recipeBook();if(book!=null&&book.mouse(x,y,button)){power$cancelBookGestures();ci.cancel();}}
+  // Dispatch before inventory gesture guards reject clicks in registered panel bounds.
+  @WrapMethod(method="mouseClicked")
+  private void power$mouse(int x,int y,int button,Operation<Void> original){var book=power$recipeBook();if(book!=null&&book.mouse(x,y,button))power$cancelBookGestures();else original.call(x,y,button);}
   @Inject(method="keyPressed",at=@At("HEAD"),cancellable=true)
   private void power$key(char c,int key,CallbackInfo ci){var book=power$recipeBook();if(book!=null&&book.key(c,key)){power$cancelBookGestures();ci.cancel();}}
   @Unique private void power$cancelBookGestures(){

@@ -501,7 +501,7 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 				var8 = var4.id;
 			}
 
-			if (var7) {
+			if (var7 && !(var4 instanceof local.luke.power.inventory.PlayerSideSlot)) {
 				var8 = -999;
 			}
 
@@ -668,7 +668,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	}
 
 	@Unique private boolean powerInventory_handleRightClick(int mouseX, int mouseY, Slot clickedSlot) {
-		if (clickedSlot != null && (clickedSlot.getClass() != Slot.class || !clickedSlot.canInsert(minecraft.player.inventory.getCursorStack()))) return false;
+		if (clickedSlot != null && ((clickedSlot.getClass() != Slot.class && !(clickedSlot instanceof PlayerSideSlot))
+				|| !clickedSlot.canInsert(minecraft.player.inventory.getCursorStack()))) return false;
 		/** - Get held item */
 		ItemStack cursorStack = minecraft.player.inventory.getCursorStack();
 
@@ -796,7 +797,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	}
 
 	@Unique private boolean powerInventory_handleLeftClickWithItem(ItemStack cursorStack, Slot clickedSlot, boolean isClientOnServer) {
-		if (clickedSlot != null && (clickedSlot.getClass() != Slot.class || !clickedSlot.canInsert(minecraft.player.inventory.getCursorStack()))) return false;
+		if (clickedSlot != null && ((clickedSlot.getClass() != Slot.class && !(clickedSlot instanceof PlayerSideSlot))
+				|| !clickedSlot.canInsert(minecraft.player.inventory.getCursorStack()))) return false;
 		/** - Ensure a slot was clicked */
 		if (null != clickedSlot) {
 
@@ -889,7 +891,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 	@Unique private void powerInventory_handleLeftClickDragMouseTweaks() {
 		boolean shift = powerInventory$shiftDown();
 		boolean armor = ArmorTransfers.armorSlot(container, slot);
-		if (slot.getClass() != Slot.class && !(shift && minecraft.player.inventory.getCursorStack() == null && armor)) return;
+		if (slot.getClass() != Slot.class && !(slot instanceof PlayerSideSlot)
+				&& !(shift && minecraft.player.inventory.getCursorStack() == null && armor)) return;
 		if (slot.id != lastLMBSlotId) {
 			lastLMBSlotId = slot.id;
 

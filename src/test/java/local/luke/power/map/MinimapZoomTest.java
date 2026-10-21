@@ -57,4 +57,22 @@ class MinimapZoomTest {
     zoom.set(1.25, 200_001_000); assertEquals(moving, zoom.value(200_001_000));
     zoom.reset(); zoom.set(4, 0); assertEquals(4, zoom.value(0));
   }
+  @Test void replacementCanPublishWithMissingNewEdgesButKeepsAnyUnreplacedKnownCenter() {
+    assertTrue(MinimapBuffer.replacementReady(true, false, 81, 9, 0));
+    assertFalse(MinimapBuffer.replacementReady(true, false, 81, 80, 1));
+    assertFalse(MinimapBuffer.replacementReady(true, false, 81, 0, 0));
+    assertFalse(MinimapBuffer.replacementReady(false, true, 81, 72, 0));
+    assertTrue(MinimapBuffer.replacementReady(false, true, 81, 73, 0));
+    assertFalse(MinimapBuffer.replacementReady(false, true, 0, 0, 0));
+    assertTrue(MinimapBuffer.replacementReady(false, false, 81, 1, 0));
+  }
+  @Test void zoomingOutStartsImmediatelyAndCanReverseBeforeTheFirstTransitionEnds() {
+    var zoom = new MinimapZoom(); zoom.set(4, 0); zoom.set(.25, 1_000);
+    double wider = zoom.value(30_001_000);
+    assertTrue(wider < 4 && wider > .25);
+    zoom.set(2.5, 30_001_000);
+    assertEquals(wider, zoom.value(30_001_000));
+    assertTrue(zoom.value(60_001_000) > wider);
+    assertEquals(2.5, zoom.value(210_001_000));
+  }
 }

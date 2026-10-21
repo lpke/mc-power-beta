@@ -7,6 +7,7 @@ import java.util.function.BooleanSupplier;
 /** Read-only live state providers across modules with different Minecraft mappings. */
 public final class TweakIndicators {
   public enum Tweak {
+    RESTOCK("Hotbar restocking"), TOOL_SWITCH("Automatic tool switching"),
     FAKE_SNEAK("Fake sneak"), FAST_PLACEMENT("Fast placement"),
     PLACEMENT_RESTRICTION("Placement restriction"), AUTO_WALK("Auto-walk"),
     AUTO_MINE("Auto-mine"), CLICK_MINING("Click mining", " "), FREE_LOOK("Free look"), CINEMATIC_CAMERA("Cinematic camera"),

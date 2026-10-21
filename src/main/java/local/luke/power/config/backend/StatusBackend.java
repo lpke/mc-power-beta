@@ -20,6 +20,8 @@ public final class StatusBackend implements Backend {
         case "offsetY" -> "Vertical offset";
         case "textColor" -> "Text color";
         case "opacity" -> "Text opacity";
+        case "restock" -> "Hotbar restocking";
+        case "toolSwitch" -> "Automatic tool switching";
         case "autoWalk" -> "Auto-walk";
         case "autoMine" -> "Auto-mine";
         default -> Catalog.words(name);

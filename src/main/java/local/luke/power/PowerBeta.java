@@ -29,6 +29,7 @@ public final class PowerBeta {
     local.luke.power.mining.VeinMining.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.inventory.tools.InventoryAutomation.registerIndicators(mc);
       local.luke.power.input.ReportedPosition.register(() -> mc.player, () -> {
         if (mc.player == null || mc.world == null) return null;
         boolean detached = local.luke.power.input.DetachedCamera.isActive();

@@ -175,7 +175,7 @@ public final class OffhandActions400Checks {
   }
   private static final class Visual{
     final OffhandActions400State state;
-    final List<String> phases=List.of("asymmetric-first","armored-rear","armored-front","main-map","off-map","both-maps","empty-offhand","fishing-off-first","fishing-off-third","fishing-swapped-both-third");
+    final List<String> phases=List.of("asymmetric-first","generated-first","handheld-first","bow-first","armored-rear","armored-front","main-map","off-map","both-maps","empty-offhand","fishing-off-first","fishing-off-third","fishing-swapped-both-third");
     final List<Map<String,Object>> captures=new ArrayList<>();
     final List<Map<String,Object>> phaseResults=new ArrayList<>();
     final Set<Integer> observedTicks=new LinkedHashSet<>();
@@ -191,6 +191,9 @@ public final class OffhandActions400Checks {
       boolean third=name.startsWith("armored")||name.endsWith("third");
       state.visual(third,name.equals("armored-front"));
       targetMain=tagged(267,1,37,"visible-tool");targetOff=tagged(4,13,0,"visible-block");
+      if(name.equals("generated-first"))targetOff=tagged(50,16,0,"visible-torch");
+      if(name.equals("handheld-first"))targetOff=tagged(278,1,12,"visible-pickaxe");
+      if(name.equals("bow-first"))targetOff=tagged(261,1,12,"visible-bow");
       state.hands(targetMain,targetOff);action="settle-pose";
       if(name.startsWith("armored"))for(int i=0;i<4;i++)mc.player.inventory.armor[i]=tagged(313-i,1,11+i,"visible-armor"+i);
       if(name.equals("main-map")){targetMain=state.map();action="hands";}

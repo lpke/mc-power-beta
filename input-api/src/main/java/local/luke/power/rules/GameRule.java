@@ -84,9 +84,9 @@ public enum GameRule {
   public static GameRule find(String name) { return NAMES.get(name.toLowerCase(Locale.ROOT)); }
   public JsonPrimitive parse(String text) {
     if (!integer()) {
-      if (text.equalsIgnoreCase("true")) return new JsonPrimitive(true);
-      if (text.equalsIgnoreCase("false")) return new JsonPrimitive(false);
-      throw new IllegalArgumentException(id + " needs true or false.");
+      if (text.equalsIgnoreCase("true") || text.equalsIgnoreCase("on")) return new JsonPrimitive(true);
+      if (text.equalsIgnoreCase("false") || text.equalsIgnoreCase("off")) return new JsonPrimitive(false);
+      throw new IllegalArgumentException(id + " needs true/false or on/off.");
     }
     try {
       if (!text.matches("[0-9]+")) throw new NumberFormatException();

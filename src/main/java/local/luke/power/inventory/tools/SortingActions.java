@@ -16,7 +16,17 @@ public final class SortingActions {
     if (!InventoryToolsConfig.current().sorting || !SortingSlots.eligible(mc)) return false;
     try {
       var regions = SortingSlots.read(mc); List<Slot> slots = playerStorage || regions.storage().isEmpty() ? regions.player() : regions.storage();
-      var before = capture(slots); var after = SortingPlanner.sort(before);
+      var before = capture(mc, slots);
+      Map<Integer, SortingPlanner.Preference> preferences = new LinkedHashMap<>();
+      if (slots == regions.player()) for (int i = 0; i < slots.size(); i++) {
+        int nativeIndex = ((DeathSlotAccessor)(Object)slots.get(i)).power$deathIndex();
+        String value = InventoryToolsConfig.current().preferredItems.get(nativeIndex);
+        if (value != null) {
+          var item = local.luke.power.ui.ItemCatalogue.resolve(local.luke.power.ui.ItemCatalogue.Domain.FILTER, value);
+          preferences.put(i, new SortingPlanner.Preference(item.id(), item.damage()));
+        }
+      }
+      var after = SortingPlanner.sort(before, InventoryToolsConfig.current().sortDescending, preferences);
       List<NativeInventoryPlan.Change> changes = changes(mc, slots, before, after);
       return NativeInventoryPlan.submit(mc, "inventory_sort", true, changes,
           () -> InventoryToolsConfig.current().sorting && SortingSlots.owns(mc, regions), () -> {});
@@ -26,14 +36,14 @@ public final class SortingActions {
     if (!InventoryToolsConfig.current().depositMatching || !SortingSlots.eligible(mc)) return false;
     try {
       var regions = SortingSlots.read(mc); if (regions.storage().isEmpty()) return false;
-      var source = capture(regions.player()); var destination = capture(regions.storage()); var planned = SortingPlanner.deposit(source, destination);
+      var source = capture(mc, regions.player()); var destination = capture(mc, regions.storage()); var planned = SortingPlanner.deposit(source, destination);
       List<NativeInventoryPlan.Change> changes = new ArrayList<>(changes(mc, regions.player(), source, planned.source()));
       changes.addAll(changes(mc, regions.storage(), destination, planned.destination()));
       return NativeInventoryPlan.submit(mc, "deposit_matching", true, changes,
           () -> InventoryToolsConfig.current().depositMatching && SortingSlots.owns(mc, regions), () -> {});
     } catch (IOException | RuntimeException failure) { feedback(mc, failure.getMessage()); return false; }
   }
-  private static List<SortingPlanner.Cell> capture(List<Slot> slots) throws IOException {
+  private static List<SortingPlanner.Cell> capture(Minecraft mc, List<Slot> slots) throws IOException {
     List<SortingPlanner.Cell> cells = new ArrayList<>();
     for (Slot slot : slots) {
       ItemStack stack = slot.getStack(); int limit = slot.getMaxItemCount();
@@ -45,6 +55,9 @@ public final class SortingActions {
         item = new SortingPlanner.Item(DeathItems.encode(identity), data, stack.itemId, stack.getDamage(), stack.count, stack.getMaxCount(), stack.isStackable());
       }
       boolean pinned = stack != null && (stack.count > Math.min(limit, stack.getMaxCount()) || !slot.canInsert(stack));
+      var access = (DeathSlotAccessor)(Object)slot;
+      pinned |= access.power$deathInventory() == mc.player.inventory
+          && InventoryToolsConfig.current().protectedSlots.contains(access.power$deathIndex());
       cells.add(new SortingPlanner.Cell(item, limit, pinned));
     }
     return List.copyOf(cells);

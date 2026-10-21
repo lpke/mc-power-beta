@@ -208,6 +208,9 @@ public final class FastPlace {
         || !local.luke.power.building.config.Config.current().placement.enabled
         || !canOperate(mc)) return;
     while (placedThisTick < local.luke.power.building.config.Config.current().placement.attemptsPerTick) {
+      // A partial-stack refill also replaces the native stack reference. Let the
+      // worker flush and publish it before consuming another item from this session.
+      if (waitingRefill(mc)) break;
       ItemStack stack = held(mc);
       if (!sameItem(stack, mc.player.inventory.selectedSlot) || !eligible(mc, stack)) {
         if (waitingRefill(mc)) break;

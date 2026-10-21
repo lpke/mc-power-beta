@@ -13,10 +13,13 @@ public final class StatusSettings {
       autoWalk = true, autoMine = true, freeLook = true, cinematicCamera = true, freecamPlayerMovement = true;
   public boolean freecam = true;
   public boolean hiddenEntities = true, fullBright = true, clickMining = true;
+  public boolean restock = true, toolSwitch = true;
   public boolean cinematicCameraMessages;
 
   public boolean includes(Tweak tweak) {
     return switch (tweak) {
+      case RESTOCK -> restock;
+      case TOOL_SWITCH -> toolSwitch;
       case FAKE_SNEAK -> fakeSneak;
       case FAST_PLACEMENT -> fastPlacement;
       case PLACEMENT_RESTRICTION -> placementRestriction;

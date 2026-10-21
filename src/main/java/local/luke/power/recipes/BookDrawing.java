@@ -19,12 +19,26 @@ public final class BookDrawing extends DrawableHelper {
     image(mc,name,x,y,width,height,0,0,width,height,width,height);
   }
   public void image(Minecraft mc,String name,int x,int y,int width,int height,int u,int v,int sw,int sh,int tw,int th) {
+    texture(mc,ROOT+name+".png",x,y,width,height,u,v,sw,sh,tw,th);
+  }
+  private void texture(Minecraft mc,String path,int x,int y,int width,int height,int u,int v,int sw,int sh,int tw,int th) {
     GL11.glColor4f(1,1,1,1);GL11.glEnable(GL11.GL_TEXTURE_2D);GL11.glDisable(GL11.GL_LIGHTING);GL11.glDisable(GL11.GL_DEPTH_TEST);
-    mc.textureManager.bindTexture(mc.textureManager.getTextureId(ROOT+name+".png"));
+    mc.textureManager.bindTexture(mc.textureManager.getTextureId(path));
     Tessellator t=Tessellator.INSTANCE;t.startQuads();
     t.vertex(x,y+height,zOffset,u/(double)tw,(v+sh)/(double)th);t.vertex(x+width,y+height,zOffset,(u+sw)/(double)tw,(v+sh)/(double)th);
     t.vertex(x+width,y,zOffset,(u+sw)/(double)tw,v/(double)th);t.vertex(x,y,zOffset,u/(double)tw,v/(double)th);t.draw();
   }
+  public void craftingSlot(Minecraft mc,int x,int y){texture(mc,"/gui/crafting.png",x,y,18,18,29,16,18,18,256,256);}
+  public void outputSlot(Minecraft mc,int x,int y){texture(mc,"/gui/crafting.png",x,y,26,26,119,30,26,26,256,256);}
+  public void craftingArrow(Minecraft mc,int x,int y){texture(mc,"/gui/crafting.png",x,y,24,17,89,35,24,17,256,256);}
+  public void nativePanel(Minecraft mc,int x,int y,int width,int height) {
+    int[] a={0,4,width-4,width}, b={0,4,height-4,height};
+    int[] u={0,4,172,176}, v={0,4,162,166};
+    for(int row=0;row<3;row++)for(int col=0;col<3;col++)
+      texture(mc,"/gui/inventory.png",x+a[col],y+b[row],a[col+1]-a[col],b[row+1]-b[row],
+          col==1?170:u[col],row==1?80:v[row],col==1?1:u[col+1]-u[col],row==1?1:v[row+1]-v[row],256,256);
+  }
+  public void smeltingArrow(Minecraft mc,int x,int y){texture(mc,"/gui/furnace.png",x,y,24,17,79,34,24,17,256,256);}
   public void panel(Minecraft mc,int x,int y,int width,int height) {
     int[] a={0,4,width-4,width},b={0,4,height-4,height},s={0,4,28,32};
     for(int row=0;row<3;row++)for(int col=0;col<3;col++)
@@ -61,8 +75,7 @@ public final class BookDrawing extends DrawableHelper {
     }else mc.textRenderer.drawWithShadow(value.substring(view.start(),view.end()),left,top,0xffffff);
     if(input.focused&&InterfaceState.uiCursorVisible()) {
       int caret=left+mc.textRenderer.getWidth(value.substring(view.start(),input.cursor()));
-      if(input.cursor()<value.length()||value.length()>=50)rectangle(caret,top-1,1,10,0xffd0d0d0);
-      else mc.textRenderer.drawWithShadow("_",caret,top,0xffffff);
+      rectangle(caret,top-1,1,10,0xffd0d0d0);
     }
   }
   public void tooltip(Minecraft mc,String message,int mx,int my,int screenWidth,int screenHeight) {
@@ -70,8 +83,7 @@ public final class BookDrawing extends DrawableHelper {
     int x=mx+12,y=my-12,height=lines.size()*10-2;
     if(x+width+6>screenWidth)x=mx-width-16;if(y+height+6>screenHeight)y=screenHeight-height-6;
     x=Math.max(4,x);y=Math.max(4,y);GL11.glDisable(GL11.GL_DEPTH_TEST);GL11.glDisable(GL11.GL_LIGHTING);
-    fill(x-3,y-4,x+width+3,y+height+4,0xf0100010);fill(x-4,y-3,x+width+4,y+height+3,0xf0100010);
-    fill(x-3,y-3,x+width+3,y-2,0xff5000ff);fill(x-3,y+height+2,x+width+3,y+height+3,0xff28007f);
+    fill(x-3,y-3,x+width+3,y+height+3,0xc0000000);
     for(int i=0;i<lines.size();i++)mc.textRenderer.drawWithShadow(lines.get(i),x,y+i*10,i==0?0xffffff:0xaaaaaa);
   }
 }

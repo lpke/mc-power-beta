@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import local.luke.power.offhand.*;
 import net.minecraft.*;
-import net.minecraft.block.Block;
 import net.minecraft.client.render.entity.*;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,23 +31,13 @@ public abstract class OffhandPlayerRendererMixin extends LivingEntityRenderer {
   private void power$item(PlayerEntity player,float delta,CallbackInfo ci) {
     if(!Offhand.enabled(player))return;
     ItemStack stack=Offhand.get(player.inventory);if(stack==null)return;
-    if(player.fishHook!=null&&stack.getItem() instanceof class_607)stack=new ItemStack(Item.field_377);
-    GL11.glPushAttrib(GL11.GL_ENABLE_BIT|GL11.GL_CURRENT_BIT|GL11.GL_POLYGON_BIT);
+    GL11.glPushAttrib(GL11.GL_ENABLE_BIT|GL11.GL_CURRENT_BIT|GL11.GL_POLYGON_BIT|GL11.GL_LIGHTING_BIT|GL11.GL_TEXTURE_BIT);
     GL11.glPushMatrix();
     try {
-      bipedModel.leftArm.transform(1f/16);GL11.glTranslatef(.0625f,.4375f,.0625f);
-      if(stack.itemId<256&&Block.BLOCKS[stack.itemId]!=null&&class_13.method_42(Block.BLOCKS[stack.itemId].method_1621())) {
-        GL11.glTranslatef(0,.1875f,-.3125f);GL11.glRotatef(20,1,0,0);GL11.glRotatef(-45,0,1,0);GL11.glScalef(.375f,-.375f,.375f);
-      } else if(stack.getItem().method_448()) {
-        if(stack.getItem().method_449()){GL11.glRotatef(180,0,0,1);GL11.glTranslatef(0,-.125f,0);}
-        GL11.glTranslatef(0,.1875f,0);GL11.glScalef(.625f,-.625f,.625f);GL11.glRotatef(-100,1,0,0);GL11.glRotatef(-45,0,1,0);
-      } else {
-        GL11.glTranslatef(-.25f,.1875f,-.1875f);GL11.glScalef(.375f,.375f,.375f);
-        GL11.glRotatef(-60,0,0,1);GL11.glRotatef(-90,1,0,0);GL11.glRotatef(-20,0,0,1);
-      }
-      if(stack.getItem() instanceof class_367&&Boolean.TRUE.equals(local.luke.power.controls.ControlFeatures.BUGFIXES_CONFIG.bowHeldFix))
-        GL11.glTranslatef(0,-.5f,0);
-      dispatcher.field_2494.method_1862(player,stack);
+      bipedModel.leftArm.transform(1f/16);
+      GL11.glEnable(org.lwjgl.opengl.GL12.GL_RESCALE_NORMAL);
+      HeldItemTransforms.thirdPersonHand(-1);
+      HeldItemTransforms.render(player, dispatcher.field_2494, stack, false, -1);
     } finally { GL11.glPopMatrix();GL11.glPopAttrib(); }
   }
   @WrapOperation(method="method_827",at=@At(value="FIELD",target="Lnet/minecraft/entity/player/PlayerEntity;fishHook:Lnet/minecraft/entity/projectile/FishingBobberEntity;"))

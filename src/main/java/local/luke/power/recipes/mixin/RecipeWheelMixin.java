@@ -19,6 +19,7 @@ public abstract class RecipeWheelMixin {
     if(Mouse.getEventDWheel()==0||minecraft.currentScreen!=(Object)this)return;
     int x=Mouse.getEventX()*width/minecraft.displayWidth,y=height-Mouse.getEventY()*height/minecraft.displayHeight-1;
     if(RecipeBooks.owns(this,x,y)){
+      if(org.lwjgl.opengl.Display.isActive())RecipeBooks.book(this).scroll(x,y,Mouse.getEventDWheel());
       InventoryWheel.event(this,org.lwjgl.opengl.Display.isActive(),0,true);ci.cancel();
     }
   }

@@ -69,6 +69,7 @@ final class Release300SprintPolishChecks {
         test("actual native modes charge stamina only for grounded Survival and preserve exhausted reserves elsewhere", () -> modes(mc, state, keys, input));
         test("ground, Creative and Spectator share dynamic-FOV strength while freecam keeps its own preference", () -> fov(mc, state));
         test("zero-stamina Creative takeoff hands published ground sprint to flight before ground cancellation", () -> handoff(mc, state, keys, input, flight));
+        test("only accepted incoming mob damage starts the sprint combat timer", () -> combat(mc, state, keys, input));
         test("native stamina HUD draws in gameplay/chat/pause, skips other menus and restores GL state", () -> hud(mc, state));
         Release300StaminaHudChecks.run(mc, state);
       } finally {
@@ -124,6 +125,38 @@ final class Release300SprintPolishChecks {
     check(state.sprinting && Math.abs(state.stamina - 1.5) < 1e-9, "actual Survival movement/jump did not charge its stamina");
   }
   private static void resetFov() throws Exception { field(SprintController.class, "previousFov").setFloat(null, 1); field(SprintController.class, "fov").setFloat(null, 1); }
+  private static void combat(Minecraft mc, SprintState state, ByteBuffer keys, net.minecraft.class_41 input) throws Exception {
+    var settings = SprintConfig.copy(); var armor = mc.player.inventory.armor.clone();
+    int slot = mc.player.inventory.selectedSlot; var held = mc.player.inventory.main[slot];
+    try (var playerFields = new Fields(mc.player); var stateFields = new Fields(state)) {
+      mode(mc, "SURVIVAL", false);
+      var draft = SprintConfig.copy(); draft.stamina = false; draft.noSprintInCombat = true;
+      draft.sprintKnockback = true; draft.combatTime = 8; SprintConfig.preview(draft);
+      Arrays.fill(mc.player.inventory.armor, null); mc.player.inventory.main[slot] = null;
+      var mob = new net.minecraft.class_443(mc.world); mob.health = 20;
+      state.combatTicks = 0; state.sprinting = true;
+      mc.player.attack(mob);
+      check(mob.health < 20 && state.combatTicks == 0 && state.sprinting, "outgoing native mob hit stopped sprinting or started combat");
+      check(!SprintCombat.mobDamage(mc.player, true), "player damage counted as mob damage");
+      for (net.minecraft.entity.Entity source : new net.minecraft.entity.Entity[]{null, new net.minecraft.class_365(mc.world), mc.player, mob}) {
+        mc.player.health = 20; mc.player.dead = false; mc.player.field_1613 = 0; mc.player.hurtTime = 0; mc.player.field_1041 = 0;
+        state.combatTicks = 0;
+        check(mc.player.damage(source, 1), "native incoming damage was rejected for " + source);
+        check(state.combatTicks == (source == mob ? 160 : 0), "wrong combat timer for native incoming source " + source);
+      }
+      mc.player.field_1613 = 0; state.combatTicks = 0;
+      check(!mc.player.damage(mob, 0) && state.combatTicks == 0, "rejected mob damage started combat");
+      state.combatTicks = 0;
+      local.luke.power.world.ExplosionSource.fireball(mob, () -> { mc.player.damage(null, 1); return null; });
+      check(state.combatTicks == 160, "ghast explosion lost its mob owner");
+      input.field_2533 = 1; keys.put(17, (byte)1); keys.put(29, (byte)1);
+      SprintController.movement(mc.player); check(!state.sprinting, "incoming mob combat did not block ground sprint");
+      state.combatTicks = 0; SprintController.movement(mc.player); check(state.sprinting, "ground sprint did not resume after mob combat ended");
+    } finally {
+      System.arraycopy(armor, 0, mc.player.inventory.armor, 0, armor.length);
+      mc.player.inventory.main[slot] = held; SprintConfig.preview(settings);
+    }
+  }
   private static void fov(Minecraft mc, SprintState state) throws Exception {
     var settings = SprintConfig.copy(); settings.speed = 200; settings.dynamicFov = true; settings.fovStrength = 40;
     settings.creativeFov = settings.spectatorFov = false; settings.freecamFov = true; SprintConfig.preview(settings);

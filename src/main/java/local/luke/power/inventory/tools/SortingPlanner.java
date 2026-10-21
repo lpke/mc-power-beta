@@ -19,11 +19,17 @@ public final class SortingPlanner {
   private static final Comparator<Item> ORDER = Comparator.comparingInt(Item::id).thenComparingInt(Item::damage).thenComparing(Item::identity);
   private SortingPlanner() {}
 
-  public static List<Cell> sort(List<Cell> before) {
+  public record Preference(int id, int damage) {
+    boolean matches(Item item) { return item.id == id && (damage < 0 || item.damage == damage); }
+  }
+  public static List<Cell> sort(List<Cell> before) { return sort(before, false, Map.of()); }
+  public static List<Cell> sort(List<Cell> before, boolean descending, Map<Integer, Preference> preferences) {
     check(before);
+    if (preferences == null || preferences.keySet().stream().anyMatch(slot -> slot == null || slot < 0 || slot >= before.size()))
+      throw new IllegalArgumentException("Invalid preferred slot");
     ArrayList<Item> items = new ArrayList<>();
     for (Cell cell : before) if (!cell.pinned && cell.item != null) items.add(cell.item);
-    items.sort(ORDER);
+    items.sort(descending ? ORDER.reversed() : ORDER);
     ArrayList<Item> groups = new ArrayList<>();
     for (Item item : items) {
       if (!groups.isEmpty()) {
@@ -34,9 +40,25 @@ public final class SortingPlanner {
       }
       groups.add(item);
     }
+    Map<Integer, Item> preferred = new HashMap<>();
+    for (var entry : new TreeMap<>(preferences).entrySet()) {
+      Cell cell = before.get(entry.getKey());
+      if (cell.pinned || entry.getValue() == null) continue;
+      for (int i = 0; i < groups.size(); i++) {
+        Item item = groups.get(i);
+        if (!entry.getValue().matches(item)) continue;
+        int count = item.stackable ? Math.min(item.count, Math.min(item.limit, cell.limit)) : item.count;
+        if (count > Math.min(item.limit, cell.limit)) continue;
+        preferred.put(entry.getKey(), item.count(count));
+        if (count == item.count) groups.remove(i); else groups.set(i, item.count(item.count - count));
+        break;
+      }
+    }
     ArrayList<Cell> result = new ArrayList<>(); int index = 0;
     for (Cell cell : before) {
       if (cell.pinned) { result.add(cell); continue; }
+      Item reserved = preferred.get(result.size());
+      if (reserved != null) { result.add(new Cell(reserved, cell.limit, false)); continue; }
       if (index >= groups.size()) { result.add(new Cell(null, cell.limit, false)); continue; }
       Item item = groups.get(index); int capacity = Math.min(item.limit, cell.limit);
       int count = item.stackable ? Math.min(item.count, capacity) : item.count;

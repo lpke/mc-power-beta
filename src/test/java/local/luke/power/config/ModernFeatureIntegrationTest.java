@@ -42,7 +42,7 @@ class ModernFeatureIntegrationTest {
     JsonObject bases = resource("/assets/powerbeta/default-bases.json");
     for (var base : DefaultBases.Base.values()) for (String id : FLAGS) {
       assertTrue(bases.getAsJsonObject(base.id).has(id), base + " must freeze " + id);
-      boolean expected = base == DefaultBases.Base.POWER_BETA && !Set.of("recipeBook.enabled", "inventoryTools.restock").contains(id);
+      boolean expected = base == DefaultBases.Base.POWER_BETA && !Set.of("subtitles.enabled", "inventoryTools.restock", "inventoryTools.toolSwitch").contains(id);
       assertEquals(expected, DefaultBases.value(base, id, new JsonPrimitive(!expected)).getAsBoolean(), base + " " + id);
     }
   }

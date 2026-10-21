@@ -4,15 +4,20 @@
 
 ## [4.0.0] - 2026-10-21
 
-- Add a searchable recipe book for crafting and smelting, with recipe categories, craftable filtering, ingredient ghosts and safe recipe placement. Use it in supported inventories or only from the pause menu. It starts off in every defaults base.
+- Add a searchable recipe book for crafting and smelting, with recipe categories, craftable filtering, ingredient ghosts and safe recipe placement. Use it in supported inventories or only from the pause menu. Power Beta enables the pause-menu book by default and leaves the inventory button optional.
 - Add an optional offhand slot, hand-swap binding, held-item rendering and native item use. Preserve offhand items through saving, death, respawn and permitted recovery.
 - Light nearby terrain smoothly while holding a light-emitting block or lava bucket, including in the offhand. This changes rendering without changing world light or spawning.
-- Add automatic tool selection and optional hotbar restocking, with durability controls and checks for native item data, mining targets and manual input. Restocking starts off and its toggle is unbound.
-- Sort native inventories and transfer items matching chest contents with compact controls and configurable bindings. Keep hotbars, equipment, crafting inputs and custom inventories protected.
+- Add automatic tool selection and optional hotbar restocking, with durability controls and checks for native item data, mining targets and manual input. Both start off with unbound toggle keys and appear in Active tweaks when enabled.
+- Sort native inventories and transfer items matching chest contents with compact controls, protected storage slots, preferred item positions and configurable bindings. Keep hotbars, equipment, crafting inputs and custom inventories protected.
 - Save nine Creative hotbars and load them through a menu or configurable held-key shortcuts. Saved hotbars remain separate from settings defaults.
 - Back up, duplicate and recreate saved worlds from the world menu. Verify copied files before publishing them and give duplicated worlds independent map and recovery identities.
-- Show directional sound subtitles with configurable duration, visibility and HUD placement. Captions remain available when game audio is muted.
-- Integrate the new features with searchable Options, selected defaults, shared input ownership and HUD drafts. Power Beta enables them except the recipe book and automatic restocking; Beta and Refined Beta leave them off.
+- Add optional directional sound subtitles with configurable duration, visibility and HUD placement. Subtitles start off. Captions remain available when game audio is muted.
+- Integrate the new features with searchable Options, selected defaults, shared input ownership and HUD drafts. Power Beta leaves subtitles, automatic tool switching and automatic restocking off; Beta and Refined Beta leave them off.
+- Place the offhand beside the hotbar with the Creative destroy slot above it, align inventory extensions and keep compact inventory actions inside the panel. Use modern per-item hand transforms.
+- Make the recipe book clickable in inventories, support wheel paging and native search/tooltip styling, and show pause-menu recipes in a joined crafting or smelting panel.
+- Keep minimap zoom responsive while cave tiles load and avoid rebuilding Options lists for each scroll event.
+- Start sprint combat restrictions only after taking mob damage, and accept on/off aliases in /gamerule.
+- Include Power Beta settings in world backups, with optional maps and historical metadata backups.
 - Keep configuration format 7 with support for formats 3–6. World-rule format 4 supports formats 1–3 and earlier metadata; verified upgrades retain existing world rules and prevent older clients from dropping new inventory ownership.
 
 ## [3.3.0] - 2026-10-21

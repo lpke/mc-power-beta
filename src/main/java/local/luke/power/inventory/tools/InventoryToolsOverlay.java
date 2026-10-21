@@ -28,7 +28,7 @@ public final class InventoryToolsOverlay extends UiScreen {
   public boolean modal() { return modal; }
   public void attach(Minecraft mc, Screen host, int width, int height, int panelWidth, int panelHeight, List<ButtonWidget> buttons) {
     init(mc, width, height); this.host = host; this.panelWidth = panelWidth; this.panelHeight = panelHeight;
-    sort = new Header(195400, 34); second = new Header(195401, 50); buttons.add(sort); buttons.add(second); prepare();
+    sort = new Header(195400, 14); second = new Header(195401, 14); buttons.add(sort); buttons.add(second); prepare();
   }
   private int offset() { return InventoryPanels.offset(host); }
   private boolean hotbars() { return host.getClass() == class_585.class && InventoryToolsConfig.current().creativeHotbars
@@ -40,7 +40,7 @@ public final class InventoryToolsOverlay extends UiScreen {
     boolean storage = host.getClass() != class_585.class;
     boolean showSecond = base && (storage ? InventoryToolsConfig.current().depositMatching : hotbars());
     sort.visible = base && InventoryToolsConfig.current().sorting && !modal;
-    second.visible = showSecond && !modal; second.text = storage ? "Deposit" : "Hotbars";
+    second.visible = showSecond && !modal; second.text = storage ? "D" : "H";
     place(sort, InventoryToolsLayout.sort(width, height, panelWidth, panelHeight, offset(), showSecond));
     place(second, InventoryToolsLayout.second(width, height, panelWidth, panelHeight, offset()));
     sort.active = SortingSlots.eligible(minecraft); second.active = storage ? SortingSlots.eligible(minecraft) : SavedCreativeHotbars.eligible(minecraft);
@@ -161,7 +161,7 @@ public final class InventoryToolsOverlay extends UiScreen {
   }
   private final class Header extends ButtonWidget {
     InventoryToolsLayout.Rect rect = new InventoryToolsLayout.Rect(0, 0, 0, 0);
-    Header(int id, int width) { super(id, 0, 0, width, 18, "Sort"); }
+    Header(int id, int width) { super(id, 0, 0, width, 14, "S"); }
     @Override public void render(Minecraft mc, int x, int y) {
       if (visible) InventoryToolsOverlay.this.button(text, rect.x(), rect.y(), rect.width(), rect.height(), x, y, active);
     }

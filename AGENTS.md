@@ -156,12 +156,18 @@
   previous and dimension files before any new inventory ownership is enabled.
   Wrap the complete world-load path: the capture module replaces native loading
   with a cancellable HEAD hook, so native TAIL injections alone are insufficient.
+  Inventory side slots share drawing and hit geometry through InventorySideSlots.
+  Reserve their width beside an open recipe book; gameplay slots are not modal
+  panel bounds. Scope native outside-click redirection to the originating slot,
+  player and world, retaining the inventory gesture dispatch path.
 - Recipe placement, sorting, refills, automatic tools and saved Creative hotbars
   share inventory leases and immutable worker-flushed plans. Validate the whole
   protected inventory and external native owners before and after callbacks. Roll
   back only owned bytes; restore derived recipe output only after every input was
   restored. Fuel is never a recipe ingredient. Unknown recipe subclasses need an
   explicit display provider. Saved Creative hotbars remain user data outside defaults.
+  Fast placement waits for queued partial-stack refills as well as empty hands,
+  including the handoff to a durable inventory plan.
 - Held-item lighting uses render-only terrain endpoints and the existing 32-byte
   vertex. Never change world light, material opacity or spawning. Bound endpoint
   preparation to loaded render sections; freeze and prepare the physical source

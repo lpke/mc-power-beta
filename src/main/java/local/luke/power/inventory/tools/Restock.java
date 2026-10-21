@@ -37,12 +37,24 @@ public final class Restock {
   public static void after(Minecraft mc, Action action) {
     if (action == null || mc.player != action.player || mc.world != action.world
         || action.original.count >= action.count) return;
+    var settings = InventoryToolsConfig.current();
+    // Pause repeated placement only when this consumption actually needs a refill.
+    // Higher untouched counts must not turn fast placement into one placement per tick.
+    if (action.original.count > 0 && (action.tool || !settings.restockBeforeEmpty
+        || action.original.count > settings.restockThreshold) || action.tool && !settings.restockTools) return;
+    ItemStack held = Offhand.stack(mc.player, action.hand);
+    if (held != null && held != action.original) return;
     ready.put(action.hand, action);
   }
   /** Held-use repeats wait for their own durable refill; a fresh press supersedes it. */
   public static boolean waitingForUse(Minecraft mc) {
-    Action action = publishing;
-    return action != null && InventoryToolsConfig.current().restock && NativeInventoryPlan.ownsAction(mc, "restock")
+    if (!InventoryToolsConfig.current().restock) return false;
+    if (publishing != null && NativeInventoryPlan.ownsAction(mc, "restock") && sameUse(mc, publishing)) return true;
+    for (Action action : ready.values()) if (sameUse(mc, action)) return true;
+    return false;
+  }
+  private static boolean sameUse(Minecraft mc, Action action) {
+    return action != null
         && action.world == mc.world && action.player == mc.player && mc.player != null
         && action.inventory == mc.player.inventory && action.selected == mc.player.inventory.selectedSlot
         && action.hands == HandUse.manualRevision() && action.press == OffhandUse.pressRevision()

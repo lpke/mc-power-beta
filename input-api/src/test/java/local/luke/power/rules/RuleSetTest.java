@@ -52,6 +52,26 @@ class RuleSetTest {
       assertThrows(IllegalArgumentException.class, () -> PLAYERS_SLEEPING_PERCENTAGE.parse(value));
     assertThrows(IllegalArgumentException.class, () -> FIRE_SPREAD.parse("yes"));
   }
+  @Test void booleanCommandAliasesStayBooleanInSavedData() {
+    for (GameRule rule : GameRule.values()) {
+      if (rule.integer()) {
+        for (String value : new String[]{"on", "off", "true", "false"})
+          assertThrows(IllegalArgumentException.class, () -> rule.parse(value));
+        continue;
+      }
+      for (String value : new String[]{"true", "TRUE", "on", "On", "ON"}) {
+        JsonPrimitive parsed = rule.parse(value);
+        assertTrue(parsed.isBoolean()); assertTrue(parsed.getAsBoolean());
+      }
+      for (String value : new String[]{"false", "FALSE", "off", "Off", "OFF"}) {
+        JsonPrimitive parsed = rule.parse(value);
+        assertTrue(parsed.isBoolean()); assertFalse(parsed.getAsBoolean());
+      }
+      for (String value : new String[]{"yes", "no", "1", "0", "", " on", "off "})
+        assertThrows(IllegalArgumentException.class, () -> rule.parse(value));
+      assertThrows(IllegalArgumentException.class, () -> rule.checked(new JsonPrimitive("on")));
+    }
+  }
   @Test void groundSprintDefaultsOffAndRoundTripsIndependentlyOfOtherPermissions() {
     assertSame(ALLOW_SPRINTING, GameRule.find("allowSprinting"));
     assertTrue(ALLOW_SPRINTING.help().contains("/gamerule allow_sprinting"));

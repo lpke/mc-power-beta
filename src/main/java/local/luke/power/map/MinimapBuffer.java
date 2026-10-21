@@ -39,8 +39,7 @@ public final class MinimapBuffer {
     }
     if (requestedZoom != view.scale) {
       requestedZoom = view.scale;
-      // Wider coverage must be prepared before exposing it. Zooming in can use the old image.
-      zoom.set(view.scale < zoom.value(now) ? zoom.value(now) : view.scale, now);
+      zoom.set(view.scale, now);
     }
     boolean sameContext = contextMatches(active);
     boolean sameZoom = active.texture == 0 || active.requestScale == view.scale;
@@ -54,23 +53,30 @@ public final class MinimapBuffer {
       }
       if (preparing == null) preparing = new Surface();
       if (!preparing.update(mc, view, settings)) return false;
-      if (sameContext && !sameZoom)
-        active.update(mc, scaled(view, active.requestScale), settings, false);
-      boolean caveReady = replacementKnown(sameContext, sameZoom, active.knownSamples, preparing.knownSamples);
+      boolean caveReady = replacementReady(sameContext, sameZoom, active.knownSamples,
+          preparing.renderedSamples, preparing.retainedMissing);
       boolean coversTransition = view.scale <= zoom.value(now) || zoom.value(now) == view.scale;
-      if (!preparing.pending && caveReady && coversTransition) {
+      if (caveReady && coversTransition) {
         active.clear(); active = preparing; preparing = null; zoom.set(view.scale, now);
       }
     }
     displayedZoom = zoom.value(now);
-    active.draw(scaled(view, displayedZoom), settings);
+    var displayed = scaled(view, displayedZoom);
+    if (preparing != null && sameContext) {
+      preparing.drawReplacement(displayed, settings, active);
+    } else active.draw(displayed, settings);
     return true;
   }
   static boolean replacementKnown(boolean sameContext, boolean sameZoom, int previous, int candidate) {
     return sameContext || candidate >= (sameZoom ? Math.max(1, (int)Math.ceil(previous * .9)) : 1);
   }
+  static boolean replacementReady(boolean sameContext, boolean sameZoom, int previous, int rendered, int retainedMissing) {
+    return sameContext ? rendered > 0 && retainedMissing == 0 : replacementKnown(false, sameZoom, previous, rendered);
+  }
   private static final class Surface {
-    private int knownSamples;
+    private int knownSamples, renderedSamples, retainedMissing;
+    private final boolean[] rendered = new boolean[81], retainedCells = new boolean[81];
+    private double sampleSpan;
     private int framebuffer, texture, side, coverage;
     private boolean failed, pending;
     private MapCache source;
@@ -128,21 +134,47 @@ public final class MinimapBuffer {
     }
 
     private void draw(MapProjection view, MapSettings settings) {
+      double half = side / (2 * scale);
+      draw(view, settings, centerX - half, centerZ - half, centerX + half, centerZ + half);
+    }
+    private void drawReplacement(MapProjection view, MapSettings settings, Surface retained) {
+      double half = side / (2 * scale);
+      double retainedSpan = retained.renderedSamples == 0 ? retained.side / retained.scale : retained.sampleSpan;
+      double x0 = retained.centerX - retainedSpan / 2, x1 = x0 + retainedSpan;
+      double z0 = retained.centerZ - retainedSpan / 2, z1 = z0 + retainedSpan;
+      // Disjoint regions apply opacity once, including while the wider image is incomplete.
+      draw(view, settings, centerX - half, centerZ - half, centerX + half, z0);
+      draw(view, settings, centerX - half, z1, centerX + half, centerZ + half);
+      draw(view, settings, centerX - half, z0, x0, z1);
+      draw(view, settings, x1, z0, centerX + half, z1);
+      if (retained.renderedSamples == 0) { retained.draw(view, settings); return; }
+      double step = retainedSpan / 9;
+      for (int i = 0; i < retainedCells.length; i++) {
+        double x = x0 + i % 9 * step, z = z0 + i / 9 * step;
+        (retainedCells[i] ? retained : this).draw(view, settings, x, z, x + step, z + step);
+      }
+    }
+    private void draw(MapProjection view, MapSettings settings, double x0, double z0, double x1, double z1) {
+      double half = side / (2 * scale);
+      x0 = Math.max(x0, centerX - half); x1 = Math.min(x1, centerX + half);
+      z0 = Math.max(z0, centerZ - half); z1 = Math.min(z1, centerZ + half);
+      if (x0 >= x1 || z0 >= z1) return;
       GL11.glEnable(GL11.GL_TEXTURE_2D);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
       GL11.glColor4d(1, 1, 1, settings.opacity);
-      double half = side / (2 * scale);
-      var a = view.screen(centerX - half, centerZ - half);
-      var b = view.screen(centerX + half, centerZ - half);
-      var c = view.screen(centerX + half, centerZ + half);
-      var d = view.screen(centerX - half, centerZ + half);
+      double u0 = (x0 - centerX + half) / (2 * half), u1 = (x1 - centerX + half) / (2 * half);
+      double v0 = 1 - (z0 - centerZ + half) / (2 * half), v1 = 1 - (z1 - centerZ + half) / (2 * half);
+      var a = view.screen(x0, z0);
+      var b = view.screen(x1, z0);
+      var c = view.screen(x1, z1);
+      var d = view.screen(x0, z1);
       MapRenderer.polygon(
           view.clip(
               List.of(
-                  new MapProjection.Point(a.x(), a.y(), 0, 1),
-                  new MapProjection.Point(b.x(), b.y(), 1, 1),
-                  new MapProjection.Point(c.x(), c.y(), 1, 0),
-                  new MapProjection.Point(d.x(), d.y(), 0, 0)),
+                  new MapProjection.Point(a.x(), a.y(), u0, v0),
+                  new MapProjection.Point(b.x(), b.y(), u1, v0),
+                  new MapProjection.Point(c.x(), c.y(), u1, v1),
+                  new MapProjection.Point(d.x(), d.y(), u0, v1)),
               settings.circular));
 
     }
@@ -225,6 +257,10 @@ public final class MinimapBuffer {
               local.luke.power.config.Catalog.JSON.toJson(settings), MapSettings.class);
           opaqueSettings.opacity = 1;
         }
+        int probeLevel = MapCoverage.select(new MapProjection(centerX, centerZ, pixelScale, 0, 0, painted, painted, 0),
+            false, settings.cacheTiles, 1).level();
+        sampleSpan = painted / pixelScale;
+        prepareSamples(mc, probeLevel);
         MapRenderer.terrain(
             source,
             new MapProjection(
@@ -245,18 +281,7 @@ public final class MinimapBuffer {
             1,
             ownsInterest && !(mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen));
         generation = source.generation();
-        pending = MapRenderer.pending();
-        knownSamples = 0;
-        int probeLevel = MapCoverage.select(new MapProjection(x, z, pixelScale, 0, 0, painted, painted, 0),
-            false, settings.cacheTiles, 1).level();
-        for (int sz = -4; sz <= 4; sz++) for (int sx = -4; sx <= 4; sx++) {
-          // Fixed bounded probes, only when painting. Never read native terrain or synchronously load tiles.
-          int wx = (int)Math.floor(x + sx * painted / (12 * pixelScale));
-          int wz = (int)Math.floor(z + sz * painted / (12 * pixelScale));
-          int level = probeLevel;
-          var tile = source.peek(source.viewKey(MapMath.key(dimension, layer, level, wx, wz)));
-          if (tile != null && tile.known(MapMath.index(Math.floorDiv(wx, 1 << level), Math.floorDiv(wz, 1 << level)))) knownSamples++;
-        }
+        pending = MapRenderer.pending() || renderedSamples == 0 || renderedSamples < knownSamples || retainedMissing > 0;
         return true;
       } finally {
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
@@ -266,6 +291,38 @@ public final class MinimapBuffer {
         GL11.glMatrixMode(oldMatrix);
         EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, oldBuffer);
         GL11.glPopAttrib();
+      }
+    }
+    private boolean known(int level, double x, double z) {
+      int wx = (int)Math.floor(x), wz = (int)Math.floor(z);
+      var tile = source.peek(source.viewKey(MapMath.key(dimension, layer, level, wx, wz)));
+      return tile != null && tile.known(MapMath.index(Math.floorDiv(wx, 1 << level), Math.floorDiv(wz, 1 << level)));
+    }
+    private boolean uploaded(Minecraft mc, int level, double x, double z) {
+      // The peek guard admits resident tiles only, so tile() cannot schedule a visible read
+      // or replace the world map's interest when this minimap is a secondary preview.
+      return known(level, x, z) && MapRenderer.tile(source,
+          MapMath.key(dimension, layer, level, (int)Math.floor(x), (int)Math.floor(z)),
+          opaqueSettings, !mc.world.isRemote, mc.world.getSeed()) != 0;
+    }
+    private void prepareSamples(Minecraft mc, int level) {
+      knownSamples = renderedSamples = retainedMissing = 0;
+      java.util.Arrays.fill(rendered, false);
+      java.util.Arrays.fill(retainedCells, false);
+      // Center-first probes share the renderer's upload budget. Disk reads remain asynchronous.
+      for (int radius = 0; radius <= 4; radius++) for (int sz = -radius; sz <= radius; sz++) for (int sx = -radius; sx <= radius; sx++) {
+        if (Math.max(Math.abs(sx), Math.abs(sz)) != radius) continue;
+        double x = centerX + sx * sampleSpan / 9, z = centerZ + sz * sampleSpan / 9;
+        if (known(level, x, z)) knownSamples++;
+        if (uploaded(mc, level, x, z)) { rendered[(sz + 4) * 9 + sx + 4] = true; renderedSamples++; }
+      }
+      if (this == active || !contextMatches(active)) return;
+      double step = active.sampleSpan / 9;
+      for (int i = 0; i < rendered.length; i++) if (active.rendered[i]) {
+        double x = active.centerX + (i % 9 - 4) * step, z = active.centerZ + (i / 9 - 4) * step;
+        boolean inside = Math.abs(x - centerX) <= sampleSpan / 2 && Math.abs(z - centerZ) <= sampleSpan / 2;
+        retainedCells[i] = !inside || !uploaded(mc, level, x, z);
+        if (inside && retainedCells[i]) retainedMissing++;
       }
     }
   }

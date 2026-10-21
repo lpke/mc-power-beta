@@ -33,10 +33,10 @@ public final class PauseMenuTools extends UiScreen {
   private void include() {
     included.clear();
     if (!available()) return;
+    if (local.luke.power.recipes.RecipeBooks.pauseAvailable(minecraft)) included.add(Tool.RECIPES);
     if (ControlFeatures.USER_INTERFACE_CONFIG.photoModeConfig.enablePhotoModeButton) included.add(Tool.PHOTO);
     if (MenuPreferences.pauseMapButton() && MapKeys.available("powerbeta.map")) included.add(Tool.MAP);
     if (MenuPreferences.pauseWaypointsButton()) included.add(Tool.WAYPOINTS);
-    if (local.luke.power.recipes.RecipeBooks.pauseAvailable(minecraft)) included.add(Tool.RECIPES);
   }
   public int reserveAboveBack() {
     include();

@@ -127,7 +127,7 @@ public final class WorldTools400Checks {
     var operation = (WorldOperationScreen)mc.currentScreen; operation.init(mc, 640, 360); return operation;
   }
   private static WorldSnapshots.Task start(WorldOperationScreen screen) throws Exception {
-    ((ScreenInput)(Object)screen).power$click(screen.width / 2, 125, 0);
+    ((ScreenInput)(Object)screen).power$click(screen.width / 2 - 75, screen.height - 20, 0);
     var task = (WorldSnapshots.Task)UiChecks.field(screen, "task"); check(task != null, "native Start did not admit a task: " + UiChecks.field(screen, "error")); return task;
   }
   private static void await(WorldSnapshots.Task task) throws Exception {

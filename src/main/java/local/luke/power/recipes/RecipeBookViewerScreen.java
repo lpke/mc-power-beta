@@ -14,19 +14,19 @@ public final class RecipeBookViewerScreen extends UiScreen implements RecipeBook
   @Override public RecipeBookOverlay power$recipeBook(){return book;}
   @Override public void tick(){if(book!=null)book.tick();}
   @Override public void render(int x,int y,float delta){renderBackground();titleBar("Recipe book");
-    int left=Math.min(width-72,book.layout().x()+153),top=book.layout().y();
-    tabButton("Crafting",left,top,68,x,y,kind==RecipeDefinition.Kind.CRAFTING);
-    tabButton("Smelting",left,top+22,68,x,y,kind==RecipeDefinition.Kind.FURNACE);
-    button("Done",left,top+144,68,20,x,y,true);
+    var crafting=book.layout().kindTab(0);var smelting=book.layout().kindTab(1);var done=book.layout().done();
+    tabButton("Crafting",crafting.x(),crafting.y(),crafting.width(),crafting.height(),x,y,true,kind==RecipeDefinition.Kind.CRAFTING);
+    tabButton("Smelting",smelting.x(),smelting.y(),smelting.width(),smelting.height(),x,y,true,kind==RecipeDefinition.Kind.FURNACE);
+    button("Done",done.x(),done.y(),done.width(),done.height(),x,y,true);
     book.render(x,y);
   }
   @Override protected void mouseClicked(int x,int y,int button){
     if(local.luke.power.input.InventoryPanels.modalOther(this,book))return;
     if(local.luke.power.input.InventoryPanels.modal(this)){book.mouse(x,y,button);return;}
-    int left=Math.min(width-72,book.layout().x()+153),top=book.layout().y();
-    if(button==0&&inside(x,y,left,top,68,20)){click();kind=RecipeDefinition.Kind.CRAFTING;book.kind(kind);return;}
-    if(button==0&&inside(x,y,left,top+22,68,20)){click();kind=RecipeDefinition.Kind.FURNACE;book.kind(kind);return;}
-    if(button==0&&inside(x,y,left,top+144,68,20)){click();minecraft.setScreen(parent);return;}
+    var layout=book.layout();
+    if(button==0&&layout.kindTab(0).contains(x,y)){click();kind=RecipeDefinition.Kind.CRAFTING;book.kind(kind);return;}
+    if(button==0&&layout.kindTab(1).contains(x,y)){click();kind=RecipeDefinition.Kind.FURNACE;book.kind(kind);return;}
+    if(button==0&&layout.done().contains(x,y)){click();minecraft.setScreen(parent);return;}
     book.mouse(x,y,button);
   }
   @Override protected void keyPressed(char c,int key){if(book.key(c,key))return;if(key==Keyboard.KEY_ESCAPE||local.luke.power.input.Bindings.matches("powerbeta.recipeBook",key))minecraft.setScreen(parent);}

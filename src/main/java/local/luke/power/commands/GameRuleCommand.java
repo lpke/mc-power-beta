@@ -42,7 +42,7 @@ public final class GameRuleCommand {
       String[] words = total.strip().split("\\s+");
       if (words.length > 1 && words[1].equalsIgnoreCase("help")) values.addAll(java.util.stream.IntStream.rangeClosed(1, pages()).mapToObj(Integer::toString).toList());
       GameRule rule = words.length > 1 ? GameRule.find(words[1]) : null;
-      if (rule != null) values.addAll(rule.integer() ? List.of("0", "100") : List.of("true", "false"));
+      if (rule != null) values.addAll(rule.integer() ? List.of("0", "100") : List.of("true", "false", "on", "off"));
     }
     return values.stream().filter(v -> local.luke.power.chat.ChatCompletion.startsWith(v, prefix)).sorted().map(v -> v.substring(prefix.length())).toArray(String[]::new);
   }
@@ -80,7 +80,7 @@ public final class GameRuleCommand {
   private static void help(Minecraft mc, int page, boolean explicitPage) {
     if (page < 1 || page > pages()) throw new IllegalArgumentException("Choose a valid game-rule help page.");
     chat(mc, "§b/gamerule <rule> [value] §7Read or change a rule for this world.");
-    chat(mc, "§7Use true/false, or a percentage from 0 to 100 for numeric rules.");
+    chat(mc, "§7Use true/false or on/off, or a percentage from 0 to 100 for numeric rules.");
     chat(mc, "§7Rule aliases work too. The local owner can always edit rules.");
     List<String> names = Arrays.stream(GameRule.values()).map(GameRule::id).sorted().toList();
     // Keep the first view short when chat scrolling is disabled.

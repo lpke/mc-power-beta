@@ -124,8 +124,9 @@ public final class SprintController {
         && !mode.power$spectator() && !mode.power$flying();
   }
 
-  public static void combat(Entity entity) {
-    if (entity instanceof ClientPlayerEntity && entity == mc().player && !entity.world.isRemote)
+  public static void damaged(Entity entity, Entity source, boolean successful) {
+    if (SprintCombat.mobDamage(source, successful) && entity instanceof ClientPlayerEntity
+        && entity == mc().player && !entity.world.isRemote)
       ((SprintPlayer) entity).power$sprint().combat(SprintConfig.current());
   }
 

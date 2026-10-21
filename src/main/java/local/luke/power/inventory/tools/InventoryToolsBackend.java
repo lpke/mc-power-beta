@@ -14,6 +14,9 @@ public final class InventoryToolsBackend implements Backend {
       String key = field.getName();
       String label = switch (key) {
         case "sorting" -> "Inventory sorting";
+        case "sortDescending" -> "Reverse item order";
+        case "protectedSlots" -> "Protected storage slots";
+        case "preferredItems" -> "Sorting layout";
         case "depositMatching" -> "Deposit matching items";
         case "creativeHotbars" -> "Saved Creative hotbars";
         case "restock" -> "Automatic hotbar restocking";
@@ -26,6 +29,9 @@ public final class InventoryToolsBackend implements Backend {
         default -> "Tool durability reserve";
       };
       String help = switch (key) {
+        case "sortDescending" -> "Sort higher item IDs first. Preferred slot items and protected slots keep their positions.";
+        case "protectedSlots" -> "Keep selected main-storage slots untouched by sorting and Deposit matching. Configure them in the sorting layout.";
+        case "preferredItems" -> "Choose protected slots and preferred items in a main-storage layout. Preferences move only existing items, preserving all native data.";
         case "sorting" -> "Show sorting controls for native player storage, chests and dispensers in singleplayer. Keeps the hotbar, armor, offhand and crafting slots separate.";
         case "depositMatching" -> "Deposit main-storage items that match the chest or dispenser's original contents, including all native item data.";
         case "creativeHotbars" -> "Save nine hotbar presets and load them in singleplayer Creative. Disabling keeps saved presets.";
@@ -38,11 +44,11 @@ public final class InventoryToolsBackend implements Backend {
         case "toolsFromInventory" -> "Allow tools from the three main-storage rows to swap into the selected hotbar slot. Off only selects tools already in the hotbar.";
         default -> "Do not automatically choose tools with this many durability uses left or fewer. Lower values use tools longer; higher values protect them earlier. Zero allows the final use.";
       };
-      String group = key.equals("sorting") || key.equals("depositMatching") ? "Sorting"
+      String group = key.equals("sorting") || key.equals("depositMatching") || key.equals("sortDescending") || key.equals("protectedSlots") || key.equals("preferredItems") ? "Sorting"
           : key.equals("creativeHotbars") ? "Saved Creative hotbars" : key.startsWith("tool") ? "Automatic tool switching" : "Automatic restocking";
       boolean numeric = field.getType() == int.class;
       entries.add(new Setting("inventoryTools." + key, "inventoryTools", "Inventory", group, label, help,
-          numeric ? Setting.Kind.INTEGER : Setting.Kind.BOOLEAN, Catalog.JSON.toJsonTree(field.get(current)),
+          numeric ? Setting.Kind.INTEGER : field.getType() == boolean.class ? Setting.Kind.BOOLEAN : Setting.Kind.LIST, Catalog.JSON.toJsonTree(field.get(current)),
           Catalog.JSON.toJsonTree(field.get(defaults)), key.equals("restockThreshold") ? 1 : 0,
           key.equals("restockThreshold") ? 64 : key.equals("toolDurabilityReserve") ? 100 : 1, 1, List.of(), false));
     }
@@ -55,7 +61,7 @@ public final class InventoryToolsBackend implements Backend {
     for (var entry : values.entrySet()) {
       if (!entry.getKey().startsWith("inventoryTools.")) throw new IllegalArgumentException("Unknown inventory setting");
       var field = InventoryToolsSettings.class.getField(entry.getKey().substring("inventoryTools.".length()));
-      field.set(next, Catalog.JSON.fromJson(entry.getValue(), field.getType()));
+      field.set(next, Catalog.JSON.fromJson(entry.getValue(), field.getGenericType()));
     }
     next.validate(); return next;
   }

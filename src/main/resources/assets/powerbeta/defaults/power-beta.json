@@ -745,7 +745,9 @@
       "hiddenEntities": true,
       "fullBright": true,
       "clickMining": true,
-      "freecam": true
+      "freecam": true,
+      "restock": true,
+      "toolSwitch": true
     },
     "interface": {
       "blinkingChatCursor": true,
@@ -1184,7 +1186,7 @@
       "recreate": true
     },
     "subtitles": {
-      "enabled": true,
+      "enabled": false,
       "position": 8,
       "offsetX": -1,
       "offsetY": -30,
@@ -1198,22 +1200,25 @@
       "sorting": true,
       "depositMatching": true,
       "creativeHotbars": true,
-      "toolSwitch": true,
+      "toolSwitch": false,
       "restock": false,
       "restockBeforeEmpty": true,
       "restockOtherHotbar": false,
       "restockTools": true,
       "toolsFromInventory": true,
       "restockThreshold": 6,
-      "toolDurabilityReserve": 1
+      "toolDurabilityReserve": 1,
+      "sortDescending": false,
+      "protectedSlots": [],
+      "preferredItems": {}
     },
     "heldLight": {
       "enabled": true
     },
     "recipeBook": {
-      "enabled": false,
-      "inventory": true,
-      "pauseMenu": false,
+      "enabled": true,
+      "inventory": false,
+      "pauseMenu": true,
       "craftingOpen": false,
       "furnaceOpen": false,
       "craftingFilter": false,

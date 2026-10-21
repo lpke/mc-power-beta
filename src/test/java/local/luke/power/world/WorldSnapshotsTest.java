@@ -120,6 +120,54 @@ class WorldSnapshotsTest {
     assertEquals(newId, manifest.get("duplicateWorldId").getAsString()); assertTrue(manifest.has("payload"));
     SavedWorldAccess.requireOpenable(game, copy.getFileName().toString()); unchanged(before); noStage();
   }
+
+  @Test void backupIncludesConfigByDefaultWithoutChangingItsBytes() throws Exception {
+    Path config = game.resolve("config/power-beta.json");
+    Files.createDirectories(config.getParent());
+    byte[] before = "{\"schemaVersion\":7,\"settings\":{},\"preserved\":true}\n".getBytes(StandardCharsets.UTF_8);
+    Files.write(config, before);
+    try (ZipFile zip = new ZipFile(run(WorldSnapshots.Action.BACKUP).path().toFile())) {
+      assertArrayEquals(before, zip.getInputStream(zip.getEntry("external/config/power-beta.json")).readAllBytes());
+    }
+    assertArrayEquals(before, Files.readAllBytes(config));
+    var copy = run(WorldSnapshots.Action.DUPLICATE).path();
+    assertFalse(Files.exists(copy.resolve("config/power-beta.json")));
+    assertArrayEquals(before, Files.readAllBytes(config));
+  }
+
+  @Test void optionalBackupFilesCanBeOmittedWhileRecoveryAndPendingMetadataStayIncluded() throws Exception {
+    Files.createDirectories(maps(id)); Files.writeString(maps(id).resolve("waypoints.json"), "map data");
+    Path config = game.resolve("config/power-beta.json"); Files.createDirectories(config.getParent()); Files.writeString(config, "{}");
+    Path death = game.resolve("power-beta-data/deaths/owned.journal"); death(death, id, false);
+    for (String state : List.of("complete", "pending")) {
+      Path backup = game.resolve("power-beta-data/settings-backups/" + state); Files.createDirectories(backup);
+      Files.writeString(backup.resolve(state + ".json"), "{\"saves/Original/level.dat\":\"file-0\"}");
+      Files.writeString(backup.resolve("file-0"), "original metadata");
+    }
+    Path uncertain = game.resolve("power-beta-data/settings-backups/uncertain"); Files.createDirectories(uncertain);
+    Files.writeString(uncertain.resolve("complete.json"), "unreadable evidence");
+    var result = WorldSnapshots.execute(access(), WorldSnapshots.Action.BACKUP, "Minimal",
+        new WorldSnapshots.BackupOptions(false, false, false), () -> false, QUIET, NORMAL);
+    try (ZipFile zip = new ZipFile(result.path().toFile())) {
+      assertNotNull(zip.getEntry("world/level.dat")); assertNotNull(zip.getEntry("world/region/r.0.0.mcr"));
+      assertNotNull(zip.getEntry("external/power-beta-data/deaths/owned.journal"));
+      assertNotNull(zip.getEntry("external/power-beta-data/settings-backups/pending/file-0"));
+      assertNotNull(zip.getEntry("external/power-beta-data/settings-backups/uncertain/complete.json"));
+      assertNull(zip.getEntry("external/config/power-beta.json"));
+      assertNull(zip.getEntry("external/power-beta-data/maps/" + maps(id).getFileName() + "/waypoints.json"));
+      assertNull(zip.getEntry("external/power-beta-data/settings-backups/complete/file-0"));
+    }
+    assertEquals("{}", Files.readString(config)); assertEquals("map data", Files.readString(maps(id).resolve("waypoints.json")));
+  }
+
+  @Test void enabledBackupConfigCannotChangeBeforePublication() throws Exception {
+    Path config = game.resolve("config/power-beta.json"); Files.createDirectories(config.getParent()); Files.writeString(config, "{\"value\":1}");
+    assertThrows(IOException.class, () -> WorldSnapshots.execute(access(), WorldSnapshots.Action.BACKUP, "Changed config", () -> false, QUIET,
+        (phase, path) -> { if (phase.equals("before-publish")) Files.writeString(config, "{\"value\":2}"); }));
+    assertEquals("{\"value\":2}", Files.readString(config));
+    try (var paths = Files.list(game.resolve("backups/power-beta"))) { assertEquals(0, paths.count()); }
+    noStage();
+  }
   @Test void successiveCopiesHaveIndependentIdsAndMapDirectories() throws Exception {
     String first = WorldRuleFiles.read(run(WorldSnapshots.Action.DUPLICATE).path().resolve("level.dat")).getCompound("Data").getString("PowerBetaCommandWorldId");
     String second = WorldRuleFiles.read(run(WorldSnapshots.Action.DUPLICATE).path().resolve("level.dat")).getCompound("Data").getString("PowerBetaCommandWorldId");

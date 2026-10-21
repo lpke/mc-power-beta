@@ -12,7 +12,9 @@ class InventoryToolsLayoutTest {
     var second = InventoryToolsLayout.second(600, 400, 176, 166, 77); assertTrue(shifted.x() + shifted.width() < second.x());
   }
   @Test void largeChestHeaderStaysVisibleWithoutMovingNativeSlots() {
-    var header = InventoryToolsLayout.sort(320, 240, 176, 222, 0, true); assertEquals(2, header.y()); assertEquals(18, header.height());
+    var header = InventoryToolsLayout.sort(320, 240, 176, 222, 0, true); assertEquals(14, header.y()); assertEquals(14, header.height());
+    assertTrue(header.x() >= (320 - 176) / 2);
+    assertTrue(header.y() + header.height() < (240 - 222) / 2 + 36);
   }
   @Test void modalStaysInsideNarrowScreensAndTracksBookOffsetWhenSpaceAllows() {
     for (int width : new int[]{320, 427, 600}) for (int offset : new int[]{0, 77}) {

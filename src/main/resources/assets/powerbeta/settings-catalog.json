@@ -5459,7 +5459,7 @@
     "page": "Gameplay",
     "group": "Sprint stamina and combat",
     "label": "Block sprinting in combat",
-    "description": "Stop sprinting while the combat timer is active after dealing or receiving entity damage.",
+    "description": "Stop sprinting after taking damage from a mob, until the combat timer expires. Attacking, damage from players and environmental damage do not start this timer.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5510,7 +5510,7 @@
     "page": "Gameplay",
     "group": "Sprint stamina and combat",
     "label": "Combat duration",
-    "description": "Seconds after the last successful entity hit before combat ends. Environmental damage does not start combat.",
+    "description": "Seconds after the last successful mob damage taken before combat ends. A shorter time lets sprinting and stamina recovery resume sooner; a longer time keeps combat restrictions active longer.",
     "min": 0.0,
     "max": 120.0,
     "step": 0.5,
@@ -5542,7 +5542,7 @@
     "page": "Gameplay",
     "group": "Sprint stamina and combat",
     "label": "Recover stamina in combat",
-    "description": "Allow stamina recovery while the combat timer is active. Off by default.",
+    "description": "Allow stamina recovery while the timer from taking mob damage is active. Off waits until that timer expires.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -6638,5 +6638,36 @@
   },
   "subtitles.displaySeconds": {
     "unit": "s"
+  },
+  "activeTweaks.restock": {
+    "label": "Automatic restocking",
+    "description": "Include this enabled tweak in Active tweaks. This does not enable the feature.",
+    "default": true,
+    "order": 40
+  },
+  "activeTweaks.toolSwitch": {
+    "label": "Automatic tool switching",
+    "description": "Include this enabled tweak in Active tweaks. This does not enable the feature.",
+    "default": true,
+    "order": 41
+  },
+  "keys.powerbeta.toolSwitch": {
+    "label": "Automatic tool switching (toggle)",
+    "page": "Controls",
+    "group": "Inventory",
+    "default": 0,
+    "order": 11.5
+  },
+  "inventoryTools.preferredItems": {
+    "label": "Sorting layout",
+    "description": "Choose protected storage slots and preferred items. Sorting only moves existing items and keeps the hotbar, armor, offhand and crafting slots separate.",
+    "order": 3
+  },
+  "inventoryTools.protectedSlots": {
+    "label": "Protected storage slots",
+    "order": 4
+  },
+  "inventoryTools.sortDescending": {
+    "order": 5
   }
 }

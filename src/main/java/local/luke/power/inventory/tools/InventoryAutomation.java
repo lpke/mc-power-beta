@@ -1,14 +1,22 @@
 package local.luke.power.inventory.tools;
 
-import java.io.IOException;
 import local.luke.power.input.*;
-import local.luke.power.inventory.NativeInventoryPlan;
 import local.luke.power.world.WorldCompatibility;
 import net.minecraft.client.Minecraft;
 
 /** Shared physical-player eligibility; settings menus never run automatic inventory actions. */
 public final class InventoryAutomation {
   private InventoryAutomation() {}
+  public static void registerIndicators(Minecraft mc) {
+    TweakIndicators.register(TweakIndicators.Tweak.RESTOCK,
+        () -> enabledForPlayer(mc) && InventoryToolsConfig.current().restock ? "" : null);
+    TweakIndicators.register(TweakIndicators.Tweak.TOOL_SWITCH,
+        () -> enabledForPlayer(mc) && InventoryToolsConfig.current().toolSwitch ? "" : null);
+  }
+  private static boolean enabledForPlayer(Minecraft mc) {
+    return mc.player != null && mc.world != null && !mc.world.isRemote
+        && !(mc.player instanceof PlayerMode mode && (mode.power$creative() || mode.power$spectator()));
+  }
   public static boolean playable(Minecraft mc) {
     return mc != null && mc.player != null && mc.world != null && !mc.world.isRemote
         && mc.player.world == mc.world && !mc.player.dead && mc.player.health > 0
@@ -22,11 +30,18 @@ public final class InventoryAutomation {
     return playable(mc) && !(mc.player instanceof PlayerMode mode && mode.power$creative());
   }
   public static void toggleRestock(Minecraft mc) {
-    if (!playable(mc)) return;
+    if (!survival(mc)) return;
     var next = InventoryToolsConfig.copy(); next.restock = !next.restock;
     InventoryToolsConfig.preview(next);
     local.luke.power.storage.PowerConfig.saveDeferred("inventoryTools", next);
     Restock.clear();
+  }
+  public static void toggleToolSwitch(Minecraft mc) {
+    if (!survival(mc)) return;
+    var next = InventoryToolsConfig.copy(); next.toolSwitch = !next.toolSwitch;
+    InventoryToolsConfig.preview(next);
+    local.luke.power.storage.PowerConfig.saveDeferred("inventoryTools", next);
+    AutoToolSwitch.clear();
   }
   public static void tick(Minecraft mc) { Restock.tick(mc); }
   public static void clear() { Restock.clear(); AutoToolSwitch.clear(); }

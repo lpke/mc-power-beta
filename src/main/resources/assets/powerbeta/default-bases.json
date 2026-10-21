@@ -91,14 +91,16 @@
     "worldTools.backup": true,
     "worldTools.duplicate": true,
     "worldTools.recreate": true,
-    "subtitles.enabled": true,
+    "subtitles.enabled": false,
     "inventoryTools.sorting": true,
     "inventoryTools.depositMatching": true,
     "inventoryTools.creativeHotbars": true,
-    "inventoryTools.toolSwitch": true,
+    "inventoryTools.toolSwitch": false,
     "heldLight.enabled": true,
     "inventoryTools.restock": false,
-    "recipeBook.enabled": false
+    "recipeBook.enabled": true,
+    "recipeBook.inventory": false,
+    "recipeBook.pauseMenu": true
   },
   "beta": {
     "activeTweaks.enabled": false,

@@ -16,9 +16,6 @@ public abstract class OffhandContainerMixin extends Container {
   private void power$appendOffhand(PlayerInventory inventory, boolean local, CallbackInfo ci) {
     // Remote container protocols retain their native layout.
     if (inventory.player.world != null && inventory.player.world.isRemote) return;
-    method_2079(new Slot(new OffhandSlotInventory(inventory), 0, 77, 62) {
-      @Override public boolean canInsert(ItemStack stack) { return Offhand.enabled(inventory.player)
-          &&!(inventory.player instanceof local.luke.power.input.PlayerMode mode&&mode.power$spectator()); }
-    });
+    method_2079(new OffhandNativeSlot(inventory));
   }
 }

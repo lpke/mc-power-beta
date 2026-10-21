@@ -13,8 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SprintCombatMixin {
   @Inject(method = "damage", at = @At("RETURN"))
   private void power$combatDamage(Entity source, int damage, CallbackInfoReturnable<Boolean> cir) {
-    if (source != null && cir.getReturnValue())
-      SprintController.combat((PlayerEntity) (Object) this);
+    SprintController.damaged((PlayerEntity) (Object) this, source, cir.getReturnValue());
   }
 
   @WrapOperation(
@@ -28,7 +27,6 @@ public class SprintCombatMixin {
     boolean sprint = SprintController.active(source);
     boolean hit = original.call(target, source, damage);
     if (hit) {
-      SprintController.combat(source);
       if (sprint && SprintConfig.current().sprintKnockback) {
         double angle = source.yaw * Math.PI / 180;
         if (target instanceof LivingEntity) {
@@ -42,7 +40,6 @@ public class SprintCombatMixin {
         }
         source.velocityX *= .6;
         source.velocityZ *= .6;
-        ((SprintPlayer) source).power$sprint().sprinting = false;
       }
     }
     return hit;

@@ -8,12 +8,14 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Keyboard;
 
-/** The screen owns only its name draft; the worker owns all streaming and verification. */
+/** The screen owns its drafts; the worker owns all streaming and verification. */
 public final class WorldOperationScreen extends UiScreen {
   private final Screen parent;
   private final String folder;
   private final WorldSnapshots.Action action;
   private final Setting name;
+  private final String worldName;
+  private WorldSnapshots.BackupOptions options = WorldSnapshots.BackupOptions.ALL;
   private final InlineValueEditor inline = new InlineValueEditor();
   private WorldSnapshots.Task task;
   private String error = "";
@@ -22,6 +24,7 @@ public final class WorldOperationScreen extends UiScreen {
   public WorldOperationScreen(Screen parent, String folder, String displayName, WorldSnapshots.Action action) {
     this.parent = parent; this.folder = folder; this.action = action;
     String initial = displayName == null || displayName.isBlank() ? folder : displayName;
+    worldName = initial;
     if (action == WorldSnapshots.Action.DUPLICATE) initial += " (Copy)";
     name = new Setting("worldOperation.name", "", "", "", "World name", "", Setting.Kind.TEXT,
         new JsonPrimitive(initial), new JsonPrimitive(initial), 0, 0, 1, List.of(), false);
@@ -30,6 +33,8 @@ public final class WorldOperationScreen extends UiScreen {
   }
   private int left() { return Math.max(8, width / 2 - 150); }
   private int span() { return Math.min(300, width - 16); }
+  private int footerSpan() { return task == null ? (span() - 6) / 2 : span(); }
+  private int backLeft() { return task == null ? left() + span() - footerSpan() : left(); }
   private boolean running() { return task != null && !task.finished(); }
   private void leave() {
     inline.cancel();
@@ -38,7 +43,7 @@ public final class WorldOperationScreen extends UiScreen {
   private void start() {
     try {
       task = WorldSnapshots.start(FabricLoader.getInstance().getGameDir(), folder, action,
-          name.value.getAsString(), () -> minecraft.world == null);
+          name.value.getAsString(), options, () -> minecraft.world == null);
       error = "";
     } catch (Exception failure) { error = Objects.toString(failure.getMessage(), "World files could not be read."); }
   }
@@ -49,27 +54,42 @@ public final class WorldOperationScreen extends UiScreen {
   @Override protected void mouseClicked(int x, int y, int button) {
     if (inline.press(x, y, button)) return;
     if (button != 0) return;
-    if (inside(x, y, left(), height - 30, span(), 20)) { click(); leave(); return; }
+    if (inside(x, y, backLeft(), height - 30, footerSpan(), 20)) { click(); leave(); return; }
     if (task != null) return;
+    if (!inline.active() && inside(x, y, left(), height - 30, footerSpan(), 20)) { click(); start(); return; }
     if (action == WorldSnapshots.Action.DUPLICATE && inside(x, y, left(), 62, span(), 18)) {
       click(); inline.begin(name, name, () -> error = "", left(), 62, span(), 28, height - 38); return;
     }
-    if (inside(x, y, left(), 116, span(), 20)) { click(); start(); }
+    if (action == WorldSnapshots.Action.BACKUP) {
+      if (inside(x, y, left(), 70, span(), 18)) {
+        click(); options = new WorldSnapshots.BackupOptions(!options.maps(), options.powerConfig(), options.metadataBackups());
+      } else if (inside(x, y, left(), 92, span(), 18)) {
+        click(); options = new WorldSnapshots.BackupOptions(options.maps(), !options.powerConfig(), options.metadataBackups());
+      } else if (inside(x, y, left(), 114, span(), 18)) {
+        click(); options = new WorldSnapshots.BackupOptions(options.maps(), options.powerConfig(), !options.metadataBackups());
+      }
+    }
   }
   @Override public void removed() {
     Keyboard.enableRepeatEvents(false); inline.cancel(); TextDrag.cancel();
     if (running()) task.cancel();
   }
   @Override public void render(int mx, int my, float delta) {
-    renderBackground(); titleBar(action == WorldSnapshots.Action.BACKUP ? "Back up world" : "Duplicate world");
+    renderBackground(); titleBar(fit((action == WorldSnapshots.Action.BACKUP ? "Back up world: " : "Duplicate world: ") + worldName, width - 16));
     inline.beginFrame();
     if (task == null) {
-      text(action == WorldSnapshots.Action.DUPLICATE ? "New world name" : "World", left(), 44, 0xcccccc);
-      if (inline.active()) inline.render(this, left(), 62, span(), mx, my, 28, height - 38);
-      else if (action == WorldSnapshots.Action.DUPLICATE) button(fit(name.value.getAsString(), span() - 12), left(), 62, span(), 18, mx, my, true);
-      else text(fit(name.value.getAsString(), span()), left(), 65, 0xffffff);
-      text(action == WorldSnapshots.Action.BACKUP ? "Includes map and recovery files." : "Recovery history stays with the original.", left(), 91, 0xaaaaaa);
-      button(action == WorldSnapshots.Action.BACKUP ? "Create backup" : "Duplicate", left(), 116, span(), 20, mx, my, !inline.active());
+      if (action == WorldSnapshots.Action.BACKUP) {
+        text("Includes terrain, player data, world rules", left(), 39, 0xcccccc);
+        text("and recovery records. Also include:", left(), 50, 0xcccccc);
+        button("Maps and waypoints: " + on(options.maps()), left(), 70, span(), 18, mx, my, true);
+        button("Power Beta config: " + on(options.powerConfig()), left(), 92, span(), 18, mx, my, true);
+        button("Previous metadata backups: " + on(options.metadataBackups()), left(), 114, span(), 18, mx, my, true);
+      } else {
+        text("New world name", left(), 44, 0xcccccc);
+        if (inline.active()) inline.render(this, left(), 62, span(), mx, my, 28, height - 38);
+        else button(fit(name.value.getAsString(), span() - 12), left(), 62, span(), 18, mx, my, true);
+      }
+      button(action == WorldSnapshots.Action.BACKUP ? "Create backup" : "Duplicate", left(), height - 30, footerSpan(), 20, mx, my, !inline.active());
     } else {
       text(fit(task.cancelling() ? "Canceling and cleaning up" : task.phase(), span()), left(), 47, 0xffffff);
       if (running()) {
@@ -83,10 +103,16 @@ public final class WorldOperationScreen extends UiScreen {
       }
       if (!task.error().isEmpty()) lines(task.error(), 94, 0xff8888);
     }
-    if (!error.isEmpty()) lines(error, 147, 0xff8888);
-    button(running() ? task.cancelling() ? "Canceling..." : "Cancel" : "Back", left(), height - 30, span(), 20, mx, my, task == null || !task.cancelling());
+    if (!error.isEmpty()) lines(error, action == WorldSnapshots.Action.BACKUP ? 141 : 94, 0xff8888);
+    button(running() ? task.cancelling() ? "Canceling..." : "Cancel" : "Back", backLeft(), height - 30, footerSpan(), 20, mx, my, task == null || !task.cancelling());
     inline.endFrame(); inline.renderError(this);
+    if (task == null && action == WorldSnapshots.Action.BACKUP) {
+      if (inside(mx, my, left(), 70, span(), 18)) foregroundTooltip("Map tiles and saved waypoints for this world.", mx, my);
+      else if (inside(mx, my, left(), 92, span(), 18)) foregroundTooltip("A snapshot of config/power-beta.json, including global preferences and creation presets. Restoring the world does not apply these settings automatically.", mx, my);
+      else if (inside(mx, my, left(), 114, span(), 18)) foregroundTooltip("Completed backups of this world's metadata. Interrupted saves and recovery evidence are always included.", mx, my);
+    }
   }
+  private static String on(boolean enabled) { return enabled ? "On" : "Off"; }
   private int lines(String message, int y, int color) {
     String line = "";
     for (String word : message.split(" ")) {

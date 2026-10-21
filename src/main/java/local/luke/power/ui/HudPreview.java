@@ -194,7 +194,7 @@ final class HudPreview {
       List<String> lines = new ArrayList<>();
       for (var tweak : local.luke.power.input.TweakIndicators.Tweak.values()) if (status.includes(tweak))
         lines.add(switch (tweak) { case AUTO_WALK -> "Auto-walk"; case AUTO_MINE -> "Auto-mine";
-          case FREE_LOOK -> "Free look"; default -> Catalog.words(tweak.name()); });
+          case FREE_LOOK -> "Free look"; case RESTOCK -> "Hotbar restocking"; case TOOL_SWITCH -> "Automatic tool switching"; default -> Catalog.words(tweak.name()); });
       if (!lines.isEmpty()) {
         int textWidth = lines.stream().mapToInt(mc.textRenderer::getWidth).max().orElse(1);
         var layout = StatusLayout.at(width, height, textWidth, lines.size(), status);

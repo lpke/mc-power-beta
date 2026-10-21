@@ -197,6 +197,35 @@ public final class AutoTools400Checks {
 
   private static void restock(AutoTools400State s) throws Exception {
     var mc = s.mc; var inv = s.inventory;
+    scenario(s, "held fast placement pauses at the refill threshold until durable publication", () -> {
+      var original = local.luke.power.building.config.Config.current().copy();
+      try {
+        var enabled = original.copy(); enabled.placement.setEnabled(true);
+        local.luke.power.building.config.Config.preview(enabled);
+        local.luke.power.fastplace.FastPlace.release();
+        local.luke.power.fastplace.FastPlace.beginTick(mc, true, false, true);
+        s.scene(1, 1); inv.main[0] = tagged(4, 2, 0, "fast-place"); inv.main[9] = tagged(4, 63, 0, "fast-place");
+        OffhandUse.newPress(mc); s.place(HandUse.Hand.MAIN);
+        check(inv.main[0].count == 1 && local.luke.power.fastplace.FastPlace.suppressVanilla(mc, 1), "fast placement did not retain its first session");
+        check(Restock.waitingForUse(mc), "queued partial refill did not own held use before submission");
+        String before = s.snapshot();
+        local.luke.power.fastplace.FastPlace.placeBatch(mc);
+        check(before.equals(s.snapshot()) && local.luke.power.fastplace.FastPlace.suppressVanilla(mc, 1), "queued refill was overtaken or lost its held session");
+        try (var slow = new SlowWriter()) {
+          Restock.tick(mc); check(NativeInventoryPlan.ownsAction(mc, "restock"), "fast-placement refill did not acquire a durable plan");
+          local.luke.power.fastplace.FastPlace.beginTick(mc, true, false, true);
+          local.luke.power.fastplace.FastPlace.placeBatch(mc); slow.checkBlocked();
+          check(before.equals(s.snapshot()) && Restock.waitingForUse(mc), "held placement changed unflushed inventory data");
+          slow.release(); s.finish();
+        }
+        check(inv.main[0].count == 64 && inv.main[9] == null, "fast-placement refill lost or duplicated items");
+        local.luke.power.fastplace.FastPlace.beginTick(mc, true, false, true);
+        check(local.luke.power.fastplace.FastPlace.suppressVanilla(mc, 1), "published refill failed to resume the same held placement session");
+      } finally {
+        local.luke.power.fastplace.FastPlace.release();
+        local.luke.power.building.config.Config.preview(original);
+      }
+    });
     scenario(s, "native offhand food use refills only that hand after durable completion", () -> {
       inv.main[0] = tagged(35, 13, 5, "main-sentinel"); String main = bytes(inv.main[0]);
       Offhand.set(inv, tagged(260, 1, 0, "food")); inv.main[9] = tagged(260, 7, 0, "food");

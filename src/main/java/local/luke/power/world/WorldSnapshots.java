@@ -20,6 +20,9 @@ import net.minecraft.nbt.NbtCompound;
 /** One bounded worker streams an unopened save, verifies it, then publishes its new name. */
 public final class WorldSnapshots {
   public enum Action { BACKUP, DUPLICATE }
+  public record BackupOptions(boolean maps, boolean powerConfig, boolean metadataBackups) {
+    public static final BackupOptions ALL = new BackupOptions(true, true, true);
+  }
   public record Result(Path path, List<String> warnings) {
     public Result { warnings = List.copyOf(warnings); }
   }
@@ -34,10 +37,16 @@ public final class WorldSnapshots {
   private WorldSnapshots() {}
 
   public static synchronized Task start(Path game, String folder, Action action, String name, BooleanSupplier unloaded) throws IOException {
+    return start(game, folder, action, name, BackupOptions.ALL, unloaded);
+  }
+
+  public static synchronized Task start(Path game, String folder, Action action, String name, BackupOptions options,
+      BooleanSupplier unloaded) throws IOException {
     if (active != null && !active.finished) throw new IOException("Finish or cancel the current world operation first.");
     name = validName(name);
     SavedWorldAccess access = new SavedWorldAccess(game, folder, unloaded);
-    Task task = new Task(access, Objects.requireNonNull(action), name, access.acquire());
+    Objects.requireNonNull(options);
+    Task task = new Task(access, Objects.requireNonNull(action), name, options, access.acquire());
     active = task;
     try { WORKER.execute(task::run); }
     catch (RejectedExecutionException busy) { active = null; task.lease.close(); throw new IOException("World storage is busy. Try again when it finishes.", busy); }
@@ -54,14 +63,15 @@ public final class WorldSnapshots {
     private final SavedWorldAccess access;
     private final Action action;
     private final String name;
+    private final BackupOptions options;
     private final SavedWorldAccess.Lease lease;
     private final AtomicBoolean cancelled = new AtomicBoolean();
     private volatile boolean finished;
     private volatile String phase = "Preparing world files", error = "";
     private volatile long done, total;
     private volatile Result result;
-    private Task(SavedWorldAccess access, Action action, String name, SavedWorldAccess.Lease lease) {
-      this.access = access; this.action = action; this.name = name; this.lease = lease;
+    private Task(SavedWorldAccess access, Action action, String name, BackupOptions options, SavedWorldAccess.Lease lease) {
+      this.access = access; this.action = action; this.name = name; this.options = options; this.lease = lease;
     }
     public void cancel() { cancelled.set(true); }
     public boolean finished() { return finished; }
@@ -75,7 +85,7 @@ public final class WorldSnapshots {
         PowerConfig.flushPending();
         local.luke.power.storage.JournalQueue.awaitQueued();
         local.luke.power.map.MapIO.awaitQueued();
-        result = execute(access, lease, action, name, cancelled::get,
+        result = execute(access, lease, action, name, options, cancelled::get,
             (message, current, count) -> { phase = message; done = current; total = count; }, NORMAL);
         phase = action == Action.BACKUP ? "Backup created" : "World duplicated";
       } catch (IOException | RuntimeException failure) {
@@ -89,10 +99,15 @@ public final class WorldSnapshots {
 
   static Result execute(SavedWorldAccess access, Action action, String name, BooleanSupplier cancelled,
       Progress progress, Faults faults) throws IOException {
-    return execute(access, access.acquire(), action, name, cancelled, progress, faults);
+    return execute(access, action, name, BackupOptions.ALL, cancelled, progress, faults);
+  }
+  static Result execute(SavedWorldAccess access, Action action, String name, BackupOptions options, BooleanSupplier cancelled,
+      Progress progress, Faults faults) throws IOException {
+    Objects.requireNonNull(options);
+    return execute(access, access.acquire(), action, name, options, cancelled, progress, faults);
   }
   private static Result execute(SavedWorldAccess access, SavedWorldAccess.Lease ownedLease, Action action, String name,
-      BooleanSupplier cancelled, Progress progress, Faults faults) throws IOException {
+      BackupOptions options, BooleanSupplier cancelled, Progress progress, Faults faults) throws IOException {
     Path root = access.game().resolve("power-beta-data/world-operations");
     Path stage = null, publishedMaps = null;
     boolean worldPublished = false;
@@ -104,7 +119,7 @@ public final class WorldSnapshots {
       stage = Files.createTempDirectory(root, "staging-");
       DurableFiles.syncDirectory(root);
       WorldOwnedData.Owner owner = WorldOwnedData.owner(access.world());
-      WorldOwnedData.Discovery external = WorldOwnedData.discover(access.game(), owner);
+      WorldOwnedData.Discovery external = discover(access.game(), owner, action, options);
       List<WorldSnapshotFiles.Source> sources = WorldSnapshotFiles.collect(access.game(), access.world(), external, cancelled);
       if (action == Action.DUPLICATE) checkDuplicate(access.world(), owner, external, sources);
       faults.at("collected", stage); access.checkIdle(lease);
@@ -126,7 +141,7 @@ public final class WorldSnapshots {
         String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
         destination = available(backups, date + "_" + fileName(name), ".zip");
         faults.at("before-publish", destination); WorldSnapshotFiles.check(cancelled);
-        validateSources(access, lease, owner, sources, proofs, cancelled, progress);
+        validateSources(access, lease, owner, action, options, sources, proofs, cancelled, progress);
         rename(zip, destination); faults.at("backup-renamed", destination);
         DurableFiles.syncDirectory(destination.getParent());
       } else {
@@ -156,7 +171,7 @@ public final class WorldSnapshots {
         if (!Arrays.equals(manifestBytes, Files.readAllBytes(manifestPath))) throw new IOException("Copy manifest could not be verified.");
         destination = available(access.game().resolve("saves"), fileName(name), "");
         faults.at("before-publish", destination); WorldSnapshotFiles.check(cancelled);
-        validateSources(access, lease, owner, sources, proofs, cancelled, progress);
+        validateSources(access, lease, owner, action, options, sources, proofs, cancelled, progress);
         if (Files.exists(maps)) {
           Path target = access.game().resolve("power-beta-data/maps")
               .resolve(UUID.nameUUIDFromBytes(("world:" + id).getBytes(StandardCharsets.UTF_8)).toString());
@@ -184,6 +199,30 @@ public final class WorldSnapshots {
         if (primaryFailure != null) primaryFailure.addSuppressed(cleanup); else throw cleanup;
       }
     }
+  }
+
+  private static WorldOwnedData.Discovery discover(Path game, WorldOwnedData.Owner owner, Action action,
+      BackupOptions options) throws IOException {
+    var discovered = WorldOwnedData.discover(game, owner);
+    if (action != Action.BACKUP) return discovered;
+    List<WorldOwnedData.External> files = new ArrayList<>();
+    for (var file : discovered.files()) {
+      if (!options.maps() && Set.of("maps", "unclassified-maps").contains(file.kind())) continue;
+      // Pending and unclassified evidence always stays with the native world data.
+      if (!options.metadataBackups() && !file.pending() && !file.uncertain()
+          && Set.of("settings-backups", "world-metadata-backups").contains(file.kind())) continue;
+      files.add(file);
+    }
+    if (options.powerConfig()) {
+      Path config = game.resolve("config/power-beta.json"); SavedWorldAccess.safe(config);
+      if (Files.exists(config, LinkOption.NOFOLLOW_LINKS)) {
+        if (!Files.isRegularFile(config, LinkOption.NOFOLLOW_LINKS)) throw new IOException("Power Beta config is not a regular file.");
+        files.add(new WorldOwnedData.External(config, "power-config", false, false));
+      }
+    }
+    List<String> warnings = discovered.warnings().stream()
+        .filter(warning -> options.maps() || !warning.startsWith("The save has no readable stable world ID.")).toList();
+    return new WorldOwnedData.Discovery(files, warnings);
   }
 
   private static void checkDuplicate(Path world, WorldOwnedData.Owner owner, WorldOwnedData.Discovery external,
@@ -305,10 +344,11 @@ public final class WorldSnapshots {
   }
 
   private static void validateSources(SavedWorldAccess access, SavedWorldAccess.Lease lease, WorldOwnedData.Owner owner,
+      Action action, BackupOptions options,
       List<WorldSnapshotFiles.Source> expected, Map<String, WorldSnapshotFiles.Proof> proofs,
       BooleanSupplier cancelled, Progress progress) throws IOException {
     access.checkIdle(lease);
-    var current = WorldSnapshotFiles.collect(access.game(), access.world(), WorldOwnedData.discover(access.game(), owner), cancelled);
+    var current = WorldSnapshotFiles.collect(access.game(), access.world(), discover(access.game(), owner, action, options), cancelled);
     if (!expected.equals(current)) throw new IOException("World files changed. Reopen the saved-world menu and retry; the original was preserved.");
     int checked = 0;
     for (var source : expected) {

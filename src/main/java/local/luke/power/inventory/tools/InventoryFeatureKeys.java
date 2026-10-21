@@ -8,7 +8,7 @@ public final class InventoryFeatureKeys {
   public static boolean available(Minecraft mc, String id) {
     return switch (id) {
       case "powerbeta.swapHands" -> local.luke.power.offhand.OffhandInput.available(mc);
-      case "powerbeta.restock" -> InventoryAutomation.survival(mc);
+      case "powerbeta.restock", "powerbeta.toolSwitch" -> InventoryAutomation.survival(mc);
       case "powerbeta.sortInventory" -> InventoryToolsConfig.current().sorting && SortingSlots.eligible(mc) && local.luke.power.offhand.OffhandInput.container(mc);
       case "powerbeta.depositMatching" -> InventoryToolsConfig.current().depositMatching && SortingSlots.eligible(mc) && local.luke.power.offhand.OffhandInput.container(mc)
           && (mc.currentScreen.getClass() == net.minecraft.class_264.class || mc.currentScreen.getClass() == net.minecraft.class_235.class);

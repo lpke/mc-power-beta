@@ -82,6 +82,7 @@ public final class Validation {
       else if (command.startsWith("settings-400 ")) HudSettings400Checks.run(mc,command.substring(13));
       else if (command.startsWith("input-400 ")) Input400Checks.run(mc,command.substring(10));
       else if (command.startsWith("offhand-actions-400 ")) OffhandActions400Checks.run(mc,command.substring(20));
+      else if (command.equals("polish-400")) Polish400Checks.run(mc);
       else if (command.startsWith("recipe-400 ")) Recipe400Checks.run(mc,command.substring(11));
       else if (command.startsWith("release-330 ")) Release330Checks.run(mc,command.substring(12));
       else if (command.startsWith("release-322 ")) Release322Checks.run(mc,command.substring(12));

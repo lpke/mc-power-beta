@@ -26,7 +26,7 @@ public final class QuickTransfers {
     }
 
     public static boolean writable(Slot slot, ItemStack stack) {
-        return slot != null && slot.getClass() == Slot.class && stack != null
+        return slot != null && (slot.getClass() == Slot.class || slot instanceof PlayerSideSlot) && stack != null
                 && slot.canInsert(stack) && slot.getMaxItemCount() > 0;
     }
 

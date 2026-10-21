@@ -2,6 +2,7 @@ package local.luke.power.creative.inventory.mixin.client;
 
 import java.util.List;
 import local.luke.power.creative.inventory.CreativeGrid;
+import local.luke.power.input.InventorySideSlots;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.container.ContainerScreen;
 import net.minecraft.client.gui.screen.container.PlayerScreen;
@@ -39,8 +40,9 @@ import local.luke.power.creative.inventory.util.SlotUpdatePacket;
 public abstract class PlayerScreenMixin extends ContainerScreen implements CreativeDragScreen, local.luke.power.input.InventoryGui {
   @Override public boolean power$usesCatalogWheel() { return creative_isInCreative() && !creative_normalGUI; }
   public boolean power$extraGuiSpace(int mouseX, int mouseY) {
+    int x = (width - containerWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this), y = (height - containerHeight) / 2;
+    if (power$offhandVisible() && InventorySideSlots.contains(mouseX,mouseY,x,y,containerHeight,creative_isInCreative() && local.luke.power.creative.config.Config.current().destroySlot)) return true;
     if (!creative_isInCreative()) return false;
-    int x = (width - containerWidth) / 2, y = (height - containerHeight) / 2;
     boolean body = !creative_normalGUI && !CreativeGrid.outsideBody(mouseX, mouseY, x, y,
         containerWidth, containerHeight, local.luke.power.creative.config.Config.current().destroySlot);
     boolean viewTabs = mouseX >= x + 173 && mouseX < x + 198 && mouseY >= y + 114 && mouseY < y + 162;
@@ -48,8 +50,9 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         && mouseY >= CreativeGrid.tabTop(y) && mouseY < CreativeGrid.tabTop(y) + CreativeGrid.tabHeight(y);
     boolean destroy = local.luke.power.creative.config.Config.current().destroySlot
         && mouseX >= x - CreativeGrid.DESTROY_WIDTH && mouseX < x
-        && mouseY >= y + CreativeGrid.DESTROY_TOP && mouseY < y + containerHeight;
-    return body || viewTabs || categories || destroy;
+        && mouseY >= y + (power$offhandVisible() ? InventorySideSlots.top(true) : CreativeGrid.DESTROY_TOP) && mouseY < y + containerHeight;
+    return body || viewTabs || categories || destroy || power$offhandVisible()
+        && InventorySideSlots.contains(mouseX,mouseY,x,y,containerHeight,local.luke.power.creative.config.Config.current().destroySlot);
   }
   @Unique private static final int CREATIVE_COLOR_FILLER = MHelper.getColor(198, 198, 198, 128);
   @Unique private static final ItemRenderer CREATIVE_ITEM_RENDERER = new ItemRenderer();
@@ -140,11 +143,6 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     RenderHelper.disableLighting();
     GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-    var hands = (local.luke.power.inventory.OffhandInventory<?>)(Object)this.minecraft.player.inventory;
-    if (hands.power$offhandEnabled() || hands.power$offhandStack() != null) {
-      this.minecraft.textureManager.bindTexture(this.minecraft.textureManager.getTextureId("/gui/inventory.png"));
-      this.blit(posX + 76, posY + 61, 7, 83, 18, 18);
-    }
     creative_destroySlot(posX, posY);
 
     int tabX = (int) mouseX - posX - 173;
@@ -304,19 +302,38 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     }
   }
 
+  @Unique private boolean power$offhandVisible() {
+    var hands = (local.luke.power.inventory.OffhandInventory<?>)(Object)minecraft.player.inventory;
+    return hands.power$offhandEnabled() || hands.power$offhandStack() != null;
+  }
+
+  @Unique private int power$destroyY() {
+    return power$offhandVisible() ? InventorySideSlots.DESTROY_Y : 142;
+  }
+
   @Unique
   private void creative_destroySlot(int x, int y) {
-    if (!local.luke.power.creative.config.Config.current().destroySlot) return;
-    int left = x - CreativeGrid.DESTROY_WIDTH, top = y + CreativeGrid.DESTROY_TOP, bottom = y + containerHeight;
-    // The extension shares the inventory's bottom border, including its two shadow pixels.
-    fill(left + 1, top, x + 1, bottom, 0xFF000000);
-    fill(left, top + 1, x + 4, bottom - 1, 0xFF000000);
-    fill(left + 1, top + 1, x + 4, bottom - 1, 0xFFC6C6C6);
-    fill(left + 2, top + 1, x + 3, top + 3, 0xFFFFFFFF);
-    fill(left + 1, top + 2, left + 3, bottom - 3, 0xFFFFFFFF);
-    fill(left + 2, bottom - 3, x + 4, bottom - 1, 0xFF555555);
-    local.luke.power.creative.ui.Texture.draw(
-        minecraft, "inventory", x - 18, y + 141, 18, 18, 172, 111, 18, 18, 256, 256);
+    boolean offhand = power$offhandVisible(), destroy = local.luke.power.creative.config.Config.current().destroySlot;
+    if (!offhand && !destroy) return;
+    InventorySideSlots.frame(this::fill,x,y,containerHeight,offhand && destroy);
+    if (offhand) {
+      minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId("/gui/inventory.png"));
+      GL11.glColor4f(1,1,1,1);
+      blit(x+InventorySideSlots.OFFHAND_X-1,y+InventorySideSlots.OFFHAND_Y-1,7,141,18,18);
+      if (!creative_normalGUI) {
+        var stack = (ItemStack)((local.luke.power.inventory.OffhandInventory<?>)(Object)minecraft.player.inventory).power$offhandStack();
+        GL11.glPushMatrix(); GL11.glRotatef(120,1,0,0); RenderHelper.enableLighting(); GL11.glPopMatrix();
+        creative_renderItem(stack,x+InventorySideSlots.OFFHAND_X,y+InventorySideSlots.OFFHAND_Y);
+        RenderHelper.disableLighting();
+        if (mouseX >= x+InventorySideSlots.OFFHAND_X && mouseX < x+InventorySideSlots.OFFHAND_X+16
+            && mouseY >= y+InventorySideSlots.OFFHAND_Y && mouseY < y+InventorySideSlots.OFFHAND_Y+16) {
+          creative_renderSlotOverlay(x+InventorySideSlots.OFFHAND_X,y+InventorySideSlots.OFFHAND_Y);
+          creative_renderName(stack);
+        }
+      }
+    }
+    if (destroy) local.luke.power.creative.ui.Texture.draw(
+        minecraft, "inventory", x - 18, y + power$destroyY()-1, 18, 18, 172, 111, 18, 18, 256, 256);
   }
 
   @Inject(method = "render", at = @At("TAIL"))
@@ -332,8 +349,8 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))
         && mouseX >= x - 18
         && mouseX < x
-        && mouseY >= y + 141
-        && mouseY < y + 159) {
+        && mouseY >= y + power$destroyY()-1
+        && mouseY < y + power$destroyY()+17) {
       // Tooltips draw after native slots and the cursor stack, restoring the caller's GL state.
       GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT);
       try {
@@ -505,8 +522,8 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       if (local.luke.power.creative.config.Config.current().destroySlot
           && mouseX >= posX - 18
           && mouseX < posX
-          && mouseY >= posY + 141
-          && mouseY < posY + 159) {
+          && mouseY >= posY + power$destroyY()-1
+          && mouseY < posY + power$destroyY()+17) {
         local.luke.power.creative.InventoryActions.destroy(
             minecraft.player,
             Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
@@ -530,6 +547,11 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         return;
       }
 
+      if (power$offhandVisible() && mouseX >= posX+InventorySideSlots.OFFHAND_X-1
+          && mouseX < posX+InventorySideSlots.OFFHAND_X+17
+          && mouseY >= posY+InventorySideSlots.OFFHAND_Y-1 && mouseY < posY+InventorySideSlots.OFFHAND_Y+17) {
+        super.mouseClicked(mouseX,mouseY,button); return;
+      }
       if (creative_normalGUI) {
         super.mouseClicked(mouseX, mouseY, button);
         return;
@@ -673,6 +695,15 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
   @Override
   protected void mouseReleased(int mouseX, int mouseY, int button) {
     super.mouseReleased(mouseX, mouseY, button);
+    // Native slot gestures consume their own event first. A wheel over the offhand
+    // must never fall through to the catalogue when slot scrolling is disabled.
+    if (creative_isInCreative() && !creative_normalGUI && power$offhandVisible()) {
+      int left = (width - containerWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this);
+      int top = (height - containerHeight) / 2;
+      if (mouseX >= left + InventorySideSlots.OFFHAND_X - 1 && mouseX < left + InventorySideSlots.OFFHAND_X + 17
+          && mouseY >= top + InventorySideSlots.OFFHAND_Y - 1 && mouseY < top + InventorySideSlots.OFFHAND_Y + 17)
+        local.luke.power.input.InventoryWheel.takeEvent(this, org.lwjgl.opengl.Display.isActive());
+    }
     if (button > -1) {
       creative_drag = false;
     }
