@@ -78,3 +78,8 @@ such as `sqrt`, `abs`, `min`, `max`, `floor`, `ceil`, `round`, `sin`, `cos` and 
 Angles use radians. For example, `//calc 64 * 27` returns `1728`.
 
 `/fly` toggles flight without changing game mode. It requires `allow_flight` outside Creative and does not change Spectator flight. `/fly help` describes the permission and controls.
+
+`/instakill` toggles one-hit attacks in singleplayer. `/ik` is its alias. It requires
+`allow_survival_assistance` and clears when that permission is revoked or the world closes.
+Use `/instakill help` for syntax. Individual command help uses the same permissions
+as execution, so waypoint help omits teleportation when the world does not allow it.

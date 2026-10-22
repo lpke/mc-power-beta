@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class ExtraSoundDefaultsTest {
-  private static final List<String> KEYS = List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds");
+  private static final List<String> KEYS = List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds",
+      "lavaPopSounds", "waterSplashSounds", "swimmingSounds");
   @TempDir Path game;
   private Object priorFile, priorBase, priorSetup;
 

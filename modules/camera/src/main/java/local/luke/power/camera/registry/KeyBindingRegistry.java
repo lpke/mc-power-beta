@@ -20,7 +20,7 @@ public class KeyBindingRegistry {
         list.add(freecamKeybinding = new KeyBinding("Toggle Freecam", Keyboard.KEY_C));
         list.add(playerMovementKeybinding = new KeyBinding("Toggle Player Movement", Keyboard.KEY_V));
         list.add(changeSpeedKeybinding = new KeyBinding("Change Freecam Speed", Keyboard.KEY_B));
-        list.add(cameraPositionKeybinding = new KeyBinding("Save Or Load Camera Position", Keyboard.KEY_N));
+        list.add(cameraPositionKeybinding = new KeyBinding("Save Or Load Camera Position", Keyboard.KEY_NONE));
         list.add(cameraPositionGuiKeybinding = new KeyBinding("Open Camera Position Gui", Keyboard.KEY_M));
     }
 }

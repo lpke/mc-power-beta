@@ -81,6 +81,19 @@ public final class NativeInventoryPlan {
 
   private static boolean submit(Minecraft mc, String action, boolean manual, List<Change> changes,
       BooleanSupplier eligible, Runnable committed, Replacement replacement, Runnable rollback) {
+    return submit(mc, action, manual, changes, eligible, committed, replacement, rollback, null);
+  }
+
+  /** One verified native recipe may exchange its exact ingredients for its result and containers. */
+  public static boolean submitRecipe(Minecraft mc, List<Change> changes, BooleanSupplier eligible,
+      Runnable committed, Runnable rollback, local.luke.power.recipes.RecipeCrafts.Exchange exchange) {
+    if (exchange == null || !exchange.allowed(mc)) return false;
+    return submit(mc, "recipe_craft", true, changes, eligible, committed, Replacement.NONE, rollback, exchange);
+  }
+
+  private static boolean submit(Minecraft mc, String action, boolean manual, List<Change> changes,
+      BooleanSupplier eligible, Runnable committed, Replacement replacement, Runnable rollback,
+      local.luke.power.recipes.RecipeCrafts.Exchange exchange) {
     if (failed || mc.player == null || mc.world == null || mc.world.isRemote
         || !WorldCompatibility.ready(mc.world) || !Display.isActive() || !eligible.getAsBoolean()) return false;
     if (replacement != Replacement.NONE && !creative(mc)) return false;
@@ -94,7 +107,7 @@ public final class NativeInventoryPlan {
     var lease = InventoryActions.begin(mc.world, mc.player, mc.player.container, mc.player.inventory, action, manual);
     if (lease == null) return false;
     try {
-      var plan = new Pending(mc, lease, changes, eligible, committed, replacement, rollback);
+      var plan = new Pending(mc, lease, changes, eligible, committed, replacement, rollback, exchange);
       if (plan.changes.isEmpty()) { InventoryActions.finish(lease); return false; }
       String id = ((WorldIdentity)mc.world.method_262()).power$commandWorldId();
       journalPath = FabricLoader.getInstance().getGameDir().resolve("power-beta-data/inventory-recovery")
@@ -191,7 +204,8 @@ public final class NativeInventoryPlan {
     int encodedSize;
 
     Pending(Minecraft mc, InventoryActions.Lease lease, List<Change> requested,
-        BooleanSupplier eligible, Runnable committed, Replacement replacement, Runnable rollback) throws IOException {
+        BooleanSupplier eligible, Runnable committed, Replacement replacement, Runnable rollback,
+        local.luke.power.recipes.RecipeCrafts.Exchange exchange) throws IOException {
       if (requested == null || requested.size() > 128) throw new IOException("Inventory plan exceeds its slot limit");
       this.lease = lease; world = mc.world; player = mc.player; handler = mc.player.container; screen = mc.currentScreen;
       inventory = mc.player.inventory; main = inventory.main; armor = inventory.armor; selected = inventory.selectedSlot;
@@ -244,6 +258,11 @@ public final class NativeInventoryPlan {
         }
         if (armor == null) throw new IOException("Creative equipment has no armor target");
         totals.merge(identity(armor.next), 1L, Long::sum);
+      }
+      if (exchange != null) {
+        if (!exchange.allowed(mc)) throw new IOException("The native crafting recipe changed");
+        for (var item : exchange.consumed()) total(totals, local.luke.power.recipes.RecipeNative.nativeStack(item), -1);
+        for (var item : exchange.produced()) total(totals, local.luke.power.recipes.RecipeNative.nativeStack(item), 1);
       }
       if (replacement != Replacement.CREATIVE_HOTBAR && totals.values().stream().anyMatch(value -> value != 0))
         throw new IOException("Inventory plan does not conserve native items");

@@ -55,6 +55,7 @@ public final class SubtitleCatalog {
     caption("subtitles.entity.generic.hurt", "Something hurts");
     caption("subtitles.entity.generic.small_fall", "Something trips");
     caption("subtitles.entity.generic.splash", "Splashing");
+    caption("subtitles.entity.generic.swim", "Swimming");
     caption("subtitles.entity.ghast.ambient", "Ghast cries");
     caption("subtitles.entity.ghast.death", "Ghast dies");
     caption("subtitles.entity.ghast.hurt", "Ghast hurts");
@@ -202,6 +203,10 @@ public final class SubtitleCatalog {
     SOUNDS.put("power_beta:item.bucket.empty_lava", CAPTIONS.get("subtitles.item.bucket.empty"));
     SOUNDS.put("power_beta:entity.cow.milk", CAPTIONS.get("subtitles.entity.cow.milk"));
     SOUNDS.put("power_beta:item.bone_meal.use", CAPTIONS.get("subtitles.item.bone_meal.use"));
+    SOUNDS.put("power_beta:block.lava.pop", CAPTIONS.get("subtitles.block.lava.ambient"));
+    SOUNDS.put("power_beta:entity.player.swim", CAPTIONS.get("subtitles.entity.generic.swim"));
+    SOUNDS.put("power_beta:entity.player.splash", CAPTIONS.get("subtitles.entity.generic.splash"));
+    SOUNDS.put("power_beta:entity.player.splash.high_speed", CAPTIONS.get("subtitles.entity.generic.splash"));
   }
   private SubtitleCatalog() {}
   private static void caption(String key, String label) { CAPTIONS.put(key, new Caption(key, label)); }

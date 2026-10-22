@@ -51,7 +51,9 @@ final class RadarTracking {
 
   void tick(Minecraft mc, MapSettings settings, boolean mini, boolean full, int tick,
       double x, double y, double z) {
-    boolean activeMini = mini && minimapTypesVisible(settings, VisualConfig.current());
+    boolean types = settings.players || settings.hostile || settings.animals || settings.items || settings.otherEntities;
+    full &= types;
+    boolean activeMini = mini && types && minimapTypesVisible(settings, VisualConfig.current());
     if (!activeMini && !full) { clear(); return; }
     int radius = range(settings.radarRange, local.luke.power.controls.util.ModOptions.getRenderDistanceChunks());
     double radiusSquared = radius * radius * 256d;
@@ -65,14 +67,15 @@ final class RadarTracking {
         entity -> eligible(mc, settings, entity, false, x, y, z, radiusSquared));
     worldMap.refresh(full ? settings.radarLimit : 0,
         entity -> eligible(mc, settings, entity, true, x, y, z, radiusSquared));
+    final boolean fullView = full;
     java.util.function.Consumer<Entity> visit = entity -> {
-          if (!full && EntityVisibility.hidden(entity)) return;
-          double distance = position(mc, entity, x, y, z, settings.radarHeight, radiusSquared);
-          if (!(activeMini && minimap.accepts(distance)) && !(full && worldMap.accepts(distance))) return;
+          if (!fullView && EntityVisibility.hidden(entity)) return;
           String nativeType = net.minecraft.class_206.method_734(entity);
           if (!kind(entity, nativeType).visible(settings)) return;
+          double distance = position(mc, entity, x, y, z, settings.radarHeight, radiusSquared);
+          if (!(activeMini && minimap.accepts(distance)) && !(fullView && worldMap.accepts(distance))) return;
           if (activeMini && !EntityVisibility.hidden(entity)) minimap.offer(entity, distance);
-          if (full) worldMap.offer(entity, distance);
+          if (fullView) worldMap.offer(entity, distance);
         };
     // The open World Map may need native items/TNT while its minimap preview hides them.
     // Reserve half the existing budget for that preview's compact index so opening the
@@ -88,8 +91,9 @@ final class RadarTracking {
           CHUNKS_PER_TICK / 2, ENTITIES_PER_TICK / 2, visit);
     else filteredScan.clear();
     var captured = new IdentityHashMap<Entity, Maps.Radar>();
-    minimapSnapshot = capture(minimap.values(), settings, tick, mc.paused, mc.world.isRemote, captured);
-    worldMapSnapshot = capture(worldMap.values(), settings, tick, mc.paused, mc.world.isRemote, captured);
+    boolean icons = MapKeys.iconsShown(mc, true, settings) || MapKeys.iconsShown(mc, false, settings);
+    minimapSnapshot = capture(minimap.values(), settings, tick, mc.paused, mc.world.isRemote, captured, icons);
+    worldMapSnapshot = capture(worldMap.values(), settings, tick, mc.paused, mc.world.isRemote, captured, icons);
   }
 
   private static RadarChunkScan.Access<class_43, Entity> access(Minecraft mc, boolean compact) {
@@ -107,11 +111,12 @@ final class RadarTracking {
 
   private static double eligible(Minecraft mc, MapSettings settings, Entity entity, boolean full,
       double x, double y, double z, double radiusSquared) {
+    if (!kind(entity, net.minecraft.class_206.method_734(entity)).visible(settings)) return Double.NaN;
     if (!full && EntityVisibility.hidden(entity)) return Double.NaN;
     double distance = position(mc, entity, x, y, z, settings.radarHeight, radiusSquared);
     if (!Double.isFinite(distance) || MapSampler.loaded(mc.world,
         (int)Math.floor(entity.x / 16), (int)Math.floor(entity.z / 16)) == null) return Double.NaN;
-    return kind(entity, net.minecraft.class_206.method_734(entity)).visible(settings) ? distance : Double.NaN;
+    return distance;
   }
 
   private static double position(Minecraft mc, Entity entity, double x, double y, double z,
@@ -123,7 +128,7 @@ final class RadarTracking {
   }
 
   private static List<Maps.Radar> capture(Collection<Entity> selected, MapSettings settings, int tick, boolean paused, boolean remote,
-      IdentityHashMap<Entity, Maps.Radar> captured) {
+      IdentityHashMap<Entity, Maps.Radar> captured, boolean icons) {
     var result = new ArrayList<Maps.Radar>(selected.size());
     for (Entity entity : selected) {
       var snapshot = captured.get(entity);
@@ -136,7 +141,7 @@ final class RadarTracking {
             settings.mobColor(nativeType, kind.color(settings)), entity instanceof net.minecraft.class_142,
             previous(entity.prevX, entity.x, paused, remote), previous(entity.prevY, entity.y, paused, remote),
             previous(entity.prevZ, entity.z, paused, remote), tick, kind, nativeType,
-            RadarIconSource.capture(entity, nativeType));
+            icons ? RadarIconSource.capture(entity, nativeType) : null);
         captured.put(entity, snapshot);
       }
       result.add(snapshot);

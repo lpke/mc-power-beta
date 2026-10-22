@@ -28,7 +28,9 @@ public abstract class HotbarInputMixin {
     if (Hotbars.consumesMouse((Minecraft) (Object) this, button)) ci.cancel();
   }
 
-  @Inject(method = "tick", at = @At("HEAD"))
+  // Settle queued debug presses before a held row release can publish. Native
+  // direct row key-down handlers above still run at their original event boundary.
+  @Inject(method = "tick", at = @At("TAIL"))
   private void power$hotbars(CallbackInfo ci) {
     Hotbars.tick((Minecraft) (Object) this);
   }

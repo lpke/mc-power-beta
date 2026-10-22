@@ -202,7 +202,7 @@ public final class Release321Checks {
         AudioController.previewSound(id);check(AudioController.previewing(id),"preview did not start "+id);
         AudioController.previewSound(id);check(!AudioController.previewing(id),"preview did not stop "+id);count++;
       }
-      check(count==10,"expected all ten Extra sounds rows, got "+count);
+      check(count==13,"expected all thirteen Extra sounds rows, got "+count);
     });
     test("all current bucket variants decode completely through the actual game codec",()->{
       var manifest=JsonParser.parseReader(new java.io.InputStreamReader(Release321Checks.class.getResourceAsStream("/assets/powerbeta/extra-sounds.json"))).getAsJsonObject();

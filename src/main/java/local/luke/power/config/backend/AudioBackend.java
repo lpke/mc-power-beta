@@ -23,6 +23,12 @@ public final class AudioBackend implements Backend {
         "Play water and lava bucket sounds and cow milking sounds in singleplayer. Uses Blocks or Passive creatures volume.");
     extra("boneMealSounds", "Bone meal sounds", s.boneMealSounds,
         "Play bone meal sounds after fertilizing plants in singleplayer. Uses the Blocks sound volume.");
+    extra("lavaPopSounds", "Lava pop sounds", s.lavaPopSounds,
+        "Play modern lava pops when an exposed lava surface emits a particle in singleplayer. Uses the Blocks sound volume.");
+    extra("waterSplashSounds", "Water splash sounds", s.waterSplashSounds,
+        "Use modern splash sounds when you enter water in singleplayer. Faster entries use a heavier splash. Uses the Players sound volume.");
+    extra("swimmingSounds", "Swimming sounds", s.swimmingSounds,
+        "Play modern swimming sounds as you move through water in singleplayer. Uses the Players sound volume.");
     add(
         "master",
         "Volume",
@@ -269,6 +275,9 @@ public final class AudioBackend implements Backend {
           case "hoeTillingSounds" -> s.hoeTillingSounds = v.getAsBoolean();
           case "bucketSounds" -> s.bucketSounds = v.getAsBoolean();
           case "boneMealSounds" -> s.boneMealSounds = v.getAsBoolean();
+          case "lavaPopSounds" -> s.lavaPopSounds = v.getAsBoolean();
+          case "waterSplashSounds" -> s.waterSplashSounds = v.getAsBoolean();
+          case "swimmingSounds" -> s.swimmingSounds = v.getAsBoolean();
           case "exclusions" -> { }
           case "presetTrackPool" -> { }
           case "preset" -> s.preset = v.getAsString();

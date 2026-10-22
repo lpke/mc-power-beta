@@ -11,7 +11,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ClientPlayerEntity;
 import net.minecraft.util.math.Box;
 
-/** Java 1.21.1's unenchanted local-player swimming and collision-safe pose changes. */
+/** Java 1.21.1's local-player swimming and shared collision-safe crouching/crawling poses. */
 public final class ModernSwimming {
   private ModernSwimming() {}
 
@@ -45,7 +45,17 @@ public final class ModernSwimming {
     return waterAt(player, player.boundingBox.minY + (compact(player) ? SwimState.EYE_HEIGHT : crouched(player) ? 1.27 : 1.62));
   }
 
+  public static void preparePose(ClientPlayerEntity player) {
+    SwimState state = ((SwimPlayer)player).power$swim();
+    // Resolve obstructions before Beta's upright push-out checks and sprint
+    // eligibility. Resize once, retaining the native feet and input magnitudes.
+    updatePose(player, state);
+    state.inputPosePrepared = true;
+  }
+
   public static void prepareInput(ClientPlayerEntity player) {
+    SwimState state = ((SwimPlayer)player).power$swim();
+    if (!state.inputPosePrepared) preparePose(player);
     var input=player.field_161;
     // Undo only the real keyboard adapter's crouch scaling, including auto-walk's
     // matching .3 factor. Other input producers already supply their own magnitudes.
@@ -54,7 +64,8 @@ public final class ModernSwimming {
       input.field_2532 /= .3f;
       input.field_2533 /= .3f;
     }
-    if (lowPose(player) && !player.method_1334() && !input.field_2536) {
+    if (lowPose(player) && !player.method_1334()
+        && !(input instanceof net.minecraft.class_413 && input.field_2536)) {
       input.field_2532 *= .3f;
       input.field_2533 *= .3f;
     }
@@ -77,14 +88,16 @@ public final class ModernSwimming {
     SwimState state = ((SwimPlayer) player).power$swim();
     if (player.dead || player.health <= 0) {
       state.swimming = state.compact = state.crouched = false;
+      state.inputPosePrepared = false;
       state.previousAmount = state.amount = 0;
       return;
     }
-    boolean wet = player.method_1334();
+    boolean wet = player.method_1334(), wasSwimming = state.swimming;
     boolean sprint = player instanceof SprintPlayer sprinter && sprinter.power$sprint().sprinting;
     state.swimming = ModernWater.eligible(player) && permitted(player) && sprint && wet
         && (state.swimming || eyesInWater(player) && waterAt(player, player.boundingBox.minY + .001));
-    updatePose(player, state);
+    if (!state.inputPosePrepared || wasSwimming != state.swimming) updatePose(player, state);
+    state.inputPosePrepared = false;
     state.animate();
     state.cameraTick(lowPose(player) ? player.field_1631 : 1.62f);
   }
@@ -106,11 +119,13 @@ public final class ModernSwimming {
       player.method_1340(player.x,feet+player.field_1631,player.z);
     }
     state.swimming=state.compact=state.crouched=false;
+    state.inputPosePrepared=false;
     state.previousAmount=state.amount=0;state.waterDepth=0;state.waterJumpTicks=0;
     state.resetCamera(1.62f);
   }
 
   private static void updatePose(ClientPlayerEntity player, SwimState state) {
+    if (player.world == null || player.world.isRemote || player.dead || player.health <= 0) return;
     if (player.method_943()) {
       // Native bed entry has already placed and resized the player.
       state.swimming = state.compact = state.crouched = false;
@@ -118,18 +133,24 @@ public final class ModernSwimming {
       state.resetCamera(1.62f);
       return;
     }
-    boolean small = state.swimming;
-    boolean crouched = false;
-    if (!small && (state.compact || state.crouched)) {
-      // A vehicle owns its rider pose.
-      if (player.field_1595 != null) {
-        state.compact = state.crouched = false;
-        resize(player, false, false);
-        return;
-      }
-      if (!canFit(player,1.8)) {
-        crouched=canFit(player,1.5);
-        small=!crouched;
+    // Native mounting owns its pose even if an enclosing vehicle collides with
+    // a standing test. It must never initiate crawling.
+    if (player.field_1595 != null) {
+      if (state.compact || state.crouched) resize(player, false, false);
+      state.swimming = state.compact = state.crouched = false;
+      return;
+    }
+    boolean crawling = GameplayConfig.current().modernCrawling && ModernWater.localMovement(player);
+    boolean small = state.swimming, crouched = false;
+    if (!small && (state.compact || state.crouched || crawling)) {
+      // Modern Player.updatePlayerPose first proves the compact box fits. A
+      // wall through the feet must not manufacture a new crawl, nor force an
+      // unsafe standing box when terrain is unavailable.
+      if (crawling && !canFit(player, SwimState.HEIGHT)) return;
+      boolean sneak = crawling && player.field_161 != null && player.field_161.field_2536;
+      if (sneak || !canFit(player, 1.8)) {
+        crouched = canFit(player, 1.5);
+        small = !crouched;
       }
     }
     if (small != state.compact || crouched != state.crouched) {

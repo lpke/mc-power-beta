@@ -70,7 +70,7 @@ public final class ItemPickerScreen extends UiScreen {
   }
   private ItemCatalogue.Entry resolve(String value) {
     var entry=ItemCatalogue.resolve(domain,value);
-    if(!options.accepts().test(entry))throw new IllegalArgumentException("This block cannot render in the title logo");
+    if(!options.accepts().test(entry))throw new IllegalArgumentException("This item is unavailable in this picker");
     return entry;
   }
   private void custom(){

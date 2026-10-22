@@ -45,6 +45,8 @@ public final class Validation {
   }
 
   public static void tick(Minecraft mc) {
+    AutoMineChecks.observe(mc);
+    Performance420Checks.tick(mc);
     HeldLight400Checks.tick(mc);
     Forest241Capture.tick(mc);
     Release300Checks.observe(mc);
@@ -79,12 +81,18 @@ public final class Validation {
       else if (command.startsWith("auto-tools-400 ")) AutoTools400Checks.run(mc,command.substring(15));
       else if (command.equals("saved-hotbars-400")) SavedHotbars400Checks.run(mc);
       else if (command.equals("death-restoration-400")) DeathRestoration400Checks.run(mc);
+      else if (command.equals("kept-load-420")) KeptLoad420Checks.run(mc);
+      else if (command.equals("tool-whitelist-420")) ToolWhitelist420Checks.run(mc);
       else if (command.startsWith("settings-400 ")) HudSettings400Checks.run(mc,command.substring(13));
       else if (command.startsWith("input-400 ")) Input400Checks.run(mc,command.substring(10));
       else if (command.startsWith("offhand-actions-400 ")) OffhandActions400Checks.run(mc,command.substring(20));
       else if (command.equals("polish-400")) Polish400Checks.run(mc);
       else if ((command.equals("spectator-inventory-401") || command.equals("spectator-inventory-404"))) SpectatorInventory401Checks.run(mc);
       else if (command.startsWith("debug-410")) Debug410Checks.run(mc,command.substring(9).trim());
+      else if (command.startsWith("release-420 ")) Release420Checks.run(mc,command.substring(12));
+      else if (command.startsWith("performance-420 ")) Performance420Checks.run(mc, command.substring(16));
+      else if (command.equals("terrain-cache-420")) TerrainCache420Checks.run(mc);
+      else if (command.startsWith("mesh-cache-420 ")) MeshCache420Checks.run(mc, command.substring(15).trim());
       else if (command.equals("spectator-containers-404")) SpectatorContainer404Checks.run(mc);
       else if (command.equals("sorting-401")) Sorting401Checks.run(mc);
       else if (command.equals("recipe-401")) Recipe401Checks.run(mc);
@@ -94,6 +102,7 @@ public final class Validation {
       else if (command.startsWith("controls-403 ")) Controls403Checks.run(mc,command.substring(13));
       else if (command.equals("sorting-layer-402")) SortingLayer402Checks.run(mc);
       else if (command.equals("container-offhand-402")) ContainerOffhand402Checks.run(mc);
+      else if (command.equals("fluid-sounds-420")) FluidSounds420Checks.run(mc);
       else if (command.equals("command-names-402")) CommandNames402Checks.run(mc);
       else if (command.startsWith("recipe-400 ")) Recipe400Checks.run(mc,command.substring(11));
       else if (command.startsWith("release-330 ")) Release330Checks.run(mc,command.substring(12));
@@ -223,6 +232,7 @@ public final class Validation {
       else if (command.equals("release-300-chat-break") || command.startsWith("release-300-chat-break "))
         Release300ChatBreakChecks.run(mc, command.substring("release-300-chat-break".length()).trim());
       else if (command.equals("swimming-300")) Swimming300Checks.run(mc);
+      else if (command.equals("crawling-420")) Crawling420Checks.run(mc);
       else if (command.startsWith("release-300-stamina ")) Release300StaminaHudChecks.visual(mc, command.substring("release-300-stamina ".length()).trim());
       else if (command.equals("release-300-marker-refinements")) Release300MarkerRefinementsChecks.run(mc);
       else if (command.equals("redstone-sounds")) RedstoneSoundChecks.run(mc);

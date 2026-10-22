@@ -32,4 +32,18 @@ class AutoMineToggleTest {
     state.update(true, true, false); state.update(true, true, true);
     assertFalse(state.active());
   }
+  @Test void headPollingCannotActivateOrConsumeTheQueuedNativePress() {
+    var state = new AutoMineToggle();
+    state.poll(true, true); assertFalse(state.active());
+    state.press(true, true); assertTrue(state.active());
+    state.poll(true, true); assertTrue(state.active());
+    state.release(); state.press(true, true); assertFalse(state.active());
+  }
+  @Test void nativeFullTapRearmsAndDebugDeniedPressNeverStartsMining() {
+    var state = new AutoMineToggle();
+    state.press(true, false); state.release(); assertFalse(state.active());
+    state.press(true, true); state.release(); assertTrue(state.active());
+    state.poll(true, false); state.press(true, true); assertFalse(state.active());
+    state.release(); state.press(true, true); assertTrue(state.active());
+  }
 }

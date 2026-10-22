@@ -19,7 +19,17 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 /** Native remove-one publication, callbacks and recipe-book ownership in a disposable client. */
-final class Recipe402Checks {
+public final class Recipe402Checks {
+  public static int callbackMode;
+  public static Object callbackPlayer;
+  public static void craftCallback(net.minecraft.inventory.Inventory inputs, net.minecraft.entity.player.PlayerEntity player, ItemStack result) {
+    if (callbackPlayer != player || callbackMode == 0) return;
+    if (callbackMode == 1) throw new IllegalStateException("Deliberate native craft callback failure");
+    if (callbackMode == 2) result.count++;
+    if (callbackMode == 3) for (int i = 0; i < inputs.size(); i++) if (inputs.getStack(i) != null) {
+      ItemStack changed = inputs.getStack(i).clone(); changed.count++; inputs.setStack(i, changed); break;
+    }
+  }
   private Recipe402Checks() {}
   static void run(Minecraft mc) throws Exception {
     check(mc.world != null && mc.player != null && !mc.world.isRemote && Display.isActive(), "focus a disposable loaded singleplayer world");
@@ -82,14 +92,94 @@ final class Recipe402Checks {
             "a different native recipe was admitted for removal");
         check(before.equals(snapshot(mc, state.context)), "recipe mismatch changed native items");
       });
-      test("RECIPE402 right-click still opens recipe variants before placement", () -> {
-        state.reset(640);
-        @SuppressWarnings("unchecked") var groups = (List<List<RecipeDefinition>>) field(state.book, "groups");
-        var variants = groups.stream().filter(group -> group.size() > 1).findFirst().orElseThrow();
-        field(state.book, "groups", List.of(variants)); field(state.book, "page", 0); String before = snapshot(mc, state.context);
-        var cell = state.book.layout().cell(0); check(state.book.mouse(cell.x() + 12, cell.y() + 12, 1), "variant press was not owned");
-        check(((List<?>) field(state.book, "popup")).size() == variants.size() && before.equals(snapshot(mc, state.context)), "unplaced recipe lost its variant chooser");
+      test("RECIPE420 recipe-cell right-click crafts one batch after its durable flush", () -> {
+        state.reset(640); var sticks = recipe(state.book, 280); mc.player.inventory.main[9] = new ItemStack(5, 6, 0);
+        field(state.book, "groups", List.of(List.of(sticks))); field(state.book, "page", 0); String before = snapshot(mc, state.context);
+        var cell = state.book.layout().cell(0); check(state.book.mouse(cell.x() + 12, cell.y() + 12, 1), "craft press was not owned");
+        check(before.equals(snapshot(mc, state.context)), "crafting changed slots before its durable flush"); state.finish();
+        int planks = 0, made = 0; for (var item : mc.player.inventory.main) if (item != null) {
+          if (item.itemId == 5) planks += item.count; if (item.itemId == 280) made += item.count;
+        }
+        check(planks == 4 && made == sticks.output.count && state.context.inputs.stream().allMatch(slot -> slot.getStack() == null)
+            && state.context.output.getStack() == null && !NativeInventoryPlan.failed(), "right-click did not craft exactly one complete batch");
       });
+      test("RECIPE420 grid wheel places from zero, removes one and respects inversion", () -> {
+        state.reset(640); var sticks = recipe(state.book, 280); mc.player.inventory.main[9] = new ItemStack(5, 8, 0);
+        Object inventorySettings = Class.forName("local.luke.power.inventory.Config").getField("INVENTORY_TWEAKS_CONFIG").get(null);
+        Object mouse = inventorySettings.getClass().getField("MOUSE_TWEAKS_CONFIG").get(inventorySettings);
+        Object wheel = mouse.getClass().getField("SCROLL_WHEEL_CONFIG").get(mouse);
+        var enabled = wheel.getClass().getField("enableScrollWheelTweaks"); var inverted = wheel.getClass().getField("invertScrollCursorSlotDirection");
+        Object previousEnabled = enabled.get(wheel), previousInverted = inverted.get(wheel);
+        try {
+          enabled.set(wheel, true); inverted.set(wheel, false); choose(state.book, sticks); state.finish();
+          rightClick(state.book, sticks); state.finish();
+          var input = state.context.inputs.get(0); var layout = state.book.layout();
+          int px = layout.inventoryX() + input.x + 8, py = layout.inventoryY() + input.y + 8;
+          check(state.book.ownsWheel(px, py), "empty recipe grid lost wheel ownership");
+          state.book.scroll(px, py, 120); state.finish();
+          check(state.context.output.getStack() != null, "wheel up did not place from zero");
+          inverted.set(wheel, true); state.book.scroll(px, py, 120); state.finish();
+          check(state.context.output.getStack() == null, "inverted wheel up did not remove the last batch");
+        } finally { enabled.set(wheel, previousEnabled); inverted.set(wheel, previousInverted); }
+      });
+      test("RECIPE420 main storage falls back to stored 2x2 inputs only when the hotbar cannot accept items", () -> {
+        state.reset(640);
+        Object compatibility = Class.forName("local.luke.power.compat.Config").getField("config").get(null);
+        var stored = compatibility.getClass().getField("allowCraftingInventorySlots"); Object previous = stored.get(compatibility);
+        try {
+          stored.set(compatibility, true); mc.player.inventory.main[9] = DeathChecks.tagged(4, 7, 0, "stored-grid");
+          state.context.handler.onSlotClick(9, 0, true, mc.player);
+          check(mc.player.inventory.main[0] != null && mc.player.inventory.main[9] == null
+              && state.context.inputs.stream().allMatch(slot -> slot.getStack() == null), "available hotbar lost native transfer priority");
+          for (int i = 0; i < 9; i++) mc.player.inventory.main[i] = new ItemStack(267, 1, 0);
+          mc.player.inventory.main[9] = DeathChecks.tagged(4, 7, 0, "stored-grid"); String source = bytes(mc.player.inventory.main[9]);
+          state.context.handler.onSlotClick(9, 0, true, mc.player);
+          check(source.equals(bytes(mc.player.inventory.main[9])), "2x2 fallback published before its durable flush"); state.finish();
+          check(mc.player.inventory.main[9] == null && source.equals(bytes(state.context.inputs.get(0).getStack())), "full hotbar did not fall back into crafting storage");
+        } finally { stored.set(compatibility, previous); }
+      });
+      test("RECIPE420 one native cake batch retains all three bucket containers", () -> {
+        state.reset(640); int[] air = null;
+        int px = (int)Math.floor(mc.player.x), py = Math.max(1, Math.min(126, (int)Math.floor(mc.player.boundingBox.minY))), pz = (int)Math.floor(mc.player.z);
+        for (int dx = -2; dx <= 2 && air == null; dx++) for (int dz = -2; dz <= 2; dz++)
+          if (mc.world.method_239(px + dx, py, pz + dz) && mc.world.getBlockId(px + dx, py, pz + dz) == 0) { air = new int[]{px + dx, py, pz + dz}; break; }
+        check(air != null, "cake fixture needs one nearby loaded air block");
+        var previousScreen = mc.currentScreen; var previousHandler = mc.player.container;
+        mc.world.method_154(air[0], air[1], air[2], 58, 0);
+        var table = new net.minecraft.class_516(mc.player.inventory, mc.world, air[0], air[1], air[2]);
+        RecipeContext tableContext = null;
+        try {
+          mc.currentScreen = table; mc.player.container = table.container; table.init(mc, 640, 360);
+          tableContext = RecipeContext.of(table); check(tableContext != null && tableContext.writable(mc), "cake table is not writable");
+          var cake = NativeRecipes.load().stream().filter(recipe -> recipe.kind == RecipeDefinition.Kind.CRAFTING && recipe.output.itemId == 354).findFirst().orElseThrow();
+          for (int i = 9; i <= 11; i++) mc.player.inventory.main[i] = new ItemStack(335, 1, 0);
+          mc.player.inventory.main[12] = new ItemStack(344, 1, 0); mc.player.inventory.main[13] = new ItemStack(353, 2, 0); mc.player.inventory.main[14] = new ItemStack(296, 3, 0);
+          check(RecipeCrafts.craftResult(mc, tableContext, cake, () -> true, ignored -> {}) == RecipeFills.Result.ACCEPTED, "native cake craft was declined"); state.finish();
+          int cakes = 0, buckets = 0;
+          for (var stack : mc.player.inventory.main) if (stack != null && stack.itemId == 354) cakes += stack.count;
+          for (var slot : tableContext.inputs) if (slot.getStack() != null && slot.getStack().itemId == 325) buckets += slot.getStack().count;
+          check(cakes == 1 && buckets == 3 && tableContext.output.getStack() == null && !NativeInventoryPlan.failed(), "cake craft lost native bucket containers or duplicated its result");
+        } finally {
+          NativeInventoryPlan.cancel(); state.finish();
+          if (tableContext != null) for (var slot : tableContext.inputs) slot.setStack(null);
+          var book = RecipeBooks.book(table); if (book != null) book.removed(); InventoryPanels.remove(table);
+          mc.currentScreen = previousScreen; mc.player.container = previousHandler; mc.world.method_154(air[0], air[1], air[2], 0, 0);
+        }
+      });
+      for (int failureMode = 1; failureMode <= 3; failureMode++) {
+        final int scenario = failureMode;
+        test("RECIPE420 native craft callback refuses mutation and restores owned bytes " + scenario, () -> {
+          state.reset(640); var sticks = recipe(state.book, 280); mc.player.inventory.main[9] = new ItemStack(5, 6, 0);
+          choose(state.book, sticks); state.finish(); choose(state.book, sticks); state.finish();
+          String before = snapshot(mc, state.context); callbackMode = scenario; callbackPlayer = mc.player;
+          try {
+            check(RecipeCrafts.craftResult(mc, state.context, sticks, () -> true, ignored -> {}) == RecipeFills.Result.ACCEPTED,
+                "native callback fixture could not prepare its craft"); state.finish();
+            check(NativeInventoryPlan.failed() && before.equals(snapshot(mc, state.context)), "callback mutation escaped or lost original bytes");
+          } finally { callbackMode = 0; callbackPlayer = null; }
+          var failed = NativeInventoryPlan.class.getDeclaredField("failed"); failed.setAccessible(true); failed.setBoolean(null, false);
+        });
+      }
       test("RECIPE402 a carried cursor cancels unpublished removal without stopping future work", () -> {
         state.reset(640); var sticks = recipe(state.book, 280);
         mc.player.inventory.main[9] = new ItemStack(5, 2, 0); choose(state.book, sticks); state.finish(); String before = snapshot(mc, state.context);
@@ -130,8 +220,8 @@ final class Recipe402Checks {
     return recipes.stream().filter(recipe -> recipe.kind == RecipeDefinition.Kind.CRAFTING && recipe.output.itemId == output && recipe.layout(2, 2) != null).findFirst().orElseThrow();
   }
   private static void rightClick(RecipeBookOverlay book, RecipeDefinition recipe) throws Exception {
-    field(book, "groups", List.of(List.of(recipe))); field(book, "page", 0); var cell = book.layout().cell(0);
-    check(book.mouse(cell.x() + 12, cell.y() + 12, 1), "recipe right-click was not owned by the book");
+    RecipeContext context = (RecipeContext)field(book, "context"); var slot = context.inputs.get(0); var layout = book.layout();
+    book.mouse(layout.inventoryX() + slot.x + 8, layout.inventoryY() + slot.y + 8, 1);
   }
   private static List<ItemStack> items(Minecraft mc, RecipeContext context) {
     var items = new ArrayList<>(Arrays.asList(mc.player.inventory.main)); items.add(Offhand.get(mc.player.inventory));

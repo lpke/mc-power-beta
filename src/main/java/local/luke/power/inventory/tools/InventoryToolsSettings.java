@@ -10,7 +10,16 @@ public final class InventoryToolsSettings {
   public boolean sortingButton = true, depositMatchingButton = true, creativeHotbarsButton = true;
   public boolean restockBeforeEmpty = true, restockOtherHotbar, restockTools = true, toolsFromInventory = true;
   public int restockThreshold = 6, toolDurabilityReserve = 1;
+  // The wildcard admits newly registered tools. An empty list deliberately allows none.
+  public java.util.List<String> toolWhitelist = new java.util.ArrayList<>(java.util.List.of("*"));
   public void validate() {
+    if (toolWhitelist == null || toolWhitelist.size() > 4096)
+      throw new IllegalArgumentException("Invalid tool whitelist");
+    for (String tool : toolWhitelist)
+      if (tool == null || !tool.equals("*") && !tool.matches("[1-9][0-9]{0,8}"))
+        throw new IllegalArgumentException("Tools must use registered numeric item IDs");
+    if (toolWhitelist.contains("*") && toolWhitelist.size() != 1)
+      throw new IllegalArgumentException("All tools cannot be combined with individual tools");
     if (protectedSlots == null || protectedSlots.size() > 27 || preferredItems == null || preferredItems.size() > 27)
       throw new IllegalArgumentException("Invalid sorting layout");
     for (Integer slot : protectedSlots)

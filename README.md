@@ -99,7 +99,7 @@ Settings save automatically by default. Right-click Apply to use manual editing;
 leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
 edits stay in the draft until you create the world.
 
-Version 4.0.0 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
+Version 4.2.0 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
 with a verified backup. World rules use format 4 and support formats 1, 2, 3 and
 Power Beta's earlier world settings. Existing worlds retain their rules and item
 protection. Old footwear-specific crop protection needs an explicit trampling choice. Conflicting old permissions or unsupported formats stop conversion
@@ -117,13 +117,23 @@ preferred item. Layouts opened from Options retain Done and Discard.
 Offhand appears beside the hotbar in inventories, chests, furnaces, crafting tables
 and dispensers. Disabling it retains its contents for removal. Saved Creative
 hotbars are user data and survive loading defaults.
+Double-click the offhand to gather matching items. Pickups fill an existing matching
+offhand stack before using main-inventory space. Automatic tools has an Allowed tools
+picker, and leaves the current hand alone for instant-break blocks.
 
 The recipe book reads the installed Beta crafting and smelting registries, including
 enabled custom recipes. Beta recipes are available without an advancement unlock
 system. Recipes from extensions with custom matching logic need a display provider
 before the book can safely place their ingredients.
-Right-click a recipe you placed to return one batch of ingredients to your inventory.
-Removing the last batch clears the crafting grid.
+Right-click a recipe to craft one batch immediately; Shift-right-click chooses variants.
+With inventory scroll controls enabled, scroll over recipes or grid ingredients to
+add or remove a batch. Right-click grid ingredients to return a batch to inventory.
+Removing the last batch clears the grid.
+
+Controls includes unassigned Hold use and Auto-walk line lock toggles. Hold use keeps
+using the held item until toggled off or interrupted by a menu or lost focus. Line lock
+keeps active forward or backward Auto-walk within its current block lane, without
+turning the player. Active tweaks shows both states.
 
 Saved-world backups appear in `backups/power-beta`. They include the save and known
 world-owned map and recovery files, with a verified manifest. Duplication copies
@@ -170,22 +180,32 @@ teleport permission and the player's view. Maps do not grant access permissions.
 
 Options > Game rules > Allow sprinting enables ground sprinting for the current
 singleplayer world. `/gamerule allow_sprinting true` changes the same rule. Both
-creation presets and all defaults bases start it off; existing worlds without the
-rule also start it off. Options > Gameplay > Sprinting keeps its global tuning. The default
+Power Beta creation presets enable it, as do Cheats presets in every base. Refined Beta
+and Beta Survival presets leave it off; existing worlds without the rule also keep it off.
+Options > Gameplay > Sprinting keeps its global tuning. The default
 activation uses Ctrl or a forward double tap, with modern acceleration, jump boost,
 dust and sprint-hit knockback. Sprint stamina and combat contains optional stamina,
 recharge delays and combat limits that can balance it without adding a hunger system.
 These preferences apply across worlds that allow sprinting. Ground sprinting stays disabled in
 multiplayer. Ground, Creative and Spectator sprint share dynamic FOV and its amount in
 Gameplay > Sprinting; freecam has its own FOV preference. All start off. Creative and
-flight never consume stamina. Depleted Survival stamina appears as ten gold lightning
-icons beside the hotbar. Their pale notch marks the recovery threshold after exhaustion.
+flight never consume stamina. Survival stamina appears beside the hotbar, with a darker
+restart reserve while exhausted.
 Stationary and moving stamina recovery have separate rates.
+Stop sprinting at walls is optional. Line-locked Auto-walk keeps sprinting at walls.
+Power Beta also enables sprinting up ladders. Inventory movement allows ground sprint
+in supported inventory screens while text fields and modal controls keep their keys.
 
 With Modern water movement and Allow sprinting enabled together, sprint underwater
 to swim using a low pose, look-directed dives and modern speed and strokes. The low
 collision box fits one-block passages. Leaving swimming keeps the player crouched or
 low until there is room to stand. Creative and flight still bypass stamina.
+Modern crawling is a separate Gameplay preference. Low ceilings and closed trapdoors
+select a crawling pose automatically, then the player stands when space opens. It works
+independently of modern water movement and sprint permission. Power Beta enables it.
+
+Extra sounds includes official modern lava pops, player splashes and swimming sounds,
+with preview buttons and subtitles. Power Beta enables them; other bases leave them off.
 
 ## Install
 

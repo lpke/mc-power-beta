@@ -16,7 +16,8 @@ public abstract class GameOptionsMixin {
 
   @Inject(method = "load", at = @At("HEAD"))
   private void registerKey(CallbackInfo ci) {
-    for (KeyBinding added : new KeyBinding[] { AutoWalk.KEY, local.luke.power.building.mining.AutoMine.KEY }) {
+    for (KeyBinding added : new KeyBinding[] { AutoWalk.KEY, AutoWalk.LINE_LOCK_KEY,
+        local.luke.power.building.mining.AutoMine.KEY, local.luke.power.building.mining.HoldUse.KEY }) {
       if (Arrays.asList(allKeys).contains(added)) continue;
       allKeys = Arrays.copyOf(allKeys, allKeys.length + 1);
       allKeys[allKeys.length - 1] = added;

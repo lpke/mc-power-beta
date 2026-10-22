@@ -25,7 +25,9 @@ public class SprintCombatMixin {
   private boolean power$sprintHit(
       Entity target, Entity source, int damage, Operation<Boolean> original) {
     boolean sprint = SprintController.active(source);
-    boolean hit = original.call(target, source, damage);
+    boolean instant = source.world != null && !source.world.isRemote
+        && local.luke.power.input.InstantKill.active(source, source.world);
+    boolean hit = original.call(target, source, instant ? Math.max(damage, 32767) : damage);
     if (hit) {
       if (sprint && SprintConfig.current().sprintKnockback) {
         double angle = source.yaw * Math.PI / 180;

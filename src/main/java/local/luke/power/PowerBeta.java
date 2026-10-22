@@ -57,6 +57,7 @@ public final class PowerBeta {
       });
       local.luke.power.death.DeathCommands.register();
       local.luke.power.map.WaypointCommands.register();
+      local.luke.power.input.SpectatorTarget.register(() -> local.luke.power.inventory.InteractionTargets.spectator(mc));
       local.luke.power.commands.GameRuleCommand.register();
       local.luke.power.input.TweakIndicators.register(
           local.luke.power.input.TweakIndicators.Tweak.CINEMATIC_CAMERA,

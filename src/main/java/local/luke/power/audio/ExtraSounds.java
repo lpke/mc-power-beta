@@ -8,7 +8,8 @@ import net.minecraft.world.World;
 public final class ExtraSounds {
   private static final Set<String> EVENTS = Set.of("item.crop.plant", "item.hoe.till",
       "item.bucket.fill", "item.bucket.fill_lava", "item.bucket.empty", "item.bucket.empty_lava",
-      "entity.cow.milk", "item.bone_meal.use");
+      "entity.cow.milk", "item.bone_meal.use", "block.lava.pop", "entity.player.swim",
+      "entity.player.splash", "entity.player.splash.high_speed");
 
   private ExtraSounds() {}
 
@@ -28,6 +29,9 @@ public final class ExtraSounds {
       case "audio.hoeTillingSounds" -> "power_beta:item.hoe.till";
       case "audio.bucketSounds" -> "power_beta:item.bucket.fill";
       case "audio.boneMealSounds" -> "power_beta:item.bone_meal.use";
+      case "audio.lavaPopSounds" -> "power_beta:block.lava.pop";
+      case "audio.waterSplashSounds" -> "power_beta:entity.player.splash";
+      case "audio.swimmingSounds" -> "power_beta:entity.player.swim";
       default -> null;
     };
   }

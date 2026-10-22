@@ -13,6 +13,7 @@ public final class FakeSneak {
   public static final Logger LOG = LogManager.getLogger("Beta Fake Sneak");
 
   private static boolean toggleDown;
+  private static Minecraft client;
 
   private FakeSneak() {}
 
@@ -25,32 +26,44 @@ public final class FakeSneak {
   }
 
   public static void tick(Minecraft mc) {
-    beginTick(mc, local.luke.power.input.Bindings.down(Keys.ALL[0]), Display.isCreated() && Display.isActive());
+    if (client != mc) {
+      client = mc;
+      local.luke.power.input.Bindings.onKeyPress("building.fakeSneak", FakeSneak::press);
+      local.luke.power.input.Bindings.onMousePress("building.fakeSneak", FakeSneak::press);
+      local.luke.power.input.Bindings.onRelease("building.fakeSneak", key -> { if (key == Keys.ALL[0].code) toggleDown = false; });
+    }
+    boolean down = local.luke.power.input.Bindings.physical(Keys.ALL[0].code);
+    if (!down) toggleDown = false;
+    else if (!playable(mc, Display.isCreated() && Display.isActive())) toggleDown = true;
   }
 
-  public static void beginTick(Minecraft mc, boolean down, boolean focused) {
-    boolean playable =
-        focused
-            && mc.world != null
-            && !mc.world.isRemote
-            && mc.player != null
-            && mc.player.health > 0
-            && !mc.player.dead
-            && mc.currentScreen == null
-            && !mc.paused
-            && mc.field_2778
-            && mc.field_2807 == mc.player
-            && !Compatibility.freecam();
-    if (down && !toggleDown && playable) {
-      Settings next = local.luke.power.building.config.Config.current().sneak.copy();
-      next.enabled = !next.enabled;
-      try {
-        apply(next);
-      } catch (IOException e) {
-        LOG.error("Could not save Fake Sneak settings", e);
-        mc.inGameHud.addChatMessage("\u00a7cFake sneak settings could not be saved.\u00a7r");
-      }
+  private static void press(int key) {
+    if (key != Keys.ALL[0].code) return;
+    if (!toggleDown && playable(client, Display.isActive())
+        && local.luke.power.input.Bindings.matches(Keys.ALL[0], key)) toggle(client);
+    toggleDown = true;
+  }
+
+  private static boolean playable(Minecraft mc, boolean focused) {
+    return focused && mc != null && mc.world != null && !mc.world.isRemote
+        && mc.player != null && mc.player.health > 0 && !mc.player.dead
+        && mc.currentScreen == null && !mc.paused && mc.field_2778
+        && mc.field_2807 == mc.player && !Compatibility.freecam();
+  }
+
+  private static void toggle(Minecraft mc) {
+    Settings next = local.luke.power.building.config.Config.current().sneak.copy();
+    next.enabled = !next.enabled;
+    try { apply(next); }
+    catch (IOException e) {
+      LOG.error("Could not save Fake Sneak settings", e);
+      mc.inGameHud.addChatMessage("\u00a7cFake sneak settings could not be saved.\u00a7r");
     }
+  }
+
+  /** Explicit synthetic input adapter used by the disposable runtime fixtures. */
+  public static void beginTick(Minecraft mc, boolean down, boolean focused) {
+    if (down && !toggleDown && playable(mc, focused)) toggle(mc);
     toggleDown = down;
   }
 

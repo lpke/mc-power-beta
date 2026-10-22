@@ -5,6 +5,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class MapRenderingTest {
+  @Test void holdingEnlargeCanRevealTheMinimapOverDebugWithoutChangingItsPreference() {
+    var settings = new MapSettings(); settings.minimap = true; settings.hideWithDebug = true;
+    assertFalse(Minimap.visible(settings, true));
+    assertTrue(Minimap.visible(settings, true, true));
+    assertTrue(settings.hideWithDebug);
+    settings.minimap = false;
+    assertFalse(Minimap.visible(settings, true, true));
+  }
   @Test
   void bufferPaddingDoesNotRequestTilesAndOversizedMapsUseFallback() {
     var layout = MapBufferLayout.create(108, 4, 16384);

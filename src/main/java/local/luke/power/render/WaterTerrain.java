@@ -5,6 +5,7 @@ import java.nio.ByteOrder;
 import local.luke.power.visual.VisualConfig;
 import net.mine_diver.smoothbeta.client.render.gl.VertexBuffer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.class_43;
 import net.minecraft.world.World;
 
 /** Shared native/water/neutral capture. Two reusable packed stages; one final GPU upload per stage. */
@@ -12,12 +13,13 @@ public final class WaterTerrain {
   private static final int MAX_BYTES = 4 * 1024 * 1024;
   private static final int BASE = 0, CLEAR = 1, NEUTRAL = 2;
   private static final Slot[] slots = {new Slot(), new Slot()};
+  private static final TerrainBlockCache blockIds = new TerrainBlockCache();
   private static ByteBuffer packed;
   private static World owner;
-  private static Thread thread, meshThread;
+  private static Thread thread, meshThread, mutationThread;
   private static boolean prepared, building, affected, waterColumn, overflow, uploading;
   private static boolean held, baseDiffers, clearDiffers, clearRan, mismatch, neutralComplete;
-  private static int count, phase, meshDepth, buildingDepth;
+  private static int count, phase, meshDepth, buildingDepth, mutationDepth;
   private static long sections, secondPasses, neutralPasses, mismatches, neutralStarted, maxNeutralNanos;
   private WaterTerrain() {}
 
@@ -40,12 +42,57 @@ public final class WaterTerrain {
 
   // Covers EVERY native mesh build, even when endpoint capture is disabled.
   // Fixed-function held lighting must never become a source-dependent baked mesh color.
-  public static void beginMesh() {
+  public static void beginMesh(World world, int x, int y, int z) {
+    if (meshDepth != 0 && meshThread != Thread.currentThread()) return;
     if (meshDepth == 0) meshThread = Thread.currentThread();
     meshDepth++;
+    blockIds.begin(world, x, y, z);
   }
-  public static void endMesh() { if (--meshDepth == 0) meshThread = null; }
+  public static void endMesh() {
+    if (meshDepth == 0 || meshThread != Thread.currentThread()) return;
+    blockIds.end(); if (--meshDepth == 0) meshThread = null;
+  }
   public static boolean meshing() { return meshDepth > 0 && meshThread == Thread.currentThread(); }
+
+  public static int block(World world, class_43 chunk, int x, int y, int z) {
+    // Unknown chunk subclasses may supply dynamic IDs. Preserve their reads.
+    boolean cache = meshing() && cacheable(chunk);
+    if (cache) {
+      int id = blockIds.get(world, x, y, z);
+      if (id >= 0) return id;
+    }
+    int id = chunk.method_859(x & 15, y, z & 15);
+    if (cache) blockIds.put(world, x, y, z, id);
+    return id;
+  }
+
+  public static boolean cacheable(class_43 chunk) {
+    return !mutating() && (chunk.getClass() == class_43.class
+        || chunk.getClass() == net.modificationstation.stationapi.impl.world.chunk.FlattenedChunk.class);
+  }
+
+  /** Raw chunk writes do not always notify the world renderer. Bypass all cached
+   * reads throughout their callbacks, including nested writes and exceptional exits. */
+  public static boolean beginMutation(World world) {
+    if (!meshing() && !RenderControls.rendering()) return false;
+    if (mutationDepth != 0 && mutationThread != Thread.currentThread()) return false;
+    mutationThread = Thread.currentThread(); mutationDepth++;
+    invalidateBlocks(world, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
+        Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+    return true;
+  }
+  public static void endMutation(World world, boolean entered) {
+    if (!entered || mutationThread != Thread.currentThread()) return;
+    invalidateBlocks(world, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE,
+        Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+    if (--mutationDepth == 0) mutationThread = null;
+  }
+  public static boolean mutating() { return mutationDepth != 0 && mutationThread == Thread.currentThread(); }
+
+  public static void invalidateBlocks(World world, int x, int y, int z, int maxX, int maxY, int maxZ) {
+    blockIds.invalidate(world, x, y, z, maxX, maxY, maxZ);
+    if (RenderControls.rendering()) WaterLighting.clear();
+  }
 
   public static boolean begin(boolean captureHeld) {
     if (building || (!prepared && !captureHeld) || !RenderControls.rendering() || RenderControls.fullBright()) return false;

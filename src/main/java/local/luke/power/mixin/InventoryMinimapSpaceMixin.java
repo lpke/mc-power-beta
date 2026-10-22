@@ -10,6 +10,6 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(ContainerScreen.class)
 public abstract class InventoryMinimapSpaceMixin extends Screen implements InventoryGui {
   @Override public boolean power$ownsPointerControl(int x, int y) {
-    return Minimap.inventoryContains(minecraft, x, y);
+    return local.luke.power.map.MinimapQuickMenu.owns(minecraft,x,y) || Minimap.inventoryContains(minecraft, x, y);
   }
 }

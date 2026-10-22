@@ -25,7 +25,10 @@ public final class SortingSlots {
   }
   private SortingSlots() {}
   public static boolean screen(Screen screen) {
-    return screen != null && (screen.getClass() == class_585.class || screen.getClass() == class_264.class || screen.getClass() == class_235.class);
+    return screen instanceof ContainerScreen container && OffhandContainers.supported(container);
+  }
+  public static boolean storage(Screen screen) {
+    return screen != null && (screen.getClass() == class_264.class || screen.getClass() == class_235.class);
   }
   public static boolean eligible(Minecraft mc) {
     return mc != null && mc.player != null && mc.world != null && !mc.world.isRemote && WorldCompatibility.ready(mc.world)
@@ -36,12 +39,14 @@ public final class SortingSlots {
         && !InventoryTextInput.active(mc.currentScreen) && !InventoryPanels.modal(mc.currentScreen) && mc.player.inventory.getCursorStack() == null;
   }
   public static Regions read(Minecraft mc) throws IOException {
-    if (!eligible(mc)) throw new IOException("Open a native player inventory, chest or dispenser with an empty cursor.");
+    if (!eligible(mc)) throw new IOException("Open a native inventory with an empty cursor.");
     Container handler = mc.player.container; Class<?> screen = mc.currentScreen.getClass();
     if (handler == null || ((ContainerScreen)mc.currentScreen).container != handler || !handler.method_2094(mc.player)
         || screen == class_585.class && (handler != mc.player.playerContainer || handler.getClass() != class_277.class)
         || screen == class_264.class && handler.getClass() != class_506.class
-        || screen == class_235.class && handler.getClass() != class_407.class)
+        || screen == class_235.class && handler.getClass() != class_407.class
+        || screen == class_516.class && handler.getClass() != class_196.class
+        || screen == class_524.class && handler.getClass() != class_337.class)
       throw new IOException("This container does not have a supported native layout.");
     if (handler.slots.size() < 36 || handler.slots.size() > 128 || mc.player.inventory.main.length != 36)
       throw new IOException("This inventory layout is unsupported.");
@@ -61,18 +66,19 @@ public final class SortingSlots {
       if (owner == mc.player.inventory && index >= 0 && index < 36) {
         if (slot.getClass() != Slot.class || !allMain.add(index)) throw new IOException("Custom or aliased player storage slots.");
         if (index >= 9) main.put(index, slot);
-      } else if (screen != class_585.class && owner != mc.player.inventory) {
+      } else if (storage(mc.currentScreen) && owner != mc.player.inventory) {
         if (slot.getClass() != Slot.class || !owner(owner, screen) || index < 0 || index >= owner.size()
             || storage.put(index, slot) != null || storageOwner != null && storageOwner != owner)
           throw new IOException("Custom or aliased container storage slots.");
         storageOwner = owner;
       }
     }
-    if (main.size() != 27 || allMain.size() != 36 || screen != class_585.class && (storageOwner == null || storage.size() != storageOwner.size()
+    if (main.size() != 27 || allMain.size() != 36 || storage(mc.currentScreen) && (storageOwner == null || storage.size() != storageOwner.size()
         || handler.slots.size() != storage.size() + 36 + (offhand == null ? 0 : 1)))
       throw new IOException("The native storage region is incomplete.");
-    if (screen == class_585.class && handler.slots.size() != 45 + (offhand == null ? 0 : 1))
-      throw new IOException("This player inventory has unsupported custom slots.");
+    int nativeSize = screen == class_585.class ? 45 : screen == class_516.class ? 46 : screen == class_524.class ? 39 : -1;
+    if (nativeSize >= 0 && handler.slots.size() != nativeSize + (offhand == null ? 0 : 1))
+      throw new IOException("This inventory has unsupported custom slots.");
     return new Regions(new ArrayList<>(main.values()), new ArrayList<>(storage.values()));
   }
   public static boolean owns(Minecraft mc, Regions expected) {

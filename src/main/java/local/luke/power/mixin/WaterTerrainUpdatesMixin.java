@@ -94,10 +94,14 @@ public class WaterTerrainUpdatesMixin implements WaterTerrainUpdates {
   }
 
   @Inject(method = "method_1149", at = @At("RETURN"))
-  private void power$column(int x, int y, int z, CallbackInfo ci) { power$columns(x,y,z,x,y,z); }
+  private void power$column(int x, int y, int z, CallbackInfo ci) {
+    WaterTerrain.invalidateBlocks(field_1805, x, y, z, x, y, z);
+    power$columns(x,y,z,x,y,z);
+  }
 
   @Inject(method = "method_1150", at = @At("RETURN"))
   private void power$columnArea(int x, int y, int z, int maxX, int maxY, int maxZ, CallbackInfo ci) {
+    WaterTerrain.invalidateBlocks(field_1805, x, y, z, maxX, maxY, maxZ);
     power$columns(x,y,z,maxX,maxY,maxZ);
   }
 

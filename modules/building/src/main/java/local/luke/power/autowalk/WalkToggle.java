@@ -34,6 +34,26 @@ public final class WalkToggle {
     return before != active;
   }
 
+  /** Native key-down owns activation; polling only maintains a held gesture. */
+  public void press(boolean canWalk, boolean holdToWalk, long now, boolean walkingBackwards) {
+    if (!canWalk) { cancel(); return; }
+    if (keyWasDown) return;
+    active = !active;
+    direction = walkingBackwards ? -1 : 1;
+    pressedAt = now; holdEligible = holdToWalk; longHold = false; keyWasDown = true;
+  }
+
+  public void poll(boolean keyDown, boolean canWalk, boolean holdToWalk, long now, int holdMillis) {
+    if (!canWalk) { cancel(); }
+    if (canWalk && holdEligible && holdToWalk && now - pressedAt >= Math.max(100, holdMillis) * 1_000_000L) {
+      if (keyDown && !longHold) { active = true; longHold = true; }
+      if (!keyDown) active = false;
+    }
+    if (!keyDown) { keyWasDown = false; holdEligible = false; longHold = false; }
+  }
+
+  public void cancel() { stop(); keyWasDown = true; }
+
   public boolean isActive() {
     return active;
   }

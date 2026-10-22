@@ -24,6 +24,7 @@ public final class StatusBackend implements Backend {
         case "toolSwitch" -> "Automatic tool switching";
         case "autoWalk" -> "Auto-walk";
         case "autoMine" -> "Auto-mine";
+        case "holdUse" -> "Hold use";
         default -> Catalog.words(name);
       };
       String help = switch (name) {
@@ -39,6 +40,7 @@ public final class StatusBackend implements Backend {
         case "freecamPlayerMovement" -> "Show while the detached camera allows movement of your actual player.";
         case "autoWalk" -> "Show while auto-walk is running, rather than whenever the feature is available.";
         case "autoMine" -> "Show while auto-mine is holding the attack and block-breaking action.";
+        case "holdUse" -> "Show while Hold use is repeating the native use action.";
         default -> "Include " + label.toLowerCase(Locale.ROOT) + " while it is enabled.";
       };
       if (toggle && !name.equals("enabled") && !name.endsWith("Messages")) label = "Include " + label;

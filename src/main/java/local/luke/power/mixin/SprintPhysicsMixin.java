@@ -9,6 +9,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = LivingEntity.class, priority = 900)
 public class SprintPhysicsMixin {
+  @ModifyConstant(method = "method_945", constant = @Constant(doubleValue = .2))
+  private double power$ladderSprint(double speed) {
+    return SprintController.ladderSpeed((LivingEntity) (Object) this, speed);
+  }
+
   @WrapOperation(
       method = "method_945",
       at =

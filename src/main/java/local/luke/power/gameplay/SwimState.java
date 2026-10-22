@@ -4,6 +4,7 @@ package local.luke.power.gameplay;
 public final class SwimState {
   public static final float WIDTH = .6f, HEIGHT = .6f, EYE_HEIGHT = .4f;
   public boolean swimming, compact, crouched;
+  boolean inputPosePrepared;
   public float previousAmount, amount;
   public float previousEyeHeight=1.62f, eyeHeight=1.62f;
   public double waterDepth;

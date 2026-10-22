@@ -7,6 +7,14 @@ import local.luke.power.config.Setting;
 import org.junit.jupiter.api.Test;
 
 class OptionsSearchScopeTest {
+  @Test void ordinaryTabsRetainIndependentScopeChoices() {
+    assertFalse(OptionsSearchScope.thisTab("General"));
+    assertTrue(OptionsSearchScope.thisTab("Controls"));
+    OptionsSearchScope.toggle("Controls");
+    assertFalse(OptionsSearchScope.thisTab("Controls"));
+    assertTrue(OptionsSearchScope.thisTab("Audio"));
+    OptionsSearchScope.toggle("Controls");
+  }
   private Setting setting(String id, String page, String group) {
     return new Setting(id, "test", page, group, id, "", Setting.Kind.INTEGER,
         new JsonPrimitive(1), new JsonPrimitive(1), 0, 100, 1, List.of(), false);

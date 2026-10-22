@@ -336,6 +336,10 @@ public final class MapRenderer {
 
   /** Two shaded faces give the default arrow its raised center seam at every UI scale. */
   public static void player(double x, double y, double angle, MapSettings settings) {
+    player(x, y, angle, settings, settings.playerOpacity);
+  }
+
+  private static void player(double x, double y, double angle, MapSettings settings, double opacity) {
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     GL11.glPushMatrix();
     try {
@@ -351,7 +355,7 @@ public final class MapRenderer {
         GL11.glScaled(size, size, 1);
         int rgb = outline == 1 ? 0x191919 : settings.playerColor;
         if (settings.playerIcon == 3) {
-          color(rgb, settings.playerOpacity);
+          color(rgb, opacity);
           GL11.glBegin(GL11.GL_TRIANGLE_FAN);
           GL11.glVertex2d(0, 0);
           for (int i = 0; i <= 16; i++) {
@@ -362,11 +366,11 @@ public final class MapRenderer {
         } else {
           double base = settings.playerIcon == 2 ? 4 : 2;
           GL11.glBegin(GL11.GL_TRIANGLES);
-          color(outline == 0 && settings.playerIcon == 0 ? shade(rgb, 1.25) : rgb, settings.playerOpacity);
+          color(outline == 0 && settings.playerIcon == 0 ? shade(rgb, 1.25) : rgb, opacity);
           GL11.glVertex2d(0, -5);
           GL11.glVertex2d(0, base);
           GL11.glVertex2d(-3.5, 4);
-          color(outline == 0 && settings.playerIcon == 0 ? shade(rgb, .65) : rgb, settings.playerOpacity);
+          color(outline == 0 && settings.playerIcon == 0 ? shade(rgb, .65) : rgb, opacity);
           GL11.glVertex2d(0, -5);
           GL11.glVertex2d(3.5, 4);
           GL11.glVertex2d(0, base);
@@ -491,6 +495,7 @@ public final class MapRenderer {
         }
       if (s.radar && dimension == Maps.dimension())
         for (var entity : Maps.radar(mini)) {
+          if (entity.kind() != null && !entity.kind().visible(s)) continue;
           var p =
               view.screen(
                   MapMotion.position(
@@ -520,17 +525,30 @@ public final class MapRenderer {
                 mc, view, circle, entity.name(), (int)Math.ceil(p.x() + radius + 2), (int)p.y() + 3, color);
         }
       if (dimension == Maps.dimension()) {
-        var p = view.screen(pose.x(), pose.z());
-        if (view.contains(p.x(), p.y(), circle, 6)) {
-          GL11.glPushMatrix();
-          GL11.glTranslated(p.x(), p.y(), 0);
-          if (mini) GL11.glScaled(.55, .55, 1);
-          player(0, 0, Math.toRadians(pose.yaw() + 180) + view.angle, s);
-          GL11.glPopMatrix();
+        boolean detached = local.luke.power.input.DetachedCamera.isActive();
+        playerMarker(view, circle, mini, pose.x(), pose.z(), pose.yaw(), s,
+            s.playerOpacity * (detached ? .4 : 1));
+        if (detached && mc.player != null) {
+          double px = MapMotion.position(mc.player.prevX, mc.player.x, mc.paused ? 1 : delta);
+          double pz = MapMotion.position(mc.player.prevZ, mc.player.z, mc.paused ? 1 : delta);
+          float yaw = MapMotion.angle(mc.player.prevYaw, mc.player.yaw, mc.paused ? 1 : delta);
+          playerMarker(view, circle, mini, px, pz, yaw, s, 1);
         }
       }
     } finally {
       GL11.glPopAttrib();
     }
+  }
+
+  private static void playerMarker(MapProjection view, boolean circle, boolean mini,
+      double x, double z, float yaw, MapSettings settings, double opacity) {
+    var point = view.screen(x, z);
+    if (!view.contains(point.x(), point.y(), circle, 6)) return;
+    GL11.glPushMatrix();
+    try {
+      GL11.glTranslated(point.x(), point.y(), 0);
+      if (mini) GL11.glScaled(.55, .55, 1);
+      player(0, 0, Math.toRadians(yaw + 180) + view.angle, settings, opacity);
+    } finally { GL11.glPopMatrix(); }
   }
 }

@@ -50,6 +50,9 @@ public class RetroChatUtil {
     commands.add(new God());
     commands.add(new Heal());
     commands.add(new Repair());
+    commands.add(new Instakill("instakill"));
+    commands.add(new Instakill("ik"));
+    local.luke.power.input.TweakLifecycle.register("instakill", local.luke.power.input.InstantKill::clear);
     commands.add(new Id());
     commands.add(new Mobs());
     commands.add(new Summon());

@@ -29,6 +29,7 @@ public final class InventoryToolsBackend implements Backend {
         case "restockTools" -> "Replace broken tools";
         case "toolSwitch" -> "Automatic tool switching";
         case "toolsFromInventory" -> "Find tools in main storage";
+        case "toolWhitelist" -> "Allowed tools";
         default -> "Tool durability reserve";
       };
       String help = switch (key) {
@@ -48,6 +49,7 @@ public final class InventoryToolsBackend implements Backend {
         case "restockTools" -> "After a successful native action breaks a tool, equip another matching tool, preserving its native data. The most worn matching tool is used first.";
         case "toolSwitch" -> "Before mining, choose a faster suitable tool using native Beta harvestability and mining strength. Keeps the current tool on ties and preserves torch-shovel priority. Singleplayer Survival only.";
         case "toolsFromInventory" -> "Allow tools from the three main-storage rows to swap into the selected hotbar slot. Off only selects tools already in the hotbar.";
+        case "toolWhitelist" -> "Choose tools automatic switching may select. All tools includes newly registered tools. An empty selection disables switching to any tool. Your current hand is always retained when it is already suitable.";
         default -> "Do not automatically choose tools with this many durability uses left or fewer. Lower values use tools longer; higher values protect them earlier. Zero allows the final use.";
       };
       String group = Set.of("sorting", "sortingButton", "depositMatching", "depositMatchingButton", "sortDescending", "protectedSlots", "preferredItems").contains(key) ? "Sorting"

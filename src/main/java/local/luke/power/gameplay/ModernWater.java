@@ -14,7 +14,12 @@ public final class ModernWater {
   private ModernWater() {}
   private static Minecraft client() { return (Minecraft)FabricLoader.getInstance().getGameInstance(); }
   public static boolean eligible(Entity entity) {
-    if (!GameplayConfig.current().modernWaterMovement || !(entity instanceof ClientPlayerEntity player)
+    return GameplayConfig.current().modernWaterMovement && localMovement(entity);
+  }
+
+  /** Common physical-player boundary; dry crawling does not require water settings or sprint access. */
+  static boolean localMovement(Entity entity) {
+    if (!(entity instanceof ClientPlayerEntity player)
         || player.world == null || player.world.isRemote || player.dead || player.health <= 0
         || player.field_1595 != null || player.method_943() || DetachedCamera.isActive()
         || !(player instanceof PlayerMode mode) || mode.power$spectator() || mode.power$flying()) return false;

@@ -27,10 +27,11 @@ public final class BuildingIndicators {
       String rule = s.restrictionMode.name().toLowerCase(Locale.ROOT);
       return Character.toUpperCase(rule.charAt(0)) + rule.substring(1);
     }, () -> Config.current().placement.announceRestrictionToggle);
-    add(AUTO_WALK, () -> AutoWalk.isWalking() ? "" : null,
+    add(AUTO_WALK, () -> AutoWalk.isWalking() ? AutoWalk.lineLocked() ? "(line lock)" : "" : null,
         () -> Config.current().autoWalkAnnounceToggle);
     TweakIndicators.register(AUTO_MINE, () -> local.luke.power.building.mining.AutoMine.active() ? "" : null,
         () -> Config.current().autoMineAnnounceToggle);
+    TweakIndicators.register(HOLD_USE, () -> local.luke.power.building.mining.HoldUse.active() ? "" : null);
     TweakIndicators.register(CLICK_MINING, () -> client.world != null && !client.world.isRemote
         && local.luke.power.input.ClickMining.inverted()
         ? local.luke.power.input.ClickMining.enabled(Config.current().clickMining) ? "enabled" : "disabled" : null);
@@ -46,6 +47,7 @@ public final class BuildingIndicators {
     local.luke.power.building.hotbar.Hotbars.cancelPending();
     AutoWalk.stop();
     local.luke.power.building.mining.AutoMine.stop();
+    local.luke.power.building.mining.HoldUse.stop();
     FreeLook.reset(mc);
     local.luke.power.autowalk.InventoryLook.stop();
     local.luke.power.fastplace.FastPlace.interrupt();

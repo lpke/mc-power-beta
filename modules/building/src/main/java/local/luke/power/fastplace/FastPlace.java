@@ -22,6 +22,7 @@ public final class FastPlace {
   public static final KeyBinding KEY = new KeyBinding("Fast place (toggle)", Keyboard.KEY_NONE);
 
   private static PlacementSession session;
+  private static Minecraft client;
   private static boolean toggleDown, releaseRequired, useDown;
   private static int placedThisTick;
 
@@ -64,16 +65,46 @@ public final class FastPlace {
   }
 
   public static void tickInput(Minecraft mc) {
-    beginTick(
+    if (client != mc) {
+      client = mc;
+      local.luke.power.input.Bindings.onKeyPress("building.fastPlace", FastPlace::press);
+      local.luke.power.input.Bindings.onMousePress("building.fastPlace", FastPlace::press);
+      local.luke.power.input.Bindings.onRelease("building.fastPlace", key -> { if (key == KEY.code) toggleDown = false; });
+    }
+    maintainTick(
         mc,
-        Mouse.isCreated()
-            && Mouse.isButtonDown(1)
+        (local.luke.power.input.UseInput.held() || Mouse.isCreated() && Mouse.isButtonDown(1)
+            && !local.luke.power.input.Bindings.claimsMouse(-99))
             && !local.luke.power.building.hotbar.Hotbars.consumesMouse(mc, 1),
-        local.luke.power.input.Bindings.down(KEY),
+        local.luke.power.input.Bindings.physical(KEY.code),
         Display.isCreated() && Display.isActive());
   }
 
+  private static void press(int key) {
+    if (key != KEY.code) return;
+    if (!toggleDown && Display.isActive() && canOperate(client)
+        && local.luke.power.input.Bindings.matches(KEY, key)) toggle(client);
+    toggleDown = true;
+  }
+
+  private static void toggle(Minecraft mc) {
+    Settings next = local.luke.power.building.config.Config.current().placement.copy();
+    next.setEnabled(!next.enabled);
+    try { apply(next); }
+    catch (IOException e) {
+      LOG.error("Could not save Fast Place settings", e);
+      mc.inGameHud.addChatMessage("\u00a7cFast place settings could not be saved.\u00a7r");
+    }
+  }
+
+  /** Explicit synthetic input adapter used by the disposable runtime fixtures. */
   public static void beginTick(Minecraft mc, boolean use, boolean toggle, boolean focused) {
+    if (toggle && !toggleDown && focused && canOperate(mc)) toggle(mc);
+    maintainTick(mc, use, toggle, focused);
+    toggleDown = toggle;
+  }
+
+  private static void maintainTick(Minecraft mc, boolean use, boolean toggle, boolean focused) {
     placedThisTick = 0;
     useDown = use;
     if (!use) {
@@ -82,17 +113,9 @@ public final class FastPlace {
     }
     boolean playable = focused && canOperate(mc);
     if (!playable) interrupt();
-    if (toggle && !toggleDown && playable) {
-      Settings next = local.luke.power.building.config.Config.current().placement.copy();
-      next.setEnabled(!next.enabled);
-      try {
-        apply(next);
-      } catch (IOException e) {
-        LOG.error("Could not save Fast Place settings", e);
-        mc.inGameHud.addChatMessage("\u00a7cFast place settings could not be saved.\u00a7r");
-      }
-    }
-    toggleDown = toggle;
+    // Observing a physical down at HEAD must not consume its queued native press.
+    if (!toggle) toggleDown = false;
+    else if (!playable) toggleDown = true;
     if (session != null
         && (session.handRevision!=HandUse.manualRevision()||!sameItem(held(mc), mc.player.inventory.selectedSlot) && !waitingRefill(mc)))
       interrupt();

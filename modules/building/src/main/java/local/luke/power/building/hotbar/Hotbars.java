@@ -23,6 +23,7 @@ public final class Hotbars {
   private static boolean scrolling, scrollDown, blocked;
   private static int row;
   private static ClientPlayerEntity owner;
+  private static long debugGeneration;
 
   private Hotbars() {}
 
@@ -46,14 +47,20 @@ public final class Hotbars {
   }
 
   public static void tick(Minecraft mc) {
-    HotbarTransaction.tick(mc);
     boolean down = local.luke.power.input.Bindings.down(SCROLL);
+    int rowMask = 0;
+    for (int i = 0; i < 3; i++) if (rowDown(i)) rowMask |= 1 << i;
+    debugBoundary();
+    // Debug may claim a fresh physical press before its queued key event. Suppression
+    // must cancel a preview instead of committing it as an ordinary key release.
+    if (debugClaimed()) cancelPending();
+    HotbarTransaction.tick(mc);
     boolean eligible = eligible(mc);
     if (!eligible || owner != null && owner != mc.player) {
       scrolling = false;
       owner = null;
       blocked = down;
-      for (int i = 0; i < 3; i++) held[i] = rowDown(i);
+      for (int i = 0; i < 3; i++) held[i] = (rowMask & 1 << i) != 0;
       scrollDown = down;
       return;
     }
@@ -83,7 +90,7 @@ public final class Hotbars {
     scrollDown = down;
     boolean performed = false;
     for (int i = 0; i < 3; i++) {
-      boolean pressed = rowDown(i);
+      boolean pressed = (rowMask & 1 << i) != 0;
       if (!consumedScroll && !down && !performed && pressed && !held[i]) {
         swap(mc, i);
         performed = true;
@@ -96,7 +103,25 @@ public final class Hotbars {
     return local.luke.power.input.Bindings.down(ROWS[i])
         || Config.current().hotbar.numberRowKeys
             && local.luke.power.input.Bindings.down(BASE)
+            && local.luke.power.input.DebugInput.allows(BASE.translationKey, Keyboard.KEY_1 + i, Input.down(Keyboard.KEY_1 + i))
             && Input.down(Keyboard.KEY_1 + i);
+  }
+
+  private static boolean debugClaimed() {
+    for (KeyBinding binding : ALL)
+      if (binding.code != 0 && local.luke.power.input.DebugInput.claimed(binding.code)) return true;
+    if (Config.current().hotbar.numberRowKeys && Input.down(BASE.code))
+      for (int i = 0; i < 3; i++) if (local.luke.power.input.DebugInput.claimed(Keyboard.KEY_1 + i)) return true;
+    return false;
+  }
+
+  private static void debugBoundary() {
+    long generation = local.luke.power.input.DebugInput.entryGeneration();
+    if (debugGeneration == generation) return;
+    debugGeneration = generation;
+    // A held row preview is a gesture, unlike movement held before Debug.
+    if (scrolling) cancelPending();
+    else if (Input.down(SCROLL.code)) scrollDown = blocked = true;
   }
 
   public static void swap(Minecraft mc, int row) {
@@ -106,12 +131,19 @@ public final class Hotbars {
 
   public static void cancelPending() {
     HotbarTransaction.cancel();
+    scrolling = false;
+    owner = null;
+    scrollDown = blocked = Input.down(SCROLL.code);
+    for (int i = 0; i < 3; i++) held[i] = Input.down(ROWS[i].code)
+        || Config.current().hotbar.numberRowKeys && Input.down(BASE.code) && Input.down(Keyboard.KEY_1 + i);
   }
 
   public static int wheel(Minecraft mc, int delta) {
+    boolean down = local.luke.power.input.Bindings.down(SCROLL);
+    debugBoundary();
     if (delta == 0
         || !eligible(mc)
-        || !local.luke.power.input.Bindings.down(SCROLL)
+        || !down
         || blocked) return delta;
     if (!scrolling) {
       scrolling = true;
@@ -148,10 +180,12 @@ public final class Hotbars {
   }
 
   public static int key(Minecraft mc, int code) {
+    debugBoundary();
     return event(mc, code, Keyboard.getEventKeyState()) ? 0 : code;
   }
 
   public static int mouse(Minecraft mc, int button) {
+    debugBoundary();
     if (button < 0 || !eligible(mc)) return button;
     boolean row = event(mc, button - 100, Mouse.getEventButtonState());
     return row || consumesMouse(mc, button) ? -1 : button;

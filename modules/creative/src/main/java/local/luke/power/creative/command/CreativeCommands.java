@@ -36,8 +36,8 @@ public final class CreativeCommands {
         mc.overlay.addChatMessage("§7Flight " + (enabled ? "enabled" : "disabled") + ".§r");
         return true;
       }
-      if (args.length == 2 && args[1].equalsIgnoreCase("help")) {
-        mc.overlay.addChatMessage("§b/gamemode <survival|creative|spectator> [target]§r");
+      if (args.length == 1 || args.length == 2 && args[1].equalsIgnoreCase("help")) {
+        modeHelp(mc);
         return true;
       }
       if (args.length < 2 || args.length > 3)
@@ -56,6 +56,15 @@ public final class CreativeCommands {
 
   private static void flyHelp(Minecraft mc) {
     mc.overlay.addChatMessage("§b/fly §7Toggle flight ability without changing game mode. Requires allow_flight outside Creative; unavailable in Spectator.§r");
+  }
+
+  private static List<String> availableModes() {
+    return List.of("survival", "creative", "spectator").stream()
+        .filter(mode -> local.luke.power.permissions.CommandPermissions.modeDenial(mode).isEmpty()).toList();
+  }
+
+  private static void modeHelp(Minecraft mc) {
+    mc.overlay.addChatMessage("§b/gamemode <" + String.join("|", availableModes()) + "> [target]§r");
   }
 
   public static void register() {
@@ -92,8 +101,7 @@ public final class CreativeCommands {
                       case "manual" -> {
                         Minecraft mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
                         if (name.equals("fly")) flyHelp(mc);
-                        else mc.overlay.addChatMessage(
-                            "\u00a7b/gamemode <survival|creative|spectator> [target]\u00a7r");
+                        else modeHelp(mc);
                         yield null;
                       }
                       case "suggestion" -> {
@@ -101,7 +109,7 @@ public final class CreativeCommands {
                         String prefix = (String) args[2];
                         List<String> choices =
                             index == 1 && name.equals("fly") ? List.of("help") : index == 1
-                                ? List.of("survival", "creative", "spectator")
+                                ? availableModes()
                                 : index == 2 ? List.of("@s", "@p", "@a") : List.of();
                         yield choices.stream()
                             .filter(v -> local.luke.power.chat.ChatCompletion.startsWith(v, prefix))

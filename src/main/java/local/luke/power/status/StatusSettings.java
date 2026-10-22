@@ -10,7 +10,7 @@ public final class StatusSettings {
   public String textColor = "#FFFFFF";
   public int opacity = 100;
   public boolean fakeSneak = true, fastPlacement = true, placementRestriction = true,
-      autoWalk = true, autoMine = true, freeLook = true, cinematicCamera = true, freecamPlayerMovement = true;
+      autoWalk = true, autoMine = true, holdUse = true, freeLook = true, cinematicCamera = true, freecamPlayerMovement = true;
   public boolean freecam = true;
   public boolean hiddenEntities = true, fullBright = true, clickMining = true;
   public boolean restock = true, toolSwitch = true;
@@ -25,6 +25,7 @@ public final class StatusSettings {
       case PLACEMENT_RESTRICTION -> placementRestriction;
       case AUTO_WALK -> autoWalk;
       case AUTO_MINE -> autoMine;
+      case HOLD_USE -> holdUse;
       case CLICK_MINING -> clickMining;
       case FREE_LOOK -> freeLook;
       case CINEMATIC_CAMERA -> cinematicCamera;

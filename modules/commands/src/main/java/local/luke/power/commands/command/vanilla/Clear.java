@@ -64,11 +64,10 @@ public class Clear implements Command {
   }
 
   public void manual(SharedCommandSource s) {
-    s.sendFeedback("/clear [targets] [item] [maxCount]");
-    s.sendFeedback(
-        "Removes matching inventory items. maxCount 0 only counts them. /clearchat clears chat"
-            + " instead.");
-    s.sendFeedback("Removing items requires allow_survival_assistance. Counting remains available.");
+    boolean writes = !s.isClient() || local.luke.power.permissions.CommandPermissions.allowed("clear");
+    s.sendFeedback(writes ? "/clear [targets] [item] [maxCount]" : "/clear <targets> <item> 0");
+    s.sendFeedback(writes ? "Remove matching items, or use maxCount 0 to count them."
+        : "Count matching inventory items without removing them.");
   }
 
   public String[] suggestion(SharedCommandSource s, int n, String input, String total) {

@@ -10,7 +10,8 @@ public final class Reach {
   @EventListener
   public void adjust(PlayerEvent.Reach event) {
     var mc = ClientRuntime.minecraft();
-    if (ClientRuntime.local(mc) && event.player == mc.player && mc.player.creative_isCreative())
+    if (ClientRuntime.local(mc) && event.player == mc.player
+        && (mc.player.creative_isCreative() || Modes.spectator(mc.player)))
       event.currentReach =
           (event.type == HitType.BLOCK ? Config.current().blockReach : Config.current().entityReach)
               / 10.0;

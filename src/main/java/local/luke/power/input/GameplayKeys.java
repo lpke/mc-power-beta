@@ -67,7 +67,10 @@ public final class GameplayKeys {
     catch (Exception e) { local.luke.power.PowerBeta.LOG.error("Could not save light overlay toggle", e); }
   }
   @EventListener public void key(KeyStateChangedEvent event) {
-    if (event.environment != KeyStateChangedEvent.Environment.IN_GAME || !Keyboard.getEventKeyState() || Keyboard.isRepeatEvent()) return;
+    if (!Keyboard.getEventKeyState() || Keyboard.isRepeatEvent()) return;
+    if (local.luke.power.map.MinimapQuickMenu.ownsKeyEvent()) return;
+    Bindings.keyPress(Keyboard.getEventKey());
+    if (event.environment != KeyStateChangedEvent.Environment.IN_GAME) return;
     toggleLight(Keyboard.getEventKey());
     toggleInfoHud(Keyboard.getEventKey());
     local.luke.power.map.MapKeys.press((Minecraft)FabricLoader.getInstance().getGameInstance(), Keyboard.getEventKey());

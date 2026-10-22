@@ -40,10 +40,13 @@ public final class DebugActions {
       case PROFILE -> DebugPerformance.record(mc);
       case TEXTURE_DUMP -> DebugTextures.dump(mc);
       case RESOURCES -> {
-        local.luke.power.visual.TextureOverrides.clear(); mc.textureManager.method_1096();
-        net.modificationstation.stationapi.api.StationAPI.EVENT_BUS.post(
-            net.modificationstation.stationapi.api.client.event.resource.AssetsReloadEvent.builder().build());
-        mc.worldRenderer.method_1537(); message(mc,"Reloaded textures and resources");
+        DebugReload.begin();
+        try {
+          local.luke.power.visual.TextureOverrides.clear(); mc.textureManager.method_1096();
+          net.modificationstation.stationapi.api.StationAPI.EVENT_BUS.post(
+              net.modificationstation.stationapi.api.client.event.resource.AssetsReloadEvent.builder().build());
+          mc.worldRenderer.method_1537();
+        } catch (RuntimeException error) { DebugReload.finish(); throw error; }
       }
       case FOCUS -> {
         Object config=Class.forName("local.luke.power.controls.ControlFeatures").getField("GENERAL_CONFIG").get(null);
@@ -89,7 +92,11 @@ public final class DebugActions {
     message(mc,"Mode picker uses its configured modifier and cycle key in Controls.");
   }
   private static final class SilentPause extends Screen {
+    private final long openingEvent = org.lwjgl.input.Keyboard.getEventNanoseconds();
     @Override public void render(int x,int y,float delta) {}
-    @Override protected void keyPressed(char c,int key) { if(key==org.lwjgl.input.Keyboard.KEY_ESCAPE) minecraft.setScreen(null); }
+    @Override protected void keyPressed(char c,int key) {
+      if(key==org.lwjgl.input.Keyboard.KEY_ESCAPE && org.lwjgl.input.Keyboard.getEventNanoseconds()!=openingEvent
+          && !org.lwjgl.input.Keyboard.isRepeatEvent()) minecraft.setScreen(null);
+    }
   }
 }

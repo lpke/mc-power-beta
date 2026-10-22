@@ -58,10 +58,10 @@ public class Time implements Command {
   }
 
   public void manual(SharedCommandSource s) {
-    s.sendFeedback("/time set <day|noon|night|midnight|time> | /time add <time>");
+    if (!s.isClient() || local.luke.power.permissions.CommandPermissions.allowed("time"))
+      s.sendFeedback("/time set <day|noon|night|midnight|time> | /time add <time>");
     s.sendFeedback("/time query <daytime|gametime|day>");
-    s.sendFeedback(
-        "Set/add require allow_time_editing. Queries are always available. Durations accept t ticks, s seconds and d days.");
+    s.sendFeedback("Queries are always available. Durations accept t ticks, s seconds and d days.");
   }
 
   public String[] suggestion(SharedCommandSource s, int n, String input, String total) {

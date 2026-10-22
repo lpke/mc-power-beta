@@ -2,6 +2,25 @@
 
 ## [Unreleased]
 
+## [4.2.0] - 2026-10-23
+
+- Start ordinary Options tabs with This tab search, retaining All settings on General and remembering each tab's scope. Name the selected defaults base in reset tooltips and add Cancel and Clear to binding capture.
+- Add unassigned Hold use and Auto-walk line lock controls. Show their live state in Active tweaks, keep forward and backward Auto-walk within its block lane, and retain sprinting at real and invisible walls while locked. Leave the camera-position save/load binding unassigned by default.
+- Add Stop sprinting at walls and optional sprinting up ladders. Allow ground sprint to continue or start in supported inventories while preserving text input, focus, permission, stamina and combat ownership.
+- Show Spectator's crosshair over interactable targets and share Creative's configured block and entity reach.
+- Add /instakill and /ik under Allow survival assistance. Filter individual waypoint, time, clear and game-mode help through the same permissions as execution and completion.
+- Allow double-click gathering from the offhand and fill matching offhand stacks first during item pickups, retaining native item data and normal limits.
+- Adjust crafting-grid recipe amounts with the inventory scroll controls, including initial placement and inverted scrolling. Right-click a recipe to craft one batch through a verified durable inventory plan.
+- Reveal the minimap over F3 while holding its expand shortcut. Refresh expanded chicken bounds live, allow F3+H in inventories, keep debug holds out of ordinary bindings and repair F3+Escape. Use a fading dark overlay and progress bar for resource reloads.
+- Add inventory minimap quick settings for items, mobs, map waypoints and in-game waypoints. Skip unwanted radar tracking and unused head preparation, default vertical radar range to 16, and distinguish the detached camera from the physical player on both maps.
+- Add an allowed-tools picker for automatic switching and keep the current hand for instant-break targets. Restore repeated hand swings when automatic mining starts after pointer capture.
+- Use available 2x2 crafting storage when a main-inventory Shift-click cannot enter the hotbar. Support player-inventory sorting in furnaces and crafting tables alongside existing chest and dispenser targets.
+- Add official modern lava pops, normal and heavy player splashes, and swimming sounds with previews, volume categories and subtitles. Enable them only in Power Beta defaults.
+- Add automatic modern crawling with collision-safe standing and crouching, low camera and player/armor poses, reduced dry movement and preserved saved positions. Keep crawling independent of modern water movement and sprint permissions; enable it only in Power Beta defaults.
+- Reuse block IDs within one synchronous terrain mesh build and cached water-column opacity to reduce repeated palette reads during directional and chunk-border rebuilds. Preserve loaded-terrain guards, dynamic edit invalidation, geometry, light arrays and native update scheduling.
+- Restore oversized kept-inventory counts safely when native dead-player NBT wraps them into signed bytes, verifying full item data and ownership before repair.
+- Keep configuration format 7 with support for formats 3–6 and world-rule format 4 with support for formats 1–3 and earlier metadata. Initialize new preferences once from the selected base with verified backups, preserving existing settings, bindings, worlds and recovery data.
+
 ## [4.1.0] - 2026-10-22
 
 - Add editable Debug shortcuts behind one enable setting, on by default for Power Beta and Refined Beta. Keep the mode picker independent and prevent debug chords from triggering ordinary gameplay actions.

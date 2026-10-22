@@ -9,7 +9,9 @@ import org.lwjgl.opengl.Display;
 
 public final class AutoWalk {
   public static final KeyBinding KEY = new KeyBinding("Auto-walk (toggle)", Keyboard.KEY_NONE);
+  public static final KeyBinding LINE_LOCK_KEY = new KeyBinding("Auto-walk line lock (toggle)", Keyboard.KEY_NONE);
   private static final WalkToggle TOGGLE = new WalkToggle();
+  private static final LineLock LINE_LOCK = new LineLock();
   private static Minecraft client;
   private static Object world;
   private static Object player;
@@ -25,6 +27,12 @@ public final class AutoWalk {
       client = minecraft;
       local.luke.power.input.MovementOwnership.registerAutoWalk(AutoWalk::isWalking);
       local.luke.power.input.MovementOwnership.registerAutoWalkInput(AutoWalk::input);
+      local.luke.power.input.MovementOwnership.registerAutoWalkLineLock(AutoWalk::lineLocked);
+      Bindings.onKeyPress("building.autoWalk", AutoWalk::press);
+      Bindings.onMousePress("building.autoWalk", AutoWalk::press);
+      Bindings.onRelease("building.autoWalk", AutoWalk::release);
+      Bindings.onKeyPress("building.lineLock", AutoWalk::toggleLineLock);
+      Bindings.onMousePress("building.lineLock", AutoWalk::toggleLineLock);
       MovementScreens.register(screen -> screen instanceof net.minecraft.client.gui.screen.Screen s
           && InventoryMovement.allows(minecraft, s));
     }
@@ -49,12 +57,31 @@ public final class AutoWalk {
     boolean back = inventory ? MovementScreens.keyboardDown(minecraft.options.backKey) : Bindings.down(minecraft.options.backKey);
     if (inventory && !local.luke.power.input.MovementOwnership.cameraControlsMovement()
         && (forward && !forwardWasDown || back && !backWasDown)) TOGGLE.stop();
-    TOGGLE.update(inventory ? MovementScreens.keyboardDown(KEY) : Bindings.down(KEY), canWalk(), settings.autoWalkHoldToWalk,
-        System.nanoTime(), settings.autoWalkHoldMillis,
-        !local.luke.power.input.MovementOwnership.cameraControlsMovement()
-            && back && !forward);
+    TOGGLE.poll(inventory ? MovementScreens.keyboardDown(KEY) : Bindings.down(KEY), canWalk(), settings.autoWalkHoldToWalk,
+        System.nanoTime(), settings.autoWalkHoldMillis);
+    if (!TOGGLE.isActive()) LINE_LOCK.stop();
     forwardWasDown = forward;
     backWasDown = back;
+  }
+
+  private static void press(int key) {
+    if (client == null || key != KEY.code || !Bindings.matches(KEY, key) || !Display.isActive()
+        || client.currentScreen != null && !InventoryMovement.eligible(client, client.currentScreen)) return;
+    boolean inventory = InventoryMovement.allows(client, client.currentScreen);
+    if (inventory && !MovementScreens.movementKey(key)) return;
+    var settings = local.luke.power.building.config.Config.current();
+    boolean backwards = !local.luke.power.input.MovementOwnership.cameraControlsMovement()
+        && Bindings.down(client.options.backKey) && !Bindings.down(client.options.forwardKey);
+    TOGGLE.press(canWalk(), settings.autoWalkHoldToWalk, System.nanoTime(), backwards);
+    if (!TOGGLE.isActive()) LINE_LOCK.stop();
+  }
+
+  private static void release(int key) {
+    if (key != KEY.code) return;
+    var settings = local.luke.power.building.config.Config.current();
+    if (!settings.autoWalkCancelOnLostFocus && (!Display.isActive()
+        || focusPause != null && client.currentScreen == focusPause)) TOGGLE.unfocused();
+    TOGGLE.poll(false, canWalk(), settings.autoWalkHoldToWalk, System.nanoTime(), settings.autoWalkHoldMillis);
   }
 
   private static boolean canWalk() {
@@ -74,7 +101,8 @@ public final class AutoWalk {
   }
 
   public static void stop() {
-    TOGGLE.stop();
+    TOGGLE.cancel();
+    LINE_LOCK.stop();
     focusPause = null;
   }
 
@@ -103,6 +131,14 @@ public final class AutoWalk {
   }
 
   public static float input() { return suppliesMovement() ? TOGGLE.input() : 0; }
+  private static void toggleLineLock(int key) {
+    if (!Bindings.matches(LINE_LOCK_KEY,key) || !canWalk() || !TOGGLE.isActive() || client.world.isRemote) return;
+    if (LINE_LOCK.active()) LINE_LOCK.stop();
+    else LINE_LOCK.start(client.player.x,client.player.z,client.player.yaw);
+  }
+  public static boolean lineLocked() { return isWalking() && LINE_LOCK.active(); }
+  public static double lockX(double x, double halfWidth, double delta) { return lineLocked() ? LINE_LOCK.x(x, halfWidth, delta) : delta; }
+  public static double lockZ(double z, double halfWidth, double delta) { return lineLocked() ? LINE_LOCK.z(z, halfWidth, delta) : delta; }
 
   public static float movementInput(float vanillaInput, boolean forwardHeld, boolean backHeld, boolean sneaking) {
     return TOGGLE.movementInput(vanillaInput, forwardHeld, backHeld, sneaking);

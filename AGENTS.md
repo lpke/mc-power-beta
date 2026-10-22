@@ -249,7 +249,9 @@
   Wrapped chat keeps the last Beta color code from the preceding line.
   Help and completion share command availability. Group WorldEdit under //help,
   retain aliases, and keep per-command help free of gameplay changes.
-  Every new command must appear in /help and completion, with /<command> help
+  Added, removed and changed commands must stay consistent in /help, individual help and completion.
+  Individual help filters subcommands through the same permissions as execution, including bare
+  command help, /<command> help and /help <command>. Every new command must appear in /help and completion, with /<command> help
   describing its syntax and permissions without changing gameplay. /gamerule uses
   the same registry, aliases and validation as the UI; confirm writes only after a
   verified durable metadata save. /repair changes only held-item durability and
@@ -263,6 +265,8 @@
   start fresh in 1.4.2. Keep inventory is an independent per-world rule; changing
   access permissions must not reset it. Preserve native stacks through death, respawn and dead-player
   saves; kept deaths claim their recorded items without creating drops.
+  Kept-save count repair runs only at native load, matches the exact signed-byte projection
+  and full verified item data, and retains owner checks and rollback for partial repairs.
   Death snapshots include the four player crafting inputs, never the recipe output.
   Normal deaths drop those inputs once; kept deaths preserve them through respawn.
   Recovery restores empty original crafting slots and rolls back recipe callback failures.
@@ -685,3 +689,25 @@
 - Options search scope is visit-independent session state, restricted to ordinary Options.
   Search breadcrumbs and tab filtering use the actual available editor destination; map
   sidebars and isolated rules editors retain their own fixed search scopes.
+  Retain each ordinary tab's choice independently. General defaults to All settings;
+  every other tab defaults to This tab.
+- Hold use and Auto-walk line lock are temporary native actions. Dispatch their hotkeys
+  on key-down and clear through TweakLifecycle. Hold use supplies one initial native
+  press before held repeats. Line lock adds block-lane side walls without rotating the
+  player, and exempts real and invisible collisions from stopping ground sprint.
+- Modern crawling and modern water movement remain independent global preferences.
+  Reuse collision-safe compact/crouched poses, native feet, camera interpolation and
+  render-scoped player/armor animation. Never force an unsafe standing pose when disabled.
+  Ladder sprint uses normal ground permission, stamina and combat ownership.
+- Recipe craft-one exchanges authorize exactly one native recipe batch and its container
+  returns. Flush the immutable journal before publication and verify native callbacks
+  against an isolated grid; preserve output ownership and owned rollback.
+- Terrain block-ID caches belong to one synchronous mesh and its owning render thread.
+  Bound the cache to the section plus one-block border, bypass unknown chunk subclasses
+  and nested builds, and invalidate IDs and water opacity when live terrain callbacks edit it.
+  Never use the cache to load chunks, change world light or defer native geometry updates.
+- Spectator crosshair checks use loaded-only read-only rays and Creative reach. Detect
+  native use overrides without invoking them or changing the player's interaction target.
+- Optional fluid sounds follow verified official assets and native movement/display events.
+  Keep player splashes/swimming local and singleplayer; lava pops use exposed-surface
+  display events. Preserve particles, disabled behavior, category gain and subtitle admission.

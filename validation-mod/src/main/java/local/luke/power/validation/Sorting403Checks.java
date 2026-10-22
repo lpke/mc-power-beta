@@ -93,7 +93,9 @@ final class Sorting403Checks {
     log("SORTING403 failures="+failures+" captures="+REPORT);check(failures==0,"Sorting403 failures="+failures);
   }
   private static void owned(JsonObject before,Set<Integer> locked,Map<Integer,String> preferred) {
-    var expected=before.deepCopy().getAsJsonObject("settings").getAsJsonObject("inventoryTools");expected.add("protectedSlots",Catalog.JSON.toJsonTree(locked));expected.add("preferredItems",Catalog.JSON.toJsonTree(preferred));
+    var expected=before.deepCopy().getAsJsonObject("settings").getAsJsonObject("inventoryTools");
+    if(!expected.has("toolWhitelist"))expected.add("toolWhitelist",Catalog.JSON.toJsonTree(new InventoryToolsSettings().toolWhitelist));
+    expected.add("protectedSlots",Catalog.JSON.toJsonTree(locked));expected.add("preferredItems",Catalog.JSON.toJsonTree(preferred));
     var after=PowerConfig.document();check(expected.equals(after.getAsJsonObject("settings").get("inventoryTools")),"layout changed unrelated inventory settings");
     before.getAsJsonObject("settings").add("inventoryTools",expected);check(before.equals(after),"layout changed another configuration section");
   }

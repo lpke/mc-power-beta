@@ -332,7 +332,10 @@
       "seedPlantingSounds": true,
       "hoeTillingSounds": true,
       "bucketSounds": true,
-      "boneMealSounds": true
+      "boneMealSounds": true,
+      "lavaPopSounds": true,
+      "waterSplashSounds": true,
+      "swimmingSounds": true
     },
     "visual": {
       "softRain": true,
@@ -571,7 +574,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.1.0"
+        "customVersionText": "Power Beta 4.2.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -703,6 +706,7 @@
       "key_power_creative.picker": "62",
       "key_power_creative.modifier": "61",
       "key_Auto-walk (toggle)": "0",
+      "key_Auto-walk line lock (toggle)": "0",
       "key_Fast place (toggle)": "0",
       "key_Placement offset (hold)": "0",
       "key_Placement adjacent (hold)": "0",
@@ -718,6 +722,7 @@
       "key_power_building.hotbar.row3": "0",
       "framerate_limit": 125,
       "key_Auto-mine (toggle)": "0",
+      "key_Hold use (toggle)": "0",
       "key_power_beta.entities": 0,
       "key_power_beta.fullBright": 0,
       "key_power_beta.clickMining": "0",
@@ -742,6 +747,7 @@
     "activeTweaks": {
       "cinematicCameraMessages": false,
       "autoMine": true,
+      "holdUse": true,
       "hiddenEntities": true,
       "fullBright": true,
       "clickMining": true,
@@ -812,7 +818,8 @@
       "torchShovel": true,
       "axesSlashLeaves": true,
       "boatPlacementFacing": true,
-      "modernWaterMovement": true
+      "modernWaterMovement": true,
+      "modernCrawling": true
     },
     "infoHud": {
       "enabled": false,
@@ -1067,7 +1074,7 @@
       "otherEntities": true,
       "entityNames": false,
       "entityHeights": true,
-      "radarHeight": 24,
+      "radarHeight": 16,
       "radarLimit": 256,
       "waypoints": true,
       "worldWaypoints": true,
@@ -1158,6 +1165,8 @@
       "doubleTapTicks": 7,
       "doubleTap": true,
       "jumpBoost": true,
+      "stopAtWalls": true,
+      "sprintLadders": true,
       "particles": true,
       "sprintKnockback": true,
       "speed": 130,
@@ -1205,6 +1214,7 @@
       "depositMatchingButton": true,
       "creativeHotbarsButton": true,
       "toolSwitch": false,
+      "toolWhitelist": ["*"],
       "restock": false,
       "restockBeforeEmpty": true,
       "restockOtherHotbar": false,

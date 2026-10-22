@@ -71,6 +71,14 @@ public final class KeptInventory {
   public void restore(PlayerEntity player) throws IOException {
     restore(player, () -> true);
   }
+  /** Native player loading truncates main/armor counts to a signed byte before this hook. */
+  public void restoreLoaded(PlayerEntity player) throws IOException {
+    ItemStack[] verified = decode();
+    if (format == 0 && local.luke.power.offhand.Offhand.get(player.inventory) != null)
+      throw new IOException("Historical kept snapshot conflicts with an occupied offhand");
+    KeptLoadCounts.normalize(player, verified);
+    restore(player);
+  }
   void restore(PlayerEntity player, DeathInventoryRestore.Admission admitted) throws IOException {
     ItemStack[] stacks = decode(); var inventory = player.inventory;
     var hand = local.luke.power.offhand.Offhand.get(inventory);

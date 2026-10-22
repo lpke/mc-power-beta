@@ -27,7 +27,7 @@ public abstract class KeptInventoryMixin implements KeptPlayer {
   private void power$loadKept(NbtCompound tag, CallbackInfo ci) {
     byte[] bytes = tag.getByteArray("PowerBetaKeptInventory");
     if (bytes.length == 0) { power$kept = null; return; }
-    try { power$kept = KeptInventory.read(bytes); power$kept.restore((PlayerEntity)(Object)this); }
+    try { power$kept = KeptInventory.read(bytes); power$kept.restoreLoaded((PlayerEntity)(Object)this); }
     catch (java.io.IOException e) { throw new IllegalStateException("Saved kept inventory is unsafe; original world data retained", e); }
   }
 }

@@ -36,7 +36,7 @@ public class WaterTerrainMixin implements WaterTerrainSection {
     power$waterColumn = false;
     boolean prepared = power$heldReady;
     power$heldReady = power$heldRejected = false;
-    WaterTerrain.beginMesh();
+    WaterTerrain.beginMesh(field_229, field_231, field_232, field_233);
     try {
       boolean held = HeldLighting.admit(field_229, field_231, field_232, field_233, prepared);
       if (!WaterTerrain.begin(held)) { original.call(); return; }

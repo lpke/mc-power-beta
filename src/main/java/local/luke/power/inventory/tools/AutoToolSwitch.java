@@ -24,6 +24,7 @@ public final class AutoToolSwitch {
     int id = mc.world.getBlockId(x, y, z);
     if (id <= 0 || id >= Block.BLOCKS.length || Block.BLOCKS[id] == null) return true;
     Block block = Block.BLOCKS[id];
+    if (block.method_1582(mc.player) >= 1) { clear(); return true; }
     if (TorchShovel.slot(mc.player, block) >= 0) return true;
     if (waiting && NativeInventoryPlan.busy() && world == mc.world && targetX == x && targetY == y && targetZ == z && targetId == id)
       return false;
@@ -32,6 +33,7 @@ public final class AutoToolSwitch {
     var inventory = mc.player.inventory; int selected = inventory.selectedSlot, best = selected;
     double value = score(inventory.main[selected], block, -1);
     for (int i = 0; i < (settings.toolsFromInventory ? 36 : 9); i++) {
+      if (!ToolWhitelist.allows(settings.toolWhitelist, inventory.main[i])) continue;
       double score = score(inventory.main[i], block, settings.toolDurabilityReserve);
       if (score > value + 1e-8) { best = i; value = score; }
     }
@@ -39,10 +41,12 @@ public final class AutoToolSwitch {
     if (best < 9) { inventory.selectedSlot = best; return true; }
     world = mc.world; targetX = x; targetY = y; targetZ = z; targetId = id;
     int source = best;
+    ItemStack candidate = inventory.main[source];
     waiting = NativeInventoryPlan.submit(mc, "tool_switch", false, List.of(
         NativeInventoryPlan.Change.main(inventory, selected, inventory.main[source]),
         NativeInventoryPlan.Change.main(inventory, source, inventory.main[selected])),
         () -> InventoryAutomation.survival(mc) && InventoryToolsConfig.current().toolSwitch
+            && ToolWhitelist.allows(InventoryToolsConfig.current().toolWhitelist, candidate)
             && miningTarget(mc, x, y, z) && mc.world.method_239(x, y, z) && mc.world.getBlockId(x, y, z) == id,
         () -> waiting = false);
     return !waiting;

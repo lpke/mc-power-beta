@@ -45,7 +45,7 @@ than overwrite a changed block or inventory.
 
 ## Inventory plans
 
-Offhand swaps, recipe placement, sorting, restocking, tool changes and saved Creative
+Offhand swaps, recipe placement and crafting, crafting-storage transfers, sorting, restocking, tool changes and saved Creative
 hotbar loads use `.minecraft/power-beta-data/inventory-recovery`. Each checksummed
 journal is scoped to the stable world ID and player. Prepared records contain full
 native before/after item data, protected player slots and external container snapshots.
@@ -86,6 +86,9 @@ inventory, armor, the offhand, the held cursor and player crafting inputs throug
 Dead-player NBT includes a complete native snapshot for restart safety. Death
 records retain their item snapshots but mark every stack recovered, with the log
 label Recovered (kept). The keep rule works even when death records are disabled.
+Reloading a dead player verifies the full kept snapshot before repairing native
+signed-byte count wraps in matching inventory slots. Conflicting item data or
+slots stop loading and retain the saved snapshot and original world data.
 
 Death IDs are decimal numbers, starting at 1 for each world and player. Release
 1.4.2 deliberately wipes earlier death logs rather than importing their IDs or

@@ -1,5 +1,61 @@
 # Runtime checks
 
+- `release-420 commands`, `release-420 sprint` and `release-420 spectator` check live
+  command dispatch/help permissions, native one-hit attacks, ladder ascent/stamina,
+  inventory sprint ownership and loaded camera interaction rays at configured reach.
+  They restore settings previews, rules, mode, native player/input state, inventory and
+  their bounded terrain scene, including block-entity data. Run in a focused disposable world.
+- `release-420 hold-use` arms the real binding and observes ordinary native ticks for
+  initial block use, held repeats, offhand food and one Creative boat/minecart per
+  activation. Wait for `HOLD420 done`; `hold-use-status` and `hold-use-stop` inspect or
+  cancel the run. A final Fast placement phase checks partial-stack restocking and
+  resumed batches. The fixture restores its input, inventory and terrain on completion.
+- `release-420 debug-toggles` watches F3-owned F20–F23 presses for AutoMine, AutoWalk, FastPlace and FakeSneak. `debug-toggles-ordinary` verifies activation inside each native key-down callback; automatic mining/walking stop immediately after observation. Use `debug-toggles-check` after releasing the keys and `debug-toggles-stop` to restore bindings/settings.
+- `release-420 debug-hotbar` arms distinct tagged native inventory rows and watches
+  every normal tick for changed bytes, a prepared/queued row or a saved row selection.
+  Send fast native F3+Q in one input batch with each release order, then run
+  `release-420 debug-hotbar-check` after each. Use `release-420 debug-hotbar-stop`
+  to restore the inventory, keys, settings preview and debug overlay.
+  `debug-hotbar-preheld` admits a Q preview before F3 and checks its cancellation;
+  `debug-hotbar-ordinary` is the positive control for one immediate ordinary Q-release swap.
+  Stop the preceding watcher before starting either variant.
+- `release-420 line-lock` uses the real Auto-walk and line-lock bindings, installed
+  Entity.move clamp and native travel. It checks forward/backward diagonal displacement
+  in both lane axes, unchanged view, real/ghost-wall sprint, other-entity exclusion and
+  toggle-off movement. It restores player, input, rules, previews and bounded terrain.
+
+- `crawling-420` checks real trapdoor entry with all water/sprint combinations,
+  native crawl distance and wall collision, single input scaling, safe disabled
+  exits, crouch/standing heights, saved feet and player/armor model isolation.
+  It checks multiplayer, Spectator, other-player and unloaded-terrain exclusions.
+  Run in a focused muted disposable world; it restores its scene and settings.
+
+- `debug-410 controls420` checks the new temporary control registrations, live chicken
+  hitbox dimensions, Delete-to-clear binding capture and narrow/wide prompt captures.
+  Physical checks still cover F3+H in inventories, F3+Q without ordinary shortcuts,
+  both F3 release orders, F3+Esc release/repress, F3+T progress/fade, and forward/backward
+  auto-walk line lock against lane edges and real walls while sprinting.
+- `debug-410 minimap420` checks the gear's modal pointer/keyboard ownership, native
+  inventory retention, Escape cleanup and an actual menu capture above the container.
+
+- `mesh-cache-420 LABEL` rebuilds twelve loaded native sections in one tick with
+  caching enabled and bypassed. It warms both arms, checks identical packed GPU
+  bytes, then records 24 ABBA pairs with frozen simulation/daylight in the performance
+  report directory. Run without other builds or CPU-heavy tests.
+- `terrain-cache-420` compares native render-region reads across every mesh-border
+  cell, tests active-mesh invalidation after a real block edit, and checks that
+  dynamic custom chunks bypass the cache. It restores its single edited block.
+- `performance-420 start LABEL [SECONDS]` records actual world-frame CPU/GPU,
+  frame intervals, ticks, terrain builds, map work, chunk disk reads, generation
+  and population. The default is ten seconds; reports stay in the clone under
+  `power-beta-data/reports/performance-420`. GPU queries never block and sample
+  storage is bounded. `turn LABEL` rotates two degrees per tick; `travel LABEL`
+  requires an already flying or Spectator player and moves half a block east per
+  tick. Both restore their owned pose on completion. Run the same travel twice
+  after settling to distinguish new terrain from explored terrain. Use `status`
+  or `stop` to inspect or cancel. Keep the disposable window focused and use a
+  real GPU for performance comparisons; the report records its renderer.
+
 - After `new-world`, run `spectator-inventory-404`, `spectator-containers-404` and
   `commands-403` for 4.0.4. These check blocked drops, retained full-data cursors,
   immutable native-style container views, fuzzy token replacement and captures.
@@ -34,18 +90,21 @@ restores the original preferences. `zoom-watch`, a physical Zoom in press, then
 4.0.1 native checks, after `new-world`:
 
 - `spectator-inventory-401` checks Creative permission switching, native item data, offhand, crafting, open-inventory dropping and closed/world restrictions. It captures the inventory views and restores fixture state.
-- `sorting-401` checks preset dropdown input, draft isolation and instant preferred-item selection at narrow and wide sizes, with native captures.
+- `sorting-401` retains historical pre-4.0.3 draft and geometry checks. Use `sorting-403` for the current sorting editor.
 - `recipe-401` reproduces empty-offhand swapping with the book open, native dropping during a prepared fill, subsequent crafting and accurate capacity/busy/recovery feedback. Run in actual Survival. Its final controlled callback-failure check verifies rollback and failure shutdown.
 - `held-light-400 mining` checks rendered lighting while breaking a real block with an offhand torch, including section seams and separate refresh/preparation budgets. Keep the muted clone focused until `held-light-400 status` reports completion.
 
 4.0.2 checks, after `new-world`:
 
-- `sorting-layer-402` checks the inventory settings overlay, nested item selection, draft save/discard, protected preferred-item clearing, native input ownership and narrow/wide captures.
+- `sorting-layer-402` retains historical hotkey draft/save expectations from 4.0.2. Use `sorting-403` for current immediate publication, modal ownership and captures.
 - `commands-403` checks live Wooden Planks aliases, the last partial/complete suggestion row and native Tab completion without executing a command.
 - `sorting-403` checks immediate hotkey layout/preset publication, slot double-clicks, the Item/Clear/Reset row, ordinary menu drafts and Escape returning to the same native container. Captures and a native render observer verify that modal layers skip the underlying inventory.
 - Run `controls-403 open`, hold W and Tab in the disposable window, then run `controls-403 check` and release both keys. It checks actual held movement during recipe search, inventory mob-head priority, compact glyph bounds, both Creative Survival recipe-button styles, hidden Creative hotbars and pause-menu map/photo returns. `controls-403 cancel` restores an unfinished setup.
-- `recipe-402` checks right-click ingredient removal, capacity refusal, native item data, output callbacks and stale-plan cancellation.
-- `container-offhand-402` checks offhand geometry and native ownership across every Beta container, transfers, disabled extraction and narrow/wide captures.
+- `recipe-402` checks recipe-cell craft-one, grid ingredient removal, wheel quantity/inversion, durable 2x2 storage fallback, capacity refusal, native item data, callbacks and stale-plan cancellation.
+- `container-offhand-402` checks offhand geometry and native ownership across every Beta container, double-click gathering, pickup refill priority, transfers, disabled extraction and narrow/wide captures.
+- `fluid-sounds-420` requires the verified silent Pulse sink and muted client. It checks native lava/splash/swim conditions and particles, all eighteen registered decodes against the pinned native codec through EOS, previews, subtitles and selected-base settings without saving preferences. Codec evidence reports source granules and decoded durations separately because Beta's native decoder can omit tail packets or retain padding.
+- `kept-load-420` checks native signed-byte count wraps, exact item/slot conflicts and source-evidence retention on unregistered scratch players. It leaves live recovery state untouched.
+- `tool-whitelist-420` captures the Allowed tools picker at 320 and 640 pixels and checks isolated sword exclusions, Done and Discard without changing items or saved settings.
 - `command-names-402` checks live registry parsing and completion for plain and explicitly qualified item/block names, preserving inventory and settings.
 
 4.0.0 native checks, after `new-world`:
@@ -53,7 +112,7 @@ restores the original preferences. `zoom-watch`, a physical Zoom in press, then
 - `recipe-400 registry`, `crafting-native`, `furnace-native` and `visual` check native recipes, metadata, safe placement and wide/narrow UI captures. Run `furnace-rollback` last because it deliberately exercises failure shutdown.
 - `inventory-400 native` checks offhand full data, death snapshots, journal-lock failure, slow durable writes and callback rollback. Run `persist-start`, quit and restart the disposable client, load the same world, then run `persist-finish` for process persistence.
 - `inventory-tools-400 native` checks sorting, pointer-selected hotkey targets, matching transfers and native slot ownership. `headers` captures single/double chests at narrow and wide sizes, verifies button clearance and checks that native item tooltips cover the controls. `modal` checks Creative and recipe-modal input exclusion.
-- `auto-tools-400 native` exercises tool selection, borrowed shovels, vein ownership, main/offhand restocking and cancellation through real native callbacks.
+- `auto-tools-400 native` exercises tool selection/whitelists, instant-break exclusions, borrowed shovels, vein ownership, main/offhand restocking and cancellation through real native callbacks.
 - `subtitles-400 native` checks muted sound events, native/freecam directional bases, lifecycle clearing and bounded event bursts.
 - `saved-hotbars-400` checks all nine native rows, slow durable loading and foreign/permission cancellation. `death-restoration-400` checks owned rollback, foreign callbacks, pending claims and kept-player transfer.
 - `settings-400 native` exercises actual Options resets in all three bases, nested HUD drafts, Undo/Discard/Apply, saved-hotbar retention and subtitle renderer visibility. It captures narrow and wide controls for review. `placement` checks default subtitle avoidance and the first drag/nudge plus Undo.

@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.1.0",
+    "default": "Power Beta 4.2.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -3515,6 +3515,13 @@
     "group": "Movement",
     "order": 8
   },
+  "keys.Auto-walk line lock (toggle)": {
+    "page": "Controls",
+    "group": "Movement",
+    "label": "Auto-walk line lock (toggle)",
+    "default": 0,
+    "order": 8
+  },
   "keys.Fake sneak (toggle)": {
     "page": "Controls",
     "group": "Movement",
@@ -3640,7 +3647,8 @@
     "page": "Controls",
     "group": "Free camera",
     "order": 3,
-    "label": "Save or load camera position"
+    "label": "Save or load camera position",
+    "default": 0
   },
   "keys.Open Camera Position Gui": {
     "page": "Controls",
@@ -4007,6 +4015,23 @@
     "default": true,
     "restart": false,
     "order": 101
+  },
+  "keys.Hold use (toggle)": {
+    "page": "Controls",
+    "group": "Building",
+    "label": "Hold use (toggle)",
+    "default": 0,
+    "restart": false,
+    "order": 1
+  },
+  "activeTweaks.holdUse": {
+    "page": "Interface",
+    "group": "Active tweaks HUD",
+    "label": "Include Hold use",
+    "description": "Show while Hold use is repeating the native Use action.",
+    "default": true,
+    "restart": false,
+    "order": 102
   },
   "death.enabled": {
     "page": "Gameplay",
@@ -6735,5 +6760,54 @@
     "page": "Controls",
     "group": "Debug",
     "order": 0
+  },
+  "sprint.stopAtWalls": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Stop sprinting at walls",
+    "description": "Stop ground sprinting after hitting a wall. Auto-walk line lock keeps sprinting through real and line-lock wall collisions.",
+    "order": 25
+  },
+  "sprint.sprintLadders": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Sprint up ladders",
+    "description": "Use the ground sprint speed multiplier while climbing ladders. Sprint permissions, stamina and combat limits still apply.",
+    "order": 26
+  },
+  "gameplay.modernCrawling": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Modern crawling",
+    "description": "Crawl under low ceilings, including closed trapdoors, with modern collision, movement, camera and animation. Independent of modern water movement.",
+    "order": 41
+  },
+  "inventoryTools.toolWhitelist": {
+    "page": "Inventory",
+    "group": "Automatic tool switching",
+    "label": "Allowed tools",
+    "description": "Choose which tools automatic switching may select. All tools includes newly registered tools.",
+    "order": 5
+  },
+  "audio.lavaPopSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Lava popping sounds",
+    "description": "Play modern lava pops at exposed lava surfaces in singleplayer.",
+    "order": 30
+  },
+  "audio.waterSplashSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Modern water splashes",
+    "description": "Use modern player splash sounds, including separate high-speed splashes.",
+    "order": 31
+  },
+  "audio.swimmingSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Modern swimming sounds",
+    "description": "Play modern swimming sounds as you move through water.",
+    "order": 32
   }
 }

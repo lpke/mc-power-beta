@@ -6,6 +6,7 @@
     "GameOptionsMixin",
     "MinecraftMixin",
     "KeyboardInputMixin",
+    "LineLockMixin",
     "ContainerGuiMixin",
     "ButtonGuiAccessor",
     "InventoryLookScreenMixin",

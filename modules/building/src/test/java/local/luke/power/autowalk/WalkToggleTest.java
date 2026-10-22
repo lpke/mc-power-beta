@@ -118,4 +118,27 @@ class WalkToggleTest {
     assertEquals(0F, WalkToggle.forwardInput(-1F, false, false));
     assertEquals(0F, WalkToggle.forwardInput(-0.3F, false, true));
   }
+  @Test void headPollingDoesNotActivateOrConsumeANativeBackwardPress() {
+    var state = new WalkToggle();
+    state.poll(true, true, true, 0, 350); assertFalse(state.isActive());
+    state.press(true, true, 10, true); assertEquals(-1F, state.input());
+    state.poll(true, true, true, 400_000_010L, 350); assertEquals(-1F, state.input());
+    state.poll(false, true, true, 500_000_010L, 350); assertFalse(state.isActive());
+  }
+  @Test void completeNativeTapsAndMenuCancellationRequireFreshPress() {
+    var state = new WalkToggle();
+    state.press(true, false, 0, false);
+    state.poll(false, true, false, 1, 350); assertTrue(state.isActive());
+    state.press(true, false, 2, false); assertFalse(state.isActive());
+    state.poll(true, false, false, 3, 350);
+    state.press(true, false, 4, false); assertFalse(state.isActive());
+    state.poll(false, true, false, 5, 350);
+    state.press(true, false, 6, true); assertEquals(-1F, state.input());
+  }
+  @Test void configuredChordReleaseCompletesAHoldWithoutAnotherActivation() {
+    var state = new WalkToggle();
+    state.press(true, true, 0, true);
+    state.poll(false, true, true, 400_000_000L, 350); assertFalse(state.isActive());
+    state.poll(true, true, true, 500_000_000L, 350); assertFalse(state.isActive());
+  }
 }

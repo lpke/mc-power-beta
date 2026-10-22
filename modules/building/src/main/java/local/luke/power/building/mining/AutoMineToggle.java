@@ -11,6 +11,17 @@ public final class AutoMineToggle {
     if (down && !wasDown && matches) active = !active;
     wasDown = down;
   }
+  /** Maintenance never turns a fresh physical edge into gameplay. */
+  public void poll(boolean down, boolean eligible) {
+    if (!eligible) stop();
+    if (!down) wasDown = false;
+  }
+  public void press(boolean eligible, boolean matches) {
+    if (!eligible) { stop(); return; }
+    if (!wasDown && matches) active = !active;
+    wasDown = true;
+  }
+  public void release() { wasDown = false; }
   public boolean active() { return active; }
   public void stop() { active = false; wasDown = true; }
 }

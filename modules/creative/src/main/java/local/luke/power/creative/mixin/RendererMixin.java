@@ -23,7 +23,7 @@ public abstract class RendererMixin {
               value = "INVOKE",
               target = "Lnet/minecraft/client/ClientInteractionManager;getBlockReachDistance()F"))
   private float power$rayDistance(float distance) {
-    return ClientRuntime.local(minecraft) && minecraft.player.creative_isCreative()
+    return ClientRuntime.local(minecraft) && (minecraft.player.creative_isCreative() || Modes.spectator(minecraft.player))
         ? (float) Math.max(distance, Reach.entity())
         : distance;
   }
@@ -32,7 +32,7 @@ public abstract class RendererMixin {
   private void power$blockLimit(float delta, CallbackInfo ci) {
     var hit = minecraft.hitResult;
     if (ClientRuntime.local(minecraft)
-        && minecraft.player.creative_isCreative()
+        && (minecraft.player.creative_isCreative() || Modes.spectator(minecraft.player))
         && hit != null
         && hit.type == net.minecraft.util.hit.HitType.BLOCK
         && minecraft.viewEntity.getInterpolatedPosition(delta).distance(hit.pos)

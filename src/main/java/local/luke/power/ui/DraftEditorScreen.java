@@ -346,7 +346,7 @@ abstract class DraftEditorScreen extends UiScreen {
               local.luke.power.config.Tooltips.setting(s, s.numeric() && !InheritedColors.accepts(s) ? "Right-click to enter an exact value." : ""));
         }
         if (hasRelatedControl(s) && inside(mx, listMouseY, controlX(), y, 20, 18)) { tip = "Related control"; hoverId += ".related"; }
-        if (resettable(s) && inside(mx, listMouseY, resetX(), y, 20, 18)) { tip = "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
+        if (resettable(s) && inside(mx, listMouseY, resetX(), y, 20, 18)) { tip = "Reset to " + local.luke.power.config.DefaultBases.current().label + " default"; hoverId += ".reset"; }
       }
       if (sticky != null) {
         clip(controlsLeft(), controlsTop(), controlsSpan() - 8, controlsBottom() - controlsTop());

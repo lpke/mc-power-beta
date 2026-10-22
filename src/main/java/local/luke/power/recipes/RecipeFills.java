@@ -103,7 +103,7 @@ public final class RecipeFills {
     return NativeInventoryPlan.busy()||local.luke.power.inventory.InventoryActions.busy()?Result.BUSY:Result.UNAVAILABLE;
   }
   private static String encode(ItemStack stack)throws IOException{return stack==null?null:DeathItems.encode(stack);}
-  private static String craftingOutput(RecipeContext context,List<RecipeStack> grid)throws IOException {
+  static String craftingOutput(RecipeContext context,List<RecipeStack> grid)throws IOException {
     class_159 scratch=scratch(context,grid);
     for(Object object:class_148.method_538().method_541())if(object instanceof class_160 nativeRecipe&&nativeRecipe.method_2072(scratch))
       return encode(nativeRecipe.method_2074(scratch));

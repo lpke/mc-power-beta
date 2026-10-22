@@ -40,6 +40,18 @@ public final class AutoTools400Checks {
 
   private static void mining(AutoTools400State s) throws Exception {
     var mc = s.mc; var inv = s.inventory;
+    scenario(s, "instant-break blocks keep the selected hand", () -> {
+      s.scene(50, 1); inv.main[0] = tagged(4, 7, 0, "held"); inv.main[1] = tagged(279, 1, 0, "axe");
+      String before = s.snapshot(); s.begin();
+      check(inv.selectedSlot == 0 && before.equals(s.snapshot()) && !NativeInventoryPlan.busy(), "instant-break mining swapped the hand");
+    });
+    scenario(s, "tool whitelist excludes swords and preserves explicit empty selection", () -> {
+      s.scene(30, 1); inv.main[0] = tagged(4, 7, 0, "held"); inv.main[1] = tagged(276, 1, 0, "sword");
+      var settings = InventoryToolsConfig.copy(); settings.toolWhitelist = java.util.List.of("278"); InventoryToolsConfig.preview(settings);
+      s.begin(); check(inv.selectedSlot == 0, "excluded sword was selected");
+      settings.toolWhitelist = java.util.List.of(); InventoryToolsConfig.preview(settings); inv.main[2] = tagged(278, 1, 0, "pick");
+      s.begin(); check(inv.selectedSlot == 0 && !NativeInventoryPlan.busy(), "empty whitelist admitted a tool");
+    });
     scenario(s, "native mining selects a harvest-capable hotbar tool over gold", () -> {
       // Power Beta's optional gold silk touch gives gold iron-tier harvesting. Obsidian
       // still requires diamond, so this remains a real harvestability test in every base.

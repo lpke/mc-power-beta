@@ -194,7 +194,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private static final Map<String, Double> positions = new HashMap<>();
   private static final Set<String> rememberedCollapsed = new HashSet<>(SettingsLayout.initiallyCollapsed());
   private static double rememberedSideScroll;
-  private static boolean showDisabled, searchThisTab;
+  private static boolean showDisabled;
   private List<String> conflictIds = List.of();
   private final Screen parent;
   private Screen exitTarget;
@@ -663,7 +663,7 @@ public final class PowerOptionsScreen extends UiScreen {
         .filter(Objects::nonNull).toList();
     candidates = candidates.stream().filter(this::inMapScope)
         .filter(s -> !s.id.equals("maps.worldMapEditor") || mapAppearanceDestination)
-        .filter(s -> query.isEmpty() || !searchScopeVisible() || !searchThisTab || searchPage(s).equals(page)).toList();
+        .filter(s -> query.isEmpty() || !searchScopeVisible() || !OptionsSearchScope.thisTab(page) || searchPage(s).equals(page)).toList();
     if (embedded() && mapView.equals("Minimap") && query.isEmpty() && listed.isEmpty() && !changedOnly)
       candidates = HudEditorSections.order(candidates);
     Map<String, Integer> scores = new HashMap<>();
@@ -862,6 +862,12 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (capture != null) {
+      if (button == 0 && inside(x, y, width / 2 - 102, height / 2 + 36, 100, 20)) {
+        click(); capture = null; captureModifier = 0; return;
+      }
+      if (button == 0 && inside(x, y, width / 2 + 2, height / 2 + 36, 100, 20)) {
+        click(); clearBinding(); return;
+      }
       capture.value = new JsonPrimitive(new Chord(button - 100, Bindings.heldModifiers()).encoded());
       Setting bound = capture; capture = null; changed(bound);
       return;
@@ -900,7 +906,7 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (button == 0 && searchScopeVisible() && inside(x, y, searchScopeX(), 27, 20, 20)) {
-      click(); searchThisTab = !searchThisTab; scroll = 0; selected = -1; layout(); return;
+      click(); OptionsSearchScope.toggle(page); scroll = 0; selected = -1; layout(); return;
     }
     if (button == 0 && hasSections() && inside(x, y, sectionButtonX(), 27, 20, 20)) {
       click(); toggleSections(); return;
@@ -1125,6 +1131,9 @@ public final class PowerOptionsScreen extends UiScreen {
               || value.id.equals("inventoryTools.protectedSlots")).toList(), false)));
       return;
     }
+    if (s.id.equals("inventoryTools.toolWhitelist")) {
+      minecraft.setScreen(ToolWhitelistEditor.open(this, s, () -> changed(s))); return;
+    }
     if (s.id.equals("rules.review")) { reviewRules(); return; }
     if (s.id.equals("maps.zoomSteps")) { minecraft.setScreen(new ZoomStepsScreen(this, s)); return; }
     if (s.id.equals("interface.debugOrder")) {
@@ -1252,6 +1261,10 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public boolean capturingBinding() { return capture != null; }
+  private void clearBinding() {
+    Setting bound = capture; bound.value = new JsonPrimitive(0);
+    capture = null; captureModifier = 0; changed(bound);
+  }
 
   protected void keyPressed(char c, int key) {
     if (page.equals("Defaults") && defaultsPanel.key(key)) return;
@@ -1261,9 +1274,10 @@ public final class PowerOptionsScreen extends UiScreen {
       // Unmapped platform events must not silently clear an existing binding.
       if (key == Keyboard.KEY_NONE) return;
       if (key == Keyboard.KEY_ESCAPE) {
-        capture = null;
+        capture = null; captureModifier = 0;
         return;
       }
+      if (key == Keyboard.KEY_DELETE) { clearBinding(); return; }
       if (Chord.modifier(key) != 0) {
         captureModifier = key;
         return;
@@ -1343,6 +1357,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (InheritedColors.accepts(s)) return InheritedColors.label(s);
     if (ColorSettings.accepts(s)) return ColorSettings.label(s, session.settings());
     if (s.id.equals("inventoryTools.preferredItems")) return "Edit...";
+    if (s.id.equals("inventoryTools.toolWhitelist")) {
+      var tools = s.value.getAsJsonArray();
+      return tools.size() == 1 && tools.get(0).getAsString().equals("*") ? "All tools" : tools.size() + " tools...";
+    }
     if (s.id.equals("interface.debugOrder")) return "Reorder";
     if (s.id.equals("rules.review")) return "Review...";
     if (s.id.equals("maps.zoomSteps")) return s.value.getAsJsonArray().size() + " levels...";
@@ -1478,9 +1496,9 @@ public final class PowerOptionsScreen extends UiScreen {
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
         !conflictIds.isEmpty() ? "Conflicting bindings"
         : changedOnly ? "Search changed settings..." : embedded() ? "Search maps and controls..."
-        : searchScopeVisible() && searchThisTab ? "Search settings in this tab..." : "Search all settings...");
+        : searchScopeVisible() && OptionsSearchScope.thisTab(page) ? "Search settings in this tab..." : "Search all settings...");
     if (canClear()) iconButton("remove", clearSearchX(), 27, 20, 20, mx, my, true, false);
-    if (searchScopeVisible()) button(searchThisTab ? "T" : "A", searchScopeX(), 27, 20, 20, mx, my, true);
+    if (searchScopeVisible()) button(OptionsSearchScope.thisTab(page) ? "T" : "A", searchScopeX(), 27, 20, 20, mx, my, true);
     boolean expandSections = libraryVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
     iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 20, 20, mx, my,
         hasSections(), false);
@@ -1581,7 +1599,7 @@ public final class PowerOptionsScreen extends UiScreen {
       if (hover) {
         hoverId = s.id;
         if (!editable) tip = Tooltips.setting(s, lock);
-        else if (!s.id.equals(HudEditorSettings.ENTRY) && mx >= right() - 34) { tip = ColorSettings.accepts(s) ? "Reset color" + (ColorSettings.opacity(s, session.settings()) == null ? "" : " and opacity") + " to Defaults" : "Reset to " + s.display(s.defaultValue); hoverId += ".reset"; }
+        else if (!s.id.equals(HudEditorSettings.ENTRY) && mx >= right() - 34) { tip = "Reset to " + DefaultBases.current().label + " default"; hoverId += ".reset"; }
         else if (!conflicts.isEmpty() && inside(mx, listMouseY, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
@@ -1641,7 +1659,7 @@ public final class PowerOptionsScreen extends UiScreen {
       hoverId = "sections";
     }
     if (searchScopeVisible() && inside(mx, my, searchScopeX(), 27, 20, 20)) {
-      tip = searchThisTab ? "Searching only this tab. Click to search all settings."
+      tip = OptionsSearchScope.thisTab(page) ? "Searching only this tab. Click to search all settings."
           : "Searching all settings. Click to search only this tab.";
       hoverId = "searchScope";
     }
@@ -1657,9 +1675,11 @@ public final class PowerOptionsScreen extends UiScreen {
       drawCenteredTextWithShadow(textRenderer, message, width / 2, height / 2 - 18, 0xffffff);
       if (capture != null) {
         drawCenteredTextWithShadow(
-            textRenderer, "Modifiers: Ctrl / Shift / Alt", width / 2, height / 2, 0xaaaaaa);
+            textRenderer, "Allowed modifiers: Ctrl / Shift / Alt", width / 2, height / 2, 0xaaaaaa);
         drawCenteredTextWithShadow(
-            textRenderer, "Escape cancels. Delete clears.", width / 2, height / 2 + 14, 0xaaaaaa);
+            textRenderer, "Press Esc to cancel or Del to clear.", width / 2, height / 2 + 14, 0xaaaaaa);
+        button("Cancel", width / 2 - 102, height / 2 + 36, 100, 20, mx, my, true);
+        button("Clear", width / 2 + 2, height / 2 + 36, 100, 20, mx, my, true);
       }
       else {
         int cy = height / 2 + 12;

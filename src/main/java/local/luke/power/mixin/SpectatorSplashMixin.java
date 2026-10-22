@@ -3,6 +3,7 @@ package local.luke.power.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import local.luke.power.input.PlayerMode;
+import local.luke.power.audio.*;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +16,8 @@ public class SpectatorSplashMixin {
   private void power$splash(World world, Entity entity, String sound, float volume, float pitch,
       Operation<Void> original) {
     if (sound.equals("random.splash") && entity instanceof PlayerMode mode && mode.power$spectator()) return;
+    if (sound.equals("random.splash") && AudioConfig.current().waterSplashSounds && FluidSounds.localPlayer(entity))
+      sound = FluidSoundMath.splash(volume);
     original.call(world, entity, sound, volume, pitch);
   }
 }

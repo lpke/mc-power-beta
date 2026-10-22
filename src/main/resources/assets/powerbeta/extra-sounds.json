@@ -184,6 +184,44 @@
         }
       ],
       "subtitle": "subtitles.item.bone_meal.use"
+    },
+    "block.lava.pop": {
+      "sounds": [
+        "liquid/lavapop"
+      ],
+      "subtitle": "subtitles.block.lava.ambient"
+    },
+    "entity.player.swim": {
+      "sounds": [
+        "liquid/swim5",
+        "liquid/swim6",
+        "liquid/swim7",
+        "liquid/swim8",
+        "liquid/swim9",
+        "liquid/swim10",
+        "liquid/swim11",
+        "liquid/swim12",
+        "liquid/swim13",
+        "liquid/swim14",
+        "liquid/swim15",
+        "liquid/swim16",
+        "liquid/swim17",
+        "liquid/swim18"
+      ],
+      "subtitle": "subtitles.entity.generic.swim"
+    },
+    "entity.player.splash": {
+      "sounds": [
+        "liquid/splash",
+        "liquid/splash2"
+      ],
+      "subtitle": "subtitles.entity.generic.splash"
+    },
+    "entity.player.splash.high_speed": {
+      "sounds": [
+        "liquid/heavy_splash"
+      ],
+      "subtitle": "subtitles.entity.generic.splash"
     }
   },
   "assets": [
@@ -408,6 +446,132 @@
       "asset": "minecraft/sounds/item/bonemeal/bonemeal5.ogg",
       "sha1": "1e38ab01b7b4b6b6b9b29d889801440d285cb508",
       "size": 38428
+    },
+    {
+      "event": "block.lava.pop",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/lava/pop1.ogg",
+      "asset": "minecraft/sounds/liquid/lavapop.ogg",
+      "sha1": "19a5aae31c3e0018a960b709a9f0240d8d47dda7",
+      "size": 5609
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim1.ogg",
+      "asset": "minecraft/sounds/liquid/swim5.ogg",
+      "sha1": "5b66f85f4091d100117bd6ea7f49543f7bb682e0",
+      "size": 57135
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim2.ogg",
+      "asset": "minecraft/sounds/liquid/swim6.ogg",
+      "sha1": "95a646b2a6d24a431cace49c00481455477e9a44",
+      "size": 50147
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim3.ogg",
+      "asset": "minecraft/sounds/liquid/swim7.ogg",
+      "sha1": "3a395719dac4db21f2092558c28afcf35b833d99",
+      "size": 53312
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim4.ogg",
+      "asset": "minecraft/sounds/liquid/swim8.ogg",
+      "sha1": "e1687542340bef3e6edf3ed8245261596496734f",
+      "size": 36550
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim5.ogg",
+      "asset": "minecraft/sounds/liquid/swim9.ogg",
+      "sha1": "53994743817a68885a2ded1f9857bb254c00a70a",
+      "size": 53348
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim6.ogg",
+      "asset": "minecraft/sounds/liquid/swim10.ogg",
+      "sha1": "abe8061b7227e85b98196f11e44706154bbbd394",
+      "size": 51067
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim7.ogg",
+      "asset": "minecraft/sounds/liquid/swim11.ogg",
+      "sha1": "64f5dddfcc6df8945707437a9bdda63ab43ab6a9",
+      "size": 47598
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim8.ogg",
+      "asset": "minecraft/sounds/liquid/swim12.ogg",
+      "sha1": "5314c31c0e041d9356558c085442aed9fda0000b",
+      "size": 36181
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim9.ogg",
+      "asset": "minecraft/sounds/liquid/swim13.ogg",
+      "sha1": "9e06706877ed1eadb48064afe4a1b9c86b557457",
+      "size": 42722
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim10.ogg",
+      "asset": "minecraft/sounds/liquid/swim14.ogg",
+      "sha1": "34a8626957250f7d60ed3af2360e4e0a3da002e7",
+      "size": 45222
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim11.ogg",
+      "asset": "minecraft/sounds/liquid/swim15.ogg",
+      "sha1": "98f0b58f75b0bbbdd609b35b46c05656ded22a94",
+      "size": 48602
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim12.ogg",
+      "asset": "minecraft/sounds/liquid/swim16.ogg",
+      "sha1": "d5cf493c3c24bff9abc4e122cd9afa72e6c0d1a8",
+      "size": 43310
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim13.ogg",
+      "asset": "minecraft/sounds/liquid/swim17.ogg",
+      "sha1": "6a0b196f6911af249cab7d1b3ff03bea80ec76c1",
+      "size": 46073
+    },
+    {
+      "event": "entity.player.swim",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim14.ogg",
+      "asset": "minecraft/sounds/liquid/swim18.ogg",
+      "sha1": "38b0fa011c55c2b15e10a8f1b032b3e545b1a63f",
+      "size": 50020
+    },
+    {
+      "event": "entity.player.splash",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/splash1.ogg",
+      "asset": "minecraft/sounds/liquid/splash.ogg",
+      "sha1": "4c14c40542e249c902d0cac710ab4c6d6debba28",
+      "size": 16702
+    },
+    {
+      "event": "entity.player.splash",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/splash2.ogg",
+      "asset": "minecraft/sounds/liquid/splash2.ogg",
+      "sha1": "92429140e98c02a1b0e61d87aed53b898cde0de2",
+      "size": 90299
+    },
+    {
+      "event": "entity.player.splash.high_speed",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/splash/high_speed1.ogg",
+      "asset": "minecraft/sounds/liquid/heavy_splash.ogg",
+      "sha1": "937c5f93e51d6a81a14b23d4ab7ccee3389feed9",
+      "size": 83480
     }
   ],
   "existingAssets": [

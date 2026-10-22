@@ -54,7 +54,7 @@ public final class InventoryToolsOverlay extends UiScreen {
     if (sortingLayer != null) { sortingLayer.prepare(); if (!sortingLayer.active()) sortingLayer = null; }
     boolean base = SortingSlots.screen(host) && minecraft.world != null && !minecraft.world.isRemote
         && !(host instanceof InventoryGui gui && gui.power$usesCatalogWheel()) && !InventoryPanels.modalOther(host, SavedCreativeHotbars.MODAL_OWNER);
-    boolean storage = host.getClass() != class_585.class;
+    boolean storage = SortingSlots.storage(host);
     var settings = InventoryToolsConfig.current();
     boolean showSecond = base && (storage ? settings.depositMatchingButton : hotbars() && settings.creativeHotbarsButton);
     sort.visible = base && settings.sortingButton && !modal;

@@ -875,7 +875,8 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 			lastLMBSlot = clickedSlot;
 			this.minecraft.interactionManager.clickSlot(this.container.syncId, clickedSlot.id, 0, isShiftKeyDown, this.minecraft.player);
 			ItemStack picked = minecraft.player.inventory.getCursorStack();
-			if (!isShiftKeyDown && picked != null && clickedSlot.getClass() == Slot.class)
+			if (!isShiftKeyDown && picked != null && picked.isStackable() && picked.count < picked.getMaxCount()
+					&& QuickTransfers.writable(clickedSlot, picked))
 				powerInventory$gatherDouble.start(container, clickedSlot, picked, InventoryStacks.data(picked), MouseClickClock.now());
 
 

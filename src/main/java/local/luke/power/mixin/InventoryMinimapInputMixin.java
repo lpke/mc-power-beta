@@ -1,6 +1,7 @@
 package local.luke.power.mixin;
 
 import local.luke.power.map.Minimap;
+import local.luke.power.map.MinimapQuickMenu;
 import local.luke.power.input.InventoryGui;
 import local.luke.power.input.InventoryWheel;
 import net.minecraft.client.Minecraft;
@@ -24,6 +25,9 @@ public abstract class InventoryMinimapInputMixin {
     int wheel = Mouse.getEventDWheel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+    if(MinimapQuickMenu.mouse(minecraft,x,y,Mouse.getEventButton(),Mouse.getEventButtonState())) {
+      InventoryWheel.event(this,false,wheel,true);ci.cancel();return;
+    }
     if (!org.lwjgl.opengl.Display.isActive()) power$resetPress = false;
     boolean claimed = Mouse.getEventButton() == 1 && !Mouse.getEventButtonState() && power$resetPress;
     if (Mouse.getEventButton() == 1 && !Mouse.getEventButtonState()) power$resetPress = false;
@@ -33,6 +37,10 @@ public abstract class InventoryMinimapInputMixin {
     if (!claimed) claimed = wheel != 0 && Minimap.inventoryWheel(minecraft, x, y, wheel);
     InventoryWheel.event(this, org.lwjgl.opengl.Display.isActive() && !Mouse.isGrabbed(), wheel, claimed);
     if (claimed) ci.cancel();
+  }
+  @Inject(method="onKeyboardEvent",at=@At("HEAD"),cancellable=true)
+  private void power$minimapKey(CallbackInfo ci) {
+    if(MinimapQuickMenu.key(minecraft,org.lwjgl.input.Keyboard.getEventKey(),org.lwjgl.input.Keyboard.getEventKeyState()))ci.cancel();
   }
   @Inject(method = "onMouseEvent", at = @At("RETURN"))
   private void power$finishWheel(CallbackInfo ci) {

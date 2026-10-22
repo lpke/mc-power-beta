@@ -10,6 +10,43 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class DefaultBasesTest {
+  @Test void newMovementAndSoundPreferencesAreFrozenOnceWithoutChangingExistingPreferences() throws Exception {
+    ConfigDefaults.prepare(game);
+    for (var base : DefaultBases.Base.values()) {
+      var old = PowerConfig.document();
+      var settings = old.getAsJsonObject("settings");
+      settings.getAsJsonObject("defaults").addProperty("base", base.id);
+      settings.getAsJsonObject("gameplay").remove("modernCrawling");
+      settings.getAsJsonObject("sprint").remove("sprintLadders");
+      settings.getAsJsonObject("sprint").remove("stopAtWalls");
+      for (String key : List.of("lavaPopSounds", "waterSplashSounds", "swimmingSounds"))
+        settings.getAsJsonObject("audio").remove(key);
+      settings.getAsJsonObject("audio").addProperty("futurePreference", "keep");
+      PowerConfig.write(old);
+      byte[] original = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      boolean modern = base == DefaultBases.Base.POWER_BETA;
+      var expected = old.deepCopy().getAsJsonObject("settings");
+      expected.getAsJsonObject("gameplay").addProperty("modernCrawling", modern);
+      expected.getAsJsonObject("sprint").addProperty("sprintLadders", modern);
+      expected.getAsJsonObject("sprint").addProperty("stopAtWalls", true);
+      for (String key : List.of("lavaPopSounds", "waterSplashSounds", "swimmingSounds"))
+        expected.getAsJsonObject("audio").addProperty(key, modern);
+      assertEquals(expected, PowerConfig.document().getAsJsonObject("settings"));
+      try (var files = Files.walk(game.resolve("power-beta-data/settings-backups"))) {
+        assertTrue(files.filter(Files::isRegularFile).anyMatch(path -> {
+          try { return Arrays.equals(original, Files.readAllBytes(path)); }
+          catch (Exception error) { return false; }
+        }));
+      }
+      DefaultBases.use(modern ? DefaultBases.Base.BETA : DefaultBases.Base.POWER_BETA, game);
+      byte[] saved = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      assertArrayEquals(saved, Files.readAllBytes(PowerConfig.path()));
+      assertEquals(modern, PowerConfig.section("gameplay").get("modernCrawling").getAsBoolean());
+    }
+  }
+
   @TempDir Path game;
   private Object priorFile, priorBase, priorSetup;
   @org.junit.jupiter.api.BeforeEach void isolateProcessState() throws Exception {

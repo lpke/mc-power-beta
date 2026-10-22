@@ -49,7 +49,7 @@ public final class SprintController {
         && !player.dead
         && !player.method_943()
         && player.field_1595 == null
-        && mc.currentScreen == null
+        && (mc.currentScreen == null || MovementScreens.allows(mc.currentScreen))
         && !mc.paused
         && Display.isActive()
         && !DetachedCamera.isActive()
@@ -68,7 +68,7 @@ public final class SprintController {
     SprintState state = ((SprintPlayer) player).power$sprint();
     var settings = SprintConfig.current();
     boolean eligible = eligible(player);
-    boolean key = Bindings.down("powerbeta.sprint");
+    boolean key = sprintKey(mc());
     if (player != owner) {
       owner = player;
       minorCollision = false;
@@ -84,7 +84,7 @@ public final class SprintController {
             && (player.field_161.field_2535 || player.field_161.field_2536);
     state.tick(
         settings, eligible, water && forward > 0 ? 1 : forward, key, player.field_1623 || water,
-        player.field_1624 && !minorCollision && !water, usesStamina(player), moving);
+        stopsAtWall(player, water), usesStamina(player), moving);
     ModernSwimming.tick(player);
     SprintView.publish(SprintView.Kind.GROUND, state.sprinting, settings.speed / 100);
   }
@@ -94,8 +94,29 @@ public final class SprintController {
     boolean water = ModernSwimming.canSprint(player);
     float forward = player.field_161.field_2533;
     ((SprintPlayer)player).power$sprint().land(SprintConfig.current(), eligible(player),
-        water && forward > 0 ? 1 : forward, Bindings.down("powerbeta.sprint"),
-        player.field_1624 && !minorCollision && !water, usesStamina(player));
+        water && forward > 0 ? 1 : forward, sprintKey(mc()),
+        stopsAtWall(player, water), usesStamina(player));
+  }
+
+  private static boolean sprintKey(Minecraft mc) {
+    if (mc.currentScreen != null) {
+      for (Object key : mc.options.allKeys)
+        if (key instanceof Binding binding && binding.power$id().equals("powerbeta.sprint"))
+          return MovementScreens.allows(mc.currentScreen) && MovementScreens.keyboardDown(key);
+      return false;
+    }
+    return Bindings.down("powerbeta.sprint");
+  }
+
+  private static boolean stopsAtWall(ClientPlayerEntity player, boolean water) {
+    return SprintConfig.current().stopAtWalls && player.field_1624 && !minorCollision && !water
+        && !(SprintConfig.current().sprintLadders && player.method_932())
+        && !MovementOwnership.autoWalkLineLocked();
+  }
+
+  public static double ladderSpeed(Entity entity, double nativeSpeed) {
+    return active(entity) && SprintConfig.current().sprintLadders
+        ? nativeSpeed * SprintConfig.current().speed / 100 : nativeSpeed;
   }
 
   public static float acceleration(Entity player, float value) {

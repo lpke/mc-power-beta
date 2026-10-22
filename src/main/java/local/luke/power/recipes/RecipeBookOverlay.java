@@ -33,6 +33,9 @@ public final class RecipeBookOverlay {
   private List<ItemStack> placedInputs=List.of();
   private List<RecipeStack> placedGrid=List.of();
   private RecipeStack placedOutput;
+  private RecipeDefinition wheelRecipe;
+  private int wheelSteps;
+  private boolean wheelDispatch;
   public RecipeBookOverlay(Screen screen,Minecraft mc,RecipeContext context,boolean standalone) {
     this.screen=screen;this.mc=mc;this.context=context;this.standalone=standalone;
     var state=RecipeBookConfig.current();boolean furnace=context.kind==RecipeDefinition.Kind.FURNACE;
@@ -69,11 +72,12 @@ public final class RecipeBookOverlay {
   public boolean owns(int x,int y){var l=layout();return enabled()&&(buttonVisible()&&toggleBounds().contains(x,y)
       ||open&&(l.narrow()||l.background().contains(x,y)||l.tabs(tabs().length).contains(x,y)||standalone&&l.detail().contains(x,y)||!popup.isEmpty()||detail!=null&&!standalone));}
   public void tick() {
-    if(!enabled()){generation++;closeInput();InventoryPanels.update(screen,0,List.of());return;}
-    if(!org.lwjgl.opengl.Display.isActive()||InventoryPanels.modalOther(screen,this)){generation++;releaseInput();ghost=null;}
+    if(!enabled()){clearWheel();generation++;closeInput();InventoryPanels.update(screen,0,List.of());return;}
+    if(!org.lwjgl.opengl.Display.isActive()||InventoryPanels.modalOther(screen,this)){clearWheel();generation++;releaseInput();ghost=null;}
     if(open&&!Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)&&!Keyboard.isKeyDown(Keyboard.KEY_RCONTROL))ticks++;
     if(open){if(model==null)model=new RecipeBookModel();model.tick(mc,context);rebuild();}
     refreshGeometry();
+    dispatchWheel();
   }
   private int[] tabs(){return context.kind==RecipeDefinition.Kind.FURNACE?new int[]{0,1,2,3}:new int[]{0,3,1,4,2};}
   private void rebuild(){if(model==null)return;groups=model.groups(context,category,search.text(),filter);page=Math.min(page,Math.max(0,(groups.size()-1)/20));}
@@ -90,7 +94,7 @@ public final class RecipeBookOverlay {
   private void state(){if(!standalone)RecipeBookConfig.state(context.kind==RecipeDefinition.Kind.FURNACE,open,filter);refreshGeometry();}
   private void releaseInput(){search.focused=false;popup=List.of();InventoryPanels.modal(screen,this,detail!=null&&!standalone);if(!InventoryPanels.modalOther(screen,this))InventoryTextInput.focus(screen,false);}
   private void closeInput(){detail=null;releaseInput();}
-  public void removed(){generation++;clearPlacement();closeInput();InventoryPanels.update(screen,0,List.of());}
+  public void removed(){clearWheel();generation++;clearPlacement();closeInput();InventoryPanels.update(screen,0,List.of());}
   public void kind(RecipeDefinition.Kind kind){generation++;clearPlacement();context=RecipeContext.viewer(mc,kind);category=page=0;ghost=null;detail=null;lastRecipe=null;popup=List.of();model=null;filter=false;tick();}
   /** Native containers draw buttons before slots, carried stacks and item tooltips. */
   public void renderInventoryButton(int mx,int my) {
@@ -129,7 +133,8 @@ public final class RecipeBookOverlay {
         boolean same=variants.size()>1&&variants.stream().allMatch(value->value.output.itemId==recipe.output.itemId&&value.output.getDamage()==recipe.output.getDamage());
         if(same)draw.item(mc,recipe.output,r.x()+5,r.y()+5,1,false);
         draw.item(mc,recipe.output,r.x()+(same?3:4),r.y()+(same?3:4),1,false);
-        if(r.contains(mx,my))tooltip=recipe.name+(removable(recipe)?"\nRight-click to remove 1":variants.size()>1?"\nRight-click for more":"")+(!writable()?"\nView recipe":"");
+        if(r.contains(mx,my))tooltip=recipe.name+(writable()&&context.kind==RecipeDefinition.Kind.CRAFTING?"\nRight-click to craft 1":"")
+            +(variants.size()>1?"\nShift-right-click for variants":"")+(!writable()?"\nView recipe":"");
       }
       int pages=Math.max(1,(groups.size()+19)/20);
       if(pages>1){if(page>0)arrow(l.previous(),"page_backward",mx,my);if(page+1<pages)arrow(l.next(),"page_forward",mx,my);
@@ -232,7 +237,7 @@ public final class RecipeBookOverlay {
         int gy=recipe.kind==RecipeDefinition.Kind.FURNACE?1:recipe.shaped?n/recipe.width+oy:n/3;
         draw.item(mc,icons.get((ticks/30)%icons.size()),r.x()+2+7*gx,r.y()+2+7*gy,.375f,false);
       }
-      if(r.contains(mx,my))tooltip=recipe.name+(removable(recipe)?"\nRight-click to remove 1":"");
+      if(r.contains(mx,my))tooltip=recipe.name+(writable()&&context.kind==RecipeDefinition.Kind.CRAFTING?"\nRight-click to craft 1":"");
     }return tooltip;
   }
   private Rect detailBounds(){return standalone?layout().detail():new Rect(Math.max(4,(screen.width-146)/2),Math.max(4,(screen.height-104)/2),146,104);}
@@ -253,23 +258,27 @@ public final class RecipeBookOverlay {
   }
   public boolean mouse(int x,int y,int button) {
     if(!enabled()||InventoryPanels.modalOther(screen,this))return false;var l=layout();
+    clearWheel();
     if(detail!=null&&!standalone){detail=null;click();refreshGeometry();return true;}
-    if(!popup.isEmpty()){if(button==0||button==1)for(int i=0;i<popup.size();i++)if(popupCell(i).contains(x,y)){var value=popup.get(i);popup=List.of();if(button==0)choose(value);else if(removable(value))remove(value);refreshGeometry();return true;}popup=List.of();refreshGeometry();return true;}
+    if(!popup.isEmpty()){if(button==0||button==1)for(int i=0;i<popup.size();i++)if(popupCell(i).contains(x,y)){var value=popup.get(i);popup=List.of();if(button==0)choose(value);else choose(value,false,true);refreshGeometry();return true;}popup=List.of();refreshGeometry();return true;}
     if(buttonVisible()&&toggleBounds().contains(x,y)){if(button==0)toggle();return true;}
-    if(!open)return nativeClick(x,y);
+    if(!open)return nativeClick(x,y,button);
     if(l.search().contains(x,y)||l.magnifier().contains(x,y)){if(button==0){if(!search.focused)generation++;search.focused=true;if(l.search().contains(x,y))search.click(x,button);refreshGeometry();}return true;}
     search.focused=false;refreshGeometry();
     if(l.filter().contains(x,y)){if(button==0){generation++;filter=!filter;page=0;click();state();rebuild();}return true;}
     int[] tabs=tabs();for(int i=0;i<tabs.length;i++)if(l.tab(i).contains(x,y)){if(button==0){generation++;category=tabs[i];page=0;click();rebuild();}return true;}
     if(l.previous().contains(x,y)&&page>0){if(button==0){generation++;page--;click();}return true;}
     if(l.next().contains(x,y)&&(page+1)*20<groups.size()){if(button==0){generation++;page++;click();}return true;}
-    for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){var variants=groups.get(page*20+i);var recipe=cycling(variants);if(button==1&&removable(recipe))remove(recipe);else if(button==1&&variants.size()>1){click();openPopup(variants,l.cell(i));}else if(button==0)choose(recipe);return true;}
-    if(owns(x,y))return true;return nativeClick(x,y);
+    for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){var variants=groups.get(page*20+i);var recipe=cycling(variants);
+      if(button==1&&variants.size()>1&&(!writable()||local.luke.power.ui.TextEditing.shift())){click();openPopup(variants,l.cell(i));}
+      else if(button==1)choose(recipe,false,true);else if(button==0)choose(recipe);return true;}
+    if(owns(x,y))return true;return nativeClick(x,y,button);
   }
-  private boolean nativeClick(int x,int y) {
+  private boolean nativeClick(int x,int y,int button) {
     var l=layout();List<net.minecraft.screen.slot.Slot> crafting=new ArrayList<>(context.inputs);crafting.add(context.output);
     if(context.kind==RecipeDefinition.Kind.FURNACE&&!context.inputs.isEmpty())crafting.add(context.handler.method_2084(1));
     for(var slot:crafting)if(new Rect(l.inventoryX()+slot.x-1,l.inventoryY()+slot.y-1,18,18).contains(x,y)) {
+      if(button==1&&context.inputs.contains(slot)&&placedRecipe!=null&&removable(placedRecipe)){remove(placedRecipe);return true;}
       ghost=null;lastUnavailable=null;lastRecipe=null;clearPlacement();break;
     }
     message="";generation++;return false;
@@ -278,17 +287,23 @@ public final class RecipeBookOverlay {
     choose(recipe,Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)||Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
   }
   private void choose(RecipeDefinition recipe,boolean maximum) {
-    click();message="";search.focused=false;popup=List.of();refreshGeometry();
+    choose(recipe,maximum,false);
+  }
+  private void choose(RecipeDefinition recipe,boolean maximum,boolean craft) {
+    if(!wheelDispatch)click();message="";search.focused=false;popup=List.of();refreshGeometry();
     if(!writable()){detail=recipe;refreshGeometry();return;}
     if(lastUnavailable==recipe&&model.current()&&!model.available(recipe)){generation++;return;}
     lastRecipe=recipe;int token=++generation;
     try {
-      var result=RecipeFills.fillResult(mc,context,recipe,maximum,()->enabled()&&mc.currentScreen==screen&&token==generation
-          &&!InventoryPanels.modal(screen)&&!search.focused&&org.lwjgl.opengl.Display.isActive(),unavailable->{
+      java.util.function.BooleanSupplier eligible=()->enabled()&&mc.currentScreen==screen&&token==generation
+          &&!InventoryPanels.modal(screen)&&!search.focused&&org.lwjgl.opengl.Display.isActive();
+      java.util.function.Consumer<Boolean> selected=unavailable->{
         ghost=unavailable?recipe:null;lastUnavailable=unavailable?recipe:null;
         if(unavailable)clearPlacement();else rememberPlacement(recipe);
         if(!unavailable&&layout().narrow()){open=false;state();}
-      });
+      };
+      var result=craft&&context.kind==RecipeDefinition.Kind.CRAFTING?RecipeCrafts.craftResult(mc,context,recipe,eligible,selected)
+          :RecipeFills.fillResult(mc,context,recipe,maximum,eligible,selected);
       if(result!=RecipeFills.Result.ACCEPTED){
         message=switch(result){
           case NO_SPACE->"Not enough inventory space";
@@ -302,7 +317,7 @@ public final class RecipeBookOverlay {
   }
   private void remove(RecipeDefinition recipe) {
     if(!removable(recipe))return;
-    click();message="";search.focused=false;popup=List.of();refreshGeometry();int token=++generation;
+    if(!wheelDispatch)click();message="";search.focused=false;popup=List.of();refreshGeometry();int token=++generation;
     try {
       var result=RecipeFills.removeResult(mc,context,recipe,()->enabled()&&mc.currentScreen==screen&&token==generation
           &&!InventoryPanels.modal(screen)&&!search.focused&&org.lwjgl.opengl.Display.isActive(),ignored->{
@@ -316,14 +331,44 @@ public final class RecipeBookOverlay {
       };
     }catch(Exception failure){message="Recipe could not be removed safely";}
   }
-  public void toggle() {generation++;open=!open;closeInput();message="";click();state();if(open)tick();}
+  public void toggle() {clearWheel();generation++;open=!open;closeInput();message="";click();state();if(open)tick();}
   public void scroll(int x,int y,int amount) {
     if(!enabled()||!open||amount==0||InventoryPanels.modalOther(screen,this)||!popup.isEmpty()||detail!=null&&!standalone)return;
-    var l=layout();if(!l.background().contains(x,y)&&!l.tabs(tabs().length).contains(x,y))return;
+    var l=layout();
+    int direction=RecipeWheelControls.direction(amount);
+    if(direction!=0&&writable()&&context.kind==RecipeDefinition.Kind.CRAFTING) {
+      RecipeDefinition recipe=null;
+      for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){recipe=cycling(groups.get(page*20+i));break;}
+      if(recipe==null)for(var slot:context.inputs)if(new Rect(l.inventoryX()+slot.x-1,l.inventoryY()+slot.y-1,18,18).contains(x,y)){recipe=lastRecipe;break;}
+      if(recipe!=null){
+        if(wheelRecipe!=recipe){wheelRecipe=recipe;wheelSteps=0;}
+        int steps=Math.max(1,(int)Math.min(64,Math.ceil(Math.abs((double)amount)/120)));
+        wheelSteps=Math.max(-64,Math.min(64,wheelSteps+direction*steps));dispatchWheel();return;
+      }
+    }
+    if(!l.background().contains(x,y)&&!l.tabs(tabs().length).contains(x,y))return;
     int next=RecipeBookLayout.pageAfterScroll(page,groups.size(),amount);if(next!=page){generation++;page=next;}
+  }
+  private void clearWheel(){wheelRecipe=null;wheelSteps=0;}
+  private void dispatchWheel() {
+    if(wheelSteps==0||wheelRecipe==null)return;
+    if(!open||!writable()||!org.lwjgl.opengl.Display.isActive()||InventoryPanels.modal(screen)){clearWheel();return;}
+    if(local.luke.power.inventory.NativeInventoryPlan.busy())return;
+    int direction=Integer.signum(wheelSteps);wheelSteps-=direction;RecipeDefinition recipe=wheelRecipe;
+    wheelDispatch=true;
+    try{if(direction>0)choose(recipe,false);else if(removable(recipe))remove(recipe);else clearWheel();}
+    finally{wheelDispatch=false;}
+    if(!message.isEmpty())clearWheel();
+  }
+  public boolean ownsWheel(int x,int y) {
+    if(owns(x,y))return true;
+    if(!enabled()||!open||lastRecipe==null||RecipeWheelControls.direction(1)==0||!writable())return false;
+    var l=layout();for(var slot:context.inputs)if(new Rect(l.inventoryX()+slot.x-1,l.inventoryY()+slot.y-1,18,18).contains(x,y))return true;
+    return false;
   }
   public boolean key(char character,int key) {
     if(!enabled()||InventoryPanels.modalOther(screen,this))return false;
+    clearWheel();
     if(!popup.isEmpty()||detail!=null&&!standalone){if(key==Keyboard.KEY_ESCAPE){popup=List.of();if(!standalone)detail=null;refreshGeometry();}return true;}
     if(!standalone&&!search.focused&&Bindings.matches("powerbeta.recipeBook",key)&&!Keyboard.isRepeatEvent()){toggle();return true;}
     if(!open)return false;

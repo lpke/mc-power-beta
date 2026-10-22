@@ -42,8 +42,8 @@ final class WaterTerrainChecks {
         for(int pass=0;pass<2;pass++)if(!section.field_244[pass]) {
           ByteBuffer data=read(section,pass);vertices+=data.limit()/32;
           for(int p=0;p<data.limit();p+=32) {
-            check(data.get(p+23)==data.get(p+31),"alpha changed");
-            for(int c=0;c<3;c++) if((data.get(p+28+c)&255)>(data.get(p+20+c)&255))changed++;
+            check((data.get(p+23)&255)==255,"native alpha changed");
+            for(int c=0;c<3;c++) if(water(data,p,c)>(data.get(p+20+c)&255))changed++;
           }
         }
         check(changed>0,"GPU has no brighter water endpoint");
@@ -90,7 +90,7 @@ final class WaterTerrainChecks {
       });
       test("night, roof and terrain edits rebuild endpoints together",()->{
         mc.world.field_202=11;build(section);ByteBuffer night=read(section,0);
-        for(int p=0;p<night.limit();p+=32)check((night.get(p+28)&255)<200,"night turned into daylight");
+        for(int p=0;p<night.limit();p+=32)check(water(night,p,0)<200,"night turned into daylight");
         for(int x=31;x<=48;x++)for(int z=31;z<=48;z++) {
           mc.world.method_154(x,110,z,1,0);
           for(int y=94;y<=110;y++)mc.world.method_205(class_56.SKY,x,y,z,0);
@@ -98,7 +98,7 @@ final class WaterTerrainChecks {
         mc.world.field_202=0;long before=WaterTerrain.secondPasses();build(section);
         check(WaterTerrain.secondPasses()==before,"roofed section unnecessarily calculated a second light color");
         ByteBuffer roof=read(section,0);
-        for(int p=0;p<roof.limit();p+=32)for(int c=0;c<4;c++)check(roof.get(p+20+c)==roof.get(p+28+c),"roof brightened");
+        for(int p=0;p<roof.limit();p+=32)for(int c=0;c<3;c++)check((roof.get(p+20+c)&255)==water(roof,p,c),"roof brightened");
         mc.world.method_154(36,96,36,0,0);build(section);
         check(!roof.equals(read(section,0)),"block edit left stale geometry");
       });
@@ -155,11 +155,14 @@ final class WaterTerrainChecks {
     log("WATER TERRAIN FAILURES "+failures);
   }
 
+  private static int water(ByteBuffer data,int vertex,int channel) {
+    return data.get(vertex+((data.get(vertex+27)&128)!=0?28:20)+channel)&255;
+  }
   private static void build(class_66 section) {
     section.field_249=true;RenderControls.beginRender();
     try {section.method_296();}finally{RenderControls.endRender();}
   }
-  private static ByteBuffer read(class_66 section,int pass) throws Exception {
+  static ByteBuffer read(class_66 section,int pass) throws Exception {
     Object buffer=section.getClass().getMethod("smoothbeta_getBuffer",int.class).invoke(section,pass);
     Object pool=field(buffer,"pool"),pos=field(buffer,"poolPos");
     check((int)field(pool,"vertexBytes")==32,"pool stride differs");

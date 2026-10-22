@@ -13,7 +13,7 @@ public final class Minimap {
   public static float frameDelta() { return frameDelta; }
   public static boolean radarActive(Minecraft mc, MapSettings settings) {
     return mc.world != null && mc.player != null && !mc.options.hideHud
-        && visible(settings, mc.options.debugHud)
+        && visible(settings, mc.options.debugHud, Bindings.down(MapKeys.ENLARGE))
         && (mc.currentScreen == null || mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen
             || settings.showInInventory && mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen);
   }
@@ -21,7 +21,7 @@ public final class Minimap {
     return mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen
         && MapConfig.current().showInInventory && MapConfig.current().minimap
         && mc.world != null && mc.player != null && !mc.options.hideHud
-        && visible(MapConfig.current(), mc.options.debugHud);
+        && visible(MapConfig.current(), mc.options.debugHud, Bindings.down(MapKeys.ENLARGE));
   }
   public static void renderInventory(Minecraft mc, float delta) {
     if (inventoryVisible(mc) && Maps.cache() != null) {
@@ -29,6 +29,7 @@ public final class Minimap {
       var resolution = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
       var settings = MapConfig.current();
       drawFrame(mc, settings, frame(mc, settings, resolution.method_1857(), resolution.method_1858(), false, false), false, delta);
+      MinimapQuickMenu.renderButton(mc);
     }
   }
   public static boolean inventoryWheel(Minecraft mc, int x, int y, int wheel) {
@@ -60,7 +61,10 @@ public final class Minimap {
     return true;
   }
   public static boolean visible(MapSettings settings, boolean debug) {
-    return settings.minimap && (!debug || !settings.hideWithDebug);
+    return visible(settings, debug, false);
+  }
+  public static boolean visible(MapSettings settings, boolean debug, boolean enlarged) {
+    return settings.minimap && (!debug || !settings.hideWithDebug || enlarged);
   }
 
   public static Frame frame(
@@ -104,7 +108,7 @@ public final class Minimap {
 
   public static void render(Minecraft mc, float delta) {
     MapSettings settings = MapConfig.current();
-    if (!visible(settings, mc.options.debugHud)
+    if (!visible(settings, mc.options.debugHud, Bindings.down(MapKeys.ENLARGE))
         || Maps.cache() == null
         || mc.world == null
         || mc.player == null

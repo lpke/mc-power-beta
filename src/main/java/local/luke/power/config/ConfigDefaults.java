@@ -33,11 +33,27 @@ public final class ConfigDefaults {
       }
       if (PowerConfig.problem().isEmpty()) {
         initializeGameplay(game);
+        initializeSprint(game);
         initializeMaps(game);
         initializeExtraSounds(game);
         initializeInterface(game);
         initializeModernFeatures(game);
       }
+    }
+  }
+
+  private static void initializeSprint(Path game) throws IOException {
+    JsonObject sprint = PowerConfig.section("sprint");
+    boolean changed = false;
+    for (String key : java.util.List.of("sprintLadders", "stopAtWalls")) {
+      if (sprint.has(key)) continue;
+      sprint.add(key, DefaultBases.value("sprint." + key, new JsonPrimitive(key.equals("stopAtWalls"))));
+      changed = true;
+    }
+    if (!changed) return;
+    try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
+      PowerConfig.put("sprint", sprint);
+      transaction.commit();
     }
   }
 
@@ -70,7 +86,8 @@ public final class ConfigDefaults {
   private static void initializeExtraSounds(Path game) throws IOException {
     JsonObject audio = PowerConfig.section("audio");
     boolean changed = false;
-    for (String key : java.util.List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds")) {
+    for (String key : java.util.List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds",
+        "lavaPopSounds", "waterSplashSounds", "swimmingSounds")) {
       if (audio.has(key)) continue;
       audio.add(key, DefaultBases.value("audio." + key, new JsonPrimitive(false)));
       changed = true;
@@ -101,9 +118,9 @@ public final class ConfigDefaults {
     JsonObject gameplay = PowerConfig.section("gameplay");
     boolean changed = false;
     // Freeze the first value so later reset-base changes cannot change it on restart.
-    for (String key : java.util.List.of("boatPlacementFacing", "modernWaterMovement")) {
+    for (String key : java.util.List.of("boatPlacementFacing", "modernWaterMovement", "modernCrawling")) {
       if (gameplay.has(key)) continue;
-      gameplay.add(key, DefaultBases.value("gameplay." + key, new JsonPrimitive(true)));
+      gameplay.add(key, DefaultBases.value("gameplay." + key, new JsonPrimitive(!key.equals("modernCrawling"))));
       changed = true;
     }
     if (!changed) return;

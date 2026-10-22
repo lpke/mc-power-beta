@@ -9,6 +9,15 @@ public final class RecipeFillPlanner {
     public Plan(List<RecipeStack> main,RecipeStack offhand,List<RecipeStack> grid,int amount,boolean ghost){this(main,offhand,grid,amount,ghost,null);}
     public Plan { main=Collections.unmodifiableList(new ArrayList<>(main));grid=Collections.unmodifiableList(new ArrayList<>(grid)); }
   }
+  /** Preflight the complete crafted result before any native ingredient is consumed. */
+  public static Plan receive(List<RecipeStack> main, RecipeStack offhand, List<RecipeStack> grid,
+      RecipeStack result, int selected, boolean offhandWritable) {
+    if (main.size() != 36 || selected < 0 || selected > 8 || grid.size() > 9)
+      throw new IllegalArgumentException("Unsupported recipe inventory layout");
+    ReturnState destination = new ReturnState(main, offhand, selected, offhandWritable);
+    if (!destination.insert(result)) return null;
+    return new Plan(destination.main, destination.offhand, grid, 0, false);
+  }
   /** Return one native item per occupied ingredient without rearranging the remaining grid. */
   public static Plan removeOne(List<RecipeStack> originalMain,RecipeStack originalOffhand,List<RecipeStack> originalGrid,
       int selected,boolean offhandWritable,boolean matches) {

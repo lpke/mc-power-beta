@@ -23,8 +23,10 @@ public final class WorldRuleChanges {
         .getMethod("returnToSurvival", Minecraft.class).invoke(null, mc);
     ((WorldRules) mc.world.method_262()).power$rules(rules);
     local.luke.power.sprint.SprintController.rulesChanged(mc);
-    if (!rules.enabled(GameRule.ALLOW_SURVIVAL_ASSISTANCE))
+    if (!rules.enabled(GameRule.ALLOW_SURVIVAL_ASSISTANCE)) {
+      InstantKill.clear();
       Class.forName("local.luke.power.commands.command.extra.God").getMethod("clear").invoke(null);
+    }
   }
   public static void save(Minecraft mc) throws java.io.IOException {
     mc.world.method_251();

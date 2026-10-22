@@ -56,6 +56,8 @@ public final class ControlLinks {
     // These settings are live toggle states, not feature-availability switches.
     link("power_beta.clickMining", "tweaks.clickMining", "", "Temporarily invert Continuous click mining until the next press or world exit.");
     link("Auto-mine (toggle)", "", "", "Toggle holding Attack / Break. Menus, focus loss, world changes and detached-camera control stop it.");
+    link("Hold use (toggle)", "", "", "Toggle holding Use. Menus, focus loss, world changes, Spectator and detached-camera control stop it.");
+    link("Auto-walk line lock (toggle)", "", "", "While auto-walking, keep your player inside the current block lane. Does not turn the player or start auto-walk.");
     // Keep their toggles and placement modifiers visible while the state is off.
     link("Fast place (toggle)", "tweaks.placement.enabled", "", "Toggle repeated block placement while holding Use.");
     link("Fake sneak (toggle)", "tweaks.sneak.enabled", "", "Toggle fake sneak to stop at ledges without slowing movement.");

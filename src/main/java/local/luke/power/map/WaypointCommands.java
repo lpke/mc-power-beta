@@ -135,12 +135,20 @@ public final class WaypointCommands {
     return choices.stream().distinct().filter(v -> v.regionMatches(true, 0, prefix, 0, prefix.length())).sorted().map(v -> v.substring(prefix.length())).toArray(String[]::new);
   }
   private static void help(Minecraft mc) {
-    chat(mc, "§b/waypoint add <name> §7Save the current camera position in the selected waypoint set.");
-    chat(mc, "§b/waypoint remove <name or ID> §7Remove a saved waypoint.");
-    chat(mc, "§b/waypoint list [page] §7List waypoints in the current set view, including their IDs.");
-    chat(mc, "§b/waypoint destination [x y z] §7Set a temporary destination at whole coordinates, or at the current camera position. Alias: dest.");
-    chat(mc, "§b/waypoint teleport <name or ID> §7Travel within this dimension when Allow teleportation is enabled.");
-    chat(mc, "§7Aliases: /way and /wp. Adding, removing, listing and destinations do not require teleport permission.");
+    helpLines(canTeleport(mc)).forEach(line -> chat(mc, line));
+  }
+  static List<String> helpLines(boolean teleport) {
+    var lines = new ArrayList<>(List.of(
+        "§b/waypoint add <name> §7Save the current camera position in the selected waypoint set.",
+        "§b/waypoint remove <name or ID> §7Remove a saved waypoint.",
+        "§b/waypoint list [page] §7List waypoints in the current set view, including their IDs.",
+        "§b/waypoint destination [x y z] §7Set a temporary destination at whole coordinates, or at the current camera position. Alias: dest."));
+    if (teleport) lines.add("§b/waypoint teleport <name or ID> §7Travel within this dimension.");
+    lines.add("§7Aliases: /way and /wp.");
+    return List.copyOf(lines);
+  }
+  private static boolean canTeleport(Minecraft mc) {
+    return mc.world != null && !mc.world.isRemote && CommandPermissions.allowed(GameRule.ALLOW_TELEPORTATION);
   }
   private static void chat(Minecraft mc, String line) { mc.inGameHud.addChatMessage(line + "§r"); }
 }

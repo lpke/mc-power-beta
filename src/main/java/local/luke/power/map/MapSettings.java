@@ -37,7 +37,7 @@ public final class MapSettings {
       radarGhastColor = -1, radarZombiePigmanColor = -1,
       radarPigColor = -1, radarSheepColor = -1, radarCowColor = -1,
       radarChickenColor = -1, radarSquidColor = -1, radarWolfColor = -1;
-  public int radarHeight = 24, radarRange = 8, radarLimit = 256, radarIconSize = 50;
+  public int radarHeight = 16, radarRange = 8, radarLimit = 256, radarIconSize = 50;
   public boolean radarDimming = true;
   public int radarDimDistance = 24;
   public int lightRadius = 64;

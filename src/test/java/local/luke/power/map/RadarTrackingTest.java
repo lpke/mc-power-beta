@@ -92,6 +92,7 @@ class RadarTrackingTest {
   @Test void rangeDefaultsToEightChunksAndNeverExceedsNativeTerrainRange() {
     var settings = new MapSettings();
     assertEquals(8, settings.radarRange);
+    assertEquals(16, settings.radarHeight);
     assertEquals(8, RadarTracking.range(8, 12)); assertEquals(4, RadarTracking.range(8, 4));
     settings.radarRange = 0; assertThrows(IllegalArgumentException.class, settings::validate);
     settings.radarRange = 33; assertThrows(IllegalArgumentException.class, settings::validate);

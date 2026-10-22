@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class ExtraSoundsTest {
   @Test void extraSoundRowsPreviewRegisteredSoundsWithoutChangingTheirEnablement() {
     assertEquals("step.stone", ExtraSounds.previewId("audio.redstonePlacementSound"));
-    for (String setting : List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds"))
+    for (String setting : List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds", "lavaPopSounds", "waterSplashSounds", "swimmingSounds"))
       assertTrue(ExtraSounds.contains(ExtraSounds.previewId("audio." + setting)), setting);
     for (String key : List.of("eatingSounds", "shearingSounds", "toolBreakSounds", "armorBreakSounds", "moreSoundsChests"))
       assertTrue(BetaSounds.contains(ExtraSounds.previewId("power_controls:features." + key)), key);
@@ -26,9 +26,12 @@ class ExtraSoundsTest {
     assertFalse(settings.hoeTillingSounds);
     assertFalse(settings.bucketSounds);
     assertFalse(settings.boneMealSounds);
+    assertFalse(settings.lavaPopSounds || settings.waterSplashSounds || settings.swimmingSounds);
     settings.seedPlantingSounds = settings.hoeTillingSounds = settings.bucketSounds = settings.boneMealSounds = true;
+    settings.lavaPopSounds = settings.waterSplashSounds = settings.swimmingSounds = true;
     AudioSettings restored = gson.fromJson(gson.toJson(settings), AudioSettings.class);
     assertTrue(restored.seedPlantingSounds && restored.hoeTillingSounds && restored.bucketSounds && restored.boneMealSounds);
+    assertTrue(restored.lavaPopSounds && restored.waterSplashSounds && restored.swimmingSounds);
     assertDoesNotThrow(restored::validate);
   }
 
@@ -37,7 +40,8 @@ class ExtraSoundsTest {
       assertNotNull(input);
       var manifest = JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject();
       Set<String> expected = Set.of("item.crop.plant", "item.hoe.till", "item.bucket.fill", "item.bucket.fill_lava",
-          "item.bucket.empty", "item.bucket.empty_lava", "entity.cow.milk", "item.bone_meal.use");
+          "item.bucket.empty", "item.bucket.empty_lava", "entity.cow.milk", "item.bone_meal.use",
+          "block.lava.pop", "entity.player.swim", "entity.player.splash", "entity.player.splash.high_speed");
       assertEquals(expected, manifest.getAsJsonObject("events").keySet());
       Map<String, Set<String>> assets = new HashMap<>();
       for (var value : manifest.getAsJsonArray("assets")) {
@@ -65,7 +69,8 @@ class ExtraSoundsTest {
         }
         assertEquals(official, assets.get(event), event);
       }
-      assertEquals(30, manifest.getAsJsonArray("assets").size());
+      assertEquals(48, manifest.getAsJsonArray("assets").size());
+      assertEquals(14, manifest.getAsJsonObject("events").getAsJsonObject("entity.player.swim").getAsJsonArray("sounds").size());
     }
     assertFalse(ExtraSounds.contains("power_beta:unknown"));
   }
@@ -81,5 +86,10 @@ class ExtraSoundsTest {
     assertEquals(.1, settings.gain("power_beta:item.bucket.fill_lava", false), 1e-9);
     assertEquals(.1, settings.gain("power_beta:item.bone_meal.use", false), 1e-9);
     assertEquals(.2, settings.gain("power_beta:entity.cow.milk", false), 1e-9);
+    assertEquals(.1, settings.gain("power_beta:block.lava.pop", false), 1e-9);
+    settings.categories.put("players", 60);
+    assertEquals(.3, settings.gain("power_beta:entity.player.swim", false), 1e-9);
+    assertEquals(.3, settings.gain("power_beta:entity.player.splash", false), 1e-9);
+    assertEquals(.3, settings.gain("power_beta:entity.player.splash.high_speed", false), 1e-9);
   }
 }

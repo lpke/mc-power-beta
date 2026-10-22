@@ -2,6 +2,7 @@ package local.luke.power.inventory.tools;
 
 import static org.junit.jupiter.api.Assertions.*;
 import com.google.gson.Gson;
+import java.util.*;
 import org.junit.jupiter.api.Test;
 
 class InventoryToolsSettingsTest {
@@ -26,5 +27,20 @@ class InventoryToolsSettingsTest {
     assertThrows(IllegalArgumentException.class, settings::validate);
     settings.preferredItems.clear(); settings.preferredItems.put(9, "bad:item:data");
     assertThrows(IllegalArgumentException.class, settings::validate);
+  }
+  @Test void missingWhitelistKeepsAllToolsAndExplicitEmptyKeepsNoneAfterRestart() {
+    Gson gson = new Gson();
+    var legacy = gson.fromJson("{}", InventoryToolsSettings.class); legacy.validate();
+    assertEquals(List.of("*"), legacy.toolWhitelist);
+    legacy.toolWhitelist = new ArrayList<>();
+    var reloaded = gson.fromJson(gson.toJson(legacy), InventoryToolsSettings.class); reloaded.validate();
+    assertTrue(reloaded.toolWhitelist.isEmpty());
+  }
+  @Test void explicitWhitelistRejectsInvalidAndMixedWildcardValues() {
+    var settings = new InventoryToolsSettings();
+    settings.toolWhitelist = List.of("257", "278"); assertDoesNotThrow(settings::validate);
+    for (var invalid : List.of(List.of("*", "278"), List.of("-1"), List.of("0"), List.of("278:4"))) {
+      settings.toolWhitelist = invalid; assertThrows(IllegalArgumentException.class, settings::validate);
+    }
   }
 }

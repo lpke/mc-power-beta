@@ -8,6 +8,8 @@ import org.lwjgl.input.Mouse;
 public final class Bindings {
   private static volatile Map<String, Integer> required = Map.of();
   private static final Map<String, java.util.function.IntConsumer> mouseListeners = new LinkedHashMap<>();
+  private static final Map<String, java.util.function.IntConsumer> keyListeners = new LinkedHashMap<>();
+  private static final Map<String, java.util.function.IntConsumer> releaseListeners = new LinkedHashMap<>();
   private static java.util.function.Predicate<String> available = id -> true;
   public static void availability(java.util.function.Predicate<String> predicate) { available = Objects.requireNonNull(predicate); }
   private static boolean hasMouseBindings;
@@ -26,17 +28,27 @@ public final class Bindings {
     }
   }
   public static boolean hasMouseBindings() { return hasMouseBindings; }
+  public static Set<Integer> heldCodes() {
+    Set<Integer> held = new HashSet<>();
+    for (Object object : registered) if (object instanceof Binding binding && physical(binding.power$code())) held.add(binding.power$code());
+    return held;
+  }
   public static void onMousePress(String owner, java.util.function.IntConsumer listener) {
     mouseListeners.put(owner, listener);
   }
   public static void mousePress(int key) {
     for (var listener : mouseListeners.values()) listener.accept(key);
   }
+  public static void onKeyPress(String owner, java.util.function.IntConsumer listener) { keyListeners.put(owner, listener); }
+  public static void keyPress(int key) { for (var listener : keyListeners.values()) listener.accept(key); }
+  public static void onRelease(String owner, java.util.function.IntConsumer listener) { releaseListeners.put(owner, listener); }
+  /** Native releases rearm canceled actions even when a whole tap arrives in one batch. */
+  public static void released(int key) { for (var listener : releaseListeners.values()) listener.accept(key); }
   public static boolean claimsMouse(int key) {
     if (key >= 0) return false;
     int pressedWith = presses.update(key, physical(key), heldModifiers());
     for (Object object : registered) if (object instanceof Binding b && b.power$code() == key
-        && available.test(b.power$id()) && DebugInput.allows(b.power$id(), key)
+        && available.test(b.power$id()) && DebugInput.allows(b.power$id(), key, physical(key))
         && (pressedWith & modifiers(b.power$id())) == modifiers(b.power$id())) return true;
     return false;
   }
@@ -84,8 +96,14 @@ public final class Bindings {
     return keyBinding instanceof Binding b && active(b) && physical(b.power$code());
   }
 
-  private static boolean active(Binding b) {
-    if (!available.test(b.power$id()) || !DebugInput.allows(b.power$id(), b.power$code())) return false;
+  /** Configured chord state before debug ownership, used only to preflight that ownership. */
+  public static boolean downUnclaimed(Object keyBinding) {
+    return keyBinding instanceof Binding b && active(b, false) && physical(b.power$code());
+  }
+
+  private static boolean active(Binding b) { return active(b, true); }
+  private static boolean active(Binding b, boolean ownership) {
+    if (!available.test(b.power$id()) || ownership && !DebugInput.allows(b.power$id(), b.power$code(), physical(b.power$code()))) return false;
     int key = b.power$code(), mask = modifiers(b.power$id()), held = heldModifiers();
     int pressedWith = presses.update(key, physical(key), held);
     if (key == 0 || (held & mask) != mask || (pressedWith & mask) != mask) return false;
@@ -93,7 +111,7 @@ public final class Bindings {
     // Unrelated movement keys still work while Ctrl/Shift/Alt are held.
     for (Object other : registered) {
       if (!(other instanceof Binding candidate) || candidate.power$code() != key || !available.test(candidate.power$id())
-          || !DebugInput.allows(candidate.power$id(), key)) continue;
+          || ownership && !DebugInput.allows(candidate.power$id(), key, physical(key))) continue;
       int otherMask = modifiers(candidate.power$id());
       if (Integer.bitCount(otherMask) > Integer.bitCount(mask) && (pressedWith & otherMask) == otherMask)
         return false;

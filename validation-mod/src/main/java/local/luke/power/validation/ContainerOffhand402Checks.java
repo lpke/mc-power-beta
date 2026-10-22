@@ -101,6 +101,32 @@ final class ContainerOffhand402Checks {
           check(inventory.getCursorStack() == null && before.equals(bytes(Offhand.get(inventory))), "putback changed native item data");
           check(OffhandSlotClick.nativeSlot(mc, -999) == -999, "outside-click scope leaked after release");
         });
+        test("OFFHAND420 double-click gathering starts from the offhand " + name, () -> {
+          ItemStack[] saved = inventory.main.clone(); ItemStack previous = Offhand.get(inventory);
+          try {
+            Arrays.fill(inventory.main, null); inventory.main[9] = DeathChecks.tagged(35, 8, 5, "gather-hand");
+            Offhand.set(inventory, DeathChecks.tagged(35, 7, 5, "gather-hand"));
+            int[] point = point(screen, slot); click(screen, point[0], point[1]); click(screen, point[0], point[1]);
+            check(inventory.getCursorStack() != null && inventory.getCursorStack().count == 15
+                && inventory.main[9] == null && Offhand.get(inventory) == null, "offhand did not gather matching player stacks");
+          } finally { inventory.setCursorStack(null); System.arraycopy(saved, 0, inventory.main, 0, 36); Offhand.set(inventory, previous); }
+        });
+        if (i == 0) test("OFFHAND420 pickups fill occupied matching offhand before empty inventory slots", () -> {
+          ItemStack[] saved = inventory.main.clone(); ItemStack previous = Offhand.get(inventory);
+          try {
+            Arrays.fill(inventory.main, null); Offhand.set(inventory, DeathChecks.tagged(35, 60, 5, "pickup-hand"));
+            ItemStack incoming = DeathChecks.tagged(35, 6, 5, "pickup-hand");
+            check(inventory.method_671(incoming) && incoming.count == 0 && Offhand.get(inventory).count == 64
+                && inventory.main[0] != null && inventory.main[0].count == 2, "pickup used empty storage before offhand capacity");
+            for (int index = 0; index < 36; index++) inventory.main[index] = new ItemStack(4, 64, 0);
+            Offhand.set(inventory, DeathChecks.tagged(35, 62, 5, "pickup-hand"));
+            incoming = DeathChecks.tagged(35, 6, 5, "pickup-hand");
+            check(inventory.method_671(incoming) && incoming.count == 4 && Offhand.get(inventory).count == 64, "partial offhand pickup reported failure or lost the remainder");
+            Arrays.fill(inventory.main, null); Offhand.set(inventory, DeathChecks.tagged(35, 60, 5, "pickup-hand"));
+            incoming = DeathChecks.tagged(35, 3, 5, "different-data"); inventory.method_671(incoming);
+            check(Offhand.get(inventory).count == 60 && inventory.main[0].count == 3, "pickup merged distinct native item data");
+          } finally { System.arraycopy(saved, 0, inventory.main, 0, 36); Offhand.set(inventory, previous); }
+        });
         test("OFFHAND402 disabled offhand keeps extraction available " + name, () -> {
           var disabled = OffhandConfig.copy(); disabled.enabled = false; OffhandConfig.preview(disabled);
           try {
@@ -121,10 +147,12 @@ final class ContainerOffhand402Checks {
           JournalQueue.awaitQueued(); NativeInventoryPlan.tick(mc);
           check(!NativeInventoryPlan.busy() && hand.equals(bytes(inventory.main[9])) && before.equals(bytes(Offhand.get(inventory))), "durable swap changed native data");
         });
-        if (i == 0 || i == 1 || i == 2 || i == 5) test("OFFHAND402 sorting excludes offhand " + name, () -> {
+        test("OFFHAND402 sorting excludes offhand " + name, () -> {
           var regions = SortingSlots.read(mc);
           check(regions.player().size() == 27 && regions.player().stream().noneMatch(candidate -> candidate == slot)
               && regions.storage().stream().noneMatch(candidate -> candidate == slot), "sorting claimed the offhand slot");
+          if (screen.getClass() == class_516.class || screen.getClass() == class_524.class)
+            check(regions.storage().isEmpty(), "crafting or furnace inputs became sortable storage");
         });
         if (i == 1 || i == 2 || i == 5) test("OFFHAND402 storage Shift-transfer cannot fill offhand " + name, () -> {
           for (int index = 0; index < 36; index++) inventory.main[index] = new ItemStack(4, 64, 0);

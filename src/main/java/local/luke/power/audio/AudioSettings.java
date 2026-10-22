@@ -8,6 +8,9 @@ public final class AudioSettings {
   public boolean hoeTillingSounds = false;
   public boolean bucketSounds = false;
   public boolean boneMealSounds = false;
+  public boolean lavaPopSounds = false;
+  public boolean waterSplashSounds = false;
+  public boolean swimmingSounds = false;
   public enum MusicMode {
     VANILLA,
     ALPHA_BETA_SURVIVAL,
@@ -133,6 +136,7 @@ public final class AudioSettings {
     id = id.substring(id.indexOf(':') + 1);
     if (id.startsWith("ambient.weather") || id.contains("thunder")) return "weather";
     if (id.startsWith("ambient") || id.startsWith("portal")) return "ambient";
+    if (id.startsWith("entity.player.")) return "players";
     if (id.startsWith("mob.") || id.startsWith("entity.")) {
       String mob = id.substring(id.indexOf('.') + 1).split("\\.")[0];
       return Set.of("cow", "pig", "sheep", "chicken", "wolf", "squid").contains(mob)
@@ -140,6 +144,7 @@ public final class AudioSettings {
           : "hostile";
     }
     if (id.startsWith("step.")
+        || id.equals("block.lava.pop")
         || id.equals("item.crop.plant")
         || id.equals("item.hoe.till")
         || id.startsWith("item.bucket.")

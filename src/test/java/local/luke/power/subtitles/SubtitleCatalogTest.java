@@ -33,5 +33,9 @@ class SubtitleCatalogTest {
     assertEquals("Lava hisses", SubtitleCatalog.resolve("random.fizz", "subtitles.block.lava.extinguish").label());
     assertEquals("Torch fizzes", SubtitleCatalog.resolve("random.fizz", "subtitles.block.redstone_torch.burnout").label());
     assertEquals("Bucket fills", SubtitleCatalog.resolve("power_beta:item.bucket.fill_lava", null).label());
+    assertEquals("Lava pops", SubtitleCatalog.resolve("power_beta:block.lava.pop", null).label());
+    assertEquals("Swimming", SubtitleCatalog.resolve("power_beta:entity.player.swim", null).label());
+    assertEquals("Splashing", SubtitleCatalog.resolve("power_beta:entity.player.splash", null).label());
+    assertEquals("Splashing", SubtitleCatalog.resolve("power_beta:entity.player.splash.high_speed", null).label());
   }
 }

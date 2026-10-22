@@ -14,12 +14,19 @@ public final class AutoMine {
   private AutoMine() {}
 
   public static void tick(Minecraft mc) {
-    if (client != mc) { client = mc; AttackInput.register(AutoMine::active); }
+    if (client != mc) {
+      client = mc; AttackInput.register(AutoMine::active);
+      Bindings.onKeyPress("building.autoMine", AutoMine::press);
+      Bindings.onMousePress("building.autoMine", AutoMine::press);
+      Bindings.onRelease("building.autoMine", key -> { if (key == KEY.code) TOGGLE.release(); });
+    }
     if (world != mc.world || player != mc.player) {
       stop(); world = mc.world; player = mc.player;
     }
-    boolean matches = Bindings.down(KEY);
-    TOGGLE.update(Bindings.physical(KEY.code), eligible(), matches);
+    TOGGLE.poll(Bindings.physical(KEY.code), eligible());
+  }
+  private static void press(int key) {
+    if (key == KEY.code) TOGGLE.press(eligible(), Bindings.matches(KEY, key));
   }
   private static boolean eligible() {
     return client != null && client.world != null && client.player != null

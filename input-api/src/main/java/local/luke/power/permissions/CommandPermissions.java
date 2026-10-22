@@ -21,6 +21,7 @@ public final class CommandPermissions {
       case "gm" -> "gamemode";
       case "teleport" -> "tp";
       case "way", "wp" -> "waypoint";
+      case "ik" -> "instakill";
       case "weather" -> "toggledownfall";
       default -> command;
     };
@@ -30,7 +31,7 @@ public final class CommandPermissions {
       case "fly" -> ALLOW_FLIGHT;
       case "give" -> ALLOW_ITEM_SPAWNING;
       case "summon", "kill", "killall", "ride", "remove", "rem", "rement", "butcher" -> ALLOW_ENTITY_CONTROL;
-      case "heal", "god", "clear", "repair" -> ALLOW_SURVIVAL_ASSISTANCE;
+      case "heal", "god", "clear", "repair", "instakill" -> ALLOW_SURVIVAL_ASSISTANCE;
       case "tp", "spawn", "waypoint", "up", "ceil", "ascend", "descend", "unstuck", "thru", "jumpto" -> ALLOW_TELEPORTATION;
       case "spawnpoint", "setworldspawn" -> ALLOW_SPAWN_EDITING;
       case "time" -> ALLOW_TIME_EDITING;

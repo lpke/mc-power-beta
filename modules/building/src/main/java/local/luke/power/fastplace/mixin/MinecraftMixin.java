@@ -33,7 +33,7 @@ public abstract class MinecraftMixin {
       at =
           @At(value = "INVOKE", target = "Lorg/lwjgl/input/Mouse;getEventDWheel()I", remap = false))
   private void fastplace$release(CallbackInfo ci) {
-    if (Mouse.getEventButton() == 1 && !Mouse.getEventButtonState()) FastPlace.release();
+    if (Mouse.getEventButton() == 1 && !Mouse.getEventButtonState() && !local.luke.power.input.UseInput.held()) FastPlace.release();
   }
 
   @Inject(method = "method_2107", at = @At("HEAD"), cancellable = true)

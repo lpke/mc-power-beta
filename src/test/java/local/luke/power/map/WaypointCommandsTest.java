@@ -4,6 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class WaypointCommandsTest {
+  @Test void individualHelpOmitsTeleportWhenDeniedAndKeepsSafeActions() {
+    var denied = String.join("\n", WaypointCommands.helpLines(false));
+    assertFalse(denied.contains("teleport"));
+    for (String action : new String[]{"add", "remove", "list", "destination"})
+      assertTrue(denied.contains("/waypoint " + action));
+    assertTrue(String.join("\n", WaypointCommands.helpLines(true)).contains("/waypoint teleport"));
+  }
   @Test void listPlacesWhiteCoordinatesBeforeDimensionSetAndFinalId() {
     var point = new Waypoint(); point.name = "Home"; point.set = "Builds";
     point.x = -12; point.y = 64; point.z = 30; point.dimension = -1;
