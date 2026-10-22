@@ -1,4 +1,6 @@
-package local.luke.power.debug;
+package local.luke.power.debug.mixin;
+
+import local.luke.power.debug.*;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import local.luke.power.input.DebugInput;

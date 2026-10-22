@@ -1,4 +1,6 @@
-package local.luke.power.debug;
+package local.luke.power.debug.mixin;
+
+import local.luke.power.debug.*;
 
 import net.minecraft.network.Packet;
 import org.spongepowered.asm.mixin.Mixin;

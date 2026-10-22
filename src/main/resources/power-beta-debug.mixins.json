@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "local.luke.power.debug",
+  "package": "local.luke.power.debug.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
     "DebugNativeKeysMixin",
