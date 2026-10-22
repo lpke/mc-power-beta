@@ -34,7 +34,7 @@ public final class DebugKeys {
       return;
     }
     if(repeat) return;
-    if(Bindings.matches(MODIFIER,key) && Bindings.heldModifiers()==Bindings.modifiers(MODIFIER.translationKey)) {
+    if(Bindings.matches(MODIFIER,key) && !Bindings.matches(GameplayKeys.GRAPH,key)) {
       boolean same=Arrays.stream(mc.options.allKeys).anyMatch(b -> b.translationKey.equals("key.power_controls.debug_hud")
           && b.code==key && Bindings.modifiers(b.translationKey)==Bindings.modifiers(MODIFIER.translationKey));
       DebugInput.press(same); return;
