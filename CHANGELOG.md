@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Support texture-pack overrides for inventory side slots and compact button backgrounds and letters.
+
 ## [4.0.3] - 2026-10-22
 
 - Align the chest offhand frame with the native bottom border, retaining native hotbar item and click positions.

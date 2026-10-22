@@ -22,3 +22,6 @@ replay_pid*.log
 **/servers.dat
 **/session.lock
 **/hs_err_pid*.log
+
+# Generated source-texture previews
+Power Beta Texture Preview.zip

@@ -13,23 +13,18 @@ public final class InventorySideSlots {
   public static boolean contains(int px, int py, int x, int y, int height, int hotbarY, boolean destroyAbove) {
     return px >= x - WIDTH && px < x + 4 && py >= y + top(hotbarY, destroyAbove) && py < y + height;
   }
-  @FunctionalInterface public interface Fill { void draw(int left, int top, int right, int bottom, int color); }
-  public static void frame(Fill fill, int x, int y, int height, boolean destroyAbove) {
-    frame(fill, x, y, height, OFFHAND_Y, destroyAbove);
+  public static final String FRAME_TEXTURE = "/assets/powerbeta/textures/gui/offhand_frame.png";
+  public static final String SLOT_TEXTURE = "/assets/powerbeta/textures/gui/offhand_slot.png";
+  @FunctionalInterface public interface Texture {
+    void draw(int x, int y, int width, int height, int u, int v, int sourceWidth, int sourceHeight);
   }
-  public static void frame(Fill fill, int x, int y, int height, int hotbarY, boolean destroyAbove) {
+  public static void frame(Texture texture, int x, int y, int height, boolean destroyAbove) {
+    frame(texture, x, y, height, OFFHAND_Y, destroyAbove);
+  }
+  public static void frame(Texture texture, int x, int y, int height, int hotbarY, boolean destroyAbove) {
     int left = x - WIDTH, top = y + top(hotbarY, destroyAbove), bottom = y + height;
-    fill.draw(left + 1, top, x + 4, bottom, 0xffc6c6c6);
-    // The upper edge joins the native panel; only the lower edge continues into it.
-    fill.draw(left + 1, top, x, top + 1, 0xff000000);
-    fill.draw(left, top + 1, x + 4, bottom - 1, 0xff000000);
-    fill.draw(left + 1, top + 1, x + 4, bottom - 1, 0xffc6c6c6);
-    // Continue the native panel's white left bevel into the horizontal extension.
-    // Clearing its black edge alone leaves a gray break above the white ledge.
-    fill.draw(x, top, x + 3, top + 1, 0xffffffff);
-    fill.draw(left + 2, top + 1, x + 3, top + 3, 0xffffffff);
-    fill.draw(left + 1, top + 2, left + 3, bottom - 3, 0xffffffff);
-    fill.draw(left + 2, bottom - 3, x + 4, bottom - 1, 0xff555555);
-    fill.draw(left + 1, bottom - 1, x + 4, bottom, 0xff000000);
+    texture.draw(left, top, 26, 3, 0, 0, 26, 3);
+    texture.draw(left, top + 3, 26, bottom - top - 6, 0, 3, 26, 1);
+    texture.draw(left, bottom - 3, 26, 3, 0, 4, 26, 3);
   }
 }

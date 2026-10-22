@@ -18,6 +18,9 @@
 - Root tests: `./gradlew --no-daemon test`. Utility build:
   `python3 tools/build_utilities.py [MODULE ...]`. For a pack already built,
   `python3 tools/build_pack.py --skip-build` only assembles the export.
+- Texture editing uses source PNGs and `tools/preview_textures.py --instance ...
+  [--watch]`; see `docs/texture-editing.md`. Source PNGs are authoritative; preview
+  ZIPs are disposable and untracked. A preview needs no build or release.
 
 ## Changes that need care
 

@@ -46,11 +46,13 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
         || ((ContainerScreen)(Object)this).getClass() == net.minecraft.class_585.class
             && minecraft.player instanceof PlayerMode mode && mode.power$creativeInventory()) return;
     GL11.glColor4f(1, 1, 1, 1);
-    minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId("/gui/inventory.png"));
+    minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.FRAME_TEXTURE));
     int x = (width - backgroundWidth) / 2 + InventoryPanels.offset(this), y = (height - backgroundHeight) / 2;
     int hotbarY = OffhandContainers.hotbarY(container, minecraft.player.inventory);
-    InventorySideSlots.frame(this::fill, x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight), hotbarY, false);
+    InventorySideSlots.frame((px, py, w, h, u, v, sw, sh) ->
+        GuiSprite.draw(px, py, w, h, u, v, sw, sh, 26, 7), x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight), hotbarY, false);
     GL11.glColor4f(1, 1, 1, 1);
-    drawTexture(x + InventorySideSlots.OFFHAND_X - 1, y + hotbarY - 1, 7, 141, 18, 18);
+    minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.SLOT_TEXTURE));
+    GuiSprite.draw(x + InventorySideSlots.OFFHAND_X - 1, y + hotbarY - 1, 18, 18, 0, 0, 18, 18, 18, 18);
   }
 }

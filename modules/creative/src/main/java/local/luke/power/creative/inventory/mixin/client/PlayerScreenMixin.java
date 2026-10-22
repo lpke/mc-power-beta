@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import local.luke.power.creative.inventory.CreativeGrid;
 import local.luke.power.input.InventorySideSlots;
+import local.luke.power.input.GuiSprite;
 import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.container.ContainerScreen;
 import net.minecraft.client.gui.screen.container.PlayerScreen;
@@ -322,11 +323,14 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
   private void creative_destroySlot(int x, int y) {
     boolean offhand = power$offhandVisible(), destroy = local.luke.power.creative.config.Config.current().destroySlot;
     if (!offhand && !destroy) return;
-    InventorySideSlots.frame(this::fill,x,y,containerHeight,offhand && destroy);
+    minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.FRAME_TEXTURE));
+    GL11.glColor4f(1,1,1,1);
+    InventorySideSlots.frame((px, py, w, h, u, v, sw, sh) ->
+        GuiSprite.draw(px, py, w, h, u, v, sw, sh, 26, 7), x, y, containerHeight, offhand && destroy);
     if (offhand) {
-      minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId("/gui/inventory.png"));
+      minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.SLOT_TEXTURE));
       GL11.glColor4f(1,1,1,1);
-      blit(x+InventorySideSlots.OFFHAND_X-1,y+InventorySideSlots.OFFHAND_Y-1,7,141,18,18);
+      GuiSprite.draw(x+InventorySideSlots.OFFHAND_X-1,y+InventorySideSlots.OFFHAND_Y-1,18,18,0,0,18,18,18,18);
       if (!creative_normalGUI) {
         var stack = (ItemStack)((local.luke.power.inventory.OffhandInventory<?>)(Object)minecraft.player.inventory).power$offhandStack();
         GL11.glPushMatrix(); GL11.glRotatef(120,1,0,0); RenderHelper.enableLighting(); GL11.glPopMatrix();
