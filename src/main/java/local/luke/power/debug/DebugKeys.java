@@ -40,7 +40,7 @@ public final class DebugKeys {
       DebugInput.press(same); return;
     }
     if(!DebugInput.held()) return;
-    if(Bindings.down("power_creative.modifier") && Bindings.matches("power_creative.picker",key)) {
+    if(configured(mc,"power_creative.modifier",null) && configured(mc,"power_creative.picker",key)) {
       DebugInput.picker(key); return; // Existing mode picker owns its own rules and release gesture.
     }
     for(var entry:KEYS.entrySet()) {
@@ -54,6 +54,14 @@ public final class DebugKeys {
       }
       return;
     }
+  }
+  private static boolean configured(Minecraft mc,String id,Integer event) {
+    for(var binding:mc.options.allKeys) if(binding.translationKey.equals(id)) {
+      int mask=Bindings.modifiers(id);
+      return binding.code!=0 && (event==null?Bindings.physical(binding.code):binding.code==event)
+          && (Bindings.heldModifiers()&mask)==mask;
+    }
+    return false;
   }
   public static void tick(Minecraft mc) {
     if(world!=mc.world) { world=mc.world; DebugInput.clear(); DebugActions.clear(); }
