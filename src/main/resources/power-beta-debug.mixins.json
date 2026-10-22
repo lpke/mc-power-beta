@@ -5,8 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "DebugNativeKeysMixin",
-    "DebugPacketsMixin",
-    "DebugMouseMixin"
+    "DebugPacketsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
