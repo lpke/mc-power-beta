@@ -15,3 +15,7 @@ processTestResources {
 }
 tasks.withType(JavaCompile).configureEach { options.release = 17 }
 tasks.withType(AbstractArchiveTask).configureEach { preserveFileTimestamps = false; reproducibleFileOrder = true }
+
+ext.texturePackRoot = rootDir.parentFile
+ext.textureProject = 'input-api'
+apply from: new File(texturePackRoot, 'gradle/texture-assets.gradle')

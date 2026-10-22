@@ -51,3 +51,7 @@ tasks.withType(AbstractArchiveTask).configureEach {
 
 
 configurations.configureEach { resolutionStrategy.eachDependency { if (requested.group == "org.ow2.asm" && requested.name == "asm-all") useVersion "4.1" } }
+
+ext.texturePackRoot = rootDir.parentFile.parentFile
+ext.textureProject = 'modules/building'
+apply from: new File(texturePackRoot, 'gradle/texture-assets.gradle')

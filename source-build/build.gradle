@@ -58,8 +58,6 @@ sourceSets.main {
     resources.srcDirs = [new File(sources, 'src/main/resources')]
 }
 processResources {
-    // Copy tasks otherwise retain resources that were removed from the source tree.
-    doFirst { delete destinationDir }
     inputs.property 'version', project.version
     filesMatching('fabric.mod.json') { expand version: project.version }
 }
@@ -74,3 +72,7 @@ configurations.configureEach {
 
 if (moduleId in ["power_commands", "power_capture", "power_mechanics", "power_camera", "power_inventory"]) sourceSets.test.java.srcDirs = [new File(sources, "src/test/java")]
 test { useJUnitPlatform() }
+
+ext.texturePackRoot = packRoot
+ext.textureProject = module.source
+apply from: new File(texturePackRoot, 'gradle/texture-assets.gradle')

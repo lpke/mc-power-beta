@@ -1,0 +1,35 @@
+import groovy.json.JsonSlurper
+
+// Each build retains its existing resource paths and ownership inside its JAR.
+def textureRoot = new File(texturePackRoot, 'textures')
+def manifest = new File(textureRoot, 'manifest.json')
+def groups = new JsonSlurper().parse(manifest).groups.findAll { it.project == textureProject }
+def originalResources = sourceSets.main.resources.srcDirs.toList()
+def prepared = tasks.register('prepareTextureResources', Sync) {
+    inputs.file(manifest)
+    into layout.buildDirectory.dir('generated/texture-resources')
+    groups.each { entry ->
+        if ([entry.source, entry.target].any { it.startsWith('/') || it.contains('\\') || it.split('/').any { it in ['', '.', '..'] } })
+            throw new GradleException("Invalid texture mapping: ${entry}")
+        def source = new File(textureRoot, entry.source)
+        if (!source.exists()) throw new GradleException("Missing texture source: ${entry.source}")
+        from(source) {
+            include '**/*.png'
+            if (source.isFile()) {
+                into new File(entry.target).parent
+                rename { new File(entry.target).name }
+            } else into entry.target
+        }
+    }
+}
+sourceSets.main.resources.srcDir(prepared)
+tasks.named('processResources') {
+    doFirst {
+        originalResources.each { resourceRoot ->
+            if (!fileTree(resourceRoot).matching { include '**/*.png' }.empty)
+                throw new GradleException('Put editable textures in textures/ and register their manifest mapping.')
+        }
+        // Remove stale files after a source texture or mapping has been deleted.
+        delete destinationDir
+    }
+}

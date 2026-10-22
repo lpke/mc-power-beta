@@ -21,6 +21,9 @@
 - Texture editing uses source PNGs and `tools/preview_textures.py --instance ...
   [--watch]`; see `docs/texture-editing.md`. Source PNGs are authoritative; preview
   ZIPs are disposable and untracked. A preview needs no build or release.
+  Keep all editable game textures in `textures/`, grouped by feature, including
+  future additions. Register build mappings in `textures/manifest.json` and preserve
+  existing runtime paths. Screenshots and test fixtures stay separate.
 
 ## Changes that need care
 

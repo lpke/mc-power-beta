@@ -50,7 +50,7 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
     int x = (width - backgroundWidth) / 2 + InventoryPanels.offset(this), y = (height - backgroundHeight) / 2;
     int hotbarY = OffhandContainers.hotbarY(container, minecraft.player.inventory);
     InventorySideSlots.frame((px, py, w, h, u, v, sw, sh) ->
-        GuiSprite.draw(px, py, w, h, u, v, sw, sh, 26, 7), x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight), hotbarY, false);
+        GuiSprite.draw(px, py, w, h, u, v, sw, sh, InventorySideSlots.FRAME_TEXTURE_WIDTH, InventorySideSlots.FRAME_TEXTURE_HEIGHT), x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight), hotbarY, false);
     GL11.glColor4f(1, 1, 1, 1);
     minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.SLOT_TEXTURE));
     GuiSprite.draw(x + InventorySideSlots.OFFHAND_X - 1, y + hotbarY - 1, 18, 18, 0, 0, 18, 18, 18, 18);

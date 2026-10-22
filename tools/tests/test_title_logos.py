@@ -6,12 +6,13 @@ import unittest
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[2]
-ASSETS = ROOT / 'modules/title/src/main/resources/assets/power_title/logos'
+ASSETS = ROOT / 'textures/title/logos'
+SOURCES = ROOT / 'modules/title/src/main/resources/assets/power_title/logos/sources.json'
 
 
 class TitleLogosTest(unittest.TestCase):
     def test_bundled_logos_match_the_pinned_official_sources(self):
-        sources = json.loads((ASSETS / 'sources.json').read_text())
+        sources = json.loads(SOURCES.read_text())
         self.assertEqual({'beta.png', 'java_2017.png', 'java_2020.png', 'modern.png',
                           'edition.png', 'edition_modern.png'}, {row['file'] for row in sources})
         for row in sources:

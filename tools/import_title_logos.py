@@ -7,11 +7,13 @@ from pathlib import Path
 from urllib.request import urlopen
 import zipfile
 
-ASSETS = Path(__file__).resolve().parents[1] / 'modules/title/src/main/resources/assets/power_title/logos'
+ROOT = Path(__file__).resolve().parents[1]
+ASSETS = ROOT / 'textures/title/logos'
+SOURCES = ROOT / 'modules/title/src/main/resources/assets/power_title/logos/sources.json'
 
 
 def main():
-    sources = json.loads((ASSETS / 'sources.json').read_text())
+    sources = json.loads(SOURCES.read_text())
     for url in dict.fromkeys(row['client']['url'] for row in sources):
         rows = [row for row in sources if row['client']['url'] == url]
         with urlopen(url, timeout=120) as response:

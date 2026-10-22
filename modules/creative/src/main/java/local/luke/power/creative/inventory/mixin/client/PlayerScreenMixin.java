@@ -326,7 +326,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.FRAME_TEXTURE));
     GL11.glColor4f(1,1,1,1);
     InventorySideSlots.frame((px, py, w, h, u, v, sw, sh) ->
-        GuiSprite.draw(px, py, w, h, u, v, sw, sh, 26, 7), x, y, containerHeight, offhand && destroy);
+        GuiSprite.draw(px, py, w, h, u, v, sw, sh, InventorySideSlots.FRAME_TEXTURE_WIDTH, InventorySideSlots.FRAME_TEXTURE_HEIGHT), x, y, containerHeight, offhand && destroy);
     if (offhand) {
       minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.SLOT_TEXTURE));
       GL11.glColor4f(1,1,1,1);

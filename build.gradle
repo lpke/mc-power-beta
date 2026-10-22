@@ -88,3 +88,7 @@ tasks.register('upgradeInstance', JavaExec) {
         if (project.hasProperty('instanceRuleDefaults')) args '--rule-defaults'
     }
 }
+
+ext.texturePackRoot = rootDir
+ext.textureProject = '.'
+apply from: new File(texturePackRoot, 'gradle/texture-assets.gradle')

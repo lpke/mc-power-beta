@@ -103,3 +103,7 @@ tasks.withType(AbstractArchiveTask).configureEach {
     preserveFileTimestamps = false
     reproducibleFileOrder = true
 }
+
+ext.texturePackRoot = rootDir.parentFile.parentFile
+ext.textureProject = 'modules/creative'
+apply from: new File(texturePackRoot, 'gradle/texture-assets.gradle')

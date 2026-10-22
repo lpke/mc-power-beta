@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class InventorySideSlotsTest {
   private static final java.awt.image.BufferedImage FRAME = frameImage();
   private static java.awt.image.BufferedImage frameImage() {
-    try (var input = InventorySideSlotsTest.class.getResourceAsStream(InventorySideSlots.FRAME_TEXTURE)) {
+    try (var input = InventorySideSlotsTest.class.getResourceAsStream("/assets/" + InventorySideSlots.FRAME_TEXTURE.replace(':', '/'))) {
       return javax.imageio.ImageIO.read(input);
     } catch (java.io.IOException e) { throw new java.io.UncheckedIOException(e); }
   }

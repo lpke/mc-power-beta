@@ -6,7 +6,7 @@ import org.lwjgl.opengl.GL11;
 
 /** Asset-backed ten-pixel inventory buttons and six-pixel letter sprites. */
 public final class CompactInventoryButton {
-  private static final String ROOT = "/assets/powerbeta/textures/gui/";
+  private static final String ROOT = "powerbeta:textures/gui/";
   private static final String LABELS = "SDHR";
   private CompactInventoryButton() {}
 

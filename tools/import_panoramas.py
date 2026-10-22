@@ -9,6 +9,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / 'modules/controls/src/main/resources/assets/power_controls'
+TEXTURES = ROOT / 'textures/title/panoramas'
 MANIFEST = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
 
 
@@ -72,7 +73,7 @@ def main():
                 folder = scenes.setdefault(digest, 'official_' + row['id'])
                 row['folder'] = folder
                 row['faces'] = []
-                directory = ASSETS / 'textures' / folder
+                directory = TEXTURES / folder
                 directory.mkdir(parents=True, exist_ok=True)
                 for i, face in enumerate(faces):
                     (directory / f'panorama{i}.png').write_bytes(face)

@@ -1,0 +1,219 @@
+{
+  "groups": [
+    {
+      "source": "blocks/legacy/old-terrain.png",
+      "project": ".",
+      "target": "assets/powerbeta/textures/old-terrain.png"
+    },
+    {
+      "source": "creative-inventory/catalog",
+      "project": "modules/creative",
+      "target": "assets/power_creative_inventory/textures/gui"
+    },
+    {
+      "source": "creative-inventory/screens",
+      "project": "modules/creative",
+      "target": "assets/power_creative/textures"
+    },
+    {
+      "source": "hud/armor",
+      "project": "modules/controls",
+      "target": "assets/power_controls/textures/gui"
+    },
+    {
+      "source": "hud/buttons",
+      "project": "modules/hud",
+      "target": "assets/power_hud"
+    },
+    {
+      "source": "hud/editor/hud-preview-forest.png",
+      "project": ".",
+      "target": "assets/powerbeta/textures/hud-preview-forest.png"
+    },
+    {
+      "source": "inventory-buttons",
+      "project": "input-api",
+      "target": "assets/powerbeta/textures/gui"
+    },
+    {
+      "source": "legacy/recipe-browser",
+      "project": "modules/recipes",
+      "target": "assets/power_recipes/stationapi/textures/gui"
+    },
+    {
+      "source": "maps",
+      "project": ".",
+      "target": "assets/powerbeta/map"
+    },
+    {
+      "source": "module-icons/building.png",
+      "project": "modules/building",
+      "target": "assets/power_building/icon.png"
+    },
+    {
+      "source": "module-icons/camera.png",
+      "project": "modules/camera",
+      "target": "assets/power_camera/icon.png"
+    },
+    {
+      "source": "module-icons/capture.png",
+      "project": "modules/capture",
+      "target": "assets/power_capture/icon.png"
+    },
+    {
+      "source": "module-icons/client-fixes.png",
+      "project": "modules/client_fixes",
+      "target": "assets/power_client_fixes/icon.png"
+    },
+    {
+      "source": "module-icons/commands.png",
+      "project": "modules/commands",
+      "target": "assets/spc/icon.png"
+    },
+    {
+      "source": "module-icons/compat.png",
+      "project": "modules/compat",
+      "target": "assets/power_compat/icon.png"
+    },
+    {
+      "source": "module-icons/config-api.png",
+      "project": "modules/config_api",
+      "target": "assets/gcapi3/icon.png"
+    },
+    {
+      "source": "module-icons/controls.png",
+      "project": "modules/controls",
+      "target": "assets/power_controls/icon.png"
+    },
+    {
+      "source": "module-icons/creative-inventory.png",
+      "project": "modules/creative",
+      "target": "assets/power_creative_inventory/icon.png"
+    },
+    {
+      "source": "module-icons/creative.png",
+      "project": "modules/creative",
+      "target": "assets/power_creative/icon.png"
+    },
+    {
+      "source": "module-icons/environment.png",
+      "project": "modules/environment",
+      "target": "assets/power_environment/icon.png"
+    },
+    {
+      "source": "module-icons/food-preview.png",
+      "project": "modules/food_preview",
+      "target": "assets/power_food_preview/icon.png"
+    },
+    {
+      "source": "module-icons/gold.png",
+      "project": "modules/gold",
+      "target": "assets/power_gold/icon.png"
+    },
+    {
+      "source": "module-icons/hud.png",
+      "project": "modules/hud",
+      "target": "assets/power_hud/icon.png"
+    },
+    {
+      "source": "module-icons/inventory.png",
+      "project": "modules/inventory",
+      "target": "assets/power_inventory/icon.png"
+    },
+    {
+      "source": "module-icons/mechanics.png",
+      "project": "modules/mechanics",
+      "target": "assets/power_mechanics/icon.png"
+    },
+    {
+      "source": "module-icons/music-api-test.png",
+      "project": "modules/music_api",
+      "target": "assets/power_music_api/icon-test.png"
+    },
+    {
+      "source": "module-icons/music-api.png",
+      "project": "modules/music_api",
+      "target": "assets/power_music_api/icon.png"
+    },
+    {
+      "source": "module-icons/player-list.png",
+      "project": "modules/player_list",
+      "target": "assets/playerlist/icon.png"
+    },
+    {
+      "source": "module-icons/power-beta.png",
+      "project": ".",
+      "target": "assets/powerbeta/icon.png"
+    },
+    {
+      "source": "module-icons/recipes.png",
+      "project": "modules/recipes",
+      "target": "assets/power_recipes/icon.png"
+    },
+    {
+      "source": "module-icons/title.png",
+      "project": "modules/title",
+      "target": "assets/power_title/icon.png"
+    },
+    {
+      "source": "module-icons/window.png",
+      "project": "modules/window",
+      "target": "assets/power_window/icon.png"
+    },
+    {
+      "source": "module-icons/worldedit.png",
+      "project": "modules/worldedit",
+      "target": "assets/power_worldedit/icon.png"
+    },
+    {
+      "source": "offhand/gui",
+      "project": "input-api",
+      "target": "assets/powerbeta/textures/gui"
+    },
+    {
+      "source": "offhand/hud",
+      "project": ".",
+      "target": "assets/powerbeta/textures/hud"
+    },
+    {
+      "source": "player-skins",
+      "project": "modules/client_fixes",
+      "target": "mob"
+    },
+    {
+      "source": "recipe-book",
+      "project": ".",
+      "target": "assets/powerbeta/textures/recipes"
+    },
+    {
+      "source": "redstone",
+      "project": ".",
+      "target": "assets/powerbeta/stationapi/textures/redstone"
+    },
+    {
+      "source": "settings-ui",
+      "project": "modules/config_api",
+      "target": "assets/gcapi3"
+    },
+    {
+      "source": "title/logos",
+      "project": "modules/title",
+      "target": "assets/power_title/logos"
+    },
+    {
+      "source": "title/panoramas",
+      "project": "modules/controls",
+      "target": "assets/power_controls/textures"
+    },
+    {
+      "source": "weather",
+      "project": ".",
+      "target": "assets/powerbeta/textures"
+    },
+    {
+      "source": "window/icons",
+      "project": "modules/window",
+      "target": "assets/power_window/icons"
+    }
+  ]
+}
