@@ -168,14 +168,20 @@ public final class NativeBackend implements Backend {
       if (k.translationKey.equals("powerbeta.mapZoomOut")) label = "Minimap zoom out";
       if (k.translationKey.equals("powerbeta.minimap")) label = "Minimap (toggle)";
       if (k.translationKey.equals("powerbeta.sprint")) label = "Sprint on foot";
+      var debugAction = local.luke.power.debug.DebugAction.find(k.translationKey);
+      if (debugAction != null) label = debugAction.label;
+      if (k.translationKey.equals("powerbeta.debug.modifier")) label = "Debug modifier (hold)";
       entries.add(
           new Setting(
               key,
               id(),
               "Controls",
-              "Key bindings",
+              k.translationKey.startsWith("powerbeta.debug.") ? "Debug" : "Key bindings",
               label,
-              ControlLinks.description(key),
+              debugAction == null ? ControlLinks.description(key)
+                  : "Hold the Debug modifier, then press this key. " + (debugAction == local.luke.power.debug.DebugAction.CRASH
+                      ? "Hold both for 10 seconds to trigger a deliberate game crash. Release either key to cancel."
+                      : "Other gameplay actions on this key are suppressed for the whole press."),
               Setting.Kind.KEY,
               new JsonPrimitive(new Chord(k.code, Bindings.modifiers(k.translationKey)).encoded()),
               new JsonPrimitive(defaultKey(k)),
@@ -194,6 +200,9 @@ public final class NativeBackend implements Backend {
   }
 
   private static int defaultKey(KeyBinding k) {
+    var action = local.luke.power.debug.DebugAction.find(k.translationKey);
+    if (action != null) return action.key;
+    if (k.translationKey.equals("powerbeta.debug.modifier")) return Keyboard.KEY_F3;
     return switch (k.translationKey) {
       case "powerbeta.lightOverlay" -> Keyboard.KEY_F7;
       case "powerbeta.map" -> Keyboard.KEY_M;

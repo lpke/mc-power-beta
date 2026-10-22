@@ -15,7 +15,8 @@
     "power-beta-offhand.mixins.json",
     "power-beta-subtitles.mixins.json",
     "power-beta-inventory-tools.mixins.json",
-    "power-beta-recipes.mixins.json"
+    "power-beta-recipes.mixins.json",
+    "power-beta-debug.mixins.json"
   ],
   "depends": {
     "minecraft": "1.0.0-beta.7.3",
@@ -45,7 +46,8 @@
       "local.luke.power.visual.ModTextureReload",
       "local.luke.power.gameplay.TorchShovelEvents",
       "local.luke.power.world.SavedWorldMenu",
-      "local.luke.power.gameplay.AxesSlashLeavesEvents"
+      "local.luke.power.gameplay.AxesSlashLeavesEvents",
+      "local.luke.power.debug.DebugTooltips"
     ]
   },
   "languageAdapters": {

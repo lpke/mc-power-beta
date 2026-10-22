@@ -571,7 +571,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.0.4"
+        "customVersionText": "Power Beta 4.1.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -1229,6 +1229,9 @@
       "furnaceOpen": false,
       "craftingFilter": false,
       "furnaceFilter": false
+    },
+    "debug": {
+      "enabled": true
     }
   }
 }

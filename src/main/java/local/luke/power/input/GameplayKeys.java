@@ -42,6 +42,7 @@ public final class GameplayKeys {
     event.keyBindings.add(TOOL_SWITCH);
     event.keyBindings.addAll(java.util.List.of(RECIPE_BOOK, SORT_INVENTORY, SORTING_LAYOUT, DEPOSIT_MATCHING, SAVE_HOTBAR, LOAD_HOTBAR));
     event.keyBindings.addAll(local.luke.power.map.MapKeys.all());
+    event.keyBindings.addAll(local.luke.power.debug.DebugKeys.all());
     Bindings.onMousePress("powerbeta.mapActions", key -> local.luke.power.map.MapKeys.press((Minecraft)FabricLoader.getInstance().getGameInstance(), key));
     Bindings.onMousePress("powerbeta.lightOverlay", GameplayKeys::toggleLight);
     Bindings.onMousePress("powerbeta.infoHud", GameplayKeys::toggleInfoHud);

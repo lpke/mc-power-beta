@@ -36,6 +36,7 @@ public final class DebugKey {
   }
 
   public static void event(Minecraft mc, int key, boolean down, boolean repeat) {
+    if (local.luke.power.input.DebugInput.managesOverlay()) { gesture.cancel(); return; }
     tick(mc);
     if (key == Keyboard.KEY_F4 && down && !repeat) gesture.cycle();
     if (key != Keyboard.KEY_F3) return;

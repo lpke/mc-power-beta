@@ -12,8 +12,7 @@
   Other modules use `source-build/modules.json`; their original Gradle files are
   upstream reference, not the pack build. `input-api/` is the shared input bridge.
 - Utility JARs are compiled here and nested inside Power Beta. Six platform,
-  authentication and performance JARs remain external. Disabled vendor artifacts
-  and the recipe-browser source are retained for reference, not shipped.
+  authentication and performance JARs remain external. Disabled vendor artifacts are retained for reference, not shipped.
   Review pinned dependency manifests before changing platform binaries.
 - Root tests: `./gradlew --no-daemon test`. Utility build:
   `python3 tools/build_utilities.py [MODULE ...]`. For a pack already built,
@@ -88,7 +87,9 @@
   settings inside groups. Presentation metadata applies to every adapter without
   changing storage IDs. Keep the flight sprint binding shared; Creative, Spectator and freecam own separate sprint preferences.
   The focus-loss pause preference is `power_controls:general.pauseOnLostFocus`.
-- Ctrl, Shift and Alt are the only chord modifiers. Gameplay acts on key-down.
+- Ctrl, Shift and Alt are the standard chord modifiers. Debug actions have a separate
+  configurable hold key and own their action presses until release. Keep the mode
+  picker independent and preserve plain F3 and performance graph handling. Gameplay acts on key-down.
   Test both release orders, held movement, focus loss and open menus.
   Linux key repairs must update native events and polling together. F20–F24 use
   reserved LWJGL codes 114–118. Inventory movement only admits known screens without

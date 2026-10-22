@@ -101,7 +101,8 @@
     "recipeBook.enabled": true,
     "recipeBook.inventory": false,
     "recipeBook.pauseMenu": true,
-    "recipeBook.buttonStyle": 0
+    "recipeBook.buttonStyle": 0,
+    "debug.enabled": true
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -510,6 +511,7 @@
     "inventoryTools.toolSwitch": false,
     "heldLight.enabled": false,
     "inventoryTools.restock": false,
-    "recipeBook.enabled": false
+    "recipeBook.enabled": false,
+    "debug.enabled": true
   }
 }

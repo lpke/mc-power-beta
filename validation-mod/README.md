@@ -704,3 +704,5 @@ The driver verifies the Java process, game directory, isolated Xvfb display and
 window before sending input. It covers both release orders, repeat suppression,
 existing row/scroll priority, Creative hover swaps, text ownership and mouse
 slot/header/outside guards. Every case restores its captured settings and inventory.
+
+`debug-410` checks Debug controls, actions and JFR recording. `debug-410 setup` prepares native key testing; `debug-410 state` reports the current key/overlay state.

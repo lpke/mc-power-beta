@@ -36,11 +36,6 @@
       "target": "assets/powerbeta/textures/gui"
     },
     {
-      "source": "legacy/recipe-browser",
-      "project": "modules/recipes",
-      "target": "assets/power_recipes/stationapi/textures/gui"
-    },
-    {
       "source": "maps",
       "project": ".",
       "target": "assets/powerbeta/map"
@@ -126,11 +121,6 @@
       "target": "assets/power_mechanics/icon.png"
     },
     {
-      "source": "module-icons/music-api-test.png",
-      "project": "modules/music_api",
-      "target": "assets/power_music_api/icon-test.png"
-    },
-    {
       "source": "module-icons/music-api.png",
       "project": "modules/music_api",
       "target": "assets/power_music_api/icon.png"
@@ -144,11 +134,6 @@
       "source": "module-icons/power-beta.png",
       "project": ".",
       "target": "assets/powerbeta/icon.png"
-    },
-    {
-      "source": "module-icons/recipes.png",
-      "project": "modules/recipes",
-      "target": "assets/power_recipes/icon.png"
     },
     {
       "source": "module-icons/title.png",

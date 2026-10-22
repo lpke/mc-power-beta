@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "local.luke.power.debug",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "DebugNativeKeysMixin",
+    "DebugPacketsMixin",
+    "DebugMouseMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

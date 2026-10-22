@@ -2,7 +2,8 @@
   "General": [
     "Game",
     "Interface",
-    "Input"
+    "Input",
+    "Debug shortcuts"
   ],
   "Video": [
     "Rendering",
@@ -39,7 +40,8 @@
     "Interface",
     "Screenshots",
     "Mouse input",
-    "Key bindings"
+    "Key bindings",
+    "Debug"
   ],
   "Interface": [
     "General",

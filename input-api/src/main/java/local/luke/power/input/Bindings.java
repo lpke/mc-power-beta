@@ -36,7 +36,8 @@ public final class Bindings {
     if (key >= 0) return false;
     int pressedWith = presses.update(key, physical(key), heldModifiers());
     for (Object object : registered) if (object instanceof Binding b && b.power$code() == key
-        && available.test(b.power$id()) && (pressedWith & modifiers(b.power$id())) == modifiers(b.power$id())) return true;
+        && available.test(b.power$id()) && DebugInput.allows(b.power$id(), key)
+        && (pressedWith & modifiers(b.power$id())) == modifiers(b.power$id())) return true;
     return false;
   }
 
@@ -84,14 +85,15 @@ public final class Bindings {
   }
 
   private static boolean active(Binding b) {
-    if (!available.test(b.power$id())) return false;
+    if (!available.test(b.power$id()) || !DebugInput.allows(b.power$id(), b.power$code())) return false;
     int key = b.power$code(), mask = modifiers(b.power$id()), held = heldModifiers();
     int pressedWith = presses.update(key, physical(key), held);
     if (key == 0 || (held & mask) != mask || (pressedWith & mask) != mask) return false;
     // A more specific binding takes precedence over an overlapping plain key.
     // Unrelated movement keys still work while Ctrl/Shift/Alt are held.
     for (Object other : registered) {
-      if (!(other instanceof Binding candidate) || candidate.power$code() != key || !available.test(candidate.power$id())) continue;
+      if (!(other instanceof Binding candidate) || candidate.power$code() != key || !available.test(candidate.power$id())
+          || !DebugInput.allows(candidate.power$id(), key)) continue;
       int otherMask = modifiers(candidate.power$id());
       if (Integer.bitCount(otherMask) > Integer.bitCount(mask) && (pressedWith & otherMask) == otherMask)
         return false;

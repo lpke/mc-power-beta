@@ -84,6 +84,7 @@ public final class Validation {
       else if (command.startsWith("offhand-actions-400 ")) OffhandActions400Checks.run(mc,command.substring(20));
       else if (command.equals("polish-400")) Polish400Checks.run(mc);
       else if ((command.equals("spectator-inventory-401") || command.equals("spectator-inventory-404"))) SpectatorInventory401Checks.run(mc);
+      else if (command.startsWith("debug-410")) Debug410Checks.run(mc,command.substring(9).trim());
       else if (command.equals("spectator-containers-404")) SpectatorContainer404Checks.run(mc);
       else if (command.equals("sorting-401")) Sorting401Checks.run(mc);
       else if (command.equals("recipe-401")) Recipe401Checks.run(mc);

@@ -245,6 +245,14 @@ public final class PowerOptionsScreen extends UiScreen {
     mc.setScreen(screen);
   }
 
+  public static void openDebug(net.minecraft.client.Minecraft mc) {
+    var screen = new PowerOptionsScreen(null);
+    screen.page = "Controls"; screen.search.setText("Debug"); screen.history.clear();
+    screen.highlightedId = ""; screen.conflictIds = List.of(); screen.changedOnly = false;
+    screen.collapsed.remove("Controls/Debug"); screen.scroll = 0;
+    mc.setScreen(screen);
+  }
+
   public PowerOptionsScreen(Screen parent, boolean directPause) {
     this.parent = parent;
     this.exitTarget = parent;
@@ -1364,6 +1372,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private List<Setting> conflicts(Setting s) {
     if (s.kind != Setting.Kind.KEY || Chord.decode(s.value.getAsInt()).key() == 0) return List.of();
     return session.settings().stream().filter(v -> v != s && v.kind == Setting.Kind.KEY && SettingAccess.visible(session, v)
+        && local.luke.power.debug.DebugConflicts.overlap(s.id, v.id)
         && Chord.decode(v.value.getAsInt()).key() == Chord.decode(s.value.getAsInt()).key()).toList();
   }
 

@@ -42,6 +42,7 @@ public abstract class DebugHudMixin {
     local.luke.power.subtitles.Subtitles.render(minecraft);
     local.luke.power.map.Minimap.render(minecraft, delta);
     local.luke.power.map.WaypointMarkers.render(minecraft);
+    local.luke.power.debug.DebugPerformance.render(minecraft);
     if (!minecraft.options.debugHud) return;
     if (MenuPreferences.debugTimeOfDay() && !local.luke.power.hud.InfoHud.timeLine().isEmpty())
       DebugOverlay.add(local.luke.power.hud.InfoHud.timeLine(), 2, 144);

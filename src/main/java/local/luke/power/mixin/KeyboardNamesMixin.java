@@ -15,6 +15,7 @@ public abstract class KeyboardNamesMixin {
     if (cir.getReturnValue()) {
       local.luke.power.input.FullscreenKey.releaseEvent(Keyboard.getEventKey(), Keyboard.getEventKeyState());
       local.luke.power.input.KeyEventModifiers.event(Keyboard.getEventKey(), Keyboard.getEventKeyState());
+      local.luke.power.debug.DebugKeys.event(Keyboard.getEventKey(), Keyboard.getEventKeyState(), Keyboard.isRepeatEvent());
     } else {
       int physical = 0;
       for (int i = 0; i < power$modifiers.length; i++) if (Keyboard.isKeyDown(power$modifiers[i])) physical |= 1 << i;

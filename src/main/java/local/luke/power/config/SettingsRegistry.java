@@ -33,6 +33,7 @@ public final class SettingsRegistry {
     local.luke.power.heldlight.HeldLightBackend.register(s);
     MapBackend.register(s);
     SprintBackend.register(s);
+    DebugBackend.register(s);
     InterfaceBackend.register(s);
     StatusBackend.register(s);
     InfoHudBackend.register(s);

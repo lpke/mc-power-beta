@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-10-22
+
+- Add editable Debug shortcuts behind one enable setting, on by default for Power Beta and Refined Beta. Keep the mode picker independent and prevent debug chords from triggering ordinary gameplay actions.
+- Show entity hitboxes, eye lines and facing directions, and Beta-height chunk borders. Copy location and target data, clear chat, toggle focus-loss pausing and open Debug controls with dedicated shortcuts.
+- Reload chunks and textures, dump loaded textures, record ten-second Java performance captures, and show frame/tick, network and light-brightness diagnostics. Retain the traditional debug help shortcut and deliberate hold-to-crash handling.
+- Remove the disabled legacy recipe-browser source and unused textures. Retain the current recipe book and the Creative inventory atlas used by the destroy slot.
+
 ## [4.0.4] - 2026-10-22
 
 - Inspect containers in Spectator without withdrawing, depositing or activating them. Keep your own inventory editable while preventing item drops, including outside clicks and inventory closure.

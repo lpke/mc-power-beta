@@ -117,13 +117,6 @@
     "enabled": true,
     "source": "modules/commands"
   },
-  "power_recipes": {
-    "version": "1.10.4",
-    "mapping": "net.glasslauncher:biny:b1.7.3+2f404bc:v2",
-    "dependencies": [],
-    "enabled": false,
-    "source": "modules/recipes"
-  },
   "power_food_preview": {
     "version": "1.0.1",
     "mapping": "babric:barn:b1.7.3+build.8:v2",

@@ -7,6 +7,8 @@ public final class ControlLinks {
   private record Link(String setting, String featureGate, String help) {}
   private static final Map<String, Link> LINKS = new LinkedHashMap<>();
   static {
+    link("powerbeta.debug.modifier", "debug.enabled", "debug.enabled", "Hold this key while pressing a Debug action key. The debug overlay and mode-picker keys can be configured independently.");
+    for (var action : local.luke.power.debug.DebugAction.values()) link(action.id, "", "debug.enabled", "Hold the Debug modifier while using this action.");
     link("power_beta.entities", "visual.hideEntities", "", "Toggle rendering for the selected entity types.");
     link("power_beta.fullBright", "", "", "Toggle full bright. Changes rendering only.");
     link("powerbeta.lightOverlay", "lightOverlay.enabled", "", "Toggle light-level numbers on nearby block tops.");

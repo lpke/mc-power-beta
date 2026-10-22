@@ -78,6 +78,7 @@ public class ClientMixin {
 
   @Inject(method = "tick", at = @At("HEAD"))
   private void power$bindings(CallbackInfo ci) {
+    local.luke.power.debug.DebugPerformance.beginTick();
     Minecraft mc = (Minecraft)(Object)this;
     local.luke.power.inventory.NativeInventoryPlan.tick(mc);
     local.luke.power.input.InventoryWheel.context(mc.currentScreen, org.lwjgl.opengl.Display.isActive());

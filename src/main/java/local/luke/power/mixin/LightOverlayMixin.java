@@ -39,6 +39,7 @@ public abstract class LightOverlayMixin {
       target = "Lnet/minecraft/class_555;method_1847(F)V"))
   private void power$light(float delta, long end, CallbackInfo ci) {
     LightOverlay.render(field_2349, delta);
+    local.luke.power.debug.DebugWorld.render(field_2349, delta);
   }
 
   @Inject(method = "method_1841", at = @At(value = "INVOKE",
