@@ -19,6 +19,11 @@ being updated too. Save as PNG with transparency.
 3. Select **Default**, then **Power Beta Texture Preview.zip** to reload the images.
 4. Press Ctrl+C in the terminal when finished.
 
+Older builds can refresh cached mod textures before StationAPI switches packs.
+If the preview ZIP updates but the image stays unchanged, select the preview pack,
+then turn 3D anaglyph on and back off once to refresh it again. Updated builds
+refresh these textures after the pack switch, so the normal steps above suffice.
+
 Omit `--watch` to refresh the ZIP once. The script writes only its preview ZIP;
 it leaves instance settings, other texture packs, worlds and JARs alone. Incomplete
 saves retain the previous preview until the image is ready.
