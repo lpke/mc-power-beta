@@ -21,7 +21,10 @@ public final class CullingTerrain {
   }
   public static class_43 chunk(World world, int x, int z) {
     if (world.method_259() instanceof CullingChunkCacheAccessor cache) {
-      class_43 chunk = cache.power$loadedChunks().get(class_515.method_1854(x, z));
+      var chunks = cache.power$loadedChunks();
+      int key = class_515.method_1854(x, z);
+      class_43 chunk = chunks instanceof it.unimi.dsi.fastutil.ints.Int2ObjectMap<class_43> primitive
+          ? primitive.get(key) : chunks.get(key);
       return chunk == null ? cache.power$emptyChunk() : chunk;
     }
     if (world.method_259() instanceof CullingArrayCacheAccessor cache) {

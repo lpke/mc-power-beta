@@ -711,3 +711,12 @@
 - Optional fluid sounds follow verified official assets and native movement/display events.
   Keep player splashes/swimming local and singleplayer; lava pops use exposed-surface
   display events. Preserve particles, disabled behavior, category gain and subtitle admission.
+
+- Water-lighting columns use bounded reusable storage and mixed coordinate hashes. Publish columns
+  only after filling them; nested reads and live invalidation must never expose partial or stale data.
+  Culling workers read published renderer capabilities, never the native renderer resolver, which
+  mutates its registry even for missing renderers. Native world setup and renderer discovery own
+  snapshot publication. Map clipping retains exact native coordinates and texture interpolation.
+- Terrain draw-command storage grows with submitted meshes, independently of vertex-pool capacity.
+  Retain all pending command words across both command-buffer and vertex-buffer growth. Native
+  draw order, indices, vertex format, visibility and GPU buffer ownership stay unchanged.

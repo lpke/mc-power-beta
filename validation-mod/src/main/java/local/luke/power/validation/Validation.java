@@ -91,7 +91,12 @@ public final class Validation {
       else if (command.startsWith("debug-410")) Debug410Checks.run(mc,command.substring(9).trim());
       else if (command.startsWith("release-420 ")) Release420Checks.run(mc,command.substring(12));
       else if (command.startsWith("performance-420 ")) Performance420Checks.run(mc, command.substring(16));
+      else if (command.equals("vbo-421")) Vbo421Checks.run(mc);
+      else if (command.equals("map-hot-421")) MapHot421Checks.run(mc);
+      else if (command.equals("culling-421")) Culling421Checks.run(mc);
+      else if (command.startsWith("performance-421 ")) Performance421Controls.run(mc, command.substring(16));
       else if (command.equals("terrain-cache-420")) TerrainCache420Checks.run(mc);
+      else if (command.startsWith("mesh-water-421 ")) MeshWater421Checks.run(mc, command.substring(15).trim());
       else if (command.startsWith("mesh-cache-420 ")) MeshCache420Checks.run(mc, command.substring(15).trim());
       else if (command.equals("spectator-containers-404")) SpectatorContainer404Checks.run(mc);
       else if (command.equals("sorting-401")) Sorting401Checks.run(mc);

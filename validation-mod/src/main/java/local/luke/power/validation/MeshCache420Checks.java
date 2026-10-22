@@ -35,11 +35,13 @@ public final class MeshCache420Checks {
     double[] enabled = new double[PAIRS * 2], disabled = new double[PAIRS * 2];
     long mismatches = WaterTerrain.mismatches(), time = mc.world.getTime();
     int sky = mc.world.field_202;
+    var privateBuffers = new MeshBenchmarkBuffers();
     try {
       for (int i = 0; i < selected.size(); i++) {
         var source = selected.get(i);
         meshes.add(new class_66(mc.world, new ArrayList<>(), source.field_231, source.field_232,
             source.field_233, 16, lists + i * 3));
+        privateBuffers.attach(meshes.get(meshes.size() - 1));
         coordinates.add(List.of(source.field_231, source.field_232, source.field_233));
       }
       WaterTerrain.prepare(mc);
@@ -59,7 +61,7 @@ public final class MeshCache420Checks {
       var report = new LinkedHashMap<String, Object>();
       report.put("label", label); report.put("renderer", GL11.glGetString(GL11.GL_RENDERER));
       report.put("sections", coordinates); report.put("warmupBatches", WARMUP); report.put("meshesPerArm", SECTIONS * enabled.length);
-      report.put("daylightTime", time); report.put("skyDarkness", sky); report.put("packedBytesEqual", true);
+      report.put("daylightTime", time); report.put("skyDarkness", sky); report.put("packedBytesEqual", true); report.put("isolatedGpuPool", true);
       var visual = local.luke.power.visual.VisualConfig.current();
       report.put("underwaterDarkness", visual.underwaterDarkness);
       report.put("underwaterDarknessOutside", visual.underwaterDarknessOutside);
@@ -80,6 +82,7 @@ public final class MeshCache420Checks {
         section.method_302();
       }
       GL11.glDeleteLists(lists, SECTIONS * 3);
+      privateBuffers.close();
     }
   }
 

@@ -6,6 +6,19 @@ import java.util.*;
 public final class MapProjection {
   public record Point(double x, double y, double u, double v) {}
 
+  private static final double[] CIRCLE_X = new double[48], CIRCLE_Y = new double[48];
+  private static final double[] SQUARE_X = new double[4], SQUARE_Y = new double[4];
+  static {
+    for (int side = 0; side < 48; side++) {
+      double angle = side * 2 * Math.PI / 48;
+      CIRCLE_X[side] = Math.cos(angle); CIRCLE_Y[side] = Math.sin(angle);
+    }
+    for (int side = 0; side < 4; side++) {
+      double angle = side * Math.PI / 2;
+      SQUARE_X[side] = Math.cos(angle); SQUARE_Y[side] = Math.sin(angle);
+    }
+  }
+
   public final double x, z, scale, left, top, width, height, angle;
   private final double cos, sin;
 
@@ -68,18 +81,14 @@ public final class MapProjection {
   public List<Point> clip(List<Point> polygon, boolean circle) {
     if (polygon.stream().allMatch(p -> contains(p.x, p.y, circle))) return polygon;
     int sides = circle ? 48 : 4;
+    var first = new ArrayList<Point>(polygon.size() + sides);
+    var second = new ArrayList<Point>(polygon.size() + sides);
     for (int side = 0; side < sides && !polygon.isEmpty(); side++) {
-      double a = (circle ? side * 2 * Math.PI / sides : Math.PI / 4 + side * Math.PI / 2);
-      double nx = Math.cos(a), ny = Math.sin(a);
-      double radius = circle ? width / 2 : width / Math.sqrt(2);
-      // A square uses axis-aligned half planes, while a circle uses a regular polygon.
-      if (!circle) {
-        a = side * Math.PI / 2;
-        nx = Math.cos(a);
-        ny = Math.sin(a);
-        radius = (side % 2 == 0 ? width : height) / 2;
-      }
-      var output = new ArrayList<Point>(polygon.size() + 1);
+      double nx = circle ? CIRCLE_X[side] : SQUARE_X[side];
+      double ny = circle ? CIRCLE_Y[side] : SQUARE_Y[side];
+      double radius = circle || side % 2 == 0 ? width / 2 : height / 2;
+      var output = polygon == first ? second : first;
+      output.clear();
       Point previous = polygon.get(polygon.size() - 1);
       double pd = distance(previous, nx, ny, radius);
       for (Point next : polygon) {

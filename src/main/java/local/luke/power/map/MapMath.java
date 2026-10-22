@@ -4,8 +4,6 @@ package local.luke.power.map;
 public final class MapMath {
   public static final int SIZE = 64, PIXELS = SIZE * SIZE, MAX_LEVEL = 14;
   public static final int BORDER = 32000000;
-  private static final java.util.regex.Pattern CAVE_CONTEXT =
-      java.util.regex.Pattern.compile("cave-v2/a([0-9]{1,2})-b([0-9]{1,2})/p[0-7]");
 
   private MapMath() {}
 
@@ -16,9 +14,7 @@ public final class MapMath {
     public Key {
       if (context == null) throw new IllegalArgumentException("Invalid map context");
       if (!context.isEmpty()) {
-        var match = CAVE_CONTEXT.matcher(context);
-        if (layer < 0 || !match.matches() || Integer.parseInt(match.group(1)) > 64
-            || Integer.parseInt(match.group(2)) > 64)
+        if (layer < 0 || !validContext(context))
           throw new IllegalArgumentException("Invalid map context");
       }
       if (dimension < -1024
@@ -63,7 +59,28 @@ public final class MapMath {
   }
 
   public static Key key(int dimension, int layer, int level, int x, int z, String context) {
-    return key(dimension, layer, level, x, z).withContext(context);
+    int span = SIZE << level;
+    return new Key(dimension, layer, level, Math.floorDiv(x, span), Math.floorDiv(z, span), context);
+  }
+
+  private static boolean validContext(String value) {
+    int length = value.length();
+    if (length < 16 || length > 18 || !value.startsWith("cave-v2/a")) return false;
+    int split = value.indexOf("-b", 9), end = length - 3;
+    return split >= 10 && split <= 11 && value.charAt(end) == '/' && value.charAt(end + 1) == 'p'
+        && value.charAt(end + 2) >= '0' && value.charAt(end + 2) <= '7'
+        && range(value, 9, split) && range(value, split + 2, end);
+  }
+
+  private static boolean range(String value, int start, int end) {
+    if (end - start < 1 || end - start > 2) return false;
+    int number = 0;
+    for (int i = start; i < end; i++) {
+      char digit = value.charAt(i);
+      if (digit < '0' || digit > '9') return false;
+      number = number * 10 + digit - '0';
+    }
+    return number <= 64;
   }
 
   public static int index(int x, int z) {

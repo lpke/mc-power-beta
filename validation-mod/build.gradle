@@ -27,6 +27,7 @@ dependencies {
     modCompileOnly files('../vendor/jars/GlassConfigAPI-3.2.5.jar')
     modCompileOnly files('../build/platform-compile/station-gui-api-v0-2.0.0-alpha.6.4-1.0.0.jar')
     compileOnly 'com.google.code.gson:gson:2.8.9'
+    compileOnly files('../vendor/jars/SmoothBeta-1.1.8.jar')
     compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'
     compileOnly 'io.github.llamalad7:mixinextras-common:0.5.0'
     annotationProcessor 'io.github.llamalad7:mixinextras-common:0.5.0'

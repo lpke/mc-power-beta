@@ -5,6 +5,19 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 class CaveWindowTest {
+  @Test void contextValidationRetainsThePersistedGrammarWithoutRegexWorkPerTile() {
+    for (int above = 0; above <= 64; above++) for (int below = 0; below <= 64; below++)
+      for (int phase = 0; phase < 8; phase++) {
+        String context = "cave-v2/a" + above + "-b" + below + "/p" + phase;
+        assertEquals(context, new MapMath.Key(0, 0, 0, 0, 0, context).context());
+      }
+    assertEquals("cave-v2/a00-b01/p7", new MapMath.Key(0, 0, 0, 0, 0, "cave-v2/a00-b01/p7").context());
+    for (String context : new String[]{"cave-v2/a-b1/p0", "cave-v2/a1-b/p0", "cave-v2/a000-b1/p0",
+        "cave-v2/a1-b001/p0", "cave-v2/a65-b1/p0", "cave-v2/a1-b65/p0", "cave-v2/a1-b1/p8",
+        "cave-v2/a1-b1/p00", "cave-v2/a+1-b1/p0", "cave-v2/a1-b1/p0/", "cave-v2/a1-b1/p0\n",
+        "cave-v2/a１-b1/p0", "../cave-v2/a1-b1/p0", "cave-v3/a1-b1/p0"})
+      assertThrows(IllegalArgumentException.class, () -> new MapMath.Key(0, 0, 0, 0, 0, context), context);
+  }
   @Test void exactHeightAndSearchRangeOwnTheirSavedContext() {
     CaveWindow a = CaveWindow.at(64.9, 2, 8), b = CaveWindow.at(65.1, 2, 8);
     assertEquals(64, a.reference());

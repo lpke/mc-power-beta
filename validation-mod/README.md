@@ -38,10 +38,37 @@
 - `debug-410 minimap420` checks the gear's modal pointer/keyboard ownership, native
   inventory retention, Escape cleanup and an actual menu capture above the container.
 
+- `performance-421 load FOLDER` opens an existing cloned save without generating a substitute world.
+  `preview ID JSON` and `restore` use an isolated Options preview, without saving preferences.
+  `remember`, `return`, and `position X Y Z YAW PITCH` control repeatable views. `autosave SECONDS`
+  explicitly changes the live test world's interval, which the ordinary option initializes at load.
+  `held ID` and `held -1` temporarily replace and restore the selected stack in the clone.
+  `map` opens the World Map; `resume` closes it. `state` records the actual light source and view.
+  Always start comparisons from the same saved world/config/cache snapshot, outside normal instances,
+  with a muted audio sink. Keep builds out of timed runs and separate warmup from steady samples.
+- `performance-420 ui LABEL [SECONDS]` measures the whole native drawing call, including HUD/GUI,
+  and keeps the current screen fixed. Other actions measure world rendering only. Reports also retain
+  main-thread allocated-byte deltas and frame counts over 8.33, 16.67 and 33.33 ms.
+  The allocation counter includes observer overhead. Parent/child CPU timings overlap.
+  Native display-update intervals are recorded separately from world-render start intervals;
+  neither measures physical monitor scanout or input-to-photon latency.
+- `mesh-water-421 LABEL` compares native rebuilds against the frozen 4.2.0 water-lighting reference.
+  It warms both arms, checks exact packed GPU bytes and alternates ABBA batches over identical
+  sections and fixed simulation. Scratch meshes and byte readbacks use a private GPU pool so
+  driver allocation/readback state cannot contaminate later live-world travel samples.
+  The reference exists only inside this validation mod.
+- `map-hot-421` checks exact coordinate and UV bits against 4.2.0 for 2,000 clipped polygons.
+  `culling-421` races native world setup against immutable renderer-capability reads, checks inherited
+  and missing renderers and rejects any observed culling-worker access to mutable native resolution
+  or native chunk loading. Run after a real world has rendered for at least a few seconds.
 - `mesh-cache-420 LABEL` rebuilds twelve loaded native sections in one tick with
   caching enabled and bypassed. It warms both arms, checks identical packed GPU
   bytes, then records 24 ABBA pairs with frozen simulation/daylight in the performance
   report directory. Run without other builds or CPU-heavy tests.
+- `vbo-421` queues 40,000 native draw commands, grows a private vertex pool and verifies
+  all five command words, bounded command storage, retained queue ownership and no GL error.
+  `performance-421 vbo` reports the live pool capacities without reading its GPU bytes.
+  Performance reports include overlapping upload, compaction and growth timers.
 - `terrain-cache-420` compares native render-region reads across every mesh-border
   cell, tests active-mesh invalidation after a real block edit, and checks that
   dynamic custom chunks bypass the cache. It restores its single edited block.
@@ -324,7 +351,8 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   real Shift-double-click gestures with native/raw input, both release orders,
   cancellation and matching-item conservation. Use the isolated muted Xvfb clone.
 
-- `water-terrain`: inspect GPU color endpoints, 1000 crossings without queued builds or
+- `water-terrain`: first place the disposable camera near X/Z 32/32 and let its render
+  grid settle, so the fixture section at 32/80/32 exists. Inspect GPU color endpoints, 1000 crossings without queued builds or
   uploads, slider preview/Cancel, shader uniforms, night/roofs and native terrain edits,
   including torch-lit deep water at dawn and roof changes below native light's reach.
 

@@ -12,7 +12,7 @@ class LightSettingsTest {
     assertEquals(0x1234AB,s.color(15));s.greenFrom=0;s.validate();assertEquals(0xFEDCBA,s.color(0));
   }
   @Test void rejectsInvalidColourRangeAndNonFiniteSize() {
-    for(String color:new String[]{null,"", "red","#FFF","#FFFFFFFF","#GG0000"})
+    for(String color:new String[]{null,"", "red","#FFF","#FFFFFFFF","#GG0000","#12４567"," 000000","000000\n","+12345","##12345"})
       assertThrows(IllegalArgumentException.class,()->LightSettings.rgb(color));
     LightSettings s=new LightSettings();s.radius=25;assertThrows(IllegalArgumentException.class,s::validate);
     s.radius=12;s.greenFrom=17;assertThrows(IllegalArgumentException.class,s::validate);

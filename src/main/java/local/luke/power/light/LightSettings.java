@@ -27,9 +27,23 @@ public final class LightSettings {
   }
 
   public static int rgb(String value) {
-    if (value == null || !value.matches("#?[0-9a-fA-F]{6}"))
-      throw new IllegalArgumentException("Use a six-digit RGB color, such as #FF5555");
-    return Integer.parseInt(value.startsWith("#") ? value.substring(1) : value, 16);
+    if (value == null) throw invalidColor();
+    int start = value.length() == 7 && value.charAt(0) == '#' ? 1 : 0;
+    if (value.length() - start != 6) throw invalidColor();
+    int rgb = 0;
+    for (int i = start; i < value.length(); i++) {
+      char c = value.charAt(i);
+      int digit = c >= '0' && c <= '9' ? c - '0'
+          : c >= 'a' && c <= 'f' ? c - 'a' + 10
+          : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1;
+      if (digit < 0) throw invalidColor();
+      rgb = rgb * 16 + digit;
+    }
+    return rgb;
+  }
+
+  private static IllegalArgumentException invalidColor() {
+    return new IllegalArgumentException("Use a six-digit RGB color, such as #FF5555");
   }
 
   public int color(int level) { return rgb(level < greenFrom ? lowColor : highColor); }

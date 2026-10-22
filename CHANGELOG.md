@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [4.2.1] - 2026-10-23
+
+- Reduce terrain-rebuild CPU work and temporary allocations with reusable water-lighting columns and direct loaded-chunk lookups, preserving native geometry and lighting.
+- Reduce minimap allocations and clipping work while retaining exact map coordinates, texture interpolation and saved cave identities.
+- Size terrain draw-command storage by submitted meshes instead of vertex capacity, and retain queued draws when the terrain buffer grows.
+- Avoid repeated color-pattern compilation while drawing the HUD and light overlay.
+- Prevent the background culling worker from changing the block-entity renderer registry during world setup, fixing a world-load crash.
+
 ## [4.2.0] - 2026-10-23
 
 - Start ordinary Options tabs with This tab search, retaining All settings on General and remembering each tab's scope. Name the selected defaults base in reset tooltips and add Cancel and Clear to binding capture.

@@ -1,7 +1,5 @@
 package local.luke.power.render;
 
-import java.util.HashMap;
-import java.util.Map;
 import net.minecraft.block.Block;
 import net.minecraft.block.Material;
 import net.minecraft.class_43;
@@ -10,8 +8,9 @@ import net.minecraft.world.World;
 
 /** Read-only daylight compensation. Never changes chunk opacity or either light array. */
 public final class WaterLighting {
-  private static final Map<Long, byte[]> columns = new HashMap<>();
+  private static final WaterColumnCache columns = new WaterColumnCache();
   private static World owner;
+  private static boolean preparingColumn;
   private WaterLighting() {}
 
   public static void clear() { columns.clear(); owner = null; }
@@ -22,16 +21,21 @@ public final class WaterLighting {
         || world.dimension.field_2177 || y < 0 || y >= 128) return nativeShade;
     if (owner != world) { clear(); owner = world; }
     long key = ((long)x << 32) ^ (z & 0xffffffffL);
-    byte[] sky = WaterTerrain.mutating() ? null : columns.get(key);
+    boolean transientColumn = preparingColumn || WaterTerrain.mutating();
+    byte[] sky = transientColumn ? null : columns.get(key);
     if (sky == null || (sky[y] & 128) == 0) {
       class_43 chunk = CullingTerrain.chunk(world, x >> 4, z >> 4);
       if (chunk == null || !chunk.method_858(x >> 4, z >> 4)) return nativeShade;
       int id = WaterTerrain.block(world, chunk, x, y, z);
       if (Block.field_1941[id] >= 15) return nativeShade;
       if (sky == null) {
-        sky = column(chunk, x & 15, z & 15);
-        // Bound transient memory even in very large isometric captures.
-        if (!WaterTerrain.mutating() && columns.size() < 4096) columns.put(key, sky);
+        int generation = columns.generation();
+        sky = transientColumn ? new byte[128] : columns.prepare(key);
+        boolean nested = preparingColumn;
+        preparingColumn = true;
+        try { column(chunk, x & 15, z & 15, sky); }
+        finally { preparingColumn = nested; }
+        if (!transientColumn) columns.publish(key, sky, generation);
       }
     }
     // The same frame-local column already knows opacity. Repeated AO samples
@@ -47,8 +51,7 @@ public final class WaterLighting {
     return nativeShade + Math.max(0, clearShade - nativeShade) * (100 - darkness) / 100F;
   }
 
-  private static byte[] column(class_43 chunk, int x, int z) {
-    byte[] result = new byte[128];
+  private static void column(class_43 chunk, int x, int z, byte[] result) {
     int stableOpacity = WaterTerrain.cacheable(chunk) ? 128 : 0;
     int sky = 15;
     boolean water = false, waterAbove = false;
@@ -70,6 +73,5 @@ public final class WaterLighting {
       result[y] = (byte)((water ? sky | (sky > nativeSky ? 16 : 0) : nativeSky)
           | (waterAbove ? 32 : 0) | (Block.field_1941[id] >= 15 ? 64 : 0) | stableOpacity);
     }
-    return result;
   }
 }

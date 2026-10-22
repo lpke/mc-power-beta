@@ -4,6 +4,11 @@
   "package": "local.luke.power.validation.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "Performance421TickCapture",
+    "Performance421WorldCapture",
+    "Performance421MinimapCapture",
+    "Performance421InfoHudCapture",
+    "Performance421MapCacheCapture",
     "RecipeCraft420Capture",
     "ValidationMixin",
     "HeldLight400Capture",
@@ -54,7 +59,11 @@
     "Inventory330RenderMixin",
     "Minimap330RenderMixin",
     "Player330RenderMixin",
-    "Inventory403RenderCapture"
+    "Inventory403RenderCapture",
+    "MeshWater421Reference",
+    "CullingRenderer421Capture",
+    "Performance421VboCapture",
+    "Performance421PresentCapture"
   ],
   "injectors": {
     "defaultRequire": 1

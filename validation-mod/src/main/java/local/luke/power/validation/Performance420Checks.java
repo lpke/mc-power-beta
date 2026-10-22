@@ -21,15 +21,26 @@ public final class Performance420Checks {
     if (args[0].equals("status")) { log(task == null ? "PERFORMANCE 420 idle" : "PERFORMANCE 420 " + task.label + " frames=" + task.frames); return; }
     if (args[0].equals("stop")) { finish("stopped"); return; }
     check(task == null, "performance observer already running");
-    check(args.length >= 2 && Set.of("start", "turn", "travel").contains(args[0]), "use performance-420 start|turn|travel LABEL [SECONDS], status or stop");
+    check(args.length >= 2 && Set.of("start", "turn", "travel", "ui").contains(args[0]), "use performance-420 start|turn|travel|ui LABEL [SECONDS], status or stop");
     check(args[1].matches("[a-zA-Z0-9_-]{1,60}"), "invalid report label");
-    check(mc.world != null && !mc.world.isRemote && mc.player != null && mc.currentScreen == null, "open a disposable singleplayer world");
+    check(mc.world != null && !mc.world.isRemote && mc.player != null && (mc.currentScreen == null || args[0].equals("ui")), "open a disposable singleplayer world");
     if (args[0].equals("travel")) check(mc.player instanceof PlayerMode mode && (mode.power$spectator() || mode.power$flying()), "travel requires an already flying or Spectator player");
     int seconds = args.length > 2 ? Integer.parseInt(args[2]) : 10;
     check(seconds >= 2 && seconds <= 60, "sample duration must be 2–60 seconds");
     task = new Task(mc, args[0], args[1], seconds);
     log("PERFORMANCE 420 START " + task.label + " renderer=" + GL11.glGetString(GL11.GL_RENDERER));
   }
+
+  public static long beforePresent() {
+    Task current = task;
+    if (current == null) return 0;
+    long now = System.nanoTime();
+    if (current.lastPresent != 0) current.presentIntervals.add((now - current.lastPresent) / 1e6);
+    current.lastPresent = now;
+    return now;
+  }
+
+  public static boolean ui() { return task != null && task.action.equals("ui"); }
 
   public static long start() { return task == null ? 0 : System.nanoTime(); }
   public static void measured(String kind, long started) {
@@ -81,7 +92,7 @@ public final class Performance420Checks {
     try {
       if (mc.world != current.world || mc.player == null) { finish("world-changed"); return; }
       if (System.nanoTime() >= current.until) { finish("complete"); return; }
-      if (mc.currentScreen != null || !Display.isActive()) { finish("interrupted"); return; }
+      if (mc.currentScreen != current.screen || !Display.isActive()) { finish("interrupted"); return; }
       current.ticks++;
       if (current.action.equals("turn")) mc.player.yaw = current.yaw + current.ticks * 2;
       if (current.action.equals("travel")) {
@@ -112,12 +123,14 @@ public final class Performance420Checks {
     report.put("renderer", GL11.glGetString(GL11.GL_RENDERER)); report.put("vendor", GL11.glGetString(GL11.GL_VENDOR));
     report.put("gpuTimers", done.gpu); report.put("frames", done.frames); report.put("ticks", done.ticks);
     report.put("seconds", (System.nanoTime() - done.started) / 1e9);
+    report.put("mainThreadAllocatedBytes", allocated() - done.allocated);
     report.put("renderDistanceChunks", Class.forName("local.luke.power.controls.util.ModOptions")
         .getMethod("getRenderDistanceChunks").invoke(null));
     report.put("window", List.of(done.mc.displayWidth, done.mc.displayHeight));
     report.put("mapSettings", MapConfig.copy());
     report.put("frameCpuMs", done.frameCpu.report()); report.put("frameGpuMs", done.frameGpu.report());
     report.put("frameIntervalMs", done.intervals.report());
+    report.put("presentIntervalMs", done.presentIntervals.report());
     var metrics = new LinkedHashMap<String, Object>();
     done.metrics.forEach((name, metric) -> metrics.put(name, metric.report())); report.put("work", metrics);
     var slow = new ArrayList<>(done.slowest); slow.sort(Comparator.comparingDouble(SlowFrame::cpuMs).reversed());
@@ -131,14 +144,20 @@ public final class Performance420Checks {
   private record SlowFrame(double cpuMs, int terrainBuilds, double terrainBuildMs,
       int generatedChunks, double generationMs, double x, double z, float yaw) {}
 
+  private static long allocated() {
+    return ((com.sun.management.ThreadMXBean)java.lang.management.ManagementFactory.getThreadMXBean())
+        .getThreadAllocatedBytes(Thread.currentThread().getId());
+  }
+
   private static final class Metric {
     final ArrayList<Double> samples = new ArrayList<>();
-    long calls;
+    long calls, over8, over16, over33;
     double total, maximum;
-    void add(double value) { calls++; total += value; maximum = Math.max(maximum, value); if (samples.size() < LIMIT) samples.add(value); }
+    void add(double value) { calls++; if (value > 8.333333) over8++; if (value > 16.666667) over16++; if (value > 33.333333) over33++; total += value; maximum = Math.max(maximum, value); if (samples.size() < LIMIT) samples.add(value); }
     Map<String, Object> report() {
       var result = new LinkedHashMap<>(HeldLight400Frames.percentiles(samples));
       result.put("calls", calls); result.put("total", total); result.put("max", maximum);
+      result.put("over8ms", over8); result.put("over16ms", over16); result.put("over33ms", over33);
       result.put("truncated", calls > samples.size()); return result;
     }
   }
@@ -146,21 +165,23 @@ public final class Performance420Checks {
   private static final class Task {
     final Minecraft mc;
     final World world;
+    final net.minecraft.client.gui.screen.Screen screen;
     final Thread thread = Thread.currentThread();
     final String action, label;
     final long started = System.nanoTime(), until;
+    final long allocated = allocated();
     final double x, y, z, vx, vy, vz;
     final float yaw;
     final boolean gpu = GLContext.getCapabilities().OpenGL33;
     final ArrayDeque<Integer> available = new ArrayDeque<>(), pending = new ArrayDeque<>();
-    final Metric frameCpu = new Metric(), frameGpu = new Metric(), intervals = new Metric();
+    final Metric frameCpu = new Metric(), frameGpu = new Metric(), intervals = new Metric(), presentIntervals = new Metric();
     final Map<String, Metric> metrics = new LinkedHashMap<>();
     final PriorityQueue<SlowFrame> slowest = new PriorityQueue<>(Comparator.comparingDouble(SlowFrame::cpuMs));
-    long frameStart, lastFrame, frames;
+    long frameStart, lastFrame, lastPresent, frames;
     int activeQuery, ticks, frameBuilds, frameGenerations;
     double frameBuildMs, frameGenerationMs;
     Task(Minecraft mc, String action, String label, int seconds) {
-      this.mc = mc; world = mc.world; this.action = action; this.label = label;
+      this.mc = mc; world = mc.world; screen = mc.currentScreen; this.action = action; this.label = label;
       until = started + seconds * 1_000_000_000L;
       x = mc.player.x; y = mc.player.y; z = mc.player.z; yaw = mc.player.yaw;
       vx = mc.player.velocityX; vy = mc.player.velocityY; vz = mc.player.velocityZ;
