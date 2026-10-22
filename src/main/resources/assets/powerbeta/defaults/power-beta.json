@@ -571,7 +571,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.0.3"
+        "customVersionText": "Power Beta 4.0.4"
       },
       "panoramaConfig": {
         "enablePanorma": true,

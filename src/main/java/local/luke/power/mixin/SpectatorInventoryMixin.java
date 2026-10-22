@@ -20,8 +20,9 @@ public abstract class SpectatorInventoryMixin {
     if (player.world.isRemote) return;
     tag.values().removeIf(value -> "PowerBetaSpectatorCursor".equals(((net.minecraft.nbt.NbtElement)value).getKey()));
     // Closing Spectator inventory retains the cursor instead of dropping it.
+    // Keep it safe even if mode access is revoked before the next inventory visit.
     // Use the existing full-count/native-NBT codec for the already owned cursor slot.
-    if (!((PlayerMode)player).power$spectator() || player.inventory.getCursorStack()==null) return;
+    if (player.inventory.getCursorStack()==null) return;
     try { tag.putString("PowerBetaSpectatorCursor",local.luke.power.death.DeathItems.encode(player.inventory.getCursorStack())); }
     catch(java.io.IOException e) { throw new IllegalStateException("Could not preserve held Spectator item",e); }
   }

@@ -9,4 +9,8 @@ public final class RecipeBookSettings {
   // craftingOpen is shared; retain the old furnace field as a mirrored storage alias.
   public boolean craftingOpen=false,furnaceOpen=false;
   public boolean craftingFilter=false,furnaceFilter=false;
+  public void state(boolean furnace,boolean open,boolean filter) {
+    craftingOpen=furnaceOpen=open;
+    if(furnace)furnaceFilter=filter;else craftingFilter=filter;
+  }
 }

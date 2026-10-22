@@ -11,8 +11,7 @@ public final class RecipeBookConfig {
   public static void preview(RecipeBookSettings next){current=Catalog.JSON.fromJson(Catalog.JSON.toJson(next),RecipeBookSettings.class);}
   public static void save(RecipeBookSettings next)throws java.io.IOException{PowerConfig.save("recipeBook",next);preview(next);}
   public static void state(boolean furnace,boolean open,boolean filter) {
-    var next=copy();next.craftingOpen=next.furnaceOpen=open;
-    if(furnace)next.furnaceFilter=filter;else next.craftingFilter=filter;
+    var next=copy();next.state(furnace,open,filter);
     PowerConfig.saveDeferred("recipeBook",next);preview(next);
   }
 }

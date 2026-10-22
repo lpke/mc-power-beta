@@ -5,6 +5,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class RecipeBookSettingsTest {
+  @Test void visibilityIsSharedWhileCraftabilityFiltersRemainIndependent() {
+    var settings=new RecipeBookSettings();
+    settings.state(true,true,true);
+    assertTrue(settings.craftingOpen);assertTrue(settings.furnaceOpen);
+    settings.state(false,false,false);
+    assertFalse(settings.craftingOpen);assertFalse(settings.furnaceOpen);
+    assertTrue(settings.furnaceFilter);assertFalse(settings.craftingFilter);
+    var restored=new Gson().fromJson(new Gson().toJson(settings),RecipeBookSettings.class);
+    assertFalse(restored.craftingOpen);assertFalse(restored.furnaceOpen);assertTrue(restored.furnaceFilter);
+  }
   @Test void existingSettingsRetainModernButtonAndBookState() {
     var settings=new Gson().fromJson("{\"craftingOpen\":true,\"furnaceFilter\":true}",RecipeBookSettings.class);
     assertEquals(0,settings.buttonStyle);assertTrue(settings.craftingOpen);assertTrue(settings.furnaceFilter);
