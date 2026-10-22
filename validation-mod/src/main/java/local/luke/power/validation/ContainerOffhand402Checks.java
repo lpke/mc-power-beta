@@ -80,7 +80,7 @@ final class ContainerOffhand402Checks {
                   "a player constructor omitted or duplicated the offhand slot");
           }
           check(inventory.main.length == 36 && inventory.armor.length == 4 && inventory.size() == 40, "native player arrays changed");
-          check(slot.x == -17 && slot.y == hotbarY && OffhandContainers.hotbarY(screen.container, inventory) == hotbarY, "offhand does not follow the native hotbar");
+          check(slot.x == local.luke.power.input.InventorySideSlots.OFFHAND_X && slot.y == hotbarY && OffhandContainers.hotbarY(screen.container, inventory) == hotbarY, "offhand does not follow the native hotbar");
           var change = NativeInventoryPlan.Change.slot(slot, null);
           check(change.owner() == inventory && change.index() == 45, "transport ID leaked into recovery ownership");
           int[] point = point(screen, slot);
@@ -95,7 +95,7 @@ final class ContainerOffhand402Checks {
           // Click the frame's upper-left padding while carrying the item. It must never become an outside drop.
           var bounds = (ContainerInput)(Object)screen;
           int left = (screen.width - bounds.power$width()) / 2 + InventoryPanels.offset(screen), top = (screen.height - bounds.power$height()) / 2;
-          click(screen, left - 21, top + hotbarY - 4);
+          click(screen, left - InventorySideSlots.WIDTH + 1, top + hotbarY - 4);
           check(before.equals(bytes(inventory.getCursorStack())), "frame padding dropped the carried stack");
           click(screen, point[0], point[1]);
           check(inventory.getCursorStack() == null && before.equals(bytes(Offhand.get(inventory))), "putback changed native item data");

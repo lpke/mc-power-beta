@@ -52,7 +52,7 @@ final class SpectatorContainer404Checks {
   }
   private static final class DisplaySource implements Inventory {
     private final ItemStack[] items;
-    DisplaySource(int size){items=new ItemStack[size];items[0]=DeathChecks.tagged(35,23,5,"viewer-native-data");}
+    DisplaySource(int size)throws Exception{items=new ItemStack[size];items[0]=DeathChecks.tagged(35,23,5,"viewer-native-data");}
     public int size(){return items.length;}
     public ItemStack getStack(int slot){return items[slot];}
     public void setStack(int slot,ItemStack value){items[slot]=value;}
