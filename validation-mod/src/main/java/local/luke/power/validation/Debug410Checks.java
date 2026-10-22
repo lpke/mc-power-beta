@@ -27,6 +27,7 @@ final class Debug410Checks {
       test("DEBUG410 controls UI contains debug group",()->{
         local.luke.power.ui.PowerOptionsScreen.openDebug(mc);
         var screen=(local.luke.power.ui.PowerOptionsScreen)mc.currentScreen;
+        Files.createDirectories(Path.of("power-beta-data/reports/debug-410"));
         SettingsSnapshot.render(mc,screen,640,360,Path.of("power-beta-data/reports/debug-410/controls.png"));
         check(screen.session().settings().stream().filter(s->s.group.equals("Debug")).count()>=DebugAction.values().length,"missing controls");
       });
