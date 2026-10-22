@@ -74,13 +74,16 @@ public abstract class ClientMixin {
     Minecraft mc = (Minecraft) (Object) this;
     if (ClientRuntime.local(mc)
         && Modes.spectator(mc.player)
-        && key == mc.options.dropKey.key && !Modes.spectatorInventory(mc.player)) return 0;
+        && key == mc.options.dropKey.key) return 0;
     return key;
   }
 
   @Inject(method = "processAttack", at = @At("HEAD"), cancellable = true)
   private void power$interact(int button, CallbackInfo ci) {
-    if (Modes.spectator(((Minecraft) (Object) this).player)) ci.cancel();
+    if (Modes.spectator(((Minecraft) (Object) this).player)) {
+      if (button == 1) local.luke.power.input.SpectatorContainers.open();
+      ci.cancel();
+    }
   }
 
   @Inject(method = "processDigging", at = @At("HEAD"), cancellable = true)

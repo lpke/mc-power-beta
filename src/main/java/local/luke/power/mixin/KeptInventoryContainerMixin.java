@@ -12,5 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin({Container.class, class_277.class})
 public abstract class KeptInventoryContainerMixin {
   @Inject(method = "method_2087", at = @At("HEAD"), cancellable = true)
-  private void power$keepHeld(PlayerEntity player, CallbackInfo ci) { if (KeepInventory.kept(player)) ci.cancel(); }
+  private void power$keepHeld(PlayerEntity player, CallbackInfo ci) {
+    if (KeepInventory.kept(player) || player instanceof local.luke.power.input.PlayerMode mode && mode.power$spectator()) ci.cancel();
+  }
 }

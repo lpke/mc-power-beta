@@ -108,16 +108,23 @@ final class SpectatorInventory401Checks {
           check(nativeContainer.method_2084(1).getStack() == null && nativeContainer.method_2084(0).getStack() == null
               && inventory.main[9] != null && inventory.main[9].itemId == 5 && inventory.main[9].count == 4, "crafting consumed wrong inputs or output");
         });
-        test("SPECTATOR401 open inventory native drops creative=" + allowed, () -> {
+        test("SPECTATOR404 open inventory drops preserve cursor and selected stacks creative=" + allowed, () -> {
           clear(mc, grid); ItemStack carried = DeathChecks.tagged(35, 3, 5, "spectator-outside");
           String bytes = bytes(carried); inventory.setCursorStack(carried); Set<Object> before = entitySet(mc);
-          click(mc, -999);
-          check(inventory.getCursorStack() == null && newDrops(mc, before).size() == 1
-              && bytes.equals(bytes(newDrops(mc, before).get(0).field_564)), "outside drop changed full native stack");
+          for(int button:new int[]{0,1})mc.interactionManager.clickSlot(nativeContainer.syncId,-999,button,false,player);
+          check(bytes.equals(bytes(inventory.getCursorStack())) && newDrops(mc,before).isEmpty(), "outside click dropped or lost the cursor");
           inventory.main[0] = DeathChecks.tagged(35, 2, 5, "spectator-selected");
-          ItemStack single = DeathItems.decode(bytes(inventory.main[0])); single.count = 1; before = entitySet(mc); player.dropSelectedItem();
-          check(bytes(single).equals(bytes(inventory.main[0])) && newDrops(mc, before).size() == 1
-              && bytes(single).equals(bytes(newDrops(mc, before).get(0).field_564)), "open selected-item drop changed native data/count");
+          String selectedBytes=bytes(inventory.main[0]); player.dropSelectedItem();
+          check(selectedBytes.equals(bytes(inventory.main[0])) && newDrops(mc,before).isEmpty(), "selected-item drop changed inventory");
+          nativeContainer.method_2087(player);
+          check(bytes.equals(bytes(inventory.getCursorStack())) && newDrops(mc,before).isEmpty(), "closing inventory dropped or erased the cursor");
+          var saved=new net.minecraft.nbt.NbtCompound(); player.writeNbt(saved);
+          check(saved.contains("PowerBetaSpectatorCursor"),"Spectator cursor was not saved");
+          inventory.setCursorStack(null);
+          hook(player,"power$loadCursor",net.minecraft.nbt.NbtCompound.class,CallbackInfo.class).invoke(player,saved,new CallbackInfo("fixture",false));
+          check(bytes.equals(bytes(inventory.getCursorStack())),"Spectator cursor reload changed native item data");
+          inventory.setCursorStack(null); player.writeNbt(saved);
+          check(!saved.contains("PowerBetaSpectatorCursor"),"saving an empty cursor retained stale ownership");
         });
         test("SPECTATOR401 catalog and destroy permission creative=" + allowed, () -> {
           clear(mc, grid); Class<?> actions = Class.forName("local.luke.power.creative.InventoryActions");

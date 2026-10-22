@@ -53,6 +53,6 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
         GuiSprite.draw(px, py, w, h, u, v, sw, sh, InventorySideSlots.FRAME_TEXTURE_WIDTH, InventorySideSlots.FRAME_TEXTURE_HEIGHT), x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight), hotbarY, false);
     GL11.glColor4f(1, 1, 1, 1);
     minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.SLOT_TEXTURE));
-    GuiSprite.draw(x + InventorySideSlots.OFFHAND_X - 1, y + hotbarY - 1, 18, 18, 0, 0, 18, 18, 18, 18);
+    GuiSprite.draw(x + InventorySideSlots.SLOT_X, y + hotbarY - 1, 18, 18, 0, 0, 18, 18, 18, 18);
   }
 }

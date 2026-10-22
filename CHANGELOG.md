@@ -2,7 +2,13 @@
 
 ## [Unreleased]
 
-- Support texture-pack overrides for inventory side slots and compact button backgrounds and letters.
+## [4.0.4] - 2026-10-22
+
+- Inspect containers in Spectator without withdrawing, depositing or activating them. Keep your own inventory editable while preventing item drops, including outside clicks and inventory closure.
+- Share the recipe book's open state between inventory, crafting and furnace screens. Find recipes with fuzzy item search.
+- Use fuzzy command suggestions, including matches within names such as plank for wooden_planks. Keep closer matches nearest the input and replace the full token when completing.
+- Support editable texture-pack assets for inventory side slots and compact buttons. Refresh cached mod textures after pack changes.
+- Refine offhand and Creative destroy-slot padding, preserve custom frame corners and align the slots with the white inventory border across native containers.
 
 ## [4.0.3] - 2026-10-22
 

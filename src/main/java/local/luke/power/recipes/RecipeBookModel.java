@@ -31,12 +31,17 @@ final class RecipeBookModel {
   boolean available(RecipeDefinition recipe){return availability.available(recipe);}
   boolean current(){return availability.current();}
   List<List<RecipeDefinition>> groups(RecipeContext context,int category,String query,boolean filter) {
-    Map<String,List<RecipeDefinition>> groups=new LinkedHashMap<>();String[] words=query.toLowerCase(Locale.ROOT).strip().split("\\s+");
+    Map<String,List<RecipeDefinition>> groups=new LinkedHashMap<>();
+    Map<String,Integer> scores=new HashMap<>();
     for(var recipe:recipes) {
       if(recipe.kind!=context.kind||recipe.layout(context.width,context.height)==null||category!=0&&recipe.category!=category||filter&&!available(recipe))continue;
-      boolean matches=true;for(String word:words)if(!recipe.search.contains(word)){matches=false;break;}
-      if(matches)groups.computeIfAbsent(recipe.group,key->new ArrayList<>()).add(recipe);
+      int score=local.luke.power.ui.FuzzySearch.score(query,recipe.name,recipe.search);
+      if(score<local.luke.power.ui.FuzzySearch.NONE){
+        groups.computeIfAbsent(recipe.group,key->new ArrayList<>()).add(recipe);
+        scores.merge(recipe.group,score,Math::min);
+      }
     }
-    return List.copyOf(groups.values());
+    return groups.entrySet().stream().sorted(Comparator.comparingInt(entry->scores.get(entry.getKey())))
+        .map(Map.Entry::getValue).toList();
   }
 }

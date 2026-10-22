@@ -1,5 +1,10 @@
 # Runtime checks
 
+- After `new-world`, run `spectator-inventory-404`, `spectator-containers-404` and
+  `commands-403` for 4.0.4. These check blocked drops, retained full-data cursors,
+  immutable native-style container views, fuzzy token replacement and captures.
+  The old spectator-inventory-401 command now follows the no-dropping behavior.
+
 - After `new-world`, `release-322 ui` checks direct Options return, manual drafts and
   the single-row zoom footer. Use `sidebar-prepare`, physical Tab hold, `sidebar-held`,
   physical release and `sidebar-released` for sidebar input and the world-only Mobs lock.

@@ -106,7 +106,7 @@ public abstract class ChatScreenMixin extends Screen {
     @Unique private String power$completionToken(String suffix) {
         String input = power$input();
         int start = input.lastIndexOf(' ') + 1;
-        String completed = input.substring(start) + suffix;
+        String completed = suffix;
         if (start == 0) {
             for (Command command : RetroChatUtil.commands)
                 if (("/" + command.name()).equalsIgnoreCase(completed)) return "/" + command.name();
@@ -149,7 +149,7 @@ public abstract class ChatScreenMixin extends Screen {
             return;
         }
 
-        currentWord = sections[sections.length - 1];
+        currentWord = power$input().endsWith(" ") ? "" : sections[sections.length - 1];
         fetchSuggestionsForCurrentWord(sections);
 
         if (power$input().endsWith(" "))
@@ -180,42 +180,38 @@ public abstract class ChatScreenMixin extends Screen {
     @Unique
     private void fetchSuggestionsForCurrentWord(String[] sections) {
         try {
-            Minecraft mc = ((Minecraft) FabricLoader.getInstance().getGameInstance());
-
-            if (power$input().startsWith(" ")) {
-                return;
-            }
-
-            if (sections.length == 1 && currentWord.length() > 1 && power$input().charAt(0) == '/' && !power$input().endsWith(" ")) {
-
-                if (mc.world.isRemote && !ClientCommands.mp_rc) {
-                    suggestions = vanillaNoOPCommands.stream()
-                            .filter(s -> local.luke.power.chat.ChatCompletion.startsWith(s, currentWord.substring(1)))
-                            .map(s -> s.substring(power$input().length() - 1))
-                            .toArray(String[]::new);
+            if (!power$input().startsWith("/")) return;
+            List<String> choices = new ArrayList<>();
+            if (sections.length == 1 && !power$input().endsWith(" ")) {
+                if (minecraft.world.isRemote && !ClientCommands.mp_rc) {
+                    vanillaNoOPCommands.forEach(name -> choices.add("/" + name));
                 } else {
-                    suggestions = RetroChatUtil.commands.stream()
-                            .filter(c -> local.luke.power.chat.ChatCompletion.startsWith(c.name(), currentWord.substring(1)))
-                            .filter(c -> !ClientCommands.disabled_commands.contains(c.name()))
-                            .filter(c -> local.luke.power.commands.util.CommandAccess.available(c, new SharedCommandSource(mc.player)))
-                            .map(c -> c.name().substring(power$input().length() - 1))
-                            .toArray(String[]::new);
+                    SharedCommandSource source = new SharedCommandSource(minecraft.player);
+                    RetroChatUtil.commands.stream()
+                        .filter(c -> !ClientCommands.disabled_commands.contains(c.name()))
+                        .filter(c -> local.luke.power.commands.util.CommandAccess.available(c, source))
+                        .forEach(c -> choices.add("/" + c.name()));
                 }
             } else {
                 Command command = RetroChatUtil.commands.stream()
-                        .filter(c -> c.name().equalsIgnoreCase(sections[0].substring(1)))
-                        .filter(c -> local.luke.power.commands.util.CommandAccess.available(c, new SharedCommandSource(mc.player)))
-                        .findFirst().orElse(null);
-                if (command != null && (!command.disableInSingleplayer() || mc.world.isRemote)) {
-                    PlayerEntity player = mc.player;
-                    SharedCommandSource source = new SharedCommandSource(player);
-                    suggestions = power$input().endsWith(" ") ? command.suggestion(source, sections.length, "", power$input()) : command.suggestion(source, sections.length - 1, currentWord, power$input());
+                    .filter(c -> c.name().equalsIgnoreCase(sections[0].substring(1)))
+                    .filter(c -> local.luke.power.commands.util.CommandAccess.available(c, new SharedCommandSource(minecraft.player)))
+                    .findFirst().orElse(null);
+                if (command != null && (!command.disableInSingleplayer() || minecraft.world.isRemote)) {
+                    int parameter = power$input().endsWith(" ") ? sections.length : sections.length - 1;
+                    // Keep structured block-state completion contextual. Plain item names
+                    // ask for full choices so fuzzy matches can replace the entire token.
+                    String prefix = currentWord.contains("[") ? currentWord
+                        : currentWord.contains(":") ? currentWord.substring(0, currentWord.indexOf(':') + 1) : "";
+                    String before = power$input().substring(0, power$input().length() - currentWord.length());
+                    for (String suffix : command.suggestion(new SharedCommandSource(minecraft.player), parameter, prefix, before + prefix))
+                        choices.add(prefix + suffix);
                 }
             }
-
+            suggestions = local.luke.power.chat.ChatCompletion.ranked(currentWord, choices);
             textWidthPixels = this.textRenderer.getWidth("> " + power$input());
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        } catch (RuntimeException ignored) {
+            suggestions = new String[0];
         }
     }
 
@@ -320,14 +316,16 @@ public abstract class ChatScreenMixin extends Screen {
         var editor = power$editor();
         if (editor.cursor() != editor.text().length()) return;
         int x = 4 + textRenderer.getWidth("> " + editor.text().substring(power$viewStart));
-        String ghost = suggestions[chosen];
+        String choice = suggestions[chosen];
+        if (!local.luke.power.chat.ChatCompletion.startsWith(choice, currentWord)) return;
+        String ghost = choice.substring(currentWord.length());
         while (!ghost.isEmpty() && x + textRenderer.getWidth(ghost) > width - 4) ghost = ghost.substring(0, ghost.length() - 1);
         drawTextWithShadow(textRenderer, ghost, x, height - 12, 0xAAAAAA);
     }
 
     @Unique
     private void renderMultipleSuggestions() {
-        int listWidth = Math.min(width - 8, textRenderer.getWidth(currentWord) + getMaxSuggestionWidth() + 4);
+        int listWidth = Math.min(width - 8, getMaxSuggestionWidth() + 4);
         int wordStart = Math.max(power$viewStart, power$input().length() - currentWord.length());
         int x = Math.min(width - 4 - listWidth, 4 + textRenderer.getWidth("> " + power$input().substring(power$viewStart, wordStart)));
         int count = Math.min(suggestions.length, Math.max(1, Math.min(10, (height - 20) / 10)));
@@ -336,7 +334,7 @@ public abstract class ChatScreenMixin extends Screen {
         GL11.glEnable(GL11.GL_BLEND);
         GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         for (int i = from; i < from + count; i++) {
-            String label = currentWord + suggestions[i];
+            String label = suggestions[i];
             while (!label.isEmpty() && textRenderer.getWidth(label) > listWidth) label = label.substring(0, label.length() - 1);
             drawTextWithShadow(textRenderer, label, x, height - 12 - 10 * (i - from + 1), i == chosen ? 0xFCFC00 : 0xFFFFFF);
         }

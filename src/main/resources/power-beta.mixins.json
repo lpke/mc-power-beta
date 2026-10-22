@@ -4,6 +4,8 @@
   "package": "local.luke.power.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "SpectatorInventoryMixin",
+    "SpectatorSlotMixin",
     "ClientMixin",
     "SavedWorldMenuMixin",
     "BoatPlacementMixin",

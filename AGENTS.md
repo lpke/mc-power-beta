@@ -216,7 +216,10 @@
   inventory screen and owned player container. Creative permission selects its
   inventory views without changing actual mode. Keep crafting, gestures and manual
   inventory tools available there; world interaction, background automation and
-  closed-inventory dropping remain blocked. Scope the inventory player model to
+  all item dropping remain blocked. Spectator container inspection uses immutable
+  display slots without installing or activating a world-owned handler. Closing
+  the personal inventory retains crafting inputs and the cursor; persist the latter
+  with full native item data so save/reload cannot lose it. Scope the inventory player model to
   its renderer so opening inventory never reveals the Spectator body in the world.
 - `TweakIndicators` exposes live module state across mappings. HUD inclusion is
   separate from gameplay settings. Do not infer active auto-walk/free look from

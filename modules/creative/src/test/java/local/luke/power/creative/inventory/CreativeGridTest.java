@@ -35,9 +35,9 @@ class CreativeGridTest {
   }
 
   @Test void destroySlotBorderIsPartOfTheWindowOnlyWhenVisible() {
-    assertFalse(CreativeGrid.outsideBody(78, 237, 100, 100, 176, 166, true));
+    assertFalse(CreativeGrid.outsideBody(80, 236, 100, 100, 176, 166, true));
     assertFalse(CreativeGrid.outsideBody(99, 265, 100, 100, 176, 166, true));
-    assertTrue(CreativeGrid.outsideBody(78, 237, 100, 100, 176, 166, false));
-    assertTrue(CreativeGrid.outsideBody(77, 237, 100, 100, 176, 166, true));
+    assertTrue(CreativeGrid.outsideBody(80, 236, 100, 100, 176, 166, false));
+    assertTrue(CreativeGrid.outsideBody(79, 236, 100, 100, 176, 166, true));
   }
 }

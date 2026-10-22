@@ -17,21 +17,22 @@ class InventorySideSlotsTest {
     }
   }
   @Test void containerFramesAndHitsFollowTheirOwnHotbarAndBottom() {
-    for (int[] layout : new int[][]{{142, 166}, {143, 168}, {197, 222}}) {
-      int hotbarY = layout[0], height = layout[1], x = 30, top = hotbarY - 5;
+    // Player, crafting table, furnace and dispenser; then single and double chest.
+    for (int[] layout : new int[][]{{142, 166}, {143, 167}, {197, 221}}) {
+      int hotbarY = layout[0], height = layout[1], x = 30, top = hotbarY - 6;
       int[][] pixels = new int[height + 1][40];
       InventorySideSlots.frame((px, py, w, h, u, v, sw, sh) -> raster(pixels, px, py, w, h, u, v, sw, sh), x, 0, height, hotbarY, false);
-      assertEquals(0, pixels[top - 1][9]);
-      assertEquals(0xff000000, pixels[top][9]);
-      assertEquals(0xffffffff, pixels[top][x]);
-      assertEquals(0xff000000, pixels[height - 1][9]);
-      assertEquals(0, pixels[height][9]);
-      assertTrue(InventorySideSlots.contains(8, top, x, 0, height, hotbarY, false));
+      assertEquals(0, pixels[top - 1][13]);
+      assertEquals(0xff000000, pixels[top][13]);
+      assertEquals(0xffffffff, pixels[top][x + 1]);
+      assertEquals(0xff000000, pixels[height - 1][13]);
+      assertEquals(0, pixels[height][13]);
+      assertTrue(InventorySideSlots.contains(10, top, x, 0, height, hotbarY, false));
       assertTrue(InventorySideSlots.contains(33, height - 1, x, 0, height, hotbarY, false));
-      assertFalse(InventorySideSlots.contains(7, hotbarY, x, 0, height, hotbarY, false));
+      assertFalse(InventorySideSlots.contains(9, hotbarY, x, 0, height, hotbarY, false));
       assertFalse(InventorySideSlots.contains(34, hotbarY, x, 0, height, hotbarY, false));
-      assertFalse(InventorySideSlots.contains(8, top - 1, x, 0, height, hotbarY, false));
-      assertFalse(InventorySideSlots.contains(8, height, x, 0, height, hotbarY, false));
+      assertFalse(InventorySideSlots.contains(10, top - 1, x, 0, height, hotbarY, false));
+      assertFalse(InventorySideSlots.contains(10, height, x, 0, height, hotbarY, false));
     }
   }
 
@@ -40,12 +41,12 @@ class InventorySideSlotsTest {
       int[][] pixels = new int[166][40];
       InventorySideSlots.frame((px, py, w, h, u, v, sw, sh) -> raster(pixels, px, py, w, h, u, v, sw, sh), 30, 0, 166, destroy);
       int top = InventorySideSlots.top(destroy);
-      for (int x = 30; x < 33; x++) assertEquals(0xffffffff, pixels[top][x]);
+      for (int x = 31; x < 33; x++) assertEquals(0xffffffff, pixels[top][x]);
       assertEquals(0xffc6c6c6, pixels[top][33]);
-      for (int x = 9; x < 34; x++) assertEquals(0xff000000, pixels[165][x]);
-      assertEquals(0xff000000, pixels[top][10]);
-      assertEquals(0xff000000, pixels[top + 1][8]);
-      assertEquals(0xffffffff, pixels[top + 1][10]);
+      for (int x = 13; x < 34; x++) assertEquals(0xff000000, pixels[165][x]);
+      assertEquals(0xff000000, pixels[top][12]);
+      assertEquals(0xff000000, pixels[top + 1][11]);
+      assertEquals(0xffffffff, pixels[top + 1][12]);
     }
   }
 
@@ -62,8 +63,9 @@ class InventorySideSlotsTest {
       for (int y = top - 1; y <= top + 2; y++)
         assertEquals(0xffffffff, pixels[y][31], "The native white bevel must reach the extension ledge");
       assertEquals(0xff000000, pixels[top - 1][30]);
-      for (int y = top; y <= top + 2; y++) assertNotEquals(0xff000000, pixels[y][30]);
-      for (int x = 9; x < 34; x++) assertEquals(0xff000000, pixels[165][x]);
+      assertEquals(0xff000000, pixels[top][30]);
+      for (int y = top + 1; y <= top + 2; y++) assertNotEquals(0xff000000, pixels[y][30]);
+      for (int x = 13; x < 34; x++) assertEquals(0xff000000, pixels[165][x]);
     }
   }
 }

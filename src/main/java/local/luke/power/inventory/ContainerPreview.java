@@ -26,6 +26,16 @@ public final class ContainerPreview extends DrawableHelper {
     return snapshot(mc, 1);
   }
   private static List<ItemStack> snapshot(Minecraft mc, float delta) {
+    List<Inventory> sources = sources(mc, delta);
+    if (sources.isEmpty()) return List.of();
+    List<ItemStack> stacks = new ArrayList<>();
+    for (Inventory source : sources) {
+      if (source.size() < 1 || source.size() > 54) return List.of();
+      for (int i=0; i<source.size();i++) { ItemStack stack=source.getStack(i); stacks.add(stack == null ? null : stack.clone()); }
+    }
+    return stacks.size() > 54 ? List.of() : stacks;
+  }
+  static List<Inventory> sources(Minecraft mc, float delta) {
     var hit = ContainerTarget.find(mc, delta);
     if (hit == null) return List.of();
     List<Inventory> sources = new ArrayList<>();
@@ -44,13 +54,7 @@ public final class ContainerPreview extends DrawableHelper {
         }
       }
     } else if (hit.field_1989 instanceof Inventory inventory) sources.add(inventory);
-    if (sources.isEmpty()) return List.of();
-    List<ItemStack> stacks = new ArrayList<>();
-    for (Inventory source : sources) {
-      if (source.size() < 1 || source.size() > 54) return List.of();
-      for (int i=0; i<source.size();i++) { ItemStack stack=source.getStack(i); stacks.add(stack == null ? null : stack.clone()); }
-    }
-    return stacks.size() > 54 ? List.of() : stacks;
+    return sources;
   }
   private void draw(Minecraft mc, List<ItemStack> stacks) {
     var size = new class_564(mc.options,mc.displayWidth,mc.displayHeight);

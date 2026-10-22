@@ -31,7 +31,7 @@ public final class FuzzySearch {
         return 9 + compactTitle.length() - query.length();
     }
     int total = 0;
-    for (String term : query.split("\\s+")) {
+    for (String term : query.split("[\\s_]+")) {
       int best = Math.min(words(term, title), add(words(term, context), 30));
       if (best == NONE) return NONE;
       total += best;

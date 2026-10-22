@@ -36,7 +36,7 @@ public final class RecipeBookOverlay {
   public RecipeBookOverlay(Screen screen,Minecraft mc,RecipeContext context,boolean standalone) {
     this.screen=screen;this.mc=mc;this.context=context;this.standalone=standalone;
     var state=RecipeBookConfig.current();boolean furnace=context.kind==RecipeDefinition.Kind.FURNACE;
-    open=standalone||(furnace?state.furnaceOpen:state.craftingOpen);filter=!standalone&&(furnace?state.furnaceFilter:state.craftingFilter);
+    open=standalone||state.craftingOpen;filter=!standalone&&(furnace?state.furnaceFilter:state.craftingFilter);
     refreshGeometry();
   }
   public boolean enabled() {
@@ -46,7 +46,7 @@ public final class RecipeBookOverlay {
   }
   public RecipeBookLayout layout(){
     int overhang=!standalone&&mc.player!=null&&local.luke.power.offhand.Offhand.visible(mc.player)
-        &&local.luke.power.offhand.OffhandContainers.slot(context.handler,mc.player.inventory)!=null?22:0;
+        &&local.luke.power.offhand.OffhandContainers.slot(context.handler,mc.player.inventory)!=null?InventorySideSlots.WIDTH:0;
     return new RecipeBookLayout(screen.width,screen.height,open&&enabled(),standalone,overhang);
   }
   public boolean replacesNative(){return enabled()&&open&&layout().narrow()&&!InventoryPanels.modalOther(screen,this);}
