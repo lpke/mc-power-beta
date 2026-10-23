@@ -67,12 +67,22 @@ public final class RecipeFillPlanner {
   }
   public static Plan plan(List<RecipeStack> originalMain,RecipeStack originalOffhand,List<RecipeStack> originalGrid,
       List<RecipeIngredient> cells,int selected,boolean offhandWritable,boolean matches,boolean maximum,RecipeStack originalOutput) {
+    return plan(originalMain,originalOffhand,originalGrid,cells,selected,offhandWritable,matches,maximum,originalOutput,true);
+  }
+  /** A crafting turn may use the grid directly; it need not return ingredients before consuming them. */
+  public static Plan forCraft(List<RecipeStack> main,RecipeStack offhand,List<RecipeStack> grid,
+      List<RecipeIngredient> cells,int selected,boolean offhandWritable) {
+    return plan(main,offhand,grid,cells,selected,offhandWritable,false,true,null,false);
+  }
+  private static Plan plan(List<RecipeStack> originalMain,RecipeStack originalOffhand,List<RecipeStack> originalGrid,
+      List<RecipeIngredient> cells,int selected,boolean offhandWritable,boolean matches,boolean maximum,
+      RecipeStack originalOutput,boolean returnFirst) {
     if(originalMain.size()!=36||originalGrid.size()!=cells.size()||cells.size()>9||selected<0||selected>8)
       throw new IllegalArgumentException("Unsupported recipe inventory layout");
     if(originalOutput!=null&&cells.size()!=1)throw new IllegalArgumentException("Only furnace output is returned as an item");
     // Vanilla checks whether the original grid can be returned before any recipe is placed.
     ReturnState clear=new ReturnState(originalMain,originalOffhand,selected,offhandWritable);
-    for(RecipeStack stack:originalGrid)if(!clear.insert(stack))return null;
+    for(RecipeStack stack:originalGrid)if(!clear.insert(stack)&&returnFirst)return null;
     int offhandBeforeOutput=clear.offhand==null?0:clear.offhand.count();
     if(!clear.insert(originalOutput))return null;
     List<RecipeStack> supply=supply(originalMain,originalGrid,originalOutput,clear,offhandBeforeOutput);

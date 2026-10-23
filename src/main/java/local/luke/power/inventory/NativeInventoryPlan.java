@@ -199,6 +199,7 @@ public final class NativeInventoryPlan {
     final BooleanSupplier eligible;
     final Runnable committed, rollback;
     final Replacement replacement;
+    final local.luke.power.recipes.RecipeCrafts.Exchange exchange;
     Future<?> durable;
     boolean cancelled;
     int encodedSize;
@@ -207,6 +208,7 @@ public final class NativeInventoryPlan {
         BooleanSupplier eligible, Runnable committed, Replacement replacement, Runnable rollback,
         local.luke.power.recipes.RecipeCrafts.Exchange exchange) throws IOException {
       if (requested == null || requested.size() > 128) throw new IOException("Inventory plan exceeds its slot limit");
+      this.exchange = exchange;
       this.lease = lease; world = mc.world; player = mc.player; handler = mc.player.container; screen = mc.currentScreen;
       inventory = mc.player.inventory; main = inventory.main; armor = inventory.armor; selected = inventory.selectedSlot;
       references = DeathItems.snapshot(inventory, mc.player.playerContainer);
@@ -349,6 +351,7 @@ public final class NativeInventoryPlan {
           written = i + 1; change.set.accept(next.get(i));
         }
         verifyPublished(mc);
+        if (exchange != null) exchange.callbacks(mc, () -> verifyPublished(mc));
         committed.run();
         verifyPublished(mc);
       } catch (Exception | LinkageError failure) {

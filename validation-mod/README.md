@@ -31,6 +31,21 @@
   the unchanged decoder on the same bytes, verifies exact source frame counts and
   writes disposable PCM evidence for comparison with FFmpeg.
 
+- `minimap-441 prepare CASE`, `check`, `check-release` and `stop` verify real wheel
+  ownership while Enlarge minimap is held. Cases cover enabled/disabled, hidden maps,
+  F3, zoom limits, camera zoom, Spectator speed, chord release order and hotbar rows.
+  Follow the logged physical-key instructions; release keys after each case.
+- `recipe-441` checks Alt-click variants, untouched-icon wheel page scrolling, last-batch
+  removal and reuse, and Shift-right-click maximum crafting. It blocks the journal
+  worker to prove no early publication, then checks all batches complete in one tick.
+  Partial/zero capacity, tagged ingredients, native container returns, stale owners,
+  per-batch callback failures, external-owner guards and unsupported subclasses are
+  included. Use a focused, muted disposable Survival world with one nearby loaded air
+  block. The fixture restores settings, inventory and its temporary crafting table.
+  `recipe-441 prepare variants|max|wheel`, `check` and `stop` also check physical
+  Alt-click, Shift-right-click and wheel input at the logged client coordinates.
+  Use a wide native GUI and follow each logged action before checking.
+
 - `sorting-worlds-440` checks separate active layouts and named presets across two
   world IDs, retained legacy/global preferences and unchanged native inventory data.
   It restores the complete settings document and runtime caches.

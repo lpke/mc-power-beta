@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [4.4.1] - 2026-10-24
+
+- Use Alt-click to open recipe variants.
+- Shift-right-click fills and crafts the maximum whole recipe batches that fit in the inventory through one protected transaction.
+- Scroll over a chosen recipe to adjust its ingredients, including removing the last batch. Hovering untouched recipes keeps page scrolling available.
+- Add wheel zoom while holding Enlarge minimap, enabled by default. Share inventory zoom increments and limits while preserving menu, hotbar-row and hidden-map input ownership.
+
 ## [4.4.0] - 2026-10-23
 
 - Add editable Creative tabs with custom names, icons, ordered item grids, empty slots, multiple selection and dragging. Keep Search pinned beside six regular tabs, with fuzzy item search and remembered tab scrolling.

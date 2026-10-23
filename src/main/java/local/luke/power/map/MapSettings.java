@@ -4,6 +4,7 @@ package local.luke.power.map;
 public final class MapSettings {
   public boolean minimap = true, worldMap = true, rotate = true, circular = true, hideWithDebug = true;
   public boolean showInInventory = true;
+  public boolean zoomWhileExpanded = true;
   public int size = 108, corner = 1, offsetX = 6, offsetY = 6;
   public double opacity = 1, zoom = 1;
   public double zoomDefault = 1.25;

@@ -5,6 +5,15 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 
 class MinimapZoomTest {
+  @Test void expandedWheelDefaultsOnWithoutReplacingSavedOptOuts() {
+    var gson = new Gson();
+    assertTrue(gson.fromJson("{}", MapSettings.class).zoomWhileExpanded);
+    var optedOut = gson.fromJson("{\"zoomWhileExpanded\":false}", MapSettings.class);
+    assertFalse(gson.fromJson(gson.toJson(optedOut), MapSettings.class).zoomWhileExpanded);
+    for (var base : local.luke.power.config.DefaultBases.Base.values())
+      assertTrue(local.luke.power.config.DefaultBases.value(base, "maps.zoomWhileExpanded",
+          new com.google.gson.JsonPrimitive(true)).getAsBoolean());
+  }
   @Test void resetUsesTheChosenStepAndOldPreferencesStartAtOneAndAQuarter() {
     double[] steps = {.25, .5, 1.25, 2.5, 4};
     assertEquals(1.25, MinimapZoomSteps.reset(steps, 1.25));

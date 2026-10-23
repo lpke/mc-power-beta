@@ -249,7 +249,7 @@ public final class Recipe402Checks {
     }
     return totals;
   }
-  private static final class State implements AutoCloseable {
+  static final class State implements AutoCloseable {
     private final Minecraft mc;
     private final ItemStack[] main, armor, grid, inputs;
     private final ItemStack cursor, offhand, output;
@@ -285,6 +285,8 @@ public final class Recipe402Checks {
       mc.currentScreen = current; mc.player.container = mc.player.playerContainer; current.init(mc, width, 360); screens.add(current);
       context = RecipeContext.of(current); book = RecipeBooks.book(current); check(context != null && context.writable(mc) && book != null, "native recipe context unavailable"); book.tick();
     }
+    RecipeContext context() { return context; }
+    RecipeBookOverlay book() { return book; }
     void finish() throws Exception { JournalQueue.awaitQueued(); NativeInventoryPlan.tick(mc); check(!NativeInventoryPlan.busy(), "durable inventory action did not finish"); }
     String snapshot() throws Exception { return DeathItems.inventory(DeathItems.snapshot(mc.player.inventory, mc.player.playerContainer)); }
     public void close() throws Exception {

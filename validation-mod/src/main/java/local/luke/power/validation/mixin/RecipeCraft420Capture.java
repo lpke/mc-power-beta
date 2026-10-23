@@ -16,5 +16,6 @@ public abstract class RecipeCraft420Capture {
   @Inject(method = "onCrafted", at = @At("TAIL"))
   private void validation$nativeCraft(ItemStack result, CallbackInfo ci) {
     Recipe402Checks.craftCallback(field_2366, field_2367, result);
+    local.luke.power.validation.Recipe441Checks.callback(field_2366, field_2367, result);
   }
 }

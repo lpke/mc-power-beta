@@ -7,6 +7,7 @@
     "SpectatorInventoryMixin",
     "SpectatorSlotMixin",
     "ClientMixin",
+    "MinimapWheelMixin",
     "SavedWorldMenuMixin",
     "BoatPlacementMixin",
     "PlayerWaterContactMixin",

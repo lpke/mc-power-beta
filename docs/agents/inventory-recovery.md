@@ -103,9 +103,20 @@
   wheel zoom only owns terrain inside the visible minimap and outside every InventoryGui
   panel/control. HUD preview wheel edits remain in its draft; sidebar edits reuse the
   Options session; gameplay snapshots use the queued PowerConfig writer.
+  Expanded-map gameplay zoom must consume the native wheel before Spectator speed
+  and camera zoom handlers, while retaining held hotbar-row priority. Hidden maps,
+  menus and focus loss leave their existing wheel ownership intact.
 - Recipe craft-one exchanges authorize exactly one native recipe batch and its container
-  returns. Flush the immutable journal before publication and verify native callbacks
-  against an isolated grid; preserve output ownership and owned rollback.
+  returns. Shift-right-click maximizes one grid and plans complete batches up to native
+  ingredient limits and output capacity, capped at 64. Publish the complete turn once
+  after its immutable journal is flushed. Run each native callback against its isolated
+  grid and check all protected inventory and external owners before and after each
+  callback. Enlist external crafting owners even when the final inputs are unchanged.
+  Preserve output ownership and owned rollback; a later callback failure cancels the turn.
+- Alt-click opens recipe variants. Shift-right-click crafts maximum in crafting grids;
+  furnace recipes only fill ingredients and never bypass smelting. Untouched recipe
+  icons keep wheel page scrolling. Amount changes require an explicit recipe choice
+  during that book visit; retain that choice when removing the last batch to zero.
 - Minimap quick controls share native inventory and pause hosts, remain visible without focus,
   and open inward from the selected corner. World waypoints render below their GUI and minimap,
   never over settings editors. Disabling cave mode retires only obsolete view work; retain saves.

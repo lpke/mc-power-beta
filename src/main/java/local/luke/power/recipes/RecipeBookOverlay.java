@@ -33,6 +33,7 @@ public final class RecipeBookOverlay {
   private List<ItemStack> placedInputs=List.of();
   private List<RecipeStack> placedGrid=List.of();
   private RecipeStack placedOutput;
+  private final Set<RecipeDefinition> startedRecipes = Collections.newSetFromMap(new IdentityHashMap<>());
   private RecipeDefinition wheelRecipe;
   private int wheelSteps;
   private boolean wheelDispatch;
@@ -95,8 +96,8 @@ public final class RecipeBookOverlay {
   private void state(){if(!standalone)RecipeBookConfig.state(context.kind==RecipeDefinition.Kind.FURNACE,open,filter);refreshGeometry();}
   private void releaseInput(){search.focused=false;popup=List.of();InventoryPanels.modal(screen,this,detail!=null&&!standalone);if(!InventoryPanels.modalOther(screen,this))InventoryTextInput.focus(screen,false);}
   private void closeInput(){detail=null;releaseInput();}
-  public void removed(){clearWheel();generation++;clearPlacement();closeInput();InventoryPanels.update(screen,0,List.of());}
-  public void kind(RecipeDefinition.Kind kind){generation++;clearPlacement();context=RecipeContext.viewer(mc,kind);category=page=0;ghost=null;detail=null;lastRecipe=null;popup=List.of();model=null;filter=false;tick();}
+  public void removed(){startedRecipes.clear();clearWheel();generation++;clearPlacement();closeInput();InventoryPanels.update(screen,0,List.of());}
+  public void kind(RecipeDefinition.Kind kind){startedRecipes.clear();generation++;clearPlacement();context=RecipeContext.viewer(mc,kind);category=page=0;ghost=null;detail=null;lastRecipe=null;popup=List.of();model=null;filter=false;tick();}
   /** Native containers draw buttons before slots, carried stacks and item tooltips. */
   public void renderInventoryButton(int mx,int my) {
     if(!enabled()||!buttonVisible()||InventoryPanels.modalOther(screen,this))return;
@@ -135,7 +136,8 @@ public final class RecipeBookOverlay {
         if(same)draw.item(mc,recipe.output,r.x()+5,r.y()+5,1,false);
         draw.item(mc,recipe.output,r.x()+(same?3:4),r.y()+(same?3:4),1,false);
         if(r.contains(mx,my))tooltip=recipe.name+(writable()&&context.kind==RecipeDefinition.Kind.CRAFTING?"\nRight-click to craft 1":"")
-            +(variants.size()>1?"\nShift-right-click for variants":"")+(!writable()?"\nView recipe":"");
+            +(writable()&&context.kind==RecipeDefinition.Kind.CRAFTING?"\nShift-right-click to craft maximum":"")
+            +(variants.size()>1?"\nAlt-click for variants":"")+(!writable()?"\nView recipe":"");
       }
       int pages=Math.max(1,(groups.size()+19)/20);
       if(pages>1){if(page>0)arrow(l.previous(),"page_backward",mx,my);if(page+1<pages)arrow(l.next(),"page_forward",mx,my);
@@ -169,6 +171,7 @@ public final class RecipeBookOverlay {
   }
   private RecipeDefinition cycling(List<RecipeDefinition> values){
     if(placedRecipe!=null&&values.contains(placedRecipe)&&removable(placedRecipe))return placedRecipe;
+    if(lastRecipe!=null&&values.contains(lastRecipe)&&startedRecipes.contains(lastRecipe))return lastRecipe;
     return values.get((ticks/30)%values.size());
   }
   private void clearPlacement(){placedRecipe=null;placedWorld=placedPlayer=null;placedInputs=List.of();placedGrid=List.of();placedOutput=null;}
@@ -238,7 +241,7 @@ public final class RecipeBookOverlay {
         int gy=recipe.kind==RecipeDefinition.Kind.FURNACE?1:recipe.shaped?n/recipe.width+oy:n/3;
         draw.item(mc,icons.get((ticks/30)%icons.size()),r.x()+2+7*gx,r.y()+2+7*gy,.375f,false);
       }
-      if(r.contains(mx,my))tooltip=recipe.name+(writable()&&context.kind==RecipeDefinition.Kind.CRAFTING?"\nRight-click to craft 1":"");
+      if(r.contains(mx,my))tooltip=recipe.name+(writable()&&context.kind==RecipeDefinition.Kind.CRAFTING?"\nRight-click to craft 1\nShift-right-click to craft maximum":"");
     }return tooltip;
   }
   private Rect detailBounds(){return standalone?layout().detail():new Rect(Math.max(4,(screen.width-146)/2),Math.max(4,(screen.height-104)/2),146,104);}
@@ -261,7 +264,7 @@ public final class RecipeBookOverlay {
     if(!enabled()||InventoryPanels.modalOther(screen,this))return false;var l=layout();
     clearWheel();
     if(detail!=null&&!standalone){detail=null;click();refreshGeometry();return true;}
-    if(!popup.isEmpty()){if(button==0||button==1)for(int i=0;i<popup.size();i++)if(popupCell(i).contains(x,y)){var value=popup.get(i);popup=List.of();if(button==0)choose(value);else choose(value,false,true);refreshGeometry();return true;}popup=List.of();refreshGeometry();return true;}
+    if(!popup.isEmpty()){if(button==0||button==1)for(int i=0;i<popup.size();i++)if(popupCell(i).contains(x,y)){var value=popup.get(i);popup=List.of();if(button==0)choose(value);else choose(value,local.luke.power.ui.TextEditing.shift(),true);refreshGeometry();return true;}popup=List.of();refreshGeometry();return true;}
     if(buttonVisible()&&toggleBounds().contains(x,y)){if(button==0)toggle();return true;}
     if(!open)return nativeClick(x,y,button);
     if(l.search().contains(x,y)||l.magnifier().contains(x,y)){if(button==0){if(!search.focused)generation++;search.focused=true;if(l.search().contains(x,y))search.click(x,button);refreshGeometry();}return true;}
@@ -271,8 +274,8 @@ public final class RecipeBookOverlay {
     if(l.previous().contains(x,y)&&page>0){if(button==0){generation++;page--;click();}return true;}
     if(l.next().contains(x,y)&&(page+1)*20<groups.size()){if(button==0){generation++;page++;click();}return true;}
     for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){var variants=groups.get(page*20+i);var recipe=cycling(variants);
-      if(button==1&&variants.size()>1&&(!writable()||local.luke.power.ui.TextEditing.shift())){click();openPopup(variants,l.cell(i));}
-      else if(button==1)choose(recipe,false,true);else if(button==0)choose(recipe);return true;}
+      if((button==0||button==1)&&variants.size()>1&&(alt()||button==1&&!writable())){click();openPopup(variants,l.cell(i));}
+      else if(button==1)choose(recipe,local.luke.power.ui.TextEditing.shift(),true);else if(button==0)choose(recipe);return true;}
     if(owns(x,y))return true;return nativeClick(x,y,button);
   }
   private boolean nativeClick(int x,int y,int button) {
@@ -285,7 +288,7 @@ public final class RecipeBookOverlay {
     message="";generation++;return false;
   }
   private void choose(RecipeDefinition recipe) {
-    choose(recipe,Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)||Keyboard.isKeyDown(Keyboard.KEY_RSHIFT));
+    choose(recipe,local.luke.power.ui.TextEditing.shift());
   }
   private void choose(RecipeDefinition recipe,boolean maximum) {
     choose(recipe,maximum,false);
@@ -294,6 +297,7 @@ public final class RecipeBookOverlay {
     if(!wheelDispatch)click();message="";search.focused=false;popup=List.of();refreshGeometry();
     if(!writable()){detail=recipe;refreshGeometry();return;}
     if(lastUnavailable==recipe&&model.current()&&!model.available(recipe)){generation++;return;}
+    if(!wheelDispatch)startedRecipes.add(recipe);
     lastRecipe=recipe;int token=++generation;
     try {
       java.util.function.BooleanSupplier eligible=()->enabled()&&mc.currentScreen==screen&&token==generation
@@ -303,7 +307,7 @@ public final class RecipeBookOverlay {
         if(unavailable)clearPlacement();else rememberPlacement(recipe);
         if(!unavailable&&layout().narrow()){open=false;state();}
       };
-      var result=craft&&context.kind==RecipeDefinition.Kind.CRAFTING?RecipeCrafts.craftResult(mc,context,recipe,eligible,selected)
+      var result=craft&&context.kind==RecipeDefinition.Kind.CRAFTING?RecipeCrafts.craftResult(mc,context,recipe,maximum,eligible,selected)
           :RecipeFills.fillResult(mc,context,recipe,maximum,eligible,selected,wheelDispatch?wheelBatch:1);
       if(result!=RecipeFills.Result.ACCEPTED){
         message=switch(result){
@@ -339,7 +343,11 @@ public final class RecipeBookOverlay {
     int direction=RecipeWheelControls.direction(amount);
     if(direction!=0&&writable()&&context.kind==RecipeDefinition.Kind.CRAFTING) {
       RecipeDefinition recipe=null;
-      for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){recipe=cycling(groups.get(page*20+i));break;}
+      for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){
+        var variants=groups.get(page*20+i);
+        var candidate=lastRecipe!=null&&variants.contains(lastRecipe)?lastRecipe:cycling(variants);
+        if(startedRecipes.contains(candidate))recipe=candidate;break;
+      }
       if(recipe==null)for(var slot:context.inputs)if(new Rect(l.inventoryX()+slot.x-1,l.inventoryY()+slot.y-1,18,18).contains(x,y)){recipe=lastRecipe;break;}
       if(recipe!=null){
         if(wheelRecipe!=recipe){wheelRecipe=recipe;wheelSteps=0;}
@@ -350,6 +358,7 @@ public final class RecipeBookOverlay {
     if(!l.background().contains(x,y)&&!l.tabs(tabs().length).contains(x,y))return;
     int next=RecipeBookLayout.pageAfterScroll(page,groups.size(),amount);if(next!=page){generation++;page=next;}
   }
+  private static boolean alt(){return (KeyEventModifiers.mask(Bindings.heldModifiers())&Chord.ALT)!=0;}
   private void clearWheel(){wheelRecipe=null;wheelSteps=0;}
   private void dispatchWheel() {
     if(wheelSteps==0||wheelRecipe==null)return;

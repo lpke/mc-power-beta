@@ -64,7 +64,10 @@ final class Sorting403Checks {
         preferred(editor).put(9,"35:4");UiChecks.call(editor,"applyNow");s.press(left(editor)+75,controls(editor)+9,0);
         check(InventoryToolsConfig.current().preferredItems.isEmpty(),"Clear did not apply");
         s.press(left(editor)+145,controls(editor)+9,0);
-        check(InventoryToolsConfig.current().protectedSlots.isEmpty()&&InventoryToolsConfig.current().preferredItems.isEmpty(),"Reset waited for Done");
+        var protectedDefault=((Setting)UiChecks.field(editor,"protectedSetting")).defaultValue;
+        var preferredDefault=((Setting)UiChecks.field(editor,"preferredSetting")).defaultValue;
+        check(Catalog.JSON.toJsonTree(InventoryToolsConfig.current().protectedSlots).equals(protectedDefault)
+            &&Catalog.JSON.toJsonTree(InventoryToolsConfig.current().preferredItems).equals(preferredDefault),"Reset did not immediately apply the selected Defaults base");
         s.key('\0',Keyboard.KEY_ESCAPE);s.closed();s.unchanged(items);
       });
       test("SORTING403 presets apply on Load and persist named edits immediately",()->{
@@ -76,7 +79,8 @@ final class Sorting403Checks {
         s.press(left(editor)+120,top+9,0);check(InventoryToolsConfig.current().protectedSlots.equals(List.of(11)),"Load did not apply");
         s.press(left(editor)+165,top+9,0);check(SortingLayoutsData.read(SortingLayoutPresets.snapshot().getAsJsonObject()).size()==2,"Delete did not persist");
         ((TextInput)UiChecks.field(editor,"presetName")).setText("Saved immediately");s.press(left(editor)+160,top+29,0);
-        check(SortingLayoutsData.read(PowerConfig.section("sortingLayouts")).size()==3,"Save did not persist");
+        var persisted=persistedLayout().getAsJsonObject("presets");
+        check(SortingLayoutsData.read(persisted).size()==3&&persisted.equals(SortingLayoutPresets.snapshot()),"Save did not persist the current world's presets or refresh its cache");
         s.press(left(editor)+10,top+9,0);capture(mc,s.screen,"dropdown-640",true);s.key('\0',Keyboard.KEY_ESCAPE);s.key('\0',Keyboard.KEY_ESCAPE);s.closed();s.unchanged(items);
       });
       test("SORTING403 menu editor keeps its ordinary draft and Discard",()->{
@@ -93,11 +97,15 @@ final class Sorting403Checks {
     log("SORTING403 failures="+failures+" captures="+REPORT);check(failures==0,"Sorting403 failures="+failures);
   }
   private static void owned(JsonObject before,Set<Integer> locked,Map<Integer,String> preferred) {
-    var expected=before.deepCopy().getAsJsonObject("settings").getAsJsonObject("inventoryTools");
-    if(!expected.has("toolWhitelist"))expected.add("toolWhitelist",Catalog.JSON.toJsonTree(new InventoryToolsSettings().toolWhitelist));
-    expected.add("protectedSlots",Catalog.JSON.toJsonTree(locked));expected.add("preferredItems",Catalog.JSON.toJsonTree(preferred));
-    var after=PowerConfig.document();check(expected.equals(after.getAsJsonObject("settings").get("inventoryTools")),"layout changed unrelated inventory settings");
-    before.getAsJsonObject("settings").add("inventoryTools",expected);check(before.equals(after),"layout changed another configuration section");
+    var expected=before.deepCopy();var settings=expected.getAsJsonObject("settings");
+    var scoped=WorldSortingLayoutsData.read(settings.getAsJsonObject(WorldSortingLayoutsData.SECTION));
+    var layout=scoped.layout(WorldSortingLayouts.world());
+    layout.add("protectedSlots",Catalog.JSON.toJsonTree(locked));layout.add("preferredItems",Catalog.JSON.toJsonTree(preferred));
+    settings.add(WorldSortingLayoutsData.SECTION,scoped.replace(WorldSortingLayouts.world(),layout).json());
+    check(expected.equals(PowerConfig.document()),"layout changed global preferences, another world's layout, the legacy seed or unrelated current-world fields");
+  }
+  private static JsonObject persistedLayout() {
+    return WorldSortingLayoutsData.read(PowerConfig.section(WorldSortingLayoutsData.SECTION)).layout(WorldSortingLayouts.world());
   }
   static void capture(Minecraft mc,Screen host,String name,boolean hidden)throws Exception {
     Inventory403Signals.backgrounds=0;Inventory403Signals.count=true;

@@ -47,9 +47,26 @@ public final class Minimap {
     var settings = MapConfig.current();
     if (!MinimapGeometry.contains(MinimapGeometry.layout(settings, mc.currentScreen.width,
         mc.currentScreen.height, false), settings.circular, x, y)) return false;
-    var copy = MapConfig.copy(); copy.zoom = MinimapZoom.scroll(copy.zoom, wheel);
-    if (copy.zoom != settings.zoom) MapConfig.queued(copy);
+    scrollZoom(wheel);
     return true;
+  }
+  public static boolean expandedWheel(Minecraft mc, int wheel) {
+    if (wheel == 0 || mc.world == null || mc.player == null || mc.player.world != mc.world
+        || mc.player.dead || mc.player.health <= 0 || mc.options == null || mc.options.hideHud
+        || mc.currentScreen != null || mc.paused || !mc.field_2778
+        || !org.lwjgl.opengl.Display.isActive() || !org.lwjgl.input.Mouse.isGrabbed()
+        || Maps.cache() == null) return false;
+    var settings = MapConfig.current();
+    if (!settings.zoomWhileExpanded || !visible(settings, mc.options.debugHud, true)
+        || !Bindings.down(MapKeys.ENLARGE) || Bindings.down("power_building.hotbar.scroll")) return false;
+    scrollZoom(wheel);
+    return true;
+  }
+  private static void scrollZoom(int wheel) {
+    var copy = MapConfig.copy();
+    double previous = copy.zoom;
+    copy.zoom = MinimapZoom.scroll(previous, wheel);
+    if (copy.zoom != previous) MapConfig.queued(copy);
   }
   public static boolean inventoryContains(Minecraft mc, int x, int y) {
     return inventoryVisible(mc) && MinimapGeometry.contains(MinimapGeometry.layout(MapConfig.current(),

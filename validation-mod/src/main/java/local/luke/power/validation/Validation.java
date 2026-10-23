@@ -45,6 +45,7 @@ public final class Validation {
   }
 
   public static void tick(Minecraft mc) {
+    Minimap441Checks.observe(mc);
     AutoMineChecks.observe(mc);
     Performance420Checks.tick(mc);
     HeldLight400Checks.tick(mc);
@@ -253,6 +254,9 @@ public final class Validation {
       else if (command.equals("redstone-visuals")) RedstoneVisualChecks.run(mc);
       else if (command.equals("creative-440")) Creative440Checks.run(mc);
       else if (command.startsWith("creative-440 ")) Creative440PointerChecks.run(mc, command.substring("creative-440 ".length()).trim());
+      else if (command.equals("recipe-441")) Recipe441Checks.run(mc);
+      else if (command.startsWith("recipe-441 ")) Recipe441Checks.physical(mc, command.substring(11));
+      else if (command.startsWith("minimap-441 ")) Minimap441Checks.run(mc, command.substring(12));
       else if (command.equals("creative-borders")) CreativeBorderChecks.run(mc);
       else if (command.equals("creative-drops")) CreativeDropChecks.run(mc);
       else if (command.startsWith("creative-paint")) CreativePaintChecks.run(mc, command.length() > 14 ? command.substring(14).trim() : "check");
