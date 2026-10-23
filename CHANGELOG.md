@@ -5,7 +5,7 @@
 ## [4.4.0] - 2026-10-23
 
 - Add editable Creative tabs with custom names, icons, ordered item grids, empty slots, multiple selection and dragging. Keep Search pinned beside six regular tabs, with fuzzy item search and remembered tab scrolling.
-- Combine Tools and Weapons, simplify Creative tab titles, darken unselected tabs, hide unused arrows and refine palette spacing. Support advanced tooltips and cursor wheel transfers; keep only inventory-clear confirmations audible.
+- Combine Tools and Weapons, simplify Creative tab titles, darken unselected tabs, hide unused arrows and refine palette spacing. Support advanced tooltips and cursor wheel transfers, protect the combined offhand/destroy frame from outside drops, and keep only inventory-clear confirmations audible.
 - Use one All settings / This tab search choice across Options, starting at All. Controls always searches controls and has no scope button.
 - Make Fast placement, Fake sneak, Placement restriction and Hide selected entities temporary gameplay actions. Retain their bindings and tuning, add an unassigned placement-restriction toggle, and clear active state on world exit.
 - Allow Shift-click and Shift-drag into the personal crafting grid when the hotbar is full, independently of crafting-grid storage. Preserve native item data, callbacks and durable inventory protection.

@@ -42,4 +42,17 @@ class CreativeGridTest {
     assertTrue(CreativeGrid.outsideBody(80, 236, 100, 100, 176, 166, false));
     assertTrue(CreativeGrid.outsideBody(79, 236, 100, 100, 176, 166, true));
   }
+  @Test void sideFrameHitTestingMatchesEveryVisibilityCombination() {
+    // A combined frame starts at y+114; either slot alone starts at y+136.
+    for (boolean destroy : new boolean[]{false, true}) for (boolean offhand : new boolean[]{false, true}) {
+      int top = destroy && offhand ? 214 : 236;
+      assertEquals(!(destroy || offhand), CreativeGrid.outsideBody(80, top + 1, 100, 100, 176, 166, destroy, offhand));
+      assertTrue(CreativeGrid.outsideBody(79, top + 1, 100, 100, 176, 166, destroy, offhand));
+      assertTrue(CreativeGrid.outsideBody(80, top - 1, 100, 100, 176, 166, destroy, offhand));
+      assertEquals(!(destroy || offhand), CreativeGrid.outsideBody(99, 265, 100, 100, 176, 166, destroy, offhand));
+      assertTrue(CreativeGrid.outsideBody(80, 266, 100, 100, 176, 166, destroy, offhand));
+      assertEquals(!(destroy && offhand), CreativeGrid.outsideBody(80, 215, 100, 100, 176, 166, destroy, offhand));
+    }
+  }
+
 }

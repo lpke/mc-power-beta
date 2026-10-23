@@ -17,10 +17,15 @@ public final class CreativeGrid {
   /** Category and view tabs handle their own clicks before checking the body. */
   public static boolean outsideBody(int mouseX, int mouseY, int x, int y,
                                     int width, int height, boolean destroySlot) {
+    return outsideBody(mouseX, mouseY, x, y, width, height, destroySlot, false);
+  }
+
+  public static boolean outsideBody(int mouseX, int mouseY, int x, int y,
+                                    int width, int height, boolean destroySlot, boolean offhand) {
     if (mouseX >= x && mouseX < x + width
         && mouseY >= y - EXTRA_HEIGHT && mouseY < y + height) return false;
-    if (destroySlot && mouseX >= x - DESTROY_WIDTH && mouseX < x
-        && mouseY >= y + DESTROY_TOP && mouseY < y + height) return false;
+    if ((destroySlot || offhand) && InventorySideSlots.contains(mouseX, mouseY, x, y, height,
+        destroySlot && offhand)) return false;
     return true;
   }
 }

@@ -4,6 +4,7 @@ import static local.luke.power.validation.Validation.*;
 import static local.luke.power.validation.UiChecks.*;
 import java.nio.file.*;
 import java.util.List;
+import local.luke.power.input.InventorySideSlots;
 import javax.imageio.ImageIO;
 import net.minecraft.class_585;
 import net.minecraft.client.Minecraft;
@@ -20,6 +21,10 @@ final class CreativeBorderChecks {
       var screen = new class_585(mc.player); mc.setScreen(screen);
       field(screen, "creative_normalGUI", false);
       Path dir = Path.of("power-beta-data/reports/creative-borders"); Files.createDirectories(dir);
+      java.awt.image.BufferedImage sideFrame;
+      try (var source = CreativeBorderChecks.class.getResourceAsStream("/assets/powerbeta/textures/gui/offhand_frame.png")) {
+        check(source != null, "Owned side-frame atlas is unavailable"); sideFrame = ImageIO.read(source);
+      }
       for (int[] size : new int[][] {{320, 240}, {640, 420}}) test("creative border pixels at " + size[0], () -> {
         screen.init(mc, size[0], size[1]);
         // Search refreshes its catalog during native init. Clear it afterwards so
@@ -38,9 +43,22 @@ final class CreativeBorderChecks {
                 == image.getRGB((x + col) * 2, (y + 119 + row) * 2), "final row differs at " + col + "/" + row);
         for (int col = 1; col < 4; col++)
           check((image.getRGB((x + col) * 2, (y + 137) * 2) & 0xffffff) != 0, "black seam at " + col);
+        boolean offhand = (boolean)call(screen, "power$offhandVisible");
+        Object settings = Class.forName("local.luke.power.creative.config.Config").getMethod("current").invoke(null);
+        boolean destroy = settings.getClass().getField("destroySlot").getBoolean(settings);
         for (int row = 138; row < 140; row++) {
-          check((image.getRGB((x + 2) * 2, (y + row) * 2) & 0xffffff) == 0xffffff, "white edge disconnected");
-          check((image.getRGB((x + 3) * 2, (y + row) * 2) & 0xffffff) == 0xc6c6c6, "white edge extends too far");
+          if (offhand || destroy) {
+            // The 24px side frame overlaps the old main-panel edge by four pixels.
+            // Check its actual outer white edge and the joined interior against its atlas.
+            int relative = row - InventorySideSlots.top(offhand && destroy);
+            int sourceRow = relative < 3 ? relative : row >= 162 ? row - 158 : 3;
+            for (int column : new int[]{1, 2, 3, InventorySideSlots.WIDTH + 2, InventorySideSlots.WIDTH + 3})
+              check((image.getRGB((x - InventorySideSlots.WIDTH + column) * 2, (y + row) * 2) & 0xffffff)
+                  == (sideFrame.getRGB(column, sourceRow) & 0xffffff), "side-frame edge or join differs at " + column + "/" + row);
+          } else {
+            check((image.getRGB((x + 2) * 2, (y + row) * 2) & 0xffffff) == 0xffffff, "white edge disconnected");
+            check((image.getRGB((x + 3) * 2, (y + row) * 2) & 0xffffff) == 0xc6c6c6, "white edge extends too far");
+          }
         }
       });
     } finally {

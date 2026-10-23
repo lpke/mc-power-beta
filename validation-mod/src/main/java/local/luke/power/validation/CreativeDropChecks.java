@@ -43,7 +43,7 @@ final class CreativeDropChecks {
           int[][] points = {{x - 1, y}, {x + 176, y}, {x, tabTop - 1}, {x, y + 166}};
           for (int i = 0; i < points.length; i++) {
             String name = prefix + "/edge-" + i;
-            mc.player.inventory.setCursorStack(tagged(35, 37, 5, name));
+            cursor(mc, screen, tagged(35, 37, 5, name));
             click(screen, points[i][0], points[i][1], 0);
             check(mc.player.inventory.getCursorStack() == null, "cursor not cleared at edge " + i + " (" + points[i][0] + "," + points[i][1] + ")");
             drops(mc, name, 1, 37, 35, 5);
@@ -54,7 +54,7 @@ final class CreativeDropChecks {
         });
         test("creative outside right-click splits one item and preserves the remainder, width " + size[0], () -> {
           String name = prefix + "/split";
-          mc.player.inventory.setCursorStack(tagged(35, 4, 9, name));
+          cursor(mc, screen, tagged(35, 4, 9, name));
           for (int i = 1; i <= 4; i++) {
             click(screen, x - 1, y, 1);
             if (i < 4) stack(mc.player.inventory.getCursorStack(), 35, 4 - i, 9, name);
@@ -65,7 +65,7 @@ final class CreativeDropChecks {
         });
         test("creative tool drops retain durability and ignore middle/extra mouse buttons, width " + size[0], () -> {
           String name = prefix + "/tool";
-          mc.player.inventory.setCursorStack(tagged(267, 1, 83, name));
+          cursor(mc, screen, tagged(267, 1, 83, name));
           for (int button : new int[] {2, 3}) click(screen, x - 1, y, button);
           stack(mc.player.inventory.getCursorStack(), 267, 1, 83, name);
           drops(mc, name, 0, 0, 267, 83);
@@ -76,7 +76,7 @@ final class CreativeDropChecks {
         test("creative borders, category/view tabs and destroy-slot border do not drop items, width " + size[0], () -> {
           destroy.setBoolean(config, true);
           String name = prefix + "/protected";
-          ItemStack cursor = tagged(264, 7, 0, name); mc.player.inventory.setCursorStack(cursor);
+          ItemStack cursor = tagged(264, 7, 0, name); cursor(mc, screen, cursor);
           boolean offhand = (boolean)call(screen, "power$offhandVisible");
           int frameX = x - InventorySideSlots.WIDTH;
           int frameY = y + InventorySideSlots.top(offhand) + 1;
@@ -89,6 +89,10 @@ final class CreativeDropChecks {
             stack(mc.player.inventory.getCursorStack(), 264, 7, 0, name, "protected point (" + point[0] + "," + point[1] + ")");
             drops(mc, name, 0, 0, 264, 0);
           }
+          field(screen, "creative_normalGUI", true);
+          click(screen, frameX, frameY, 0);
+          stack(mc.player.inventory.getCursorStack(), 264, 7, 0, name, "Survival-view frame border");
+          drops(mc, name, 0, 0, 264, 0);
           field(screen, "creative_normalGUI", false);
           inventory(mc);
           destroy.setBoolean(config, false);
@@ -105,7 +109,7 @@ final class CreativeDropChecks {
           click(screen, x - 1, y, 0); drops(mc, name, 1, 1, 267, 41);
           mc.player.inventory.main[0] = tagged(4, 1, 0, "inventory-0");
           field(screen, "creative_normalGUI", true);
-          mc.player.inventory.setCursorStack(tagged(264, 3, 0, prefix + "/normal"));
+          cursor(mc, screen, tagged(264, 3, 0, prefix + "/normal"));
           click(screen, x - 1, y, 1);
           stack(mc.player.inventory.getCursorStack(), 264, 2, 0, prefix + "/normal");
           click(screen, x - 1, y, 0); drops(mc, prefix + "/normal", 2, 3, 264, 0);
@@ -126,7 +130,15 @@ final class CreativeDropChecks {
     log("CREATIVE DROP FAILURES " + failures);
   }
 
-  private static void click(class_585 screen, int x, int y, int button) { ((ScreenInput) screen).power$click(x, y, button); }
+  private static void click(class_585 screen, int x, int y, int button) {
+    ((ScreenInput) screen).power$click(x, y, button);
+    ((ScreenInput) screen).power$release(x, y, button);
+  }
+  private static void cursor(Minecraft mc, class_585 screen, ItemStack stack) {
+    // Fixture seeding replaces native cursor identity outside the input dispatcher.
+    ((local.luke.power.input.InventoryDrag)(Object)screen).power$cancelItemDrag();
+    mc.player.inventory.setCursorStack(stack);
+  }
   private static NbtCompound tag(ItemStack stack) throws Exception { return (NbtCompound) stack.getClass().getMethod("getStationNbt").invoke(stack); }
   private static ItemStack tagged(int id, int count, int damage, String name) throws Exception {
     ItemStack stack = new ItemStack(id, count, damage); tag(stack).putString(TAG, name); return stack;

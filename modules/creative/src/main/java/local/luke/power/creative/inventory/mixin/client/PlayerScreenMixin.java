@@ -53,7 +53,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     if (power$offhandVisible() && InventorySideSlots.contains(mouseX,mouseY,x,y,containerHeight,creative_isInCreative() && local.luke.power.creative.config.Config.current().destroySlot)) return true;
     if (!creative_isInCreative()) return false;
     boolean body = !creative_normalGUI && !CreativeGrid.outsideBody(mouseX, mouseY, x, y,
-        containerWidth, containerHeight, local.luke.power.creative.config.Config.current().destroySlot);
+        containerWidth, containerHeight, local.luke.power.creative.config.Config.current().destroySlot, power$offhandVisible());
     boolean viewTabs = mouseX >= x + 173 && mouseX < x + 198 && mouseY >= y + 114 && mouseY < y + 162;
     boolean categories = !creative_normalGUI && mouseX >= x && mouseX < x + containerWidth
         && mouseY >= CreativeGrid.tabTop(y) && mouseY < CreativeGrid.tabTop(y) + CreativeGrid.tabHeight(y);
@@ -624,6 +624,9 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         super.mouseClicked(mouseX,mouseY,button); return;
       }
       if (creative_normalGUI) {
+        boolean offhand = power$offhandVisible(), destroy = local.luke.power.creative.config.Config.current().destroySlot;
+        if ((offhand || destroy) && InventorySideSlots.contains(mouseX, mouseY, posX, posY,
+            containerHeight, offhand && destroy)) return;
         super.mouseClicked(mouseX, mouseY, button);
         return;
       }
@@ -747,7 +750,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         }
         super.mouseClicked(mouseX, mouseY, button);
       } else if (CreativeGrid.outsideBody(mouseX, mouseY, posX, posY,
-          containerWidth, containerHeight, local.luke.power.creative.config.Config.current().destroySlot)) {
+          containerWidth, containerHeight, local.luke.power.creative.config.Config.current().destroySlot, power$offhandVisible())) {
         // Use the normal outside-slot click for whole-stack/single-item drops and server sync.
         super.mouseClicked(mouseX, mouseY, button);
       }
