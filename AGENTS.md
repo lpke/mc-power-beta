@@ -125,6 +125,29 @@
   moving back in history or consuming queued tracks. Paused tracks remain current.
   Keep the advertised next track reserved through settings previews while it remains
   eligible; volume, gap and menu-control edits must not consume the selector.
+- New and imported Ogg sounds must retain complete playback through Beta's decoder.
+  Native `CodecJOrbis` mistakes `SyncState.pageout() == 0` for EOF when a buffered
+  page needs more input, and can stop before draining buffered pages. It can also
+  retain samples beyond the final Ogg granule position. Valid asset hashes and an
+  EOF result do not prove that a sound played completely.
+  `ExtraSoundDecoderMixin` fixes page refill/draining, keeps native PCM conversion
+  and trims final padding to the declared source frame count. Its scope is cached
+  at initialization through `ExtraSoundResources.owns`, currently covering the
+  `power_beta` and `power_controls` extra-effect resource paths. Keep personal music,
+  native sounds and other mods outside that scope. New sound namespaces must extend
+  the scope and its tests; verify the actual registered sound-pool URL reaches it.
+  Preserve `AudioResource.streaming` for short compressed-resource reads; that
+  wrapper alone does not repair the Ogg page parser. Never alter official audio
+  bytes to hide decoder faults. Stream long ambience on the sound threads.
+- When adding sounds from another version, verify its official client behavior,
+  resource index and `sounds.json`; pin asset hashes and retain per-variant gain,
+  pitch, probability/weight and streaming metadata. Extend `extra-sounds.json`,
+  `tools/audit_extra_sounds.py` and the runtime decoder fixture for every added
+  variant. Run `extra-sound-decoders-432` and relevant behavior fixtures in a muted
+  disposable clone on a verified silent output. Check both registered `readAll`
+  playback resources and streaming reads against the final Ogg granule frame count,
+  and compare PCM with an independent FFmpeg decode, explaining rounding/padding
+  differences. Comparing two instances of the same broken decoder is insufficient.
 - Difficulty is per-world, independent of access permissions, including creation, world switches,
   dimension copies and commands. Never copy it from global GameOptions. Defaults
   are Normal; manual menu edits take effect on Apply and auto-apply commits them.
