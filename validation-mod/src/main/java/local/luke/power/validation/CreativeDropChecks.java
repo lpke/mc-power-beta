@@ -20,6 +20,7 @@ final class CreativeDropChecks {
     check(mc.world != null && !mc.world.isRemote, "run new-world first");
     mc.player.closeScreen();
     var inventory = mc.player.inventory.main.clone();
+    var savedMap = local.luke.power.map.MapConfig.copy();
     var properties = AccessRules.of(mc.world.method_262());
     boolean cheats = properties.allAllowed();
     String mode = Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(mc.player).toString();
@@ -28,6 +29,8 @@ final class CreativeDropChecks {
     boolean oldDestroy = destroy.getBoolean(config);
     String run = UUID.randomUUID().toString();
     try {
+      var hiddenMap = local.luke.power.map.MapConfig.copy(); hiddenMap.minimap = false;
+      local.luke.power.map.MapConfig.preview(hiddenMap);
       properties.allAllowed(true);
       CreativeVehicleChecks.mode(mc, "CREATIVE");
       for (int i = 0; i < inventory.length; i++) mc.player.inventory.main[i] = tagged(4, i % 5 + 1, 0, "inventory-" + i);
@@ -120,6 +123,7 @@ final class CreativeDropChecks {
         });
       }
     } finally {
+      local.luke.power.map.MapConfig.preview(savedMap);
       mc.player.inventory.setCursorStack(null); mc.player.closeScreen();
       System.arraycopy(inventory, 0, mc.player.inventory.main, 0, inventory.length);
       destroy.setBoolean(config, oldDestroy);
