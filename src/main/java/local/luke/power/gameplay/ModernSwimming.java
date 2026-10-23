@@ -99,7 +99,9 @@ public final class ModernSwimming {
     if (!state.inputPosePrepared || wasSwimming != state.swimming) updatePose(player, state);
     state.inputPosePrepared = false;
     state.animate();
-    state.cameraTick(lowPose(player) ? player.field_1631 : 1.62f);
+    state.cameraTick(state.compact || state.crouched && (state.lowCeiling
+        || GameplayConfig.current().modernCrawling && GameplayConfig.current().crouchCameraHeight)
+        ? player.field_1631 : 1.62f);
   }
 
   public static void cancel(ClientPlayerEntity player) {
@@ -142,13 +144,15 @@ public final class ModernSwimming {
     }
     boolean crawling = GameplayConfig.current().modernCrawling && ModernWater.localMovement(player);
     boolean small = state.swimming, crouched = false;
+    state.lowCeiling = false;
     if (!small && (state.compact || state.crouched || crawling)) {
       // Modern Player.updatePlayerPose first proves the compact box fits. A
       // wall through the feet must not manufacture a new crawl, nor force an
       // unsafe standing box when terrain is unavailable.
       if (crawling && !canFit(player, SwimState.HEIGHT)) return;
       boolean sneak = crawling && player.field_161 != null && player.field_161.field_2536;
-      if (sneak || !canFit(player, 1.8)) {
+      state.lowCeiling = !canFit(player, 1.8);
+      if (sneak || state.lowCeiling) {
         crouched = canFit(player, 1.5);
         small = !crouched;
       }

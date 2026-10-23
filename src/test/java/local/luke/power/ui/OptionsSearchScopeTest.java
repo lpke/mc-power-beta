@@ -7,13 +7,17 @@ import local.luke.power.config.Setting;
 import org.junit.jupiter.api.Test;
 
 class OptionsSearchScopeTest {
-  @Test void ordinaryTabsRetainIndependentScopeChoices() {
-    assertFalse(OptionsSearchScope.thisTab("General"));
-    assertTrue(OptionsSearchScope.thisTab("Controls"));
-    OptionsSearchScope.toggle("Controls");
-    assertFalse(OptionsSearchScope.thisTab("Controls"));
-    assertTrue(OptionsSearchScope.thisTab("Audio"));
-    OptionsSearchScope.toggle("Controls");
+  @Test void automaticScopesBecomeOneSessionChoiceAfterTheFirstToggle() {
+    OptionsSearchScope.reset();
+    try {
+      assertFalse(OptionsSearchScope.thisTab("General"));
+      assertTrue(OptionsSearchScope.thisTab("Controls"));
+      assertFalse(OptionsSearchScope.thisTab("General"));
+      OptionsSearchScope.toggle("Controls");
+      for (String page : List.of("General", "Controls", "Audio")) assertFalse(OptionsSearchScope.thisTab(page));
+      OptionsSearchScope.toggle("General");
+      for (String page : List.of("General", "Controls", "Audio")) assertTrue(OptionsSearchScope.thisTab(page));
+    } finally { OptionsSearchScope.reset(); }
   }
   private Setting setting(String id, String page, String group) {
     return new Setting(id, "test", page, group, id, "", Setting.Kind.INTEGER,

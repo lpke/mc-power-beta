@@ -12,6 +12,7 @@ public final class GameplaySettings {
   public boolean boatPlacementFacing = true;
   public boolean modernWaterMovement = true;
   public boolean modernCrawling;
+  public boolean crouchCameraHeight;
 
   public void validate() {
     if (mergeThreshold < 16 || mergeThreshold > 16384 || tntPerTick < 1 || tntPerTick > 64

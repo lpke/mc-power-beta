@@ -21,7 +21,7 @@ public abstract class InventoryMinimapInputMixin {
   @Unique private boolean power$resetPress;
   @Inject(method = "onMouseEvent", at = @At("HEAD"), cancellable = true)
   private void power$minimapWheel(CallbackInfo ci) {
-    if (!((Object)this instanceof ContainerScreen) || minecraft.currentScreen != (Object)this) return;
+    if (!Minimap.menuHost((Screen)(Object)this) || minecraft.currentScreen != (Object)this) return;
     int wheel = Mouse.getEventDWheel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;

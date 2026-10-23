@@ -110,7 +110,8 @@
     "recipeBook.inventory": false,
     "recipeBook.pauseMenu": true,
     "recipeBook.buttonStyle": 0,
-    "debug.enabled": true
+    "debug.enabled": true,
+    "power_controls:general.autosaveInterval": 300
   },
   "beta": {
     "activeTweaks.enabled": false,

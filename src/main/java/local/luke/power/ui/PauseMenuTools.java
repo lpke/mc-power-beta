@@ -60,6 +60,9 @@ public final class PauseMenuTools extends UiScreen {
     if (music != null) obstacles.add(new PauseToolsLayout.Box(music.x(), music.y(), music.width(), music.height()));
     bounds = PauseToolsLayout.at(width, height, MenuPreferences.pauseToolsPosition(), included.size(), back, obstacles);
   }
+  public boolean contains(int x, int y) {
+    return bounds != null && inside(x,y,bounds.x(),bounds.y(),bounds.width(),bounds.height());
+  }
   public boolean press(int x, int y, int button) {
     if (button != 0 || bounds == null || !available()) return false;
     for (int i = 0; i < included.size(); i++) {

@@ -16,7 +16,19 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = {class_525.class, net.minecraft.client.gui.screen.TitleScreen.class}, priority = 800)
-public class PauseMusicMixin extends Screen {
+public class PauseMusicMixin extends Screen implements local.luke.power.input.InventoryGui {
+  @Override public boolean power$containsGuiSpace(int x, int y) {
+    if (power$tools.contains(x,y)) return true;
+    var music=power$music.bounds();
+    if (music!=null && x>=music.x() && x<music.x()+music.width() && y>=music.y() && y<music.y()+music.height()) return true;
+    for (Object value : buttons) {
+      var button=(ButtonWidget)value;
+      var bounds=(ButtonBoundsAccessor)(Object)button;
+      if (button.visible && x>=button.x && x<button.x+bounds.power$width()
+          && y>=button.y && y<button.y+bounds.power$height()) return true;
+    }
+    return false;
+  }
   @Unique private final PauseMenuMusic power$music = new PauseMenuMusic();
   @Unique private final PauseMenuTools power$tools = new PauseMenuTools();
   @Unique private final Map<ButtonWidget, Integer> power$buttonY = new IdentityHashMap<>();

@@ -30,7 +30,9 @@ public final class MapConfig {
 
   public static void preview(MapSettings value) {
     value.validate();
+    int previousCaveMode=current.caveMode;
     current = Catalog.JSON.fromJson(Catalog.JSON.toJson(value), MapSettings.class);
+    if(previousCaveMode!=current.caveMode) Maps.caveModeChanged(current.caveMode);
   }
 
   public static void save(MapSettings value) throws java.io.IOException {

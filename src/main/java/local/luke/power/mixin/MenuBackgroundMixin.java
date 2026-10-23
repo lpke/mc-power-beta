@@ -17,6 +17,7 @@ public abstract class MenuBackgroundMixin extends net.minecraft.client.gui.Drawa
   @Shadow public int height;
   @Inject(method = "renderBackground(I)V", at = @At("TAIL"))
   private void power$inventoryMinimap(int ignored, CallbackInfo ci) {
+    if (local.luke.power.map.Minimap.menuHost(minecraft.currentScreen)) local.luke.power.map.WaypointMarkers.render(minecraft);
     local.luke.power.map.Minimap.renderInventory(minecraft, local.luke.power.map.Minimap.frameDelta());
   }
   @Inject(method = "renderBackgroundTexture", at = @At("HEAD"), cancellable = true)

@@ -127,6 +127,16 @@ public final class MapCache {
     }
   }
 
+  /** Surface-only views no longer need queued cave images; durable sampling/parent work finishes. */
+  public void cancelCaveViewReads() {
+    visibleView=null;
+    for(var it=loading.entrySet().iterator();it.hasNext();) {
+      var entry=it.next();int flags=loadKinds.getOrDefault(entry.getKey(),GENERAL);
+      if(entry.getKey().layer()<0 || (flags & ~(VISIBLE|SECONDARY))!=0) continue;
+      if(MapIO.cancelQueuedRead(entry.getValue())) {loadKinds.remove(entry.getKey());it.remove();}
+    }
+  }
+
   private int loads(int kind) {
     int count = 0;
     for (int flags : loadKinds.values()) if ((flags & kind) != 0) count++;

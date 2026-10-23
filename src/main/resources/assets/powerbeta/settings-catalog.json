@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.2.1",
+    "default": "Power Beta 4.2.3",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6184,7 +6184,7 @@
     "page": "Map",
     "group": "World map",
     "label": "Map light shading radius",
-    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0–7, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
     "min": 8,
     "max": 128,
     "step": 1,
@@ -6546,8 +6546,8 @@
   "maps.showInInventory": {
     "page": "Interface",
     "group": "Minimap",
-    "label": "Show in inventories",
-    "description": "Keep the minimap visible behind inventory panels without dimming it. Scroll over its terrain to zoom precisely; inventory panels and slots keep their normal mouse controls.",
+    "label": "Show in inventories and pause menu",
+    "description": "Show the minimap behind inventory and pause controls. Scroll over the map to zoom, right-click to reset zoom, or open its quick settings.",
     "order": -1
   },
   "maps.radarRange": {
@@ -6809,5 +6809,12 @@
     "label": "Modern swimming sounds",
     "description": "Play modern swimming sounds as you move through water.",
     "order": 32
+  },
+  "gameplay.crouchCameraHeight": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Lower camera when crouching",
+    "description": "With Modern crawling enabled, lower the camera while sneaking in open spaces, in first and third person. Low ceilings and crawling still lower the camera when this is off.",
+    "order": 41.1
   }
 }

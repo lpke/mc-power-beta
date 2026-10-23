@@ -1,26 +1,27 @@
 package local.luke.power.map;
 
-/** One layout supplies both drawing and hit testing for the inventory map controls. */
+/** One layout supplies drawing and hit testing; the selected corner chooses the inward edge. */
 public final class MinimapQuickMenuLayout {
-  public static final int ROW_HEIGHT = 20;
-  public record Circle(int x, int y, int radius) {
-    public boolean contains(int px, int py) { return (px-x)*(px-x)+(py-y)*(py-y)<=radius*radius; }
-  }
+  public static final int ROW_HEIGHT = 20, ROWS = 5, BUTTON_SIZE = 16;
   public record Rect(int x, int y, int width, int height) {
     public boolean contains(int px, int py) { return px>=x && py>=y && px<x+width && py<y+height; }
   }
-  public record Layout(Circle gear, Rect menu) {
+  public record Layout(Rect gear, Rect menu) {
     public Rect row(int index) { return new Rect(menu.x+4, menu.y+4+index*ROW_HEIGHT, menu.width-8, ROW_HEIGHT); }
-    public int rowAt(int x,int y) { for(int index=0;index<4;index++)if(row(index).contains(x,y))return index;return -1; }
+    public int rowAt(int x,int y) { for(int index=0;index<ROWS;index++)if(row(index).contains(x,y))return index;return -1; }
   }
   private MinimapQuickMenuLayout() {}
-  public static Layout at(MinimapGeometry.Layout map, boolean circular, int width, int height, int labelWidth) {
-    double inset = circular ? map.size() * (1 - Math.sqrt(.5)) / 2 : 0;
-    Circle gear = new Circle(Math.max(7, Math.min(width-8, (int)Math.round(map.x()+inset))),
-        Math.max(7, Math.min(height-8, (int)Math.round(map.y()+inset))), 7);
-    int menuWidth = Math.max(40, Math.min(width-8, labelWidth+30)), menuHeight = 88;
-    int x = Math.max(4, Math.min(width-menuWidth-4, gear.x+9));
-    int y = Math.max(4, Math.min(height-menuHeight-4, gear.y+9));
-    return new Layout(gear,new Rect(x,y,menuWidth,menuHeight));
+  public static Layout at(MinimapGeometry.Layout map, boolean circular, int corner, int width, int height, int labelWidth) {
+    boolean left=corner%2==0, top=corner<2;
+    double inset=circular?map.size()*(1-Math.sqrt(.5))/2:0;
+    int cx=(int)Math.round(map.x()+(left?map.size()-inset:inset));
+    int cy=(int)Math.round(map.y()+(top?inset:map.size()-inset));
+    Rect gear=new Rect(Math.max(0,Math.min(width-BUTTON_SIZE,cx-BUTTON_SIZE/2)),
+        Math.max(0,Math.min(height-BUTTON_SIZE,cy-BUTTON_SIZE/2)),BUTTON_SIZE,BUTTON_SIZE);
+    int menuWidth=Math.max(40,Math.min(width-8,labelWidth+30)),menuHeight=8+ROWS*ROW_HEIGHT;
+    int x=left?gear.x+gear.width+2:gear.x-menuWidth-2;
+    int y=top?gear.y:gear.y+gear.height-menuHeight;
+    return new Layout(gear,new Rect(Math.max(4,Math.min(width-menuWidth-4,x)),
+        Math.max(4,Math.min(height-menuHeight-4,y)),menuWidth,menuHeight));
   }
 }

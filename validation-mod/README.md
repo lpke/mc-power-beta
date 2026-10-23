@@ -1,5 +1,11 @@
 # Runtime checks
 
+- `menu-423 check` checks the actual inventory and pause menu at all four minimap
+  corners, modal ownership, immediate cave cancellation, selected cave-mode restoration
+  and exclusion of unrelated screens. It captures every corner and restores preferences.
+  Run in a focused disposable world. `menu-423 pause` and `menu-423 inventory` open the
+  native hosts for pointer, focus-loss and waypoint-layering checks.
+
 - `release-420 commands`, `release-420 sprint` and `release-420 spectator` check live
   command dispatch/help permissions, native one-hit attacks, ladder ascent/stamina,
   inventory sprint ownership and loaded camera interaction rays at configured reach.
@@ -27,6 +33,7 @@
 - `crawling-420` checks real trapdoor entry with all water/sprint combinations,
   native crawl distance and wall collision, single input scaling, safe disabled
   exits, crouch/standing heights, saved feet and player/armor model isolation.
+  It checks optional open-air crouch camera height through both native perspectives.
   It checks multiplayer, Spectator, other-player and unloaded-terrain exclusions.
   Run in a focused muted disposable world; it restores its scene and settings.
 

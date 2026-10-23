@@ -339,7 +339,6 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         if (mouseX >= x+InventorySideSlots.OFFHAND_X && mouseX < x+InventorySideSlots.OFFHAND_X+16
             && mouseY >= y+InventorySideSlots.OFFHAND_Y && mouseY < y+InventorySideSlots.OFFHAND_Y+16) {
           creative_renderSlotOverlay(x+InventorySideSlots.OFFHAND_X,y+InventorySideSlots.OFFHAND_Y);
-          creative_renderName(stack);
         }
       }
     }
@@ -350,6 +349,16 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
   @Inject(method = "render", at = @At("TAIL"))
   private void power$survivalViewTooltip(int mouseX, int mouseY, float delta, CallbackInfo ci) {
     if (creative_normalGUI) creative_destroyTooltip();
+  }
+
+  @Unique private void power$offhandTooltip() {
+    if (!power$offhandVisible() || minecraft.player.inventory.getCursorItem()!=null) return;
+    int x=(width-containerWidth)/2+local.luke.power.input.InventoryPanels.offset(this), y=(height-containerHeight)/2;
+    if (!InventorySideSlots.containsSlot((int)mouseX,(int)mouseY,x,y,InventorySideSlots.OFFHAND_Y)) return;
+    var stack=(ItemStack)((local.luke.power.inventory.OffhandInventory<?>)(Object)minecraft.player.inventory).power$offhandStack();
+    GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+    try { GL11.glDisable(GL11.GL_LIGHTING); GL11.glColor4f(1,1,1,1); creative_renderName(stack); }
+    finally { GL11.glPopAttrib(); }
   }
 
   @Unique
@@ -451,15 +460,17 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
 
   @Unique
   private void creative_renderSlotOverlay(int x, int y) {
-    GL11.glDisable(GL11.GL_LIGHTING);
-    GL11.glDisable(GL11.GL_DEPTH_TEST);
-    this.fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
-    GL11.glEnable(GL11.GL_LIGHTING);
-    GL11.glEnable(GL11.GL_DEPTH_TEST);
+    GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+    try {
+      GL11.glDisable(GL11.GL_LIGHTING);
+      GL11.glDisable(GL11.GL_DEPTH_TEST);
+      this.fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
+    } finally { GL11.glPopAttrib(); }
   }
 
   @Inject(method = "render", at = @At("HEAD"), cancellable = true)
   public void creative_render(int mouseX, int mouseY, float delta, CallbackInfo info) {
+    this.mouseX=mouseX; this.mouseY=mouseY;
     if (creative_isInCreative() && !creative_normalGUI) {
       creative_mouseScroll();
 
@@ -508,6 +519,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       this.mouseX = (float) mouseX;
       this.mouseY = (float) mouseY;
       creative_destroyTooltip();
+      power$offhandTooltip();
       info.cancel();
     }
   }

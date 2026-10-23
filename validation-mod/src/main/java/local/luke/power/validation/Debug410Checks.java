@@ -84,8 +84,8 @@ final class Debug410Checks {
       local.luke.power.map.MapConfig.preview(draft);mc.options.hideHud=false;
       var inventory=new net.minecraft.class_585(mc.player);mc.setScreen(inventory);inventory.init(mc,480,270);
       test("MINIMAP420 gear and menu retain native container and own pointer/keyboard",()->{
-        var geometry=local.luke.power.map.MinimapQuickMenuLayout.at(local.luke.power.map.Minimap.layout(draft,480,270,false),draft.circular,480,270,mc.textRenderer.getWidth("Show in-game waypoints"));
-        int x=geometry.gear().x(),y=geometry.gear().y();
+        var geometry=local.luke.power.map.MinimapQuickMenuLayout.at(local.luke.power.map.Minimap.layout(draft,480,270,false),draft.circular,draft.corner,480,270,mc.textRenderer.getWidth("Show in-game waypoints"));
+        int x=geometry.gear().x()+8,y=geometry.gear().y()+8;
         check(local.luke.power.map.MinimapQuickMenu.mouse(mc,x,y,0,true),"gear did not open");
         check(local.luke.power.map.MinimapQuickMenu.active(mc),"menu inactive");
         check(local.luke.power.input.InventoryPanels.modal(inventory),"menu did not claim modal ownership");
@@ -97,7 +97,7 @@ final class Debug410Checks {
         var capture=new net.minecraft.client.gui.screen.Screen(){@Override public void render(int mx,int my,float delta){inventory.render(mx,my,delta);local.luke.power.map.MinimapQuickMenu.renderMenu(mc,mx,my);}};
         SettingsSnapshot.render(mc,capture,480,270,output.resolve("minimap-quick-menu.png"),x,y);
         var image=javax.imageio.ImageIO.read(output.resolve("minimap-quick-menu.png").toFile());int scale=image.getWidth()/480;
-        for(int row=0;row<4;row++) {
+        for(int row=0;row<5;row++) {
           var bounds=geometry.row(row);int bright=0;
           for(int py=(bounds.y()+5)*scale;py<(bounds.y()+15)*scale;py++)
             for(int px=(bounds.x()+19)*scale;px<(bounds.x()+bounds.width()-2)*scale;px++) {

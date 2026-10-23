@@ -105,6 +105,26 @@ final class Crawling420Checks {
         mc.world.method_154(x, y + 2, z, 0, 0); ModernSwimming.tick(player);
         check(!ModernSwimming.lowPose(player), "clear exit retained low pose"); near(player.spacingY, 1.8, 1e-6, "standing body");
       });
+      test("crouch camera is optional in open air and follows both native perspectives", () -> {
+        boolean third=mc.options.thirdPerson;
+        try {
+          for(boolean enabled:new boolean[]{false,true}) for(boolean perspective:new boolean[]{false,true}) {
+            floor(mc,x,y,z); settings(true,false); reset(mc,x,y,z);
+            var options=GameplayConfig.copy();options.crouchCameraHeight=enabled;GameplayConfig.preview(options);
+            mc.options.thirdPerson=perspective;
+            for(int tick=0;tick<25;tick++)step(mc,0,true);
+            var state=((SwimPlayer)player).power$swim();
+            check(state.crouched&&!state.compact,"sneak lost physical crouch");
+            near(player.boundingBox.minY,y,1e-6,"sneak moved feet");
+            near(state.cameraEye(1),enabled?1.27:1.62,1e-5,"camera preference");
+            near(cameraY(mc),y+(enabled?1.27:1.62),2e-4,"native perspective height");
+          }
+          var options=GameplayConfig.copy();options.crouchCameraHeight=false;GameplayConfig.preview(options);
+          mc.world.method_154(x,y+1,z,1,0);
+          for(int tick=0;tick<25;tick++)step(mc,0,false);
+          near(((SwimPlayer)player).power$swim().cameraEye(1),.4,1e-5,"disabled sneak camera blocked crawling camera");
+        } finally {mc.options.thirdPerson=third;floor(mc,x,y,z);}
+      });
       test("dry models and armor use the modern stroke without leaking it to another render", () -> {
         settings(true, false); reset(mc, x, y, z); mc.world.method_154(x, y + 1, z, 1, 0);
         for (int i = 0; i < 12; i++) step(mc, 0, false);
@@ -153,6 +173,17 @@ final class Crawling420Checks {
       player.read(saved); player.field_161 = input; mc.paused = paused; mc.setScreen(screen); SprintController.reset();
     }
     log("CRAWLING 420 FAILURES " + failures);
+  }
+
+  private static double cameraY(Minecraft mc) throws Exception {
+    GL11.glMatrixMode(GL11.GL_MODELVIEW);GL11.glPushMatrix();
+    try {
+      GL11.glLoadIdentity();var method=net.minecraft.class_555.class.getDeclaredMethod("method_1851",float.class);
+      method.setAccessible(true);method.invoke(mc.field_2818,1f);
+      GL11.glTranslated(-mc.player.x,-mc.player.y,-mc.player.z);
+      var matrix=org.lwjgl.BufferUtils.createFloatBuffer(16);GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX,matrix);
+      return -(matrix.get(4)*matrix.get(12)+matrix.get(5)*matrix.get(13)+matrix.get(6)*matrix.get(14));
+    } finally {GL11.glPopMatrix();}
   }
 
   private static void settings(boolean crawl, boolean water) {

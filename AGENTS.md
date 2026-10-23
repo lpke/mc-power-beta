@@ -689,8 +689,8 @@
 - Options search scope is visit-independent session state, restricted to ordinary Options.
   Search breadcrumbs and tab filtering use the actual available editor destination; map
   sidebars and isolated rules editors retain their own fixed search scopes.
-  Retain each ordinary tab's choice independently. General defaults to All settings;
-  every other tab defaults to This tab.
+  General defaults to All settings and other tabs to This tab until the first explicit
+  scope toggle. That choice then applies to every ordinary tab for the game session.
 - Hold use and Auto-walk line lock are temporary native actions. Dispatch their hotkeys
   on key-down and clear through TweakLifecycle. Hold use supplies one initial native
   press before held repeats. Line lock adds block-lane side walls without rotating the
@@ -720,3 +720,9 @@
 - Terrain draw-command storage grows with submitted meshes, independently of vertex-pool capacity.
   Retain all pending command words across both command-buffer and vertex-buffer growth. Native
   draw order, indices, vertex format, visibility and GPU buffer ownership stay unchanged.
+
+- Minimap quick controls share native inventory and pause hosts, remain visible without focus,
+  and open inward from the selected corner. World waypoints render below their GUI and minimap,
+  never over settings editors. Disabling cave mode retires only obsolete view work; retain saves.
+- Optional crouch camera height affects open-space sneaking only with Modern crawling. Keep
+  collision-safe low-ceiling cameras and both native perspectives consistent.

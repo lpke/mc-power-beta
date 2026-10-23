@@ -15,10 +15,16 @@ public final class Minimap {
     return mc.world != null && mc.player != null && !mc.options.hideHud
         && visible(settings, mc.options.debugHud, Bindings.down(MapKeys.ENLARGE))
         && (mc.currentScreen == null || mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen
-            || settings.showInInventory && mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen);
+            || settings.showInInventory && menuHost(mc.currentScreen));
+  }
+  public static boolean menuHost(net.minecraft.client.gui.screen.Screen screen) {
+    return screen instanceof net.minecraft.client.gui.screen.container.ContainerScreen || screen instanceof net.minecraft.class_525;
+  }
+  public static boolean waypointHost(net.minecraft.client.gui.screen.Screen screen) {
+    return screen == null || screen instanceof net.minecraft.client.gui.screen.ChatScreen || menuHost(screen);
   }
   public static boolean inventoryVisible(Minecraft mc) {
-    return mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen
+    return menuHost(mc.currentScreen)
         && MapConfig.current().showInInventory && MapConfig.current().minimap
         && mc.world != null && mc.player != null && !mc.options.hideHud
         && visible(MapConfig.current(), mc.options.debugHud, Bindings.down(MapKeys.ENLARGE));

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [4.2.3] - 2026-10-23
+
+- Show the minimap and its quick settings in Pause as well as inventories, with mouse-wheel zoom and right-click reset. Keep the button visible after focus loss, use a native compact button and place its dropdown away from the map according to the selected corner.
+- Keep in-game waypoint labels visible behind inventory and Pause controls, while hiding them in settings and other editors.
+- Add a Cave mode checkbox to minimap quick settings. Disabling it immediately stops obsolete cave sampling and cancels queued cave-view reads while preserving explored terrain and pending saves.
+- Set the Power Beta defaults base and fresh-install autosave interval to five minutes. Preserve existing saved intervals and the other defaults bases.
+- Add Lower camera when crouching, off by default, for Modern crawling. Enable it to lower both first-person and third-person cameras while sneaking; retain safe camera and collision heights under low ceilings.
+- Fix Creative offhand hover changing the destroy-slot highlight and drawing a grey item tooltip.
+- Start Options search with All settings on General and This tab elsewhere. Once changed, retain one shared search-scope choice across ordinary tabs for the rest of the session.
+
 ## [4.2.1] - 2026-10-23
 
 - Reduce terrain-rebuild CPU work and temporary allocations with reusable water-lighting columns and direct loaded-chunk lookups, preserving native geometry and lighting.

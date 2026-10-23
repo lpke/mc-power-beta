@@ -219,6 +219,15 @@ public final class Maps {
     }
   }
 
+  public static void caveModeChanged(int mode) {
+    sampler=null;
+    if(mode==0) {
+      layer=-1;
+      if(cache!=null) cache.cancelCaveViewReads();
+      MinimapBuffer.clear();
+    }
+  }
+
   private static void clearRadar() {
     RADAR.clear();
   }

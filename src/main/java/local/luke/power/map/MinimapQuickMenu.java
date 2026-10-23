@@ -11,18 +11,19 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
 /** A visit-local modal over the unchanged native inventory. Writes only queued preferences. */
-public final class MinimapQuickMenu extends Screen {
+public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
   private static final Object OWNER = new Object();
   private static final MinimapQuickMenu VIEW = new MinimapQuickMenu();
-  private static final String[] LABELS = {"Show items", "Show mobs", "Show waypoints", "Show in-game waypoints"};
+  private static final String[] LABELS = {"Show items", "Show mobs", "Show waypoints", "Show in-game waypoints", "Cave mode"};
   private static Screen host;
   private static Object world, player;
   private static boolean open;
+  private static int rememberedCaveMode=1;
   private static int ownedButtons;
   private static long ownedKeyEvent = Long.MIN_VALUE;
   private static long frame, checkedFrame = Long.MIN_VALUE;
   private static Screen checkedHost;
-  private static MinimapQuickMenuLayout.Circle checkedGear;
+  private static MinimapQuickMenuLayout.Rect checkedGear;
   private static boolean gearClear;
   private static Screen layoutHost;
   private static MapSettings layoutSettings;
@@ -39,10 +40,10 @@ public final class MinimapQuickMenu extends Screen {
     int labelWidth = java.util.Arrays.stream(LABELS).mapToInt(mc.textRenderer::getWidth).max().orElse(120);
     layoutHost=screen;layoutSettings=settings;layoutFont=mc.textRenderer;layoutWidth=screen.width;layoutHeight=screen.height;
     return cachedLayout=MinimapQuickMenuLayout.at(Minimap.layout(settings,screen.width,screen.height,false),
-        settings.circular,screen.width,screen.height,labelWidth);
+        settings.circular,settings.corner,screen.width,screen.height,labelWidth);
   }
   private static boolean available(Minecraft mc) {
-    return Minimap.inventoryVisible(mc) && Maps.cache()!=null && Display.isActive() && !Mouse.isGrabbed()
+    return Minimap.inventoryVisible(mc) && Maps.cache()!=null && !Mouse.isGrabbed()
         && !InventoryPanels.modalOther(mc.currentScreen,OWNER);
   }
   public static boolean active(Minecraft mc) {
@@ -68,8 +69,8 @@ public final class MinimapQuickMenu extends Screen {
     var gear=layout.gear();
     if(checkedFrame==frame&&checkedHost==mc.currentScreen&&gear.equals(checkedGear))return gearClear;
     checkedFrame=frame;checkedHost=mc.currentScreen;checkedGear=gear;gearClear=false;
-    for(int y=gear.y()-gear.radius();y<=gear.y()+gear.radius();y++)
-      for(int x=gear.x()-gear.radius();x<=gear.x()+gear.radius();x++)
+    for(int y=gear.y();y<gear.y()+gear.height();y++)
+      for(int x=gear.x();x<gear.x()+gear.width();x++)
         if(gear.contains(x,y)&&gui.power$containsGuiSpace(x,y))return false;
     return gearClear=true;
   }
@@ -82,6 +83,7 @@ public final class MinimapQuickMenu extends Screen {
     boolean wasOpen=active(mc);
     if(host!=mc.currentScreen)ownedButtons=0;
     if(button>=0&&button<16&&!down&&(ownedButtons&(1<<button))!=0) {ownedButtons&=~(1<<button);return true;}
+    if(!Display.isActive()) return wasOpen;
     if(wasOpen) {
       if(button>=0&&button<16&&down)ownedButtons|=1<<button;
       if(button>=0&&down) {
@@ -115,6 +117,10 @@ public final class MinimapQuickMenu extends Screen {
       case 1 -> {boolean enabled=!(copy.hostile&&copy.animals);copy.hostile=copy.animals=enabled;}
       case 2 -> copy.waypoints=!copy.waypoints;
       case 3 -> copy.worldWaypoints=!copy.worldWaypoints;
+      case 4 -> {
+        if(copy.caveMode!=0) { rememberedCaveMode=copy.caveMode; copy.caveMode=0; }
+        else copy.caveMode=rememberedCaveMode;
+      }
       default -> throw new IllegalArgumentException("Unknown minimap toggle");
     }
     MapConfig.queued(copy);
@@ -129,29 +135,29 @@ public final class MinimapQuickMenu extends Screen {
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {
       GL11.glDisable(GL11.GL_DEPTH_TEST);GL11.glDisable(GL11.GL_LIGHTING);
-      for(int dy=-gear.radius();dy<=gear.radius();dy++) {
-        int half=(int)Math.sqrt(gear.radius()*gear.radius()-dy*dy);
-        VIEW.fill(gear.x()-half,gear.y()+dy,gear.x()+half+1,gear.y()+dy+1,0xe0202020);
+      int mx=Display.isActive()?Mouse.getX()*mc.currentScreen.width/mc.displayWidth:-1;
+      int my=Display.isActive()?mc.currentScreen.height-Mouse.getY()*mc.currentScreen.height/mc.displayHeight-1:-1;
+      VIEW.button("",gear.x(),gear.y(),gear.width(),gear.height(),mx,my,true);
+      int colour=gear.contains(mx,my)||open?0xffffe0a0:0xffe0e0e0;
+      // A crisp three-slider icon shares the native button borders and hover treatment.
+      for(int line=0;line<3;line++) {
+        int y=gear.y()+4+line*3, knob=gear.x()+(line==1?9:5);
+        VIEW.fill(gear.x()+4,y,gear.x()+12,y+1,0xff303030);
+        VIEW.fill(gear.x()+4,y-1,gear.x()+12,y,colour);
+        VIEW.fill(knob,y-2,knob+2,y+1,colour);
       }
-      // Eight teeth and the hollow center stay legible at the native GUI scale.
-      for(int index=0;index<8;index++) {
-        double angle=index*Math.PI/4;int x=gear.x()+(int)Math.round(Math.cos(angle)*4),y=gear.y()+(int)Math.round(Math.sin(angle)*4);
-        VIEW.fill(x-1,y-1,x+2,y+2,0xffcccccc);
-      }
-      VIEW.fill(gear.x()-2,gear.y()-2,gear.x()+3,gear.y()+3,0xffcccccc);
-      VIEW.fill(gear.x()-1,gear.y()-1,gear.x()+2,gear.y()+2,0xff202020);
     }finally{GL11.glPopAttrib();}
   }
   public static void renderMenu(Minecraft mc,int mouseX,int mouseY) {
     if(!active(mc))return;
     prepare(mc);var layout=layout(mc);var menu=layout.menu();var settings=MapConfig.current();
-    boolean[] values={settings.items,settings.hostile&&settings.animals,settings.waypoints,settings.worldWaypoints};
+    boolean[] values={settings.items,settings.hostile&&settings.animals,settings.waypoints,settings.worldWaypoints,settings.caveMode!=0};
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);GL11.glPushMatrix();
     try {
       GL11.glDisable(GL11.GL_DEPTH_TEST);GL11.glDisable(GL11.GL_LIGHTING);GL11.glTranslatef(0,0,700);
       VIEW.fill(menu.x()-1,menu.y()-1,menu.x()+menu.width()+1,menu.y()+menu.height()+1,0xff808080);
       VIEW.fill(menu.x(),menu.y(),menu.x()+menu.width(),menu.y()+menu.height(),0xf0181818);
-      for(int index=0;index<4;index++) {
+      for(int index=0;index<LABELS.length;index++) {
         var row=layout.row(index);boolean hovered=row.contains(mouseX,mouseY);
         if(hovered)VIEW.fill(row.x(),row.y(),row.x()+row.width(),row.y()+row.height(),0xff383838);
         VIEW.fill(row.x()+3,row.y()+5,row.x()+13,row.y()+15,0xffa0a0a0);

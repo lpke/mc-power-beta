@@ -21,7 +21,7 @@ public final class WaypointMarkers {
   private static boolean captureBob;
   private static boolean eligible(Minecraft mc) {
     return MapConfig.current().worldWaypoints && mc.world != null && mc.player != null
-        && !mc.options.hideHud && (mc.currentScreen == null || mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen) && Maps.waypoints() != null && !Maps.points().isEmpty();
+        && !mc.options.hideHud && Minimap.waypointHost(mc.currentScreen) && Maps.waypoints() != null && !Maps.points().isEmpty();
   }
   public static void beginCamera(Minecraft mc) {
     CAMERA.reset();
@@ -82,7 +82,7 @@ public final class WaypointMarkers {
   }
 
   public static void render(Minecraft mc) {
-    if (world != mc.world || mc.options.hideHud || mc.currentScreen != null && !(mc.currentScreen instanceof net.minecraft.client.gui.screen.ChatScreen)) return;
+    if (world != mc.world || mc.options.hideHud || !Minimap.waypointHost(mc.currentScreen)) return;
     var size = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
     int w = size.method_1857(), h = size.method_1858();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);

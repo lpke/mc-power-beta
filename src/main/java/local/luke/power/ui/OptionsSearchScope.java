@@ -4,10 +4,11 @@ import local.luke.power.config.Setting;
 
 /** Search uses the same destination that opening a result will visit. */
 final class OptionsSearchScope {
-  private static final java.util.Map<String, Boolean> choices = new java.util.HashMap<>();
+  private static Boolean choice;
   private OptionsSearchScope() {}
-  static boolean thisTab(String page) { return choices.getOrDefault(page, !page.equals("General")); }
-  static void toggle(String page) { choices.put(page, !thisTab(page)); }
+  static boolean thisTab(String page) { return choice == null ? !page.equals("General") : choice; }
+  static void toggle(String page) { choice = !thisTab(page); }
+  static void reset() { choice = null; }
   static String page(Setting setting, boolean mapPreview) {
     if (mapPreview && HudEditorSettings.mapAppearance(setting.id)) return "Map";
     return HudEditorSettings.contains(setting) ? "General" : setting.page;

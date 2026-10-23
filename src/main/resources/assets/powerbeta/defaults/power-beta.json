@@ -492,7 +492,7 @@
     },
     "power_controls:general": {
       "pauseOnLostFocus": false,
-      "autosaveInterval": 30,
+      "autosaveInterval": 300,
       "tcpNoDelay": true,
       "rawInput": true,
       "disableControllerInit": true,
@@ -574,7 +574,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.2.1"
+        "customVersionText": "Power Beta 4.2.3"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -819,7 +819,8 @@
       "axesSlashLeaves": true,
       "boatPlacementFacing": true,
       "modernWaterMovement": true,
-      "modernCrawling": true
+      "modernCrawling": true,
+      "crouchCameraHeight": false
     },
     "infoHud": {
       "enabled": false,
