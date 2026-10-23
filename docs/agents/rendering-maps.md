@@ -33,8 +33,8 @@
   Hide the HUD on entry only when requested, default off. Allow manual F1 changes
   during the visit and restore its entry state on every exit. Freecam and Spectator
   never use front view, regardless of perspective style or HUD visibility. On freecam entry, hide the stationary player only until the view first leaves its head; after that, proximity never hides it during that visit.
-  Container previews use a separate interpolated, occluded ray and configured
-  Creative block/entity reach in every mode, including with the HUD hidden. Reject
+  Container previews use a separate interpolated, occluded ray and independent
+  container-preview block/entity reach in every mode, including with the HUD hidden. Reject
   unloaded terrain before raycasting; never load chunks, open inventories or change
   the player's interaction target. Keep multiplayer previews disabled.
 - WorldEdit named states map only to supported Beta metadata. Reject unsupported

@@ -4,6 +4,10 @@ import local.luke.power.permissions.CommandPermissions;
 
 public final class SettingAccess {
   private SettingAccess() {}
+  public static boolean pageVisible(ConfigSession session, String page) {
+    return !page.equals("Creative") || session.settings().stream().noneMatch(s -> s.id.startsWith("rules.world."))
+        || enabled(session, local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE);
+  }
 
   public static boolean visible(ConfigSession session, Setting setting) {
     if (java.util.Set.of("inventoryTools.protectedSlots", "inventoryTools.sorting", "inventoryTools.depositMatching").contains(setting.id)) return false;
@@ -43,8 +47,8 @@ public final class SettingAccess {
     if (id.startsWith("worldedit.")) return local.luke.power.rules.GameRule.ALLOW_WORLD_EDITING;
     if (id.equals("visual.spectatorFullBright")
         || id.startsWith("creative.spectator") || id.equals("creative.showSpectatorSpeed")) return local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE;
-    // Reach is also used by container previews; the sprint binding is shared across modes.
-    if (java.util.Set.of("creative.blockReach", "creative.entityReach", "keys.power_creative.sprint").contains(id)) return null;
+    // The sprint binding is shared across Creative, Spectator and freecam.
+    if (id.equals("keys.power_creative.sprint")) return null;
     if (setting.backend.equals("creative") || setting.backend.equals("creativeTabs") || id.contains("power_creative.") || id.equals("gameplay.leavesDropSaplingsInCreative"))
       return local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE;
     return null;

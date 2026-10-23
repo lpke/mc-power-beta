@@ -23,7 +23,7 @@ import org.lwjgl.opengl.Display;
 final class Minimap441Checks {
   private static final String ROWS = "power_building.hotbar.scroll";
   private static final Set<String> CASES = Set.of("enabled", "disabled", "nohold", "hud-hidden",
-      "minimap-off", "debug", "clamp", "fov", "spectator", "chord-modifier-first", "chord-key-first", "rows", "guards", "menu");
+      "minimap-off", "debug", "clamp", "fov", "spectator", "chord-modifier-first", "chord-key-first", "rows", "guards", "menu", "reset");
   private static Saved saved;
   private static String active;
   private static boolean releaseStage, observedOffset;
@@ -110,7 +110,8 @@ final class Minimap441Checks {
       if (name.startsWith("chord-")) modifiers.put(MapKeys.ENLARGE.translationKey, Chord.CTRL);
       Bindings.configure(modifiers); Bindings.register(mc.options.allKeys);
       var map = MapConfig.copy(); map.minimap = !name.equals("minimap-off"); map.hideWithDebug = true;
-      map.zoomWhileExpanded = !name.equals("disabled"); map.zoom = name.equals("clamp") ? 4 : 1.25;
+      map.zoomWhileExpanded = !name.equals("disabled"); map.zoom = name.equals("clamp") ? 4 : name.equals("reset") ? 2.5 : 1.25;
+      if (name.equals("reset")) map.zoomDefault = 1.25;
       MapConfig.preview(map);
       controls().getField("zoomFovOffset").setFloat(null, 0);
       if (name.equals("fov")) field(mc.field_2818, "fovZoom").setFloat(mc.field_2818, 0);
@@ -119,7 +120,7 @@ final class Minimap441Checks {
       observedOffset = false; releaseStage = false; active = name;
       if (name.equals("menu")) mc.setScreen(new Screen() {});
       String input = name.equals("nohold") || name.equals("menu") ? "hold no keys" : name.startsWith("chord-") ? "hold Ctrl_L, then F9" : "hold z";
-      log("MINIMAP441 READY " + name + " " + input + "; send exactly one wheelup/button4; keep keys held; run check. Expected zoom="
+      log("MINIMAP441 READY " + name + " " + input + (name.equals("reset") ? "; RIGHT button down, hold then release, keep z held; run check. Expected zoom=" : "; send exactly one wheelup/button4; keep keys held; run check. Expected zoom=")
           + expectedZoom(name) + " hotbar=" + expectedSlot(name));
       return;
     }
@@ -163,7 +164,7 @@ final class Minimap441Checks {
   }
 
   private static double expectedZoom(String name) {
-    return name.equals("clamp") ? 4 : Set.of("disabled", "nohold", "hud-hidden", "minimap-off", "rows", "menu").contains(name) ? 1.25 : 1.375;
+    return name.equals("clamp") ? 4 : Set.of("disabled", "nohold", "hud-hidden", "minimap-off", "rows", "menu", "reset").contains(name) ? 1.25 : 1.375;
   }
   private static int expectedSlot(String name) { return Set.of("disabled", "nohold", "hud-hidden", "minimap-off").contains(name) ? 8 : 0; }
   private static void unchanged(Minecraft mc) throws Exception {

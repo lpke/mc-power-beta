@@ -78,7 +78,7 @@ final class ExtraSoundDecoder432Checks {
       log("DECODER432 " + id + " " + suffix + " sourceFrames=" + expected + " legacyFrames=" + before + " repairedFrames=" + expected + " streamedFrames=" + streamed);
     }
     Files.writeString(output.resolve("decoded.json"), new GsonBuilder().setPrettyPrinting().create().toJson(report));
-    check(assets.size() == 89, "not every bundled extra was audited");
+    check(assets.size() == 88, "not every bundled extra was audited");
     log("DECODER432 PASS assets=" + assets.size() + " truncated=" + truncated + " padded=" + padded + " unchanged=" + unchanged);
   }
 }

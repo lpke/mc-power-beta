@@ -18,7 +18,6 @@ public final class DefaultBases {
     public final String id, label, description;
     Base(String id, String label, String description) { this.id = id; this.label = label; this.description = description; }
     public static Base read(String id) {
-      if ("power_beta_full".equals(id)) return POWER_BETA; // Retain the retired Full selection without changing values.
       for (Base base : values()) if (base.id.equals(id)) return base;
       throw new IllegalArgumentException("Unknown defaults base: " + id + ". Use a compatible Power Beta version.");
     }

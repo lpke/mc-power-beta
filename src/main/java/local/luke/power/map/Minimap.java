@@ -51,15 +51,23 @@ public final class Minimap {
     return true;
   }
   public static boolean expandedWheel(Minecraft mc, int wheel) {
-    if (wheel == 0 || mc.world == null || mc.player == null || mc.player.world != mc.world
+    if (wheel == 0 || !expandedInput(mc)) return false;
+    scrollZoom(wheel);
+    return true;
+  }
+  private static boolean expandedInput(Minecraft mc) {
+    if (mc.world == null || mc.player == null || mc.player.world != mc.world
         || mc.player.dead || mc.player.health <= 0 || mc.options == null || mc.options.hideHud
         || mc.currentScreen != null || mc.paused || !mc.field_2778
         || !org.lwjgl.opengl.Display.isActive() || !org.lwjgl.input.Mouse.isGrabbed()
         || Maps.cache() == null) return false;
     var settings = MapConfig.current();
-    if (!settings.zoomWhileExpanded || !visible(settings, mc.options.debugHud, true)
-        || !Bindings.down(MapKeys.ENLARGE) || Bindings.down("power_building.hotbar.scroll")) return false;
-    scrollZoom(wheel);
+    return settings.zoomWhileExpanded && visible(settings, mc.options.debugHud, true)
+        && Bindings.down(MapKeys.ENLARGE) && !Bindings.down("power_building.hotbar.scroll");
+  }
+  public static boolean expandedReset(Minecraft mc) {
+    if (!expandedInput(mc)) return false;
+    resetZoom(mc);
     return true;
   }
   private static void scrollZoom(int wheel) {
@@ -78,10 +86,13 @@ public final class Minimap {
         || local.luke.power.input.InventoryPanels.modal(mc.currentScreen)
         || !(mc.currentScreen instanceof local.luke.power.input.InventoryGui gui)
         || gui.power$containsGuiSpace(x, y)) return false;
+    resetZoom(mc);
+    return true;
+  }
+  private static void resetZoom(Minecraft mc) {
     var copy = MapConfig.copy(); copy.zoom = MinimapZoomSteps.reset(copy.zoomSteps, copy.zoomDefault);
     if (copy.zoom != MapConfig.current().zoom) MapConfig.queued(copy);
     mc.soundManager.method_2009("random.click", 1, 1);
-    return true;
   }
   public static boolean visible(MapSettings settings, boolean debug) {
     return visible(settings, debug, false);

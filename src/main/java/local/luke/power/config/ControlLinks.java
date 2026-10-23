@@ -12,7 +12,7 @@ public final class ControlLinks {
     link("power_beta.entities", "", "", "Toggle rendering for the selected entity types.");
     link("power_beta.fullBright", "", "", "Toggle full bright. Changes rendering only.");
     link("powerbeta.lightOverlay", "lightOverlay.enabled", "", "Toggle light-level numbers on nearby block tops.");
-    link("powerbeta.containerPreview", "", "", "Hold while aiming at a container to preview its contents without opening it.");
+    link("powerbeta.containerPreview", "visual.containerBlockReach", "visual.containerEntityReach", "Hold while aiming at a container to preview its contents without opening it.");
     link("key.forward", "", "", "Move forward.");
     link("key.back", "", "", "Move backward.");
     link("key.left", "", "", "Strafe left.");

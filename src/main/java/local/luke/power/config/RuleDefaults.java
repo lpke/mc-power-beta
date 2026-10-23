@@ -39,14 +39,14 @@ public final class RuleDefaults {
     } catch (NoSuchAlgorithmException impossible) { throw new AssertionError(impossible); }
   }
   /** Only proven, supported defaults follow a base change. Never infer this from custom values. */
-  public static JsonObject followBase(JsonElement source, JsonObject evidence,
+  public static JsonObject followBase(JsonElement source,
       DefaultBases.Base previous, DefaultBases.Base next) {
     if (previous == next || source == null || !source.isJsonObject()) return null;
     JsonObject section = source.getAsJsonObject();
     try {
       JsonObject meta = section.has("review") ? section.getAsJsonObject("review") : null;
       DefaultBases.Base reference = meta == null ? previous : DefaultBases.Base.read(meta.get("base").getAsString());
-      Review review = new Review(section, evidence, reference);
+      Review review = new Review(section, reference);
       if (!review.compatible()) return null;
       if (meta != null && meta.has("defaultsSignature")) {
         JsonObject signatures = meta.getAsJsonObject("defaultsSignature");
@@ -66,13 +66,12 @@ public final class RuleDefaults {
   public static final class Review {
     private final JsonElement expected;
     public final DefaultBases.Base base;
-    private final JsonObject evidence;
     private JsonObject draft;
     private String problem = "";
     private boolean compatible, matches, acknowledged;
     private List<Difference> differences = List.of();
-    Review(JsonElement source, JsonObject evidence, DefaultBases.Base base) {
-      this.expected = source == null ? null : source.deepCopy(); this.evidence = evidence.deepCopy(); this.base = base;
+    Review(JsonElement source, DefaultBases.Base base) {
+      this.expected = source == null ? null : source.deepCopy(); this.base = base;
       draft = source != null && source.isJsonObject() ? source.getAsJsonObject().deepCopy() : new JsonObject();
       inspect();
     }
@@ -89,7 +88,7 @@ public final class RuleDefaults {
         try { RuleSet.version(raw.getAsJsonObject()); supported = true; }
         catch (RuntimeException ignored) { }
         RuleSet converted = null;
-        try { converted = TemplateDocuments.read(raw, cheats, evidence); }
+        try { converted = TemplateDocuments.read(raw, cheats); }
         catch (RuntimeException failure) { compatible = false; problem = shortText(Objects.toString(failure.getMessage(), "Invalid template"), 220); }
         if (converted == null || !converted.equals(defaults) || !values.equals(defaults.values())) matches = false;
         for (GameRule rule : GameRule.values()) {
@@ -148,7 +147,7 @@ public final class RuleDefaults {
       if (!reset && !compatible) throw new IOException("Incompatible creation templates require Reset or a compatible release.");
       JsonObject next = draft.deepCopy();
       for (String name : List.of("survival", "cheats")) {
-        RuleSet rules = reset ? latest(base, name.equals("cheats")) : TemplateDocuments.read(next.get(name), name.equals("cheats"), evidence);
+        RuleSet rules = reset ? latest(base, name.equals("cheats")) : TemplateDocuments.read(next.get(name), name.equals("cheats"));
         next.add(name, rules.document());
       }
       next.add("review", acknowledgement(base));
@@ -166,8 +165,7 @@ public final class RuleDefaults {
   }
   public static Review review() {
     JsonObject root = PowerConfig.document();
-    return new Review(root.getAsJsonObject("settings").get("gameRules"),
-        root.has("worldRuleUpgrade210") ? root.getAsJsonObject("worldRuleUpgrade210") : new JsonObject(), DefaultBases.current());
+    return new Review(root.getAsJsonObject("settings").get("gameRules"), DefaultBases.current());
   }
   public static void resetLatest() throws IOException { review().commit(true); }
 }

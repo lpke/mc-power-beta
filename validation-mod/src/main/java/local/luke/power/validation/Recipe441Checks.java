@@ -70,7 +70,7 @@ public final class Recipe441Checks {
         check(callbacks == 64 && total(mc, 280) == 256 && total(mc, 5) == 0, "maximum crafting did not complete exactly 64 native batches in one publication");
         check(state.context().inputs.stream().allMatch(slot -> slot.getStack() == null) && !NativeInventoryPlan.busy() && !NativeInventoryPlan.failed(), "maximum craft left a repeated/pending operation");
       });
-      test("RECIPE441 hovering an untouched recipe scrolls pages, chosen icons retain zero-to-one wheel control", () -> {
+      test("RECIPE442 untouched icons scroll pages and quantity control stops at zero", () -> {
         state.reset(640); var book = state.book(); var sticks = recipe(book, 280);
         List<List<RecipeDefinition>> pages = new ArrayList<>(); for (int i = 0; i < 21; i++) pages.add(List.of(sticks)); groups(book, pages);
         mc.player.inventory.main[9] = new ItemStack(5, 12, 0); String before = snapshot(mc, state.context()); var cell = book.layout().cell(0);
@@ -87,7 +87,9 @@ public final class Recipe441Checks {
           book.scroll(cell.x() + 10, cell.y() + 10, -120); state.finish();
           check(state.context().inputs.stream().allMatch(slot -> slot.getStack() == null), "wheel did not remove the last batch");
           book.scroll(cell.x() + 10, cell.y() + 10, 120); state.finish();
-          check(state.context().output.getStack() != null, "clicked recipe lost wheel ownership at zero");
+          check(state.context().output.getStack() == null && state.context().inputs.stream().allMatch(slot -> slot.getStack() == null), "wheel refilled a recipe from zero");
+          click(book, 0); state.finish();
+          check(state.context().output.getStack() != null, "explicit click did not reenable recipe placement");
         } finally { enabled.set(wheel, oldEnabled); inverted.set(wheel, oldInverted); }
       });
       test("RECIPE441 partial capacity crafts whole batches and keeps tagged leftover ingredients", () -> {
@@ -258,16 +260,19 @@ public final class Recipe441Checks {
               "untouched native wheel changed ingredients or failed to change pages");
           set(book, "page", page); stage++; instruction(mc, "plain left-click once; wait for publication; check"); return;
         }
-        if (stage == 1 || stage == 3) {
+        if (stage == 1) {
           check(field(book, "lastRecipe") == recipe && state.context().output.getStack() != null,
-              "physical recipe choice or wheel zero-to-one did not fill the requested recipe");
+              "physical recipe choice did not fill the requested recipe");
           check(state.context().inputs.stream().filter(slot -> slot.getStack() != null).allMatch(slot -> slot.getStack().count == 1), "physical recipe did not fill exactly one batch");
           check(total(mc, 5) == 10 && total(mc, 280) == 0 && callbacks == 0, "physical one-batch fill changed ingredient/result totals");
-          if (stage == 1) { stage++; instruction(mc, "wheel DOWN once on the clicked icon; wait for publication; check"); return; }
+          stage++; instruction(mc, "wheel DOWN once on the clicked icon; wait for publication; check"); return;
         } else if (stage == 2) {
           check(state.context().inputs.stream().allMatch(slot -> slot.getStack() == null) && state.context().output.getStack() == null
               && total(mc, 5) == 12 && callbacks == 0, "physical wheel did not remove the last batch to zero");
-          stage++; instruction(mc, "wheel UP once on the same icon; wait for publication; check"); return;
+          stage++; instruction(mc, "wheel UP once on the same icon; wait for publication; check; grid must stay empty"); return;
+        } else if (stage == 3) {
+          check(state.context().inputs.stream().allMatch(slot -> slot.getStack() == null) && state.context().output.getStack() == null
+              && total(mc, 5) == 12 && callbacks == 0, "physical wheel refilled recipe from zero");
         }
       }
       log("PASS RECIPE441 PHYSICAL " + kind + "; use stop to restore or prepare the next case");

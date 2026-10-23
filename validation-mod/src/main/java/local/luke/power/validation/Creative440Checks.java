@@ -19,6 +19,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 
 /** Disposable client only. Tests production screens without persisting a layout or touching world terrain. */
@@ -83,13 +84,11 @@ public final class Creative440Checks {
         check(combined.subList(tools.size(), combined.size()).equals(weapons), "Weapons were omitted");
         for (int i = 0; i < defaults.size(); i++) check(!defaults.tab(i).get("title").getAsString().startsWith("Minecraft"), "Default branding retained");
       });
-      test("CREATIVE440 pinned Search includes every native variant in item ID order", () -> {
+      test("CREATIVE440 pinned Search includes every native variant once", () -> {
         Object search = registry().getMethod("search").invoke(null); List<ItemStack> all = items(search);
-        Set<String> identities = new HashSet<>(); int last = -1, damage = -1;
+        Set<String> identities = new HashSet<>();
         for (ItemStack stack : all) {
-          check(stack.itemId > last || stack.itemId == last && stack.getDamage() >= damage, "Search is not in numeric ID order");
           check(identities.add(stack.itemId + ":" + stack.getDamage()), "Duplicate search variant");
-          last = stack.itemId; damage = stack.getDamage();
         }
         for (int i = 0; i < 7; i++) {
           JsonObject group = CreativeTabsData.read(CreativeTabsBackend.nativeLayout()).tab(i);
@@ -109,6 +108,7 @@ public final class Creative440Checks {
         try {
           mc.player.inventory.setCursorStack(new ItemStack(1, 3, 0));
           press(screen, x - 15, y + (int)call(screen, "power$destroyY") + 2);
+          local.luke.power.storage.JournalQueue.awaitQueued(); local.luke.power.inventory.NativeInventoryPlan.tick(mc);
         }
         finally { creative.getClass().getField("destroySlot").setBoolean(creative, destroy); }
         check(Release240Checks.clicks == clicks, "Individual deletion played click audio");
@@ -120,7 +120,9 @@ public final class Creative440Checks {
         int x = (640 - 176) / 2 + 9, y = (420 - 166) / 2 - 20 + 15;
         mc.player.inventory.setCursorStack(null); List<String> before = inventory(mc);
         InventoryWheel.event(screen, true, 120, false); ((ScreenInput)(Object)screen).power$release(x, y, -1);
-        check(mc.player.inventory.getCursorStack() != null && mc.player.inventory.getCursorStack().count == 1, "Wheel up did not supply one item");
+        check(mc.player.inventory.getCursorStack() == null, "Untouched palette wheel supplied an item");
+        InventoryWheel.clear(); press(screen, x, y); release(screen, x, y);
+        check(mc.player.inventory.getCursorStack() != null && mc.player.inventory.getCursorStack().count == 1, "Click did not supply one item");
         check(mc.player.inventory.getCursorStack().itemId == item.itemId, "Wheel supplied wrong item");
         InventoryWheel.event(screen, true, 240, false); ((ScreenInput)(Object)screen).power$release(x, y, -1);
         check(mc.player.inventory.getCursorStack().count == 3, "Multi-notch wheel lost steps");
@@ -222,7 +224,10 @@ public final class Creative440Checks {
         CreativeTabsData.slots(draft.tab(6), filled); field(editor, "error", "");
         int gridX = (int)call(editor, "gridLeft"), gridY = (int)call(editor, "gridTop");
         press(editor, gridX + 3, gridY + 3); release(editor, gridX + 3, gridY + 3);
-        check(mc.currentScreen instanceof ItemPickerScreen, "Single click did not open the shared picker");
+        check(mc.currentScreen == editor, "Single click did not stay in cell selection");
+        ((SlotDoubleClick)field(editor, "clicks")).press(0, 0, Mouse.getEventNanoseconds() - 100_000_000L);
+        press(editor, gridX + 3, gridY + 3); release(editor, gridX + 3, gridY + 3);
+        check(mc.currentScreen instanceof ItemPickerScreen, "Double click did not open the shared picker");
         ItemPickerScreen picker = (ItemPickerScreen)mc.currentScreen;
         invoke(picker, "choose", new Class<?>[]{String.class}, "264");
         check(mc.currentScreen == editor, "One-click picker needed another confirmation");
@@ -232,7 +237,7 @@ public final class Creative440Checks {
         check(draft.tab(6).get("title").getAsString().equals("Renamed"), "Inline tab title did not commit");
         // Returning from the native picker recomputes GUI scale and screen size.
         int currentGridX = (int)call(editor, "gridLeft");
-        press(editor, currentGridX + 4, editor.height - 60);
+        press(editor, currentGridX + 4, (int)call(editor, "rowControlsY") + 4);
         check(CreativeTabsData.slots(draft.tab(6)).size() >= 72, "Add row did not retain eight initial rows");
         check(setting.value.equals(before) && accepted[0] == 0, "Draft editor published before Save");
         check(inventory(mc).equals(inv), "Settings editor edited inventory");

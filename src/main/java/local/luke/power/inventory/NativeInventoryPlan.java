@@ -29,7 +29,7 @@ public final class NativeInventoryPlan {
   };
   private static boolean failed;
   private static Path journalPath;
-  private enum Replacement { NONE, CREATIVE_HOTBAR, CREATIVE_EQUIPMENT }
+  private enum Replacement { NONE, CREATIVE_HOTBAR, CREATIVE_EQUIPMENT, CREATIVE_DELETION }
   private NativeInventoryPlan() {}
 
   public record Change(String label, Object owner, int index, Supplier<ItemStack> get,
@@ -44,6 +44,10 @@ public final class NativeInventoryPlan {
     public static Change offhand(PlayerInventory inventory, ItemStack next) {
       return new Change("offhand", inventory, Offhand.RECOVERY_SLOT, () -> Offhand.get(inventory),
           stack -> Offhand.set(inventory, stack), stack -> true, inventory::getMaxCountPerStack, true, next);
+    }
+    public static Change cursor(PlayerInventory inventory, ItemStack next) {
+      return new Change("cursor", inventory, 40, inventory::getCursorStack, inventory::setCursorStack,
+          stack -> true, inventory::getMaxCountPerStack, true, next);
     }
     public static Change slot(Slot slot, ItemStack next) {
       var access = (local.luke.power.mixin.DeathSlotAccessor)(Object)slot;
@@ -77,6 +81,12 @@ public final class NativeInventoryPlan {
       BooleanSupplier eligible, Runnable committed, boolean copiesEquipment) {
     return submit(mc, action, true, changes, eligible, committed,
         copiesEquipment ? Replacement.CREATIVE_EQUIPMENT : Replacement.NONE, () -> {});
+  }
+
+  /** Intentional Creative deletion may only remove owned player items; never replace or create. */
+  public static boolean submitDeletion(Minecraft mc, List<Change> changes, BooleanSupplier eligible,
+      Runnable committed, Runnable rollback) {
+    return submit(mc, "creative_delete", true, changes, eligible, committed, Replacement.CREATIVE_DELETION, rollback);
   }
 
   private static boolean submit(Minecraft mc, String action, boolean manual, List<Change> changes,
@@ -158,7 +168,8 @@ public final class NativeInventoryPlan {
     pending = null;
     try {
       plan.durable.get();
-      if (!failed && !plan.cancelled && plan.owns(mc) && plan.matchesBefore(mc)) plan.publish(mc);
+      if (!failed && !plan.cancelled && plan.owns(mc) && plan.matchesBefore(mc)
+          && (!plan.lease.action.equals("crafting_grid_transfer") || CraftingGridTransfer.currentGesture(mc, plan.handler))) plan.publish(mc);
     } catch (Exception | LinkageError failure) { fail(mc, failure); }
     finally { InventoryActions.finish(plan.lease); }
   }
@@ -236,6 +247,9 @@ public final class NativeInventoryPlan {
         int logical = logical(change, mc);
         if (logical >= 0 && !logicalTargets.add(logical)) throw new IOException("Inventory adapters share a physical target");
         ItemStack original = change.get.get(); String saved = encode(original), planned = encode(change.next);
+        if (replacement == Replacement.CREATIVE_DELETION && !Objects.equals(saved, planned)
+            && (logical < 0 || change.next != null))
+          throw new IOException("Creative deletion may only empty owned player slots");
         if (logical >= 0 && original != references[logical]) throw new IOException("Inventory target has the wrong native owner");
         if (logical < 0 && !(change.owner instanceof net.minecraft.inventory.Inventory))
           throw new IOException("Unsupported native inventory owner");
@@ -266,7 +280,8 @@ public final class NativeInventoryPlan {
         for (var item : exchange.consumed()) total(totals, local.luke.power.recipes.RecipeNative.nativeStack(item), -1);
         for (var item : exchange.produced()) total(totals, local.luke.power.recipes.RecipeNative.nativeStack(item), 1);
       }
-      if (replacement != Replacement.CREATIVE_HOTBAR && totals.values().stream().anyMatch(value -> value != 0))
+      if (replacement != Replacement.CREATIVE_HOTBAR && replacement != Replacement.CREATIVE_DELETION
+          && totals.values().stream().anyMatch(value -> value != 0))
         throw new IOException("Inventory plan does not conserve native items");
       for (int i = 0; i < changes.size(); i++) {
         Change change = changes.get(i); ItemStack item = next.get(i);
@@ -279,7 +294,7 @@ public final class NativeInventoryPlan {
       if (encodedSize > AppendJournal.MAX_RECORD / 2) throw new IOException("Inventory recovery data exceeds the bounded snapshot size");
     }
     int logical(Change change, Minecraft mc) {
-      if (change.owner == inventory && (change.index >= 0 && change.index < 40 || change.index == Offhand.RECOVERY_SLOT)) return change.index;
+      if (change.owner == inventory && (change.index >= 0 && change.index <= 40 || change.index == Offhand.RECOVERY_SLOT)) return change.index;
       for (int i = 1; i <= 4; i++) {
         var slot = (local.luke.power.mixin.DeathSlotAccessor)(Object)mc.player.playerContainer.method_2084(i);
         if (slot.power$deathInventory() == change.owner && slot.power$deathIndex() == change.index) return 40 + i;

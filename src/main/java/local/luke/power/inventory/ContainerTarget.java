@@ -1,8 +1,7 @@
 package local.luke.power.inventory;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import local.luke.power.input.DetachedCamera;
+import local.luke.power.visual.VisualConfig;
 import net.minecraft.class_27;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -11,27 +10,14 @@ import net.minecraft.util.math.Vec3d;
 
 /** A separate, read-only pick. Never replaces the player's interaction target. */
 final class ContainerTarget {
-  private static final Method settings;
-  private static final Field blockReach, entityReach;
-  static {
-    try {
-      settings = Class.forName("local.luke.power.creative.config.Config").getMethod("current");
-      blockReach = settings.getReturnType().getField("blockReach");
-      entityReach = settings.getReturnType().getField("entityReach");
-    } catch (ReflectiveOperationException e) { throw new ExceptionInInitializerError(e); }
-  }
   private ContainerTarget() {}
 
   static class_27 find(Minecraft mc) { return find(mc, 1); }
 
   static class_27 find(Minecraft mc, float delta) {
     if (mc.world == null || mc.world.isRemote || mc.player == null || mc.field_2807 == null) return null;
-    double blocks, entities;
-    try {
-      Object current = settings.invoke(null);
-      blocks = Math.max(3, Math.min(10, blockReach.getInt(current) / 10.0));
-      entities = Math.max(3, Math.min(10, entityReach.getInt(current) / 10.0));
-    } catch (ReflectiveOperationException e) { return null; }
+    var current = VisualConfig.current();
+    double blocks = current.containerBlockReach, entities = current.containerEntityReach;
     Vec3d start, direction;
     if (DetachedCamera.isActive()) {
       start = Vec3d.createCached(DetachedCamera.x(), DetachedCamera.y(), DetachedCamera.z());

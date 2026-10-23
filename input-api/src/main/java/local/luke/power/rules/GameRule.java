@@ -73,8 +73,6 @@ public enum GameRule {
 
   private static final Map<String, GameRule> NAMES = new HashMap<>();
   static {
-    NAMES.put("sleep_ambushes", SLEEP_NIGHTMARES);
-    NAMES.put("sleepambushes", SLEEP_NIGHTMARES);
     for (GameRule rule : values()) {
       if (NAMES.put(rule.id.toLowerCase(Locale.ROOT), rule) != null
           || NAMES.put(rule.alias.toLowerCase(Locale.ROOT), rule) != null)

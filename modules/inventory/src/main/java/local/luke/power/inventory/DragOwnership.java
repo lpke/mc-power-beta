@@ -35,4 +35,15 @@ public final class DragOwnership {
     }
 
     public void clear() { owner = null; cursor = null; slots.clear(); }
+
+    public boolean accept(Object owner, ItemStack cursor, Iterable<Slot> changed) {
+        if (this.owner == null) return true;
+        if (this.owner != owner || !this.cursor.matches(cursor)) return false;
+        var accepted = new IdentityHashMap<Slot, Boolean>();
+        for (Slot slot : changed) accepted.put(slot, true);
+        for (var entry : slots.entrySet())
+            if (!accepted.containsKey(entry.getKey()) && !entry.getValue().matches(entry.getKey().getStack())) return false;
+        for (Slot slot : accepted.keySet()) if (slots.containsKey(slot)) slots.put(slot, new StackState(slot.getStack()));
+        return true;
+    }
 }

@@ -4,11 +4,11 @@
   Rule groups identify world scope without repeated row labels.
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
-  track and preset IDs. Global schema 7 supports conversion from schemas 3, 4, 5 and 6 through
-  `input-api/.../storage/ConfigVersions` and `ConfigCleanup`. World-rule format 4
-  supports formats 1, 2 and 3 and pre-rule metadata through `rules/LegacyWorldRules`, `WorldRuleUpgrade210` and `WorldRuleData`.
-  Preserve frozen legacy evidence for worlds converted later. Use these helpers when
-  updating an instance; never widen conflicting permissions or reset unsupported data.
+  track and preset IDs. Global schema 7 and world-rule/template format 4 are the
+  supported formats. Older configuration schemas, rule formats and pre-rule worlds
+  must first be upgraded with Power Beta 4.4.1. Reject them with recovery guidance;
+  never reconstruct permissions from retired global settings. Retain opaque historical
+  evidence already stored in configuration documents without consuming it.
   Validate converted values and verify durable backups before replacing originals.
   Unsupported/future formats block writes or world opening with a useful recovery UI.
   Fresh installs copy `defaults/power-beta.json`; keep unrelated historical importers out.
@@ -33,8 +33,8 @@
   Play the native UI click sound for buttons, tabs, toggles and confirmations.
   Slider movement, pointer selection, dragging and silent group chevrons stay quiet.
 - Reset values depend on the user's Defaults base: Power Beta, Refined Beta 1.7.3
-  or Beta 1.7.3. Power Beta keeps the `power_beta` ID; the retired `power_beta_full`
-  ID is an alias, never a reason to reload settings. Keep the backend/catalog
+  or Beta 1.7.3. Power Beta keeps the `power_beta` ID; retired base IDs are rejected
+  without reloading or resetting settings. Keep the backend/catalog
   fallback values stable so changes to one base do not change another. Power Beta's
   explicit overrides and fresh-install JSON must agree. Never copy personal controls,
   paths, music libraries, HUD layouts or world IDs into defaults. Ore vein mining

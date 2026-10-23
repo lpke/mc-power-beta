@@ -99,12 +99,10 @@ Settings save automatically by default. Right-click Apply to use manual editing;
 leaving with unsaved edits offers Save, Discard or Keep editing. World-creation
 edits stay in the draft until you create the world.
 
-Version 4.2.0 uses configuration format 7 and supports formats 3, 4, 5 and 6, converting older formats
-with a verified backup. World rules use format 4 and support formats 1, 2, 3 and
-Power Beta's earlier world settings. Existing worlds retain their rules and item
-protection. Old footwear-specific crop protection needs an explicit trampling choice. Conflicting old permissions or unsupported formats stop conversion
-and show recovery guidance. Keep a full instance backup before upgrading; world
-folders alone do not include global preferences, music libraries or recovery history.
+Version 4.4.2 reads configuration format 7 and world-rule format 4. Upgrade older
+formats with Power Beta 4.4.1 first. Unsupported formats remain protected and show
+recovery guidance. Keep a full instance backup before upgrading; world folders
+alone do not include global preferences, music libraries or recovery history.
 
 Automatic restocking and automatic tools start off. Power Beta enables offhand and
 the recipe book; the book starts in the pause menu. Sorting and depositing matching

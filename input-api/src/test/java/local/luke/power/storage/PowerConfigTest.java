@@ -45,28 +45,17 @@ class PowerConfigTest {
     assertThrows(IllegalStateException.class,()->PowerConfig.put("test",new JsonObject()));
     assertEquals("broken",Files.readString(PowerConfig.path()));
   }
-  @Test void conversionBacksUpExactBytesAndDoesNotReimportAfterRestart() throws Exception {
-    String original = "{\"schemaVersion\":3,\"settings\":{\"gameplay\":{\"fireSpread\":false,\"mergeItems\":true},\"commandAccess\":{\"enabled\":false}}}";
-    Files.writeString(PowerConfig.path(), original);
-    JsonObject converted = PowerConfig.document();
-    assertEquals(local.luke.power.storage.ConfigVersions.CURRENT, converted.get("schemaVersion").getAsInt());
-    assertFalse(converted.getAsJsonObject("settings").has("commandAccess"));
-    assertFalse(PowerConfig.section("gameplay").has("fireSpread"));
-    assertTrue(PowerConfig.section("gameplay").get("mergeItems").getAsBoolean());
-    assertFalse(converted.getAsJsonObject("legacyWorldRules").getAsJsonObject("gameplay").get("fireSpread").getAsBoolean());
-    try (var backups = Files.list(dir.resolve("backups"))) {
-      assertTrue(backups.anyMatch(p -> { try { return Files.readString(p).equals(original); } catch (Exception e) { return false; } }));
+  @Test void retiredAndFutureFormatsBlockEveryWriterAndPreserveExactBytes() throws Exception {
+    for (int version : new int[]{3, 4, 5, 6, 8, 99}) {
+      String original = "{\"schemaVersion\":" + version + ",\"settings\":{\"keep\":{\"value\":true}}}";
+      Files.writeString(PowerConfig.path(), original);
+      JsonObject fresh = JsonParser.parseString("{\"schemaVersion\":7,\"settings\":{}}").getAsJsonObject();
+      assertThrows(IllegalStateException.class, PowerConfig::document);
+      assertThrows(IllegalStateException.class, () -> PowerConfig.write(fresh));
+      assertThrows(IllegalStateException.class, () -> PowerConfig.put("test", new JsonObject()));
+      assertThrows(IllegalStateException.class, () -> PowerConfig.replaceSection("keep", null, new JsonObject()));
+      assertEquals(original, Files.readString(PowerConfig.path()));
     }
-    assertEquals(converted, PowerConfig.document());
-    assertEquals(converted, JsonParser.parseString(Files.readString(PowerConfig.path())).getAsJsonObject());
-  }
-  @Test void futureFormatsBlockEveryWriterAndPreserveExactBytes() throws Exception {
-    String original = "{\"schemaVersion\":99,\"settings\":{}}";
-    Files.writeString(PowerConfig.path(), original);
-    JsonObject fresh = JsonParser.parseString("{\"schemaVersion\":4,\"settings\":{}}").getAsJsonObject();
-    assertThrows(IllegalStateException.class, () -> PowerConfig.write(fresh));
-    assertThrows(IllegalStateException.class, () -> PowerConfig.put("test", new JsonObject()));
-    assertEquals(original, Files.readString(PowerConfig.path()));
   }
   @Test void rejectsLinksWithoutTouchingTheirTargets() throws Exception {
     Path target=dir.resolve("keep");Files.writeString(target,"keep");
@@ -123,30 +112,6 @@ class PowerConfigTest {
       assertTrue(JsonParser.parseString(Files.readString(persisted)).getAsJsonObject().getAsJsonObject("settings")
           .getAsJsonObject("shutdown").get("enabled").getAsBoolean());
     } finally { if (child.isAlive()) child.destroyForcibly(); }
-  }
-  @Test void persistedConversionHasAnExactBackupAndDoesNotRepeatAfterRestart() throws Exception {
-    Path config = PowerConfig.path();
-    String original = new GsonBuilder().setPrettyPrinting().create().toJson(FlightConfigUpgradeTest.legacy());
-    Files.writeString(config,original);
-    JsonObject converted = PowerConfig.document();
-    assertEquals(converted,JsonParser.parseString(Files.readString(config)));
-    try(var backups=Files.list(dir.resolve("backups"))) {
-      assertTrue(backups.anyMatch(p->{try{return Files.readString(p).equals(original);}catch(Exception e){return false;}}));
-    }
-    PowerConfig.configure(config);
-    assertEquals(converted,PowerConfig.document());
-  }
-  @Test void malformedTuningBlocksConversionBeforeAnyWrite() throws Exception {
-    Path config = PowerConfig.path();
-    for(String bad:new String[]{"-1","1001","\"10\"","null","{}"}) {
-      var old=FlightConfigUpgradeTest.legacy();old.getAsJsonObject("settings").getAsJsonObject("power_camera:config").add("drag",JsonParser.parseString(bad));
-      String original=old.toString();Files.writeString(config,original);
-      assertThrows(IllegalStateException.class,PowerConfig::document,bad);
-      assertEquals(original,Files.readString(config));
-    }
-    var future=FlightConfigUpgradeTest.legacy();future.addProperty("schemaVersion",99);String original=future.toString();Files.writeString(config,original);
-    assertThrows(IllegalStateException.class,PowerConfig::document);
-    assertEquals(original,Files.readString(config));
   }
   @Test void incompatibleTemplatesArePreservedForReviewWithoutBlockingUnrelatedPreferences() throws Exception {
     JsonObject root = new JsonObject(); root.addProperty("schemaVersion", 7);

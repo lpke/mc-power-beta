@@ -201,12 +201,12 @@ class DefaultBasesTest {
       assertEquals(enabled,PowerConfig.read("gameplay",local.luke.power.gameplay.GameplaySettings.class).modernWaterMovement);
     }
   }
-  @Test void consolidatedPowerBetaRetainsBothIdsAndUsesStandardDisplayDefaults() throws Exception {
+  @Test void powerBetaUsesCurrentIdAndStandardDisplayDefaults() throws Exception {
     ConfigDefaults.prepare(game);
     assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.read("power_beta"));
     assertEquals("Power Beta", DefaultBases.Base.POWER_BETA.label);
     assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.values()[0]);
-    assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.Base.read("power_beta_full"));
+    assertThrows(IllegalArgumentException.class, () -> DefaultBases.Base.read("power_beta_full"));
     assertEquals(3, DefaultBases.Base.values().length);
     for (var id : List.of("veinMining.enabled", "gameplay.torchShovel", "gameplay.axesSlashLeaves", "tweaks.boatSpeed")) {
       assertTrue(DefaultBases.value(DefaultBases.Base.POWER_BETA, id, new JsonPrimitive(false)).getAsBoolean(), id);
@@ -254,10 +254,14 @@ class DefaultBasesTest {
     assertEquals(95, water.get("underwaterDarknessOutside").getAsInt());
     assertTrue(water.get("removeUnderwaterOverlay").getAsBoolean());
     assertEquals(1, PowerConfig.section("title").get("style").getAsInt());
-    var alias = new DefaultBases.State(); alias.base = "power_beta_full"; alias.setupComplete = true;
-    PowerConfig.save("defaults", alias); byte[] before = java.nio.file.Files.readAllBytes(PowerConfig.path());
-    DefaultBases.reload(); assertEquals(DefaultBases.Base.POWER_BETA, DefaultBases.current());
-    assertArrayEquals(before, java.nio.file.Files.readAllBytes(PowerConfig.path()));
+
+  }
+  @Test void retiredDefaultsBaseIsRejectedWithoutResettingOrWritingPreferences() throws Exception {
+    ConfigDefaults.prepare(game); DefaultBases.Base previous = DefaultBases.current();
+    var document = PowerConfig.document(); document.getAsJsonObject("settings").getAsJsonObject("defaults").addProperty("base", "power_beta_full");
+    PowerConfig.write(document); byte[] original = Files.readAllBytes(PowerConfig.path());
+    assertThrows(IllegalArgumentException.class, DefaultBases::reload);
+    assertEquals(previous, DefaultBases.current()); assertArrayEquals(original, Files.readAllBytes(PowerConfig.path()));
   }
   @Test void newSprintDefaultsMatchFreshSetupAndKeepOtherBasesAndMissingWorldRulesOff() throws Exception {
     ConfigDefaults.prepare(game);

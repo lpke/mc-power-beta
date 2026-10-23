@@ -41,42 +41,21 @@ public final class RuleSet {
     return object;
   }
   public static RuleSet read(JsonObject document, RuleSet defaults) {
-    int version = version(document);
+    version(document);
     if (!document.has("values") || !document.get("values").isJsonObject())
       throw new IllegalArgumentException("Game rules values are missing or invalid.");
-    return readValues(upgradeValues(document.getAsJsonObject("values"), version), defaults);
+    return readValues(document.getAsJsonObject("values"), defaults);
   }
   public static int version(JsonObject document) {
     try {
       JsonPrimitive value = document.getAsJsonPrimitive("version");
       if (!value.isNumber()) throw new IllegalArgumentException();
       int version = value.getAsBigDecimal().intValueExact();
-      if (version < 1 || version > VERSION) throw new IllegalArgumentException();
+      if (version != VERSION) throw new IllegalArgumentException();
       return version;
     } catch (RuntimeException e) {
-      throw new IllegalArgumentException("Unsupported game rules version. Supported versions: 1 through " + VERSION + ". Original data is preserved.", e);
+      throw new IllegalArgumentException("Unsupported game rules version. Supported version: " + VERSION + ". Upgrade older worlds and templates with Power Beta 4.4.1 first, or use the release that saved this data. Original data is preserved.", e);
     }
-  }
-  public static JsonObject upgradeValues(JsonObject source, int version) {
-    JsonObject values = source.deepCopy();
-    if (version < 3) {
-      JsonElement old = values.remove("sleep_ambushes");
-      if (old != null) {
-        if (values.has("sleep_nightmares") && !old.equals(values.get("sleep_nightmares")))
-          throw new IllegalArgumentException("Conflicting sleep nightmare rules. Original data is preserved.");
-        values.add("sleep_nightmares", old);
-      }
-      JsonElement percentage = values.get("players_sleeping_percentage");
-      if (percentage != null && percentage.isJsonPrimitive() && percentage.getAsJsonPrimitive().isNumber()
-          && percentage.getAsBigDecimal().compareTo(java.math.BigDecimal.valueOf(100)) > 0) {
-        // Old values above 100 disabled skipping. Keep that restriction explicitly.
-        try { percentage.getAsBigDecimal().intValueExact(); }
-        catch (ArithmeticException e) { throw new IllegalArgumentException("Invalid old sleeping percentage", e); }
-        values.addProperty("allow_sleep", false);
-        values.addProperty("players_sleeping_percentage", 100);
-      }
-    }
-    return values;
   }
   public static RuleSet readValues(JsonObject object, RuleSet defaults) {
     RuleSet rules = defaults.copy();

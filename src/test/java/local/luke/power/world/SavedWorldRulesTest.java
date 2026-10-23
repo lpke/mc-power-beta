@@ -86,13 +86,11 @@ class SavedWorldRulesTest {
     var root = WorldRuleFiles.read(level);
     var data = root.getCompound("Data");
     data.putString("PowerBetaCommandWorldId", "stable-sprint-world");
-    for (int version = 1; version <= RuleSet.VERSION; version++) {
-      var oldRules = new NbtCompound();
-      oldRules.putInt("version", version);
-      oldRules.putBoolean("allow_creative_mode", true);
-      data.put("GameRules", oldRules);
-      assertFalse(WorldRuleData.read(data).enabled(GameRule.ALLOW_SPRINTING));
-    }
+    var savedRules = new NbtCompound();
+    savedRules.putInt("version", RuleSet.VERSION);
+    savedRules.putBoolean("allow_creative_mode", true);
+    data.put("GameRules", savedRules);
+    assertFalse(WorldRuleData.read(data).enabled(GameRule.ALLOW_SPRINTING));
     write(level, root);
     byte[] previous = Files.readAllBytes(old);
     var session = SavedWorldBackend.open(open());

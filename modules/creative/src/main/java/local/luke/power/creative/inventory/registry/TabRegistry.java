@@ -46,13 +46,22 @@ public final class TabRegistry {
     }
     search = new SimpleTab(CreativeInventory.id("search"), new ItemStack(Item.compass));
     Map<String, ItemStack> all = new LinkedHashMap<>();
-    for (CreativeTab tab : NATIVE_TABS) for (ItemStack stack : tab.getItems())
+    for (CreativeTab tab : DEFAULT_TABS) for (ItemStack stack : tab.getItems())
       if (stack != null) all.putIfAbsent(stack.itemId + ":" + stack.getDamage(), stack);
+    List<ItemStack> ordinary = all.values().stream().filter(stack -> !unobtainable(stack)).toList();
+    ordinary.forEach(search::addItem);
+    all.values().stream().filter(TabRegistry::unobtainable).forEach(search::addItem);
+    Set<String> grouped = new HashSet<>(all.keySet());
     for (int id = 1; id < Item.byId.length; id++) if (Item.byId[id] != null)
       all.putIfAbsent(id + ":0", new ItemStack(id, 1, 0));
-    all.values().stream().sorted(Comparator.comparingInt((ItemStack stack) -> stack.itemId)
+    all.entrySet().stream().filter(entry -> !grouped.contains(entry.getKey())).map(Map.Entry::getValue)
+        .sorted(Comparator.comparingInt((ItemStack stack) -> stack.itemId)
         .thenComparingInt(ItemStack::getDamage)).forEach(search::addItem);
     reload(PowerConfig.section("creativeTabs"));
+  }
+  private static boolean unobtainable(ItemStack stack) {
+    return stack != null && (stack.itemId == 7 || stack.itemId == 19 || stack.itemId == 52 || stack.itemId == 95
+        || stack.itemId >= 302 && stack.itemId <= 305);
   }
   public static void reload(JsonObject source) {
     List<CreativeTab> next = new ArrayList<>();

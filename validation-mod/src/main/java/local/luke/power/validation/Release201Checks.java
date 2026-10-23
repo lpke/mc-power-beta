@@ -189,49 +189,23 @@ final class Release201Checks {
   }
 
   private static void migration(Minecraft mc) throws Exception {
-    var original = local.luke.power.storage.PowerConfig.document();
-    try {
-      var edited = original.deepCopy();
-      edited.add("worldRuleUpgrade", JsonParser.parseString("{\"gameplay\":{\"lavaProofItems\":true}}"));
-      local.luke.power.storage.PowerConfig.write(edited);
-      test("format-one native worlds retain explicit rules, old trampling and frozen item protection", () -> {
+    test("retired rule formats reject before native world loading and preserve data", () -> {
+      for (int version : new int[]{0, 1, 2, 3}) {
         var data = new net.minecraft.nbt.NbtCompound();
-        RuleSet previous = new RuleSet(); previous.set(GameRule.KEEP_INVENTORY, true);
-        local.luke.power.world.WorldRuleData.write(data, previous);
-        var saved = data.getCompound(local.luke.power.world.WorldRuleData.TAG); saved.putInt("version", 1);
-        saved.values().removeIf(entry -> Set.of("player_crop_trampling", "lava_destroys_items", "cactus_destroys_items")
-            .contains(((net.minecraft.nbt.NbtElement)entry).getKey()));
-        var converted = local.luke.power.world.WorldRuleData.read(data);
-        check(converted.enabled(GameRule.KEEP_INVENTORY) && !converted.enabled(GameRule.MOB_CROP_TRAMPLING)
-            && converted.enabled(GameRule.PLAYER_CROP_TRAMPLING) && !converted.enabled(GameRule.LAVA_DESTROYS_ITEMS)
-            && converted.enabled(GameRule.CACTUS_DESTROYS_ITEMS), "converted effective behavior differs");
-        var properties = new net.minecraft.world.WorldProperties(data);
-        var dimension = new net.minecraft.world.WorldProperties(properties);
-        check(WorldRules.of(dimension).equals(converted), "converted dimension rules lost");
-        var roundTrip = new net.minecraft.world.WorldProperties(properties.asNbt());
-        check(WorldRules.of(roundTrip).equals(converted), "converted rules lost after native save/reload");
-        Path game = Path.of(".").toAbsolutePath().normalize(), world = game.resolve("saves/Rule migration fixture");
-        Files.createDirectories(world);
-        var root = new net.minecraft.nbt.NbtCompound(); root.put("Data", data);
-        Path file = world.resolve("level.dat");
-        try (var output = Files.newOutputStream(file)) { net.minecraft.nbt.NbtIo.writeCompressed(root, output); }
-        byte[] bytes = Files.readAllBytes(file);
-        local.luke.power.world.WorldRuleFiles.beforeOpen(game, "Rule migration fixture");
-        check(Arrays.equals(bytes, Files.readAllBytes(file)), "pre-open validation modified original bytes");
-        try (var files = Files.walk(game.resolve("power-beta-data/settings-backups"))) {
-          check(files.filter(p -> p.getFileName().toString().startsWith("file-"))
-              .anyMatch(p -> { try { return Arrays.equals(bytes, Files.readAllBytes(p)); } catch (Exception e) { return false; } }),
-              "format-one metadata backup missing");
+        if (version != 0) {
+          local.luke.power.world.WorldRuleData.write(data, RuleSet.cheats());
+          data.getCompound(local.luke.power.world.WorldRuleData.TAG).putInt("version", version);
         }
-      });
-      test("pre-rule all-entity crop protection converts to both independent rules", () -> {
-        var config = local.luke.power.storage.PowerConfig.document();
-        config.add("legacyWorldRules", JsonParser.parseString("{\"power_mechanics:config\":{\"MOB_CONFIG\":{\"disableTramplingFarmland\":true}}}"));
-        local.luke.power.storage.PowerConfig.write(config);
-        var rules = local.luke.power.world.WorldRuleData.read(new net.minecraft.nbt.NbtCompound());
-        check(!rules.enabled(GameRule.PLAYER_CROP_TRAMPLING) && !rules.enabled(GameRule.MOB_CROP_TRAMPLING), "old whole-world protection changed");
-      });
-    } finally { local.luke.power.storage.PowerConfig.write(original); }
+        boolean rejected = false;
+        try { local.luke.power.world.WorldRuleData.read(data); }
+        catch (IllegalArgumentException expected) { rejected = expected.getMessage().contains("4.4.1"); }
+        check(rejected, "retired rules did not provide an upgrade path");
+        var properties = new net.minecraft.world.WorldProperties(data);
+        check(!((WorldRules)properties).power$rulesProblem().isEmpty(), "native loader admitted retired rules");
+        if (version != 0) check(data.getCompound(local.luke.power.world.WorldRuleData.TAG).getInt("version") == version,
+            "rejected rules changed their version");
+      }
+    });
   }
 
   private static void defuse(Minecraft mc) throws Exception {

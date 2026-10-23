@@ -85,33 +85,4 @@ public final class DebugOrder {
     next.add(index, id);
     return validate(next);
   }
-  /** Freeze the old providers' offsets once, as rows, before they are retired from the UI. */
-  public static List<String> legacy(JsonObject settings) {
-    int extra = number(settings, "power_compat:config", "overlayAdditionsYOffset");
-    int culling = number(settings, "entityculling:config", "f3InfoYOffset");
-    int music = number(settings, "power_environment:config", "MUSIC_CONFIG", "overlayForMusicInDebugYOffset");
-    if (extra == 0 && culling == 0 && music == 0) return defaults();
-    Map<String,Integer> y = new LinkedHashMap<>();
-    int[] ys = {2,12,22,32,42,64,72,80,88,104,96,112,120,128,136,144,144,152,106,115,124};
-    for (var line : DebugLines.values()) {
-      if (line.right()) continue;
-      int offset = line.culling() ? culling : line == DebugLines.MUSIC ? music
-          : EnumSet.of(DebugLines.PLAY_TIME, DebugLines.LIGHT, DebugLines.BIOME, DebugLines.DAY, DebugLines.SLIME, DebugLines.FACING).contains(line) ? extra : 0;
-      y.put(line.id, Math.max(2, ys[line.ordinal()] + offset));
-    }
-    List<String> result = new ArrayList<>();
-    for (String id : y.keySet().stream().sorted(Comparator.comparingInt(y::get)).toList()) {
-      int desired = Math.min(MAX_ROWS - DebugLines.values().length, Math.max(0, (y.get(id) - 2) / 10));
-      while (result.size() < desired) result.add("");
-      result.add(id);
-    }
-    return validate(result);
-  }
-  private static int number(JsonObject settings, String section, String... path) {
-    JsonElement at = settings.get(section);
-    for (String key : path) { if (at == null || !at.isJsonObject()) return 0; at = at.getAsJsonObject().get(key); }
-    if (at == null) return 0;
-    try { int n = at.getAsBigDecimal().intValueExact(); if (Math.abs((long)n) > 2048) throw new IllegalArgumentException(); return n; }
-    catch (RuntimeException bad) { throw new IllegalArgumentException("Invalid legacy F3 offset. Original settings preserved.", bad); }
-  }
 }

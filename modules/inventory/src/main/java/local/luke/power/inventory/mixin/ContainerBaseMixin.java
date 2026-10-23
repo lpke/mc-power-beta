@@ -44,6 +44,17 @@ public abstract class ContainerBaseMixin extends Screen implements local.luke.po
 		powerInventory$dragOwnership.clear();
 	}
 
+	@Override public void power$acceptItemDragChanges(Object owner, java.util.List<?> changed) {
+		var nativeSlots = new ArrayList<Slot>();
+		for (Object entry : changed) if (entry instanceof Slot target) nativeSlots.add(target);
+		if (!powerInventory$dragOwnership.accept(owner, minecraft.player.inventory.getCursorStack(), nativeSlots)) power$cancelItemDrag();
+	}
+
+	@Override public boolean power$itemDragCurrent(Object owner) {
+		return owner == container && minecraft.player != null
+				&& powerInventory$dragOwnership.current(container, minecraft.player.inventory.getCursorStack());
+	}
+
 	@Shadow
 	protected int backgroundWidth;
 

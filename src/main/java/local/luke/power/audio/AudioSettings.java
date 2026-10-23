@@ -11,7 +11,6 @@ public final class AudioSettings {
   public boolean boneMealSounds = false;
   public boolean lavaPopSounds = false;
   public boolean lavaAmbientSounds = false;
-  public boolean lavaBurnSounds = false;
   public boolean waterSplashSounds = false;
   public boolean swimmingSounds = false;
   public boolean underwaterEnterSounds = false;

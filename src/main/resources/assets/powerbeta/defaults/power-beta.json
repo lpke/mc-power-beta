@@ -340,8 +340,7 @@
       "underwaterRareAdditions": false,
       "underwaterUltraRareAdditions": false,
       "lavaBucketSounds": true,
-      "lavaAmbientSounds": true,
-      "lavaBurnSounds": true
+      "lavaAmbientSounds": true
     },
     "visual": {
       "softRain": true,
@@ -372,7 +371,9 @@
       "underwaterDarknessOutside": 95,
       "narrowUnderwaterFov": false,
       "swapEquipment": true,
-      "containerCarry": true
+      "containerCarry": true,
+      "containerBlockReach": 5,
+      "containerEntityReach": 5
     },
     "power_environment:config": {
       "MISSING_ACHIEVEMENTS_CONFIG": {
@@ -579,7 +580,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.4.1"
+        "customVersionText": "Power Beta 4.4.2"
       },
       "panoramaConfig": {
         "enablePanorma": true,

@@ -66,10 +66,5 @@ public final class FlightMotion {
     return (1 - drag * retention) / (1 - drag);
   }
 
-  public static double legacyDrift(double responsePerSecond) {
-    if (!Double.isFinite(responsePerSecond) || responsePerSecond < 0 || responsePerSecond > 1000)
-      throw new IllegalArgumentException("Freecam drag must be from 0 to 1000.");
-    return Math.max(0, Math.min(5, 5 * Math.exp(-responsePerSecond / TICKS) / HORIZONTAL_DRAG));
-  }
   private static double snap(double value) { return Math.abs(value) < .003 ? 0 : value; }
 }

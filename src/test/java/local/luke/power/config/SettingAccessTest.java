@@ -26,6 +26,17 @@ class SettingAccessTest {
     session.settings().stream().filter(s -> s.id.equals("rules.world." + rule.id()))
         .findFirst().orElseThrow().value = new JsonPrimitive(value);
   }
+  @Test void creativeTabRequiresCreativeAccessWhilePreviewDistancesRemainAvailable() {
+    var session = world();
+    for (boolean allowed : new boolean[]{false, true, false}) {
+      rule(session, GameRule.ALLOW_CREATIVE_MODE, allowed);
+      assertEquals(allowed, SettingAccess.pageVisible(session, "Creative"));
+      assertTrue(SettingAccess.pageVisible(session, "Inventory"));
+      assertTrue(SettingAccess.visible(session, entry("visual.containerBlockReach")));
+      assertTrue(SettingAccess.visible(session, entry("visual.containerEntityReach")));
+    }
+    assertTrue(SettingAccess.pageVisible(new ConfigSession(), "Creative"));
+  }
 
   @Test void eachPermissionOnlyExposesItsOwnSettingsAndPreservesPreferences() {
     var session = world();
@@ -54,8 +65,10 @@ class SettingAccessTest {
       assertEquals(permission == GameRule.ALLOW_SPECTATOR_MODE, SettingAccess.visible(session, entry("creative.spectatorSprintToggle")));
       for (String id : List.of("keys.power_creative.modifier", "keys.power_creative.picker"))
         assertEquals(permission != GameRule.ALLOW_FLIGHT, SettingAccess.visible(session, entry(id)));
-      for (String id : List.of("keys.power_creative.sprint", "creative.blockReach", "creative.entityReach", "power_camera:config.speed", "world.difficulty"))
+      for (String id : List.of("keys.power_creative.sprint", "visual.containerBlockReach", "visual.containerEntityReach", "power_camera:config.speed", "world.difficulty"))
         assertTrue(SettingAccess.visible(session, entry(id)), id);
+      for (String id : List.of("creative.blockReach", "creative.entityReach"))
+        assertEquals(permission == GameRule.ALLOW_CREATIVE_MODE, SettingAccess.visible(session, entry(id)), id);
       rule(session, permission, false);
     }
   }

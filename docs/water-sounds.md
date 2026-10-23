@@ -80,26 +80,19 @@ block with Blocks volume. Cow milking uses Passive creatures volume.
 A missing `lavaBucketSounds` copies the previous explicit bucket choice once
 through the verified settings backup; existing explicit split choices remain intact.
 
-The lava audit checked `LavaFluid.animateTick`, `Entity.lavaHurt`,
-`ItemEntity.shouldPlayLavaHurtSound`, `LiquidBlock.fizz` and
+The lava audit checked `LavaFluid.animateTick`, `LiquidBlock.fizz` and
 `LevelEventHandler` event 1501 in the same verified client.
 
 | Effect | Conditions and gain | Category |
 | --- | --- | --- |
 | Pop | Native 1/100 exposed-surface particle event, gain 0.2 to 0.4, pitch 0.9 to 1.05. | Ambient |
 | Lava ambience | Independent 1/200 exposed-surface display event, same gain and pitch range. | Ambient |
-| Lava burning | Successful native lava damage, gain 0.4, pitch 2 to 2.4. Item sounds require every tenth entity tick or destruction. | The entity category, Ambient for dropped items |
 | Cooling/extinguishing | Native water/lava contact, unchanged `random.fizz`, gain 0.5 and pitch `2.6 + (random1 - random2) * 0.8`. | Blocks |
 
-Lava ambience and burning have their own toggles, enabled in the Power Beta base
-and disabled in the other bases. Missing preferences initialize from the selected
-base after a verified backup. The pop category now matches modern Ambient.
-The modern item damage API returns true after damage; Beta returns false even
-when its item health decreases. The audio hook checks the actual health decrease
-and preserves that native return value. Disabling item destruction or fire damage
-prevents its associated new burn cue. With modern burning sounds on, the native
-per-tick item bounce fizz is replaced by that damage-owned cue to avoid duplicates.
-With it off, the native sound remains. All additional lava sounds stay singleplayer.
+Lava ambience has its own toggle, enabled in the Power Beta base and disabled
+in the other bases. Missing preferences initialize from the selected base after
+a verified backup. The pop category matches modern Ambient.
+Native lava damage, item bounce sounds and their timing remain unchanged.
 
 Cooling already has matching native behavior and bytes, so it needs no extra asset
 or toggle. Modern lava adds no general lava entry, swimming or exit sound.

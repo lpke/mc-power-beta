@@ -17,15 +17,17 @@ public final class VisualBackend implements Backend {
     for (var f : VisualSettings.class.getFields()) {
       if(java.lang.reflect.Modifier.isTransient(f.getModifiers()))continue;
       boolean distance = f.getName().equals("thirdPersonDistance");
+      boolean reach = f.getName().equals("containerBlockReach") || f.getName().equals("containerEntityReach");
       boolean percentage = f.getName().equals("underwaterFogDensity") || f.getName().equals("underwaterDarkness")
           || f.getName().equals("underwaterDarknessOutside");
       entries.add(Catalog.setting("visual." + f.getName(), b.id(), distance ? "Camera" : "Video",
           distance ? "Third person" : "Texture overrides", distance ? "Camera distance" : Catalog.words(f.getName()),
           distance ? "Distance behind the player in blocks. Walls can move the camera closer; 4 is vanilla."
               : "Overrides only this texture in the selected pack. Can be combined with the other overrides.",
-          distance ? Setting.Kind.DECIMAL : percentage ? Setting.Kind.INTEGER : Setting.Kind.BOOLEAN,
+          distance || reach ? Setting.Kind.DECIMAL : percentage ? Setting.Kind.INTEGER : Setting.Kind.BOOLEAN,
           Catalog.JSON.toJsonTree(f.get(current)), Catalog.JSON.toJsonTree(f.get(defaults)),
-          distance ? 1 : 0, distance ? 12 : percentage ? 100 : 1, distance ? .25 : 1, List.of(), false));
+          distance ? 1 : reach ? 3 : 0, distance ? 12 : reach ? 10 : percentage ? 100 : 1,
+          distance ? .25 : reach ? .5 : 1, List.of(), false));
     }
     session.add(b, entries);
   }

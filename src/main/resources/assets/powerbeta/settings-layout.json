@@ -103,7 +103,8 @@
     "Automatic restocking",
     "Automatic tool switching",
     "Sorting",
-    "Saved Creative hotbars"
+    "Saved Creative hotbars",
+    "Container previews"
   ],
   "Building": [
     "Fast placement",

@@ -2,29 +2,28 @@ package local.luke.power.world;
 
 import com.google.gson.*;
 import local.luke.power.rules.*;
-import local.luke.power.storage.PowerConfig;
 import net.minecraft.nbt.*;
 
-/** Native NBT boundary. Validation runs before any converted values are published. */
+/** Strict current-format native NBT boundary, validated before world state is published. */
 public final class WorldRuleData {
   public static final String TAG = "GameRules";
   private WorldRuleData() {}
 
   public static RuleSet read(NbtCompound world) {
-    if (!world.contains(TAG)) return legacy(world);
+    if (!world.contains(TAG)) throw new IllegalArgumentException("World game rules are missing. Upgrade this existing world with Power Beta 4.4.1 first. Original world is preserved.");
     requireType(world, TAG, 10);
     NbtCompound tag = world.getCompound(TAG);
     requireType(tag, "version", 3);
     int version = tag.getInt("version");
-    if (version < 1 || version > RuleSet.VERSION)
-      throw new IllegalArgumentException("World game rules version " + version + " is unsupported. Supported versions: 1 through " + RuleSet.VERSION + ". Open with a compatible release or restore a backup.");
+    if (version != RuleSet.VERSION)
+      throw new IllegalArgumentException("World game rules version " + version + " is unsupported. Supported version: " + RuleSet.VERSION + ". Upgrade older worlds with Power Beta 4.4.1 first, or use the release that saved this world. Original world is preserved.");
     JsonObject values = new JsonObject();
     for (Object value : tag.values()) {
       NbtElement entry = (NbtElement) value;
       String id = entry.getKey();
       if (id.equals("version")) continue;
       GameRule rule = GameRule.find(id);
-      if (rule == null || !rule.id().equals(id) && !(version < 3 && id.equals("sleep_ambushes"))) throw new IllegalArgumentException("Unknown saved game rule: " + id + ". Open with a compatible release.");
+      if (rule == null || !rule.id().equals(id)) throw new IllegalArgumentException("Unknown saved game rule: " + id + ". Open with a compatible release.");
       requireType(tag, id, rule.integer() ? 3 : 1);
       if (rule.integer()) values.addProperty(id, tag.getInt(id));
       else {
@@ -33,9 +32,7 @@ public final class WorldRuleData {
         values.addProperty(id, number == 1);
       }
     }
-    RuleSet defaults = version == 1 ? WorldRuleUpgrade.defaults(upgradeEvidence()) : new RuleSet();
-    if (version < 3) defaults = WorldRuleUpgrade210.defaults(upgradeEvidence210(), defaults);
-    return RuleSet.readValues(WorldRuleUpgrade210.values(values, version, upgradeEvidence210()), defaults);
+    return RuleSet.readValues(values, new RuleSet());
   }
   public static void write(NbtCompound world, RuleSet rules) {
     NbtCompound tag = new NbtCompound(); tag.putInt("version", RuleSet.VERSION);
@@ -45,57 +42,11 @@ public final class WorldRuleData {
     }
     world.put(TAG, tag);
   }
-  private static JsonObject upgradeEvidence210() {
-    JsonObject config = PowerConfig.document();
-    return config.has("worldRuleUpgrade210") ? config.getAsJsonObject("worldRuleUpgrade210") : new JsonObject();
-  }
-  private static JsonObject upgradeEvidence() {
-    JsonObject config = PowerConfig.document();
-    return config.has("worldRuleUpgrade") ? config.getAsJsonObject("worldRuleUpgrade") : new JsonObject();
-  }
   private static void requireType(NbtCompound compound, String key, int type) {
     for (Object value : compound.values()) {
       NbtElement element = (NbtElement) value;
       if (element.getKey().equals(key) && element.getType() == type) return;
     }
     throw new IllegalArgumentException("Invalid or missing game-rule data: " + key + ". Original world is preserved.");
-  }
-  private static RuleSet legacy(NbtCompound tag) {
-    if (tag.contains("PowerBetaCommandWorldId")) requireType(tag, "PowerBetaCommandWorldId", 8);
-    if (tag.contains("PowerBetaWorldEditAccess")) {
-      requireType(tag, "PowerBetaWorldEditAccess", 3);
-      int access = tag.getInt("PowerBetaWorldEditAccess");
-      if (access < 0 || access > 2) throw new IllegalArgumentException("Invalid old world-edit access. Original world is preserved.");
-    }
-    for (String key : new String[]{"PowerBetaCheatsEnabled", "PowerBetaKeepInventory", "PowerBetaDaylightCycle",
-        "PowerBetaWeatherCycle", "PowerBetaHostileSpawning", "PowerBetaPassiveSpawning"}) {
-      if (!tag.contains(key)) continue;
-      requireType(tag, key, 1);
-      if (tag.getByte(key) != 0 && tag.getByte(key) != 1)
-        throw new IllegalArgumentException("Invalid old world rule: " + key + ". Original world is preserved.");
-    }
-    JsonObject old = new JsonObject();
-    old.addProperty("world", tag.getString("PowerBetaCommandWorldId"));
-    old.addProperty("cheats", tag.getBoolean("PowerBetaCheatsEnabled"));
-    old.addProperty("keepInventory", tag.getBoolean("PowerBetaKeepInventory"));
-    old.addProperty("editing", tag.getInt("PowerBetaWorldEditAccess"));
-    for (var mapping : java.util.Map.of("daylight", "PowerBetaDaylightCycle", "weather", "PowerBetaWeatherCycle",
-        "hostile", "PowerBetaHostileSpawning", "passive", "PowerBetaPassiveSpawning").entrySet())
-      old.addProperty(mapping.getKey(), !tag.contains(mapping.getValue()) || tag.getBoolean(mapping.getValue()));
-    JsonObject config = PowerConfig.document();
-    RuleSet converted = LegacyWorldRules.convert(old, config.has("legacyWorldRules") ? config.getAsJsonObject("legacyWorldRules") : new JsonObject());
-    JsonObject evidence = upgradeEvidence();
-    // Pre-rule all-entity farmland protection already has an exact two-rule equivalent.
-    if (!converted.enabled(GameRule.PLAYER_CROP_TRAMPLING) && !evidence.has("playerCropTrampling"))
-      evidence.addProperty("playerCropTrampling", false);
-    RuleSet added = WorldRuleUpgrade.defaults(evidence);
-    for (GameRule rule : new GameRule[]{GameRule.LAVA_DESTROYS_ITEMS, GameRule.CACTUS_DESTROYS_ITEMS, GameRule.PLAYER_CROP_TRAMPLING})
-      converted.set(rule, added.get(rule));
-    RuleSet additions = WorldRuleUpgrade210.defaults(upgradeEvidence210(), converted);
-    for (GameRule rule : new GameRule[]{GameRule.GHAST_EXPLOSION_FIRE,
-        GameRule.LIGHTNING_STRIKE_FIRE, GameRule.EXPLOSION_DROP_CHANCE}) converted.set(rule, additions.get(rule));
-    if (!additions.enabled(GameRule.ADVANCE_WEATHER)) converted.set(GameRule.ADVANCE_WEATHER, false);
-    converted.set(GameRule.ALLOW_SLEEP, converted.enabled(GameRule.ALLOW_SLEEP) && additions.enabled(GameRule.ALLOW_SLEEP));
-    return converted;
   }
 }

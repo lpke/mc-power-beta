@@ -11,7 +11,7 @@ class SoundCategoryScopeTest {
     SoundCategoryScope.run("passive", () -> {
       assertEquals(.2, settings.gain("power_beta:entity.generic.splash", false, SoundCategoryScope.current()));
       assertThrows(IllegalStateException.class, () -> SoundCategoryScope.run("ambient", () -> {
-        assertEquals(.4, settings.gain("power_beta:entity.generic.burn", false, SoundCategoryScope.current()));
+        assertEquals(.4, settings.gain("power_beta:entity.generic.splash", false, SoundCategoryScope.current()));
         throw new IllegalStateException();
       }));
       assertEquals("passive", SoundCategoryScope.current());

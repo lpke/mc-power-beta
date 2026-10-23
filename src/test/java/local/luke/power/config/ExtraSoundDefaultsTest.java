@@ -16,7 +16,7 @@ class ExtraSoundDefaultsTest {
       JsonObject old=PowerConfig.document();
       JsonObject audio=old.getAsJsonObject("settings").getAsJsonObject("audio");
       audio.addProperty("bucketSounds",enabled);audio.remove("lavaBucketSounds");
-      audio.remove("lavaAmbientSounds");audio.remove("lavaBurnSounds");
+      audio.remove("lavaAmbientSounds");
       PowerConfig.write(old);byte[] original=Files.readAllBytes(PowerConfig.path());
       ConfigDefaults.prepare(game);
       assertEquals(enabled,PowerConfig.section("audio").get("bucketSounds").getAsBoolean());

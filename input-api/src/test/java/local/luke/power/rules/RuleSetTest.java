@@ -28,17 +28,17 @@ class RuleSetTest {
     assertFalse(rules.enabled(FIRE_SPREAD));
   }
   @Test void missingFieldsUseDeclaredPresetDefaultsWithoutErasingChoices() {
-    JsonObject doc = JsonParser.parseString("{\"version\":1,\"values\":{\"allow_world_editing\":false}}").getAsJsonObject();
+    JsonObject doc = JsonParser.parseString("{\"version\":4,\"values\":{\"allow_world_editing\":false}}").getAsJsonObject();
     RuleSet rules = RuleSet.read(doc, RuleSet.cheats());
     assertFalse(rules.enabled(ALLOW_WORLD_EDITING)); assertTrue(rules.enabled(ALLOW_CREATIVE_MODE));
     assertTrue(rules.enabled(KEEP_INVENTORY)); assertTrue(rules.enabled(EXPLOSIONS_DESTROY_ITEMS));
   }
   @Test void badTypesUnknownNamesAndVersionsAreRejectedWithoutChangingInput() {
     for (String source : new String[]{"{\"version\":" + (RuleSet.VERSION + 1) + ",\"values\":{}}", "{\"version\":\"1\",\"values\":{}}",
-        "{\"version\":1,\"values\":{\"fire_spread\":\"false\"}}", "{\"version\":1,\"values\":{\"fire_spread\":0}}",
-        "{\"version\":1,\"values\":{\"players_sleeping_percentage\":-1}}", "{\"version\":1,\"values\":{\"players_sleeping_percentage\":1.5}}",
-        "{\"version\":1,\"values\":{\"players_sleeping_percentage\":2147483648}}", "{\"version\":1,\"values\":{\"doFireTick\":true}}",
-        "{\"version\":1,\"values\":{\"future_rule\":true}}"}) {
+        "{\"version\":4,\"values\":{\"fire_spread\":\"false\"}}", "{\"version\":4,\"values\":{\"fire_spread\":0}}",
+        "{\"version\":4,\"values\":{\"players_sleeping_percentage\":-1}}", "{\"version\":4,\"values\":{\"players_sleeping_percentage\":1.5}}",
+        "{\"version\":4,\"values\":{\"players_sleeping_percentage\":2147483648}}", "{\"version\":4,\"values\":{\"doFireTick\":true}}",
+        "{\"version\":4,\"values\":{\"future_rule\":true}}"}) {
       JsonObject input = JsonParser.parseString(source).getAsJsonObject(), before = input.deepCopy();
       assertThrows(IllegalArgumentException.class, () -> RuleSet.read(input, new RuleSet()), source);
       assertEquals(before, input);
@@ -77,12 +77,9 @@ class RuleSetTest {
     assertTrue(ALLOW_SPRINTING.help().contains("/gamerule allow_sprinting"));
     for (RuleSet defaults : new RuleSet[]{new RuleSet(), RuleSet.cheats()}) {
       assertFalse(defaults.enabled(ALLOW_SPRINTING));
-      for (int version = 1; version <= RuleSet.VERSION; version++) {
-        JsonObject old = defaults.document();
-        old.addProperty("version", version);
-        old.getAsJsonObject("values").remove("allow_sprinting");
-        assertFalse(RuleSet.read(old, defaults).enabled(ALLOW_SPRINTING));
-      }
+      JsonObject missingSprint = defaults.document();
+      missingSprint.getAsJsonObject("values").remove("allow_sprinting");
+      assertFalse(RuleSet.read(missingSprint, defaults).enabled(ALLOW_SPRINTING));
       RuleSet enabled = defaults.copy();
       enabled.set(ALLOW_SPRINTING, ALLOW_SPRINTING.parse("true"));
       RuleSet loaded = RuleSet.read(new Gson().fromJson(new Gson().toJson(enabled.document()), JsonObject.class), new RuleSet());

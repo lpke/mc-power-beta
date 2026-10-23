@@ -32,9 +32,7 @@ public final class DefaultsBackend implements Backend {
     if (values.containsKey("defaults.base")) state.base = values.get("defaults.base").getAsString();
     if (values.containsKey("defaults.setupComplete")) state.setupComplete = values.get("defaults.setupComplete").getAsBoolean();
     state.validate();
-    JsonObject replacement = RuleDefaults.followBase(expected,
-        root.has("worldRuleUpgrade210") ? root.getAsJsonObject("worldRuleUpgrade210") : new JsonObject(),
-        previous, DefaultBases.Base.read(state.base));
+    JsonObject replacement = RuleDefaults.followBase(expected, previous, DefaultBases.Base.read(state.base));
     PowerConfig.save("defaults", state);
     if (replacement != null) PowerConfig.replaceSection("gameRules", expected, replacement);
   }

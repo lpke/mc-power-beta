@@ -56,7 +56,7 @@ public final class WorldRuleFiles {
         if (Files.size(path) > 4 * 1024 * 1024) throw new IOException("World metadata exceeds 4 MiB.");
         byte[] original = Files.readAllBytes(path);
         NbtCompound root = readBytes(original), data = root.getCompound("Data");
-        rules.put(path, WorldRuleData.read(data)); // Resolve frozen legacy evidence before assigning an ID.
+        rules.put(path, WorldRuleData.read(data)); // Validate the current rule format before assigning an ID.
         local.luke.power.offhand.OffhandData.validateWorldData(data);
         originals.put(path, original);
         roots.put(path, root);
@@ -84,34 +84,11 @@ public final class WorldRuleFiles {
 
   /** Viewing/renaming may validate a newer inventory without modifying the retained previous metadata. */
   public static void validateOfflineEdit(Path level, Path old) throws IOException {
-    boolean newInventory = false, oldFormat = false;
     for (Path path : List.of(level, old)) if (Files.exists(path)) {
       checkPath(path); NbtCompound data = read(path).getCompound("Data");
       WorldRuleData.read(data); local.luke.power.offhand.OffhandData.validateWorldData(data);
-      oldFormat |= !data.contains(WorldRuleData.TAG) || data.getCompound(WorldRuleData.TAG).getInt("version") < 4;
-      NbtCompound player = data.getCompound("Player");
-      newInventory |= containsNewInventory(player);
     }
-    Path world = level.getParent(); validatePlayers(world);
-    Path players = world.resolve("players");
-    if (Files.isDirectory(players)) try (var paths = Files.list(players)) {
-      for (Path path : paths.filter(p -> p.getFileName().toString().endsWith(".dat")).toList())
-        try (InputStream input = Files.newInputStream(path)) { newInventory |= containsNewInventory(NbtIo.readCompressed(input)); }
-    }
-    if (newInventory && oldFormat)
-      throw new IOException("This world's new inventory data has an older metadata fallback. Run instance maintenance or open it with Power Beta 4.0.0 to verify and upgrade both files first.");
-  }
-
-  private static boolean containsNewInventory(NbtCompound player) throws IOException {
-    if (player.contains(local.luke.power.offhand.OffhandData.TAG)) return true;
-    if (!player.contains("PowerBetaKeptInventory")) return false;
-    byte[] bytes = player.getByteArray("PowerBetaKeptInventory");
-    if (bytes.length == 0) return false; // Ordinary historical saves include this empty tag.
-    local.luke.power.death.KeptInventory.read(bytes);
-    JsonObject kept;
-    try { kept = JsonParser.parseString(new String(bytes, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject(); }
-    catch (RuntimeException error) { throw new IOException("Invalid kept inventory data", error); }
-    return kept.has("offhand") && !kept.get("offhand").isJsonNull();
+    validatePlayers(level.getParent());
   }
 
   /** Shared by staged world copies. Changes only the validated rule format and preserves every other tag. */

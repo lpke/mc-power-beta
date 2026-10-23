@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.4.1",
+    "default": "Power Beta 4.4.2",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -2854,7 +2854,7 @@
     "page": "Creative",
     "group": "Interaction",
     "label": "Block reach",
-    "description": "Interaction reach in Creative. Container previews use this distance in every game mode.",
+    "description": "Interaction reach in Creative and the read-only Spectator crosshair. Container previews have separate reach settings.",
     "min": 3,
     "max": 10,
     "step": 0.5,
@@ -2864,7 +2864,7 @@
     "page": "Creative",
     "group": "Interaction",
     "label": "Entity reach",
-    "description": "Interaction reach in Creative. Container previews use this distance in every game mode.",
+    "description": "Interaction reach in Creative and the read-only Spectator crosshair. Container previews have separate reach settings.",
     "min": 3,
     "max": 10,
     "step": 0.5,
@@ -2874,7 +2874,7 @@
     "page": "Creative",
     "group": "Inventory",
     "label": "Destroy slot",
-    "description": "Drag items to the slot beside the hotbar to delete them."
+    "description": "Delete carried items using the slot beside the hotbar in native inventory screens. Shift-click clears your inventory after a verified recovery write."
   },
   "creative.shiftClearsInventory": {
     "page": "Creative",
@@ -6154,7 +6154,7 @@
     "page": "Map",
     "group": "World map",
     "label": "Map light shading radius",
-    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0–7, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
     "min": 8,
     "max": 128,
     "step": 1,
@@ -6503,7 +6503,7 @@
     "page": "Map",
     "group": "Minimap",
     "label": "Zoom with wheel while expanded",
-    "description": "Hold Enlarge minimap and scroll during gameplay. Uses the same zoom limits and smooth movement as scrolling over the minimap in an inventory.",
+    "description": "Hold Enlarge minimap and scroll during gameplay. Right-click while held to reset the zoom. Uses the same zoom limits and smooth movement as the inventory minimap.",
     "order": 1.4
   },
   "maps.zoomSteps": {
@@ -6861,10 +6861,24 @@
     "label": "Lava ambience",
     "order": 30.1
   },
-  "audio.lavaBurnSounds": {
-    "page": "Audio",
-    "group": "Extra sounds",
-    "label": "Lava burning sounds",
-    "order": 30.2
+  "visual.containerBlockReach": {
+    "page": "Inventory",
+    "group": "Container previews",
+    "label": "Block reach",
+    "description": "Maximum distance for read-only container previews in every game mode. Does not change interaction reach.",
+    "min": 3,
+    "max": 10,
+    "step": 0.5,
+    "order": 0
+  },
+  "visual.containerEntityReach": {
+    "page": "Inventory",
+    "group": "Container previews",
+    "label": "Entity reach",
+    "description": "Maximum distance for read-only container previews in every game mode. Does not change interaction reach.",
+    "min": 3,
+    "max": 10,
+    "step": 0.5,
+    "order": 1
   }
 }

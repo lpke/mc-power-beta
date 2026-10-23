@@ -17,6 +17,11 @@
 
 # Runtime checks
 
+- `current-formats-442` validates schema 7, both format-4 templates and every saved
+  world metadata/previous/dimension file, including native offhand/kept-item decoding
+  after registry initialization. It checks byte preservation, old/future rejection
+  and fresh native-world creation. Requires a muted disposable singleplayer clone.
+
 - `water-sounds-432` requires a muted disposable world routed to the verified silent
   Pulse sink. It checks native head crossings at source/flowing surfaces in both
   perspectives, 40-tick fade-in and 20-tick fade-out, actual streaming playback and
@@ -24,10 +29,10 @@
   settings preview/Cancel and all 45 modern water decodes through EOS.
 - `fluid-sounds-440` checks water entry for every native creature, items and vehicles,
   first-tick and repeat suppression, rider volume and boat shielding, independent lava
-  ambience/pop switches, accepted lava damage, item throttling, remote ownership and
+  ambience/pop switches, remote ownership and
   individual previews. Requires the same muted disposable world and verified silent sink.
   `release-300-extra-sounds` also tests every water/lava bucket toggle combination.
-- `extra-sound-decoders-432` compares all 89 bundled extra-effect variants against
+- `extra-sound-decoders-432` compares all 88 bundled extra-effect variants against
   the unchanged decoder on the same bytes, verifies exact source frame counts and
   writes disposable PCM evidence for comparison with FFmpeg.
 

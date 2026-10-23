@@ -80,12 +80,10 @@ class ModernFeatureIntegrationTest {
     settings.getAsJsonObject("native").addProperty("gui_scale", "0.375");
     settings.getAsJsonObject("native").addProperty("framerate_limit", 145);
     JsonObject nativeSettings = settings.getAsJsonObject("native").deepCopy();
-    for (int version : List.of(3, 4, 5, 6, 7)) {
-      JsonObject old = document.deepCopy(); old.addProperty("schemaVersion", version);
-      JsonObject converted = ConfigVersions.convert(old).getAsJsonObject("settings");
-      assertEquals(presets, converted.get("savedCreativeHotbars"), "preset data at schema " + version);
-      for (String id : List.of("fov", "guiScale", "gui_scale", "fpsLimit", "framerate_limit")) assertEquals(nativeSettings.get(id), converted.getAsJsonObject("native").get(id), id);
-    }
+    JsonObject validated = ConfigVersions.convert(document).getAsJsonObject("settings");
+    assertEquals(presets, validated.get("savedCreativeHotbars"));
+    for (String id : List.of("fov", "guiScale", "gui_scale", "fpsLimit", "framerate_limit"))
+      assertEquals(nativeSettings.get(id), validated.getAsJsonObject("native").get(id), id);
     assertFalse(resource("/assets/powerbeta/defaults/power-beta.json").getAsJsonObject("settings").has("savedCreativeHotbars"));
   }
   private static Setting row(String id, boolean key) {

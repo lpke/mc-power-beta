@@ -26,6 +26,7 @@ public final class CraftingGridTransfer {
         || mc.player.container != first.container || mc.player.inventory.getCursorStack() != null
         || NativeInventoryPlan.busy() && !NativeInventoryPlan.ownsAction(mc, "crafting_grid_transfer")) { queued.clear(); return; }
     if (NativeInventoryPlan.busy()) return;
+    if (!currentGesture(mc, first.container)) return;
     queued.remove(first.source);
     try {
       ItemStack source = first.container.method_2084(first.source).getStack();
@@ -35,6 +36,13 @@ public final class CraftingGridTransfer {
     } catch (java.io.IOException | RuntimeException changed) { queued.clear(); }
   }
   private CraftingGridTransfer() {}
+  /** Run before a queued plan snapshots its baseline, and once before publishing owned writes. */
+  static boolean currentGesture(Minecraft mc, Object owner) {
+    if (mc.currentScreen instanceof local.luke.power.input.InventoryDrag drag && drag.power$itemDragCurrent(owner)) return true;
+    queued.clear();
+    if (mc.currentScreen instanceof local.luke.power.input.InventoryDrag drag) drag.power$cancelItemDrag();
+    return false;
+  }
 
   public static boolean transfer(Container container, int sourceId, PlayerEntity player) {
     if (container.getClass() == class_277.class) return playerGridFallback(container, sourceId, player);
@@ -130,7 +138,13 @@ public final class CraftingGridTransfer {
       changes.add(0, NativeInventoryPlan.Change.main(player.inventory, access.power$deathIndex(), left));
       NativeInventoryPlan.submit(mc, "crafting_grid_transfer", true, changes,
           () -> VisualConfig.current().shiftClickIntoCraftingGrid && context.writable(mc) && output.matches(),
-          () -> { if (!output.matches()) throw new IllegalStateException("Crafting output changed during transfer"); }, output::restore);
+          () -> {
+            if (!output.matches()) throw new IllegalStateException("Crafting output changed during transfer");
+            if (mc.currentScreen instanceof local.luke.power.input.InventoryDrag drag) {
+              var owned = new ArrayList<Slot>(context.inputs); owned.add(source);
+              drag.power$acceptItemDragChanges(container, owned);
+            }
+          }, output::restore);
       // A pending/rejected protected operation must not fall through to a second native gesture.
       return true;
     } catch (java.io.IOException failure) {

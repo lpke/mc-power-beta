@@ -17,42 +17,50 @@ class RuleDefaultsTest {
   @Test void customTemplatesPromptOncePerDefaultsTargetAndRetainPrivateChanges() {
     var base = DefaultBases.Base.POWER_BETA; var section = defaults(base);
     section.getAsJsonObject("survival").getAsJsonObject("values").addProperty("allow_sprinting", false);
-    var review = new RuleDefaults.Review(section, new JsonObject(), base);
+    var review = new RuleDefaults.Review(section, base);
     assertTrue(review.compatible()); assertTrue(review.required());
     section.add("review", RuleDefaults.acknowledgement(base));
-    assertFalse(new RuleDefaults.Review(section, new JsonObject(), base).required());
-    assertTrue(new RuleDefaults.Review(section, new JsonObject(), DefaultBases.Base.BETA).required());
+    assertFalse(new RuleDefaults.Review(section, base).required());
+    assertTrue(new RuleDefaults.Review(section, DefaultBases.Base.BETA).required());
   }
   @Test void unknownRulesCanOnlyBeRemovedFromThePrivateDraftAndFutureFormatsCannotBeKept() {
     var section = defaults(DefaultBases.Base.POWER_BETA);
     section.getAsJsonObject("survival").getAsJsonObject("values").addProperty("retired_rule", true);
-    var review = new RuleDefaults.Review(section, new JsonObject(), DefaultBases.Base.POWER_BETA);
+    var review = new RuleDefaults.Review(section, DefaultBases.Base.POWER_BETA);
     assertFalse(review.compatible());
     var retired = review.differences().stream().filter(d -> d.id().equals("retired_rule")).findFirst().orElseThrow();
     assertTrue(retired.removable()); review.remove(retired); assertTrue(review.compatible());
     assertTrue(section.getAsJsonObject("survival").getAsJsonObject("values").has("retired_rule"));
     section.getAsJsonObject("survival").addProperty("version", 99);
-    var future = new RuleDefaults.Review(section, new JsonObject(), DefaultBases.Base.POWER_BETA);
+    var future = new RuleDefaults.Review(section, DefaultBases.Base.POWER_BETA);
     assertFalse(future.compatible()); assertTrue(future.required()); assertTrue(future.differences().stream().noneMatch(d -> d.template().equals("survival") && d.removable()));
+  }
+  @Test void olderTemplatesStayInTheReviewDraftAndCannotBeKeptWithoutExplicitReset() {
+    for (int version : new int[]{1, 2, 3, 99}) {
+      var section = defaults(DefaultBases.Base.POWER_BETA); section.getAsJsonObject("survival").addProperty("version", version);
+      var original = section.deepCopy(); var review = new RuleDefaults.Review(section, DefaultBases.Base.POWER_BETA);
+      assertFalse(review.compatible()); assertTrue(review.required());
+      assertThrows(java.io.IOException.class, () -> review.commit(false)); assertEquals(original, section);
+    }
   }
   @Test void reviewDependsOnDefaultsRevisionRatherThanUnrelatedPackVersionText() {
     var base = DefaultBases.Base.POWER_BETA; var section = defaults(base);
     section.getAsJsonObject("survival").getAsJsonObject("values").addProperty("allow_sprinting", false);
     JsonObject review = RuleDefaults.acknowledgement(base); review.addProperty("release", "3.1.1"); section.add("review", review);
-    assertFalse(new RuleDefaults.Review(section,new JsonObject(),base).required());
+    assertFalse(new RuleDefaults.Review(section,base).required());
     review.addProperty("defaultsRevision", 99);
-    var future = new RuleDefaults.Review(section,new JsonObject(),base);
+    var future = new RuleDefaults.Review(section,base);
     assertTrue(future.required()); assertFalse(future.compatible());
   }
   @Test void legacyUneditedTemplatesFollowEachBaseWithoutMutatingTheSource() {
     for (var base : DefaultBases.Base.values()) for (var next : DefaultBases.Base.values()) {
       var source = defaults(base); var original = source.deepCopy();
-      var replacement = RuleDefaults.followBase(source, new JsonObject(), base, next);
+      var replacement = RuleDefaults.followBase(source, base, next);
       assertEquals(original, source);
       if (base == next) { assertNull(replacement); continue; }
       assertEquals(RuleDefaults.latest(next, false).document(), replacement.get("survival"));
       assertEquals(RuleDefaults.latest(next, true).document(), replacement.get("cheats"));
-      assertFalse(new RuleDefaults.Review(replacement, new JsonObject(), next).required());
+      assertFalse(new RuleDefaults.Review(replacement, next).required());
     }
   }
   @Test void signaturesRecognizeUnchangedOldDefaultsButNeverAUserEdit() {
@@ -60,14 +68,14 @@ class RuleDefaultsTest {
     source.add("review", RuleDefaults.acknowledgement(base));
     source.getAsJsonObject("review").addProperty("defaultsRevision", 1);
     source.getAsJsonObject("review").addProperty("release", "3.0.0");
-    assertNotNull(RuleDefaults.followBase(source, new JsonObject(), base, DefaultBases.Base.BETA));
+    assertNotNull(RuleDefaults.followBase(source, base, DefaultBases.Base.BETA));
     // Key ordering is not an edit, including after Gson 2.8.9 reads a saved document.
     JsonObject values = source.getAsJsonObject("survival").getAsJsonObject("values");
     var sprint = values.remove("allow_sprinting"); values.add("allow_sprinting", sprint);
     source = JsonParser.parseString(source.toString()).getAsJsonObject();
-    assertNotNull(RuleDefaults.followBase(source, new JsonObject(), base, DefaultBases.Base.BETA));
+    assertNotNull(RuleDefaults.followBase(source, base, DefaultBases.Base.BETA));
     source.getAsJsonObject("survival").getAsJsonObject("values").addProperty("allow_sprinting", false);
-    assertNull(RuleDefaults.followBase(source, new JsonObject(), base, DefaultBases.Base.BETA));
+    assertNull(RuleDefaults.followBase(source, base, DefaultBases.Base.BETA));
   }
   @Test void customOrUnverifiableTemplatesAndFutureMetadataNeverFollowSilently() {
     var base = DefaultBases.Base.POWER_BETA;
@@ -84,7 +92,7 @@ class RuleDefaultsTest {
         case "unknownBase" -> meta.addProperty("base", "future_base");
       }
       var original = source.deepCopy();
-      assertNull(RuleDefaults.followBase(source, new JsonObject(), base, DefaultBases.Base.BETA), fault);
+      assertNull(RuleDefaults.followBase(source, base, DefaultBases.Base.BETA), fault);
       assertEquals(original, source);
     }
   }

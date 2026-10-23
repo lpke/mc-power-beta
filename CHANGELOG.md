@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [4.4.2] - 2026-10-24
+
+- Keep the searched tab selected for Controls and This tab searches; simplify Controls result headings. Give container previews independent block and entity reach, both defaulting to five blocks, and hide the Creative tab when Creative access is disabled.
+- Make Creative deletion available in native inventory screens through protected inventory transactions. Restore palette cursor deletion, limit wheel transfers to matching held items and allow wheel paging over overflowing tabs.
+- Refine Creative tab editing with scrollbars, row removal, selection-first dragging, native double-click editing, drag previews and Undo for every edit including Reset.
+- Focus Creative Search on entry, use a light search field, keep movement out of text editing and group ordinary items before unusual unobtainables.
+- Keep Shift-drag transfers active through verified asynchronous transfers into the personal crafting grid, independently of crafting-grid storage.
+- Remove optional lava burning sounds and retain native lava audio. Right-click an expanded minimap to reset its zoom when expanded wheel zoom is enabled.
+- Limit recipe amount scrolling to recipes still placed in the grid. Hide complete recipe ghost hints when native items would overlap them.
+- Retire historical configuration and world-rule converters after verifying the primary instance. Current formats remain configuration 7 and world rules 4; older formats must be upgraded with 4.4.1 first. Preserve current recovery records, unsupported-data protection and per-world sorting migration seeds.
+
 ## [4.4.1] - 2026-10-24
 
 - Use Alt-click to open recipe variants.

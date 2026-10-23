@@ -103,6 +103,7 @@ by the client, including every `level.dat` and `level.dat_old` under `saves`:
 ```
 
 Add `-PinstanceDefaults` only when resetting preferences to pack defaults. It retains
-FOV, GUI scale and the frame limit, and migrates existing worlds using their original
-conversion evidence. This command refuses running clients, validates every metadata
-file before writing worlds, and restores its transaction if any conversion fails.
+FOV, GUI scale and the frame limit. Version 4.4.2 accepts configuration schema 7 and
+world-rule format 4; upgrade older data with 4.4.1 first. This command refuses running
+clients, validates every metadata file before writing worlds, and restores its
+transaction if any required update fails.

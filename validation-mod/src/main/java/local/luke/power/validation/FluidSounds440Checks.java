@@ -8,7 +8,6 @@ import local.luke.power.audio.*;
 import local.luke.power.config.*;
 import local.luke.power.input.PlayerMode;
 import local.luke.power.storage.PowerConfig;
-import local.luke.power.rules.GameRule;
 import net.minecraft.*;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
@@ -48,7 +47,7 @@ public final class FluidSounds440Checks {
       settings.waterSplashSounds = true; settings.swimmingSounds = false;
       settings.underwaterEnterSounds = settings.underwaterExitSounds = settings.underwaterAmbience = false;
       settings.underwaterAdditions = settings.underwaterRareAdditions = settings.underwaterUltraRareAdditions = false;
-      settings.lavaPopSounds = settings.lavaAmbientSounds = settings.lavaBurnSounds = false;
+      settings.lavaPopSounds = settings.lavaAmbientSounds = false;
       AudioConfig.preview(settings);
       for (int[] b : blocks) mc.world.method_154(b[0], b[1], b[2], b[1] == y ? 9 : 0, 0);
       test("FLUID440 every native species, item and vehicle splashes once with modern event and gain", () -> {
@@ -138,40 +137,8 @@ public final class FluidSounds440Checks {
           finally { mc.world.isRemote = false; }
         }
       });
-      test("FLUID440 accepted lava damage sounds once, with item throttling and native return values intact", () -> {
-        var s = AudioConfig.copy(); s.lavaBurnSounds = true; AudioConfig.preview(s);
-        Method lava = Entity.class.getDeclaredMethod("method_1332"); lava.setAccessible(true);
-        AccessRules.set(mc, GameRule.LAVA_DESTROYS_ITEMS, true);
-        Entity cow = new class_466(mc.world); pose(cow, x, y, z);
-        SOUNDS.clear(); lava.invoke(cow); one("entity.generic.burn");
-        check(SOUNDS.get(0).volume == .4f && SOUNDS.get(0).pitch >= 2 && SOUNDS.get(0).pitch < 2.4f, "wrong modern burn gain/pitch");
-        SOUNDS.clear(); lava.invoke(cow); check(SOUNDS.isEmpty(), "rejected repeated lava damage sounded");
-        for (int tick : new int[]{1, 10}) {
-          var item = new class_142(mc.world, x + .5, y + .5, z + .5, new ItemStack(1, 1, 0)); item.field_1645 = tick;
-          SOUNDS.clear(); lava.invoke(item); check(count("entity.generic.burn") == (tick == 10 ? 1 : 0), "item burn throttling mismatch " + SOUNDS);
-          SOUNDS.clear(); lava.invoke(item); one("entity.generic.burn"); check(item.dead, "destroyed item did not retain native damage");
-        }
-        var ticking = new class_142(mc.world, x + .5, y + .5, z + .5, new ItemStack(1, 1, 0));
-        field(class_142.class, "field_569").setInt(ticking, 100); ticking.field_1645 = 9;
-        SOUNDS.clear(); ticking.tick(); one("entity.generic.burn");
-        s.lavaBurnSounds = false; AudioConfig.preview(s);
-        ticking = new class_142(mc.world, x + .5, y + .5, z + .5, new ItemStack(1, 1, 0));
-        field(class_142.class, "field_569").setInt(ticking, 100); SOUNDS.clear(); ticking.tick();
-        check(SOUNDS.size() == 1 && SOUNDS.get(0).id.equals("random.fizz"), "disabled modern burning lost native item fizz " + SOUNDS);
-        SOUNDS.clear(); lava.invoke(new class_466(mc.world)); check(SOUNDS.isEmpty(), "disabled burn sounded");
-        s.lavaBurnSounds = true; AudioConfig.preview(s);
-        AccessRules.set(mc, GameRule.LAVA_DESTROYS_ITEMS, false);
-        var protectedItem = new class_142(mc.world, x + .5, y + .5, z + .5, new ItemStack(1, 1, 0));
-        SOUNDS.clear(); lava.invoke(protectedItem);
-        check(SOUNDS.isEmpty() && ((ItemLavaSoundState)protectedItem).power$itemSoundHealth() == 5, "audio bypassed item protection");
-        Entity immune = class_206.method_732("PigZombie", mc.world); SOUNDS.clear(); lava.invoke(immune);
-        check(SOUNDS.isEmpty(), "fire-immune entity emitted a lava burn cue");
-        s.lavaBurnSounds = true; AudioConfig.preview(s); mc.world.isRemote = true;
-        try { SOUNDS.clear(); lava.invoke(new class_466(mc.world)); check(SOUNDS.isEmpty(), "remote burn addition sounded"); }
-        finally { mc.world.isRemote = false; }
-      });
       test("FLUID440 new settings preview independently without writes", () -> {
-        for (String key : List.of("bucketSounds", "lavaBucketSounds", "lavaPopSounds", "lavaAmbientSounds", "lavaBurnSounds", "waterSplashSounds")) {
+        for (String key : List.of("bucketSounds", "lavaBucketSounds", "lavaPopSounds", "lavaAmbientSounds", "waterSplashSounds")) {
           String id = ExtraSounds.previewId("audio." + key); check(id != null && BetaSounds.contains(id), "unregistered preview " + key);
           AudioController.previewSound(id); check(AudioController.previewing(id), "preview did not start " + key);
           AudioController.previewSound(id); check(!AudioController.previewing(id), "preview did not stop " + key);

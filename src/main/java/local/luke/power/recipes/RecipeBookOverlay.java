@@ -50,8 +50,10 @@ public final class RecipeBookOverlay {
         &&!(context.width==2&&screen instanceof InventoryGui gui&&gui.power$usesCatalogWheel());
   }
   public RecipeBookLayout layout(){
-    int overhang=!standalone&&mc.player!=null&&local.luke.power.offhand.Offhand.visible(mc.player)
-        &&local.luke.power.offhand.OffhandContainers.slot(context.handler,mc.player.inventory)!=null?InventorySideSlots.WIDTH:0;
+    boolean hand=mc.player!=null&&local.luke.power.offhand.Offhand.visible(mc.player)
+        &&local.luke.power.offhand.OffhandContainers.slot(context.handler,mc.player.inventory)!=null;
+    boolean destroy=local.luke.power.inventory.CreativeDeletion.enabled(mc)&&local.luke.power.inventory.CreativeDeletion.destroySetting();
+    int overhang=!standalone&&(hand||destroy)?InventorySideSlots.WIDTH:0;
     return new RecipeBookLayout(screen.width,screen.height,open&&enabled(),standalone,overhang);
   }
   public boolean replacesNative(){return enabled()&&open&&layout().narrow()&&!InventoryPanels.modalOther(screen,this);}
@@ -200,6 +202,9 @@ public final class RecipeBookOverlay {
   private ItemStack icon(int id){return id>=0&&id<net.minecraft.Item.ITEMS.length&&net.minecraft.Item.ITEMS[id]!=null?new ItemStack(id,1,0):null;}
   private String renderGhost(int mx,int my,RecipeBookLayout l) {
     if(ghost==null)return null;var cells=ghost.layout(context.width,context.height);if(cells==null)return null;
+    // Render the complete hint only when every overlapping native slot is empty.
+    for(int i=0;i<cells.size();i++)if(cells.get(i)!=null&&context.inputs.get(i).getStack()!=null)return null;
+    if(context.output.getStack()!=null)return null;
     String tooltip=null;
     int ingredient=0;for(int i=0;i<cells.size();i++){if(cells.get(i)==null)continue;var slot=context.inputs.get(i);int x=l.inventoryX()+slot.x,y=l.inventoryY()+slot.y;
       draw.rectangle(x,y,16,16,0x30ff0000);var choices=ghost.icons.get(ghost.shaped?(i%context.width-(ghost.width<context.width/2f?(int)Math.floor(context.width/2f-ghost.width/2f):0))+(i/context.width-(ghost.height<context.height/2f?(int)Math.floor(context.height/2f-ghost.height/2f):0))*ghost.width:ingredient++);
@@ -346,9 +351,9 @@ public final class RecipeBookOverlay {
       for(int i=0;i<20&&page*20+i<groups.size();i++)if(l.cell(i).contains(x,y)){
         var variants=groups.get(page*20+i);
         var candidate=lastRecipe!=null&&variants.contains(lastRecipe)?lastRecipe:cycling(variants);
-        if(startedRecipes.contains(candidate))recipe=candidate;break;
+        if(startedRecipes.contains(candidate)&&removable(candidate))recipe=candidate;break;
       }
-      if(recipe==null)for(var slot:context.inputs)if(new Rect(l.inventoryX()+slot.x-1,l.inventoryY()+slot.y-1,18,18).contains(x,y)){recipe=lastRecipe;break;}
+      if(recipe==null&&removable(lastRecipe))for(var slot:context.inputs)if(new Rect(l.inventoryX()+slot.x-1,l.inventoryY()+slot.y-1,18,18).contains(x,y)){recipe=lastRecipe;break;}
       if(recipe!=null){
         if(wheelRecipe!=recipe){wheelRecipe=recipe;wheelSteps=0;}
         int steps=Math.max(1,(int)Math.min(64,Math.ceil(Math.abs((double)amount)/120)));
@@ -366,13 +371,13 @@ public final class RecipeBookOverlay {
     if(local.luke.power.inventory.NativeInventoryPlan.busy())return;
     int direction=Integer.signum(wheelSteps);wheelBatch=Math.abs(wheelSteps);wheelSteps=0;RecipeDefinition recipe=wheelRecipe;
     wheelDispatch=true;
-    try{if(direction>0)choose(recipe,false);else if(removable(recipe))remove(recipe);else clearWheel();}
+    try{if(!removable(recipe))clearWheel();else if(direction>0)choose(recipe,false);else remove(recipe);}
     finally{wheelDispatch=false;wheelBatch=1;}
     if(!message.isEmpty())clearWheel();
   }
   public boolean ownsWheel(int x,int y) {
     if(owns(x,y))return true;
-    if(!enabled()||!open||lastRecipe==null||RecipeWheelControls.direction(1)==0||!writable())return false;
+    if(!enabled()||!open||!removable(lastRecipe)||RecipeWheelControls.direction(1)==0||!writable())return false;
     var l=layout();for(var slot:context.inputs)if(new Rect(l.inventoryX()+slot.x-1,l.inventoryY()+slot.y-1,18,18).contains(x,y))return true;
     return false;
   }

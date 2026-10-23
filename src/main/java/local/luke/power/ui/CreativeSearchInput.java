@@ -13,13 +13,20 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
   private CreativeSearchInput(Minecraft client) { minecraft = client; textRenderer = client.textRenderer; }
   public String text() { return search.text(); }
   public boolean focused() { return search.focused; }
+  public void focus() {
+    search.focused = true;
+    local.luke.power.input.InventoryTextInput.focus(minecraft.currentScreen, true);
+    Keyboard.enableRepeatEvents(true);
+  }
   public void render(int width, int height, int left, int top, int span, int mx, int my) {
     this.width = width; this.height = height; this.left = left; this.top = top; this.span = span;
     GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_SCISSOR_BIT | GL11.GL_COLOR_BUFFER_BIT);
     try {
       GL11.glDisable(GL11.GL_LIGHTING); GL11.glDisable(GL11.GL_DEPTH_TEST);
-      fill(left - 1, top - 1, left + span + 1, top + 11, search.focused ? 0xffaaaaaa : 0xff777777);
-      fill(left, top, left + span, top + 10, 0xff101010);
+      fill(left - 1, top - 1, left + span + 1, top + 11, 0xff373737);
+      fill(left, top, left + span, top + 10, 0xff8b8b8b);
+      fill(left, top + 10, left + span + 1, top + 11, 0xffffffff);
+      fill(left + span, top, left + span + 1, top + 10, 0xffffffff);
       clip(left + 2, top, span - 4, 10);
       var view = search.layout(minecraft.currentScreen, left + 3, span - 6, textRenderer::getWidth);
       String value = search.text();
@@ -27,7 +34,7 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
       if (search.focused && from < to) fill(left + 3 + textRenderer.getWidth(value.substring(view.start(), from)), top + 1,
           left + 3 + textRenderer.getWidth(value.substring(view.start(), to)), top + 9, 0xff335577);
       text(value.isEmpty() && !search.focused ? "Search..." : value.substring(view.start(), view.end()), left + 3, top + 1,
-          value.isEmpty() && !search.focused ? 0x888888 : 0xffffff);
+          value.isEmpty() && !search.focused ? 0xdddddd : 0xffffff);
       if (search.focused && InterfaceState.uiCursorVisible()) {
         int caret = left + 3 + textRenderer.getWidth(value.substring(view.start(), search.cursor()));
         fill(caret, top + 1, caret + 1, top + 9, 0xffffffff);

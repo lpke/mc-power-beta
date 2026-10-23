@@ -178,7 +178,7 @@ public final class FluidSounds420Checks {
     for (int[] block : blocks) mc.world.method_154(block[0], block[1], block[2], block[1] == floor - 1 ? 1 : water ? 9 : 0, 0);
   }
   private static void enable(boolean enabled) {
-    var settings = AudioConfig.copy(); settings.lavaAmbientSounds = settings.lavaBurnSounds = false; settings.lavaPopSounds = settings.waterSplashSounds = settings.swimmingSounds = enabled;
+    var settings = AudioConfig.copy(); settings.lavaAmbientSounds = false; settings.lavaPopSounds = settings.waterSplashSounds = settings.swimmingSounds = enabled;
     settings.underwaterEnterSounds = settings.underwaterExitSounds = settings.underwaterAmbience = false;
     settings.underwaterAdditions = settings.underwaterRareAdditions = settings.underwaterUltraRareAdditions = false;
     AudioConfig.preview(settings);

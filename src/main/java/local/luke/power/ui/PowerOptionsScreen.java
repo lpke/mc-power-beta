@@ -429,6 +429,7 @@ public final class PowerOptionsScreen extends UiScreen {
     return OptionsSearchScope.page(s, embedded() || mapAppearanceDestination);
   }
   private String searchGroup(Setting s, int hudMode) {
+    if (controls()) return s.group;
     return OptionsSearchScope.group(s, hudMode, embedded() || mapAppearanceDestination);
   }
   private String sectionKey(String group) {
@@ -641,7 +642,7 @@ public final class PowerOptionsScreen extends UiScreen {
         && Double.compare(scroll, focusAnchorScroll) == 0
         && Double.compare(sideScroll, focusAnchorSideScroll) == 0;
     if (!revealTarget) focusAnchorId = "";
-    pages = embedded() ? List.of("Map") : PAGES.stream().filter(p -> p.equals("Defaults") && !isolatedRules() || session.settings().stream()
+    pages = embedded() ? List.of("Map") : PAGES.stream().filter(p -> SettingAccess.pageVisible(session, p)).filter(p -> p.equals("Defaults") && !isolatedRules() || session.settings().stream()
         .anyMatch(s -> s.page.equals(p) && SettingAccess.visible(session, s))).toList();
     if (!pages.contains(page) && !pages.isEmpty()) {
       positions.put(page, scroll);
@@ -662,6 +663,7 @@ public final class PowerOptionsScreen extends UiScreen {
         .map(id -> session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElse(null))
         .filter(Objects::nonNull).toList();
     candidates = candidates.stream().filter(this::inMapScope)
+        .filter(s -> SettingAccess.pageVisible(session, s.page))
         .filter(s -> !s.id.equals("maps.worldMapEditor") || mapAppearanceDestination)
         .filter(s -> !controls() || s.kind == Setting.Kind.KEY)
         .filter(s -> query.isEmpty() || !controls() && (!searchScopeVisible() || !OptionsSearchScope.thisTab(page)) || searchPage(s).equals(page)).toList();
@@ -1429,7 +1431,7 @@ public final class PowerOptionsScreen extends UiScreen {
     for (int i = 0; i < pages.size(); i++) {
       int y = 24 + i * 22 - (int) sideScroll;
       boolean hover = inside(mx, my, origin(), y, sidebar(), 22);
-      if (pages.get(i).equals(page) && search.text().isBlank() && !changedOnly)
+      if (pages.get(i).equals(page) && (search.text().isBlank() || OptionsSearchScope.thisTab(page)) && !changedOnly)
         fill(origin(), y, origin() + sidebar(), y + 21, 0xc0000000);
       GL11.glPushMatrix();
       GL11.glColor4f(1, 1, 1, 1);

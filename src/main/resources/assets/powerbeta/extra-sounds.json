@@ -329,12 +329,6 @@
       ],
       "subtitle": "subtitles.entity.generic.splash"
     },
-    "entity.generic.burn": {
-      "sounds": [
-        "random/fizz"
-      ],
-      "subtitle": "subtitles.entity.generic.burn"
-    },
     "block.lava.ambient": {
       "sounds": [
         "liquid/lava"
@@ -1235,18 +1229,6 @@
       "sampleRate": 48000,
       "channels": 1,
       "durationTicks": 78
-    },
-    {
-      "event": "entity.generic.burn",
-      "file": "assets/power_beta/stationapi/sounds/sound/entity/generic/burn1.ogg",
-      "asset": "minecraft/sounds/random/fizz.ogg",
-      "sha1": "bd76df5c882dc4b65925a8b25c0e7dbebef9bb2e",
-      "size": 15222,
-      "source": "waterSource",
-      "frames": 59919,
-      "sampleRate": 48000,
-      "channels": 1,
-      "durationTicks": 25
     },
     {
       "event": "block.lava.ambient",

@@ -16,7 +16,9 @@ public final class OffhandSlotClick implements AutoCloseable {
     boolean valid=(button==0||button==1) && mc.currentScreen==screen
         && mc.player!=null && mc.world!=null && !mc.world.isRemote
         && mc.player.world==mc.world && OffhandContainers.supported(screen)
-        && Offhand.visible(mc.player) && screen instanceof InventoryGui gui && gui.power$sideSlotGuiSpace(x,y)
+        && (Offhand.visible(mc.player) || local.luke.power.inventory.CreativeDeletion.enabled(mc)
+            && local.luke.power.inventory.CreativeDeletion.destroySetting())
+        && screen instanceof InventoryGui gui && gui.power$sideSlotGuiSpace(x,y)
         && (slot==null || slot==OffhandContainers.slot(screen.container,mc.player.inventory))
         && !InventoryPanels.modal(screen) && !InventoryPanels.contains(screen,x,y);
     return new OffhandSlotClick(valid?new Target(screen,slot,mc.player,mc.world):null);

@@ -35,7 +35,6 @@ class SubtitleCatalogTest {
     assertEquals("Bucket fills", SubtitleCatalog.resolve("power_beta:item.bucket.fill_lava", null).label());
     assertEquals("Lava pops", SubtitleCatalog.resolve("power_beta:block.lava.pop", null).label());
     assertEquals("Lava pops", SubtitleCatalog.resolve("power_beta:block.lava.ambient", null).label());
-    assertEquals("Burning", SubtitleCatalog.resolve("power_beta:entity.generic.burn", null).label());
     assertEquals("Splashing", SubtitleCatalog.resolve("power_beta:entity.generic.splash", null).label());
     assertEquals("Splashing", SubtitleCatalog.resolve("power_beta:entity.hostile.splash", null).label());
     assertEquals("Swimming", SubtitleCatalog.resolve("power_beta:entity.player.swim", null).label());

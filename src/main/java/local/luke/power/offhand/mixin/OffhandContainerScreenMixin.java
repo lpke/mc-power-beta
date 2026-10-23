@@ -2,6 +2,7 @@ package local.luke.power.offhand.mixin;
 
 import local.luke.power.input.*;
 import local.luke.power.offhand.*;
+import local.luke.power.inventory.CreativeDeletion;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.container.ContainerScreen;
 import net.minecraft.inventory.Container;
@@ -11,9 +12,12 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ContainerScreen.class)
-public abstract class OffhandContainerScreenMixin extends Screen implements InventoryGui {
+public abstract class OffhandContainerScreenMixin extends Screen implements InventoryGui, CreativeDeletion.Host {
   @Shadow public Container container;
   @Shadow protected int backgroundWidth, backgroundHeight;
+  @Override public boolean power$deleteSlotAt(int x, int y) {
+    return CreativeDeletion.contains(minecraft, (ContainerScreen)(Object)this, backgroundWidth, backgroundHeight, x, y);
+  }
 
   @Unique private boolean power$sideSlotVisible() {
     return minecraft != null && minecraft.player != null
@@ -23,10 +27,11 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
   }
 
   @Override public boolean power$sideSlotGuiSpace(int px, int py) {
-    if (!power$sideSlotVisible()) return false;
+    boolean destroy = CreativeDeletion.enabled(minecraft) && CreativeDeletion.destroySetting();
+    if (!power$sideSlotVisible() && !destroy) return false;
     int x = (width - backgroundWidth) / 2 + InventoryPanels.offset(this), y = (height - backgroundHeight) / 2;
     return InventorySideSlots.contains(px, py, x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight),
-        OffhandContainers.hotbarY(container, minecraft.player.inventory), false);
+        OffhandContainers.hotbarY(container, minecraft.player.inventory), power$sideSlotVisible() && destroy);
   }
 
   @Inject(method = "render", at = @At("HEAD"))
@@ -42,7 +47,8 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
   @Inject(method = "render", at = @At(value = "INVOKE",
       target = "Lnet/minecraft/client/gui/screen/container/ContainerScreen;drawBackground(F)V", shift = At.Shift.AFTER))
   private void power$frame(int pointerX, int pointerY, float delta, CallbackInfo ci) {
-    if (!power$sideSlotVisible()
+    boolean offhand = power$sideSlotVisible(), destroy = CreativeDeletion.enabled(minecraft) && CreativeDeletion.destroySetting();
+    if ((!offhand && !destroy)
         || ((ContainerScreen)(Object)this).getClass() == net.minecraft.class_585.class
             && minecraft.player instanceof PlayerMode mode && mode.power$creativeInventory()) return;
     GL11.glColor4f(1, 1, 1, 1);
@@ -50,9 +56,16 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
     int x = (width - backgroundWidth) / 2 + InventoryPanels.offset(this), y = (height - backgroundHeight) / 2;
     int hotbarY = OffhandContainers.hotbarY(container, minecraft.player.inventory);
     InventorySideSlots.frame((px, py, w, h, u, v, sw, sh) ->
-        GuiSprite.draw(px, py, w, h, u, v, sw, sh, InventorySideSlots.FRAME_TEXTURE_WIDTH, InventorySideSlots.FRAME_TEXTURE_HEIGHT), x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight), hotbarY, false);
+        GuiSprite.draw(px, py, w, h, u, v, sw, sh, InventorySideSlots.FRAME_TEXTURE_WIDTH, InventorySideSlots.FRAME_TEXTURE_HEIGHT), x, y, OffhandContainers.frameHeight((ContainerScreen)(Object)this, backgroundHeight), hotbarY, offhand && destroy);
     GL11.glColor4f(1, 1, 1, 1);
-    minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.SLOT_TEXTURE));
-    GuiSprite.draw(x + InventorySideSlots.SLOT_X, y + hotbarY - 1, 18, 18, 0, 0, 18, 18, 18, 18);
+    if (offhand) {
+      minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId(InventorySideSlots.SLOT_TEXTURE));
+      GuiSprite.draw(x + InventorySideSlots.SLOT_X, y + hotbarY - 1, 18, 18, 0, 0, 18, 18, 18, 18);
+    }
+    if (destroy) {
+      minecraft.textureManager.bindTexture(minecraft.textureManager.getTextureId("/assets/power_creative/textures/inventory.png"));
+      GuiSprite.draw(x + InventorySideSlots.SLOT_X, y + hotbarY - (offhand ? 22 : 0) - 1,
+          18, 18, 172, 111, 18, 18, 256, 256);
+    }
   }
 }

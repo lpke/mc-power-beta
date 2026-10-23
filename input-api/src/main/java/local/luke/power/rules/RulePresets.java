@@ -14,8 +14,7 @@ public final class RulePresets {
     if (!section.isJsonObject()) throw new IllegalArgumentException("Review creation defaults before creating a world.");
     JsonObject templates = section.getAsJsonObject();
     if (!templates.has(id)) return defaults;
-    JsonObject evidence = root.has("worldRuleUpgrade210") ? root.getAsJsonObject("worldRuleUpgrade210") : new JsonObject();
-    return TemplateDocuments.read(templates.get(id), id.equals("cheats"), evidence);
+    return TemplateDocuments.read(templates.get(id), id.equals("cheats"));
   }
   public static RuleSet survival() { return read("survival", new RuleSet()); }
   public static RuleSet cheats() { return read("cheats", RuleSet.cheats()); }

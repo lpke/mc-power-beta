@@ -9,7 +9,7 @@ import local.luke.power.rules.*;
 import local.luke.power.storage.PowerConfig;
 import net.minecraft.nbt.*;
 
-/** Offline instance maintenance uses the same converters and durable transactions as the game. */
+/** Offline maintenance validates current data with the same durable transactions as the game. */
 public final class InstanceUpgrade {
   private InstanceUpgrade() {}
   public static void main(String[] args) throws Exception {
@@ -65,7 +65,7 @@ public final class InstanceUpgrade {
         // Saved libraries and hotbars are user data, independent of resettable preferences.
         JsonObject oldSettings = converted.getAsJsonObject("settings"), freshSettings = fresh.getAsJsonObject("settings");
         preserveSavedData(oldSettings, freshSettings);
-        // Keep immutable conversion evidence for worlds imported after this maintenance pass.
+        // Retain opaque historical evidence as user data, even though current readers never consume it.
         for (String key : List.of("legacyWorldRules", "worldRuleUpgrade", "worldRuleUpgrade210"))
           if (converted.has(key)) fresh.add(key, converted.get(key).deepCopy());
         assertIdle(game); PowerConfig.write(fresh);

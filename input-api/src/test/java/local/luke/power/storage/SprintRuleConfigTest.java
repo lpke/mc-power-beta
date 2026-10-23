@@ -6,29 +6,12 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class SprintRuleConfigTest {
-  @Test void oldGlobalSprintCannotEnableEitherCreationPresetAndTuningIsRetained() {
-    JsonObject source = JsonParser.parseString("""
-        {"schemaVersion":7,"settings":{"sprint":{"enabled":true,"activation":2,
-        "speed":145,"stamina":true,"dynamicFov":true},"gameRules":{
-        "survival":{"version":3,"values":{"allow_creative_mode":false}},
-        "cheats":{"version":3,"values":{"allow_creative_mode":true}}}},
-        "legacyWorldRules":{"gameplay":{"fireSpread":false}}}
-        """).getAsJsonObject();
-    JsonObject original = source.deepCopy();
-    JsonObject converted = ConfigVersions.convert(source);
-    assertEquals(original, source);
-    assertEquals(source.getAsJsonObject("settings").get("sprint"),
-        converted.getAsJsonObject("settings").get("sprint"));
-    assertEquals(source.get("legacyWorldRules"), converted.get("legacyWorldRules"));
-    JsonObject presets = converted.getAsJsonObject("settings").getAsJsonObject("gameRules");
-    for (String name : new String[]{"survival", "cheats"}) {
-      RuleSet rules = RuleSet.read(presets.getAsJsonObject(name), new RuleSet());
-      assertFalse(rules.enabled(GameRule.ALLOW_SPRINTING));
-      assertEquals(name.equals("cheats"), rules.enabled(GameRule.ALLOW_CREATIVE_MODE));
-    }
-    assertEquals(converted, ConfigVersions.convert(converted));
+  @Test void olderTemplatesRemainOpaqueAndCannotAuthorizeCreation() {
+    JsonObject source = JsonParser.parseString("{\"schemaVersion\":7,\"settings\":{\"gameRules\":{\"survival\":{\"version\":3,\"values\":{\"allow_creative_mode\":true}}}},\"legacyWorldRules\":{\"keep\":true}}").getAsJsonObject();
+    assertEquals(source, ConfigVersions.convert(source));
+    JsonObject retained = ConfigVersions.convert(source).getAsJsonObject("settings").getAsJsonObject("gameRules").getAsJsonObject("survival");
+    assertThrows(IllegalArgumentException.class, () -> TemplateDocuments.read(retained, false));
   }
-
   @Test void explicitSprintPresetsSurviveNormalizationAndGlobalPreferenceChanges() {
     RuleSet survival = new RuleSet();
     survival.set(GameRule.ALLOW_SPRINTING, true);

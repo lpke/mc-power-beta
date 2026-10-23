@@ -20,6 +20,12 @@ public class MouseBindingMixin {
   @Unique private boolean power$mouseConsumed;
   @Unique private boolean power$automaticUse;
   @Unique private boolean power$automaticAttack;
+  @Unique private boolean power$mapResetPress;
+  @Inject(method="tick",at=@At("TAIL"))
+  private void power$releaseMapReset(CallbackInfo ci) {
+    // Clear after native input dispatch, including a release handled by an open GUI.
+    if (power$mapResetPress && !Mouse.isButtonDown(1)) power$mapResetPress = false;
+  }
 
   @Inject(method="tick",at=@At(value="INVOKE",target="Lorg/lwjgl/input/Mouse;isButtonDown(I)Z",ordinal=0,remap=false))
   private void power$initialUse(CallbackInfo ci) {
@@ -38,8 +44,17 @@ public class MouseBindingMixin {
       power$mouseEvent = event;
       power$mouseConsumed = false;
       Minecraft mc = (Minecraft)(Object)this;
-      if (button == 1 && Mouse.getEventButtonState()) local.luke.power.offhand.OffhandUse.newPress(mc);
-      if (button >= 0 && Mouse.getEventButtonState() && mc.field_2778 && mc.currentScreen == null
+      if (button == 1) {
+        if (power$mapResetPress) {
+          power$mouseConsumed = true;
+          if (!Mouse.getEventButtonState()) power$mapResetPress = false;
+        } else if (Mouse.getEventButtonState() && !Bindings.claimsMouse(button - 100)
+            && local.luke.power.map.Minimap.expandedReset(mc)) {
+          power$mapResetPress = power$mouseConsumed = true;
+        }
+      }
+      if (!power$mouseConsumed && button == 1 && Mouse.getEventButtonState()) local.luke.power.offhand.OffhandUse.newPress(mc);
+      if (!power$mouseConsumed && button >= 0 && Mouse.getEventButtonState() && mc.field_2778 && mc.currentScreen == null
           && mc.player != null && Bindings.claimsMouse(button - 100)) {
         power$mouseConsumed = true;
         MouseActions.press(mc, button - 100);
@@ -51,6 +66,7 @@ public class MouseBindingMixin {
   @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Mouse;isButtonDown(I)Z", remap = false))
   private boolean power$heldMouse(int button, Operation<Boolean> original) {
     Minecraft mc = (Minecraft)(Object)this;
+    if (button == 1 && power$mapResetPress) return false;
     if(DebugInput.suppressNative(button-100))return false;
     if (button == 0) {
       boolean automatic = AttackInput.held();

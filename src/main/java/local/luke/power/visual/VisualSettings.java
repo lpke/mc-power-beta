@@ -18,8 +18,12 @@ public final class VisualSettings {
   public boolean swapEquipment = true;
   public boolean limitCapeRotation = true;
   public double thirdPersonDistance = 4;
+  public double containerBlockReach = 5, containerEntityReach = 5;
 
   public void validate() {
+    for (double reach : new double[]{containerBlockReach, containerEntityReach})
+      if (!Double.isFinite(reach) || reach < 3 || reach > 10)
+        throw new IllegalArgumentException("Container preview reach must be between 3 and 10 blocks");
     if (underwaterDarknessOutside < 0 || underwaterDarknessOutside > 100)
       throw new IllegalArgumentException("Water darkness from outside must be between 0 and 100 percent");
     if (underwaterDarkness < 0 || underwaterDarkness > 100)

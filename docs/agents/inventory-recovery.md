@@ -79,6 +79,21 @@
 - Armor Shift-drags share the inventory gesture cancellation boundary and native
   clicks, keep cursor/NBT/count ownership, visit each source once and exclude custom
   containers, catalog/output and read-only slots.
+- A durable personal-grid transfer acknowledges only its verified changed slots to
+  the active drag guard. Keep unrelated visited-slot and cursor checks intact so
+  a publication cannot cancel its own Shift-drag or admit a foreign mutation.
+  Revalidate the drag before preparing each queued baseline and immediately before
+  publication; do not apply the old baseline check between the plan's own writes.
+- Creative delete slots share the native container's hotbar geometry, offhand frame
+  and pointer bounds. Delete through the flushed inventory plan, including cursor,
+  equipment and personal crafting inputs when clearing all. Never clear chest,
+  dispenser or furnace contents. Capture those external owners, retain permission
+  and exact-screen checks, and restore derived crafting output only after owned
+  input rollback. Creative deletion authorizes null replacements only.
+- Dropping an incompatible cursor onto the Creative palette deletes that cursor
+  through the same protected plan. Palette amount scrolling needs a matching,
+  nonempty cursor; zero needs another click. Tab-bar wheel pages regular tabs.
+  Search autofocus owns the shared text-input bridge until focus leaves that editor.
 - Item merging preserves native NBT, damage, normal stack limits and total counts.
   TNT limits retain native entities and saved fuses, bound work each tick and stay
   available from the main menu for recovery. Both leave multiplayer server-owned.
@@ -116,7 +131,7 @@
 - Alt-click opens recipe variants. Shift-right-click crafts maximum in crafting grids;
   furnace recipes only fill ingredients and never bypass smelting. Untouched recipe
   icons keep wheel page scrolling. Amount changes require an explicit recipe choice
-  during that book visit; retain that choice when removing the last batch to zero.
+  during that book visit; removing the last batch releases wheel ownership until a new click places it.
 - Minimap quick controls share native inventory and pause hosts, remain visible without focus,
   and open inward from the selected corner. World waypoints render below their GUI and minimap,
   never over settings editors. Disabling cave mode retires only obsolete view work; retain saves.

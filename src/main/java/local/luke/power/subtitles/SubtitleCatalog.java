@@ -48,7 +48,6 @@ public final class SubtitleCatalog {
     caption("subtitles.entity.egg.throw", "Egg flies");
     caption("subtitles.entity.fishing_bobber.throw", "Bobber thrown");
     caption("subtitles.entity.generic.big_fall", "Something fell");
-    caption("subtitles.entity.generic.burn", "Burning");
     caption("subtitles.entity.generic.death", "Dying");
     caption("subtitles.entity.generic.eat", "Eating");
     caption("subtitles.entity.generic.explode", "Explosion");
@@ -206,7 +205,6 @@ public final class SubtitleCatalog {
     SOUNDS.put("power_beta:item.bone_meal.use", CAPTIONS.get("subtitles.item.bone_meal.use"));
     SOUNDS.put("power_beta:block.lava.pop", CAPTIONS.get("subtitles.block.lava.ambient"));
     SOUNDS.put("power_beta:block.lava.ambient", CAPTIONS.get("subtitles.block.lava.ambient"));
-    SOUNDS.put("power_beta:entity.generic.burn", CAPTIONS.get("subtitles.entity.generic.burn"));
     SOUNDS.put("power_beta:entity.generic.splash", CAPTIONS.get("subtitles.entity.generic.splash"));
     SOUNDS.put("power_beta:entity.hostile.splash", CAPTIONS.get("subtitles.entity.generic.splash"));
     SOUNDS.put("power_beta:entity.player.swim", CAPTIONS.get("subtitles.entity.generic.swim"));

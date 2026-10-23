@@ -46,9 +46,7 @@
 - Optional fluid sounds follow verified official assets and native movement/display events.
   Keep splashes singleplayer for every native entity; swimming stays local-player-only.
   Lava pops/ambience use exposed-surface display events and Ambient volume.
-  Burn cues require accepted native lava damage; item damage returns false in Beta
-  even when health decreases, so compare item health and preserve the return value.
-  Items admit burn cues every tenth entity tick or destruction. Keep disabled native
-  fizz, particles, per-entity categories and source categories through live volume edits.
+  Keep native lava damage and item fizz unchanged. Preserve particles, per-entity
+  categories and source categories through live volume edits.
   Audio randomness must not advance native entity/display random generators.
   See `docs/water-sounds.md` for the pinned modern source and Beta differences.

@@ -103,7 +103,7 @@ public final class Recipe402Checks {
         check(planks == 4 && made == sticks.output.count && state.context.inputs.stream().allMatch(slot -> slot.getStack() == null)
             && state.context.output.getStack() == null && !NativeInventoryPlan.failed(), "right-click did not craft exactly one complete batch");
       });
-      test("RECIPE420 grid wheel places from zero, removes one and respects inversion", () -> {
+      test("RECIPE442 grid wheel stops at zero, click reenables quantity and inversion", () -> {
         state.reset(640); var sticks = recipe(state.book, 280); mc.player.inventory.main[9] = new ItemStack(5, 8, 0);
         Object inventorySettings = Class.forName("local.luke.power.inventory.Config").getField("INVENTORY_TWEAKS_CONFIG").get(null);
         Object mouse = inventorySettings.getClass().getField("MOUSE_TWEAKS_CONFIG").get(inventorySettings);
@@ -115,9 +115,11 @@ public final class Recipe402Checks {
           rightClick(state.book, sticks); state.finish();
           var input = state.context.inputs.get(0); var layout = state.book.layout();
           int px = layout.inventoryX() + input.x + 8, py = layout.inventoryY() + input.y + 8;
-          check(state.book.ownsWheel(px, py), "empty recipe grid lost wheel ownership");
+          check(!state.book.ownsWheel(px, py), "empty recipe grid retained wheel ownership");
           state.book.scroll(px, py, 120); state.finish();
-          check(state.context.output.getStack() != null, "wheel up did not place from zero");
+          check(state.context.output.getStack() == null && state.context.inputs.stream().allMatch(slot -> slot.getStack() == null), "wheel up refilled from zero");
+          choose(state.book, sticks); state.finish();
+          check(state.context.output.getStack() != null, "explicit recipe click did not reenable quantity control");
           inverted.set(wheel, true); state.book.scroll(px, py, 120); state.finish();
           check(state.context.output.getStack() == null, "inverted wheel up did not remove the last batch");
         } finally { enabled.set(wheel, previousEnabled); inverted.set(wheel, previousInverted); }

@@ -2,6 +2,7 @@ package local.luke.power.inventory.tools.mixin;
 
 import local.luke.power.input.*;
 import local.luke.power.inventory.tools.*;
+import local.luke.power.inventory.CreativeDeletion;
 import local.luke.power.offhand.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
@@ -21,6 +22,17 @@ public abstract class InventoryToolsMouseMixin {
     int button = Mouse.getEventButton();
     if (button >= 0 && button < 100 && !Mouse.getEventButtonState() && power$ownedMouseButtons.get(button)) {
       power$ownedMouseButtons.clear(button); ci.cancel(); return;
+    }
+    if (button >= 0 && button <= 1 && Mouse.getEventButtonState() && minecraft != null
+        && minecraft.displayWidth > 0 && minecraft.displayHeight > 0
+        && minecraft.currentScreen == (Object)this && (Object)this instanceof net.minecraft.client.gui.screen.container.ContainerScreen screen
+        && Display.isActive() && !Mouse.isGrabbed() && !Bindings.matches(minecraft.options.inventoryKey, button - 100)) {
+      int x = Mouse.getEventX() * width / minecraft.displayWidth, y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+      if (screen instanceof CreativeDeletion.Host host && host.power$deleteSlotAt(x, y)) {
+        if (CreativeDeletion.destroy(minecraft, local.luke.power.ui.TextEditing.shift()) && CreativeDeletion.clearSetting()
+            && local.luke.power.ui.TextEditing.shift()) minecraft.soundManager.method_2009("random.click", 1, 1);
+        power$ownedMouseButtons.set(button); ci.cancel(); return;
+      }
     }
     if ((Object)this instanceof InventoryToolsHost host && host.power$inventoryToolsModal() && Mouse.getEventDWheel() != 0) {
       host.power$inventoryToolsWheel(Mouse.getEventDWheel());

@@ -114,6 +114,10 @@ public final class Validation {
       else if (command.equals("sorting-layer-402")) SortingLayer402Checks.run(mc);
       else if (command.equals("container-offhand-402")) ContainerOffhand402Checks.run(mc);
       else if (command.equals("release-440")) Release440Checks.run(mc);
+      else if (command.equals("current-formats-442")) CurrentFormats442Checks.run(mc);
+      else if (command.equals("interface-442")) Interface442Checks.run(mc);
+      else if (command.equals("palette-442")) Palette442Checks.run(mc);
+      else if (command.startsWith("inventory-442")) Inventory442Checks.run(mc, command.substring(13).trim());
       else if (command.equals("fluid-sounds-440")) FluidSounds440Checks.run(mc);
       else if (command.equals("fluid-sounds-420")) FluidSounds420Checks.run(mc);
       else if (command.equals("water-sounds-432")) WaterSounds432Checks.run(mc);
@@ -255,6 +259,8 @@ public final class Validation {
       else if (command.equals("creative-440")) Creative440Checks.run(mc);
       else if (command.startsWith("creative-440 ")) Creative440PointerChecks.run(mc, command.substring("creative-440 ".length()).trim());
       else if (command.equals("recipe-441")) Recipe441Checks.run(mc);
+      else if (command.equals("current-formats-442")) CurrentFormats442Checks.run(mc);
+      else if (command.startsWith("creative-442")) Creative442Checks.run(mc, command.substring(12).trim());
       else if (command.startsWith("recipe-441 ")) Recipe441Checks.physical(mc, command.substring(11));
       else if (command.startsWith("minimap-441 ")) Minimap441Checks.run(mc, command.substring(12));
       else if (command.equals("creative-borders")) CreativeBorderChecks.run(mc);

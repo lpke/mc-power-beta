@@ -129,6 +129,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
   private void power$initSearch(CallbackInfo ci) {
     // The native Screen binds its client before init, after the PlayerScreen constructor.
     if (power_search == null && minecraft != null) power_search = CreativePaletteBridge.create(minecraft);
+    if (power_search != null && creative_isInCreative() && !creative_normalGUI && creative_tabIndex == 6) power_search.focus();
     power_query = "\u0000";
     power$filterSearch();
   }
@@ -517,6 +518,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
   @Inject(method = "render", at = @At("HEAD"), cancellable = true)
   public void creative_render(int mouseX, int mouseY, float delta, CallbackInfo info) {
     this.mouseX=mouseX; this.mouseY=mouseY;
+    if (power_search != null && power_search.focused() && (!creative_isInCreative() || creative_normalGUI || creative_tabIndex != 6)) power_search.close();
     if (creative_isInCreative() && !creative_normalGUI) {
       if (power_tabRevision != TabRegistry.revision()) {
         power_tabRevision = TabRegistry.revision();
@@ -607,6 +609,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       int tabY = mouseY - posY - 114;
       if (tabX >= 0 && tabX < 25 && tabY >= 0 && tabY < 24) {
         creative_normalGUI = false;
+        if (creative_tabIndex == 6 && power_search != null) power_search.focus();
         creative_drag = false;
         power$remember();
         return;
@@ -615,6 +618,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       tabY = mouseY - posY - 138;
       if (tabX >= 0 && tabX < 25 && tabY >= 0 && tabY < 24) {
         creative_normalGUI = true;
+        if (power_search != null) power_search.close();
         creative_drag = false;
         power$remember();
         return;
@@ -705,21 +709,21 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         ItemStack cursor = inventory.getCursorItem();
         if (index < creative_items.size()) {
           ItemStack item = creative_items.get(index);
+          boolean isSame = cursor != null && item != null && power$sameItem(cursor, item);
+          if (cursor != null && !isSame && (button == 0 || button == 1)) {
+            local.luke.power.input.CreativePaletteBridge.destroy(minecraft, false);
+            return;
+          }
           if (item != null && (button == 0 || button == 1)
               && (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT))) {
             if (local.luke.power.creative.InventoryActions.catalogueStack(minecraft.player, item))
               creative_updateInventory(inventory);
             return;
           }
-          boolean isSame = cursor != null && item != null && cursor.isDamageAndIDIdentical(item);
           if (item != null && button == 2) {
             cursor = item.copy();
             cursor.count = cursor.getMaxStackSize();
             inventory.setCursorItem(cursor);
-            creative_updateInventory(inventory);
-            return;
-          } else if (item != null && !isSame && cursor != null && button == 0) {
-            inventory.setCursorItem(item.copy());
             creative_updateInventory(inventory);
             return;
           } else if (item != null && (cursor == null || isSame)) {
@@ -768,7 +772,8 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
 
   @Override
   protected void mouseReleased(int mouseX, int mouseY, int button) {
-    if (creative_isInCreative() && !creative_normalGUI && power$paletteWheel(mouseX, mouseY)) return;
+    if (button == -1 && creative_isInCreative() && !creative_normalGUI
+        && (power$tabWheel(mouseX, mouseY) || power$paletteWheel(mouseX, mouseY))) return;
     super.mouseReleased(mouseX, mouseY, button);
     // Native slot gestures consume their own event first. A wheel over the offhand
     // must never fall through to the catalogue when slot scrolling is disabled.
@@ -797,6 +802,10 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     int y = (height - containerHeight) / 2;
     int col = Math.floorDiv(mouseX - x - 8, 18), row = Math.floorDiv(mouseY - y + CreativeGrid.EXTRA_HEIGHT - CreativeGrid.ITEM_TOP, 18);
     if (col < 0 || col >= 8 || row < 0 || row >= CreativeGrid.ROWS) return false;
+    int index = creative_rowIndex + row * 8 + col;
+    ItemStack item = index < creative_items.size() ? creative_items.get(index) : null;
+    ItemStack cursor = minecraft.player.inventory.getCursorItem();
+    if (cursor == null || cursor.count <= 0 || item == null || !power$sameItem(cursor, item)) return false;
     boolean enabled, inverted;
     try {
       Object config = Class.forName("local.luke.power.inventory.Config").getField("INVENTORY_TWEAKS_CONFIG").get(null);
@@ -809,20 +818,31 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     int wheel = local.luke.power.input.InventoryWheel.takeEvent(this, org.lwjgl.opengl.Display.isActive());
     if (wheel == 0) return false;
     if (inverted) wheel = -wheel;
-    int index = creative_rowIndex + row * 8 + col;
-    ItemStack item = index < creative_items.size() ? creative_items.get(index) : null;
-    ItemStack cursor = minecraft.player.inventory.getCursorItem();
     int amount = Math.max(1, (int)Math.ceil(Math.abs(wheel / 120.0)));
-    if (wheel > 0 && item != null && (cursor == null || power$sameItem(cursor, item))) {
-      if (cursor == null) { cursor = item.copy(); cursor.count = 0; }
+    if (wheel > 0) {
       if (cursor.count < 0 || cursor.count >= cursor.getMaxStackSize()) return true;
       cursor.count += Math.min(amount, cursor.getMaxStackSize() - cursor.count);
       minecraft.player.inventory.setCursorItem(cursor);
-    } else if (wheel < 0 && cursor != null && (item == null || power$sameItem(cursor, item))) {
+    } else if (wheel < 0) {
       cursor.count -= Math.min(cursor.count, amount);
       minecraft.player.inventory.setCursorItem(cursor.count > 0 ? cursor : null);
     } else return true;
     creative_updateInventory(minecraft.player.inventory);
+    return true;
+  }
+
+  @Unique private boolean power$tabWheel(int mouseX, int mouseY) {
+    if (creative_pagesCount <= 1 || creative_drag) return false;
+    int x = (width - containerWidth) / 2 + local.luke.power.input.InventoryPanels.offset(this);
+    int y = (height - containerHeight) / 2;
+    if (mouseX < x + 4 || mouseX >= x + 172 || mouseY < CreativeGrid.tabTop(y)
+        || mouseY >= CreativeGrid.tabTop(y) + CreativeGrid.tabHeight(y)) return false;
+    int wheel = local.luke.power.input.InventoryWheel.takeEvent(this, org.lwjgl.opengl.Display.isActive());
+    if (wheel == 0) return false;
+    int next = Math.max(0, Math.min(creative_pagesCount - 1, creative_tabPage - Integer.signum(wheel)));
+    if (next != creative_tabPage) {
+      creative_tabPage = next; creative_updateMaxIndex(); power$selectTab(0); power$remember();
+    }
     return true;
   }
 
@@ -897,6 +917,10 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     CreativeTab tab = creative_getTab(creative_tabPage, index);
     if (tab == null) { index = 6; tab = TabRegistry.search(); }
     creative_tabIndex = index;
+    if (power_search != null) {
+      if (index == 6 && creative_isInCreative() && !creative_normalGUI) power_search.focus();
+      else power_search.close();
+    }
     creative_tabKey = tab.getTranslationKey();
     power_selectedTab = tab;
     creative_items = tab.getItems();
