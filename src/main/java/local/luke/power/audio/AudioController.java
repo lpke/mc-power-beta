@@ -21,6 +21,7 @@ public final class AudioController {
   private static final TrackSelector WORLD = new TrackSelector();
   private static final Random RANDOM = new Random();
   private static final Map<String, Source> SOURCES = new HashMap<>();
+  private static final UnderwaterAudio UNDERWATER = new UnderwaterAudio();
 
   private record Source(String sound, float base, boolean ui) {}
 
@@ -147,8 +148,13 @@ public final class AudioController {
     SoundSystem system = system();
     system.stop("PowerBetaPreview");
     system.removeSource("PowerBetaPreview");
-    system.newSource(false, "PowerBetaPreview", track.field_2127, track.field_2126, false, 0, 0, 0, 0, 0);
-    system.setVolume("PowerBetaPreview", mix("PowerBetaPreview", id, client.options.soundVolume, false));
+    var water = WaterSoundCatalog.choose(id, RANDOM);
+    if (water != null && water.stream())
+      system.newStreamingSource(true, "PowerBetaPreview", water.url(), water.filename(), false, 0, 0, 0, 0, 0);
+    else system.newSource(false, "PowerBetaPreview", water == null ? track.field_2127 : water.url(),
+        water == null ? track.field_2126 : water.filename(), false, 0, 0, 0, 0, 0);
+    system.setVolume("PowerBetaPreview", mix("PowerBetaPreview", id,
+        client.options.soundVolume * (water == null ? 1 : water.volume()), false));
     soundPreview = id;
     soundPreviewStarted = System.nanoTime();
     soundPreviewPlaying = false;
@@ -436,6 +442,7 @@ public final class AudioController {
       }
     }
     SoundSystem system = system();
+    UNDERWATER.context(mc, system);
     if (system == null) return;
     progress.update(!paused && !MusicPreview.active() && system.playing("BgMusic"), System.nanoTime());
     MusicSeeking.Prepared seek = MusicSeeking.take();
@@ -628,7 +635,27 @@ public final class AudioController {
     return SoundManagerAccessor.power$started() ? SoundManagerAccessor.power$system() : null;
   }
 
+  /** Called by the native physical-player tick, never by rendering or paused menu ticks. */
+  public static void waterTick(net.minecraft.entity.player.ClientPlayerEntity player) {
+    Object game = FabricLoader.getInstance().getGameInstance();
+    if (!(game instanceof Minecraft mc) || mc.player != player || mc.world != player.world || mc.paused) return;
+    client = mc;
+    UNDERWATER.tick(mc, system(), player);
+  }
+
+  public static void waterSample(net.minecraft.entity.player.ClientPlayerEntity player) {
+    Object game = FabricLoader.getInstance().getGameInstance();
+    if (!(game instanceof Minecraft mc) || mc.player != player || mc.world != player.world || mc.paused) return;
+    client = mc;
+    UNDERWATER.sample(mc, system(), player);
+  }
+
+  static float waterVolume(String event, float base) {
+    return client == null ? 0 : (float)(base * client.options.soundVolume * AudioConfig.current().gain(event, false));
+  }
+
   public static void refresh() {
+    UNDERWATER.refresh();
     SoundSystem s = system();
     if (s == null) return;
     float effects = client == null ? 1 : client.options.soundVolume;

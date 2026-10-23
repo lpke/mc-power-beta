@@ -19,7 +19,7 @@ def fetch(url, digest):
 def main():
     manifest = json.loads((RESOURCES / 'assets/powerbeta/extra-sounds.json').read_text())
     sources = {}
-    for name in ('source', 'bucketSource'):
+    for name in ('source', 'bucketSource', 'waterSource'):
         source = manifest[name]
         metadata = fetch(source['metadata']['url'], source['metadata']['sha1'])
         assert metadata['assetIndex'] == source['assetIndex']
@@ -29,7 +29,8 @@ def main():
         sounds = fetch(f"https://resources.download.minecraft.net/{sound['hash'][:2]}/{sound['hash']}", sound['hash'])
         sources[name] = (index, sounds)
     for event, definition in manifest['events'].items():
-        index, sounds = sources['bucketSource' if 'bucket' in event else 'source']
+        index, sounds = sources['waterSource' if event.startswith(('ambient.underwater.', 'entity.player.'))
+                                else 'bucketSource' if 'bucket' in event else 'source']
         assert sounds[event] == definition, event
         expected = {'minecraft/sounds/' + (entry if isinstance(entry, str) else entry['name']) + '.ogg'
                     for entry in definition['sounds']}

@@ -87,7 +87,8 @@ public final class ConfigDefaults {
     JsonObject audio = PowerConfig.section("audio");
     boolean changed = false;
     for (String key : java.util.List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds",
-        "lavaPopSounds", "waterSplashSounds", "swimmingSounds")) {
+        "lavaPopSounds", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds",
+        "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions")) {
       if (audio.has(key)) continue;
       audio.add(key, DefaultBases.value("audio." + key, new JsonPrimitive(false)));
       changed = true;

@@ -24,14 +24,21 @@ public abstract class FluidMovementSoundMixin {
     power$soundMoving = moving; power$soundMoveY = y;
     try { original.call(dx, dy, dz); }
     finally { power$soundMoving = priorMoving; power$soundMoveY = priorY; }
-    if (!moving || !FluidSounds.movement(entity)) { power$soundDistance = 0; power$nextSwimSound = 1; return; }
+    // Modern moveDist survives flight, riding and quiet crouching. Returning to
+    // ordinary movement resumes that cadence rather than starting a new stride.
+    if (!moving || !FluidSounds.movement(entity)) return;
     int stepBlock = FluidSounds.stepBlock(entity);
     double vertical = entity.boundingBox.minY - y;
     power$soundDistance += FluidSoundMath.distance(entity.x - x,
         stepBlock == net.minecraft.block.Block.field_1854.id ? vertical : 0, entity.z - z);
     if (power$soundDistance > power$nextSwimSound && stepBlock > 0) {
-      power$nextSwimSound = (float)FluidSoundMath.nextStep(power$soundDistance);
-      if (FluidSounds.swimStep(entity, stepBlock, vertical)) FluidSounds.swim(entity, random);
+      if (FluidSounds.swimStep(entity, stepBlock, vertical)) {
+        power$nextSwimSound = (float)FluidSoundMath.nextStep(power$soundDistance);
+        FluidSounds.swim(entity, random);
+      } else if (entity.field_1623 || stepBlock == net.minecraft.block.Block.field_1854.id
+          || entity.method_1373() && vertical == 0) {
+        power$nextSwimSound = (float)FluidSoundMath.nextStep(power$soundDistance);
+      }
     }
   }
   @WrapOperation(method = "move", at = @At(value = "INVOKE",

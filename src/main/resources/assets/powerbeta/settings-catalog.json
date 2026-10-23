@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.3.1",
+    "default": "Power Beta 4.3.2",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6816,5 +6816,47 @@
     "label": "Lower camera when crouching",
     "description": "With Modern crawling enabled, use a deeper camera drop than Beta while sneaking, in first and third person. Off keeps Beta's normal crouch camera movement. Low ceilings and crawling always use a safe lower camera.",
     "order": 41.1
+  },
+  "audio.underwaterEnterSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Submerging sounds",
+    "description": "Play the modern entry sound once when your eyes enter water.",
+    "order": 33
+  },
+  "audio.underwaterExitSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Surfacing sounds",
+    "description": "Play the modern exit sound once when your eyes leave water.",
+    "order": 34
+  },
+  "audio.underwaterAmbience": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Underwater ambience",
+    "description": "Fade in modern background water ambience while your eyes are underwater. Fade out when surfacing.",
+    "order": 35
+  },
+  "audio.underwaterAdditions": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Underwater bubbles and water",
+    "description": "Play occasional modern bubbles and water sounds while underwater. Stop them when surfacing.",
+    "order": 36
+  },
+  "audio.underwaterRareAdditions": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Rare underwater sounds",
+    "description": "Play the rare modern underwater animal, creaking and dripping sounds.",
+    "order": 37
+  },
+  "audio.underwaterUltraRareAdditions": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Very rare underwater sounds",
+    "description": "Play the very rare modern deep underwater sounds.",
+    "order": 38
   }
 }

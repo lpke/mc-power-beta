@@ -222,6 +222,98 @@
         "liquid/heavy_splash"
       ],
       "subtitle": "subtitles.entity.generic.splash"
+    },
+    "ambient.underwater.enter": {
+      "sounds": [
+        {
+          "name": "ambient/underwater/enter1",
+          "volume": 0.5
+        },
+        {
+          "name": "ambient/underwater/enter2",
+          "volume": 0.5
+        },
+        {
+          "name": "ambient/underwater/enter3",
+          "volume": 0.5
+        }
+      ]
+    },
+    "ambient.underwater.exit": {
+      "sounds": [
+        {
+          "name": "ambient/underwater/exit1",
+          "volume": 0.3
+        },
+        {
+          "name": "ambient/underwater/exit2",
+          "volume": 0.3
+        },
+        {
+          "name": "ambient/underwater/exit3",
+          "volume": 0.3
+        }
+      ]
+    },
+    "ambient.underwater.loop": {
+      "sounds": [
+        {
+          "name": "ambient/underwater/underwater_ambience",
+          "stream": true,
+          "volume": 0.65
+        }
+      ]
+    },
+    "ambient.underwater.loop.additions": {
+      "sounds": [
+        "ambient/underwater/additions/bubbles1",
+        "ambient/underwater/additions/bubbles2",
+        "ambient/underwater/additions/bubbles3",
+        "ambient/underwater/additions/bubbles4",
+        "ambient/underwater/additions/bubbles5",
+        "ambient/underwater/additions/bubbles6",
+        "ambient/underwater/additions/water1",
+        "ambient/underwater/additions/water2"
+      ]
+    },
+    "ambient.underwater.loop.additions.rare": {
+      "sounds": [
+        "ambient/underwater/additions/animal1",
+        {
+          "name": "ambient/underwater/additions/bass_whale1",
+          "volume": 0.45
+        },
+        {
+          "name": "ambient/underwater/additions/bass_whale2",
+          "volume": 0.5
+        },
+        {
+          "name": "ambient/underwater/additions/crackles1",
+          "volume": 0.7
+        },
+        "ambient/underwater/additions/crackles2",
+        {
+          "name": "ambient/underwater/additions/driplets1",
+          "volume": 0.5
+        },
+        {
+          "name": "ambient/underwater/additions/driplets2",
+          "volume": 0.5
+        },
+        "ambient/underwater/additions/earth_crack"
+      ]
+    },
+    "ambient.underwater.loop.additions.ultra_rare": {
+      "sounds": [
+        "ambient/underwater/additions/animal2",
+        "ambient/underwater/additions/dark1",
+        {
+          "name": "ambient/underwater/additions/dark2",
+          "volume": 0.7
+        },
+        "ambient/underwater/additions/dark3",
+        "ambient/underwater/additions/dark4"
+      ]
     }
   },
   "assets": [
@@ -230,70 +322,100 @@
       "file": "assets/power_beta/stationapi/sounds/sound/item/crop/plant1.ogg",
       "asset": "minecraft/sounds/item/plant/crop1.ogg",
       "sha1": "632c93324d6342c23fe229287ff86ad3170cd5fe",
-      "size": 17325
+      "size": 17325,
+      "frames": 31108,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.crop.plant",
       "file": "assets/power_beta/stationapi/sounds/sound/item/crop/plant2.ogg",
       "asset": "minecraft/sounds/item/plant/crop2.ogg",
       "sha1": "0076a7bdf840e166559cd82e8f58e633c59382ea",
-      "size": 21903
+      "size": 21903,
+      "frames": 29680,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.crop.plant",
       "file": "assets/power_beta/stationapi/sounds/sound/item/crop/plant3.ogg",
       "asset": "minecraft/sounds/item/plant/crop3.ogg",
       "sha1": "42a6d1b8c9ef9c21d4a7a2684ac946ae822d49ac",
-      "size": 18039
+      "size": 18039,
+      "frames": 21820,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.crop.plant",
       "file": "assets/power_beta/stationapi/sounds/sound/item/crop/plant4.ogg",
       "asset": "minecraft/sounds/item/plant/crop4.ogg",
       "sha1": "b2190b1e1ad177232b337fea5f7534fbfe632d2e",
-      "size": 20711
+      "size": 20711,
+      "frames": 31208,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.crop.plant",
       "file": "assets/power_beta/stationapi/sounds/sound/item/crop/plant5.ogg",
       "asset": "minecraft/sounds/item/plant/crop5.ogg",
       "sha1": "a859d7056370c987ff986c15e4952e2123e0e59c",
-      "size": 22511
+      "size": 22511,
+      "frames": 34016,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.crop.plant",
       "file": "assets/power_beta/stationapi/sounds/sound/item/crop/plant6.ogg",
       "asset": "minecraft/sounds/item/plant/crop6.ogg",
       "sha1": "dda6283eefbd528215c11f8e76c7e8e621f0d3b5",
-      "size": 22350
+      "size": 22350,
+      "frames": 34306,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.hoe.till",
       "file": "assets/power_beta/stationapi/sounds/sound/item/hoe/till1.ogg",
       "asset": "minecraft/sounds/item/hoe/till1.ogg",
       "sha1": "0e6696ec35c5f4982cad6a6731edcffb11728aa9",
-      "size": 5875
+      "size": 5875,
+      "frames": 14144,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.hoe.till",
       "file": "assets/power_beta/stationapi/sounds/sound/item/hoe/till2.ogg",
       "asset": "minecraft/sounds/item/hoe/till2.ogg",
       "sha1": "46dd1e5e0f90bb72261e2986d530e80e8fc50560",
-      "size": 6022
+      "size": 6022,
+      "frames": 13792,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.hoe.till",
       "file": "assets/power_beta/stationapi/sounds/sound/item/hoe/till3.ogg",
       "asset": "minecraft/sounds/item/hoe/till3.ogg",
       "sha1": "d75f19c657e1f22b47d2060fd3495c444f35a477",
-      "size": 5833
+      "size": 5833,
+      "frames": 13696,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.hoe.till",
       "file": "assets/power_beta/stationapi/sounds/sound/item/hoe/till4.ogg",
       "asset": "minecraft/sounds/item/hoe/till4.ogg",
       "sha1": "cb95637a9d5e9b0cb36a2516f0dfac30fed9d720",
-      "size": 6544
+      "size": 6544,
+      "frames": 17376,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.fill",
@@ -301,7 +423,10 @@
       "asset": "minecraft/sounds/item/bucket/fill1.ogg",
       "sha1": "a8436a6aa1015791109dfce0ebc7d47399338c7f",
       "size": 10208,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 34771,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.fill",
@@ -309,7 +434,10 @@
       "asset": "minecraft/sounds/item/bucket/fill2.ogg",
       "sha1": "21e1cc7289a188e7424f451b787257063f20a61e",
       "size": 9574,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 31816,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.fill",
@@ -317,7 +445,10 @@
       "asset": "minecraft/sounds/item/bucket/fill3.ogg",
       "sha1": "7a34a4136adc49b5a656010daad587b73de65786",
       "size": 9864,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 33383,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.fill_lava",
@@ -325,7 +456,10 @@
       "asset": "minecraft/sounds/item/bucket/fill_lava1.ogg",
       "sha1": "46c8440dcc94a4874d2926708eced9f73a13be0f",
       "size": 9618,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 29568,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.fill_lava",
@@ -333,7 +467,10 @@
       "asset": "minecraft/sounds/item/bucket/fill_lava2.ogg",
       "sha1": "8c9c80d0e76124c462434740a97e925546e0de11",
       "size": 9618,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 29568,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.fill_lava",
@@ -341,7 +478,10 @@
       "asset": "minecraft/sounds/item/bucket/fill_lava3.ogg",
       "sha1": "fa66a080afaf3d8a87939789053b326e76e43323",
       "size": 9669,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 35072,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.empty",
@@ -349,7 +489,10 @@
       "asset": "minecraft/sounds/item/bucket/empty1.ogg",
       "sha1": "f75e57175b69ab1e6c408ab3f32160c8416a8675",
       "size": 10813,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 38400,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.empty",
@@ -357,7 +500,10 @@
       "asset": "minecraft/sounds/item/bucket/empty2.ogg",
       "sha1": "270c29f3c5cbc795c36bd3e41fb9c367ab91ae0f",
       "size": 10547,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 37376,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.empty",
@@ -365,7 +511,10 @@
       "asset": "minecraft/sounds/item/bucket/empty3.ogg",
       "sha1": "ef7610b0effe7d9ae641938cc7cc317158a59b91",
       "size": 10217,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 36864,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.empty_lava",
@@ -373,7 +522,10 @@
       "asset": "minecraft/sounds/item/bucket/empty_lava1.ogg",
       "sha1": "c78cf4fe10dcc6e3e47b01f7008ee8396b02d2bd",
       "size": 10648,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 39808,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.empty_lava",
@@ -381,7 +533,10 @@
       "asset": "minecraft/sounds/item/bucket/empty_lava2.ogg",
       "sha1": "b2fa3db0c8363b9c454f9a04f93eebb11409229e",
       "size": 12210,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 51200,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bucket.empty_lava",
@@ -389,189 +544,623 @@
       "asset": "minecraft/sounds/item/bucket/empty_lava3.ogg",
       "sha1": "6376cabb22a0e3042b25cb7443a5a75bffe6e4a6",
       "size": 12217,
-      "source": "bucketSource"
+      "source": "bucketSource",
+      "frames": 49408,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.cow.milk",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/cow/milk1.ogg",
       "asset": "minecraft/sounds/entity/cow/milk1.ogg",
       "sha1": "462cbc14581ba05f4a5f1e5aa23cb48eb823bf2d",
-      "size": 14489
+      "size": 14489,
+      "frames": 54049,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.cow.milk",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/cow/milk2.ogg",
       "asset": "minecraft/sounds/entity/cow/milk2.ogg",
       "sha1": "47d640178306584d10213dbf05290150ff60a46b",
-      "size": 13302
+      "size": 13302,
+      "frames": 50674,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.cow.milk",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/cow/milk3.ogg",
       "asset": "minecraft/sounds/entity/cow/milk3.ogg",
       "sha1": "e7133a7d4822e40f0abd716faa3a8f340362b8d7",
-      "size": 13332
+      "size": 13332,
+      "frames": 48672,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bone_meal.use",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bone_meal/use1.ogg",
       "asset": "minecraft/sounds/item/bonemeal/bonemeal1.ogg",
       "sha1": "3c110e8daaedc779da97c827d30cc73668824f97",
-      "size": 34376
+      "size": 34376,
+      "frames": 53442,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bone_meal.use",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bone_meal/use2.ogg",
       "asset": "minecraft/sounds/item/bonemeal/bonemeal2.ogg",
       "sha1": "2e2f05457af0bdda5c63d3e28cd286ae5fe2f272",
-      "size": 36702
+      "size": 36702,
+      "frames": 55416,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bone_meal.use",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bone_meal/use3.ogg",
       "asset": "minecraft/sounds/item/bonemeal/bonemeal3.ogg",
       "sha1": "f548f0e60d971cd9ddb2736463a4a872097ca601",
-      "size": 39162
+      "size": 39162,
+      "frames": 60477,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bone_meal.use",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bone_meal/use4.ogg",
       "asset": "minecraft/sounds/item/bonemeal/bonemeal4.ogg",
       "sha1": "0ff31eb8381878ed4394515fa2df5714fde1742b",
-      "size": 34385
+      "size": 34385,
+      "frames": 53417,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "item.bone_meal.use",
       "file": "assets/power_beta/stationapi/sounds/sound/item/bone_meal/use5.ogg",
       "asset": "minecraft/sounds/item/bonemeal/bonemeal5.ogg",
       "sha1": "1e38ab01b7b4b6b6b9b29d889801440d285cb508",
-      "size": 38428
+      "size": 38428,
+      "frames": 56283,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "block.lava.pop",
       "file": "assets/power_beta/stationapi/sounds/sound/block/lava/pop1.ogg",
       "asset": "minecraft/sounds/liquid/lavapop.ogg",
       "sha1": "19a5aae31c3e0018a960b709a9f0240d8d47dda7",
-      "size": 5609
+      "size": 5609,
+      "frames": 5799,
+      "sampleRate": 44100,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim1.ogg",
       "asset": "minecraft/sounds/liquid/swim5.ogg",
-      "sha1": "5b66f85f4091d100117bd6ea7f49543f7bb682e0",
-      "size": 57135
+      "sha1": "7d467b1a379b73ebf64453402b46a4430a42657a",
+      "size": 21760,
+      "source": "waterSource",
+      "frames": 75776,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim2.ogg",
       "asset": "minecraft/sounds/liquid/swim6.ogg",
-      "sha1": "95a646b2a6d24a431cace49c00481455477e9a44",
-      "size": 50147
+      "sha1": "11e7c4b42ab89941ee148bc84f10dfeee42c0925",
+      "size": 19724,
+      "source": "waterSource",
+      "frames": 72704,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim3.ogg",
       "asset": "minecraft/sounds/liquid/swim7.ogg",
-      "sha1": "3a395719dac4db21f2092558c28afcf35b833d99",
-      "size": 53312
+      "sha1": "fa138f9ab5a15dd9507b033c5948b1de357ed1f8",
+      "size": 20288,
+      "source": "waterSource",
+      "frames": 78272,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim4.ogg",
       "asset": "minecraft/sounds/liquid/swim8.ogg",
-      "sha1": "e1687542340bef3e6edf3ed8245261596496734f",
-      "size": 36550
+      "sha1": "5fbcb419f46e58e1f5079abfa6099646a6f035e6",
+      "size": 13724,
+      "source": "waterSource",
+      "frames": 44800,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim5.ogg",
       "asset": "minecraft/sounds/liquid/swim9.ogg",
-      "sha1": "53994743817a68885a2ded1f9857bb254c00a70a",
-      "size": 53348
+      "sha1": "f03d18b2bce2a3c51e6e831747cd8b944f5771f6",
+      "size": 21640,
+      "source": "waterSource",
+      "frames": 81408,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim6.ogg",
       "asset": "minecraft/sounds/liquid/swim10.ogg",
-      "sha1": "abe8061b7227e85b98196f11e44706154bbbd394",
-      "size": 51067
+      "sha1": "3c83854d50456a6cc9a4dde52975e71960da1688",
+      "size": 20349,
+      "source": "waterSource",
+      "frames": 87296,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim7.ogg",
       "asset": "minecraft/sounds/liquid/swim11.ogg",
-      "sha1": "64f5dddfcc6df8945707437a9bdda63ab43ab6a9",
-      "size": 47598
+      "sha1": "30a600a9e2cfef0400bbab062cbbd0be2755b5a0",
+      "size": 18242,
+      "source": "waterSource",
+      "frames": 67904,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim8.ogg",
       "asset": "minecraft/sounds/liquid/swim12.ogg",
-      "sha1": "5314c31c0e041d9356558c085442aed9fda0000b",
-      "size": 36181
+      "sha1": "f9500ef831484ce2c2e69bbb02fe9ec23af93d9b",
+      "size": 13608,
+      "source": "waterSource",
+      "frames": 44800,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim9.ogg",
       "asset": "minecraft/sounds/liquid/swim13.ogg",
-      "sha1": "9e06706877ed1eadb48064afe4a1b9c86b557457",
-      "size": 42722
+      "sha1": "ef6e9421377a64e4b25d8f60da356a60a39c16a4",
+      "size": 18223,
+      "source": "waterSource",
+      "frames": 79104,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim10.ogg",
       "asset": "minecraft/sounds/liquid/swim14.ogg",
-      "sha1": "34a8626957250f7d60ed3af2360e4e0a3da002e7",
-      "size": 45222
+      "sha1": "fd8953047707f4ab8fef40ed4e55bf07b2217df9",
+      "size": 18641,
+      "source": "waterSource",
+      "frames": 87232,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim11.ogg",
       "asset": "minecraft/sounds/liquid/swim15.ogg",
-      "sha1": "98f0b58f75b0bbbdd609b35b46c05656ded22a94",
-      "size": 48602
+      "sha1": "80156c24f24360716ea24497c857fbba853ca5dd",
+      "size": 20445,
+      "source": "waterSource",
+      "frames": 92160,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim12.ogg",
       "asset": "minecraft/sounds/liquid/swim16.ogg",
-      "sha1": "d5cf493c3c24bff9abc4e122cd9afa72e6c0d1a8",
-      "size": 43310
+      "sha1": "c8c78d167a008f5320cb7112e00345adf6eb39eb",
+      "size": 16378,
+      "source": "waterSource",
+      "frames": 64064,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim13.ogg",
       "asset": "minecraft/sounds/liquid/swim17.ogg",
-      "sha1": "6a0b196f6911af249cab7d1b3ff03bea80ec76c1",
-      "size": 46073
+      "sha1": "7d33a0653252f7f8b0ca57688c6eaf9e200ab37c",
+      "size": 18779,
+      "source": "waterSource",
+      "frames": 77440,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.swim",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/swim14.ogg",
       "asset": "minecraft/sounds/liquid/swim18.ogg",
-      "sha1": "38b0fa011c55c2b15e10a8f1b032b3e545b1a63f",
-      "size": 50020
+      "sha1": "b511c74ca73f54d9e698f560fdf7762f9af92f16",
+      "size": 19681,
+      "source": "waterSource",
+      "frames": 85120,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.splash",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/splash1.ogg",
       "asset": "minecraft/sounds/liquid/splash.ogg",
-      "sha1": "4c14c40542e249c902d0cac710ab4c6d6debba28",
-      "size": 16702
+      "sha1": "264ae650cce4cea0cd4cb1757624a9d51653499b",
+      "size": 18026,
+      "source": "waterSource",
+      "frames": 72878,
+      "sampleRate": 44100,
+      "channels": 1
     },
     {
       "event": "entity.player.splash",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/splash2.ogg",
       "asset": "minecraft/sounds/liquid/splash2.ogg",
-      "sha1": "92429140e98c02a1b0e61d87aed53b898cde0de2",
-      "size": 90299
+      "sha1": "338e0b08a21e73dd5e7888c9c7e67e9a1a119dc1",
+      "size": 32985,
+      "source": "waterSource",
+      "frames": 185625,
+      "sampleRate": 48000,
+      "channels": 1
     },
     {
       "event": "entity.player.splash.high_speed",
       "file": "assets/power_beta/stationapi/sounds/sound/entity/player/splash/high_speed1.ogg",
       "asset": "minecraft/sounds/liquid/heavy_splash.ogg",
-      "sha1": "937c5f93e51d6a81a14b23d4ab7ccee3389feed9",
-      "size": 83480
+      "sha1": "c8c992df46642c5c27a8c713c6078a08da1693e2",
+      "size": 32263,
+      "source": "waterSource",
+      "frames": 145280,
+      "sampleRate": 48000,
+      "channels": 1
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/enter1.ogg",
+      "event": "ambient.underwater.enter",
+      "asset": "minecraft/sounds/ambient/underwater/enter1.ogg",
+      "sha1": "7ba5854050897c8ef2efd8b1e4f878807154808a",
+      "size": 26107,
+      "source": "waterSource",
+      "durationTicks": 40,
+      "frames": 91136,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/enter2.ogg",
+      "event": "ambient.underwater.enter",
+      "asset": "minecraft/sounds/ambient/underwater/enter2.ogg",
+      "sha1": "8f501d40a4f75b8ebea3718ec6de8b9bee9bef6c",
+      "size": 24505,
+      "source": "waterSource",
+      "durationTicks": 41,
+      "frames": 91744,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/enter3.ogg",
+      "event": "ambient.underwater.enter",
+      "asset": "minecraft/sounds/ambient/underwater/enter3.ogg",
+      "sha1": "ca75ecfa65f05b616911574da104a3b58448eb2a",
+      "size": 23879,
+      "source": "waterSource",
+      "durationTicks": 38,
+      "frames": 86016,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/exit1.ogg",
+      "event": "ambient.underwater.exit",
+      "asset": "minecraft/sounds/ambient/underwater/exit1.ogg",
+      "sha1": "1811fdab411fd2501e8aa5a325de18db0282b693",
+      "size": 31375,
+      "source": "waterSource",
+      "durationTicks": 40,
+      "frames": 90880,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/exit2.ogg",
+      "event": "ambient.underwater.exit",
+      "asset": "minecraft/sounds/ambient/underwater/exit2.ogg",
+      "sha1": "125de45cae330e1e1c370482bc62c0f8c916d259",
+      "size": 25129,
+      "source": "waterSource",
+      "durationTicks": 34,
+      "frames": 75204,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/exit3.ogg",
+      "event": "ambient.underwater.exit",
+      "asset": "minecraft/sounds/ambient/underwater/exit3.ogg",
+      "sha1": "aa952fbf823bf799bbd023de31442569ea8b6688",
+      "size": 25414,
+      "source": "waterSource",
+      "durationTicks": 37,
+      "frames": 81664,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop1.ogg",
+      "event": "ambient.underwater.loop",
+      "asset": "minecraft/sounds/ambient/underwater/underwater_ambience.ogg",
+      "sha1": "2619f8780101e7ed90979adae6e88e39a0222c29",
+      "size": 355379,
+      "source": "waterSource",
+      "durationTicks": 551,
+      "frames": 1315346,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions1.ogg",
+      "event": "ambient.underwater.loop.additions",
+      "asset": "minecraft/sounds/ambient/underwater/additions/bubbles1.ogg",
+      "sha1": "42d408bcaf1eedb56d67ecb1830c1bca972945bb",
+      "size": 25651,
+      "source": "waterSource",
+      "durationTicks": 39,
+      "frames": 87587,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions2.ogg",
+      "event": "ambient.underwater.loop.additions",
+      "asset": "minecraft/sounds/ambient/underwater/additions/bubbles2.ogg",
+      "sha1": "2a7e0c71307f2f6d1b6b2e4e89dd83974cbf41d8",
+      "size": 20232,
+      "source": "waterSource",
+      "durationTicks": 29,
+      "frames": 63232,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions3.ogg",
+      "event": "ambient.underwater.loop.additions",
+      "asset": "minecraft/sounds/ambient/underwater/additions/bubbles3.ogg",
+      "sha1": "16d4ffc146ea150158b410b094c676a2b2a1b33a",
+      "size": 18029,
+      "source": "waterSource",
+      "durationTicks": 26,
+      "frames": 55808,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions4.ogg",
+      "event": "ambient.underwater.loop.additions",
+      "asset": "minecraft/sounds/ambient/underwater/additions/bubbles4.ogg",
+      "sha1": "799bc1661b7f771993906dbd61f66e331e6c7371",
+      "size": 32955,
+      "source": "waterSource",
+      "durationTicks": 50,
+      "frames": 113664,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions5.ogg",
+      "event": "ambient.underwater.loop.additions",
+      "asset": "minecraft/sounds/ambient/underwater/additions/bubbles5.ogg",
+      "sha1": "f413b910995d27726ff581e2cffea2b73b9bea9c",
+      "size": 32585,
+      "source": "waterSource",
+      "durationTicks": 50,
+      "frames": 114176,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions6.ogg",
+      "event": "ambient.underwater.loop.additions",
+      "asset": "minecraft/sounds/ambient/underwater/additions/bubbles6.ogg",
+      "sha1": "a70223a6a2369490c3f0e524794bee4e1ced6a7f",
+      "size": 39989,
+      "source": "waterSource",
+      "durationTicks": 61,
+      "frames": 141312,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions7.ogg",
+      "event": "ambient.underwater.loop.additions",
+      "asset": "minecraft/sounds/ambient/underwater/additions/water1.ogg",
+      "sha1": "bd3df414a62eeb543b2e6ff2ee3ecad44412875a",
+      "size": 62573,
+      "source": "waterSource",
+      "durationTicks": 104,
+      "frames": 243712,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions8.ogg",
+      "event": "ambient.underwater.loop.additions",
+      "asset": "minecraft/sounds/ambient/underwater/additions/water2.ogg",
+      "sha1": "e47790094f5b42482c9d6fd04f79a9b84ae9ff0d",
+      "size": 39832,
+      "source": "waterSource",
+      "durationTicks": 65,
+      "frames": 150528,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/rare1.ogg",
+      "event": "ambient.underwater.loop.additions.rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/animal1.ogg",
+      "sha1": "722f551cfab940a7cd04dc19fe7ea9faf9a7a2a5",
+      "size": 80383,
+      "source": "waterSource",
+      "durationTicks": 121,
+      "frames": 283454,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/rare2.ogg",
+      "event": "ambient.underwater.loop.additions.rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/bass_whale1.ogg",
+      "sha1": "89236079c6c9eafb1b3d5aeaefbeb08dbf6003ff",
+      "size": 51637,
+      "source": "waterSource",
+      "durationTicks": 80,
+      "frames": 186624,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/rare3.ogg",
+      "event": "ambient.underwater.loop.additions.rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/bass_whale2.ogg",
+      "sha1": "b85c213aed6546ec8686f23f6c067886c8877ef3",
+      "size": 48587,
+      "source": "waterSource",
+      "durationTicks": 83,
+      "frames": 192512,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/rare4.ogg",
+      "event": "ambient.underwater.loop.additions.rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/crackles1.ogg",
+      "sha1": "1252bc3bc70444a0719651f9c44f63d5343c7e46",
+      "size": 66973,
+      "source": "waterSource",
+      "durationTicks": 106,
+      "frames": 248832,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/rare5.ogg",
+      "event": "ambient.underwater.loop.additions.rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/crackles2.ogg",
+      "sha1": "ab38a0de64c27de16e3268d86339b100665f31ed",
+      "size": 47745,
+      "source": "waterSource",
+      "durationTicks": 73,
+      "frames": 170184,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/rare6.ogg",
+      "event": "ambient.underwater.loop.additions.rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/driplets1.ogg",
+      "sha1": "309b7d70e68e6adcce89347356f1ff369281f676",
+      "size": 24946,
+      "source": "waterSource",
+      "durationTicks": 34,
+      "frames": 75776,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/rare7.ogg",
+      "event": "ambient.underwater.loop.additions.rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/driplets2.ogg",
+      "sha1": "4a28fb5d79c2cdcdd65666d9e8c11977b76a70c7",
+      "size": 32476,
+      "source": "waterSource",
+      "durationTicks": 46,
+      "frames": 103424,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/rare8.ogg",
+      "event": "ambient.underwater.loop.additions.rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/earth_crack.ogg",
+      "sha1": "880940d69969b702dde0807f29411c4c166f7c50",
+      "size": 38904,
+      "source": "waterSource",
+      "durationTicks": 58,
+      "frames": 133120,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/ultra_rare1.ogg",
+      "event": "ambient.underwater.loop.additions.ultra_rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/animal2.ogg",
+      "sha1": "cce307819901e2b9523a3b7b4ac76b9a25a6629c",
+      "size": 35807,
+      "source": "waterSource",
+      "durationTicks": 52,
+      "frames": 117760,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/ultra_rare2.ogg",
+      "event": "ambient.underwater.loop.additions.ultra_rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/dark1.ogg",
+      "sha1": "5c2c1396d025b31899e64170c0d68b5aaa5bcf95",
+      "size": 183094,
+      "source": "waterSource",
+      "durationTicks": 345,
+      "frames": 821248,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/ultra_rare3.ogg",
+      "event": "ambient.underwater.loop.additions.ultra_rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/dark2.ogg",
+      "sha1": "d18c5588648d2ccfad21266bc3086e817715a1c9",
+      "size": 167994,
+      "source": "waterSource",
+      "durationTicks": 297,
+      "frames": 706560,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/ultra_rare4.ogg",
+      "event": "ambient.underwater.loop.additions.ultra_rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/dark3.ogg",
+      "sha1": "9870aac3e67912103715daff13532010b94f8dfb",
+      "size": 128694,
+      "source": "waterSource",
+      "durationTicks": 228,
+      "frames": 540672,
+      "sampleRate": 48000,
+      "channels": 2
+    },
+    {
+      "file": "assets/power_beta/stationapi/sounds/sound/ambient/underwater/loop/additions/ultra_rare5.ogg",
+      "event": "ambient.underwater.loop.additions.ultra_rare",
+      "asset": "minecraft/sounds/ambient/underwater/additions/dark4.ogg",
+      "sha1": "59d9086078d62a1c254f376efdc9563e99f6f9ec",
+      "size": 86659,
+      "source": "waterSource",
+      "durationTicks": 165,
+      "frames": 389120,
+      "sampleRate": 48000,
+      "channels": 2
     }
   ],
   "existingAssets": [
@@ -579,43 +1168,64 @@
       "file": "modules/controls/src/main/resources/assets/power_controls/stationapi/sounds/sound/entity/sheep/shear.ogg",
       "asset": "minecraft/sounds/mob/sheep/shear.ogg",
       "sha1": "5d9055cf25f126c47e18637aeef917fa1ef61a42",
-      "size": 6870
+      "size": 6870,
+      "frames": 16538,
+      "sampleRate": 44100,
+      "channels": 1
     },
     {
       "file": "modules/controls/src/main/resources/assets/power_controls/stationapi/sounds/sound/random/break.ogg",
       "asset": "minecraft/sounds/random/break.ogg",
       "sha1": "8bf3ecb0fe9a6a615f5995e3dd21b6c39adc21d5",
-      "size": 6551
+      "size": 6551,
+      "frames": 17120,
+      "sampleRate": 44100,
+      "channels": 1
     },
     {
       "file": "modules/controls/src/main/resources/assets/power_controls/stationapi/sounds/sound/random/chestclosed.ogg",
       "asset": "minecraft/sounds/random/chestclosed.ogg",
       "sha1": "056393a33a9633685c3dc3be2887f5cbd7dbc63f",
-      "size": 7779
+      "size": 7779,
+      "frames": 22050,
+      "sampleRate": 44100,
+      "channels": 1
     },
     {
       "file": "modules/controls/src/main/resources/assets/power_controls/stationapi/sounds/sound/random/chestopen.ogg",
       "asset": "minecraft/sounds/random/chestopen.ogg",
       "sha1": "186d5d9481d59cc99bc4be1b5fbb98d0ef877b8e",
-      "size": 8703
+      "size": 8703,
+      "frames": 22050,
+      "sampleRate": 44100,
+      "channels": 1
     },
     {
       "file": "modules/controls/src/main/resources/assets/power_controls/stationapi/sounds/sound/random/eat1.ogg",
       "asset": "minecraft/sounds/random/eat1.ogg",
       "sha1": "dfee39084c771182f6b9e7cfb8c8bc4e255747bc",
-      "size": 5678
+      "size": 5678,
+      "frames": 12261,
+      "sampleRate": 44100,
+      "channels": 1
     },
     {
       "file": "modules/controls/src/main/resources/assets/power_controls/stationapi/sounds/sound/random/eat2.ogg",
       "asset": "minecraft/sounds/random/eat2.ogg",
       "sha1": "d26bde554d88f0ca156baf471c44ce2c0e68176c",
-      "size": 5677
+      "size": 5677,
+      "frames": 12261,
+      "sampleRate": 44100,
+      "channels": 1
     },
     {
       "file": "modules/controls/src/main/resources/assets/power_controls/stationapi/sounds/sound/random/eat3.ogg",
       "asset": "minecraft/sounds/random/eat3.ogg",
       "sha1": "9f2c4bab5ed55f1714fffa223985c81babc8f6c0",
-      "size": 5813
+      "size": 5813,
+      "frames": 12261,
+      "sampleRate": 44100,
+      "channels": 1
     }
   ],
   "bucketSource": {
@@ -635,6 +1245,29 @@
       "size": 597035,
       "totalSize": 484829952,
       "url": "https://piston-meta.mojang.com/v1/packages/e787e8afd149a4cefa89d341b91f5aed8f5d93a0/34.json"
+    },
+    "sounds": {
+      "hash": "7975165ad4a3c0cb3c05078b914eac0f2c3b5f5f",
+      "size": 635867
+    }
+  },
+  "waterSource": {
+    "version": "26.3",
+    "metadata": {
+      "id": "26.3",
+      "type": "release",
+      "url": "https://piston-meta.mojang.com/v1/packages/61fff1316bd50312624a858bbb5eb18fa45208ed/26.3.json",
+      "time": "2026-10-20T06:46:34+00:00",
+      "releaseTime": "2026-09-15T11:23:02+00:00",
+      "sha1": "61fff1316bd50312624a858bbb5eb18fa45208ed",
+      "complianceLevel": 1
+    },
+    "assetIndex": {
+      "id": "34",
+      "sha1": "0c8f43b28f837869c1e54a6aeb22c396a1548946",
+      "size": 597035,
+      "totalSize": 484894038,
+      "url": "https://piston-meta.mojang.com/v1/packages/0c8f43b28f837869c1e54a6aeb22c396a1548946/34.json"
     },
     "sounds": {
       "hash": "7975165ad4a3c0cb3c05078b914eac0f2c3b5f5f",

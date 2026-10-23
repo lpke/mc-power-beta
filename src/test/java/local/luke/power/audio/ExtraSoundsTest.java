@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class ExtraSoundsTest {
   @Test void extraSoundRowsPreviewRegisteredSoundsWithoutChangingTheirEnablement() {
     assertEquals("step.stone", ExtraSounds.previewId("audio.redstonePlacementSound"));
-    for (String setting : List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds", "lavaPopSounds", "waterSplashSounds", "swimmingSounds"))
+    for (String setting : List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds", "lavaPopSounds", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds", "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions"))
       assertTrue(ExtraSounds.contains(ExtraSounds.previewId("audio." + setting)), setting);
     for (String key : List.of("eatingSounds", "shearingSounds", "toolBreakSounds", "armorBreakSounds", "moreSoundsChests"))
       assertTrue(BetaSounds.contains(ExtraSounds.previewId("power_controls:features." + key)), key);
@@ -41,7 +41,9 @@ class ExtraSoundsTest {
       var manifest = JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject();
       Set<String> expected = Set.of("item.crop.plant", "item.hoe.till", "item.bucket.fill", "item.bucket.fill_lava",
           "item.bucket.empty", "item.bucket.empty_lava", "entity.cow.milk", "item.bone_meal.use",
-          "block.lava.pop", "entity.player.swim", "entity.player.splash", "entity.player.splash.high_speed");
+          "block.lava.pop", "entity.player.swim", "entity.player.splash", "entity.player.splash.high_speed", "ambient.underwater.enter", "ambient.underwater.exit",
+          "ambient.underwater.loop", "ambient.underwater.loop.additions", "ambient.underwater.loop.additions.rare",
+          "ambient.underwater.loop.additions.ultra_rare");
       assertEquals(expected, manifest.getAsJsonObject("events").keySet());
       Map<String, Set<String>> assets = new HashMap<>();
       for (var value : manifest.getAsJsonArray("assets")) {
@@ -69,7 +71,7 @@ class ExtraSoundsTest {
         }
         assertEquals(official, assets.get(event), event);
       }
-      assertEquals(48, manifest.getAsJsonArray("assets").size());
+      assertEquals(76, manifest.getAsJsonArray("assets").size());
       assertEquals(14, manifest.getAsJsonObject("events").getAsJsonObject("entity.player.swim").getAsJsonArray("sounds").size());
     }
     assertFalse(ExtraSounds.contains("power_beta:unknown"));

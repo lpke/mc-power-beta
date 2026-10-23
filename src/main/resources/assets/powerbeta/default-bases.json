@@ -111,7 +111,13 @@
     "recipeBook.pauseMenu": true,
     "recipeBook.buttonStyle": 0,
     "debug.enabled": true,
-    "power_controls:general.autosaveInterval": 300
+    "power_controls:general.autosaveInterval": 300,
+    "audio.underwaterEnterSounds": true,
+    "audio.underwaterExitSounds": true,
+    "audio.underwaterAmbience": true,
+    "audio.underwaterAdditions": true,
+    "audio.underwaterRareAdditions": true,
+    "audio.underwaterUltraRareAdditions": true
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -343,7 +349,13 @@
     "inventoryTools.toolSwitch": false,
     "heldLight.enabled": false,
     "inventoryTools.restock": false,
-    "recipeBook.enabled": false
+    "recipeBook.enabled": false,
+    "audio.underwaterEnterSounds": false,
+    "audio.underwaterExitSounds": false,
+    "audio.underwaterAmbience": false,
+    "audio.underwaterAdditions": false,
+    "audio.underwaterRareAdditions": false,
+    "audio.underwaterUltraRareAdditions": false
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -537,6 +549,12 @@
     "heldLight.enabled": false,
     "inventoryTools.restock": false,
     "recipeBook.enabled": false,
-    "debug.enabled": true
+    "debug.enabled": true,
+    "audio.underwaterEnterSounds": false,
+    "audio.underwaterExitSounds": false,
+    "audio.underwaterAmbience": false,
+    "audio.underwaterAdditions": false,
+    "audio.underwaterRareAdditions": false,
+    "audio.underwaterUltraRareAdditions": false
   }
 }

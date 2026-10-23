@@ -335,7 +335,13 @@
       "boneMealSounds": true,
       "lavaPopSounds": true,
       "waterSplashSounds": true,
-      "swimmingSounds": true
+      "swimmingSounds": true,
+      "underwaterEnterSounds": true,
+      "underwaterExitSounds": true,
+      "underwaterAmbience": true,
+      "underwaterAdditions": true,
+      "underwaterRareAdditions": true,
+      "underwaterUltraRareAdditions": true
     },
     "visual": {
       "softRain": true,
@@ -574,7 +580,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.3.1"
+        "customVersionText": "Power Beta 4.3.2"
       },
       "panoramaConfig": {
         "enablePanorma": true,

@@ -29,6 +29,18 @@ public final class AudioBackend implements Backend {
         "Use modern splash sounds when you enter water in singleplayer. Faster entries use a heavier splash. Uses the Players sound volume.");
     extra("swimmingSounds", "Swimming sounds", s.swimmingSounds,
         "Play modern swimming sounds as you move through water in singleplayer. Uses the Players sound volume.");
+    extra("underwaterEnterSounds", "Submerging sounds", s.underwaterEnterSounds,
+        "Play the modern entry sound when your eyes enter water in singleplayer. Uses Ambient volume.");
+    extra("underwaterExitSounds", "Surfacing sounds", s.underwaterExitSounds,
+        "Play the modern exit sound when your eyes leave water in singleplayer. Uses Ambient volume.");
+    extra("underwaterAmbience", "Underwater ambience", s.underwaterAmbience,
+        "Fade modern background water ambience in and out as your eyes cross the surface. Uses Ambient volume.");
+    extra("underwaterAdditions", "Underwater bubbles and water", s.underwaterAdditions,
+        "Play occasional modern bubbles and water sounds while underwater. Uses Ambient volume.");
+    extra("underwaterRareAdditions", "Rare underwater sounds", s.underwaterRareAdditions,
+        "Play rare modern underwater animal, creaking and dripping sounds. Uses Ambient volume.");
+    extra("underwaterUltraRareAdditions", "Very rare underwater sounds", s.underwaterUltraRareAdditions,
+        "Play very rare modern deep underwater sounds. Uses Ambient volume.");
     add(
         "master",
         "Volume",
@@ -278,6 +290,12 @@ public final class AudioBackend implements Backend {
           case "lavaPopSounds" -> s.lavaPopSounds = v.getAsBoolean();
           case "waterSplashSounds" -> s.waterSplashSounds = v.getAsBoolean();
           case "swimmingSounds" -> s.swimmingSounds = v.getAsBoolean();
+          case "underwaterEnterSounds" -> s.underwaterEnterSounds = v.getAsBoolean();
+          case "underwaterExitSounds" -> s.underwaterExitSounds = v.getAsBoolean();
+          case "underwaterAmbience" -> s.underwaterAmbience = v.getAsBoolean();
+          case "underwaterAdditions" -> s.underwaterAdditions = v.getAsBoolean();
+          case "underwaterRareAdditions" -> s.underwaterRareAdditions = v.getAsBoolean();
+          case "underwaterUltraRareAdditions" -> s.underwaterUltraRareAdditions = v.getAsBoolean();
           case "exclusions" -> { }
           case "presetTrackPool" -> { }
           case "preset" -> s.preset = v.getAsString();

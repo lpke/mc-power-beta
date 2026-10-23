@@ -19,7 +19,7 @@ class DefaultBasesTest {
       settings.getAsJsonObject("gameplay").remove("modernCrawling");
       settings.getAsJsonObject("sprint").remove("sprintLadders");
       settings.getAsJsonObject("sprint").remove("stopAtWalls");
-      for (String key : List.of("lavaPopSounds", "waterSplashSounds", "swimmingSounds"))
+      for (String key : List.of("lavaPopSounds", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds", "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions"))
         settings.getAsJsonObject("audio").remove(key);
       settings.getAsJsonObject("audio").addProperty("futurePreference", "keep");
       PowerConfig.write(old);
@@ -30,7 +30,7 @@ class DefaultBasesTest {
       expected.getAsJsonObject("gameplay").addProperty("modernCrawling", modern);
       expected.getAsJsonObject("sprint").addProperty("sprintLadders", modern);
       expected.getAsJsonObject("sprint").addProperty("stopAtWalls", true);
-      for (String key : List.of("lavaPopSounds", "waterSplashSounds", "swimmingSounds"))
+      for (String key : List.of("lavaPopSounds", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds", "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions"))
         expected.getAsJsonObject("audio").addProperty(key, modern);
       assertEquals(expected, PowerConfig.document().getAsJsonObject("settings"));
       try (var files = Files.walk(game.resolve("power-beta-data/settings-backups"))) {

@@ -87,7 +87,9 @@ public final class FluidSounds420Checks {
       test("FLUID420 native water entry chooses normal/heavy splash and never repeats while wet", () -> {
         scene(mc, blocks, y, true); enable(true);
         for (double speed : new double[]{-.2, -2}) {
-          pose(mc, x, y, z); mc.player.velocityY = speed;
+          pose(mc, x, y, z);
+          field(mc.player.getClass(), "power$audioWet").setBoolean(mc.player, false);
+          field(mc.player.getClass(), "power$contactReady").setBoolean(mc.player, true); mc.player.velocityY = speed;
           field(Entity.class, "field_1612").setBoolean(mc.player, false); field(Entity.class, "field_1649").setBoolean(mc.player, false);
           SOUNDS.clear(); PARTICLES.clear(); recording = true; mc.player.baseTick();
           one(speed == -.2 ? "power_beta:entity.player.splash" : "power_beta:entity.player.splash.high_speed");
@@ -101,6 +103,7 @@ public final class FluidSounds420Checks {
       test("FLUID420 native movement follows modern swim cadence and dry/idle exclusions", () -> {
         scene(mc, blocks, y, true); enable(true); pose(mc, x, y, z);
         field(Entity.class, "field_1612").setBoolean(mc.player, true);
+        mc.player.baseTick();
         field(mc.player.getClass(), "power$soundDistance").setFloat(mc.player, 0);
         field(mc.player.getClass(), "power$nextSwimSound").setFloat(mc.player, 1);
         mc.player.velocityX = .2; SOUNDS.clear(); recording = true;
@@ -109,7 +112,8 @@ public final class FluidSounds420Checks {
         mc.player.move(.2, 0, 0); one("power_beta:entity.player.swim");
         check(Math.abs(SOUNDS.get(0).volume - FluidSoundMath.volume(.2, 0, 0, .35f)) < 1e-6, "swim gain did not use native velocity");
         SOUNDS.clear(); mc.player.move(0, .2, 0); check(SOUNDS.isEmpty(), "vertical water travel advanced the ordinary step threshold");
-        field(Entity.class, "field_1612").setBoolean(mc.player, false); SOUNDS.clear(); mc.player.move(.2, 0, 0);
+        field(Entity.class, "field_1612").setBoolean(mc.player, false);
+        field(mc.player.getClass(), "power$audioWet").setBoolean(mc.player, false); SOUNDS.clear(); mc.player.move(.2, 0, 0);
         check(SOUNDS.stream().noneMatch(sound -> sound.id.equals("power_beta:entity.player.swim")), "dry movement emitted a swim sound");
       });
       test("FLUID420 every new variant is registered and matches an independent native-codec decode through EOS", () -> {
@@ -136,6 +140,8 @@ public final class FluidSounds420Checks {
                 &&decoded.audioFormat.matches(expected.audioFormat), "registered decode differs from pinned native codec " + file);
             double seconds = decoded.audioData.length / (double)decoded.audioFormat.getFrameSize() / decoded.audioFormat.getSampleRate();
             double sourceSeconds=samples/decoded.audioFormat.getSampleRate();
+            check(decoded.audioData.length / decoded.audioFormat.getFrameSize() == samples,
+                "bundled extra sound lost samples or retained padding " + file);
             log("FLUID420 CODEC "+file+" codec="+codec.getClass().getName()+" bytesEqual=true eof=true sourceSeconds="+sourceSeconds
                 +" decodedSeconds="+seconds+" legacyDelta="+(seconds-sourceSeconds));count++;
           } finally { codec.cleanup(); reference.cleanup(); }
@@ -172,7 +178,10 @@ public final class FluidSounds420Checks {
     for (int[] block : blocks) mc.world.method_154(block[0], block[1], block[2], block[1] == floor - 1 ? 1 : water ? 9 : 0, 0);
   }
   private static void enable(boolean enabled) {
-    var settings = AudioConfig.copy(); settings.lavaPopSounds = settings.waterSplashSounds = settings.swimmingSounds = enabled; AudioConfig.preview(settings);
+    var settings = AudioConfig.copy(); settings.lavaPopSounds = settings.waterSplashSounds = settings.swimmingSounds = enabled;
+    settings.underwaterEnterSounds = settings.underwaterExitSounds = settings.underwaterAmbience = false;
+    settings.underwaterAdditions = settings.underwaterRareAdditions = settings.underwaterUltraRareAdditions = false;
+    AudioConfig.preview(settings);
   }
   private static void one(String id) {
     check(SOUNDS.size() == 1 && SOUNDS.get(0).id.equals(id), "expected one " + id + ", got " + SOUNDS);

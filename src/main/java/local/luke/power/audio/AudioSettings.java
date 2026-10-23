@@ -11,6 +11,12 @@ public final class AudioSettings {
   public boolean lavaPopSounds = false;
   public boolean waterSplashSounds = false;
   public boolean swimmingSounds = false;
+  public boolean underwaterEnterSounds = false;
+  public boolean underwaterExitSounds = false;
+  public boolean underwaterAmbience = false;
+  public boolean underwaterAdditions = false;
+  public boolean underwaterRareAdditions = false;
+  public boolean underwaterUltraRareAdditions = false;
   public enum MusicMode {
     VANILLA,
     ALPHA_BETA_SURVIVAL,

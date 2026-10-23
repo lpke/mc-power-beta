@@ -9,7 +9,9 @@ public final class ExtraSounds {
   private static final Set<String> EVENTS = Set.of("item.crop.plant", "item.hoe.till",
       "item.bucket.fill", "item.bucket.fill_lava", "item.bucket.empty", "item.bucket.empty_lava",
       "entity.cow.milk", "item.bone_meal.use", "block.lava.pop", "entity.player.swim",
-      "entity.player.splash", "entity.player.splash.high_speed");
+      "entity.player.splash", "entity.player.splash.high_speed", "ambient.underwater.enter", "ambient.underwater.exit",
+      "ambient.underwater.loop", "ambient.underwater.loop.additions", "ambient.underwater.loop.additions.rare",
+      "ambient.underwater.loop.additions.ultra_rare");
 
   private ExtraSounds() {}
 
@@ -32,6 +34,12 @@ public final class ExtraSounds {
       case "audio.lavaPopSounds" -> "power_beta:block.lava.pop";
       case "audio.waterSplashSounds" -> "power_beta:entity.player.splash";
       case "audio.swimmingSounds" -> "power_beta:entity.player.swim";
+      case "audio.underwaterEnterSounds" -> "power_beta:ambient.underwater.enter";
+      case "audio.underwaterExitSounds" -> "power_beta:ambient.underwater.exit";
+      case "audio.underwaterAmbience" -> "power_beta:ambient.underwater.loop";
+      case "audio.underwaterAdditions" -> "power_beta:ambient.underwater.loop.additions";
+      case "audio.underwaterRareAdditions" -> "power_beta:ambient.underwater.loop.additions.rare";
+      case "audio.underwaterUltraRareAdditions" -> "power_beta:ambient.underwater.loop.additions.ultra_rare";
       default -> null;
     };
   }

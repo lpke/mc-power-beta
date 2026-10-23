@@ -22,6 +22,7 @@ public abstract class PlacementSoundCaptureMixin {
     RedstoneSoundChecks.capture(x, y, z, id, volume, pitch);
     Release300ExtraSoundsChecks.capture(x, y, z, id, volume, pitch);
     FluidSounds420Checks.capture(id, volume, pitch);
+    local.luke.power.validation.WaterSounds432Checks.capture(id, volume, pitch);
   }
 
   @Inject(method = "method_191", at = @At("HEAD"))

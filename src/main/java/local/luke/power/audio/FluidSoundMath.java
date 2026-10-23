@@ -1,6 +1,6 @@
 package local.luke.power.audio;
 
-/** Java 1.21.1 local-player movement sound gain and step threshold. */
+/** Java 26.3 local-player movement sound gain and step threshold. */
 public final class FluidSoundMath {
   private FluidSoundMath() {}
   public static float volume(double vx, double vy, double vz, float multiplier) {
@@ -11,7 +11,7 @@ public final class FluidSoundMath {
     return distance(dx, 0, dz);
   }
   public static double distance(double dx, double dy, double dz) {
-    double amount = (float)Math.sqrt(dx * dx + dy * dy + dz * dz) * .6f;
+    double amount = (float)(Math.sqrt(dx * dx + dy * dy + dz * dz) * (double).6f);
     return Double.isFinite(amount) ? amount : 0;
   }
   public static double nextStep(double distance) { return Math.floor(distance) + 1; }

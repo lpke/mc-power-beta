@@ -1,5 +1,14 @@
 # Runtime checks
 
+- `water-sounds-432` requires a muted disposable world routed to the verified silent
+  Pulse sink. It checks native head crossings at source/flowing surfaces in both
+  perspectives, 40-tick fade-in and 20-tick fade-out, actual streaming playback and
+  gain, exclusive random bands, immediate toggle cleanup, pause/world/mode boundaries,
+  settings preview/Cancel and all 45 modern water decodes through EOS.
+- `extra-sound-decoders-432` compares all 83 bundled extra-effect variants against
+  the unchanged decoder on the same bytes, verifies exact source frame counts and
+  writes disposable PCM evidence for comparison with FFmpeg.
+
 - `menu-423 check` checks the actual inventory and pause menu at all four minimap
   corners, modal ownership, immediate cave cancellation, selected cave-mode restoration
   and exclusion of unrelated screens. It captures every corner and restores preferences.

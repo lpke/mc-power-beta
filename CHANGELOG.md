@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [4.3.2] - 2026-10-23
+
+- Add independently toggleable submerging, surfacing, underwater ambience, bubbles and water, rare underwater sounds and very rare underwater sounds under Audio > Extra sounds. Match modern head crossings, variant volume, random chances, pause handling and ambience fades.
+- Update modern swimming and splash audio to the verified Java 26.3 assets. Match modern body-contact depth, movement cadence, quiet movement exclusions, volume and pitch without changing water physics or native particles.
+- Fix bundled extra sounds ending early or retaining padding, including swimming, splashes, planting, milking, bone meal and chests. Keep personal music and other sound resources on their existing decoder path.
+
 ## [4.3.1] - 2026-10-23
 
 - Restore Beta's normal crouch camera movement when Lower camera when crouching is off. Enable it for the deeper Modern crawling camera drop in both first and third person; keep low ceilings and crawling collision-safe.

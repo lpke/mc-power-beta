@@ -112,6 +112,8 @@ public final class Validation {
       else if (command.equals("sorting-layer-402")) SortingLayer402Checks.run(mc);
       else if (command.equals("container-offhand-402")) ContainerOffhand402Checks.run(mc);
       else if (command.equals("fluid-sounds-420")) FluidSounds420Checks.run(mc);
+      else if (command.equals("water-sounds-432")) WaterSounds432Checks.run(mc);
+      else if (command.equals("extra-sound-decoders-432")) ExtraSoundDecoder432Checks.run(mc);
       else if (command.equals("command-names-402")) CommandNames402Checks.run(mc);
       else if (command.startsWith("recipe-400 ")) Recipe400Checks.run(mc,command.substring(11));
       else if (command.startsWith("release-330 ")) Release330Checks.run(mc,command.substring(12));
