@@ -54,6 +54,9 @@ def website_feed(repository, version, commit, download, releases, public=True):
                  'sha256': asset['digest'].removeprefix('sha256:'),
                  'download': download if v == version else asset['browser_download_url'] if public else None,
                  'checksum': '/download.sha256' if v == version else asset['browser_download_url'] + '.sha256' if public else None}
+        title = re.fullmatch(r'Power Beta ((0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*))', release.get('name', ''))
+        if title and title[1] != v:
+            entry['displayVersion'] = title[1]
         history.append(entry)
     history.sort(key=lambda r: tuple(map(int, r['version'].split('.'))), reverse=True)
     if not history or history[0]['version'] != version:

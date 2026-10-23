@@ -26,10 +26,16 @@ final class WaterColumnCache {
   byte[] prepare(long key) {
     int slot = slot(key);
     if (stamps[slot] == stamp) return values[slot];
-    if (size == LIMIT) return new byte[128];
-    if (values[slot] == null) values[slot] = new byte[128];
+    if (size == LIMIT) return scratch();
+    if (values[slot] == null) values[slot] = scratch();
+    reset(values[slot]);
     return values[slot];
   }
+
+  // The suffix retains the downward scan cursor, light and water state. Rows below
+  // the cursor are never read until a later query extends this same column.
+  static byte[] scratch() { byte[] result = new byte[131]; reset(result); return result; }
+  private static void reset(byte[] column) { column[128] = (byte)128; column[129] = 15; column[130] = 0; }
 
   void publish(long key, byte[] column, int generation) {
     if (stamp != generation || size == LIMIT) return;

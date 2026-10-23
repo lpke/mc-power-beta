@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [4.3.0] - 2026-10-23
+
+- Remove per-sample callback allocation from leaf lighting while retaining the same brightness and native light reads.
+- Reduce water-lighting work during terrain rebuilds by scanning only to the requested height, reusing known block IDs and loaded section data, and skipping samples already at maximum brightness. Preserve native shading, geometry, roofs, daylight changes and held-item lighting.
+- Reuse minimap and world-map clipping storage instead of allocating temporary points and lists each frame, preserving exact map positions and texture coordinates.
+- Avoid repeated full-tile copies when preparing zoomed-out map images. Keep terrain updates on the game thread and retain immutable snapshots for durable worker saves.
+
 ## [4.2.3] - 2026-10-23
 
 - Show the minimap and its quick settings in Pause as well as inventories, with mouse-wheel zoom and right-click reset. Keep the button visible after focus loss, use a native compact button and place its dropdown away from the map according to the selected corner.

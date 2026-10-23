@@ -346,6 +346,9 @@
   into the next version when preparing a release. Never invent past release versions.
 - Follow `docs/releases.md`. Publishing requires explicit user permission in the
   current task. A code push alone does not authorize publishing a release.
+- Owner-requested display renumbering uses the GitHub release title. Retain the
+  immutable build version, tag, assets and checksums, and show the original number
+  beside a different display version. Both numbers may resolve to the same download.
 - `python3 tools/release.py --check` validates release notes and versioning.
   The publish command builds and tests sequentially, verifies the export, publishes
   GitHub release assets and notes, and updates/deploys the website from the same data.
@@ -712,8 +715,18 @@
   Keep player splashes/swimming local and singleplayer; lava pops use exposed-surface
   display events. Preserve particles, disabled behavior, category gain and subtitle admission.
 
-- Water-lighting columns use bounded reusable storage and mixed coordinate hashes. Publish columns
-  only after filling them; nested reads and live invalidation must never expose partial or stale data.
+- Leaf brightness hooks retain StationAPI state emission for ordinary samples and
+  fixed block emission for the enabled leaf override. Read native brightness once
+  and avoid per-sample cancellable callback allocation.
+- Water-light columns remain frame-local and resume scans only to requested heights.
+  Maximum-brightness shortcuts must check the complete current brightness table.
+  Direct section reads admit only known native implementations; custom chunks and
+  sections retain native reads. Map clipping scratch retains exact coordinates and
+  texture interpolation. Map parent reduction may share game-thread-owned tiles;
+  durable worker writes must still receive immutable snapshots.
+
+- Water-lighting columns use bounded reusable storage and mixed coordinate hashes. Publish only
+  completed requested rows; nested reads and live invalidation must never expose unfinished or stale data.
   Culling workers read published renderer capabilities, never the native renderer resolver, which
   mutates its registry even for missing renderers. Native world setup and renderer discovery own
   snapshot publication. Map clipping retains exact native coordinates and texture interpolation.

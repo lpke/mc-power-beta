@@ -23,6 +23,40 @@ class MapStorageTest {
   }
   @TempDir Path root;
 
+  @Test void parentCoalescingKeepsLatestPixelsWhileWorkerSavesRetainTheirSnapshot() throws Exception {
+    var cache = new MapCache(root, 8, message -> fail(message));
+    var key = new MapMath.Key(0, -1, 0, -2, 3);
+    cache.get(key); MapIO.awaitQueued(); cache.tick();
+    var child = cache.get(key);
+    child.put(0, 0x102030, 0x304050, 64, 7, 1, 2); cache.changed(child);
+    var gate = new java.util.concurrent.CountDownLatch(1);
+    var entered = new java.util.concurrent.CountDownLatch(1);
+    var blocker = MapIO.submit(() -> { entered.countDown(); gate.await(); return null; });
+    assertNotNull(blocker);
+    assertTrue(entered.await(5, java.util.concurrent.TimeUnit.SECONDS));
+    try {
+      cache.tick(); // Queues the first durable snapshot behind the blocked worker.
+      for (int i = 0; i < 40; i++) {
+        child.put(0, 0x506070 + i, 0x708090 + i, 80, 13, 4, 6);
+        cache.changed(child);
+      }
+    } finally { gate.countDown(); }
+    MapIO.awaitQueued();
+    assertEquals(0x102030, MapCodec.read(root.resolve(key.file()), key).accurate[0]);
+    cache.retire();
+    for (int tick = 0; tick < 512 && !cache.idle(); tick++) { cache.tick(); MapIO.awaitQueued(); }
+    assertTrue(cache.idle());
+    assertTrue(cache.releaseIfIdle());
+    var saved = MapCodec.read(root.resolve(key.file()), key);
+    assertEquals(0x506070 + 39, saved.accurate[0]);
+    var expected = new MapTile(key.parent()); expected.merge(saved);
+    var parent = MapCodec.read(root.resolve(key.parent().file()), key.parent());
+    assertArrayEquals(expected.accurate, parent.accurate);
+    assertArrayEquals(expected.reliefAccurate, parent.reliefAccurate);
+    assertArrayEquals(expected.heights, parent.heights);
+    assertArrayEquals(expected.lights, parent.lights);
+  }
+
   private MapTile tile(int x, int z) {
     var tile = new MapTile(new MapMath.Key(0, -1, 0, x, z));
     for (int i = 0; i < 4096; i++)

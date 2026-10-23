@@ -40,4 +40,21 @@ class WaterColumnCacheTest {
     assertSame(first, cache.prepare(Long.MIN_VALUE));
     assertNotSame(first, cache.prepare(Long.MAX_VALUE));
   }
+
+  @Test void reusedColumnsRestartTheirPartialScanAndPublishedColumnsRetainIt() {
+    var cache = new WaterColumnCache();
+    byte[] column = cache.prepare(12);
+    assertEquals(128, column[128] & 255);
+    assertEquals(15, column[129]);
+    assertEquals(0, column[130]);
+    column[128] = 64; column[129] = 7; column[130] = 3;
+    cache.publish(12, column, cache.generation());
+    assertSame(column, cache.prepare(12));
+    assertEquals(64, column[128]);
+    cache.clear();
+    assertSame(column, cache.prepare(12));
+    assertEquals(128, column[128] & 255);
+    assertEquals(15, column[129]);
+    assertEquals(0, column[130]);
+  }
 }

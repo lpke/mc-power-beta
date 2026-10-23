@@ -54,6 +54,11 @@ public final class WaterTerrain {
   }
   public static boolean meshing() { return meshDepth > 0 && meshThread == Thread.currentThread(); }
 
+  /** Only IDs already admitted by the native-chunk mesh cache can bypass another lookup. */
+  public static int cachedBlock(World world, int x, int y, int z) {
+    return mutating() ? -1 : blockIds.get(world, x, y, z);
+  }
+
   public static int block(World world, class_43 chunk, int x, int y, int z) {
     // Unknown chunk subclasses may supply dynamic IDs. Preserve their reads.
     boolean cache = meshing() && cacheable(chunk);

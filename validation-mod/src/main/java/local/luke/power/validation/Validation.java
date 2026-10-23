@@ -97,6 +97,9 @@ public final class Validation {
       else if (command.equals("culling-421")) Culling421Checks.run(mc);
       else if (command.startsWith("performance-421 ")) Performance421Controls.run(mc, command.substring(16));
       else if (command.equals("terrain-cache-420")) TerrainCache420Checks.run(mc);
+      else if (command.startsWith("mesh-water-430 ")) MeshWater430Checks.run(mc, command.substring(15).trim());
+      else if (command.equals("water-columns-430")) WaterColumns430Checks.run(mc);
+      else if (command.equals("leaf-lighting-430")) LeafLighting430Checks.run();
       else if (command.startsWith("mesh-water-421 ")) MeshWater421Checks.run(mc, command.substring(15).trim());
       else if (command.startsWith("mesh-cache-420 ")) MeshCache420Checks.run(mc, command.substring(15).trim());
       else if (command.equals("spectator-containers-404")) SpectatorContainer404Checks.run(mc);

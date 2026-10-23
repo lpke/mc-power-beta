@@ -156,6 +156,23 @@ class ArchiveTest(unittest.TestCase):
 
 
 class GitHubFeedTest(unittest.TestCase):
+    def test_corrected_display_version_retains_original_artifact_identity(self):
+        from release import website_feed
+        rows = []
+        for version, name in [('4.2.3', 'Power Beta 4.2.2'), ('4.3.0', 'Power Beta 4.3.0')]:
+            url = 'https://github.com/lpke/mc-power-beta/releases/download/v' + version + '/Power-Beta-' + version + '-Prism.zip'
+            rows.append({'tag_name': 'v' + version, 'name': name, 'draft': False, 'prerelease': False,
+                'published_at': '2026-10-23T12:00:00Z', 'body': '- Original changes',
+                'html_url': 'https://github.com/lpke/mc-power-beta/releases/tag/v' + version,
+                'assets': [{'name': 'Power-Beta-' + version + '-Prism.zip', 'state': 'uploaded',
+                    'size': 123, 'digest': 'sha256:' + 'a' * 64, 'browser_download_url': url}]})
+        feed = website_feed('lpke/mc-power-beta', '4.3.0', 'b' * 40, 'https://example.invalid/new.zip', rows)
+        old = feed['releases'][1]
+        self.assertEqual('4.2.2', old['displayVersion'])
+        self.assertEqual('4.2.3', old['version'])
+        self.assertIn('/v4.2.3/Power-Beta-4.2.3-Prism.zip', old['download'])
+        self.assertNotIn('displayVersion', feed['releases'][0])
+
     def test_public_releases_use_verified_github_assets_without_blob(self):
         import release
         events = []

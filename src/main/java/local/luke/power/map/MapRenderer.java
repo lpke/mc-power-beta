@@ -15,6 +15,7 @@ public final class MapRenderer {
 
   private static final LinkedHashMap<Key, Texture> TEXTURES = new LinkedHashMap<>(64, .75f, true);
   private static final ByteBuffer BUFFER = BufferUtils.createByteBuffer(PIXELS * 4);
+  private static final MapPolygon POLYGON = new MapPolygon();
   private static MapCache cache;
   private static int remaining;
   private static float delta = 1;
@@ -136,14 +137,8 @@ public final class MapRenderer {
       GL11.glAlphaFunc(GL11.GL_GREATER, 0);
       GL11.glDisable(GL11.GL_TEXTURE_2D);
       GL11.glColor4d(0, 0, 0, settings.opacity);
-      polygon(
-          view.clip(
-              List.of(
-                  new MapProjection.Point(view.left, view.top, 0, 0),
-                  new MapProjection.Point(view.left + view.width, view.top, 0, 0),
-                  new MapProjection.Point(view.left + view.width, view.top + view.height, 0, 0),
-                  new MapProjection.Point(view.left, view.top + view.height, 0, 0)),
-              circle));
+      polygon(POLYGON.rectangle(view.left, view.top, view.left + view.width, view.top + view.height)
+          .clip(view, circle));
       GL11.glEnable(GL11.GL_TEXTURE_2D);
       GL11.glColor4d(1, 1, 1, settings.opacity);
       int style =
@@ -159,19 +154,8 @@ public final class MapRenderer {
           int x = cell.x(), z = cell.z();
           Key key = source.viewKey(new Key(dimension, layer, level, x, z));
           double wx = key.minX(), wz = key.minZ();
-          var a = view.screen(wx, wz);
-          var b = view.screen(wx + span, wz);
-          var c = view.screen(wx + span, wz + span);
-          var d = view.screen(wx, wz + span);
-          var polygon =
-              view.clip(
-                  List.of(
-                      new MapProjection.Point(a.x(), a.y(), 0, 0),
-                      new MapProjection.Point(b.x(), b.y(), 1, 0),
-                      new MapProjection.Point(c.x(), c.y(), 1, 1),
-                      new MapProjection.Point(d.x(), d.y(), 0, 1)),
-                  circle);
-          if (polygon.isEmpty()) continue;
+          var polygon = POLYGON.project(view, wx, wz, wx + span, wz + span, 0, 0, 1, 1).clip(view, circle);
+          if (polygon.size() == 0) continue;
           MapTile tile = ownsInterest ? source.visible(key) : source.secondary(key);
           if (tile == null) {
             pending = true;
@@ -256,6 +240,16 @@ public final class MapRenderer {
       GL11.glPopClientAttrib();
     }
     return new Texture(id, tile, tile.revision, style);
+  }
+
+  static void polygon(MapPolygon points) {
+    if (points.size() < 3) return;
+    GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+    for (int i = 0; i < points.size(); i++) {
+      GL11.glTexCoord2d(points.value(i, 2), points.value(i, 3));
+      GL11.glVertex2d(points.value(i, 0), points.value(i, 1));
+    }
+    GL11.glEnd();
   }
 
   static void polygon(List<MapProjection.Point> points) {

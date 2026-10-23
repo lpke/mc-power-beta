@@ -49,6 +49,15 @@ public final class MapProjection {
         left + width / 2 + dx * cos - dz * sin, top + height / 2 + dx * sin + dz * cos, 0, 0);
   }
 
+  void screen(double wx, double wz, double[] target, int offset) {
+    double dx = (wx - x) * scale, dz = (wz - z) * scale;
+    target[offset] = left + width / 2 + dx * cos - dz * sin;
+    target[offset + 1] = top + height / 2 + dx * sin + dz * cos;
+  }
+
+  static double normalX(boolean circle, int side) { return circle ? CIRCLE_X[side] : SQUARE_X[side]; }
+  static double normalY(boolean circle, int side) { return circle ? CIRCLE_Y[side] : SQUARE_Y[side]; }
+
   public Point world(double sx, double sy) {
     double dx = (sx - left - width / 2) / scale, dz = (sy - top - height / 2) / scale;
     return new Point(x + dx * cos + dz * sin, z - dx * sin + dz * cos, 0, 0);

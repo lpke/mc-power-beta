@@ -64,6 +64,14 @@
   sections and fixed simulation. Scratch meshes and byte readbacks use a private GPU pool so
   driver allocation/readback state cannot contaminate later live-world travel samples.
   The reference exists only inside this validation mod.
+- `mesh-water-430 LABEL` uses the same paired native/GPU-byte comparison against
+  frozen 4.2.3 water lighting. `water-columns-430` compares exact shade bits across
+  ascending, descending and shuffled height queries at three daylight levels.
+  `leaf-lighting-430` checks the transformed native brightness method with the leaf
+  option on/off, different sampled materials and emissions, and exact shade bits.
+  Repeat in cloned Bliss and the water/roof fixture scene. For timed VirtualGL
+  runs, use `VGL_READBACK=none` to exclude test-display pixel copies; retain normal
+  readback for visual inspection. Do not compare timings from different display modes.
 - `map-hot-421` checks exact coordinate and UV bits against 4.2.0 for 2,000 clipped polygons.
   `culling-421` races native world setup against immutable renderer-capability reads, checks inherited
   and missing renderers and rejects any observed culling-worker access to mutable native resolution

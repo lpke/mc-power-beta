@@ -61,6 +61,7 @@
     "Player330RenderMixin",
     "Inventory403RenderCapture",
     "MeshWater421Reference",
+    "MeshWater430Reference",
     "CullingRenderer421Capture",
     "Performance421VboCapture",
     "Performance421PresentCapture"

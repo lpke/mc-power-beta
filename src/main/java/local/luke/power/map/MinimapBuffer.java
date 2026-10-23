@@ -1,6 +1,5 @@
 package local.luke.power.map;
 
-import java.util.List;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.*;
 
@@ -74,6 +73,7 @@ public final class MinimapBuffer {
     return sameContext ? rendered > 0 && retainedMissing == 0 : replacementKnown(false, sameZoom, previous, rendered);
   }
   private static final class Surface {
+    private final MapPolygon polygon = new MapPolygon();
     private int knownSamples, renderedSamples, retainedMissing;
     private final boolean[] rendered = new boolean[81], retainedCells = new boolean[81];
     private double sampleSpan;
@@ -164,18 +164,8 @@ public final class MinimapBuffer {
       GL11.glColor4d(1, 1, 1, settings.opacity);
       double u0 = (x0 - centerX + half) / (2 * half), u1 = (x1 - centerX + half) / (2 * half);
       double v0 = 1 - (z0 - centerZ + half) / (2 * half), v1 = 1 - (z1 - centerZ + half) / (2 * half);
-      var a = view.screen(x0, z0);
-      var b = view.screen(x1, z0);
-      var c = view.screen(x1, z1);
-      var d = view.screen(x0, z1);
-      MapRenderer.polygon(
-          view.clip(
-              List.of(
-                  new MapProjection.Point(a.x(), a.y(), u0, v0),
-                  new MapProjection.Point(b.x(), b.y(), u1, v0),
-                  new MapProjection.Point(c.x(), c.y(), u1, v1),
-                  new MapProjection.Point(d.x(), d.y(), u0, v1)),
-              settings.circular));
+      MapRenderer.polygon(polygon.project(view, x0, z0, x1, z1, u0, v0, u1, v1)
+          .clip(view, settings.circular));
 
     }
 

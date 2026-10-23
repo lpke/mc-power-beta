@@ -184,7 +184,10 @@ public final class MapCache {
   private void queueParent(MapTile tile) {
     generation++;
     for (var listener : listeners) listener.accept(tile.key);
-    if (tile.key.level() < MAX_LEVEL) parents.put(tile.key, tile.copy());
+    // Parent reduction runs on this same game thread. Keep the latest owned tile
+    // instead of copying all its pixels on every sampling batch. Worker saves
+    // still receive an immutable copy, independently of this maintenance queue.
+    if (tile.key.level() < MAX_LEVEL) parents.put(tile.key, tile);
   }
 
   private boolean refresh(MapTile tile) {
