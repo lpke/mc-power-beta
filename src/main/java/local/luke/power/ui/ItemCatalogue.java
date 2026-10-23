@@ -35,13 +35,18 @@ public final class ItemCatalogue {
       // The creative catalog already owns supported metadata variants, including modded items.
       try {
         Class<?> tabs=Class.forName("local.luke.power.creative.inventory.registry.TabRegistry");
-        int count=(int)tabs.getMethod("getTabsCount").invoke(null);
+        var catalogues=new ArrayList<Object>();
+        try {catalogues.add(tabs.getMethod("search").invoke(null));}
+        catch(NoSuchMethodException previousVersion) {
+          int count=(int)tabs.getMethod("getTabsCount").invoke(null);
+          for(int tab=0;tab<count;tab++)catalogues.add(tabs.getMethod("getTabByIndex",int.class).invoke(null,tab));
+        }
         Map<Integer,Set<Integer>> variants=new TreeMap<>();
-        for(int tab=0;tab<count;tab++) {
-          Object value=tabs.getMethod("getTabByIndex",int.class).invoke(null,tab);
+        for(Object value:catalogues) {
+          if(value==null)continue;
           for(Object stack:(List<?>)value.getClass().getMethod("getItems").invoke(value)) {
             ItemStack s=(ItemStack)stack;
-            if(item(s.itemId)) variants.computeIfAbsent(s.itemId,k->new TreeSet<>()).add(s.getDamage());
+            if(s!=null&&item(s.itemId)) variants.computeIfAbsent(s.itemId,k->new TreeSet<>()).add(s.getDamage());
           }
         }
         for(var variant:variants.entrySet()) if(variant.getValue().size()>1) {

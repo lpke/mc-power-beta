@@ -36,7 +36,7 @@
     "visual.softSnow": true,
     "visual.underwaterDarkness": 75,
     "visual.underwaterDarknessOutside": 95,
-    "visual.underwaterFogDensity": 30,
+    "visual.underwaterFogDensity": 40,
     "power_camera:config.sprintToggle": true,
     "power_camera:config.speed": 11.977777777777783,
     "gameplay.boatPlacementFacing": true,
@@ -44,7 +44,9 @@
     "gameplay.modernCrawling": true,
     "sprint.sprintLadders": true,
     "sprint.stopAtWalls": true,
-    "inventoryTools.toolWhitelist": ["*"],
+    "inventoryTools.toolWhitelist": [
+      "*"
+    ],
     "maps.radarHeight": 16,
     "maps.minimap": true,
     "sprint.dynamicFov": false,
@@ -114,10 +116,13 @@
     "power_controls:general.autosaveInterval": 300,
     "audio.underwaterEnterSounds": true,
     "audio.underwaterExitSounds": true,
-    "audio.underwaterAmbience": true,
+    "audio.underwaterAmbience": false,
     "audio.underwaterAdditions": true,
-    "audio.underwaterRareAdditions": true,
-    "audio.underwaterUltraRareAdditions": true
+    "audio.underwaterRareAdditions": false,
+    "audio.underwaterUltraRareAdditions": false,
+    "audio.lavaBucketSounds": true,
+    "audio.lavaAmbientSounds": true,
+    "audio.lavaBurnSounds": true
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -304,7 +309,9 @@
     "gameplay.modernCrawling": false,
     "sprint.sprintLadders": false,
     "sprint.stopAtWalls": true,
-    "inventoryTools.toolWhitelist": ["*"],
+    "inventoryTools.toolWhitelist": [
+      "*"
+    ],
     "maps.radarHeight": 16,
     "maps.minimap": false,
     "sprint.dynamicFov": false,
@@ -355,7 +362,10 @@
     "audio.underwaterAmbience": false,
     "audio.underwaterAdditions": false,
     "audio.underwaterRareAdditions": false,
-    "audio.underwaterUltraRareAdditions": false
+    "audio.underwaterUltraRareAdditions": false,
+    "audio.lavaBucketSounds": false,
+    "audio.lavaAmbientSounds": false,
+    "audio.lavaBurnSounds": false
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -503,7 +513,9 @@
     "gameplay.modernCrawling": false,
     "sprint.sprintLadders": false,
     "sprint.stopAtWalls": true,
-    "inventoryTools.toolWhitelist": ["*"],
+    "inventoryTools.toolWhitelist": [
+      "*"
+    ],
     "maps.radarHeight": 16,
     "maps.minimap": false,
     "sprint.dynamicFov": false,
@@ -555,6 +567,9 @@
     "audio.underwaterAmbience": false,
     "audio.underwaterAdditions": false,
     "audio.underwaterRareAdditions": false,
-    "audio.underwaterUltraRareAdditions": false
+    "audio.underwaterUltraRareAdditions": false,
+    "audio.lavaBucketSounds": false,
+    "audio.lavaAmbientSounds": false,
+    "audio.lavaBurnSounds": false
   }
 }

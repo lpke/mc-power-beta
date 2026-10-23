@@ -19,14 +19,20 @@ public final class AudioBackend implements Backend {
         "Play crop planting sounds after planting seeds in singleplayer. Uses the Blocks sound volume.");
     extra("hoeTillingSounds", "Hoe tilling sounds", s.hoeTillingSounds,
         "Use modern hoe sounds after tilling soil in singleplayer. Uses the Blocks sound volume.");
-    extra("bucketSounds", "Bucket sounds", s.bucketSounds,
-        "Play water and lava bucket sounds and cow milking sounds in singleplayer. Uses Blocks or Passive creatures volume.");
+    extra("bucketSounds", "Water bucket sounds", s.bucketSounds,
+        "Play water bucket and cow milking sounds in singleplayer. Uses Players, Blocks or Passive creatures volume.");
+    extra("lavaBucketSounds", "Lava bucket sounds", s.lavaBucketSounds,
+        "Play lava bucket filling and emptying sounds in singleplayer. Uses Players or Blocks volume.");
     extra("boneMealSounds", "Bone meal sounds", s.boneMealSounds,
         "Play bone meal sounds after fertilizing plants in singleplayer. Uses the Blocks sound volume.");
     extra("lavaPopSounds", "Lava pop sounds", s.lavaPopSounds,
-        "Play modern lava pops when an exposed lava surface emits a particle in singleplayer. Uses the Blocks sound volume.");
+        "Play modern lava pops when an exposed lava surface emits a particle in singleplayer. Uses Ambient volume.");
+    extra("lavaAmbientSounds", "Lava ambience", s.lavaAmbientSounds,
+        "Play modern bubbling at exposed lava surfaces in singleplayer. Uses Ambient volume.");
+    extra("lavaBurnSounds", "Lava burning sounds", s.lavaBurnSounds,
+        "Play modern sizzling after lava damages an entity in singleplayer. Uses the entity sound category.");
     extra("waterSplashSounds", "Water splash sounds", s.waterSplashSounds,
-        "Use modern splash sounds when you enter water in singleplayer. Faster entries use a heavier splash. Uses the Players sound volume.");
+        "Use modern water entry sounds for players, creatures, items and vehicles in singleplayer. Uses each entity sound category.");
     extra("swimmingSounds", "Swimming sounds", s.swimmingSounds,
         "Play modern swimming sounds as you move through water in singleplayer. Uses the Players sound volume.");
     extra("underwaterEnterSounds", "Submerging sounds", s.underwaterEnterSounds,
@@ -286,8 +292,11 @@ public final class AudioBackend implements Backend {
           case "seedPlantingSounds" -> s.seedPlantingSounds = v.getAsBoolean();
           case "hoeTillingSounds" -> s.hoeTillingSounds = v.getAsBoolean();
           case "bucketSounds" -> s.bucketSounds = v.getAsBoolean();
+          case "lavaBucketSounds" -> s.lavaBucketSounds = v.getAsBoolean();
           case "boneMealSounds" -> s.boneMealSounds = v.getAsBoolean();
           case "lavaPopSounds" -> s.lavaPopSounds = v.getAsBoolean();
+          case "lavaAmbientSounds" -> s.lavaAmbientSounds = v.getAsBoolean();
+          case "lavaBurnSounds" -> s.lavaBurnSounds = v.getAsBoolean();
           case "waterSplashSounds" -> s.waterSplashSounds = v.getAsBoolean();
           case "swimmingSounds" -> s.swimmingSounds = v.getAsBoolean();
           case "underwaterEnterSounds" -> s.underwaterEnterSounds = v.getAsBoolean();

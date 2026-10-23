@@ -11,7 +11,7 @@ class SettingScopeTest {
         new JsonPrimitive(1), new JsonPrimitive(1), 0, 4, 1, List.of(), true);
   }
   @Test void scopeFollowsExplicitRulesAndGlobalPreferences() {
-    for (String id : List.of("world.difficulty", "rules.world.advance_time", "rules.world.keep_inventory"))
+    for (String id : List.of("world.difficulty", "rules.world.advance_time", "rules.world.keep_inventory", "inventoryTools.protectedSlots", "inventoryTools.preferredItems"))
       assertTrue(SettingScope.perWorld(setting(id, "world")), id);
     for (String id : List.of("rules.survival.fire_spread", "rules.cheats.fire_spread", "audio.preset", "worldedit.maxBlocks", "tweaks.autoWalkCancelOnLostFocus"))
       assertFalse(SettingScope.perWorld(setting(id, "test")), id);

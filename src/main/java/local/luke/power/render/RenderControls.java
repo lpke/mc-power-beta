@@ -42,7 +42,7 @@ public final class RenderControls {
         || mc.player.dead || mc.player.health <= 0 || !Display.isActive()) return;
     if (Bindings.matches(ENTITIES, key)) {
       VisualSettings settings = VisualConfig.copy(); settings.hideEntities = !settings.hideEntities;
-      VisualConfig.queue(settings);
+      VisualConfig.preview(settings);
     }
     if (Bindings.matches(FULL_BRIGHT, key)) {
       tick(mc); brightness.toggle(); refresh(mc);
@@ -65,7 +65,7 @@ public final class RenderControls {
     brightness.update(null, false, false, false);
     refresh(mc);
     if (VisualConfig.current().hideEntities) {
-      var settings = VisualConfig.copy(); settings.hideEntities = false; VisualConfig.queue(settings);
+      var settings = VisualConfig.copy(); settings.hideEntities = false; VisualConfig.preview(settings);
     }
   }
   public static boolean rendering() { return renderDepth > 0 && Thread.currentThread() == renderThread; }

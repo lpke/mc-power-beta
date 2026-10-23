@@ -102,7 +102,7 @@ public final class NativeInventoryPlan {
       InventoryActions.cancel(); pending.cancelled = true;
       retired.add(pending); pending = null;
     }
-    if (mc.currentScreen instanceof InventoryDrag drag) drag.power$cancelItemDrag();
+    if (!action.equals("crafting_grid_transfer") && mc.currentScreen instanceof InventoryDrag drag) drag.power$cancelItemDrag();
     if (mc.currentScreen instanceof CreativePaint paint) paint.power$cancelCreativePaint();
     var lease = InventoryActions.begin(mc.world, mc.player, mc.player.container, mc.player.inventory, action, manual);
     if (lease == null) return false;

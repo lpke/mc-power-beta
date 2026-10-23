@@ -20,8 +20,12 @@ public final class VisualConfig {
     } catch (Exception e) { PowerBeta.LOG.error("Could not load visual settings", e); return new VisualSettings(); }
   }
   public static VisualSettings current() { return current; }
-  public static VisualSettings copy() { return Catalog.JSON.fromJson(Catalog.JSON.toJson(current), VisualSettings.class); }
-  public static void preview(VisualSettings s) { s.validate(); current = Catalog.JSON.fromJson(Catalog.JSON.toJson(s), VisualSettings.class); local.luke.power.input.InteractionState.containerCarryEnabled=current.containerCarry; }
+  public static VisualSettings copy() { return copy(current); }
+  private static VisualSettings copy(VisualSettings s) {
+    VisualSettings copy=Catalog.JSON.fromJson(Catalog.JSON.toJson(s),VisualSettings.class);
+    copy.hideEntities=s.hideEntities;return copy;
+  }
+  public static void preview(VisualSettings s) { s.validate(); current = copy(s); local.luke.power.input.InteractionState.containerCarryEnabled=current.containerCarry; }
   public static void queue(VisualSettings s) {
     preview(s);
     PowerConfig.saveDeferred("visual", s);

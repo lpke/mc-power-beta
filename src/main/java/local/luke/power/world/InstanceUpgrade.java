@@ -13,10 +13,11 @@ import net.minecraft.nbt.*;
 public final class InstanceUpgrade {
   private InstanceUpgrade() {}
   public static void main(String[] args) throws Exception {
-    if (args.length < 1 || args.length > 2) throw new IllegalArgumentException("Usage: GAME_DIRECTORY [--defaults|--rule-defaults]");
+    if (args.length < 1 || args.length > 2) throw new IllegalArgumentException("Usage: GAME_DIRECTORY [--defaults|--rule-defaults|--sorting-layouts]");
     boolean templates = args.length == 2 && args[1].equals("--rule-defaults");
     boolean defaults = args.length == 2 && args[1].equals("--defaults");
-    if (args.length == 2 && !defaults && !templates) throw new IllegalArgumentException("Unknown option");
+    boolean sorting = args.length == 2 && args[1].equals("--sorting-layouts");
+    if (args.length == 2 && !defaults && !templates && !sorting) throw new IllegalArgumentException("Unknown option");
     Path game = Path.of(args[0]).toRealPath();
     assertIdle(game);
     PowerConfig.configure(game.resolve("config/power-beta.json"));
@@ -34,6 +35,9 @@ public final class InstanceUpgrade {
     List<Path> worlds = new ArrayList<>();
     if (Files.isDirectory(game.resolve("saves"))) try (var paths = Files.list(game.resolve("saves"))) {
       worlds.addAll(paths.filter(Files::isDirectory).sorted().toList());
+    }
+    if (sorting) {
+      migrateSortingLayouts(game, worlds); return;
     }
     var originals = new LinkedHashMap<Path, byte[]>();
     var planned = new LinkedHashMap<Path, byte[]>();
@@ -74,6 +78,7 @@ public final class InstanceUpgrade {
           throw new IOException("World metadata changed during maintenance.");
       }
       assertIdle(game);
+      migrateSortingLayouts(game, worlds);
       if (metadata != null) metadata.commit();
       transaction.commit();
       System.out.println("Verified configuration schema " + local.luke.power.storage.ConfigVersions.CURRENT
@@ -83,12 +88,53 @@ public final class InstanceUpgrade {
   }
   static void preserveSavedData(JsonObject oldSettings, JsonObject freshSettings) {
     // Keep opaque unsupported formats too. A defaults reset never owns user libraries.
-    for (String section : List.of("savedCreativeHotbars", "sortingLayouts"))
+    for (String section : List.of("savedCreativeHotbars", "sortingLayouts", "worldSortingLayouts"))
       if (oldSettings.has(section)) freshSettings.add(section, oldSettings.get(section).deepCopy());
+    if (!oldSettings.has("worldSortingLayouts") && (oldSettings.has("sortingLayouts") || oldSettings.has("inventoryTools")))
+      freshSettings.add("worldSortingLayouts", local.luke.power.inventory.tools.WorldSortingLayoutsData.migrate(oldSettings).json());
     for (String[] field : new String[][]{{"audio", "presets"}, {"audio", "favourites"}, {"logo", "presets"}, {"interface", "debugPresets"}}) {
       if (oldSettings.has(field[0]) && oldSettings.getAsJsonObject(field[0]).has(field[1]))
         freshSettings.getAsJsonObject(field[0]).add(field[1], oldSettings.getAsJsonObject(field[0]).get(field[1]).deepCopy());
     }
+  }
+  private static void migrateSortingLayouts(Path game, List<Path> worlds) throws IOException {
+    JsonObject settings = PowerConfig.document().getAsJsonObject("settings");
+    JsonElement original = settings.get(local.luke.power.inventory.tools.WorldSortingLayoutsData.SECTION);
+    var layouts = local.luke.power.inventory.tools.WorldSortingLayoutsData.migrate(settings);
+    var ids = new LinkedHashSet<String>(); var evidence = new LinkedHashMap<Path, byte[]>();
+    for (Path world : worlds) {
+      SavedWorldAccess.safe(world);
+      String identity = null;
+      try (var files = Files.walk(world, 32)) {
+        for (Path path : files.filter(p -> Set.of("level.dat", "level.dat_old").contains(p.getFileName().toString())).sorted().toList()) {
+          SavedWorldAccess.safe(path);
+          if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException("World metadata is not a regular file.");
+          byte[] bytes = Files.readAllBytes(path); evidence.put(path, bytes);
+          String id = WorldRuleFiles.read(path).getCompound("Data").getString("PowerBetaCommandWorldId");
+          try { if (!UUID.fromString(id).toString().equals(id)) throw new IllegalArgumentException(); }
+          catch (IllegalArgumentException invalid) { throw new IOException("Sorting migration requires a stable world ID. Run normal instance maintenance first.", invalid); }
+          if (identity != null && !identity.equals(id)) throw new IOException("Conflicting world identities; sorting layouts were not changed.");
+          identity = id;
+        }
+      }
+      if (identity != null) {
+        ids.add(identity);
+        if (!layouts.contains(identity)) {
+          JsonObject imported = local.luke.power.inventory.tools.WorldSortingLayoutCopies.imported(world, identity);
+          if (imported != null) layouts = layouts.replace(identity, imported);
+        }
+      }
+    }
+    var next = layouts.seed(ids);
+    for (String id : ids) next.layout(id);
+    assertIdle(game);
+    for (var entry : evidence.entrySet()) if (!Arrays.equals(entry.getValue(), Files.readAllBytes(entry.getKey())))
+      throw new IOException("World metadata changed during sorting migration.");
+    if (!Objects.equals(original, next.json())) PowerConfig.replaceSection(local.luke.power.inventory.tools.WorldSortingLayoutsData.SECTION, original, next.json());
+    assertIdle(game);
+    for (var entry : evidence.entrySet()) if (!Arrays.equals(entry.getValue(), Files.readAllBytes(entry.getKey())))
+      throw new IOException("World metadata changed during sorting migration; restore the verified settings backup.");
+    System.out.println("Verified per-world sorting layouts for " + ids.size() + " worlds; retained global layouts and all world metadata bytes.");
   }
   private static void assertIdle(Path game) throws IOException {
     try (var processes = Files.list(Path.of("/proc"))) {

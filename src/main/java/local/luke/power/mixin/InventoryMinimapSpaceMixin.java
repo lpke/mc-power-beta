@@ -5,10 +5,16 @@ import local.luke.power.map.Minimap;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.container.ContainerScreen;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /** The free-pointer minimap owns its controls before inventory looking can capture a press. */
 @Mixin(ContainerScreen.class)
 public abstract class InventoryMinimapSpaceMixin extends Screen implements InventoryGui {
+  @Inject(method="removed",at=@At("HEAD"),cancellable=true)
+  private void power$retainMapContainer(CallbackInfo ci) {
+    if(local.luke.power.map.MinimapMapVisit.retains(this))ci.cancel();
+  }
   @Override public boolean power$ownsPointerControl(int x, int y) {
     return local.luke.power.map.MinimapQuickMenu.owns(minecraft,x,y) || Minimap.inventoryContains(minecraft, x, y);
   }

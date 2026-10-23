@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.3.2",
+    "default": "Power Beta 4.4.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -2950,14 +2950,6 @@
     "description": "Maximum number of edit records kept in memory.",
     "control": "number"
   },
-  "tweaks.placement.enabled": {
-    "page": "Building",
-    "group": "Fast placement",
-    "label": "Fast placement",
-    "description": "Hold right-click to keep placing blocks.",
-    "order": 0,
-    "default": false
-  },
   "tweaks.placement.attemptsPerTick": {
     "page": "Building",
     "group": "Fast placement",
@@ -2976,13 +2968,6 @@
     "group": "Fast placement",
     "label": "Remember orientation",
     "description": "Keep the initial orientation during continuous placement."
-  },
-  "tweaks.placement.restrictionEnabled": {
-    "page": "Building",
-    "group": "Placement rules",
-    "label": "Placement restriction",
-    "description": "Constrain continued placement using the first successful placement.",
-    "order": 0
   },
   "tweaks.placement.restrictionTiedToFast": {
     "page": "Building",
@@ -3158,14 +3143,6 @@
     "description": "",
     "order": 5
   },
-  "tweaks.sneak.enabled": {
-    "page": "Movement",
-    "group": "Fake sneak",
-    "label": "Fake sneak",
-    "description": "Prevent walking off ledges without crouching or slowing down.",
-    "order": 0,
-    "default": false
-  },
   "tweaks.sneak.announceToggle": {
     "page": "Movement",
     "group": "Fake sneak",
@@ -3278,8 +3255,8 @@
   "visual.shiftClickIntoCraftingGrid": {
     "page": "Inventory",
     "group": "Quick transfer",
-    "label": "Shift-click into crafting table",
-    "description": "Shift-click inventory stacks into the crafting-table grid in singleplayer. Fills matching stacks first, then empty slots. Returns leftovers to the source slot. Uses the normal transfer when the grid has no room.",
+    "label": "Shift-click into crafting grid",
+    "description": "Shift-click or Shift-drag inventory stacks into a crafting-table grid, or into your personal 2x2 grid when the hotbar is full. Works independently of crafting-grid storage. Preserves leftovers and normal transfers when the grid is full.",
     "default": true,
     "restart": false
   },
@@ -4104,13 +4081,6 @@
     "label": "Leaves drop saplings in creative",
     "description": "Allow saplings from leaves decaying while you are in creative. Applies to normal and fast decay. Survival drops resume immediately when you leave creative.",
     "order": 2
-  },
-  "visual.hideEntities": {
-    "page": "Video",
-    "group": "Entity visibility",
-    "label": "Hide selected entities",
-    "description": "Hide the selected entity types visually. Entities keep ticking and can still be hit or picked up. Use the toggle key to switch.",
-    "order": 0
   },
   "visual.hideItems": {
     "page": "Video",
@@ -6002,8 +5972,8 @@
   "audio.bucketSounds": {
     "page": "Audio",
     "group": "Extra sounds",
-    "label": "Bucket sounds",
-    "description": "Play water and lava bucket sounds and cow milking sounds in singleplayer. Uses Blocks or Passive creatures volume.",
+    "label": "Water bucket sounds",
+    "description": "Play water bucket and cow milking sounds in singleplayer. Uses Players, Blocks or Passive creatures volume.",
     "order": 11,
     "default": false
   },
@@ -6184,7 +6154,7 @@
     "page": "Map",
     "group": "World map",
     "label": "Map light shading radius",
-    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0–7, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
     "min": 8,
     "max": 128,
     "step": 1,
@@ -6793,14 +6763,14 @@
     "page": "Audio",
     "group": "Extra sounds",
     "label": "Lava popping sounds",
-    "description": "Play modern lava pops at exposed lava surfaces in singleplayer.",
+    "description": "Play modern lava pops at exposed lava surfaces in singleplayer. Uses Ambient volume.",
     "order": 30
   },
   "audio.waterSplashSounds": {
     "page": "Audio",
     "group": "Extra sounds",
     "label": "Modern water splashes",
-    "description": "Use modern player splash sounds, including separate high-speed splashes.",
+    "description": "Use modern water-entry splashes for players, mobs, dropped items and vehicles in singleplayer, with their native sound categories and movement-based volume.",
     "order": 31
   },
   "audio.swimmingSounds": {
@@ -6858,5 +6828,36 @@
     "label": "Very rare underwater sounds",
     "description": "Play the very rare modern deep underwater sounds.",
     "order": 38
+  },
+  "keys.Placement restriction (toggle)": {
+    "page": "Controls",
+    "group": "Building",
+    "label": "Placement restriction (toggle)",
+    "order": 3
+  },
+  "creativeTabs.tabs": {
+    "page": "Creative",
+    "group": "Inventory",
+    "label": "Creative tabs",
+    "order": -100
+  },
+  "audio.lavaBucketSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Lava bucket sounds",
+    "order": 11.5,
+    "description": "Play lava bucket filling and emptying sounds in singleplayer. Uses Players or Blocks volume."
+  },
+  "audio.lavaAmbientSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Lava ambience",
+    "order": 30.1
+  },
+  "audio.lavaBurnSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Lava burning sounds",
+    "order": 30.2
   }
 }

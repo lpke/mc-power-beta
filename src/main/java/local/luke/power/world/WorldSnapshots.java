@@ -361,9 +361,10 @@ public final class WorldSnapshots {
   }
 
   private static JsonObject manifest(WorldOwnedData.Owner owner, WorldOwnedData.Discovery external, Path game, List<WorldSnapshotFiles.Source> sources,
-      Map<String, WorldSnapshotFiles.Proof> proofs) {
+      Map<String, WorldSnapshotFiles.Proof> proofs) throws IOException {
     JsonObject root = new JsonObject(); root.addProperty("version", 1); root.addProperty("name", owner.name());
     root.addProperty("created", System.currentTimeMillis());
+    root.add("sortingLayouts", local.luke.power.inventory.tools.WorldSortingLayoutCopies.snapshot(game, owner.ids(), game.resolve("saves").resolve(owner.folder())));
     JsonArray ids = new JsonArray(); owner.ids().forEach(ids::add); root.add("worldIds", ids);
     JsonArray notes = new JsonArray(); external.warnings().forEach(notes::add); root.add("warnings", notes);
     JsonArray owned = new JsonArray();

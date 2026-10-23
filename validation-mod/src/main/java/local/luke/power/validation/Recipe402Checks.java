@@ -122,12 +122,14 @@ public final class Recipe402Checks {
           check(state.context.output.getStack() == null, "inverted wheel up did not remove the last batch");
         } finally { enabled.set(wheel, previousEnabled); inverted.set(wheel, previousInverted); }
       });
-      test("RECIPE420 main storage falls back to stored 2x2 inputs only when the hotbar cannot accept items", () -> {
+      test("RECIPE440 main storage falls back to 2x2 inputs with crafting storage disabled", () -> {
         state.reset(640);
         Object compatibility = Class.forName("local.luke.power.compat.Config").getField("config").get(null);
         var stored = compatibility.getClass().getField("allowCraftingInventorySlots"); Object previous = stored.get(compatibility);
+        var visual = local.luke.power.visual.VisualConfig.copy();
         try {
-          stored.set(compatibility, true); mc.player.inventory.main[9] = DeathChecks.tagged(4, 7, 0, "stored-grid");
+          var transfer = local.luke.power.visual.VisualConfig.copy(); transfer.shiftClickIntoCraftingGrid = true; local.luke.power.visual.VisualConfig.preview(transfer);
+          stored.set(compatibility, false); mc.player.inventory.main[9] = DeathChecks.tagged(4, 7, 0, "stored-grid");
           state.context.handler.onSlotClick(9, 0, true, mc.player);
           check(mc.player.inventory.main[0] != null && mc.player.inventory.main[9] == null
               && state.context.inputs.stream().allMatch(slot -> slot.getStack() == null), "available hotbar lost native transfer priority");
@@ -135,8 +137,17 @@ public final class Recipe402Checks {
           mc.player.inventory.main[9] = DeathChecks.tagged(4, 7, 0, "stored-grid"); String source = bytes(mc.player.inventory.main[9]);
           state.context.handler.onSlotClick(9, 0, true, mc.player);
           check(source.equals(bytes(mc.player.inventory.main[9])), "2x2 fallback published before its durable flush"); state.finish();
-          check(mc.player.inventory.main[9] == null && source.equals(bytes(state.context.inputs.get(0).getStack())), "full hotbar did not fall back into crafting storage");
-        } finally { stored.set(compatibility, previous); }
+          check(mc.player.inventory.main[9] == null && source.equals(bytes(state.context.inputs.get(0).getStack())), "full hotbar did not fall back into crafting inputs");
+          mc.player.inventory.main[10] = DeathChecks.tagged(35, 5, 4, "shift-drag-a");
+          mc.player.inventory.main[11] = DeathChecks.tagged(35, 3, 14, "shift-drag-b");
+          String first = bytes(mc.player.inventory.main[10]), second = bytes(mc.player.inventory.main[11]);
+          state.context.handler.onSlotClick(10, 0, true, mc.player);
+          state.context.handler.onSlotClick(11, 0, true, mc.player);
+          state.finish(); local.luke.power.inventory.CraftingGridTransfer.tick(mc); state.finish();
+          check(mc.player.inventory.main[10] == null && mc.player.inventory.main[11] == null
+              && first.equals(bytes(state.context.inputs.get(1).getStack()))
+              && second.equals(bytes(state.context.inputs.get(2).getStack())), "queued Shift-drag lost a source or its native data");
+        } finally { stored.set(compatibility, previous); local.luke.power.visual.VisualConfig.preview(visual); }
       });
       test("RECIPE420 one native cake batch retains all three bucket containers", () -> {
         state.reset(640); int[] air = null;

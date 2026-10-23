@@ -4,6 +4,7 @@ import static local.luke.power.validation.Validation.*;
 import static local.luke.power.validation.UiChecks.*;
 import java.util.*;
 import local.luke.power.validation.mixin.ScreenInput;
+import local.luke.power.input.InventorySideSlots;
 import net.minecraft.class_142;
 import net.minecraft.class_585;
 import net.minecraft.client.Minecraft;
@@ -35,14 +36,16 @@ final class CreativeDropChecks {
       for (int[] size : new int[][] {{320, 240}, {640, 420}}) {
         screen.init(mc, size[0], size[1]);
         int x = (size[0] - 176) / 2, y = (size[1] - 166) / 2;
+        int tabTop = (int)Class.forName("local.luke.power.creative.inventory.CreativeGrid")
+            .getMethod("tabTop", int.class).invoke(null, y);
         String prefix = run + "/" + size[0];
         test("creative outside left-click drops full tagged stacks at all four edges, width " + size[0], () -> {
-          int[][] points = {{x - 1, y}, {x + 176, y}, {x, y - 21}, {x, y + 166}};
+          int[][] points = {{x - 1, y}, {x + 176, y}, {x, tabTop - 1}, {x, y + 166}};
           for (int i = 0; i < points.length; i++) {
             String name = prefix + "/edge-" + i;
             mc.player.inventory.setCursorStack(tagged(35, 37, 5, name));
             click(screen, points[i][0], points[i][1], 0);
-            check(mc.player.inventory.getCursorStack() == null, "cursor not cleared");
+            check(mc.player.inventory.getCursorStack() == null, "cursor not cleared at edge " + i + " (" + points[i][0] + "," + points[i][1] + ")");
             drops(mc, name, 1, 37, 35, 5);
             click(screen, points[i][0], points[i][1], 0);
             drops(mc, name, 1, 37, 35, 5);
@@ -74,19 +77,22 @@ final class CreativeDropChecks {
           destroy.setBoolean(config, true);
           String name = prefix + "/protected";
           ItemStack cursor = tagged(264, 7, 0, name); mc.player.inventory.setCursorStack(cursor);
+          boolean offhand = (boolean)call(screen, "power$offhandVisible");
+          int frameX = x - InventorySideSlots.WIDTH;
+          int frameY = y + InventorySideSlots.top(offhand) + 1;
           int[][] points = {{x, y - 20}, {x + 170, y - 10}, {x + 170, y + 80},
-              {x + 90, y + 138}, {x + 175, y + 165}, {x - 22, y + 137},
-              {x - 1, y + 165}, {x + 4, Math.max(0, y - 41)}, {x + 175, y + 120}, {x + 175, y + 145}};
+              {x + 90, y + 138}, {x + 175, y + 165}, {frameX, frameY},
+              {x - 1, y + 165}, {x + 4, tabTop}, {x + 175, y + 120}, {x + 175, y + 145}};
           for (int[] point : points) {
             field(screen, "creative_normalGUI", false);
             click(screen, point[0], point[1], 0);
-            stack(mc.player.inventory.getCursorStack(), 264, 7, 0, name);
+            stack(mc.player.inventory.getCursorStack(), 264, 7, 0, name, "protected point (" + point[0] + "," + point[1] + ")");
             drops(mc, name, 0, 0, 264, 0);
           }
           field(screen, "creative_normalGUI", false);
           inventory(mc);
           destroy.setBoolean(config, false);
-          click(screen, x - 22, y + 137, 0);
+          click(screen, frameX, frameY, 0);
           check(mc.player.inventory.getCursorStack() == null, "hidden destroy border still blocks drops");
           drops(mc, name, 1, 7, 264, 0);
         });
@@ -128,6 +134,10 @@ final class CreativeDropChecks {
   private static void stack(ItemStack item, int id, int count, int damage, String name) throws Exception {
     check(item != null && item.itemId == id && item.count == count && item.getDamage() == damage
         && tag(item).getString(TAG).equals(name), "count/damage/NBT changed: " + name);
+  }
+  private static void stack(ItemStack item, int id, int count, int damage, String name, String context) throws Exception {
+    try { stack(item, id, count, damage, name); }
+    catch (AssertionError failure) { throw new AssertionError(context + ": " + failure.getMessage(), failure); }
   }
   private static void inventory(Minecraft mc) throws Exception {
     for (int i = 0; i < mc.player.inventory.main.length; i++) stack(mc.player.inventory.main[i], 4, i % 5 + 1, 0, "inventory-" + i);

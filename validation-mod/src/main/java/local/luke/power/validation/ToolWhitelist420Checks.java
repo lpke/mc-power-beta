@@ -47,6 +47,13 @@ final class ToolWhitelist420Checks {
             "accepted selection retained swords");
         session.discard(); check(Catalog.JSON.toJsonTree(original).equals(Catalog.JSON.toJsonTree(InventoryToolsConfig.current())), "session Discard did not restore tools");
 
+        JsonArray historical = new JsonArray(); historical.add("1"); historical.add("267"); row.value = historical;
+        var retained = (ItemPickerScreen)ToolWhitelistEditor.open(screen, row, () -> accepted[0]++);
+        mc.currentScreen = retained; retained.init(mc, size[0], size[1]);
+        ((ScreenInput)(Object)retained).power$key('\0', Keyboard.KEY_RETURN);
+        check(accepted[0] == 2 && row.value.equals(historical), "unchanged historical non-tool blocked saving the picker");
+        row.value = all.deepCopy();
+
         var canceled = (ItemPickerScreen)ToolWhitelistEditor.open(screen, row, () -> accepted[0]++);
         mc.currentScreen = canceled; canceled.init(mc, size[0], size[1]);
         ((ScreenInput)(Object)canceled).power$click((int)UiChecks.call(canceled, "left") + 10, 74, 0);
@@ -54,7 +61,7 @@ final class ToolWhitelist420Checks {
         check((boolean)UiChecks.call(UiChecks.field(canceled, "exitPrompt"), "active"), "changed picker skipped its exit prompt");
         int width = Math.min(76, Math.max(10, (canceled.width - 32) / 3));
         ((ScreenInput)(Object)canceled).power$click((canceled.width - (width * 3 + 8)) / 2 + width + 4 + width / 2, canceled.height / 2 + 18, 0);
-        check(accepted[0] == 1 && row.value.equals(before), "picker Discard published a selection");
+        check(accepted[0] == 2 && row.value.equals(before), "picker Discard published a selection");
         check(inventory.equals(DeathItems.inventory(DeathItems.snapshot(mc.player.inventory, mc.player.playerContainer)))
             && Arrays.equals(disk, Files.readAllBytes(PowerConfig.path())), "tool editor changed native items or saved settings");
       });

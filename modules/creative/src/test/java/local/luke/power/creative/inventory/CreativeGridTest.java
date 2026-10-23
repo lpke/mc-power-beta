@@ -16,19 +16,21 @@ class CreativeGridTest {
       int base = (height - 166) / 2;
       assertTrue(CreativeGrid.tabTop(base) >= 0);
       assertTrue(CreativeGrid.tabHeight(base) >= 20);
-      int lastRow = base - CreativeGrid.EXTRA_HEIGHT + 14 + (CreativeGrid.ROWS - 1) * 18;
+      int lastRow = base - CreativeGrid.EXTRA_HEIGHT + CreativeGrid.ITEM_TOP + (CreativeGrid.ROWS - 1) * 18;
       assertEquals(22, base + 142 - lastRow, "Match survival row-to-hotbar spacing");
-      assertTrue(CreativeGrid.tabTop(base) + CreativeGrid.tabHeight(base) <= base - CreativeGrid.EXTRA_HEIGHT + 3);
+      assertTrue(CreativeGrid.tabTop(base) + CreativeGrid.tabHeight(base) <= base - CreativeGrid.EXTRA_HEIGHT + CreativeGrid.TITLE_TOP);
+      assertTrue(CreativeGrid.tabIconTop(base) >= CreativeGrid.tabTop(base));
+      assertTrue(CreativeGrid.tabIconTop(base) + 16 <= base - CreativeGrid.EXTRA_HEIGHT + CreativeGrid.TITLE_TOP - 1);
     }
   }
 
   @Test void catalogueBodyProtectsTheExtraRowAndMarginsFromOutsideDrops() {
     for (int[] size : new int[][] {{320, 240}, {640, 420}}) {
       int x = (size[0] - 176) / 2, y = (size[1] - 166) / 2;
-      assertFalse(CreativeGrid.outsideBody(x, y - 20, x, y, 176, 166, false));
+      assertFalse(CreativeGrid.outsideBody(x, y - CreativeGrid.EXTRA_HEIGHT, x, y, 176, 166, false));
       assertFalse(CreativeGrid.outsideBody(x + 175, y + 165, x, y, 176, 166, false));
       assertTrue(CreativeGrid.outsideBody(x - 1, y, x, y, 176, 166, false));
-      assertTrue(CreativeGrid.outsideBody(x, y - 21, x, y, 176, 166, false));
+      assertTrue(CreativeGrid.outsideBody(x, y - CreativeGrid.EXTRA_HEIGHT - 1, x, y, 176, 166, false));
       assertTrue(CreativeGrid.outsideBody(x + 176, y, x, y, 176, 166, false));
       assertTrue(CreativeGrid.outsideBody(x, y + 166, x, y, 176, 166, false));
     }

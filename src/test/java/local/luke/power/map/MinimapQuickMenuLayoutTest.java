@@ -9,9 +9,11 @@ class MinimapQuickMenuLayoutTest {
       var map=new MinimapGeometry.Layout(300,200,size);
       var circle=MinimapQuickMenuLayout.at(map,true,corner,1000,800,130).gear();
       double centreX=map.x()+size/2d,centreY=map.y()+size/2d;
-      double dx=Math.max(Math.max(circle.x()-centreX,centreX-circle.x()-circle.width()),0);
-      double dy=Math.max(Math.max(circle.y()-centreY,centreY-circle.y()-circle.height()),0);
-      assertTrue(Math.hypot(dx,dy)>size/2d,"button overlaps circular terrain");
+      double distance=Math.hypot(circle.x()+circle.width()/2d-centreX,circle.y()+circle.height()/2d-centreY);
+      assertTrue(distance-circle.width()/2d>=size/2d,"button overlaps circular terrain");
+      assertTrue(distance-circle.width()/2d<size/2d+MinimapGeometry.BORDER,"button misses the circular frame");
+      assertFalse(circle.containsCircle(circle.x(),circle.y()));
+      assertTrue(circle.containsCircle(circle.x()+8,circle.y()+8));
       var square=MinimapQuickMenuLayout.at(map,false,corner,1000,800,130).gear();
       assertEquals(map.x()+(corner%2==0?size:0)-8,square.x());
       assertEquals(map.y()+(corner<2?0:size)-8,square.y());

@@ -20,10 +20,11 @@ import org.lwjgl.opengl.Display;
 public final class FastPlace {
   public static final Logger LOG = LogManager.getLogger("Beta Fast Place");
   public static final KeyBinding KEY = new KeyBinding("Fast place (toggle)", Keyboard.KEY_NONE);
+  public static final KeyBinding RESTRICTION_KEY = new KeyBinding("Placement restriction (toggle)", Keyboard.KEY_NONE);
 
   private static PlacementSession session;
   private static Minecraft client;
-  private static boolean toggleDown, releaseRequired, useDown;
+  private static boolean toggleDown, restrictionDown, releaseRequired, useDown;
   private static int placedThisTick;
 
   static { InventoryRefills.onReplaced((inventory, hand, original, replacement) -> {
@@ -69,7 +70,10 @@ public final class FastPlace {
       client = mc;
       local.luke.power.input.Bindings.onKeyPress("building.fastPlace", FastPlace::press);
       local.luke.power.input.Bindings.onMousePress("building.fastPlace", FastPlace::press);
-      local.luke.power.input.Bindings.onRelease("building.fastPlace", key -> { if (key == KEY.code) toggleDown = false; });
+      local.luke.power.input.Bindings.onRelease("building.fastPlace", key -> {
+        if (key == KEY.code) toggleDown = false;
+        if (key == RESTRICTION_KEY.code) restrictionDown = false;
+      });
     }
     maintainTick(
         mc,
@@ -78,9 +82,18 @@ public final class FastPlace {
             && !local.luke.power.building.hotbar.Hotbars.consumesMouse(mc, 1),
         local.luke.power.input.Bindings.physical(KEY.code),
         Display.isCreated() && Display.isActive());
+    if (!local.luke.power.input.Bindings.physical(RESTRICTION_KEY.code)) restrictionDown = false;
   }
 
   private static void press(int key) {
+    if(key==RESTRICTION_KEY.code) {
+      if(!restrictionDown&&Display.isActive()&&canOperate(client)
+          &&local.luke.power.input.Bindings.matches(RESTRICTION_KEY,key)) {
+        var state=local.luke.power.building.config.Config.current().placement;
+        state.restrictionEnabled=!state.restrictionEnabled;interrupt();
+      }
+      restrictionDown=true;
+    }
     if (key != KEY.code) return;
     if (!toggleDown && Display.isActive() && canOperate(client)
         && local.luke.power.input.Bindings.matches(KEY, key)) toggle(client);
@@ -88,13 +101,9 @@ public final class FastPlace {
   }
 
   private static void toggle(Minecraft mc) {
-    Settings next = local.luke.power.building.config.Config.current().placement.copy();
-    next.setEnabled(!next.enabled);
-    try { apply(next); }
-    catch (IOException e) {
-      LOG.error("Could not save Fast Place settings", e);
-      mc.inGameHud.addChatMessage("\u00a7cFast place settings could not be saved.\u00a7r");
-    }
+    Settings state = local.luke.power.building.config.Config.current().placement;
+    state.setEnabled(!state.enabled);
+    interrupt();
   }
 
   /** Explicit synthetic input adapter used by the disposable runtime fixtures. */

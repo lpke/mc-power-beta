@@ -1,3 +1,20 @@
+- `creative-440` checks the six default tabs, seven native fill groups, pinned
+  ID-ordered Search and supported variants, silent navigation/deletion, cursor-only
+  palette wheel exchange, shared selectable fuzzy search, custom holes, remembered
+  tab pages and isolated editor drafts with the one-click shared picker. It captures
+  the palette and editor at 320x240 and 640x420. Run in a focused muted disposable
+  world. It restores rules, mode, inventory, cursor, wheel settings and layout without
+  writing configuration. Physical checks still cover Ctrl/Shift pointer selection,
+  multi-cell drag release and Shift-delete click audio. The automatic check renders
+  normal and F3+H damaged-sword tooltips through the native event and text pipeline,
+  checking ID/metadata, durability and narrow-GUI clipping.
+  `creative-440 editor` opens a seeded, isolated pointer draft and logs GUI/display
+  coordinates. Follow its single, Ctrl-multiple, Shift-range and tab-drag instructions
+  with native mouse input, then run each `creative-440 pointer-check STAGE`. Each
+  stage checks the resulting slots, selection, release ownership and unchanged native
+  inventory/configuration. `creative-440 stop` verifies preservation and restores the
+  previous screen. Do not press Save while using this pointer fixture.
+
 # Runtime checks
 
 - `water-sounds-432` requires a muted disposable world routed to the verified silent
@@ -5,9 +22,23 @@
   perspectives, 40-tick fade-in and 20-tick fade-out, actual streaming playback and
   gain, exclusive random bands, immediate toggle cleanup, pause/world/mode boundaries,
   settings preview/Cancel and all 45 modern water decodes through EOS.
-- `extra-sound-decoders-432` compares all 83 bundled extra-effect variants against
+- `fluid-sounds-440` checks water entry for every native creature, items and vehicles,
+  first-tick and repeat suppression, rider volume and boat shielding, independent lava
+  ambience/pop switches, accepted lava damage, item throttling, remote ownership and
+  individual previews. Requires the same muted disposable world and verified silent sink.
+  `release-300-extra-sounds` also tests every water/lava bucket toggle combination.
+- `extra-sound-decoders-432` compares all 89 bundled extra-effect variants against
   the unchanged decoder on the same bytes, verifies exact source frame counts and
   writes disposable PCM evidence for comparison with FFmpeg.
+
+- `sorting-worlds-440` checks separate active layouts and named presets across two
+  world IDs, retained legacy/global preferences and unchanged native inventory data.
+  It restores the complete settings document and runtime caches.
+- `recipe-402` includes personal-grid fallback with crafting storage disabled and
+  queued Shift-drag sources. `tool-whitelist-420` checks saving a retained historical
+  selection. `offhand-actions-400 native` checks count-only equip continuity and
+  normal animation for changed native data or an empty hand. Run these in a focused,
+  muted disposable world. The offhand native fixture needs its ordinary air-only scene.
 
 - `menu-423 check` checks the actual inventory and pause menu at all four minimap
   corners, modal ownership, immediate cave cancellation, selected cave-mode restoration

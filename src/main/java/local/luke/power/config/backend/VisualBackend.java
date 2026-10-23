@@ -15,6 +15,7 @@ public final class VisualBackend implements Backend {
     VisualSettings current = VisualConfig.copy(), defaults = new VisualSettings();
     List<Setting> entries = new ArrayList<>();
     for (var f : VisualSettings.class.getFields()) {
+      if(java.lang.reflect.Modifier.isTransient(f.getModifiers()))continue;
       boolean distance = f.getName().equals("thirdPersonDistance");
       boolean percentage = f.getName().equals("underwaterFogDensity") || f.getName().equals("underwaterDarkness")
           || f.getName().equals("underwaterDarknessOutside");

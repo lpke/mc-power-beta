@@ -36,6 +36,7 @@ public final class RecipeBookOverlay {
   private RecipeDefinition wheelRecipe;
   private int wheelSteps;
   private boolean wheelDispatch;
+  private int wheelBatch = 1;
   public RecipeBookOverlay(Screen screen,Minecraft mc,RecipeContext context,boolean standalone) {
     this.screen=screen;this.mc=mc;this.context=context;this.standalone=standalone;
     var state=RecipeBookConfig.current();boolean furnace=context.kind==RecipeDefinition.Kind.FURNACE;
@@ -303,7 +304,7 @@ public final class RecipeBookOverlay {
         if(!unavailable&&layout().narrow()){open=false;state();}
       };
       var result=craft&&context.kind==RecipeDefinition.Kind.CRAFTING?RecipeCrafts.craftResult(mc,context,recipe,eligible,selected)
-          :RecipeFills.fillResult(mc,context,recipe,maximum,eligible,selected);
+          :RecipeFills.fillResult(mc,context,recipe,maximum,eligible,selected,wheelDispatch?wheelBatch:1);
       if(result!=RecipeFills.Result.ACCEPTED){
         message=switch(result){
           case NO_SPACE->"Not enough inventory space";
@@ -322,7 +323,7 @@ public final class RecipeBookOverlay {
       var result=RecipeFills.removeResult(mc,context,recipe,()->enabled()&&mc.currentScreen==screen&&token==generation
           &&!InventoryPanels.modal(screen)&&!search.focused&&org.lwjgl.opengl.Display.isActive(),ignored->{
         ghost=null;lastUnavailable=null;rememberPlacement(recipe);
-      });
+      },wheelDispatch?wheelBatch:1);
       if(result!=RecipeFills.Result.ACCEPTED)message=switch(result){
         case NO_SPACE->"Not enough inventory space";
         case BUSY->"Another inventory action is pending";
@@ -354,10 +355,10 @@ public final class RecipeBookOverlay {
     if(wheelSteps==0||wheelRecipe==null)return;
     if(!open||!writable()||!org.lwjgl.opengl.Display.isActive()||InventoryPanels.modal(screen)){clearWheel();return;}
     if(local.luke.power.inventory.NativeInventoryPlan.busy())return;
-    int direction=Integer.signum(wheelSteps);wheelSteps-=direction;RecipeDefinition recipe=wheelRecipe;
+    int direction=Integer.signum(wheelSteps);wheelBatch=Math.abs(wheelSteps);wheelSteps=0;RecipeDefinition recipe=wheelRecipe;
     wheelDispatch=true;
     try{if(direction>0)choose(recipe,false);else if(removable(recipe))remove(recipe);else clearWheel();}
-    finally{wheelDispatch=false;}
+    finally{wheelDispatch=false;wheelBatch=1;}
     if(!message.isEmpty())clearWheel();
   }
   public boolean ownsWheel(int x,int y) {

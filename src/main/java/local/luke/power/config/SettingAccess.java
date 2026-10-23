@@ -45,7 +45,7 @@ public final class SettingAccess {
         || id.startsWith("creative.spectator") || id.equals("creative.showSpectatorSpeed")) return local.luke.power.rules.GameRule.ALLOW_SPECTATOR_MODE;
     // Reach is also used by container previews; the sprint binding is shared across modes.
     if (java.util.Set.of("creative.blockReach", "creative.entityReach", "keys.power_creative.sprint").contains(id)) return null;
-    if (setting.backend.equals("creative") || id.contains("power_creative.") || id.equals("gameplay.leavesDropSaplingsInCreative"))
+    if (setting.backend.equals("creative") || setting.backend.equals("creativeTabs") || id.contains("power_creative.") || id.equals("gameplay.leavesDropSaplingsInCreative"))
       return local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE;
     return null;
   }

@@ -42,7 +42,20 @@ final class Menu423Checks {
           MinimapQuickMenu.mouse(mc,row.x()+20,row.y()+10,0,true);MinimapQuickMenu.mouse(mc,row.x()+20,row.y()+10,0,false);
           check(MapConfig.current().caveMode==2,"checkbox lost selected cave mode");
           var output=Path.of("power-beta-data/reports/menu-423");Files.createDirectories(output);
-          SettingsSnapshot.render(mc,new Screen(){@Override public void render(int mx,int my,float delta){host.render(mx,my,delta);MinimapQuickMenu.renderMenu(mc,mx,my);}},480,270,output.resolve((pause?"pause":"inventory")+(circular?"circle":"square")+anchor+".png"),x,y);
+          Path capture=output.resolve((pause?"pause":"inventory")+(circular?"circle":"square")+anchor+".png");
+          SettingsSnapshot.render(mc,new Screen(){@Override public void render(int mx,int my,float delta){
+            host.render(mx,my,delta);
+            boolean culling=org.lwjgl.opengl.GL11.glIsEnabled(org.lwjgl.opengl.GL11.GL_CULL_FACE);
+            org.lwjgl.opengl.GL11.glEnable(org.lwjgl.opengl.GL11.GL_CULL_FACE);
+            MinimapQuickMenu.renderButton(mc);
+            check(org.lwjgl.opengl.GL11.glIsEnabled(org.lwjgl.opengl.GL11.GL_CULL_FACE),"button leaked face-culling state");
+            if(!culling)org.lwjgl.opengl.GL11.glDisable(org.lwjgl.opengl.GL11.GL_CULL_FACE);
+            MinimapQuickMenu.renderMenu(mc,mx,my);
+          }},480,270,capture,x,y);
+          var image=javax.imageio.ImageIO.read(capture.toFile());
+          int background=image.getRGB((layout.gear().x()+8)*image.getWidth()/480,
+              (layout.gear().y()+3)*image.getHeight()/270)&0xffffff;
+          check(background==0x65655a||background==0x4d4d4d,"circular button background missing: "+Integer.toHexString(background));
           check(MinimapQuickMenu.key(mc,org.lwjgl.input.Keyboard.KEY_ESCAPE,true),"Escape leaked");
           check(mc.currentScreen==host&&!InventoryPanels.modal(host),"closing menu changed native host");
           check(!Minimap.inventoryWheel(mc,240,140,120)||!((InventoryGui)host).power$containsGuiSpace(240,140),"wheel stole native controls");

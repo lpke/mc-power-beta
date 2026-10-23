@@ -200,8 +200,6 @@
         "slabMode": "DOUBLE",
         "attemptsPerTick": 2,
         "listMode": "BLACKLIST",
-        "enabled": false,
-        "restrictionEnabled": false,
         "whitelist": [],
         "rememberOrientation": true,
         "restrictionMode": "FACE",
@@ -216,8 +214,7 @@
       "freeLookToggle": false,
       "boatSteering": true,
       "sneak": {
-        "announceToggle": false,
-        "enabled": false
+        "announceToggle": false
       },
       "boatSpeed": true,
       "boatProtection": true,
@@ -338,10 +335,13 @@
       "swimmingSounds": true,
       "underwaterEnterSounds": true,
       "underwaterExitSounds": true,
-      "underwaterAmbience": true,
+      "underwaterAmbience": false,
       "underwaterAdditions": true,
-      "underwaterRareAdditions": true,
-      "underwaterUltraRareAdditions": true
+      "underwaterRareAdditions": false,
+      "underwaterUltraRareAdditions": false,
+      "lavaBucketSounds": true,
+      "lavaAmbientSounds": true,
+      "lavaBurnSounds": true
     },
     "visual": {
       "softRain": true,
@@ -355,7 +355,6 @@
       "redstonePowerLevels": true,
       "damageCameraShake": true,
       "fireDamageCameraShake": false,
-      "hideEntities": false,
       "hideItems": true,
       "hideMobs": false,
       "hidePlayers": false,
@@ -368,7 +367,7 @@
       "spectatorFullBright": false,
       "limitCapeRotation": true,
       "removeUnderwaterOverlay": true,
-      "underwaterFogDensity": 30,
+      "underwaterFogDensity": 40,
       "underwaterDarkness": 75,
       "underwaterDarknessOutside": 95,
       "narrowUnderwaterFov": false,
@@ -580,7 +579,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.3.2"
+        "customVersionText": "Power Beta 4.4.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -1221,7 +1220,9 @@
       "depositMatchingButton": true,
       "creativeHotbarsButton": true,
       "toolSwitch": false,
-      "toolWhitelist": ["*"],
+      "toolWhitelist": [
+        "*"
+      ],
       "restock": false,
       "restockBeforeEmpty": true,
       "restockOtherHotbar": false,

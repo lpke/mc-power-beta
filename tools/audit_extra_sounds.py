@@ -23,13 +23,15 @@ def main():
         source = manifest[name]
         metadata = fetch(source['metadata']['url'], source['metadata']['sha1'])
         assert metadata['assetIndex'] == source['assetIndex']
+        if 'client' in source:
+            assert metadata['downloads']['client'] == source['client']
         index = fetch(source['assetIndex']['url'], source['assetIndex']['sha1'])['objects']
         sound = index['minecraft/sounds.json']
         assert sound == source['sounds']
         sounds = fetch(f"https://resources.download.minecraft.net/{sound['hash'][:2]}/{sound['hash']}", sound['hash'])
         sources[name] = (index, sounds)
     for event, definition in manifest['events'].items():
-        index, sounds = sources['waterSource' if event.startswith(('ambient.underwater.', 'entity.player.'))
+        index, sounds = sources['waterSource' if event.startswith(('ambient.underwater.', 'entity.player.', 'entity.generic.', 'entity.hostile.')) or event == 'block.lava.ambient'
                                 else 'bucketSource' if 'bucket' in event else 'source']
         assert sounds[event] == definition, event
         expected = {'minecraft/sounds/' + (entry if isinstance(entry, str) else entry['name']) + '.ogg'

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(Entity.class)
 public abstract class FluidMovementSoundMixin {
-  @Shadow protected Random random;
+  @Unique private final Random power$swimRandom = new Random();
   @Unique private float power$soundDistance, power$nextSwimSound = 1;
   @Unique private boolean power$soundMoving;
   @Unique private double power$soundMoveY;
@@ -34,7 +34,7 @@ public abstract class FluidMovementSoundMixin {
     if (power$soundDistance > power$nextSwimSound && stepBlock > 0) {
       if (FluidSounds.swimStep(entity, stepBlock, vertical)) {
         power$nextSwimSound = (float)FluidSoundMath.nextStep(power$soundDistance);
-        FluidSounds.swim(entity, random);
+        FluidSounds.swim(entity, power$swimRandom);
       } else if (entity.field_1623 || stepBlock == net.minecraft.block.Block.field_1854.id
           || entity.method_1373() && vertical == 0) {
         power$nextSwimSound = (float)FluidSoundMath.nextStep(power$soundDistance);

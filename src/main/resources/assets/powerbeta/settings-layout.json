@@ -115,11 +115,11 @@
     "Light overlay"
   ],
   "Creative": [
+    "Inventory",
     "Game modes",
     "Flight",
     "Spectator",
-    "Interaction",
-    "Inventory"
+    "Interaction"
   ],
   "World editing": [
     "Access",

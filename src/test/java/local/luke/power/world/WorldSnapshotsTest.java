@@ -173,6 +173,21 @@ class WorldSnapshotsTest {
     String second = WorldRuleFiles.read(run(WorldSnapshots.Action.DUPLICATE).path().resolve("level.dat")).getCompound("Data").getString("PowerBetaCommandWorldId");
     assertNotEquals(first, second);
   }
+  @Test void unopenedCopyOfCopyRetainsItsScopedSortingLayoutWithoutMutatingGlobalSettings() throws Exception {
+    var settings = JsonParser.parseString("{\"inventoryTools\":{\"protectedSlots\":[31],\"preferredItems\":{}}}").getAsJsonObject();
+    var data = local.luke.power.inventory.tools.WorldSortingLayoutsData.migrate(settings).seed(List.of(id));
+    var active = data.layout(id); active.add("protectedSlots", JsonParser.parseString("[35]"));
+    active.add("presets", JsonParser.parseString("{\"format\":999,\"future\":true}")); data = data.replace(id, active);
+    settings.add(local.luke.power.inventory.tools.WorldSortingLayoutsData.SECTION, data.json());
+    JsonObject config = new JsonObject(); config.addProperty("schemaVersion", 7); config.add("settings", settings);
+    Path path = game.resolve("config/power-beta.json"); Files.createDirectories(path.getParent()); Files.writeString(path, config.toString()); byte[] original = Files.readAllBytes(path);
+    Path first = run(WorldSnapshots.Action.DUPLICATE).path();
+    var firstAccess = new SavedWorldAccess(game, first.getFileName().toString(), () -> true);
+    Path second = WorldSnapshots.execute(firstAccess, WorldSnapshots.Action.DUPLICATE, "Second copy", () -> false, QUIET, NORMAL).path();
+    String secondId = WorldRuleFiles.read(second.resolve("level.dat")).getCompound("Data").getString("PowerBetaCommandWorldId");
+    assertEquals(active, local.luke.power.inventory.tools.WorldSortingLayoutCopies.imported(second, secondId));
+    assertArrayEquals(original, Files.readAllBytes(path));
+  }
   @Test void duplicateOpensAndBacksUpAfterOriginalWorldAndExternalDataAreRemoved() throws Exception {
     writeMetadata(world.resolve("DIM-1/level.dat"), id, "Original", 0);
     Files.createDirectories(world.resolve("data")); Files.writeString(world.resolve("data/map_7.dat"), "native map bytes");

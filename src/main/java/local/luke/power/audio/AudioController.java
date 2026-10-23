@@ -23,7 +23,7 @@ public final class AudioController {
   private static final Map<String, Source> SOURCES = new HashMap<>();
   private static final UnderwaterAudio UNDERWATER = new UnderwaterAudio();
 
-  private record Source(String sound, float base, boolean ui) {}
+  private record Source(String sound, float base, boolean ui, String category) {}
 
   private record Library(MusicLibrary.Scan world, MusicLibrary.Scan menu) {}
 
@@ -610,9 +610,10 @@ public final class AudioController {
 
   public static float mix(String source, String id, float volume, boolean ui) {
     float effects = client == null ? 1 : client.options.soundVolume;
-    SOURCES.put(source, new Source(id, effects > 0 ? volume / effects : 0, ui));
+    String category = SoundCategoryScope.current();
+    SOURCES.put(source, new Source(id, effects > 0 ? volume / effects : 0, ui, category));
     return source.equals("streaming") && MusicPreview.active() ? 0
-        : (float) (volume * AudioConfig.current().gain(id, ui) * rules().ambient(id));
+        : (float) (volume * AudioConfig.current().gain(id, ui, category) * rules().ambient(id));
   }
 
   public static String musicGroup(String id) {
@@ -666,7 +667,7 @@ public final class AudioController {
           e.getKey().equals("streaming") && MusicPreview.active() ? 0 : (float)
               (source.base
                   * effects
-                  * AudioConfig.current().gain(source.sound, source.ui)
+                  * AudioConfig.current().gain(source.sound, source.ui, source.category)
                   * rules().ambient(source.sound)));
     }
     if (client != null) {

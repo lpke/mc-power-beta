@@ -7,11 +7,13 @@ import local.luke.power.config.*;
 import local.luke.power.storage.PowerConfig;
 
 public final class InventoryToolsBackend implements Backend {
+  private final String layoutWorld = WorldSortingLayouts.world();
   public static void register(ConfigSession session) throws ReflectiveOperationException {
     var current = InventoryToolsConfig.current(); var defaults = new InventoryToolsSettings();
     List<Setting> entries = new ArrayList<>();
     for (var field : InventoryToolsSettings.class.getFields()) {
       String key = field.getName();
+      if (Set.of("protectedSlots", "preferredItems").contains(key) && !WorldSortingLayouts.available()) continue;
       String label = switch (key) {
         case "sorting" -> "Inventory sorting";
         case "sortingButton" -> "Show sorting button";
@@ -68,6 +70,7 @@ public final class InventoryToolsBackend implements Backend {
   public String id() { return "inventoryTools"; }
   public List<Path> files() { return List.of(PowerConfig.path()); }
   private InventoryToolsSettings draft(Map<String, JsonElement> values) throws ReflectiveOperationException {
+    if (values.containsKey("inventoryTools.protectedSlots") || values.containsKey("inventoryTools.preferredItems")) WorldSortingLayouts.requireWorld(layoutWorld);
     var next = InventoryToolsConfig.copy();
     for (var entry : values.entrySet()) {
       if (entry.getKey().equals("inventoryTools.hotbarEditor")) continue;

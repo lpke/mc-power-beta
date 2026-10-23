@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class Tooltip173Capture {
   @Inject(method="drawWithShadow",at=@At("HEAD"))
   private void text(String text,int x,int y,int color,CallbackInfo ci){
+    local.luke.power.validation.Creative440Checks.captureTooltipText(text, x, y);
     if(Release173Checks.capture && text.equals("Clear inventory")){
       Release173Checks.tooltip=++Release173Checks.event;Release173Checks.tooltipCount++;
       Release173Checks.tooltipDepth=GL11.glIsEnabled(GL11.GL_DEPTH_TEST);

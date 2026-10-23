@@ -180,7 +180,8 @@ public final class WaterSounds432Checks {
         Path output = Path.of("power-beta-validation-pcm"); Files.createDirectories(output);
         int count = 0;
         for (var value : manifest.getAsJsonArray("assets")) {
-          var asset = value.getAsJsonObject(); if (!asset.has("source") || !asset.get("source").getAsString().equals("waterSource")) continue;
+          var asset = value.getAsJsonObject(); String variantEvent = asset.get("event").getAsString();
+          if (!variantEvent.startsWith("entity.player.") && !variantEvent.startsWith("ambient.underwater.")) continue;
           String file = asset.get("file").getAsString(); var url = WaterSounds432Checks.class.getResource("/" + file);
           String event = "power_beta:" + asset.get("event").getAsString();
           String suffix = file.substring("assets/power_beta/stationapi/sounds/sound/".length());

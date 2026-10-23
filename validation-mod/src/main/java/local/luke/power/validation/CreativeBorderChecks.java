@@ -18,10 +18,16 @@ final class CreativeBorderChecks {
       CreativeVehicleChecks.mode(mc, "CREATIVE");
       java.util.Arrays.fill(mc.player.inventory.main, null); mc.player.inventory.setCursorStack(null);
       var screen = new class_585(mc.player); mc.setScreen(screen);
-      field(screen, "creative_normalGUI", false); field(screen, "creative_items", List.of());
+      field(screen, "creative_normalGUI", false);
       Path dir = Path.of("power-beta-data/reports/creative-borders"); Files.createDirectories(dir);
       for (int[] size : new int[][] {{320, 240}, {640, 420}}) test("creative border pixels at " + size[0], () -> {
         screen.init(mc, size[0], size[1]);
+        // Search refreshes its catalog during native init. Clear it afterwards so
+        // this texture comparison sees empty slot backgrounds rather than item pixels.
+        var select = screen.getClass().getDeclaredMethod("power$selectTab", int.class);
+        select.setAccessible(true); select.invoke(screen, 0);
+        field(screen, "creative_items", List.of()); field(screen, "creative_rowIndex", 0);
+        field(screen, "creative_maxIndex", 0); field(screen, "creative_slider", 0F);
         Path file = dir.resolve("creative-" + size[0] + ".png");
         SettingsSnapshot.render(mc, screen, size[0], size[1], file);
         var image = ImageIO.read(file.toFile());

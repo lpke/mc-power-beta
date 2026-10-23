@@ -28,6 +28,10 @@ public abstract class InventoryMinimapInputMixin {
     if(MinimapQuickMenu.mouse(minecraft,x,y,Mouse.getEventButton(),Mouse.getEventButtonState())) {
       InventoryWheel.event(this,false,wheel,true);ci.cancel();return;
     }
+    if(Mouse.getEventButton()==0&&Mouse.getEventButtonState()
+        &&local.luke.power.map.MinimapMapVisit.open(minecraft,x,y)) {
+      InventoryWheel.event(this,false,wheel,true);ci.cancel();return;
+    }
     if (!org.lwjgl.opengl.Display.isActive()) power$resetPress = false;
     boolean claimed = Mouse.getEventButton() == 1 && !Mouse.getEventButtonState() && power$resetPress;
     if (Mouse.getEventButton() == 1 && !Mouse.getEventButtonState()) power$resetPress = false;

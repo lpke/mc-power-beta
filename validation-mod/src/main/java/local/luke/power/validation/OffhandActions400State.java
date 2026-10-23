@@ -145,12 +145,22 @@ final class OffhandActions400State implements AutoCloseable {
     clearBlocks();
     for(int x=0;x<3;x++)for(int z=-1;z<=1;z++)mc.world.method_200(nativeState.x+x,nativeState.y-1,nativeState.z+z,1);
     mc.world.method_200(nativeState.x+1,nativeState.y,nativeState.z,id);
+    // Air admission covers this margin, not the path from the player's original pose.
+    // Stand beside the target on the owned floor so natural terrain cannot intercept use.
+    double nativeY=mc.player.y+nativeState.y-mc.player.boundingBox.minY;
+    mc.player.method_1340(nativeState.x+1.5,nativeY,nativeState.z+1.5);
+    mc.player.prevX=mc.player.field_1637=mc.player.x;
+    mc.player.prevY=mc.player.field_1638=mc.player.y;
+    mc.player.prevZ=mc.player.field_1639=mc.player.z;
+    mc.player.velocityX=mc.player.velocityY=mc.player.velocityZ=0;
     double tx=nativeState.x+1.5,ty=nativeState.y+.5,tz=nativeState.z+.5;
     double eyeY=mc.player.y+1.62-mc.player.field_1631,dx=tx-mc.player.x,dy=ty-eyeY,dz=tz-mc.player.z;
     mc.player.yaw=mc.player.prevYaw=(float)Math.toDegrees(Math.atan2(-dx,dz));
     mc.player.pitch=mc.player.prevPitch=(float)-Math.toDegrees(Math.atan2(dy,Math.hypot(dx,dz)));
     mc.field_2823=mc.world.method_161(Vec3d.createCached(mc.player.x,eyeY,mc.player.z),Vec3d.createCached(tx,ty,tz),id==8||id==9);
-    check(mc.field_2823!=null&&mc.field_2823.field_1984==nativeState.x+1&&mc.field_2823.field_1985==nativeState.y&&mc.field_2823.field_1986==nativeState.z,"native ray missed owned target");
+    check(mc.field_2823!=null&&mc.field_2823.field_1984==nativeState.x+1&&mc.field_2823.field_1985==nativeState.y&&mc.field_2823.field_1986==nativeState.z,
+        "native ray missed owned target "+(nativeState.x+1)+","+nativeState.y+","+nativeState.z
+            +" from "+mc.player.x+","+eyeY+","+mc.player.z+" hit="+(mc.field_2823==null?"null":mc.field_2823.field_1984+","+mc.field_2823.field_1985+","+mc.field_2823.field_1986));
     if(id==1){int[] p=adjacent();mc.world.method_200(p[0],p[1],p[2],0);}
   }
   int[] adjacent() {

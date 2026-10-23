@@ -34,6 +34,8 @@ public final class InventoryActions {
     generation++;
   }
 
+  public static long revision() { gameThread(); return generation; }
+
   public static boolean busy() {
     gameThread();
     return active != null;

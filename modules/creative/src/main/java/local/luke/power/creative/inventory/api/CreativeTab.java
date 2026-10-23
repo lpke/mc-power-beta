@@ -23,6 +23,9 @@ public abstract class CreativeTab implements Comparable<CreativeTab> {
 		return items;
 	}
 	
+	/** Custom names are displayed exactly, even when they resemble a translation key. */
+	public boolean literalTitle() { return false; }
+
 	public String getTranslationKey() {
 		return translationKey;
 	}

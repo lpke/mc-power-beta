@@ -8,6 +8,22 @@ class RecipeFillPlannerTest {
   private RecipeStack stack(String item,int count){return new RecipeStack(item,0,item,count,64,true);}
   private RecipeIngredient ingredient(String...items){return new RecipeIngredient(Arrays.stream(items).map(item->new RecipeIngredient.Option(item,0,null)).toList());}
   private List<RecipeStack> inventory(RecipeStack...items){List<RecipeStack> slots=new ArrayList<>(Collections.nCopies(36,null));for(int i=0;i<items.length;i++)slots.set(i,items[i]);return slots;}
+  @Test void wheelBatchMatchesRepeatedPlansAndStopsAtCapacityWithoutTouchingSources() {
+    var main=inventory(stack("a",20));var grid=List.of(stack("a",3));var cells=List.of(ingredient("a"));
+    var batch=RecipeFillPlanner.placeSteps(main,null,grid,cells,0,true,true,false,null,8);
+    assertEquals(11,batch.grid().get(0).count());assertEquals(12,batch.main().get(0).count());
+    var returned=RecipeFillPlanner.removeSteps(batch.main(),batch.offhand(),batch.grid(),0,true,8);
+    assertEquals(main,returned.main());assertEquals(grid,returned.grid());assertEquals(20,main.get(0).count());
+    var maximum=RecipeFillPlanner.placeSteps(main,null,grid,cells,0,true,true,false,null,64);
+    assertEquals(23,maximum.grid().get(0).count());
+  }
+  @Test void removalBatchStopsWhenAnyIngredientCellEmptiesAndPreservesNativeComponents() {
+    var tagged=new RecipeStack("a",0,"tagged-a",7,64,true);
+    var grid=List.of(tagged,stack("b",2));
+    var result=RecipeFillPlanner.removeSteps(inventory(),null,grid,0,true,64);
+    assertEquals(tagged.count(5),result.grid().get(0));assertNull(result.grid().get(1));
+    assertEquals(tagged.count(2),result.main().get(0));assertEquals(stack("b",2),result.main().get(1));
+  }
   @Test void overlappingAlternativesUseAnAugmentingAssignmentInsteadOfGreedyLoss() {
     var match=RecipeMatcher.match(List.of(ingredient("a","b"),ingredient("a")),List.of(stack("a",1),stack("b",1)),1,Arrays.asList(null,null));
     assertNotNull(match);assertEquals("b",match.supplies().get(match.cells()[0]).representative().item());

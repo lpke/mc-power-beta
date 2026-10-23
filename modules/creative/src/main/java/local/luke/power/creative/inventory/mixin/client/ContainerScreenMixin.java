@@ -15,12 +15,19 @@ import org.lwjgl.input.Mouse;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = ContainerScreen.class, priority = 1100)
 public abstract class ContainerScreenMixin extends Screen implements CreativeDragScreen {
   @Shadow public Container container;
   @Shadow protected abstract Slot getSlot(int x, int y);
   @Unique private final CreativeStackDrag power$paint = new CreativeStackDrag();
+
+  @Inject(method = "getSlot", at = @At("RETURN"), cancellable = true)
+  private void power$hideCatalogBackgroundSlots(int x, int y, CallbackInfoReturnable<Slot> ci) {
+    if ((Object)this instanceof local.luke.power.input.InventoryGui gui && gui.power$usesCatalogWheel()
+        && ci.getReturnValue() != null && ci.getReturnValue().id < 36) ci.setReturnValue(null);
+  }
 
   @Override public Slot power$defaultCreativePaintSlot(int x, int y) { return getSlot(x, y); }
   @Override public Slot power$creativePaintSlot(int x, int y) { return getSlot(x, y); }

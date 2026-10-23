@@ -41,9 +41,20 @@ public final class OffhandRenderer {
     previousEquip = equip; previousSwing = swing;
     if (swingTicks > 0) { swing = (6 - --swingTicks) / 6f; } else swing = 0;
     ItemStack actual = mc.player != null && Offhand.enabled(mc.player) ? Offhand.get(mc.player.inventory) : null;
+    // Durable transfers replace stack objects. Count-only changes keep the same held pose.
+    if (!changed && sameItem(rendered, actual)) rendered = actual;
     float target = !changed && rendered == actual ? 1 : 0;
     equip += Math.max(-.4f, Math.min(.4f, target - equip));
     if (equip < .1f) { rendered = actual; changed = false; }
+  }
+  private static boolean sameItem(ItemStack previous, ItemStack actual) {
+    if (previous == actual) return true;
+    if (previous == null || actual == null || previous.count <= 0 || actual.count <= 0
+        || previous.itemId != actual.itemId || previous.getDamage() != actual.getDamage()) return false;
+    try {
+      ItemStack before = previous.clone(), after = actual.clone(); before.count = after.count = 1;
+      return local.luke.power.death.DeathItems.encode(before).equals(local.luke.power.death.DeathItems.encode(after));
+    } catch (java.io.IOException unavailable) { return false; }
   }
   public static boolean splitMap(Minecraft mc, ItemStack main) {
     return Offhand.playable(mc) && owner == mc.player && world == mc.world && rendered != null

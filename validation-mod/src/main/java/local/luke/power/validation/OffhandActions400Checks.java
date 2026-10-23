@@ -131,6 +131,17 @@ public final class OffhandActions400Checks {
       String[] before=s.items();data.method_667(mc.player,map);boolean included=context.equals("offhand")||context.equals("main");
       check(!data.field_726.isEmpty()==included&&!data.field_727.isEmpty()==included,"native map tracker/marker disagrees with actual enabled hand ownership");exact(s,before);
     });
+    probe(s,"count-only replacement retains offhand equip height while item/NBT/empty changes lower it",()->{
+      ItemStack first=tagged(35,13,4,"count-animation");s.hands(tagged(280,1,0,"main"),first);
+      for(int i=0;i<8;i++)OffhandRenderer.tick(mc);
+      check(OffhandRenderer.equip(mc.player,1)==1,"offhand did not finish its initial equip");
+      ItemStack countOnly=DeathItems.decode(DeathItems.encode(first));countOnly.count=12;Offhand.set(inv,countOnly);
+      OffhandRenderer.tick(mc);check(OffhandRenderer.equip(mc.player,1)==1,"count replacement restarted offhand equip");
+      Offhand.set(inv,tagged(35,12,4,"different-native-nbt"));OffhandRenderer.tick(mc);
+      check(OffhandRenderer.equip(mc.player,1)<1,"native NBT replacement skipped equip animation");
+      for(int i=0;i<8;i++)OffhandRenderer.tick(mc);Offhand.set(inv,null);OffhandRenderer.tick(mc);
+      check(OffhandRenderer.equip(mc.player,1)<1,"empty offhand skipped stow animation");
+    });
     for(String changed:List.of("owner","world"))probe(s,"new "+changed+" swing cannot revive the prior rendered item",()->{
       Map<Field,Object> saved=new LinkedHashMap<>();
       for(String name:List.of("owner","world","rendered","equip","previousEquip","swing","previousSwing","swingTicks","changed")){

@@ -18,11 +18,12 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class BucketActionSoundMixin {
   @WrapOperation(method = "method_451", at = @At(value = "INVOKE",
       target = "Lnet/minecraft/world/World;method_229(IIII)Z"))
-  private boolean power$fill(World world, int x, int y, int z, int block, Operation<Boolean> original) {
+  private boolean power$fill(World world, int x, int y, int z, int block, Operation<Boolean> original,
+      @Local(argsOnly = true) PlayerEntity player) {
     Material fluid = world.method_1779(x, y, z);
     boolean filled = original.call(world, x, y, z, block);
-    if (filled && world.getBlockId(x, y, z) == 0 && AudioConfig.current().bucketSounds)
-      ExtraSounds.play(world, x + .5, y + .5, z + .5,
+    if (filled && world.getBlockId(x, y, z) == 0 && (fluid == Material.LAVA ? AudioConfig.current().lavaBucketSounds : AudioConfig.current().bucketSounds))
+      ExtraSounds.play(world, player.x, player.y - player.field_1631, player.z,
           fluid == Material.LAVA ? "item.bucket.fill_lava" : "item.bucket.fill");
     return filled;
   }
@@ -31,7 +32,8 @@ public abstract class BucketActionSoundMixin {
       target = "Lnet/minecraft/world/World;method_201(IIIII)Z"))
   private boolean power$empty(World world, int x, int y, int z, int block, int metadata, Operation<Boolean> original) {
     boolean emptied = original.call(world, x, y, z, block, metadata);
-    if (emptied && world.getBlockId(x, y, z) == block && AudioConfig.current().bucketSounds)
+    if (emptied && world.getBlockId(x, y, z) == block && (world.method_1779(x, y, z) == Material.LAVA
+            ? AudioConfig.current().lavaBucketSounds : AudioConfig.current().bucketSounds))
       ExtraSounds.play(world, x + .5, y + .5, z + .5,
           world.method_1779(x, y, z) == Material.LAVA ? "item.bucket.empty_lava" : "item.bucket.empty");
     return emptied;

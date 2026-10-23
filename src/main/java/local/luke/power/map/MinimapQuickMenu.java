@@ -71,13 +71,13 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
     checkedFrame=frame;checkedHost=mc.currentScreen;checkedGear=gear;gearClear=false;
     for(int y=gear.y();y<gear.y()+gear.height();y++)
       for(int x=gear.x();x<gear.x()+gear.width();x++)
-        if(gear.contains(x,y)&&gui.power$containsGuiSpace(x,y))return false;
+        if(gear.containsCircle(x,y)&&gui.power$containsGuiSpace(x,y))return false;
     return gearClear=true;
   }
   public static boolean owns(Minecraft mc,int x,int y) {
     if(active(mc))return true;
     if(!available(mc))return false;
-    var layout=layout(mc);return layout.gear().contains(x,y)&&gearAvailable(mc,layout);
+    var layout=layout(mc);return layout.gear().containsCircle(x,y)&&gearAvailable(mc,layout);
   }
   public static boolean mouse(Minecraft mc,int x,int y,int button,boolean down) {
     boolean wasOpen=active(mc);
@@ -89,13 +89,13 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
       if(button>=0&&down) {
         var layout=layout(mc);int row=layout.rowAt(x,y);
         if(button==0&&row>=0) { toggle(row); click(mc); }
-        else if(!layout.menu().contains(x,y)||layout.gear().contains(x,y)) {close();click(mc);}
+        else if(!layout.menu().contains(x,y)||layout.gear().containsCircle(x,y)) {close();click(mc);}
       }
       return true;
     }
     if(button!=0||!down||!available(mc))return false;
     var layout=layout(mc);
-    if(!layout.gear().contains(x,y)||!gearAvailable(mc,layout))return false;
+    if(!layout.gear().containsCircle(x,y)||!gearAvailable(mc,layout))return false;
     host=mc.currentScreen;world=mc.world;player=mc.player;open=true;ownedButtons|=1;
     if(host instanceof InventoryDrag drag)drag.power$cancelItemDrag();
     if(host instanceof CreativePaint paint)paint.power$cancelCreativePaint();
@@ -134,20 +134,33 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
     prepare(mc);var gear=layout.gear();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {
-      GL11.glDisable(GL11.GL_DEPTH_TEST);GL11.glDisable(GL11.GL_LIGHTING);
+      GL11.glDisable(GL11.GL_DEPTH_TEST);GL11.glDisable(GL11.GL_LIGHTING);GL11.glDisable(GL11.GL_CULL_FACE);
       int mx=Display.isActive()?Mouse.getX()*mc.currentScreen.width/mc.displayWidth:-1;
       int my=Display.isActive()?mc.currentScreen.height-Mouse.getY()*mc.currentScreen.height/mc.displayHeight-1:-1;
-      VIEW.button("",gear.x(),gear.y(),gear.width(),gear.height(),mx,my,true);
-      int colour=gear.contains(mx,my)||open?0xffffe0a0:0xffe0e0e0;
-      // A crisp three-slider icon shares the native button borders and hover treatment.
+      boolean hovered=gear.containsCircle(mx,my)||open;
+      circle(gear,8,0xff151515);
+      circle(gear,7,hovered?0xffa6a693:0xff8b8b8b);
+      circle(gear,6,hovered?0xff65655a:0xff4d4d4d);
+      int colour=hovered?0xffffe0a0:0xffe0e0e0;
       for(int line=0;line<3;line++) {
-        int y=gear.y()+4+line*3, knob=gear.x()+(line==1?9:5);
-        VIEW.fill(gear.x()+4,y,gear.x()+12,y+1,0xff303030);
-        VIEW.fill(gear.x()+4,y-1,gear.x()+12,y,colour);
-        VIEW.fill(knob,y-2,knob+2,y+1,colour);
+        int y=gear.y()+5+line*3, knob=gear.x()+(line==1?9:5);
+        VIEW.fill(gear.x()+4,y+1,gear.x()+12,y+2,0xff303030);
+        VIEW.fill(gear.x()+4,y,gear.x()+12,y+1,colour);
+        VIEW.fill(knob,y-1,knob+2,y+2,colour);
       }
     }finally{GL11.glPopAttrib();}
   }
+  private static void circle(MinimapQuickMenuLayout.Rect gear,double radius,int colour) {
+    GL11.glDisable(GL11.GL_TEXTURE_2D);
+    GL11.glColor4f((colour>>16&255)/255f,(colour>>8&255)/255f,(colour&255)/255f,(colour>>>24)/255f);
+    GL11.glBegin(GL11.GL_TRIANGLE_FAN);
+    double x=gear.x()+gear.width()/2d,y=gear.y()+gear.height()/2d;
+    GL11.glVertex2d(x,y);
+    for(int i=0;i<=24;i++)GL11.glVertex2d(x+radius*CIRCLE_X[i],y+radius*CIRCLE_Y[i]);
+    GL11.glEnd();GL11.glEnable(GL11.GL_TEXTURE_2D);GL11.glColor4f(1,1,1,1);
+  }
+  private static final double[] CIRCLE_X=new double[25],CIRCLE_Y=new double[25];
+  static {for(int i=0;i<=24;i++){CIRCLE_X[i]=Math.cos(i*Math.PI/12);CIRCLE_Y[i]=Math.sin(i*Math.PI/12);}}
   public static void renderMenu(Minecraft mc,int mouseX,int mouseY) {
     if(!active(mc))return;
     prepare(mc);var layout=layout(mc);var menu=layout.menu();var settings=MapConfig.current();

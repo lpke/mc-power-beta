@@ -28,6 +28,7 @@ public class ClientMixin {
     local.luke.power.input.InventoryTextInput.clear();
     local.luke.power.inventory.InventoryActions.cancel();
     Minecraft mc = (Minecraft)(Object)this;
+    screen=local.luke.power.map.MinimapMapVisit.transition(mc,screen);
     return screen instanceof net.minecraft.client.gui.screen.TitleScreen && mc.world == null
         && local.luke.power.storage.PowerConfig.problem().isEmpty()
         && local.luke.power.config.DefaultBases.needsSetup()
@@ -81,6 +82,7 @@ public class ClientMixin {
     local.luke.power.debug.DebugPerformance.beginTick();
     Minecraft mc = (Minecraft)(Object)this;
     local.luke.power.inventory.NativeInventoryPlan.tick(mc);
+    local.luke.power.inventory.CraftingGridTransfer.tick(mc);
     local.luke.power.input.InventoryWheel.context(mc.currentScreen, org.lwjgl.opengl.Display.isActive());
     local.luke.power.input.KeyConfig.load();
     if (mc.options != null) local.luke.power.input.Bindings.register(mc.options.allKeys);

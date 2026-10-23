@@ -2,16 +2,25 @@
 
 Audio > Extra sounds has independent controls for body splashes, swimming,
 submerging, surfacing, underwater ambience and three groups of occasional
-underwater effects. Power Beta defaults enable them. The other defaults bases
-keep them off. Existing explicit choices stay unchanged.
+underwater effects. Power Beta defaults enable splash, swimming, head transitions
+and bubbles/water additions. Underwater ambience, rare and very rare additions
+default off in every base. The other bases keep all these additions off.
+Existing explicit choices stay unchanged.
 
-The reference is the verified Mojang Java 26.3 client and resource index.
+The reference is Mojang Java 26.3, pinned by its
+[version metadata](https://piston-meta.mojang.com/v1/packages/61fff1316bd50312624a858bbb5eb18fa45208ed/26.3.json),
+[client JAR](https://piston-data.mojang.com/v1/objects/e877b6a07acd633fb3bb475002175cec036e7b87/client.jar)
+and [resource index](https://piston-meta.mojang.com/v1/packages/0c8f43b28f837869c1e54a6aeb22c396a1548946/34.json).
+The client bytes match SHA-1 `e877b6a07acd633fb3bb475002175cec036e7b87`.
+The checked methods are `Entity.updateFluidInteraction`, `Entity.doWaterSplashEffect`,
+`EntityFluidInteraction.update`, `Player.doWaterSplashEffect`, `Monster` splash
+overrides and `AbstractBoat.modifyPassengerFluidInteractionBox`.
 `assets/powerbeta/extra-sounds.json` pins its metadata and every asset hash.
 `python3 tools/audit_extra_sounds.py` checks those bytes against Mojang.
 
 | Effect | When it plays | Modern sound gain before user volume controls |
 | --- | --- | --- |
-| Body splash | The player's body first touches water, excluding the first world tick. Remaining in water does not repeat it. | Weighted movement speed multiplied by 0.2, capped at 1. A gain of 0.25 or higher selects the heavy splash. |
+| Body splash | An entity's body first touches water, excluding its first tick. Remaining in water does not repeat it. | Weighted movement speed multiplied by 0.2, capped at 1. A controlled boat uses its player's motion multiplied by 0.9. Players select the heavy splash at 0.25 or higher. |
 | Swimming | Actual horizontal movement crosses the next stride threshold while in water. Climbing also counts vertical movement. Walking on the bottom, riding, flight and grounded sneaking retain their native exclusions. | Weighted movement speed multiplied by 0.35, capped at 1. |
 | Submerging | The player's physical eyes enter water. | 0.5, pitch 1. |
 | Surfacing | The player's physical eyes leave water. | 0.3, pitch 1. |
@@ -47,11 +56,57 @@ These additions remain local to singleplayer. They do not add bubble-column
 sounds because Beta has no bubble-column blocks. Native flowing-water sounds
 remain native. Body contact for modern splash/swim audio is a separate loaded-only
 read and never changes Beta's water contact, currents, damage or particles.
+It covers players, all native creatures, dropped items, projectiles and vehicles.
+A boat above water shields the part of its passenger below the boat top; a
+submerged boat stops shielding. Empty boats and minecarts use their own motion.
+Generic and hostile splashes use the official two normal variants, even at high
+speed. Each event keeps its entity category, including after live volume edits.
+Sampling covers loaded boxes up to 16 blocks on each axis, including native giants.
+Larger custom entities retain no additional sound rather than causing an unbounded scan.
+Added audio uses separate random generators so native particles, damage and
+movement retain their random sequence.
 
 The long ambience file streams on the sound threads. Sound creation and decoding
 never run in rendering. With all water additions off, they do no terrain sampling
 or sound work. Master, Game sounds, Ambient/Players and individual sound volume
 controls continue to apply. Previews use the same official variant gains.
+
+## Buckets and lava
+
+Water bucket sounds and lava bucket sounds have separate controls and previews.
+The stable `bucketSounds` preference now controls water and cow milking.
+Filling plays at the player with Players volume; emptying plays at the target
+block with Blocks volume. Cow milking uses Passive creatures volume.
+A missing `lavaBucketSounds` copies the previous explicit bucket choice once
+through the verified settings backup; existing explicit split choices remain intact.
+
+The lava audit checked `LavaFluid.animateTick`, `Entity.lavaHurt`,
+`ItemEntity.shouldPlayLavaHurtSound`, `LiquidBlock.fizz` and
+`LevelEventHandler` event 1501 in the same verified client.
+
+| Effect | Conditions and gain | Category |
+| --- | --- | --- |
+| Pop | Native 1/100 exposed-surface particle event, gain 0.2 to 0.4, pitch 0.9 to 1.05. | Ambient |
+| Lava ambience | Independent 1/200 exposed-surface display event, same gain and pitch range. | Ambient |
+| Lava burning | Successful native lava damage, gain 0.4, pitch 2 to 2.4. Item sounds require every tenth entity tick or destruction. | The entity category, Ambient for dropped items |
+| Cooling/extinguishing | Native water/lava contact, unchanged `random.fizz`, gain 0.5 and pitch `2.6 + (random1 - random2) * 0.8`. | Blocks |
+
+Lava ambience and burning have their own toggles, enabled in the Power Beta base
+and disabled in the other bases. Missing preferences initialize from the selected
+base after a verified backup. The pop category now matches modern Ambient.
+The modern item damage API returns true after damage; Beta returns false even
+when its item health decreases. The audio hook checks the actual health decrease
+and preserves that native return value. Disabling item destruction or fire damage
+prevents its associated new burn cue. With modern burning sounds on, the native
+per-tick item bounce fizz is replaced by that damage-owned cue to avoid duplicates.
+With it off, the native sound remains. All additional lava sounds stay singleplayer.
+
+Cooling already has matching native behavior and bytes, so it needs no extra asset
+or toggle. Modern lava adds no general lava entry, swimming or exit sound.
+Bubble-column effects and modern-only creatures have no Beta counterpart.
+Native Beta fluid physics, damage cadence and boat geometry remain unchanged;
+the audio follows their native event times. These are the remaining differences
+from running a modern client.
 
 ## Complete decoding
 

@@ -33,6 +33,34 @@ public final class RecipeFillPlanner {
     }
     return new Plan(returns.main,returns.offhand,grid,remaining,false);
   }
+  /** Coalesce wheel detents into one immutable plan, preserving repeated-click capacity rules. */
+  public static Plan removeSteps(List<RecipeStack> main, RecipeStack offhand, List<RecipeStack> grid,
+      int selected, boolean offhandWritable, int steps) {
+    if (steps < 1 || steps > 64) throw new IllegalArgumentException("Invalid recipe wheel count");
+    Plan result = null;
+    long occupied = grid.stream().filter(Objects::nonNull).count();
+    for (int i = 0; i < steps; i++) {
+      Plan next = removeOne(main, offhand, grid, selected, offhandWritable, true);
+      if (next == null) break;
+      result = next; main = next.main(); offhand = next.offhand(); grid = next.grid();
+      if (grid.stream().filter(Objects::nonNull).count() != occupied) break;
+    }
+    return result;
+  }
+  public static Plan placeSteps(List<RecipeStack> main, RecipeStack offhand, List<RecipeStack> grid,
+      List<RecipeIngredient> cells, int selected, boolean offhandWritable, boolean matching,
+      boolean maximum, RecipeStack output, int steps) {
+    if (steps < 1 || steps > 64) throw new IllegalArgumentException("Invalid recipe wheel count");
+    Plan result = null;
+    for (int i = 0; i < steps; i++) {
+      Plan next = plan(main, offhand, grid, cells, selected, offhandWritable, matching, maximum, output);
+      if (next == null) break;
+      result = next;
+      if (next.ghost() || maximum || next.grid().equals(grid)) break;
+      main = next.main(); offhand = next.offhand(); grid = next.grid(); output = next.output(); matching = true;
+    }
+    return result;
+  }
   public static Plan plan(List<RecipeStack> originalMain,RecipeStack originalOffhand,List<RecipeStack> originalGrid,
       List<RecipeIngredient> cells,int selected,boolean offhandWritable,boolean matches,boolean maximum) {
     return plan(originalMain,originalOffhand,originalGrid,cells,selected,offhandWritable,matches,maximum,null);

@@ -38,6 +38,7 @@ public final class SettingsRegistry {
     StatusBackend.register(s);
     InfoHudBackend.register(s);
     ComponentBackend.register(s);
+    local.luke.power.creativeui.CreativeTabsBackend.register(s);
     GlassBackend.register(s);
     LogoBackend.register(s);
     DeathBackend.register(s);

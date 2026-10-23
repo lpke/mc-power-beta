@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [4.4.0] - 2026-10-23
+
+- Add editable Creative tabs with custom names, icons, ordered item grids, empty slots, multiple selection and dragging. Keep Search pinned beside six regular tabs, with fuzzy item search and remembered tab scrolling.
+- Combine Tools and Weapons, simplify Creative tab titles, darken unselected tabs, hide unused arrows and refine palette spacing. Support advanced tooltips and cursor wheel transfers; keep only inventory-clear confirmations audible.
+- Use one All settings / This tab search choice across Options, starting at All. Controls always searches controls and has no scope button.
+- Make Fast placement, Fake sneak, Placement restriction and Hide selected entities temporary gameplay actions. Retain their bindings and tuning, add an unassigned placement-restriction toggle, and clear active state on world exit.
+- Allow Shift-click and Shift-drag into the personal crafting grid when the hotbar is full, independently of crafting-grid storage. Preserve native item data, callbacks and durable inventory protection.
+- Keep offhand equip animation steady during count-only wheel transfers. Batch queued recipe-wheel steps into one protected transaction and fix saving the Allowed tools picker.
+- Save sorting layouts and their presets separately for each world. Migrate existing layouts from a retained global seed, preserve world-copy layouts and protect unsupported data.
+- Use a circular minimap settings button aligned to the frame. Left-click the minimap in an inventory or Pause to open the World Map; Escape returns to the same screen and container.
+- Set Power Beta's default underwater fog density to 40 percent and disable underwater ambience, rare sounds and very rare sounds by default. Preserve existing saved preferences and other defaults bases.
+- Split water and lava bucket sounds into separate toggles and previews, preserving the old bucket choice for both. Extend modern splashes to mobs, items and vehicles with their own volumes and categories.
+- Add independently toggleable modern lava ambience and burning sounds, retain native cooling and extinguishing audio, and correct lava-pop volume-category handling.
+
 ## [4.3.2] - 2026-10-23
 
 - Add independently toggleable submerging, surfacing, underwater ambience, bubbles and water, rare underwater sounds and very rare underwater sounds under Audio > Extra sounds. Match modern head crossings, variant volume, random chances, pause handling and ambience fades.

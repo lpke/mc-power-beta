@@ -411,7 +411,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private boolean canClear() { return libraryVisible() ? library.hasQuery() : !search.text().isBlank() || filtered(); }
   private boolean searchScopeVisible() {
     return !embedded() && !isolatedRules() && editorReturn == null && !libraryVisible()
-        && !filtered() && !page.equals("Defaults");
+        && !filtered() && !page.equals("Defaults") && !controls();
   }
   private int sectionButtonX() { return right() - 34; }
   private int searchScopeX() { return sectionButtonX() - 24; }
@@ -663,7 +663,8 @@ public final class PowerOptionsScreen extends UiScreen {
         .filter(Objects::nonNull).toList();
     candidates = candidates.stream().filter(this::inMapScope)
         .filter(s -> !s.id.equals("maps.worldMapEditor") || mapAppearanceDestination)
-        .filter(s -> query.isEmpty() || !searchScopeVisible() || !OptionsSearchScope.thisTab(page) || searchPage(s).equals(page)).toList();
+        .filter(s -> !controls() || s.kind == Setting.Kind.KEY)
+        .filter(s -> query.isEmpty() || !controls() && (!searchScopeVisible() || !OptionsSearchScope.thisTab(page)) || searchPage(s).equals(page)).toList();
     if (embedded() && mapView.equals("Minimap") && query.isEmpty() && listed.isEmpty() && !changedOnly)
       candidates = HudEditorSections.order(candidates);
     Map<String, Integer> scores = new HashMap<>();
@@ -1119,6 +1120,9 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!SettingAccess.reason(session, s).isEmpty()) return;
     error = "";
     click();
+    if (s.id.equals(local.luke.power.creativeui.CreativeTabsBackend.SETTING)) {
+      minecraft.setScreen(new CreativeTabsScreen(this, s, () -> changed(s))); return;
+    }
     if (s.id.equals("inventoryTools.hotbarEditor")) {
       if (!local.luke.power.inventory.tools.SavedCreativeHotbars.editable(minecraft)) {
         error = "Editing saved hotbars requires Creative access in a singleplayer world."; return;
@@ -1356,6 +1360,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private String value(Setting s) {
     if (InheritedColors.accepts(s)) return InheritedColors.label(s);
     if (ColorSettings.accepts(s)) return ColorSettings.label(s, session.settings());
+    if (s.id.equals(local.luke.power.creativeui.CreativeTabsBackend.SETTING)) return "Edit...";
     if (s.id.equals("inventoryTools.preferredItems")) return "Edit...";
     if (s.id.equals("inventoryTools.toolWhitelist")) {
       var tools = s.value.getAsJsonArray();
@@ -1495,7 +1500,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
         !conflictIds.isEmpty() ? "Conflicting bindings"
-        : changedOnly ? "Search changed settings..." : embedded() ? "Search maps and controls..."
+        : controls() ? "Search controls..." : changedOnly ? "Search changed settings..." : embedded() ? "Search maps and controls..."
         : searchScopeVisible() && OptionsSearchScope.thisTab(page) ? "Search settings in this tab..." : "Search all settings...");
     if (canClear()) iconButton("remove", clearSearchX(), 27, 20, 20, mx, my, true, false);
     if (searchScopeVisible()) button(OptionsSearchScope.thisTab(page) ? "T" : "A", searchScopeX(), 27, 20, 20, mx, my, true);

@@ -40,7 +40,7 @@ public final class ComponentBackend implements Backend {
 
   private void visit(String prefix, Object current, Object defaults) throws Exception {
     for (Field f : current.getClass().getFields()) {
-      if (Modifier.isStatic(f.getModifiers())) continue;
+      if (Modifier.isStatic(f.getModifiers()) || Modifier.isTransient(f.getModifiers())) continue;
       String name = prefix + f.getName(), key = id + "." + name;
       Object v = f.get(current), d = f.get(defaults);
       Class<?> t = f.getType();

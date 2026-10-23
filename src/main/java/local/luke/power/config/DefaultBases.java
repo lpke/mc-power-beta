@@ -68,7 +68,7 @@ public final class DefaultBases {
     ConfigSession session = SettingsRegistry.openDefaults(mc);
     Set<String> libraries = Set.of("audio.presets", "audio.favourites", "logo.presets", "interface.debugPresets", "interface.colours");
     for (Setting setting : session.settings()) {
-      if (libraries.contains(setting.id)) continue;
+      if (libraries.contains(setting.id) || Set.of("inventoryTools.protectedSlots", "inventoryTools.preferredItems").contains(setting.id)) continue;
       setting.value = value(base, setting.id, setting.powerBetaDefault);
     }
     session.settings().stream().filter(s -> s.id.equals("defaults.base")).forEach(s -> s.value = new JsonPrimitive(base.id));

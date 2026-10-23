@@ -84,6 +84,7 @@ public final class Validation {
       else if (command.equals("death-restoration-400")) DeathRestoration400Checks.run(mc);
       else if (command.equals("kept-load-420")) KeptLoad420Checks.run(mc);
       else if (command.equals("tool-whitelist-420")) ToolWhitelist420Checks.run(mc);
+      else if (command.equals("sorting-worlds-440")) Sorting440Checks.run(mc);
       else if (command.startsWith("settings-400 ")) HudSettings400Checks.run(mc,command.substring(13));
       else if (command.startsWith("input-400 ")) Input400Checks.run(mc,command.substring(10));
       else if (command.startsWith("offhand-actions-400 ")) OffhandActions400Checks.run(mc,command.substring(20));
@@ -111,6 +112,8 @@ public final class Validation {
       else if (command.startsWith("controls-403 ")) Controls403Checks.run(mc,command.substring(13));
       else if (command.equals("sorting-layer-402")) SortingLayer402Checks.run(mc);
       else if (command.equals("container-offhand-402")) ContainerOffhand402Checks.run(mc);
+      else if (command.equals("release-440")) Release440Checks.run(mc);
+      else if (command.equals("fluid-sounds-440")) FluidSounds440Checks.run(mc);
       else if (command.equals("fluid-sounds-420")) FluidSounds420Checks.run(mc);
       else if (command.equals("water-sounds-432")) WaterSounds432Checks.run(mc);
       else if (command.equals("extra-sound-decoders-432")) ExtraSoundDecoder432Checks.run(mc);
@@ -248,6 +251,8 @@ public final class Validation {
       else if (command.equals("release-300-marker-refinements")) Release300MarkerRefinementsChecks.run(mc);
       else if (command.equals("redstone-sounds")) RedstoneSoundChecks.run(mc);
       else if (command.equals("redstone-visuals")) RedstoneVisualChecks.run(mc);
+      else if (command.equals("creative-440")) Creative440Checks.run(mc);
+      else if (command.startsWith("creative-440 ")) Creative440PointerChecks.run(mc, command.substring("creative-440 ".length()).trim());
       else if (command.equals("creative-borders")) CreativeBorderChecks.run(mc);
       else if (command.equals("creative-drops")) CreativeDropChecks.run(mc);
       else if (command.startsWith("creative-paint")) CreativePaintChecks.run(mc, command.length() > 14 ? command.substring(14).trim() : "check");

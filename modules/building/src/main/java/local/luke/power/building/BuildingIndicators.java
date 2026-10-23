@@ -56,6 +56,5 @@ public final class BuildingIndicators {
     if (!next.sneak.enabled && !next.placement.enabled && !next.placement.restrictionEnabled) return;
     next.sneak.enabled = next.placement.enabled = next.placement.restrictionEnabled = false;
     Config.preview(next);
-    local.luke.power.storage.PowerConfig.saveDeferred("building", next);
   }
 }

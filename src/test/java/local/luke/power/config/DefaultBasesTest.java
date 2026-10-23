@@ -31,7 +31,7 @@ class DefaultBasesTest {
       expected.getAsJsonObject("sprint").addProperty("sprintLadders", modern);
       expected.getAsJsonObject("sprint").addProperty("stopAtWalls", true);
       for (String key : List.of("lavaPopSounds", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds", "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions"))
-        expected.getAsJsonObject("audio").addProperty(key, modern);
+        expected.getAsJsonObject("audio").addProperty(key, modern && !Set.of("underwaterAmbience", "underwaterRareAdditions", "underwaterUltraRareAdditions").contains(key));
       assertEquals(expected, PowerConfig.document().getAsJsonObject("settings"));
       try (var files = Files.walk(game.resolve("power-beta-data/settings-backups"))) {
         assertTrue(files.filter(Files::isRegularFile).anyMatch(path -> {
@@ -249,7 +249,7 @@ class DefaultBasesTest {
     for (String id : List.of("flightSpeed", "spectatorSpeed")) assertEquals(100, creative.get(id).getAsInt());
     for (String id : List.of("sprintMultiplier", "spectatorSprintMultiplier")) assertEquals(200, creative.get(id).getAsInt());
     var water = PowerConfig.section("visual");
-    assertEquals(30, water.get("underwaterFogDensity").getAsInt());
+    assertEquals(40, water.get("underwaterFogDensity").getAsInt());
     assertEquals(75, water.get("underwaterDarkness").getAsInt());
     assertEquals(95, water.get("underwaterDarknessOutside").getAsInt());
     assertTrue(water.get("removeUnderwaterOverlay").getAsBoolean());

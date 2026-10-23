@@ -1,7 +1,7 @@
 package local.luke.power.visual;
 
 public final class VisualSettings {
-  public boolean hideEntities;
+  public transient boolean hideEntities;
   public boolean hideItems = true;
   public boolean hideMobs, hidePlayers, hideVehicles, hideProjectiles, hideTnt, hideOther;
   public boolean entityRenderingMessages, fullBrightMessages, spectatorFullBright;

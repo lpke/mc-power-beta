@@ -86,9 +86,16 @@ public final class ConfigDefaults {
   private static void initializeExtraSounds(Path game) throws IOException {
     JsonObject audio = PowerConfig.section("audio");
     boolean changed = false;
+    if(!audio.has("lavaBucketSounds")&&audio.has("bucketSounds")) {
+      JsonElement previous=audio.get("bucketSounds");
+      if(!previous.isJsonPrimitive()||!previous.getAsJsonPrimitive().isBoolean())
+        throw new IOException("Cannot split an unsupported bucket sound preference; original settings were preserved");
+      audio.add("lavaBucketSounds",previous.deepCopy());changed=true;
+    }
     for (String key : java.util.List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds",
         "lavaPopSounds", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds",
-        "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions")) {
+        "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions",
+        "lavaBucketSounds", "lavaAmbientSounds", "lavaBurnSounds")) {
       if (audio.has(key)) continue;
       audio.add(key, DefaultBases.value("audio." + key, new JsonPrimitive(false)));
       changed = true;

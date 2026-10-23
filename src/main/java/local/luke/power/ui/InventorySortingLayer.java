@@ -21,7 +21,7 @@ public final class InventorySortingLayer {
   private UiScreen page;
   private boolean active = true;
   public static boolean available(Minecraft mc) {
-    return OffhandInput.container(mc) && !InventoryPanels.modal(mc.currentScreen)
+    return local.luke.power.inventory.tools.WorldSortingLayouts.available() && OffhandInput.container(mc) && !InventoryPanels.modal(mc.currentScreen)
         && !InventoryTextInput.active(mc.currentScreen) && PowerConfig.problem().isEmpty();
   }
   public InventorySortingLayer(Minecraft mc, ContainerScreen host) throws ReflectiveOperationException {

@@ -155,12 +155,6 @@
     "label": "Undo history",
     "description": "Maximum number of edit records kept in memory."
   },
-  "tweaks.placement.enabled": {
-    "page": "Building",
-    "group": "Fast placement",
-    "label": "Fast placement",
-    "description": "Hold right-click to keep placing blocks."
-  },
   "tweaks.placement.attemptsPerTick": {
     "page": "Building",
     "group": "Fast placement",
@@ -178,12 +172,6 @@
     "group": "Fast placement",
     "label": "Remember orientation",
     "description": "Keep the initial orientation during continuous placement."
-  },
-  "tweaks.placement.restrictionEnabled": {
-    "page": "Building",
-    "group": "Placement rules",
-    "label": "Placement restriction",
-    "description": "Constrain continued placement using the first successful placement."
   },
   "tweaks.placement.restrictionTiedToFast": {
     "page": "Building",
@@ -346,12 +334,6 @@
     "group": "Vehicles",
     "label": "Faster minecarts",
     "description": ""
-  },
-  "tweaks.sneak.enabled": {
-    "page": "Movement",
-    "group": "Walking",
-    "label": "Fake sneak",
-    "description": "Prevent walking off ledges without crouching or slowing down."
   },
   "tweaks.sneak.announceToggle": {
     "page": "Movement",

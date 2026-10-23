@@ -43,7 +43,7 @@ public final class ItemPickerScreen extends UiScreen {
     this.parent=parent;this.title=title;this.domain=domain;this.multiple=multiple;this.accepted=accepted;
     this.selected=new LinkedHashSet<>(selected);original=Set.copyOf(selected);catalogue=new ArrayList<>(ItemCatalogue.entries(domain).stream().filter(options.accepts()).toList());
     for(String value:selected) if(catalogue.stream().noneMatch(e->e.value().equals(value))) {
-      try{var entry=ItemCatalogue.resolve(domain,value);if(options.accepts().test(entry))catalogue.add(entry);}catch(IllegalArgumentException ignored){}
+      try{var entry=ItemCatalogue.resolve(domain,value);catalogue.add(entry);}catch(IllegalArgumentException ignored){}
     }
     filter();
   }
@@ -64,7 +64,7 @@ public final class ItemPickerScreen extends UiScreen {
         .map(Match::entry).toList();
   }
   private void choose(String value){
-    if(multiple) {if(!selected.remove(value))selected.add(value);}
+    if(multiple) {if(!selected.remove(value)){try{resolve(value);}catch(IllegalArgumentException failure){error=failure.getMessage();return;}selected.add(value);}}
     else {selected.clear();selected.add(value);}
     error="";filter();if(options.instant())save();
   }
@@ -87,7 +87,7 @@ public final class ItemPickerScreen extends UiScreen {
   }
   private void save(){
     if(!multiple && selected.isEmpty())return;
-    try{for(String value:selected)resolve(value);accepted.accept(List.copyOf(selected));showScreen(parent);}
+    try{for(String value:selected)if(!original.contains(value))resolve(value);accepted.accept(List.copyOf(selected));showScreen(parent);}
     catch(IllegalArgumentException e){error=Objects.toString(e.getMessage(),"Invalid selection");}
   }
   private void leave(){

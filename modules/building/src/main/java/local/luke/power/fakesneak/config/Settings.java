@@ -1,7 +1,8 @@
 package local.luke.power.fakesneak.config;
 
 public final class Settings {
-  public boolean enabled = false;
+  /** Visit-local action state, deliberately excluded from persisted preferences. */
+  public transient boolean enabled;
   public boolean announceToggle;
 
   public Settings copy() {

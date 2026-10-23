@@ -10,6 +10,27 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class ExtraSoundDefaultsTest {
+  @Test void splittingBucketsPreservesTheOldChoiceAndNeverFollowsLaterBaseChanges() throws Exception {
+    ConfigDefaults.prepare(game);
+    for(boolean enabled:new boolean[]{false,true}) {
+      JsonObject old=PowerConfig.document();
+      JsonObject audio=old.getAsJsonObject("settings").getAsJsonObject("audio");
+      audio.addProperty("bucketSounds",enabled);audio.remove("lavaBucketSounds");
+      audio.remove("lavaAmbientSounds");audio.remove("lavaBurnSounds");
+      PowerConfig.write(old);byte[] original=Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      assertEquals(enabled,PowerConfig.section("audio").get("bucketSounds").getAsBoolean());
+      assertEquals(enabled,PowerConfig.section("audio").get("lavaBucketSounds").getAsBoolean());
+      assertTrue(PowerConfig.section("audio").get("lavaAmbientSounds").getAsBoolean());
+      try(var files=Files.walk(game.resolve("power-beta-data/settings-backups"))) {
+        assertTrue(files.filter(Files::isRegularFile).anyMatch(path->{
+          try{return Arrays.equals(original,Files.readAllBytes(path));}catch(Exception e){return false;}
+        }));
+      }
+      byte[] migrated=Files.readAllBytes(PowerConfig.path());ConfigDefaults.prepare(game);
+      assertArrayEquals(migrated,Files.readAllBytes(PowerConfig.path()));
+    }
+  }
   private static final List<String> KEYS = List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds",
       "lavaPopSounds", "waterSplashSounds", "swimmingSounds");
   @TempDir Path game;

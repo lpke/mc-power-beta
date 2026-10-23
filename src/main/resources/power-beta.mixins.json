@@ -150,6 +150,8 @@
     "SpectatorOutlineMixin",
     "SpectatorSplashMixin",
     "LavaPopSoundMixin",
+    "LavaBurnSoundMixin",
+    "LavaItemSoundMixin",
     "FluidMovementSoundMixin",
     "UnderwaterSoundMixin",
     "UnderwaterPlayerTickMixin",

@@ -41,6 +41,10 @@ public final class RecipeFills {
   }
   public static Result fillResult(Minecraft mc,RecipeContext context,RecipeDefinition recipe,boolean maximum,
       BooleanSupplier eligible,java.util.function.Consumer<Boolean> selected)throws IOException {
+    return fillResult(mc,context,recipe,maximum,eligible,selected,1);
+  }
+  public static Result fillResult(Minecraft mc,RecipeContext context,RecipeDefinition recipe,boolean maximum,
+      BooleanSupplier eligible,java.util.function.Consumer<Boolean> selected,int steps)throws IOException {
     if(NativeInventoryPlan.failed())return Result.RECOVERY_REQUIRED;
     if(!context.writable(mc)||recipe.kind!=context.kind||!eligible.getAsBoolean())return Result.UNAVAILABLE;
     var cells=recipe.layout(context.width,context.height);if(cells==null)return Result.UNAVAILABLE;
@@ -51,7 +55,7 @@ public final class RecipeFills {
     RecipeStack originalOutput=context.kind==RecipeDefinition.Kind.FURNACE?RecipeNative.stack(context.output.getStack()):null;
     boolean matching=context.crafting!=null&&recipe.nativeRecipe!=null&&recipe.nativeRecipe.method_2072(context.crafting);
     if(context.kind==RecipeDefinition.Kind.FURNACE)matching=grid.get(0)!=null&&cells.get(0).accepts(grid.get(0));
-    var plan=RecipeFillPlanner.plan(main,off,grid,cells,mc.player.inventory.selectedSlot,Offhand.enabled(mc.player),matching,maximum,originalOutput);
+    var plan=RecipeFillPlanner.placeSteps(main,off,grid,cells,mc.player.inventory.selectedSlot,Offhand.enabled(mc.player),matching,maximum,originalOutput,steps);
     if(plan==null)return Result.NO_SPACE;
     if(!plan.ghost()&&!valid(recipe,context,plan.grid()))return Result.UNAVAILABLE;
     return publish(mc,context,recipe,main,off,grid,originalOutput,plan,false,eligible,selected);
@@ -59,6 +63,10 @@ public final class RecipeFills {
   /** Only the displayed, already placed crafting recipe may return one batch of inputs. */
   public static Result removeResult(Minecraft mc,RecipeContext context,RecipeDefinition recipe,
       BooleanSupplier eligible,java.util.function.Consumer<Boolean> selected)throws IOException {
+    return removeResult(mc,context,recipe,eligible,selected,1);
+  }
+  public static Result removeResult(Minecraft mc,RecipeContext context,RecipeDefinition recipe,
+      BooleanSupplier eligible,java.util.function.Consumer<Boolean> selected,int steps)throws IOException {
     if(NativeInventoryPlan.failed())return Result.RECOVERY_REQUIRED;
     if(context.kind!=RecipeDefinition.Kind.CRAFTING||recipe.kind!=context.kind||!context.writable(mc)
         ||!eligible.getAsBoolean())return Result.UNAVAILABLE;
@@ -67,7 +75,7 @@ public final class RecipeFills {
     for(var slot:context.inputs)grid.add(RecipeNative.stack(slot.getStack()));
     if(!valid(recipe,context,grid)||!Objects.equals(encode(context.output.getStack()),encode(recipe.output)))return Result.UNAVAILABLE;
     RecipeStack off=RecipeNative.stack(Offhand.get(mc.player.inventory));
-    var plan=RecipeFillPlanner.removeOne(main,off,grid,mc.player.inventory.selectedSlot,Offhand.enabled(mc.player),true);
+    var plan=RecipeFillPlanner.removeSteps(main,off,grid,mc.player.inventory.selectedSlot,Offhand.enabled(mc.player),steps);
     if(plan==null)return Result.NO_SPACE;
     return publish(mc,context,recipe,main,off,grid,null,plan,true,eligible,selected);
   }

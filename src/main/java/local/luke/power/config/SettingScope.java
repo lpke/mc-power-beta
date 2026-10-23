@@ -9,7 +9,7 @@ public final class SettingScope {
   }
 
   private static boolean perWorld(String id, String backend) {
-    return backend.equals("world");
+    return backend.equals("world") || id.equals("inventoryTools.protectedSlots") || id.equals("inventoryTools.preferredItems");
   }
 
   public static String label(String id, String backend, String group, String label) {

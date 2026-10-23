@@ -7,8 +7,11 @@ public final class AudioSettings {
   public boolean seedPlantingSounds = false;
   public boolean hoeTillingSounds = false;
   public boolean bucketSounds = false;
+  public boolean lavaBucketSounds = false;
   public boolean boneMealSounds = false;
   public boolean lavaPopSounds = false;
+  public boolean lavaAmbientSounds = false;
+  public boolean lavaBurnSounds = false;
   public boolean waterSplashSounds = false;
   public boolean swimmingSounds = false;
   public boolean underwaterEnterSounds = false;
@@ -129,9 +132,13 @@ public final class AudioSettings {
   }
 
   public double gain(String sound, boolean menu) {
+    return gain(sound, menu, null);
+  }
+
+  double gain(String sound, boolean menu, String category) {
     return master
         / 100.0
-        * categories.getOrDefault(category(sound, menu), 100)
+        * categories.getOrDefault(category == null ? category(sound, menu) : category, 100)
         / 100.0
         * sounds.getOrDefault(sound, 100)
         / 100.0;
@@ -141,16 +148,15 @@ public final class AudioSettings {
     if (id == null) return "ambient";
     id = id.substring(id.indexOf(':') + 1);
     if (id.startsWith("ambient.weather") || id.contains("thunder")) return "weather";
-    if (id.startsWith("ambient") || id.startsWith("portal")) return "ambient";
-    if (id.startsWith("entity.player.")) return "players";
+    if (id.startsWith("ambient") || id.startsWith("portal") || id.equals("block.lava.pop") || id.equals("block.lava.ambient")) return "ambient";
+    if (id.startsWith("entity.player.") || id.equals("item.bucket.fill") || id.equals("item.bucket.fill_lava")) return "players";
     if (id.startsWith("mob.") || id.startsWith("entity.")) {
       String mob = id.substring(id.indexOf('.') + 1).split("\\.")[0];
-      return Set.of("cow", "pig", "sheep", "chicken", "wolf", "squid").contains(mob)
+      return Set.of("cow", "pig", "sheep", "chicken", "wolf", "squid", "generic").contains(mob)
           ? "passive"
           : "hostile";
     }
     if (id.startsWith("step.")
-        || id.equals("block.lava.pop")
         || id.equals("item.crop.plant")
         || id.equals("item.hoe.till")
         || id.startsWith("item.bucket.")

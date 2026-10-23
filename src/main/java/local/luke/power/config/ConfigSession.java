@@ -74,18 +74,7 @@ public final class ConfigSession {
           var value = new JsonArray(); pool.forEach(value::add); s.value = value;
         });
     }
-    if (changed.id.equals("tweaks.placement.enabled")) {
-      boolean tied =
-          settings.stream()
-              .filter(s -> s.id.equals("tweaks.placement.restrictionTiedToFast"))
-              .findFirst()
-              .map(s -> s.value.getAsBoolean())
-              .orElse(false);
-      if (tied)
-        settings.stream()
-            .filter(s -> s.id.equals("tweaks.placement.restrictionEnabled"))
-            .forEach(s -> s.value = changed.value.deepCopy());
-    }
+
   }
 
   private final Map<String, JsonElement> previewed = new HashMap<>();

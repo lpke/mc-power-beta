@@ -26,13 +26,10 @@ class ControlLinksTest {
     var pairs = Map.ofEntries(
         Map.entry("keys.Auto-walk (toggle)", "tweaks.autoWalkHoldToWalk"),
         Map.entry("keys.key.powerbeta.free_look", "tweaks.freeLookToggle"),
-        Map.entry("keys.Fast place (toggle)", "tweaks.placement.enabled"),
-        Map.entry("keys.Fake sneak (toggle)", "tweaks.sneak.enabled"),
         Map.entry("keys.power_building.hotbar.base", "tweaks.hotbar.overlay"),
         Map.entry("keys.power_building.hotbar.scroll", "tweaks.hotbar.reverseScroll"),
         Map.entry("keys.power_creative.sprint", "creative.sprintToggle"),
         Map.entry("keys.Change Freecam Speed", "power_camera:config.speed"),
-        Map.entry("keys.power_beta.entities", "visual.hideEntities"),
         Map.entry("keys.power_beta.clickMining", "tweaks.clickMining"),
         Map.entry("keys.powerbeta.lightOverlay", "lightOverlay.enabled"),
         Map.entry("keys.powerbeta.infoHud", "infoHud.enabled"),
@@ -68,7 +65,8 @@ class ControlLinksTest {
         "keys.powerbeta.waypoints", "keys.powerbeta.enlargeMap", "keys.power_beta.fullBright", "keys.Auto-mine (toggle)",
         "keys.key.power_controls.zoom", "keys.key.power_controls.cinematic_camera", "keys.key.power_controls.photo_mode",
         "keys.key.power_controls.take_screenshot", "keys.key.power_controls.rescan", "keys.powerbeta.clearMapDestination",
-        "keys.powerbeta.mapSettings")) {
+        "keys.powerbeta.mapSettings", "keys.Fast place (toggle)", "keys.Fake sneak (toggle)",
+        "keys.Placement restriction (toggle)", "keys.power_beta.entities")) {
       Setting key = setting(id);
       List<Setting> all = new ArrayList<>(preferences.stream().map(this::setting).toList());
       all.add(key);

@@ -19,6 +19,7 @@ public final class WorldCompatibility {
   public static void clear() {
     if (verified != null) ((WorldIdentity)verified.method_262()).power$inventoryReady(false);
     verified = null;
+    local.luke.power.inventory.tools.WorldSortingLayouts.clear();
   }
 
   public static void confirm(Minecraft mc) throws IOException {
@@ -43,5 +44,6 @@ public final class WorldCompatibility {
     DurableFiles.syncDirectory(directory);
     ((WorldIdentity)mc.world.method_262()).power$inventoryReady(true);
     verified = mc.world;
+    local.luke.power.inventory.tools.WorldSortingLayouts.activate(expected, directory);
   }
 }

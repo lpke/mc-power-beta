@@ -251,7 +251,7 @@ final class SortingLayer402Checks {
       try {
         if (tools != null) tools.close(); for (var host : screens) { var book = RecipeBooks.book(host); if (book != null) book.removed(); InventoryPanels.remove(host); }
         if (!document.equals(PowerConfig.document())) PowerConfig.write(document);
-        var cache = SortingLayoutPresets.class.getDeclaredField("current"); cache.setAccessible(true); cache.set(null, cachedPresets == null ? null : cachedPresets.deepCopy());
+        var cache = WorldSortingLayouts.class.getDeclaredField("data"); cache.setAccessible(true); cache.set(null, WorldSortingLayoutsData.read(document.getAsJsonObject("settings").getAsJsonObject(WorldSortingLayoutsData.SECTION)));
         InventoryToolsConfig.preview(settings); RecipeBookConfig.preview(recipes);
       } finally {
         mc.player.inventory.main = originalMain; mc.player.inventory.armor = originalArmor; mc.player.inventory.selectedSlot = originalSelected;

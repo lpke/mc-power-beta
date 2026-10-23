@@ -17,7 +17,8 @@ public abstract class GameOptionsMixin {
   @Inject(method = "load", at = @At("HEAD"))
   private void fastplace$register(CallbackInfo ci) {
     for (KeyBinding key : allKeys) if (key == FastPlace.KEY) return;
-    allKeys = Arrays.copyOf(allKeys, allKeys.length + 1);
-    allKeys[allKeys.length - 1] = FastPlace.KEY;
+    allKeys = Arrays.copyOf(allKeys, allKeys.length + 2);
+    allKeys[allKeys.length - 2] = FastPlace.KEY;
+    allKeys[allKeys.length - 1] = FastPlace.RESTRICTION_KEY;
   }
 }

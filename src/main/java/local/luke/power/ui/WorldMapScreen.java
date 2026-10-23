@@ -104,7 +104,7 @@ public final class WorldMapScreen extends UiScreen {
     screen.openSettings = true; screen.openMinimapSettings = minimap; screen.initialSetting = setting;
     mc.setScreen(screen); return true;
   }
-  private void closeMap() { minecraft.setScreen(optionsOwner == null ? parent : optionsOwner.returnScreen()); }
+  private void closeMap() { minecraft.setScreen(optionsOwner == null ? MinimapMapVisit.returning(minecraft,parent) : optionsOwner.returnScreen()); }
   public WorldMapScreen() {}
   public WorldMapScreen(Screen parent) { this.parent = parent; }
   public WorldMapScreen(Waypoint point) {

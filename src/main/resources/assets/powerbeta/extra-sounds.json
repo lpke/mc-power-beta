@@ -314,6 +314,32 @@
         "ambient/underwater/additions/dark3",
         "ambient/underwater/additions/dark4"
       ]
+    },
+    "entity.generic.splash": {
+      "sounds": [
+        "liquid/splash",
+        "liquid/splash2"
+      ],
+      "subtitle": "subtitles.entity.generic.splash"
+    },
+    "entity.hostile.splash": {
+      "sounds": [
+        "liquid/splash",
+        "liquid/splash2"
+      ],
+      "subtitle": "subtitles.entity.generic.splash"
+    },
+    "entity.generic.burn": {
+      "sounds": [
+        "random/fizz"
+      ],
+      "subtitle": "subtitles.entity.generic.burn"
+    },
+    "block.lava.ambient": {
+      "sounds": [
+        "liquid/lava"
+      ],
+      "subtitle": "subtitles.block.lava.ambient"
     }
   },
   "assets": [
@@ -1161,6 +1187,78 @@
       "frames": 389120,
       "sampleRate": 48000,
       "channels": 2
+    },
+    {
+      "event": "entity.generic.splash",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/generic/splash1.ogg",
+      "asset": "minecraft/sounds/liquid/splash.ogg",
+      "sha1": "264ae650cce4cea0cd4cb1757624a9d51653499b",
+      "size": 18026,
+      "source": "waterSource",
+      "frames": 72878,
+      "sampleRate": 44100,
+      "channels": 1,
+      "durationTicks": 34
+    },
+    {
+      "event": "entity.generic.splash",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/generic/splash2.ogg",
+      "asset": "minecraft/sounds/liquid/splash2.ogg",
+      "sha1": "338e0b08a21e73dd5e7888c9c7e67e9a1a119dc1",
+      "size": 32985,
+      "source": "waterSource",
+      "frames": 185625,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 78
+    },
+    {
+      "event": "entity.hostile.splash",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/hostile/splash1.ogg",
+      "asset": "minecraft/sounds/liquid/splash.ogg",
+      "sha1": "264ae650cce4cea0cd4cb1757624a9d51653499b",
+      "size": 18026,
+      "source": "waterSource",
+      "frames": 72878,
+      "sampleRate": 44100,
+      "channels": 1,
+      "durationTicks": 34
+    },
+    {
+      "event": "entity.hostile.splash",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/hostile/splash2.ogg",
+      "asset": "minecraft/sounds/liquid/splash2.ogg",
+      "sha1": "338e0b08a21e73dd5e7888c9c7e67e9a1a119dc1",
+      "size": 32985,
+      "source": "waterSource",
+      "frames": 185625,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 78
+    },
+    {
+      "event": "entity.generic.burn",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/generic/burn1.ogg",
+      "asset": "minecraft/sounds/random/fizz.ogg",
+      "sha1": "bd76df5c882dc4b65925a8b25c0e7dbebef9bb2e",
+      "size": 15222,
+      "source": "waterSource",
+      "frames": 59919,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 25
+    },
+    {
+      "event": "block.lava.ambient",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/lava/ambient1.ogg",
+      "asset": "minecraft/sounds/liquid/lava.ogg",
+      "sha1": "fac082b27d0637fec11f0f150c440a44b13afa8a",
+      "size": 66851,
+      "source": "waterSource",
+      "frames": 360819,
+      "sampleRate": 44100,
+      "channels": 1,
+      "durationTicks": 164
     }
   ],
   "existingAssets": [
@@ -1272,6 +1370,11 @@
     "sounds": {
       "hash": "7975165ad4a3c0cb3c05078b914eac0f2c3b5f5f",
       "size": 635867
+    },
+    "client": {
+      "sha1": "e877b6a07acd633fb3bb475002175cec036e7b87",
+      "size": 41483720,
+      "url": "https://piston-data.mojang.com/v1/objects/e877b6a07acd633fb3bb475002175cec036e7b87/client.jar"
     }
   }
 }

@@ -25,6 +25,7 @@ public final class SortingPreferencesScreen extends UiScreen {
   private final DraftExitPrompt exit = new DraftExitPrompt();
   private final SortingProtectionDrag drag = new SortingProtectionDrag();
   private final TextInput presetName = new TextInput("", 64);
+  private final String layoutWorld;
   private JsonElement originalPresets;
   private SortingLayoutsData presets;
   private int presetIndex;
@@ -39,6 +40,7 @@ public final class SortingPreferencesScreen extends UiScreen {
   }
   public SortingPreferencesScreen(Screen parent, ConfigSession session, Runnable accepted, boolean immediate) {
     this.parent = parent; this.accepted = accepted; this.immediate = immediate;
+    layoutWorld = local.luke.power.inventory.tools.WorldSortingLayouts.world();
     protectedSetting = setting(session, "inventoryTools.protectedSlots");
     preferredSetting = setting(session, "inventoryTools.preferredItems");
     for (var value : protectedSetting.value.getAsJsonArray()) protectedSlots.add(value.getAsInt());
@@ -107,6 +109,7 @@ public final class SortingPreferencesScreen extends UiScreen {
   private void applyNow() {
     if (!immediate) return;
     try {
+      local.luke.power.inventory.tools.WorldSortingLayouts.requireWorld(layoutWorld);
       var locked = Catalog.JSON.toJsonTree(protectedSlots); var preferred = Catalog.JSON.toJsonTree(preferredItems);
       protectedSetting.validate(locked); preferredSetting.validate(preferred); SortingLayoutsData.layout(locked, preferred);
       if (presetChanged()) {
@@ -142,6 +145,7 @@ public final class SortingPreferencesScreen extends UiScreen {
   private void done() {
     try {
       drag.cancel();
+      local.luke.power.inventory.tools.WorldSortingLayouts.requireWorld(layoutWorld);
       // Unknown saved items survive a visit. Validate only new or changed selections.
       for (var entry : preferredItems.entrySet()) {
         var original = preferredSetting.value.getAsJsonObject().get(Integer.toString(entry.getKey()));

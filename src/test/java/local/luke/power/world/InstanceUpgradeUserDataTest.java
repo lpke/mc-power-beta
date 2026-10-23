@@ -9,7 +9,9 @@ class InstanceUpgradeUserDataTest {
     var previous = JsonParser.parseString("{\"sortingLayouts\":{\"format\":999,\"opaque\":[1,\"future\"]},\"savedCreativeHotbars\":{\"format\":999,\"future\":true}}").getAsJsonObject();
     var fresh = new JsonObject();
     InstanceUpgrade.preserveSavedData(previous, fresh);
-    assertEquals(previous, fresh);
+    assertEquals(previous.get("sortingLayouts"), fresh.get("sortingLayouts"));
+    assertEquals(previous.get("savedCreativeHotbars"), fresh.get("savedCreativeHotbars"));
+    assertEquals(previous.get("sortingLayouts"), fresh.getAsJsonObject("worldSortingLayouts").getAsJsonObject("legacy").get("presets"));
     fresh.getAsJsonObject("sortingLayouts").addProperty("changed", true);
     assertFalse(previous.getAsJsonObject("sortingLayouts").has("changed"));
   }

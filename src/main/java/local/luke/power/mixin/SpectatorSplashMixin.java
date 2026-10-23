@@ -18,19 +18,17 @@ public class SpectatorSplashMixin implements FluidSoundContact {
   @Unique private static final java.util.Random power$splashRandom = new java.util.Random();
   @Override public boolean power$audioInWater() { return power$audioWet; }
 
-  @Inject(method = "baseTick", at = @At("HEAD"))
+  @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;method_1393()Z"))
   private void power$modernContact(CallbackInfo ci) {
     Entity entity = (Entity)(Object)this;
-    if (!(entity instanceof net.minecraft.entity.player.ClientPlayerEntity)) return;
     var settings = AudioConfig.current();
-    if (!(settings.waterSplashSounds || settings.swimmingSounds) || !FluidSounds.localPlayer(entity)) {
+    if (!(settings.waterSplashSounds || settings.swimmingSounds && entity instanceof net.minecraft.entity.player.ClientPlayerEntity)
+        || !FluidSounds.splashOwner(entity)) {
       power$audioWet = power$contactReady = false; return;
     }
     boolean wet = FluidSounds.bodyInWater(entity);
     if (power$contactReady && wet && !power$audioWet && !field_1649 && settings.waterSplashSounds) {
-      float volume = FluidSoundMath.volume(entity.velocityX, entity.velocityY, entity.velocityZ, .2f);
-      entity.world.method_150(entity.x, entity.boundingBox.minY, entity.z, FluidSoundMath.splash(volume), volume,
-          1 + (power$splashRandom.nextFloat() - power$splashRandom.nextFloat()) * .4f);
+      FluidSounds.splash(entity, power$splashRandom);
     }
     power$audioWet = wet;
     power$contactReady = true;
@@ -40,7 +38,7 @@ public class SpectatorSplashMixin implements FluidSoundContact {
   private void power$splash(World world, Entity entity, String sound, float volume, float pitch,
       Operation<Void> original) {
     if (sound.equals("random.splash") && entity instanceof PlayerMode mode && mode.power$spectator()) return;
-    if (sound.equals("random.splash") && AudioConfig.current().waterSplashSounds && FluidSounds.localPlayer(entity))
+    if (sound.equals("random.splash") && AudioConfig.current().waterSplashSounds && FluidSounds.splashOwner(entity))
       return;
     original.call(world, entity, sound, volume, pitch);
   }

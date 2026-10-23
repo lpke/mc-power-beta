@@ -33,14 +33,14 @@ public final class InventoryAutomation {
     if (!survival(mc)) return;
     var next = InventoryToolsConfig.copy(); next.restock = !next.restock;
     InventoryToolsConfig.preview(next);
-    local.luke.power.storage.PowerConfig.saveDeferred("inventoryTools", next);
+    InventoryToolsConfig.queuedPreferences(next);
     Restock.clear();
   }
   public static void toggleToolSwitch(Minecraft mc) {
     if (!survival(mc)) return;
     var next = InventoryToolsConfig.copy(); next.toolSwitch = !next.toolSwitch;
     InventoryToolsConfig.preview(next);
-    local.luke.power.storage.PowerConfig.saveDeferred("inventoryTools", next);
+    InventoryToolsConfig.queuedPreferences(next);
     AutoToolSwitch.clear();
   }
   public static void tick(Minecraft mc) { Restock.tick(mc); }

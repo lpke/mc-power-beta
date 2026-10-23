@@ -1,10 +1,10 @@
-tab.power_creative_inventory.full_blocks.name=Minecraft Full Blocks
-tab.power_creative_inventory.other_blocks.name=Minecraft Other Blocks
-tab.power_creative_inventory.tools.name=Minecraft Tools
-tab.power_creative_inventory.weapons.name=Minecraft Weapons
-tab.power_creative_inventory.resources.name=Minecraft Resources
-tab.power_creative_inventory.food.name=Minecraft Food
-tab.power_creative_inventory.other_items.name=Minecraft Items
+tab.power_creative_inventory.full_blocks.name=Full Blocks
+tab.power_creative_inventory.other_blocks.name=Other Blocks
+tab.power_creative_inventory.tools.name=Tools
+tab.power_creative_inventory.weapons.name=Weapons
+tab.power_creative_inventory.resources.name=Resources
+tab.power_creative_inventory.food.name=Food
+tab.power_creative_inventory.other_items.name=Items
 title.power_creative_inventory.selectWorld.survival=Survival
 title.power_creative_inventory.selectWorld.creative=Creative
 title.power_creative_inventory.selectGame.inventory=Inventory
@@ -15,3 +15,7 @@ tile.power_creative_inventory.dead_bush.name=Dead Bush
 power_creative.sprint=Creative Flight Sprint
 power_creative.picker=Cycle Gamemode
 power_creative.modifier=Gamemode Picker Modifier
+
+tab.power_creative_inventory.search.name=Search
+
+tab.power_creative_inventory.tools_and_weapons.name=Tools & Weapons

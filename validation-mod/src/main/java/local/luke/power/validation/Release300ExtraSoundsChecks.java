@@ -15,7 +15,7 @@ import net.minecraft.item.ItemStack;
 
 /** Native action and sound events in a muted disposable client. */
 public final class Release300ExtraSoundsChecks {
-  private static final String[] KEYS = {"seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds"};
+  private static final String[] KEYS = {"seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "lavaBucketSounds", "boneMealSounds"};
   private static final int X = 44, Y = 111, Z = 44;
   private record Sound(String id, float volume, float pitch) {}
   private record Block(int x, int y, int z, int id, int metadata) {}
@@ -107,6 +107,22 @@ public final class Release300ExtraSoundsChecks {
           enable(false); mc.world.method_154(X, Y, Z, 9, 0); bucket(mc, 325); noExtra();
           bucket(mc, 326); noExtra();
         });
+        test("water and lava bucket toggles remain independent in " + testMode, () -> {
+          pose(mc);
+          for (boolean water : new boolean[]{false, true}) for (boolean lava : new boolean[]{false, true}) {
+            var settings = AudioConfig.copy(); settings.bucketSounds = water; settings.lavaBucketSounds = lava; AudioConfig.preview(settings);
+            for (int fluid : new int[]{9, 11}) {
+              soil(mc, 1, 0); mc.world.method_154(X, Y, Z, fluid, 0);
+              bucket(mc, 325);
+              if (fluid == 9 ? water : lava) one(fluid == 9 ? "item.bucket.fill" : "item.bucket.fill_lava"); else noExtra();
+              bucket(mc, fluid == 9 ? 326 : 327);
+              if (fluid == 9 ? water : lava) one(fluid == 9 ? "item.bucket.empty" : "item.bucket.empty_lava"); else noExtra();
+            }
+            mc.player.inventory.main[0] = new ItemStack(325, 1, 0);
+            record(() -> new class_466(mc.world).method_1323(mc.player));
+            if (water) one("entity.cow.milk"); else noExtra();
+          }
+        });
         test("cow milking sounds once and failed or disabled interaction stays silent in " + testMode, () -> {
           enable(true); var cow = new class_466(mc.world);
           mc.player.inventory.main[0] = new ItemStack(325, 1, 0);
@@ -143,7 +159,7 @@ public final class Release300ExtraSoundsChecks {
           record(() -> new class_466(mc.world).method_1323(mc.player)); noExtra();
         } finally { mc.world.isRemote = remote; }
       });
-      test("Apply stores all four independent controls", () -> {
+      test("Apply stores all independent controls", () -> {
         var session = SettingsRegistry.open(mc);
         for (String key : KEYS) find(session, "audio." + key).parse("true");
         session.save(Path.of(".").toAbsolutePath());
@@ -163,7 +179,7 @@ public final class Release300ExtraSoundsChecks {
 
   private static void enable(boolean enabled) {
     var settings = AudioConfig.copy();
-    settings.seedPlantingSounds = settings.hoeTillingSounds = settings.bucketSounds = settings.boneMealSounds = enabled;
+    settings.seedPlantingSounds = settings.hoeTillingSounds = settings.bucketSounds = settings.lavaBucketSounds = settings.boneMealSounds = enabled;
     AudioConfig.preview(settings);
   }
 

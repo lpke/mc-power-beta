@@ -45,7 +45,8 @@ final class ExtraSoundDecoder432Checks {
       check(ExtraSoundResources.owns(track.field_2127), "registered extra escaped the decoder scope " + id);
       long expected = asset.get("frames").getAsLong();
       var codec = SoundSystemConfig.getCodec(file); var original = SoundSystemConfig.getCodec(file);
-      long before;
+      var streaming = SoundSystemConfig.getCodec(file);
+      long before; long streamed;
       try {
         check(codec.initialize(track.field_2127) && original.initialize(legacy(track.field_2127)), "codec initialization " + file);
         var repaired = codec.readAll(); var baseline = original.readAll();
@@ -53,15 +54,31 @@ final class ExtraSoundDecoder432Checks {
         check(repaired.audioData.length / repaired.audioFormat.getFrameSize() == expected, "lost source samples " + file);
         before = baseline == null || baseline.audioData == null ? 0 : baseline.audioData.length / baseline.audioFormat.getFrameSize();
         Files.write(output.resolve(file.replace('/', '_') + ".pcm"), repaired.audioData);
+        check(streaming.initialize(track.field_2127), "streaming initialization " + file);
+        var chunks = new ByteArrayOutputStream();
+        int reads = 0;
+        while (!streaming.endOfStream() && reads++ < 100_000) {
+          var buffer = streaming.read();
+          if (buffer != null && buffer.audioData != null) {
+            check(buffer.audioFormat.matches(repaired.audioFormat), "streaming format changed " + file);
+            chunks.write(buffer.audioData);
+          }
+        }
+        check(streaming.endOfStream(), "streaming never reached EOS " + file);
+        byte[] streamedBytes = chunks.toByteArray();
+        streamed = streamedBytes.length / repaired.audioFormat.getFrameSize();
+        check(streamed == expected && Arrays.equals(repaired.audioData, streamedBytes),
+            "streaming lost source frames, retained padding or changed PCM " + file);
+
         // The foreign resource takes Beta's original path, including its original result.
         var foreign = legacy(track.field_2127); check(!ExtraSoundResources.owns(foreign), "foreign decoder was widened");
-      } finally { codec.cleanup(); original.cleanup(); }
+      } finally { codec.cleanup(); original.cleanup(); streaming.cleanup(); }
       if (before < expected) truncated++; else if (before > expected) padded++; else unchanged++;
-      var row = asset.deepCopy(); row.addProperty("resource", file); row.addProperty("legacyFrames", before); row.addProperty("decodedFrames", expected); report.add(row);
-      log("DECODER432 " + id + " " + suffix + " sourceFrames=" + expected + " legacyFrames=" + before + " repairedFrames=" + expected);
+      var row = asset.deepCopy(); row.addProperty("resource", file); row.addProperty("legacyFrames", before); row.addProperty("decodedFrames", expected); row.addProperty("streamedFrames", streamed); report.add(row);
+      log("DECODER432 " + id + " " + suffix + " sourceFrames=" + expected + " legacyFrames=" + before + " repairedFrames=" + expected + " streamedFrames=" + streamed);
     }
     Files.writeString(output.resolve("decoded.json"), new GsonBuilder().setPrettyPrinting().create().toJson(report));
-    check(assets.size() == 83, "not every bundled extra was audited");
+    check(assets.size() == 89, "not every bundled extra was audited");
     log("DECODER432 PASS assets=" + assets.size() + " truncated=" + truncated + " padded=" + padded + " unchanged=" + unchanged);
   }
 }

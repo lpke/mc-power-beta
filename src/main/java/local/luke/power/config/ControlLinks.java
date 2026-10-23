@@ -9,7 +9,7 @@ public final class ControlLinks {
   static {
     link("powerbeta.debug.modifier", "debug.enabled", "debug.enabled", "Hold this key while pressing a Debug action key. The debug overlay and mode-picker keys can be configured independently.");
     for (var action : local.luke.power.debug.DebugAction.values()) link(action.id, "", "debug.enabled", "Hold the Debug modifier while using this action.");
-    link("power_beta.entities", "visual.hideEntities", "", "Toggle rendering for the selected entity types.");
+    link("power_beta.entities", "", "", "Toggle rendering for the selected entity types.");
     link("power_beta.fullBright", "", "", "Toggle full bright. Changes rendering only.");
     link("powerbeta.lightOverlay", "lightOverlay.enabled", "", "Toggle light-level numbers on nearby block tops.");
     link("powerbeta.containerPreview", "", "", "Hold while aiming at a container to preview its contents without opening it.");
@@ -59,8 +59,9 @@ public final class ControlLinks {
     link("Hold use (toggle)", "", "", "Toggle holding Use. Menus, focus loss, world changes, Spectator and detached-camera control stop it.");
     link("Auto-walk line lock (toggle)", "", "", "While auto-walking, keep your player inside the current block lane. Does not turn the player or start auto-walk.");
     // Keep their toggles and placement modifiers visible while the state is off.
-    link("Fast place (toggle)", "tweaks.placement.enabled", "", "Toggle repeated block placement while holding Use.");
-    link("Fake sneak (toggle)", "tweaks.sneak.enabled", "", "Toggle fake sneak to stop at ledges without slowing movement.");
+    link("Fast place (toggle)", "", "", "Toggle repeated block placement while holding Use. Clears when leaving the world.");
+    link("Fake sneak (toggle)", "", "", "Toggle fake sneak to stop at ledges without slowing movement. Clears when leaving the world.");
+    link("Placement restriction (toggle)", "", "", "Toggle the selected placement restriction for fast placement. Clears when leaving the world.");
     for (String action : List.of("offset", "adjacent", "rotation", "reverse", "into face"))
       link("Placement " + action + " (hold)", "", "", switch (action) {
         case "offset" -> "Hold to move placement outward using the targeted face regions.";
