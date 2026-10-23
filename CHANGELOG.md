@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [4.3.1] - 2026-10-23
+
+- Restore Beta's normal crouch camera movement when Lower camera when crouching is off. Enable it for the deeper Modern crawling camera drop in both first and third person; keep low ceilings and crawling collision-safe.
+- Move the inventory and Pause quick-settings button farther outside circular minimaps, retaining corner-aware dropdown placement and matching click bounds.
+
 ## [4.3.0] - 2026-10-23
 
 - Remove per-sample callback allocation from leaf lighting while retaining the same brightness and native light reads.

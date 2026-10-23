@@ -18,12 +18,12 @@ final class Menu423Checks {
     try {
       mc.options.hideHud=false;
       var draft=MapConfig.copy();draft.minimap=draft.showInInventory=true;draft.hideWithDebug=false;draft.size=64;
-      for(boolean pause:new boolean[]{false,true})for(int corner=0;corner<4;corner++) {
-        draft.corner=corner;draft.caveMode=2;MapConfig.preview(draft);Maps.tick(mc);
+      for(boolean pause:new boolean[]{false,true})for(boolean circular:new boolean[]{false,true})for(int corner=0;corner<4;corner++) {
+        draft.corner=corner;draft.circular=circular;draft.caveMode=2;MapConfig.preview(draft);Maps.tick(mc);
         Screen host=pause?new net.minecraft.class_525():new net.minecraft.class_585(mc.player);
         mc.setScreen(host);host.init(mc,480,270);MinimapQuickMenu.beginFrame();
         final int anchor=corner;
-        test("MENU423 "+(pause?"pause":"inventory")+" corner "+corner,()->{
+        test("MENU423 "+(pause?"pause":"inventory")+" "+(circular?"circle":"square")+" corner "+corner,()->{
           check(Minimap.inventoryVisible(mc),"minimap hidden in native host");
           check(Minimap.waypointHost(host),"waypoints excluded from native host");
           var layout=MinimapQuickMenuLayout.at(Minimap.layout(MapConfig.current(),480,270,false),draft.circular,anchor,480,270,mc.textRenderer.getWidth("Show in-game waypoints"));
@@ -42,7 +42,7 @@ final class Menu423Checks {
           MinimapQuickMenu.mouse(mc,row.x()+20,row.y()+10,0,true);MinimapQuickMenu.mouse(mc,row.x()+20,row.y()+10,0,false);
           check(MapConfig.current().caveMode==2,"checkbox lost selected cave mode");
           var output=Path.of("power-beta-data/reports/menu-423");Files.createDirectories(output);
-          SettingsSnapshot.render(mc,new Screen(){@Override public void render(int mx,int my,float delta){host.render(mx,my,delta);MinimapQuickMenu.renderMenu(mc,mx,my);}},480,270,output.resolve((pause?"pause":"inventory")+anchor+".png"),x,y);
+          SettingsSnapshot.render(mc,new Screen(){@Override public void render(int mx,int my,float delta){host.render(mx,my,delta);MinimapQuickMenu.renderMenu(mc,mx,my);}},480,270,output.resolve((pause?"pause":"inventory")+(circular?"circle":"square")+anchor+".png"),x,y);
           check(MinimapQuickMenu.key(mc,org.lwjgl.input.Keyboard.KEY_ESCAPE,true),"Escape leaked");
           check(mc.currentScreen==host&&!InventoryPanels.modal(host),"closing menu changed native host");
           check(!Minimap.inventoryWheel(mc,240,140,120)||!((InventoryGui)host).power$containsGuiSpace(240,140),"wheel stole native controls");

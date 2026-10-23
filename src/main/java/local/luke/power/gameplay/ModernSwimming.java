@@ -69,7 +69,7 @@ public final class ModernSwimming {
       input.field_2532 *= .3f;
       input.field_2533 *= .3f;
     }
-    if (lowPose(player)) player.field_1640=0;
+    if (loweredCamera(((SwimPlayer)player).power$swim())) player.field_1640=0;
   }
 
   private static boolean waterAt(ClientPlayerEntity player, double height) {
@@ -99,9 +99,12 @@ public final class ModernSwimming {
     if (!state.inputPosePrepared || wasSwimming != state.swimming) updatePose(player, state);
     state.inputPosePrepared = false;
     state.animate();
-    state.cameraTick(state.compact || state.crouched && (state.lowCeiling
-        || GameplayConfig.current().modernCrawling && GameplayConfig.current().crouchCameraHeight)
-        ? player.field_1631 : 1.62f);
+    state.cameraTick(loweredCamera(state) ? player.field_1631 : 1.62f);
+  }
+
+  private static boolean loweredCamera(SwimState state) {
+    return state.compact || state.crouched && (state.lowCeiling
+        || GameplayConfig.current().modernCrawling && GameplayConfig.current().crouchCameraHeight);
   }
 
   public static void cancel(ClientPlayerEntity player) {
@@ -144,7 +147,6 @@ public final class ModernSwimming {
     }
     boolean crawling = GameplayConfig.current().modernCrawling && ModernWater.localMovement(player);
     boolean small = state.swimming, crouched = false;
-    state.lowCeiling = false;
     if (!small && (state.compact || state.crouched || crawling)) {
       // Modern Player.updatePlayerPose first proves the compact box fits. A
       // wall through the feet must not manufacture a new crawl, nor force an
@@ -156,14 +158,15 @@ public final class ModernSwimming {
         crouched = canFit(player, 1.5);
         small = !crouched;
       }
-    }
+    } else state.lowCeiling = false;
     if (small != state.compact || crouched != state.crouched) {
       state.compact = small;
       state.crouched = crouched;
       resize(player, small, crouched);
     }
-    if (state.compact || state.crouched) {
-      // Beta sneak smoothing otherwise moves the tiny box and camera apart.
+    if (loweredCamera(state)) {
+      // Compact poses own their camera. Ordinary crouching retains Beta's
+      // native sneak offset when the extra camera lowering is disabled.
       player.field_1640 = 0;
     }
   }
@@ -194,8 +197,10 @@ public final class ModernSwimming {
     double offset=player.field_1631-previousOffset;
     player.prevY+=offset;
     player.field_1638+=offset;
-    player.field_1640 = 0;
-    player.method_1340(player.x, feet + player.field_1631, player.z);
+    if (loweredCamera(((SwimPlayer)player).power$swim())) player.field_1640 = 0;
+    // Native positioning adds sneak/step smoothing back to the collision box.
+    // Subtract it here so retaining Beta's camera motion never moves the feet.
+    player.method_1340(player.x, feet + player.field_1631 - player.field_1640, player.z);
   }
 
   public static void steer(ClientPlayerEntity player) {

@@ -4,6 +4,19 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MinimapQuickMenuLayoutTest {
+  @Test void circularButtonsClearTheTerrainWhileSquareButtonsKeepTheirCorner() {
+    for(int size:new int[]{24,64,128,256})for(int corner=0;corner<4;corner++) {
+      var map=new MinimapGeometry.Layout(300,200,size);
+      var circle=MinimapQuickMenuLayout.at(map,true,corner,1000,800,130).gear();
+      double centreX=map.x()+size/2d,centreY=map.y()+size/2d;
+      double dx=Math.max(Math.max(circle.x()-centreX,centreX-circle.x()-circle.width()),0);
+      double dy=Math.max(Math.max(circle.y()-centreY,centreY-circle.y()-circle.height()),0);
+      assertTrue(Math.hypot(dx,dy)>size/2d,"button overlaps circular terrain");
+      var square=MinimapQuickMenuLayout.at(map,false,corner,1000,800,130).gear();
+      assertEquals(map.x()+(corner%2==0?size:0)-8,square.x());
+      assertEquals(map.y()+(corner<2?0:size)-8,square.y());
+    }
+  }
   @Test void controlsFaceAwayFromTheMapAtAllFourAnchors() {
     for(int corner=0;corner<4;corner++) {
       var s=new MapSettings();s.corner=corner;

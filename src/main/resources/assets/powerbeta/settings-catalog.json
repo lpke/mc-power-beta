@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.3.0",
+    "default": "Power Beta 4.3.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6814,7 +6814,7 @@
     "page": "Gameplay",
     "group": "Interaction",
     "label": "Lower camera when crouching",
-    "description": "With Modern crawling enabled, lower the camera while sneaking in open spaces, in first and third person. Low ceilings and crawling still lower the camera when this is off.",
+    "description": "With Modern crawling enabled, use a deeper camera drop than Beta while sneaking, in first and third person. Off keeps Beta's normal crouch camera movement. Low ceilings and crawling always use a safe lower camera.",
     "order": 41.1
   }
 }

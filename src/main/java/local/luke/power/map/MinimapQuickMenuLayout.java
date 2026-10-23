@@ -13,7 +13,9 @@ public final class MinimapQuickMenuLayout {
   private MinimapQuickMenuLayout() {}
   public static Layout at(MinimapGeometry.Layout map, boolean circular, int corner, int width, int height, int labelWidth) {
     boolean left=corner%2==0, top=corner<2;
-    double inset=circular?map.size()*(1-Math.sqrt(.5))/2:0;
+    // Keep the whole button beyond the circle's diagonal edge. Square maps
+    // retain their existing corner placement; window clamping still applies.
+    double inset=circular?map.size()*(1-Math.sqrt(.5))/2-BUTTON_SIZE/2d-2:0;
     int cx=(int)Math.round(map.x()+(left?map.size()-inset:inset));
     int cy=(int)Math.round(map.y()+(top?inset:map.size()-inset));
     Rect gear=new Rect(Math.max(0,Math.min(width-BUTTON_SIZE,cx-BUTTON_SIZE/2)),

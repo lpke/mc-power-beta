@@ -33,7 +33,9 @@
 - `crawling-420` checks real trapdoor entry with all water/sprint combinations,
   native crawl distance and wall collision, single input scaling, safe disabled
   exits, crouch/standing heights, saved feet and player/armor model isolation.
-  It checks optional open-air crouch camera height through both native perspectives.
+  It compares the default open-air crouch camera against native Beta through repeated
+  presses, releases and frame interpolation in both perspectives. It also checks the
+  optional deeper camera, live changes and native-smoothed save/reload feet.
   It checks multiplayer, Spectator, other-player and unloaded-terrain exclusions.
   Run in a focused muted disposable world; it restores its scene and settings.
 

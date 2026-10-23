@@ -738,4 +738,6 @@
   and open inward from the selected corner. World waypoints render below their GUI and minimap,
   never over settings editors. Disabling cave mode retires only obsolete view work; retain saves.
 - Optional crouch camera height affects open-space sneaking only with Modern crawling. Keep
-  collision-safe low-ceiling cameras and both native perspectives consistent.
+  Beta's native sneak movement when off, the deeper modern drop when on, collision-safe
+  low-ceiling cameras and both native perspectives consistent. Retaining native sneak/step
+  smoothing during pose resizing must preserve collision-box feet and saved positions.

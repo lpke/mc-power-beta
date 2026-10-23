@@ -105,7 +105,49 @@ final class Crawling420Checks {
         mc.world.method_154(x, y + 2, z, 0, 0); ModernSwimming.tick(player);
         check(!ModernSwimming.lowPose(player), "clear exit retained low pose"); near(player.spacingY, 1.8, 1e-6, "standing body");
       });
-      test("crouch camera is optional in open air and follows both native perspectives", () -> {
+      test("default crouch camera matches native Beta through presses, releases and frame interpolation", () -> {
+        boolean third=mc.options.thirdPerson;
+        try {
+          for(boolean perspective:new boolean[]{false,true}) {
+            mc.options.thirdPerson=perspective;
+            double[][] nativeHeights=new double[72][3];
+            for(int variant=0;variant<3;variant++) {
+              boolean crawling=variant==2;
+              floor(mc,x,y,z);settings(crawling,false);reset(mc,x,y,z);
+              var options=GameplayConfig.copy();options.crouchCameraHeight=variant==1;GameplayConfig.preview(options);
+              for(int tick=0;tick<72;tick++) {
+                boolean held=tick%24<12;
+                step(mc,0,held);
+                near(player.boundingBox.minY,y,1e-6,"native-height crouch moved feet");
+                for(int frame=0;frame<3;frame++) {
+                  double height=cameraY(mc,frame*.5f);
+                  if(variant==0)nativeHeights[tick][frame]=height;
+                  else near(height,nativeHeights[tick][frame],2e-4,"Beta camera trajectory tick "+tick+" frame "+frame);
+                }
+                if(tick%24==11)near(cameraY(mc),y+1.54,2e-4,"Beta's settled crouch height");
+                if(tick==11)log("CROUCH CAMERA "+(perspective?"third":"first")+" crawling="+crawling
+                    +" option="+options.crouchCameraHeight+" height="+(cameraY(mc)-y));
+              }
+            }
+          }
+        } finally {mc.options.thirdPerson=third;floor(mc,x,y,z);}
+      });
+      test("crouching saves native-normalized positions and retains collision feet after reload", () -> {
+        for(boolean enabled:new boolean[]{false,true}) {
+          floor(mc,x,y,z);settings(true,false);reset(mc,x,y,z);
+          var options=GameplayConfig.copy();options.crouchCameraHeight=enabled;GameplayConfig.preview(options);
+          for(int tick=0;tick<25;tick++)step(mc,0,true);
+          var tag=new NbtCompound();player.write(tag);
+          near(((net.minecraft.nbt.NbtDouble)tag.getList("Pos").get(1)).value,y+1.62,1e-6,"saved native eye origin");
+          player.read(tag);
+          near(player.boundingBox.minY,y,1e-6,"crouch reload moved feet");
+          for(int tick=0;tick<12;tick++) {
+            step(mc,0,tick<6);
+            near(player.boundingBox.minY,y,1e-6,"reloaded crouch moved feet tick "+tick);
+          }
+        }
+      });
+      test("deeper crouch camera is optional and both perspectives retain safe low poses", () -> {
         boolean third=mc.options.thirdPerson;
         try {
           for(boolean enabled:new boolean[]{false,true}) for(boolean perspective:new boolean[]{false,true}) {
@@ -117,7 +159,13 @@ final class Crawling420Checks {
             check(state.crouched&&!state.compact,"sneak lost physical crouch");
             near(player.boundingBox.minY,y,1e-6,"sneak moved feet");
             near(state.cameraEye(1),enabled?1.27:1.62,1e-5,"camera preference");
-            near(cameraY(mc),y+(enabled?1.27:1.62),2e-4,"native perspective height");
+            near(cameraY(mc),y+(enabled?1.27:1.54),2e-4,"native perspective height");
+            log("CROUCH CAMERA "+(perspective?"third":"first")+" option="+enabled+" height="+(cameraY(mc)-y));
+            // Changing only the camera preference must not change collision or saved feet.
+            options.crouchCameraHeight=!enabled;GameplayConfig.preview(options);
+            for(int tick=0;tick<25;tick++)step(mc,0,true);
+            near(cameraY(mc),y+(!enabled?1.27:1.54),2e-4,"live preference change");
+            near(player.boundingBox.minY,y,1e-6,"live preference moved feet");
           }
           var options=GameplayConfig.copy();options.crouchCameraHeight=false;GameplayConfig.preview(options);
           mc.world.method_154(x,y+1,z,1,0);
@@ -163,6 +211,16 @@ final class Crawling420Checks {
         try { ModernSwimming.tick(player); }
         finally { Release252Checks.checkingUnloaded = false; }
         check(Release252Checks.chunkRequests == 0 && !ModernSwimming.lowPose(player), "pose check loaded terrain or shrank at an unknown boundary");
+        floor(mc,x,y,z);reset(mc,x,y,z);mc.world.method_154(x,y+2,z,1,0);
+        player.method_1341(x+.5,y+.5,z+.5,0,0);ModernSwimming.tick(player);
+        var state=((SwimPlayer)player).power$swim();
+        check(state.crouched&&state.lowCeiling,"low-ceiling fixture did not crouch");state.resetCamera(1.27f);
+        player.method_1340(31_999_900,y,31_999_900);
+        Release252Checks.chunkRequests=0;Release252Checks.checkingUnloaded=true;
+        try {ModernSwimming.tick(player);}
+        finally {Release252Checks.checkingUnloaded=false;}
+        check(Release252Checks.chunkRequests==0&&state.crouched&&state.lowCeiling,"unknown terrain discarded the safe low camera");
+        near(state.cameraEye(1),1.27,1e-6,"unknown terrain raised a blocked camera");
       });
       test("crawl previews and movement do not write global preferences", () -> check(Arrays.equals(disk, Files.readAllBytes(PowerConfig.path())), "crawl wrote preferences"));
     } finally {
@@ -175,12 +233,15 @@ final class Crawling420Checks {
     log("CRAWLING 420 FAILURES " + failures);
   }
 
-  private static double cameraY(Minecraft mc) throws Exception {
+  private static double cameraY(Minecraft mc) throws Exception {return cameraY(mc,1f);}
+
+  private static double cameraY(Minecraft mc,float delta) throws Exception {
     GL11.glMatrixMode(GL11.GL_MODELVIEW);GL11.glPushMatrix();
     try {
       GL11.glLoadIdentity();var method=net.minecraft.class_555.class.getDeclaredMethod("method_1851",float.class);
-      method.setAccessible(true);method.invoke(mc.field_2818,1f);
-      GL11.glTranslated(-mc.player.x,-mc.player.y,-mc.player.z);
+      method.setAccessible(true);method.invoke(mc.field_2818,delta);
+      var p=mc.player;
+      GL11.glTranslated(-(p.prevX+(p.x-p.prevX)*delta),-(p.prevY+(p.y-p.prevY)*delta),-(p.prevZ+(p.z-p.prevZ)*delta));
       var matrix=org.lwjgl.BufferUtils.createFloatBuffer(16);GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX,matrix);
       return -(matrix.get(4)*matrix.get(12)+matrix.get(5)*matrix.get(13)+matrix.get(6)*matrix.get(14));
     } finally {GL11.glPopMatrix();}
