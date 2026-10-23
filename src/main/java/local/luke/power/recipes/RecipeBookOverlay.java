@@ -92,11 +92,11 @@ public final class RecipeBookOverlay {
     if(open){if(l.narrow())bounds.add(new Rect(0,0,screen.width,screen.height));else{bounds.add(l.background());bounds.add(l.tabs(tabs().length));if(standalone)bounds.add(l.detail());}}
     InventoryPanels.update(screen,l.offset(),bounds);
     boolean modal=!popup.isEmpty()||detail!=null&&!standalone;InventoryPanels.modal(screen,this,modal);
-    if(!InventoryPanels.modalOther(screen,this))InventoryTextInput.focus(screen,search.focused||modal);
+    if(!InventoryPanels.modalOther(screen,this))InventoryTextInput.focus(screen,this,search.focused||modal);
   }
   private void click(){mc.soundManager.method_2009("random.click",1,1);}
   private void state(){if(!standalone)RecipeBookConfig.state(context.kind==RecipeDefinition.Kind.FURNACE,open,filter);refreshGeometry();}
-  private void releaseInput(){search.focused=false;popup=List.of();InventoryPanels.modal(screen,this,detail!=null&&!standalone);if(!InventoryPanels.modalOther(screen,this))InventoryTextInput.focus(screen,false);}
+  private void releaseInput(){search.focused=false;popup=List.of();InventoryPanels.modal(screen,this,detail!=null&&!standalone);InventoryTextInput.focus(screen,this,false);}
   private void closeInput(){detail=null;releaseInput();}
   public void removed(){startedRecipes.clear();clearWheel();generation++;clearPlacement();closeInput();InventoryPanels.update(screen,0,List.of());}
   public void kind(RecipeDefinition.Kind kind){startedRecipes.clear();generation++;clearPlacement();context=RecipeContext.viewer(mc,kind);category=page=0;ghost=null;detail=null;lastRecipe=null;popup=List.of();model=null;filter=false;tick();}

@@ -9,13 +9,14 @@ import org.lwjgl.opengl.GL11;
 public final class CreativeSearchInput extends UiScreen implements CreativePaletteBridge.Search {
   static { CreativePaletteBridge.register(client -> new CreativeSearchInput((Minecraft) client)); }
   private final TextInput search = new TextInput("", 128);
+  private final Object host;
   private int left, top, span;
-  private CreativeSearchInput(Minecraft client) { minecraft = client; textRenderer = client.textRenderer; }
+  private CreativeSearchInput(Minecraft client) { minecraft = client; textRenderer = client.textRenderer; host = client.currentScreen; }
   public String text() { return search.text(); }
   public boolean focused() { return search.focused; }
   public void focus() {
     search.focused = true;
-    local.luke.power.input.InventoryTextInput.focus(minecraft.currentScreen, true);
+    local.luke.power.input.InventoryTextInput.focus(host, this, true);
     Keyboard.enableRepeatEvents(true);
   }
   public void render(int width, int height, int left, int top, int span, int mx, int my) {
@@ -43,7 +44,7 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
   }
   public boolean press(int x, int y, int button) {
     search.focused = inside(x, y, left, top, span, 10);
-    local.luke.power.input.InventoryTextInput.focus(minecraft.currentScreen, search.focused);
+    local.luke.power.input.InventoryTextInput.focus(host, this, search.focused);
     Keyboard.enableRepeatEvents(search.focused);
     if (search.focused) search.click(x, button);
     return search.focused;
@@ -55,6 +56,6 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
   }
   public void close() {
     search.focused = false; TextDrag.cancel(); Keyboard.enableRepeatEvents(false);
-    local.luke.power.input.InventoryTextInput.focus(minecraft.currentScreen, false);
+    local.luke.power.input.InventoryTextInput.focus(host, this, false);
   }
 }

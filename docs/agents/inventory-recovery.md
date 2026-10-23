@@ -94,6 +94,8 @@
   through the same protected plan. Palette amount scrolling needs a matching,
   nonempty cursor; zero needs another click. Tab-bar wheel pages regular tabs.
   Search autofocus owns the shared text-input bridge until focus leaves that editor.
+  Text-focus claims belong to individual overlays on their host screen; disabled
+  recipe-book cleanup must never release Creative Search or another editor's claim.
 - Item merging preserves native NBT, damage, normal stack limits and total counts.
   TNT limits retain native entities and saved fuses, bound work each tick and stay
   available from the main menu for recovery. Both leave multiplayer server-owned.

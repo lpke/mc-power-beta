@@ -68,4 +68,25 @@ public abstract class OffhandContainerScreenMixin extends Screen implements Inve
           18, 18, 172, 111, 18, 18, 256, 256);
     }
   }
+  @Inject(method = "render", at = @At("TAIL"))
+  private void power$deleteHint(int x, int y, float delta, CallbackInfo ci) {
+    // The native player inventory owns the same hint in its Creative renderer.
+    if (((ContainerScreen)(Object)this).getClass() == net.minecraft.class_585.class
+        || !CreativeDeletion.clearSetting()
+        || !(org.lwjgl.input.Keyboard.isKeyDown(org.lwjgl.input.Keyboard.KEY_LSHIFT)
+            || org.lwjgl.input.Keyboard.isKeyDown(org.lwjgl.input.Keyboard.KEY_RSHIFT))
+        || !power$deleteSlotAt(x, y)) return;
+    String message = "Clear inventory";
+    int textWidth = textRenderer.getWidth(message);
+    int left = Math.max(4, Math.min(x + 12, width - textWidth - 4));
+    int top = Math.max(4, Math.min(y - 12, height - 12));
+    GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_COLOR_BUFFER_BIT);
+    try {
+      GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING);
+      GL11.glColor4f(1, 1, 1, 1);
+      fillGradient(left - 3, top - 3, left + textWidth + 3, top + 11, 0xc0000000, 0xc0000000);
+      textRenderer.drawWithShadow(message, left, top, 0xffffff);
+    } finally { GL11.glPopAttrib(); }
+  }
+
 }

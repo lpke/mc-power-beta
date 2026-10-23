@@ -32,7 +32,7 @@ public final class InventorySortingLayer {
     var editor = new SortingPreferencesScreen(host, session, () -> {}, true);
     navigate(editor);
     InventoryPanels.extra(host, OWNER, java.util.List.of(new InventoryPanels.Rect(0, 0, host.width, host.height)));
-    InventoryPanels.modal(host, OWNER, true); InventoryTextInput.focus(host, true);
+    InventoryPanels.modal(host, OWNER, true); InventoryTextInput.focus(host, this, true);
   }
   public boolean active() { return active; }
   public void prepare() {
@@ -66,6 +66,6 @@ public final class InventorySortingLayer {
     if (page != null) page.removed();
     TextDrag.cancel(); Keyboard.enableRepeatEvents(repeat);
     InventoryPanels.removeExtra(host, OWNER); InventoryPanels.modal(host, OWNER, false);
-    if (!InventoryPanels.modal(host)) InventoryTextInput.focus(host, false);
+    InventoryTextInput.focus(host, this, false);
   }
 }

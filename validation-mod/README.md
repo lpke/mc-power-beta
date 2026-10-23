@@ -17,6 +17,25 @@
 
 # Runtime checks
 
+- `creative-443` checks scrollbar event ownership, immediate item dragging, Ctrl-drag
+  selection, editable names and the Reset/Cancel/Undo/Save footer at small and wide sizes.
+  Use `creative-443 prepare list|grid|item|paint`, `hold-check`, `check` and `stop`
+  for real pointer checks, following its coordinates and modifier release instructions.
+- `creative-443-containers run` requires either Shift key physically held and checks
+  native container clear hints, rendering order, GL state and item preservation.
+  `prepare`, `check` and `stop` exercise a physical Shift-click with isolated items.
+
+- `creative-443-movement prepare focused|focused-flying|unfocused|recipe` opens an isolated native
+  inventory with inventory movement enabled. Keep physical W held for at least one
+  second, then run `creative-443-movement check` while still holding it. The focused
+  Creative and recipe searches must accept W with zero horizontal displacement
+  across actual world ticks; the unfocused Search control must move over 0.1 blocks.
+  Release W and run `creative-443-movement stop` before another case. The fixture
+  restores inventory, preferences, bindings, mode, flight, velocity and position.
+  Use a muted disposable world with clear, loaded ground ahead of the player.
+  `creative-443-movement sorting` checks current immediate-editor Escape and
+  screen-change cleanup, then confirms a stale sorting close preserves recipe-search focus.
+
 - `current-formats-442` validates schema 7, both format-4 templates and every saved
   world metadata/previous/dimension file, including native offhand/kept-item decoding
   after registry initialization. It checks byte preservation, old/future rejection

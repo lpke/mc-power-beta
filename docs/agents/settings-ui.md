@@ -61,6 +61,9 @@
   one picker draft and reset/Undo boundary, and hide only the paired opacity row.
   `ColorValue` preserves legacy palette indices 0–3; custom palette colors use
   `0x1000000 | RGB`, including black and RGB values 1–3.
+- Native Beta mouse motion and wheel events call `mouseReleased` with button -1.
+  Scrollbar ownership ends only on its originating button release, focus loss or
+  navigation; apply final release coordinates before clearing the drag.
 - Text inputs share editing and pointer selection through the input bridge. UI cursor
   blinking is separate from chat. Cancel selection on focus/screen changes; keep native
   limits, validation and gcapi3 widget methods. Search-only cluster suffixes never change IDs.

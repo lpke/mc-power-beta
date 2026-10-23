@@ -19,6 +19,8 @@ import local.luke.power.validation.mixin.ScreenInput;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.input.Keyboard;
+import java.nio.ByteBuffer;
 import org.lwjgl.opengl.GL11;
 
 /** Native editor controls exercise an isolated draft; no gameplay slot or setting is published. */
@@ -63,9 +65,15 @@ final class Creative442Checks {
     var editor = new CreativeTabsScreen(parent, setting, () -> accepted[0]++);
     try {
       mc.setScreen(editor); editor.init(mc, 640, 420);
-      test("CREATIVE442 first drag selects; selected occupied cells move on fast release", () -> {
-        JsonObject original = data(editor).json(); drag(editor, 0, 3);
-        check(selected(editor).equals(Set.of(0, 1, 2, 3)) && data(editor).json().equals(original), "Unselected item drag moved data instead of selecting");
+      test("CREATIVE443 plain drag moves immediately; Ctrl drag selects and keeps multi-item movement", () -> {
+        JsonObject original = data(editor).json(); List<String> initial = CreativeTabsData.slots(data(editor).tab(0)); drag(editor, 0, 4);
+        check(selected(editor).equals(Set.of(4)) && CreativeTabsData.slots(data(editor).tab(0)).equals(CreativeTabsData.moveCells(initial, Set.of(0), 4)), "Plain occupied-cell drag required prior selection");
+        invoke(editor, "undo", new Class<?>[0]);
+        var keysField = Keyboard.class.getDeclaredField("keyDownBuffer"); keysField.setAccessible(true); var keys = (ByteBuffer)keysField.get(null);
+        byte previous = keys.get(Keyboard.KEY_LCONTROL);
+        try { keys.put(Keyboard.KEY_LCONTROL, (byte)1); drag(editor, 0, 3); }
+        finally { keys.put(Keyboard.KEY_LCONTROL, previous); }
+        check(selected(editor).equals(Set.of(0, 1, 2, 3)) && data(editor).json().equals(original), "Ctrl drag moved data instead of selecting");
         List<String> source = CreativeTabsData.slots(data(editor).tab(0)); drag(editor, 0, 4);
         check(CreativeTabsData.slots(data(editor).tab(0)).equals(CreativeTabsData.moveCells(source, Set.of(0, 1, 2, 3), 4)), "Selected item drag lost cells/holes/unknown IDs");
         invoke(editor, "undo", new Class<?>[0]); check(data(editor).json().equals(original), "Move undo did not restore exact layout");
@@ -90,7 +98,7 @@ final class Creative442Checks {
         invoke(editor, "removeRow", new Class<?>[0]); check(CreativeTabsData.slots(data(editor).tab(0)).size() == 8, "Remove row removed last row");
         for (int row = 1; row < 9; row++) invoke(editor, "undo", new Class<?>[0]);
         check(data(editor).json().equals(original), "Row removal undo did not restore exact rows");
-        int left = (int)call(editor, "left"); ((ScreenInput)(Object)editor).power$click(left + 4, editor.height - 46, 0);
+        var footer = CreativeTabsScreen.class.getDeclaredMethod("footerX", int.class); footer.setAccessible(true); int reset = (int)footer.invoke(editor, 0); ((ScreenInput)(Object)editor).power$click(reset + 4, editor.height - 24, 0);
         check(data(editor).size() == 6, "Reset did not restore default tabs");
         invoke(editor, "undo", new Class<?>[0]); check(data(editor).json().equals(original), "Reset was not undoable");
       });
@@ -162,13 +170,13 @@ final class Creative442Checks {
       pointer = new CreativeTabsScreen(pointerParent, pointerSetting, () -> { throw new AssertionError("Pointer draft published"); }); mc.setScreen(pointer);
       pointerDocument = data(pointer).json();
       log("CREATIVE442 POINTER ready GUI=" + pointer.width + "x" + pointer.height + " display=" + mc.displayWidth + "x" + mc.displayHeight
-          + " grid=" + call(pointer, "gridLeft") + "," + call(pointer, "gridTop") + " cell18. First drag cell0 to3, check select; then drag0to4, check move; singleclickcell4, check single; doubleclickcell4, check double; stop."); return;
+          + " grid=" + call(pointer, "gridLeft") + "," + call(pointer, "gridTop") + " cell18. First Ctrl-left-drag cell0 to3, release Ctrl, check select; then drag0to4, check move; singleclickcell4, check single; doubleclickcell4, check double; stop."); return;
     }
     check(pointer != null, "Run creative-442 editor first");
     if (action.equals("stop")) { try { untouched(mc); } finally { mc.setScreen(pointerParent); pointer = null; } return; }
     check(action.startsWith("check "), "Use editor, check select|move|single|double, stop"); String stage = action.substring(6);
     switch (stage) {
-      case "select" -> check(selected(pointer).equals(Set.of(0, 1, 2, 3)) && data(pointer).json().equals(pointerDocument), "Native first drag moved items");
+      case "select" -> check(selected(pointer).equals(Set.of(0, 1, 2, 3)) && data(pointer).json().equals(pointerDocument), "Native Ctrl drag moved items");
       case "move" -> {
         List<String> original = CreativeTabsData.slots(CreativeTabsData.read(pointerDocument).tab(0));
         check(CreativeTabsData.slots(data(pointer).tab(0)).equals(CreativeTabsData.moveCells(original, Set.of(0, 1, 2, 3), 4)), "Native selected drag failed");

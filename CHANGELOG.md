@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [4.4.3] - 2026-10-24
+
+- Drag Creative tab items immediately with the left button; use Ctrl-drag to select cells, retaining multiple selection and drag previews.
+- Keep Creative tab scrollbars attached to their originating mouse press through motion and release. Place Reset, Cancel, Undo and Save together in the footer, and show tab names as editable fields.
+- Keep Creative Search text focus independent of the recipe book so typing blocks inventory movement across game ticks.
+- Show the Shift-clear inventory hint over Creative delete slots in native chests, furnaces, crafting tables and other supported containers.
+
 ## [4.4.2] - 2026-10-24
 
 - Keep the searched tab selected for Controls and This tab searches; simplify Controls result headings. Give container previews independent block and entity reach, both defaulting to five blocks, and hide the Creative tab when Creative access is disabled.
