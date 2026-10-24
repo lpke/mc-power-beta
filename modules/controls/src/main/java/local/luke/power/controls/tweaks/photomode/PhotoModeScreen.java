@@ -45,6 +45,7 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
     public Screen previousScreen;
     private long lastTickTime = System.nanoTime();
     private int dragButton = -1;
+    private boolean initialZoomApplied;
 
     public PhotoModeScreen(Screen previousScreen) {
         this.previousScreen = previousScreen;
@@ -53,6 +54,16 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
     @Override
     public void init() {
         super.init();
+
+        if (!this.initialZoomApplied) {
+            PhotoTerrainBounds grid = (PhotoTerrainBounds) this.minecraft.worldRenderer;
+            var view = grid.powerPhoto$initialView(this.minecraft.displayWidth, this.minecraft.displayHeight,
+                this.tilt, 45.0 + 90.0 * this.rotation);
+            this.zoom = this.zoomGoal = (float) view.zoom();
+            this.cameraX = (float) view.cameraX();
+            this.cameraY = (float) view.cameraY();
+            this.initialZoomApplied = true;
+        }
 
         int id = 0;
         this.exitButton = new ButtonWidget(id++, 0, 0, 20, 20, "X");

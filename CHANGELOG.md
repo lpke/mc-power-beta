@@ -8,7 +8,8 @@
 - Hide in-game waypoint labels during Pause while retaining them in inventory screens.
 - Accept relative waypoint coordinates in commands and the editor, including ~ for the current reported position and ~offset values.
 - Remove Cave mode from World Map checkbox controls and remember Show/Hide Toggles for the session. Keep minimap cave controls and saved middle-click action IDs.
-- Remove photo mode's bright blue lower-sky square. Re-release: restore the native sky-colored background and previous zoom scale/range, without automatically fitting terrain to the viewport.
+- Remove photo mode's bright blue lower-sky square while retaining the native sky-colored surroundings.
+- Re-release: restore photo mode's full manual zoom range and choose an initial zoom from rendered terrain and screen size only when opening. Later zoom and camera controls stay unrestricted.
 
 ## [4.4.8] - 2026-10-25
 

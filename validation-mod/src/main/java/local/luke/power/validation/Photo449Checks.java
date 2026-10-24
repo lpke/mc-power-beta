@@ -54,6 +54,59 @@ final class Photo449Checks {
     GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPushMatrix();
     try {
       mc.setScreen(photo);
+      test("photo 4.4.9 fits terrain only when the screen first opens", () -> {
+        float initial = (float) field(photo,"zoom");
+        var expected = initialView(mc);
+        check(Math.abs(initial-expected.zoom())<1e-6,"opening zoom ignored the renderer footprint or physical aspect");
+        check(initial==(float)field(photo,"zoomGoal"),"opening fit animated from the old zoom");
+        check(Math.abs((float)field(photo,"cameraX")-expected.cameraX())<1e-6
+            &&Math.abs((float)field(photo,"cameraY")-expected.cameraY())<1e-6,"opening frame was not centered before rendering");
+        Method camera=class_555.class.getDeclaredMethod("method_1840",float.class,int.class);
+        camera.setAccessible(true);camera.invoke(mc.field_2818,1F,0);
+        double[] coverage=openingCoverage(mc,(class_66[])chunks);
+        double horizontal=(coverage[2]-coverage[0])/2,vertical=(coverage[3]-coverage[1])/2;
+        if(initial>.010001F&&initial<11.99999F) {
+          check(horizontal<=.84001&&vertical<=.84001,"opening fit cropped the terrain volume");
+          check(Math.abs(Math.max(horizontal,vertical)-.84)<1e-5,"opening fit left too much empty space");
+          check(Math.abs(coverage[0]+coverage[2])<1e-4&&Math.abs(coverage[1]+coverage[3])<1e-4,
+              "opening native projection did not center the mesh bounds");
+        }
+        log("PHOTO449 opening zoom "+initial+"; projected terrain coverage "+horizontal+" x "+vertical);
+
+        int displayWidth=mc.displayWidth,displayHeight=mc.displayHeight;
+        int guiWidth=photo.width,guiHeight=photo.height;
+        try {
+          for(float zoom:new float[]{.01F,1.25F,12F}) {
+            set(photo,"zoom",zoom);set(photo,"rotation",.5F);set(photo,"tilt",90);
+            field(photo,"cameraX",.125F);field(photo,"cameraY",-.25F);
+            // Native resize calls init again. A changed renderer footprint must also stay manual.
+            field(mc.worldRenderer,"field_1779",maxX+16);field(mc.worldRenderer,"field_1781",maxZ+16);
+            mc.displayWidth=540;mc.displayHeight=960;
+            photo.init(mc,270,480);camera.invoke(mc.field_2818,1F,0);
+            check((float)field(photo,"zoom")==zoom&&(float)field(photo,"zoomGoal")==zoom,
+                "resize, rotation, tilt or changed terrain replaced manual zoom");
+            check((float)field(photo,"cameraX")==.125F&&(float)field(photo,"cameraY")==-.25F,
+                "resize or changed terrain replaced manual pan");
+          }
+        } finally {
+          mc.displayWidth=displayWidth;mc.displayHeight=displayHeight;
+          field(mc.worldRenderer,"field_1779",maxX);field(mc.worldRenderer,"field_1781",maxZ);
+          photo.init(mc,guiWidth,guiHeight);
+          set(photo,"zoom",initial);set(photo,"rotation",0);set(photo,"tilt",30);
+          field(photo,"cameraX",(float)expected.cameraX());field(photo,"cameraY",(float)expected.cameraY());
+        }
+      });
+      test("photo 4.4.9 falls back immediately when section metadata is absent or oversized", () -> {
+        try {
+          field(mc.worldRenderer,"field_1809",null);
+          var absent=initialView(mc);
+          field(mc.worldRenderer,"field_1809",new class_66[65537]);
+          check(initialView(mc).equals(absent),"oversized renderer scan changed the fallback");
+          field(mc.worldRenderer,"field_1809",new class_66[1]);
+          check(initialView(mc).equals(absent),"incomplete renderer metadata changed the fallback");
+          check(Double.isFinite(absent.zoom())&&Double.isFinite(absent.cameraY()),"invalid immediate fallback");
+        } finally {field(mc.worldRenderer,"field_1809",chunks);}
+      });
       test("photo 4.4.9 retains native sky background color", () -> {
         Method colors=class_555.class.getDeclaredMethod("method_1852",float.class);
         colors.setAccessible(true);
@@ -140,6 +193,28 @@ final class Photo449Checks {
   }
   private static double bounds(Minecraft mc, String name) throws Exception {
     return ((Number)mc.worldRenderer.getClass().getMethod("powerPhoto$"+name).invoke(mc.worldRenderer)).doubleValue();
+  }
+  private static PhotoProjection.InitialView initialView(Minecraft mc) throws Exception {
+    return (PhotoProjection.InitialView)mc.worldRenderer.getClass().getMethod("powerPhoto$initialView",
+        int.class,int.class,double.class,double.class).invoke(mc.worldRenderer,mc.displayWidth,mc.displayHeight,30D,45D);
+  }
+  private static double[] openingCoverage(Minecraft mc,class_66[] sections) {
+    var projection=BufferUtils.createFloatBuffer(16);GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX,projection);
+    var model=BufferUtils.createFloatBuffer(16);GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX,model);
+    double[] bounds={Double.POSITIVE_INFINITY,Double.POSITIVE_INFINITY,Double.NEGATIVE_INFINITY,Double.NEGATIVE_INFINITY};
+    for(class_66 section:sections) if(section!=null&&!section.method_304()) for(int corner=0;corner<8;corner++) {
+      double x=section.field_231+((corner&1)==0?0:section.field_234)-mc.field_2807.x;
+      double y=section.field_232+((corner&2)==0?0:section.field_235)-mc.field_2807.y;
+      double z=section.field_233+((corner&4)==0?0:section.field_236)-mc.field_2807.z;
+      double mx=model.get(0)*x+model.get(4)*y+model.get(8)*z+model.get(12);
+      double my=model.get(1)*x+model.get(5)*y+model.get(9)*z+model.get(13);
+      double mz=model.get(2)*x+model.get(6)*y+model.get(10)*z+model.get(14);
+      double px=projection.get(0)*mx+projection.get(4)*my+projection.get(8)*mz+projection.get(12);
+      double py=projection.get(1)*mx+projection.get(5)*my+projection.get(9)*mz+projection.get(13);
+      bounds[0]=Math.min(bounds[0],px);bounds[1]=Math.min(bounds[1],py);
+      bounds[2]=Math.max(bounds[2],px);bounds[3]=Math.max(bounds[3],py);
+    }
+    return bounds;
   }
   private static int transparentSections(class_66[] chunks) {
     int count=0;

@@ -30,7 +30,13 @@ def run(v):
 
     for helper in ['native','raw']:
         v.command('movement-close');v.command('release-152 setup');v.command('release-152 '+helper)
-        v.command('photo-controls open');v.command('photo-controls layout')
+        v.command('photo-controls open');opening=state()
+        assert .01<=opening['zoomGoal']<=12,opening
+        v.command('photo-controls layout');assert state()['zoomGoal']==opening['zoomGoal'],state()
+        v.tap('space');assert state()['zoomGoal']==opening['zoomGoal'],state()
+        v.tap('q');click('tiltSlider',.8);v.command('photo-controls resize')
+        assert state()['zoomGoal']==opening['zoomGoal'],state()
+        print('PASS photo opening zoom survives center, rotation, tilt and resize',helper,opening['zoomGoal'],flush=True)
         for code in [1,3,2]:
             for delay in [0,.005,.04,.15]:
                 reset();before=state()
@@ -53,6 +59,11 @@ def run(v):
         for code,expected in [(4,1.5),(5,1.25)]:
             button(code,True);button(code,False);time.sleep(.1)
             assert state()['zoomGoal']==expected,state()
+        for _ in range(8):
+            button(5,True);button(5,False)
+        time.sleep(.1);assert abs(state()['zoomGoal']-.01)<1e-6,state()
+        v.tap('q');click('tiltSlider',.8);v.command('photo-controls resize')
+        assert abs(state()['zoomGoal']-.01)<1e-6,state()
         for key,field,sign in [('w','cameraY',-1),('s','cameraY',1),('a','cameraX',1),('d','cameraX',-1)]:
             reset();v.key(key,True);time.sleep(.1);v.key(key,False)
             assert state()[field]*sign>0,state()
