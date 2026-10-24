@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [4.4.5] - 2026-10-24
+
+- Clear recipe ghosts and error backgrounds when closing the recipe book, including narrow layouts and disabled views.
+- Keep the inventory player model looking toward the original cursor position while using inventory looking, including Creative inventory views and recipe-book offsets.
+- Restore Creative Search text shadows, move typed text up one pixel and shorten its cursor from the bottom.
+- Right-click selected empty cells in the Creative tab editor to deselect them while retaining other selected cells and right-drag clearing.
+
 ## [4.4.4] - 2026-10-24
 
 - Apply the right-click text clearing preference across Creative Search, the recipe book and shared text editors. Focus Creative Search only when switching into its tab; refine its height and text drawing.

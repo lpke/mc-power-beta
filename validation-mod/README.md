@@ -17,6 +17,16 @@
 
 # Runtime checks
 
+- `ui-445 capture` writes near-final recipe/Search images before acceptance checks.
+  `ui-445 run` checks ghost cleanup, native slot/font pixels, caret geometry and
+  empty-cell selection/Undo isolation at 320/640 logical widths. Reports are under
+  `power-beta-data/reports/ui-445`. Use a focused muted Survival clone at 1280×720
+  or larger, with no inventory transaction in progress.
+- `inventory-look-445 run` captures actual player-model poses in Survival, Creative,
+  Spectator and recipe/palette views at narrow/wide sizes. `prepare survival|creative|spectator|recipe|palette`,
+  held/released `check` and `stop` cover real pointer looking. Keep the clone muted;
+  follow the logged originating press coordinates and restore through `stop`.
+
 - `text-inputs-444` checks live On/Off right-click clearing in native/config widgets
   and recipe searches at 320 and 640 pixels, including bounds, disabled fields,
   selection, text limits, callbacks, modal ownership and native inventory preservation.

@@ -97,7 +97,7 @@ public final class RecipeBookOverlay {
   private void click(){mc.soundManager.method_2009("random.click",1,1);}
   private void state(){if(!standalone)RecipeBookConfig.state(context.kind==RecipeDefinition.Kind.FURNACE,open,filter);refreshGeometry();}
   private void releaseInput(){search.focused=false;popup=List.of();InventoryPanels.modal(screen,this,detail!=null&&!standalone);InventoryTextInput.focus(screen,this,false);}
-  private void closeInput(){detail=null;releaseInput();}
+  private void closeInput(){ghost=null;lastUnavailable=null;detail=null;releaseInput();}
   public void removed(){startedRecipes.clear();clearWheel();generation++;clearPlacement();closeInput();InventoryPanels.update(screen,0,List.of());}
   public void kind(RecipeDefinition.Kind kind){startedRecipes.clear();generation++;clearPlacement();context=RecipeContext.viewer(mc,kind);category=page=0;ghost=null;detail=null;lastRecipe=null;popup=List.of();model=null;filter=false;tick();}
   /** Native containers draw buttons before slots, carried stacks and item tooltips. */
@@ -121,7 +121,7 @@ public final class RecipeBookOverlay {
         if(replacesNative())renderInventoryButton(mx,my);
         if(toggleBounds().contains(mx,my))toggleTooltip="Recipe book";
       }
-      if(!open){if(!standalone)renderGhost(mx,my,l);if(toggleTooltip!=null)draw.tooltip(mc,toggleTooltip,mx,my,screen.width,screen.height);return;}
+      if(!open){if(toggleTooltip!=null)draw.tooltip(mc,toggleTooltip,mx,my,screen.width,screen.height);return;}
       draw.image(mc,"recipe_book",l.x(),l.y(),147,166,1,1,147,166,256,256);
       if(standalone){var b=l.detail();draw.nativePanel(mc,b.x(),b.y(),b.width(),b.height());draw.rectangle(b.x()-2,b.y()+4,6,b.height()-8,0xffc6c6c6);}
       draw.search(mc,screen,search,l);
@@ -201,7 +201,7 @@ public final class RecipeBookOverlay {
   private String tabName(int tab){if(tab==0)return "Search";if(context.kind==RecipeDefinition.Kind.FURNACE)return switch(tab){case 1->"Food";case 2->"Blocks";default->"Miscellaneous";};return switch(tab){case 1->"Building blocks";case 2->"Redstone";case 3->"Equipment";default->"Miscellaneous";};}
   private ItemStack icon(int id){return id>=0&&id<net.minecraft.Item.ITEMS.length&&net.minecraft.Item.ITEMS[id]!=null?new ItemStack(id,1,0):null;}
   private String renderGhost(int mx,int my,RecipeBookLayout l) {
-    if(ghost==null)return null;var cells=ghost.layout(context.width,context.height);if(cells==null)return null;
+    if(!open||ghost==null)return null;var cells=ghost.layout(context.width,context.height);if(cells==null)return null;
     // Render the complete hint only when every overlapping native slot is empty.
     for(int i=0;i<cells.size();i++)if(cells.get(i)!=null&&context.inputs.get(i).getStack()!=null)return null;
     if(context.output.getStack()!=null)return null;

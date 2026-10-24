@@ -64,7 +64,8 @@
     "MeshWater430Reference",
     "CullingRenderer421Capture",
     "Performance421VboCapture",
-    "Performance421PresentCapture"
+    "Performance421PresentCapture",
+    "InventoryLook445Capture"
   ],
   "injectors": {
     "defaultRequire": 1

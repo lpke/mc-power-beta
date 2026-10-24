@@ -33,12 +33,12 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
       var view = search.layout(minecraft.currentScreen, left + 3, span - 6, textRenderer::getWidth);
       String value = search.text();
       int from = Math.max(view.start(), search.start()), to = Math.min(view.end(), search.end());
-      if (search.focused && from < to) fill(left + 3 + textRenderer.getWidth(value.substring(view.start(), from)), top + 1,
-          left + 3 + textRenderer.getWidth(value.substring(view.start(), to)), top + 9, 0xff335577);
-      textRenderer.draw(value.substring(view.start(), view.end()), left + 3, top + 1, 0xffffff);
+      if (search.focused && from < to) fill(left + 3 + textRenderer.getWidth(value.substring(view.start(), from)), top,
+          left + 3 + textRenderer.getWidth(value.substring(view.start(), to)), top + 8, 0xff335577);
+      text(value.substring(view.start(), view.end()), left + 3, top, 0xffffff);
       if (search.focused && InterfaceState.uiCursorVisible()) {
         int caret = left + 3 + textRenderer.getWidth(value.substring(view.start(), search.cursor()));
-        fill(caret, top + 1, caret + 1, top + 9, 0xffffffff);
+        fill(caret, top + 1, caret + 1, top + 8, 0xffffffff);
       }
     } finally { GL11.glPopAttrib(); }
   }

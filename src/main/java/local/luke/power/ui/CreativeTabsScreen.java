@@ -318,6 +318,7 @@ public final class CreativeTabsScreen extends UiScreen {
       clicks.cancel();
       clearingCells = true; dragButton = button; dragCell = cell; pressX = x; pressY = y;
       dragSource = paddedSlots(); clearCells.add(cell);
+      if (dragSource.get(cell).isEmpty()) cells.remove(cell);
       return;
     }
     selectingCells = ctrl();
@@ -368,7 +369,8 @@ public final class CreativeTabsScreen extends UiScreen {
     if (clearingCells) {
       List<String> values = new ArrayList<>(dragSource);
       for (int index : clearCells) values.set(index, "");
-      storeSlots(values); cancelDrag(); return;
+      if (!values.equals(dragSource)) storeSlots(values);
+      cancelDrag(); return;
     }
     if (dragTab >= 0) {
       int destination = tabRow(x, y);
