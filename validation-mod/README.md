@@ -17,6 +17,11 @@
 
 # Runtime checks
 
+- `creative-443-revision` checks selected-origin Ctrl deselection and Ctrl-right
+  item clearing with one Undo step. Native cases use `prepare deselect-ctrl-first`,
+  `deselect-button-first`, `clear-ctrl-first` or `clear-button-first`, then the logged
+  pointer gesture, `check`, optional `undo`, and `stop`.
+
 - `creative-443` checks scrollbar event ownership, immediate item dragging, Ctrl-drag
   selection, editable names and the Reset/Cancel/Undo/Save footer at small and wide sizes.
   Use `creative-443 prepare list|grid|item|paint`, `hold-check`, `check` and `stop`

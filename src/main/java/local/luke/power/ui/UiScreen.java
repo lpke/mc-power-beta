@@ -122,7 +122,7 @@ public abstract class UiScreen extends Screen {
       case "eyeClosed" -> new String[]{"         ", "         ", "#       #", " #     # ", "  #####  ", " #  #  # ", "         "};
       case "collapse" -> new String[]{"  #   #  ", "   # #   ", "    #    ", "         ", "         ", "    #    ", "   # #   ", "  #   #  "};
       case "expand" -> new String[]{"    #    ", "   # #   ", "  #   #  ", "         ", "  #   #  ", "   # #   ", "    #    "};
-      case "edit" -> new String[]{"       ##", "      ###", "     ### ", "    ###  ", "   ###   ", "  ###    ", " ###     ", "####     ", "###      "};
+      case "edit" -> new String[]{"      ## ", "     #o# ", "    #o#  ", "   #o#   ", "  #o#    ", " #o#     ", "#o#      ", "##       ", "#        "};
       case "check" -> new String[]{"        #", "       ##", "      ## ", "#    ##  ", "##  ##   ", " ####    ", "  ##     "};
       case "star" -> new String[]{"    #    ", "   ###   ", "#########", " ####### ", "  #####  ", " ##   ## ", " #     # "};
       case "music" -> new String[]{"   ######", "   #    #", "   #    #", "   #    #", " ###  ###", "#### ####", " ##   ## "};

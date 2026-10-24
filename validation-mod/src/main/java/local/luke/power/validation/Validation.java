@@ -263,6 +263,7 @@ public final class Validation {
       else if (command.equals("recipe-441")) Recipe441Checks.run(mc);
       else if (command.equals("current-formats-442")) CurrentFormats442Checks.run(mc);
       else if (command.startsWith("creative-442")) Creative442Checks.run(mc, command.substring(12).trim());
+      else if (command.startsWith("creative-443-revision")) Creative443RevisionChecks.run(mc, command.substring("creative-443-revision".length()).trim());
       else if (command.equals("creative-443") || command.startsWith("creative-443 ")) Creative443Checks.run(mc, command.substring("creative-443".length()).trim());
       else if (command.startsWith("recipe-441 ")) Recipe441Checks.physical(mc, command.substring(11));
       else if (command.startsWith("minimap-441 ")) Minimap441Checks.run(mc, command.substring(12));

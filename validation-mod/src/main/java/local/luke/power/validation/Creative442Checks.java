@@ -69,6 +69,8 @@ final class Creative442Checks {
         JsonObject original = data(editor).json(); List<String> initial = CreativeTabsData.slots(data(editor).tab(0)); drag(editor, 0, 4);
         check(selected(editor).equals(Set.of(4)) && CreativeTabsData.slots(data(editor).tab(0)).equals(CreativeTabsData.moveCells(initial, Set.of(0), 4)), "Plain occupied-cell drag required prior selection");
         invoke(editor, "undo", new Class<?>[0]);
+        // Undo restores the original selected origin; this case exercises adding from an unselected cell.
+        selected(editor).clear();
         var keysField = Keyboard.class.getDeclaredField("keyDownBuffer"); keysField.setAccessible(true); var keys = (ByteBuffer)keysField.get(null);
         byte previous = keys.get(Keyboard.KEY_LCONTROL);
         try { keys.put(Keyboard.KEY_LCONTROL, (byte)1); drag(editor, 0, 3); }

@@ -31,7 +31,9 @@ public final class CreativeTabsScreen extends UiScreen {
   private int nativeFocus;
   private final SortedSet<Integer> cells = new TreeSet<>();
   private int dragCell = -1, dragTab = -1, pressX, pressY;
-  private boolean dragging, selectionPress, selectingCells, movingCells, doubleClick;
+  private boolean dragging, selectionPress, selectingCells, deselectingCells, clearingCells, movingCells, doubleClick;
+  private int dragButton = -1;
+  private final SortedSet<Integer> clearCells = new TreeSet<>();
   private Set<Integer> selectionBeforePress = Set.of();
   private List<String> dragSource;
   private Set<Integer> dragSelection;
@@ -56,6 +58,10 @@ public final class CreativeTabsScreen extends UiScreen {
   private int span() { return Math.min(470, width - 20); }
   private int left() { return (width - span()) / 2; }
   private int listWidth() { return Math.max(92, Math.min(160, span() - 180)); }
+  private int tabButtonWidth() { return Math.max(68, (listWidth() - 8) / 2); }
+  private int tabButtonX(int index) { return left() + index * (tabButtonWidth() + 4); }
+  private int fillGroupX() { return Math.max(left() + listWidth(), tabButtonX(1) + tabButtonWidth() + 4); }
+  private int fillGroupWidth(int limit) { return Math.min(limit, left() + span() - fillGroupX()); }
   private int gridLeft() { return left() + listWidth() + (span() - listWidth() - 144) / 2; }
   private int gridTop() { return 85; }
   private int gridBottom() { return height - 60; }
@@ -111,7 +117,7 @@ public final class CreativeTabsScreen extends UiScreen {
     cells.clear(); anchor = -1; gridScroll = 0; rename = false; title.focused = false; cancelDrag(); clicks.cancel();
     if (data.size() > 0) title.setText(tab().get("title").getAsString());
   }
-  private void cancelDrag() { dragCell = dragTab = -1; dragging = selectingCells = movingCells = doubleClick = false; dragSource = null; dragSelection = null; }
+  private void cancelDrag() { dragCell = dragTab = dragButton = -1; dragging = selectingCells = deselectingCells = clearingCells = movingCells = doubleClick = false; dragSource = null; dragSelection = null; clearCells.clear(); }
   @Override public void init() { Keyboard.enableRepeatEvents(true); }
   @Override public void removed() { Keyboard.enableRepeatEvents(false); TextDrag.cancel(); cancelDrag(); clicks.cancel(); listBar.release(); gridBar.release(); }
   private boolean changed() {
@@ -256,7 +262,7 @@ public final class CreativeTabsScreen extends UiScreen {
     if (nativeGroups) {
       if (button != 0) return;
       for (int i = 0; i < nativeLabels().size(); i++)
-        if (inside(x, y, left() + listWidth(), 52 + i * 20, Math.min(180, span() - listWidth()), 20)) { click(); fillNative(i); return; }
+        if (inside(x, y, fillGroupX(), 52 + i * 20, fillGroupWidth(180), 20)) { click(); fillNative(i); return; }
       nativeGroups = false; return;
     }
     if (rename) {
@@ -272,9 +278,9 @@ public final class CreativeTabsScreen extends UiScreen {
     if (button == 0 && listBar.press(listTrack(), x, y)) { clicks.cancel(); listScroll = (int)Math.round(listBar.drag(listTrack(), y, true) / 23); return; }
     if (button == 0 && gridBar.press(gridTrack(), x, y)) { clicks.cancel(); gridScroll = (int)gridBar.drag(gridTrack(), y, true); return; }
     if (button == 0 && inside(x, y, footerX(3), height - 28, footerWidth(), 20)) { click(); save(); return; }
-    if (button == 0 && inside(x, y, left(), 30, 48, 20)) { click(); addTab(); return; }
-    if (button == 0 && hasTab() && inside(x, y, left() + listWidth(), 30, Math.min(144, span() - listWidth()), 20)) { click(); if (commitTitle()) { nativeGroupData(); nativeFocus = 0; nativeGroups = true; } return; }
-    if (button == 0 && inside(x, y, left() + 52, 30, Math.max(40, listWidth() - 58), 20) && hasTab()) {
+    if (button == 0 && inside(x, y, tabButtonX(0), 30, tabButtonWidth(), 20)) { click(); addTab(); return; }
+    if (button == 0 && hasTab() && inside(x, y, fillGroupX(), 30, fillGroupWidth(144), 20)) { click(); if (commitTitle()) { nativeGroupData(); nativeFocus = 0; nativeGroups = true; } return; }
+    if (button == 0 && inside(x, y, tabButtonX(1), 30, tabButtonWidth(), 20) && hasTab()) {
       click(); edit(() -> data.remove(selected)); select(selected); listScroll = Math.min(listScroll, Math.max(0, data.size() - visibleListRows())); return;
     }
     if (button == 0 && inside(x, y, footerX(0), height - 28, footerWidth(), 20)) {
@@ -310,10 +316,18 @@ public final class CreativeTabsScreen extends UiScreen {
     }
     int cell = gridCell(x, y);
     if (cell < 0 || button != 0 && button != 1) return;
-    if (button == 1) { clicks.cancel(); List<String> values = paddedSlots(); values.set(cell, ""); storeSlots(values); return; }
+    if (button == 1) {
+      clicks.cancel();
+      if (ctrl()) {
+        clearingCells = true; dragButton = button; dragCell = cell; pressX = x; pressY = y;
+        dragSource = paddedSlots(); clearCells.add(cell);
+      } else { List<String> values = paddedSlots(); values.set(cell, ""); storeSlots(values); }
+      return;
+    }
     selectingCells = ctrl();
     selectionPress = shift() || selectingCells;
     boolean alreadySelected = cells.contains(cell);
+    deselectingCells = selectingCells && alreadySelected;
     selectionBeforePress = Set.copyOf(cells);
     doubleClick = !selectionPress && clicks.press(cell, button, Mouse.getEventNanoseconds());
     if (selectionPress) clicks.cancel();
@@ -322,30 +336,44 @@ public final class CreativeTabsScreen extends UiScreen {
       for (int i = Math.min(anchor, cell); i <= Math.max(anchor, cell); i++) cells.add(i);
     } else if (ctrl()) { if (!cells.remove(cell)) cells.add(cell); anchor = cell; }
     else { if (!alreadySelected) { cells.clear(); cells.add(cell); } anchor = cell; }
-    dragCell = cell; pressX = x; pressY = y; dragging = false;
+    dragCell = cell; dragButton = button; pressX = x; pressY = y; dragging = false;
     dragSource = paddedSlots(); dragSelection = Set.copyOf(cells);
     movingCells = !selectionPress && !dragSource.get(cell).isEmpty();
   }
   private void updateDrag(int x, int y) {
     if (dragCell < 0 && dragTab < 0) return;
     dragging |= Math.abs(x - pressX) + Math.abs(y - pressY) >= 4;
+    if (clearingCells) {
+      int destination = gridCell(x, y);
+      if (destination >= 0) for (int index = Math.min(dragCell, destination); index <= Math.max(dragCell, destination); index++) clearCells.add(index);
+      return;
+    }
     if (!dragging) return;
     clicks.cancel();
     if (dragCell >= 0 && selectingCells) {
       int destination = gridCell(x, y);
       if (destination < 0) return;
       cells.clear(); cells.addAll(selectionBeforePress);
-      for (int index = Math.min(dragCell, destination); index <= Math.max(dragCell, destination); index++) cells.add(index);
+      for (int index = Math.min(dragCell, destination); index <= Math.max(dragCell, destination); index++) {
+        if (deselectingCells) cells.remove(index); else cells.add(index);
+      }
     }
   }
   @Override protected void mouseReleased(int x, int y, int button) {
-    if (button != 0) return;
-    // Beta also dispatches motion and wheel events here with button -1.
-    // Apply final release coordinates before ending native press ownership.
-    if (!exit.active() && Display.isActive()) updateScroll(y);
-    listBar.release(); gridBar.release();
+    if (button == 0) {
+      // Beta also dispatches motion and wheel events here with button -1.
+      if (!exit.active() && Display.isActive()) updateScroll(y);
+      listBar.release(); gridBar.release();
+    }
+    if (button != 0 && !(clearingCells && button == dragButton)) return;
     if (exit.active() || !Display.isActive()) { cancelDrag(); clicks.cancel(); return; }
+    if (clearingCells && button != dragButton) return;
     updateDrag(x, y);
+    if (clearingCells) {
+      List<String> values = new ArrayList<>(dragSource);
+      for (int index : clearCells) values.set(index, "");
+      storeSlots(values); cancelDrag(); return;
+    }
     if (dragTab >= 0) {
       int destination = tabRow(x, y);
       if (dragging && destination >= 0) { edit(() -> data.move(dragTab, destination)); selected = destination; }
@@ -388,9 +416,9 @@ public final class CreativeTabsScreen extends UiScreen {
     }
     if (exit.active() || nativeGroups) { mx = -100; my = -100; }
     renderBackground(); titleBar("Creative tabs");
-    button("Add", left(), 30, 48, 20, mx, my, editable() && data.size() < CreativeTabsData.MAX_TABS);
-    WaypointSetDropdown.button(this, "Fill group", left() + listWidth(), 30, Math.min(144, span() - listWidth()), mx, my, hasTab(), nativeGroups);
-    button("Remove", left() + 52, 30, Math.max(40, listWidth() - 58), 20, mx, my, hasTab());
+    button("Add tab", tabButtonX(0), 30, tabButtonWidth(), 20, mx, my, editable() && data.size() < CreativeTabsData.MAX_TABS);
+    WaypointSetDropdown.button(this, "Fill group", fillGroupX(), 30, fillGroupWidth(144), mx, my, hasTab(), nativeGroups);
+    button("Remove tab", tabButtonX(1), 30, tabButtonWidth(), 20, mx, my, hasTab());
     String tip = "";
     if (editable()) {
       clip(left(), 59, listWidth() - 14, Math.max(0, visibleListRows() * 23));
@@ -418,7 +446,8 @@ public final class CreativeTabsScreen extends UiScreen {
         for (int row = first; row < last; row++) for (int col = 0; col < 8; col++) {
           int index = row * 8 + col, x = gridLeft() + col * 18, y = gridTop() + row * 18 - gridScroll;
           fill(x, y, x + 18, y + 18, 0xff666666); fill(x + 1, y + 1, x + 17, y + 17, 0xff252525);
-          drawItem(values.get(index), x + 1, y + 1);
+          if (!clearingCells || !clearCells.contains(index)) drawItem(values.get(index), x + 1, y + 1);
+          if (clearingCells && clearCells.contains(index)) fill(x + 1, y + 1, x + 17, y + 17, 0x80bb5555);
           if (cells.contains(index) || index == hover) fill(x + 1, y + 1, x + 17, y + 17, cells.contains(index) ? 0x805588bb : 0x40ffffff);
           if (index == hover && !values.get(index).isEmpty()) {
             try { tip = ItemCatalogue.resolve(ItemCatalogue.Domain.FILTER, values.get(index)).tooltip(); }
@@ -454,7 +483,7 @@ public final class CreativeTabsScreen extends UiScreen {
       org.lwjgl.opengl.GL11.glPushMatrix(); org.lwjgl.opengl.GL11.glTranslatef(0, 0, 300);
       try { drawItem(dragSource.get(dragCell), pointerX - 8, pointerY - 8); }
       finally { org.lwjgl.opengl.GL11.glPopMatrix(); }
-    } else if (!tip.isEmpty() && !exit.active() && !nativeGroups) {
+    } else if (!tip.isEmpty() && !exit.active() && !nativeGroups && !clearingCells) {
       foregroundTooltip(tip, pointerX, pointerY);
     }
     if (nativeGroups) {
@@ -463,7 +492,7 @@ public final class CreativeTabsScreen extends UiScreen {
         org.lwjgl.opengl.GL11.glDisable(org.lwjgl.opengl.GL11.GL_DEPTH_TEST);
         org.lwjgl.opengl.GL11.glDisable(org.lwjgl.opengl.GL11.GL_LIGHTING);
         WaypointSetDropdown.render(this, nativeLabels(), -1, nativeFocus, 0,
-            left() + listWidth(), 52, Math.min(180, span() - listWidth()), nativeLabels().size(), pointerX, pointerY);
+            fillGroupX(), 52, fillGroupWidth(180), nativeLabels().size(), pointerX, pointerY);
       } finally { org.lwjgl.opengl.GL11.glPopAttrib(); }
     }
     exit.render(this, "Save changes to Creative tabs?", pointerX, pointerY);

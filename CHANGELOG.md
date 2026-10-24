@@ -4,6 +4,8 @@
 
 ## [4.4.3] - 2026-10-24
 
+- Ctrl-drag a selected Creative tab cell to deselect a range. Ctrl-right-drag clears item cells together with one Undo step. Use equal Add tab and Remove tab buttons and a clearer edit icon.
+
 - Drag Creative tab items immediately with the left button; use Ctrl-drag to select cells, retaining multiple selection and drag previews.
 - Keep Creative tab scrollbars attached to their originating mouse press through motion and release. Place Reset, Cancel, Undo and Save together in the footer, and show tab names as editable fields.
 - Keep Creative Search text focus independent of the recipe book so typing blocks inventory movement across game ticks.
