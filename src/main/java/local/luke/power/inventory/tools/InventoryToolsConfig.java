@@ -15,8 +15,13 @@ public final class InventoryToolsConfig {
     saved.preferredItems = new java.util.LinkedHashMap<>(legacyPreferred); return saved;
   }
   public static InventoryToolsSettings current() { return current; }
-  public static InventoryToolsSettings copy() { return Catalog.JSON.fromJson(Catalog.JSON.toJson(current), InventoryToolsSettings.class); }
-  public static void preview(InventoryToolsSettings value) { value.validate(); current = Catalog.JSON.fromJson(Catalog.JSON.toJson(value), InventoryToolsSettings.class); }
+  public static InventoryToolsSettings copy() { return copy(current); }
+  private static InventoryToolsSettings copy(InventoryToolsSettings value) {
+    var next = Catalog.JSON.fromJson(Catalog.JSON.toJson(value), InventoryToolsSettings.class);
+    next.restock = value.restock; next.toolSwitch = value.toolSwitch;
+    return next;
+  }
+  public static void preview(InventoryToolsSettings value) { value.validate(); current = copy(value); }
   public static void save(InventoryToolsSettings value) throws java.io.IOException { value.validate(); WorldSortingLayouts.saveLayout(value, false); PowerConfig.save("inventoryTools", global(value)); preview(value); }
   public static void queuedPreferences(InventoryToolsSettings value) { value.validate(); PowerConfig.saveDeferred("inventoryTools", global(value)); preview(value); }
   public static void queuedLayout(java.util.Set<Integer> protectedSlots, java.util.Map<Integer, String> preferredItems) {

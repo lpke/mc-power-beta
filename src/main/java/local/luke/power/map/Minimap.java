@@ -91,8 +91,7 @@ public final class Minimap {
   }
   private static void middleClick(Minecraft mc) {
     int action = MapConfig.current().middleClickAction;
-    if (action == 5) MapKeys.toggleMinimapHeads();
-    else MinimapQuickMenu.toggle(action);
+    MapToggle.ALL.get(action).toggleMinimap();
     mc.soundManager.method_2009("random.click", 1, 1);
   }
   private static void scrollZoom(int wheel) {

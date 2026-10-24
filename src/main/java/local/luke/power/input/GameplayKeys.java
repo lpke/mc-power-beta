@@ -80,8 +80,6 @@ public final class GameplayKeys {
 
   private static void inventoryKey(int code) {
     Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
-    if (mc.currentScreen == null && Display.isActive() && Bindings.matches(RECIPE_BOOK, code))
-      local.luke.power.recipes.RecipeBooks.press(mc, code);
     if (mc.currentScreen == null && Display.isActive() && Bindings.matches(RESTOCK, code))
       local.luke.power.inventory.tools.InventoryAutomation.toggleRestock(mc);
     if (mc.currentScreen == null && Display.isActive() && Bindings.matches(TOOL_SWITCH, code))

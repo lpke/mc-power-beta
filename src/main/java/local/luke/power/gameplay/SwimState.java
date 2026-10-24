@@ -8,6 +8,7 @@ public final class SwimState {
   boolean inputPosePrepared;
   public float previousAmount, amount;
   public float previousEyeHeight=1.62f, eyeHeight=1.62f;
+  private boolean cameraResetPending;
   public double waterDepth;
   public int waterJumpTicks;
 
@@ -15,11 +16,21 @@ public final class SwimState {
 
   /** Camera.tick, separately from the physical eye and collision dimensions. */
   public void cameraTick(float target) {
+    if (cameraResetPending) {
+      resetCamera(target);
+      return;
+    }
     previousEyeHeight=eyeHeight;
     eyeHeight+=(target-eyeHeight)*.5f;
   }
 
-  public void resetCamera(float height) { previousEyeHeight=eyeHeight=height; }
+  public void resetCamera(float height) {
+    previousEyeHeight=eyeHeight=height;
+    cameraResetPending=false;
+  }
+
+  /** Resolve a loaded camera only after the first tick establishes its safe pose. */
+  public void deferCameraReset() { cameraResetPending=true; }
 
   public float cameraEye(float delta) {
     return previousEyeHeight+(eyeHeight-previousEyeHeight)*delta;

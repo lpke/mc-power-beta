@@ -9,6 +9,9 @@ class WaypointCommandsTest {
     assertFalse(denied.contains("teleport"));
     for (String action : new String[]{"add", "remove", "list", "destination"})
       assertTrue(denied.contains("/waypoint " + action));
+    assertTrue(denied.contains("/waypoint add <name> [x y z]"));
+    assertTrue(denied.contains("current reported position"));
+    assertTrue(denied.contains("final three-number group"));
     assertTrue(String.join("\n", WaypointCommands.helpLines(true)).contains("/waypoint teleport"));
   }
   @Test void listPlacesWhiteCoordinatesBeforeDimensionSetAndFinalId() {
@@ -39,5 +42,41 @@ class WaypointCommandsTest {
         {"wp", "dest", "1", "2", "-2147483648"}})
       assertThrows(IllegalArgumentException.class, () -> WaypointCommands.destinationPoint(point, args));
     assertEquals(17, point.x);
+  }
+
+  @Test void addWithoutCoordinatesKeepsReportedPositionDimensionSetAndNamesWithSpaces() {
+    var point = new Waypoint(); point.x = -17; point.y = 93; point.z = 21;
+    point.dimension = -1; point.set = "Building plans";
+    for (String name : new String[] {"Home base", "Base 2", "Build 1 2", "1 2 3", "North east corner"}) {
+      var result = WaypointCommands.addPoint(point, ("wp add " + name).split(" "));
+      assertNotSame(point, result); assertEquals(name, result.name);
+      assertEquals("-17 93 21", result.coordinates()); assertEquals(-1, result.dimension);
+      assertEquals("Building plans", result.set); assertEquals(point.id, result.id);
+    }
+    assertEquals("Waypoint", point.name);
+  }
+
+  @Test void addUsesOnlyTheFinalCoordinateTripletAndKeepsTheNameAndCurrentDimension() {
+    var point = new Waypoint(); point.x = 17; point.dimension = -1; point.set = "Building plans";
+    var result = WaypointCommands.addPoint(point,
+        new String[] {"waypoint", "add", "Base", "1", "2", "3", "-32000000", "127", "+32000000"});
+    assertEquals("Base 1 2 3", result.name); assertEquals("-32000000 127 32000000", result.coordinates());
+    assertEquals(-1, result.dimension); assertEquals("Building plans", result.set);
+    assertEquals(17, point.x); assertEquals("Waypoint", point.name);
+  }
+
+  @Test void addRejectsNonWholeNonFiniteAndOutOfBoundsCoordinatesWithoutChangingTheInput() {
+    var point = new Waypoint(); point.x = 17;
+    for (String coordinates : new String[] {
+        "1.5 64 3", "1 64.5 3", "1 64 3.5", "NaN 64 3", "Infinity 64 3", "1 64 -Infinity",
+        "1e2 64 3", "999999999999999999999999999999999999 64 3", "32000001 64 3",
+        "-32000001 64 3", "1 -1 3", "1 128 3", "1 64 -2147483648"})
+      assertThrows(IllegalArgumentException.class,
+          () -> WaypointCommands.addPoint(point, ("way add Home base " + coordinates).split(" ")), coordinates);
+    assertThrows(IllegalArgumentException.class, () -> WaypointCommands.addPoint(point, new String[] {"wp", "add"}));
+    assertThrows(IllegalArgumentException.class, () -> WaypointCommands.addPoint(point, new String[] {"wp", "add", " "}));
+    assertThrows(IllegalArgumentException.class,
+        () -> WaypointCommands.addPoint(point, new String[] {"wp", "add", "x".repeat(65), "1", "64", "3"}));
+    assertEquals(17, point.x); assertEquals("Waypoint", point.name);
   }
 }

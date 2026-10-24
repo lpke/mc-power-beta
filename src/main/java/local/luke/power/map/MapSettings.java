@@ -60,7 +60,7 @@ public final class MapSettings {
       updateRate = 20;
 
   public void validate() {
-    range(middleClickAction, 0, 5);
+    range(middleClickAction, 0, 9);
     range(waypointTextSize, 50, 150);
     range(worldMapWaypointSize, 50, 150);
     range(waypointBobbing, 0, 1);

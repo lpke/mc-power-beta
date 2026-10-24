@@ -44,12 +44,12 @@ public final class InventoryToolsBackend implements Backend {
         case "creativeHotbarsButton" -> "Show the H button in the player inventory. Hiding it keeps saved hotbars and their hotkeys available.";
         case "depositMatching" -> "Deposit main-storage items that match the chest or dispenser's original contents, including all native item data.";
         case "creativeHotbars" -> "Save nine hotbar presets and load them in singleplayer Creative. Disabling keeps saved presets.";
-        case "restock" -> "Refill the hand after native item use or a successful break consumes its item. Manual drops and menu edits never trigger refilling. Singleplayer Survival only.";
+        case "restock" -> "Refill the hand after native item use or a successful break consumes its item. Manual drops and menu edits never trigger refilling. Singleplayer Survival only. Clears when leaving or switching worlds.";
         case "restockBeforeEmpty" -> "Top up a stack after using an item when its remaining count reaches the refill threshold. Off waits until empty.";
         case "restockThreshold" -> "A lower count refills later and moves items less often. A higher count refills sooner after using an item. Never changes an untouched hand.";
         case "restockOtherHotbar" -> "Also take matching items from other hotbar slots. Off uses only the three main-storage rows.";
         case "restockTools" -> "After a successful native action breaks a tool, equip another matching tool, preserving its native data. The most worn matching tool is used first.";
-        case "toolSwitch" -> "Before mining, choose a faster suitable tool using native Beta harvestability and mining strength. Keeps the current tool on ties and preserves torch-shovel priority. Singleplayer Survival only.";
+        case "toolSwitch" -> "Before mining, choose a faster suitable tool using native Beta harvestability and mining strength. Keeps the current tool on ties and preserves torch-shovel priority. Singleplayer Survival only. Clears when leaving or switching worlds.";
         case "toolsFromInventory" -> "Allow tools from the three main-storage rows to swap into the selected hotbar slot. Off only selects tools already in the hotbar.";
         case "toolWhitelist" -> "Choose tools automatic switching may select. All tools includes newly registered tools. An empty selection disables switching to any tool. Your current hand is always retained when it is already suitable.";
         default -> "Do not automatically choose tools with this many durability uses left or fewer. Lower values use tools longer; higher values protect them earlier. Zero allows the final use.";

@@ -331,6 +331,7 @@
       "bucketSounds": true,
       "boneMealSounds": true,
       "lavaPopSounds": true,
+      "playerFireExtinguish": true,
       "waterSplashSounds": true,
       "swimmingSounds": true,
       "underwaterEnterSounds": true,
@@ -580,7 +581,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.4.7"
+        "customVersionText": "Power Beta 4.4.8"
       },
       "panoramaConfig": {
         "enablePanorma": true,

@@ -219,13 +219,20 @@ public final class ModernSwimming {
 
   /** The native camera subtracts eyeOffset-1.62; replace only its render offset. */
   public static float cameraOffset(Entity entity,float delta,float nativeOffset) {
-    if (!(entity instanceof ClientPlayerEntity player) || !(entity instanceof SwimPlayer owner)
-        || player.world==null || player.world.isRemote || player.dead || player.health<=0
-        || player.field_1595!=null || player.method_943() || DetachedCamera.isActive()
-        || !(player instanceof PlayerMode mode) || mode.power$flying() || mode.power$spectator())return nativeOffset;
+    if (!ownsCameraHeight(entity)) return nativeOffset;
+    return 1.62f+nativeOffset-((SwimPlayer)entity).power$swim().cameraEye(delta);
+  }
+
+  /** Match the camera's pose height without applying bobbing, perspective or free look. */
+  public static double interactionEyeOffset(Object actor,float delta,double nativeFallback) {
+    if (!(actor instanceof Entity entity) || !ownsCameraHeight(entity)) return nativeFallback;
+    return ((SwimPlayer)entity).power$swim().cameraEye(delta)-entity.field_1631;
+  }
+
+  private static boolean ownsCameraHeight(Entity entity) {
+    if (!(entity instanceof SwimPlayer owner) || !ModernWater.localMovement(entity)) return false;
     SwimState state=owner.power$swim();
-    if(!lowPose(player) && Math.abs(state.previousEyeHeight-1.62f)<1e-6f
-        && Math.abs(state.eyeHeight-1.62f)<1e-6f)return nativeOffset;
-    return 1.62f+nativeOffset-state.cameraEye(delta);
+    return lowPose(entity) || Math.abs(state.previousEyeHeight-1.62f)>=1e-6f
+        || Math.abs(state.eyeHeight-1.62f)>=1e-6f;
   }
 }

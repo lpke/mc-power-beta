@@ -56,6 +56,24 @@ class SwimStateTest {
     state.resetCamera(.4f);assertEquals(.4,state.cameraEye(.5f),1e-6);
   }
 
+  @Test void loadedCameraStartsAtTheResolvedPoseBeforeOrdinaryEasingResumes() {
+    for (float target:new float[]{1.62f,1.27f,.4f}) {
+      var state=new SwimState();state.resetCamera(1.27f);state.deferCameraReset();
+      state.cameraTick(target);
+      for(float frame:new float[]{0,.5f,1})assertEquals(target,state.cameraEye(frame),1e-6);
+      state.cameraTick(.4f);
+      assertEquals(target,state.cameraEye(0),1e-6);
+      assertEquals(target+(.4f-target)*.5f,state.cameraEye(1),1e-6);
+    }
+  }
+
+  @Test void explicitCameraResetCancelsALoadedPendingReset() {
+    var state=new SwimState();state.deferCameraReset();state.resetCamera(1.62f);
+    state.cameraTick(.4f);
+    assertEquals(1.62,state.cameraEye(0),1e-6);
+    assertEquals(1.01,state.cameraEye(1),1e-6);
+  }
+
   @Test void strokeMatchesTheModernThreePhasesAndOpposingLegCycle() {
     assertEquals(0,SwimAnimation.armPitch(0));
     assertEquals(0,SwimAnimation.armPitch(14));

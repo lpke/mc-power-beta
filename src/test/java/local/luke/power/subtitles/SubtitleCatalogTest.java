@@ -30,6 +30,7 @@ class SubtitleCatalogTest {
     assertEquals("Bobber thrown", SubtitleCatalog.resolve("random.bow", "subtitles.entity.fishing_bobber.throw").label());
     assertEquals("Creeper hisses", SubtitleCatalog.resolve("random.fuse", "subtitles.entity.creeper.primed").label());
     assertEquals("TNT fizzes", SubtitleCatalog.resolve("random.fuse", null).label());
+    assertEquals("Fire extinguishes", SubtitleCatalog.resolve("power_beta:entity.generic.extinguish_fire", null).label());
     assertEquals("Lava hisses", SubtitleCatalog.resolve("random.fizz", "subtitles.block.lava.extinguish").label());
     assertEquals("Torch fizzes", SubtitleCatalog.resolve("random.fizz", "subtitles.block.redstone_torch.burnout").label());
     assertEquals("Bucket fills", SubtitleCatalog.resolve("power_beta:item.bucket.fill_lava", null).label());

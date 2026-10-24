@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
-/** Owners clear live actions and queue their own settings snapshots on a session exit. */
+/** Owners clear visit-local actions without changing feature preferences or saved player data. */
 public final class TweakLifecycle {
   private static final Map<String, Runnable> resets = new LinkedHashMap<>();
   private TweakLifecycle() {}

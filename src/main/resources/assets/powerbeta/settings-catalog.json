@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.4.7",
+    "default": "Power Beta 4.4.8",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -3264,7 +3264,7 @@
     "page": "Interface",
     "group": "Debug (F3) info",
     "label": "Block light",
-    "description": "Exact block-emitted light at your feet, from 0 to 15. Excludes sunlight and screen brightness.",
+    "description": "Exact block-emitted light at your reported coordinates, from 0 to 15. Follows Use feet Y coordinates; Spectator and freecam use the head base. Excludes sunlight and screen brightness.",
     "default": true,
     "restart": false
   },
@@ -6511,9 +6511,20 @@
     "group": "Minimap",
     "label": "Minimap middle-click action",
     "description": "Choose what middle-click toggles over the minimap in inventory or pause screens, or while Enlarge minimap is held with mouse utilities enabled. Mob heads lasts for this world visit; pressing the mob-icons hold key clears that toggle and returns to hold controls.",
-    "choices": ["Show items", "Show mobs", "Show waypoints", "Show in-game waypoints", "Cave mode", "Mob heads"],
+    "choices": [
+      "Show items",
+      "Show mobs",
+      "Show waypoints",
+      "Show in-game waypoints",
+      "Cave mode",
+      "Mob heads",
+      "Chunk borders",
+      "Slime chunks",
+      "Spawnable overlay",
+      "Path"
+    ],
     "min": 0,
-    "max": 5,
+    "max": 9,
     "order": 1.5
   },
   "maps.zoomSteps": {
@@ -6782,6 +6793,13 @@
     "label": "Lava popping sounds",
     "description": "Play modern lava pops at exposed lava surfaces in singleplayer. Uses Ambient volume.",
     "order": 30
+  },
+  "audio.playerFireExtinguish": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Player fire extinguish",
+    "description": "Play the modern extinguishing sound once when water puts out your fire in singleplayer. Uses Players volume.",
+    "order": 30.2
   },
   "audio.waterSplashSounds": {
     "page": "Audio",

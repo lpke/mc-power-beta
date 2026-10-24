@@ -29,6 +29,8 @@ public final class AudioBackend implements Backend {
         "Play modern lava pops when an exposed lava surface emits a particle in singleplayer. Uses Ambient volume.");
     extra("lavaAmbientSounds", "Lava ambience", s.lavaAmbientSounds,
         "Play modern bubbling at exposed lava surfaces in singleplayer. Uses Ambient volume.");
+    extra("playerFireExtinguish", "Player fire extinguish", s.playerFireExtinguish,
+        "Play the modern extinguishing sound when water puts out your fire in singleplayer. Uses Players volume.");
     extra("waterSplashSounds", "Water splash sounds", s.waterSplashSounds,
         "Use modern water entry sounds for players, creatures, items and vehicles in singleplayer. Uses each entity sound category.");
     extra("swimmingSounds", "Swimming sounds", s.swimmingSounds,
@@ -294,6 +296,7 @@ public final class AudioBackend implements Backend {
           case "boneMealSounds" -> s.boneMealSounds = v.getAsBoolean();
           case "lavaPopSounds" -> s.lavaPopSounds = v.getAsBoolean();
           case "lavaAmbientSounds" -> s.lavaAmbientSounds = v.getAsBoolean();
+          case "playerFireExtinguish" -> s.playerFireExtinguish = v.getAsBoolean();
           case "waterSplashSounds" -> s.waterSplashSounds = v.getAsBoolean();
           case "swimmingSounds" -> s.swimmingSounds = v.getAsBoolean();
           case "underwaterEnterSounds" -> s.underwaterEnterSounds = v.getAsBoolean();

@@ -205,6 +205,7 @@ public final class SubtitleCatalog {
     SOUNDS.put("power_beta:item.bone_meal.use", CAPTIONS.get("subtitles.item.bone_meal.use"));
     SOUNDS.put("power_beta:block.lava.pop", CAPTIONS.get("subtitles.block.lava.ambient"));
     SOUNDS.put("power_beta:block.lava.ambient", CAPTIONS.get("subtitles.block.lava.ambient"));
+    SOUNDS.put("power_beta:entity.generic.extinguish_fire", CAPTIONS.get("subtitles.entity.generic.extinguish_fire"));
     SOUNDS.put("power_beta:entity.generic.splash", CAPTIONS.get("subtitles.entity.generic.splash"));
     SOUNDS.put("power_beta:entity.hostile.splash", CAPTIONS.get("subtitles.entity.generic.splash"));
     SOUNDS.put("power_beta:entity.player.swim", CAPTIONS.get("subtitles.entity.generic.swim"));

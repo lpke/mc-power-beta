@@ -402,6 +402,11 @@ final class Swimming300Checks {
   private static void particles(Minecraft mc)throws Exception {
     pool(mc);modern(true);permissions(mc,true);reset(mc,0);keys.put(29,(byte)1);
     field(Entity.class,"field_1649").setBoolean(mc.player,false);mc.player.velocityY=-.1;
+    var audio=local.luke.power.audio.AudioConfig.copy();
+    // This older counter observes the native random.splash event. Modern sound
+    // replacement has its own WaterSounds432Checks event/gain coverage.
+    var nativeAudio=local.luke.power.audio.AudioConfig.copy();nativeAudio.waterSplashSounds=false;
+    local.luke.power.audio.AudioConfig.preview(nativeAudio);
     boolean oldBubble=Release175Checks.capture,oldSplash=Release173Checks.capture,oldDust=Release260Checks.captureDust;
     Entity oldEntity=Release173Checks.splashEntity;int oldBubbles=Release175Checks.bubbles,oldSplashes=Release173Checks.splashes;
     try {
@@ -412,6 +417,7 @@ final class Swimming300Checks {
       for(int i=0;i<8;i++)tick(mc,1,false,false);
       check(Release260Checks.dust.isEmpty(),"underwater sprint emitted terrain particles");
     } finally {
+      local.luke.power.audio.AudioConfig.preview(audio);
       Release175Checks.capture=oldBubble;Release173Checks.capture=oldSplash;Release260Checks.captureDust=oldDust;
       Release173Checks.splashEntity=oldEntity;Release175Checks.bubbles=oldBubbles;Release173Checks.splashes=oldSplashes;
     }

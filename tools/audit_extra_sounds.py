@@ -42,6 +42,8 @@ def main():
         assert index[asset['asset']] == {'hash': asset['sha1'], 'size': asset['size']}, asset['file']
         data = (RESOURCES / asset['file']).read_bytes()
         assert len(data) == asset['size'] and hashlib.sha1(data).hexdigest() == asset['sha1'], asset['file']
+    assert manifest['events']['entity.generic.extinguish_fire'] == {
+        'sounds': ['random/fizz'], 'subtitle': 'subtitles.entity.generic.extinguish_fire'}
     index, _ = sources['source']
     for asset in manifest['existingAssets']:
         assert index[asset['asset']] == {'hash': asset['sha1'], 'size': asset['size']}, asset['file']

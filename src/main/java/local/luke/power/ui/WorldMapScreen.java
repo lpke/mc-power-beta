@@ -35,6 +35,12 @@ public final class WorldMapScreen extends UiScreen {
   private MinimapGeometry.Layout minimapLayout;
   private MinimapGeometry.Box minimapHit;
   private boolean panelPress;
+  private boolean togglesVisible = true;
+  private int toggleScroll;
+  private MapTogglePanel.Layout toggleLayout;
+  private WorldMapControls toggleControls;
+  private Object toggleFont;
+  private int toggleLabelWidth, toggleLayoutScroll, toggleScaleX, toggleScaleY;
   private WorldMapControls controls;
   private MapSettings controlsStyle;
   private int controlsLeft = -1, controlsWidth, controlsHeight, controlsLayer, controlsDimension;
@@ -156,23 +162,36 @@ public final class WorldMapScreen extends UiScreen {
     boolean panel = settingsPanel != null;
     if (controls == null || controlsLeft != mapLeft() || controlsWidth != mapWidth() || controlsHeight != height
         || controlsLayer != layer || controlsDimension != dimension || controlsSettings != panel || controlsStyle != style) {
-      String[] labels = {style.lightOverlay ? "Spawnable: On" : "Spawnable: Off",
-          style.worldMapRadarIcons ? "Mobs: On" : "Mobs: Off", style.slimeChunks ? "Slime: On" : "Slime: Off",
-          style.chunkGrid ? "Chunks: On" : "Chunks: Off", style.footsteps ? "Path: On" : "Path: Off", "Waypoints", panel ? "Close settings" : "Settings",
+      String[] labels = {togglesVisible ? "Hide Toggles" : "Show Toggles", "Waypoints", panel ? "Close settings" : "Settings",
           layer < 0 ? "Caves" : "Surface", MapDimensions.name(dimension), "Center", "Go to", "Close"};
-      int bottomWidth = 12;
-      for (int i = 5; i < 9; i++) bottomWidth += textRenderer.getWidth(labels[i]) + 12;
-      if (bottomWidth > mapWidth() - 16) labels[6] = "Settings";
+      int bottomWidth = 16;
+      for (int i = 0; i < 5; i++) bottomWidth += textRenderer.getWidth(labels[i]) + 12;
+      if (bottomWidth > mapWidth() - 16) labels[2] = "Settings";
       controls = WorldMapControls.at(mapLeft(), mapWidth(), height, labels, textRenderer::getWidth);
       controlsLeft = mapLeft(); controlsWidth = mapWidth(); controlsHeight = height;
       controlsLayer = layer; controlsDimension = dimension; controlsSettings = panel; controlsStyle = style;
     }
     return controls;
   }
+  private MapTogglePanel.Layout togglePanel() {
+    var navigation = controls();
+    int scaleX = navigation.scale().x() + (int)scaleDx, scaleY = navigation.scale().y() + (int)scaleDy;
+    if (toggleFont != textRenderer) { toggleFont = textRenderer; toggleLabelWidth = MapTogglePanel.labelWidth(minecraft); toggleLayout = null; }
+    if (toggleLayout != null && toggleControls == navigation && toggleLayoutScroll == toggleScroll
+        && toggleScaleX == scaleX && toggleScaleY == scaleY) return toggleLayout;
+    int bottom = navigation.navigationTop() - 4;
+    // Leave the coordinate readout, map-name input and error line clear at small scales.
+    int maxWidth = mapWidth() - 16;
+    int preferredWidth = Math.min(maxWidth, toggleLabelWidth + MapTogglePanel.HORIZONTAL_ALLOWANCE);
+    if (mapLeft()+8+preferredWidth > scaleX) bottom = Math.min(bottom, scaleY-4);
+    toggleControls = navigation; toggleLayoutScroll = toggleScroll; toggleScaleX = scaleX; toggleScaleY = scaleY;
+    return toggleLayout = MapTogglePanel.at(mapLeft()+8,bottom,maxWidth,Math.max(8,bottom-64),toggleLabelWidth,toggleScroll);
+  }
+
   private int scaleY() { return controls().scale().y() + 16; }
   private WorldMapControls.Box scaleBounds() { return controls().scale().translated((int)scaleDx, (int)scaleDy); }
   private boolean overControls(int x, int y) {
-    if (controls().at(x,y) != null) return true;
+    if (controls().at(x,y) != null || togglesVisible && togglePanel().bounds().contains(x,y)) return true;
     if (settingsPanel != null && minimapHit != null
         && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) return true;
     if (minecraft.world != null && minecraft.world.isRemote
@@ -331,33 +350,18 @@ public final class WorldMapScreen extends UiScreen {
     coordinates.open(view.x,view.z,(x,z)->{view.x=x;view.z=z;});
   }
 
-  private void toggleOverlay(WorldMapControls.Action action) {
-    String id = switch(action) {
-      case LIGHT -> "maps.lightOverlay";
-      case SLIME -> "maps.slimeChunks";
-      case CHUNKS -> "maps.chunkGrid";
-      case MOBS -> "maps.worldMapRadarIcons";
-      case PATH -> "maps.footsteps";
-      default -> throw new IllegalArgumentException("Unknown map overlay");
-    };
-    if (settingsPanel != null) { settingsPanel.toggleMapSetting(id); return; }
-    if (optionsOwner != null) { optionsOwner.toggleMapSetting(id); return; }
+  private void toggleOverlay(MapToggle toggle) {
+    if (settingsPanel != null) { settingsPanel.toggleMapQuickSetting(toggle); return; }
+    if (optionsOwner != null) { optionsOwner.toggleMapQuickSetting(toggle); return; }
     var settings = MapConfig.copy();
-    switch(action) {
-      case LIGHT -> settings.lightOverlay = !settings.lightOverlay;
-      case SLIME -> settings.slimeChunks = !settings.slimeChunks;
-      case CHUNKS -> settings.chunkGrid = !settings.chunkGrid;
-      case MOBS -> settings.worldMapRadarIcons = !settings.worldMapRadarIcons;
-      case PATH -> settings.footsteps = !settings.footsteps;
-      default -> throw new IllegalArgumentException("Unknown map overlay");
-    }
+    MapToggle.apply(settings, toggle.changes(settings));
     MapConfig.queued(settings);
   }
 
   private void controlAction(WorldMapControls.Action action) {
     click();
     switch(action) {
-      case LIGHT, SLIME, MOBS, CHUNKS, PATH -> toggleOverlay(action);
+      case TOGGLES -> { togglesVisible = !togglesVisible; controls = null; }
       case WAYPOINTS -> minecraft.setScreen(new WaypointsScreen(this));
       case SETTINGS -> toggleSettings();
       case LAYER -> layer = layer < 0 ? MapSampler.window(MapConfig.current(),Maps.y()).layer() : -1;
@@ -383,15 +387,6 @@ public final class WorldMapScreen extends UiScreen {
   protected void mouseClicked(int x, int y, int button) {
     if (coordinates.press(this,x,y,button)) return;
     if (panelOwns(x)) { panelPress = true; settingsPanel.mouseClicked(x, y, button); return; }
-    if (settingsPanel != null && minimapHit != null && button == 1 && settingsPanel.minimapWheelAllowed()
-        && !context && !dragging && !scaleDragging
-        && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
-      click(); settingsPanel.resetMinimapZoom(); return;
-    }
-    if (settingsPanel != null && minimapHit != null && button == 0
-        && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
-      click(); settingsPanel.minimapAppearance(""); return;
-    }
     zoom.cancel();
     if (context) {
       var actions = contextActions();
@@ -400,6 +395,20 @@ public final class WorldMapScreen extends UiScreen {
         contextAction(actions.get((y - contextY) / 18));
       } else context = false;
       return;
+    }
+    if (togglesVisible && togglePanel().bounds().contains(x,y)) {
+      int row=togglePanel().rowAt(x,y);
+      if(button==0&&row>=0) { click(); toggleOverlay(MapToggle.ALL.get(row)); }
+      return;
+    }
+    if (settingsPanel != null && minimapHit != null && button == 1 && settingsPanel.minimapWheelAllowed()
+        && !context && !dragging && !scaleDragging
+        && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
+      click(); settingsPanel.resetMinimapZoom(); return;
+    }
+    if (settingsPanel != null && minimapHit != null && button == 0
+        && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
+      click(); settingsPanel.minimapAppearance(""); return;
     }
     if ((button == 0 || button == 1) && minecraft.world.isRemote
         && inside(x, y, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), 18)) {
@@ -467,6 +476,10 @@ public final class WorldMapScreen extends UiScreen {
       super.onMouseEvent(); return;
     }
     int wheel = Mouse.getEventDWheel();
+    if (wheel != 0 && Display.isActive() && !context && !dragging && !scaleDragging
+        && togglesVisible && togglePanel().bounds().contains(x,y)) {
+      toggleScroll=togglePanel().scroll(wheel); return;
+    }
     if (wheel != 0 && Display.isActive() && !Mouse.isGrabbed() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !context && !dragging && !scaleDragging && settingsPanel != null
         && settingsPanel.minimapWheelAllowed() && minimapLayout != null
         && MinimapGeometry.contains(minimapLayout, minimapStyle.circular, x, y)) {
@@ -532,11 +545,12 @@ public final class WorldMapScreen extends UiScreen {
     int hoverX = coordinates.active() || context ? -1000 : mx, hoverY = coordinates.active() || context ? -1000 : my;
     for (var control : controls().buttons()) {
       var b = control.bounds();
-      String label = fit(control.label(),b.width()-12);
+      String label = fit(control.label(),b.width()-WorldMapControls.TEXT_PADDING);
       if (control.action() == WorldMapControls.Action.SETTINGS && settingsPanel != null)
         tabButton(label,b.x(),b.y(),b.width(),18,hoverX,hoverY,true,true);
       else button(label,b.x(),b.y(),b.width(),18,hoverX,hoverY,true);
     }
+    if (togglesVisible) MapTogglePanel.draw(minecraft,togglePanel(),hoverX,hoverY,false);
     if (minecraft.world != null && minecraft.world.isRemote)
       input(serverMap, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), hoverX, hoverY, "Map name");
     var cursor = bounded(projection().world(mx, my));
@@ -596,8 +610,8 @@ public final class WorldMapScreen extends UiScreen {
         if (!cause.isEmpty()) caption = cause + "\n" + caption;
         caption += "\n" + hovered.x + ", " + hovered.y + ", " + hovered.z;
         if (minecraft.player != null && dimension == Maps.dimension()) {
-          double dx = hovered.x + .5 - minecraft.player.x, dy = hovered.y - minecraft.player.boundingBox.minY,
-              dz = hovered.z + .5 - minecraft.player.z;
+          var pose = Maps.framePose(minecraft, delta);
+          double dx = hovered.x + .5 - pose.x(), dy = hovered.y - pose.y(), dz = hovered.z + .5 - pose.z();
           caption += "\n" + Math.round(Math.sqrt(dx * dx + dy * dy + dz * dz)) + "m";
         }
         tooltip(caption, mx, my);

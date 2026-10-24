@@ -90,7 +90,7 @@ public final class Minimap444Checks {
       test("MINIMAP444 paused map children and centered maps retain pause and return ownership", () -> pauseChildren(mc, state));
       test("MINIMAP444 invalid middle actions are rejected and missing fields retain the default", () -> {
         check(Catalog.JSON.fromJson("{}", MapSettings.class).middleClickAction == 5, "missing middle action lost Mob heads default");
-        for (int value : new int[]{-1, 6}) {
+        for (int value : new int[]{-1, 10}) {
           var invalid = baseline(); invalid.middleClickAction = value; boolean rejected = false;
           try { invalid.validate(); } catch (IllegalArgumentException expected) { rejected = true; }
           check(rejected, "invalid middle action accepted: " + value);

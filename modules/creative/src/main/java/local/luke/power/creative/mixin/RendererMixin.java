@@ -34,8 +34,12 @@ public abstract class RendererMixin {
     if (ClientRuntime.local(minecraft)
         && (minecraft.player.creative_isCreative() || Modes.spectator(minecraft.player))
         && hit != null
-        && hit.type == net.minecraft.util.hit.HitType.BLOCK
-        && minecraft.viewEntity.getInterpolatedPosition(delta).distance(hit.pos)
-            > minecraft.interactionManager.getBlockReachDistance()) minecraft.hitResult = null;
+        && hit.type == net.minecraft.util.hit.HitType.BLOCK) {
+      var origin = minecraft.viewEntity.getInterpolatedPosition(delta);
+      double eyeY = origin.y + local.luke.power.input.InteractionEye.offset(minecraft.viewEntity, delta, 0);
+      double reach = minecraft.interactionManager.getBlockReachDistance();
+      double dx = hit.pos.x - origin.x, dy = hit.pos.y - eyeY, dz = hit.pos.z - origin.z;
+      if (dx * dx + dy * dy + dz * dz > reach * reach) minecraft.hitResult = null;
+    }
   }
 }

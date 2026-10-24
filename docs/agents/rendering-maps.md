@@ -1,5 +1,28 @@
 # Rendering, HUDs and maps
 
+- Coordinate reporting uses `HudCoordinates` through the shared `ReportedPosition`
+  provider. Survival and Creative use collision-box feet Y when Use feet Y coordinates
+  is on, and native physical eye Y (`player.y`) when off, including flight, falling
+  and low poses. Spectator always uses `player.y - field_1631` plus
+  `HeadGeometry.BASE_ABOVE_FEET`; freecam always uses
+  `HeadGeometry.baseY(DetachedCamera.y())`. These two modes ignore the checkbox.
+  Apply this to HUD/F3, coordinate-based debug samples, current-position waypoint
+  defaults, command implicit/relative origins and WorldEdit anchors. Module fallbacks
+  must use the same contract, never reconstruct eye/feet/head-base independently.
+  Logical targeting eye, rendered camera and reported Y are separate contracts.
+  Explicit coordinates, saved waypoint/warp positions and historical death/recovery
+  locations keep their stored values. Terrain readouts report terrain elevation.
+  Physics, collision, water/audio checks, entity storage, ordinary projectiles and
+  teleport/navigation safety retain physical coordinates. Render projection and
+  label sizing use the actual rendered camera. Never reinterpret saved data when
+  the coordinate preference changes.
+- Crosshair rays and their reach checks use the shared `InteractionEye` bridge for
+  the logical first-person eye, including pose transitions and the selected crouch
+  camera height. Native bucket/boat rays have their own standing-eye offset. Keep
+  these targeting corrections out of world-render translations, collision, saved
+  positions, physical head-water checks, HUD coordinates and projectile origins.
+  Free-look/bob/third-person matrices do not steer normal gameplay targeting.
+
 - Held-item lighting uses render-only terrain endpoints and the existing 32-byte
   vertex. Never change world light, material opacity or spawning. Bound endpoint
   preparation to loaded render sections; freeze and prepare the physical source

@@ -20,7 +20,7 @@ public final class ControlLinks {
     link("key.jump", "", "", "Jump, swim upward or ascend while flying.");
     link("key.sneak", "", "", "Sneak at ledges or descend while flying.");
     link("key.drop", "", "", "Drop one item from the selected hotbar slot.");
-    link("powerbeta.recipeBook", "recipeBook.enabled", "", "Open the recipe book or toggle it in an eligible inventory. Search fields and modal windows keep keyboard ownership.");
+    link("powerbeta.recipeBook", "recipeBook.enabled", "", "Toggle the recipe book in an eligible inventory. Does nothing during gameplay. Search fields and modal windows keep keyboard ownership.");
     link("powerbeta.sortingLayout", "inventoryTools.preferredItems", "", "Edit your sorting layout over the open inventory. Keeps the inventory open and changes settings only.");
     link("powerbeta.sortInventory", "inventoryTools.sortingButton", "", "Sort player storage when pointing over your inventory; otherwise sort the open chest or dispenser. Excludes hotbar, equipment and crafting slots.");
     link("powerbeta.depositMatching", "inventoryTools.depositMatchingButton", "", "Deposit matching main-storage items into the supported open chest or dispenser.");

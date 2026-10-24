@@ -44,7 +44,7 @@ public class ClientMixin {
     local.luke.power.input.InventoryWheel.clear();
     local.luke.power.inventory.InventoryActions.cancel();
     local.luke.power.world.WorldCompatibility.clear();
-    if (world == null) power$resetTweaks();
+    if (world == null || world != ((Minecraft)(Object)this).world) power$resetTweaks();
     // Capture replaces native loading with a cancellable HEAD injection. Wrap its
     // completed path too, so successful loads always establish the durability proof.
     original.call(world, message, player);

@@ -101,6 +101,44 @@ Native Beta fluid physics, damage cadence and boat geometry remain unchanged;
 the audio follows their native event times. These are the remaining differences
 from running a modern client.
 
+## Player fire extinguish
+
+Audio > Extra sounds > Player fire extinguish adds the missing player water
+extinguish cue. It defaults on only in Power Beta. Missing preferences initialize
+once from the selected base with a verified backup. Explicit choices stay intact.
+The stable setting ID is `audio.playerFireExtinguish`.
+
+The same pinned 26.3 client was checked at `WaterFluid.entityInside`,
+`InsideBlockEffectType.EXTINGUISH`, `Entity.applyEffectsFromBlocks`,
+`Entity.playEntityOnFireExtinguishedSound` and `Entity.isOnFire`.
+Water queues the extinguish effect during movement. The native block-effects
+pass plays once when a burning entity stops burning. The server owns the sound.
+The event is `entity.generic.extinguish_fire`, uses the entity's sound category,
+and plays at gain 0.7 with pitch `1.6 + (random1 - random2) * 0.4`.
+Its sole variant is the official `random/fizz.ogg`, SHA-1
+`bd76df5c882dc4b65925a8b25c0e7dbebef9bb2e`, unchanged at 15,222 bytes,
+59,919 mono frames at 48 kHz. It has no variant gain, pitch, weight or streaming
+overrides. The subtitle is "Fire extinguishes".
+
+Beta instead clears fire silently in its native water-contact branch in
+`Entity.baseTick`, after splash particles. The addition plays at that fire-clear
+point when a non-immune player has a positive fire timer. It does not require
+submerged eyes, a new body crossing or a minimum fire duration. It does not repeat
+while remaining extinguished. Enabling or disabling modern water movement keeps
+that setting's native water contact and extinguish timing. The sound does not
+change fire, damage, fluids, particles or native random sequences.
+
+If Beta's existing movement fizz extinguishes an already-wet player first, the
+addition reuses that one event with its native gain and pitch. Dry rain fizz,
+creatures, item/lava fizz, fire expiry and multiplayer remain native. Modern also
+supports other causes, including powder snow, which Beta does not have. This
+player-only option adds no effects for those cases.
+
+The bundled `power_beta:entity.generic.extinguish_fire` event uses Players volume,
+including individual sound volume and later live volume changes. Its preview uses
+gain 0.7 and the central pitch 1.6. Its registered resource stays within the scoped
+extra-effect decoder and the full registered/streaming PCM audit.
+
 ## Complete decoding
 
 Beta's Ogg decoder can treat an incomplete buffered page as the end of a file.

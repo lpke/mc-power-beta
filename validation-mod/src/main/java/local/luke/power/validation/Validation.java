@@ -58,7 +58,19 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("menu-423 ")) Menu423Checks.run(mc,command.substring(9));
+      if (command.equals("tweak-lifecycle-exit-448")) TweakLifecycle448Checks.boundary(mc);
+      else if (command.equals("native-y-reporting-448")) NativeYReporting448Checks.run(mc);
+      else if (command.equals("y-commands-448")) YCommand448Checks.run(mc);
+      else if (command.equals("tweak-lifecycle-448")) TweakLifecycle448Checks.run(mc);
+      else if (command.equals("camera-target-448")) CameraTarget448Checks.run(mc);
+      else if (command.equals("placement-pose-448")) PlacementPose448Checks.run(mc);
+      else if (command.equals("physical-pose-448")) PhysicalPose448Checks.run(mc);
+      else if (command.startsWith("map-toggles-448")) MapToggles448Checks.run(mc, command.substring("map-toggles-448".length()).trim());
+      else if (command.startsWith("mining-overlay-448 ")) MiningOverlay448Checks.run(mc, command.substring(19).trim());
+      else if (command.equals("release-448 capture")) Release448Visuals.capture(mc);
+      else if (command.equals("waypoint-448")) Waypoint448Checks.run(mc);
+      else if (command.startsWith("recipe-hotkey-448 ")) RecipeHotkey448Checks.run(mc, command.substring(18));
+      else if (command.startsWith("menu-423 ")) Menu423Checks.run(mc,command.substring(9));
       else if (command.startsWith("gallery-scene ")) WebsiteScenes.run(mc,command.substring(14));
       else if (command.startsWith("gallery-action ")) WebsiteActions.run(mc,command.substring(15));
       else if (command.startsWith("gallery-motion ")) WebsiteMotion.run(mc,command.substring(15));
@@ -120,6 +132,7 @@ public final class Validation {
       else if (command.equals("text-inputs-444")) TextInputs444Checks.run(mc);
       else if (command.startsWith("creative-443-containers")) Creative443ContainerChecks.run(mc, command.substring(23).trim());
       else if (command.startsWith("inventory-442")) Inventory442Checks.run(mc, command.substring(13).trim());
+      else if (command.equals("player-fire-extinguish-448")) PlayerFireExtinguish448Checks.run(mc);
       else if (command.equals("fluid-sounds-440")) FluidSounds440Checks.run(mc);
       else if (command.equals("fluid-sounds-420")) FluidSounds420Checks.run(mc);
       else if (command.equals("water-sounds-432")) WaterSounds432Checks.run(mc);

@@ -6,6 +6,17 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 
 class InventoryToolsSettingsTest {
+  @Test void automationActivationIsNotSavedOrRestoredFromLegacySettings() {
+    var gson = new Gson();
+    var settings = gson.fromJson("{\"restock\":true,\"toolSwitch\":true,\"restockThreshold\":3,\"toolsFromInventory\":false}", InventoryToolsSettings.class);
+    assertFalse(settings.restock); assertFalse(settings.toolSwitch);
+    assertEquals(3, settings.restockThreshold); assertFalse(settings.toolsFromInventory);
+    settings.restock = settings.toolSwitch = true;
+    var saved = gson.toJsonTree(settings).getAsJsonObject();
+    assertFalse(saved.has("restock")); assertFalse(saved.has("toolSwitch"));
+    assertEquals(3, saved.get("restockThreshold").getAsInt());
+    assertFalse(saved.get("toolsFromInventory").getAsBoolean());
+  }
   @Test void legacySettingsKeepAutomationOffAndStartWithAnUnrestrictedLayout() {
     var settings = new Gson().fromJson("{}", InventoryToolsSettings.class);
     settings.validate();

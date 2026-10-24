@@ -32,7 +32,7 @@ class ExtraSoundDefaultsTest {
     }
   }
   private static final List<String> KEYS = List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds",
-      "lavaPopSounds", "waterSplashSounds", "swimmingSounds");
+      "lavaPopSounds", "playerFireExtinguish", "waterSplashSounds", "swimmingSounds");
   @TempDir Path game;
   private Object priorFile, priorBase, priorSetup;
 
@@ -91,6 +91,7 @@ class ExtraSoundDefaultsTest {
     settings.getAsJsonObject("defaults").addProperty("base", DefaultBases.Base.POWER_BETA.id);
     var audio = settings.getAsJsonObject("audio");
     audio.addProperty("seedPlantingSounds", false); audio.addProperty("bucketSounds", true);
+    audio.addProperty("playerFireExtinguish", false);
     audio.remove("hoeTillingSounds"); audio.remove("boneMealSounds");
     PowerConfig.write(old); byte[] before = Files.readAllBytes(PowerConfig.path());
     FileTransaction.begin(game, List.of(PowerConfig.path()));
@@ -100,6 +101,7 @@ class ExtraSoundDefaultsTest {
     ConfigDefaults.prepare(game);
     var restored = PowerConfig.read("audio", AudioSettings.class);
     assertFalse(restored.seedPlantingSounds);
+    assertFalse(restored.playerFireExtinguish);
     assertTrue(restored.bucketSounds && restored.hoeTillingSounds && restored.boneMealSounds);
   }
 

@@ -257,7 +257,7 @@ public final class Maps {
     if (!activity.terrain()) retireTerrain();
     if (!radarEnabled) clearRadar();
     if (!activity.path()) PATH.clear();
-    var pose = ReportedPosition.current(mc.player, mc.player.x, mc.player.boundingBox.minY,
+    var pose = ReportedPosition.current(mc.player, mc.player.x, local.luke.power.hud.HudCoordinates.y(mc.player),
         mc.player.z, mc.player.yaw, mc.player.pitch);
     if (!pose.finite()) return;
     x = MapMath.bounded(pose.x(), -MapMath.BORDER, MapMath.BORDER);

@@ -17,6 +17,22 @@
 
 # Runtime checks
 
+- `native-y-reporting-448` and `y-commands-448` check reporting, command defaults and physical/literal exceptions across Survival, Creative, Spectator, freecam, flight, falling, feet preference and low poses. Use a focused muted disposable singleplayer client. Both restore their provider/player/settings state.
+
+- `tweak-lifecycle-exit-448` arms safe temporary actions, exits through native world unloading and checks cleanup without settings or inventory changes. It intentionally ends at the title screen; use `new-world` afterward.
+
+- `tweak-lifecycle-448` checks every Active tweaks entry and shared exit cleanup, including restock/tool-switch restart serialization, pending-work cancellation and retained preferences/user data. Use a focused muted Survival clone with idle inventory and no carried container.
+
+- `camera-target-448`, `placement-pose-448` and `physical-pose-448` check actual native camera/ray agreement, adjacent face bands, placement/reach, independent item rays, reload initialization and fishing casts across crouch, compact and transitional poses. Use a focused muted singleplayer clone with idle inventory actions; fixtures restore the local scene and player/settings state.
+
+- `map-toggles-448 capture|run` captures the World Map checkbox panel and expanded minimap menu, then checks all ten actions, middle-click IDs, sidebar drafts and disabled extra work. Use a focused muted disposable singleplayer client of at least 1280×720; it also checks narrow and embedded layouts. For settled captures, use `prepare-wheel map|gear`, wait for native saving to finish, `capture-current`, then `stop`.
+
+- `release-448 capture` captures the new Extra sounds control before acceptance tests. `mining-overlay-448 capture|run` captures native crack geometry before checking all six faces, standing/crouched poses, distance and stereo offsets against ordinary/active-vein draws, including underside depth and GL cleanup. Use a focused muted singleplayer clone with loaded air near its chunk center at Y108.
+
+- `waypoint-448` checks optional add coordinates and reported-position fallback through all command aliases, help, permissions and completion. It verifies unchanged player position, loaded chunks, preferences and legacy warps in a muted disposable singleplayer world with an idle waypoint store. Its temporary points remain in memory only.
+
+- `recipe-hotkey-448 run` checks inactive gameplay, unsupported screens, mouse ownership and native inventory/table/furnace toggles. `prepare gameplay|pause|chest|inventory|table|furnace|search`, physical F12, `check`, then `stop` covers queued native input in a focused, muted Survival clone. The fixture restores settings, inventory and bindings.
+
 - `ui-447 capture|run` captures minimap ticks and Creative header buttons, then checks tick centering, unchecked boxes, equal button borders and dropdown input at narrow/wide sizes. Use a focused, muted singleplayer clone.
 
 - `minimap-446 capture|run` captures the session mob-head toggle, then checks middle-click, hold-key handoff, menu ownership, disabled-work gates and settings preservation in a muted clone. `prepare keyboard|mouse`, `check-on|off|held|latched-held|inactive` and `stop` observe physical focus/hold gestures without saving settings.
@@ -93,7 +109,12 @@
   ambience/pop switches, remote ownership and
   individual previews. Requires the same muted disposable world and verified silent sink.
   `release-300-extra-sounds` also tests every water/lava bucket toggle combination.
-- `extra-sound-decoders-432` compares all 88 bundled extra-effect variants against
+- `player-fire-extinguish-448` checks the native water fire-clear and existing water
+  fizz, once-only playback, disabled/dry/expired/immune/mob/remote cases, an injected
+  rain-style wet query, native randomness, base reset/Load targets, preview/Cancel,
+  actual preview gain/pitch and live volume edits. Requires the same silent clone.
+  Its detached test players and terrain are restored before returning.
+- `extra-sound-decoders-432` compares all 89 bundled extra-effect variants against
   the unchanged decoder on the same bytes, verifies exact source frame counts and
   writes disposable PCM evidence for comparison with FFmpeg.
 

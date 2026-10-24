@@ -14,12 +14,10 @@ import org.lwjgl.opengl.GL11;
 public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
   private static final Object OWNER = new Object();
   private static final MinimapQuickMenu VIEW = new MinimapQuickMenu();
-  private static final String[] LABELS = {"Show items", "Show mobs", "Show waypoints", "Show in-game waypoints", "Cave mode"};
-  private static final String[] TICK = {"      ##", "     ## ", "    ##  ", "## ##   ", " ###    ", "  #     "};
   private static Screen host;
   private static Object world, player;
   private static boolean open;
-  private static int rememberedCaveMode=1;
+  private static int firstRow;
   private static int ownedButtons;
   private static long ownedKeyEvent = Long.MIN_VALUE;
   private static long frame, checkedFrame = Long.MIN_VALUE;
@@ -38,7 +36,7 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
     var screen=mc.currentScreen;var settings=MapConfig.current();
     if(cachedLayout!=null&&layoutHost==screen&&layoutSettings==settings&&layoutFont==mc.textRenderer
         &&layoutWidth==screen.width&&layoutHeight==screen.height)return cachedLayout;
-    int labelWidth = java.util.Arrays.stream(LABELS).mapToInt(mc.textRenderer::getWidth).max().orElse(120);
+    int labelWidth = MapTogglePanel.labelWidth(mc);
     layoutHost=screen;layoutSettings=settings;layoutFont=mc.textRenderer;layoutWidth=screen.width;layoutHeight=screen.height;
     return cachedLayout=MinimapQuickMenuLayout.at(Minimap.layout(settings,screen.width,screen.height,false),
         settings.circular,settings.corner,screen.width,screen.height,labelWidth);
@@ -86,9 +84,11 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
     if(button>=0&&button<16&&!down&&(ownedButtons&(1<<button))!=0) {ownedButtons&=~(1<<button);return true;}
     if(!Display.isActive()) return wasOpen;
     if(wasOpen) {
+      int wheel=Mouse.getEventDWheel();
+      if(wheel!=0&&layout(mc).menu().contains(x,y))firstRow=layout(mc).panel(firstRow).scroll(wheel);
       if(button>=0&&button<16&&down)ownedButtons|=1<<button;
       if(button>=0&&down) {
-        var layout=layout(mc);int row=layout.rowAt(x,y);
+        var layout=layout(mc);int row=layout.panel(firstRow).rowAt(x,y);
         if(button==0&&row>=0) { toggle(row); click(mc); }
         else if(!layout.menu().contains(x,y)||layout.gear().containsCircle(x,y)) {close();click(mc);}
       }
@@ -97,7 +97,7 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
     if(button!=0||!down||!available(mc))return false;
     var layout=layout(mc);
     if(!layout.gear().containsCircle(x,y)||!gearAvailable(mc,layout))return false;
-    host=mc.currentScreen;world=mc.world;player=mc.player;open=true;ownedButtons|=1;
+    host=mc.currentScreen;world=mc.world;player=mc.player;open=true;firstRow=0;ownedButtons|=1;
     if(host instanceof InventoryDrag drag)drag.power$cancelItemDrag();
     if(host instanceof CreativePaint paint)paint.power$cancelCreativePaint();
     InventoryPanels.modal(host,OWNER,true);
@@ -112,20 +112,9 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
   }
   public static boolean ownsKeyEvent() { return ownedKeyEvent==Keyboard.getEventNanoseconds(); }
   static void toggle(int row) {
-    var copy=MapConfig.copy();
-    switch(row) {
-      case 0 -> copy.items=!copy.items;
-      case 1 -> {boolean enabled=!(copy.hostile&&copy.animals);copy.hostile=copy.animals=enabled;}
-      case 2 -> copy.waypoints=!copy.waypoints;
-      case 3 -> copy.worldWaypoints=!copy.worldWaypoints;
-      case 4 -> {
-        if(copy.caveMode!=0) { rememberedCaveMode=copy.caveMode; copy.caveMode=0; }
-        else copy.caveMode=rememberedCaveMode;
-      }
-      default -> throw new IllegalArgumentException("Unknown minimap toggle");
-    }
-    MapConfig.queued(copy);
+    MapToggle.ALL.get(row).toggleMinimap();
   }
+
   private static void click(Minecraft mc){mc.soundManager.method_2009("random.click",1,1);}
   private static void prepare(Minecraft mc){VIEW.init(mc,mc.currentScreen.width,mc.currentScreen.height);}
   public static void renderButton(Minecraft mc) {
@@ -164,25 +153,11 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
   static {for(int i=0;i<=24;i++){CIRCLE_X[i]=Math.cos(i*Math.PI/12);CIRCLE_Y[i]=Math.sin(i*Math.PI/12);}}
   public static void renderMenu(Minecraft mc,int mouseX,int mouseY) {
     if(!active(mc))return;
-    prepare(mc);var layout=layout(mc);var menu=layout.menu();var settings=MapConfig.current();
-    boolean[] values={settings.items,settings.hostile&&settings.animals,settings.waypoints,settings.worldWaypoints,settings.caveMode!=0};
-    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);GL11.glPushMatrix();
+    prepare(mc);
+    GL11.glPushMatrix();
     try {
-      GL11.glDisable(GL11.GL_DEPTH_TEST);GL11.glDisable(GL11.GL_LIGHTING);GL11.glTranslatef(0,0,700);
-      VIEW.fill(menu.x()-1,menu.y()-1,menu.x()+menu.width()+1,menu.y()+menu.height()+1,0xff808080);
-      VIEW.fill(menu.x(),menu.y(),menu.x()+menu.width(),menu.y()+menu.height(),0xf0181818);
-      for(int index=0;index<LABELS.length;index++) {
-        var row=layout.row(index);boolean hovered=row.contains(mouseX,mouseY);
-        if(hovered)VIEW.fill(row.x(),row.y(),row.x()+row.width(),row.y()+row.height(),0xff383838);
-        VIEW.fill(row.x()+3,row.y()+5,row.x()+13,row.y()+15,0xffa0a0a0);
-        VIEW.fill(row.x()+4,row.y()+6,row.x()+12,row.y()+14,0xff101010);
-        if(values[index]) {
-          int left=row.x()+8-TICK[0].length()/2, top=row.y()+MinimapQuickMenuLayout.ROW_HEIGHT/2-TICK.length/2;
-          for(int y=0;y<TICK.length;y++)for(int x=0;x<TICK[y].length();x++)
-            if(TICK[y].charAt(x)=='#')VIEW.fill(left+x,top+y,left+x+1,top+y+1,0xffffffff);
-        }
-        VIEW.drawStringWithShadow(mc.textRenderer,LABELS[index],row.x()+19,row.y()+6,hovered?0xffffff:0xdddddd);
-      }
-    }finally{GL11.glPopMatrix();GL11.glPopAttrib();}
+      GL11.glTranslatef(0,0,700);
+      MapTogglePanel.draw(mc,layout(mc).panel(firstRow),mouseX,mouseY,true);
+    }finally{GL11.glPopMatrix();}
   }
 }

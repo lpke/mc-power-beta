@@ -23,9 +23,6 @@ public final class InventoryFeatureKeys {
         || !org.lwjgl.opengl.Display.isActive() || local.luke.power.input.DetachedCamera.isActive()
         || local.luke.power.input.InteractionState.carryingContainer) return false;
     var settings = local.luke.power.recipes.RecipeBookConfig.current(); if (!settings.enabled) return false;
-    if (mc.currentScreen == null) {
-      return settings.inventory && local.luke.power.recipes.RecipeBooks.inventoryAvailable(mc) || settings.pauseMenu;
-    }
     if (!(mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen)
         || org.lwjgl.input.Mouse.isGrabbed() || local.luke.power.input.InventoryTextInput.active(mc.currentScreen)
         || local.luke.power.input.InventoryPanels.modal(mc.currentScreen)) return false;

@@ -4,6 +4,7 @@
   "package": "local.luke.power.validation.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "FireState448Access",
     "Performance421TickCapture",
     "Performance421WorldCapture",
     "Performance421MinimapCapture",
@@ -65,7 +66,8 @@
     "CullingRenderer421Capture",
     "Performance421VboCapture",
     "Performance421PresentCapture",
-    "InventoryLook445Capture"
+    "InventoryLook445Capture",
+    "InteractionItemRay448CaptureMixin"
   ],
   "injectors": {
     "defaultRequire": 1

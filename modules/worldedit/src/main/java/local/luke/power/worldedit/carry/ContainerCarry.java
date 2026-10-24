@@ -134,7 +134,7 @@ public final class ContainerCarry {
     if (!blocks.loaded(pos) || file == null) return carrying;
     // Never allow synthetic or stale ray targets outside normal interaction reach.
     double dx = mc.player.x - pos.x() - .5,
-        dy = mc.player.y - pos.y() - .5,
+        dy = mc.player.y + local.luke.power.input.InteractionEye.offset(mc.player, 1, 0) - pos.y() - .5,
         dz = mc.player.z - pos.z() - .5;
     double reach = mc.interactionManager.method_1715() + 1;
     if (dx * dx + dy * dy + dz * dz > reach * reach) return carrying;

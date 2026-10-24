@@ -38,7 +38,7 @@ class MinimapQuickMenuLayoutTest {
         var layout=MinimapQuickMenuLayout.at(MinimapGeometry.layout(settings,width,height,false),circular,corner,width,height,130);
         var menu=layout.menu();
         assertTrue(menu.x()>=0&&menu.y()>=0&&menu.x()+menu.width()<=width&&menu.y()+menu.height()<=height);
-        for(int row=0;row<MinimapQuickMenuLayout.ROWS;row++) {
+        for(int row=0;row<layout.panel(0).visible();row++) {
           var bounds=layout.row(row);
           assertEquals(row,layout.rowAt(bounds.x(),bounds.y()));
           assertEquals(row,layout.rowAt(bounds.x()+bounds.width()-1,bounds.y()+bounds.height()-1));

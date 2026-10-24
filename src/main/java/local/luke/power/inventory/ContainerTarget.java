@@ -24,7 +24,8 @@ final class ContainerTarget {
       double pitch = Math.toRadians(DetachedCamera.pitch()), yaw = Math.toRadians(DetachedCamera.yaw());
       direction = Vec3d.createCached(Math.sin(yaw) * Math.cos(pitch), -Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch));
     } else {
-      start = mc.field_2807.method_931(delta);
+      start = mc.field_2807.method_931(delta)
+          .add(0, local.luke.power.input.InteractionEye.offset(mc.field_2807, delta, 0), 0);
       direction = mc.field_2807.method_926(delta);
     }
     double x = start.x, y = start.y, z = start.z, reach = Math.max(blocks, entities);

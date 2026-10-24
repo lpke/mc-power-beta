@@ -117,6 +117,12 @@ public final class PowerOptionsScreen extends UiScreen {
     Setting setting = session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElseThrow();
     setting.value = new JsonPrimitive(!setting.value.getAsBoolean()); changed(setting);
   }
+  void toggleMapQuickSetting(local.luke.power.map.MapToggle toggle) {
+    var changes = toggle.changes(local.luke.power.map.MapConfig.current());
+    var edited = session.settings().stream().filter(s -> changes.containsKey(s.id.startsWith("maps.") ? s.id.substring(5) : "")).toList();
+    for (Setting setting : edited) setting.value = Catalog.JSON.toJsonTree(changes.get(setting.id.substring(5)));
+    changed(edited, false);
+  }
   boolean panelModal() { return capture != null || confirmClose || confirmReset; }
   boolean minimapWheelAllowed() { return !panelModal() && !valueEditor.active() && dragging == null; }
   boolean radarIconsAllowed() { return !panelModal() && !valueEditor.active() && !search.focused; }

@@ -85,8 +85,20 @@
   Filling and milking exchange one bucket, with inventory insertion or a normal
   overflow drop. Preserve existing stacks when disabled and never split inventories
   while editing settings. Keep creative buckets reusable.
-- Leaving a world or quitting clears active tweaks through `TweakLifecycle`; preserve
-  feature preferences, bindings and saved user data. Queue changed persistent preferences; temporary gameplay states stay in memory.
+- Leaving, replacing a world, or quitting clears every temporary activation through
+  `TweakLifecycle`. Every `TweakIndicators.Tweak` needs an owning reset participant.
+  This includes restocking, automatic tool switching, fake sneak, fast placement and
+  its restriction, auto-walk and line lock, auto-mine, Hold use, temporary click-mining
+  inversion, free look, cinematic camera, freecam and player movement, hidden entities,
+  and manual full bright. Activation stays in memory and legacy saved activation is
+  inert. Copies and menu drafts retain live transient fields without serializing them.
+  Preserve bindings, HUD inclusion, toggle messages, tuning, feature availability,
+  saved data and actual Creative/Spectator state and protection. Spectator automatic
+  full bright remains a saved preference. Cancel pending native work on its existing
+  menu/focus boundaries without resetting unrelated activation or auto-walk policy.
+  Inventory resets cancel work through the existing leases and journal ownership;
+  never rewrite slots or clear carry state during generic cleanup. Carrying still
+  requires safe placement before revocation. Queue changed persistent preferences.
   Flexible placement is always available through its unbound-by-default hold controls.
   Complete slabs retains its saved enablement; only temporary placement operations
   and held modifiers clear. Slab completion has no hotkey,
@@ -145,9 +157,9 @@
 - Flight acceleration and deceleration use independent 0–5 response controls on all axes.
   Preserve terminal speeds, native modern response at 5 and freecam frame timing.
   Render head markers after translucent terrain with self-occlusion and restored GL state.
-- Creative reports the same feet/eye Y as Survival, including while falling or flying.
-  Only Spectator and freecam use head-base Y. Share this
-  through HudCoordinates and ReportedPosition across HUDs, commands and WorldEdit.
+- Commands and WorldEdit use the shared reported-position contract in
+  [Rendering and maps](rendering-maps.md), including mode-specific Y and literal
+  coordinate exceptions. Keep physical destinations and safe placement separate.
 
 - Axes slash leaves changes mining strength only, for leaf material and axes in singleplayer
   Survival. Preserve native drops, per-block durability, tool break cleanup and mining

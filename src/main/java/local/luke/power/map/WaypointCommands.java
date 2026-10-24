@@ -70,15 +70,15 @@ public final class WaypointCommands {
       if (lines.isEmpty()) chat(mc, "No waypoints in this view. Use /waypoint add <name>.");
       return;
     }
-    if (args.length < 3) throw new IllegalArgumentException("Use /waypoint " + action + " <name or ID>.");
-    String name = String.join(" ", Arrays.copyOfRange(args, 2, args.length)).strip();
     if (action.equals("add")) {
-      Waypoint.text(name, 64);
-      if (store.points().stream().anyMatch(p -> p.set.equals(store.selectedSet()) && p.name.equalsIgnoreCase(name)))
+      Waypoint point = addPoint(MapKeys.newWaypoint(), args);
+      if (store.points().stream().anyMatch(p -> p.set.equals(store.selectedSet()) && p.name.equalsIgnoreCase(point.name)))
         throw new IllegalArgumentException("That waypoint name already exists in this set. Choose another name.");
-      Waypoint point = MapKeys.newWaypoint(); point.name = name; point.set = store.selectedSet(); store.put(point);
+      point.set = store.selectedSet(); store.put(point);
       chat(mc, "§aAdded waypoint " + point.name + "."); return;
     }
+    if (args.length < 3) throw new IllegalArgumentException("Use /waypoint " + action + " <name or ID>.");
+    String name = String.join(" ", Arrays.copyOfRange(args, 2, args.length)).strip();
     Waypoint point = find(store, name);
     if (action.equals("remove")) { store.remove(point.id); chat(mc, "§aRemoved waypoint " + point.name + "."); return; }
     if (!Maps.canTeleport(mc, point)) throw new IllegalArgumentException("Waypoint teleportation requires the same dimension and Allow teleportation.");
@@ -93,17 +93,37 @@ public final class WaypointCommands {
   static Waypoint destinationPoint(Waypoint current, String[] args) {
     if (args.length != 2 && args.length != 5)
       throw new IllegalArgumentException("Use /waypoint destination [x y z]. Alias: /waypoint dest.");
-    Waypoint point = current.copy();
-    if (args.length == 5) {
-      try {
-        point.x = Integer.parseInt(args[2]); point.y = Integer.parseInt(args[3]); point.z = Integer.parseInt(args[4]);
-      } catch (NumberFormatException failure) {
-        throw new IllegalArgumentException("Use whole destination coordinates: X/Z from -32,000,000 to 32,000,000; Y from 0 to 127.");
-      }
-      if (Math.abs((long)point.x) > MapMath.BORDER || Math.abs((long)point.z) > MapMath.BORDER || point.y < 0 || point.y > 127)
-        throw new IllegalArgumentException("Destination is outside waypoint bounds: X/Z from -32,000,000 to 32,000,000; Y from 0 to 127.");
-    }
+    Waypoint point = args.length == 5 ? coordinates(current, args, 2, "destination") : current.copy();
     point.validate();
+    return point;
+  }
+
+  static Waypoint addPoint(Waypoint current, String[] args) {
+    if (args.length < 3) throw new IllegalArgumentException("Use /waypoint add <name> [x y z].");
+    int end = args.length;
+    boolean explicit = end >= 6 && numeric(args[end - 3]) && numeric(args[end - 2]) && numeric(args[end - 1]);
+    if (explicit) end -= 3;
+    Waypoint point = explicit ? coordinates(current, args, end, "waypoint") : current.copy();
+    point.name = String.join(" ", Arrays.copyOfRange(args, 2, end)).strip();
+    point.validate();
+    return point;
+  }
+
+  private static boolean numeric(String value) {
+    try { Double.parseDouble(value); return true; }
+    catch (NumberFormatException failure) { return false; }
+  }
+
+  private static Waypoint coordinates(Waypoint current, String[] args, int start, String label) {
+    String bounds = "X/Z from -32,000,000 to 32,000,000; Y from 0 to 127.";
+    Waypoint point = current.copy();
+    try {
+      point.x = Integer.parseInt(args[start]); point.y = Integer.parseInt(args[start + 1]); point.z = Integer.parseInt(args[start + 2]);
+    } catch (NumberFormatException failure) {
+      throw new IllegalArgumentException("Use whole " + label + " coordinates: " + bounds);
+    }
+    if (Math.abs((long)point.x) > MapMath.BORDER || Math.abs((long)point.z) > MapMath.BORDER || point.y < 0 || point.y > 127)
+      throw new IllegalArgumentException("Position is outside waypoint bounds: " + bounds);
     return point;
   }
 
@@ -139,7 +159,8 @@ public final class WaypointCommands {
   }
   static List<String> helpLines(boolean teleport) {
     var lines = new ArrayList<>(List.of(
-        "§b/waypoint add <name> §7Save the current camera position in the selected waypoint set.",
+        "§b/waypoint add <name> [x y z] §7Save whole coordinates, or the current reported position, in the selected set.",
+        "§7Names may contain spaces; a final three-number group sets X Y Z.",
         "§b/waypoint remove <name or ID> §7Remove a saved waypoint.",
         "§b/waypoint list [page] §7List waypoints in the current set view, including their IDs.",
         "§b/waypoint destination [x y z] §7Set a temporary destination at whole coordinates, or at the current camera position. Alias: dest."));

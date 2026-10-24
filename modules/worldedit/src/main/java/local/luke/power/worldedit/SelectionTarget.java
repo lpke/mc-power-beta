@@ -13,7 +13,8 @@ final class SelectionTarget {
   static Vec3d origin(Minecraft mc) {
     return DetachedCamera.isActive()
         ? Vec3d.createCached(DetachedCamera.x(), DetachedCamera.y(), DetachedCamera.z())
-        : mc.player.method_931(1);
+        : mc.player.method_931(1)
+            .add(0, local.luke.power.input.InteractionEye.offset(mc.player, 1, 0), 0);
   }
   static Vec3d direction(Minecraft mc) {
     if (DetachedCamera.isActive()) {

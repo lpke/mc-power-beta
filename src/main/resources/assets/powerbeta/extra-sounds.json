@@ -334,6 +334,12 @@
         "liquid/lava"
       ],
       "subtitle": "subtitles.block.lava.ambient"
+    },
+    "entity.generic.extinguish_fire": {
+      "sounds": [
+        "random/fizz"
+      ],
+      "subtitle": "subtitles.entity.generic.extinguish_fire"
     }
   },
   "assets": [
@@ -1241,6 +1247,17 @@
       "sampleRate": 44100,
       "channels": 1,
       "durationTicks": 164
+    },
+    {
+      "event": "entity.generic.extinguish_fire",
+      "asset": "minecraft/sounds/random/fizz.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/generic/extinguish_fire1.ogg",
+      "sha1": "bd76df5c882dc4b65925a8b25c0e7dbebef9bb2e",
+      "size": 15222,
+      "source": "waterSource",
+      "frames": 59919,
+      "sampleRate": 48000,
+      "channels": 1
     }
   ],
   "existingAssets": [

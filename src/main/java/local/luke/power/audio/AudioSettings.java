@@ -11,6 +11,7 @@ public final class AudioSettings {
   public boolean boneMealSounds = false;
   public boolean lavaPopSounds = false;
   public boolean lavaAmbientSounds = false;
+  public boolean playerFireExtinguish = false;
   public boolean waterSplashSounds = false;
   public boolean swimmingSounds = false;
   public boolean underwaterEnterSounds = false;
@@ -148,7 +149,7 @@ public final class AudioSettings {
     id = id.substring(id.indexOf(':') + 1);
     if (id.startsWith("ambient.weather") || id.contains("thunder")) return "weather";
     if (id.startsWith("ambient") || id.startsWith("portal") || id.equals("block.lava.pop") || id.equals("block.lava.ambient")) return "ambient";
-    if (id.startsWith("entity.player.") || id.equals("item.bucket.fill") || id.equals("item.bucket.fill_lava")) return "players";
+    if (id.equals("entity.generic.extinguish_fire") || id.startsWith("entity.player.") || id.equals("item.bucket.fill") || id.equals("item.bucket.fill_lava")) return "players";
     if (id.startsWith("mob.") || id.startsWith("entity.")) {
       String mob = id.substring(id.indexOf('.') + 1).split("\\.")[0];
       return Set.of("cow", "pig", "sheep", "chicken", "wolf", "squid", "generic").contains(mob)

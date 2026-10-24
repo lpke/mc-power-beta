@@ -34,7 +34,7 @@ public class Config {
 
         @ConfigEntry(
                 name = "Block light",
-                description = "Exact block-emitted light at your feet, from 0 to 15. Excludes sunlight and screen brightness."
+                description = "Exact block-emitted light at your reported coordinates, from 0 to 15. Follows Use feet Y coordinates; Spectator and freecam use the head base. Excludes sunlight and screen brightness."
         )
         public Boolean addBlockLightToDebugOverlay = true;
 

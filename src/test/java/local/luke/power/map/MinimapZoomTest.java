@@ -8,12 +8,12 @@ class MinimapZoomTest {
   @Test void middleClickDefaultsToSessionHeadsAndRetainsEverySavedQuickMenuAction() {
     var gson = new Gson();
     assertEquals(5, gson.fromJson("{}", MapSettings.class).middleClickAction);
-    for (int action = 0; action < 6; action++) {
+    for (int action = 0; action < 10; action++) {
       var settings = new MapSettings(); settings.middleClickAction = action;
       var restored = gson.fromJson(gson.toJson(settings), MapSettings.class);
       assertEquals(action, restored.middleClickAction); assertDoesNotThrow(restored::validate);
     }
-    for (int action : new int[]{-1, 6}) {
+    for (int action : new int[]{-1, 10}) {
       var settings = new MapSettings(); settings.middleClickAction = action;
       assertThrows(IllegalArgumentException.class, settings::validate);
     }

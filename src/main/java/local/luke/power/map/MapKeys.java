@@ -84,6 +84,8 @@ public final class MapKeys {
     iconsWorld = mc.world; iconsPlayer = mc.player; iconsScreen = mc.currentScreen;
   }
 
+  public static boolean minimapHeadsToggled() { return HEADS.toggled(); }
+
   static void toggleMinimapHeads() { HEADS.toggle(); }
 
   static void resetIcons() {
@@ -184,7 +186,7 @@ public final class MapKeys {
   public static Waypoint newWaypoint() {
     Minecraft mc = (Minecraft)net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
     var pose = mc.player == null ? null : local.luke.power.input.ReportedPosition.current(mc.player,
-        mc.player.x, mc.player.boundingBox.minY, mc.player.z, mc.player.yaw, mc.player.pitch);
+        mc.player.x, local.luke.power.hud.HudCoordinates.y(mc.player), mc.player.z, mc.player.yaw, mc.player.pitch);
     Waypoint p = new Waypoint();
     p.x = (int) Math.floor(MapMath.bounded(pose == null ? Maps.x() : pose.x(), -MapMath.BORDER, MapMath.BORDER));
     p.y = Math.max(0, Math.min(127, (int) Math.floor(pose == null ? Maps.y() : pose.y())));

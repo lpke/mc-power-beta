@@ -8,7 +8,7 @@ import net.minecraft.world.World;
 public final class ExtraSounds {
   private static final Set<String> EVENTS = Set.of("item.crop.plant", "item.hoe.till",
       "item.bucket.fill", "item.bucket.fill_lava", "item.bucket.empty", "item.bucket.empty_lava",
-      "entity.cow.milk", "item.bone_meal.use", "block.lava.pop", "block.lava.ambient", "entity.generic.splash", "entity.hostile.splash", "entity.player.swim",
+      "entity.cow.milk", "item.bone_meal.use", "block.lava.pop", "block.lava.ambient", "entity.generic.extinguish_fire", "entity.generic.splash", "entity.hostile.splash", "entity.player.swim",
       "entity.player.splash", "entity.player.splash.high_speed", "ambient.underwater.enter", "ambient.underwater.exit",
       "ambient.underwater.loop", "ambient.underwater.loop.additions", "ambient.underwater.loop.additions.rare",
       "ambient.underwater.loop.additions.ultra_rare");
@@ -34,6 +34,7 @@ public final class ExtraSounds {
       case "audio.boneMealSounds" -> "power_beta:item.bone_meal.use";
       case "audio.lavaPopSounds" -> "power_beta:block.lava.pop";
       case "audio.lavaAmbientSounds" -> "power_beta:block.lava.ambient";
+      case "audio.playerFireExtinguish" -> "power_beta:entity.generic.extinguish_fire";
       case "audio.waterSplashSounds" -> "power_beta:entity.player.splash";
       case "audio.swimmingSounds" -> "power_beta:entity.player.swim";
       case "audio.underwaterEnterSounds" -> "power_beta:ambient.underwater.enter";
@@ -44,6 +45,14 @@ public final class ExtraSounds {
       case "audio.underwaterUltraRareAdditions" -> "power_beta:ambient.underwater.loop.additions.ultra_rare";
       default -> null;
     };
+  }
+
+  public static float previewVolume(String id) {
+    return "power_beta:entity.generic.extinguish_fire".equals(id) ? .7f : 1;
+  }
+
+  public static float previewPitch(String id) {
+    return "power_beta:entity.generic.extinguish_fire".equals(id) ? 1.6f : 1;
   }
 
   public static void play(World world, double x, double y, double z, String event) {

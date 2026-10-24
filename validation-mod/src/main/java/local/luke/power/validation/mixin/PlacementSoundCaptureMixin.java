@@ -19,6 +19,7 @@ public abstract class PlacementSoundCaptureMixin {
   }
   @Inject(method = "method_150", at = @At("HEAD"))
   private void validation$sound(double x, double y, double z, String id, float volume, float pitch, CallbackInfo ci) {
+    local.luke.power.validation.PlayerFireExtinguish448Checks.capture(x, y, z, id, volume, pitch);
     RedstoneSoundChecks.capture(x, y, z, id, volume, pitch);
     Release300ExtraSoundsChecks.capture(x, y, z, id, volume, pitch);
     FluidSounds420Checks.capture(id, volume, pitch);
@@ -28,6 +29,7 @@ public abstract class PlacementSoundCaptureMixin {
 
   @Inject(method = "method_191", at = @At("HEAD"))
   private void validation$entitySound(Entity entity, String id, float volume, float pitch, CallbackInfo ci) {
+    local.luke.power.validation.PlayerFireExtinguish448Checks.capture(entity.x, entity.y - entity.field_1631, entity.z, id, volume, pitch);
     Release300ExtraSoundsChecks.capture(entity.x, entity.y - entity.field_1631, entity.z, id, volume, pitch);
     FluidSounds420Checks.capture(id, volume, pitch);
     local.luke.power.validation.FluidSounds440Checks.capture(id, volume, pitch);

@@ -7,6 +7,7 @@ import local.luke.power.ui.DebugOverlay;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import local.luke.power.input.DetachedCamera;
+import local.luke.power.input.ReportedPosition;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
@@ -33,10 +34,13 @@ public class InGameHudMixin extends DrawContext {
 		if (!minecraft.options.debugHud || minecraft.player == null || minecraft.world == null) return;
 		int yOffset = Config.config.overlayAdditionsYOffset;
         boolean detached = DetachedCamera.isActive();
-        double x = detached ? DetachedCamera.x() : minecraft.player.x;
-        double y = detached ? DetachedCamera.y() : minecraft.player.boundingBox.minY;
-        double z = detached ? DetachedCamera.z() : minecraft.player.z;
-        float yaw = detached ? DetachedCamera.facingYaw() : minecraft.player.yaw;
+        var pose = ReportedPosition.current(minecraft.player,
+            detached ? DetachedCamera.x() : minecraft.player.x,
+            detached ? local.luke.power.input.HeadGeometry.baseY(DetachedCamera.y()) : minecraft.player.boundingBox.minY,
+            detached ? DetachedCamera.z() : minecraft.player.z,
+            detached ? DetachedCamera.facingYaw() : minecraft.player.yaw, minecraft.player.pitch);
+        double x = pose.x(), y = pose.y(), z = pose.z();
+        float yaw = pose.yaw();
         if (Config.config.addFacingToDebugOverlay) {
             String[] directions = {"south (+Z)", "west (-X)", "north (-Z)", "east (+X)"};
             int facing = Math.floorMod((int)Math.floor(yaw / 90.0 + 0.5), 4);

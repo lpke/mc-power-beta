@@ -18,6 +18,8 @@
     "SwimmingModelMixin",
     "SwimmingRendererMixin",
     "SwimmingCameraMixin",
+    "InteractionEyeRayMixin",
+    "InteractionEyeItemMixin",
     "OptionsAccessor",
     "OptionsMixin",
     "EditWorldEscapeMixin",
@@ -150,6 +152,7 @@
     "LavaIgnitionMixin",
     "SpectatorOutlineMixin",
     "SpectatorSplashMixin",
+    "PlayerFireExtinguishMixin",
     "LavaPopSoundMixin",
     "FluidMovementSoundMixin",
     "UnderwaterSoundMixin",
@@ -184,7 +187,8 @@
     "InventoryMinimapInputMixin",
     "InventoryMinimapSpaceMixin",
     "InventoryMinimapOverlayMixin",
-    "HeldLightRegionMixin"
+    "HeldLightRegionMixin",
+    "FishingBobberPoseMixin"
   ],
   "injectors": {
     "defaultRequire": 1

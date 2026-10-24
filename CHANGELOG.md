@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [4.4.8] - 2026-10-25
+
+- Restrict the recipe-book hotkey to eligible inventory screens; it no longer opens a screen during gameplay.
+- Add a Player fire extinguish sound toggle using the modern water extinguishing cue, enabled by default in Power Beta.
+- Keep mining cracks aligned with block faces while retaining the underside visibility fix.
+- Allow /waypoint add <name> [x y z] to save explicit coordinates, or the current reported position when omitted.
+- Share checkbox controls across the World Map and minimap, including waypoints, chunk borders, slime chunks, spawnable areas and paths. Add Show/Hide Toggles on the World Map and matching minimap middle-click choices.
+- Align crouched and compact-pose targeting, Flexible Placement previews and reach checks with the chosen camera height, including container previews, Creative and WorldEdit.
+- Correct bucket and boat targeting in lowered poses, initialize restored crouch cameras correctly, and cast fishing bobbers from the physical pose.
+- Reset all temporary Active tweaks when leaving or replacing a world. Keep automatic restocking and tool-switch activation out of saved preferences.
+- Make F3 block-light sampling and map coordinate fallbacks follow the reported-position preference, including Spectator and freecam.
+
 ## [4.4.7] - 2026-10-24
 
 - Use centered, font-independent ticks in minimap quick-settings checkboxes.

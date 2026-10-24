@@ -113,13 +113,17 @@ public record PlacementPlan(
   }
 
   private static double distance(Minecraft mc, double x, double y, double z) {
-    double dx = x - mc.player.x, dy = y - mc.player.y, dz = z - mc.player.z;
+    double dx = x - mc.player.x, dy = y - eyeY(mc), dz = z - mc.player.z;
     return dx * dx + dy * dy + dz * dz;
+  }
+
+  private static double eyeY(Minecraft mc) {
+    return mc.player.y + local.luke.power.input.InteractionEye.offset(mc.player, 1, 0);
   }
 
   private static boolean withinReach(Minecraft mc, BlockPos p, double reach) {
     double x = Math.max(p.x(), Math.min(p.x() + 1, mc.player.x));
-    double y = Math.max(p.y(), Math.min(p.y() + 1, mc.player.y));
+    double y = Math.max(p.y(), Math.min(p.y() + 1, eyeY(mc)));
     double z = Math.max(p.z(), Math.min(p.z() + 1, mc.player.z));
     return distance(mc, x, y, z) <= reach * reach;
   }

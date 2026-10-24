@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 public final class InventoryAutomation {
   private InventoryAutomation() {}
   public static void registerIndicators(Minecraft mc) {
+    TweakLifecycle.register("inventory-automation", InventoryAutomation::reset);
     TweakIndicators.register(TweakIndicators.Tweak.RESTOCK,
         () -> enabledForPlayer(mc) && InventoryToolsConfig.current().restock ? "" : null);
     TweakIndicators.register(TweakIndicators.Tweak.TOOL_SWITCH,
@@ -33,16 +34,20 @@ public final class InventoryAutomation {
     if (!survival(mc)) return;
     var next = InventoryToolsConfig.copy(); next.restock = !next.restock;
     InventoryToolsConfig.preview(next);
-    InventoryToolsConfig.queuedPreferences(next);
     Restock.clear();
   }
   public static void toggleToolSwitch(Minecraft mc) {
     if (!survival(mc)) return;
     var next = InventoryToolsConfig.copy(); next.toolSwitch = !next.toolSwitch;
     InventoryToolsConfig.preview(next);
-    InventoryToolsConfig.queuedPreferences(next);
     AutoToolSwitch.clear();
   }
   public static void tick(Minecraft mc) { Restock.tick(mc); }
+  /** End activation only on a visit boundary; menus/focus loss cancel pending work. */
+  public static void reset() {
+    clear();
+    var next = InventoryToolsConfig.copy(); next.restock = next.toolSwitch = false;
+    InventoryToolsConfig.preview(next);
+  }
   public static void clear() { Restock.clear(); AutoToolSwitch.clear(); }
 }

@@ -52,6 +52,7 @@ public abstract class PlayerSwimmingMixin implements SwimPlayer {
     player.spacingY = power$swim.compact ? SwimState.HEIGHT : power$swim.crouched ? 1.5f : 1.8f;
     player.field_1631 = power$swim.compact ? SwimState.EYE_HEIGHT : power$swim.crouched ? 1.27f : 1.62f;
     power$swim.resetCamera(player.field_1631);
+    power$swim.deferCameraReset();
     // Entity.read has already read native Pos and built the upright box.
     if (power$swim.compact || power$swim.crouched) {
       player.y -= 1.62f - player.field_1631;

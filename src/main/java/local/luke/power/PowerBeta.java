@@ -30,6 +30,7 @@ public final class PowerBeta {
     local.luke.power.mining.VeinMining.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;
+      local.luke.power.input.InteractionEye.register(local.luke.power.gameplay.ModernSwimming::interactionEyeOffset);
       local.luke.power.input.SpectatorContainers.register(() -> local.luke.power.inventory.SpectatorContainerScreen.open(mc));
       local.luke.power.inventory.tools.InventoryAutomation.registerIndicators(mc);
       local.luke.power.input.ReportedPosition.register(() -> mc.player, () -> {
