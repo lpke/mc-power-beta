@@ -5,6 +5,12 @@ A user request listing changes and a release version authorizes implementation, 
 commit, push, publishing and the instance update described in AGENTS.md. A code-only
 request does not authorize publication.
 
+For a re-release, update that version's `CHANGELOG.md` entries, GitHub release notes
+and deployed website changelog to describe the revised behavior. Verify the live
+GitHub and website text, even when the version number stays the same. Update the
+existing owner review HTML and mark each re-released item as required by
+[Owner review HTML](release-report.md). These updates are part of release completion.
+
 - This project does not accept external contributions. Keep that policy in the
   README and encourage forks under the AGPL; do not add a contribution guide.
 - `gradle.properties` owns the pack version. Use semantic versions and tags `vX.Y.Z`.

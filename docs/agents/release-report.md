@@ -5,6 +5,13 @@ then keep it current through implementation, testing and delivery. Read its dest
 instructions and save a separate project document for that version, such as
 `main--4.4.0-review.html`. Keep earlier reports as historical records.
 
+For a re-release, update that version's existing report. Mark every added or revised
+item with a visible **Re-released** label and a short note explaining the revision.
+Keep this label separate from development status so it remains visible after
+Complete labels are hidden. Refresh affected descriptions, screenshots and
+verification results, and add a timestamped Work log entry. Preserve the report's
+identity, checklist IDs and owner's saved review progress.
+
 At the top, include a collapsed **Work log** with timestamped milestone updates.
 Record high-level progress, the number and roles of subagents, completed work and
 what remains. Keep entries short and distinguish code completion, review and tests.

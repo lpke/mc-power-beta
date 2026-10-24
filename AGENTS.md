@@ -48,9 +48,11 @@ review their changes. Never run Loom builds concurrently, including in subagents
 | Any new/imported sound or audio behavior | [Audio and decoder validation](docs/agents/audio.md) |
 | Rendering, water lighting, HUDs or maps | [Rendering and maps](docs/agents/rendering-maps.md) |
 | Gameplay rules, commands or input | [Gameplay and input](docs/agents/gameplay-input.md) |
-| Preparing, publishing or installing a release | [Release delivery](docs/agents/releasing.md), then [the publisher procedure](docs/releases.md) |
-| Starting or completing a requested release | [Owner review HTML](docs/agents/release-report.md), using the `$html` skill |
+| Preparing, publishing or installing a release or re-release | [Release delivery](docs/agents/releasing.md), then [the publisher procedure](docs/releases.md) |
+| Starting or completing a requested release or re-release | [Owner review HTML](docs/agents/release-report.md), using the `$html` skill |
 
 The website keeps its normal GitHub-derived changelog. Detailed owner review belongs
 in the separate HTML checklist, not in an extra website release-notes section.
+Re-releases must update both changelog destinations and the existing review HTML,
+with re-released items clearly marked.
 Keep lasting instructions in these documents rather than appending session history.
