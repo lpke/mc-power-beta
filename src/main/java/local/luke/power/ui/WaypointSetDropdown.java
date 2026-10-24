@@ -8,9 +8,14 @@ final class WaypointSetDropdown {
 
   static void button(UiScreen screen, String label, int x, int y, int width,
       int mx, int my, boolean enabled, boolean open) {
-    screen.button("", x, y, width, 18, mx, my, enabled);
-    screen.text(screen.fit(label, width - 25), x + 6, y + 5, enabled ? 0xe0e0e0 : 0xa0a0a0);
-    screen.chevron(x + width - 11, y + 7, open, 0xffdddddd);
+    button(screen, label, x, y, width, 18, mx, my, enabled, open);
+  }
+
+  static void button(UiScreen screen, String label, int x, int y, int width, int height,
+      int mx, int my, boolean enabled, boolean open) {
+    screen.button("", x, y, width, height, mx, my, enabled);
+    screen.text(screen.fit(label, width - 25), x + 6, y + (height - 8) / 2, enabled ? 0xe0e0e0 : 0xa0a0a0);
+    screen.chevron(x + width - 11, y + (height - 4) / 2, open, 0xffdddddd);
   }
 
   static void render(UiScreen screen, List<String> labels, int selected, int focus, int scroll,

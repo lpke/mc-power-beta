@@ -17,6 +17,8 @@
 
 # Runtime checks
 
+- `ui-447 capture|run` captures minimap ticks and Creative header buttons, then checks tick centering, unchecked boxes, equal button borders and dropdown input at narrow/wide sizes. Use a focused, muted singleplayer clone.
+
 - `minimap-446 capture|run` captures the session mob-head toggle, then checks middle-click, hold-key handoff, menu ownership, disabled-work gates and settings preservation in a muted clone. `prepare keyboard|mouse`, `check-on|off|held|latched-held|inactive` and `stop` observe physical focus/hold gestures without saving settings.
 
 - `ui-446 capture|run` adds native empty-cell feedback, clearing-drag, Undo and cancellation checks to the recipe/Search suite. Capture before acceptance; reports are under `power-beta-data/reports/ui-446`, with Search images under `ui-445`.

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [4.4.7] - 2026-10-24
+
+- Use centered, font-independent ticks in minimap quick-settings checkboxes.
+- Match the Creative tab editor Fill group button height and text alignment to Add tab and Remove tab.
+
 ## [4.4.6] - 2026-10-24
 
 - Add Mob heads as the default minimap middle-click action. Toggle heads for the current world visit; pressing the mob-icons hold key returns to normal hold controls.

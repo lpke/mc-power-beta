@@ -15,6 +15,7 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
   private static final Object OWNER = new Object();
   private static final MinimapQuickMenu VIEW = new MinimapQuickMenu();
   private static final String[] LABELS = {"Show items", "Show mobs", "Show waypoints", "Show in-game waypoints", "Cave mode"};
+  private static final String[] TICK = {"      ##", "     ## ", "    ##  ", "## ##   ", " ###    ", "  #     "};
   private static Screen host;
   private static Object world, player;
   private static boolean open;
@@ -175,7 +176,11 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
         if(hovered)VIEW.fill(row.x(),row.y(),row.x()+row.width(),row.y()+row.height(),0xff383838);
         VIEW.fill(row.x()+3,row.y()+5,row.x()+13,row.y()+15,0xffa0a0a0);
         VIEW.fill(row.x()+4,row.y()+6,row.x()+12,row.y()+14,0xff101010);
-        if(values[index])VIEW.drawStringWithShadow(mc.textRenderer,"x",row.x()+5,row.y()+6,0xffffff);
+        if(values[index]) {
+          int left=row.x()+8-TICK[0].length()/2, top=row.y()+MinimapQuickMenuLayout.ROW_HEIGHT/2-TICK.length/2;
+          for(int y=0;y<TICK.length;y++)for(int x=0;x<TICK[y].length();x++)
+            if(TICK[y].charAt(x)=='#')VIEW.fill(left+x,top+y,left+x+1,top+y+1,0xffffffff);
+        }
         VIEW.drawStringWithShadow(mc.textRenderer,LABELS[index],row.x()+19,row.y()+6,hovered?0xffffff:0xdddddd);
       }
     }finally{GL11.glPopMatrix();GL11.glPopAttrib();}

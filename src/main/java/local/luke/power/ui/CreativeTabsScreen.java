@@ -416,7 +416,7 @@ public final class CreativeTabsScreen extends UiScreen {
     if (exit.active() || nativeGroups) { mx = -100; my = -100; }
     renderBackground(); titleBar("Creative tabs");
     button("Add tab", tabButtonX(0), 30, tabButtonWidth(), 20, mx, my, editable() && data.size() < CreativeTabsData.MAX_TABS);
-    WaypointSetDropdown.button(this, "Fill group", fillGroupX(), 30, fillGroupWidth(144), mx, my, hasTab(), nativeGroups);
+    WaypointSetDropdown.button(this, "Fill group", fillGroupX(), 30, fillGroupWidth(144), 20, mx, my, hasTab(), nativeGroups);
     button("Remove tab", tabButtonX(1), 30, tabButtonWidth(), 20, mx, my, hasTab());
     String tip = "";
     if (editable()) {

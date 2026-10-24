@@ -268,6 +268,7 @@ public final class Validation {
       else if (command.startsWith("minimap-446")) Minimap446Checks.run(mc, command.substring("minimap-446".length()).trim());
       else if (command.startsWith("minimap-444")) Minimap444Checks.run(mc,command.substring("minimap-444".length()).trim());
       else if (command.startsWith("inventory-look-445")) InventoryLook445Checks.run(mc, command.substring("inventory-look-445".length()).trim());
+      else if (command.startsWith("ui-447")) Ui447Checks.run(mc, command.substring("ui-447".length()).trim());
       else if (command.startsWith("ui-446")) Ui445Checks.run446(mc, command.substring("ui-446".length()).trim());
       else if (command.startsWith("ui-445")) Ui445Checks.run(mc, command.substring("ui-445".length()).trim());
       else if (command.equals("gui-items-444")) GuiItems444Checks.run(mc);
