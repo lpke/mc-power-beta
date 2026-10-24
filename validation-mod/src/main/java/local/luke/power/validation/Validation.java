@@ -265,8 +265,10 @@ public final class Validation {
       else if (command.equals("recipe-availability-444")) RecipeAvailability444Checks.run(mc);
       else if (command.equals("current-formats-442")) CurrentFormats442Checks.run(mc);
       else if (command.startsWith("creative-442")) Creative442Checks.run(mc, command.substring(12).trim());
+      else if (command.startsWith("minimap-446")) Minimap446Checks.run(mc, command.substring("minimap-446".length()).trim());
       else if (command.startsWith("minimap-444")) Minimap444Checks.run(mc,command.substring("minimap-444".length()).trim());
       else if (command.startsWith("inventory-look-445")) InventoryLook445Checks.run(mc, command.substring("inventory-look-445".length()).trim());
+      else if (command.startsWith("ui-446")) Ui445Checks.run446(mc, command.substring("ui-446".length()).trim());
       else if (command.startsWith("ui-445")) Ui445Checks.run(mc, command.substring("ui-445".length()).trim());
       else if (command.equals("gui-items-444")) GuiItems444Checks.run(mc);
       else if (command.equals("creative-444")) Creative444Checks.run(mc);

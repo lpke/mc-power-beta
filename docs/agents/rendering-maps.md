@@ -169,8 +169,10 @@
   beside the settings panel.
   Secondary minimap reads retain their own bounded admission without replacing the
   world-map interest or consuming every parent-maintenance slot.
-- Entity radar heads are upright orthographic native head models. Minimap icons are hold-only;
-  the World Map can also retain heads through its own Mobs preference. Sidebar text editors,
+- Entity radar heads are upright orthographic native head models. Minimap heads use a hold key or a world-visit middle-click toggle.
+  Accepted hold presses clear that toggle; renderers read tick-owned state without polling keys.
+  Keep the latch out of settings and clear it on world exit. The World Map retains
+  heads independently through its own Mobs preference. Sidebar text editors,
   modals and binding capture retain keyboard ownership. Build at
   most one new icon and resolve at most one source texture per native frame, shared by both
   map views and stereo eyes. Use bounded caches, invalidate on texture reload, and retain

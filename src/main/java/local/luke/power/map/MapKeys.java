@@ -30,6 +30,13 @@ public final class MapKeys {
   private static final List<KeyBinding> ALL = List.of(MAP, WAYPOINT, WAYPOINTS, ENLARGE, RADAR_ICONS,
       ZOOM_IN, ZOOM_OUT, TOGGLE, WORLD_WAYPOINTS, MAP_WAYPOINTS, RADAR, CAVES, GRID,
       CLEAR_DESTINATION, SETTINGS, ZOOM_RESET);
+  private static final MinimapMobHeads HEADS = new MinimapMobHeads();
+  private static Object iconsWorld, iconsPlayer, iconsScreen;
+
+  static {
+    Bindings.onKeyPress("powerbeta.radarIcons", MapKeys::iconsPress);
+    Bindings.onMousePress("powerbeta.radarIcons", MapKeys::iconsPress);
+  }
 
   public static List<KeyBinding> all() {
     return ALL;
@@ -52,6 +59,39 @@ public final class MapKeys {
   }
 
   public static boolean iconsHeld(Minecraft mc) {
+    return HEADS.held() && iconsWorld == mc.world && iconsPlayer == mc.player
+        && iconsScreen == mc.currentScreen && iconsContextAllowed(mc);
+  }
+
+  /** Called on ticks before radar capture. Rendering only reads the resulting state. */
+  static void tickIcons(Minecraft mc, boolean radarActive) {
+    boolean allowed = radarActive && iconsContextAllowed(mc)
+        && (!(mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen)
+            || inventoryIconsAllowed(mc, -1000)) && Bindings.down(RADAR_ICONS);
+    // Context changes cannot turn an existing physical hold into another press.
+    HEADS.sample(Bindings.physical(RADAR_ICONS.code), allowed);
+    iconsWorld = mc.world; iconsPlayer = mc.player; iconsScreen = mc.currentScreen;
+  }
+
+  private static void iconsPress(int key) {
+    if (key != RADAR_ICONS.code || !available(RADAR_ICONS.translationKey)) return;
+    Minecraft mc = (Minecraft)net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
+    if (!iconsContextAllowed(mc)
+        || mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen
+            && !inventoryIconsAllowed(mc, key)
+        || !Bindings.matches(RADAR_ICONS, key)) return;
+    HEADS.press();
+    iconsWorld = mc.world; iconsPlayer = mc.player; iconsScreen = mc.currentScreen;
+  }
+
+  static void toggleMinimapHeads() { HEADS.toggle(); }
+
+  static void resetIcons() {
+    HEADS.clear();
+    iconsWorld = iconsPlayer = iconsScreen = null;
+  }
+
+  private static boolean iconsContextAllowed(Minecraft mc) {
     if (mc.world == null || mc.player == null || mc.player.dead || mc.player.health <= 0
         || !Display.isActive()) return false;
     if (mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen map) {
@@ -59,35 +99,39 @@ public final class MapKeys {
     } else if (mc.currentScreen instanceof local.luke.power.ui.HudEditorScreen hud) {
       if (!hud.radarIconsAllowed()) return false;
     } else if (mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen) {
-      if (!inventoryIconsAllowed(mc)) return false;
+      var screen = (net.minecraft.client.gui.screen.container.ContainerScreen)mc.currentScreen;
+      if (!local.luke.power.offhand.OffhandContainers.supported(screen)
+          || local.luke.power.input.InventoryTextInput.active(screen)
+          || local.luke.power.input.InventoryPanels.modal(screen) || org.lwjgl.input.Mouse.isGrabbed()) return false;
     } else if (mc.currentScreen != null || mc.paused) return false;
-    return Bindings.down(RADAR_ICONS);
+    return true;
   }
 
-  private static boolean inventoryIconsAllowed(Minecraft mc) {
+  private static boolean inventoryIconsAllowed(Minecraft mc, int eventKey) {
     var screen = (net.minecraft.client.gui.screen.container.ContainerScreen)mc.currentScreen;
-    if (!local.luke.power.offhand.OffhandContainers.supported(screen)
-        || local.luke.power.input.InventoryTextInput.active(screen)
-        || local.luke.power.input.InventoryPanels.modal(screen) || org.lwjgl.input.Mouse.isGrabbed()) return false;
     int code = RADAR_ICONS.code;
     if (code == Keyboard.KEY_ESCAPE || code >= -100 && code <= -98) return false;
     for (Object entry : mc.options.allKeys) if (entry != RADAR_ICONS
-        && entry instanceof local.luke.power.input.Binding binding && binding.power$code() == code && Bindings.down(entry)) {
+        && entry instanceof local.luke.power.input.Binding binding && binding.power$code() == code && iconsBindingActive(entry, eventKey)) {
       var metadata = local.luke.power.config.Catalog.metadata("keys." + binding.power$id());
       if (metadata.has("group") && metadata.get("group").getAsString().equals("Inventory")
           || binding.power$id().matches("key.power_controls.hotbar_[1-9]")) return false;
     }
     if (local.luke.power.input.MovementScreens.allows(screen))
       for (Object key : java.util.List.of(mc.options.forwardKey, mc.options.backKey, mc.options.leftKey, mc.options.rightKey, mc.options.jumpKey))
-        if (key instanceof local.luke.power.input.Binding binding && binding.power$code() == code && Bindings.down(key)) return false;
+        if (key instanceof local.luke.power.input.Binding binding && binding.power$code() == code && iconsBindingActive(key, eventKey)) return false;
     return true;
   }
 
+  private static boolean iconsBindingActive(Object binding, int eventKey) {
+    return eventKey == -1000 ? Bindings.down(binding) : Bindings.matches(binding, eventKey);
+  }
+
   public static boolean iconsShown(Minecraft mc, boolean minimap, MapSettings settings) {
-    return settings.radar && (iconsHeld(mc) || !minimap && settings.worldMapRadarIcons
-        && mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen
-        && mc.world != null && mc.player != null && !mc.player.dead && mc.player.health > 0
-        && Display.isActive());
+    if (!settings.radar || mc.world == null || mc.player == null || mc.player.dead
+        || mc.player.health <= 0 || !Display.isActive()) return false;
+    return iconsHeld(mc) || (minimap ? settings.minimap && HEADS.toggled()
+        : settings.worldMapRadarIcons && mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen);
   }
 
   /** Mutates only the caller's snapshot; the input dispatcher queues it once afterward. */

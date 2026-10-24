@@ -17,8 +17,12 @@
 
 # Runtime checks
 
+- `minimap-446 capture|run` captures the session mob-head toggle, then checks middle-click, hold-key handoff, menu ownership, disabled-work gates and settings preservation in a muted clone. `prepare keyboard|mouse`, `check-on|off|held|latched-held|inactive` and `stop` observe physical focus/hold gestures without saving settings.
+
+- `ui-446 capture|run` adds native empty-cell feedback, clearing-drag, Undo and cancellation checks to the recipe/Search suite. Capture before acceptance; reports are under `power-beta-data/reports/ui-446`, with Search images under `ui-445`.
+
 - `ui-445 capture` writes near-final recipe/Search images before acceptance checks.
-  `ui-445 run` checks ghost cleanup, native slot/font pixels, caret geometry and
+  `ui-445 run` checks ghost cleanup, native slot/font pixels, current caret geometry and
   empty-cell selection/Undo isolation at 320/640 logical widths. Reports are under
   `power-beta-data/reports/ui-445`. Use a focused muted Survival clone at 1280×720
   or larger, with no inventory transaction in progress.

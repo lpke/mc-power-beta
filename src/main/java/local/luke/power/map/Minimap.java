@@ -90,7 +90,9 @@ public final class Minimap {
     middleClick(mc); return true;
   }
   private static void middleClick(Minecraft mc) {
-    MinimapQuickMenu.toggle(MapConfig.current().middleClickAction);
+    int action = MapConfig.current().middleClickAction;
+    if (action == 5) MapKeys.toggleMinimapHeads();
+    else MinimapQuickMenu.toggle(action);
     mc.soundManager.method_2009("random.click", 1, 1);
   }
   private static void scrollZoom(int wheel) {
@@ -205,7 +207,7 @@ public final class Minimap {
         new MapProjection(
             pose.x(), pose.z(), s.zoom, bounds.x(), bounds.y(), bounds.size(), bounds.size(), angle);
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-    try (var heads = s.radar && MapKeys.iconsHeld(mc) ? new RadarIcons.Batch(s.radarLimit) : null) {
+    try (var heads = MapKeys.iconsShown(mc, true, s) ? new RadarIcons.Batch(s.radarLimit) : null) {
       GL11.glDisable(GL11.GL_DEPTH_TEST);
       GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glDisable(GL11.GL_CULL_FACE);

@@ -38,7 +38,7 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
       text(value.substring(view.start(), view.end()), left + 3, top, 0xffffff);
       if (search.focused && InterfaceState.uiCursorVisible()) {
         int caret = left + 3 + textRenderer.getWidth(value.substring(view.start(), search.cursor()));
-        fill(caret, top + 1, caret + 1, top + 8, 0xffffffff);
+        fill(caret, top, caret + 1, top + 8, 0xffffffff);
       }
     } finally { GL11.glPopAttrib(); }
   }

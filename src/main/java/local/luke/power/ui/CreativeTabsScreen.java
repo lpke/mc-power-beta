@@ -339,12 +339,13 @@ public final class CreativeTabsScreen extends UiScreen {
   }
   private void updateDrag(int x, int y) {
     if (dragCell < 0 && dragTab < 0) return;
-    dragging |= Math.abs(x - pressX) + Math.abs(y - pressY) >= 4;
     if (clearingCells) {
       int destination = gridCell(x, y);
+      dragging |= destination != dragCell;
       if (destination >= 0) for (int index = Math.min(dragCell, destination); index <= Math.max(dragCell, destination); index++) clearCells.add(index);
       return;
     }
+    dragging |= Math.abs(x - pressX) + Math.abs(y - pressY) >= 4;
     if (!dragging) return;
     clicks.cancel();
     if (dragCell >= 0 && selectingCells) {
@@ -441,8 +442,9 @@ public final class CreativeTabsScreen extends UiScreen {
         for (int row = first; row < last; row++) for (int col = 0; col < 8; col++) {
           int index = row * 8 + col, x = gridLeft() + col * 18, y = gridTop() + row * 18 - gridScroll;
           fill(x, y, x + 18, y + 18, 0xff666666); fill(x + 1, y + 1, x + 17, y + 17, 0xff252525);
-          if (!clearingCells || !clearCells.contains(index)) drawItem(values.get(index), x + 1, y + 1);
-          if (clearingCells && clearCells.contains(index)) fill(x + 1, y + 1, x + 17, y + 17, 0x80bb5555);
+          boolean clearing = clearingCells && clearCells.contains(index) && (dragging || !values.get(index).isEmpty());
+          if (!clearing) drawItem(values.get(index), x + 1, y + 1);
+          if (clearing) fill(x + 1, y + 1, x + 17, y + 17, 0x80bb5555);
           if (cells.contains(index) || index == hover) fill(x + 1, y + 1, x + 17, y + 17, cells.contains(index) ? 0x805588bb : 0x40ffffff);
           if (index == hover && !values.get(index).isEmpty()) {
             try { tip = ItemCatalogue.resolve(ItemCatalogue.Domain.FILTER, values.get(index)).tooltip(); }

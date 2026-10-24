@@ -580,7 +580,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.4.5"
+        "customVersionText": "Power Beta 4.4.6"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -1063,7 +1063,7 @@
       "opacity": 1,
       "zoom": 1.25,
       "zoomWhileExpanded": true,
-      "middleClickAction": 2,
+      "middleClickAction": 5,
       "coordinates": true,
       "biome": false,
       "clock": false,

@@ -60,11 +60,66 @@ final class Ui445Checks {
         }
         test("UI445 narrow Escape clears unavailable preview and retry state", () -> recipeCleanup(mc, state, 320, "escape"));
       }
-      test("UI445 native Search font, shadow, selection and seven-pixel caret", () -> searchImages(mc, REPORT.resolve(action), true));
+      test("UI445 native Search font, shadow, selection and eight-pixel caret", () -> searchImages(mc, REPORT.resolve(action), true));
       editorChecks(mc);
       log("UI445 failures=" + failures + " reports=" + REPORT.resolve(action).toAbsolutePath());
       check(failures == 0, "UI445 failures=" + failures);
     } finally { InterfaceState.blinkingUiCursor = blinking; }
+  }
+
+  static void run446(Minecraft mc, String action) throws Exception {
+    run(mc, action);
+    Path directory = Path.of("power-beta-data/reports/ui-446").resolve(action);
+    Files.createDirectories(directory);
+    boolean verify = action.equals("run");
+    Screen parent = mc.currentScreen;
+    boolean repeat = Keyboard.areRepeatEventsEnabled();
+    PowerConfig.flushPending(); byte[] disk = Files.readAllBytes(PowerConfig.path());
+    String inventory = DeathItems.inventory(DeathItems.snapshot(mc.player.inventory, mc.player.playerContainer));
+    try {
+      for (int width : List.of(320, 640)) {
+        Setting setting = editorSetting(64);
+        var editor = new CreativeTabsScreen(parent, setting, () -> { throw new AssertionError("Feedback preview published its draft"); });
+        mc.setScreen(editor); editor.init(mc, width, 360);
+        JsonObject original = document(editor);
+        cells(editor).addAll(Set.of(0, 2));
+        int px = x(editor, 1), py = y(editor, 1);
+        var cold = render(mc, editor, width, directory, "empty-reference", px, py);
+        cells(editor).add(1); editor.layerPress(px, py, 1);
+        var press = render(mc, editor, width, directory, "empty-held", px, py);
+        var within = render(mc, editor, width, directory, "empty-small-motion", px + 5, py);
+        var drag = render(mc, editor, width, directory, "clearing-drag", x(editor, 3), py);
+        var returned = render(mc, editor, width, directory, "clearing-return", px, py);
+        if (verify) {
+          int sx = (px - 7) * 2, sy = (py - 7) * 2;
+          check(same(cold, press, sx, sy, 28, 28) && same(cold, within, sx, sy, 28, 28),
+              "Empty-cell right-click or in-cell motion flashed deletion red");
+          check(!cells(editor).contains(1) && cells(editor).containsAll(Set.of(0, 2)), "Empty press lost unrelated selection");
+          check(!same(cold, drag, sx, sy, 28, 28) && !same(cold, returned, sx, sy, 28, 28),
+              "Leaving the origin did not retain clearing feedback");
+          check(document(editor).equals(original) && undoCount(editor) == 0, "Held clearing preview changed draft or Undo");
+        }
+        editor.layerRelease(x(editor, 3), py, 1);
+        if (verify) {
+          var slots = CreativeTabsData.slots(CreativeTabsData.read(document(editor)).tab(0));
+          check(slots.get(1).isEmpty() && slots.get(2).isEmpty() && slots.get(3).isEmpty() && !slots.get(0).isEmpty(),
+              "Clearing drag deleted the wrong cells");
+          check(undoCount(editor) == 1, "Clearing drag must remain one Undo edit");
+          call(editor, "undo"); check(document(editor).equals(original), "Clearing Undo lost original item IDs");
+          editor.layerPress(px, py, 1); render(mc, editor, width, directory, "empty-second-press", px, py);
+          editor.layerRelease(px, py, 1);
+          check(document(editor).equals(original) && undoCount(editor) == 0, "Empty click added a phantom content edit");
+          editor.layerPress(px, py, 1); render(mc, editor, width, directory, "empty-cancel", x(editor, 3), py);
+          editor.removed();
+          check(document(editor).equals(original) && undoCount(editor) == 0, "Canceled clearing changed content");
+          check(setting.value.equals(original), "Feedback fixture published editor settings");
+          log("PASS UI446 empty-cell feedback, clearing, Undo and cancellation at " + width);
+        } else editor.removed();
+      }
+      check(inventory.equals(DeathItems.inventory(DeathItems.snapshot(mc.player.inventory, mc.player.playerContainer)))
+          && Arrays.equals(disk, Files.readAllBytes(PowerConfig.path())), "Feedback changed native inventory or persisted settings");
+      log("UI446 " + action + " completed");
+    } finally { mc.setScreen(parent); Keyboard.enableRepeatEvents(repeat); }
   }
 
   @SuppressWarnings("unchecked") private static RecipeDefinition unavailable(Recipe402Checks.State state) throws Exception {
@@ -76,11 +131,14 @@ final class Ui445Checks {
     return recipe;
   }
   private static BufferedImage render(Minecraft mc, Screen screen, int width, Path directory, String name) throws Exception {
+    return render(mc, screen, width, directory, name, -1, -1);
+  }
+  private static BufferedImage render(Minecraft mc, Screen screen, int width, Path directory, String name, int mx, int my) throws Exception {
     Path path = directory.resolve(width + "-" + name + ".png");
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPushMatrix();
     GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPushMatrix();
-    try { SettingsSnapshot.render(mc, screen, width, 360, path); }
+    try { SettingsSnapshot.render(mc, screen, width, 360, path, mx, my); }
     finally {
       GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPopMatrix();
       GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPopMatrix();
@@ -174,9 +232,9 @@ final class Ui445Checks {
         for (int y = SearchPlate.TOP - 1; y <= SearchPlate.TOP + 9; y++)
           for (int x = SearchPlate.LEFT - 1; x <= SearchPlate.LEFT + SearchPlate.SPAN; x++)
             for (int sy = 0; sy < 2; sy++) for (int sx = 0; sx < 2; sx++) {
-              int expected = x == SearchPlate.LEFT + 3 && y >= SearchPlate.TOP + 1 && y < SearchPlate.TOP + 8
+              int expected = x == SearchPlate.LEFT + 3 && y >= SearchPlate.TOP && y < SearchPlate.TOP + 8
                   ? 0xffffff : empty.getRGB(x * 2 + sx, y * 2 + sy) & 0xffffff;
-              check((caret.getRGB(x * 2 + sx, y * 2 + sy) & 0xffffff) == expected, "Search caret changed its seven-pixel height or field frame");
+              check((caret.getRGB(x * 2 + sx, y * 2 + sy) & 0xffffff) == expected, "Search caret changed its eight-pixel height or field frame");
             }
         // The space between S and e exposes selection background without covering native glyph pixels.
         int selectionPixel = SearchPlate.LEFT + 3 + mc.textRenderer.getWidth("S") - 1;

@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.4.5",
+    "default": "Power Beta 4.4.6",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6474,14 +6474,14 @@
     "page": "Controls",
     "group": "Maps",
     "label": "Mob icons (hold)",
-    "description": "Hold to replace nearby mob radar dots with upright model-head icons on either map. Dots return on release. Shares Tab with the player list by default.",
+    "description": "Hold to replace nearby mob radar dots with upright model-head icons on either map. Pressing this key clears the minimap middle-click session toggle. Shares Tab with the player list by default.",
     "order": 2.5
   },
   "maps.radarIconSize": {
     "page": "Map",
     "group": "Entity radar",
     "label": "Mob icon size",
-    "description": "Size of entity heads on both maps. Lower values leave more map visible; higher values make faces easier to recognize. The World Map can keep heads visible with its Mobs toggle; the minimap uses the hold key. Squid heads are normalized to other mobs.",
+    "description": "Size of entity heads on both maps. Lower values leave more map visible; higher values make faces easier to recognize. The World Map can keep heads visible with its Mobs toggle; the minimap can use the hold key or its middle-click action. Squid heads are normalized to other mobs.",
     "min": 10,
     "max": 200,
     "step": 5,
@@ -6510,10 +6510,10 @@
     "page": "Map",
     "group": "Minimap",
     "label": "Minimap middle-click action",
-    "description": "Choose what middle-click toggles over the minimap in inventory or pause screens, or while Enlarge minimap is held with mouse utilities enabled.",
-    "choices": ["Show items", "Show mobs", "Show waypoints", "Show in-game waypoints", "Cave mode"],
+    "description": "Choose what middle-click toggles over the minimap in inventory or pause screens, or while Enlarge minimap is held with mouse utilities enabled. Mob heads lasts for this world visit; pressing the mob-icons hold key clears that toggle and returns to hold controls.",
+    "choices": ["Show items", "Show mobs", "Show waypoints", "Show in-game waypoints", "Cave mode", "Mob heads"],
     "min": 0,
-    "max": 4,
+    "max": 5,
     "order": 1.5
   },
   "maps.zoomSteps": {
@@ -6527,7 +6527,7 @@
     "page": "Map",
     "group": "Entity radar",
     "label": "World map mob heads",
-    "description": "Keep entity heads visible on the World Map without holding the mob-icons key. The minimap still uses its hold key. Entity radar must be enabled.",
+    "description": "Keep entity heads visible on the World Map without holding the mob-icons key. Independent of the minimap session toggle. Entity radar must be enabled.",
     "order": 8.4
   },
   "maps.showInInventory": {

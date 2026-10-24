@@ -234,6 +234,7 @@ public final class Maps {
 
   public static void tick(Minecraft mc) {
     if (mc.world == null || mc.player == null) {
+      MapKeys.resetIcons();
       if (!identity.isEmpty() || cache != null || waypoints != null) leave();
       world = null;
       return;
@@ -250,6 +251,7 @@ public final class Maps {
     boolean miniRadar = Minimap.radarActive(mc, radarSettings) || previewRadar;
     boolean radarEnabled = activity.terrain() && radarSettings.radar
         && (miniRadar || fullRadar) && MapActivity.of(radarSettings, false).radar();
+    MapKeys.tickIcons(mc, radarEnabled);
     if (minimapActive && !settings.minimap) MinimapBuffer.clear();
     minimapActive = settings.minimap;
     if (!activity.terrain()) retireTerrain();
@@ -329,6 +331,7 @@ public final class Maps {
   }
 
   public static void leave() {
+    MapKeys.resetIcons();
     MapDeathCauses.clear();
     MapLightShading.clear();
     if (cache != null) cache.finish();
