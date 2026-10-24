@@ -80,7 +80,11 @@ public final class SavedHotbarsScreen extends UiScreen {
     else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) done();
   }
   @Override protected void mouseClicked(int x, int y, int button) {
-    if (exit.click(this, x, y, button, this::done, this::discard) || button != 0) return;
+    if (exit.click(this, x, y, button, this::done, this::discard)) return;
+    if (button == 1 && inside(x, y, controls() + 34, top() + 66, 58, 18) && preview[row][slot] != null) {
+      count.focused = true; count.click(x, button); return;
+    }
+    if (button != 0) return;
     if (inside(x, y, left(), top(), 162, 162)) {
       row = (y - top()) / 18; slot = (x - left()) / 18; click(); refresh(); return;
     }
@@ -109,11 +113,9 @@ public final class SavedHotbarsScreen extends UiScreen {
           fill(x + 1, y + 1, x + 17, y + 17, 0xff202020);
         }
       }
-      GL11.glPushMatrix(); GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); GL11.glPopMatrix();
-      GL11.glEnable(32826);
       for (int r = 0; r < 9; r++) for (int s = 0; s < 9; s++) {
         ItemStack item = preview[r][s]; int x = left() + s * 18 + 1, y = top() + r * 18 + 1;
-        if (item != null) { renderer.method_1487(textRenderer, minecraft.textureManager, item, x, y); renderer.method_1488(textRenderer, minecraft.textureManager, item, x, y); }
+        GuiItems.draw(renderer, minecraft, item, x, y, true);
       }
       GL11.glDisable(GL11.GL_LIGHTING); GL11.glDisable(GL11.GL_DEPTH_TEST);
       for (int r = 0; r < 9; r++) for (int s = 0; s < 9; s++) {

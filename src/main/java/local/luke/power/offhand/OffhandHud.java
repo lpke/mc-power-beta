@@ -1,5 +1,6 @@
 package local.luke.power.offhand;
 
+import local.luke.power.ui.GuiItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.render.item.ItemRenderer;
@@ -43,10 +44,7 @@ public final class OffhandHud extends DrawableHelper {
 
       var item=Offhand.get(mc.player.inventory);
       if(item!=null) {
-        GL11.glPushMatrix();GL11.glRotatef(120,1,0,0);net.minecraft.class_583.method_1930();GL11.glPopMatrix();
-        GL11.glEnable(org.lwjgl.opengl.GL12.GL_RESCALE_NORMAL);
-        items.method_1487(mc.textRenderer,mc.textureManager,item,x+(right?10:3),y+4);
-        items.method_1488(mc.textRenderer,mc.textureManager,item,x+(right?10:3),y+4);
+        GuiItems.draw(items,mc,item,x+(right?10:3),y+4,true);
       }
     } finally { GL11.glPopMatrix();GL11.glPopAttrib(); }
   }

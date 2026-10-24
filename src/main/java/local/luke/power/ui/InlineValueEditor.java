@@ -48,7 +48,7 @@ final class InlineValueEditor {
       return false;
     }
     if (button == 0 && mx >= x + width - CHECK_WIDTH) commit();
-    else if (button == 1) input.selectAll();
+    else if (button == 1 && !TextEditing.rightClickClearEnabled()) input.selectAll();
     else input.click(mx, button);
     return true;
   }

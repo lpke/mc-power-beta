@@ -47,20 +47,11 @@ public final class BookDrawing extends UiScreen {
       image(mc,"overlay_recipe",x+a[col],y+b[row],a[col+1]-a[col],b[row+1]-b[row],s[col],s[row],s[col+1]-s[col],s[row+1]-s[row],32,32);
   }
   public void item(Minecraft mc,ItemStack item,int x,int y,float scale,boolean count) {
-    if(item==null)return;
-    GL11.glPushMatrix();GL11.glPushAttrib(GL11.GL_ENABLE_BIT|GL11.GL_CURRENT_BIT|GL11.GL_LIGHTING_BIT);
-    try {
-      GL11.glTranslatef(x,y,0);GL11.glScalef(scale,scale,1);GL11.glColor4f(1,1,1,1);
-      GL11.glPushMatrix();GL11.glRotatef(120,1,0,0);net.minecraft.class_583.method_1930();GL11.glPopMatrix();
-      GL11.glEnable(org.lwjgl.opengl.GL12.GL_RESCALE_NORMAL);GL11.glEnable(GL11.GL_DEPTH_TEST);
-      renderer.method_1487(mc.textRenderer,mc.textureManager,item,0,0);
-      if(count)renderer.method_1488(mc.textRenderer,mc.textureManager,item,0,0);
-    }finally{GL11.glPopAttrib();GL11.glPopMatrix();}
+    GuiItems.draw(renderer,mc,item,x,y,scale,count);
   }
   public void rectangle(int x,int y,int width,int height,int color){fill(x,y,x+width,y+height,color);}
   public void decorations(Minecraft mc,ItemStack item,int x,int y) {
-    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
-    try{renderer.method_1488(mc.textRenderer,mc.textureManager,item,x,y);}finally{GL11.glPopAttrib();}
+    GuiItems.decorations(renderer,mc,item,x,y);
   }
   public void search(Minecraft mc,Object owner,TextInput input,RecipeBookLayout layout) {
     var bounds=layout.search();int left=bounds.x()+4,top=bounds.y()+3;

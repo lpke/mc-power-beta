@@ -105,6 +105,7 @@ final class Creative443MovementChecks {
         var select = inventory.screen.getClass().getDeclaredMethod("power$selectTab", int.class); select.setAccessible(true); select.invoke(inventory.screen, 6);
         search = (CreativePaletteBridge.Search)field(inventory.screen, "power_search");
         if (kind.equals("unfocused")) search.close();
+        else search.focus();
         check(search.focused() == !kind.equals("unfocused"), "Creative Search preparation has wrong focus");
         // Exercise the exact conflict before returning to native ticks, retaining enabled recipes.
         for (int i = 0; i < 4; i++) book.tick();

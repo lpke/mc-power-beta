@@ -117,6 +117,7 @@ public final class Validation {
       else if (command.equals("current-formats-442")) CurrentFormats442Checks.run(mc);
       else if (command.equals("interface-442")) Interface442Checks.run(mc);
       else if (command.equals("palette-442")) Palette442Checks.run(mc);
+      else if (command.equals("text-inputs-444")) TextInputs444Checks.run(mc);
       else if (command.startsWith("creative-443-containers")) Creative443ContainerChecks.run(mc, command.substring(23).trim());
       else if (command.startsWith("inventory-442")) Inventory442Checks.run(mc, command.substring(13).trim());
       else if (command.equals("fluid-sounds-440")) FluidSounds440Checks.run(mc);
@@ -261,8 +262,12 @@ public final class Validation {
       else if (command.equals("creative-440")) Creative440Checks.run(mc);
       else if (command.startsWith("creative-440 ")) Creative440PointerChecks.run(mc, command.substring("creative-440 ".length()).trim());
       else if (command.equals("recipe-441")) Recipe441Checks.run(mc);
+      else if (command.equals("recipe-availability-444")) RecipeAvailability444Checks.run(mc);
       else if (command.equals("current-formats-442")) CurrentFormats442Checks.run(mc);
       else if (command.startsWith("creative-442")) Creative442Checks.run(mc, command.substring(12).trim());
+      else if (command.startsWith("minimap-444")) Minimap444Checks.run(mc,command.substring("minimap-444".length()).trim());
+      else if (command.equals("gui-items-444")) GuiItems444Checks.run(mc);
+      else if (command.equals("creative-444")) Creative444Checks.run(mc);
       else if (command.startsWith("creative-443-revision")) Creative443RevisionChecks.run(mc, command.substring("creative-443-revision".length()).trim());
       else if (command.equals("creative-443") || command.startsWith("creative-443 ")) Creative443Checks.run(mc, command.substring("creative-443".length()).trim());
       else if (command.startsWith("recipe-441 ")) Recipe441Checks.physical(mc, command.substring(11));

@@ -188,10 +188,10 @@ public class PhotoModeScreen extends Screen {
         updateSliders();
         int dx = Mouse.getEventDX(), dy = Mouse.getEventDY();
         if (this.dragButton == 0) {
-            float speed = (float) (0.0005f / Math.pow(2, this.zoom));
+            float speed = (float) (0.0005f * local.luke.power.input.PhotoProjection.pointerScale(minecraft.displayHeight) / Math.pow(2, this.zoom));
             if (shiftHeld()) speed *= 2;
             this.cameraX += dx * speed;
-            this.cameraY += dy * speed * ((float) width / height);
+            this.cameraY += dy * speed * ((float) minecraft.displayWidth / Math.max(1, minecraft.displayHeight));
         } else if (this.dragButton >= 0) {
             this.tiltSlider.value = Util.clamp(this.tiltSlider.value - dy * 0.0020f, 0.0f, 1.0f);
             this.tiltGoal = (int) (this.tiltSlider.value * 90.0f);

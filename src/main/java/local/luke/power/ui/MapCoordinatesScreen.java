@@ -70,11 +70,12 @@ public final class MapCoordinatesScreen extends UiScreen {
   }
 
   protected void mouseClicked(int mx, int my, int button) {
-    if (button != 0) return;
+    if (button != 0 && button != 1) return;
     x.focused = inside(mx, my, left() + 24, 42, span() - 24, 18);
     x.click(mx, button);
     z.focused = inside(mx, my, left() + 24, 68, span() - 24, 18);
     z.click(mx, button);
+    if (button != 0) return;
     if (inside(mx, my, left(), 100, span() / 2 - 2, 20)) {
       click();
       done();
@@ -97,6 +98,6 @@ public final class MapCoordinatesScreen extends UiScreen {
   }
 
   public boolean shouldPause() {
-    return local.luke.power.map.MapConfig.current().pauseMap;
+    return local.luke.power.map.MapConfig.current().pauseMap || parent != null && parent.shouldPause();
   }
 }

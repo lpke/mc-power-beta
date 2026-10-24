@@ -17,6 +17,27 @@
 
 # Runtime checks
 
+- `text-inputs-444` checks live On/Off right-click clearing in native/config widgets
+  and recipe searches at 320 and 640 pixels, including bounds, disabled fields,
+  selection, text limits, callbacks, modal ownership and native inventory preservation.
+  Run in a focused, muted, disposable Survival world. `palette-442` also checks
+  Creative Search autofocus only on tab entry, remembered-tab reopening, clearing
+  and cursor decrement over matching, different and empty catalog cells.
+
+- `creative-444` checks direct tab-name editing and focus-only confirmation at
+  320x240 and 640x420, diamond icons for new tabs, plain/Ctrl-right drag clearing
+  committed on the owning release, unknown-ID retention and one-step Undo.
+  It captures a three-item group preview and checks the spaced group drop, plus
+  photo framing across resolutions and zoom/daylight retention through resizing.
+  Requires a focused, muted disposable singleplayer client at least 1280x840.
+  Configuration and native inventory snapshots must remain unchanged.
+
+- `gui-items-444` compares custom GUI and shared picker/editor icons against native
+  inventory pixels for grass, stone, leaves, metadata wool, redstone and a damaged
+  counted sword. It checks normal/scaled rendering after deliberately dark prior
+  lighting and verifies light, material, color, texture and matrix restoration.
+  Requires framebuffer support in a disposable client and never edits inventory.
+
 - `creative-443-revision` checks selected-origin Ctrl deselection and Ctrl-right
   item clearing with one Undo step. Native cases use `prepare deselect-ctrl-first`,
   `deselect-button-first`, `clear-ctrl-first` or `clear-button-first`, then the logged
@@ -60,6 +81,11 @@
   the unchanged decoder on the same bytes, verifies exact source frame counts and
   writes disposable PCM evidence for comparison with FFmpeg.
 
+- `minimap-444 run` checks quick actions and pause inheritance. Use `minimap-444 aim`
+  in the disposable client to look down before `prepare left|right|middle0..middle4|disabled-middle`,
+  then hold Enlarge and send the indicated native mouse press before `check`.
+  `stop` restores a prepared case.
+
 - `minimap-441 prepare CASE`, `check`, `check-release` and `stop` verify real wheel
   ownership while Enlarge minimap is held. Cases cover enabled/disabled, hidden maps,
   F3, zoom limits, camera zoom, Spectator speed, chord release order and hotbar rows.
@@ -74,6 +100,10 @@
   `recipe-441 prepare variants|max|wheel`, `check` and `stop` also check physical
   Alt-click, Shift-right-click and wheel input at the logged client coordinates.
   Use a wide native GUI and follow each logged action before checking.
+- `recipe-availability-444` measures recipe-book startup and the slowest refresh tick,
+  compares the completed display with uncached native checks, and verifies ingredient
+  removal invalidates it without writing inventory. Use a focused, muted disposable
+  Survival world. The fixture restores its inventory and settings.
 
 - `sorting-worlds-440` checks separate active layouts and named presets across two
   world IDs, retained legacy/global preferences and unchanged native inventory data.

@@ -3,6 +3,7 @@ package local.luke.power.inventory;
 import java.util.*;
 import local.luke.power.input.*;
 import local.luke.power.visual.VisualConfig;
+import local.luke.power.ui.GuiItems;
 import net.minecraft.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DrawableHelper;
@@ -70,11 +71,9 @@ public final class ContainerPreview extends DrawableHelper {
       GL11.glColor4f(1,1,1,1);
       GL11.glBindTexture(GL11.GL_TEXTURE_2D,mc.textureManager.getTextureId("/gui/inventory.png"));
       for (int i=0;i<stacks.size();i++) drawTexture(x+(i%columns)*18,y+(i/columns)*18,7,83,18,18);
-      GL11.glPushMatrix(); GL11.glRotatef(120,1,0,0); class_583.method_1930(); GL11.glPopMatrix(); GL11.glEnable(32826);
       for (int i=0;i<stacks.size();i++) if (stacks.get(i)!=null) {
         int px=x+(i%columns)*18+1, py=y+(i/columns)*18+1;
-        renderer.method_1487(mc.textRenderer,mc.textureManager,stacks.get(i),px,py);
-        renderer.method_1488(mc.textRenderer,mc.textureManager,stacks.get(i),px,py);
+        GuiItems.draw(renderer,mc,stacks.get(i),px,py,true);
       }
     } finally {
       GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPopMatrix();

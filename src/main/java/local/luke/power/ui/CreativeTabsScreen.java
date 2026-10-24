@@ -63,6 +63,7 @@ public final class CreativeTabsScreen extends UiScreen {
   private int fillGroupX() { return Math.max(left() + listWidth(), tabButtonX(1) + tabButtonWidth() + 4); }
   private int fillGroupWidth(int limit) { return Math.min(limit, left() + span() - fillGroupX()); }
   private int gridLeft() { return left() + listWidth() + (span() - listWidth() - 144) / 2; }
+  private int nameWidth() { return span() - listWidth() - (rename ? 46 : 24); }
   private int gridTop() { return 85; }
   private int gridBottom() { return height - 60; }
   private int rowControlsY() { return height - 56; }
@@ -160,7 +161,7 @@ public final class CreativeTabsScreen extends UiScreen {
   private void addTab() {
     if (!commitTitle()) return;
     try {
-      edit(() -> data.append(CreativeTabsData.tab(UUID.randomUUID().toString(), "New tab", "1", Collections.nCopies(64, ""))));
+      edit(() -> data.append(CreativeTabsData.tab(UUID.randomUUID().toString(), "New tab", "264", Collections.nCopies(64, ""))));
       select(data.size() - 1); listScroll = Math.max(0, data.size() - visibleListRows());
     } catch (IllegalArgumentException e) { error = e.getMessage(); }
   }
@@ -266,7 +267,7 @@ public final class CreativeTabsScreen extends UiScreen {
       nativeGroups = false; return;
     }
     if (rename) {
-      int nameLeft = left() + listWidth() + 24, nameWidth = span() - listWidth() - 46;
+      int nameLeft = left() + listWidth() + 24, nameWidth = nameWidth();
       boolean nameHit = inside(x, y, nameLeft, 59, nameWidth, 18);
       boolean checkHit = inside(x, y, left() + span() - 18, 58, 18, 20);
       boolean footerHit = inside(x, y, footerX(0), height - 28, footerWidth() * 4 + 12, 20);
@@ -294,16 +295,13 @@ public final class CreativeTabsScreen extends UiScreen {
       dragTab = row; pressX = x; pressY = y; return;
     }
     if (!hasTab()) return;
-    int panelLeft = left() + listWidth(), nameLeft = panelLeft + 24, nameWidth = span() - listWidth() - 46;
+    int panelLeft = left() + listWidth(), nameLeft = panelLeft + 24, nameWidth = nameWidth();
     if (inside(x, y, nameLeft, 59, nameWidth, 18) && (button == 0 || button == 1)) {
       if (!rename) { title.setText(tab().get("title").getAsString()); rename = true; }
       title.focused = true; title.click(x, button); return;
     }
-    if (button == 0 && inside(x, y, left() + span() - 18, 58, 18, 20)) {
-      click();
-      if (rename) commitTitle();
-      else { title.setText(tab().get("title").getAsString()); rename = true; title.focused = true; }
-      return;
+    if (button == 0 && rename && inside(x, y, left() + span() - 18, 58, 18, 20)) {
+      click(); commitTitle(); return;
     }
     if (!commitTitle()) return;
     if (button == 0 && inside(x, y, panelLeft, 58, 20, 20)) { click(); picker(tab().get("icon").getAsString(), value -> edit(() -> tab().addProperty("icon", value))); return; }
@@ -318,10 +316,8 @@ public final class CreativeTabsScreen extends UiScreen {
     if (cell < 0 || button != 0 && button != 1) return;
     if (button == 1) {
       clicks.cancel();
-      if (ctrl()) {
-        clearingCells = true; dragButton = button; dragCell = cell; pressX = x; pressY = y;
-        dragSource = paddedSlots(); clearCells.add(cell);
-      } else { List<String> values = paddedSlots(); values.set(cell, ""); storeSlots(values); }
+      clearingCells = true; dragButton = button; dragCell = cell; pressX = x; pressY = y;
+      dragSource = paddedSlots(); clearCells.add(cell);
       return;
     }
     selectingCells = ctrl();
@@ -432,13 +428,10 @@ public final class CreativeTabsScreen extends UiScreen {
       }
       unclip(); listBar.render(this, listTrack());
       if (hasTab()) {
-        int panelLeft = left() + listWidth(), nameWidth = span() - listWidth() - 46;
+        int panelLeft = left() + listWidth(), nameWidth = nameWidth();
         button("", panelLeft, 58, 20, 20, mx, my, true); drawItem(tab().get("icon").getAsString(), panelLeft + 2, 60);
-        if (rename) { input(title, panelLeft + 24, 59, nameWidth, mx, my, "Tab name"); iconButton("check", left() + span() - 18, 58, 18, 20, mx, my, true, false); }
-        else {
-          input(title, panelLeft + 24, 59, nameWidth, mx, my, "Tab name");
-          iconButton("edit", left() + span() - 18, 58, 18, 20, mx, my, true, false);
-        }
+        input(title, panelLeft + 24, 59, nameWidth, mx, my, "Tab name");
+        if (rename) iconButton("check", left() + span() - 18, 58, 18, 20, mx, my, true, false);
         List<String> values = paddedSlots();
         clip(gridLeft(), gridTop(), 144, Math.max(0, gridBottom() - gridTop()));
         int first = gridScroll / 18, last = Math.min(values.size() / 8, (gridScroll + Math.max(0, gridBottom() - gridTop()) + 17) / 18);
@@ -481,7 +474,13 @@ public final class CreativeTabsScreen extends UiScreen {
     button("Save", footerX(3), height - 28, footerWidth(), 20, mx, my, editable());
     if (dragging && movingCells && dragCell >= 0 && dragSource != null) {
       org.lwjgl.opengl.GL11.glPushMatrix(); org.lwjgl.opengl.GL11.glTranslatef(0, 0, 300);
-      try { drawItem(dragSource.get(dragCell), pointerX - 8, pointerY - 8); }
+      try {
+        for (int source : dragSelection) {
+          int x = pointerX - 8 + (source % 8 - dragCell % 8) * 18;
+          int y = pointerY - 8 + (source / 8 - dragCell / 8) * 18;
+          if (x > -16 && x < width && y > -16 && y < height) drawItem(dragSource.get(source), x, y);
+        }
+      }
       finally { org.lwjgl.opengl.GL11.glPopMatrix(); }
     } else if (!tip.isEmpty() && !exit.active() && !nativeGroups && !clearingCells) {
       foregroundTooltip(tip, pointerX, pointerY);

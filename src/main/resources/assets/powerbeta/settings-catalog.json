@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.4.3",
+    "default": "Power Beta 4.4.4",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6502,9 +6502,19 @@
   "maps.zoomWhileExpanded": {
     "page": "Map",
     "group": "Minimap",
-    "label": "Zoom with wheel while expanded",
-    "description": "Hold Enlarge minimap and scroll during gameplay. Right-click while held to reset the zoom. Uses the same zoom limits and smooth movement as the inventory minimap.",
+    "label": "Enable mouse utilities while expanded",
+    "description": "While holding Enlarge minimap, scroll to zoom, left-click to open the World Map, right-click to reset zoom, or middle-click to use your chosen Minimap middle-click action. These clicks replace normal gameplay actions while held.",
     "order": 1.4
+  },
+  "maps.middleClickAction": {
+    "page": "Map",
+    "group": "Minimap",
+    "label": "Minimap middle-click action",
+    "description": "Choose what middle-click toggles over the minimap in inventory or pause screens, or while Enlarge minimap is held with mouse utilities enabled.",
+    "choices": ["Show items", "Show mobs", "Show waypoints", "Show in-game waypoints", "Cave mode"],
+    "min": 0,
+    "max": 4,
+    "order": 1.5
   },
   "maps.zoomSteps": {
     "page": "Map",

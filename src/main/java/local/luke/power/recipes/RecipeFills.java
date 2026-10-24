@@ -30,7 +30,11 @@ public final class RecipeFills {
   }
   public static boolean craftable(RecipeContext context,RecipeDefinition recipe,List<RecipeStack> supply)throws IOException {
     var cells=recipe.layout(context.width,context.height);if(cells==null||recipe.kind!=context.kind)return false;
-    var match=RecipeMatcher.match(cells,supply,1,Collections.nCopies(cells.size(),null));
+    return craftable(context,recipe,cells,RecipeMatcher.prepare(supply));
+  }
+  /** Display checks may reuse immutable inputs; placement still captures and validates native owners afresh. */
+  static boolean craftable(RecipeContext context,RecipeDefinition recipe,List<RecipeIngredient> cells,RecipeMatcher.PreparedSupply supply)throws IOException {
+    var match=RecipeMatcher.matchPrepared(cells,supply,1,Collections.nCopies(cells.size(),null));
     if(match==null)return false;
     List<RecipeStack> grid=new ArrayList<>();for(int index:match.cells())grid.add(index<0?null:match.supplies().get(index).representative().count(1));
     return valid(recipe,context,grid);

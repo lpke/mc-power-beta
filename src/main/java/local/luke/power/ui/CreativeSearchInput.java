@@ -10,6 +10,7 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
   static { CreativePaletteBridge.register(client -> new CreativeSearchInput((Minecraft) client)); }
   private final TextInput search = new TextInput("", 128);
   private final Object host;
+  private static final int HEIGHT = 9;
   private int left, top, span;
   private CreativeSearchInput(Minecraft client) { minecraft = client; textRenderer = client.textRenderer; host = client.currentScreen; }
   public String text() { return search.text(); }
@@ -24,18 +25,17 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
     GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_SCISSOR_BIT | GL11.GL_COLOR_BUFFER_BIT);
     try {
       GL11.glDisable(GL11.GL_LIGHTING); GL11.glDisable(GL11.GL_DEPTH_TEST);
-      fill(left - 1, top - 1, left + span + 1, top + 11, 0xff373737);
-      fill(left, top, left + span, top + 10, 0xff8b8b8b);
-      fill(left, top + 10, left + span + 1, top + 11, 0xffffffff);
-      fill(left + span, top, left + span + 1, top + 10, 0xffffffff);
-      clip(left + 2, top, span - 4, 10);
+      fill(left - 1, top - 1, left + span + 1, top + HEIGHT + 1, 0xff373737);
+      fill(left, top, left + span, top + HEIGHT, 0xff8b8b8b);
+      fill(left, top + HEIGHT, left + span + 1, top + HEIGHT + 1, 0xffffffff);
+      fill(left + span, top, left + span + 1, top + HEIGHT, 0xffffffff);
+      clip(left + 2, top, span - 4, HEIGHT);
       var view = search.layout(minecraft.currentScreen, left + 3, span - 6, textRenderer::getWidth);
       String value = search.text();
       int from = Math.max(view.start(), search.start()), to = Math.min(view.end(), search.end());
       if (search.focused && from < to) fill(left + 3 + textRenderer.getWidth(value.substring(view.start(), from)), top + 1,
           left + 3 + textRenderer.getWidth(value.substring(view.start(), to)), top + 9, 0xff335577);
-      text(value.isEmpty() && !search.focused ? "Search..." : value.substring(view.start(), view.end()), left + 3, top + 1,
-          value.isEmpty() && !search.focused ? 0xdddddd : 0xffffff);
+      textRenderer.draw(value.substring(view.start(), view.end()), left + 3, top + 1, 0xffffff);
       if (search.focused && InterfaceState.uiCursorVisible()) {
         int caret = left + 3 + textRenderer.getWidth(value.substring(view.start(), search.cursor()));
         fill(caret, top + 1, caret + 1, top + 9, 0xffffffff);
@@ -43,7 +43,8 @@ public final class CreativeSearchInput extends UiScreen implements CreativePalet
     } finally { GL11.glPopAttrib(); }
   }
   public boolean press(int x, int y, int button) {
-    search.focused = inside(x, y, left, top, span, 10);
+    if (button != 0 && button != 1) return false;
+    search.focused = inside(x, y, left, top, span, HEIGHT);
     local.luke.power.input.InventoryTextInput.focus(host, this, search.focused);
     Keyboard.enableRepeatEvents(search.focused);
     if (search.focused) search.click(x, button);

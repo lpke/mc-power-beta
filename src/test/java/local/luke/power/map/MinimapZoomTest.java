@@ -5,6 +5,19 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 
 class MinimapZoomTest {
+  @Test void middleClickDefaultsToWaypointsAndValidatesEveryQuickMenuAction() {
+    var gson = new Gson();
+    assertEquals(2, gson.fromJson("{}", MapSettings.class).middleClickAction);
+    for (int action = 0; action < 5; action++) {
+      var settings = new MapSettings(); settings.middleClickAction = action;
+      var restored = gson.fromJson(gson.toJson(settings), MapSettings.class);
+      assertEquals(action, restored.middleClickAction); assertDoesNotThrow(restored::validate);
+    }
+    for (int action : new int[]{-1, 5}) {
+      var settings = new MapSettings(); settings.middleClickAction = action;
+      assertThrows(IllegalArgumentException.class, settings::validate);
+    }
+  }
   @Test void expandedWheelDefaultsOnWithoutReplacingSavedOptOuts() {
     var gson = new Gson();
     assertTrue(gson.fromJson("{}", MapSettings.class).zoomWhileExpanded);

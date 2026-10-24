@@ -49,7 +49,7 @@ review their changes. Never run Loom builds concurrently, including in subagents
 | Rendering, water lighting, HUDs or maps | [Rendering and maps](docs/agents/rendering-maps.md) |
 | Gameplay rules, commands or input | [Gameplay and input](docs/agents/gameplay-input.md) |
 | Preparing, publishing or installing a release | [Release delivery](docs/agents/releasing.md), then [the publisher procedure](docs/releases.md) |
-| Completing a requested release | [Owner review HTML](docs/agents/release-report.md), using the `$html` skill |
+| Starting or completing a requested release | [Owner review HTML](docs/agents/release-report.md), using the `$html` skill |
 
 The website keeps its normal GitHub-derived changelog. Detailed owner review belongs
 in the separate HTML checklist, not in an extra website release-notes section.

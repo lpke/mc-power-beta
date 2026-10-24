@@ -105,7 +105,7 @@ public final class ItemPickerScreen extends UiScreen {
     if(exitPrompt.click(this,x,y,button,this::save,()->showScreen(parent)))return;
     if(button!=0 && button!=1)return;
     search.focused=inside(x,y,left(),38,span()-96,18);
-    if(search.focused){search.click(x,button);return;}
+    if(search.focused){String before=search.text();search.click(x,button);if(!before.equals(search.text())){scroll=0;filter();}return;}
     if(button!=0)return;
     if(scrollbar.press(track(),x,y)){scroll=(int)scrollbar.drag(track(),y,true);return;}
     if(inside(x,y,right()-90,37,90,20)){click();selectedOnly=!selectedOnly;scroll=0;filter();return;}

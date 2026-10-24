@@ -20,7 +20,11 @@ public final class TextInput {
   public ChatBuffer.View layout(Object owner, int left, int width, ToIntFunction<String> measure) {
     return pointer.layout(owner, left, width, measure);
   }
-  public void click(int x, int button) { if (button == 0 && focused) pointer.click(x, () -> focused); }
+  public void click(int x, int button) {
+    if (!focused) return;
+    if (button == 0) pointer.click(x, () -> focused);
+    else TextEditing.clearOnRightClick(editor, button);
+  }
   public void key(char c, int key) {
     if (focused) TextEditing.key(editor, c, key, value -> value >= 32 && value != 127);
   }

@@ -157,7 +157,7 @@ public final class WaypointsScreen extends UiScreen {
         catch (RuntimeException failure) { error = "Clipboard is unavailable"; }
       }
       case "Teleport" -> { if (Maps.canTeleport(minecraft, point)) { Maps.teleport(minecraft, point); minecraft.setScreen(null); } }
-      case "Center here" -> minecraft.setScreen(new WorldMapScreen(point));
+      case "Center here" -> minecraft.setScreen(new WorldMapScreen(this, point));
       case "Set destination" -> { Maps.destination(point); minecraft.setScreen(null); }
     }
   }
@@ -219,10 +219,8 @@ public final class WaypointsScreen extends UiScreen {
     }
     if (button == 0 && inside(x, y, layout().doneX(), height - 26, layout().footerWidth(), 20)) { click(); minecraft.setScreen(parent); return; }
     if (inside(x, y, left(), 27, layout().searchWidth(), 18)) {
-      search.focused = true; search.click(x, button);
-      if (button == 1 && Boolean.TRUE.equals(local.luke.power.controls.ControlFeatures.USER_INTERFACE_CONFIG.clearTextFieldWithRightClick)) {
-        search.setText(""); search.selectAll(); scroll = 0;
-      }
+      search.focused = true; String previous = search.text(); search.click(x, button);
+      if (!previous.equals(search.text())) scroll = 0;
       return;
     }
     if (button == 0) search.focused = false;
@@ -324,5 +322,5 @@ public final class WaypointsScreen extends UiScreen {
     } else if (!modal() && ready && store.selectedSet().equalsIgnoreCase("Default")
         && inside(mx, my, layout().deleteX(), 49, layout().deleteWidth(), 18)) tooltip("The Default set cannot be deleted.", mx, my);
   }
-  public boolean shouldPause() { return MapConfig.current().pauseMap; }
+  public boolean shouldPause() { return MapConfig.current().pauseMap || parent != null && parent.shouldPause(); }
 }

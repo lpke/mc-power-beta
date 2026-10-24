@@ -80,6 +80,9 @@ public class ExtensibleTextFieldWidget extends DrawContext implements HasDrawabl
         if (selected && button == 0) {
             pointer.layout(TextDrag.screen(), textX(), getBackgroundOffset(), textRenderer::getWidth);
             pointer.click(mouseX, () -> selected && enabled);
+        } else if (selected) {
+            String before = getText();
+            if (TextEditing.clearOnRightClick(editor, button)) changed(before);
         }
     }
     @Override public void setXYWH(int x, int y, int width, int height) {

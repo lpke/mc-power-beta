@@ -104,9 +104,9 @@ public final class FolderScreen extends UiScreen {
       minecraft.soundManager.method_2009("random.click", 1, 1);
       return;
     }
-    if (button != 0) return;
     path.focused = inside(x, y, panelLeft() + 16, 42, panelWidth() - 128, 18);
-    if (path.focused) path.click(x, button);
+    if (path.focused) { path.click(x, button); return; }
+    if (button != 0) return;
     if (inside(x, y, panelRight() - 104, 41, 40, 20)) add(List.of(path.text()));
     else if (inside(x, y, panelRight() - 60, 41, 44, 20))
       minecraft.setScreen(new DirectoryScreen(this, this::add, folders));

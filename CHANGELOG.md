@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [4.4.4] - 2026-10-24
+
+- Apply the right-click text clearing preference across Creative Search, the recipe book and shared text editors. Focus Creative Search only when switching into its tab; refine its height and text drawing.
+- Remove one cursor item per right-click over the Creative palette. Expand the tab-title field, start new tabs with diamond icons, preview selected item groups and support plain right-drag clearing with Undo.
+- Use native inventory lighting for custom UI item icons, including grass, metadata variants and scaled previews.
+- Open the World Map with expanded minimap left-click without breaking blocks, honor its pause preference while retaining Pause-menu visits, and choose a middle-click quick toggle. Move the minimap settings icon up one pixel.
+- Prepare recipe craftability with shared snapshots and bounded scans instead of a fixed small recipe batch per tick, preserving native crafting validation and durable transactions.
+- Keep photo-mode framing and pointer panning consistent across display resolutions.
+
 ## [4.4.3] - 2026-10-24
 
 - Ctrl-drag a selected Creative tab cell to deselect a range. Ctrl-right-drag clears item cells together with one Undo step. Use equal Add tab and Remove tab buttons and a clearer edit icon.

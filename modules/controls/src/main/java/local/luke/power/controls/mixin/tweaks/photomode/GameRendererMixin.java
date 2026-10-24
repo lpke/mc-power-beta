@@ -79,8 +79,8 @@ public class GameRendererMixin {
     @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lorg/lwjgl/util/glu/GLU;gluPerspective(FFFF)V", ordinal = 0, remap = false))
     public void test8(float tickDelta, int eye, CallbackInfo ci) {
         if (this.client.currentScreen instanceof PhotoModeScreen photoScreen) {
-            int width = this.client.displayWidth;
-            int height = this.client.displayHeight;
+            double width = local.luke.power.input.PhotoProjection.width(this.client.displayWidth, this.client.displayHeight);
+            double height = local.luke.power.input.PhotoProjection.height();
 
             double zoomFactor = Math.pow(2.0, photoScreen.zoom);
 

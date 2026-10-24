@@ -48,10 +48,9 @@ final class MapCoordinatesDialog {
       z.focused = screen.inside(mx,my,b.fieldX(),b.top+58,b.fieldWidth(),18);
       TextInput field = x.focused ? x : z.focused ? z : null;
       if (field != null) {
+        String previous = field.text();
         field.click(mx,button);
-        if (button == 1 && Boolean.TRUE.equals(local.luke.power.controls.ControlFeatures.USER_INTERFACE_CONFIG.clearTextFieldWithRightClick)) {
-          TextDrag.cancel(); field.setText(""); field.selectAll(); error = "";
-        }
+        if (!previous.equals(field.text())) error = "";
       }
       if (button == 0 && screen.inside(mx,my,b.buttonX(0),b.top+118,b.buttonWidth(),20)) { screen.click(); done(); }
       else if (button == 0 && screen.inside(mx,my,b.buttonX(1),b.top+118,b.buttonWidth(),20)) { screen.click(); close(); }

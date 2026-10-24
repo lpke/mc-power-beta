@@ -1,7 +1,6 @@
 package local.luke.power.controls.mixin.tweaks.cleartextfield;
 
 import local.luke.power.controls.ControlFeatures;
-import local.luke.power.controls.util.Config;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,11 +35,12 @@ public class TextFieldWidgetMixin {
 
     @Inject(method = "mouseClicked", at = @At("HEAD"))
     public void clearTextOnRightClick(int mouseX, int mouseY, int button, CallbackInfo ci) {
-        if (!ControlFeatures.USER_INTERFACE_CONFIG.clearTextFieldWithRightClick) {
+        if (!Boolean.TRUE.equals(ControlFeatures.USER_INTERFACE_CONFIG.clearTextFieldWithRightClick)) {
             return;
         }
         
         if (enabled && mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height && button == 1) {
+            local.luke.power.ui.TextDrag.cancel();
             text = "";
         }
     }

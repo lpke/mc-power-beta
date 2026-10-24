@@ -107,7 +107,9 @@ public final class WorldMapScreen extends UiScreen {
   private void closeMap() { minecraft.setScreen(optionsOwner == null ? MinimapMapVisit.returning(minecraft,parent) : optionsOwner.returnScreen()); }
   public WorldMapScreen() {}
   public WorldMapScreen(Screen parent) { this.parent = parent; }
-  public WorldMapScreen(Waypoint point) {
+  public WorldMapScreen(Waypoint point) { this(null, point); }
+  public WorldMapScreen(Screen parent, Waypoint point) {
+    this.parent = parent;
     view.x = point.x + .5; view.z = point.z + .5;
     dimension = point.dimension;
   }
@@ -399,16 +401,15 @@ public final class WorldMapScreen extends UiScreen {
       } else context = false;
       return;
     }
+    if ((button == 0 || button == 1) && minecraft.world.isRemote
+        && inside(x, y, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), 18)) {
+      serverMap.focused = true; serverMap.click(x, button); return;
+    }
     if (button == 0) {
       var control = controls().at(x,y);
       if (control != null) { controlAction(control.action()); return; }
       if (scaleBounds().contains(x,y)) {
         scaleDragging = true; lastX = x; lastY = y; return;
-      }
-      if (minecraft.world.isRemote && inside(x, y, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), 18)) {
-        serverMap.focused = true;
-        serverMap.click(x, button);
-        return;
       }
       serverMap.focused = false;
     }
@@ -612,6 +613,6 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   public boolean shouldPause() {
-    return MapConfig.current().pauseMap;
+    return MapConfig.current().pauseMap || parent != null && parent.shouldPause();
   }
 }

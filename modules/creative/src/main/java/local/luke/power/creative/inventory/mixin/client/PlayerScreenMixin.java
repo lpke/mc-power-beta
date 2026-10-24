@@ -129,7 +129,6 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
   private void power$initSearch(CallbackInfo ci) {
     // The native Screen binds its client before init, after the PlayerScreen constructor.
     if (power_search == null && minecraft != null) power_search = CreativePaletteBridge.create(minecraft);
-    if (power_search != null && creative_isInCreative() && !creative_normalGUI && creative_tabIndex == 6) power_search.focus();
     power_query = "\u0000";
     power$filterSearch();
   }
@@ -609,7 +608,6 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       int tabY = mouseY - posY - 114;
       if (tabX >= 0 && tabX < 25 && tabY >= 0 && tabY < 24) {
         creative_normalGUI = false;
-        if (creative_tabIndex == 6 && power_search != null) power_search.focus();
         creative_drag = false;
         power$remember();
         return;
@@ -641,7 +639,9 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
         CreativeTab tab = creative_getTab(creative_tabPage, tabX);
         if (tab == null) return;
 
+        boolean enteringSearch = tabX == 6 && creative_tabIndex != 6;
         power$selectTab(tabX);
+        if (enteringSearch && power_search != null) power_search.focus();
         power$remember();
 
         return;
@@ -707,6 +707,11 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
       if (slotY >= 0 && slotY < CreativeGrid.ROWS && slotX >= 0 && slotX < 8) {
         int index = slotY * 8 + slotX + creative_rowIndex;
         ItemStack cursor = inventory.getCursorItem();
+        if (button == 1 && cursor != null) {
+          if (--cursor.count <= 0) inventory.setCursorItem(null);
+          creative_updateInventory(inventory);
+          return;
+        }
         if (index < creative_items.size()) {
           ItemStack item = creative_items.get(index);
           boolean isSame = cursor != null && item != null && power$sameItem(cursor, item);
@@ -918,8 +923,7 @@ public abstract class PlayerScreenMixin extends ContainerScreen implements Creat
     if (tab == null) { index = 6; tab = TabRegistry.search(); }
     creative_tabIndex = index;
     if (power_search != null) {
-      if (index == 6 && creative_isInCreative() && !creative_normalGUI) power_search.focus();
-      else power_search.close();
+      if (index != 6 || !creative_isInCreative() || creative_normalGUI) power_search.close();
     }
     creative_tabKey = tab.getTranslationKey();
     power_selectedTab = tab;

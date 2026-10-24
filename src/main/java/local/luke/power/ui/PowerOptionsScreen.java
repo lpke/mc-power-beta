@@ -899,10 +899,9 @@ public final class PowerOptionsScreen extends UiScreen {
       if (libraryVisible()) { library.searchClick(x, y, button); return; }
       if (page.equals("Defaults")) return;
       search.focused = true;
+      String previous = search.text();
       search.click(x, button);
-      if (button == 1) {
-        search.setText("");
-        search.selectAll();
+      if (!previous.equals(search.text())) {
         scroll = 0;
         layout();
       }
@@ -1433,11 +1432,7 @@ public final class PowerOptionsScreen extends UiScreen {
       boolean hover = inside(mx, my, origin(), y, sidebar(), 22);
       if (pages.get(i).equals(page) && (search.text().isBlank() || OptionsSearchScope.thisTab(page)) && !changedOnly)
         fill(origin(), y, origin() + sidebar(), y + 21, 0xc0000000);
-      GL11.glPushMatrix();
-      GL11.glColor4f(1, 1, 1, 1);
-      icons.method_1487(
-          textRenderer, minecraft.textureManager, new ItemStack(ICONS[PAGES.indexOf(pages.get(i))], 1, 0), origin() + 7, y + 2);
-      GL11.glPopMatrix();
+      GuiItems.draw(icons, minecraft, new ItemStack(ICONS[PAGES.indexOf(pages.get(i))], 1, 0), origin() + 7, y + 2, false);
       GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glDisable(GL11.GL_DEPTH_TEST);
       text(

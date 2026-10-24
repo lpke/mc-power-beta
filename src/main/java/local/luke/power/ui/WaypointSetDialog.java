@@ -27,9 +27,10 @@ final class WaypointSetDialog {
   }
   boolean press(UiScreen screen, int x, int y, int button) {
     if (!active()) return false;
-    if (button != 0) return true;
+    if (button != 0 && button != 1) return true;
     int width = Math.min(300, screen.width - 24), left = (screen.width - width) / 2, top = screen.height / 2;
     input.focused = screen.inside(x, y, left + 10, top - 10, width - 20, 18); input.click(x, button);
+    if (button != 0) return true;
     if (screen.inside(x, y, left + 10, top + 34, (width - 24) / 2, 20)) { screen.click(); accept(); }
     else if (screen.inside(x, y, screen.width / 2 + 2, top + 34, (width - 24) / 2, 20)) { screen.click(); close(); }
     return true;

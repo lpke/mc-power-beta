@@ -145,6 +145,15 @@ public class ScreenBuilder extends Screen {
 
     @Override
     protected void mouseClicked(int mouseX, int mouseY, int buttonID) {
+        if (buttonID == 1 && mouseY >= 32 && mouseY < height - 33) {
+            for (ConfigHandlerBase handler : configHandlerBases) {
+                for (var drawable : handler.getDrawables()) {
+                    if (drawable instanceof net.glasslauncher.mods.gcapi3.impl.screen.widget.ExtensibleTextFieldWidget field)
+                        field.mouseClicked(mouseX, mouseY, buttonID);
+                }
+            }
+            return;
+        }
         if(mouseY < 32 || mouseY > height - 33) {
             for (ButtonWidget button : screenButtons) {
                 if (button.isMouseOver(minecraft, mouseX, mouseY)) {

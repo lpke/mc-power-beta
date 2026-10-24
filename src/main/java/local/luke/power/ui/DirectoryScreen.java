@@ -131,13 +131,14 @@ public final class DirectoryScreen extends UiScreen {
   }
 
   protected void mouseClicked(int x, int y, int b) {
-    if (b != 0) return;
-    if (scrollbar.press(track(), x, y)) { scroll = (int) scrollbar.drag(track(), y, true); return; }
+    if (b != 0 && b != 1) return;
+    if (b == 0 && scrollbar.press(track(), x, y)) { scroll = (int) scrollbar.drag(track(), y, true); return; }
     if (inside(x, y, panelLeft() + 14, 38, panelWidth() - 76, 18)) {
       path.focused = true;
       path.click(x, b);
       return;
     }
+    if (b != 0) return;
     path.focused = false;
     if (inside(x, y, panelRight() - 54, 37, 40, 20)) {
       try {

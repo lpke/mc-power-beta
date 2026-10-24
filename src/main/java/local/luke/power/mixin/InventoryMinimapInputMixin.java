@@ -19,6 +19,7 @@ public abstract class InventoryMinimapInputMixin {
   @Shadow public int width;
   @Shadow public int height;
   @Unique private boolean power$resetPress;
+  @Unique private boolean power$middlePress;
   @Inject(method = "onMouseEvent", at = @At("HEAD"), cancellable = true)
   private void power$minimapWheel(CallbackInfo ci) {
     if (!Minimap.menuHost((Screen)(Object)this) || minecraft.currentScreen != (Object)this) return;
@@ -32,7 +33,15 @@ public abstract class InventoryMinimapInputMixin {
         &&local.luke.power.map.MinimapMapVisit.open(minecraft,x,y)) {
       InventoryWheel.event(this,false,wheel,true);ci.cancel();return;
     }
-    if (!org.lwjgl.opengl.Display.isActive()) power$resetPress = false;
+    if (!org.lwjgl.opengl.Display.isActive()) power$resetPress = power$middlePress = false;
+    if (Mouse.getEventButton() == 2) {
+      if (!Mouse.getEventButtonState() && power$middlePress) {
+        power$middlePress = false; InventoryWheel.event(this,false,wheel,true); ci.cancel(); return;
+      }
+      if (Mouse.getEventButtonState() && Minimap.inventoryMiddle(minecraft,x,y)) {
+        power$middlePress = true; InventoryWheel.event(this,false,wheel,true); ci.cancel(); return;
+      }
+    }
     boolean claimed = Mouse.getEventButton() == 1 && !Mouse.getEventButtonState() && power$resetPress;
     if (Mouse.getEventButton() == 1 && !Mouse.getEventButtonState()) power$resetPress = false;
     if (Mouse.getEventButton() == 1 && Mouse.getEventButtonState() && Minimap.inventoryReset(minecraft, x, y)) {

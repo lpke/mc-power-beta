@@ -58,11 +58,20 @@ final class Palette442Checks {
         check(mc.player.inventory.getCursorStack() == null && target.equals(DeathItems.encode(item)), "catalog drop copied/swapped/mutated target item");
         check(Arrays.stream(mc.player.inventory.main).allMatch(Objects::isNull), "palette drop inserted an item in inventory");
       });
-      test("CREATIVE442 identical ID/damage with different native NBT remains a different catalog item", () -> {
+      test("CREATIVE442 right-click decrements a different native NBT cursor without replacing it", () -> {
         palette(state); select(state.screen, 0); var item = items(state.screen).get(0);
         var tagged = DeathChecks.tagged(item.itemId, 7, item.getDamage(), "different-native-components"); mc.player.inventory.setCursorStack(tagged);
         int[] point = point(state.screen); ((ScreenInput)state.screen).power$click(point[0], point[1], 1); state.inventory.finish();
-        check(mc.player.inventory.getCursorStack() == null, "catalog matched incompatible native NBT");
+        check(mc.player.inventory.getCursorStack() == tagged && tagged.count == 6, "right-click replaced or destroyed the incompatible cursor");
+      });
+      test("CREATIVE444 right-click removes one matching cursor item and empties at zero over an empty catalog cell", () -> {
+        palette(state); select(state.screen, 0); var cursor = items(state.screen).get(0).clone(); cursor.count = 2;
+        mc.player.inventory.setCursorStack(cursor); int[] point = point(state.screen);
+        ((ScreenInput)state.screen).power$click(point[0], point[1], 1);
+        check(mc.player.inventory.getCursorStack() == cursor && cursor.count == 1, "matching item right-click did not remove one");
+        field(state.screen, "creative_items", List.of());
+        ((ScreenInput)state.screen).power$click(point[0], point[1], 1);
+        check(mc.player.inventory.getCursorStack() == null, "empty-cell right-click did not remove the final cursor item");
       });
       test("CREATIVE442 untouched and incompatible cursor wheel retains catalog scroll ownership", () -> {
         palette(state); select(state.screen, 0); int[] point = point(state.screen);
@@ -84,7 +93,7 @@ final class Palette442Checks {
         ((ScreenInput)state.screen).power$click(point[0], point[1], 0); check(mc.player.inventory.getCursorStack().count == 1, "new click could not restart amount control");
       });
       test("CREATIVE442 Search autofocus blocks manual movement until its shared editor loses focus", () -> {
-        palette(state); select(state.screen, 6);
+        palette(state); select(state.screen, 0); clickSearchTab(state.screen);
         var search = (CreativePaletteBridge.Search)field(state.screen, "power_search");
         check(search.focused() && InventoryTextInput.active(state.screen), "Search tab did not acquire shared typing ownership");
         var movement = Class.forName("local.luke.power.autowalk.InventoryMovement");
@@ -93,6 +102,34 @@ final class Palette442Checks {
         ((ScreenInput)state.screen).power$key('w', org.lwjgl.input.Keyboard.KEY_W);
         check(search.text().equals("w"), "Search autofocus did not accept the native typing path");
         select(state.screen, 0); check(!search.focused() && !InventoryTextInput.active(state.screen), "leaving Search retained shared movement exclusion");
+      });
+      test("CREATIVE444 reopening remembered Search does not take typing ownership", () -> {
+        palette(state); select(state.screen, 0); clickSearchTab(state.screen);
+        palette(state);
+        var search = (CreativePaletteBridge.Search)field(state.screen, "power_search");
+        check((int)field(state.screen, "creative_tabIndex") == 6 && !search.focused()
+            && !InventoryTextInput.active(state.screen), "remembered Search focused when inventory reopened");
+        clickSearchTab(state.screen);
+        check(!search.focused(), "clicking the already selected Search tab took focus");
+        select(state.screen, 0); clickSearchTab(state.screen);
+        check(search.focused() && InventoryTextInput.active(state.screen), "switching from another tab did not focus Search");
+      });
+      test("CREATIVE444 Search right-click clears only with the live preference and retains typing ownership", () -> {
+        Object ui = Class.forName("local.luke.power.controls.ControlFeatures").getField("USER_INTERFACE_CONFIG").get(null);
+        var clear = ui.getClass().getField("clearTextFieldWithRightClick"); Object previous = clear.get(ui);
+        try {
+          palette(state); select(state.screen, 0); clickSearchTab(state.screen); state.screen.render(-1, -1, 0);
+          var search = (CreativePaletteBridge.Search)field(state.screen, "power_search");
+          ((ScreenInput)state.screen).power$key('w', org.lwjgl.input.Keyboard.KEY_W);
+          int x = (int)field(search, "left") + 4, y = (int)field(search, "top") + 4;
+          clear.set(ui, false); ((ScreenInput)state.screen).power$click(x, y, 1);
+          check(search.text().equals("w"), "Creative Search ignored Off");
+          clear.set(ui, true); ((ScreenInput)state.screen).power$click(x, y, 1);
+          check(search.text().isEmpty() && search.focused() && InventoryTextInput.active(state.screen), "Creative Search did not clear and retain typing ownership");
+          ((ScreenInput)state.screen).power$key('w', org.lwjgl.input.Keyboard.KEY_W);
+          ((ScreenInput)state.screen).power$click(x, (int)field(search, "top") + 10, 1);
+          check(search.text().equals("w") && !search.focused(), "removed bottom row still accepted Search input");
+        } finally { clear.set(ui, previous); }
       });
       test("CREATIVE442 tab wheel pages more than six regular tabs without scrolling items", () -> {
         var data = CreativeTabsData.read(CreativeTabsData.defaults()); data.customized(true);
@@ -115,6 +152,11 @@ final class Palette442Checks {
   @SuppressWarnings("unchecked") private static List<ItemStack> items(Screen screen) throws Exception { return (List<ItemStack>)field(screen, "creative_items"); }
   private static void select(Screen screen, int index) throws Exception {
     var method = screen.getClass().getDeclaredMethod("power$selectTab", int.class); method.setAccessible(true); method.invoke(screen, index);
+  }
+  private static void clickSearchTab(Screen screen) throws Exception {
+    int x = (screen.width - 176) / 2 + InventoryPanels.offset(screen), y = (screen.height - 166) / 2;
+    int top = (int)Class.forName("local.luke.power.creative.inventory.CreativeGrid").getMethod("tabTop", int.class).invoke(null, y);
+    ((ScreenInput)screen).power$click(x + 4 + 6 * 24 + 8, top + 2, 0);
   }
   private static int[] point(Screen screen) {
     int x = (screen.width - 176) / 2 + InventoryPanels.offset(screen), y = (screen.height - 166) / 2;

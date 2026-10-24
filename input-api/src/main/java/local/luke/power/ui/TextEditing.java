@@ -3,12 +3,25 @@ package local.luke.power.ui;
 import java.awt.Toolkit;
 import java.awt.datatransfer.*;
 import java.util.function.IntPredicate;
+import java.util.function.BooleanSupplier;
 import local.luke.power.chat.ChatBuffer;
 import org.lwjgl.input.Keyboard;
 
 /** Common keyboard editing and clipboard handling, independent of Minecraft mappings. */
 public final class TextEditing {
+  private static BooleanSupplier rightClickClear = () -> false;
   private TextEditing() {}
+  public static void rightClickClear(BooleanSupplier preference) {
+    rightClickClear = java.util.Objects.requireNonNull(preference);
+  }
+  public static boolean rightClickClearEnabled() { return rightClickClear.getAsBoolean(); }
+  /** Called only after the field has claimed its own pointer bounds and focus. */
+  public static boolean clearOnRightClick(ChatBuffer editor, int button) {
+    if (button != 1 || !rightClickClearEnabled()) return false;
+    TextDrag.cancel();
+    editor.reset("");
+    return true;
+  }
   public static boolean shift() {
     return (local.luke.power.input.KeyEventModifiers.mask(local.luke.power.input.Bindings.heldModifiers()) & local.luke.power.input.Chord.SHIFT) != 0;
   }

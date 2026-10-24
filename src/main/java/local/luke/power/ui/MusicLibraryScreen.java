@@ -542,8 +542,9 @@ public final class MusicLibraryScreen extends UiScreen {
     if (queue || presetsOpen && !presets.editing()) return;
     presets.unfocus();
     search.focused = true;
+    String previous = search.text();
     search.click(x, button);
-    if (button == 1) clearQuery();
+    if (!previous.equals(search.text())) clearQuery();
   }
 
   protected void keyPressed(char c, int key) {

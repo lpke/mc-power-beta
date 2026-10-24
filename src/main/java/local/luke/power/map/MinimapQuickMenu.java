@@ -143,7 +143,7 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
       circle(gear,6,hovered?0xff65655a:0xff4d4d4d);
       int colour=hovered?0xffffe0a0:0xffe0e0e0;
       for(int line=0;line<3;line++) {
-        int y=gear.y()+5+line*3, knob=gear.x()+(line==1?9:5);
+        int y=gear.y()+4+line*3, knob=gear.x()+(line==1?9:5);
         VIEW.fill(gear.x()+4,y+1,gear.x()+12,y+2,0xff303030);
         VIEW.fill(gear.x()+4,y,gear.x()+12,y+1,colour);
         VIEW.fill(knob,y-1,knob+2,y+2,colour);

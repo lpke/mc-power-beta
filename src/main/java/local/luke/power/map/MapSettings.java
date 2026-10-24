@@ -5,6 +5,7 @@ public final class MapSettings {
   public boolean minimap = true, worldMap = true, rotate = true, circular = true, hideWithDebug = true;
   public boolean showInInventory = true;
   public boolean zoomWhileExpanded = true;
+  public int middleClickAction = 2;
   public int size = 108, corner = 1, offsetX = 6, offsetY = 6;
   public double opacity = 1, zoom = 1;
   public double zoomDefault = 1.25;
@@ -59,6 +60,7 @@ public final class MapSettings {
       updateRate = 20;
 
   public void validate() {
+    range(middleClickAction, 0, 4);
     range(waypointTextSize, 50, 150);
     range(worldMapWaypointSize, 50, 150);
     range(waypointBobbing, 0, 1);

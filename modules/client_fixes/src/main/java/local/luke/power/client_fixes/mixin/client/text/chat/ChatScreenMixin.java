@@ -90,6 +90,13 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
     }
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void power$click(int x, int y, int button, CallbackInfo ci) {
+        if (button == 1 && x >= 2 && x < width && y >= height - 14 && y < height - 2) {
+            editor.sync(textField.getText());
+            if (local.luke.power.ui.TextEditing.clearOnRightClick(editor, button)) {
+                local.luke.power.chat.ChatSelection.history.clear();
+                power$sync(); ci.cancel(); return;
+            }
+        }
         if (button == 0 && local.luke.power.chat.ChatSelection.history.click(this, x, y)) {
             local.luke.power.ui.TextDrag.cancel(); editor.position(editor.cursor(), false);
             power$sync(); ci.cancel(); return;

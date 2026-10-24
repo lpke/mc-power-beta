@@ -11,7 +11,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 /** Pause-only item shortcuts share native UI sounds and the final relocated menu geometry. */
 public final class PauseMenuTools extends UiScreen {
@@ -84,14 +83,7 @@ public final class PauseMenuTools extends UiScreen {
     for (int i = 0; i < included.size(); i++) {
       Tool tool = included.get(i); int x = bounds.x() + i * PauseToolsLayout.STEP, y = bounds.y();
       button("", x, y, 20, 20, mx, my, true);
-      GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS); GL11.glPushMatrix();
-      try {
-        GL11.glPushMatrix();
-        try { GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); }
-        finally { GL11.glPopMatrix(); }
-        GL11.glColor4f(1, 1, 1, 1); GL11.glEnable(32826);
-        renderer.method_1487(minecraft.textRenderer, minecraft.textureManager, icons[tool.ordinal()], x + 2, y + 2);
-      } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); }
+      GuiItems.draw(renderer, minecraft, icons[tool.ordinal()], x + 2, y + 2, false);
       if (inside(mx, my, x, y, 20, 20)) hover = switch (tool) { case PHOTO -> "Photo mode"; case MAP -> "Map"; case WAYPOINTS -> "Waypoints"; case RECIPES -> "Recipe book"; };
     }
     if (!hover.isEmpty()) tooltip(hover, mx, my);

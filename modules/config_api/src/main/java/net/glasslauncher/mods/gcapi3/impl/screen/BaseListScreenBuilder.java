@@ -149,6 +149,16 @@ public abstract class BaseListScreenBuilder<T> extends Screen {
     }
 
     @Override
+    protected void mouseClicked(int mouseX, int mouseY, int button) {
+        if (button == 1) {
+            if (mouseY >= 32 && mouseY < height - 64)
+                textFieldWidgets.forEach(field -> field.mouseClicked(mouseX, mouseY, button));
+            return;
+        }
+        super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
     public void onMouseEvent() {
         super.onMouseEvent();
         float dWheel = Mouse.getDWheel();

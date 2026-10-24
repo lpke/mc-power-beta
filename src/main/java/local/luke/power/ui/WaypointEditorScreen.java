@@ -125,6 +125,15 @@ public final class WaypointEditorScreen extends UiScreen {
       } else selectingSet = false;
       return;
     }
+    if (button == 1) {
+      if (y < 26 || y >= height - 43) return;
+      for (int i = 0; i < fields.size(); i++) {
+        var field = fields.get(i);
+        field.focused = i != 1 && inside(x, y, fieldLeft(i), row(i), fieldWidth(i), 18);
+        field.click(x, button);
+      }
+      return;
+    }
     if (button != 0) return;
     if (inside(x, y, left(), height - 26, span() / 2 - 2, 20)) { click(); save(); return; }
     if (inside(x, y, left() + span() / 2 + 2, height - 26, span() / 2 - 2, 20)) { click(); leave(); return; }
@@ -186,5 +195,5 @@ public final class WaypointEditorScreen extends UiScreen {
     }
     exit.render(this, "Save waypoint changes?", mx, my); setDialog.render(this, mx, my);
   }
-  public boolean shouldPause() { return MapConfig.current().pauseMap; }
+  public boolean shouldPause() { return MapConfig.current().pauseMap || parent != null && parent.shouldPause(); }
 }

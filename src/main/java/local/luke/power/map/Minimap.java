@@ -70,6 +70,29 @@ public final class Minimap {
     resetZoom(mc);
     return true;
   }
+  public static boolean expandedClick(Minecraft mc, int button) {
+    if (!expandedInput(mc)) return false;
+    if (button == 0) {
+      if (!MapConfig.current().worldMap) return false;
+      mc.setScreen(new local.luke.power.ui.WorldMapScreen());
+      return true;
+    }
+    if (button == 1) return expandedReset(mc);
+    if (button == 2) { middleClick(mc); return true; }
+    return false;
+  }
+  public static boolean inventoryMiddle(Minecraft mc, int x, int y) {
+    if (!inventoryContains(mc, x, y) || !org.lwjgl.opengl.Display.isActive()
+        || org.lwjgl.input.Mouse.isGrabbed()
+        || local.luke.power.input.InventoryPanels.modal(mc.currentScreen)
+        || !(mc.currentScreen instanceof local.luke.power.input.InventoryGui gui)
+        || gui.power$containsGuiSpace(x, y)) return false;
+    middleClick(mc); return true;
+  }
+  private static void middleClick(Minecraft mc) {
+    MinimapQuickMenu.toggle(MapConfig.current().middleClickAction);
+    mc.soundManager.method_2009("random.click", 1, 1);
+  }
   private static void scrollZoom(int wheel) {
     var copy = MapConfig.copy();
     double previous = copy.zoom;

@@ -272,7 +272,16 @@ public final class RecipeBookOverlay {
     if(!popup.isEmpty()){if(button==0||button==1)for(int i=0;i<popup.size();i++)if(popupCell(i).contains(x,y)){var value=popup.get(i);popup=List.of();if(button==0)choose(value);else choose(value,local.luke.power.ui.TextEditing.shift(),true);refreshGeometry();return true;}popup=List.of();refreshGeometry();return true;}
     if(buttonVisible()&&toggleBounds().contains(x,y)){if(button==0)toggle();return true;}
     if(!open)return nativeClick(x,y,button);
-    if(l.search().contains(x,y)||l.magnifier().contains(x,y)){if(button==0){if(!search.focused)generation++;search.focused=true;if(l.search().contains(x,y))search.click(x,button);refreshGeometry();}return true;}
+    if(l.search().contains(x,y)||l.magnifier().contains(x,y)){
+      if(button==0||button==1&&l.search().contains(x,y)){
+        if(!search.focused)generation++;
+        search.focused=true;String previous=search.text();
+        if(l.search().contains(x,y))search.click(x,button);
+        if(!previous.equals(search.text())){generation++;page=0;rebuild();}
+        refreshGeometry();
+      }
+      return true;
+    }
     search.focused=false;refreshGeometry();
     if(l.filter().contains(x,y)){if(button==0){generation++;filter=!filter;page=0;click();state();rebuild();}return true;}
     int[] tabs=tabs();for(int i=0;i<tabs.length;i++)if(l.tab(i).contains(x,y)){if(button==0){generation++;category=tabs[i];page=0;click();rebuild();}return true;}

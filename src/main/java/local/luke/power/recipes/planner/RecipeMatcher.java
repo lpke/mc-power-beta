@@ -6,19 +6,30 @@ import java.util.*;
 public final class RecipeMatcher {
   private RecipeMatcher() {}
   public record Supply(RecipeStack representative,int count) {}
+  /** A copied inventory snapshot, grouped once for repeated display-only queries. */
+  public record PreparedSupply(List<Supply> supplies) {
+    public PreparedSupply { supplies=List.copyOf(supplies);if(supplies.size()>45)throw new IllegalArgumentException("Invalid recipe supply bounds"); }
+  }
   public record Match(List<Supply> supplies,int[] cells,int amount) {
     public Match { supplies=List.copyOf(supplies);cells=cells.clone(); }
     @Override public int[] cells(){return cells.clone();}
   }
   public static Match match(List<RecipeIngredient> cells,List<RecipeStack> source,int amount,List<String> required) {
-    if(cells.size()>9||source.size()>45||amount<1||amount>64||required.size()!=cells.size())throw new IllegalArgumentException("Invalid recipe matching bounds");
+    return matchPrepared(cells,prepare(source),amount,required);
+  }
+  public static PreparedSupply prepare(List<RecipeStack> source) {
+    if(source.size()>45)throw new IllegalArgumentException("Invalid recipe supply bounds");
     LinkedHashMap<String,Supply> groups=new LinkedHashMap<>();
     for(RecipeStack stack:source)if(stack!=null&&stack.usable()) {
       Supply old=groups.get(stack.identity());
       int count=old==null?stack.count():Math.addExact(old.count(),stack.count());
       groups.put(stack.identity(),new Supply(stack,count));
     }
-    List<Supply> supplies=List.copyOf(groups.values());int[][] candidates=new int[cells.size()][];
+    return new PreparedSupply(new ArrayList<>(groups.values()));
+  }
+  public static Match matchPrepared(List<RecipeIngredient> cells,PreparedSupply source,int amount,List<String> required) {
+    if(cells.size()>9||amount<1||amount>64||required.size()!=cells.size())throw new IllegalArgumentException("Invalid recipe matching bounds");
+    List<Supply> supplies=source.supplies();int[][] candidates=new int[cells.size()][];
     int[] remaining=supplies.stream().mapToInt(Supply::count).toArray(),result=new int[cells.size()];Arrays.fill(result,-1);
     List<Integer> order=new ArrayList<>();
     for(int cell=0;cell<cells.size();cell++) {

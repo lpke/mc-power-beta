@@ -6,6 +6,7 @@ import local.luke.power.death.DeathItems;
 import local.luke.power.input.*;
 import local.luke.power.inventory.NativeInventoryPlan;
 import local.luke.power.ui.UiScreen;
+import local.luke.power.ui.GuiItems;
 import local.luke.power.ui.CompactInventoryButton;
 import net.minecraft.class_585;
 import net.minecraft.client.Minecraft;
@@ -185,12 +186,10 @@ public final class InventoryToolsOverlay extends UiScreen {
           fill(left, top, left + 16, top + 16, 0xff101010);
         }
       }
-      GL11.glPushMatrix(); GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); GL11.glPopMatrix();
-      GL11.glEnable(32826);
       for (int row = 0; row < 9; row++) for (int slot = 0; slot < 9; slot++) {
           int left = box.x() + 16 + slot * 16, top = box.y() + InventoryToolsLayout.MODAL_ROW_TOP + row * 18;
           ItemStack item = preview[row][slot];
-          if (item != null) { items.method_1487(minecraft.textRenderer, minecraft.textureManager, item, left, top); items.method_1488(minecraft.textRenderer, minecraft.textureManager, item, left, top); }
+          GuiItems.draw(items, minecraft, item, left, top, true);
       }
       GL11.glDisable(GL11.GL_LIGHTING); GL11.glDisable(GL11.GL_DEPTH_TEST);
       String hoverError = "";

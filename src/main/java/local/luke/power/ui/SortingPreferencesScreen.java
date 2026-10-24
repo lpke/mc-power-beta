@@ -212,9 +212,9 @@ public final class SortingPreferencesScreen extends UiScreen {
       return;
     }
     clicks.cancel();
-    if (button != 0) return;
     int top = controlsTop();
     if (inside(x, y, left(), presetsTop() + 20, 148, 18) && presets != null) { presetName.focused = true; presetName.click(x, button); return; }
+    if (button != 0) return;
     presetName.focused = false;
     if (inside(x, y, left(), presetsTop(), 110, 18)) {
       if (presets != null && presets.size() > 0) {

@@ -5,6 +5,7 @@ import java.util.*;
 import local.luke.power.commands.CommandContext;
 import local.luke.power.input.Bindings;
 import local.luke.power.ui.UiScreen;
+import local.luke.power.ui.GuiItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.resource.language.TranslationStorage;
@@ -96,13 +97,10 @@ public final class DeathInventoryScreen extends UiScreen {
       if (record.slotLayout == 2) drawTexture(x + 76, y + 61, 7, 83, 18, 18);
       drawCenteredTextWithShadow(textRenderer, "Death " + record.id, width / 2, y - 25, 0xffffff);
       drawCenteredTextWithShadow(textRenderer, date, width / 2, y - 13, 0xaaaaaa);
-      GL11.glPushMatrix(); GL11.glRotatef(120, 1, 0, 0); net.minecraft.class_583.method_1930(); GL11.glPopMatrix();
-      GL11.glEnable(32826);
       for (int i = 0; i < items.length; i++) {
         int slot = displayedSlot(i); if (slot < 0) continue;
         int sx = x + slotX(slot), sy = y + slotY(slot);
-        renderer.method_1487(minecraft.textRenderer, minecraft.textureManager, items[i], sx, sy);
-        renderer.method_1488(minecraft.textRenderer, minecraft.textureManager, items[i], sx, sy);
+        GuiItems.draw(renderer, minecraft, items[i], sx, sy, true);
       }
       GL11.glDisable(GL11.GL_LIGHTING); GL11.glDisable(GL11.GL_DEPTH_TEST);
       for (int i = 0; i < items.length; i++) {

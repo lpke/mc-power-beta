@@ -31,4 +31,9 @@ public class ControlFeatures {
 
     @ConfigRoot(value = "recipes", visibleName = "Recipes", index = 7)
     public static final Config.RecipesConfig RECIPES_CONFIG = new Config.RecipesConfig();
+
+    static {
+        local.luke.power.ui.TextEditing.rightClickClear(
+            () -> Boolean.TRUE.equals(USER_INTERFACE_CONFIG.clearTextFieldWithRightClick));
+    }
 }
