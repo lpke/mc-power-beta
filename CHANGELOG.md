@@ -6,7 +6,7 @@
 
 - Add Mob heads as the default minimap middle-click action. Toggle heads for the current world visit; pressing the mob-icons hold key returns to normal hold controls.
 - Extend the Creative Search cursor upward by one pixel without moving the text or its lower edge.
-- Keep empty-cell right-click deselection free of red deletion feedback until the pointer leaves the cell, while retaining right-drag clearing and Undo.
+- Keep right-click presses free of deletion feedback until the pointer leaves the cell, including occupied cells. Retain empty-cell deselection, right-drag clearing and Undo.
 
 ## [4.4.5] - 2026-10-24
 

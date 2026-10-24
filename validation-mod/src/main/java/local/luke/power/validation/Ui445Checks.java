@@ -79,6 +79,11 @@ final class Ui445Checks {
     try {
       for (int width : List.of(320, 640)) {
         Setting setting = editorSetting(64);
+        if (!verify) {
+          var clean = CreativeTabsData.read(setting.value.getAsJsonObject());
+          var slots = CreativeTabsData.slots(clean.tab(0)); slots.set(2, "3:0");
+          CreativeTabsData.slots(clean.tab(0), slots); setting.value = clean.json();
+        }
         var editor = new CreativeTabsScreen(parent, setting, () -> { throw new AssertionError("Feedback preview published its draft"); });
         mc.setScreen(editor); editor.init(mc, width, 360);
         JsonObject original = document(editor);
@@ -115,6 +120,31 @@ final class Ui445Checks {
           check(setting.value.equals(original), "Feedback fixture published editor settings");
           log("PASS UI446 empty-cell feedback, clearing, Undo and cancellation at " + width);
         } else editor.removed();
+        for (int occupied : verify ? List.of(0, 2) : List.of(0)) {
+          var occupiedEditor = new CreativeTabsScreen(parent, setting, () -> { throw new AssertionError("Occupied preview published"); });
+          mc.setScreen(occupiedEditor); occupiedEditor.init(mc, width, 360);
+          int ox = x(occupiedEditor, occupied), oy = y(occupiedEditor, occupied);
+          JsonObject originalOccupied = document(occupiedEditor);
+          var idle = render(mc, occupiedEditor, width, directory, "occupied-" + occupied + "-idle", ox, oy);
+          occupiedEditor.layerPress(ox, oy, 1);
+          var held = render(mc, occupiedEditor, width, directory, "occupied-" + occupied + "-held", ox, oy);
+          var moved = render(mc, occupiedEditor, width, directory, "occupied-" + occupied + "-small-motion", ox + 5, oy);
+          if (verify) {
+            check(same(idle, held, (ox - 7) * 2, (oy - 7) * 2, 28, 28)
+                && same(idle, moved, (ox - 7) * 2, (oy - 7) * 2, 28, 28),
+                "Occupied right press changed item pixels before leaving its cell");
+            check(document(occupiedEditor).equals(originalOccupied) && undoCount(occupiedEditor) == 0,
+                "Occupied press changed content before release");
+            occupiedEditor.layerRelease(ox, oy, 1);
+            check(CreativeTabsData.slots(CreativeTabsData.read(document(occupiedEditor)).tab(0)).get(occupied).isEmpty()
+                && undoCount(occupiedEditor) == 1, "Occupied right-click no longer clears on release");
+            call(occupiedEditor, "undo");
+            check(document(occupiedEditor).equals(originalOccupied), "Occupied right-click Undo lost original data");
+            check(setting.value.equals(originalOccupied), "Occupied right-click published its draft");
+            log("PASS UI446 occupied-cell press feedback and release/Undo at " + width + " cell=" + occupied);
+          }
+          occupiedEditor.removed();
+        }
       }
       check(inventory.equals(DeathItems.inventory(DeathItems.snapshot(mc.player.inventory, mc.player.playerContainer)))
           && Arrays.equals(disk, Files.readAllBytes(PowerConfig.path())), "Feedback changed native inventory or persisted settings");
