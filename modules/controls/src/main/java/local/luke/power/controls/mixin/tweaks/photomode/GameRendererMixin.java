@@ -63,11 +63,6 @@ public class GameRendererMixin {
         }
     }
 
-    @Inject(method = "updateSkyAndFogColors", at = @At("RETURN"))
-    private void powerPhoto$background(float tickDelta, CallbackInfo ci) {
-        if (this.client.currentScreen instanceof PhotoModeScreen) GL11.glClearColor(0.08F, 0.08F, 0.08F, 0);
-    }
-
     // 8/13
     @ModifyExpressionValue(method = "renderWorld", at = @At(value = "FIELD", target = "Lnet/minecraft/client/render/GameRenderer;zoom:D", ordinal = 0, opcode = Opcodes.GETFIELD))
     public double test8_forceif(double original) {
@@ -96,9 +91,8 @@ public class GameRendererMixin {
     public void test8(float tickDelta, int eye, CallbackInfo ci) {
         if (this.client.currentScreen instanceof PhotoModeScreen photoScreen) {
             PhotoTerrainBounds grid = (PhotoTerrainBounds) this.client.worldRenderer;
-            double height = PhotoProjection.fittedHeight(grid.powerPhoto$spanX(), grid.powerPhoto$spanZ(),
-                    photoScreen.tilt, 45 + 90 * photoScreen.rotation, this.client.displayWidth, this.client.displayHeight);
-            double width = height * Math.max(1, this.client.displayWidth) / Math.max(1, this.client.displayHeight);
+            double height = PhotoProjection.height();
+            double width = PhotoProjection.width(this.client.displayWidth, this.client.displayHeight);
             double zoomFactor = PhotoProjection.zoomFactor(photoScreen.zoom);
 
             // The visible window's size in world units after zooming

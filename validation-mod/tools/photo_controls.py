@@ -39,7 +39,7 @@ def run(v):
                 assert after['dragButton']==-1 and not after['grabbed'],after
                 if code==1:
                     # Pan is a viewport fraction; convert it back to physical pixels at this zoom.
-                    assert abs(after['cameraX'] * before['displayWidth'] * 2**(before['zoomGoal']-1.25) - 30)<.02 and after['cameraY']<0,(before,after)
+                    assert abs(after['cameraX'] * before['displayWidth'] * 2**before['zoomGoal'] - 30)<.02 and after['cameraY']<0,(before,after)
                     assert after['rotationGoal']==0 and after['tiltGoal']==30,after
                 else:
                     assert abs(after['rotationGoal']-.06)<.0001 and 33<=after['tiltGoal']<=34,after

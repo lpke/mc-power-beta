@@ -54,29 +54,57 @@ final class Photo449Checks {
     GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPushMatrix();
     try {
       mc.setScreen(photo);
+      test("photo 4.4.9 retains native sky background color", () -> {
+        Method colors=class_555.class.getDeclaredMethod("method_1852",float.class);
+        colors.setAccessible(true);
+        var cycles=(local.luke.power.world.WorldCycles)mc.world.method_262();
+        long daylight=cycles.power$daylightTime();
+        var old=BufferUtils.createFloatBuffer(16);
+        GL11.glGetFloat(GL11.GL_COLOR_CLEAR_VALUE,old);
+        String[] fogFields={"field_2346","field_2347","field_2348"};
+        float[] fog=new float[3];
+        for(int i=0;i<3;i++)fog[i]=(float)field(mc.field_2818,fogFields[i]);
+        try {
+          cycles.power$daylightTime(6000);
+          mc.currentScreen=null;
+          colors.invoke(mc.field_2818,1F);
+          var nativeColor=BufferUtils.createFloatBuffer(16);
+          GL11.glGetFloat(GL11.GL_COLOR_CLEAR_VALUE,nativeColor);
+          mc.currentScreen=photo;
+          colors.invoke(mc.field_2818,1F);
+          var photoColor=BufferUtils.createFloatBuffer(16);
+          GL11.glGetFloat(GL11.GL_COLOR_CLEAR_VALUE,photoColor);
+          for(int i=0;i<4;i++)check(Math.abs(nativeColor.get(i)-photoColor.get(i))<1e-6,"photo replaced native sky color");
+          check(photoColor.get(2)>.2F,"daytime background is dark; use an outdoor fixture");
+        } finally {
+          mc.currentScreen=photo;cycles.power$daylightTime(daylight);
+          for(int i=0;i<3;i++)field(mc.field_2818,fogFields[i],fog[i]);
+          GL11.glClearColor(old.get(0),old.get(1),old.get(2),old.get(3));
+        }
+      });
       test("photo 4.4.9 uses existing finite renderer bounds", () -> {
         check(bounds(mc, "spanX") == maxX - minX + 16, "wrong X footprint");
         check(bounds(mc, "spanZ") == maxZ - minZ + 16, "wrong Z footprint");
         check(bounds(mc, "centerX") == ((double) minX + maxX + 16) / 2, "wrong X center");
         check(bounds(mc, "centerZ") == ((double) minZ + maxZ + 16) / 2, "wrong Z center");
       });
-      test("photo 4.4.9 native projection follows grid, rotation and tilt", () -> {
+      test("photo 4.4.9 native projection preserves reference zoom at every tilt", () -> {
         Method camera = class_555.class.getDeclaredMethod("method_1840", float.class, int.class);
         camera.setAccessible(true);
         for (boolean third : new boolean[]{false, true}) {
           mc.options.thirdPerson = third;
-          for (float rotation : new float[]{0, .5f, 1, 2}) for (float tilt : new float[]{0, 30, 90}) {
-            set(photo, "rotation", rotation); set(photo, "tilt", tilt);
+          for (float rotation : new float[]{0, .5f, 1, 2}) for (float tilt : new float[]{0, 30, 90})
+              for (float zoom : new float[]{.01F, 1.25F, 12F}) {
+            set(photo, "rotation", rotation); set(photo, "tilt", tilt); set(photo,"zoom",zoom);
             camera.invoke(mc.field_2818, 1F, 0);
             var matrix = BufferUtils.createFloatBuffer(16);
             GL11.glGetFloat(GL11.GL_PROJECTION_MATRIX, matrix);
-            double height = PhotoProjection.fittedHeight(maxX-minX+16, maxZ-minZ+16, tilt,
-                45+90*rotation, mc.displayWidth, mc.displayHeight);
+            double height = PhotoProjection.height() / PhotoProjection.zoomFactor((float)field(photo,"zoom"));
             double width = height * mc.displayWidth / mc.displayHeight;
             double expected = 2 * Math.cos(Math.toRadians(45+90*rotation)) / width;
-            check(Math.abs(matrix.get(0)-expected) < 1e-5, "native projection did not use fitted width");
+            check(Math.abs(matrix.get(0)-expected) < 1e-5, "native projection changed reference zoom scale");
             for (int i=0;i<16;i++) check(Float.isFinite(matrix.get(i)), "invalid matrix at tilt "+tilt);
-            check((float)field(photo,"tilt") == tilt, "fit altered selected tilt");
+            check((float)field(photo,"tilt") == tilt, "projection altered selected tilt");
           }
         }
       });
