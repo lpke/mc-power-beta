@@ -12,7 +12,7 @@ public class FreecamBlockEntityDistanceMixin {
   @Redirect(method = "method_1278", at = @At(value = "INVOKE",
       target = "Lnet/minecraft/block/entity/BlockEntity;method_1074(DDD)D"))
   private double power$blockEntityDistance(BlockEntity entity, double x, double y, double z) {
-    return DetachedCamera.isActive()
+    return DetachedCamera.isActive() && !local.luke.power.render.RenderControls.photoCamera()
         ? entity.method_1074(DetachedCamera.x(), DetachedCamera.y(), DetachedCamera.z())
         : entity.method_1074(x, y, z);
   }

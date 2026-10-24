@@ -21,7 +21,8 @@ public final class Minimap {
     return screen instanceof net.minecraft.client.gui.screen.container.ContainerScreen || screen instanceof net.minecraft.class_525;
   }
   public static boolean waypointHost(net.minecraft.client.gui.screen.Screen screen) {
-    return screen == null || screen instanceof net.minecraft.client.gui.screen.ChatScreen || menuHost(screen);
+    return screen == null || screen instanceof net.minecraft.client.gui.screen.ChatScreen
+        || screen instanceof net.minecraft.client.gui.screen.container.ContainerScreen;
   }
   public static boolean inventoryVisible(Minecraft mc) {
     return menuHost(mc.currentScreen)
@@ -40,6 +41,7 @@ public final class Minimap {
   }
   public static boolean inventoryWheel(Minecraft mc, int x, int y, int wheel) {
     if (wheel == 0 || !inventoryVisible(mc) || !org.lwjgl.opengl.Display.isActive()
+        || MinimapQuickMenu.blocksMapInput(mc,x,y)
         || org.lwjgl.input.Mouse.isGrabbed() || org.lwjgl.input.Mouse.isButtonDown(0)
         || org.lwjgl.input.Mouse.isButtonDown(1)
         || !(mc.currentScreen instanceof local.luke.power.input.InventoryGui gui)
@@ -84,7 +86,7 @@ public final class Minimap {
   public static boolean inventoryMiddle(Minecraft mc, int x, int y) {
     if (!inventoryContains(mc, x, y) || !org.lwjgl.opengl.Display.isActive()
         || org.lwjgl.input.Mouse.isGrabbed()
-        || local.luke.power.input.InventoryPanels.modal(mc.currentScreen)
+        || MinimapQuickMenu.blocksMapInput(mc,x,y)
         || !(mc.currentScreen instanceof local.luke.power.input.InventoryGui gui)
         || gui.power$containsGuiSpace(x, y)) return false;
     middleClick(mc); return true;
@@ -107,7 +109,7 @@ public final class Minimap {
   public static boolean inventoryReset(Minecraft mc, int x, int y) {
     if (!inventoryContains(mc, x, y) || !org.lwjgl.opengl.Display.isActive()
         || org.lwjgl.input.Mouse.isGrabbed() || org.lwjgl.input.Mouse.isButtonDown(0)
-        || local.luke.power.input.InventoryPanels.modal(mc.currentScreen)
+        || MinimapQuickMenu.blocksMapInput(mc,x,y)
         || !(mc.currentScreen instanceof local.luke.power.input.InventoryGui gui)
         || gui.power$containsGuiSpace(x, y)) return false;
     resetZoom(mc);

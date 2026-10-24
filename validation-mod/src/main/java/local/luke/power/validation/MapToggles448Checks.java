@@ -43,6 +43,8 @@ public final class MapToggles448Checks {
     PowerConfig.flushPending();
     var before=MapConfig.copy();var screen=mc.currentScreen;
     boolean grabbed=Mouse.isGrabbed(),auto=MenuPreferences.current().autoApply,hidden=mc.options.hideHud,debug=mc.options.debugHud;
+    boolean toggleVisibility=field(WorldMapScreen.class,"rememberedTogglesVisible").getBoolean(null);
+    field(WorldMapScreen.class,"rememberedTogglesVisible").setBoolean(null,true);
     failures=0;
     try {
       var style=MapConfig.copy();style.minimap=style.worldMap=style.showInInventory=style.radar=true;
@@ -73,11 +75,11 @@ public final class MapToggles448Checks {
       }
       test("MAPTOGGLES448 every checkbox changes its retained setting and cannot start a map drag",()->{
         var map=open(mc,320,240);
-        for(int index=0;index<MapToggle.ALL.size();index++) {
+        for(int index=0;index<MapToggle.WORLD_MAP.size();index++) {
           field(WorldMapScreen.class,"toggleScroll").setInt(map,index);
           var panel=(MapTogglePanel.Layout)call(map,"togglePanel");
           check(index>=panel.first()&&index<panel.first()+panel.visible(),"row unavailable after scroll");
-          var toggle=MapToggle.ALL.get(index);boolean enabled=toggle.enabled(MapConfig.current(),false);
+          var toggle=panel.toggle(index);boolean enabled=toggle.enabled(MapConfig.current(),false);
           var row=panel.row(index);map.layerPress(row.x()+20,row.y()+10,0);
           check(toggle.enabled(MapConfig.current(),false)!=enabled,"checkbox did not change "+toggle);
           check(!field(WorldMapScreen.class,"dragging").getBoolean(map),"checkbox started map drag");
@@ -86,7 +88,8 @@ public final class MapToggles448Checks {
           check(toggle.enabled(MapConfig.current(),false)==enabled,"second click did not restore "+toggle);
         }
         pressAction(map,"TOGGLES");check(!field(WorldMapScreen.class,"togglesVisible").getBoolean(map),"hide failed");
-        check(field(WorldMapScreen.class,"togglesVisible").getBoolean(open(mc,320,240)),"new visit hid toggles");
+        check(!field(WorldMapScreen.class,"togglesVisible").getBoolean(open(mc,320,240)),"new visit lost hidden toggle preference");
+        field(WorldMapScreen.class,"rememberedTogglesVisible").setBoolean(null,true);
       });
       test("MAPTOGGLES448 middle-click IDs 0 through 9 retain their actions and head state stays visit-local",()->{
         var middle=Minimap.class.getDeclaredMethod("middleClick",Minecraft.class);middle.setAccessible(true);
@@ -137,7 +140,7 @@ public final class MapToggles448Checks {
         field(WorldMapScreen.class,"minimapHit").set(map,new MinimapGeometry.Box(row.x(),row.y(),row.width(),row.height()));
         var options=field(WorldMapScreen.class,"settingsPanel").get(map);
         String mapView=(String)field(PowerOptionsScreen.class,"mapView").get(options);
-        var toggle=MapToggle.ALL.get(index);boolean enabled=toggle.enabled(MapConfig.current(),false);
+        var toggle=panel.toggle(index);boolean enabled=toggle.enabled(MapConfig.current(),false);
         double zoom=MapConfig.current().zoom;
         map.layerPress(x,y,0);map.layerRelease(x,y,0);
         check(toggle.enabled(MapConfig.current(),false)!=enabled,"front checkbox lost left click to preview");
@@ -159,6 +162,7 @@ public final class MapToggles448Checks {
         MapLightShading.tick(mc,disabled);check(MapLightShading.checksLastTick==0,"disabled light survey kept working");
       });
     } finally {
+      field(WorldMapScreen.class,"rememberedTogglesVisible").setBoolean(null,toggleVisibility);
       MenuPreferences.current().autoApply=auto;
       MapConfig.queued(before);PowerConfig.flushPending();
       mc.options.hideHud=hidden;mc.options.debugHud=debug;

@@ -26,7 +26,7 @@ def run(v):
     def reset():
         v.key('Shift_L',True);v.tap('space');v.key('Shift_L',False)
         absolute(400,300)
-        s=state();assert (s['cameraX'],s['cameraY'],s['rotationGoal'],s['zoomGoal'],s['tiltGoal'])==(0,0,0,1,30),s
+        s=state();assert (s['cameraX'],s['cameraY'],s['rotationGoal'],s['zoomGoal'],s['tiltGoal'])==(0,0,0,1.25,30),s
 
     for helper in ['native','raw']:
         v.command('movement-close');v.command('release-152 setup');v.command('release-152 '+helper)
@@ -38,7 +38,8 @@ def run(v):
                 time.sleep(.2);after=state()
                 assert after['dragButton']==-1 and not after['grabbed'],after
                 if code==1:
-                    assert abs(after['cameraX']-.0075)<.0001 and after['cameraY']<0,(before,after)
+                    # Pan is a viewport fraction; convert it back to physical pixels at this zoom.
+                    assert abs(after['cameraX'] * before['displayWidth'] * 2**(before['zoomGoal']-1.25) - 30)<.02 and after['cameraY']<0,(before,after)
                     assert after['rotationGoal']==0 and after['tiltGoal']==30,after
                 else:
                     assert abs(after['rotationGoal']-.06)<.0001 and 33<=after['tiltGoal']<=34,after
@@ -49,7 +50,7 @@ def run(v):
         reset();button(1,True);v.move(30,20);button(1,False);time.sleep(.1)
         click('centerButton');assert state()['cameraX']==state()['cameraY']==0,state()
         reset()
-        for code,expected in [(4,1.25),(5,1)]:
+        for code,expected in [(4,1.5),(5,1.25)]:
             button(code,True);button(code,False);time.sleep(.1)
             assert state()['zoomGoal']==expected,state()
         for key,field,sign in [('w','cameraY',-1),('s','cameraY',1),('a','cameraX',1),('d','cameraX',-1)]:
@@ -78,7 +79,7 @@ def run(v):
         v.command('photo-controls open');shots=set((v.game/'screenshots').glob('*.png'))
         click('screenshotButton');time.sleep(.4)
         assert set((v.game/'screenshots').glob('*.png'))-shots,'photo screenshot missing'
-        v.tap('Escape');v.command('photo-controls closed');assert state()['screen']=='none',state()
+        v.tap('Escape');v.command('photo-controls closed');assert state()['screen'].endswith('.class_525'),state()
         print('PASS photo keyboard, wheel, sliders, buttons, focus, screenshot and exits',helper,flush=True)
     v.command('release-152 setup');v.command('release-152 native')
     v.command('set tweaks.freeLookPerspective 1');v.command('set tweaks.freeLookFollowThirdPerson true')
@@ -95,14 +96,16 @@ def run(v):
         assert not after['freeLook'] and after['thirdPerson']==before['thirdPerson'],after
         print('PASS held free-look perspective transitions',start_third,flush=True)
     for helper in ['native','raw']:
-        v.command('release-152 setup');v.command('release-152 '+helper);v.command('movement-inventory')
-        before,_=v.origin();v.button(True);v.move(40,30);time.sleep(.2);after=v.state()
+        v.command('release-152 setup');v.command('release-152 '+helper)
+        v.command('inventory-look-445 prepare survival')
+        v.origin();v.button(True);v.move(40,30);time.sleep(.2);after=v.state()
         assert after['looking'] and after['guiMouseX']<0 and after['guiMouseY']<0,after
-        assert after['modelX']==before['mouseX']*after['screenWidth']//after['displayWidth'],after
-        assert after['modelY']==after['screenHeight']-before['mouseY']*after['screenHeight']//after['displayHeight']-1,after
-        v.move(50,20);time.sleep(.1);held=v.state()
-        assert (held['modelX'],held['modelY'])==(after['modelX'],after['modelY']),held
-        v.button(False);v.command('movement-close')
+        # The hover-cache fields intentionally stay hidden. Check the pose
+        # actually submitted to the native player renderer instead.
+        v.command('inventory-look-445 check')
+        v.move(50,20);time.sleep(.15);v.command('inventory-look-445 check')
+        v.button(False);time.sleep(.15);v.command('inventory-look-445 check')
+        v.command('inventory-look-445 stop');v.command('movement-close')
         print('PASS inventory model stays at drag origin with hidden hover',helper,flush=True)
 
 

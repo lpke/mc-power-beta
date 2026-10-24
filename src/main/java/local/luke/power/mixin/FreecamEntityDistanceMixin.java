@@ -13,7 +13,7 @@ public class FreecamEntityDistanceMixin {
   private Vec3d power$entityDistanceOrigin(Vec3d playerView) {
     // Change only the render-distance reference. Entity simulation and renderer
     // translations still use the real player and the existing view transform.
-    return DetachedCamera.isActive()
+    return DetachedCamera.isActive() && !local.luke.power.render.RenderControls.photoCamera()
         ? Vec3d.createCached(DetachedCamera.x(), DetachedCamera.y(), DetachedCamera.z())
         : playerView;
   }

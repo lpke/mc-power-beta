@@ -36,6 +36,10 @@ public final class RenderControls {
   private static Minecraft client() {
     return (Minecraft)net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
   }
+  public static boolean photoCamera() {
+    Minecraft mc = client();
+    return mc != null && mc.currentScreen instanceof PhotoProjection.CameraOwner;
+  }
   public static void press(int key) {
     Minecraft mc = client();
     if (mc.world == null || mc.player == null || mc.currentScreen != null || mc.paused

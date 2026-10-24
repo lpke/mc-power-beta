@@ -58,7 +58,10 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("tweak-lifecycle-exit-448")) TweakLifecycle448Checks.boundary(mc);
+      if (command.startsWith("map-449 ")) Map449Checks.run(mc,command.substring(8));
+      else if (command.startsWith("photo-449 ")) Photo449Checks.run(mc,command.substring(10));
+      else if (command.equals("waypoint-449")) Waypoint449Checks.run(mc);
+      else if (command.equals("tweak-lifecycle-exit-448")) TweakLifecycle448Checks.boundary(mc);
       else if (command.equals("native-y-reporting-448")) NativeYReporting448Checks.run(mc);
       else if (command.equals("y-commands-448")) YCommand448Checks.run(mc);
       else if (command.equals("tweak-lifecycle-448")) TweakLifecycle448Checks.run(mc);

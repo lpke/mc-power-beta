@@ -17,6 +17,10 @@
 
 # Runtime checks
 
+- `map-449 run` checks open-menu map mouse ownership, other modals, Pause label eligibility and session-only World Map visibility. `prepare inventory|pause-wheel|right|middle|left`, actual pointer action, `check`, then `stop` covers native mouse batches. The prepare token is combined, for example `prepare inventory-wheel`.
+- `waypoint-449` covers relative command/editor coordinates, one commit-time reported origin, bounds, invalid drafts and retained data.
+- `photo-449 check|open|view ROTATION TILT [ZOOM]|capture|close` checks fitted native projection, renderer-grid ownership and normal screenshot capture. Use a focused muted disposable client with loaded water and at least 1280×720 for captures.
+
 - `native-y-reporting-448` and `y-commands-448` check reporting, command defaults and physical/literal exceptions across Survival, Creative, Spectator, freecam, flight, falling, feet preference and low poses. Use a focused muted disposable singleplayer client. Both restore their provider/player/settings state.
 
 - `tweak-lifecycle-exit-448` arms safe temporary actions, exits through native world unloading and checks cleanup without settings or inventory changes. It intentionally ends at the title screen; use `new-world` afterward.

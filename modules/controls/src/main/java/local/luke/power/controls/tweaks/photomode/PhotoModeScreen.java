@@ -14,7 +14,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.Display;
 
 @SuppressWarnings("unchecked")
-public class PhotoModeScreen extends Screen {
+public class PhotoModeScreen extends Screen implements local.luke.power.input.PhotoProjection.CameraOwner {
     private ButtonWidget exitButton;
     private SliderWidget tiltSlider;
     private SliderWidget timeSlider;
@@ -188,7 +188,7 @@ public class PhotoModeScreen extends Screen {
         updateSliders();
         int dx = Mouse.getEventDX(), dy = Mouse.getEventDY();
         if (this.dragButton == 0) {
-            float speed = (float) (0.0005f * local.luke.power.input.PhotoProjection.pointerScale(minecraft.displayHeight) / Math.pow(2, this.zoom));
+            float speed = (float) (1 / (Math.max(1, minecraft.displayWidth) * local.luke.power.input.PhotoProjection.zoomFactor(this.zoom)));
             if (shiftHeld()) speed *= 2;
             this.cameraX += dx * speed;
             this.cameraY += dy * speed * ((float) minecraft.displayWidth / Math.max(1, minecraft.displayHeight));
@@ -229,7 +229,7 @@ public class PhotoModeScreen extends Screen {
         // Movement via keyboard
         boolean shift = shiftHeld();
         float deltaTime = Math.min(1.0f, (System.nanoTime() - lastTickTime) / 100000000F);
-        float cameraVelocity = (float) (0.075f / Math.pow(2, this.zoom)) * deltaTime;
+        float cameraVelocity = (float) (0.075f / local.luke.power.input.PhotoProjection.zoomFactor(this.zoom)) * deltaTime;
         if (shift) cameraVelocity *= 2;
 
         if (Keyboard.isKeyDown(Keyboard.KEY_W)) {

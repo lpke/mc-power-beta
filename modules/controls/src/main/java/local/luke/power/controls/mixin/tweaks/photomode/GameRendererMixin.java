@@ -5,6 +5,8 @@ import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import local.luke.power.controls.tweaks.photomode.PhotoModeScreen;
+import local.luke.power.controls.tweaks.photomode.PhotoTerrainBounds;
+import local.luke.power.input.PhotoProjection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.option.GameOptions;
@@ -44,12 +46,26 @@ public class GameRendererMixin {
         return this.client.currentScreen instanceof PhotoModeScreen || original.call(instance);
     }
 
+    @ModifyExpressionValue(method = "applyCameraTransform", at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;thirdPerson:Z"))
+    private boolean powerPhoto$fixedCamera(boolean original) {
+        return !(this.client.currentScreen instanceof PhotoModeScreen) && original;
+    }
+
     // 5/13
     @Inject(method = "applyCameraTransform", at = @At(value = "INVOKE", target = "Lorg/lwjgl/opengl/GL11;glTranslatef(FFF)V", ordinal = 4, remap = false))
     public void test5(float tickDelta, CallbackInfo ci) {
         if (this.client.currentScreen instanceof PhotoModeScreen photoScreen) {
-            
+            PhotoTerrainBounds grid = (PhotoTerrainBounds) this.client.worldRenderer;
+            var camera = this.client.camera;
+            double x = camera.lastTickX + (camera.x - camera.lastTickX) * tickDelta;
+            double z = camera.lastTickZ + (camera.z - camera.lastTickZ) * tickDelta;
+            GL11.glTranslated(x - grid.powerPhoto$centerX(), 0, z - grid.powerPhoto$centerZ());
         }
+    }
+
+    @Inject(method = "updateSkyAndFogColors", at = @At("RETURN"))
+    private void powerPhoto$background(float tickDelta, CallbackInfo ci) {
+        if (this.client.currentScreen instanceof PhotoModeScreen) GL11.glClearColor(0.08F, 0.08F, 0.08F, 0);
     }
 
     // 8/13
@@ -79,10 +95,11 @@ public class GameRendererMixin {
     @Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lorg/lwjgl/util/glu/GLU;gluPerspective(FFFF)V", ordinal = 0, remap = false))
     public void test8(float tickDelta, int eye, CallbackInfo ci) {
         if (this.client.currentScreen instanceof PhotoModeScreen photoScreen) {
-            double width = local.luke.power.input.PhotoProjection.width(this.client.displayWidth, this.client.displayHeight);
-            double height = local.luke.power.input.PhotoProjection.height();
-
-            double zoomFactor = Math.pow(2.0, photoScreen.zoom);
+            PhotoTerrainBounds grid = (PhotoTerrainBounds) this.client.worldRenderer;
+            double height = PhotoProjection.fittedHeight(grid.powerPhoto$spanX(), grid.powerPhoto$spanZ(),
+                    photoScreen.tilt, 45 + 90 * photoScreen.rotation, this.client.displayWidth, this.client.displayHeight);
+            double width = height * Math.max(1, this.client.displayWidth) / Math.max(1, this.client.displayHeight);
+            double zoomFactor = PhotoProjection.zoomFactor(photoScreen.zoom);
 
             // The visible window's size in world units after zooming
             double viewWidth = width / zoomFactor;
@@ -93,15 +110,14 @@ public class GameRendererMixin {
             double yTranslation = -(photoScreen.cameraY * height);
 
             GL11.glLoadIdentity();
-            GL11.glTranslatef(photoScreen.cameraX + 1.0F, photoScreen.cameraY + 1.0F, 0.0F);
 
             GL11.glOrtho(
-                    xTranslation,
-                    viewWidth + xTranslation,
-                    yTranslation,
-                    viewHeight + yTranslation,
-                    (double) this.viewDistance * -4.0,
-                    (double) this.viewDistance * 4.0
+                    -viewWidth / 2 + xTranslation,
+                    viewWidth / 2 + xTranslation,
+                    -viewHeight / 2 + yTranslation,
+                    viewHeight / 2 + yTranslation,
+                    -Math.max(this.viewDistance * 4.0, grid.powerPhoto$spanX() + grid.powerPhoto$spanZ() + 256.0),
+                    Math.max(this.viewDistance * 4.0, grid.powerPhoto$spanX() + grid.powerPhoto$spanZ() + 256.0)
             );
 
             GL11.glRotatef(photoScreen.tilt, 1.0F, 0.0F, 0.0F);

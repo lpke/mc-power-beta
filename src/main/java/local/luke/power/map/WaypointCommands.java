@@ -3,6 +3,7 @@ package local.luke.power.map;
 import java.lang.reflect.Proxy;
 import java.util.*;
 import local.luke.power.chat.HelpOutput;
+import local.luke.power.input.ReportedPosition;
 import local.luke.power.permissions.CommandPermissions;
 import local.luke.power.rules.GameRule;
 import net.fabricmc.loader.api.FabricLoader;
@@ -44,7 +45,7 @@ public final class WaypointCommands {
     if (!List.of("add", "remove", "list", "dest", "destination", "teleport", "tp").contains(action))
       throw new IllegalArgumentException("Use /waypoint add, remove, list, destination or teleport. Aliases: /way and /wp.");
     if (action.equals("dest") || action.equals("destination")) {
-      Waypoint point = destinationPoint(MapKeys.newWaypoint(), args);
+      Waypoint point = destinationPoint(MapKeys.newWaypoint(), args, WaypointCoordinates.current(mc));
       Maps.destination(point);
       chat(mc, "§aDestination set to §f" + point.coordinates() + "§a.");
       return;
@@ -71,7 +72,7 @@ public final class WaypointCommands {
       return;
     }
     if (action.equals("add")) {
-      Waypoint point = addPoint(MapKeys.newWaypoint(), args);
+      Waypoint point = addPoint(MapKeys.newWaypoint(), args, WaypointCoordinates.current(mc));
       if (store.points().stream().anyMatch(p -> p.set.equals(store.selectedSet()) && p.name.equalsIgnoreCase(point.name)))
         throw new IllegalArgumentException("That waypoint name already exists in this set. Choose another name.");
       point.set = store.selectedSet(); store.put(point);
@@ -91,40 +92,41 @@ public final class WaypointCommands {
   }
 
   static Waypoint destinationPoint(Waypoint current, String[] args) {
+    return destinationPoint(current, args, origin(current));
+  }
+
+  static Waypoint destinationPoint(Waypoint current, String[] args, ReportedPosition.Pose origin) {
     if (args.length != 2 && args.length != 5)
       throw new IllegalArgumentException("Use /waypoint destination [x y z]. Alias: /waypoint dest.");
-    Waypoint point = args.length == 5 ? coordinates(current, args, 2, "destination") : current.copy();
+    Waypoint point = args.length == 5 ? coordinates(current, args, 2, origin) : current.copy();
     point.validate();
     return point;
   }
 
   static Waypoint addPoint(Waypoint current, String[] args) {
+    return addPoint(current, args, origin(current));
+  }
+
+  static Waypoint addPoint(Waypoint current, String[] args, ReportedPosition.Pose origin) {
     if (args.length < 3) throw new IllegalArgumentException("Use /waypoint add <name> [x y z].");
     int end = args.length;
-    boolean explicit = end >= 6 && numeric(args[end - 3]) && numeric(args[end - 2]) && numeric(args[end - 1]);
+    boolean explicit = end >= 6 && WaypointCoordinates.candidate(args[end - 3])
+        && WaypointCoordinates.candidate(args[end - 2]) && WaypointCoordinates.candidate(args[end - 1]);
+    if (!explicit && Arrays.stream(args, 3, end).anyMatch(value -> value.startsWith("~")))
+      throw new IllegalArgumentException("Specify all three waypoint coordinates: x y z. Use ~ for the current coordinate.");
     if (explicit) end -= 3;
-    Waypoint point = explicit ? coordinates(current, args, end, "waypoint") : current.copy();
+    Waypoint point = explicit ? coordinates(current, args, end, origin) : current.copy();
     point.name = String.join(" ", Arrays.copyOfRange(args, 2, end)).strip();
     point.validate();
     return point;
   }
 
-  private static boolean numeric(String value) {
-    try { Double.parseDouble(value); return true; }
-    catch (NumberFormatException failure) { return false; }
+  private static ReportedPosition.Pose origin(Waypoint current) {
+    return new ReportedPosition.Pose(current.x, current.y, current.z, 0, 0);
   }
 
-  private static Waypoint coordinates(Waypoint current, String[] args, int start, String label) {
-    String bounds = "X/Z from -32,000,000 to 32,000,000; Y from 0 to 127.";
-    Waypoint point = current.copy();
-    try {
-      point.x = Integer.parseInt(args[start]); point.y = Integer.parseInt(args[start + 1]); point.z = Integer.parseInt(args[start + 2]);
-    } catch (NumberFormatException failure) {
-      throw new IllegalArgumentException("Use whole " + label + " coordinates: " + bounds);
-    }
-    if (Math.abs((long)point.x) > MapMath.BORDER || Math.abs((long)point.z) > MapMath.BORDER || point.y < 0 || point.y > 127)
-      throw new IllegalArgumentException("Position is outside waypoint bounds: " + bounds);
-    return point;
+  private static Waypoint coordinates(Waypoint current, String[] args, int start, ReportedPosition.Pose origin) {
+    return WaypointCoordinates.resolve(current, args[start], args[start + 1], args[start + 2], origin);
   }
 
   public static Waypoint find(WaypointStore store, String text) {
@@ -140,11 +142,14 @@ public final class WaypointCommands {
   }
   public static String[] suggestions(Minecraft mc, int index, String prefix, String total) {
     var choices = new ArrayList<String>();
+    String[] words = total.stripLeading().split("\\s+");
+    if (words.length > 1 && (words[1].equalsIgnoreCase("add") && index >= 3
+        || (words[1].equalsIgnoreCase("dest") || words[1].equalsIgnoreCase("destination")) && index >= 2 && index <= 4))
+      choices.add("~");
     if (index == 1) {
       choices.addAll(List.of("add", "remove", "list", "dest", "destination", "help"));
       if (mc.world != null && !mc.world.isRemote && CommandPermissions.allowed(GameRule.ALLOW_TELEPORTATION)) choices.addAll(List.of("teleport", "tp"));
     } else if (index >= 2 && Maps.waypoints() != null && Maps.waypoints().ready()) {
-      String[] words = total.stripLeading().split("\\s+");
       if (words.length > 1 && (words[1].equalsIgnoreCase("remove") || (words[1].equalsIgnoreCase("teleport") || words[1].equalsIgnoreCase("tp"))
           && mc.world != null && !mc.world.isRemote && CommandPermissions.allowed(GameRule.ALLOW_TELEPORTATION))) {
         String earlier = index <= 2 ? "" : String.join(" ", Arrays.copyOfRange(words, 2, Math.min(index, words.length))) + " ";
@@ -160,10 +165,11 @@ public final class WaypointCommands {
   static List<String> helpLines(boolean teleport) {
     var lines = new ArrayList<>(List.of(
         "§b/waypoint add <name> [x y z] §7Save whole coordinates, or the current reported position, in the selected set.",
-        "§7Names may contain spaces; a final three-number group sets X Y Z.",
+        "§7Names may contain spaces; a final three-coordinate group sets X Y Z.",
+        "§7Use ~ for the current reported coordinate, or ~offset to add an offset. Relative results round down.",
         "§b/waypoint remove <name or ID> §7Remove a saved waypoint.",
         "§b/waypoint list [page] §7List waypoints in the current set view, including their IDs.",
-        "§b/waypoint destination [x y z] §7Set a temporary destination at whole coordinates, or at the current camera position. Alias: dest."));
+        "§b/waypoint destination [x y z] §7Set a temporary destination at coordinates, or at the current reported position. Alias: dest."));
     if (teleport) lines.add("§b/waypoint teleport <name or ID> §7Travel within this dimension.");
     lines.add("§7Aliases: /way and /wp.");
     return List.copyOf(lines);

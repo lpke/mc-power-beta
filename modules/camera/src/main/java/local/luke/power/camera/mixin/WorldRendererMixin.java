@@ -20,6 +20,7 @@ public class WorldRendererMixin {
     // Keep the player body visible from the detached first-person camera.
     @Inject(at = @At("TAIL"), method = "renderEntities")
     private void freecam_cameraRenderer(Vec3d arg2, Culler f, float par3, CallbackInfo ci){
+        if (client.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner) return;
         if (entityRenderCooldown <= 0) {
             if(Freecam.freecamController.isActive() && !client.options.thirdPerson && !local.luke.power.input.DetachedCamera.hidesEntryBody()){
                 EntityRenderDispatcher.INSTANCE.render(client.camera, par3);

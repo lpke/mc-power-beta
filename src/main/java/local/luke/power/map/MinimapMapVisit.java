@@ -15,7 +15,7 @@ public final class MinimapMapVisit {
   public static boolean open(Minecraft mc,int x,int y) {
     if(!MapConfig.current().worldMap||!Minimap.inventoryContains(mc,x,y)
         ||!(mc.currentScreen instanceof InventoryGui gui)||gui.power$containsGuiSpace(x,y)
-        ||InventoryPanels.modal(mc.currentScreen)||!org.lwjgl.opengl.Display.isActive()
+        ||MinimapQuickMenu.blocksMapInput(mc,x,y)||!org.lwjgl.opengl.Display.isActive()
         ||org.lwjgl.input.Mouse.isGrabbed())return false;
     host=mc.currentScreen;world=mc.world;player=mc.player;
     container=host instanceof ContainerScreen screen?screen.container:null;

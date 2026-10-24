@@ -35,7 +35,8 @@ public final class WorldMapScreen extends UiScreen {
   private MinimapGeometry.Layout minimapLayout;
   private MinimapGeometry.Box minimapHit;
   private boolean panelPress;
-  private boolean togglesVisible = true;
+  private static boolean rememberedTogglesVisible = true;
+  private boolean togglesVisible = rememberedTogglesVisible;
   private int toggleScroll;
   private MapTogglePanel.Layout toggleLayout;
   private WorldMapControls toggleControls;
@@ -176,7 +177,7 @@ public final class WorldMapScreen extends UiScreen {
   private MapTogglePanel.Layout togglePanel() {
     var navigation = controls();
     int scaleX = navigation.scale().x() + (int)scaleDx, scaleY = navigation.scale().y() + (int)scaleDy;
-    if (toggleFont != textRenderer) { toggleFont = textRenderer; toggleLabelWidth = MapTogglePanel.labelWidth(minecraft); toggleLayout = null; }
+    if (toggleFont != textRenderer) { toggleFont = textRenderer; toggleLabelWidth = MapTogglePanel.labelWidth(minecraft,MapToggle.WORLD_MAP); toggleLayout = null; }
     if (toggleLayout != null && toggleControls == navigation && toggleLayoutScroll == toggleScroll
         && toggleScaleX == scaleX && toggleScaleY == scaleY) return toggleLayout;
     int bottom = navigation.navigationTop() - 4;
@@ -185,7 +186,7 @@ public final class WorldMapScreen extends UiScreen {
     int preferredWidth = Math.min(maxWidth, toggleLabelWidth + MapTogglePanel.HORIZONTAL_ALLOWANCE);
     if (mapLeft()+8+preferredWidth > scaleX) bottom = Math.min(bottom, scaleY-4);
     toggleControls = navigation; toggleLayoutScroll = toggleScroll; toggleScaleX = scaleX; toggleScaleY = scaleY;
-    return toggleLayout = MapTogglePanel.at(mapLeft()+8,bottom,maxWidth,Math.max(8,bottom-64),toggleLabelWidth,toggleScroll);
+    return toggleLayout = MapTogglePanel.at(mapLeft()+8,bottom,maxWidth,Math.max(8,bottom-64),toggleLabelWidth,toggleScroll,MapToggle.WORLD_MAP);
   }
 
   private int scaleY() { return controls().scale().y() + 16; }
@@ -271,6 +272,7 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   public void init() {
+    togglesVisible=rememberedTogglesVisible; controls=null;
     Keyboard.enableRepeatEvents(true);
     if (openSettings) {
       openSettings = false;
@@ -361,7 +363,7 @@ public final class WorldMapScreen extends UiScreen {
   private void controlAction(WorldMapControls.Action action) {
     click();
     switch(action) {
-      case TOGGLES -> { togglesVisible = !togglesVisible; controls = null; }
+      case TOGGLES -> { togglesVisible = !togglesVisible; rememberedTogglesVisible=togglesVisible; controls = null; }
       case WAYPOINTS -> minecraft.setScreen(new WaypointsScreen(this));
       case SETTINGS -> toggleSettings();
       case LAYER -> layer = layer < 0 ? MapSampler.window(MapConfig.current(),Maps.y()).layer() : -1;
@@ -398,7 +400,7 @@ public final class WorldMapScreen extends UiScreen {
     }
     if (togglesVisible && togglePanel().bounds().contains(x,y)) {
       int row=togglePanel().rowAt(x,y);
-      if(button==0&&row>=0) { click(); toggleOverlay(MapToggle.ALL.get(row)); }
+      if(button==0&&row>=0) { click(); toggleOverlay(togglePanel().toggle(row)); }
       return;
     }
     if (settingsPanel != null && minimapHit != null && button == 1 && settingsPanel.minimapWheelAllowed()

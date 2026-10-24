@@ -28,7 +28,7 @@ public final class WaypointEditorScreen extends UiScreen {
     savedColors = new local.luke.power.config.Setting("interface.colours", "interface", "Interface", "", "Saved colors", "",
         local.luke.power.config.Setting.Kind.LIST, originalColors, new com.google.gson.JsonArray(), 0, 16, 1, List.of(), false);
     fields = List.of(new TextInput(waypoint.name, 64), new TextInput(waypoint.set, 48),
-        new TextInput("" + waypoint.x, 10), new TextInput("" + waypoint.y, 3), new TextInput("" + waypoint.z, 10),
+        new TextInput("" + waypoint.x, 24), new TextInput("" + waypoint.y, 24), new TextInput("" + waypoint.z, 24),
         new TextInput("" + waypoint.dimension, 5), new TextInput(String.format(Locale.ROOT, "#%06X", waypoint.colour), 7),
         new TextInput(waypoint.abbreviation == null ? "" : waypoint.abbreviation, 8));
   }
@@ -48,16 +48,23 @@ public final class WaypointEditorScreen extends UiScreen {
     catch (NumberFormatException failure) { return "Dimension"; }
   }
   private Waypoint value() {
-    Waypoint point = initial.copy();
+    return value(WaypointCoordinates.current(minecraft));
+  }
+  private Waypoint value(local.luke.power.input.ReportedPosition.Pose origin) {
+    Waypoint point = WaypointCoordinates.resolve(initial, fields.get(2).text().trim(), fields.get(3).text().trim(),
+        fields.get(4).text().trim(), origin);
     point.name = fields.get(0).text().strip(); point.set = fields.get(1).text().strip();
-    point.x = Integer.parseInt(fields.get(2).text().trim()); point.y = Integer.parseInt(fields.get(3).text().trim());
-    point.z = Integer.parseInt(fields.get(4).text().trim()); point.dimension = Integer.parseInt(fields.get(5).text().trim());
+    point.dimension = Integer.parseInt(fields.get(5).text().trim());
     point.colour = local.luke.power.light.LightSettings.rgb(fields.get(6).text());
     point.abbreviation = fields.get(ABBREVIATION).text().strip(); point.enabled = enabled; point.global = global;
     point.validate(); return point;
   }
   private boolean changed() {
-    try { return !savedColors.value.equals(originalColors) || !local.luke.power.config.Catalog.JSON.toJson(initial).equals(local.luke.power.config.Catalog.JSON.toJson(value())); }
+    for (int i = 2; i <= 4; i++) if (fields.get(i).text().trim().startsWith("~")) return true;
+    try {
+      var origin = new local.luke.power.input.ReportedPosition.Pose(initial.x, initial.y, initial.z, 0, 0);
+      return !savedColors.value.equals(originalColors) || !local.luke.power.config.Catalog.JSON.toJson(initial).equals(local.luke.power.config.Catalog.JSON.toJson(value(origin)));
+    }
     catch (RuntimeException failure) { return true; }
   }
   private void leave() { exit.leave(changed(), () -> minecraft.setScreen(parent)); }
@@ -185,6 +192,8 @@ public final class WaypointEditorScreen extends UiScreen {
     text("Always show", left(), row(ALWAYS) + 5, 0xcccccc); button(global ? "On" : "Off", left() + 72, row(ALWAYS), span() - 72, 18, hoverX, hoverY, true);
     unclip();
     if (!error.isEmpty()) text(fit(error, width - 20), 10, height - 40, 0xff7777);
+    else if (fields.subList(2, 5).stream().anyMatch(field -> field.focused))
+      text(fit("Use ~ for current position, ~offset to add an offset.", width - 20), 10, height - 40, 0xaaaaaa);
     button("Done", left(), height - 26, span() / 2 - 2, 20, hoverX, hoverY, Maps.waypoints() != null && Maps.waypoints().ready());
     button("Cancel", left() + span() / 2 + 2, height - 26, span() / 2 - 2, 20, hoverX, hoverY, true);
     if (selectingSet) {

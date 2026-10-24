@@ -16,6 +16,7 @@ public final class GhostHead {
 
   public static boolean visible(Minecraft mc) {
     return mc.world != null && mc.player != null && mc.field_2807 != null
+        && !(mc.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner)
         && (mc.options.thirdPerson && DetachedCamera.isActive()
             || mc.player instanceof PlayerMode mode && mode.power$spectator()
                 && (mc.options.thirdPerson || DetachedCamera.isActive()));

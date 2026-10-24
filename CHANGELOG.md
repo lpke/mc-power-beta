@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [4.4.9] - 2026-10-25
+
+- Keep minimap mouse controls available while quick settings is open, preserving inventory and menu ownership.
+- Hide in-game waypoint labels during Pause while retaining them in inventory screens.
+- Accept relative waypoint coordinates in commands and the editor, including ~ for the current reported position and ~offset values.
+- Remove Cave mode from World Map checkbox controls and remember Show/Hide Toggles for the session. Keep minimap cave controls and saved middle-click action IDs.
+- Remove photo mode's lower-sky plane and frame the actual rendered terrain across window sizes and render distances.
+
 ## [4.4.8] - 2026-10-25
 
 - Restrict the recipe-book hotkey to eligible inventory screens; it no longer opens a screen during gameplay.

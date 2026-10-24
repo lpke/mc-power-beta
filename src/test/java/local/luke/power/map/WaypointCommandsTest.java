@@ -1,6 +1,7 @@
 package local.luke.power.map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import local.luke.power.input.ReportedPosition;
 import org.junit.jupiter.api.Test;
 
 class WaypointCommandsTest {
@@ -11,7 +12,8 @@ class WaypointCommandsTest {
       assertTrue(denied.contains("/waypoint " + action));
     assertTrue(denied.contains("/waypoint add <name> [x y z]"));
     assertTrue(denied.contains("current reported position"));
-    assertTrue(denied.contains("final three-number group"));
+    assertTrue(denied.contains("final three-coordinate group"));
+    assertTrue(denied.contains("~offset"));
     assertTrue(String.join("\n", WaypointCommands.helpLines(true)).contains("/waypoint teleport"));
   }
   @Test void listPlacesWhiteCoordinatesBeforeDimensionSetAndFinalId() {
@@ -78,5 +80,39 @@ class WaypointCommandsTest {
     assertThrows(IllegalArgumentException.class,
         () -> WaypointCommands.addPoint(point, new String[] {"wp", "add", "x".repeat(65), "1", "64", "3"}));
     assertEquals(17, point.x); assertEquals("Waypoint", point.name);
+  }
+
+  @Test void aliasesResolveMixedRelativeCoordinatesAndKeepMultiWordNames() {
+    var point = new Waypoint(); point.dimension = -1; point.set = "Building plans";
+    var origin = new ReportedPosition.Pose(-16.25, 83.75, 29.5, 0, 0);
+    for (String alias : new String[]{"waypoint", "way", "wp"}) {
+      var result = WaypointCommands.addPoint(point, (alias + " add Example Waypoint ~100 ~ 100").split(" "), origin);
+      assertEquals("Example Waypoint", result.name); assertEquals("83 83 100", result.coordinates());
+      assertEquals(-1, result.dimension); assertEquals("Building plans", result.set);
+      for (String action : new String[]{"dest", "destination"})
+        assertEquals("-17 83 29", WaypointCommands.destinationPoint(point,
+            (alias + " " + action + " ~ ~ ~").split(" "), origin).coordinates());
+    }
+    assertEquals("0 64 0", point.coordinates());
+  }
+
+  @Test void invalidRelativeSuffixesNeverBecomeWaypointNames() {
+    var point = new Waypoint();
+    for (String suffix : new String[]{"~", "~ ~", "~ ~ ~oops", "~ foo 10", "~NaN ~ ~", "~Infinity ~ ~",
+        "~1e309 ~ ~", "~32000001 ~ ~", "~ ~128 ~", "~ ~ ~-32000001"}) {
+      assertThrows(IllegalArgumentException.class,
+          () -> WaypointCommands.addPoint(point, ("wp add Home base " + suffix).split(" ")), suffix);
+    }
+    assertEquals("Waypoint", point.name); assertEquals("0 64 0", point.coordinates());
+  }
+
+  @Test void coordinateCompletionOffersRelativeSyntaxWithoutAReadyWaypointStore() {
+    for (String alias : new String[]{"waypoint", "way", "wp"}) {
+      assertArrayEquals(new String[]{"~"}, WaypointCommands.suggestions(null, 3, "", "/" + alias + " add Home "));
+      assertArrayEquals(new String[]{""}, WaypointCommands.suggestions(null, 4, "~", "/" + alias + " add Home ~ ~"));
+      for (String action : new String[]{"dest", "destination"}) for (int axis = 2; axis <= 4; axis++)
+        assertArrayEquals(new String[]{"~"}, WaypointCommands.suggestions(null, axis, "", "/" + alias + " " + action + " "));
+      assertArrayEquals(new String[0], WaypointCommands.suggestions(null, 2, "", "/" + alias + " add "));
+    }
   }
 }

@@ -1,5 +1,6 @@
 package local.luke.power.map;
 
+import java.util.List;
 import local.luke.power.ui.UiScreen;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.opengl.GL11;
@@ -9,7 +10,9 @@ public final class MapTogglePanel extends UiScreen {
   public static final int ROW_HEIGHT = 20, PADDING = 4, HORIZONTAL_ALLOWANCE = 32;
   private static final MapTogglePanel VIEW = new MapTogglePanel();
   private static final String[] TICK = {"      ##", "     ## ", "    ##  ", "## ##   ", " ###    ", "  #     "};
-  public record Layout(MinimapQuickMenuLayout.Rect bounds, int first, int visible) {
+  public record Layout(MinimapQuickMenuLayout.Rect bounds, int first, int visible, List<MapToggle> toggles) {
+    public Layout { toggles=List.copyOf(toggles); }
+    public MapToggle toggle(int index) { return toggles.get(index); }
     public MinimapQuickMenuLayout.Rect row(int index) {
       return new MinimapQuickMenuLayout.Rect(bounds.x()+PADDING,
           bounds.y()+PADDING+(index-first)*ROW_HEIGHT,bounds.width()-PADDING*2,ROW_HEIGHT);
@@ -20,18 +23,24 @@ public final class MapTogglePanel extends UiScreen {
       return -1;
     }
     public int scroll(int wheel) {
-      return Math.max(0,Math.min(MapToggle.ALL.size()-visible,first-Integer.signum(wheel)));
+      return Math.max(0,Math.min(toggles.size()-visible,first-Integer.signum(wheel)));
     }
   }
   private MapTogglePanel() {}
   public static int labelWidth(Minecraft mc) {
-    return MapToggle.ALL.stream().mapToInt(toggle->mc.textRenderer.getWidth(toggle.label)).max().orElse(120);
+    return labelWidth(mc,MapToggle.ALL);
+  }
+  public static int labelWidth(Minecraft mc,List<MapToggle> toggles) {
+    return toggles.stream().mapToInt(toggle->mc.textRenderer.getWidth(toggle.label)).max().orElse(120);
   }
   public static Layout at(int x,int bottom,int maxWidth,int maxHeight,int labelWidth,int first) {
-    int visible=Math.max(0,Math.min(MapToggle.ALL.size(),(maxHeight-PADDING*2)/ROW_HEIGHT));
+    return at(x,bottom,maxWidth,maxHeight,labelWidth,first,MapToggle.ALL);
+  }
+  public static Layout at(int x,int bottom,int maxWidth,int maxHeight,int labelWidth,int first,List<MapToggle> toggles) {
+    int visible=Math.max(0,Math.min(toggles.size(),(maxHeight-PADDING*2)/ROW_HEIGHT));
     int height=PADDING*2+visible*ROW_HEIGHT;
     return new Layout(new MinimapQuickMenuLayout.Rect(x,bottom-height,Math.max(1,Math.min(maxWidth,labelWidth+HORIZONTAL_ALLOWANCE)),height),
-        Math.max(0,Math.min(MapToggle.ALL.size()-visible,first)),visible);
+        Math.max(0,Math.min(toggles.size()-visible,first)),visible,toggles);
   }
   public static void draw(Minecraft mc,Layout layout,int mouseX,int mouseY,boolean minimap) {
     VIEW.init(mc,mc.currentScreen.width,mc.currentScreen.height);
@@ -42,7 +51,7 @@ public final class MapTogglePanel extends UiScreen {
       VIEW.clip(box.x(),box.y(),box.width(),box.height());
       VIEW.fill(box.x(),box.y(),box.x()+box.width(),box.y()+box.height(),0xf0202020);
       for(int index=layout.first();index<layout.first()+layout.visible();index++) {
-        var row=layout.row(index);var toggle=MapToggle.ALL.get(index);
+        var row=layout.row(index);var toggle=layout.toggle(index);
         boolean hovered=row.contains(mouseX,mouseY);
         if(hovered)VIEW.fill(row.x(),row.y(),row.x()+row.width(),row.y()+row.height(),0xff444444);
         VIEW.fill(row.x()+3,row.y()+5,row.x()+13,row.y()+15,0xffa0a0a0);
@@ -54,9 +63,9 @@ public final class MapTogglePanel extends UiScreen {
         }
         VIEW.text(VIEW.fit(toggle.label,row.width()-23),row.x()+19,row.y()+6,hovered?0xffffff:0xdddddd);
       }
-      if(layout.visible()<MapToggle.ALL.size()) {
-        int track=box.height()-8,thumb=Math.max(4,track*layout.visible()/MapToggle.ALL.size());
-        int y=box.y()+4+(track-thumb)*layout.first()/(MapToggle.ALL.size()-layout.visible());
+      if(layout.visible()<layout.toggles().size()) {
+        int track=box.height()-8,thumb=Math.max(4,track*layout.visible()/layout.toggles().size());
+        int y=box.y()+4+(track-thumb)*layout.first()/(layout.toggles().size()-layout.visible());
         VIEW.fill(box.x()+box.width()-3,y,box.x()+box.width()-2,y+thumb,0xff999999);
       }
     }finally{GL11.glPopAttrib();}

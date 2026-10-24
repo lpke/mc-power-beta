@@ -10,7 +10,7 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
-/** A visit-local modal over the unchanged native inventory. Writes only queued preferences. */
+/** A visit-local inventory modal that leaves uncovered minimap controls available. */
 public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
   private static final Object OWNER = new Object();
   private static final MinimapQuickMenu VIEW = new MinimapQuickMenu();
@@ -78,17 +78,32 @@ public final class MinimapQuickMenu extends local.luke.power.ui.UiScreen {
     if(!available(mc))return false;
     var layout=layout(mc);return layout.gear().containsCircle(x,y)&&gearAvailable(mc,layout);
   }
+  /** The quick-menu modal blocks inventory actions but admits its own uncovered map. */
+  public static boolean blocksMapInput(Minecraft mc,int x,int y) {
+    if(InventoryPanels.modalOther(mc.currentScreen,OWNER))return true;
+    if(!active(mc))return false;
+    var layout=layout(mc);
+    return layout.menu().contains(x,y)||layout.gear().containsCircle(x,y);
+  }
+  private static boolean overMap(Minecraft mc,int x,int y) {
+    return Minimap.inventoryContains(mc,x,y)&&mc.currentScreen instanceof InventoryGui gui
+        &&!gui.power$containsGuiSpace(x,y);
+  }
   public static boolean mouse(Minecraft mc,int x,int y,int button,boolean down) {
     boolean wasOpen=active(mc);
     if(host!=mc.currentScreen)ownedButtons=0;
     if(button>=0&&button<16&&!down&&(ownedButtons&(1<<button))!=0) {ownedButtons&=~(1<<button);return true;}
     if(!Display.isActive()) return wasOpen;
     if(wasOpen) {
+      var layout=layout(mc);
+      // Keep the menu open while wheel/left/right/middle events reach the map.
+      // Menu geometry remains an extra GUI panel and wins where they overlap.
+      if(!layout.menu().contains(x,y)&&!layout.gear().containsCircle(x,y)&&overMap(mc,x,y))return false;
       int wheel=Mouse.getEventDWheel();
-      if(wheel!=0&&layout(mc).menu().contains(x,y))firstRow=layout(mc).panel(firstRow).scroll(wheel);
+      if(wheel!=0&&layout.menu().contains(x,y))firstRow=layout.panel(firstRow).scroll(wheel);
       if(button>=0&&button<16&&down)ownedButtons|=1<<button;
       if(button>=0&&down) {
-        var layout=layout(mc);int row=layout.panel(firstRow).rowAt(x,y);
+        int row=layout.panel(firstRow).rowAt(x,y);
         if(button==0&&row>=0) { toggle(row); click(mc); }
         else if(!layout.menu().contains(x,y)||layout.gear().containsCircle(x,y)) {close();click(mc);}
       }

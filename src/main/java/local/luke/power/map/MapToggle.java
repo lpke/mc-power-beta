@@ -17,6 +17,7 @@ public enum MapToggle {
   PATH("Path", "footsteps");
 
   public static final List<MapToggle> ALL = List.of(values());
+  public static final List<MapToggle> WORLD_MAP = ALL.stream().filter(toggle->toggle!=CAVES).toList();
   public final String label;
   public final List<String> fields;
   private static int rememberedCaveMode = 1;

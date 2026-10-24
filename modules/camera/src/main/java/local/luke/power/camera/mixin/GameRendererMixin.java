@@ -59,7 +59,8 @@ public class GameRendererMixin {
                 entity.prevX + (entity.x - entity.prevX) * delta,
                 entity.prevY + (entity.y - entity.prevY) * delta,
                 entity.prevZ + (entity.z - entity.prevZ) * delta);
-        if (Freecam.freecamController.isActive()) return;
+        if (Freecam.freecamController.isActive()
+                || client.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner) return;
         CameraPosition position = CameraPose.fromView(power$view,
                 entity.prevX + (entity.x - entity.prevX) * delta,
                 entity.prevY + (entity.y - entity.prevY) * delta,
@@ -70,7 +71,8 @@ public class GameRendererMixin {
 	// Translate camera position
 	@Inject(at = @At("HEAD"), method = "applyCameraTransform", cancellable = true)
 	private void freecam_cameraPositionHandler(float par1, CallbackInfo ci){
-		if(!Freecam.freecamController.isActive()){
+		if(!Freecam.freecamController.isActive()
+                || client.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner){
 			return;
 		}
 		LivingEntity player = client.camera;

@@ -25,7 +25,7 @@ final class Menu423Checks {
         final int anchor=corner;
         test("MENU423 "+(pause?"pause":"inventory")+" "+(circular?"circle":"square")+" corner "+corner,()->{
           check(Minimap.inventoryVisible(mc),"minimap hidden in native host");
-          check(Minimap.waypointHost(host),"waypoints excluded from native host");
+          check(Minimap.waypointHost(host)!=pause,"waypoint eligibility differs from inventory/Pause policy");
           var layout=MinimapQuickMenuLayout.at(Minimap.layout(MapConfig.current(),480,270,false),draft.circular,anchor,480,270,mc.textRenderer.getWidth("Show in-game waypoints"));
           int x=layout.gear().x()+8,y=layout.gear().y()+8;
           // Render first so pause controls have their final positions.

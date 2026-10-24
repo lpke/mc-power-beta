@@ -52,4 +52,23 @@ class MapToggleTest {
       assertEquals(0,layout.first());
     }
   }
+  @Test void worldMapRowsExcludeCavesWithoutChangingMinimapOrSavedActionIds() {
+    assertEquals(10,MapToggle.ALL.size());
+    assertEquals(4,MapToggle.CAVES.ordinal());assertEquals(5,MapToggle.HEADS.ordinal());
+    assertEquals(9,MapToggle.WORLD_MAP.size());assertFalse(MapToggle.WORLD_MAP.contains(MapToggle.CAVES));
+    for(int available:new int[]{88,128,168,208}) {
+      var seen=new HashSet<MapToggle>();
+      var layout=MapTogglePanel.at(8,220,184,available,150,0,MapToggle.WORLD_MAP);
+      for(int wheel=0;wheel<20;wheel++) {
+        for(int row=layout.first();row<layout.first()+layout.visible();row++) {
+          seen.add(layout.toggle(row));
+          var bounds=layout.row(row);assertEquals(row,layout.rowAt(bounds.x(),bounds.y()));
+        }
+        layout=MapTogglePanel.at(8,220,184,available,150,layout.scroll(-120),MapToggle.WORLD_MAP);
+      }
+      assertEquals(new HashSet<>(MapToggle.WORLD_MAP),seen);
+      assertEquals(MapToggle.WORLD_MAP.size()-layout.visible(),layout.first());
+    }
+  }
+
 }
