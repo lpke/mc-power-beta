@@ -38,6 +38,10 @@
   Build with `./gradlew -p validation-mod --no-daemon build` after the root JAR.
   Install only in the disposable clone. Its README explains command dispatch.
   Fixtures can change settings and worlds; never ship them.
+  Validate current-format world metadata with full native item data through
+  `world-metadata-450` on disposable copies at the native client's title screen.
+  Standalone JVMs lack the game's item-codec mixins; never weaken round-trip guards
+  or rewrite player data to make offline validation pass.
 - For an existing Power Beta instance on matching dependencies, use
   `python3 tools/update_artifacts.py /path/to/instance`. It refuses running clients,
   verifies a backup and checks that settings and worlds remain byte-identical.
