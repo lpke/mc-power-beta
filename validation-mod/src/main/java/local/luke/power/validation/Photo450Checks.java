@@ -62,6 +62,7 @@ final class Photo450Checks {
       mc.setScreen(photo);Mouse.setGrabbed(false);
       test("PHOTO450 visit defaults and independent photo waypoint preference",()->{
         check((boolean)field(tools,"items")&&(boolean)field(tools,"mobs"),"entity defaults are off");
+        check((boolean)field(tools,"toggles"),"photo toggle menu started hidden");
         check(!(boolean)field(tools,"chunks")&&!(boolean)field(tools,"spawnable"),"expensive photo overlays started enabled");
         boolean world=MapConfig.current().worldWaypoints,map=MapConfig.current().waypoints;
         toggle(MapToggle.WAYPOINTS);check(MapConfig.current().photoWaypoints!=before.photoWaypoints,"photo preference did not change");
@@ -69,11 +70,21 @@ final class Photo450Checks {
         toggle(MapToggle.WAYPOINTS);
       });
       test("PHOTO450 photo tools keep their native host and fit small layouts",()->{
-        for(int[] size:new int[][]{{320,240},{359,240},{360,240},{427,240},{640,360}}){
+        int wrap=320;
+        while(wrap<854&&PhotoControlsLayout.at(wrap,240,mc.textRenderer::getWidth).rotationY()<216)wrap++;
+        for(int[] size:new int[][]{{320,240},{359,240},{360,240},{427,240},{wrap-1,240},{wrap,240},{640,360}}){
           photo.init(mc,size[0],size[1]);field(tools,"toggles",true);
           var layout=(MapTogglePanel.Layout)call(tools,"panel");
           check(layout.toggles().size()==5,"wrong photo toggle list");
           check(layout.bounds().x()>=0&&layout.bounds().y()>=0&&layout.bounds().x()+layout.bounds().width()<=size[0],"photo panel clipped");
+          var footer=PhotoControlsLayout.at(size[0],size[1],mc.textRenderer::getWidth);
+          var center=(net.minecraft.client.gui.widget.ButtonWidget)field(photo,"centerButton");
+          check(center.x==footer.centerX()&&center.y==footer.bottomY(),"Center does not follow toggles");
+          check(center.x==footer.toggleX()+footer.toggleWidth()+4,"footer gap missing");
+          var centerBounds=(local.luke.power.validation.mixin.ButtonBounds)center;
+          check(center.x+centerBounds.power$width()<=footer.playerX()-4,"Center overlaps player control");
+          check(centerBounds.power$height()==18&&center.y+18==size[1]-6,"footer spacing differs from maps");
+          check(layout.bounds().y()+layout.bounds().height()<=footer.rotationY(),"menu overlaps photo footer");
           for(int i=layout.first();i<layout.first()+layout.visible();i++){
             var row=layout.row(i);String name=layout.toggle(i).name();
             boolean consumed=PhotoModeHooks.tools().mouse(photo,row.x()+21,row.y()+10,0,true,0);

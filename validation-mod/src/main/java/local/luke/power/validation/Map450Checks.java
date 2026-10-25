@@ -61,7 +61,9 @@ final class Map450Checks {
     test("MAP450 defaults and settings metadata agree", () -> {
       var session=SettingsRegistry.open(mc);
       var photo=session.settings().stream().filter(setting->setting.id.equals("maps.photoWaypoints")).findFirst().orElseThrow();
-      check(DefaultBases.value(DefaultBases.Base.POWER_BETA,photo.id,photo.powerBetaDefault).getAsBoolean(),"Power Beta photo waypoints default off");
+      for(var base:DefaultBases.Base.values())
+        check(!DefaultBases.value(base,photo.id,photo.powerBetaDefault).getAsBoolean(),"photo waypoints default on");
+      check(MapToggle.WORLD_MAP.indexOf(MapToggle.RENDERED_AREA)==MapToggle.WORLD_MAP.indexOf(MapToggle.CHUNKS)+1,"rendered area is not under chunk borders");
       for(var base:DefaultBases.Base.values())
         check(!DefaultBases.value(base,"maps.renderedArea",new com.google.gson.JsonPrimitive(false)).getAsBoolean(),"rendered border default on");
     });

@@ -5,6 +5,7 @@ import static local.luke.power.validation.Validation.*;
 import com.google.gson.*;
 import java.nio.file.*;
 import local.luke.power.world.WorldCycles;
+import local.luke.power.input.PhotoControlsLayout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -24,12 +25,15 @@ final class PhotoControlsChecks {
     } else if (action.equals("layout")) {
       int width=photo.width,height=photo.height;
       try {
-        for(int[] size:new int[][]{{320,240},{359,240},{360,240},{427,240},{854,480}}) {
+        int wrap=320;
+        while(wrap<854&&PhotoControlsLayout.at(wrap,240,mc.textRenderer::getWidth).rotationY()<216)wrap++;
+        for(int[] size:new int[][]{{320,240},{359,240},{360,240},{427,240},{wrap-1,240},{wrap,240},{854,480}}) {
           photo.init(mc,size[0],size[1]);
           var buttons=((ScreenInput)photo).power$buttons();
           for(int i=0;i<buttons.size();i++) {
             var a=buttons.get(i);var ab=(local.luke.power.validation.mixin.ButtonBounds)a;
-            check(a.x>=0&&a.y>=0&&a.x+ab.power$width()<=photo.width+1&&a.y+ab.power$height()<=photo.height,"clipped photo control");
+            check(a.x>=8&&a.y>=6&&a.x+ab.power$width()<=photo.width-8&&a.y+ab.power$height()<=photo.height-6,"clipped photo control");
+            check(ab.power$height()==18,"photo control height differs from maps");
             for(int j=i+1;j<buttons.size();j++) {
               var b=buttons.get(j);var bb=(local.luke.power.validation.mixin.ButtonBounds)b;
               check(a.x+ab.power$width()<=b.x||b.x+bb.power$width()<=a.x||a.y+ab.power$height()<=b.y||b.y+bb.power$height()<=a.y,"overlapping photo controls "+a.id+" "+b.id+" width="+size[0]);

@@ -5,6 +5,11 @@ A user request listing changes and a release version authorizes implementation, 
 commit, push, publishing and the instance update described in AGENTS.md. A code-only
 request does not authorize publication.
 
+Complete validation and review before updating the idle primary Prism instance.
+Install and verify the exact final artifacts and required backed-up migrations,
+then tell the owner the instance is ready. Only then start publication and website
+deployment. Never postpone the instance update until after publication.
+
 For a re-release, update that version's `CHANGELOG.md` entries, GitHub release notes
 and deployed website changelog to describe the revised behavior. Verify the live
 GitHub and website text, even when the version number stays the same. Update the
@@ -27,7 +32,8 @@ existing owner review HTML and mark each re-released item as required by
 - `python3 tools/release.py --check` validates release notes and versioning.
   The publish command builds and tests sequentially, verifies the export, publishes
   GitHub release assets and notes, and updates/deploys the website from the same data.
-  Do not hand-edit generated website release details or overwrite published artifacts.
+  Do not hand-edit generated website release details. Replace published artifacts
+  only for an explicitly requested re-release, following the backed-up procedure.
 - GitHub hosts every release ZIP and checksum. Public repositories use GitHub
   downloads and retain no Blob mirrors. Private repositories mirror only the
   latest ZIP; older website entries keep their notes without a download link.

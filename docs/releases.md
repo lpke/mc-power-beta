@@ -19,6 +19,26 @@ The original unversioned work is collected under 1.0.0.
 4. With permission, commit and push the reviewed changes to `main`. The website
    checkout must also be clean, on `main`, pushed, and linked to the correct Vercel
    project. Keep credentials in the CLIs, never in Git.
+5. Build the exact clean commit with `python3 tools/build_pack.py --offline`.
+   Complete runtime validation and final review before installing it.
+6. Update and verify the idle primary instance using the instructions below.
+   Tell the owner it is ready before starting publication, so they can test while
+   uploads and deployment run. If artifacts change, validate and install them again.
+
+## Install before publishing
+
+For an idle existing instance with the same platform dependencies:
+
+```sh
+python3 tools/update_artifacts.py /path/to/prism/instance
+```
+
+The updater verifies a backup, replaces the pack JAR, removes the old version and
+checks that settings and worlds remain byte-identical. A failed copy restores the
+previous artifacts. Keep the backup until verification finishes. Apply required
+migrations with the shared backed-up converters, and refresh creation templates
+as described in [Builds and runtime testing](agents/build-testing.md).
+Verify the installed JAR matches the validated release candidate before publishing.
 
 ## Publish
 
@@ -29,11 +49,12 @@ Install Java 21, Python 3, GitHub CLI and Vercel CLI. Sign in with `gh auth logi
 and `vercel login`. From this repository run:
 
 ```sh
-python3 tools/release.py --publish --site /path/to/mc-power-beta-website
+python3 tools/release.py --publish --skip-build --site /path/to/mc-power-beta-website
 ```
 
-The command builds modules sequentially, runs tests, checks the seven-JAR export
-and creates a draft GitHub release tagged `vX.Y.Z` at the reviewed commit. It
+With `--skip-build`, the command verifies the already-built candidate and its
+seven-JAR export, then creates a draft GitHub release tagged `vX.Y.Z` at the reviewed
+commit. It
 uploads the ZIP and SHA-256 file, verifies the public download, publishes the
 release notes, then commits and deploys the website's generated release details.
 The website's version, download, checksum and changelog all come from that release.
@@ -65,7 +86,15 @@ clean commit being released. The command verifies a build receipt and archive
 hash before accepting it. It refuses changed assets, changed release notes,
 incorrect project links, unpushed commits and attempts to replace newer versions.
 After an interruption, inspect the draft and local Git status before retrying.
-Never overwrite published ZIPs or move existing release tags. Fixes get a new version.
+Ordinary fixes get a new version. Replacing a published version requires the
+owner's explicit re-release request. Save the existing release metadata,
+tag commit, ZIP and checksum in a private
+backup. Verify both asset hashes and the archive before removing anything.
+After validation and the primary update, remove only that release and tag with
+`gh release delete vX.Y.Z --cleanup-tag`,
+then run the documented publisher on the reviewed clean commit. Retain the verified
+backup until the replacement download, notes and website are checked. Update the
+existing changelog and review HTML, marking revised items as Re-released.
 
 The two repositories are configured in `tools/publish_config.json`. Public release
 metadata is copied to the website's `public/release.json`; `tools/sync_release.py`
@@ -73,18 +102,10 @@ in that repository renders the page and fallback metadata. No service token is
 needed to serve the website. When a private repository needs Blob, the publisher
 uses a temporary, private file for its credentials and removes it when finished.
 
-## Verify and install
+## Verify publication
 
 Check the GitHub release, website version, changelog, download and checksum.
-For an idle existing instance with the same platform dependencies:
-
-```sh
-python3 tools/update_artifacts.py /path/to/prism/instance
-```
-
-The updater verifies a backup, replaces the pack JAR, removes the old version and
-checks that settings and worlds remain byte-identical. A failed copy restores the
-previous artifacts. Keep the backup until verification finishes.
+The primary instance is already installed and verified before this step.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 versioned modpack notes such as [Fabulously Optimized](https://github.com/Fabulously-Optimized/fabulously-optimized/blob/main/CHANGELOG.md).

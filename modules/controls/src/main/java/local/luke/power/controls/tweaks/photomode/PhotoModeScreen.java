@@ -67,15 +67,16 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
         }
 
         int id = 0;
-        this.exitButton = new ButtonWidget(id++, 0, 0, 20, 20, "X");
-        this.tiltSlider = new SliderWidgetWithoutSaving(id++, this.width - 150, 0, "Tilt: Default", 0.33333334f);
-        this.timeSlider = new SliderWidgetWithoutSaving(id++, this.width - 150, 20, "Time of Day: Current", 0.0f);
-        int rotationY = this.height - (this.width < 360 ? 44 : 20);
-        this.centerButton = new ButtonWidget(id++, 0, this.height - 20, 98, 20, "Center");
-        this.rotateLeftButton = new ButtonWidget(id++, this.width / 2 - 49 - 2 - 20, rotationY, 20, 20, "<");
-        this.rotateRightButton = new ButtonWidget(id++, this.width / 2 + 49 + 2, rotationY, 20, 20, ">");
-        this.screenshotButton = new ButtonWidget(id++, this.width / 2 - 49, rotationY, 98, 20, "Take Screenshot");
-        this.renderPlayerButton = new ButtonWidget(id++, this.width - 104, this.height - 20, 105, 20, "Render Player: On");
+        var footer = local.luke.power.input.PhotoControlsLayout.at(this.width, this.height, this.minecraft.textRenderer::getWidth);
+        this.exitButton = new PhotoButtonWidget(id++, 8, 6, 20, footer.buttonHeight(), "X");
+        this.tiltSlider = new SliderWidgetWithoutSaving(id++, this.width - 158, 6, "Tilt: Default", 0.33333334f);
+        this.timeSlider = new SliderWidgetWithoutSaving(id++, this.width - 158, 28, "Time of Day: Current", 0.0f);
+        int rotationY = footer.rotationY();
+        this.centerButton = new PhotoButtonWidget(id++, footer.centerX(), footer.bottomY(), footer.centerWidth(), footer.buttonHeight(), "Center");
+        this.rotateLeftButton = new PhotoButtonWidget(id++, footer.rotationLeftX(), rotationY, 20, footer.buttonHeight(), "<");
+        this.rotateRightButton = new PhotoButtonWidget(id++, footer.rotationRightX(), rotationY, 20, footer.buttonHeight(), ">");
+        this.screenshotButton = new PhotoButtonWidget(id++, footer.screenshotX(), rotationY, footer.screenshotWidth(), footer.buttonHeight(), "Take Screenshot");
+        this.renderPlayerButton = new PhotoButtonWidget(id++, footer.playerX(), footer.bottomY(), footer.playerWidth(), footer.buttonHeight(), "Render Player: On");
 
         this.buttons.add(this.exitButton);
         this.buttons.add(this.tiltSlider);

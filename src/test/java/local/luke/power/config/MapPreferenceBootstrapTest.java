@@ -35,7 +35,7 @@ class MapPreferenceBootstrapTest {
       PowerConfig.write(root);
       byte[] original = Files.readAllBytes(PowerConfig.path());
       ConfigDefaults.prepare(instance);
-      boolean expected = base == DefaultBases.Base.POWER_BETA;
+      boolean expected = false;
       assertEquals(expected, PowerConfig.section("maps").get("photoWaypoints").getAsBoolean());
       assertFalse(PowerConfig.section("maps").get("renderedArea").getAsBoolean());
       assertEquals(2.5, PowerConfig.section("maps").get("zoom").getAsDouble());

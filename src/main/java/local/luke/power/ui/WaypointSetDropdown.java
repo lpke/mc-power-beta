@@ -14,7 +14,7 @@ final class WaypointSetDropdown {
   static void button(UiScreen screen, String label, int x, int y, int width, int height,
       int mx, int my, boolean enabled, boolean open) {
     screen.button("", x, y, width, height, mx, my, enabled);
-    screen.text(screen.fit(label, width - 25), x + 6, y + (height - 8) / 2, enabled ? 0xe0e0e0 : 0xa0a0a0);
+    centeredLabel(screen, label, x, y + (height - 8) / 2, width, 6, 19, enabled ? 0xe0e0e0 : 0xa0a0a0);
     screen.chevron(x + width - 11, y + (height - 4) / 2, open, 0xffdddddd);
   }
 
@@ -29,9 +29,25 @@ final class WaypointSetDropdown {
   }
   static void row(UiScreen screen, String label, int x, int top, int width, int mx, int my,
       boolean selected, boolean focused) {
+    row(screen, label, x, top, width, mx, my, selected, focused, 0);
+  }
+
+  static void row(UiScreen screen, String label, int x, int top, int width, int mx, int my,
+      boolean selected, boolean focused, int trailingWidth) {
     boolean hover = screen.inside(mx, my, x, top, width, 20);
     if (hover || focused) screen.rectangle(x, top, x + width, top + 20, 0xff3c3c3c);
     if (selected) screen.rectangle(x + 2, top + 4, x + 4, top + 16, 0xff268bff);
-    screen.text(screen.fit(label, width - 18), x + 9, top + 6, hover || selected ? 0xffffff : 0xcccccc);
+    centeredLabel(screen, label, x, top + 6, width, 9, 9 + trailingWidth, hover || selected ? 0xffffff : 0xcccccc);
+  }
+
+  private static void centeredLabel(UiScreen screen, String label, int x, int y, int width,
+      int leftPadding, int rightPadding, int colour) {
+    int left = x + leftPadding, right = x + width - rightPadding;
+    if (right <= left) return;
+    String fitted = screen.fit(label, right - left);
+    int textWidth = screen.textWidth(fitted);
+    if (textWidth > right - left) return;
+    int centered = x + (width - textWidth) / 2;
+    screen.text(fitted, Math.max(left, Math.min(centered, right - textWidth)), y, colour);
   }
 }

@@ -52,6 +52,11 @@ public abstract class UiScreen extends Screen {
 
   protected void button(String label, int left, int top, int span, int h,
       int mx, int my, boolean enabled, int labelColour) {
+    button(label, left, top, span, h, mx, my, enabled, labelColour, null);
+  }
+
+  protected void button(String label, int left, int top, int span, int h,
+      int mx, int my, boolean enabled, int labelColour, Runnable overlay) {
     int w = Math.max(10, span);
     boolean hovered = inside(mx, my, left, top, w, h);
     int v = 46 + (enabled ? hovered ? 2 : 1 : 0) * 20;
@@ -70,6 +75,7 @@ public abstract class UiScreen extends Screen {
       }
       dy += sh;
     }
+    if (overlay != null) overlay.run();
     drawCenteredTextWithShadow(textRenderer, label, left + w / 2, top + (h - 8) / 2,
         !enabled ? 0xa0a0a0 : labelColour >= 0 ? labelColour : hovered ? 0xffffa0 : 0xe0e0e0);
   }

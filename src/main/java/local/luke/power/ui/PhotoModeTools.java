@@ -23,6 +23,7 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
   private final PhotoTerrainSurvey survey=new PhotoTerrainSurvey();
   private Screen host;
   private UiScreen layer;
+  private PhotoControlsLayout controls;
   private Object visitWorld;
   private boolean items=true,mobs=true,chunks,spawnable,toggles,context,contextSafe;
   private int scroll,contextX,contextY,pointerX,pointerY;
@@ -65,10 +66,11 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     var mc=(Minecraft)client;
     if(host!=screen || visitWorld!=mc.world) {
       if(host!=null)removed(host);
-      host=(Screen)screen;visitWorld=mc.world;items=mobs=true;chunks=spawnable=toggles=context=false;
+      host=(Screen)screen;visitWorld=mc.world;items=mobs=toggles=true;chunks=spawnable=context=false;
       message="";scroll=0;
     }
     super.init(mc,host.width,host.height);
+    controls=PhotoControlsLayout.at(width,height,textRenderer::getWidth);
     if(MapConfig.current().photoWaypoints)Maps.ensureWaypoints(mc);
     if(layer!=null)layer.init(mc,width,height);
     pointerX=Mouse.getX()*width/Math.max(1,mc.displayWidth);
@@ -81,13 +83,19 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
   }
   @Override public boolean blocked(Object screen){return screen==host&&(layer!=null||context);}
   @Override public boolean controlsHidden(Object screen){return screen==host&&layer!=null;}
-  private int toggleY(){return height-(width<420?68:44);}
+  @Override public boolean renderButton(Object client,String label,int x,int y,int span,int h,
+      int mx,int my,boolean enabled,Runnable overlay){
+    if(client!=minecraft||!active())return false;
+    button(label,x,y,span,h,mx,my,enabled,-1,overlay);return true;
+  }
+  private PhotoControlsLayout footer(){return controls;}
+  private int toggleY(){return footer().bottomY();}
   private MapTogglePanel.Layout panel(){
-    return MapTogglePanel.at(6,toggleY()-2,Math.max(1,width-12),Math.max(8,toggleY()-48),
+    return MapTogglePanel.at(footer().toggleX(),footer().panelBottom(),Math.max(1,width-16),Math.max(8,footer().panelBottom()-64),
         MapTogglePanel.labelWidth(minecraft,TOGGLES),scroll,TOGGLES);
   }
   private boolean owns(int x,int y){return host instanceof PhotoModeHooks.Camera camera&&camera.powerPhoto$ownsPointer(x,y)
-      || inside(x,y,6,toggleY(),110,20)||toggles&&panel().bounds().contains(x,y);}
+      || inside(x,y,footer().toggleX(),toggleY(),footer().toggleWidth(),footer().buttonHeight())||toggles&&panel().bounds().contains(x,y);}
   private boolean enabled(MapToggle toggle){return switch(toggle){case ITEMS->items;case MOBS->mobs;
     case WAYPOINTS->MapConfig.current().photoWaypoints;case CHUNKS->chunks;case LIGHT->spawnable;default->false;};}
   private void toggle(MapToggle toggle){
@@ -181,7 +189,7 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
       if(button==0&&down){int row=layout.rowAt(x,y);if(row>=0){click();toggle(layout.toggle(row));}}
       return true;
     }
-    if(inside(x,y,6,toggleY(),110,20)){if(button==0&&down){click();toggles=!toggles;}return true;}
+    if(inside(x,y,footer().toggleX(),toggleY(),footer().toggleWidth(),footer().buttonHeight())){if(button==0&&down){click();toggles=!toggles;}return true;}
     if(owns(x,y))return false;
     if(button==2&&down){
       target=waypoints()?WaypointMarkers.hovered(minecraft,x,y):null;
@@ -200,9 +208,9 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     if(screen!=host)return;
     if(layer!=null){layer.render(x,y,delta);return;}
     int mx=layer!=null||context?-1000:x,my=layer!=null||context?-1000:y;
-    button(toggles?"Hide Toggles":"Show Toggles",6,toggleY(),110,20,mx,my,true);
+    button(toggles?"Hide Toggles":"Show Toggles",footer().toggleX(),toggleY(),footer().toggleWidth(),footer().buttonHeight(),mx,my,true);
     if(toggles)MapTogglePanel.draw(minecraft,panel(),mx,my,this::enabled);
-    if(!message.isEmpty())text(fit(message,Math.max(1,width-170)),24,6,0xffffff);
+    if(!message.isEmpty())text(fit(message,Math.max(1,width-194)),32,11,0xffffff);
     if(context){fill(contextX,contextY,contextX+142,contextY+actions().size()*18,0xf0202020);
       boolean safe=contextSafe;
       for(int i=0;i<actions().size();i++){

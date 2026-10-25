@@ -14,6 +14,8 @@ public final class PhotoModeHooks {
     default boolean mouse(Object screen, int x, int y, int button, boolean down, int wheel) { return false; }
     default boolean blocked(Object screen) { return false; }
     default boolean controlsHidden(Object screen) { return false; }
+    default boolean renderButton(Object client, String label, int x, int y, int width, int height,
+        int mouseX, int mouseY, boolean enabled, Runnable overlay) { return false; }
     default void renderScene(Object screen, int x, int y) {}
     default void render(Object screen, int x, int y, float delta) {}
   }

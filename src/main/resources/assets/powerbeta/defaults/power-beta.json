@@ -1088,7 +1088,7 @@
       "radarLimit": 256,
       "waypoints": true,
       "worldWaypoints": true,
-      "photoWaypoints": true,
+      "photoWaypoints": false,
       "renderedArea": false,
       "waypointNames": true,
       "waypointDistances": true,

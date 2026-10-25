@@ -8,6 +8,8 @@ import java.nio.file.*;
 import java.util.*;
 import local.luke.power.audio.MusicPreset;
 import local.luke.power.config.*;
+import local.luke.power.creative.CreativeTabsData;
+import local.luke.power.creativeui.CreativeTabsBackend;
 import local.luke.power.inventory.tools.SortingLayoutsData;
 import local.luke.power.map.*;
 import local.luke.power.storage.PowerConfig;
@@ -39,7 +41,7 @@ final class Dropdown450Screens {
         var options = new PowerOptionsScreen(previous); options.init(mc, size[0], size[1]);
         try {
           hud(mc, options, size); music(mc, options, size); waypoints(mc, previous, size);
-          sorting(mc, options, size); creation(mc, size);
+          sorting(mc, options, size); creative(mc, options, size); creation(mc, size);
         } finally { options.removed(); }
       }
       check(document.equals(PowerConfig.document()) && Arrays.equals(saved, Files.readAllBytes(PowerConfig.path())), "screen captures changed saved preferences");
@@ -58,7 +60,14 @@ final class Dropdown450Screens {
     try {
       set(screen, "settingsHidden", false); set(screen, "previewHidden", false);
       invoke(screen, "select", new Class<?>[]{String.class}, "debug");
-      var draft = (SettingsDraft)get(screen, "draft"); var coordinates = draft.get("power_hud:config.coordinateDisplay");
+      var draft = (SettingsDraft)get(screen, "draft");
+      var beforeSelector = draft.snapshot();
+      input(screen).power$click((int)invoke(screen, "left", new Class<?>[]{}) + 8, 38, 0);
+      check((boolean)get(screen, "selecting"), "HUD element selector did not open");
+      capture(mc, screen, size, "hud-elements");
+      input(screen).power$key('\0', Keyboard.KEY_ESCAPE);
+      check(!(boolean)get(screen, "selecting") && beforeSelector.equals(draft.snapshot()), "HUD element capture changed its editor draft");
+      var coordinates = draft.get("power_hud:config.coordinateDisplay");
       invoke(screen, "revealControl", new Class<?>[]{Setting.class}, coordinates);
       int y = (int)invoke(screen, "controlY", new Class<?>[]{Setting.class}, coordinates);
       invoke(screen, "edit", new Class<?>[]{Setting.class, int.class, int.class}, coordinates, 1, y);
@@ -139,6 +148,23 @@ final class Dropdown450Screens {
       set(editor, "presets", presets);
       input(editor).power$click((int)invoke(editor, "left", new Class<?>[]{}) + 8, (int)invoke(editor, "presetsTop", new Class<?>[]{}) + 8, 0);
       capture(mc, editor, size, "sorting-presets");
+    } finally { editor.removed(); }
+  }
+
+  private static void creative(Minecraft mc, PowerOptionsScreen options, int[] size) throws Exception {
+    var session = new ConfigSession(); CreativeTabsBackend.register(session);
+    var setting = session.settings().get(0); setting.value = CreativeTabsData.defaults();
+    var original = setting.value.deepCopy();
+    var editor = new CreativeTabsScreen(options, setting, () -> { throw new AssertionError("Creative capture accepted its draft"); });
+    editor.init(mc, size[0], size[1]);
+    try {
+      var data = (CreativeTabsData)get(editor, "data"); var before = data.json();
+      input(editor).power$click((int)invoke(editor, "fillGroupX", new Class<?>[]{}) + 8, 38, 0);
+      check((boolean)get(editor, "nativeGroups"), "Creative Fill group selector did not open");
+      capture(mc, editor, size, "creative-fill-group");
+      input(editor).power$key('\0', Keyboard.KEY_ESCAPE);
+      check(!(boolean)get(editor, "nativeGroups") && original.equals(setting.value) && before.equals(data.json()),
+          "Creative Fill group capture changed its isolated layout draft");
     } finally { editor.removed(); }
   }
 

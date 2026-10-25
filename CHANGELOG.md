@@ -9,6 +9,8 @@
 - Allow full bright and relevant overlay hotkeys in photo mode, and restore normal lighting before returning to Pause.
 - Add an optional gold rendered-area border to the minimap and World Map.
 - Stop light-overlay surveys while their views are hidden.
+- Re-release: open the photo toggles menu by default, place its button beside Center and match button spacing and height to World Map controls. Start photo waypoints off in pack defaults, preserving saved choices.
+- Re-release: center settings dropdown text and place Show rendered area directly below Chunk borders in the World Map menu.
 
 ## [4.4.9] - 2026-10-25
 

@@ -123,8 +123,8 @@ final class SettingsDropdown {
         boolean over = screen.inside(mx, my, x, Math.max(y, top), rowWidth, Math.min(y + rows * 20, top + 20) - Math.max(y, top));
         if (over) hovered = i;
         int reserve = i == defaultIndex ? screen.textWidth("Default") + 12 : 0;
-        WaypointSetDropdown.row(screen, screen.fit(labels.get(i), rowWidth - 18 - reserve), x, top,
-            rowWidth, mx, my, i == selected, i == focus);
+        WaypointSetDropdown.row(screen, labels.get(i), x, top,
+            rowWidth, mx, my, i == selected, i == focus, reserve);
         if (i == defaultIndex) screen.text("Default", x + rowWidth - screen.textWidth("Default") - 7, top + 6, 0x888888);
       }
       screen.unclip(); bar.render(screen, track());

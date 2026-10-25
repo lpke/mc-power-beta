@@ -18,7 +18,8 @@ public enum MapToggle {
   RENDERED_AREA("Show rendered area", "renderedArea");
 
   public static final List<MapToggle> ALL = List.of(values());
-  public static final List<MapToggle> WORLD_MAP = ALL.stream().filter(toggle->toggle!=CAVES).toList();
+  public static final List<MapToggle> WORLD_MAP = List.of(ITEMS, MOBS, WAYPOINTS, WORLD_WAYPOINTS,
+      HEADS, CHUNKS, RENDERED_AREA, SLIME, LIGHT, PATH);
   public final String label;
   public final List<String> fields;
   private static int rememberedCaveMode = 1;
