@@ -28,6 +28,8 @@ public abstract class UiScreen extends Screen {
     return x >= left && x < left + width && y >= top && y < top + height;
   }
 
+  int textWidth(String text) { return textRenderer.getWidth(text); }
+
   protected String fit(String text, int span) {
     if (textRenderer.getWidth(text) <= span) return text;
     while (!text.isEmpty() && textRenderer.getWidth(text + "...") > span)

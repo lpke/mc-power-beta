@@ -123,15 +123,16 @@ public final class PowerOptionsScreen extends UiScreen {
     for (Setting setting : edited) setting.value = Catalog.JSON.toJsonTree(changes.get(setting.id.substring(5)));
     changed(edited, false);
   }
-  boolean panelModal() { return capture != null || confirmClose || confirmReset; }
+  boolean panelModal() { return capture != null || confirmClose || confirmReset || choices.active(); }
   boolean minimapWheelAllowed() { return !panelModal() && !valueEditor.active() && dragging == null; }
   boolean radarIconsAllowed() { return !panelModal() && !valueEditor.active() && !search.focused; }
   void panelCancelGesture() {
     capture = null; captureModifier = 0; dragging = null; contentBar.release(); sidebarBar.release();
-    valueEditor.cancel(); hoverDelay.clear(); TextDrag.cancel();
+    valueEditor.cancel(); choices.close(); hoverDelay.clear(); TextDrag.cancel();
     finishContinuousChange();
   }
   void panelWheel(int wheel) {
+    if (choices.wheel(wheel)) return;
     if (wheel == 0 || panelModal()) return;
     valueEditor.cancel(); scrollViewport(wheel, false);
   }
@@ -238,6 +239,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private int selected = -1, musicRevision = -1;
   private final HoverDelay hoverDelay = new HoverDelay();
+  private final SettingsDropdown choices = new SettingsDropdown();
   private List<Row> rows = List.of();
   private List<String> sectionKeys = List.of();
 
@@ -341,7 +343,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void init() {
-    valueEditor.cancel();
+    choices.close(); valueEditor.cancel();
     Keyboard.enableRepeatEvents(true);
     if (session == null)
       try {
@@ -358,7 +360,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void removed() {
-    valueEditor.cancel();
+    choices.close(); valueEditor.cancel();
     rememberPosition();
     musicStatus.cancel();
     contentBar.release(); sidebarBar.release();
@@ -770,7 +772,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (!page.equals("Game rules")) ruleReviewChecked = false;
     if (page.equals("Game rules") && minecraft.currentScreen == this
         && (!ruleReviewChecked || reviewedRulesBase != DefaultBases.current()) && reviewRules()) return;
-    hoverDelay.tick();
+    choices.tick(); hoverDelay.tick();
     defaultsPanel.tick(page.equals("Defaults"));
     if (library != null) library.tick();
     int revision = local.luke.power.audio.AudioController.libraryRevision();
@@ -850,6 +852,7 @@ public final class PowerOptionsScreen extends UiScreen {
   public void onMouseEvent() {
     super.onMouseEvent();
     int wheel = Mouse.getEventDWheel();
+    if (choices.wheel(wheel)) return;
     if (hidden || wheel == 0 || capture != null || confirmClose || confirmReset) return;
     valueEditor.cancel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
@@ -859,7 +862,14 @@ public final class PowerOptionsScreen extends UiScreen {
     else scrollViewport(wheel, false);
   }
 
+  @Override
+  protected void mouseReleased(int x, int y, int button) {
+    choices.release(y, button);
+    super.mouseReleased(x, y, button);
+  }
+
   protected void mouseClicked(int x, int y, int button) {
+    if (choices.press(this, x, y, button)) return;
     if (page.equals("Defaults") && !confirmClose && !confirmReset && defaultsPanel.press(x, y, button, left(), span())) return;
     if (valueEditor.press(x, y, button)) return;
     if (hidden) {
@@ -1123,6 +1133,12 @@ public final class PowerOptionsScreen extends UiScreen {
     if (inside(x, y, actionX(2), height - 28, actionWidth(2), 20)) save(true);
   }
 
+  void choose(List<String> labels, List<String> help, int selected, int x, int y, int span,
+      java.util.function.IntConsumer accepted) {
+    valueEditor.cancel(); search.focused = false;
+    choices.open(labels, help, selected, -1, x, y, span, width, height, accepted);
+  }
+
   private void activate(Setting s, int direction) {
     if (!SettingAccess.reason(session, s).isEmpty()) return;
     error = "";
@@ -1190,6 +1206,13 @@ public final class PowerOptionsScreen extends UiScreen {
       int y = top() + row.y - (int) scroll + SettingRows.buttonOffset(span());
       valueEditor.begin(s, s, () -> changed(s), mainControlLeft(row), y,
           right() - 38 - mainControlLeft(row), top(), bottom());
+      return;
+    }
+    if (SettingsDropdown.accepts(s)) {
+      Row row = rows.stream().filter(r -> r.setting == s).findFirst().orElseThrow();
+      search.focused = false; valueEditor.cancel();
+      choices.open(s, mainControlLeft(row), top() + row.y - (int)scroll + SettingRows.buttonOffset(span()),
+          controlEnd(s) - mainControlLeft(row), embedded() ? right() : width, height, () -> changed(s));
       return;
     }
     switch (s.kind) {
@@ -1278,6 +1301,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   protected void keyPressed(char c, int key) {
+    if (choices.key(this, key)) return;
     if (page.equals("Defaults") && defaultsPanel.key(key)) return;
     if (valueEditor.key(c, key)) return;
     if (hidden) { if (key == Keyboard.KEY_ESCAPE || key == Keyboard.KEY_F1) hidden = false; return; }
@@ -1452,6 +1476,8 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void render(int mx, int my, float delta) {
+    int pointerX = mx, pointerY = my;
+    if (choices.active()) { mx = -1000; my = -1000; }
     valueEditor.beginFrame();
     if (!hidden && !confirmClose && !confirmReset && capture == null) {
       if (!isolatedRules() && !embedded()) sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
@@ -1595,6 +1621,7 @@ public final class PowerOptionsScreen extends UiScreen {
       else if (s.kind == Setting.Kind.KEY && editable) button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, true,
           local.luke.power.input.Chord.decode(s.value.getAsInt()).key() == 0 ? 0x999999 : -1);
+      else if (SettingsDropdown.accepts(s)) WaypointSetDropdown.button(this, value(s), controlLeft, cy, valueEnd - controlLeft, mx, listMouseY, editable, choices.editing(s));
       else button(fit(value(s), Math.max(5, valueEnd - controlLeft - 8)),
           controlLeft, cy, valueEnd - controlLeft, 18, mx, listMouseY, editable);
       boolean defaultValue = rowSettings(s).stream().allMatch(value -> value == s || value.value.equals(value.defaultValue))
@@ -1672,8 +1699,9 @@ public final class PowerOptionsScreen extends UiScreen {
       hoverId = "searchScope";
     }
     if (canClear() && inside(mx, my, clearSearchX(), 27, 20, 20)) { tip = "Clear search"; hoverId = "clearSearch"; }
-    if (hoverDelay.ready(dragging == null && !(libraryVisible() && library.draggingSlider()) && !confirmClose && !confirmReset ? hoverId : "") && !tip.isEmpty()) tooltip(tip, mx, my);
+    if (hoverDelay.ready(!choices.active() && dragging == null && !(libraryVisible() && library.draggingSlider()) && !confirmClose && !confirmReset ? hoverId : "") && !tip.isEmpty()) tooltip(tip, mx, my);
     valueEditor.renderError(this);
+    choices.render(this, pointerX, pointerY);
     if (capture != null || confirmClose || confirmReset) {
       fill(0, 0, width, height, 0xc0000000);
       String message =

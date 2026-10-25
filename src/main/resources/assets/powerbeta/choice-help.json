@@ -1,0 +1,257 @@
+{
+  "audio.musicMode": {
+    "description": "Choose the built-in tracks available for world music. Nether and End tracks remain available in the library and presets.",
+    "items": {
+      "Vanilla": "Use the original Beta 1.7.3 soundtrack.",
+      "Alpha and Beta survival": "Use survival tracks from Minecraft Volume Alpha and Volume Beta.",
+      "Alpha and Beta all": "Add creative, menu, record and credits tracks from Volume Alpha and Volume Beta.",
+      "Minecraft survival": "Use survival tracks from the bundled Minecraft soundtracks.",
+      "Minecraft all": "Include bundled survival, creative, menu, record and credits tracks."
+    }
+  },
+  "audio.customMusic": {
+    "description": "Choose how world music folders contribute to automatic playback.",
+    "items": {
+      "Off": "Ignore world music folders during automatic playback.",
+      "Add to soundtrack": "Mix world music folder tracks with the selected built-in soundtrack.",
+      "Custom only": "Play only world music folder tracks. Empty folders fall back to World music."
+    }
+  },
+  "audio.menuMusic": {
+    "description": "Choose which soundtrack plays in menus.",
+    "items": {
+      "World soundtrack": "Keep the world soundtrack playing when entering or leaving a world.",
+      "Menu folders": "Play menu folder tracks. Empty folders fall back to World music.",
+      "Mix both": "Mix menu folder tracks with the world soundtrack and keep music playing across world transitions."
+    }
+  },
+  "audio.dimensionMusic": {
+    "description": "Choose what happens to the current track when using a portal.",
+    "items": {
+      "Continue": "Let the current track finish after changing dimensions.",
+      "Stop dimension tracks": "End custom tracks assigned to the dimension you leave.",
+      "Stop all": "End the current track whenever the dimension changes."
+    }
+  },
+  "maps.colourMode": {
+    "description": "Choose the terrain colors used by both maps.",
+    "items": {
+      "Textures": "Use block texture colors and biome tints.",
+      "Native map": "Use the original Beta map material colors."
+    }
+  },
+  "maps.caveMode": {
+    "description": "Choose which terrain layer the maps display. Cave checks use loaded terrain only.",
+    "items": {
+      "Surface": "Map the highest terrain, including roofs above caves.",
+      "Automatic": "Map a cave window around the camera below a solid roof and in the Nether.",
+      "Manual": "Map a cave window centered on the selected reference height."
+    }
+  },
+  "maps.waypointBobbing": {
+    "description": "Choose how in-game waypoint markers follow camera motion.",
+    "items": {
+      "Fixed to screen": "Remove walking view bobbing from marker projection while following camera movement.",
+      "Fixed to world": "Let walking view bobbing move the view around markers at their world positions."
+    }
+  },
+  "maps.playerIcon": {
+    "description": "Choose the marker for your current camera position on both maps.",
+    "items": {
+      "Embossed arrow": "Show a shaded directional arrow.",
+      "Flat arrow": "Show an unshaded directional arrow.",
+      "Triangle": "",
+      "Dot": "The dot does not show facing direction."
+    }
+  },
+  "sprint.activation": {
+    "description": "Choose how the sprint key starts and stops sprinting on foot.",
+    "items": {
+      "Modern": "Start while held, then keep sprinting until movement stops.",
+      "Hold": "Hold the sprint key while moving forward. Double-tap sprint is independent.",
+      "Toggle": "Press once to start sprinting and again to stop."
+    }
+  },
+  "power_controls:userinterface.frontViewThirdPerson": {
+    "description": "Choose which perspectives the third-person key visits.",
+    "items": {
+      "Disabled": "Switch between first person and rear third person.",
+      "Normal": "Include front third person in the perspective sequence.",
+      "Hide HUD": "Use front view while the HUD is hidden in third person."
+    }
+  },
+  "power_controls:features.moreSoundsChests": {
+    "description": "Choose sounds for opening and closing chests.",
+    "items": {
+      "Off": "Keep chests silent.",
+      "Modern": "Use modern chest opening and closing sounds.",
+      "Door": "Use Beta door opening and closing sounds."
+    }
+  },
+  "power_hud:config.coordinateDisplay": {
+    "description": "Choose how coordinates appear in the debug overlay.",
+    "items": {
+      "Show": "Display the actual coordinates.",
+      "Hide": "Remove coordinates from the debug overlay.",
+      "Randomize": "Display disguised coordinates instead of the actual position."
+    }
+  },
+  "tweaks.placement.slabMode": {
+    "description": "Choose how repeated fast placement handles slabs.",
+    "items": {
+      "Continuous layers": "Continue half-slab rows across exposed side faces.",
+      "Double slabs": "Combine slab halves into double slabs.",
+      "Match first placement": "Repeat the first slab configuration and keep its placement height."
+    }
+  },
+  "tweaks.placement.restrictionMode": {
+    "description": "Restrict fast placement relative to the first placement.",
+    "items": {
+      "Face": "Use the same clicked face direction as the first placement.",
+      "Plane": "Stay in the plane parallel to the first clicked face.",
+      "Layer": "Stay at the same world height.",
+      "Column": "Follow a column perpendicular to the first clicked face.",
+      "Line": "Follow a straight axis within the first placement plane.",
+      "Diagonal": "Follow a diagonal within the first placement plane."
+    }
+  },
+  "tweaks.placement.listMode": {
+    "description": "Choose which held items can use fast placement. Ordinary placement is unchanged.",
+    "items": {
+      "None": "Allow every held item to use fast placement.",
+      "Blacklist": "Prevent listed items from using fast placement.",
+      "Whitelist": "Allow only listed items to use fast placement.",
+      "Off": "Allow every held item to use fast placement.",
+      "Exclude": "Prevent listed items from using fast placement.",
+      "Allow only": "Allow only listed items to use fast placement."
+    }
+  },
+  "lightOverlay.lightSource": {
+    "description": "Choose which light level the overlay measures.",
+    "items": {
+      "Block light": "Ignore daylight when checking build lighting.",
+      "Combined light": "Include the current daylight and weather."
+    }
+  },
+  "world.difficulty": {
+    "description": "Set combat difficulty and hostile mob spawning.",
+    "items": {
+      "Peaceful": "Remove hostile mobs and restore health over time.",
+      "Easy": "Use reduced hostile mob damage.",
+      "Normal": "Use standard hostile mob damage.",
+      "Hard": "Use increased hostile mob damage."
+    }
+  },
+  "logo.style": {
+    "description": "Choose the title-screen logo style.",
+    "items": {
+      "Retro": "Render the editable title lettering from blocks.",
+      "Beta": "Use the original Beta logo image.",
+      "Java Edition (2017)": "",
+      "Java Edition (2020)": "",
+      "Modern": ""
+    }
+  },
+  "tweaks.freeLookPerspective": {
+    "description": "Choose the camera perspective while free look is active.",
+    "items": {
+      "Third person": "View the player from the detached third-person camera.",
+      "First person": "Look around from the first-person camera."
+    }
+  },
+  "native.renderDistance": {
+    "description": "Choose how far terrain is visible.",
+    "items": {
+      "Far": "Draw terrain up to 16 chunks away.",
+      "Normal": "Draw terrain up to 8 chunks away.",
+      "Short": "Draw terrain up to 4 chunks away.",
+      "Tiny": "Draw terrain up to 2 chunks away."
+    }
+  },
+  "native.fpsLimit": {
+    "description": "Limit rendering speed. VSync can impose a lower limit.",
+    "items": {
+      "Unlimited": "Render frames without a cap.",
+      "Balanced": "Use a 120 FPS update budget without sleeping between frames.",
+      "Power saver": "Cap rendering at 40 FPS and sleep between frames."
+    }
+  },
+  "creative.sprintToggle": {
+    "description": "Choose how the shared flight sprint key activates faster flight.",
+    "items": {
+      "Hold": "Fly faster only while holding the shared flight sprint key.",
+      "Toggle": "Press once to enable faster flight and again to stop. Stopping movement on all axes also resets it."
+    }
+  },
+  "creative.spectatorSprintToggle": {
+    "description": "Choose how the shared flight sprint key activates faster flight.",
+    "items": {
+      "Hold": "Fly faster only while holding the shared flight sprint key.",
+      "Toggle": "Press once to enable faster flight and again to stop. Stopping movement on all axes also resets it."
+    }
+  },
+  "power_camera:config.sprintToggle": {
+    "description": "Choose how the shared flight sprint key activates faster flight.",
+    "items": {
+      "Hold": "Fly faster only while holding the shared flight sprint key.",
+      "Toggle": "Press once to enable faster flight and again to stop. Stopping movement on all axes also resets it."
+    }
+  },
+  "tweaks.freeLookToggle": {
+    "description": "Choose how the free-look key activates the camera.",
+    "items": {
+      "Hold": "Keep free look active only while holding the key.",
+      "Toggle": "Press once to enable free look and again to disable it."
+    }
+  },
+  "maps.middleClickAction": {
+    "description": "Choose what middle-click toggles over the minimap in inventory or pause screens, or while Enlarge minimap is held with mouse utilities enabled.",
+    "items": {
+      "Show items": "Toggle dropped item markers on the maps.",
+      "Show mobs": "Toggle hostile and animal markers together.",
+      "Show waypoints": "Toggle waypoint markers on the maps.",
+      "Show in-game waypoints": "Toggle waypoint markers projected into the world.",
+      "Cave mode": "Switch between surface mapping and the last selected cave mode.",
+      "Mob heads": "Toggle minimap mob heads for this world visit. The mob-icons hold key clears this toggle.",
+      "Chunk borders": "Toggle chunk boundary lines.",
+      "Slime chunks": "Toggle slime-chunk shading where the world seed is known.",
+      "Spawnable overlay": "Toggle spawn-light shading near the camera.",
+      "Path": "Toggle the recorded movement path."
+    }
+  },
+  "recipeBook.buttonStyle": {
+    "description": "Choose the appearance of the recipe-book button.",
+    "items": {
+      "Modern": "Use the recipe-book icon beside the inventory.",
+      "Subtle": "Place a small R beside the inventory sorting button."
+    }
+  },
+  "power_hud:hudpositions.hudPositioningSystem": {
+    "description": "Arrange and preview the HUD. Choose combined or separate positioning in the editor.",
+    "items": {
+      "Vanilla": "Keep the original Beta HUD positions.",
+      "Combined": "Move the native HUD elements as a group.",
+      "Separate": "Position the native HUD elements independently."
+    }
+  },
+  "station-api-configuration:config.loadingScreenOption": {
+    "description": "Choose the StationAPI loading-screen presentation.",
+    "items": {
+      "Show": "Show the animated loading screen and its changing colors.",
+      "Don't animate": "Keep the loading screen still.",
+      "Don't recolor": "Keep the original loading-screen colors.",
+      "Forge-like": "Show the Forge-style loading progress display.",
+      "Hide (vanilla)": "Use the original Minecraft loading-screen presentation."
+    }
+  },
+  "power_mechanics:config.MOB_CONFIG.zombieDropItem": {
+    "description": "Choose zombie drops when Extra zombie drops is on.",
+    "items": {}
+  },
+  "power_mechanics:config.MOB_CONFIG.zombiePigmanDropItem": {
+    "description": "Choose zombie-pigman drops when Extra zombie-pigman drops is on.",
+    "items": {
+      "Gold sword": "May drop one golden sword with random wear."
+    }
+  }
+}

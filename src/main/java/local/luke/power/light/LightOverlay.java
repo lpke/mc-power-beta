@@ -16,7 +16,7 @@ public final class LightOverlay {
 
   public static void tick(Minecraft mc) {
     LightSettings settings = LightConfig.current();
-    if (!settings.enabled || mc.world == null || mc.player == null) {
+    if (!settings.enabled || mc.world == null || mc.player == null || mc.options.hideHud) {
       CACHE.clear();
       world = null;
       return;
@@ -52,7 +52,8 @@ public final class LightOverlay {
 
   public static void render(Minecraft mc, float delta) {
     LightSettings s = LightConfig.current();
-    if (!s.enabled || mc.world == null || mc.world != world || mc.player == null
+    if (mc.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner
+        || !s.enabled || mc.world == null || mc.world != world || mc.player == null
         || mc.options.hideHud || CACHE.cells().isEmpty()) return;
     var camera = mc.field_2807 == null ? mc.player : mc.field_2807;
     double cx = camera.field_1637 + (camera.x - camera.field_1637) * delta;

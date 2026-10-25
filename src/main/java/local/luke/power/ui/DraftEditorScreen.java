@@ -22,6 +22,7 @@ abstract class DraftEditorScreen extends UiScreen {
   private boolean resetPrompt;
   protected final Set<String> collapsed = new HashSet<>();
   private final HoverDelay hover = new HoverDelay();
+  private final SettingsDropdown choices = new SettingsDropdown();
 
   DraftEditorScreen(PowerOptionsScreen parent, SettingsDraft draft) { this.parent = parent; this.draft = draft; }
   protected int left() { return (width - span()) / 2; }
@@ -77,9 +78,10 @@ abstract class DraftEditorScreen extends UiScreen {
   protected String resetQuestion() { return "Reset to defaults?"; }
   protected String extraFooterLabel() { return ""; }
   protected void extraFooterAction() {}
-  protected void cancelControlGesture() { bar.release(); slider = null; inline.cancel(); hover.clear(); }
+  protected void cancelControlGesture() { choices.close(); bar.release(); slider = null; inline.cancel(); hover.clear(); }
   protected void controlsChanged() { scroll = 0; cancelControlGesture(); }
-  protected boolean modal() { return exit.active() || resetPrompt; }
+  protected boolean choicesActive() { return choices.active(); }
+  protected boolean modal() { return exit.active() || resetPrompt || choices.active(); }
   protected int controlX() { return controlsLeft() + controlsSpan() / 2; }
   protected int controlWidth() { return controlsSpan() / 2 - 10; }
   protected int controlX(Setting s) { return controlX() + (hasRelatedControl(s) ? 22 : 0); }
@@ -124,9 +126,9 @@ abstract class DraftEditorScreen extends UiScreen {
     int content = rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height;
     return new ScrollBar.Track(controlsRight() - 4, controlsTop(), Math.max(0, controlsBottom() - controlsTop()), content, scroll);
   }
-  public void init() { Keyboard.enableRepeatEvents(true); inline.cancel(); stopGesture(); hover.clear(); }
-  public void tick() { hover.tick(); }
-  public void removed() { Keyboard.enableRepeatEvents(false); stopGesture(); slider = null; bar.release(); inline.cancel(); TextDrag.cancel(); }
+  public void init() { choices.close(); Keyboard.enableRepeatEvents(true); inline.cancel(); stopGesture(); hover.clear(); }
+  public void tick() { choices.tick(); hover.tick(); }
+  public void removed() { choices.close(); Keyboard.enableRepeatEvents(false); stopGesture(); slider = null; bar.release(); inline.cancel(); TextDrag.cancel(); }
   protected void save() {
     stopGesture(); slider = null; bar.release(); inline.cancel();
     if (parent.acceptEditor(draft)) minecraft.setScreen(parent.returnScreen()); else error = parent.editorError();
@@ -139,11 +141,17 @@ abstract class DraftEditorScreen extends UiScreen {
     inline.begin(s, s, accepted, x, y, w, controlsTop(), controlsBottom());
   }
   protected void edit(Setting s, int direction, int y) {
+    if (SettingsDropdown.accepts(s)) {
+      error = "";
+      click(); choices.open(s, controlX(s), y, controlWidth(s), width, height,
+          () -> editingDraft().checkpoint(), () -> valueChanged(s));
+      return;
+    }
     editingDraft().checkpoint(); error = "";
     click();
     if (InheritedColors.accepts(s)) { InheritedColors.toggle(s, editingDraft().settings()); valueChanged(s); }
     else if (ColourScreen.accepts(s)) openColour(s);
-    else if (s.kind == Setting.Kind.BOOLEAN || s.kind == Setting.Kind.CHOICE) { s.cycle(direction); valueChanged(s); }
+    else if (s.kind == Setting.Kind.BOOLEAN) { s.cycle(direction); valueChanged(s); }
     else if (s.numeric() || s.kind == Setting.Kind.TEXT)
       openInline(s, () -> valueChanged(s), controlX(s), y, controlWidth(s));
     else minecraft.setScreen(new ValueScreen(s, this, () -> valueChanged(s)));
@@ -157,6 +165,7 @@ abstract class DraftEditorScreen extends UiScreen {
     slider.slide((x - controlX(slider) - 4d) / Math.max(1, controlWidth(slider) - 8)); valueChanged(slider);
   }
   protected void keyPressed(char c, int key) {
+    if (choices.key(this, key)) return;
     if (exit.key(key)) return;
     if (resetPrompt) { if (key == Keyboard.KEY_ESCAPE) resetPrompt = false; return; }
     if (inline.key(c, key)) return;
@@ -171,6 +180,7 @@ abstract class DraftEditorScreen extends UiScreen {
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
     int wheel = Mouse.getEventDWheel();
+    if (choices.wheel(wheel)) return;
     if (controlsVisible() && !modal() && wheel != 0 && inside(x, y, controlsLeft(), controlsTop(), controlsSpan(), controlsBottom() - controlsTop()))
       scroll = Math.max(0, Math.min(track().maximum(), scroll - Math.signum(wheel) * 46));
   }
@@ -229,6 +239,7 @@ abstract class DraftEditorScreen extends UiScreen {
     return buttons;
   }
   protected void mouseClicked(int x, int y, int button) {
+    if (choices.press(this, x, y, button)) return;
     if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent.returnScreen()))) return;
     if (resetPrompt) {
       if (button == 0) for (ResetButton f : resetButtons()) if (inside(x, y, f.x, f.y, f.width, 20)) {
@@ -289,6 +300,7 @@ abstract class DraftEditorScreen extends UiScreen {
   }
   @Override
   protected void mouseReleased(int x, int y, int button) {
+    choices.release(y, button);
     if (button >= 0) {
       if (Display.isActive() && !modal()) {
         if (button == 0 && slider != null) slide(x);
@@ -310,6 +322,7 @@ abstract class DraftEditorScreen extends UiScreen {
     }
     else if (ColourScreen.accepts(s)) colourButton(ColorSettings.hex(s), ColorSettings.opacityPercent(s, editingDraft().settings()), x, y, w, mx, my);
     else if (usesSlider(s)) slider(fit(display(s), w - 8), x, y, w, mx, my, (s.value.getAsDouble() - s.min) / Math.max(.0001, s.max - s.min));
+    else if (SettingsDropdown.accepts(s)) WaypointSetDropdown.button(this, display(s), x, y, w, mx, my, true, choices.editing(s));
     else button(fit(display(s), w - 8), x, y, w, 18, mx, my, true);
     if (resettable(s)) button("R", resetX(), y, 20, 18, mx, my, !atDefault(s));
   }
@@ -359,8 +372,9 @@ abstract class DraftEditorScreen extends UiScreen {
     for (Footer f : footer()) button(fit(f.label, f.width - 8), f.x, height - 29, f.width, 20, mx, my, f.enabled);
     String help = hoverHelp(mx, my);
     if (!help.isBlank()) { tip = help; hoverId = "editor:" + help; }
-    if (hover.ready(slider == null && !modal() && Display.isActive() ? hoverId : "") && !tip.isBlank()) tooltip(tip, mx, my);
+    if (hover.ready(!choices.active() && slider == null && !modal() && Display.isActive() ? hoverId : "") && !tip.isBlank()) tooltip(tip, mx, my);
     inline.renderError(this);
+    choices.render(this, pointerX, pointerY);
     if (resetPrompt) {
       GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_DEPTH_BUFFER_BIT);
       try {

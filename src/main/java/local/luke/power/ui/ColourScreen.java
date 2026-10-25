@@ -124,7 +124,7 @@ public final class ColourScreen extends UiScreen {
   }
   private void leave() {
     stopGesture(); inline.cancel(); hex.focused = false;
-    exit.leave(changed(), () -> minecraft.setScreen(parent));
+    exit.leave(changed(), () -> showScreen(parent));
   }
 
   private void parse() {
@@ -178,8 +178,8 @@ public final class ColourScreen extends UiScreen {
   }
 
   protected void mouseClicked(int x, int y, int button) {
-    if (!Display.isActive() || minecraft.currentScreen != this) { stopGesture(); return; }
-    if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent))) return;
+    if (!Display.isActive() || minecraft.currentScreen != this && !inLayer()) { stopGesture(); return; }
+    if (exit.click(this, x, y, button, this::save, () -> showScreen(parent))) return;
     if (dragging >= 0 || inline.press(x, y, button)) return;
     if (button != 0 && button != 1) return;
     if (button == 0) for (int i = 0; i < 2; i++) {
@@ -237,18 +237,23 @@ public final class ColourScreen extends UiScreen {
 
   @Override
   protected void mouseReleased(int x, int y, int button) {
-    if (button == 0) { if (!exit.active() && Display.isActive() && minecraft.currentScreen == this) drag(x, y); stopGesture(); }
+    if (button == -1 && inLayer() && dragging >= 0 && !exit.active() && Display.isActive()) drag(x,y);
+    if (button == 0) { if (!exit.active() && Display.isActive() && (minecraft.currentScreen == this || inLayer())) drag(x, y); stopGesture(); }
     super.mouseReleased(x, y, button);
   }
 
   public void onMouseEvent() {
     super.onMouseEvent();
-    if (minecraft.currentScreen != this || !Display.isActive() || exit.active()) { stopGesture(); return; }
+    if (minecraft.currentScreen != this && !inLayer() || !Display.isActive() || exit.active()) { stopGesture(); return; }
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
     if (dragging >= 0) { drag(x, y); return; }
-    int wheel = Mouse.getEventDWheel();
-    if (wheel != 0 && inBody(x, y)) {
+    layerWheel(Mouse.getEventDWheel());
+  }
+  @Override public void layerWheel(int wheel) {
+    int x = Mouse.getX() * width / minecraft.displayWidth;
+    int y = height - Mouse.getY() * height / minecraft.displayHeight - 1;
+    if (!exit.active() && wheel != 0 && inBody(x, y)) {
       inline.cancel(); hex.focused = false;
       scroll = Math.max(0, Math.min(track().maximum(), scroll - Math.signum(wheel) * ROW * 2));
     }
@@ -272,7 +277,7 @@ public final class ColourScreen extends UiScreen {
       return;
     }
     accepted.run();
-    minecraft.setScreen(parent);
+    showScreen(parent);
   }
 
   protected void keyPressed(char c, int key) {

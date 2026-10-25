@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [4.5.0] - 2026-10-25
+
+- Replace multi-value settings buttons with dropdowns, including selected/default markers, short option tooltips and scrolling lists.
+- Add photo-mode waypoint markers, middle-click location actions and a Show/Hide Toggles menu for items, mobs, waypoints, surface chunk borders and spawnable terrain.
+- Allow full bright and relevant overlay hotkeys in photo mode, and restore normal lighting before returning to Pause.
+- Add an optional gold rendered-area border to the minimap and World Map.
+- Stop light-overlay surveys while their views are hidden.
+
 ## [4.4.9] - 2026-10-25
 
 - Keep minimap mouse controls available while quick settings is open, preserving inventory and menu ownership.

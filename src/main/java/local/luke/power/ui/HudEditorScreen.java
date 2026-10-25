@@ -59,6 +59,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
     select("minimap"); clearHighlight(); initialSetting = ""; scroll = 0;
   }
   public void removed() {
+    reorder.closePicker();
     HudEditorMemory.selected = selected; HudEditorMemory.scrolls.put(selected, scroll);
     HudEditorMemory.collapsed.clear(); HudEditorMemory.collapsed.addAll(collapsed); super.removed();
   }
@@ -78,7 +79,9 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected String title() { return "HUD editor"; }
   protected String doneLabel() { return reorder.active() ? "Save F3" : "Done"; }
   protected String cancelLabel() { return reorder.active() ? "Back" : "Cancel"; }
+  public void tick() { super.tick(); reorder.tick(); }
   public void init() {
+    reorder.closePicker();
     toolbarCache = null; super.init();
     if (!initialSetting.isEmpty()) {
       revealControl(draft.get(initialSetting));
@@ -116,6 +119,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
     int wheel = Mouse.getEventDWheel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     int y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+    if (reorder.picker() && wheel != 0) { reorder.wheel(wheel, x, y); return; }
     if (wheel != 0 && org.lwjgl.opengl.Display.isActive() && !Mouse.isGrabbed()
         && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !modal() && !selecting && !inline.active() && !reorder.active()
         && dragging == null && !divider.dragging() && previewVisible()
@@ -396,6 +400,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   protected void stopGesture() { dragging = null; divider.stop(); if (reorder != null) reorder.cancelDrag(); }
   protected void mouseClicked(int x, int y, int button) {
+    if (reorder.picker()) { reorder.press(x, y, button); return; }
+    if (choicesActive()) { super.mouseClicked(x, y, button); return; }
     if (reorderExit.click(this, x, y, button, () -> finishReorder(true), () -> finishReorder(false))) return;
     if (button == 1 && !modal() && !selecting && !inline.active() && !reorder.active()
         && dragging == null && !divider.dragging() && previewVisible()
@@ -434,6 +440,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
     super.mouseClicked(x, y, button);
   }
   protected void keyPressed(char c, int key) {
+    if (choicesActive()) { super.keyPressed(c, key); return; }
     if (reorderExit.key(key)) return;
     if (reorder.active() && reorder.key(c, key)) return;
     if (key == Keyboard.KEY_ESCAPE && reorder.active() && !super.modal() && !inline.active()) { leaveReorder(); return; }
@@ -450,7 +457,8 @@ public final class HudEditorScreen extends DraftEditorScreen {
   }
   private int selectorRows() { return Math.max(1, Math.min(selectionIds().size(), (height - 96) / 20)); }
   public void render(int x, int y, float delta) {
-    super.render(selecting ? -1000 : x, selecting ? -1000 : y, delta);
+    super.render(selecting || reorder.picker() ? -1000 : x, selecting || reorder.picker() ? -1000 : y, delta);
+    reorder.drawPicker(x, y);
     if (reorder.active()) {
       GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT);
       try {

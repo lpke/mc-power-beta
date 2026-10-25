@@ -9,6 +9,7 @@ import net.minecraft.entity.projectile.FishingBobberEntity;
 public final class EntityVisibility {
   private EntityVisibility() {}
   public static boolean hidden(Entity entity) {
+    if (local.luke.power.ui.PhotoModeTools.hidden(entity)) return true;
     VisualSettings s = VisualConfig.current();
     if (!s.hideEntities) return false;
     if (entity instanceof class_142) return s.hideItems;

@@ -28,8 +28,7 @@ public final class MapLightShading {
 
   public static void tick(Minecraft mc, MapSettings settings) {
     checksLastTick = 0;
-    if (!settings.lightOverlay || mc.world == null || Maps.cache() == null
-        || !settings.minimap && !(settings.worldMap && mc.currentScreen instanceof WorldMapScreen)) {
+    if (!settings.lightOverlay || mc.world == null || Maps.cache() == null || !viewVisible(mc, settings)) {
       if (world != null) clear();
       return;
     }
@@ -68,6 +67,15 @@ public final class MapLightShading {
     }
     if (++ticks % 4 == 0 && cells.isEmpty() || cursor == total) cells = List.copyOf(pending);
     if (cursor == total) { cursor = 0; pending.clear(); }
+  }
+
+  private static boolean viewVisible(Minecraft mc, MapSettings settings) {
+    if (mc.currentScreen instanceof WorldMapScreen screen)
+      return screen.terrainVisible() && (settings.worldMap || screen.minimapRadarActive());
+    if (mc.currentScreen instanceof local.luke.power.ui.HudEditorScreen screen)
+      return screen.minimapRadarActive();
+    // This shared predicate follows F1, F3, inventory visibility and menu ownership.
+    return Minimap.radarActive(mc, settings);
   }
 
   public static void draw(Minecraft mc, MapProjection view, int dimension, boolean circle, boolean mini, MapSettings settings) {

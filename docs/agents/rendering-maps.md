@@ -1,5 +1,11 @@
 # Rendering, HUDs and maps
 
+- Gate optional work before sampling, tracking, cache preparation or drawing.
+  Turning a feature off, or hiding its last relevant view, stops that work.
+  Keep background work only for a concrete player benefit, such as map exploration
+  history, and document that choice. Check both disabled and temporarily hidden
+  states when testing performance-sensitive features.
+
 - Coordinate reporting uses `HudCoordinates` through the shared `ReportedPosition`
   provider. Survival and Creative use collision-box feet Y when Use feet Y coordinates
   is on, and native physical eye Y (`player.y`) when off, including flight, falling

@@ -965,3 +965,19 @@ existing row/scroll priority, Creative hover swaps, text ownership and mouse
 slot/header/outside guards. Every case restores its captured settings and inventory.
 
 `debug-410` checks Debug controls, actions and JFR recording. `debug-410 setup` prepares native key testing; `debug-410 state` reports the current key/overlay state.
+
+4.5.0 checks use a muted, focused disposable client. Capture near-final UI before acceptance:
+
+- `dropdown-450 capture` captures the Options popup/default tooltip at small and normal sizes.
+  `dropdown-450 screens` captures all changed selector families at both sizes.
+  `dropdown-450` checks the complete live choice inventory and selected-base defaults,
+  isolated F3 presets, wheel/drag scrolling and sidebar release ownership.
+- `photo-450 open`, `stage`, `toggles`, `state`, `middle X Y` and `stage-modal` stage
+  native photo tools and modal screenshots. `photo-450 check` checks lighting restoration,
+  hotkey priority, modal drafts, native matrix picking, chunk-load exclusion and bounded surveys.
+  `photo-450 close` restores staged bindings. `tools/photo_controls.py` covers native/raw
+  pointer input; middle click now opens location actions instead of rotating the camera.
+- `map-450 open|capture|check` checks renderer bounds, defaults and shared map checkboxes.
+  `light-450` verifies zero hidden-survey work across F1, F3, photo and covered menus.
+
+Keep screenshots and generated inventories with the private review report; never ship them.

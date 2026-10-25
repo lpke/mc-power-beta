@@ -416,6 +416,7 @@ public final class MapRenderer {
       boolean mini, MapSettings s, RadarIcons.Batch heads) {
     var pose = Maps.framePose(mc, delta);
     MapLightShading.draw(mc, view, dimension, circle, mini, s);
+    RenderedArea.draw(mc, view, dimension, circle, s);
     var store = Maps.waypoints();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {

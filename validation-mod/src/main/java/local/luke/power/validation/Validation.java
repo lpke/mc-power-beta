@@ -58,7 +58,13 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("map-449 ")) Map449Checks.run(mc,command.substring(8));
+      if (command.startsWith("photo-450 ")) Photo450Checks.run(mc,command.substring(10));
+      else if (command.startsWith("map-450 ")) Map450Checks.run(mc,command.substring(8));
+      else if (command.equals("dropdown-450 screens")) Dropdown450Screens.capture(mc);
+      else if (command.equals("dropdown-450 capture")) Dropdown450Checks.capture(mc);
+      else if (command.equals("dropdown-450")) Dropdown450Checks.run(mc);
+      else if (command.equals("light-450")) Light450Checks.run(mc);
+      else if (command.startsWith("map-449 ")) Map449Checks.run(mc,command.substring(8));
       else if (command.startsWith("photo-449 ")) Photo449Checks.run(mc,command.substring(10));
       else if (command.equals("waypoint-449")) Waypoint449Checks.run(mc);
       else if (command.equals("tweak-lifecycle-exit-448")) TweakLifecycle448Checks.boundary(mc);
@@ -374,7 +380,13 @@ public final class Validation {
       log("COMMAND DONE " + command);
     } catch (Throwable e) {
       try {
-        log("COMMAND FAILED " + e);
+        Throwable cause = e;
+        Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
+        while (cause.getCause() != null && seen.add(cause)) cause = cause.getCause();
+        log("COMMAND FAILED " + cause);
+        var details = new java.io.StringWriter();
+        e.printStackTrace(new java.io.PrintWriter(details));
+        log(details.toString());
       } catch (Exception ignored) {
       }
       e.printStackTrace();

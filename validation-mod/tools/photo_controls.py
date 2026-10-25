@@ -37,7 +37,7 @@ def run(v):
         v.tap('q');click('tiltSlider',.8);v.command('photo-controls resize')
         assert state()['zoomGoal']==opening['zoomGoal'],state()
         print('PASS photo opening zoom survives center, rotation, tilt and resize',helper,opening['zoomGoal'],flush=True)
-        for code in [1,3,2]:
+        for code in [1,3]:
             for delay in [0,.005,.04,.15]:
                 reset();before=state()
                 button(code,True);time.sleep(delay);v.move(30,20);time.sleep(delay);button(code,False)
@@ -53,6 +53,14 @@ def run(v):
                 v.move(7,4);time.sleep(.1);idle=state()
                 assert all(idle[k]==after[k] for k in ['cameraX','cameraY','rotationGoal','tiltGoal']),idle
                 print('PASS photo drag',helper,code,delay,flush=True)
+        reset();before=state();button(2,True);v.move(30,20);button(2,False);time.sleep(.2)
+        after=state()
+        assert after['dragButton']==-1 and all(after[k]==before[k] for k in ['cameraX','cameraY','rotationGoal','tiltGoal']),after
+        # Middle click owns its location menu instead of rotating the camera.
+        v.command('photo-450 state')
+        if json.loads((v.game/'power-beta-data/reports/photo-450-state.json').read_text())['context']:
+            v.tap('Escape')
+        print('PASS photo middle-click leaves the camera still',helper,flush=True)
         reset();button(1,True);v.move(30,20);button(1,False);time.sleep(.1)
         click('centerButton');assert state()['cameraX']==state()['cameraY']==0,state()
         reset()

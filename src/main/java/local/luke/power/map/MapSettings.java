@@ -47,12 +47,13 @@ public final class MapSettings {
       worldWaypoints = true,
       waypointNames = true,
       waypointDistances = true;
+  public boolean photoWaypoints;
   public int waypointDistance = 1000;
   public int waypointTextSize = 75;
   public int worldMapWaypointSize = 85, waypointBobbing = 1;
   public boolean waypointDistanceScaling = true;
   public boolean deathpoints = true, keepOldDeaths = true;
-  public boolean chunkGrid, slimeChunks, lightOverlay, footsteps, pauseMap;
+  public boolean chunkGrid, slimeChunks, lightOverlay, footsteps, pauseMap, renderedArea;
   public int columnsPerTick = 512,
       cacheTiles = 256,
       uploadsPerFrame = 4,

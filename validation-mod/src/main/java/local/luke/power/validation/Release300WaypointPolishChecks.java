@@ -173,13 +173,12 @@ final class Release300WaypointPolishChecks {
       check(number(editor, "row", 7) == number(editor, "row", 0) + 25 && number(editor, "row", 1) == number(editor, "row", 7) + 25,
           "Abbreviation is not immediately below Name");
       click(editor, number(editor, "fieldLeft", 1) + 8, number(editor, "row", 1) + 8, 0);
-      check((boolean)get(editor, "selectingSet"), "editor Set is not a dropdown");
+      check((boolean)call(get(editor, "choices"), "active"), "editor Set is not a dropdown");
       List<String> sets = (List<String>)call(editor, "sets"); int builds = sets.indexOf("Builds");
-      click(editor, number(editor, "fieldLeft", 1) + 8, number(editor, "setTop") + builds * 20 + 8, 0);
+      click(editor, number(editor, "fieldLeft", 1) + 8, ((Number)get(get(editor, "choices"), "y")).intValue() + builds * 20 + 8, 0);
       check(fields(editor).get(1).text().equals("Builds") && points.current(point.id).set.equals("Default"), "existing set selection escaped the editor draft");
       click(editor, number(editor, "fieldLeft", 1) + 8, number(editor, "row", 1) + 8, 0);
-      int count = ((List<?>)call(editor, "sets")).size(); set(editor, "setScroll", Math.max(0, count + 1 - number(editor, "setRows")));
-      click(editor, number(editor, "fieldLeft", 1) + 8, number(editor, "setTop") + (count - ((Number)get(editor, "setScroll")).intValue()) * 20 + 8, 0);
+      key(editor, Keyboard.KEY_END); key(editor, Keyboard.KEY_RETURN);
       Object dialog = get(editor, "setDialog"); check((boolean)call(dialog, "active"), "New set option failed to reuse set-name dialog");
       ((TextInput)get(dialog, "input")).setText("Private draft set"); key(editor, Keyboard.KEY_RETURN);
       check(fields(editor).get(1).text().equals("Private draft set") && !points.store.sets().contains("Private draft set"), "new editor set was published before Done");
@@ -200,7 +199,8 @@ final class Release300WaypointPolishChecks {
           && sharedColors.equals(Catalog.JSON.toJsonTree(MenuPreferences.current().colours)), "Discard published abbreviation/new set/swatches");
       editor = new WaypointEditorScreen(parent, point); open(mc, editor, size);
       fields(editor).get(7).setText("HB");
-      call(editor, "chooseSet", new Class<?>[]{int.class}, ((List<?>)call(editor, "sets")).size());
+      var visibleSets = (List<?>)call(editor, "sets");
+      call(editor, "chooseSet", new Class<?>[]{List.class, int.class}, visibleSets, visibleSets.size());
       dialog = get(editor, "setDialog"); ((TextInput)get(dialog, "input")).setText("Accepted set"); key(editor, Keyboard.KEY_RETURN);
       click(editor, number(editor, "left") + number(editor, "span") / 4, editor.height - 16, 0);
       Waypoint saved = points.current(point.id);

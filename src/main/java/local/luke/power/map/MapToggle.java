@@ -14,7 +14,8 @@ public enum MapToggle {
   CHUNKS("Chunk borders", "chunkGrid"),
   SLIME("Slime chunks", "slimeChunks"),
   LIGHT("Spawnable overlay", "lightOverlay"),
-  PATH("Path", "footsteps");
+  PATH("Path", "footsteps"),
+  RENDERED_AREA("Show rendered area", "renderedArea");
 
   public static final List<MapToggle> ALL = List.of(values());
   public static final List<MapToggle> WORLD_MAP = ALL.stream().filter(toggle->toggle!=CAVES).toList();
@@ -35,6 +36,7 @@ public enum MapToggle {
       case SLIME -> settings.slimeChunks;
       case LIGHT -> settings.lightOverlay;
       case PATH -> settings.footsteps;
+      case RENDERED_AREA -> settings.renderedArea;
     };
   }
 

@@ -63,16 +63,27 @@ public abstract class CreateWorldMixin extends Screen {
     return "Game rules: " + switch (power$draft.preset()) { case SURVIVAL -> "Survival"; case CHEATS -> "Cheats"; case CUSTOM -> "Custom"; };
   }
   @Unique private String power$difficultyLabel() { return "Difficulty: " + POWER_DIFFICULTIES[power$difficulty]; }
-  @Unique private void power$cycle(int id, int direction) {
-    if (id == 2) power$draft.cycle(direction);
-    if (id == 3) power$difficulty = Math.floorMod(power$difficulty + direction, 4);
-    init();
+  @Unique private void power$select(int id) {
+    int left = width / 2 - 132 + (id == 3 ? 134 : 0);
+    java.util.List<String> labels = id == 2 ? java.util.List.of("Survival", "Cheats", "Custom") : java.util.List.of(POWER_DIFFICULTIES);
+    java.util.List<String> help = id == 2 ? java.util.List.of(
+        "Use your Survival creation defaults and start in Survival mode.",
+        "Use your Cheats creation defaults and start in Creative mode. Requires Creative permission.",
+        "Use your custom rules draft.") : java.util.List.of(
+        "Remove hostile mobs and restore health over time.", "Use reduced hostile mob damage.",
+        "Use standard hostile mob damage.", "Use increased hostile mob damage.");
+    minecraft.setScreen(new local.luke.power.ui.ChoiceScreen(this, labels, help,
+        id == 2 ? power$draft.preset().ordinal() : power$difficulty, id == 2 ? 0 : WorldDifficulty.DEFAULT,
+        left, 164, 130, index -> {
+          if (id == 2) while (power$draft.preset().ordinal() != index) power$draft.cycle(1);
+          else power$difficulty = index;
+        }));
   }
   @Inject(method = "buttonClicked", at = @At("HEAD"), cancellable = true)
   private void power$choose(ButtonWidget button, CallbackInfo ci) {
     if (!button.active) return;
     if (button.id == 0 && !power$draft.problem().isEmpty()) { ci.cancel(); return; }
-    if (button.id == 2 || button.id == 3) { power$cycle(button.id, 1); ci.cancel(); }
+    if (button.id == 2 || button.id == 3) { power$select(button.id); ci.cancel(); }
     if (button.id == 4) {
       local.luke.power.ui.PowerOptionsScreen.openCreationRules(minecraft, this, power$draft); ci.cancel();
     }
@@ -83,7 +94,7 @@ public abstract class CreateWorldMixin extends Screen {
     for (Object entry : buttons) {
       ButtonWidget button = (ButtonWidget) entry;
       if ((button.id == 2 || button.id == 3) && button.isMouseOver(minecraft, x, y)) {
-        power$cycle(button.id, -1); minecraft.soundManager.method_2009("random.click", 1, 1); ci.cancel(); return;
+        power$select(button.id); minecraft.soundManager.method_2009("random.click", 1, 1); ci.cancel(); return;
       }
     }
   }

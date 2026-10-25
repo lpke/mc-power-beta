@@ -44,6 +44,10 @@ public final class RenderControls {
     Minecraft mc = client();
     if (mc.world == null || mc.player == null || mc.currentScreen != null || mc.paused
         || mc.player.dead || mc.player.health <= 0 || !Display.isActive()) return;
+    photoPress(mc, key);
+  }
+  /** Called after the photo screen has reserved its camera and modal controls. */
+  public static void photoPress(Minecraft mc, int key) {
     if (Bindings.matches(ENTITIES, key)) {
       VisualSettings settings = VisualConfig.copy(); settings.hideEntities = !settings.hideEntities;
       VisualConfig.preview(settings);

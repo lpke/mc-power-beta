@@ -486,16 +486,11 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   private String folderLabel() {
-    return folders.isEmpty() ? "No folders" : Objects.toString(Path.of(folder).getFileName(), folder);
+    return folders.isEmpty() ? "No folders" : folderLabel(folder);
   }
+  private static String folderLabel(String folder) { return Objects.toString(Path.of(folder).getFileName(), folder); }
 
-  private void cycleFolder(int direction) {
-    if (folders.isEmpty()) return;
-    folder = folders.get(Math.floorMod(folders.indexOf(folder) + direction, folders.size()));
-    lastFolder = folder;
-    scroll(0);
-    rebuild();
-  }
+
 
   public void tick() {
     if (conversionRevision != Mp3Converter.revision()) {
@@ -590,7 +585,12 @@ public final class MusicLibraryScreen extends UiScreen {
         if (tab.id().equals("cycle")) {
           var choices=List.of("active","","favourites","presets","custom","folder");
           String current=folderSelected()?"folder":folder;
-          selectFilter(choices.get(Math.floorMod(choices.indexOf(current)+(b==0?1:-1),choices.size())));
+          parent.choose(List.of("Active", "Everything", "Favorites", "Preset", "All folders", "Folder"),
+              List.of("Tracks allowed by your current soundtrack, folders and playback context.",
+                  "All available built-in and custom tracks.", "Starred tracks. Favorites do not change automatic rotation.",
+                  "Browse a saved preset without loading it.", "Tracks found in all your music folders.",
+                  "Tracks in one folder and its subfolders."),
+              choices.indexOf(current), tab.x(), tab.y(), tab.width(), i -> selectFilter(choices.get(i)));
         } else selectFilter(tab.id());
         return;
       }
@@ -599,9 +599,18 @@ public final class MusicLibraryScreen extends UiScreen {
           var choices = edits.presets();
           if (!choices.isEmpty()) {
             int i = -1; for (int n=0;n<choices.size();n++) if (choices.get(n).id().equals(selectedPreset)) i=n;
-            selectedPreset=choices.get(Math.floorMod(i+(b==0?1:-1),choices.size())).id(); rebuild();
+            parent.choose(choices.stream().map(p -> edits.name(p.id())).toList(), List.of(), i,
+                tabs.folderX(), tabs.folderY(), tabs.folderWidth(), n -> {
+                  selectedPreset = choices.get(n).id(); rebuild();
+                });
           }
-        } else if (!folders.isEmpty()) { click(); cycleFolder(b == 0 ? 1 : -1); }
+        } else if (!folders.isEmpty()) {
+          click(); var choices = List.copyOf(folders);
+          parent.choose(choices.stream().map(MusicLibraryScreen::folderLabel).toList(),
+              choices, choices.indexOf(folder), tabs.folderX(), tabs.folderY(), tabs.folderWidth(), i -> {
+                folder = choices.get(i); lastFolder = folder; scroll(0); rebuild();
+              });
+        }
         return;
       }
     }
@@ -738,9 +747,13 @@ public final class MusicLibraryScreen extends UiScreen {
       var tabs = filters();
       for (var tab : tabs.tabs()) {
         boolean selected = tab.id().equals("cycle") || (tab.id().equals("folder") ? folderSelected() : tab.id().equals(folder));
-        fill(tab.x(), tab.y(), tab.x() + tab.width(), tab.y() + 18, selected ? 0xb0000000 : 0x40000000);
-        text(tab.label(), tab.x() + 4, tab.y() + 5, selected ? 0xffffff : 0xaaaaaa);
-        if (selected) fill(tab.x(), tab.y() + 17, tab.x() + tab.width(), tab.y() + 18, 0xffaaaaaa);
+        if (tab.id().equals("cycle"))
+          WaypointSetDropdown.button(this, tab.label(), tab.x(), tab.y(), tab.width(), mx, my, true, false);
+        else {
+          fill(tab.x(), tab.y(), tab.x() + tab.width(), tab.y() + 18, selected ? 0xb0000000 : 0x40000000);
+          text(tab.label(), tab.x() + 4, tab.y() + 5, selected ? 0xffffff : 0xaaaaaa);
+          if (selected) fill(tab.x(), tab.y() + 17, tab.x() + tab.width(), tab.y() + 18, 0xffaaaaaa);
+        }
         if (inside(mx, my, tab.x(), tab.y(), tab.width(), 18))
           tip = switch (tab.id()) {
             case "active" -> "The pool allowed by your soundtrack, folders and world/menu rules. Excluded tracks remain visible.";
@@ -754,7 +767,9 @@ public final class MusicLibraryScreen extends UiScreen {
       }
       if (folderSelected() || folder.equals("presets")) {
         boolean presetFilter = folder.equals("presets");
-        button(fit(presetFilter ? edits.name(selectedPreset) : folderLabel(), tabs.folderWidth() - 8), tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18, mx, my, presetFilter ? !edits.presets().isEmpty() : !folders.isEmpty());
+        WaypointSetDropdown.button(this, presetFilter ? edits.name(selectedPreset) : folderLabel(),
+            tabs.folderX(), tabs.folderY(), tabs.folderWidth(), mx, my,
+            presetFilter ? !edits.presets().isEmpty() : !folders.isEmpty(), false);
         if (inside(mx, my, tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18))
           tip = presetFilter ? "Browse another saved preset without loading it." : folders.isEmpty() ? "Add music folders in Audio settings." : folder;
       }

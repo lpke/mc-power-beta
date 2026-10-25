@@ -43,8 +43,11 @@ public final class MapTogglePanel extends UiScreen {
         Math.max(0,Math.min(toggles.size()-visible,first)),visible,toggles);
   }
   public static void draw(Minecraft mc,Layout layout,int mouseX,int mouseY,boolean minimap) {
+    draw(mc,layout,mouseX,mouseY,toggle -> toggle.enabled(MapConfig.current(),minimap));
+  }
+  public static void draw(Minecraft mc,Layout layout,int mouseX,int mouseY,java.util.function.Predicate<MapToggle> enabled) {
     VIEW.init(mc,mc.currentScreen.width,mc.currentScreen.height);
-    var box=layout.bounds();var settings=MapConfig.current();
+    var box=layout.bounds();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {
       GL11.glDisable(GL11.GL_DEPTH_TEST);GL11.glDisable(GL11.GL_LIGHTING);
@@ -56,7 +59,7 @@ public final class MapTogglePanel extends UiScreen {
         if(hovered)VIEW.fill(row.x(),row.y(),row.x()+row.width(),row.y()+row.height(),0xff444444);
         VIEW.fill(row.x()+3,row.y()+5,row.x()+13,row.y()+15,0xffa0a0a0);
         VIEW.fill(row.x()+4,row.y()+6,row.x()+12,row.y()+14,0xff101010);
-        if(toggle.enabled(settings,minimap)) {
+        if(enabled.test(toggle)) {
           int left=row.x()+4,top=row.y()+7;
           for(int y=0;y<TICK.length;y++)for(int x=0;x<TICK[y].length();x++)
             if(TICK[y].charAt(x)=='#')VIEW.fill(left+x,top+y,left+x+1,top+y+1,0xffffffff);

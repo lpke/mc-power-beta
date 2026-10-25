@@ -358,13 +358,16 @@ public final class Release300Checks {
         int left = number(list, "left"), span = number(list, "span");
         check(left >= 8 && left + span <= w - 8 && span <= h * 16 / 9 - 16, "Waypoints escaped centered 16:9 content");
         Object layout = call(list, "layout");
-        click(list, left + 8, 55, 0); check((boolean)get(list, "selectingSet"), "set dropdown did not open");
-        key(list, Keyboard.KEY_ESCAPE); check(!(boolean)get(list, "selectingSet"), "set dropdown did not own Escape");
+        click(list, left + 8, 55, 0); check((boolean)call(get(list, "choices"), "active"), "set dropdown did not open");
+        key(list, Keyboard.KEY_ESCAPE); check(!(boolean)call(get(list, "choices"), "active"), "set dropdown did not own Escape");
         click(list, number(layout, "createX") + 8, 55, 0); check((boolean)get(list, "creatingSet"), "New set button did not open its dialog");
         int sort = (int)get(list, "sort"); click(list, number(layout, "sortX") + 8, 35, 0);
         check((int)get(list, "sort") == sort, "modal click reached the list behind New set");
         key(list, Keyboard.KEY_ESCAPE); check(!(boolean)get(list, "creatingSet"), "New set did not own Escape");
-        click(list, number(layout, "sortX") + 8, 35, 1); check((int)get(list, "sort") == Math.floorMod(sort - 1, 3), "right click did not reverse sort");
+        click(list, number(layout, "sortX") + 8, 35, 1);
+        check((int)get(list, "sort") == sort, "opening the sort menu changed its value");
+        key(list, Keyboard.KEY_UP); key(list, Keyboard.KEY_RETURN);
+        check((int)get(list, "sort") == Math.floorMod(sort - 1, 3), "sort dropdown did not apply the focused choice");
       }
     });
     test("World Map screenshot action writes a readable native-size PNG inside the clone screenshots directory", () -> {

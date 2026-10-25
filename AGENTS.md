@@ -32,6 +32,10 @@ review their changes. Never run Loom builds concurrently, including in subagents
 - Test only in disposable clones outside the normal instance list. Never launch or
   edit an active instance. Use silent audio routing and stop only verified processes
   you started. Preserve all user data and verified backups.
+- Plan toggleable features around their actual consumers. Disabled or currently
+  irrelevant features stop their calculations, scans and preparation, even for
+  small costs. Retain background work only when its player benefit justifies it,
+  such as recording explored terrain for a later map visit.
 - Inventory writes retain leases, complete native item data, durable journals,
   callback validation and owned rollback. UI drafts never edit gameplay inventory.
 - Read the relevant instructions below before changing that area. Reuse existing

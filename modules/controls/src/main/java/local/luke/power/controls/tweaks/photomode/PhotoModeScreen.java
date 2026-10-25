@@ -1,6 +1,7 @@
 package local.luke.power.controls.tweaks.photomode;
 
 import local.luke.power.controls.util.ModOptions;
+import local.luke.power.input.PhotoModeHooks;
 import local.luke.power.controls.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
@@ -14,7 +15,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.Display;
 
 @SuppressWarnings("unchecked")
-public class PhotoModeScreen extends Screen implements local.luke.power.input.PhotoProjection.CameraOwner {
+public class PhotoModeScreen extends Screen implements local.luke.power.input.PhotoProjection.CameraOwner, local.luke.power.input.PhotoModeHooks.Camera {
     private ButtonWidget exitButton;
     private SliderWidget tiltSlider;
     private SliderWidget timeSlider;
@@ -105,11 +106,20 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
         this.lastTickTime = System.nanoTime();
         this.updateButtonsText();
         ModOptions.photoModeFogMultiplier = 100F;
+        PhotoModeHooks.tools().init(this, this.minecraft);
     }
 
     @Override
     public void removed() {
-        if (originalCycles != null) originalCycles.power$daylightTime(this.originalTOD);
+        if (originalCycles != null) {
+            originalCycles.power$daylightTime(this.originalTOD);
+            // Restore both cached darkness values before the next menu/world frame.
+            if (this.minecraft.world != null && this.minecraft.world.getProperties() == originalCycles) {
+                this.minecraft.world.updateSkyBrightness();
+                this.minecraft.worldRenderer.notifyAmbientDarknessChanged();
+            }
+        }
+        PhotoModeHooks.tools().removed(this);
         ModOptions.photoModeFogMultiplier = 1.0F;
     }
 
@@ -167,6 +177,7 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
 
     @Override
     protected void keyPressed(char character, int keyCode) {
+        if (PhotoModeHooks.tools().key(this, character, keyCode)) return;
         if (keyCode == Keyboard.KEY_ESCAPE) {
             this.minecraft.setScreen(this.previousScreen);
             if (this.previousScreen == null) this.minecraft.lockMouse();
@@ -183,6 +194,17 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
         }
     }
     
+    @Override public void powerPhoto$screenshot() { this.shouldScreenshot = true; }
+
+    @Override public boolean powerPhoto$dragging() {
+        return this.dragButton >= 0 || this.tiltSlider.dragging || this.timeSlider.dragging;
+    }
+
+    public boolean powerPhoto$ownsPointer(int x, int y) {
+        return powerPhoto$dragging()
+            || this.buttons.stream().anyMatch(value -> value instanceof ButtonWidget widget && isMouseInBounds(x, y, widget));
+    }
+
     private boolean shiftHeld() {
         return Keyboard.isKeyDown(Keyboard.KEY_LSHIFT) || Keyboard.isKeyDown(Keyboard.KEY_RSHIFT);
     }
@@ -194,6 +216,13 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
             return;
         }
         int mouseX = Mouse.getEventX() * width / minecraft.displayWidth;
+        int mouseY = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
+        if (PhotoModeHooks.tools().mouse(this, mouseX, mouseY, Mouse.getEventButton(),
+                Mouse.getEventButtonState(), Mouse.getEventDWheel())) {
+            this.dragButton = -1;
+            this.tiltSlider.dragging = this.timeSlider.dragging = false;
+            return;
+        }
         moveSlider(tiltSlider, mouseX);
         moveSlider(timeSlider, mouseX);
         updateSliders();
@@ -236,6 +265,8 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
             this.tiltSlider.dragging = this.timeSlider.dragging = false;
             return;
         }
+
+        if (PhotoModeHooks.tools().blocked(this)) return;
 
         // Movement via keyboard
         boolean shift = shiftHeld();
@@ -318,8 +349,12 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
                 this.tilt = this.tiltGoal;
             }
         }
+        PhotoModeHooks.tools().renderScene(this, mouseX, mouseY);
         if (!this.shouldScreenshot) {
-            super.render(mouseX, mouseY, delta);
+            if (!PhotoModeHooks.tools().controlsHidden(this))
+                super.render(PhotoModeHooks.tools().blocked(this) ? -1000 : mouseX,
+                    PhotoModeHooks.tools().blocked(this) ? -1000 : mouseY, delta);
+            PhotoModeHooks.tools().render(this, mouseX, mouseY, delta);
         } else {
             Screenshot.take(Minecraft.getRunDirectory(), this.minecraft.displayWidth, this.minecraft.displayHeight);
             this.shouldScreenshot = false;

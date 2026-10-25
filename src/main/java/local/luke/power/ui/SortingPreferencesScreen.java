@@ -16,6 +16,7 @@ public final class SortingPreferencesScreen extends UiScreen {
   private final Screen parent;
   private final Runnable accepted;
   private final boolean immediate;
+  private final ScrollBar presetBar = new ScrollBar();
   private final SlotDoubleClick clicks = new SlotDoubleClick();
   private final Setting protectedSetting, preferredSetting;
   private final Set<Integer> protectedSlots = new LinkedHashSet<>();
@@ -71,13 +72,17 @@ public final class SortingPreferencesScreen extends UiScreen {
     for (int i = 0; i < presets.size(); i++) labels.add(presets.preset(i).get("name").getAsString());
     return labels;
   }
+  private ScrollBar.Track presetTrack() {
+    return new ScrollBar.Track(left() + 193, presetMenuTop(), presetRows() * 20, presets.size() * 20, presetScroll * 20d);
+  }
+  private void dragPreset(int y) { presetScroll = (int)presetBar.drag(presetTrack(), y, true) / 20; }
   private void revealPreset() {
     presetScroll = Math.max(0, Math.min(presetScroll, presets.size() - presetRows()));
     if (presetFocus < presetScroll) presetScroll = presetFocus;
     if (presetFocus >= presetScroll + presetRows()) presetScroll = presetFocus - presetRows() + 1;
   }
   @Override public void init() { Keyboard.enableRepeatEvents(true); }
-  @Override public void removed() { Keyboard.enableRepeatEvents(false); drag.cancel(); clicks.cancel(); TextDrag.cancel(); }
+  @Override public void removed() { presetBar.release(); Keyboard.enableRepeatEvents(false); drag.cancel(); clicks.cancel(); TextDrag.cancel(); }
   private boolean changed() {
     return presetChanged() || !Catalog.JSON.toJsonTree(protectedSlots).equals(protectedSetting.value)
         || !Catalog.JSON.toJsonTree(preferredItems).equals(preferredSetting.value);
@@ -121,6 +126,7 @@ public final class SortingPreferencesScreen extends UiScreen {
     } catch (RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Invalid sorting layout"); }
   }
   @Override protected void mouseReleased(int x, int y, int button) {
+    if (choosingPreset && button == 0) { dragPreset(y); presetBar.release(); }
     if (Display.isActive() && !exit.active() && !choosingPreset) drag.release(slotAt(x, y), button, this::paint); else drag.cancel();
   }
   private void presetAction(int action) {
@@ -194,6 +200,7 @@ public final class SortingPreferencesScreen extends UiScreen {
     if (exit.click(this, x, y, button, this::done, this::discard)) return;
     if (button != 0 && button != 1) return;
     if (choosingPreset) {
+      if (button == 0 && presetBar.press(presetTrack(), x, y)) { dragPreset(y); return; }
       if (button == 0 && inside(x, y, left(), presetMenuTop(), 198, presetRows() * 20)) {
         presetIndex = presetScroll + (y - presetMenuTop()) / 20; click();
       }
@@ -276,8 +283,12 @@ public final class SortingPreferencesScreen extends UiScreen {
     }
     if (!error.isEmpty() && mouseY >= 22 && mouseY < gridTop()) tooltip = error;
     if (!tooltip.isEmpty()) foregroundTooltip(tooltip, mouseX, mouseY);
-    if (choosingPreset) WaypointSetDropdown.render(this, presetLabels(), presetIndex, presetFocus, presetScroll,
-        left(), presetMenuTop(), 198, presetRows(), pointerX, pointerY);
+    if (choosingPreset) {
+      dragPreset(pointerY);
+      WaypointSetDropdown.render(this, presetLabels(), presetIndex, presetFocus, presetScroll,
+          left(), presetMenuTop(), 198, presetRows(), pointerX, pointerY);
+      presetBar.render(this, presetTrack());
+    } else presetBar.release();
     if (!immediate) exit.render(this, "Save sorting layout?", pointerX, pointerY);
   }
 }

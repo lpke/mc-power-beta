@@ -35,6 +35,7 @@ public final class WorldMapScreen extends UiScreen {
   private MinimapGeometry.Layout minimapLayout;
   private MinimapGeometry.Box minimapHit;
   private boolean panelPress;
+  private int panelPressButton = -1;
   private static boolean rememberedTogglesVisible = true;
   private boolean togglesVisible = rememberedTogglesVisible;
   private int toggleScroll;
@@ -73,6 +74,7 @@ public final class WorldMapScreen extends UiScreen {
   public boolean capturingBinding() { return settingsPanel != null && settingsPanel.capturingBinding(); }
   public void requestScreenshot() { screenshot = true; }
   public boolean minimapRadarActive() { return settingsPanel != null && mapWidth() >= 200; }
+  public boolean terrainVisible() { return mapLeft() < width; }
   public boolean radarIconsAllowed() {
     return !coordinates.active() && !serverMap.focused && !context
         && (settingsPanel == null || settingsPanel.radarIconsAllowed());
@@ -388,7 +390,10 @@ public final class WorldMapScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int button) {
     if (coordinates.press(this,x,y,button)) return;
-    if (panelOwns(x)) { panelPress = true; settingsPanel.mouseClicked(x, y, button); return; }
+    if (panelOwns(x)) {
+      if (!panelPress) { panelPress = true; panelPressButton = button; }
+      settingsPanel.mouseClicked(x, y, button); return;
+    }
     zoom.cancel();
     if (context) {
       var actions = contextActions();
@@ -455,8 +460,12 @@ public final class WorldMapScreen extends UiScreen {
     if (button < 0) return;
     if (coordinates.active()) return;
     if (panelPress) {
-      if (settingsPanel != null) settingsPanel.panelRelease();
-      panelPress = false; return;
+      if (settingsPanel != null) {
+        settingsPanel.mouseReleased(x, y, button);
+        if (button == panelPressButton) settingsPanel.panelRelease();
+      }
+      if (button == panelPressButton) { panelPress = false; panelPressButton = -1; }
+      return;
     }
     if (button == 0) {
       if (dragging) panTo(x, y);

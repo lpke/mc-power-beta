@@ -18,9 +18,10 @@ public final class WaypointEditorScreen extends UiScreen {
   private final WaypointSetDialog setDialog = new WaypointSetDialog();
   private final List<String> draftSets = new ArrayList<>();
   private final String[] labels = {"Name", "Set", "X", "Y", "Z", "Dimension", "Color", "Abbreviation"};
-  private boolean enabled, global, selectingSet;
+  private final SettingsDropdown choices = new SettingsDropdown();
+  private boolean enabled, global;
   private String error = "";
-  private int scroll, setScroll, setIndex;
+  private int scroll;
 
   public WaypointEditorScreen(Screen parent, Waypoint waypoint) {
     this.parent = parent; initial = waypoint.copy(); enabled = waypoint.enabled; global = waypoint.global;
@@ -32,8 +33,9 @@ public final class WaypointEditorScreen extends UiScreen {
         new TextInput("" + waypoint.dimension, 5), new TextInput(String.format(Locale.ROOT, "#%06X", waypoint.colour), 7),
         new TextInput(waypoint.abbreviation == null ? "" : waypoint.abbreviation, 8));
   }
-  public void init() { Keyboard.enableRepeatEvents(true); }
-  public void removed() { Keyboard.enableRepeatEvents(false); TextDrag.cancel(); }
+  public void init() { choices.close(); Keyboard.enableRepeatEvents(true); }
+  public void tick() { choices.tick(); }
+  public void removed() { choices.close(); Keyboard.enableRepeatEvents(false); TextDrag.cancel(); }
   private int left() { return (width - span()) / 2; }
   private int span() { return Math.min(360, width - 20); }
   private int row(int index) {
@@ -67,7 +69,7 @@ public final class WaypointEditorScreen extends UiScreen {
     }
     catch (RuntimeException failure) { return true; }
   }
-  private void leave() { exit.leave(changed(), () -> minecraft.setScreen(parent)); }
+  private void leave() { exit.leave(changed(), () -> showScreen(parent)); }
   private void save() {
     var store = Maps.waypoints();
     if (store == null || !store.ready()) { error = "Waypoints are loading or protected after a storage error."; return; }
@@ -78,7 +80,7 @@ public final class WaypointEditorScreen extends UiScreen {
         List<String> colors = new ArrayList<>(); savedColors.value.getAsJsonArray().forEach(c -> colors.add(c.getAsString()));
         MenuPreferences.update(preferences -> preferences.colours = colors);
       }
-      store.put(point); minecraft.setScreen(parent);
+      store.put(point); showScreen(parent);
     }
     catch (java.io.IOException | RuntimeException failure) { error = failure instanceof NumberFormatException ? "Enter whole-number coordinates" : failure.getMessage(); }
   }
@@ -87,10 +89,7 @@ public final class WaypointEditorScreen extends UiScreen {
     if (store != null && store.ready()) names.addAll(store.sets());
     names.add("Default"); names.add(fields.get(1).text()); names.addAll(draftSets); return List.copyOf(names);
   }
-  private int setTop() { return Math.max(26, Math.min(height - 43 - setRows() * 20, row(1) + 20)); }
-  private int setRows() { return Math.min(sets().size() + 1, Math.max(1, (height - 69) / 20)); }
-  private void chooseSet(int index) {
-    var sets = sets(); selectingSet = false;
+  private void chooseSet(List<String> sets, int index) {
     if (index < sets.size()) { fields.get(1).setText(sets.get(index)); return; }
     setDialog.open(name -> {
       if (sets().stream().anyMatch(set -> set.equalsIgnoreCase(name))) throw new IllegalArgumentException("A set with that name already exists");
@@ -98,20 +97,14 @@ public final class WaypointEditorScreen extends UiScreen {
     });
   }
   private void beginSet() {
-    fields.forEach(field -> field.focused = false); TextDrag.cancel(); selectingSet = true;
-    setIndex = Math.max(0, sets().indexOf(fields.get(1).text()));
-    setScroll = Math.max(0, Math.min(setIndex, sets().size() + 1 - setRows()));
+    fields.forEach(field -> field.focused = false); TextDrag.cancel();
+    var sets = sets(); var labels = new ArrayList<>(sets); labels.add("New set...");
+    choices.open(labels, List.of(), sets.indexOf(fields.get(1).text()), -1,
+        fieldLeft(1), row(1), fieldWidth(1), width, height, index -> chooseSet(sets, index));
   }
   protected void keyPressed(char c, int key) {
+    if (choices.key(this, key)) return;
     if (exit.key(key) || setDialog.key(this, c, key)) return;
-    if (selectingSet) {
-      if (key == Keyboard.KEY_ESCAPE) selectingSet = false;
-      else if (key == Keyboard.KEY_UP || key == Keyboard.KEY_DOWN) {
-        setIndex = Math.floorMod(setIndex + (key == Keyboard.KEY_UP ? -1 : 1), sets().size() + 1);
-        setScroll = Math.max(0, Math.min(setIndex, Math.max(setScroll, setIndex - setRows() + 1)));
-      } else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { click(); chooseSet(setIndex); }
-      return;
-    }
     if (key == Keyboard.KEY_ESCAPE) { leave(); return; }
     if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { click(); save(); return; }
     if (key == Keyboard.KEY_TAB) {
@@ -125,13 +118,8 @@ public final class WaypointEditorScreen extends UiScreen {
     for (int i = 0; i < fields.size(); i++) if (i != 1) fields.get(i).key(c, key);
   }
   protected void mouseClicked(int x, int y, int button) {
-    if (exit.click(this, x, y, button, this::save, () -> minecraft.setScreen(parent)) || setDialog.press(this, x, y, button)) return;
-    if (selectingSet) {
-      if (button == 0 && inside(x, y, fieldLeft(1), setTop(), fieldWidth(1), setRows() * 20)) {
-        click(); chooseSet(setScroll + (y - setTop()) / 20);
-      } else selectingSet = false;
-      return;
-    }
+    if (choices.press(this, x, y, button)) return;
+    if (exit.click(this, x, y, button, this::save, () -> showScreen(parent)) || setDialog.press(this, x, y, button)) return;
     if (button == 1) {
       if (y < 26 || y >= height - 43) return;
       for (int i = 0; i < fields.size(); i++) {
@@ -156,7 +144,11 @@ public final class WaypointEditorScreen extends UiScreen {
         field.setText(reset[i]);
       }
     }
-    if (inside(x, y, left() + 72, row(5), dimensionWidth(), 18)) { click(); fields.get(5).setText(fields.get(5).text().equals("0") ? "-1" : "0"); }
+    if (inside(x, y, left() + 72, row(5), dimensionWidth(), 18)) {
+      click(); List<String> dimensions = List.of("0", "-1");
+      choices.open(List.of("Overworld", "Nether"), List.of(), dimensions.indexOf(fields.get(5).text()), -1,
+          left() + 72, row(5), dimensionWidth(), width, height, i -> fields.get(5).setText(dimensions.get(i)));
+    }
     if (inside(x, y, left() + 72, row(VISIBLE), span() - 72, 18)) { click(); enabled = !enabled; }
     if (inside(x, y, left() + 72, row(ALWAYS), span() - 72, 18)) { click(); global = !global; }
     if (inside(x, y, left() + 45, row(6), 22, 18)) {
@@ -164,27 +156,32 @@ public final class WaypointEditorScreen extends UiScreen {
         var setting = new local.luke.power.config.Setting("waypoint.colour", "maps", "Map", "Waypoints", "Color", "",
             local.luke.power.config.Setting.Kind.TEXT, new com.google.gson.JsonPrimitive(fields.get(6).text()),
             new com.google.gson.JsonPrimitive("#FFCC33"), 0, 0, 1, List.of(), false);
-        minecraft.setScreen(new ColourScreen(this, setting, null, () -> fields.get(6).setText(setting.value.getAsString()), savedColors));
+        showScreen(new ColourScreen(this, setting, null, () -> fields.get(6).setText(setting.value.getAsString()), savedColors));
       } catch (RuntimeException failure) { error = failure.getMessage(); }
     }
   }
+  protected void mouseReleased(int x, int y, int button) {
+    choices.release(y, button); super.mouseReleased(x, y, button);
+  }
   public void onMouseEvent() {
-    int wheel = Mouse.getEventDWheel();
-    if (selectingSet && wheel != 0) setScroll = Math.max(0, Math.min(sets().size() + 1 - setRows(), setScroll - Integer.signum(wheel) * 3));
-    else if (!exit.active() && !setDialog.active() && wheel != 0)
-      scroll = Math.max(0, Math.min(Math.max(0, 32 + ROWS * 25 - (height - 43)), scroll - Integer.signum(wheel) * 25));
+    layerWheel(Mouse.getEventDWheel());
     super.onMouseEvent();
+  }
+  @Override public void layerWheel(int wheel) {
+    if (choices.wheel(wheel)) return;
+    if (!exit.active() && !setDialog.active() && wheel != 0)
+      scroll = Math.max(0, Math.min(Math.max(0, 32 + ROWS * 25 - (height - 43)), scroll - Integer.signum(wheel) * 25));
   }
   public void render(int mx, int my, float delta) {
     renderBackground(); titleBar("Waypoint");
-    boolean modal = exit.active() || selectingSet || setDialog.active(); int hoverX = modal ? -1000 : mx, hoverY = modal ? -1000 : my;
+    boolean modal = exit.active() || choices.active() || setDialog.active(); int hoverX = modal ? -1000 : mx, hoverY = modal ? -1000 : my;
     clip(left() - 2, 26, span() + 4, Math.max(0, height - 69));
     for (int i = 0; i < fields.size(); i++) {
       text(labels[i], left(), row(i) + 5, 0xcccccc);
       if (i == 1) {
-        WaypointSetDropdown.button(this, fields.get(i).text(), fieldLeft(i), row(i), fieldWidth(i), hoverX, hoverY, true, selectingSet);
+        WaypointSetDropdown.button(this, fields.get(i).text(), fieldLeft(i), row(i), fieldWidth(i), hoverX, hoverY, true, choices.active());
       } else input(fields.get(i), fieldLeft(i), row(i), fieldWidth(i), hoverX, hoverY, i == ABBREVIATION ? "Automatic" : "");
-      if (i == 5) button(fit(dimensionName(), dimensionWidth() - 6), left() + 72, row(i), dimensionWidth(), 18, hoverX, hoverY, true);
+      if (i == 5) WaypointSetDropdown.button(this, dimensionName(), left() + 72, row(i), dimensionWidth(), hoverX, hoverY, true, choices.active());
       button("R", left() + span() - 20, row(i), 20, 18, hoverX, hoverY, true);
     }
     try { colourButton(fields.get(6).text(), left() + 45, row(6), 22, hoverX, hoverY); } catch (RuntimeException ignored) {}
@@ -196,12 +193,7 @@ public final class WaypointEditorScreen extends UiScreen {
       text(fit("Use ~ for current position, ~offset to add an offset.", width - 20), 10, height - 40, 0xaaaaaa);
     button("Done", left(), height - 26, span() / 2 - 2, 20, hoverX, hoverY, Maps.waypoints() != null && Maps.waypoints().ready());
     button("Cancel", left() + span() / 2 + 2, height - 26, span() / 2 - 2, 20, hoverX, hoverY, true);
-    if (selectingSet) {
-      var sets = sets(); int left = fieldLeft(1), top = setTop(), width = fieldWidth(1);
-      var labels = new ArrayList<>(sets); labels.add("New set...");
-      WaypointSetDropdown.render(this, labels, sets.indexOf(fields.get(1).text()), setIndex, setScroll,
-          left, top, width, setRows(), mx, my);
-    }
+    choices.render(this, mx, my);
     exit.render(this, "Save waypoint changes?", mx, my); setDialog.render(this, mx, my);
   }
   public boolean shouldPause() { return MapConfig.current().pauseMap || parent != null && parent.shouldPause(); }

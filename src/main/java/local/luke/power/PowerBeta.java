@@ -9,6 +9,7 @@ public final class PowerBeta {
   private static boolean ready;
 
   public static void tick(Minecraft mc) {
+    local.luke.power.ui.PhotoModeTools.tick(mc);
     local.luke.power.debug.DebugKeys.tick(mc);
     if (local.luke.power.world.WorldLoadGuard.tick(mc)) return;
     local.luke.power.ui.TextDrag.context(mc.currentScreen, org.lwjgl.opengl.Display.isActive());

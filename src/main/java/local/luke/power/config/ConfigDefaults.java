@@ -75,8 +75,13 @@ public final class ConfigDefaults {
 
   private static void initializeMaps(Path game) throws IOException {
     JsonObject maps = PowerConfig.section("maps");
-    if (maps.has("minimap")) return;
-    maps.add("minimap", DefaultBases.value("maps.minimap", new JsonPrimitive(true)));
+    boolean changed = false;
+    for (String key : java.util.List.of("minimap", "photoWaypoints", "renderedArea")) {
+      if (maps.has(key)) continue;
+      maps.add(key, DefaultBases.value("maps." + key, new JsonPrimitive(key.equals("minimap"))));
+      changed = true;
+    }
+    if (!changed) return;
     try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
       PowerConfig.put("maps", maps);
       transaction.commit();

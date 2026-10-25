@@ -38,6 +38,7 @@ public abstract class LightOverlayMixin {
   @Inject(method = "method_1841", at = @At(value = "INVOKE",
       target = "Lnet/minecraft/class_555;method_1847(F)V"))
   private void power$light(float delta, long end, CallbackInfo ci) {
+    local.luke.power.ui.PhotoModeTools.renderWorld(field_2349, delta);
     LightOverlay.render(field_2349, delta);
     local.luke.power.debug.DebugWorld.render(field_2349, delta);
   }
@@ -45,6 +46,7 @@ public abstract class LightOverlayMixin {
   @Inject(method = "method_1841", at = @At(value = "INVOKE",
       target = "Lnet/minecraft/class_555;method_1840(FI)V", shift = At.Shift.AFTER))
   private void power$waypointCamera(float delta, long end, CallbackInfo ci) {
+    local.luke.power.ui.PhotoModeTools.capture(field_2349, delta);
     local.luke.power.map.WaypointMarkers.project(field_2349, delta);
   }
 }

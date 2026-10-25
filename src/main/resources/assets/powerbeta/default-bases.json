@@ -1,5 +1,6 @@
 {
   "power_beta": {
+    "maps.photoWaypoints": true,
     "audio.gapMaxSeconds": 350,
     "audio.gapMinSeconds": 100,
     "creative.spectatorSprintToggle": true,

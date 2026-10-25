@@ -2,7 +2,7 @@ package local.luke.power.map;
 
 /** One layout supplies drawing and hit testing; the selected corner chooses the inward edge. */
 public final class MinimapQuickMenuLayout {
-  public static final int ROW_HEIGHT = 20, ROWS = 10, BUTTON_SIZE = 16;
+  public static final int ROW_HEIGHT = 20, ROWS = MapToggle.ALL.size(), BUTTON_SIZE = 16;
   public record Rect(int x, int y, int width, int height) {
     public boolean contains(int px, int py) { return px>=x && py>=y && px<x+width && py<y+height; }
     public boolean containsCircle(int px, int py) {

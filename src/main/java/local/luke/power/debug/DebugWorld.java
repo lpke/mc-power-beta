@@ -21,7 +21,7 @@ public final class DebugWorld {
       GL11.glEnable(GL11.GL_DEPTH_TEST); GL11.glDepthMask(false); GL11.glDisable(GL11.GL_CULL_FACE);
       GL11.glLineWidth(1); GL11.glTranslated(-cx,-cy,-cz);
       GL11.glBegin(GL11.GL_LINES);
-      if(DebugActions.borders) borders(cx,cz);
+      if(DebugActions.borders && !(mc.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner)) borders(cx,cz);
       if(DebugActions.hitboxes) {
         int count=0;
         for(Object item:mc.world.field_198) {
@@ -43,6 +43,19 @@ public final class DebugWorld {
       }
       GL11.glEnd();
     } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); }
+  }
+  /** Photo hover reuses the native debug-style chunk geometry without changing debug state. */
+  public static void renderPhotoBorders(Minecraft mc,float delta,double x,double z) {
+    if(mc.world==null||mc.player==null)return;
+    var camera=mc.field_2807==null?mc.player:mc.field_2807;
+    GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);GL11.glPushMatrix();
+    try {
+      GL11.glTranslated(-camera.field_1637-(camera.x-camera.field_1637)*delta,
+          -camera.field_1638-(camera.y-camera.field_1638)*delta,-camera.field_1639-(camera.z-camera.field_1639)*delta);
+      GL11.glDisable(GL11.GL_TEXTURE_2D);GL11.glDisable(GL11.GL_LIGHTING);GL11.glDisable(GL11.GL_FOG);
+      GL11.glEnable(GL11.GL_DEPTH_TEST);GL11.glDepthMask(false);GL11.glDisable(GL11.GL_CULL_FACE);
+      GL11.glLineWidth(1);GL11.glBegin(GL11.GL_LINES);borders(x,z);GL11.glEnd();
+    } finally {GL11.glPopMatrix();GL11.glPopAttrib();}
   }
   private static void borders(double cx,double cz) {
     double x=Math.floor(cx/16)*16,z=Math.floor(cz/16)*16;

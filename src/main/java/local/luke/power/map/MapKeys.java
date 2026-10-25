@@ -43,6 +43,9 @@ public final class MapKeys {
   }
 
   public static boolean available(String id) {
+    if (local.luke.power.ui.PhotoModeTools.active() && (id.equals("powerbeta.toggleMapWaypoints")
+        || id.equals("powerbeta.toggleMapRadar") || id.equals("powerbeta.toggleMapGrid")
+        || id.equals("powerbeta.clearMapDestination"))) return true;
     return available(id, MapConfig.current());
   }
 

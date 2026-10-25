@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 class MapToggleTest {
   @Test void allQuickSettingsHaveDistinctStableIdsAndPersistWithoutChangingOtherPreferences() {
-    assertEquals(java.util.List.of("ITEMS","MOBS","WAYPOINTS","WORLD_WAYPOINTS","CAVES","HEADS","CHUNKS","SLIME","LIGHT","PATH"),MapToggle.ALL.stream().map(Enum::name).toList());
+    assertEquals(java.util.List.of("ITEMS","MOBS","WAYPOINTS","WORLD_WAYPOINTS","CAVES","HEADS","CHUNKS","SLIME","LIGHT","PATH","RENDERED_AREA"),MapToggle.ALL.stream().map(Enum::name).toList());
     var gson=new Gson();
     var fields=new HashSet<String>();
     for(var toggle:MapToggle.ALL) {
@@ -46,16 +46,16 @@ class MapToggleTest {
         assertEquals(-1,layout.rowAt(20,layout.bounds().y()+layout.bounds().height()));
         layout=MapTogglePanel.at(8,220,184,available,150,layout.scroll(-120));
       }
-      assertEquals(10,reached.size());
-      assertEquals(10-layout.visible(),layout.first());
+      assertEquals(11,reached.size());
+      assertEquals(11-layout.visible(),layout.first());
       for(int wheel=0;wheel<20;wheel++)layout=MapTogglePanel.at(8,220,184,available,150,layout.scroll(120));
       assertEquals(0,layout.first());
     }
   }
   @Test void worldMapRowsExcludeCavesWithoutChangingMinimapOrSavedActionIds() {
-    assertEquals(10,MapToggle.ALL.size());
+    assertEquals(11,MapToggle.ALL.size());
     assertEquals(4,MapToggle.CAVES.ordinal());assertEquals(5,MapToggle.HEADS.ordinal());
-    assertEquals(9,MapToggle.WORLD_MAP.size());assertFalse(MapToggle.WORLD_MAP.contains(MapToggle.CAVES));
+    assertEquals(10,MapToggle.WORLD_MAP.size());assertFalse(MapToggle.WORLD_MAP.contains(MapToggle.CAVES));
     for(int available:new int[]{88,128,168,208}) {
       var seen=new HashSet<MapToggle>();
       var layout=MapTogglePanel.at(8,220,184,available,150,0,MapToggle.WORLD_MAP);

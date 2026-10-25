@@ -94,7 +94,7 @@ public final class MapToggles448Checks {
       test("MAPTOGGLES448 middle-click IDs 0 through 9 retain their actions and head state stays visit-local",()->{
         var middle=Minimap.class.getDeclaredMethod("middleClick",Minecraft.class);middle.setAccessible(true);
         var reset=MapKeys.class.getDeclaredMethod("resetIcons");reset.setAccessible(true);reset.invoke(null);
-        for(int index=0;index<MapToggle.ALL.size();index++) {
+        for(int index=0;index<10;index++) {
           var chosen=MapConfig.copy();chosen.middleClickAction=index;MapConfig.preview(chosen);
           var toggle=MapToggle.ALL.get(index);
           boolean enabled=toggle.enabled(MapConfig.current(),index==5);

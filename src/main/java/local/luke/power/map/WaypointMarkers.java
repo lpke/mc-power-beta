@@ -20,12 +20,15 @@ public final class WaypointMarkers {
   private static final FloatBuffer UNBOBBED = BufferUtils.createFloatBuffer(16);
   private static boolean captureBob;
   private static boolean eligible(Minecraft mc) {
-    return MapConfig.current().worldWaypoints && mc.world != null && mc.player != null
-        && !mc.options.hideHud && Minimap.waypointHost(mc.currentScreen) && Maps.waypoints() != null && !Maps.points().isEmpty();
+    boolean photo = mc.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner;
+    return (photo ? local.luke.power.ui.PhotoModeTools.waypointsVisible() : MapConfig.current().worldWaypoints)
+        && mc.world != null && mc.player != null
+        && (photo || !mc.options.hideHud && Minimap.waypointHost(mc.currentScreen))
+        && Maps.waypoints() != null && !Maps.points().isEmpty();
   }
   public static void beginCamera(Minecraft mc) {
     CAMERA.reset();
-    captureBob = eligible(mc) && MapConfig.current().waypointBobbing == 0
+    captureBob = eligible(mc) && !(mc.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner) && MapConfig.current().waypointBobbing == 0
         && !local.luke.power.input.DetachedCamera.isActive();
   }
   public static void beforeBob() {
@@ -48,7 +51,7 @@ public final class WaypointMarkers {
         by = camera.field_1638 + (camera.y - camera.field_1638) * delta,
         bz = camera.field_1639 + (camera.z - camera.field_1639) * delta;
     GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, MODEL);
-    if (settings.waypointBobbing == 0 && !local.luke.power.input.DetachedCamera.isActive()) {
+    if (settings.waypointBobbing == 0 && !(mc.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner) && !local.luke.power.input.DetachedCamera.isActive()) {
       CAMERA.apply(MODEL, UNBOBBED);
       for (int i = 0; i < 16; i++) MODEL.put(i, UNBOBBED.get(i));
     }
@@ -82,7 +85,27 @@ public final class WaypointMarkers {
   }
 
   public static void render(Minecraft mc) {
-    if (world != mc.world || mc.options.hideHud || !Minimap.waypointHost(mc.currentScreen)) return;
+    render(mc, mc.currentScreen == null ? -1 : mc.currentScreen.width / 2,
+        mc.currentScreen == null ? -1 : mc.currentScreen.height / 2);
+  }
+
+  /** Hit testing reads the same projected markers and visibility as painting. */
+  public static Waypoint hovered(Minecraft mc, int x, int y) {
+    if (world != mc.world || !eligible(mc)) return null;
+    Waypoint nearest = null; double limit = 81;
+    int w = mc.currentScreen.width, h = mc.currentScreen.height;
+    for (Label label : LABELS) {
+      if (label.x <= 0 || label.x >= 1 || label.y <= 0 || label.y >= 1
+          || WaypointSymbols.opacity(label.point, MapConfig.current()) <= 0) continue;
+      double dx = label.x * w - x, dy = label.y * h - y, distance = dx * dx + dy * dy;
+      if (distance <= limit) { limit = distance; nearest = label.point; }
+    }
+    return nearest;
+  }
+
+  public static void render(Minecraft mc, int mouseX, int mouseY) {
+    if (world != mc.world || !eligible(mc)) return;
+    boolean photo = mc.currentScreen instanceof local.luke.power.input.PhotoProjection.CameraOwner;
     var size = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
     int w = size.method_1857(), h = size.method_1858();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -100,7 +123,7 @@ public final class WaypointMarkers {
       double closest = 81;
       for (Label label : LABELS) {
         if (WaypointSymbols.opacity(label.point, MapConfig.current()) <= 0) continue;
-        double dx = (label.x - .5) * w, dy = (label.y - .5) * h;
+        double dx = label.x * w - (photo ? mouseX : w * .5), dy = label.y * h - (photo ? mouseY : h * .5);
         double distance = dx * dx + dy * dy;
         if (distance < closest) { closest = distance; aimed = label; }
       }

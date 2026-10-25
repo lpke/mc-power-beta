@@ -16,7 +16,8 @@ final class DebugReorder extends UiScreen {
   private DebugPreview preview;
   private int selectedSide = -1, anchor = -1, first = -1, last = -1;
   private boolean pressed, dragging, rangePress;
-  private int pressedRow, presetScroll;
+  private int pressedRow;
+  private final SettingsDropdown picker = new SettingsDropdown();
   private int pressX, pressY, left, top, span, tall, toolbarTop, toolbarWidth;
   private final int[] scroll = new int[2];
   private long lastScroll;
@@ -25,16 +26,21 @@ final class DebugReorder extends UiScreen {
   private boolean choosing, naming, reset, remove;
   private final TextInput name = new TextInput("", 64);
   DebugReorder(SettingsDraft owner, Consumer<String> select) { this.owner = owner; this.select = select; }
+  boolean picker() { return picker.active(); }
+  public void tick() { if (active()) picker.tick(); }
+  void drawPicker(int x, int y) { picker.render(this, x, y); choosing = picker.active(); }
   boolean active() { return draft != null; }
   boolean changed() { return active() && draft.changed(); }
   SettingsDraft draft() { return active() ? draft : owner; }
   void begin() {
+    closePicker();
     draft = new SettingsDraft(owner.settings(), s -> true); preview = new DebugPreview(draft);
     Arrays.fill(scroll, 0); clearSelection(); error = "";
   }
   void finish(boolean save) {
     if (!active()) return;
     if (save && changed()) { owner.checkpoint(); owner.restore(draft.snapshot()); }
+    closePicker();
     draft = null; choosing = naming = reset = remove = false; clearSelection();
   }
   private DebugColumns rows() { return new DebugColumns(preview.order(), preview.rightOrder()).complete(); }
@@ -65,6 +71,7 @@ final class DebugReorder extends UiScreen {
   }
   boolean press(int mx, int my, int button) {
     if (!active()) return false;
+    if (picker.press(this, mx, my, button)) { choosing = picker.active(); return true; }
     if (prompt()) return promptPress(mx, my, button);
     if (toolbarPress(mx, my, button)) return true;
     if (!contains(mx, my)) return false;
@@ -84,10 +91,10 @@ final class DebugReorder extends UiScreen {
     }
     return true;
   }
-  void closePicker() { choosing = false; }
+  void closePicker() { picker.close(); choosing = false; }
   void cancelDrag() { pressed = dragging = false; }
   void wheel(int amount, int mx, int my) {
-    if (choosing) { presetScroll = Math.max(0, Math.min(Math.max(0, presets().size() - popupRows()), presetScroll - Integer.signum(amount))); return; }
+    if (picker.wheel(amount)) return;
     int side = side(mx, my);
     if (active() && !prompt() && side >= 0) scroll[side] = Math.max(0, Math.min(DebugOrder.MAX_ROWS - visibleRows(), scroll[side] - Integer.signum(amount) * 3));
   }
@@ -95,6 +102,7 @@ final class DebugReorder extends UiScreen {
   private int dropRow(int side, int my) { return Math.max(0, Math.min(DebugOrder.MAX_ROWS - 1, scroll[side] + Math.max(0, my - top - 5) / ROW)); }
   private boolean insert(int side, int my) { return DebugColumns.insertion(shown(side), dropRow(side, my), Math.floorMod(my - top - 5, ROW), ROW); }
   void release(int mx, int my, int button) {
+    picker.release(my, button);
     if (button != 0 || !pressed) return;
     dragging |= Math.abs(mx - pressX) + Math.abs(my - pressY) >= 3;
     if (dragging && contains(mx, my) && selectedSide >= 0) {
@@ -115,6 +123,7 @@ final class DebugReorder extends UiScreen {
   }
   boolean prompt() { return naming || reset || remove; }
   boolean key(char c, int key) {
+    if (picker.key(this, key)) { choosing = picker.active(); return true; }
     if (!prompt() && !choosing) return false;
     if (key == Keyboard.KEY_ESCAPE) { naming = reset = remove = choosing = false; return true; }
     if (naming) {
@@ -124,21 +133,22 @@ final class DebugReorder extends UiScreen {
     return true;
   }
   private JsonArray presets() { return draft.get("interface.debugPresets").value.getAsJsonArray(); }
-  private int popupRows() { return Math.max(1, Math.min(8, (height - toolbarTop - 52) / 18)); }
   private int toolbarButtonWidth() { return Math.max(20, (toolbarWidth - 12) / 4); }
   private String selectedPreset() { return presets().size() == 0 ? "No saved presets" : presets().get(Math.min(presetIndex, presets().size() - 1)).getAsJsonObject().get("name").getAsString(); }
   private boolean toolbarPress(int mx, int my, int button) {
-    if (choosing) {
-      if (button == 0 && inside(mx, my, left, toolbarTop + 19, toolbarWidth, Math.min(popupRows(), presets().size()) * 18)) {
-        presetIndex = presetScroll + (my - toolbarTop - 19) / 18; click();
-        DebugPresets.load(presets().get(presetIndex).getAsJsonObject(), draft); clearSelection();
-      }
-      choosing = false; return true;
-    }
     if (!inside(mx, my, left, toolbarTop, toolbarWidth, 18)) return false;
     if (button == 0) {
       int at = Math.min(3, (mx - left) / (toolbarButtonWidth() + 4));
-      if (at == 0 && presets().size() > 0) { click(); choosing = true; presetScroll = Math.max(0, presetIndex - popupRows() + 1); }
+      if (at == 0 && presets().size() > 0) {
+        click(); var values = presets().deepCopy();
+        var labels = new ArrayList<String>();
+        values.forEach(value -> labels.add(value.getAsJsonObject().get("name").getAsString()));
+        picker.open(labels, List.of(), presetIndex, -1, left, toolbarTop, toolbarWidth, width, height, index -> {
+          presetIndex = index; choosing = false;
+          DebugPresets.load(values.get(index).getAsJsonObject(), draft); clearSelection();
+        });
+        choosing = true;
+      }
       else if (at == 1) { click(); naming = true; name.setText(""); name.focused = true; }
       else if (at == 2 && presets().size() > 0) { click(); remove = true; }
       else if (at == 3) { click(); reset = true; }
@@ -178,7 +188,7 @@ final class DebugReorder extends UiScreen {
     if (!active()) return;
     left = previewLeft + 8; toolbarTop = previewTop + 5; toolbarWidth = previewWidth - 16;
     top = previewTop + 43; span = Math.max(20, (previewWidth - 28) / 2); tall = Math.max(24, previewHeight - 51);
-    if (!Display.isActive()) cancelDrag();
+    if (!Display.isActive()) { cancelDrag(); closePicker(); }
     if (pressed && Math.abs(mx - pressX) + Math.abs(my - pressY) >= 3) dragging = true;
     int targetSide = side(mx, my); long now = System.nanoTime();
     if (dragging && targetSide >= 0 && now - lastScroll > 100_000_000L) {
@@ -190,8 +200,10 @@ final class DebugReorder extends UiScreen {
     int w = toolbarButtonWidth();
     String[] labels = w < 90 ? new String[]{"Presets", "Save as...", "Remove", "Reset..."}
         : new String[]{"Preset: " + selectedPreset(), "Save as...", "Remove", "Reset layout..."};
-    for (int i = 0; i < labels.length; i++) button(fit(labels[i], w - 8), left + i * (w + 4), toolbarTop, w, 18, mx, my, i != 0 && i != 2 || presets().size() > 0);
-    if (choosing) for (int i = presetScroll; i < Math.min(presets().size(), presetScroll + popupRows()); i++) button(fit(presets().get(i).getAsJsonObject().get("name").getAsString(), toolbarWidth - 8), left, toolbarTop + 19 + (i - presetScroll) * 18, toolbarWidth, 18, mx, my, true);
+    for (int i = 0; i < labels.length; i++) {
+      if (i == 0) WaypointSetDropdown.button(this, labels[i], left, toolbarTop, w, mx, my, presets().size() > 0, picker.active());
+      else button(fit(labels[i], w - 8), left + i * (w + 4), toolbarTop, w, 18, mx, my, i != 2 || presets().size() > 0);
+    }
     if (!error.isEmpty() && !prompt()) tooltip(error, left, top + tall - 12);
   }
   private void drawColumn(int side, int mx, int my) {

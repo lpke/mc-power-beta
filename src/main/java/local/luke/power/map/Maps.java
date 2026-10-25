@@ -242,7 +242,7 @@ public final class Maps {
     prepareWorld(mc);
     MapSettings settings = MapConfig.current();
     explicitWaypoints = waypointScreen(mc.currentScreen);
-    MapActivity activity = MapActivity.of(settings, explicitWaypoints);
+    MapActivity activity = MapActivity.of(settings, explicitWaypoints || local.luke.power.ui.PhotoModeTools.waypoints());
     boolean fullRadar = mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen;
     boolean previewRadar = mc.currentScreen instanceof local.luke.power.ui.HudEditorScreen hud && hud.minimapRadarActive()
         || mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen map && map.minimapRadarActive();

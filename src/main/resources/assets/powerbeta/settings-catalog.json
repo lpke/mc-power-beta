@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.4.9",
+    "default": "Power Beta 4.5.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -5214,6 +5214,16 @@
     "step": 1.0,
     "order": 32
   },
+  "maps.photoWaypoints": {
+    "page": "Map",
+    "group": "Waypoints",
+    "label": "Show waypoints in photo mode",
+    "description": "Show waypoint markers in photo mode. Point at a marker to expand its label.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 33.5
+  },
   "maps.worldWaypoints": {
     "page": "Map",
     "group": "Waypoints",
@@ -5273,6 +5283,16 @@
     "max": 1.0,
     "step": 1.0,
     "order": 38
+  },
+  "maps.renderedArea": {
+    "page": "Interface",
+    "group": "Minimap",
+    "label": "Show rendered area",
+    "description": "Draw a gold border around the live terrain render bounds on both maps.",
+    "min": 0.0,
+    "max": 1.0,
+    "step": 1.0,
+    "order": 39.5
   },
   "maps.chunkGrid": {
     "page": "Interface",
