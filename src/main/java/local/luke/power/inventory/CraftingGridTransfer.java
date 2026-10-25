@@ -96,7 +96,7 @@ public final class CraftingGridTransfer {
     } catch (java.io.IOException unavailable) { return false; }
   }
   private static boolean playerGridFallback(Container container, int sourceId, PlayerEntity player) {
-    if (!VisualConfig.current().shiftClickIntoCraftingGrid || sourceId < 9 || sourceId >= 36 || player.world == null || player.world.isRemote
+    if (!VisualConfig.current().shiftClickIntoCraftingGrid || sourceId < 9 || sourceId >= 45 || player.world == null || player.world.isRemote
         || player.container != container || player.inventory.getCursorStack() != null) return false;
     var mc = (Minecraft)net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
     if (mc == null || mc.player != player || !(mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen screen)) return false;
@@ -104,17 +104,18 @@ public final class CraftingGridTransfer {
     if (context == null || context.width != 2 || context.handler != container || !context.writable(mc)) return false;
     Slot source = container.method_2084(sourceId); ItemStack stack = source.getStack();
     var access = (local.luke.power.mixin.DeathSlotAccessor)source;
-    if (access.power$deathInventory() != player.inventory || access.power$deathIndex() < 9
+    if (access.power$deathInventory() != player.inventory || access.power$deathIndex() < 0
         || access.power$deathIndex() >= 36 || stack == null || stack.count <= 0 || stack.count > stack.getMaxCount()) return false;
-    // Let native Shift-click own every transfer that can move anything into the hotbar.
-    for (int id = 36; id < 45; id++) {
+    // Give the normal storage/hotbar destination priority whenever it has any capacity.
+    int targetStart = sourceId < 36 ? 36 : 9, targetEnd = sourceId < 36 ? 45 : 36;
+    for (int id = targetStart; id < targetEnd; id++) {
       Slot slot = container.method_2084(id); ItemStack existing = slot.getStack();
       if (slot.canInsert(stack) && (existing == null || stack.isStackable() && sameIdentity(stack, existing)
           && existing.count < Math.min(existing.getMaxCount(), slot.getMaxItemCount()))) return false;
     }
     try {
       if (NativeInventoryPlan.busy()) {
-        if (NativeInventoryPlan.ownsAction(mc, "crafting_grid_transfer") && queued.size() < 27) {
+        if (NativeInventoryPlan.ownsAction(mc, "crafting_grid_transfer") && queued.size() < 36) {
           queuedRevision = InventoryActions.revision();
           queued.putIfAbsent(sourceId, new Queued(container, sourceId, player, mc.currentScreen, stack,
               local.luke.power.death.DeathItems.encode(stack)));

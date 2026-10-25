@@ -983,3 +983,16 @@ slot/header/outside guards. Every case restores its captured settings and invent
   `light-450` verifies zero hidden-survey work across F1, F3, photo and covered menus.
 
 Keep screenshots and generated inventories with the private review report; never ship them.
+
+4.5.1 checks run after `new-world` in a focused, muted disposable client:
+
+- `offhand-torch-451` checks ordinary/redstone torches through both native hands,
+  spawner-top attachment, neighbor updates, support removal and unchanged tool data.
+- `inventory-451` checks hotbar fallback, durable journals, full item data, storage
+  priority, partial grid capacity, disabled/full grids and stale drag cancellation.
+  `inventory-451 prepare shift`, real Shift-drag through the logged hotbar positions,
+  `inventory-451 check`, then `inventory-451 stop` checks native mouse gestures.
+- `crawling-420` includes clear overhead trapdoors and forced ladder crouching,
+  comparing normal descent with actual Sneak holding and safe standing restoration.
+- `sprint-stairs-451` compares flat and wood/stone stair pace in both axes at
+  several sprint speeds, native walking, revoked permission, camera smoothing and walls.

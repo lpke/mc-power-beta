@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [4.5.1] - 2026-10-26
+
+- Offhand torches now place on monster spawners while holding a pickaxe.
+- Shift-clicking hotbar items uses available personal crafting-grid space when main storage is full, including enabled Shift-drags.
+- A trapdoor forcing a crouched pose no longer holds the player on a ladder unless Sneak is pressed.
+- Sprinting up successive stairs no longer loses momentum while the previous step camera motion settles.
+
 ## [4.5.0] - 2026-10-25
 
 - Replace multi-value settings buttons with dropdowns, including selected/default markers, short option tooltips and scrolling lists.

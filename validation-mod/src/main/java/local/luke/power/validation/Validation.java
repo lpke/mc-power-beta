@@ -59,6 +59,9 @@ public final class Validation {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
       if (command.equals("world-metadata-450")) WorldMetadata450Checks.run(mc);
+      else if (command.equals("offhand-torch-451")) OffhandTorch451Checks.run(mc);
+      else if (command.equals("sprint-stairs-451")) SprintStairs451Checks.run(mc);
+      else if (command.equals("inventory-451") || command.startsWith("inventory-451 ")) Inventory451Checks.run(mc,command.length()==13 ? "test" : command.substring(14));
       else if (command.equals("photo-paused-450")) PhotoPausedTeleport450Checks.run(mc);
       else if (command.startsWith("photo-450 ")) Photo450Checks.run(mc,command.substring(10));
       else if (command.startsWith("map-450 ")) Map450Checks.run(mc,command.substring(8));

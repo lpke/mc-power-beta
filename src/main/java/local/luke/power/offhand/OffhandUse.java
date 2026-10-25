@@ -70,6 +70,11 @@ public final class OffhandUse implements AutoCloseable {
   }
   /** Unknown extensions can have effects without changing their stack. Stop conservatively. */
   private static boolean nativeType(Object object) { return object.getClass().getName().startsWith("net.minecraft."); }
+  private static boolean nativeBlock(Object block) {
+    // The bundled spawner subclass adds an item factory, with no use override.
+    return nativeType(block) || block.getClass().getName().equals(
+        "local.luke.power.commands.optionaldep.stapi.block.SpecialMobSpawnerBlock");
+  }
   public static void blockResult(boolean result, ItemStack stack) {
     if (current != null && (result || stack != null && !nativeType(stack.getItem()))) current.consumed = true;
     if(current!=null&&result&&stack!=null&&stack.getItem() instanceof class_381) current.vehicle();
@@ -82,7 +87,7 @@ public final class OffhandUse implements AutoCloseable {
     try { result=nativeUse.getAsBoolean(); } finally { use.callback=false; }
     if(!use.ownsNative()){use.consumed=true;return result;}
     blockResult(result,stack);
-    use.consumed|=use.effect||!before.equals(data(Offhand.stack(mc.player,use.hand)))||block!=null&&!nativeType(block);
+    use.consumed|=use.effect||!before.equals(data(Offhand.stack(mc.player,use.hand)))||block!=null&&!nativeBlock(block);
     // Modern block items report a terminal placement failure rather than passing to the other hand.
     if(!result&&stack!=null&&stack.getItem() instanceof class_533)use.consumed=true;
     return result;

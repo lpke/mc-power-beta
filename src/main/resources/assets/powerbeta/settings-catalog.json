@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.5.0",
+    "default": "Power Beta 4.5.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -3256,7 +3256,7 @@
     "page": "Inventory",
     "group": "Quick transfer",
     "label": "Shift-click into crafting grid",
-    "description": "Shift-click or Shift-drag inventory stacks into a crafting-table grid, or into your personal 2x2 grid when the hotbar is full. Works independently of crafting-grid storage. Preserves leftovers and normal transfers when the grid is full.",
+    "description": "Shift-click or Shift-drag inventory stacks into a crafting-table grid, or into your personal 2x2 grid when their normal storage or hotbar destination is full. Works independently of crafting-grid storage. Preserves leftovers and normal transfers when the grid is full.",
     "default": true,
     "restart": false
   },

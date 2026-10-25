@@ -55,6 +55,43 @@ final class Crawling420Checks {
           mc.world.method_154(x, y + 1, z, 0, 0);
         }
       });
+      test("overhead trapdoors retain standing clearance across ladder positions", () -> {
+        settings(true, false); permission(mc, false);
+        for (int direction = 0; direction < 4; direction++) for (double offset : new double[]{.31, .5, .69}) {
+          floor(mc, x, y, z); reset(mc, x, y, z);
+          mc.world.method_154(x, y, z, 65, 5);
+          mc.world.method_154(x, y + 1, z, 65, 5);
+          mc.world.method_154(x, y + 2, z, 96, direction | 4);
+          player.method_1341(x + offset, y, z + .5, 0, 0);
+          ModernSwimming.tick(player);
+          mc.world.method_154(x, y + 2, z, 96, direction);
+          ModernSwimming.tick(player);
+          check(!ModernSwimming.lowPose(player), "clear closed trapdoor forced a low pose");
+          near(player.boundingBox.minY, y, 1e-6, "overhead trapdoor moved feet");
+        }
+        floor(mc, x, y, z);
+      });
+      test("forced crouching on a ladder allows descent but real Sneak still holds", () -> {
+        for (boolean sneak : new boolean[]{false, true}) {
+          floor(mc, x, y, z); settings(true, false); reset(mc, x, y, z);
+          mc.world.method_154(x, y, z, 65, 5);
+          mc.world.method_154(x, y + 1, z, 65, 5);
+          mc.world.method_154(x, y + 2, z, 96, 0);
+          player.method_1341(x + .5, y + .4, z + .5, 0, 0);
+          player.field_161.field_2536 = sneak;
+          ModernSwimming.tick(player);
+          check(ModernSwimming.crouched(player) && player.method_932(), "fixture did not crouch on a ladder");
+          double feet = player.boundingBox.minY;
+          player.velocityY = -.1; player.field_1623 = false; player.method_945(0, 0);
+          near(player.boundingBox.minY, feet - (sneak ? 0 : .1), 1e-6, "ladder descent follows actual Sneak input");
+          if (!sneak) {
+            for (int i = 0; i < 8; i++) { ModernSwimming.tick(player); player.method_945(0, 0); }
+            ModernSwimming.tick(player);
+            check(!ModernSwimming.lowPose(player), "ladder descent retained crouch after clearing the trapdoor");
+          }
+        }
+        floor(mc, x, y, z);
+      });
       test("the independent off preference and solid lower-body obstruction cannot initiate crawling", () -> {
         settings(false, true); permission(mc, true); reset(mc, x, y, z);
         mc.world.method_154(x, y + 1, z, 96, 0); ModernSwimming.tick(player);
