@@ -64,11 +64,17 @@ final class PhotoControlsChecks {
     out.addProperty("renderPlayer",(boolean)field(photo,"renderPlayer"));
     out.addProperty("dragButton",(int)field(photo,"dragButton"));
     JsonObject buttons = new JsonObject();
-    for (String name : new String[]{"exitButton","centerButton","rotateLeftButton","rotateRightButton","screenshotButton","renderPlayerButton","tiltSlider","timeSlider"}) {
+    for (String name : new String[]{"exitButton","centerButton","rotateLeftButton","rotateRightButton","screenshotButton","tiltSlider","timeSlider"}) {
       var button=(ButtonWidget)field(photo,name);
       JsonObject b=new JsonObject();b.addProperty("x",button.x);b.addProperty("y",button.y);
       var bounds=(local.luke.power.validation.mixin.ButtonBounds)button;
       b.addProperty("width",bounds.power$width());b.addProperty("height",bounds.power$height());buttons.add(name,b);
+    }
+    if (local.luke.power.ui.PhotoModeTools.active()) {
+      var panel=(local.luke.power.map.MapTogglePanel.Layout<?>)call(local.luke.power.input.PhotoModeHooks.tools(),"panel");
+      var row=panel.row(0);var b=new JsonObject();
+      b.addProperty("x",row.x());b.addProperty("y",row.y());b.addProperty("width",row.width());b.addProperty("height",row.height());
+      buttons.add("showPlayer",b);
     }
     out.add("buttons",buttons);
     Files.writeString(Path.of("power-beta-photo-state.json"),out.toString());

@@ -35,7 +35,7 @@ final class WaypointSetDropdown {
   static void row(UiScreen screen, String label, int x, int top, int width, int mx, int my,
       boolean selected, boolean focused, int trailingWidth) {
     boolean hover = screen.inside(mx, my, x, top, width, 20);
-    if (hover || focused) screen.rectangle(x, top, x + width, top + 20, 0xff3c3c3c);
+    if (selected || hover || focused) screen.rectangle(x, top, x + width, top + 20, selected ? 0xff3c3c3c : 0xff343434);
     if (selected) screen.rectangle(x + 2, top + 4, x + 4, top + 16, 0xff268bff);
     int available = width - 18 - trailingWidth;
     if (available > 0) {

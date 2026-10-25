@@ -11,6 +11,8 @@
 - Stop light-overlay surveys while their views are hidden.
 - Re-release: open the photo toggles menu by default, place its button beside Center and match button spacing and height to World Map controls. Start photo waypoints off in pack defaults, preserving saved choices.
 - Re-release: center settings dropdown button text, keep list items left-aligned and place Show rendered area directly below Chunk borders in the World Map menu.
+- Re-release: use Power Beta photo sliders, put Show player first in the toggles menu and move Close to the bottom-right corner. Hide unavailable teleport actions and refresh the paused view immediately after teleporting.
+- Re-release: give hovered dropdown items a dimmer background than the selected item.
 
 ## [4.4.9] - 2026-10-25
 

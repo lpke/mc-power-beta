@@ -77,7 +77,7 @@ public final class MapToggles448Checks {
         var map=open(mc,320,240);
         for(int index=0;index<MapToggle.WORLD_MAP.size();index++) {
           field(WorldMapScreen.class,"toggleScroll").setInt(map,index);
-          var panel=(MapTogglePanel.Layout)call(map,"togglePanel");
+          var panel=(MapTogglePanel.Layout<MapToggle>)call(map,"togglePanel");
           check(index>=panel.first()&&index<panel.first()+panel.visible(),"row unavailable after scroll");
           var toggle=panel.toggle(index);boolean enabled=toggle.enabled(MapConfig.current(),false);
           var row=panel.row(index);map.layerPress(row.x()+20,row.y()+10,0);
@@ -132,7 +132,7 @@ public final class MapToggles448Checks {
       test("MAPTOGGLES448 front checkbox owns both buttons over minimap preview and context remains modal",()->{
         MenuPreferences.current().autoApply=false;
         var map=open(mc,800,360);call(map,"toggleSettings");movePreviewOverToggles(map);
-        var panel=(MapTogglePanel.Layout)call(map,"togglePanel");
+        var panel=(MapTogglePanel.Layout<MapToggle>)call(map,"togglePanel");
         int index=panel.first()+panel.visible()-1;var row=panel.row(index);
         int x=row.x()+20,y=row.y()+10;
         // Rendering places the left-bottom preview behind these rows. Publish its hit area
@@ -192,7 +192,7 @@ public final class MapToggles448Checks {
       style.size=64;style.corner=1;style.offsetX=style.offsetY=6;MapConfig.preview(style);Maps.tick(mc);
       MinimapQuickMenuLayout.Rect box;
       if(kind.equals("map")) {
-        var map=open(mc,320,240);box=((MapTogglePanel.Layout)call(map,"togglePanel")).bounds();
+        var map=open(mc,320,240);box=((MapTogglePanel.Layout<MapToggle>)call(map,"togglePanel")).bounds();
         first=field(WorldMapScreen.class,"toggleScroll").getInt(map);zoom=((MapMath.View)field(WorldMapScreen.class,"view").get(map)).scale;
       } else {
         var pause=new net.minecraft.class_525();mc.setScreen(pause);pause.init(mc,320,180);Mouse.setGrabbed(false);openGear(mc);

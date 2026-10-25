@@ -10,9 +10,10 @@ public final class MapTogglePanel extends UiScreen {
   public static final int ROW_HEIGHT = 20, PADDING = 4, HORIZONTAL_ALLOWANCE = 32;
   private static final MapTogglePanel VIEW = new MapTogglePanel();
   private static final String[] TICK = {"      ##", "     ## ", "    ##  ", "## ##   ", " ###    ", "  #     "};
-  public record Layout(MinimapQuickMenuLayout.Rect bounds, int first, int visible, List<MapToggle> toggles) {
+  public interface Toggle { String label(); }
+  public record Layout<T extends Toggle>(MinimapQuickMenuLayout.Rect bounds, int first, int visible, List<T> toggles) {
     public Layout { toggles=List.copyOf(toggles); }
-    public MapToggle toggle(int index) { return toggles.get(index); }
+    public T toggle(int index) { return toggles.get(index); }
     public MinimapQuickMenuLayout.Rect row(int index) {
       return new MinimapQuickMenuLayout.Rect(bounds.x()+PADDING,
           bounds.y()+PADDING+(index-first)*ROW_HEIGHT,bounds.width()-PADDING*2,ROW_HEIGHT);
@@ -30,22 +31,22 @@ public final class MapTogglePanel extends UiScreen {
   public static int labelWidth(Minecraft mc) {
     return labelWidth(mc,MapToggle.ALL);
   }
-  public static int labelWidth(Minecraft mc,List<MapToggle> toggles) {
-    return toggles.stream().mapToInt(toggle->mc.textRenderer.getWidth(toggle.label)).max().orElse(120);
+  public static int labelWidth(Minecraft mc,List<? extends Toggle> toggles) {
+    return toggles.stream().mapToInt(toggle->mc.textRenderer.getWidth(toggle.label())).max().orElse(120);
   }
-  public static Layout at(int x,int bottom,int maxWidth,int maxHeight,int labelWidth,int first) {
+  public static Layout<MapToggle> at(int x,int bottom,int maxWidth,int maxHeight,int labelWidth,int first) {
     return at(x,bottom,maxWidth,maxHeight,labelWidth,first,MapToggle.ALL);
   }
-  public static Layout at(int x,int bottom,int maxWidth,int maxHeight,int labelWidth,int first,List<MapToggle> toggles) {
+  public static <T extends Toggle> Layout<T> at(int x,int bottom,int maxWidth,int maxHeight,int labelWidth,int first,List<T> toggles) {
     int visible=Math.max(0,Math.min(toggles.size(),(maxHeight-PADDING*2)/ROW_HEIGHT));
     int height=PADDING*2+visible*ROW_HEIGHT;
-    return new Layout(new MinimapQuickMenuLayout.Rect(x,bottom-height,Math.max(1,Math.min(maxWidth,labelWidth+HORIZONTAL_ALLOWANCE)),height),
+    return new Layout<>(new MinimapQuickMenuLayout.Rect(x,bottom-height,Math.max(1,Math.min(maxWidth,labelWidth+HORIZONTAL_ALLOWANCE)),height),
         Math.max(0,Math.min(toggles.size()-visible,first)),visible,toggles);
   }
-  public static void draw(Minecraft mc,Layout layout,int mouseX,int mouseY,boolean minimap) {
+  public static void draw(Minecraft mc,Layout<MapToggle> layout,int mouseX,int mouseY,boolean minimap) {
     draw(mc,layout,mouseX,mouseY,toggle -> toggle.enabled(MapConfig.current(),minimap));
   }
-  public static void draw(Minecraft mc,Layout layout,int mouseX,int mouseY,java.util.function.Predicate<MapToggle> enabled) {
+  public static <T extends Toggle> void draw(Minecraft mc,Layout<T> layout,int mouseX,int mouseY,java.util.function.Predicate<T> enabled) {
     VIEW.init(mc,mc.currentScreen.width,mc.currentScreen.height);
     var box=layout.bounds();
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
@@ -64,7 +65,7 @@ public final class MapTogglePanel extends UiScreen {
           for(int y=0;y<TICK.length;y++)for(int x=0;x<TICK[y].length();x++)
             if(TICK[y].charAt(x)=='#')VIEW.fill(left+x,top+y,left+x+1,top+y+1,0xffffffff);
         }
-        VIEW.text(VIEW.fit(toggle.label,row.width()-23),row.x()+19,row.y()+6,hovered?0xffffff:0xdddddd);
+        VIEW.text(VIEW.fit(toggle.label(),row.width()-23),row.x()+19,row.y()+6,hovered?0xffffff:0xdddddd);
       }
       if(layout.visible()<layout.toggles().size()) {
         int track=box.height()-8,thumb=Math.max(4,track*layout.visible()/layout.toggles().size());

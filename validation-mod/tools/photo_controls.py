@@ -79,7 +79,8 @@ def run(v):
         v.tap('e');assert state()['rotationGoal']==0,state()
         click('rotateLeftButton');assert state()['rotationGoal']==.5,state()
         click('rotateRightButton');assert state()['rotationGoal']==0,state()
-        before=state()['renderPlayer'];click('renderPlayerButton');assert state()['renderPlayer']!=before
+        before=state()['renderPlayer'];click('showPlayer');assert state()['renderPlayer']!=before
+        assert state()['dragButton']==-1,state()
         click('tiltSlider',.8);assert 65<=state()['tiltGoal']<=77,state()
         reset();click('tiltSlider',.5);assert 43<=state()['tiltGoal']<=46,state()
         # A widget-origin drag must never turn into a camera drag.

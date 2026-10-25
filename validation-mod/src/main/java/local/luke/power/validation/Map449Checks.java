@@ -82,7 +82,7 @@ final class Map449Checks {
       test("MAP449 World Map omits cave row and remembers visibility through visits and resize",()->{
         closeMenu(mc);field(WorldMapScreen.class,"rememberedTogglesVisible").setBoolean(null,true);
         var first=new WorldMapScreen();mc.setScreen(first);first.init(mc,640,360);
-        var panel=(MapTogglePanel.Layout)call(first,"togglePanel");
+        var panel=(MapTogglePanel.Layout<MapToggle>)call(first,"togglePanel");
         check(panel.toggles().equals(MapToggle.WORLD_MAP)&&!panel.toggles().contains(MapToggle.CAVES),"world-map row set includes cave mode");
         check(MinimapQuickMenuLayout.ROWS==MapToggle.ALL.size()&&MapToggle.ALL.get(4)==MapToggle.CAVES,"minimap cave action moved");
         String settings=Catalog.JSON.toJson(MapConfig.current());

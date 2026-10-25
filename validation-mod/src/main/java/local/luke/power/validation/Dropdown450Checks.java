@@ -53,6 +53,11 @@ final class Dropdown450Checks {
         int mx = integer(popup, "x") + 12;
         int my = integer(popup, "y") + integer(popup, "defaultIndex") * 20 - (int)(double)field(popup, "scroll") + 8;
         SettingsSnapshot.render(mc, options, size[0], size[1], REPORT.resolve("options-default-" + size[0] + ".png"), mx, my);
+        int selected = integer(popup, "selected"), defaultIndex = integer(popup, "defaultIndex");
+        int hovered = (selected + 1) % setting.choices.size();
+        if (hovered == defaultIndex && defaultIndex != selected) hovered = (hovered + 1) % setting.choices.size();
+        int hoverY = integer(popup, "y") + hovered * 20 - (int)(double)field(popup, "scroll") + 8;
+        SettingsSnapshot.render(mc, options, size[0], size[1], REPORT.resolve("options-hover-" + size[0] + ".png"), mx, hoverY);
         call(popup, "close", new Class<?>[]{});
         setting = options.session().settings().stream().filter(v -> v.id.equals("maps.middleClickAction")).findFirst().orElseThrow();
         Dropdown450Screens.openSetting(options, setting);

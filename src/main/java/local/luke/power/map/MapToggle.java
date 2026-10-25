@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /** Shared quick settings. Ordinals are the retained middle-click action IDs. */
-public enum MapToggle {
+public enum MapToggle implements MapTogglePanel.Toggle {
   ITEMS("Show items", "items"),
   MOBS("Show mobs", "hostile", "animals"),
   WAYPOINTS("Show waypoints", "waypoints"),
@@ -24,6 +24,7 @@ public enum MapToggle {
   public final List<String> fields;
   private static int rememberedCaveMode = 1;
   MapToggle(String label, String... fields) { this.label = label; this.fields = List.of(fields); }
+  @Override public String label() { return label; }
 
   public boolean enabled(MapSettings settings, boolean minimap) {
     return switch (this) {

@@ -14,25 +14,20 @@ public class SliderWidgetWithoutSaving extends SliderWidget {
     @Override
     public void render(Minecraft minecraft, int mouseX, int mouseY) {
         if (!visible) return;
-        if (!PhotoModeHooks.tools().renderButton(minecraft, text, x, y, width, height,
-            mouseX, mouseY, active, () -> renderBackground(minecraft, mouseX, mouseY))) {
+        updateDrag(mouseX);
+        if (!PhotoModeHooks.tools().renderSlider(minecraft, text, x, y, width, mouseX, mouseY, value)) {
             super.render(minecraft, mouseX, mouseY);
         }
+    }
+
+    private void updateDrag(int mouseX) {
+        if (dragging) value = Math.max(0, Math.min(1, (float) (mouseX - x - 4) / (width - 8)));
     }
 
     @Override
     protected void renderBackground(Minecraft minecraft, int mouseX, int mouseY) {
         if (this.visible) {
-            if (this.dragging) {
-                this.value = (float) (mouseX - (this.x + 4)) / (float) (this.width - 8);
-                if (this.value < 0.0F) {
-                    this.value = 0.0F;
-                }
-
-                if (this.value > 1.0F) {
-                    this.value = 1.0F;
-                }
-            }
+            updateDrag(mouseX);
 
             GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             int handleX = this.x + (int) (this.value * (float) (this.width - 8));

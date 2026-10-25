@@ -24,7 +24,6 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
     private ButtonWidget rotateLeftButton;
     private ButtonWidget rotateRightButton;
     private ButtonWidget screenshotButton;
-    private ButtonWidget renderPlayerButton;
 
     private long originalTOD;
     private local.luke.power.world.WorldCycles originalCycles;
@@ -68,7 +67,7 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
 
         int id = 0;
         var footer = local.luke.power.input.PhotoControlsLayout.at(this.width, this.height, this.minecraft.textRenderer::getWidth);
-        this.exitButton = new PhotoButtonWidget(id++, 8, 6, 20, footer.buttonHeight(), "X");
+        this.exitButton = new PhotoButtonWidget(id++, footer.closeX(), footer.bottomY(), footer.closeWidth(), footer.buttonHeight(), "Close");
         this.tiltSlider = new SliderWidgetWithoutSaving(id++, this.width - 158, 6, "Tilt: Default", 0.33333334f);
         this.timeSlider = new SliderWidgetWithoutSaving(id++, this.width - 158, 28, "Time of Day: Current", 0.0f);
         int rotationY = footer.rotationY();
@@ -76,7 +75,6 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
         this.rotateLeftButton = new PhotoButtonWidget(id++, footer.rotationLeftX(), rotationY, 20, footer.buttonHeight(), "<");
         this.rotateRightButton = new PhotoButtonWidget(id++, footer.rotationRightX(), rotationY, 20, footer.buttonHeight(), ">");
         this.screenshotButton = new PhotoButtonWidget(id++, footer.screenshotX(), rotationY, footer.screenshotWidth(), footer.buttonHeight(), "Take Screenshot");
-        this.renderPlayerButton = new PhotoButtonWidget(id++, footer.playerX(), footer.bottomY(), footer.playerWidth(), footer.buttonHeight(), "Render Player: On");
 
         this.buttons.add(this.exitButton);
         this.buttons.add(this.tiltSlider);
@@ -84,7 +82,6 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
         this.buttons.add(this.rotateLeftButton);
         this.buttons.add(this.rotateRightButton);
         this.buttons.add(this.screenshotButton);
-        this.buttons.add(this.renderPlayerButton);
 
         if (!this.minecraft.world.isRemote) {
             this.buttons.add(this.timeSlider);
@@ -135,8 +132,6 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
             this.shouldScreenshot = true;
         } else if (button == this.exitButton) {
             this.minecraft.setScreen(this.previousScreen);
-        } else if (button == this.renderPlayerButton) {
-            this.renderPlayer = !this.renderPlayer;
         } else if (button == this.centerButton) {
             this.center();
         }
@@ -196,6 +191,8 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
     }
     
     @Override public void powerPhoto$screenshot() { this.shouldScreenshot = true; }
+    @Override public boolean powerPhoto$showPlayer() { return this.renderPlayer; }
+    @Override public void powerPhoto$showPlayer(boolean visible) { this.renderPlayer = visible; }
 
     @Override public boolean powerPhoto$dragging() {
         return this.dragButton >= 0 || this.tiltSlider.dragging || this.timeSlider.dragging;
@@ -302,7 +299,6 @@ public class PhotoModeScreen extends Screen implements local.luke.power.input.Ph
     private void updateButtonsText() {
         this.timeSlider.text = this.timeSlider.value == 0.0f ? "Time of Day: Default" : "Time of Day: " + (long) (this.timeSlider.value * 24000.0f);
         this.tiltSlider.text = (int) (this.tiltSlider.value * 90.0f) == 30 ? "Tilt: Default" : "Tilt: " + (Math.floor(this.tiltSlider.value * 90.0f)) + " degrees";
-        this.renderPlayerButton.text = this.renderPlayer ? "Render Player: On" : "Render Player: Off";
         this.centerButton.text = shiftHeld() ? "Full Reset" : "Center";
     }
 

@@ -39,7 +39,7 @@ public final class WorldMapScreen extends UiScreen {
   private static boolean rememberedTogglesVisible = true;
   private boolean togglesVisible = rememberedTogglesVisible;
   private int toggleScroll;
-  private MapTogglePanel.Layout toggleLayout;
+  private MapTogglePanel.Layout<MapToggle> toggleLayout;
   private WorldMapControls toggleControls;
   private Object toggleFont;
   private int toggleLabelWidth, toggleLayoutScroll, toggleScaleX, toggleScaleY;
@@ -176,7 +176,7 @@ public final class WorldMapScreen extends UiScreen {
     }
     return controls;
   }
-  private MapTogglePanel.Layout togglePanel() {
+  private MapTogglePanel.Layout<MapToggle> togglePanel() {
     var navigation = controls();
     int scaleX = navigation.scale().x() + (int)scaleDx, scaleY = navigation.scale().y() + (int)scaleDy;
     if (toggleFont != textRenderer) { toggleFont = textRenderer; toggleLabelWidth = MapTogglePanel.labelWidth(minecraft,MapToggle.WORLD_MAP); toggleLayout = null; }

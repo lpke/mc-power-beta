@@ -11,7 +11,7 @@ public final class MinimapQuickMenuLayout {
     }
   }
   public record Layout(Rect gear, Rect menu) {
-    public MapTogglePanel.Layout panel(int first) { return MapTogglePanel.at(menu.x,menu.y+menu.height,menu.width,menu.height,menu.width-MapTogglePanel.HORIZONTAL_ALLOWANCE,first); }
+    public MapTogglePanel.Layout<MapToggle> panel(int first) { return MapTogglePanel.at(menu.x,menu.y+menu.height,menu.width,menu.height,menu.width-MapTogglePanel.HORIZONTAL_ALLOWANCE,first); }
     public Rect row(int index) { return panel(0).row(index); }
     public int rowAt(int x,int y) { for(int index=0;index<panel(0).visible();index++)if(row(index).contains(x,y))return index;return -1; }
   }

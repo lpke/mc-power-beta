@@ -43,6 +43,13 @@ final class Photo450Checks {
     if(action.equals("state")){state(mc);return;}
     if(action.equals("capture")){checkPhoto(mc);((PhotoModeHooks.Camera)mc.currentScreen).powerPhoto$screenshot();return;}
     if(action.equals("toggles")){checkPhoto(mc);field(tools(),"toggles",true);return;}
+    if(action.equals("player")){
+      checkPhoto(mc);field(tools(),"toggles",true);
+      var panel=(MapTogglePanel.Layout<?>)call(tools(),"panel");var row=panel.row(0);
+      check(panel.toggle(0).label().equals("Show player"),"player checkbox is not first");
+      PhotoModeHooks.tools().mouse(mc.currentScreen,row.x()+21,row.y()+10,0,true,0);
+      PhotoModeHooks.tools().mouse(mc.currentScreen,row.x()+21,row.y()+10,0,false,0);return;
+    }
     if(action.startsWith("bind ")){
       String[] values=action.split(" ");check(values.length==4&&values[1].equals("fullbright"),"bind fullbright <keycode> <modifier-mask>");
       if(savedBrightKey==null){savedBrightKey=RenderControls.FULL_BRIGHT.code;savedModifiers=Bindings.modifiers();}
@@ -63,6 +70,7 @@ final class Photo450Checks {
       test("PHOTO450 visit defaults and independent photo waypoint preference",()->{
         check((boolean)field(tools,"items")&&(boolean)field(tools,"mobs"),"entity defaults are off");
         check((boolean)field(tools,"toggles"),"photo toggle menu started hidden");
+        check(((PhotoModeHooks.Camera)photo).powerPhoto$showPlayer(),"player starts hidden");
         check(!(boolean)field(tools,"chunks")&&!(boolean)field(tools,"spawnable"),"expensive photo overlays started enabled");
         boolean world=MapConfig.current().worldWaypoints,map=MapConfig.current().waypoints;
         toggle(MapToggle.WAYPOINTS);check(MapConfig.current().photoWaypoints!=before.photoWaypoints,"photo preference did not change");
@@ -74,19 +82,22 @@ final class Photo450Checks {
         while(wrap<854&&PhotoControlsLayout.at(wrap,240,mc.textRenderer::getWidth).rotationY()<216)wrap++;
         for(int[] size:new int[][]{{320,240},{359,240},{360,240},{427,240},{wrap-1,240},{wrap,240},{640,360}}){
           photo.init(mc,size[0],size[1]);field(tools,"toggles",true);
-          var layout=(MapTogglePanel.Layout)call(tools,"panel");
-          check(layout.toggles().size()==5,"wrong photo toggle list");
+          var layout=(MapTogglePanel.Layout<?>)call(tools,"panel");
+          check(layout.toggles().size()==6,"wrong photo toggle list");
+          check(layout.toggle(0).label().equals("Show player")&&layout.visible()==6,"player checkbox is not first or panel scrolls unnecessarily");
           check(layout.bounds().x()>=0&&layout.bounds().y()>=0&&layout.bounds().x()+layout.bounds().width()<=size[0],"photo panel clipped");
           var footer=PhotoControlsLayout.at(size[0],size[1],mc.textRenderer::getWidth);
           var center=(net.minecraft.client.gui.widget.ButtonWidget)field(photo,"centerButton");
           check(center.x==footer.centerX()&&center.y==footer.bottomY(),"Center does not follow toggles");
           check(center.x==footer.toggleX()+footer.toggleWidth()+4,"footer gap missing");
           var centerBounds=(local.luke.power.validation.mixin.ButtonBounds)center;
-          check(center.x+centerBounds.power$width()<=footer.playerX()-4,"Center overlaps player control");
+          check(center.x+centerBounds.power$width()<=footer.closeX()-4,"Center overlaps Close");
           check(centerBounds.power$height()==18&&center.y+18==size[1]-6,"footer spacing differs from maps");
           check(layout.bounds().y()+layout.bounds().height()<=footer.rotationY(),"menu overlaps photo footer");
+          var close=(net.minecraft.client.gui.widget.ButtonWidget)field(photo,"exitButton");
+          check(close.text.equals("Close")&&close.x==footer.closeX()&&close.y==footer.bottomY(),"Close is not bottom-right");
           for(int i=layout.first();i<layout.first()+layout.visible();i++){
-            var row=layout.row(i);String name=layout.toggle(i).name();
+            var row=layout.row(i);String name=layout.toggle(i).label();
             boolean consumed=PhotoModeHooks.tools().mouse(photo,row.x()+21,row.y()+10,0,true,0);
             check(consumed&&mc.currentScreen==photo,"checkbox leaked to native screen "+name);
             check((int)field(photo,"dragButton")==-1,"checkbox started camera drag");
@@ -115,7 +126,7 @@ final class Photo450Checks {
         } finally {MapConfig.preview(before);}
       });
       test("PHOTO450 native drags keep ownership when crossing photo tools",()->{
-        field(tools,"toggles",true);var layout=(MapTogglePanel.Layout)call(tools,"panel");
+        field(tools,"toggles",true);var layout=(MapTogglePanel.Layout<?>)call(tools,"panel");
         int x=layout.bounds().x()+24,y=layout.bounds().y()+10;
         field(photo,"dragButton",0);
         check(!PhotoModeHooks.tools().mouse(photo,x,y,-1,false,0),"tool panel stole camera drag");
@@ -214,6 +225,24 @@ final class Photo450Checks {
         check(!(boolean)call(tools,"safeTeleport"),"invalid-height teleport accepted");
         check(mc.currentScreen==photo,"teleport probe changed screen");
       });
+      test("PHOTO450 permission-hidden Teleport keeps destination row identity",()->{
+        var rules=AccessRules.copy(mc);
+        var destinationField=Maps.class.getDeclaredField("destination");destinationField.setAccessible(true);
+        var destination=(Waypoint)destinationField.get(null);
+        try {
+          var allowed=rules.copy();allowed.set(local.luke.power.rules.GameRule.ALLOW_TELEPORTATION,false);AccessRules.restore(mc,allowed);
+          int[] pick=stage(mc,photo,false);
+          PhotoModeHooks.tools().mouse(photo,pick[0],pick[1],2,true,0);
+          var actions=(List<?>)call(tools,"actions");
+          check(actions.size()==3&&actions.stream().noneMatch(value->value.toString().equals("TELEPORT")),"Teleport visible without access");
+          check(actions.get(2).toString().equals("DESTINATION"),"third visible action is not destination");
+          int x=(int)field(tools,"contextX"),y=(int)field(tools,"contextY");
+          double px=mc.player.x,py=mc.player.y,pz=mc.player.z;
+          PhotoModeHooks.tools().mouse(photo,x+8,y+2*18+8,0,true,0);
+          check(destinationField.get(null)!=null&&mc.currentScreen==photo,"destination action changed host or was lost");
+          check(mc.player.x==px&&mc.player.y==py&&mc.player.z==pz,"destination row moved the player");
+        } finally {AccessRules.restore(mc,rules);Maps.destination(destination);field(tools,"context",false);}
+      });
       test("PHOTO450 lighting is restored synchronously when photo closes",()->{
         long original=(long)field(photo,"originalTOD");
         Object slider=field(photo,"timeSlider");
@@ -247,7 +276,15 @@ final class Photo450Checks {
     JsonObject value=new JsonObject();value.addProperty("active",PhotoModeTools.active());
     value.addProperty("fullBright",RenderControls.fullBright());value.addProperty("photoWaypoints",MapConfig.current().photoWaypoints);
     value.addProperty("daylight",((WorldCycles)mc.world.method_262()).power$daylightTime());
+    value.addProperty("paused",mc.paused);
+    value.addProperty("playerX",mc.player.x);value.addProperty("playerY",mc.player.y);value.addProperty("playerZ",mc.player.z);
+    var dispatcher=net.minecraft.client.render.entity.EntityRenderDispatcher.field_2489;
+    value.addProperty("renderX",dispatcher.field_2500);value.addProperty("renderY",dispatcher.field_2501);value.addProperty("renderZ",dispatcher.field_2502);
     value.addProperty("screen",mc.currentScreen==null?"none":mc.currentScreen.getClass().getName());
+    if(mc.currentScreen instanceof PhotoModeHooks.Camera camera)value.addProperty("showPlayer",camera.powerPhoto$showPlayer());
+    var actionNames=new com.google.gson.JsonArray();
+    for(Object action:(List<?>)call(tools(),"actions"))actionNames.add(action.toString());
+    value.add("contextActions",actionNames);
     for(String name:List.of("items","mobs","chunks","spawnable","toggles","context","contextSafe"))value.addProperty(name,(boolean)field(tools(),name));
     Object layer=field(tools(),"layer");value.addProperty("layer",layer==null?"none":layer.getClass().getName());
     value.addProperty("surveyChecks",((PhotoTerrainSurvey)field(tools(),"survey")).checksLastTick);

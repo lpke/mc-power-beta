@@ -6,6 +6,8 @@ public final class PhotoModeHooks {
     boolean powerPhoto$ownsPointer(int x, int y);
     boolean powerPhoto$dragging();
     void powerPhoto$screenshot();
+    boolean powerPhoto$showPlayer();
+    void powerPhoto$showPlayer(boolean visible);
   }
   public interface Tools {
     default void init(Object screen, Object client) {}
@@ -16,6 +18,8 @@ public final class PhotoModeHooks {
     default boolean controlsHidden(Object screen) { return false; }
     default boolean renderButton(Object client, String label, int x, int y, int width, int height,
         int mouseX, int mouseY, boolean enabled, Runnable overlay) { return false; }
+    default boolean renderSlider(Object client, String label, int x, int y, int width,
+        int mouseX, int mouseY, double fraction) { return false; }
     default void renderScene(Object screen, int x, int y) {}
     default void render(Object screen, int x, int y, float delta) {}
   }

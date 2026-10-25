@@ -17,8 +17,21 @@ import org.lwjgl.opengl.Display;
 
 /** Photo tools stay on the photo screen, including nested waypoint/color editor drafts. */
 public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Tools {
+  private enum PhotoToggle implements MapTogglePanel.Toggle {
+    PLAYER(null),ITEMS(MapToggle.ITEMS),MOBS(MapToggle.MOBS),WAYPOINTS(MapToggle.WAYPOINTS),CHUNKS(MapToggle.CHUNKS),LIGHT(MapToggle.LIGHT);
+    final MapToggle map;
+    PhotoToggle(MapToggle map){this.map=map;}
+    @Override public String label(){return map==null?"Show player":map.label;}
+  }
+  private enum Action {
+    CREATE("Create waypoint"),COPY("Copy coordinates"),TELEPORT("Teleport"),DESTINATION("Set destination");
+    final String label;
+    Action(String label){this.label=label;}
+  }
+  private static final List<PhotoToggle> TOGGLES=List.of(PhotoToggle.values());
+  private static final List<Action> WITH_TELEPORT=List.of(Action.values());
+  private static final List<Action> WITHOUT_TELEPORT=List.of(Action.CREATE,Action.COPY,Action.DESTINATION);
   private static final PhotoModeTools INSTANCE=new PhotoModeTools();
-  private static final List<MapToggle> TOGGLES=List.of(MapToggle.ITEMS,MapToggle.MOBS,MapToggle.WAYPOINTS,MapToggle.CHUNKS,MapToggle.LIGHT);
   private static boolean registered;
   private final PhotoTerrainSurvey survey=new PhotoTerrainSurvey();
   private Screen host;
@@ -26,8 +39,9 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
   private PhotoControlsLayout controls;
   private Object visitWorld;
   private boolean items=true,mobs=true,chunks,spawnable,toggles,context,contextSafe;
-  private int scroll,contextX,contextY,pointerX,pointerY;
+  private int scroll,contextX,contextY,pointerX,pointerY,toggleLabelWidth;
   private Waypoint target;
+  private List<Action> contextActions=WITHOUT_TELEPORT;
   private PhotoRay.Hit hovered;
   private String message="";
   private PhotoModeTools() {}
@@ -47,7 +61,10 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     if(!active()) {if(INSTANCE.host!=null)INSTANCE.removed(INSTANCE.host);return;}
     if(!Display.isActive()){INSTANCE.hovered=null;return;}
     if(INSTANCE.layer!=null)INSTANCE.layer.tick();
-    if(INSTANCE.context)INSTANCE.contextSafe=INSTANCE.safeTeleport();
+    if(INSTANCE.context){
+      if(INSTANCE.contextActions.contains(Action.TELEPORT)!=Maps.canTeleport(mc,INSTANCE.target))INSTANCE.context=false;
+      else INSTANCE.contextSafe=INSTANCE.contextActions.contains(Action.TELEPORT)&&INSTANCE.safeTeleport();
+    }
     INSTANCE.survey.tick(mc,INSTANCE.chunks,INSTANCE.spawnable);
     if(INSTANCE.chunks && INSTANCE.layer==null && !INSTANCE.context && !INSTANCE.owns(INSTANCE.pointerX,INSTANCE.pointerY))
       INSTANCE.hovered=PhotoPicking.pick(mc,INSTANCE.pointerX,INSTANCE.pointerY,2048);
@@ -71,6 +88,7 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     }
     super.init(mc,host.width,host.height);
     controls=PhotoControlsLayout.at(width,height,textRenderer::getWidth);
+    toggleLabelWidth=MapTogglePanel.labelWidth(mc,TOGGLES);
     if(MapConfig.current().photoWaypoints)Maps.ensureWaypoints(mc);
     if(layer!=null)layer.init(mc,width,height);
     pointerX=Mouse.getX()*width/Math.max(1,mc.displayWidth);
@@ -88,16 +106,26 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     if(client!=minecraft||!active())return false;
     button(label,x,y,span,h,mx,my,enabled,-1,overlay);return true;
   }
+  @Override public boolean renderSlider(Object client,String label,int x,int y,int span,int mx,int my,double fraction){
+    if(client!=minecraft||!active())return false;
+    slider(label,x,y,span,mx,my,fraction);return true;
+  }
   private PhotoControlsLayout footer(){return controls;}
   private int toggleY(){return footer().bottomY();}
-  private MapTogglePanel.Layout panel(){
-    return MapTogglePanel.at(footer().toggleX(),footer().panelBottom(),Math.max(1,width-16),Math.max(8,footer().panelBottom()-64),
-        MapTogglePanel.labelWidth(minecraft,TOGGLES),scroll,TOGGLES);
+  private MapTogglePanel.Layout<PhotoToggle> panel(){
+    return MapTogglePanel.at(footer().toggleX(),footer().panelBottom(),Math.max(1,width-16),Math.max(8,footer().panelBottom()-48),
+        toggleLabelWidth,scroll,TOGGLES);
   }
   private boolean owns(int x,int y){return host instanceof PhotoModeHooks.Camera camera&&camera.powerPhoto$ownsPointer(x,y)
       || inside(x,y,footer().toggleX(),toggleY(),footer().toggleWidth(),footer().buttonHeight())||toggles&&panel().bounds().contains(x,y);}
   private boolean enabled(MapToggle toggle){return switch(toggle){case ITEMS->items;case MOBS->mobs;
     case WAYPOINTS->MapConfig.current().photoWaypoints;case CHUNKS->chunks;case LIGHT->spawnable;default->false;};}
+  private boolean enabled(PhotoToggle toggle){return toggle==PhotoToggle.PLAYER
+      ?host instanceof PhotoModeHooks.Camera camera&&camera.powerPhoto$showPlayer():enabled(toggle.map);}
+  private void toggle(PhotoToggle toggle){
+    if(toggle==PhotoToggle.PLAYER){if(host instanceof PhotoModeHooks.Camera camera)camera.powerPhoto$showPlayer(!camera.powerPhoto$showPlayer());}
+    else toggle(toggle.map);
+  }
   private void toggle(MapToggle toggle){
     switch(toggle){case ITEMS->items=!items;case MOBS->mobs=!mobs;
       case WAYPOINTS->{var settings=MapConfig.copy();settings.photoWaypoints=!settings.photoWaypoints;MapConfig.queued(settings);if(settings.photoWaypoints)Maps.ensureWaypoints(minecraft);}
@@ -132,7 +160,7 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
         && Bindings.matches(local.luke.power.debug.DebugKeys.binding(local.luke.power.debug.DebugAction.BORDERS),key))toggle(MapToggle.CHUNKS);
     else local.luke.power.render.RenderControls.photoPress(minecraft,key);
   }
-  private List<String> actions(){return List.of("Create waypoint","Copy coordinates","Teleport","Set destination");}
+  private List<Action> actions(){return contextActions;}
   private boolean safeTeleport(){
     if(target==null||!Maps.canTeleport(minecraft,target)||target.y<1||target.y>125
         ||MapSampler.loaded(minecraft.world,target.x>>4,target.z>>4)==null)return false;
@@ -166,7 +194,14 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     }case 1->{try{
       Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(target.coordinates()),null);message="Coordinates copied";
     }catch(RuntimeException failure){message="Clipboard is unavailable";}}
-      case 2->{Maps.teleport(minecraft,target);minecraft.setScreen(host instanceof local.luke.power.controls.tweaks.photomode.PhotoModeScreen photo?photo.previousScreen:null);}
+      case 2->{
+        var world=minecraft.world;var player=minecraft.player;
+        Maps.teleport(minecraft,target);
+        if(minecraft.world==world&&minecraft.player==player&&Math.abs(player.x-target.x-.5)<.000001
+            &&Math.abs(player.z-target.z-.5)<.000001&&Math.abs(player.boundingBox.minY-target.y)<.000001)
+          world.method_193(player,false);
+        minecraft.setScreen(host instanceof local.luke.power.controls.tweaks.photomode.PhotoModeScreen photo?photo.previousScreen:null);
+      }
       case 3->{Maps.ensureWaypoints(minecraft);Maps.destination(target);}default->{}}
   }
   @Override public boolean mouse(Object screen,int x,int y,int button,boolean down,int wheel) {
@@ -182,7 +217,7 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
       else current.layerRelease(x,y,-1);
       return true;
     }
-    if(context){if(button>=0&&down){if(button==0&&inside(x,y,contextX,contextY,142,actions().size()*18))action((y-contextY)/18);else context=false;}return true;}
+    if(context){if(button>=0&&down){if(button==0&&inside(x,y,contextX,contextY,142,actions().size()*18))action(actions().get((y-contextY)/18).ordinal());else context=false;}return true;}
     if(toggles&&panel().bounds().contains(x,y)){
       var layout=panel();
       if(wheel!=0)scroll=layout.scroll(wheel);
@@ -196,7 +231,9 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
       if(target==null){var hit=PhotoPicking.pick(minecraft,x,y,8192);if(hit==null){message="No loaded terrain under pointer";return true;}
         target=MapKeys.newWaypoint();target.x=hit.x();target.y=Math.min(127,hit.y()+1);target.z=hit.z();
       }else target=target.copy();
-      contextSafe=safeTeleport();context=true;contextX=Math.max(0,Math.min(width-142,x));contextY=Math.max(0,Math.min(height-actions().size()*18,y));return true;
+      contextActions=Maps.canTeleport(minecraft,target)?WITH_TELEPORT:WITHOUT_TELEPORT;
+      contextSafe=contextActions.contains(Action.TELEPORT)&&safeTeleport();context=true;
+      contextX=Math.max(0,Math.min(width-142,x));contextY=Math.max(0,Math.min(height-actions().size()*18,y));return true;
     }
     if(button>=3&&down){featureKey(button-100);return true;}
     return false;
@@ -210,12 +247,13 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     int mx=layer!=null||context?-1000:x,my=layer!=null||context?-1000:y;
     button(toggles?"Hide Toggles":"Show Toggles",footer().toggleX(),toggleY(),footer().toggleWidth(),footer().buttonHeight(),mx,my,true);
     if(toggles)MapTogglePanel.draw(minecraft,panel(),mx,my,this::enabled);
-    if(!message.isEmpty())text(fit(message,Math.max(1,width-194)),32,11,0xffffff);
+    if(!message.isEmpty())text(fit(message,Math.max(1,width-170)),8,11,0xffffff);
     if(context){fill(contextX,contextY,contextX+142,contextY+actions().size()*18,0xf0202020);
       boolean safe=contextSafe;
       for(int i=0;i<actions().size();i++){
         if(inside(x,y,contextX,contextY+i*18,142,18))fill(contextX,contextY+i*18,contextX+142,contextY+(i+1)*18,0xff444444);
-        text(actions().get(i),contextX+5,contextY+i*18+5,i==2&&!safe?0x666666:0xffffff);
+        var action=actions().get(i);
+        text(action.label,contextX+5,contextY+i*18+5,action==Action.TELEPORT&&!safe?0x666666:0xffffff);
       }
     }
   }
