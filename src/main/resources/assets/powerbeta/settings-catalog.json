@@ -1283,7 +1283,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.volumeNetherPortalAmbient": {
     "page": "Audio",
-    "group": "Individual sounds",
+    "group": "Game sounds / All",
     "label": "Nether portal",
     "description": "Volume as a percentage, multiplied by Game sounds and Master volume.",
     "default": 1.0,
@@ -1297,7 +1297,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.volumeRainAmbient": {
     "page": "Audio",
-    "group": "Individual sounds",
+    "group": "Game sounds / All",
     "label": "Rain ambience",
     "description": "Volume as a percentage, multiplied by Game sounds and Master volume.",
     "default": 1.0,
@@ -1311,7 +1311,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.volumeGhastAmbient": {
     "page": "Audio",
-    "group": "Individual sounds",
+    "group": "Game sounds / All",
     "label": "Ghast ambience",
     "description": "Volume as a percentage, multiplied by Game sounds and Master volume.",
     "default": 1.0,
@@ -1325,7 +1325,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.volumeCaveAmbient": {
     "page": "Audio",
-    "group": "Individual sounds",
+    "group": "Game sounds / All",
     "label": "Cave ambience",
     "description": "Volume as a percentage, multiplied by Game sounds and Master volume.",
     "default": 1.0,
@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.6.0",
+    "default": "Power Beta 4.6.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -3415,12 +3415,6 @@
   },
   "audio.musicDirectories": {
     "order": 3
-  },
-  "audio.menuMusic": {
-    "order": 4
-  },
-  "audio.recursive": {
-    "order": 6
   },
   "audio.shuffle": {
     "order": 7

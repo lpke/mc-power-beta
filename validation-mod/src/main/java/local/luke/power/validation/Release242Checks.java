@@ -157,7 +157,7 @@ final class Release242Checks {
   private static void music(Minecraft mc) throws Exception {
     AudioSettings original = AudioConfig.copy(); float volume = mc.options.musicVolume;
     try {
-      var config = new AudioSettings(); config.menuMusic=AudioSettings.MenuMusic.WORLD;
+      var config = new AudioSettings();
       config.shuffle=false; AudioConfig.preview(config); mc.options.musicVolume=1;
       AudioController.quiet();
       test("waiting reservation survives volume, timing, sound and menu-control edits", () -> {

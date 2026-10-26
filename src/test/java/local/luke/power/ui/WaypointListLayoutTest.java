@@ -13,6 +13,9 @@ class WaypointListLayoutTest {
       assertTrue(layout.searchWidth() <= 400);
       assertTrue(layout.left() >= 8);
       assertTrue(layout.right() <= size[0] - 8);
+      assertEquals(layout.width(), layout.rowWidth(), "waypoint rows align with both control-row edges");
+      assertEquals(layout.right(), layout.scrollbarX() - 2, "scrollbar hit area starts after the rows");
+      assertTrue(layout.scrollbarX() + 6 <= size[0], "scrollbar hit area stays on screen");
       assertTrue(layout.searchWidth() >= 100);
       assertEquals(layout.sortX() - 4, layout.left() + layout.searchWidth());
       assertEquals(layout.filterX() - 4, layout.sortX() + layout.sortWidth());

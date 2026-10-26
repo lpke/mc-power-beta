@@ -363,7 +363,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.volumeNetherPortalAmbient": {
     "page": "Audio",
-    "group": "Individual sounds",
+    "group": "Game sounds / All",
     "label": "Nether portal",
     "description": "Volume multiplier from 0 to 1.",
     "min": 0,
@@ -372,7 +372,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.volumeRainAmbient": {
     "page": "Audio",
-    "group": "Individual sounds",
+    "group": "Game sounds / All",
     "label": "Rain ambience",
     "description": "Volume multiplier from 0 to 1.",
     "min": 0,
@@ -381,7 +381,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.volumeCaveAmbient": {
     "page": "Audio",
-    "group": "Individual sounds",
+    "group": "Game sounds / All",
     "label": "Cave ambience",
     "description": "Volume multiplier from 0 to 1.",
     "min": 0,
@@ -390,7 +390,7 @@
   },
   "power_environment:config.MUSIC_CONFIG.volumeGhastAmbient": {
     "page": "Audio",
-    "group": "Individual sounds",
+    "group": "Game sounds / All",
     "label": "Ghast ambience",
     "description": "Volume multiplier from 0 to 1.",
     "min": 0,

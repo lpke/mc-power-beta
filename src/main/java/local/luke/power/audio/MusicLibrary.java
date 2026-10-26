@@ -32,11 +32,11 @@ public final class MusicLibrary {
 
   public static final int MAX_TRACKS = 2048, MAX_VISITED = 20000;
 
-  public static Scan scan(Path game, List<String> folders, boolean recursive) {
+  public static Scan scan(Path game, List<String> folders) {
     Map<Path, Track> tracks = new TreeMap<>();
     List<String> warnings = new ArrayList<>();
     List<SourceFolder> sources = new ArrayList<>();
-    // Resolve every enabled root before walking. Even an overlapping root reached
+    // Resolve every imported root before walking. Even an overlapping root reached
     // after the scan budget runs out needs a canonical identity for attribution.
     for (String folder : folders) {
       Path dir = null;
@@ -66,7 +66,7 @@ public final class MusicLibrary {
             List.of("Folder scan incomplete: music scan limit reached")));
         continue;
       }
-      try (var paths = Files.walk(source.root(), recursive ? 12 : 1)) {
+      try (var paths = Files.walk(source.root(), 12)) {
         Iterator<Path> it = paths.iterator();
         while (it.hasNext()) {
           Path file = it.next();

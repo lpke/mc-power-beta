@@ -139,7 +139,7 @@ public final class CreativeTabsScreen extends UiScreen {
     rename = false; title.focused = false; error = ""; return true;
   }
   private void save() {
-    if (!editable() || !commitTitle()) return;
+    if (!changed() || !commitTitle()) return;
     try {
       if (changed()) {
         data.customized(true);
@@ -278,7 +278,7 @@ public final class CreativeTabsScreen extends UiScreen {
     if (button == 0 && (history.available() || pendingTitle()) && inside(x, y, footerX(2), height - 28, footerWidth(), 20)) { click(); undo(); return; }
     if (button == 0 && listBar.press(listTrack(), x, y)) { clicks.cancel(); listScroll = (int)Math.round(listBar.drag(listTrack(), y, true) / 23); return; }
     if (button == 0 && gridBar.press(gridTrack(), x, y)) { clicks.cancel(); gridScroll = (int)gridBar.drag(gridTrack(), y, true); return; }
-    if (button == 0 && inside(x, y, footerX(3), height - 28, footerWidth(), 20)) { click(); save(); return; }
+    if (button == 0 && changed() && inside(x, y, footerX(3), height - 28, footerWidth(), 20)) { click(); save(); return; }
     if (button == 0 && inside(x, y, tabButtonX(0), 30, tabButtonWidth(), 20)) { click(); addTab(); return; }
     if (button == 0 && hasTab() && inside(x, y, fillGroupX(), 30, fillGroupWidth(144), 20)) { click(); if (commitTitle()) { nativeGroupData(); nativeFocus = 0; nativeGroups = true; } return; }
     if (button == 0 && inside(x, y, tabButtonX(1), 30, tabButtonWidth(), 20) && hasTab()) {
@@ -475,7 +475,7 @@ public final class CreativeTabsScreen extends UiScreen {
     button("Reset", footerX(0), height - 28, footerWidth(), 20, mx, my, editable());
     button("Cancel", footerX(1), height - 28, footerWidth(), 20, mx, my, true);
     button("Undo", footerX(2), height - 28, footerWidth(), 20, mx, my, editable() && (history.available() || pendingTitle()));
-    button("Save", footerX(3), height - 28, footerWidth(), 20, mx, my, editable());
+    button("Save", footerX(3), height - 28, footerWidth(), 20, mx, my, changed());
     if (dragging && movingCells && dragCell >= 0 && dragSource != null) {
       org.lwjgl.opengl.GL11.glPushMatrix(); org.lwjgl.opengl.GL11.glTranslatef(0, 0, 300);
       try {

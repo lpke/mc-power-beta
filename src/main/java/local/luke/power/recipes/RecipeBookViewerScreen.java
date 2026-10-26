@@ -2,6 +2,7 @@ package local.luke.power.recipes;
 
 import net.minecraft.client.gui.screen.Screen;
 import local.luke.power.ui.UiScreen;
+import local.luke.power.ui.ConnectedTabs;
 import org.lwjgl.input.Keyboard;
 
 /** Pause viewer reads the current inventory without creating or opening a native handler. */
@@ -15,8 +16,11 @@ public final class RecipeBookViewerScreen extends UiScreen implements RecipeBook
   @Override public void tick(){if(book!=null)book.tick();}
   @Override public void render(int x,int y,float delta){renderBackground();titleBar("Recipe book");
     var crafting=book.layout().kindTab(0);var smelting=book.layout().kindTab(1);var done=book.layout().done();
-    tabButton("Crafting",crafting.x(),crafting.y(),crafting.width(),crafting.height(),x,y,true,kind==RecipeDefinition.Kind.CRAFTING);
-    tabButton("Smelting",smelting.x(),smelting.y(),smelting.width(),smelting.height(),x,y,true,kind==RecipeDefinition.Kind.FURNACE);
+    var selected=kind==RecipeDefinition.Kind.CRAFTING?crafting:smelting;
+    var detail=book.layout().detail();
+    ConnectedTabs.baseline(this,book.layout().x()-30,detail.x()+detail.width(),crafting.y(),crafting.height(),selected.x(),selected.width());
+    ConnectedTabs.tab(this,"Crafting",crafting.x(),crafting.y(),crafting.width(),crafting.height(),x,y,kind==RecipeDefinition.Kind.CRAFTING);
+    ConnectedTabs.tab(this,"Smelting",smelting.x(),smelting.y(),smelting.width(),smelting.height(),x,y,kind==RecipeDefinition.Kind.FURNACE);
     button("Done",done.x(),done.y(),done.width(),done.height(),x,y,true);
     book.render(x,y);
   }

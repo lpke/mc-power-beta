@@ -20,11 +20,19 @@ public final class BookDrawing extends UiScreen {
   public void image(Minecraft mc,String name,int x,int y,int width,int height) {
     image(mc,name,x,y,width,height,0,0,width,height,width,height);
   }
+  public void tab(Minecraft mc,int x,int y,boolean selected) {
+    try {
+      texture(mc,ROOT+(selected?"tab_selected":"tab")+".png",x,y,35,27,0,0,35,27,35,27,selected?1:.7f);
+    } finally { GL11.glColor4f(1,1,1,1); }
+  }
   public void image(Minecraft mc,String name,int x,int y,int width,int height,int u,int v,int sw,int sh,int tw,int th) {
     texture(mc,ROOT+name+".png",x,y,width,height,u,v,sw,sh,tw,th);
   }
   private void texture(Minecraft mc,String path,int x,int y,int width,int height,int u,int v,int sw,int sh,int tw,int th) {
-    GL11.glColor4f(1,1,1,1);GL11.glEnable(GL11.GL_TEXTURE_2D);GL11.glDisable(GL11.GL_LIGHTING);GL11.glDisable(GL11.GL_DEPTH_TEST);
+    texture(mc,path,x,y,width,height,u,v,sw,sh,tw,th,1);
+  }
+  private void texture(Minecraft mc,String path,int x,int y,int width,int height,int u,int v,int sw,int sh,int tw,int th,float brightness) {
+    GL11.glColor4f(brightness,brightness,brightness,1);GL11.glEnable(GL11.GL_TEXTURE_2D);GL11.glDisable(GL11.GL_LIGHTING);GL11.glDisable(GL11.GL_DEPTH_TEST);
     mc.textureManager.bindTexture(mc.textureManager.getTextureId(path));
     Tessellator t=Tessellator.INSTANCE;t.startQuads();
     t.vertex(x,y+height,zOffset,u/(double)tw,(v+sh)/(double)th);t.vertex(x+width,y+height,zOffset,(u+sw)/(double)tw,(v+sh)/(double)th);

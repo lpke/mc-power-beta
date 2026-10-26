@@ -86,10 +86,11 @@ public final class ItemPickerScreen extends UiScreen {
     }));
   }
   private void save(){
-    if(!multiple && selected.isEmpty())return;
+    if(!doneEnabled())return;
     try{for(String value:selected)if(!original.contains(value))resolve(value);accepted.accept(List.copyOf(selected));showScreen(parent);}
     catch(IllegalArgumentException e){error=Objects.toString(e.getMessage(),"Invalid selection");}
   }
+  private boolean doneEnabled(){return (options.instant() || !selected.equals(original)) && (multiple || !selected.isEmpty());}
   private void leave(){
     scrollbar.release();exitPrompt.leave(!options.instant() && !selected.equals(original),()->showScreen(parent));
   }
@@ -114,7 +115,7 @@ public final class ItemPickerScreen extends UiScreen {
     }
     if(inside(x,y,left(),height-30,76,20)){click();custom();}
     else if(multiple && inside(x,y,left()+80,height-30,44,20)){click();selected.clear();filter();}
-    else if(!options.instant() && inside(x,y,right()-156,height-30,76,20)){click();save();}
+    else if(!options.instant() && doneEnabled() && inside(x,y,right()-156,height-30,76,20)){click();save();}
     else if(inside(x,y,right()-76,height-30,76,20)){click();leave();}
   }
   public void render(int mx,int my,float delta){
@@ -140,7 +141,7 @@ public final class ItemPickerScreen extends UiScreen {
     text(fit(error.isEmpty()?selected.size()+" selected. Hover for IDs.":error,span()),left(),height-47,error.isEmpty()?0xaaaaaa:0xff8888);
     button("Custom ID",left(),height-30,76,20,mx,my,true);
     if(multiple)button("Clear",left()+80,height-30,44,20,mx,my,!selected.isEmpty());
-    if(!options.instant())button("Done",right()-156,height-30,76,20,mx,my,multiple || !selected.isEmpty());
+    if(!options.instant())button("Done",right()-156,height-30,76,20,mx,my,doneEnabled());
     button("Cancel",right()-76,height-30,76,20,mx,my,true);
     if(!exitPrompt.active() && !tip.isEmpty())tooltip(tip,mx,my);
     exitPrompt.render(this,"Save changes to this selection?",pointerX,pointerY);

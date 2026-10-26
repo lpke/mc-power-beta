@@ -108,7 +108,7 @@ class SettingsLayoutTest {
       assertTrue(initial.contains(page + "/" + group));
     for (String group : SettingsLayout.groups("Interface"))
       assertEquals(!Set.of("", "General", "Title screen").contains(group), initial.contains("Interface/" + group));
-    assertTrue(initial.containsAll(Set.of("Video/Entity visibility", "Video/Particles", "Audio/Individual sounds", "Advanced/Achievement recovery", "Map/Performance")));
+    assertTrue(initial.containsAll(Set.of("Video/Entity visibility", "Video/Particles", "Advanced/Achievement recovery", "Map/Performance")));
     initial.clear(); assertFalse(SettingsLayout.initiallyCollapsed().isEmpty());
   }
 
@@ -122,10 +122,8 @@ class SettingsLayoutTest {
     }
   }
   @Test void playlistChoicesLeadTheRemainingMusicSettings() {
-    var ids=List.of("audio.dimensionMusic", "audio.musicDirectories", "audio.menuPlaylist",
-        "audio.menuMusic", "audio.playlist", "audio.recursive");
+    var ids=List.of("audio.dimensionMusic", "audio.menuPlaylist", "audio.playlist");
     var entries=ids.stream().map(id -> setting(id,"Audio","Music playback")).toList();
-    assertEquals(List.of("audio.playlist","audio.menuPlaylist","audio.musicDirectories","audio.menuMusic",
-        "audio.recursive","audio.dimensionMusic"),SettingsLayout.ordered(entries).stream().map(s -> s.id).toList());
+    assertEquals(List.of("audio.playlist","audio.menuPlaylist","audio.dimensionMusic"),SettingsLayout.ordered(entries).stream().map(s -> s.id).toList());
   }
 }

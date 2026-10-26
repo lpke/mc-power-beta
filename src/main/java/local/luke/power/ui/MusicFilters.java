@@ -2,6 +2,7 @@ package local.luke.power.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.ToIntFunction;
 
 /** Catalog tabs and actions share a row when their actual bounds fit. */
 public final class MusicFilters {
@@ -25,5 +26,24 @@ public final class MusicFilters {
     int actionsY = firstActionX >= x + 6 ? top : top + 18 + CONTENT_GAP;
     int height = selector.equals("playlists") ? 18 : actionsY - top + 18;
     return new Layout(List.copyOf(tabs), addFolderX, left + width - 48, actionsY, height);
+  }
+
+  /** Keep complete tab labels and one library action slot on short, narrow screens. */
+  public static Layout compact(int left, int top, int width, String selector, ToIntFunction<String> measure) {
+    Layout normal = layout(left, top, width, selector);
+    if (width >= 380) return normal;
+    List<Tab> tabs = new ArrayList<>();
+    int x = left;
+    for (Tab tab : normal.tabs()) {
+      int span = measure.applyAsInt(tab.label()) + 12;
+      tabs.add(new Tab(tab.id(), tab.label(), x, top, span));
+      x += span + 2;
+    }
+    int reload = left + width - 20;
+    int add = reload - 22;
+    if (add < x + 4) add = reload;
+    int actionsY = add >= x + 4 ? top : top + 18 + CONTENT_GAP;
+    int height = selector.equals("playlists") ? 18 : actionsY - top + 18;
+    return new Layout(List.copyOf(tabs), add, reload, actionsY, height);
   }
 }

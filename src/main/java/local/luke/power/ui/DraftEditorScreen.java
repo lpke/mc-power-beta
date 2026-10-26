@@ -54,6 +54,7 @@ abstract class DraftEditorScreen extends UiScreen {
   protected boolean editorKey(char c, int key) { return false; }
   protected String label(Setting s) { return s.label; }
   protected String display(Setting s) { return s.display(); }
+  protected boolean controlEnabled(Setting s) { return true; }
   protected boolean usesSlider(Setting s) { return s.slider(); }
   protected void resetValue(Setting s) { ColorSettings.reset(s, editingDraft().settings()); }
   protected boolean atDefault(Setting s) { return ColorSettings.atDefault(s, editingDraft().settings()); }
@@ -73,6 +74,7 @@ abstract class DraftEditorScreen extends UiScreen {
   protected void valueChanged(Setting s) { afterEdit(); }
   protected String hint() { return "Click an element to edit it. Drag to move. Arrow keys fine-tune."; }
   protected String doneLabel() { return "Done"; }
+  protected boolean doneEnabled() { return draft.changed(); }
   protected String cancelLabel() { return "Cancel"; }
   protected String resetLabel() { return "Reset..."; }
   protected String resetQuestion() { return "Reset to defaults?"; }
@@ -130,6 +132,7 @@ abstract class DraftEditorScreen extends UiScreen {
   public void tick() { choices.tick(); hover.tick(); }
   public void removed() { choices.close(); Keyboard.enableRepeatEvents(false); stopGesture(); slider = null; bar.release(); inline.cancel(); TextDrag.cancel(); }
   protected void save() {
+    if (!doneEnabled()) return;
     stopGesture(); slider = null; bar.release(); inline.cancel();
     if (parent.acceptEditor(draft)) minecraft.setScreen(parent.returnScreen()); else error = parent.editorError();
   }
@@ -208,7 +211,8 @@ abstract class DraftEditorScreen extends UiScreen {
       Runnable action = i == 0 ? this::undo
           : i == 1 ? () -> { stopGesture(); resetPrompt = true; }
           : i == sizes.length - 2 ? this::leave : i == sizes.length - 1 ? this::save : () -> extraFooterAction(extraIndex);
-      buttons.add(new Footer(label, x, sizes[i], action, i != 0 || canUndo())); x += sizes[i] + 4;
+      boolean enabled = i == 0 ? canUndo() : i != sizes.length - 1 || doneEnabled();
+      buttons.add(new Footer(label, x, sizes[i], action, enabled)); x += sizes[i] + 4;
     }
     return buttons;
   }
@@ -284,6 +288,7 @@ abstract class DraftEditorScreen extends UiScreen {
           return;
         }
         if (x >= controlX(s) + controlWidth(s)) return;
+        if (!controlEnabled(s)) return;
         if (InheritedColors.accepts(s) && InheritedColorControl.at(controlX(s), controlWidth(s), InheritedColors.custom(s)).colorAt(x)) {
           editingDraft().checkpoint(); error = ""; click(); openColour(s);
         }
@@ -323,7 +328,7 @@ abstract class DraftEditorScreen extends UiScreen {
     else if (ColourScreen.accepts(s)) colourButton(ColorSettings.hex(s), ColorSettings.opacityPercent(s, editingDraft().settings()), x, y, w, mx, my);
     else if (usesSlider(s)) slider(fit(display(s), w - 8), x, y, w, mx, my, (s.value.getAsDouble() - s.min) / Math.max(.0001, s.max - s.min));
     else if (SettingsDropdown.accepts(s)) WaypointSetDropdown.button(this, display(s), x, y, w, mx, my, true, choices.editing(s));
-    else button(fit(display(s), w - 8), x, y, w, 18, mx, my, true);
+    else button(fit(display(s), w - 8), x, y, w, 18, mx, my, controlEnabled(s));
     if (resettable(s)) button("R", resetX(), y, 20, 18, mx, my, !atDefault(s));
   }
   public void render(int mx, int my, float delta) {
@@ -355,8 +360,7 @@ abstract class DraftEditorScreen extends UiScreen {
         renderControl(s, y, mx, listMouseY);
         if (inside(mx, listMouseY, controlsLeft(), y, controlsSpan() - 9, 23)) {
           hoverId = s.id;
-          tip = inline.editing(s) ? inline.help() : local.luke.power.config.Tooltips.paragraphs(label(s),
-              local.luke.power.config.Tooltips.setting(s, s.numeric() && !InheritedColors.accepts(s) ? "Right-click to enter an exact value." : ""));
+          tip = local.luke.power.config.Tooltips.paragraphs(label(s), local.luke.power.config.Tooltips.setting(s, ""));
         }
         if (hasRelatedControl(s) && inside(mx, listMouseY, controlX(), y, 20, 18)) { tip = "Related control"; hoverId += ".related"; }
         if (resettable(s) && inside(mx, listMouseY, resetX(), y, 20, 18)) { tip = "Reset to " + local.luke.power.config.DefaultBases.current().label + " default"; hoverId += ".reset"; }

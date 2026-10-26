@@ -20,7 +20,7 @@ public final class ChoiceScreen extends UiScreen {
     this.left = left; this.top = top; this.span = span; this.accepted = accepted;
   }
   public void init() {
-    dropdown.open(labels, help, selected, defaultIndex, left, top, span, width, height, index -> {
+    dropdown.open(this, labels, help, selected, defaultIndex, left, top, span, 20, width, height, index -> {
       accepted.accept(index); minecraft.setScreen(parent);
     });
   }

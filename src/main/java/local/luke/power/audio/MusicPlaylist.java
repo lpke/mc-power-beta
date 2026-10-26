@@ -89,14 +89,13 @@ public final class MusicPlaylist {
     return SAME_AS_WORLD.equals(settings.menuPlaylist) ? world(settings) : find(settings, settings.menuPlaylist);
   }
 
+  public static String selectionId(AudioSettings settings, boolean inMenu) {
+    return inMenu && !SAME_AS_WORLD.equals(settings.menuPlaylist) ? settings.menuPlaylist : settings.playlist;
+  }
+
   /** Selection order is also the non-shuffled playback order. */
   public static List<String> rotation(AudioSettings settings, boolean inMenu) {
-    LinkedHashSet<String> tracks = new LinkedHashSet<>();
-    if (!inMenu || settings.menuMusic != AudioSettings.MenuMusic.CUSTOM)
-      tracks.addAll(world(settings).tracks());
-    if (inMenu && settings.menuMusic != AudioSettings.MenuMusic.WORLD)
-      tracks.addAll(menu(settings).tracks());
-    return List.copyOf(tracks);
+    return find(settings, selectionId(settings, inMenu)).tracks();
   }
 
   /** Playback lookups read validated settings without constructing a Favorites snapshot. */
@@ -111,10 +110,8 @@ public final class MusicPlaylist {
   }
 
   public static boolean usesMenuVolumes(AudioSettings settings, String id, boolean inMenu) {
-    if (!inMenu || settings.menuMusic == AudioSettings.MenuMusic.WORLD
-        || SAME_AS_WORLD.equals(settings.menuPlaylist)) return false;
-    return settings.menuMusic == AudioSettings.MenuMusic.CUSTOM
-        || contains(settings, settings.menuPlaylist, id) && !contains(settings, settings.playlist, id);
+    return inMenu && !SAME_AS_WORLD.equals(settings.menuPlaylist)
+        && !settings.playlist.equals(settings.menuPlaylist);
   }
 
   public static void load(AudioSettings settings, String id) {

@@ -15,7 +15,7 @@ final class InlineValueEditor {
   private UiScreen screen;
   private long errorUntil;
   private int x, y, width, clipTop, clipBottom;
-  private static final int CHECK_WIDTH = 18, GAP = 2;
+  private InlineValueGeometry geometry() { return new InlineValueGeometry(x, y, width); }
 
   boolean active() { return setting != null; }
   boolean editing(Object candidate) { return active() && Objects.equals(key, candidate); }
@@ -43,11 +43,11 @@ final class InlineValueEditor {
 
   boolean press(int mx, int my, int button) {
     if (!active()) return false;
-    if (mx < x || mx >= x + width || my < Math.max(y, clipTop) || my >= Math.min(y + 18, clipBottom)) {
+    if (!geometry().contains(mx, my, clipTop, clipBottom)) {
       cancel();
       return false;
     }
-    if (button == 0 && mx >= x + width - CHECK_WIDTH) commit();
+    if (button == 0 && geometry().checkContains(mx, my, clipTop, clipBottom)) commit();
     else if (button == 1 && !TextEditing.rightClickClearEnabled()) input.selectAll();
     else input.click(mx, button);
     return true;
@@ -84,15 +84,15 @@ final class InlineValueEditor {
     if (System.nanoTime() >= errorUntil) error = "";
     bounds(x, y, width, clipTop, clipBottom);
     rendered = y + 18 > clipTop && y < clipBottom;
-    // UiScreen.input has a one-pixel border. Keep it inside the original slider bounds.
-    screen.input(input, x + 1, y, Math.max(8, width - CHECK_WIDTH - GAP - 2), mx, my, "");
-    screen.iconButton("check", x + width - CHECK_WIDTH, y, CHECK_WIDTH, mx, my, true);
-    if (!error.isEmpty()) screen.rectangle(x, y + 17, x + width - CHECK_WIDTH - GAP, y + 18, 0xffff7777);
+    InlineValueGeometry bounds = geometry();
+    screen.input(input, x + 1, y + 1, bounds.inputWidth(), InlineValueGeometry.HEIGHT - 2, mx, my, "");
+    screen.iconButton("check", bounds.checkX(), y, bounds.checkWidth(), mx, my, true);
+    if (!error.isEmpty()) screen.rectangle(x, y + 17, bounds.checkX() - InlineValueGeometry.GAP, y + 18, 0xffff7777);
   }
 
   void renderError(UiScreen screen) {
     if (active() && !error.isEmpty() && System.nanoTime() < errorUntil) screen.tooltip(error, x, y + 18);
   }
 
-  String help() { return error.isEmpty() ? "Enter or check to apply. Escape or click elsewhere to cancel." : error; }
+  String help() { return error; }
 }

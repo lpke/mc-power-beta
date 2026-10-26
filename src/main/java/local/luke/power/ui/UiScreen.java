@@ -57,7 +57,7 @@ public abstract class UiScreen extends Screen {
 
   protected void button(String label, int left, int top, int span, int h,
       int mx, int my, boolean enabled, int labelColour, Runnable overlay) {
-    int w = Math.max(10, span);
+    int w = Math.max(8, span);
     boolean hovered = inside(mx, my, left, top, w, h);
     int v = 46 + (enabled ? hovered ? 2 : 1 : 0) * 20;
     GL11.glBindTexture(GL11.GL_TEXTURE_2D, minecraft.textureManager.getTextureId("/gui/gui.png"));
@@ -133,6 +133,7 @@ public abstract class UiScreen extends Screen {
       case "edit" -> new String[]{"      ## ", "     #o# ", "    #o#  ", "   #o#   ", "  #o#    ", " #o#     ", "#o#      ", "##       ", "#        "};
       case "check" -> new String[]{"        #", "       ##", "      ## ", "#    ##  ", "##  ##   ", " ####    ", "  ##     "};
       case "star" -> new String[]{"    #    ", "   ###   ", "#########", " ####### ", "  #####  ", " ##   ## ", " #     # "};
+      case "shuffle" -> new String[]{"       # ", "##    ###", "  #  # # ", "   ##    ", "  #  # # ", "##    ###", "       # "};
       case "music" -> new String[]{"   ######", "   #    #", "   #    #", "   #    #", " ###  ###", "#### ####", " ##   ## "};
       case "remove" -> new String[]{" #     # ", "  #   #  ", "   # #   ", "    #    ", "   # #   ", "  #   #  ", " #     # "};
       case "play" -> new String[]{"  #      ", "  ###    ", "  #####  ", "  #######", "  #####  ", "  ###    ", "  #      "};
@@ -197,8 +198,8 @@ public abstract class UiScreen extends Screen {
 
   protected void slider(String label, int x, int y, int w, int mx, int my, double fraction) {
     button("", x, y, w, 18, mx, my, false);
-    int thumb = x + (int) Math.round(Math.max(0, Math.min(1, fraction)) * Math.max(0, w - 8));
-    button("", thumb, y, 8, 18, mx, my, true);
+    int thumb = SliderGeometry.thumbX(x, w, fraction);
+    button("", thumb, y, SliderGeometry.thumbWidth(w), 18, mx, my, true);
     drawCenteredTextWithShadow(textRenderer, fit(label, w - 8), x + w / 2, y + 5,
         inside(mx, my, x, y, w, 18) ? 0xffffa0 : 0xffffff);
   }
@@ -220,8 +221,14 @@ public abstract class UiScreen extends Screen {
 
   protected void input(
       TextInput input, int left, int top, int span, int mx, int my, String placeholder) {
-    fill(left - 1, top - 1, left + span + 1, top + 19, input.focused ? 0xffaaaaaa : 0xff555555);
-    fill(left, top, left + span, top + 18, 0xff101010);
+    input(input, left, top, span, 18, mx, my, placeholder);
+  }
+
+  protected void input(TextInput input, int left, int top, int span, int h, int mx, int my, String placeholder) {
+    if (span <= 0 || h <= 0) return;
+    int textTop = top + (h - 8) / 2;
+    fill(left - 1, top - 1, left + span + 1, top + h + 1, input.focused ? 0xffaaaaaa : 0xff555555);
+    fill(left, top, left + span, top + h, 0xff101010);
     // Inputs also render inside clipped scrolling lists. Preserve their outer clip.
     GL11.glPushAttrib(GL11.GL_SCISSOR_BIT);
     boolean clipped = GL11.glIsEnabled(GL11.GL_SCISSOR_TEST);
@@ -231,7 +238,7 @@ public abstract class UiScreen extends Screen {
       clipX = inputClip.get(0); clipY = inputClip.get(1);
       clipRight = clipX + inputClip.get(2); clipTop = clipY + inputClip.get(3);
     }
-    clip(left + 3, top, span - 6, 18);
+    clip(left + 3, top, Math.max(0, span - 6), h);
     if (clipped) {
       GL11.glGetInteger(GL11.GL_SCISSOR_BOX, inputClip);
       int x1 = Math.max(clipX, inputClip.get(0)), y1 = Math.max(clipY, inputClip.get(1));
@@ -239,18 +246,18 @@ public abstract class UiScreen extends Screen {
       int y2 = Math.min(clipTop, inputClip.get(1) + inputClip.get(3));
       GL11.glScissor(x1, y1, Math.max(0, x2 - x1), Math.max(0, y2 - y1));
     }
-    var view = input.layout(minecraft.currentScreen, left + 4, span - 8, textRenderer::getWidth);
+    var view = input.layout(minecraft.currentScreen, left + 4, Math.max(1, span - 8), textRenderer::getWidth);
     String value = input.text();
     int x = left + 4;
     int from = Math.max(view.start(), input.start()), to = Math.min(view.end(), input.end());
     if (input.focused && from < to)
-      fill(x + textRenderer.getWidth(value.substring(view.start(), from)), top + 3,
-          x + textRenderer.getWidth(value.substring(view.start(), to)), top + 14, 0xff335577);
+      fill(x + textRenderer.getWidth(value.substring(view.start(), from)), textTop - 2,
+          x + textRenderer.getWidth(value.substring(view.start(), to)), textTop + 9, 0xff335577);
     text(value.isEmpty() && !input.focused ? placeholder : value.substring(view.start(), view.end()),
-        x, top + 5, value.isEmpty() && !input.focused ? 0x888888 : 0xffffff);
+        x, textTop, value.isEmpty() && !input.focused ? 0x888888 : 0xffffff);
     if (input.focused && InterfaceState.uiCursorVisible()) {
       int caret = x + textRenderer.getWidth(value.substring(view.start(), input.cursor()));
-      fill(caret, top + 3, caret + 1, top + 14, 0xffffffff);
+      fill(caret, textTop - 2, caret + 1, textTop + 9, 0xffffffff);
     }
     GL11.glPopAttrib();
   }
@@ -284,14 +291,12 @@ public abstract class UiScreen extends Screen {
       }
       lines.add(line);
     }
-    int w = lines.stream().mapToInt(textRenderer::getWidth).max().orElse(0),
-        h = lines.size() * 11 + 8;
-    int x = Math.max(5, Math.min(mx + 10, width - w - 10)),
-        y = Math.max(5, Math.min(my + 12, height - h - 5));
-    fill(x - 4, y - 4, x + w + 4, y + h - 4, 0xf0101010);
-    int lineY = y;
+    int w = lines.stream().mapToInt(textRenderer::getWidth).max().orElse(0);
+    TooltipLayout bounds = TooltipLayout.at(width, height, w, lines.size(), mx, my);
+    fill(bounds.x(), bounds.y(), bounds.x() + bounds.width(), bounds.y() + bounds.height(), 0xf0101010);
+    int lineY = bounds.y() + 4;
     for (String line : lines) {
-      text(line, x, lineY, 0xeeeeee);
+      text(line, bounds.x() + 4, lineY, 0xeeeeee);
       lineY += 11;
     }
   }

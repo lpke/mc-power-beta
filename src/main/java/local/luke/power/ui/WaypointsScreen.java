@@ -47,7 +47,7 @@ public final class WaypointsScreen extends UiScreen {
   private int left() { return layout().left(); }
   private int span() { return layout().width(); }
   private int rowBottom() { return layout().listBottom(); }
-  private ScrollBar.Track track() { return new ScrollBar.Track(layout().right() - 4, 72, rowBottom() - 72, rows().size() * ROW, scroll); }
+  private ScrollBar.Track track() { return new ScrollBar.Track(layout().scrollbarX(), 72, rowBottom() - 72, rows().size() * ROW, scroll); }
   private boolean modal() { return choices.active() || creatingSet || context || !deletingSet.isEmpty(); }
   private void selectSet(String set) {
     Maps.waypoints().select(set); scroll = 0; selected = "";
@@ -95,7 +95,7 @@ public final class WaypointsScreen extends UiScreen {
   }
   private Waypoint selected() { return rows().stream().filter(p -> p.id.equals(selected)).findFirst().orElse(null); }
   private Waypoint rowAt(int x, int y) {
-    if (!inside(x, y, left(), 72, span() - 8, rowBottom() - 72)) return null;
+    if (!inside(x, y, left(), 72, layout().rowWidth(), rowBottom() - 72)) return null;
     int index = (y - 72 + scroll) / ROW;
     var points = rows();
     return index < points.size() ? points.get(index) : null;
@@ -228,7 +228,7 @@ public final class WaypointsScreen extends UiScreen {
           left(), 49, layout().setWidth(), width, height, i -> selectSet(sets.get(i))); return;
     }
     if (button == 0 && bar.press(track(), x, y)) { scroll = (int)bar.drag(track(), y, true); return; }
-    if (inside(x, y, left(), 72, span() - 8, rowBottom() - 72)) {
+    if (inside(x, y, left(), 72, layout().rowWidth(), rowBottom() - 72)) {
       int index = (y - 72 + scroll) / ROW; var rows = rows();
       if (index < rows.size()) {
         Waypoint point = rows.get(index); selected = point.id;
@@ -268,11 +268,11 @@ public final class WaypointsScreen extends UiScreen {
     for (int i = 0; i < rows.size(); i++) {
       int y = 72 + i * ROW - scroll; if (y + ROW <= 72 || y >= rowBottom()) continue;
       Waypoint p = rows.get(i);
-      if (p.id.equals(selected)) fill(left() + 2, y + 1, left() + span() - 8, y + ROW - 1, 0x604e7294);
-      else if (inside(hoverX, hoverY, left(), y, span() - 8, ROW)) fill(left() + 2, y + 1, left() + span() - 8, y + ROW - 1, 0x90000000);
+      if (p.id.equals(selected)) fill(left(), y + 1, layout().right(), y + ROW - 1, 0x604e7294);
+      else if (inside(hoverX, hoverY, left(), y, layout().rowWidth(), ROW)) fill(left(), y + 1, layout().right(), y + ROW - 1, 0x90000000);
       iconButton(p.enabled ? "eye" : "eyeClosed", left() + 6, y + 5, EYE, EYE, hoverX, hoverY, true, p.enabled);
       String details = fit("§f" + p.coordinates() + " §7· " + MapDimensions.name(p.dimension) + " · " + Math.round(p.distance(Maps.x(), Maps.z())) + "m", span() / 2 - 12);
-      int detailsX = layout().right() - 12 - textRenderer.getWidth(details);
+      int detailsX = layout().right() - 6 - textRenderer.getWidth(details);
       int nameWidth = Math.max(20, detailsX - left() - 38);
       text(fit(p.name, nameWidth), left() + 30, y + 4, p.enabled ? p.colour : 0x777777);
       text(details, detailsX, y + (ROW - 8) / 2, 0xeeeeee);
@@ -286,11 +286,11 @@ public final class WaypointsScreen extends UiScreen {
     choices.render(this, mx, my);
     if (context) {
       var actions = contextActions(); fitMenu(actions); int count = menuRows(actions);
-      fill(contextX - 1, contextY - 1, contextX + menuWidth() + 1, contextY + count * MENU_ROW + 1, 0xffaaaaaa);
+      PopupStyle.background(this, contextX, contextY, menuWidth(), count * MENU_ROW, false);
       for (int i = 0; i < count; i++) {
         int y = contextY + i * MENU_ROW; String label = actions.get(i + contextScroll);
-        fill(contextX, y, contextX + menuWidth(), y + MENU_ROW, inside(mx, my, contextX, y, menuWidth(), MENU_ROW) ? 0xff454545 : 0xff252525);
-        text(fit(label, menuWidth() - 20), contextX + 6, y + 5, 0xffffff);
+        PopupStyle.row(this, label, contextX, y, menuWidth(), MENU_ROW, mx, my, true, false, false,
+            !moving && label.equals("Move to") ? 12 : 0);
         if (!moving && label.equals("Move to")) chevron(contextX + menuWidth() - 11, y + 7, false, 0xffcccccc);
       }
     }

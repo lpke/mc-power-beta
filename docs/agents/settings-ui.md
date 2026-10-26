@@ -31,6 +31,31 @@
   sliders with right-click exact entry, individual resets and isolated editor drafts.
   Play the native UI click sound for buttons, tabs, toggles and confirmations.
   Slider movement, pointer selection, dragging and silent group chevrons stay quiet.
+  Save/Done controls that commit isolated drafts enable only for changed drafts;
+  rendering, clicks and keyboard acceptance share that condition. Nested F3 saves
+  use the reorder draft, and naming a new preset counts as a change. Navigation-only
+  Done controls stay available, as do Cancel/Discard exits for unchanged drafts.
+- Choice dropdowns and context action menus share `PopupStyle`: background
+  `0xf0202020`, hover/keyboard focus `0xff444444`, selected background `0xff3c3c3c`,
+  active blue indicator `0xff268bff`, nine-pixel text padding and vertically centered
+  eight-pixel text. Choice dropdowns have a one-pixel `0xff777777` border; action
+  menus have no border. Row fills meet the inside of the dropdown border without
+  an inset. Match dropdown row height to its owning control, normally 18 or 20
+  pixels, and share all scroll, separator and hit-test geometry through `PopupLayout`.
+  Five-pixel separators span the full row width and do not accept input or change callback indices.
+  Mark the active choice with the blue indicator and the selected Defaults-base
+  target with a trailing `Default` label. Context actions open without keyboard
+  focus; arrows, Home and End establish focus. Track popup ownership by the actual
+  setting, toolbar control or row so only that owner retains its open highlight.
+  Map, minimap and photo checklist panels keep their existing toggle layout and
+  persistent-open behavior; their colors and text spacing follow the same menu style.
+  Parent and child volume sliders share horizontal bounds; place group counts after
+  the slider, anchored to the right. Playlist catalog rows use the Defaults picker's
+  gold bar and text for the active playlist, and retain disabled Delete buttons for
+  protected playlists. Choice popups retain their shared blue active indicator.
+  Shared sliders use an eight-pixel thumb contained within the track at both
+  endpoints. Exact-entry inputs and their check button occupy the same outer
+  bounds, including the input border, and the check ends at the slider's right edge.
 - Reset values depend on the user's Defaults base: Power Beta, Refined Beta 1.7.3
   or Beta 1.7.3. Power Beta keeps the `power_beta` ID; retired base IDs are rejected
   without reloading or resetting settings. Keep the backend/catalog

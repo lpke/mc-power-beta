@@ -11,7 +11,7 @@ final class MusicPreview {
   private static String track = "";
   private static Object world;
   private static long started;
-  private static boolean playing, paused;
+  private static boolean playing, paused, restoreBackground, restoreRecords;
   private static final MusicProgress progress = new MusicProgress();
   static double position() { return progress.seconds(); }
   static void seeked(double offset) { progress.reset(offset,System.nanoTime());playing=false;started=System.nanoTime(); }
@@ -24,6 +24,12 @@ final class MusicPreview {
     world = mc.world;
     // A jukebox belongs to the old world, unlike the background soundtrack.
     resume.remove("streaming");
+    restoreRecords = false;
+  }
+  static void discardBackground() {
+    restoreBackground = false;
+    resume.remove("BgMusic");
+    resume.remove("PowerBetaMenu");
   }
   static String track() { return track; }
   static boolean paused() { return paused; }
@@ -37,6 +43,8 @@ final class MusicPreview {
     String id = AudioController.trackId(selected);
     if (track.equals(id)) { stop(system, true); return; }
     if (!active()) {
+      restoreBackground = true;
+      restoreRecords = true;
       resume.clear();
       for (String name : List.of("BgMusic", "PowerBetaMenu", "streaming")) {
         if (system.playing(name) || name.equals("BgMusic") && backgroundStarting) resume.add(name);
@@ -59,7 +67,8 @@ final class MusicPreview {
     // It was muted before queuing the preview; catch that late start here.
     for (String name : List.of("BgMusic", "PowerBetaMenu", "streaming")) {
       if (system.playing(name)) {
-        if (!resume.contains(name)) resume.add(name);
+        boolean owned = name.equals("streaming") ? restoreRecords : restoreBackground;
+        if (owned && !resume.contains(name)) resume.add(name);
         system.pause(name);
       }
     }
@@ -80,7 +89,7 @@ final class MusicPreview {
     return true;
   }
 
-  private static boolean stop(SoundSystem system, boolean restoreMusic, boolean restoreRecords) {
+  private static boolean stop(SoundSystem system, boolean restoreMusic, boolean restoreJukeboxes) {
     if (!active()) return false;
     boolean hadMusic = resume.contains("BgMusic") || resume.contains("PowerBetaMenu");
     MusicSeeking.cancel();
@@ -89,7 +98,7 @@ final class MusicPreview {
     if (restoreMusic && hadMusic) AudioController.resuming();
     AudioController.refresh();
     for (String name : resume)
-      if (name.equals("streaming") ? restoreRecords : restoreMusic)
+      if (name.equals("streaming") ? restoreJukeboxes && restoreRecords : restoreMusic)
         system.play(name);
     resume.clear();
     return hadMusic;

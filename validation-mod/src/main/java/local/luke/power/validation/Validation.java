@@ -294,6 +294,9 @@ public final class Validation {
       else if (command.equals("current-formats-442")) CurrentFormats442Checks.run(mc);
       else if (command.startsWith("creative-442")) Creative442Checks.run(mc, command.substring(12).trim());
       else if (command.startsWith("minimap-446")) Minimap446Checks.run(mc, command.substring("minimap-446".length()).trim());
+      else if (command.startsWith("map-ui-461")) MapUi461Checks.run(mc, command.substring("map-ui-461".length()).trim());
+      else if (command.startsWith("audio-ui-461")) AudioUi461Checks.run(mc, command.substring("audio-ui-461".length()).trim());
+      else if (command.startsWith("audio-transition-461")) AudioTransition461Checks.run(mc, command.substring("audio-transition-461".length()).trim());
       else if (command.startsWith("minimap-444")) Minimap444Checks.run(mc,command.substring("minimap-444".length()).trim());
       else if (command.startsWith("inventory-look-445")) InventoryLook445Checks.run(mc, command.substring("inventory-look-445".length()).trim());
       else if (command.startsWith("ui-447")) Ui447Checks.run(mc, command.substring("ui-447".length()).trim());

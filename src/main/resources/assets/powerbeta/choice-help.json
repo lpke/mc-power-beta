@@ -1,12 +1,4 @@
 {
-  "audio.menuMusic": {
-    "description": "Choose which playlists play in menus.",
-    "items": {
-      "World soundtrack": "Use the world playlist and keep music playing across world transitions.",
-      "Menu selection": "Use the menu playlist. Empty playlists stay silent; world transitions restart music.",
-      "Mix both": "Combine the world and menu playlists and keep music playing across world transitions."
-    }
-  },
   "audio.dimensionMusic": {
     "description": "Choose what happens to the current track when using a portal.",
     "items": {

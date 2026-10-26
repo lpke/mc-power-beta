@@ -128,7 +128,7 @@ public final class RecipeBookOverlay {
       boolean hover=l.filter().contains(mx,my);String prefix=context.kind==RecipeDefinition.Kind.FURNACE?"furnace_filter":"filter";
       String suffix=filter?"_enabled":"_disabled";draw.image(mc,prefix+suffix+(hover?"_highlighted":""),l.filter().x(),l.filter().y(),26,16);
       int[] tabs=tabs();
-      for(int i=0;i<tabs.length;i++){var r=l.tab(i);boolean selected=category==tabs[i];draw.image(mc,selected?"tab_selected":"tab",r.x()+(selected?-2:0),r.y(),35,27);
+      for(int i=0;i<tabs.length;i++){var r=l.tab(i);boolean selected=category==tabs[i];draw.tab(mc,r.x()+(selected?-2:0),r.y(),selected);
         int[] icons=tabIcons(tabs[i]);for(int j=0;j<icons.length;j++)draw.item(mc,icon(icons[j]),r.x()+(selected?-2:0)+(icons.length==1?9:j==0?3:14),r.y()+5,1,false);}
       String tooltip=toggleTooltip;
       for(int i=0;i<20&&page*20+i<groups.size();i++) {

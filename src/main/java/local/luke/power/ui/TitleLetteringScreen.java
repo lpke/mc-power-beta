@@ -97,7 +97,8 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
   private int tabWidth() { return Math.min(115, (span() - 8) / 3); }
   protected void renderToolbar(int x, int y) {
     String[] labels = {"Paint", "Appearance", "Presets"}; int w = tabWidth();
-    for (int i = 0; i < labels.length; i++) tabButton(labels[i], left() + i * (w + 4), 30, w, x, y, tab == i);
+    ConnectedTabs.baseline(this, left(), right(), 30, left() + tab * (w + 4), w);
+    for (int i = 0; i < labels.length; i++) ConnectedTabs.tab(this, labels[i], left() + i * (w + 4), 30, w, x, y, tab == i);
   }
   protected boolean toolbarClick(int x, int y, int button) {
     if (button != 0) return false;

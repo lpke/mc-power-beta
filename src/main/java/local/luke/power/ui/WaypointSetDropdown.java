@@ -20,11 +20,15 @@ final class WaypointSetDropdown {
 
   static void render(UiScreen screen, List<String> labels, int selected, int focus, int scroll,
       int x, int y, int width, int rows, int mx, int my) {
-    screen.rectangle(x - 2, y - 2, x + width + 2, y + rows * 20 + 2, 0xff777777);
-    screen.rectangle(x - 1, y - 1, x + width + 1, y + rows * 20 + 1, 0xff181818);
+    render(screen, labels, selected, focus, scroll, x, y, width, 20, rows, mx, my);
+  }
+
+  static void render(UiScreen screen, List<String> labels, int selected, int focus, int scroll,
+      int x, int y, int width, int rowHeight, int rows, int mx, int my) {
+    PopupStyle.background(screen, x, y, width, rows * rowHeight, true);
     for (int i = 0; i < rows && i + scroll < labels.size(); i++) {
-      int index = i + scroll, top = y + i * 20;
-      row(screen, labels.get(index), x, top, width, mx, my, index == selected, index == focus);
+      int index = i + scroll, top = y + i * rowHeight;
+      row(screen, labels.get(index), x, top, width, rowHeight, mx, my, index == selected, index == focus, 0);
     }
   }
   static void row(UiScreen screen, String label, int x, int top, int width, int mx, int my,
@@ -34,15 +38,12 @@ final class WaypointSetDropdown {
 
   static void row(UiScreen screen, String label, int x, int top, int width, int mx, int my,
       boolean selected, boolean focused, int trailingWidth) {
-    boolean hover = screen.inside(mx, my, x, top, width, 20);
-    if (selected || hover || focused) screen.rectangle(x, top, x + width, top + 20, selected ? 0xff3c3c3c : 0xff343434);
-    if (selected) screen.rectangle(x + 2, top + 4, x + 4, top + 16, 0xff268bff);
-    int available = width - 18 - trailingWidth;
-    if (available > 0) {
-      String fitted = screen.fit(label, available);
-      if (screen.textWidth(fitted) <= available)
-        screen.text(fitted, x + 9, top + 6, hover || selected ? 0xffffff : 0xcccccc);
-    }
+    row(screen, label, x, top, width, 20, mx, my, selected, focused, trailingWidth);
+  }
+
+  static void row(UiScreen screen, String label, int x, int top, int width, int height, int mx, int my,
+      boolean selected, boolean focused, int trailingWidth) {
+    PopupStyle.row(screen, label, x, top, width, height, mx, my, true, selected, focused, trailingWidth);
   }
 
   private static void centeredLabel(UiScreen screen, String label, int x, int y, int width,

@@ -602,12 +602,11 @@ public final class WorldMapScreen extends UiScreen {
     text(scaleLabel, barX + (80 - textRenderer.getWidth(scaleLabel)) / 2, barY - 13, 0xcccccc);
     if (context) {
       var actions = contextActions();
-      fill(contextX, contextY, contextX + 142, contextY + actions.size() * 18, 0xf0202020);
+      PopupStyle.background(this, contextX, contextY, 142, actions.size() * 18, false);
       for (int i = 0; i < actions.size(); i++) {
-        if (inside(mx, my, contextX, contextY + i * 18, 142, 18))
-          fill(contextX, contextY + i * 18, contextX + 142, contextY + (i + 1) * 18, 0xff444444);
-        text(actions.get(i), contextX + 5, contextY + i * 18 + 5,
-            actions.get(i).equals("Teleport") && !Maps.canTeleport(minecraft, target) ? 0x666666 : 0xffffff);
+        boolean enabled = !actions.get(i).equals("Teleport") || Maps.canTeleport(minecraft, target);
+        PopupStyle.row(this, actions.get(i), contextX, contextY + i * 18, 142, 18,
+            mx, my, enabled, false, false, 0);
       }
     }
     String status = MapScreenshot.status();

@@ -185,7 +185,7 @@ public final class ColourScreen extends UiScreen {
     if (button == 0) for (int i = 0; i < 2; i++) {
       if (inside(x, y, left() + i * (tabWidth() + 4), tabsY(), tabWidth(), 18)) { selectTab(i); return; }
     }
-    if (button == 0 && inside(x, y, width / 2 - 102, height - 28, 100, 20)) { click(); save(); return; }
+    if (button == 0 && inside(x, y, width / 2 - 102, height - 28, 100, 20)) { if (changed()) { click(); save(); } return; }
     if (button == 0 && inside(x, y, width / 2 + 2, height - 28, 100, 20)) { click(); leave(); return; }
     if (button == 0 && scrollbar.press(track(), x, y)) {
       hex.focused = false;
@@ -260,6 +260,7 @@ public final class ColourScreen extends UiScreen {
   }
 
   private void save() {
+    if (!changed()) return;
     parse();
     if (!error.isEmpty()) return;
     var beforeColor = setting.value.deepCopy();
@@ -364,8 +365,9 @@ public final class ColourScreen extends UiScreen {
     int previewX = (width - PREVIEW) / 2;
     fill(previewX - 1, previewY() - 1, previewX + PREVIEW + 1, previewY() + PREVIEW + 1, 0xffaaaaaa);
     colorSwatch(color, ColorSettings.opacityPercent(localOpacity), previewX, previewY(), PREVIEW, PREVIEW);
-    tabButton("Color wheel", left(), tabsY(), tabWidth(), mx, my, tab == 0);
-    tabButton("RGBA", left() + tabWidth() + 4, tabsY(), tabWidth(), mx, my, tab == 1);
+    ConnectedTabs.baseline(this, left(), left() + span(), tabsY(), left() + tab * (tabWidth() + 4), tabWidth());
+    ConnectedTabs.tab(this, "Color wheel", left(), tabsY(), tabWidth(), mx, my, tab == 0);
+    ConnectedTabs.tab(this, "RGBA", left() + tabWidth() + 4, tabsY(), tabWidth(), mx, my, tab == 1);
     inline.beginFrame();
     int listMouseY = inBody(mx, my) ? my : Integer.MIN_VALUE;
     clip(left() - 1, bodyTop(), bodyWidth() + 2, Math.max(0, bodyBottom() - bodyTop()));
@@ -386,7 +388,7 @@ public final class ColourScreen extends UiScreen {
     unclip();
     inline.endFrame();
     scrollbar.render(this, track());
-    button("Done", width / 2 - 102, height - 28, 100, 20, mx, my, true);
+    button("Done", width / 2 - 102, height - 28, 100, 20, mx, my, changed());
     button("Cancel", width / 2 + 2, height - 28, 100, 20, mx, my, true);
     if (dragging < 0 && !tip.isEmpty()) tooltip(tip, mx, my);
     if (!error.isEmpty()) tooltip(fit(error, span()), left(), height - 44);

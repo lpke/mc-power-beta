@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [4.6.1] - 2026-10-27
+
+- Keep slider thumbs and scrub markers inside their tracks at both endpoints, and align exact-value controls to the same bounds.
+- Standardize bordered dropdowns, borderless context menus, edge-to-edge highlights, selected and Default markers, and row heights. Keep the owning setting highlighted while its dropdown is open.
+- Open individual game sounds through All beside Game sounds, with a dedicated search and Back button. Keep individual sounds and category names available in global Options search.
+- Share playlist selection and shuffle controls across Audio and Edit music, with direct access to playlist editing. Use Same as world for menu music by default and manage music folders exclusively in Library.
+- Refine music searches, compact playlist rows, folder headings and grouped volume controls. Browse protected playlists, restore song favourite buttons and save changed playlist drafts from the Options footer.
+- Remove redundant playback and editing tooltips, playlist row numbers and hover fills while dragging.
+- Preserve manual and queued songs across playlist-context changes, and prevent previews from restoring an old world's jukebox.
+- Match waypoint row widths to their controls, trim pause-menu tooltip padding and dim inactive recipe tabs like Creative tabs.
+- Keep minimap wheel zoom responsive while settings are open by saving zoom changes asynchronously.
+- Reuse connected tabs in color, title-lettering, recipe and rule views, and disable draft Save or Done buttons until something changes.
+
 ## [4.6.0] - 2026-10-26
 
 - Store imported music, favourites, track volumes and ordered playlists separately from playback preferences.

@@ -40,13 +40,10 @@ public final class AudioConfig {
 
   public static void preview(AudioSettings next) {
     next.validate();
-    boolean library = !current.musicDirectories.equals(next.musicDirectories)
-        || current.recursive != next.recursive;
-    boolean mode = current.menuMusic != next.menuMusic;
+    boolean library = !current.musicDirectories.equals(next.musicDirectories);
     boolean timing = current.gapMinSeconds != next.gapMinSeconds || current.gapMaxSeconds != next.gapMaxSeconds;
     current = Catalog.JSON.fromJson(Catalog.JSON.toJson(next), AudioSettings.class);
     if (library) AudioController.settingsChanged();
-    if (mode) AudioController.rotationChanged();
     AudioController.rulesChanged();
     if (timing) AudioController.resetDelay();
   }

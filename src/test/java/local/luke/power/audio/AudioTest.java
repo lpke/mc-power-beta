@@ -69,7 +69,7 @@ class AudioTest {
     Files.write(dir.resolve("good.ogg"), new byte[] {'O', 'g', 'g', 'S', 0, 0, 0, 0, 0, 0, 0, 0});
     Files.writeString(dir.resolve("broken.ogg"), "not an audio stream");
     Files.writeString(dir.resolve("track.mp3"), "not supported");
-    var scan = MusicLibrary.scan(dir, List.of(".", dir.toString()), false);
+    var scan = MusicLibrary.scan(dir, List.of(".", dir.toString()));
     assertEquals(1, scan.tracks().size());
     assertEquals(4, scan.warnings().size());
     assertTrue(Files.exists(dir.resolve("broken.ogg")));
@@ -80,7 +80,7 @@ class AudioTest {
     Path a = Files.createDirectories(dir.resolve("a")), b = Files.createDirectories(dir.resolve("b"));
     byte[] mp3 = {'I', 'D', '3', 4, 0, 0, 0, 0, 0, 0, 0, 0};
     Files.write(a.resolve("same.mp3"), mp3); Files.write(b.resolve("same.mp3"), mp3);
-    var scan = MusicLibrary.scan(dir, List.of("a", "b", "a"), false);
+    var scan = MusicLibrary.scan(dir, List.of("a", "b", "a"));
     assertEquals(2, scan.tracks().size());
     assertNotEquals(scan.tracks().get(0).id(), scan.tracks().get(1).id());
     assertFalse(scan.tracks().get(0).playable());
@@ -98,17 +98,16 @@ class AudioTest {
   }
 
   @Test
-  void recursionIsOptInAndSymlinksAreNotFollowed() throws Exception {
+  void scansSubfoldersAndDoesNotFollowSymlinks() throws Exception {
     Path sub = Files.createDirectory(dir.resolve("sub"));
     Files.write(sub.resolve("song.ogg"), new byte[] {'O', 'g', 'g', 'S', 0, 0, 0, 0, 0, 0, 0, 0});
     Files.createSymbolicLink(dir.resolve("loop"), dir);
-    assertTrue(MusicLibrary.scan(dir, List.of("."), false).tracks().isEmpty());
-    assertEquals(1, MusicLibrary.scan(dir, List.of("."), true).tracks().size());
+    assertEquals(1, MusicLibrary.scan(dir, List.of(".")).tracks().size());
   }
 
   @Test
   void missingDirectoriesDoNotEraseExistingFiles() {
-    var scan = MusicLibrary.scan(dir, List.of("missing"), true);
+    var scan = MusicLibrary.scan(dir, List.of("missing"));
     assertTrue(scan.tracks().isEmpty());
     assertEquals(1, scan.warnings().size());
     assertFalse(Files.exists(dir.resolve("missing")));

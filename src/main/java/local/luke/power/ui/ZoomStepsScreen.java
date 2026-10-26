@@ -62,12 +62,13 @@ public final class ZoomStepsScreen extends UiScreen {
     }
   }
   private void save() {
-    if (!error().isEmpty()) return;
+    if (!doneEnabled()) return;
     setting.value = json();
     defaultSetting.value = new JsonPrimitive(values.get(defaultIndex()));
     if (parent.acceptEditor(draft)) minecraft.setScreen(parent.returnScreen());
     else commitError = parent.editorError();
   }
+  private boolean doneEnabled() { return !snapshot().equals(originalState) && error().isEmpty(); }
   private void leave() { dragging = -1; bar.release(); inline.cancel(); exit.leave(!snapshot().equals(originalState), () -> minecraft.setScreen(parent.returnScreen())); }
   private void slide(int x) {
     if (dragging < 0 || dragging >= values.size()) return;
@@ -122,7 +123,7 @@ public final class ZoomStepsScreen extends UiScreen {
       click(); checkpoint(); values.clear(); setting.defaultValue.getAsJsonArray().forEach(v -> values.add(v.getAsDouble())); defaultSelection = nearest(defaultSetting.defaultValue.getAsDouble()); scroll = 0;
     } else if (action == 2 && !undo.isEmpty()) {
       click(); Snapshot previous = undo.pop(); values.clear(); values.addAll(previous.values()); defaultSelection = previous.selection();
-    } else if (action == 3) { click(); save(); }
+    } else if (action == 3 && doneEnabled()) { click(); save(); }
     else if (action == 4) { click(); leave(); }
   }
   public void render(int mx, int my, float delta) {
@@ -150,7 +151,7 @@ public final class ZoomStepsScreen extends UiScreen {
     inline.endFrame(); unclip(); bar.render(this, track());
     rectangle(0, height - 36, width, height, 0x70000000);
     var footer = footer();
-    boolean[] enabled = {values.size() < 32, true, !undo.isEmpty(), error().isEmpty(), true};
+    boolean[] enabled = {values.size() < 32, true, !undo.isEmpty(), doneEnabled(), true};
     for (int i = 0; i < 5; i++) button(ZoomStepsFooter.LABELS[i], footer.x()[i], height - 28,
         footer.width()[i], 20, mx, my, enabled[i]);
     if (!exit.active() && dragging < 0 && !inline.active() && mx >= left() && mx < left() + 18 && my >= TOP && my < bottom()) {

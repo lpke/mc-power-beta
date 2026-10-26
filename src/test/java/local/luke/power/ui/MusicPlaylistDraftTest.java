@@ -89,4 +89,26 @@ class MusicPlaylistDraftTest {
     assertEquals(40, saved.groupVolumes().get("Alpha"));
     assertEquals(25, edited.groupVolumes().get("Alpha"));
   }
+
+  @Test void protectedBetaViewKeepsItsIdentityAndRejectsEveryKindOfEdit() {
+    var beta = MusicPlaylist.beta();
+    var view = MusicPresetDraft.readOnly(beta);
+    assertTrue(view.readOnly());
+    assertFalse(view.creating());
+    assertFalse(view.changed("Another name"));
+    assertEquals(MusicPlaylist.BETA, view.id());
+    assertEquals("Beta", view.snapshot("Another name").name());
+    assertThrows(IllegalStateException.class, () -> view.appendTracks(List.of(MISSING)));
+    assertThrows(IllegalStateException.class, () -> view.include(A, false));
+    assertThrows(IllegalStateException.class, view::includeAll);
+    assertThrows(IllegalStateException.class, () -> view.excludeAll(List.of(A)));
+    assertThrows(IllegalStateException.class, () -> view.move(A, 1));
+    var reversed = new java.util.ArrayList<>(beta.tracks());
+    java.util.Collections.reverse(reversed);
+    assertThrows(IllegalStateException.class, () -> view.order(reversed));
+    assertThrows(IllegalStateException.class, () -> view.volume("Alpha", 25));
+    assertEquals(beta.tracks(), view.tracks());
+    assertEquals(beta.tracks(), view.original().tracks());
+    assertEquals(Map.of(), view.snapshot("Another name").groupVolumes());
+  }
 }

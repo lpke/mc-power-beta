@@ -248,12 +248,12 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     button(toggles?"Hide Toggles":"Show Toggles",footer().toggleX(),toggleY(),footer().toggleWidth(),footer().buttonHeight(),mx,my,true);
     if(toggles)MapTogglePanel.draw(minecraft,panel(),mx,my,this::enabled);
     if(!message.isEmpty())text(fit(message,Math.max(1,width-170)),8,11,0xffffff);
-    if(context){fill(contextX,contextY,contextX+142,contextY+actions().size()*18,0xf0202020);
+    if(context){PopupStyle.background(this,contextX,contextY,142,actions().size()*18,false);
       boolean safe=contextSafe;
       for(int i=0;i<actions().size();i++){
-        if(inside(x,y,contextX,contextY+i*18,142,18))fill(contextX,contextY+i*18,contextX+142,contextY+(i+1)*18,0xff444444);
         var action=actions().get(i);
-        text(action.label,contextX+5,contextY+i*18+5,action==Action.TELEPORT&&!safe?0x666666:0xffffff);
+        PopupStyle.row(this,action.label,contextX,contextY+i*18,142,18,x,y,
+            action!=Action.TELEPORT||safe,false,false,0);
       }
     }
   }

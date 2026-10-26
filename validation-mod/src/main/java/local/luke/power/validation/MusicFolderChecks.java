@@ -33,7 +33,7 @@ final class MusicFolderChecks {
   static void sourceClick(PowerOptionsScreen options, MusicLibraryScreen library,
       String path, String control) throws Exception {
     int y = sourceY(library, MusicLibrarySources.id(path));
-    check(y >= (int)call(library, "listTop") && y + 24 <= (int)call(library, "bottom"), "source controls outside list");
+    check(y >= (int)call(library, "listTop") && y + 20 <= (int)call(library, "bottom"), "source controls outside list");
     options.render(-1, -1, 0);
     click(options, (int)call(library, control) + 5, y + 8);
   }
@@ -45,7 +45,12 @@ final class MusicFolderChecks {
 
   private static DirectoryScreen add(Minecraft mc, PowerOptionsScreen options, MusicLibraryScreen library) throws Exception {
     click(options, (int)call(library, "addFolderX") + 5, (int)call(library, "actionTop") + 5);
-    check(mc.currentScreen instanceof DirectoryScreen, "Add folder did not open picker directly");
+    if ((boolean)call(library, "libraryActionsMenu")) {
+      Object choices = field(options, "choices");
+      check((boolean)call(choices, "active") && ((List<?>)field(choices, "labels")).get(0).equals("Add folder"), "compact Library actions did not open");
+      MusicPlaylists460Checks.choose(options, 0);
+    }
+    check(mc.currentScreen instanceof DirectoryScreen, "Add folder did not open picker");
     return (DirectoryScreen)mc.currentScreen;
   }
 

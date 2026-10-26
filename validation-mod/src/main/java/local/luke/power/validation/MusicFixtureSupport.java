@@ -29,7 +29,7 @@ final class MusicFixtureSupport {
     var tracks = new ArrayList<String>();
     if (includeBeta) tracks.addAll(BuiltinMusic.VANILLA);
     var folders = new ArrayList<>(settings.musicDirectories);
-    for (var track : MusicLibrary.scan(Path.of(".").toAbsolutePath(), folders, settings.recursive).tracks())
+    for (var track : MusicLibrary.scan(Path.of(".").toAbsolutePath(), folders).tracks())
       tracks.add(track.id());
     selection(settings, tracks);
   }

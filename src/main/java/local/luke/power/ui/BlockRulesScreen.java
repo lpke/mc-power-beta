@@ -82,11 +82,13 @@ public final class BlockRulesScreen extends UiScreen {
     }));
   }
   private void save(){
+    if(!changed())return;
     try{setting.validate(draft);setting.value=draft.deepCopy();parent.changed(setting);minecraft.setScreen(parent);}
     catch(IllegalArgumentException e){error=Objects.toString(e.getMessage(),"Invalid rule");}
   }
+  private boolean changed(){return !draft.equals(original);}
   private void leave(){
-    scrollbar.release();exitPrompt.leave(!draft.equals(original),()->minecraft.setScreen(parent));
+    scrollbar.release();exitPrompt.leave(changed(),()->minecraft.setScreen(parent));
   }
   protected void keyPressed(char c,int key){
     if(exitPrompt.key(key))return;
@@ -136,10 +138,10 @@ public final class BlockRulesScreen extends UiScreen {
     }
     unclip();scrollbar.render(this,track());
     if(keys.isEmpty())text("No blocks selected.",left()+4,72,0xaaaaaa);
-    text(fit(error.isEmpty()?(vein?"No required tools means any item. Redstone includes lit ore.":"Changes are saved with Done."):error,span()),left(),height-48,error.isEmpty()?0xaaaaaa:0xff8888);
+    text(fit(error.isEmpty()?(vein?"No required tools means any item. Redstone includes lit ore.":""):error,span()),left(),height-48,error.isEmpty()?0xaaaaaa:0xff8888);
     button(vein?"Add blocks":"Add character",left(),height-30,86,20,mx,my,true);
     button("Defaults",left()+90,height-30,58,20,mx,my,true);
-    button("Done",right()-140,height-30,68,20,mx,my,true);
+    button("Done",right()-140,height-30,68,20,mx,my,changed());
     button("Cancel",right()-68,height-30,68,20,mx,my,true);
     if(!exitPrompt.active() && !tip.isEmpty())tooltip(tip,mx,my);
     exitPrompt.render(this,vein?"Save changes to these rules?":"Save changes to this palette?",pointerX,pointerY);

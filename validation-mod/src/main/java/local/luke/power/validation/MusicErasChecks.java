@@ -21,7 +21,7 @@ public final class MusicErasChecks {
       case "setup" -> {
         failures = 0; before = AudioConfig.copy(); queueBefore = MusicRequests.tracks(); volumeBefore = mc.options.musicVolume;
         var config = AudioConfig.copy(); config.master = 100; MusicFixtureSupport.allBuiltin(config);
-        config.menuMusic = AudioSettings.MenuMusic.WORLD;
+
         config.waitBetweenTracks = true; config.delayQueuedTracks = true;
         MusicRequests.edit(q -> q.tracks.clear()); AudioConfig.preview(config); AudioController.pause(); mc.options.musicVolume = .1f;
       }

@@ -198,6 +198,27 @@
   beside the settings panel.
   Secondary minimap reads retain their own bounded admission without replacing the
   world-map interest or consuming every parent-maintenance slot.
+  Minimap wheel zoom in that host uses the same immutable queued map save as gameplay
+  when Auto-apply is enabled. Manual edits remain in the Options draft. Never run an
+  Options file transaction for each wheel event.
+- World-map, minimap and photo toggle checklists share `MapTogglePanel`. Keep their
+  borderless `0xf0202020` background, four-pixel outer padding, 20-pixel rows,
+  full-row `0xff444444` hover and native-sized checkbox. Their text starts 19 pixels
+  into each row to leave room for the checkbox. Share the viewport for drawing,
+  clicking and wheel scrolling; keep clipped rows and any scrollbar inside it.
+  These persistent checklists retain their checkbox presentation. Action menus in
+  the world map, photo mode and waypoint list use borderless `PopupStyle` with
+  18-pixel rows and nine-pixel text padding. Dropdown choices use the same colors
+  and row drawing with an outside border and a blue selected indicator.
+  Waypoint list rows span the same left/right bounds as both control rows above;
+  the scrollbar and its hit area sit immediately outside those bounds.
+- Horizontal content tabs use `ConnectedTabs`: the active tab opens into the content,
+  inactive tabs stay dark, and the baseline crosses the gaps and remaining width.
+  Reuse it for the music library, color wheel/RGBA, title lettering and recipe-book
+  Crafting/Smelting views. Keep
+  independent action/toggle buttons and textured inventory categories in their
+  existing styles. Inactive recipe category backgrounds use the Creative tabs'
+  0.7 brightness, with icons restored to full brightness.
 - Entity radar heads are upright orthographic native head models. Minimap heads use a hold key or a world-visit middle-click toggle.
   Accepted hold presses clear that toggle; renderers read tick-owned state without polling keys.
   Keep the latch out of settings and clear it on world exit. The World Map retains

@@ -46,12 +46,11 @@ final class MusicPlaylistRevisionChecks {
       for(int width:new int[]{320,boundary-1,boundary,boundary+1,854}) {
         options.init(mc,width,420);options.render(-1,-1,0);
         int left=(int)call(panel,"left"),right=(int)call(panel,"right"),top=(int)call(panel,"top");
-        int h=(int)call(panel,"headerHeight"),actionWidth=(int)call(panel,"actionWidthHeader");
+        int h=(int)call(panel,"headerHeight");
         int[][] bounds={
           {(int)call(panel,"nameX"),top,(int)call(panel,"nameWidth"),18},
-          {(int)call(panel,"saveX"),(int)call(panel,"editButtonY"),(int)call(panel,"saveWidth"),18},
-          {(int)call(panel,"addX"),(int)call(panel,"actionY"),actionWidth,18},
-          {(int)call(panel,"groupedX"),(int)call(panel,"actionY"),actionWidth,18}
+          {(int)call(panel,"addX"),(int)call(panel,"actionY"),(int)call(panel,"addWidth"),18},
+          {(int)call(panel,"groupedX"),(int)call(panel,"actionY"),(int)call(panel,"viewWidth"),18}
         };
         for(int i=0;i<bounds.length;i++) {
           int[] a=bounds[i];check(a[0]>=left && a[0]+a[2]<=right && a[1]>=top && a[1]+a[3]<=top+h,"header control clips at width " + width);
@@ -163,7 +162,7 @@ final class MusicPlaylistRevisionChecks {
       MusicPlaylists460Checks.context(options,library,SECOND,List.of("Add to queue","Favourite","Preview","Add to playlist"));
       MusicPlaylists460Checks.choose(options,3);
       click(options,(int)call(panel,"addX")+5,(int)call(panel,"actionY")+5);
-      click(options,(int)call(panel,"saveX")+5,(int)call(panel,"editButtonY")+5);
+      AudioUi461Checks.savePlaylist(options);
       check(AudioConfig.current().favourites.equals(new LinkedHashSet<>(List.of(SECOND))),"Favorites Save lost draft membership");
       check(AudioConfig.current().playlist.equals(MusicPlaylist.FAVORITES) && AudioConfig.current().menuPlaylist.equals(MusicPlaylist.FAVORITES),"Favorites Save changed selection IDs");
       check(new ArrayList<>(AudioController.activeMusic(mc)).equals(List.of(SECOND)),"saved Favorites did not update playback");

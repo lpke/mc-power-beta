@@ -8,6 +8,8 @@ record WaypointListLayout(int left, int width, int listTop, int listBottom) {
   }
 
   int right() { return left + width; }
+  int rowWidth() { return width; }
+  int scrollbarX() { return right() + 2; }
   int sortWidth() { return Math.min(108, Math.max(96, width / 5)); }
   int filterWidth() { return Math.min(102, Math.max(66, width / 4)); }
   int sortX() { return right() - filterWidth() - sortWidth() - 4; }

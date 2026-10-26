@@ -12,11 +12,11 @@ class MusicRowLayoutTest {
         var l = MusicRowLayout.at(30, width, queue);
         assertTrue(l.volumeX() >= 30);
         assertTrue(l.volumeWidth() >= 36);
-        assertEquals(4, l.playX() - l.volumeX() - l.volumeWidth());
+        assertEquals(4, l.favouriteX() - l.volumeX() - l.volumeWidth());
+        assertEquals(2, l.playX() - l.favouriteX() - l.buttonWidth());
         assertEquals(30 + width, l.playX() + l.buttonWidth());
         assertTrue(l.nameWidth() > 0);
         if (l.height() == 24) assertTrue(l.nameX() + l.nameWidth() < l.volumeX());
-        assertEquals(-1, l.favouriteX());
         assertEquals(-1, l.previewX());
         assertEquals(-1, l.queueX());
         assertEquals(-1, l.upX());

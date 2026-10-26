@@ -2,6 +2,7 @@ package local.luke.power.ui;
 
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class MusicFiltersTest {
@@ -41,5 +42,29 @@ class MusicFiltersTest {
   @Test void playlistActionsRetainTheirSeparateRow() {
     for (int width : List.of(180, 292, 500))
       assertEquals(18, MusicFilters.layout(31, 111, width, "playlists").height());
+  }
+
+  @Test void shortNarrowViewsKeepFullTabLabelsAndAnInlineActionSlot() {
+    var measured = Map.of("Library", 34, "Playlists", 40, "Favorites", 46);
+    var library = MusicFilters.compact(31, 95, 200, "library", measured::get);
+    var catalog = MusicFilters.compact(31, 95, 200, "playlists", measured::get);
+    var favorites = MusicFilters.compact(31, 95, 200, "favorites", measured::get);
+    assertEquals(library.tabs(), catalog.tabs());
+    assertEquals(library.tabs(), favorites.tabs());
+    for (var tab : library.tabs()) assertEquals(measured.get(tab.label()) + 12, tab.width());
+    var last = library.tabs().get(library.tabs().size() - 1);
+    assertTrue(last.x() + last.width() + 6 <= library.addFolderX());
+    assertEquals(library.addFolderX(), library.reloadX());
+    assertEquals(95, library.actionsY());
+    assertEquals(18, library.height());
+    assertEquals(231, library.reloadX() + 20);
+    assertTrue(173 - (95 + library.height() + 10) >= 20 + 24);
+    assertTrue(last.x() + last.width() + 6 + 34 <= 231);
+  }
+
+  @Test void shortWideViewsKeepTheNormalGeometry() {
+    for (String selector : List.of("library", "playlists", "favorites"))
+      assertEquals(MusicFilters.layout(31, 95, 600, selector),
+          MusicFilters.compact(31, 95, 600, selector, label -> 40));
   }
 }

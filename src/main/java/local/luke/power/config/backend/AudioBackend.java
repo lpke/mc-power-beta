@@ -60,7 +60,7 @@ public final class AudioBackend implements Backend {
       add(
           "category." + e.getKey(),
           "Volume",
-          Catalog.words(e.getKey()),
+          "Game sounds / " + Catalog.words(e.getKey()),
           Setting.Kind.INTEGER,
           new JsonPrimitive(e.getValue()),
           new JsonPrimitive(100),
@@ -80,31 +80,18 @@ public final class AudioBackend implements Backend {
         Catalog.JSON.toJsonTree(s.favoritesGroupVolumes), new JsonObject(), "Group volumes for Favorites.", List.of());
     add("libraryOrder", "Music data", "Library group order", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.libraryOrder), new JsonArray(), "Display order of library groups.", List.of());
-    add("menuMusic", "Music playback", "Menu music", Setting.Kind.CHOICE,
-        new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(2),
-        "Choose the world playlist, menu playlist or both. World and Mix keep music playing across world transitions. Empty playlists stay silent.",
-        List.of("World soundtrack", "Menu selection", "Mix both"));
     add("dimensionMusic", "Music playback", "On dimension change", Setting.Kind.CHOICE,
         new JsonPrimitive(s.dimensionMusic.ordinal()), new JsonPrimitive(0),
         "Continue music, end only dimension-specific custom tracks, or end any track when using a portal.",
         List.of("Continue", "Stop dimension tracks", "Stop all"));
     add(
         "musicDirectories",
-        "Music playback",
+        "Music data",
         "Music folders",
         Setting.Kind.LIST,
         MusicFolders.encode(s.musicDirectories),
         new JsonArray(),
         "Import OGG, WAV, MUS or MP3 folders. Removing a folder preserves its files and saved playlist membership. Convert MP3 in the library; original files stay intact.",
-        List.of());
-    add(
-        "recursive",
-        "Music playback",
-        "Include subfolders",
-        Setting.Kind.BOOLEAN,
-        new JsonPrimitive(s.recursive),
-        new JsonPrimitive(false),
-        "Scan up to 12 folder levels. Symbolic links are not followed.",
         List.of());
     add(
         "shuffle",
@@ -169,7 +156,7 @@ public final class AudioBackend implements Backend {
           .contains(sound)) continue;
       add(
           "sound." + sound,
-          "Individual sounds",
+          "Game sounds / All",
           Catalog.words(sound.substring(sound.indexOf(':') + 1).replace('.', ' ')),
           Setting.Kind.INTEGER,
           new JsonPrimitive(s.sounds.getOrDefault(sound, 100)),
@@ -296,11 +283,9 @@ public final class AudioBackend implements Backend {
           case "menuControlsOffsetX" -> s.menuControlsOffsetX = v.getAsInt();
           case "menuControlsOffsetY" -> s.menuControlsOffsetY = v.getAsInt();
           case "master" -> s.master = v.getAsInt();
-          case "menuMusic" -> s.menuMusic = AudioSettings.MenuMusic.values()[v.getAsInt()];
           case "dimensionMusic" -> s.dimensionMusic = AudioSettings.DimensionMusic.values()[v.getAsInt()];
           case "gapMinSeconds" -> s.gapMinSeconds = v.getAsInt();
           case "gapMaxSeconds" -> s.gapMaxSeconds = v.getAsInt();
-          case "recursive" -> s.recursive = v.getAsBoolean();
           case "waitBetweenTracks" -> s.waitBetweenTracks = v.getAsBoolean();
           case "delayQueuedTracks" -> s.delayQueuedTracks = v.getAsBoolean();
           case "shuffle" -> s.shuffle = v.getAsBoolean();

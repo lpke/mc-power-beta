@@ -11,6 +11,7 @@ public final class WaypointEditorScreen extends UiScreen {
   private static final int ABBREVIATION = 7, VISIBLE = 8, ALWAYS = 9, ROWS = 10;
   private final Screen parent;
   private final Waypoint initial;
+  private final boolean creating;
   private final List<TextInput> fields;
   private final local.luke.power.config.Setting savedColors;
   private final com.google.gson.JsonElement originalColors;
@@ -25,6 +26,8 @@ public final class WaypointEditorScreen extends UiScreen {
 
   public WaypointEditorScreen(Screen parent, Waypoint waypoint) {
     this.parent = parent; initial = waypoint.copy(); enabled = waypoint.enabled; global = waypoint.global;
+    var store = Maps.waypoints();
+    creating = store == null || store.points().stream().noneMatch(point -> point.id.equals(waypoint.id));
     originalColors = local.luke.power.config.Catalog.JSON.toJsonTree(MenuPreferences.current().colours);
     savedColors = new local.luke.power.config.Setting("interface.colours", "interface", "Interface", "", "Saved colors", "",
         local.luke.power.config.Setting.Kind.LIST, originalColors, new com.google.gson.JsonArray(), 0, 16, 1, List.of(), false);
@@ -70,7 +73,12 @@ public final class WaypointEditorScreen extends UiScreen {
     catch (RuntimeException failure) { return true; }
   }
   private void leave() { exit.leave(changed(), () -> showScreen(parent)); }
+  private boolean doneEnabled() {
+    var store = Maps.waypoints();
+    return store != null && store.ready() && (creating || changed());
+  }
   private void save() {
+    if (!doneEnabled()) return;
     var store = Maps.waypoints();
     if (store == null || !store.ready()) { error = "Waypoints are loading or protected after a storage error."; return; }
     try {
@@ -106,7 +114,7 @@ public final class WaypointEditorScreen extends UiScreen {
     if (choices.key(this, key)) return;
     if (exit.key(key) || setDialog.key(this, c, key)) return;
     if (key == Keyboard.KEY_ESCAPE) { leave(); return; }
-    if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { click(); save(); return; }
+    if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) { if (doneEnabled()) { click(); save(); } return; }
     if (key == Keyboard.KEY_TAB) {
       var editable = List.of(0, ABBREVIATION, 2, 3, 4, 5, 6);
       int index = editable.get(0);
@@ -130,7 +138,7 @@ public final class WaypointEditorScreen extends UiScreen {
       return;
     }
     if (button != 0) return;
-    if (inside(x, y, left(), height - 26, span() / 2 - 2, 20)) { click(); save(); return; }
+    if (inside(x, y, left(), height - 26, span() / 2 - 2, 20)) { if (doneEnabled()) { click(); save(); } return; }
     if (inside(x, y, left() + span() / 2 + 2, height - 26, span() / 2 - 2, 20)) { click(); leave(); return; }
     if (y < 26 || y >= height - 43) return;
     if (inside(x, y, fieldLeft(1), row(1), fieldWidth(1), 18)) { click(); beginSet(); return; }
@@ -191,7 +199,7 @@ public final class WaypointEditorScreen extends UiScreen {
     if (!error.isEmpty()) text(fit(error, width - 20), 10, height - 40, 0xff7777);
     else if (fields.subList(2, 5).stream().anyMatch(field -> field.focused))
       text(fit("Use ~ for current position, ~offset to add an offset.", width - 20), 10, height - 40, 0xaaaaaa);
-    button("Done", left(), height - 26, span() / 2 - 2, 20, hoverX, hoverY, Maps.waypoints() != null && Maps.waypoints().ready());
+    button("Done", left(), height - 26, span() / 2 - 2, 20, hoverX, hoverY, doneEnabled());
     button("Cancel", left() + span() / 2 + 2, height - 26, span() / 2 - 2, 20, hoverX, hoverY, true);
     choices.render(this, mx, my);
     exit.render(this, "Save waypoint changes?", mx, my); setDialog.render(this, mx, my);

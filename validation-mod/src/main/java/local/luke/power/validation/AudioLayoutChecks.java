@@ -48,16 +48,16 @@ public final class AudioLayoutChecks {
         }
         MenuPreferences.update(v -> v.autoApply=false);
         MusicRequests.edit(q -> q.tracks.clear());
-        rules(new MusicRules(true,true,12000,12000,1,1,1,1));
+        rules(new MusicRules(12000,12000,1,1,1,1));
         AudioSettings next=AudioConfig.copy();next.musicDirectories=new ArrayList<>(List.of("audio-layout/a", "audio-layout/b", "audio-layout/menu"));
-        next.menuMusic=AudioSettings.MenuMusic.CUSTOM;
+
         MusicPlaylist.load(next, MusicPlaylist.BETA);
         AudioConfig.preview(next);AudioController.pause();
       }
       case "checks" -> {
         check(AudioController.customTracks().size()==3,"scan not finished");
         // A completed settings-triggered scan refreshes these rules from the environment backend.
-        rules(new MusicRules(true,true,12000,12000,1,1,1,1));
+        rules(new MusicRules(12000,12000,1,1,1,1));
         String a=id("/a/"),b=id("/b/"),menu=id("/menu/");
         test("selected saved tracks stay ordered and library membership remains independent", () -> {
           var next=AudioConfig.copy();MusicFixtureSupport.selection(next,List.of(b));AudioConfig.preview(next);

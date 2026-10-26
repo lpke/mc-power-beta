@@ -1,8 +1,10 @@
 # Audio imports, playback and decoder validation
 
 - `AudioController` owns all music sources, pauses, previews and timing.
-  World/menu transitions preserve streams and pause state in WORLD/MIX modes;
-  only CUSTOM resets playback. Preview restoration must not revive old jukeboxes.
+  World/menu playback uses only the selected saved playlist. Menus default to
+  Same as world; transitions preserve eligible streams, explicit pause, gaps and
+  queue state. A changed selection drops an ineligible background stream without
+  interrupting an audition. Preview restoration must not revive old jukeboxes.
   Synchronize sound-source cleanup with decoder reads on the sound threads.
   Never scan folders or decode audio from a render loop. Playlist editor drafts
   stay separate from saved playlists until Save. Playback reads the selected saved

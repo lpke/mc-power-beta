@@ -18,6 +18,22 @@ class MusicScrubLayoutTest {
         }
   }
 
+  @Test void thumbKeepsItsWidthInsideBothTrackEndsAndPointerMappingMatches() {
+    for (boolean label : new boolean[] {false, true})
+      for (int width : new int[] {180, 200, 320, 640}) {
+        var bar = MusicScrubLayout.at(37, width, label);
+        assertEquals(bar.x(), bar.thumbLeft(0));
+        assertEquals(bar.x() + bar.width() - MusicScrubLayout.THUMB_WIDTH, bar.thumbLeft(1));
+        for (double fraction : new double[] {0, .25, .5, .75, 1}) {
+          int thumb = bar.thumbLeft(fraction);
+          assertTrue(thumb >= bar.x());
+          assertTrue(thumb + MusicScrubLayout.THUMB_WIDTH <= bar.x() + bar.width());
+          assertEquals(fraction, bar.fraction(thumb + MusicScrubLayout.THUMB_WIDTH / 2),
+              1.0 / (bar.width() - MusicScrubLayout.THUMB_WIDTH));
+        }
+      }
+  }
+
   @Test void labelledAudioRowsRetainTheirRightAlignedTrackAndTime() {
     for (int width : new int[] {180, 320, 640}) {
       var bar = MusicScrubLayout.at(37, width, true);

@@ -29,6 +29,10 @@ public final class SavedHotbarsScreen extends UiScreen {
   private int top() { return Math.max(32, (height - 192) / 2); }
   private int controls() { return left() + 178; }
   private boolean changed() { return !draft.json().equals(original.json()); }
+  private boolean doneEnabled() {
+    return changed() || count.focused && preview[row][slot] != null
+        && !count.text().equals(Integer.toString(preview[row][slot].count));
+  }
   private void refresh() {
     for (int r = 0; r < 9; r++) {
       String[] stored = draft.bar(r);
@@ -61,6 +65,7 @@ public final class SavedHotbarsScreen extends UiScreen {
     } catch (IOException | RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Invalid item count"); }
   }
   private void done() {
+    if (!doneEnabled()) return;
     try {
       if (count.focused) { applyCount(); if (!error.isEmpty()) return; }
       if (changed()) SavedCreativeHotbars.acceptEdit(minecraft, original, draft);
@@ -94,7 +99,7 @@ public final class SavedHotbarsScreen extends UiScreen {
     else if (inside(x, y, cx + 34, ty + 66, 58, 18) && preview[row][slot] != null) { count.focused = true; count.click(x, button); }
     else if (inside(x, y, cx + 96, ty + 66, 26, 18) && preview[row][slot] != null) { click(); applyCount(); }
     else if (inside(x, y, cx, ty + 94, 122, 18)) { click(); draft = draft.with(row, new String[9]); refresh(); }
-    else if (inside(x, y, width / 2 - 80, height - 28, 76, 20)) { click(); done(); }
+    else if (doneEnabled() && inside(x, y, width / 2 - 80, height - 28, 76, 20)) { click(); done(); }
     else if (inside(x, y, width / 2 + 4, height - 28, 76, 20)) { click(); discard(); }
   }
   @Override public void render(int mx, int my, float delta) {
@@ -135,7 +140,7 @@ public final class SavedHotbarsScreen extends UiScreen {
       input(count, cx + 34, ty + 66, 58, mx, my, "");
       button("OK", cx + 96, ty + 66, 26, 18, mx, my, preview[row][slot] != null);
       button("Clear hotbar", cx, ty + 94, 122, 18, mx, my, true);
-      button("Done", width / 2 - 80, height - 28, 76, 20, mx, my, true);
+      button("Done", width / 2 - 80, height - 28, 76, 20, mx, my, doneEnabled());
       button("Discard", width / 2 + 4, height - 28, 76, 20, mx, my, true);
       if (!error.isEmpty()) drawCenteredTextWithShadow(textRenderer, fit(error, width - 20), width / 2, height - 41, 0xffaaaa);
       if (!tooltip.isEmpty()) foregroundTooltip(tooltip, mx, my);

@@ -111,7 +111,7 @@ final class IndicatorsMenuChecks {
         } finally { System.arraycopy(inventory,0,mc.player.inventory.main,0,inventory.length);mc.player.inventory.setCursorStack(cursor);mc.setScreen(screen); }
       });
       case "mix", "world", "custom" -> {
-        AudioSettings s=AudioConfig.copy();s.menuMusic=action.equals("mix")?AudioSettings.MenuMusic.MIX:action.equals("world")?AudioSettings.MenuMusic.WORLD:AudioSettings.MenuMusic.CUSTOM;
+        AudioSettings s=AudioConfig.copy();s.menuPlaylist=local.luke.power.audio.MusicPlaylist.SAME_AS_WORLD;
         s.menuControls=true;s.menuControlsMainMenu=true;s.gapMinSeconds=600;s.gapMaxSeconds=1200;s.waitBetweenTracks=true;
         AudioConfig.preview(s);mc.options.musicVolume=.1f;AudioStartChecks.run("reset");AudioController.playNow(SONG);
       }

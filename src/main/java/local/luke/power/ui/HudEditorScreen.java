@@ -78,6 +78,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected int controlsTop() { return toolbar().controlsTop(); }
   protected String title() { return "HUD editor"; }
   protected String doneLabel() { return reorder.active() ? "Save F3" : "Done"; }
+  protected boolean doneEnabled() { return reorder.active() ? reorder.changed() : super.doneEnabled(); }
   protected String cancelLabel() { return reorder.active() ? "Back" : "Cancel"; }
   public void tick() { super.tick(); reorder.tick(); }
   public void init() {
@@ -107,12 +108,13 @@ public final class HudEditorScreen extends DraftEditorScreen {
     return selected.equals("minimap") && previewVisible() && !modal() && !inline.active()
         && !selecting && !reorder.active();
   }
-  protected void save() { if (reorder.active()) finishReorder(true); else super.save(); }
+  protected void save() { if (!doneEnabled()) return; if (reorder.active()) finishReorder(true); else super.save(); }
   protected void leave() { if (reorder.active()) leaveReorder(); else super.leave(); }
   private void leaveReorder() { stopGesture(); inline.cancel(); reorderExit.leave(reorder.changed(), () -> finishReorder(false)); }
   protected String display(Setting s) { return s.id.equals("interface.debugOrder") ? reorder.active() ? "Save" : "Reorder" : super.display(s); }
+  protected boolean controlEnabled(Setting s) { return !s.id.equals("interface.debugOrder") || !reorder.active() || reorder.changed(); }
   protected void edit(Setting s, int direction, int y) {
-    if (s.id.equals("interface.debugOrder")) { click(); if (reorder.active()) finishReorder(true); else beginReorder(); }
+    if (s.id.equals("interface.debugOrder")) { if (!controlEnabled(s)) return; click(); if (reorder.active()) finishReorder(true); else beginReorder(); }
     else super.edit(s, direction, y);
   }
   public void onMouseEvent() {
@@ -422,7 +424,9 @@ public final class HudEditorScreen extends DraftEditorScreen {
     if (reorder.active() && !super.modal()) {
       if (previewVisible() && reorder.press(x, y, button)) return;
       Setting order = editingDraft().get("interface.debugOrder");
-      if (controlsVisible() && inside(x, y, controlX(), controlY(order), controlWidth(order), 18)) { click(); finishReorder(true); return; }
+      if (controlsVisible() && inside(x, y, controlX(), controlY(order), controlWidth(order), 18)) {
+        if (reorder.changed()) { click(); finishReorder(true); } return;
+      }
       boolean controls = inside(x, y, controlsLeft(), controlsTop(), controlsSpan(), controlsBottom() - controlsTop());
       boolean footer = y >= height - 31;
       if (!controls && !footer) { leaveReorder(); return; }

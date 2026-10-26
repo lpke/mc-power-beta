@@ -50,7 +50,7 @@ public final class MusicLibrarySources {
 
   /** Most-specific imported root owns each track; equal roots retain configured order. */
   public static Snapshot build(Path game, List<String> configured,
-      MusicLibrary.Scan scan, boolean recursive) {
+      MusicLibrary.Scan scan) {
     Map<String, MusicLibrary.SourceFolder> observed = new LinkedHashMap<>();
     for (var source : scan.sources()) observed.putIfAbsent(source.path(), source);
     List<Root> roots = new ArrayList<>();
@@ -75,7 +75,7 @@ public final class MusicLibrarySources {
       Path file = track.path().toAbsolutePath().normalize();
       for (var root : roots) {
         if (root.root() == null) continue;
-        boolean contains = recursive ? file.startsWith(root.root()) : root.root().equals(file.getParent());
+        boolean contains = file.startsWith(root.root());
         if (contains) {
           covered.add(id(root.path()));
           if (owner == null || root.root().getNameCount() > owner.root().getNameCount()) owner = root;

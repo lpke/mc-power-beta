@@ -15,6 +15,7 @@ public final class IntegerArrayScreen extends UiScreen {
   private final Setting setting;
   private final IntegerArrayDraft.Rules rules;
   private final IntegerArrayDraft draft;
+  private final List<Integer> original;
   private final String entryLabel, unit;
   private final InlineValueEditor valueEditor = new InlineValueEditor();
   private final ScrollBar scrollbar = new ScrollBar();
@@ -27,7 +28,8 @@ public final class IntegerArrayScreen extends UiScreen {
     this.rules = rules;
     this.entryLabel = entryLabel;
     this.unit = unit;
-    draft = new IntegerArrayDraft(rules, values(setting.value));
+    original = values(setting.value);
+    draft = new IntegerArrayDraft(rules, original);
   }
 
   private static List<Integer> values(JsonElement value) {
@@ -71,13 +73,15 @@ public final class IntegerArrayScreen extends UiScreen {
   }
 
   private void save() {
-    if (!draft.error().isEmpty()) return;
+    if (!doneEnabled()) return;
     var value = new JsonArray();
     draft.values().forEach(value::add);
     setting.value = value;
     parent.changed(setting);
     minecraft.setScreen(parent);
   }
+
+  private boolean doneEnabled() { return !draft.values().equals(original) && draft.error().isEmpty(); }
 
   protected void keyPressed(char c, int key) {
     if (valueEditor.key(c, key)) return;
@@ -152,9 +156,7 @@ public final class IntegerArrayScreen extends UiScreen {
       iconButton("down", right() - 46, y, 16, mx, my, i + 1 < draft.size());
       button("-", right() - 28, y, 18, 18, mx, my, draft.size() > 1);
       if (my >= 70 && my < bottom()) {
-        if (inside(mx, my, sliderX(), y, sliderWidth(), 18))
-          tip = valueEditor.editing(i) ? valueEditor.help() : "Right-click to enter an exact distance.";
-        else if (inside(mx, my, right() - 64, y, 16, 18)) tip = "Move earlier in the cycle";
+        if (inside(mx, my, right() - 64, y, 16, 18)) tip = "Move earlier in the cycle";
         else if (inside(mx, my, right() - 46, y, 16, 18)) tip = "Move later in the cycle";
         else if (inside(mx, my, right() - 28, y, 18, 18)) tip = "Remove this distance";
       }
@@ -164,8 +166,9 @@ public final class IntegerArrayScreen extends UiScreen {
     scrollbar.render(this, track());
     button("Add distance", left(), height - 54, 100, 20, mx, my, draft.size() < rules.limit());
     button("Defaults", left() + 104, height - 54, 76, 20, mx, my, true);
-    button("Done", width / 2 - 102, height - 28, 100, 20, mx, my, error.isEmpty());
+    button("Done", width / 2 - 102, height - 28, 100, 20, mx, my, doneEnabled());
     button("Cancel", width / 2 + 2, height - 28, 100, 20, mx, my, true);
     if (dragging < 0 && !tip.isEmpty()) tooltip(tip, mx, my);
+    valueEditor.renderError(this);
   }
 }

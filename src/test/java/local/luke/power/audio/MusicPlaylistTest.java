@@ -51,24 +51,29 @@ class MusicPlaylistTest {
     assertEquals(List.of("music:c"), MusicPlaylist.menu(settings).tracks());
   }
 
-  @Test void menuModesUseSavedOrderDeduplicateMixAndSelectTheMatchingGains() {
+  @Test void menuSelectionUsesOnlyItsSavedOrderAndItsOwnGains() {
     AudioSettings settings = selected();
     settings.playlists.add(new MusicPlaylist("menu", "Menu", List.of("music:a", "music:menu"), Map.of("Alpha", 20)));
     MusicPlaylist.loadMenu(settings, "menu");
-    settings.menuMusic = AudioSettings.MenuMusic.WORLD;
-    assertEquals(MusicPlaylist.world(settings).tracks(), MusicPlaylist.rotation(settings, true));
-    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:menu", true));
-    settings.menuMusic = AudioSettings.MenuMusic.MIX;
-    assertEquals(List.of("music:z", "music:missing", "music:a", "music:menu"), MusicPlaylist.rotation(settings, true));
-    assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:menu", true));
-    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
-    settings.menuMusic = AudioSettings.MenuMusic.CUSTOM;
     assertEquals(List.of("music:a", "music:menu"), MusicPlaylist.rotation(settings, true));
+    assertEquals(MusicPlaylist.world(settings).tracks(), MusicPlaylist.rotation(settings, false));
     assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
-    assertFalse(settings.continuesAcrossMenus());
+    assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:menu", true));
+    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", false));
+    MusicPlaylist.loadMenu(settings, "one");
+    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
     MusicPlaylist.loadMenu(settings, MusicPlaylist.SAME_AS_WORLD);
     assertEquals(MusicPlaylist.world(settings).tracks(), MusicPlaylist.rotation(settings, true));
     assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
+  }
+
+  @Test void worldAliasAndExplicitSamePlaylistShareThePlaybackContext() {
+    AudioSettings settings = selected();
+    assertEquals(MusicPlaylist.selectionId(settings, false), MusicPlaylist.selectionId(settings, true));
+    MusicPlaylist.loadMenu(settings, "one");
+    assertEquals(MusicPlaylist.selectionId(settings, false), MusicPlaylist.selectionId(settings, true));
+    MusicPlaylist.loadMenu(settings, MusicPlaylist.BETA);
+    assertNotEquals(MusicPlaylist.selectionId(settings, false), MusicPlaylist.selectionId(settings, true));
   }
 
   @Test void emptyPlaylistStaysSilentAndFolderDiscoveriesCannotExpandMembership() {
@@ -144,15 +149,14 @@ class MusicPlaylistTest {
     assertThrows(IllegalArgumentException.class, settings::validate);
   }
 
-  @Test void favoriteMenuSelectionUsesItsOwnGainsForItsExclusiveTracks() {
+  @Test void favoriteMenuSelectionUsesOnlyFavoritesAndItsOwnGains() {
     AudioSettings settings = selected();
     settings.favourites.addAll(List.of("music:a", "music:favorite"));
     settings.favoritesGroupVolumes.put("Alpha", 12);
     MusicPlaylist.loadMenu(settings, MusicPlaylist.FAVORITES);
-    settings.menuMusic = AudioSettings.MenuMusic.MIX;
-    assertEquals(List.of("music:z", "music:missing", "music:a", "music:favorite"), MusicPlaylist.rotation(settings, true));
+    assertEquals(List.of("music:a", "music:favorite"), MusicPlaylist.rotation(settings, true));
     assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:favorite", true));
-    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
+    assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
     assertEquals(12, MusicPlaylist.menu(settings).groupVolumes().get("Alpha"));
     assertEquals(40, MusicPlaylist.world(settings).groupVolumes().get("Alpha"));
   }
@@ -201,26 +205,18 @@ class MusicPlaylistTest {
     assertEquals(List.of("music:custom/new"), MusicPlaylist.find(settings, settings.playlist).tracks());
   }
 
-  @Test void directPlaybackLookupsKeepWorldPriorityInMixAndResolveSharedMenuSelection() {
+  @Test void directPlaybackLookupsResolveMenuGainsAndSharedWorldSelection() {
     AudioSettings settings = selected();
     settings.favourites.addAll(List.of("music:a", "music:favorite"));
     settings.favoritesGroupVolumes.put("Alpha", 12);
     MusicPlaylist.loadMenu(settings, MusicPlaylist.FAVORITES);
-    settings.menuMusic = AudioSettings.MenuMusic.MIX;
     assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:favorite", true));
-    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
+    assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
     assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:favorite", false));
     assertEquals(12, MusicPlaylist.groupVolumes(settings, settings.menuPlaylist).get("Alpha"));
     assertEquals(40, MusicPlaylist.groupVolumes(settings, settings.playlist).get("Alpha"));
-    settings.favourites.remove("music:favorite");
-    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:favorite", true));
-    settings.menuMusic = AudioSettings.MenuMusic.CUSTOM;
-    assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
-    settings.menuMusic = AudioSettings.MenuMusic.WORLD;
-    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
     MusicPlaylist.load(settings, MusicPlaylist.FAVORITES);
     MusicPlaylist.loadMenu(settings, MusicPlaylist.SAME_AS_WORLD);
-    settings.menuMusic = AudioSettings.MenuMusic.CUSTOM;
     assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
     assertSame(settings.favoritesGroupVolumes, MusicPlaylist.groupVolumes(settings, settings.menuPlaylist));
     assertTrue(MusicPlaylist.contains(settings, settings.menuPlaylist, "music:a"));

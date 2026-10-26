@@ -26,7 +26,7 @@ final class MusicStatusBar {
   }
 
   private void slide(int x) {
-    fraction = Math.max(0, Math.min(1, (x - barX) / (double) Math.max(1, barWidth)));
+    fraction = new MusicScrubLayout(barX, barWidth).fraction(x);
   }
 
   void cancel() {
@@ -70,8 +70,8 @@ final class MusicStatusBar {
     screen.rectangle(barX, y + 7, barX + barWidth, y + 10, 0xff333333);
     int end = barX + (int) Math.round(barWidth * Math.min(1, position / duration));
     screen.rectangle(barX, y + 7, end, y + 10, 0xffaaaaaa);
-    screen.rectangle(
-        Math.max(barX, end - 1), y + 5, Math.min(barX + barWidth, end + 1), y + 12, 0xffdddddd);
+    int thumb = bounds.thumbLeft(position / duration);
+    screen.rectangle(thumb, y + 5, thumb + MusicScrubLayout.THUMB_WIDTH, y + 12, 0xffdddddd);
     screen.text(time(position), barX + barWidth + 5, y + 4, 0xaaaaaa);
   }
 

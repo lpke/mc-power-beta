@@ -6,11 +6,13 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 
 class MenuMusicTest {
-  @Test void newSettingsMixBothAndOldExplicitChoicesSurvive() {
-    Gson json = new Gson();
-    assertEquals(AudioSettings.MenuMusic.MIX, json.fromJson("{}", AudioSettings.class).menuMusic);
-    assertEquals(AudioSettings.MenuMusic.WORLD,
-        json.fromJson("{\"menuMusic\":\"WORLD\"}", AudioSettings.class).menuMusic);
+  @Test void menusDefaultToTheWorldPlaylist() {
+    AudioSettings settings = new Gson().fromJson("{}", AudioSettings.class);
+    assertEquals(MusicPlaylist.SAME_AS_WORLD, settings.menuPlaylist);
+    assertEquals(MusicPlaylist.rotation(settings, false), MusicPlaylist.rotation(settings, true));
+    var serialized = new Gson().toJsonTree(settings).getAsJsonObject();
+    assertFalse(serialized.has("menuMusic"));
+    assertFalse(serialized.has("recursive"));
   }
   @Test void titleControlsRespectMasterAndTheIndependentTitleSwitch() {
     AudioSettings s = new AudioSettings();
@@ -27,20 +29,11 @@ class MenuMusicTest {
     assertTrue(s.showMenuControls(false));
     assertFalse(s.showMenuControls(true));
   }
-  @Test void onlySeparateMenuSelectionResetsPlaybackOnWorldTransitions() {
-    AudioSettings s = new AudioSettings();
-    for (var mode : AudioSettings.MenuMusic.values()) {
-      s.menuMusic = mode;
-      assertEquals(mode != AudioSettings.MenuMusic.CUSTOM, s.continuesAcrossMenus());
-    }
-  }
   @Test void emptyCustomMenuPlaylistNeverFallsBackToWorldMusic() {
     AudioSettings settings = new AudioSettings();
     settings.playlists.add(new MusicPlaylist("empty", "Empty", List.of(), Map.of()));
     MusicPlaylist.loadMenu(settings, "empty");
-    settings.menuMusic = AudioSettings.MenuMusic.CUSTOM;
     assertTrue(MusicPlaylist.rotation(settings, true).isEmpty());
-    settings.menuMusic = AudioSettings.MenuMusic.MIX;
-    assertEquals(BuiltinMusic.VANILLA, MusicPlaylist.rotation(settings, true));
+    assertEquals(BuiltinMusic.VANILLA, MusicPlaylist.rotation(settings, false));
   }
 }

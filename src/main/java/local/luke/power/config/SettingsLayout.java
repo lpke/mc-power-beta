@@ -36,7 +36,6 @@ public final class SettingsLayout {
         boolean closed = page.equals("Interface") && !Set.of("", "General", "Title screen").contains(group)
             || page.equals("Gameplay") || page.equals("Fixes")
             || page.equals("Video") && Set.of("Entity visibility", "Particles").contains(group)
-            || page.equals("Audio") && group.equals("Individual sounds")
             || page.equals("Map") && group.equals("Performance")
             || page.equals("Advanced") && Set.of("Achievement recovery", "Miscellaneous").contains(group);
         if (closed) result.add(page + "/" + group);

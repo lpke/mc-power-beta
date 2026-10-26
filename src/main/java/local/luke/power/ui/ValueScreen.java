@@ -8,6 +8,7 @@ public final class ValueScreen extends UiScreen {
   private final Setting setting;
   private final net.minecraft.client.gui.screen.Screen returnTo;
   private final TextInput input;
+  private final String original;
   private String error = "";
   private long errorUntil;
 
@@ -23,7 +24,8 @@ public final class ValueScreen extends UiScreen {
     this.returnTo = returnTo;
     this.accepted = accepted;
     this.setting = setting;
-    input = new TextInput(setting.editText(), setting.kind == Setting.Kind.LIST ? 16384 : 4096);
+    original = setting.editText();
+    input = new TextInput(original, setting.kind == Setting.Kind.LIST ? 16384 : 4096);
     input.focused = true;
   }
 
@@ -56,6 +58,7 @@ public final class ValueScreen extends UiScreen {
   }
 
   private void save() {
+    if (!doneEnabled()) return;
     try {
       setting.parse(input.text());
       accepted.run();
@@ -65,6 +68,8 @@ public final class ValueScreen extends UiScreen {
       errorUntil = System.nanoTime() + 4_000_000_000L;
     }
   }
+
+  private boolean doneEnabled() { return !input.text().equals(original); }
 
   protected void keyPressed(char c, int key) {
     if (key == Keyboard.KEY_ESCAPE) {
@@ -94,7 +99,7 @@ public final class ValueScreen extends UiScreen {
                 ? ""
                 : "Range: " + setting.rangeText();
     text(fit(hint, span()), left(), height / 2 + 36, 0xaaaaaa);
-    button("Done", width / 2 - 102, height - 28, 100, 20, x, y, true);
+    button("Done", width / 2 - 102, height - 28, 100, 20, x, y, doneEnabled());
     button("Cancel", width / 2 + 2, height - 28, 100, 20, x, y, true);
   }
 }

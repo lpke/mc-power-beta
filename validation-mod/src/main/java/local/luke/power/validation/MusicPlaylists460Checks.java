@@ -253,8 +253,8 @@ final class MusicPlaylists460Checks {
     var bounds = (ScrollBar.Track)call(panel, "track");
     field(panel, "scroll", Math.min(index * (int)call(panel, "rowHeight"), (int)bounds.maximum()));
     options.render(-1,-1,0);
-    click(options, (int)Dropdown450Screens.invoke(panel, "editX", new Class<?>[]{int.class}, index) + 5,
-        (int)Dropdown450Screens.invoke(panel, "actionY", new Class<?>[]{int.class}, index) + 5);
+    click(options, (int)call(panel, "editX") + 5,
+        AudioUi461Checks.catalogActionY(panel, index) + 5);
     check((boolean)call(panel, "editing"), "Edit missed playlist " + id);
   }
 
@@ -419,8 +419,9 @@ final class MusicPlaylists460Checks {
       input.power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
       ((TextInput)field(exact,"input")).setText("99");input.power$key('\0',Keyboard.KEY_ESCAPE);
       check(draft.volume("Alpha")==31,"group exact Escape changed draft");
-      click(options,(int)call(library,"groupResetX")+5,MusicGroupChecks.groupY(library,"Alpha")+8);
-      check(draft.volume("Alpha")==100,"group reset missed");
+      input.power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
+      ((TextInput)field(exact,"input")).setText("100");input.power$key('\0',Keyboard.KEY_RETURN);
+      check(draft.volume("Alpha")==100,"group exact default value missed");
       int groupedY=trackY(library,FIRST);input.power$click(x,groupedY+8,0);
       check(!(boolean)call(field(library,"reorder"),"active"),"Grouped allowed drag");input.power$release(x,groupedY+24,0);
       click(options,(int)call(panel,"groupedX")+5,(int)call(panel,"actionY")+5);
@@ -434,7 +435,7 @@ final class MusicPlaylists460Checks {
       check(!(boolean)call(panel,"adding"),"Back to playlist did not leave Add view");
       draft.include(SECOND,false);draft.order(List.of(MISSING,FIRST));draft.volume("Alpha",25);
       check(selected(AudioConfig.current()).tracks().equals(original),"unsaved membership leaked into playback");
-      click(options, (int)call(panel, "saveX") + 5, (int)call(panel, "editButtonY") + 5);
+      AudioUi461Checks.savePlaylist(options);
       check(AudioConfig.current().playlist.equals("quiet"), "Save changed selected identity");
       check(selected(AudioConfig.current()).tracks().equals(List.of(MISSING, FIRST)), "Save lost membership/order/missing entry");
       check(new ArrayList<>(AudioController.activeMusic(mc)).equals(List.of(FIRST)), "selected saved playlist edit did not affect playback after Save");
@@ -443,16 +444,17 @@ final class MusicPlaylists460Checks {
       check(AudioConfig.current().menuPlaylist.equals("building"), "world Save changed menu assignment");
       options.session().discard(); check(selected(AudioConfig.current()).tracks().equals(original), "Options Discard retained previewed playlist save");
     });
-    test("MUSIC460 native Beta entry blocks Edit/Delete and Copy opens an isolated draft",()->{
+    test("MUSIC460 native Beta entry opens read-only and Copy opens an isolated draft",()->{
       AudioConfig.preview(seed());var options=open(mc);var library=library(options);tab(options,library,"playlists");
-      var panel=field(library,"presets");int y=(int)Dropdown450Screens.invoke(panel,"actionY",new Class<?>[]{int.class},0)+5;
-      click(options,(int)Dropdown450Screens.invoke(panel,"editX",new Class<?>[]{int.class},0)+5,y);
-      check(!(boolean)call(panel,"editing"),"Beta exposed Edit");
+      var panel=field(library,"presets");int y=AudioUi461Checks.catalogActionY(panel, 0)+5;
+      click(options,(int)call(panel,"editX")+5,y);
+      check((boolean)call(panel,"editing")&&(boolean)call(panel,"readOnly"),"Beta did not open its protected viewer");
+      call(library,"cancelPlaylist");
       click(options,(int)call(panel,"deleteX")+5,y);check(!library.modal(),"Beta exposed Delete");
       click(options,(int)call(panel,"copyX")+5,y);var copy=(MusicPresetDraft)call(panel,"draft");
       check(copy!=null&&copy.tracks().equals(BuiltinMusic.VANILLA),"Beta Copy missed original membership/order");
       String id=copy.snapshot(copy.name()).id();check(!id.equals(MusicPlaylist.BETA),"Beta Copy reused reserved identity");
-      copy.include(FIRST,false);click(options,(int)call(panel,"saveX")+5,(int)call(panel,"editButtonY")+5);
+      copy.include(FIRST,false);AudioUi461Checks.savePlaylist(options);
       check(MusicPlaylist.find(AudioConfig.current(),id).tracks().size()==11,"Beta Copy Save failed");
       check(MusicPlaylist.beta().tracks().equals(BuiltinMusic.VANILLA),"copy edited Beta originals");
       check(AudioConfig.current().playlist.equals("quiet"),"copy Save changed world selection");options.session().discard();
@@ -566,7 +568,7 @@ final class MusicPlaylists460Checks {
     check(index<list.size(),"playlist action target missing "+id);
     var bounds=(ScrollBar.Track)call(panel,"track");field(panel,"scroll",Math.min(index*(int)call(panel,"rowHeight"),(int)bounds.maximum()));
     options.render(-1,-1,0);
-    int y=(int)Dropdown450Screens.invoke(panel,"actionY",new Class<?>[]{int.class},index)+5;
+    int y=AudioUi461Checks.catalogActionY(panel, index)+5;
     click(options,(int)call(panel,action+"X")+5,y);
   }
 
@@ -619,15 +621,15 @@ final class MusicPlaylists460Checks {
       var input=(ScreenInput)(Object)options;input.power$key('\0',Keyboard.KEY_DOWN);int first=(int)field(options,"selected");
       input.power$key('\0',Keyboard.KEY_TAB);check((int)field(options,"selected")!=first,"Settings Tab did not move selection");
       var rows=(List<?>)field(options,"rows");int index=-1;
-      for(int i=0;i<rows.size();i++){var setting=(Setting)call(rows.get(i),"setting");if(setting!=null&&setting.id.equals("audio.menuMusic")){index=i;break;}}
+      for(int i=0;i<rows.size();i++){var setting=(Setting)call(rows.get(i),"setting");if(setting!=null&&setting.id.equals("audio.dimensionMusic")){index=i;break;}}
       check(index>=0,"menu behavior row missing");field(options,"selected",index);
-      field(options,"scroll",Math.max(0d,(int)call(rows.get(index),"y")-24d));call(options,"layout");int before=find(options.session(),"audio.menuMusic").value.getAsInt();
+      field(options,"scroll",Math.max(0d,(int)call(rows.get(index),"y")-24d));call(options,"layout");int before=find(options.session(),"audio.dimensionMusic").value.getAsInt();
       input.power$key('\0',Keyboard.KEY_RIGHT);check((boolean)call(field(options,"choices"),"active"),"Settings Right did not open shared dropdown");
       input.power$key('\0',Keyboard.KEY_DOWN);input.power$key('\0',Keyboard.KEY_RETURN);
-      check(find(options.session(),"audio.menuMusic").value.getAsInt()!=before,"Settings dropdown Down/Enter did not choose next value");
+      check(find(options.session(),"audio.dimensionMusic").value.getAsInt()!=before,"Settings dropdown Down/Enter did not choose next value");
       input.power$key('\0',Keyboard.KEY_LEFT);check((boolean)call(field(options,"choices"),"active"),"Settings Left did not open shared dropdown");
       input.power$key('\0',Keyboard.KEY_UP);input.power$key('\0',Keyboard.KEY_RETURN);
-      check(find(options.session(),"audio.menuMusic").value.getAsInt()==before,"Settings dropdown Up/Enter did not restore prior value");
+      check(find(options.session(),"audio.dimensionMusic").value.getAsInt()==before,"Settings dropdown Up/Enter did not restore prior value");
       for(int i=0;i<rows.size();i++){var setting=(Setting)call(rows.get(i),"setting");if(setting!=null&&setting.id.equals("audio.menuPlaylist")){field(options,"selected",i);break;}}
       input.power$key('\0',Keyboard.KEY_RETURN);check((boolean)call(field(options,"choices"),"active"),"Settings Enter did not open menu playlist dropdown");
       input.power$key('\0',Keyboard.KEY_ESCAPE);options.session().discard();
@@ -669,19 +671,17 @@ final class MusicPlaylists460Checks {
     var origin = AudioController.class.getDeclaredMethod("usesMenuVolumes", String.class, contextType); pool.setAccessible(true); origin.setAccessible(true);
     List<String> world = List.of(SECOND, FIRST); String creative = "music:creative4.ogg";
     List<String> menu = List.of(FIRST, creative, SECOND, "music:creative1.ogg");
-    for (var mode : AudioSettings.MenuMusic.values())
-      for (String assignment : List.of(MusicPlaylist.SAME_AS_WORLD, MusicPlaylist.BETA, "building", "empty"))
-        test("MUSIC460 native menu pool and source gain " + mode + " " + assignment, () -> {
+    for (String assignment : List.of(MusicPlaylist.SAME_AS_WORLD, MusicPlaylist.BETA, "building", "empty"))
+        test("MUSIC460 native menu pool and source gain " + assignment, () -> {
           var settings = seed(); settings.master = 80; settings.sounds.put(creative, 50);
           settings.playlists.set(1, new MusicPlaylist("building", "Building", menu, Map.of("Alpha", 25, "Beta / Creative", 65)));
-          settings.menuMusic = mode; MusicPlaylist.loadMenu(settings, assignment); AudioConfig.preview(settings);
-          boolean separate = mode != AudioSettings.MenuMusic.WORLD && !assignment.equals(MusicPlaylist.SAME_AS_WORLD);
-          List<String> expected = new ArrayList<>(); if (mode != AudioSettings.MenuMusic.CUSTOM || !separate) expected.addAll(world);
-          if (separate) for (String id : MusicPlaylist.find(settings, assignment).tracks()) if (!expected.contains(id)) expected.add(id);
+          MusicPlaylist.loadMenu(settings, assignment); AudioConfig.preview(settings);
+          boolean separate = !assignment.equals(MusicPlaylist.SAME_AS_WORLD) && !assignment.equals(settings.playlist);
+          List<String> expected = MusicPlaylist.menu(settings).tracks();
           @SuppressWarnings("unchecked") List<class_267> tracks = (List<class_267>)pool.invoke(null, menuContext);
           check(tracks.stream().map(AudioController::trackId).toList().equals(expected), "menu pool changed order/membership");
           for (String id : expected) {
-            boolean menuGain = separate && (mode == AudioSettings.MenuMusic.CUSTOM || !world.contains(id));
+            boolean menuGain = separate;
             check((boolean)origin.invoke(null, id, menuContext) == menuGain, "wrong source gain owner " + id);
             float group = menuGain ? MusicPlaylist.find(settings, assignment).groupVolumes().getOrDefault(AudioController.musicGroup(id), 100) / 100f
                 : selected(settings).groupVolumes().getOrDefault(AudioController.musicGroup(id), 100) / 100f;

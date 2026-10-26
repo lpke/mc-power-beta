@@ -20,7 +20,6 @@ public final class AudioSettings {
   public boolean underwaterAdditions = false;
   public boolean underwaterRareAdditions = false;
   public boolean underwaterUltraRareAdditions = false;
-  public enum MenuMusic { WORLD, CUSTOM, MIX }
   public enum DimensionMusic { CONTINUE, STOP_SPECIFIC, STOP_ALL }
   public enum MenuControlsPosition {
     MENU_TOP, MENU_BOTTOM, TOP_LEFT, TOP_CENTER, TOP_RIGHT,
@@ -31,7 +30,6 @@ public final class AudioSettings {
   public boolean menuControlsScrub = false;
   public MenuControlsPosition menuControlsPosition = MenuControlsPosition.MENU_BOTTOM;
   public int menuControlsOffsetX = 0, menuControlsOffsetY = 0;
-  public MenuMusic menuMusic = MenuMusic.MIX;
   public DimensionMusic dimensionMusic = DimensionMusic.CONTINUE;
   public int gapMinSeconds = 600, gapMaxSeconds = 1200;
   public int master = 100;
@@ -43,7 +41,7 @@ public final class AudioSettings {
   public String playlist = MusicPlaylist.BETA, menuPlaylist = MusicPlaylist.SAME_AS_WORLD;
   public List<MusicPlaylist> playlists = new ArrayList<>();
   public List<String> musicDirectories = new ArrayList<>();
-  public boolean recursive = false, shuffle = true, avoidRepeats = true;
+  public boolean shuffle = true, avoidRepeats = true;
   public boolean waitBetweenTracks = true, delayQueuedTracks = false;
 
   /** Settings discovery retains controls for unavailable songs without querying files. */
@@ -56,7 +54,6 @@ public final class AudioSettings {
     return List.copyOf(tracks);
   }
 
-  public boolean continuesAcrossMenus() { return menuMusic != MenuMusic.CUSTOM; }
   public boolean showMenuControls(boolean mainMenu) {
     return menuControls && (!mainMenu || menuControlsMainMenu);
   }
@@ -85,7 +82,7 @@ public final class AudioSettings {
     volume(master);
     if (gapMinSeconds < 0 || gapMaxSeconds < gapMinSeconds || gapMaxSeconds > 86400)
       throw new IllegalArgumentException("Music gaps must be 0 to 86400 seconds, with maximum at least minimum");
-    if (menuMusic == null || dimensionMusic == null)
+    if (dimensionMusic == null)
       throw new IllegalArgumentException("Music selection is incomplete");
     if (categories == null
         || sounds == null

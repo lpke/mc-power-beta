@@ -35,7 +35,7 @@ public final class AudioController {
       menuMusic = "",
       status = "";
   private static int cleanup, menuCooldown, libraryRevision, conversionRevision;
-  private static boolean trackWasPlaying, currentUsesMenuVolumes;
+  private static boolean trackWasPlaying, currentUsesMenuVolumes, currentExplicitMusic;
   private static final MusicProgress progress = new MusicProgress();
   private static AudioSettings rotationConfig;
   private static List<MusicLibrary.Track> enabledTracks = List.of();
@@ -53,6 +53,8 @@ public final class AudioController {
 
   public static int libraryRevision() { return libraryRevision; }
   private static final List<class_267> history = new ArrayList<>();
+  private record PlaybackOrigin(class_267 track, boolean explicit) {}
+  private static final List<PlaybackOrigin> historyPlayback = new ArrayList<>();
   private static int historyIndex = -1;
   private static long musicStarted, soundPreviewStarted;
   private static String soundPreview = "";
@@ -60,7 +62,7 @@ public final class AudioController {
   private static Object soundPreviewWorld;
 
   public static boolean previewing(String id) {
-    return id != null && (id.equals(soundPreview) || MusicPreview.active() && id.equals(MusicPreview.track()));
+    return id != null && !id.isBlank() && (id.equals(soundPreview) || MusicPreview.active() && id.equals(MusicPreview.track()));
   }
 
   public static boolean musicPlaying() {
@@ -94,19 +96,37 @@ public final class AudioController {
     else if (soundPreviewPlaying || System.nanoTime() - soundPreviewStarted > 1_000_000_000L) stopSoundPreview();
   }
 
-  private static void remember(class_267 track) {
-    while (history.size() > historyIndex + 1) history.remove(history.size() - 1);
+  private static void remember(class_267 track, boolean explicit) {
+    // Origin belongs to each history entry. A native track object can be played
+    // manually and then appear again as an automatic selection.
+    while (historyPlayback.size() > history.size()) historyPlayback.remove(historyPlayback.size() - 1);
+    for (int i = 0; i < history.size(); i++) {
+      if (i >= historyPlayback.size()) historyPlayback.add(new PlaybackOrigin(history.get(i), false));
+      else if (historyPlayback.get(i).track != history.get(i)) historyPlayback.set(i, new PlaybackOrigin(history.get(i), false));
+    }
+    while (history.size() > historyIndex + 1) {
+      history.remove(history.size() - 1); historyPlayback.remove(historyPlayback.size() - 1);
+    }
     history.add(track);
-    if (history.size() > 128) history.remove(0);
+    historyPlayback.add(new PlaybackOrigin(track, explicit));
+    if (history.size() > 128) { history.remove(0); historyPlayback.remove(0); }
     historyIndex = history.size() - 1;
   }
 
-  private static void play(class_267 track) {
+  private static void playHistory(int index) {
+    class_267 track = history.get(index);
+    boolean explicit = index < historyPlayback.size() && historyPlayback.get(index).track == track
+        && historyPlayback.get(index).explicit;
+    play(track, explicit);
+  }
+
+  private static void play(class_267 track, boolean explicit) {
     SoundSystem system = system();
     if (system == null || client == null) return;
     if (track == null) {
       system.stop("BgMusic"); system.stop("PowerBetaMenu");
       currentMusic = ""; menuMusic = "";
+      currentExplicitMusic = false;
       return;
     }
     MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
@@ -114,6 +134,7 @@ public final class AudioController {
     system.stop("PowerBetaMenu");
     menuMusic = "";
     currentMusic = trackId(track);
+    currentExplicitMusic = explicit;
     currentUsesMenuVolumes = usesMenuVolumes(currentMusic, context(client));
     paused = false;
     silenced = false;
@@ -131,7 +152,7 @@ public final class AudioController {
     if (history.isEmpty()) { next(); return; }
     boolean waiting = currentMusic.isEmpty() && menuMusic.isEmpty();
     historyIndex = Math.max(0, historyIndex - (waiting ? 0 : 1));
-    play(history.get(historyIndex));
+    playHistory(historyIndex);
   }
 
   public static void previewSound(String id) {
@@ -182,12 +203,7 @@ public final class AudioController {
   public static void settingsChanged() {
     dirty = true;
     history.clear();
-    historyIndex = -1;
-    pause();
-  }
-
-  public static void rotationChanged() {
-    history.clear();
+    historyPlayback.clear();
     historyIndex = -1;
     pause();
   }
@@ -312,13 +328,12 @@ public final class AudioController {
   private static void updateRotation() {
     AudioSettings config = AudioConfig.current();
     if (rotationConfig != config) {
-      if (rotationConfig != null && rotationConfig.musicDirectories.equals(config.musicDirectories)
-          && rotationConfig.recursive == config.recursive) {
+      if (rotationConfig != null && rotationConfig.musicDirectories.equals(config.musicDirectories)) {
         rotationConfig = config;
         return;
       }
       Path game = FabricLoader.getInstance().getGameDir();
-      sourceLibrary = MusicLibrarySources.build(game, config.musicDirectories, library, config.recursive);
+      sourceLibrary = MusicLibrarySources.build(game, config.musicDirectories, library);
       enabledTracks = sourceLibrary.tracks();
       rotationConfig = config;
     }
@@ -335,15 +350,8 @@ public final class AudioController {
     return new Context(mc != null && mc.world != null, dimension, biome);
   }
 
-  private static boolean menuSelection(Context context, AudioSettings settings) {
-    return !context.world && settings.menuMusic != AudioSettings.MenuMusic.WORLD
-        && !MusicPlaylist.SAME_AS_WORLD.equals(settings.menuPlaylist);
-  }
-
   private static String selectionContext(Context context, AudioSettings settings) {
-    String world = "playlist:" + settings.playlist;
-    if (!menuSelection(context, settings)) return world;
-    return "menu:" + settings.menuMusic + ":" + settings.menuPlaylist + ":" + world;
+    return "playlist:" + MusicPlaylist.selectionId(settings, !context.world);
   }
 
   private static List<class_267> orderedTracks(List<String> ids) {
@@ -412,7 +420,7 @@ public final class AudioController {
     try {
       class_267 track = resolveTrack(id);
       if (track == null) { status = "Track unavailable. Convert MP3 files or reload folders."; return; }
-      MusicPreview.stop(system(), false); remember(track); play(track);
+      MusicPreview.stop(system(), false); remember(track, true); play(track, true);
     } catch (Exception e) { status = "Could not play track"; PowerBeta.LOG.warn(status, e); }
   }
 
@@ -430,7 +438,7 @@ public final class AudioController {
   public static void playQueue() {
     if (system() == null) return;
     class_267 track = queued();
-    if (track != null) { MusicPreview.stop(system(), false); remember(track); play(track); }
+    if (track != null) { MusicPreview.stop(system(), false); remember(track, true); play(track, true); }
   }
 
   public static void reload() {
@@ -444,7 +452,7 @@ public final class AudioController {
     pending =
         CompletableFuture.supplyAsync(
             () ->
-                MusicLibrary.scan(game, s.musicDirectories, s.recursive),
+                MusicLibrary.scan(game, s.musicDirectories),
             SCANNER);
   }
 
@@ -491,30 +499,30 @@ public final class AudioController {
     }
     MusicDisplay.update(nowPlaying());
     boolean inWorld = mc.world != null;
-    boolean keepMusic = AudioConfig.current().continuesAcrossMenus();
     if (mc.world != musicWorld) {
       boolean previewPaused = MusicPreview.active() && MusicPreview.paused();
-      MusicPreview.worldChanged(mc, system, inWorld == wasWorld || keepMusic);
+      MusicPreview.worldChanged(mc, system, true);
       if (previewPaused && !MusicPreview.active()) paused = true;
       musicWorld = mc.world;
     }
     if (inWorld != wasWorld) {
-      if (!keepMusic) {
-        MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
+      // Keep eligible streams and the existing gap, explicit pause, queue and history.
+      AudioSettings settings = AudioConfig.current();
+      boolean differentPlaylist = !MusicPlaylist.selectionId(settings, !wasWorld)
+          .equals(MusicPlaylist.selectionId(settings, !inWorld));
+      if (differentPlaylist && !currentExplicitMusic && !currentMusic.isEmpty() && backgroundPool(context(mc)).stream()
+          .noneMatch(track -> trackId(track).equals(currentMusic))) {
+        MusicSeeking.cancel(); progress.reset(0, System.nanoTime());
         system.stop("PowerBetaMenu");
         system.stop("BgMusic");
         currentMusic = "";
+        currentExplicitMusic = false;
         menuMusic = "";
-        history.clear();
-        historyIndex = -1;
-        // Context changes never revoke an explicit pause. Resume chooses a new track if needed.
-        silenced = true;
         trackWasPlaying = false;
-        nextDelay((SoundManagerAccessor) mc.soundManager);
+        MusicPreview.discardBackground();
       }
-      // Keep the current stream, pause state, queue and gap. Future choices use the new context.
-      upcoming = null;
-      nextKey = null;
+      currentUsesMenuVolumes = usesMenuVolumes(currentMusic, context(mc));
+      refresh();
       wasWorld = inWorld;
     }
     tickSoundPreview();
@@ -556,6 +564,7 @@ public final class AudioController {
           || !trackWasPlaying && elapsed < 5_000_000_000L)) return;
     }
     currentMusic = "";
+    currentExplicitMusic = false;
     menuMusic = "";
     if (system.playing("streaming") || mc.options.musicVolume <= 0) return;
     var sound = (SoundManagerAccessor) mc.soundManager;
@@ -582,6 +591,7 @@ public final class AudioController {
     s.setVolume("BgMusic", 0); s.setVolume("PowerBetaMenu", 0);
     s.stop("BgMusic"); s.stop("PowerBetaMenu");
     currentMusic = ""; menuMusic = "";
+    currentExplicitMusic = false;
     trackWasPlaying = false; paused = false; silenced = true;
     status = ""; menuCooldown = 0;
     nextDelay((SoundManagerAccessor) client.soundManager);
@@ -590,14 +600,20 @@ public final class AudioController {
   public static class_267 choose() {
     AudioSettings s = AudioConfig.current();
     class_267 requested = queued();
-    if (requested != null) { remember(requested); currentMusic = trackId(requested); musicStarted = System.nanoTime(); trackWasPlaying = false; return requested; }
+    if (requested != null) {
+      remember(requested, true); currentMusic = trackId(requested); currentExplicitMusic = true;
+      currentUsesMenuVolumes = usesMenuVolumes(currentMusic, context(client));
+      musicStarted = System.nanoTime(); trackWasPlaying = false; return requested;
+    }
     Context context = context(client);
     class_267 chosen = upcoming();
     if (chosen != null) WORLD.played(selectionContext(context, s), trackId(chosen));
     upcoming = null;
     if (chosen != null) {
-      remember(chosen);
+      remember(chosen, false);
       currentMusic = trackId(chosen);
+      currentExplicitMusic = false;
+      currentUsesMenuVolumes = usesMenuVolumes(currentMusic, context);
       musicStarted = System.nanoTime(); trackWasPlaying = false;
     } else {
       status = "No tracks available for the current music settings.";
@@ -618,9 +634,9 @@ public final class AudioController {
       var pool = backgroundPool(key.context);
       boolean orderChanged = nextKey != null && (nextKey.settings.shuffle != s.shuffle
           || nextKey.settings.avoidRepeats != s.avoidRepeats
-          || !selectionContext(nextKey.context, nextKey.settings).equals(selectionContext(key.context, s))
-          || !MusicPlaylist.rotation(nextKey.settings, !nextKey.context.world)
-              .equals(MusicPlaylist.rotation(s, !key.context.world)));
+          || nextKey.context.world == key.context.world
+              && !MusicPlaylist.rotation(nextKey.settings, !nextKey.context.world)
+                  .equals(MusicPlaylist.rotation(s, !key.context.world)));
       // Gain, timing and UI previews preserve reservations; order edits choose the new successor.
       if (upcoming == null || orderChanged || pool.stream().noneMatch(t -> trackId(t).equals(trackId(upcoming))))
         upcoming = WORLD.reserve(selectionContext(key.context, s), pool, s.shuffle, s.avoidRepeats, RANDOM, AudioController::trackId);
@@ -775,8 +791,9 @@ public final class AudioController {
     }
     paused = false;
     if (!MusicRequests.tracks().isEmpty()) { playQueue(); return; }
-    if (historyIndex + 1 < history.size()) { play(history.get(++historyIndex)); return; }
-    play(choose());
+    if (historyIndex + 1 < history.size()) { playHistory(++historyIndex); return; }
+    class_267 track = choose();
+    play(track, currentExplicitMusic);
   }
 
   public static Set<String> sounds(Minecraft mc) {

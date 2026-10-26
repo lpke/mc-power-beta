@@ -183,8 +183,8 @@ public final class Release241Checks {
     check(mc.world!=null,"Load disposable world first");failures=0;var audio=AudioConfig.copy();var world=mc.world;
     try {
       test("explicit music pause survives every dimension policy and custom context resets",()->{
-        for(var menu:AudioSettings.MenuMusic.values())for(var policy:AudioSettings.DimensionMusic.values()) {
-          var config=AudioConfig.copy();config.master=100;config.menuMusic=menu;config.dimensionMusic=policy;AudioConfig.preview(config);
+        for(var policy:AudioSettings.DimensionMusic.values()) {
+          var config=AudioConfig.copy();config.master=100;config.dimensionMusic=policy;AudioConfig.preview(config);
           AudioController.tick(mc);AudioController.playNow("music:calm1.ogg");AudioController.pause();
           AudioController.changingDimension();check((boolean)staticField(AudioController.class,"paused"),"dimension policy revoked pause");
           mc.world=null;AudioController.tick(mc);mc.world=world;AudioController.tick(mc);
@@ -193,7 +193,7 @@ public final class Release241Checks {
         mc.method_2139();AudioController.tick(mc);check((boolean)staticField(AudioController.class,"paused"),"actual dimension travel revoked pause");mc.method_2139();AudioController.tick(mc);
       });
       test("paused music preview survives dimension travel without restoring old jukeboxes",()->{
-        var config=AudioConfig.copy();config.menuMusic=AudioSettings.MenuMusic.MIX;config.dimensionMusic=AudioSettings.DimensionMusic.STOP_ALL;AudioConfig.preview(config);
+        var config=AudioConfig.copy();config.dimensionMusic=AudioSettings.DimensionMusic.STOP_ALL;AudioConfig.preview(config);
         AudioController.tick(mc);var preview=AudioController.class.getDeclaredMethod("previewMusic",String.class);preview.setAccessible(true);preview.invoke(null,"music:calm1.ogg");AudioController.pause();
         mc.method_2139();AudioController.tick(mc);
         check((boolean)staticField(Class.forName("local.luke.power.audio.MusicPreview"),"paused")&&!AudioController.musicPlaying(),"dimension travel revoked preview pause");

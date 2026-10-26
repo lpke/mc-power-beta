@@ -17,6 +17,18 @@
 
 # Runtime checks
 
+- `audio-ui-461 capture-rules` captures connected rule-default tabs at the title screen.
+  In a muted disposable singleplayer world, `audio-ui-461 capture|check` covers Audio,
+  individual-sound search, playlist editing, protected views, grouped layouts, context
+  menus, selectors and scrubbers at 854x480 and 320x240. `map-ui-461 capture|check`
+  covers connected color, title-lettering and recipe tabs, map/photo/waypoint contexts,
+  waypoint widths and minimap wheel input with a stalled settings writer.
+  Captures require a focused client window of at least 1708x960 and go under
+  `power-beta-data/reports/release-461`. Run captures before acceptance checks.
+  `audio-transition-461 check` requires idle music and checks explicit requests,
+  automatic selection, preview/pause/history and late old-world jukebox starts.
+  Fixtures restore their configuration, queue, files and runtime state.
+
 - `music-playlists-460 prepare` stages two temporary imported folders with valid bundled Ogg samples.
   Wait for the scanner, then `music-playlists-460 capture` writes 32 native screenshots at 320x240 and 854x480.
   Captured views are `library`, `favorites`, `playlists`, `audio-playback`,
@@ -42,7 +54,7 @@
   `source-remove`, wait, `source-check`, `source-restore`, wait, `source-restored-check`, then `stop`. The check verifies current ID, label, group, song gain
   and duration while the removed source disappears from future track resolution.
   `menu-pools`, also included in `run`, checks native candidate order, overlap and gain
-  ownership for all WORLD/CUSTOM/MIX and same-world/Beta/saved/empty combinations.
+  ownership for same-world/Beta/saved/empty menu selections.
   It starts no playback and keeps the loaded world. Run `audio-maintenance` for native
   multi-folder import selection, inline source removal, Options Apply/Discard, failed-save rollback and source-file preservation. Existing
   `audio-groups-gain-*`, seek, history and pause/resume steps check actual playback.
