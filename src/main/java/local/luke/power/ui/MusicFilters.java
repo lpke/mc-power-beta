@@ -4,46 +4,45 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.ToIntFunction;
 
-/** Catalog tabs and actions share a row when their actual bounds fit. */
+/** Music navigation keeps a single row and moves excess tabs and actions into one menu. */
 public final class MusicFilters {
   static final int CONTENT_GAP = 8;
   public record Tab(String id, String label, int x, int y, int width) {}
-  public record Layout(List<Tab> tabs, int addFolderX, int reloadX, int actionsY, int height) {}
+  public record Layout(List<Tab> tabs, List<Tab> hiddenTabs, int addFolderX, int reloadX,
+      int actionsY, int height, boolean overflow) {}
 
   public static Layout layout(int left, int top, int width, String selector) {
-    String[] ids = {"library", "playlists", "favorites"};
-    String[] labels = {"Library", "Playlists", "Favorites"};
-    int extra = Math.min(4, Math.max(0, (width - 180) / 3));
-    int[] sizes = {50 + extra, 60 + extra, 66 + extra};
-    List<Tab> tabs = new ArrayList<>();
-    int x = left;
-    for (int i = 0; i < ids.length; i++) {
-      tabs.add(new Tab(ids[i], labels[i], x, top, sizes[i]));
-      x += sizes[i] + 2;
-    }
-    int addFolderX = left + width - 120;
-    int firstActionX = selector.equals("favorites") ? left + width - 48 : addFolderX;
-    int actionsY = firstActionX >= x + 6 ? top : top + 18 + CONTENT_GAP;
-    int height = selector.equals("playlists") ? 18 : actionsY - top + 18;
-    return new Layout(List.copyOf(tabs), addFolderX, left + width - 48, actionsY, height);
+    return layout(left, top, width, selector, "Beta 1.7.3", label -> label.length() * 6);
   }
 
-  /** Keep complete tab labels and one library action slot on short, narrow screens. */
   public static Layout compact(int left, int top, int width, String selector, ToIntFunction<String> measure) {
-    Layout normal = layout(left, top, width, selector);
-    if (width >= 380) return normal;
-    List<Tab> tabs = new ArrayList<>();
-    int x = left;
-    for (Tab tab : normal.tabs()) {
-      int span = measure.applyAsInt(tab.label()) + 12;
-      tabs.add(new Tab(tab.id(), tab.label(), x, top, span));
-      x += span + 2;
+    return layout(left, top, width, selector, "Beta 1.7.3", measure);
+  }
+
+  public static Layout layout(int left, int top, int width, String selector, String activeName,
+      ToIntFunction<String> measure) {
+    String[] ids = {"active", "library", "playlists", "favorites"};
+    String[] labels = {activeName, "Library", "Playlists", "Favorites"};
+    int[] sizes = {Math.max(56, Math.min(110, measure.applyAsInt(activeName) + 12)), 54, 64, 70};
+    int tabsWidth = sizes[0] + sizes[1] + sizes[2] + sizes[3] + 6;
+    boolean overflow = tabsWidth + 126 > width;
+    boolean hideTabs = tabsWidth + 26 > width;
+    List<Tab> tabs = new ArrayList<>(), hidden = new ArrayList<>();
+    int secondary = selector.equals("playlists") ? 2 : selector.equals("favorites") ? 3 : 1;
+    if (hideTabs) {
+      sizes[0] = Math.min(sizes[0], Math.max(56, width - 102));
+      // A fixed secondary slot prevents its active edge shifting when the label changes.
+      sizes[1] = sizes[2] = sizes[3] = Math.max(36, Math.min(70, width - sizes[0] - 30));
     }
-    int reload = left + width - 20;
-    int add = reload - 22;
-    if (add < x + 4) add = reload;
-    int actionsY = add >= x + 4 ? top : top + 18 + CONTENT_GAP;
-    int height = selector.equals("playlists") ? 18 : actionsY - top + 18;
-    return new Layout(List.copyOf(tabs), add, reload, actionsY, height);
+    int x = left;
+    for (int i = 0; i < ids.length; i++) {
+      Tab tab = new Tab(ids[i], labels[i], x, top, sizes[i]);
+      if (!hideTabs || i == 0 || i == secondary) {
+        tabs.add(tab);
+        x += sizes[i] + 2;
+      } else hidden.add(tab);
+    }
+    return new Layout(List.copyOf(tabs), List.copyOf(hidden), left + width - (overflow ? 20 : 120),
+        left + width - (overflow ? 20 : 48), top, 18, overflow);
   }
 }

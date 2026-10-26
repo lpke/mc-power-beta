@@ -15,6 +15,7 @@ final class MusicPresetsPanel extends UiScreen {
   private final TextInput name = new TextInput("", 80);
   private final SettingsDropdown choices = new SettingsDropdown();
   private MusicPresetDraft draft;
+  private MusicPlaylist sourcePlaylist;
   private boolean adding, grouped;
   private String error = "", deleting = "";
   private int scroll;
@@ -50,7 +51,7 @@ final class MusicPresetsPanel extends UiScreen {
     name.focused = false;
     choices.close();
     scrollbar.release();
-    draft = null;
+    draft = null; sourcePlaylist = null;
     adding = grouped = false;
     scroll = 0;
     error = "";
@@ -85,6 +86,29 @@ final class MusicPresetsPanel extends UiScreen {
         .filter(p -> p.name().toLowerCase(Locale.ROOT).contains(match)).toList();
   }
 
+  void showSelected() {
+    edit(edits.presets().stream().filter(p -> p.id().equals(edits.selected())).findFirst()
+        .orElseThrow(() -> new IllegalArgumentException("World playlist is unavailable")));
+  }
+
+  /** Refresh saved selection changes only after this editor has finished its own draft. */
+  void syncSelected() {
+    if (dirty() || modal()) return;
+    MusicPlaylist selected = edits.presets().stream().filter(p -> p.id().equals(edits.selected()))
+        .findFirst().orElse(null);
+    if (selected == null || draft != null && selected == sourcePlaylist) return;
+    if (draft == null || !samePlaylist(draft.original(), selected)) {
+      boolean retainGrouping = draft != null && draft.id().equals(selected.id()) && grouped;
+      edit(selected);
+      grouped = retainGrouping;
+    } else sourcePlaylist = selected;
+  }
+
+  private static boolean samePlaylist(MusicPlaylist first, MusicPlaylist second) {
+    return first.id().equals(second.id()) && first.name().equals(second.name())
+        && first.tracks().equals(second.tracks()) && first.groupVolumes().equals(second.groupVolumes());
+  }
+
   void showFavorites() {
     edit(edits.presets().stream().filter(p -> MusicPlaylist.FAVORITES.equals(p.id()))
         .findFirst().orElseThrow(() -> new IllegalArgumentException("Favorites are unavailable")));
@@ -108,6 +132,7 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   private void edit(MusicPlaylist playlist, boolean copy) {
+    sourcePlaylist = copy ? null : playlist;
     draft = copy
         ? new MusicPresetDraft(edits.copy(playlist), AudioController.music(minecraft), true)
         : playlist != null && MusicPlaylist.BETA.equals(playlist.id()) ? MusicPresetDraft.readOnly(playlist)
@@ -178,25 +203,6 @@ final class MusicPresetsPanel extends UiScreen {
   private int copyX() { return right() - 3 * (actionWidth() + 2) + 2; }
   private int deleteX() { return right() - 2 * (actionWidth() + 2) + 2; }
   private int playX() { return right() - actionWidth(); }
-
-  String help(int x, int y) {
-    if (editing() && inside(x, y, groupedX(), actionY(), viewWidth(), 18))
-      return adding() ? "Append tracks in another saved playlist's order. Existing tracks keep their position."
-          : readOnly() ? "Change how tracks are displayed. Beta cannot be edited."
-          : grouped() ? "Show the saved playback order. Drag tracks in List view to reorder them."
-          : "Group tracks without changing their saved playback order.";
-    if (!editing() && x >= left() && x < left() + textWidth() && y >= rowTop() && y < bottom()) {
-      int index = (y - rowTop() + scroll) / rowHeight();
-      var values = filteredPresets();
-      if (index >= 0 && index < values.size()) {
-        MusicPlaylist playlist = values.get(index);
-        int missing = playlist.tracks().size() - includedCounts(values).get(playlist.id());
-        return playlist.name() + " / " + trackCount(playlist) + (MusicPlaylist.BETA.equals(playlist.id()) ? " / Built-in" : "")
-            + (missing > 0 ? " / " + missing + " unavailable" : "");
-      }
-    }
-    return "";
-  }
 
   private ScrollBar.Track track() {
     return new ScrollBar.Track(right() + 5, rowTop(), Math.max(0, bottom() - rowTop()),
@@ -356,7 +362,7 @@ final class MusicPresetsPanel extends UiScreen {
     text(pending != null ? "Save changes to this playlist?" : "Delete this playlist?", x, y, 0xffffff);
     if (!error.isEmpty()) text(fit(error, w), x, y + 15, 0xff8888);
     else if (!deleting.isEmpty())
-      text(fit(deleting.equals(edits.selected()) ? "The world playlist will return to Beta."
+      text(fit(deleting.equals(edits.selected()) ? "The world playlist will return to Beta 1.7.3."
           : "Music files and other playlists stay unchanged.", w), x, y + 15, 0xaaaaaa);
     for (int i = 0; i < (pending != null ? 3 : 2); i++)
       button(pending != null ? new String[]{"Save", "Discard", "Cancel"}[i]

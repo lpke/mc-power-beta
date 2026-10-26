@@ -97,7 +97,7 @@ class MusicPlaylistDraftTest {
     assertFalse(view.creating());
     assertFalse(view.changed("Another name"));
     assertEquals(MusicPlaylist.BETA, view.id());
-    assertEquals("Beta", view.snapshot("Another name").name());
+    assertEquals("Beta 1.7.3", view.snapshot("Another name").name());
     assertThrows(IllegalStateException.class, () -> view.appendTracks(List.of(MISSING)));
     assertThrows(IllegalStateException.class, () -> view.include(A, false));
     assertThrows(IllegalStateException.class, view::includeAll);

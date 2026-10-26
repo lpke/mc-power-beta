@@ -269,7 +269,7 @@ final class Release300RereleaseChecks {
             && ((TextInput)get(picker, "hex")).text().equalsIgnoreCase(ColorSettings.hex(selected)), "RGBA slider and wheel disagree");
         check(Math.abs(ColorSettings.opacityPercent((Setting)get(picker, "localOpacity")) - 35) < 1, "tab switch discarded local alpha");
         check(field(ColourScreen.class, "PREVIEW").getInt(null) == 36
-            && number(picker, "tabsY") - number(picker, "previewY") == 42
+            && number(picker, "tabsY") - number(picker, "previewY") == 46
             && number(picker, "bodyTop") < number(picker, "bodyBottom"), "small color layout lost 36px preview/body");
         draw(mc, picker); tab(picker, 1); draw(mc, picker);
         click(picker, picker.width / 2 + 52, picker.height - 18, 0);

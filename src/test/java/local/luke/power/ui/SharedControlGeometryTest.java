@@ -37,7 +37,7 @@ class SharedControlGeometryTest {
   @Test void separatorGapsNeverActivateAdjacentRows() {
     for (int height : new int[]{18, 20}) {
       var rows = new PopupLayout.Rows(4, height, Set.of(1, 3));
-      assertEquals(4 * height + 10, rows.contentHeight());
+      assertEquals(4 * height + 2, rows.contentHeight());
       for (int index = 0; index < 4; index++) {
         assertEquals(index, rows.indexAt(rows.top(index)));
         assertEquals(index, rows.indexAt(rows.top(index) + height - 1));

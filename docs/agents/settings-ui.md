@@ -42,15 +42,20 @@
   menus have no border. Row fills meet the inside of the dropdown border without
   an inset. Match dropdown row height to its owning control, normally 18 or 20
   pixels, and share all scroll, separator and hit-test geometry through `PopupLayout`.
-  Five-pixel separators span the full row width and do not accept input or change callback indices.
+  One-pixel separators use `0xff555555`, span the full popup width and have no vertical
+  margins. Adjacent row fills meet the line; separators never accept input or change callback indices.
+  Hover and keyboard focus override the selected fill while retaining its blue indicator.
   Mark the active choice with the blue indicator and the selected Defaults-base
   target with a trailing `Default` label. Context actions open without keyboard
   focus; arrows, Home and End establish focus. Track popup ownership by the actual
   setting, toolbar control or row so only that owner retains its open highlight.
   Map, minimap and photo checklist panels keep their existing toggle layout and
   persistent-open behavior; their colors and text spacing follow the same menu style.
-  Parent and child volume sliders share horizontal bounds; place group counts after
-  the slider, anchored to the right. Playlist catalog rows use the Defaults picker's
+  Master and category volume sliders retain their full control width. Only Music
+  and Game sounds reserve space for their Edit and All buttons. Search results omit
+  normal row indentation. Extra sounds starts collapsed in Audio.
+  Parent and child music group sliders share horizontal bounds. Place group counts
+  after the slider, anchored to the right. Playlist catalog rows use the Defaults picker's
   gold bar and text for the active playlist, and retain disabled Delete buttons for
   protected playlists. Choice popups retain their shared blue active indicator.
   Shared sliders use an eight-pixel thumb contained within the track at both

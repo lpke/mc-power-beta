@@ -109,6 +109,9 @@ class SettingsLayoutTest {
     for (String group : SettingsLayout.groups("Interface"))
       assertEquals(!Set.of("", "General", "Title screen").contains(group), initial.contains("Interface/" + group));
     assertTrue(initial.containsAll(Set.of("Video/Entity visibility", "Video/Particles", "Advanced/Achievement recovery", "Map/Performance")));
+    assertTrue(initial.contains("Audio/Extra sounds"));
+    assertFalse(initial.contains("Audio/Volume"));
+    assertFalse(initial.contains("Audio/Music playback"));
     initial.clear(); assertFalse(SettingsLayout.initiallyCollapsed().isEmpty());
   }
 

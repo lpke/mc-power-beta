@@ -21,7 +21,9 @@ final class MusicPlaylistPicker {
     popup.open(owner, labels, List.of(), ids.indexOf(selected), ids.indexOf(reset), x, y, width, rowHeight,
         parent.width, parent.height, index -> {
           if (index == 0) { parent.editMusic(); return; }
-          if (menu) edits.loadMenu(ids.get(index)); else edits.load(ids.get(index));
+          if (menu) edits.loadMenu(ids.get(index));
+          else if (!ids.get(index).equals(setting.value.getAsString()))
+            parent.changeWorldPlaylist(() -> edits.load(ids.get(index)));
         });
     popup.separatorsBefore(1);
   }

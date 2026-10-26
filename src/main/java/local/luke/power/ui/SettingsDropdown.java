@@ -122,6 +122,7 @@ final class SettingsDropdown {
   }
   void tick() { if (active()) hover.tick(); }
   private ScrollBar.Track track() { return new ScrollBar.Track(x + width - 5, y, viewportHeight, layout.contentHeight(), scroll); }
+  private int rowWidth() { return width - (track().visible() ? 10 : 0); }
   private void reveal() {
     if (focus >= 0) {
       if (layout.top(focus) < scroll) scroll = layout.top(focus);
@@ -166,7 +167,7 @@ final class SettingsDropdown {
     if (button != 0 && button != 1) return true;
     if (button == 0 && bar.press(track(), mx, my)) { scroll = bar.drag(track(), my, true); return true; }
     if (screen.inside(mx, my, x, y, width, viewportHeight)) {
-      if (button == 0) select(screen, layout.indexAt((int)scroll + my - y));
+      if (button == 0 && mx < x + rowWidth()) select(screen, layout.indexAt((int)scroll + my - y));
     } else close();
     return true;
   }
@@ -181,12 +182,12 @@ final class SettingsDropdown {
     try {
       GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING); GL11.glDepthMask(false);
       PopupStyle.background(screen, x, y, width, viewportHeight, !context);
-      int rowWidth = width - (track().visible() ? 10 : 0), hovered = -1;
+      int rowWidth = rowWidth(), hovered = -1;
       screen.clip(x, y, width, viewportHeight);
       for (int i = 0; i < labels.size(); i++) {
         int top = y + layout.top(i) - (int)scroll;
         if (top >= y + viewportHeight + PopupLayout.SEPARATOR_HEIGHT) break;
-        if (layout.separators().contains(i)) PopupStyle.separator(screen, x, top - PopupLayout.SEPARATOR_HEIGHT, rowWidth);
+        if (layout.separators().contains(i)) PopupStyle.separator(screen, x, top - PopupLayout.SEPARATOR_HEIGHT, width);
         if (top + rowHeight <= y || top >= y + viewportHeight) continue;
         boolean over = screen.inside(mx, my, x, Math.max(y, top), rowWidth,
             Math.min(y + viewportHeight, top + rowHeight) - Math.max(y, top));

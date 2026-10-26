@@ -2,7 +2,7 @@ package local.luke.power.ui;
 
 /** Shared choice lists and action menus. Only choice lists draw an outside border. */
 public final class PopupStyle {
-  public static final int BACKGROUND = 0xf0202020, BORDER = 0xff777777,
+  public static final int BACKGROUND = 0xf0202020, BORDER = 0xff777777, SEPARATOR = 0xff555555,
       HOVER = 0xff444444, SELECTED = 0xff3c3c3c, ACTIVE = 0xff268bff,
       TEXT = 0xcccccc, BRIGHT_TEXT = 0xffffff, DISABLED_TEXT = 0x777777, PADDING = 9;
 
@@ -14,14 +14,14 @@ public final class PopupStyle {
   }
 
   public static void separator(UiScreen screen, int x, int y, int width) {
-    screen.rectangle(x, y + 2, x + width, y + 3, BORDER);
+    screen.rectangle(x, y, x + width, y + 1, SEPARATOR);
   }
 
   public static void row(UiScreen screen, String label, int x, int top, int width, int height,
       int mx, int my, boolean enabled, boolean selected, boolean focused, int trailingWidth) {
     boolean hover = enabled && screen.inside(mx, my, x, top, width, height);
     if (selected || hover || enabled && focused)
-      screen.rectangle(x, top, x + width, top + height, selected ? SELECTED : HOVER);
+      screen.rectangle(x, top, x + width, top + height, hover || enabled && focused ? HOVER : SELECTED);
     if (selected) screen.rectangle(x + 2, top + 4, x + 4, top + height - 4, ACTIVE);
     int available = width - 2 * PADDING - trailingWidth;
     if (available <= 0) return;

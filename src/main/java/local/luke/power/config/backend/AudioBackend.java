@@ -68,10 +68,10 @@ public final class AudioBackend implements Backend {
           List.of());
     add("playlist", "Music playback", "World playlist", Setting.Kind.TEXT,
         new JsonPrimitive(s.playlist), new JsonPrimitive(MusicPlaylist.BETA),
-        "Choose Beta or a saved playlist for world playback.", List.of());
+        "Choose Beta 1.7.3 or a saved playlist for world playback.", List.of());
     add("menuPlaylist", "Music playback", "Menu playlist", Setting.Kind.TEXT,
         new JsonPrimitive(s.menuPlaylist), new JsonPrimitive(MusicPlaylist.SAME_AS_WORLD),
-        "Use the world playlist, Beta or a saved playlist for menu music.", List.of());
+        "Use the world playlist, Beta 1.7.3 or a saved playlist for menu music.", List.of());
     add("playlists", "Music data", "Music playlists", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.playlists), new JsonArray(), "Saved ordered music selections.", List.of());
     add("favourites", "Music data", "Favorite tracks", Setting.Kind.LIST,

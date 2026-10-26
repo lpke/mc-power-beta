@@ -21,7 +21,7 @@ public record RecipeBookLayout(int screenWidth,int screenHeight,boolean open,boo
   public Rect previous(){return new Rect(x()+38,y()+137,12,17);}
   public Rect next(){return new Rect(x()+93,y()+137,12,17);}
   public Rect detail(){return new Rect(x()+143,y(),138,166);}
-  public Rect kindTab(int index){return new Rect(x()+34+index*108,y()-22,104,20);}
+  public Rect kindTab(int index){return new Rect(x()+34+index*108,standalone?Math.max(22,y()-26):y()-22,104,20);}
   public Rect done(){return new Rect((screenWidth-100)/2,screenHeight-26,100,20);}
   public static int pageAfterScroll(int page,int recipes,int amount){return Math.max(0,Math.min(Math.max(0,(recipes-1)/20),page-Integer.signum(amount)));}
   public Rect toggle(boolean furnace,int gridWidth){return new Rect(inventoryX()+(furnace?20:gridWidth==2?104:5),inventoryY()+(gridWidth==2?61:34),20,18);}

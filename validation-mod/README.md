@@ -17,6 +17,13 @@
 
 # Runtime checks
 
+- `release-462 capture|check` covers active-playlist navigation and draft guards,
+  individual song additions, stable grouped counts, dropdown/song hover colors,
+  playing and paused names, Audio defaults and color/recipe spacing at 854x480 and
+  320x240. Use a focused muted disposable client of at least 1708x960. Run capture
+  before check; screenshots go under `power-beta-data/reports/release-462/ui`.
+  The fixture restores its files, configuration, queue and runtime state.
+
 - `audio-ui-461 capture-rules` captures connected rule-default tabs at the title screen.
   In a muted disposable singleplayer world, `audio-ui-461 capture|check` covers Audio,
   individual-sound search, playlist editing, protected views, grouped layouts, context

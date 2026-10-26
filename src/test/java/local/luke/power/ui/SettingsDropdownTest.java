@@ -82,12 +82,47 @@ class SettingsDropdownTest {
     popup.press(screen, x + 5, y + 18, 0);
     assertEquals(-1, accepted.get());
     assertTrue(popup.active());
-    popup.press(screen, x + 159, y + 23, 1);
+    popup.press(screen, x + 159, y + 19, 1);
     assertEquals(-1, accepted.get());
     assertTrue(popup.active());
-    popup.press(screen, x + 159, y + 23, 0);
+    popup.press(screen, x + 159, y + 19, 0);
     assertEquals(1, accepted.get());
     assertEquals(1, screen.clicks);
     assertFalse(popup.active());
+  }
+
+  @Test void scrollingPreservesSeparatorHitBoundsAndOriginalCallbackIndices() throws Exception {
+    for (int height : new int[]{18, 20}) {
+      var popup = new SettingsDropdown();
+      var screen = new PopupStyleTest.Host();
+      var accepted = new AtomicInteger(-1);
+      var options = java.util.stream.IntStream.range(0, 30).mapToObj(i -> "Track " + i).toList();
+      popup.open("playlist", options, List.of(), 0, -1, 40, 30, 160, height, 320, 240, accepted::set);
+      popup.separatorsBefore(1, 2, 5);
+      popup.wheel(-1);
+      var layout = (PopupLayout.Rows)field(popup, "layout");
+      int x = (int)field(popup, "x"), y = (int)field(popup, "y"), scroll = ((Double)field(popup, "scroll")).intValue();
+      int next = y + layout.top(5) - scroll;
+      popup.press(screen, x + 5, next - 1, 0);
+      assertEquals(-1, accepted.get());
+      assertTrue(popup.active());
+      popup.press(screen, x + 5, next, 0);
+      assertEquals(5, accepted.get());
+      assertEquals(1, screen.clicks);
+    }
+  }
+
+  @Test void emptyScrollbarGutterDoesNotActivateAChoice() throws Exception {
+    var popup = new SettingsDropdown();
+    var screen = new PopupStyleTest.Host();
+    var accepted = new AtomicInteger(-1);
+    popup.open("playlist", java.util.Collections.nCopies(30, "Track"), List.of(), 0, -1,
+        40, 30, 160, 18, 320, 240, accepted::set);
+    int x = (int)field(popup, "x"), y = (int)field(popup, "y"), width = (int)field(popup, "width");
+    popup.press(screen, x + width - 9, y + 5, 0);
+    assertEquals(-1, accepted.get());
+    assertTrue(popup.active());
+    popup.press(screen, x + width - 11, y + 5, 0);
+    assertEquals(0, accepted.get());
   }
 }

@@ -2,9 +2,9 @@ package local.luke.power.ui;
 
 import java.util.Set;
 
-/** Popup row positions include real separator gaps in drawing, scrolling and hit tests. */
+/** Popup row positions include one-pixel separators in drawing, scrolling and hit tests. */
 final class PopupLayout {
-  static final int SEPARATOR_HEIGHT = 5;
+  static final int SEPARATOR_HEIGHT = 1;
   private PopupLayout() {}
 
   record Rows(int count, int height, Set<Integer> separators) {

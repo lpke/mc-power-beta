@@ -122,6 +122,8 @@ final class SettingsSnapshot {
     screen.render(mx, my, 0);
     if (screen instanceof PowerOptionsScreen && mx >= 0) {
       for (int tick = 0; tick < 13; tick++) screen.tick();
+      // Capture one frame after warming hover state, not two blended backgrounds.
+      GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
       screen.render(mx,my,0);
     }
     GL11.glFinish();

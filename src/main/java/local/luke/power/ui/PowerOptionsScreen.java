@@ -235,6 +235,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (libraryVisible() && library.dirtyPreset()) { library.guard(this::editMusic); return; }
     openMusicEditor(); library.openPresets(); layout();
   }
+  void changeWorldPlaylist(Runnable action) {
+    if (libraryVisible() && library.activePlaylistTab()) library.guard(action);
+    else action.run();
+  }
   private int musicStatusWidth() { return contentRight() - left() - (libraryVisible() && library.conversionVisible() ? 92 : 0); }
   private int contentHeight() { return rows.isEmpty() ? 0 : rows.get(rows.size() - 1).y + rows.get(rows.size() - 1).height + 6; }
   private ScrollBar.Track contentTrack() { return new ScrollBar.Track(right() - 8, top(), bottom() - top(), contentHeight(), scroll); }
@@ -348,7 +352,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private List<DraftFooter> draftFooter() {
     int cancelWidth = 76, end = right() - 8;
     if (playlistEditor() && library.readOnly())
-      return List.of(new DraftFooter("Back", end - cancelWidth, cancelWidth, true, () -> { library.cancelPlaylist(); layout(); }));
+      return List.of(new DraftFooter("Back", end - cancelWidth, cancelWidth, true, () -> { library.back(this::closeLibrary); layout(); }));
     String label = isolatedRules() ? "Save rules" : "Save playlist";
     int saveWidth = Math.min(Math.max(76, textWidth(label) + 16), Math.max(36, (uiWidth() - 24) / 2));
     Runnable cancel = isolatedRules() ? () -> {
@@ -389,7 +393,8 @@ public final class PowerOptionsScreen extends UiScreen {
     allSounds = false;
     scroll = 0;
     positions.put("Audio", 0d);
-    collapsed.removeIf(key -> key.startsWith("Audio"));
+    collapsed.remove("Audio/Volume");
+    collapsed.remove("Audio/Music playback");
     layout();
   }
 
@@ -415,7 +420,7 @@ public final class PowerOptionsScreen extends UiScreen {
     mc.setScreen(screen);
     if (screen.library == null) return;
     if (queue) screen.library.showQueue();
-    else if (track != null && !track.isEmpty()) screen.library.showTrack(track);
+    else if (track != null && !track.isEmpty()) screen.library.showActiveTrack(track);
     else screen.library.showTracks();
     screen.layout();
   }
@@ -493,7 +498,7 @@ public final class PowerOptionsScreen extends UiScreen {
         : !ControlLinks.controls(session, setting).isEmpty();
   }
   private int mainControlLeft(Row row) {
-    return controlLeft(row) + (row.setting.id.equals("native.music") || row.setting.id.equals("native.sound") || audio() && (row.setting.id.startsWith("audio.category.") || row.setting.id.equals("audio.master")) ? 48 : customise(row.setting) ? 66 : soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
+    return controlLeft(row) + (row.setting.id.equals("native.music") || row.setting.id.equals("native.sound") ? 48 : customise(row.setting) ? 66 : soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
   }
   private boolean auxiliaryControl(Setting s) {
     return s.id.equals("native.music") || s.id.equals("native.sound") || customise(s) || soundPreview(s) || hasLink(s);
@@ -1121,7 +1126,7 @@ public final class PowerOptionsScreen extends UiScreen {
       String id = local.luke.power.audio.AudioController.currentTrackId();
       if (!id.isEmpty()) {
         click();
-        library.guard(() -> { libraryOpen = true; library.showTrack(id); layout(); });
+        library.guard(() -> { libraryOpen = true; library.showActiveTrack(id); layout(); });
       }
       return;
     }
@@ -1759,7 +1764,7 @@ public final class PowerOptionsScreen extends UiScreen {
       int cy = y + SettingRows.buttonOffset(span()),
           controlLeft = mainControlLeft(row);
       int textWidth = narrow ? span() - 4 : controlLeft(row) - left() - 13;
-      int indent = (int)Catalog.number(Catalog.metadata(s.id), "indent", 0);
+      int indent = search.text().isBlank() ? (int)Catalog.number(Catalog.metadata(s.id), "indent", 0) : 0;
       String label = fit(settingLabel(s), textWidth - indent - (s.restart ? 9 : 0));
       text(
           label,
@@ -1831,7 +1836,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
     }
     if (musicControlsVisible() && musicStatusVisible() && musicStatus.overTrack(mx, my)) {
-      tip = "Show this track in Library. Right-click for the queue, or Audio settings when empty."; hoverId = "music.current";
+      tip = "Show this track in the active playlist. Right-click for the queue, or Audio settings when empty."; hoverId = "music.current";
     }
     String footerError = !error.isEmpty() ? error : libraryVisible() ? library.footerError() : "";
     if (!footerError.isEmpty()) text(fit(footerError, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);

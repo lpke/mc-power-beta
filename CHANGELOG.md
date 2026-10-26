@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [4.6.2] - 2026-10-27
+
+- Apply dropdown hover color to selected choices, and use muted playlist dividers that meet adjacent item backgrounds.
+- Start Extra sounds collapsed, keep Audio category search labels unindented, and restore the previous Volume slider widths.
+- Add an active-playlist tab in Edit music, and open the current song there from playback controls. Keep tabs and actions accessible in compact layouts.
+- Rename the protected original soundtrack playlist to Beta 1.7.3. Remove playlist hover tooltips, highlight hovered song rows and mark the playing song in gold.
+- Show playlist and library totals together in grouped views, and add individual songs or whole groups to playlist drafts.
+- Add space above the color editor tabs and between the menu recipe tabs and the recipe book.
+
 ## [4.6.1] - 2026-10-27
 
 - Keep slider thumbs and scrub markers inside their tracks at both endpoints, and align exact-value controls to the same bounds.

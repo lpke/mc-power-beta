@@ -42,7 +42,7 @@ public final class MusicPlaylist {
       throw new IllegalArgumentException("Invalid music selection");
   }
 
-  private static final MusicPlaylist BETA_PLAYLIST = new MusicPlaylist(BETA, "Beta", BuiltinMusic.VANILLA, Map.of());
+  private static final MusicPlaylist BETA_PLAYLIST = new MusicPlaylist(BETA, "Beta 1.7.3", BuiltinMusic.VANILLA, Map.of());
 
   public static MusicPlaylist beta() { return BETA_PLAYLIST; }
 

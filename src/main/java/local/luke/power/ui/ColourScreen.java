@@ -80,7 +80,7 @@ public final class ColourScreen extends UiScreen {
   private int span() { return Math.min(340, width - 24); }
   private int bodyWidth() { return span() - 10; }
   private int previewY() { return 34; }
-  private int tabsY() { return previewY() + PREVIEW + 6; }
+  private int tabsY() { return previewY() + PREVIEW + 10; }
   private int tabWidth() { return (span() - 4) / 2; }
   private int bodyTop() { return tabsY() + 24; }
   private int bodyBottom() { return height - 34; }

@@ -49,4 +49,25 @@ class PopupStyleTest {
     assertTrue(screen.boxes.isEmpty());
     assertEquals(PopupStyle.DISABLED_TEXT, screen.labels.get(0).colour());
   }
+
+  @Test void selectedChoiceRetainsItsIndicatorWhileHoverAndKeyboardFocusBrightenItsFill() {
+    for (boolean keyboard : new boolean[]{false, true}) {
+      var screen = new Host();
+      PopupStyle.row(screen, "Current", 10, 20, 150, 18,
+          keyboard ? -1 : 10, keyboard ? -1 : 20, true, true, keyboard, 0);
+      assertEquals(new Box(10, 20, 160, 38, PopupStyle.HOVER), screen.boxes.get(0));
+      assertEquals(new Box(12, 24, 14, 34, PopupStyle.ACTIVE), screen.boxes.get(1));
+    }
+  }
+
+  @Test void separatorIsDullerThanTheBorderAndMeetsTheRowsOnBothSides() {
+    var screen = new Host();
+    PopupStyle.row(screen, "Edit", 10, 20, 150, 18, 10, 20, true, false, false, 0);
+    PopupStyle.separator(screen, 10, 38, 150);
+    PopupStyle.row(screen, "Beta", 10, 39, 150, 18, 10, 39, true, false, false, 0);
+    assertEquals(List.of(new Box(10, 20, 160, 38, PopupStyle.HOVER),
+        new Box(10, 38, 160, 39, PopupStyle.SEPARATOR),
+        new Box(10, 39, 160, 57, PopupStyle.HOVER)), screen.boxes);
+    assertTrue((PopupStyle.SEPARATOR & 0xffffff) < (PopupStyle.BORDER & 0xffffff));
+  }
 }
