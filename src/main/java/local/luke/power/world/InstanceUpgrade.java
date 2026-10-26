@@ -48,7 +48,7 @@ public final class InstanceUpgrade {
       var upgrade = WorldRuleFiles.planUpgrade(world);
       originals.putAll(upgrade.originals()); planned.putAll(upgrade.planned());
     }
-    try (FileTransaction transaction = FileTransaction.begin(game, List.of(PowerConfig.path()));
+    try (FileTransaction transaction = FileTransaction.begin(game, List.of(PowerConfig.path(),PowerConfig.musicPath()));
         OwnedMetadataTransaction metadata = planned.isEmpty() ? null : OwnedMetadataTransaction.begin(game, originals, planned)) {
       JsonObject converted = PowerConfig.document();
       if (defaults) {
@@ -92,7 +92,7 @@ public final class InstanceUpgrade {
       if (oldSettings.has(section)) freshSettings.add(section, oldSettings.get(section).deepCopy());
     if (!oldSettings.has("worldSortingLayouts") && (oldSettings.has("sortingLayouts") || oldSettings.has("inventoryTools")))
       freshSettings.add("worldSortingLayouts", local.luke.power.inventory.tools.WorldSortingLayoutsData.migrate(oldSettings).json());
-    for (String[] field : new String[][]{{"audio", "presets"}, {"audio", "favourites"}, {"logo", "presets"}, {"interface", "debugPresets"}}) {
+    for (String[] field : new String[][]{{"logo", "presets"}, {"interface", "debugPresets"}}) {
       if (oldSettings.has(field[0]) && oldSettings.getAsJsonObject(field[0]).has(field[1]))
         freshSettings.getAsJsonObject(field[0]).add(field[1], oldSettings.getAsJsonObject(field[0]).get(field[1]).deepCopy());
     }

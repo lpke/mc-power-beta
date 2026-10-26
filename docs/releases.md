@@ -124,7 +124,6 @@ by the client, including every `level.dat` and `level.dat_old` under `saves`:
 ```
 
 Add `-PinstanceDefaults` only when resetting preferences to pack defaults. It retains
-FOV, GUI scale and the frame limit. Version 4.4.2 accepts configuration schema 7 and
-world-rule format 4; upgrade older data with 4.4.1 first. This command refuses running
+FOV, GUI scale and the frame limit. Version 4.6.0 accepts configuration schema 8, music-data format 1 and world-rule format 4. Convert earlier personal configuration with verified backups before installation; the client does not import legacy presets. This command refuses running
 clients, validates every metadata file before writing worlds, and restores its
 transaction if any required update fails.

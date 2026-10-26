@@ -1,14 +1,14 @@
 package local.luke.power.audio;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import local.luke.power.storage.PowerConfig;
 import local.luke.power.PowerBeta;
-import local.luke.power.config.*;
-import net.fabricmc.loader.api.FabricLoader;
+import local.luke.power.config.Catalog;
 
 public final class AudioConfig {
+  private static String loadProblem = "";
   private static AudioSettings current = load();
 
   public static Path path() {
@@ -18,10 +18,13 @@ public final class AudioConfig {
   private static AudioSettings load() {
     try {
       if (!Files.exists(path())) return new AudioSettings();
-      AudioSettings s = PowerConfig.read("audio", AudioSettings.class);
+      AudioSettings s = PowerConfig.readAudio(AudioSettings.class);
       s.validate();
+      loadProblem = "";
       return s;
     } catch (Exception e) {
+      loadProblem = "Audio settings could not be loaded. Repair config/power-beta.json and "
+          + "power-beta/music.json or restore verified backups, then restart Minecraft before saving.";
       PowerBeta.LOG.error("Could not load audio settings; preserving the file", e);
       return new AudioSettings();
     }
@@ -40,7 +43,7 @@ public final class AudioConfig {
     boolean library = !current.musicDirectories.equals(next.musicDirectories)
         || !current.menuDirectories.equals(next.menuDirectories) || current.recursive != next.recursive;
     boolean mode = current.musicMode != next.musicMode || current.customMusic != next.customMusic
-        || current.menuMusic != next.menuMusic || !current.preset.equals(next.preset);
+        || current.menuMusic != next.menuMusic;
     boolean timing = current.gapMinSeconds != next.gapMinSeconds || current.gapMaxSeconds != next.gapMaxSeconds;
     boolean folders = !current.disabledMusicDirectories.equals(next.disabledMusicDirectories)
         || !current.disabledMenuDirectories.equals(next.disabledMenuDirectories);
@@ -52,8 +55,9 @@ public final class AudioConfig {
   }
 
   public static void save(AudioSettings next) throws IOException {
+    if (!loadProblem.isEmpty()) throw new IOException(loadProblem);
     next.validate();
-    PowerConfig.save("audio", next);
+    PowerConfig.saveAudio(next);
     preview(next);
   }
 }

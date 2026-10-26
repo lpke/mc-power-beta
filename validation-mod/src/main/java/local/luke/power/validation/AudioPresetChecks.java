@@ -17,6 +17,7 @@ public final class AudioPresetChecks {
   private static PowerOptionsScreen options;
   private static String promised;
   private static boolean auto;
+  private static float musicBefore;
 
   private static void filter(MusicLibraryScreen library, String id) throws Exception {
     var method = MusicLibraryScreen.class.getDeclaredMethod("selectFilter", String.class);
@@ -31,12 +32,12 @@ public final class AudioPresetChecks {
     screen.render(-1, -1, 0);
     var panel = field(library, "presets");
     click(screen, (int) call(panel, "right") - 25, presetRowY(panel, 0));
-    check(AudioConfig.current().preset.isEmpty(), "None did not unload preset");
-    check(AudioConfig.current().disabledTracks.isEmpty(), "None kept exclusions");
-    check(AudioConfig.current().presetTrackPool.isEmpty(), "None kept preset pool");
+    check(AudioConfig.current().playlist.isEmpty(), "None did not unload preset");
+    check(AudioConfig.current().disabledTracks.equals(Set.of("music:calm3.ogg")), "Default changed library exclusions");
+    check(AudioConfig.current().playlistTracks.isEmpty(), "None kept preset pool");
     check(screen.session().settings().stream()
         .filter(s -> s.id.startsWith("audio.trackEnabled."))
-        .allMatch(s -> s.value.getAsBoolean()), "track rows stayed disabled");
+        .allMatch(s -> s.value.getAsBoolean() == !s.id.equals("audio.trackEnabled.music:calm3.ogg")), "track rows stayed disabled");
     check(SettingAccess.reason(screen.session(), find(screen.session(), "audio.musicMode")).isEmpty(),
         "soundtrack settings stayed locked");
   }
@@ -52,11 +53,11 @@ public final class AudioPresetChecks {
           MenuPreferences.update(v -> v.autoApply = apply);
           AudioSettings seed = new AudioSettings();
           seed.musicMode = AudioSettings.MusicMode.MINECRAFT_SURVIVAL;
-          seed.presets.add(new MusicPreset("reset-test", "Reset test",
-              Set.of("music:calm1.ogg", "music:missing.ogg"), Map.of("Alpha", 40),
-              Set.of("music:calm1.ogg", "music:calm2.ogg")));
+          seed.playlists.add(new MusicPlaylist("reset-test", "Reset test",
+              List.of("music:calm2.ogg", "music:missing.ogg"), Map.of("Alpha", 40)));
           seed.favourites.add("music:calm2.ogg");
-          MusicPreset.load(seed, "reset-test");
+          seed.disabledTracks.add("music:calm3.ogg");
+          MusicPlaylist.load(seed, "reset-test");
           AudioConfig.save(seed);
           var screen = MenuUpdateChecks.open(mc, "Audio");
           loadNone(screen);
@@ -67,10 +68,10 @@ public final class AudioPresetChecks {
             loadNone(screen);
             screen.session().save(java.nio.file.Path.of(".").toAbsolutePath());
           }
-          AudioSettings persisted = local.luke.power.storage.PowerConfig.read("audio", AudioSettings.class);
-          check(persisted.preset.isEmpty() && persisted.disabledTracks.isEmpty()
-              && persisted.presetTrackPool.isEmpty(), "reset did not persist");
-          check(Catalog.JSON.toJson(persisted.presets).equals(Catalog.JSON.toJson(seed.presets)),
+          AudioSettings persisted = local.luke.power.storage.PowerConfig.readAudio(AudioSettings.class);
+          check(persisted.playlist.isEmpty() && persisted.disabledTracks.equals(seed.disabledTracks)
+              && persisted.playlistTracks.isEmpty(), "reset did not persist");
+          check(Catalog.JSON.toJson(persisted.playlists).equals(Catalog.JSON.toJson(seed.playlists)),
               "reset changed the saved preset");
           check(persisted.groupVolumes.equals(seed.groupVolumes)
               && persisted.favourites.equals(seed.favourites) && persisted.musicMode == seed.musicMode,
@@ -79,7 +80,12 @@ public final class AudioPresetChecks {
           enabled.value = new com.google.gson.JsonPrimitive(false);
           screen.changed(enabled);
           check(AudioConfig.current().disabledTracks.contains("music:calm2.ogg"), "manual exclusion failed");
-          loadNone(screen);
+          var priorExclusions = new TreeSet<>(AudioConfig.current().disabledTracks);
+          field(screen, "libraryOpen", true);
+          var library = (MusicLibraryScreen) field(screen, "library"); library.openPresets();
+          var panel = field(library, "presets");
+          click(screen, (int)call(panel, "right") - 25, presetRowY(panel, 0));
+          check(AudioConfig.current().disabledTracks.equals(priorExclusions), "Default changed later exclusions");
         });
       }
     } finally {
@@ -135,10 +141,12 @@ public final class AudioPresetChecks {
         log("AUDIO EDITOR FAILURES " + failures);
       }
       case "setup" -> {
+        SilentAudioChecks.ready(mc);
         failures = 0;
         before = AudioConfig.copy();
         queueBefore = MusicRequests.tracks();
         auto = MenuPreferences.current().autoApply;
+        musicBefore = mc.options.musicVolume;
         MenuPreferences.update(v -> v.autoApply = false);
         var s = new AudioSettings();
         s.musicMode = AudioSettings.MusicMode.ALL_MINECRAFT;
@@ -188,9 +196,9 @@ public final class AudioPresetChecks {
                   "draft leaked into live selection");
               ((TextInput) field(panel, "name")).setText("Validation preset");
               click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
-              check(AudioConfig.current().presets.size() == 1, "save failed");
+              check(AudioConfig.current().playlists.size() == 1, "save failed");
               check(
-                  AudioConfig.current().presets.get(0).excluded().size() == 12,
+                  AudioConfig.current().playlists.get(0).tracks().size() == 12,
                   "group draft incomplete");
               check(AudioConfig.current().disabledTracks.isEmpty(), "save loaded preset");
               library.openPresets();
@@ -198,26 +206,26 @@ public final class AudioPresetChecks {
               click(
                   options, (int) call(panel, "right") - 25, presetRowY(panel,1));
               check(
-                  AudioConfig.current().disabledTracks.size() == 12,
+                  AudioConfig.current().playlistTracks.size() == 12,
                   "load did not apply exclusions");
-              check(!AudioConfig.current().preset.isEmpty(), "selection not stored");
+              check(!AudioConfig.current().playlist.isEmpty(), "selection not stored");
               check(
                   SettingAccess.reason(
                           options.session(), find(options.session(), "audio.musicMode"))
-                      .contains("preset"),
+                      .contains("playlist"),
                   "mode not locked");
               check(
                   SettingAccess.lockedValue(find(options.session(), "audio.musicMode"))
-                      .equals("Using preset"),
+                      .equals("Using playlist"),
                   "wrong locked label");
               check(
-                  AudioController.activeMusic(mc).size() == BuiltinMusic.TRACKS.size(),
+                  AudioController.activeMusic(mc).size() == 12,
                   "preset pool misses dimensions");
             });
         test(
             "renaming active preset preserves identity and current exclusions",
             () -> {
-              String id = AudioConfig.current().preset;
+              String id = AudioConfig.current().playlist;
               field(options, "libraryOpen", true);
               library.openPresets();
               var panel = field(library, "presets");
@@ -225,12 +233,12 @@ public final class AudioPresetChecks {
               ((TextInput) field(panel, "name")).setText("Renamed preset");
               click(options, (int) call(panel, "includeX") + 8, (int) call(panel, "bulkY") + 8);
               click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
-              check(AudioConfig.current().preset.equals(id), "rename changed identity");
+              check(AudioConfig.current().playlist.equals(id), "rename changed identity");
               check(
-                  AudioConfig.current().presets.get(0).excluded().isEmpty(),
+                  AudioConfig.current().playlists.get(0).tracks().containsAll(AudioController.music(mc)),
                   "editor include all failed");
               check(
-                  AudioConfig.current().disabledTracks.size() == 12,
+                  AudioConfig.current().playlistTracks.size() == 12,
                   "editing active preset applied it");
             });
         test(
@@ -273,16 +281,23 @@ public final class AudioPresetChecks {
                       + geometry.controlsY()
                       + 7;
               options.render(geometry.favouriteX() + 5, y, 0);
-              field(options, "hoverTicks", 20);
+              var delay = field(options, "hoverDelay");
+              String hoverKey = (String)field(delay, "key");
+              check(!hoverKey.isEmpty(), "favorite did not register a tooltip target");
+              for (int tick = 0; tick < 13; tick++) options.tick();
+              options.render(geometry.favouriteX() + 5, y, 0);
+              check((boolean)Dropdown450Screens.invoke(delay, "ready", new Class<?>[]{String.class}, hoverKey), "favorite tooltip delay did not expire");
               click(options, geometry.favouriteX() + 5, y);
               options.render(geometry.favouriteX() + 5, y, 0);
-              check((int) field(options, "hoverTicks") >= 20, "favorite reset the tooltip delay");
+              check(hoverKey.equals(field(delay, "key")) && (int)field(delay, "ticks") == 13,
+                  "favorite reset the tooltip target or elapsed delay");
+              check((boolean)Dropdown450Screens.invoke(delay, "ready", new Class<?>[]{String.class}, hoverKey), "favorite tooltip became delayed after click");
               check(AudioConfig.current().favourites.contains("music:calm1.ogg"), "star missed");
               filter(library, "favourites");
               check(((List<?>) field(library, "tracks")).size() == 1, "favorites filter failed");
               options.session().discard();
               check(
-                  AudioConfig.current().presets.isEmpty()
+                  AudioConfig.current().playlists.isEmpty()
                       && AudioConfig.current().favourites.isEmpty()
                       && AudioConfig.current().disabledTracks.isEmpty(),
                   "Cancel left audio edits");
@@ -374,9 +389,9 @@ public final class AudioPresetChecks {
                       promised + " vs " + AudioController.nowPlaying()));
       case "view-settings", "view-library", "view-editor", "view-presets", "view-selector", "view-queue" -> {
         var config = AudioConfig.copy();
-        config.presets = new ArrayList<>(List.of(new MusicPreset("quiet", "Quiet afternoons",
-            new TreeSet<>(BuiltinMusic.TRACKS.stream().filter(t -> !t.usage().equals("Overworld"))
-                .map(BuiltinMusic.Track::id).toList()), Map.of(), Set.of())));
+        config.playlists = new ArrayList<>(List.of(new MusicPlaylist("quiet", "Quiet afternoons",
+            BuiltinMusic.TRACKS.stream().filter(t -> t.usage().equals("Overworld"))
+                .map(BuiltinMusic.Track::id).toList(), Map.of())));
         config.favourites.add("music:calm1.ogg");
         AudioConfig.preview(config);
         options = MenuUpdateChecks.open(mc,"Audio");
@@ -408,6 +423,7 @@ public final class AudioPresetChecks {
               q.tracks.addAll(queueBefore);
             });
         MenuPreferences.update(v -> v.autoApply = auto);
+        mc.options.musicVolume = musicBefore;
         mc.setScreen(null);
         log("AUDIO PRESETS FAILURES " + failures);
       }

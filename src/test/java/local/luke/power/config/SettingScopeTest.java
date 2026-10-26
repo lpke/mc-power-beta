@@ -13,7 +13,7 @@ class SettingScopeTest {
   @Test void scopeFollowsExplicitRulesAndGlobalPreferences() {
     for (String id : List.of("world.difficulty", "rules.world.advance_time", "rules.world.keep_inventory", "inventoryTools.protectedSlots", "inventoryTools.preferredItems"))
       assertTrue(SettingScope.perWorld(setting(id, "world")), id);
-    for (String id : List.of("rules.survival.fire_spread", "rules.cheats.fire_spread", "audio.preset", "worldedit.maxBlocks", "tweaks.autoWalkCancelOnLostFocus"))
+    for (String id : List.of("rules.survival.fire_spread", "rules.cheats.fire_spread", "audio.playlist", "worldedit.maxBlocks", "tweaks.autoWalkCancelOnLostFocus"))
       assertFalse(SettingScope.perWorld(setting(id, "test")), id);
   }
   @Test void rangeScopeAndNoticesAreSeparateParagraphs() {
@@ -22,9 +22,9 @@ class SettingScopeTest {
   }
 
   @Test void onlyWorldSettingsNeedScopeLabelsAndNotes() {
-    var global = setting("audio.preset", "audio");
+    var global = setting("audio.playlist", "audio");
     assertEquals("", SettingScope.note(global));
-    assertEquals("audio.preset", global.label);
+    assertEquals("audio.playlist", global.label);
     var world = setting("world.difficulty", "world");
     assertTrue(world.label.endsWith(" (this world)"));
     assertTrue(Tooltips.setting(world, "").contains("Saved separately for each singleplayer world."));

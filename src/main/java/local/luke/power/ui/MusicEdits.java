@@ -5,53 +5,56 @@ import java.util.*;
 import local.luke.power.audio.*;
 import local.luke.power.config.*;
 
-/**
- * All library changes share the Options transaction. Editor drafts never reference these values.
- */
+/** Library changes share Options' transaction; saved playlists and editor drafts remain separate. */
 final class MusicEdits {
   private final PowerOptionsScreen parent;
-  private JsonElement cachedFavourites, cachedPresets;
+  private JsonElement cachedFavourites, cachedPlaylists;
   private Setting groupVolumeSetting;
   private Set<String> favouriteIds = Set.of();
-  private List<MusicPreset> presetValues = List.of();
+  private List<MusicPlaylist> playlistValues = List.of();
 
-  MusicEdits(PowerOptionsScreen parent) {
-    this.parent = parent;
-  }
-
-  private void changedSelection(List<Setting> changes) {
-    // Track rows were synchronized from these sets; do not feed their effective values back.
-    parent.changed(changes.stream().filter(s -> !s.id.startsWith("audio.trackEnabled.")).toList(), false);
-  }
-
+  MusicEdits(PowerOptionsScreen parent) { this.parent = parent; }
   Setting setting(String id) {
-    return parent.session().settings().stream()
-        .filter(s -> s.id.equals("audio." + id))
-        .findFirst()
-        .orElseThrow();
+    return parent.session().settings().stream().filter(s -> s.id.equals("audio." + id))
+        .findFirst().orElseThrow();
   }
-
-  List<MusicPreset> presets() {
-    JsonElement value = setting("presets").value;
-    if (value != cachedPresets) {
-      presetValues = List.of(Catalog.JSON.fromJson(value, MusicPreset[].class));
-      cachedPresets = value;
+  List<MusicPlaylist> presets() {
+    JsonElement value = setting("playlists").value;
+    if (value != cachedPlaylists) {
+      playlistValues = List.of(Catalog.JSON.fromJson(value, MusicPlaylist[].class));
+      cachedPlaylists = value;
     }
-    return presetValues;
+    return playlistValues;
   }
-
-  String selected() {
-    return setting("preset").value.getAsString();
-  }
-
+  String selected() { return setting("playlist").value.getAsString(); }
   String name(String id) {
-    return presets().stream()
-        .filter(p -> p.id().equals(id))
-        .map(MusicPreset::name)
-        .findFirst()
-        .orElse("None");
+    if (MusicPlaylist.SAME_AS_WORLD.equals(id)) return "Same as world";
+    if (id.isEmpty() || MusicPlaylist.DEFAULT.equals(id)) return "Default rotation";
+    return presets().stream().filter(p -> p.id().equals(id)).map(MusicPlaylist::name)
+        .findFirst().orElse("Current selection");
   }
-
+  List<String> currentTracks() {
+    return new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(setting("playlistTracks").value, String[].class)));
+  }
+  boolean modified() {
+    if (selected().isEmpty()) return false;
+    return presets().stream().filter(p -> p.id().equals(selected())).findFirst()
+        .map(p -> !p.tracks().equals(currentTracks())
+            || !Catalog.JSON.toJsonTree(p.groupVolumes()).equals(setting("groupVolumes").value)).orElse(true);
+  }
+  String currentName() { return name(selected()) + (modified() ? " (modified)" : ""); }
+  MusicPlaylist current(boolean copy) {
+    Set<String> enabled = new HashSet<>(parent.session().settings().stream()
+        .filter(s -> s.id.startsWith("audio.trackEnabled.") && s.value.getAsBoolean())
+        .map(s -> s.id.substring("audio.trackEnabled.".length())).toList());
+    List<String> tracks = selected().isEmpty()
+        ? AudioController.worldMusicSelection(parent.client()).stream().filter(enabled::contains).toList()
+        : currentTracks();
+    Map<String,Integer> gains = Catalog.JSON.fromJson(setting("groupVolumes").value,
+        new com.google.gson.reflect.TypeToken<TreeMap<String,Integer>>() {}.getType());
+    return new MusicPlaylist(copy || selected().isEmpty() ? UUID.randomUUID().toString() : selected(),
+        copy || selected().isEmpty() ? "Current selection" : name(selected()), tracks, gains);
+  }
   Set<String> favourites() {
     JsonElement value = setting("favourites").value;
     if (value != cachedFavourites) {
@@ -60,130 +63,85 @@ final class MusicEdits {
     }
     return favouriteIds;
   }
-
   void favourite(String id) {
     Set<String> ids = new TreeSet<>(favourites());
     if (!ids.remove(id)) ids.add(id);
-    Setting s = setting("favourites");
-    s.value = Catalog.JSON.toJsonTree(ids);
-    parent.changed(s);
+    Setting s = setting("favourites"); s.value = Catalog.JSON.toJsonTree(ids); parent.changed(s);
   }
-
-  void save(MusicPreset preset) {
-    List<MusicPreset> values = new ArrayList<>(presets());
-    if (values.stream()
-        .anyMatch(p -> !p.id().equals(preset.id()) && p.name().equalsIgnoreCase(preset.name())))
-      throw new IllegalArgumentException("A preset with this name already exists");
+  void save(MusicPlaylist playlist) {
+    List<MusicPlaylist> values = new ArrayList<>(presets());
+    if (values.stream().anyMatch(p -> !p.id().equals(playlist.id()) && p.name().equalsIgnoreCase(playlist.name())))
+      throw new IllegalArgumentException("A playlist with this name already exists");
     int index = -1;
-    for (int i = 0; i < values.size(); i++) if (values.get(i).id().equals(preset.id())) index = i;
-    if (index < 0) values.add(preset);
-    else values.set(index, preset);
-    MusicPreset.validate(values, selected());
-    Setting s = setting("presets");
-    JsonElement value = Catalog.JSON.toJsonTree(values);
-    s.validate(value);
-    s.value = value;
-    parent.changed(s);
+    for (int i=0; i<values.size(); i++) if (values.get(i).id().equals(playlist.id())) index=i;
+    if (index<0) values.add(playlist); else values.set(index, playlist);
+    MusicPlaylist.validate(values, selected(), setting("menuPlaylist").value.getAsString());
+    Setting s=setting("playlists"); s.value=Catalog.JSON.toJsonTree(values); s.validate(s.value); parent.changed(s);
   }
-
   void delete(String id) {
-    List<MusicPreset> values = new ArrayList<>(presets());
-    values.removeIf(p -> p.id().equals(id));
-    Setting list = setting("presets"), selected = setting("preset");
-    list.value = Catalog.JSON.toJsonTree(values);
+    List<MusicPlaylist> values = new ArrayList<>(presets()); values.removeIf(p -> p.id().equals(id));
     List<Setting> changes = new ArrayList<>();
-    changes.add(list);
-    if (selected.value.getAsString().equals(id)) {
-      selected.value = new JsonPrimitive("");
-      changes.add(selected);
-      changes.addAll(exclusions(new TreeSet<>(Arrays.asList(
-          Catalog.JSON.fromJson(setting("exclusions").value, String[].class)))));
+    update(changes,"playlists",Catalog.JSON.toJsonTree(values));
+    if (selected().equals(id)) { update(changes,"playlist",new JsonPrimitive("")); update(changes,"playlistTracks",new JsonArray()); }
+    if (setting("menuPlaylist").value.getAsString().equals(id)) {
+      update(changes,"menuPlaylist",new JsonPrimitive(MusicPlaylist.SAME_AS_WORLD));
+      update(changes,"menuPlaylistTracks",new JsonArray()); update(changes,"menuGroupVolumes",new JsonObject());
     }
-    changedSelection(changes);
+    syncRows(); parent.changed(changes,false);
   }
-
+  private void update(List<Setting> changes,String id,JsonElement value) {
+    Setting s=setting(id); s.value=value; changes.add(s);
+  }
   void load(String id) {
-    MusicPreset p = presets().stream().filter(v -> v.id().equals(id)).findFirst().orElse(null);
-    if (!id.isEmpty() && p == null) throw new IllegalArgumentException("Preset no longer exists");
-    List<Setting> changes = new ArrayList<>();
-    if (p != null) {
-      changes.addAll(exclusions(p.excluded()));
-      Set<String> pool = p.trackPool();
-      Setting scope = setting("presetTrackPool");
-      scope.value = Catalog.JSON.toJsonTree(pool);
-      changes.add(scope);
-      for (Setting s : changes)
-        if (s.id.startsWith("audio.trackEnabled."))
-          s.value = new JsonPrimitive(p.includes(s.id.substring("audio.trackEnabled.".length())));
-      Setting volumes = setting("groupVolumes");
-      volumes.value = Catalog.JSON.toJsonTree(MusicGroups.copy(p.groupVolumes()));
-      changes.add(volumes);
-    } else {
-      changes.addAll(exclusions(Set.of()));
-      Setting scope = setting("presetTrackPool");
-      scope.value = new JsonArray();
-      changes.add(scope);
-    }
-    Setting selected = setting("preset");
-    selected.value = new JsonPrimitive(id);
-    changes.add(selected);
-    changedSelection(changes);
+    MusicPlaylist playlist = presets().stream().filter(p -> p.id().equals(id)).findFirst().orElse(null);
+    if (!id.isEmpty() && playlist==null) throw new IllegalArgumentException("Playlist no longer exists");
+    List<Setting> changes=new ArrayList<>();
+    update(changes,"playlist",new JsonPrimitive(id));
+    update(changes,"playlistTracks",playlist==null ? new JsonArray() : Catalog.JSON.toJsonTree(playlist.tracks()));
+    if (playlist!=null) update(changes,"groupVolumes",Catalog.JSON.toJsonTree(playlist.groupVolumes()));
+    syncRows(); parent.changed(changes,false);
   }
-
-  private List<Setting> exclusions(Set<String> excluded) {
-    List<Setting> changes = new ArrayList<>();
-    Setting all = setting("exclusions");
-    all.value = Catalog.JSON.toJsonTree(excluded);
-    changes.add(all);
-    for (Setting s : parent.session().settings())
-      if (s.id.startsWith("audio.trackEnabled.")) {
-        s.value =
-            new JsonPrimitive(!excluded.contains(s.id.substring("audio.trackEnabled.".length())));
-        changes.add(s);
-      }
-    return changes;
+  void loadMenu(String id) {
+    MusicPlaylist playlist = presets().stream().filter(p -> p.id().equals(id)).findFirst().orElse(null);
+    if (playlist==null && !MusicPlaylist.SAME_AS_WORLD.equals(id) && !MusicPlaylist.DEFAULT.equals(id))
+      throw new IllegalArgumentException("Playlist no longer exists");
+    List<Setting> changes=new ArrayList<>();
+    update(changes,"menuPlaylist",new JsonPrimitive(id));
+    update(changes,"menuPlaylistTracks",playlist==null ? new JsonArray() : Catalog.JSON.toJsonTree(playlist.tracks()));
+    update(changes,"menuGroupVolumes",playlist==null ? new JsonObject() : Catalog.JSON.toJsonTree(playlist.groupVolumes()));
+    parent.changed(changes,false);
   }
-
-  private Setting groupVolumes() {
-    if (groupVolumeSetting == null) groupVolumeSetting = setting("groupVolumes");
-    return groupVolumeSetting;
-  }
-
-  int volume(String group) {
-    JsonElement v = groupVolumes().value.getAsJsonObject().get(group);
-    return v == null ? 100 : v.getAsInt();
-  }
-
-  void volume(String group, int volume) {
-    MusicGroups.copy(Map.of(group, volume));
-    if (volume(group) == volume) return;
-    Setting s = groupVolumes();
-    JsonObject values = s.value.getAsJsonObject().deepCopy();
-    if (volume == 100) values.remove(group);
-    else values.addProperty(group, volume);
-    s.validate(values);
-    s.value = values;
-    parent.changed(s, true);
-  }
-
-  void includeAll() {
-    List<Setting> changes = exclusions(Set.of());
-    if (!selected().isEmpty()) {
-      Set<String> pool = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(setting("presetTrackPool").value, String[].class)));
-      changes.stream().filter(s -> s.id.startsWith("audio.trackEnabled."))
-          .forEach(s -> pool.add(s.id.substring("audio.trackEnabled.".length())));
-      Setting scope = setting("presetTrackPool");
-      scope.value = Catalog.JSON.toJsonTree(pool);
-      changes.add(scope);
-    }
-    changedSelection(changes);
-  }
-
-  void excludeAll(Collection<String> tracks) {
-    Set<String> excluded = new TreeSet<>();
+  private void syncRows() {
+    Set<String> included=new HashSet<>(currentTracks()), excluded=new HashSet<>();
     setting("exclusions").value.getAsJsonArray().forEach(v -> excluded.add(v.getAsString()));
-    excluded.addAll(tracks);
-    MusicPreset.validateTracks(excluded);
-    changedSelection(exclusions(excluded));
+    for (Setting s:parent.session().settings()) if (s.id.startsWith("audio.trackEnabled.")) {
+      String id=s.id.substring("audio.trackEnabled.".length());
+      s.value=new JsonPrimitive(selected().isEmpty() ? !excluded.contains(id) : included.contains(id));
+    }
+  }
+  private Setting groupVolumes() {
+    if (groupVolumeSetting==null) groupVolumeSetting=setting("groupVolumes"); return groupVolumeSetting;
+  }
+  int volume(String group) {
+    JsonElement v=groupVolumes().value.getAsJsonObject().get(group); return v==null ? 100 : v.getAsInt();
+  }
+  void volume(String group,int volume) {
+    MusicGroups.copy(Map.of(group,volume)); if (volume(group)==volume) return;
+    Setting s=groupVolumes(); JsonObject values=s.value.getAsJsonObject().deepCopy();
+    if (volume==100) values.remove(group); else values.addProperty(group,volume);
+    s.validate(values); s.value=values; parent.changed(s,true);
+  }
+  void includeAll() { toggleAll(true, parent.session().settings().stream()
+      .filter(s -> s.id.startsWith("audio.trackEnabled.")).map(s -> s.id.substring("audio.trackEnabled.".length())).toList()); }
+  void excludeAll(Collection<String> tracks) { toggleAll(false,tracks); }
+  private void toggleAll(boolean include,Collection<String> ids) {
+    List<Setting> changes=new ArrayList<>();
+    for (Setting s:parent.session().settings()) if (s.id.startsWith("audio.trackEnabled.")
+        && ids.contains(s.id.substring("audio.trackEnabled.".length()))) {
+      s.value=new JsonPrimitive(include); parent.session().link(s); changes.add(s);
+    }
+    // Membership is already linked. Do not replay synthetic rows into a second membership edit.
+    changes.removeIf(s -> s.id.startsWith("audio.trackEnabled."));
+    parent.changed(changes,false);
   }
 }

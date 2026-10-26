@@ -6,7 +6,7 @@ import com.google.gson.*;
 import java.lang.reflect.*;
 import java.nio.file.*;
 import java.util.*;
-import local.luke.power.audio.MusicPreset;
+import local.luke.power.audio.MusicPlaylist;
 import local.luke.power.config.*;
 import local.luke.power.creative.CreativeTabsData;
 import local.luke.power.creativeui.CreativeTabsBackend;
@@ -96,9 +96,9 @@ final class Dropdown450Screens {
 
   private static void music(Minecraft mc, PowerOptionsScreen options, int[] size) throws Exception {
     resetOptions(options, "Audio"); set(options, "libraryOpen", true);
-    var presets = new ArrayList<MusicPreset>();
-    for (int i = 0; i < 12; i++) presets.add(new MusicPreset("review-" + i, "Soundtrack " + (i + 1), Set.of(), Map.of(), Set.of()));
-    options.session().settings().stream().filter(s -> s.id.equals("audio.presets")).findFirst().orElseThrow().value = Catalog.JSON.toJsonTree(presets);
+    var presets = new ArrayList<MusicPlaylist>();
+    for (int i = 0; i < 12; i++) presets.add(new MusicPlaylist("review-" + i, "Soundtrack " + (i + 1), List.of(), Map.of()));
+    options.session().settings().stream().filter(s -> s.id.equals("audio.playlists")).findFirst().orElseThrow().value = Catalog.JSON.toJsonTree(presets);
     var library = (MusicLibraryScreen)get(options, "library");
     library.restore(new MusicLibraryScreen.State(false, "active", "", 0, 0));
     library.showTracks(); invoke(options, "layout", new Class<?>[]{});

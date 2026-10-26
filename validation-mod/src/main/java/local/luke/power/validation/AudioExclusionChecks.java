@@ -18,8 +18,8 @@ final class AudioExclusionChecks {
     try {
       var settings=new AudioSettings();settings.musicMode=AudioSettings.MusicMode.ALL_MINECRAFT;
       settings.disabledTracks.add("music:calm1.ogg");
-      settings.presets.add(new MusicPreset("filter-test","Filter test",Set.of("music:creative1.ogg"),
-          Map.of(),new HashSet<>(AudioController.music(mc))));
+      settings.playlists.add(new MusicPlaylist("filter-test","Filter test",AudioController.music(mc).stream().filter(id -> !id.equals("music:creative1.ogg")).toList(),
+          Map.of()));
       AudioConfig.preview(settings);AudioController.pause();
       options=MenuUpdateChecks.open(mc,"Audio");var screen=options;
       field(screen,"libraryOpen",true);
@@ -55,7 +55,7 @@ final class AudioExclusionChecks {
         check(ids(library).contains("music:calm1.ogg"),"live exclusions leaked into preset filter");
         click(screen,(int)call(panel,"hideX")+8,(int)call(panel,"editButtonY")+8);
         check(ids(library).contains("music:creative1.ogg"),"Show excluded missed draft song");
-        check(draft.snapshot("Filter test").excluded().equals(snapshot.excluded()),"visibility edited draft");
+        check(draft.snapshot("Filter test").tracks().equals(snapshot.tracks()),"visibility edited draft");
         check(AudioConfig.current().disabledTracks.equals(Set.of("music:calm1.ogg")),"draft visibility edited live music");
         for(int[] size:new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
           screen.init(mc,size[0],size[1]);screen.render(-1,-1,0);

@@ -13,7 +13,7 @@ from release_data import VERSION, sha256
 
 def protected_files(instance):
     game = instance / '.minecraft'
-    paths = [p for name in ['config', 'saves'] for p in (game / name).rglob('*') if p.is_file()]
+    paths = [p for name in ['config', 'saves', 'power-beta'] for p in (game / name).rglob('*') if p.is_file()]
     if (game / 'options.txt').is_file():
         paths.append(game / 'options.txt')
     return {str(p.relative_to(instance)): sha256(p) for p in paths}

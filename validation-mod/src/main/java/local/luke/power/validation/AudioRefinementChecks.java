@@ -68,7 +68,7 @@ final class AudioRefinementChecks {
     try {
       var config=new AudioSettings();
       config.musicMode=AudioSettings.MusicMode.ALL_MINECRAFT;
-      config.presets.add(new MusicPreset("test","Test",Set.of("music:calm1.ogg"), Map.of(), Set.of()));
+      config.playlists.add(new MusicPlaylist("test","Test",AudioController.music(mc).stream().filter(id -> !id.equals("music:calm1.ogg")).toList(), Map.of()));
       AudioConfig.preview(config);
       AudioController.pause();
       PowerOptionsScreen s=MenuUpdateChecks.open(mc,"Audio");
@@ -151,10 +151,10 @@ final class AudioRefinementChecks {
           check((int)call(panel,"includeX")>=left,"bulk buttons clipped");
           click(s,(int)call(panel,"excludeX")+8,(int)call(panel,"bulkY")+8);
           var draft=(MusicPresetDraft)call(panel,"draft");
-          check(draft.snapshot("Test").excluded().containsAll(AudioController.music(mc)),"preset Exclude all missed tracks");
+          check(draft.snapshot("Test").tracks().isEmpty(),"preset Exclude all missed tracks");
           check(AudioConfig.current().disabledTracks.isEmpty(),"preset edit changed live selection");
           click(s,(int)call(panel,"includeX")+8,(int)call(panel,"bulkY")+8);
-          check(draft.snapshot("Test").excluded().isEmpty(),"preset Include all missed tracks");
+          check(draft.snapshot("Test").tracks().containsAll(AudioController.music(mc)),"preset Include all missed tracks");
           check(GL11.glGetError()==0,"GL error");
         }
         mc.setScreen(s);sidebar(s,"Audio");dialog(s,1);toolbar(s);

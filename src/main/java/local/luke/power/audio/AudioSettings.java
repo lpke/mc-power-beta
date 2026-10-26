@@ -50,9 +50,10 @@ public final class AudioSettings {
   public Map<String, Integer> groupVolumes = new TreeMap<>();
   public Set<String> disabledTracks = new TreeSet<>();
   public Set<String> favourites = new TreeSet<>();
-  public List<MusicPreset> presets = new ArrayList<>();
-  public String preset = "";
-  public Set<String> presetTrackPool = new TreeSet<>();
+  public String playlist = "", menuPlaylist = MusicPlaylist.SAME_AS_WORLD;
+  public List<MusicPlaylist> playlists = new ArrayList<>();
+  public List<String> playlistTracks = new ArrayList<>(), menuPlaylistTracks = new ArrayList<>();
+  public Map<String, Integer> menuGroupVolumes = new TreeMap<>();
   public MusicMode musicMode = MusicMode.VANILLA;
   public List<String> musicDirectories = new ArrayList<>();
   public List<String> menuDirectories = new ArrayList<>();
@@ -80,13 +81,15 @@ public final class AudioSettings {
   }
 
   public void validate() {
-    MusicPreset.validate(presets, preset);
-    MusicPreset.validateTracks(presetTrackPool);
+    MusicPlaylist.validate(playlists, playlist, menuPlaylist);
+    MusicPlaylist.validateTracks(playlistTracks);
+    MusicPlaylist.validateTracks(menuPlaylistTracks);
+    MusicGroups.copy(menuGroupVolumes);
     MusicGroups.copy(groupVolumes);
     if (menuControlsPosition == null || Math.abs((long) menuControlsOffsetX) > 4096
         || Math.abs((long) menuControlsOffsetY) > 4096)
       throw new IllegalArgumentException("Menu control offsets must be -4096 to 4096 pixels");
-    MusicPreset.validateTracks(favourites);
+    MusicPlaylist.validateTrackIds(favourites);
     volume(master);
     if (gapMinSeconds < 0 || gapMaxSeconds < gapMinSeconds || gapMaxSeconds > 86400)
       throw new IllegalArgumentException("Music gaps must be 0 to 86400 seconds, with maximum at least minimum");
@@ -104,7 +107,7 @@ public final class AudioSettings {
         throw new IllegalArgumentException("Unknown audio category");
       volume(e.getValue());
     }
-    MusicPreset.validateTracks(disabledTracks);
+    MusicPlaylist.validateTrackIds(disabledTracks);
     if (sounds.size() > 4096) throw new IllegalArgumentException("Too many sound overrides");
     for (var e : sounds.entrySet()) {
       String id = e.getKey();

@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SprintRuleConfigTest {
   @Test void olderTemplatesRemainOpaqueAndCannotAuthorizeCreation() {
-    JsonObject source = JsonParser.parseString("{\"schemaVersion\":7,\"settings\":{\"gameRules\":{\"survival\":{\"version\":3,\"values\":{\"allow_creative_mode\":true}}}},\"legacyWorldRules\":{\"keep\":true}}").getAsJsonObject();
+    JsonObject source = JsonParser.parseString("{\"schemaVersion\":8,\"settings\":{\"gameRules\":{\"survival\":{\"version\":3,\"values\":{\"allow_creative_mode\":true}}}},\"legacyWorldRules\":{\"keep\":true}}").getAsJsonObject();
     assertEquals(source, ConfigVersions.convert(source));
     JsonObject retained = ConfigVersions.convert(source).getAsJsonObject("settings").getAsJsonObject("gameRules").getAsJsonObject("survival");
     assertThrows(IllegalArgumentException.class, () -> TemplateDocuments.read(retained, false));

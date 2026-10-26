@@ -4,7 +4,7 @@ import com.google.gson.*;
 
 /** Current-format validation, independent of the release version. */
 public final class ConfigVersions {
-  public static final int CURRENT = 7;
+  public static final int CURRENT = 8;
   private ConfigVersions() {}
 
   public static int version(JsonObject root) {
@@ -12,16 +12,18 @@ public final class ConfigVersions {
       JsonPrimitive version = root.getAsJsonPrimitive("schemaVersion");
       if (!version.isNumber()) throw new IllegalArgumentException();
       return version.getAsBigDecimal().intValueExact();
-    } catch (RuntimeException e) { throw new IllegalArgumentException("Missing or invalid schemaVersion. Supported configuration version: 7. Upgrade older files with Power Beta 4.4.1 first.", e); }
+    } catch (RuntimeException e) { throw new IllegalArgumentException("Missing or invalid schemaVersion. Supported configuration version: 8. Restore a matching schema-8 configuration and music document, or use the release that saved this file.", e); }
   }
   public static JsonObject convert(JsonObject source) {
     int version = version(source);
     if (version != CURRENT)
-      throw new IllegalArgumentException("Configuration version " + version + " is unsupported. Supported version: 7. Upgrade older files with Power Beta 4.4.1 first, or use the release that saved this file; original file is preserved.");
+      throw new IllegalArgumentException("Configuration version " + version + " is unsupported. Supported version: 8. Restore a matching schema-8 configuration and music document, or use the release that saved this file; original file is preserved.");
     if (!source.has("settings") || !source.get("settings").isJsonObject())
       throw new IllegalArgumentException("Configuration settings must be an object.");
     JsonObject root = source.deepCopy();
     JsonObject settings = root.getAsJsonObject("settings");
+    if (settings.has("musicQueue"))
+      throw new IllegalArgumentException("Music queues belong in power-beta/music.json. Original configuration preserved.");
     // Creation templates have their own review boundary. Preserve unsupported documents
     // verbatim so they cannot block unrelated preferences or be consumed without consent.
     validateDebugLayout(settings);

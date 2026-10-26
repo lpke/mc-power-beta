@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 7,
+  "schemaVersion": 8,
   "settings": {
     "power_capture:config": {
       "addBasicScreenshotsToClipboard": false,
@@ -315,8 +315,6 @@
       },
       "sounds": {},
       "musicMode": "VANILLA",
-      "musicDirectories": [],
-      "menuDirectories": [],
       "recursive": false,
       "shuffle": true,
       "avoidRepeats": true,
@@ -341,7 +339,9 @@
       "underwaterRareAdditions": false,
       "underwaterUltraRareAdditions": false,
       "lavaBucketSounds": true,
-      "lavaAmbientSounds": true
+      "lavaAmbientSounds": true,
+      "playlist": "",
+      "menuPlaylist": "@world"
     },
     "visual": {
       "softRain": true,
@@ -581,7 +581,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.5.1"
+        "customVersionText": "Power Beta 4.6.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,

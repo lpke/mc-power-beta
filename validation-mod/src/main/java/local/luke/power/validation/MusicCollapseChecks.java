@@ -12,10 +12,9 @@ final class MusicCollapseChecks {
     failures=0;var before=AudioConfig.copy();var parent=mc.currentScreen;
     PowerOptionsScreen screen=null;
     try {
-      var settings=AudioConfig.copy();settings.musicMode=AudioSettings.MusicMode.ALL_MINECRAFT;
+      var settings=new AudioSettings();settings.musicMode=AudioSettings.MusicMode.ALL_MINECRAFT;
       settings.favourites=new TreeSet<>(Set.of("music:calm1.ogg","music:creative1.ogg"));
-      settings.presets=new ArrayList<>(settings.presets);
-      settings.presets.add(new MusicPreset("collapse-fixture","Collapse fixture",Set.of(),Map.of(),settings.favourites));
+      settings.playlists.add(new MusicPlaylist("collapse-fixture","Collapse fixture",new ArrayList<>(settings.favourites),Map.of()));
       AudioConfig.preview(settings);
       screen=MenuUpdateChecks.open(mc,"Audio");field(screen,"libraryOpen",true);call(screen,"layout");
       var options=screen;var library=(MusicLibraryScreen)field(screen,"library");
@@ -25,7 +24,9 @@ final class MusicCollapseChecks {
       for(String filter:List.of("active","","favourites","presets"))
         for(int[] size:new int[][]{{320,240},{854,480}})
           test("music collapse overrides individual groups only in current view "+filter+" "+size[0],()->{
-            library.showTracks();options.init(mc,size[0],size[1]);select.invoke(library,filter);
+            library.showTracks();options.init(mc,size[0],size[1]);
+            field(library,"hideExcluded",false);((TextInput)field(library,"search")).setText("");
+            select.invoke(library,filter);
             if(filter.equals("presets")){field(library,"selectedPreset","collapse-fixture");call(library,"rebuild");}
             check(library.hasSections(),"filter has no sections");
             var groups=List.copyOf((List<String>)field(library,"sectionKeys"));

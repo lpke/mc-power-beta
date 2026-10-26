@@ -56,8 +56,7 @@ final class AudioGroupChecks {
             .filter(t -> t.group().equals("Alpha"))
             .forEach(t -> excluded.add(t.id()));
         excluded.add("music:creative1.ogg");
-        s.presets.add(new MusicPreset("draft", "Quiet afternoons", excluded, Map.of("Alpha", 40),
-            new HashSet<>(AudioController.music(mc))));
+        s.playlists.add(new MusicPlaylist("draft", "Quiet afternoons", AudioController.music(mc).stream().filter(id -> !excluded.contains(id)).toList(), Map.of("Alpha", 40)));
         AudioConfig.preview(s);
         mc.options.musicVolume = .1f;
         AudioController.pause();
@@ -110,7 +109,7 @@ final class AudioGroupChecks {
               check(AudioConfig.current().groupVolumes.isEmpty(), "draft volume leaked");
               click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
               check(AudioConfig.current().groupVolumes.isEmpty(), "Save applied draft gain");
-              int volume = AudioConfig.current().presets.get(0).groupVolumes().get("Alpha");
+              int volume = AudioConfig.current().playlists.get(0).groupVolumes().get("Alpha");
               click(options, (int) call(panel, "right") - 25, presetRowY(panel, 1));
               check(
                   AudioConfig.current().groupVolumes.get("Alpha") == volume,
@@ -131,7 +130,7 @@ final class AudioGroupChecks {
               click(options, (int) call(panel, "hideX") + 8, (int) call(panel, "editButtonY") + 8);
               check(((List<?>) field(library, "rows")).isEmpty(), "excluded groups not hidden");
               check(
-                  saved.excluded().equals(draft.snapshot("New").excluded()),
+                  saved.tracks().equals(draft.snapshot("New").tracks()),
                   "visibility changed exclusions");
               for (int[] size : new int[][] {{320, 240}, {427, 240}, {640, 420}, {854, 480}}) {
                 options.init(mc, size[0], size[1]);

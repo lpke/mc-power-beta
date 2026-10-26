@@ -65,9 +65,11 @@ public final class DefaultBases {
   public static boolean load(Base base, Minecraft mc, Path game) throws Exception {
     if (RuleDefaults.review().required()) RuleDefaults.resetLatest();
     ConfigSession session = SettingsRegistry.openDefaults(mc);
-    Set<String> libraries = Set.of("audio.presets", "audio.favourites", "logo.presets", "interface.debugPresets", "interface.colours");
+    Set<String> libraries = Set.of("logo.presets", "interface.debugPresets", "interface.colours");
     for (Setting setting : session.settings()) {
-      if (libraries.contains(setting.id) || Set.of("inventoryTools.protectedSlots", "inventoryTools.preferredItems").contains(setting.id)) continue;
+      if (libraries.contains(setting.id) || setting.backend.equals("audio") && (setting.group.equals("Music data")
+          || setting.id.equals("audio.musicDirectories") || setting.id.equals("audio.menuDirectories")
+          || setting.id.startsWith("audio.sound.music:")) || Set.of("inventoryTools.protectedSlots", "inventoryTools.preferredItems").contains(setting.id)) continue;
       setting.value = value(base, setting.id, setting.powerBetaDefault);
     }
     session.settings().stream().filter(s -> s.id.equals("defaults.base")).forEach(s -> s.value = new JsonPrimitive(base.id));

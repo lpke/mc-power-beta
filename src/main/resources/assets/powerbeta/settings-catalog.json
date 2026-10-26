@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.5.1",
+    "default": "Power Beta 4.6.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -3407,8 +3407,11 @@
     "separatorAfter": false,
     "unit": "%"
   },
-  "audio.preset": {
+  "audio.playlist": {
     "order": 0
+  },
+  "audio.menuPlaylist": {
+    "order": 0.5
   },
   "audio.musicMode": {
     "order": 1

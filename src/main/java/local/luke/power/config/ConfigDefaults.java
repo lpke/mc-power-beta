@@ -26,7 +26,10 @@ public final class ConfigDefaults {
           }
         }
         catch (IllegalStateException failure) { PowerConfig.recovery(defaults, failure.getMessage()); }
-      } else PowerConfig.write(defaults);
+      } else {
+        PowerConfig.write(defaults);
+        PowerConfig.initializeMusicData();
+      }
       try { DefaultBases.reload(); }
       catch (RuntimeException failure) {
         PowerConfig.recovery(defaults, failure.getMessage()); DefaultBases.reload();

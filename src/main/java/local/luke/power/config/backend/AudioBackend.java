@@ -66,13 +66,20 @@ public final class AudioBackend implements Backend {
           new JsonPrimitive(100),
           "Volume in percent, multiplied by Master volume and Game sounds.",
           List.of());
-    add("preset", "Music library", "World music preset", Setting.Kind.TEXT,
-        new JsonPrimitive(s.preset), new JsonPrimitive(""),
-        "Load a saved soundtrack selection. Loading replaces current track exclusions and group volumes.", List.of());
-    add("presets", "Music data", "Music presets", Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.presets), new JsonArray(), "Saved soundtrack selections.", List.of());
-    add("presetTrackPool", "Music data", "Preset track pool", Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.presetTrackPool), new JsonArray(), "Tracks admitted by the loaded preset.", List.of());
+    add("playlist", "Music library", "World playlist", Setting.Kind.TEXT,
+        new JsonPrimitive(s.playlist), new JsonPrimitive(""),
+        "Load a saved playlist or use Default rotation. Library edits change the current selection; saved playlists change only in their editor.", List.of());
+    add("menuPlaylist", "Music library", "Menu playlist", Setting.Kind.TEXT,
+        new JsonPrimitive(s.menuPlaylist), new JsonPrimitive(MusicPlaylist.SAME_AS_WORLD),
+        "Use the world selection, Default rotation or a saved playlist for menu music. Menu music still controls continuity between menus and worlds.", List.of());
+    add("playlists", "Music data", "Music playlists", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.playlists), new JsonArray(), "Saved ordered music selections.", List.of());
+    add("playlistTracks", "Music data", "Current playlist tracks", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.playlistTracks), new JsonArray(), "Ordered tracks in the current world selection.", List.of());
+    add("menuPlaylistTracks", "Music data", "Menu playlist tracks", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.menuPlaylistTracks), new JsonArray(), "Ordered tracks in the current menu selection.", List.of());
+    add("menuGroupVolumes", "Music data", "Menu group volumes", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.menuGroupVolumes), new JsonObject(), "Current menu playlist group gains.", List.of());
     add("exclusions", "Music data", "Excluded tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.disabledTracks), new JsonArray(), "Excluded music identifiers.", List.of());
     add("groupVolumes", "Music data", "Music group volumes", Setting.Kind.LIST,
@@ -86,7 +93,7 @@ public final class AudioBackend implements Backend {
         Setting.Kind.CHOICE,
         new JsonPrimitive(s.musicMode.ordinal()),
         new JsonPrimitive(0),
-        "Survival uses in-game survival music. All also includes creative, menu, records and credits. Nether and End music are available only in the library and presets.",
+        "Survival uses in-game survival music. All also includes creative, menu, records and credits. Nether and End music are available in the library and playlists.",
         List.of("Vanilla", "Alpha and Beta survival", "Alpha and Beta all", "Minecraft survival", "Minecraft all"));
     add("customMusic", "Music library", "Custom music handling", Setting.Kind.CHOICE,
         new JsonPrimitive(s.customMusic.ordinal()), new JsonPrimitive(0),
@@ -94,8 +101,8 @@ public final class AudioBackend implements Backend {
         List.of("Off", "Add to soundtrack", "Custom only"));
     add("menuMusic", "Music library", "Menu music", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(2),
-        "Choose the menu soundtrack. World soundtrack and Mix both keep music playing when entering or leaving a world. Empty menu folders fall back to World music.",
-        List.of("World soundtrack", "Menu folders", "Mix both"));
+        "Choose the world soundtrack, menu selection or both. World soundtrack and Mix both keep music playing across world transitions. Default rotation uses menu folders with soundtrack fallback; an empty saved playlist stays silent.",
+        List.of("World soundtrack", "Menu selection", "Mix both"));
     add("dimensionMusic", "Music library", "On dimension change", Setting.Kind.CHOICE,
         new JsonPrimitive(s.dimensionMusic.ordinal()), new JsonPrimitive(0),
         "Continue music, end only dimension-specific custom tracks, or end any track when using a portal.",
@@ -134,7 +141,7 @@ public final class AudioBackend implements Backend {
         Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.shuffle),
         new JsonPrimitive(true),
-        "Off plays tracks in filename order.",
+        "Off follows playlist order, or filename order for Default rotation.",
         List.of());
     add(
         "avoidRepeats",
@@ -212,8 +219,8 @@ public final class AudioBackend implements Backend {
           new JsonPrimitive(100), 0, 100, 5, List.of(), false));
       result.add(new Setting("audio.trackEnabled." + track, "audio", "Audio", "Track rotation", label + " in rotation",
           "Include this track in automatic selection. You can still preview or explicitly queue excluded tracks.",
-          Setting.Kind.BOOLEAN, new JsonPrimitive(!config.disabledTracks.contains(track)
-              && (config.preset.isEmpty() || config.presetTrackPool.contains(track))),
+          Setting.Kind.BOOLEAN, new JsonPrimitive(config.playlist.isEmpty() ? !config.disabledTracks.contains(track)
+              : config.playlistTracks.contains(track)),
           new JsonPrimitive(true), 0, 1, 1, List.of(), false));
     }
     return result;
@@ -265,14 +272,15 @@ public final class AudioBackend implements Backend {
   }
 
   public List<Path> files() {
-    return List.of(AudioConfig.path());
+    return List.of(AudioConfig.path(), local.luke.power.storage.PowerConfig.musicPath());
   }
 
   private AudioSettings draft(Map<String, JsonElement> changes) {
     AudioSettings s = AudioConfig.copy();
-    if (changes.containsKey("audio.preset")) s.preset = changes.get("audio.preset").getAsString();
-    if (changes.containsKey("audio.presetTrackPool")) s.presetTrackPool = new TreeSet<>(Arrays.asList(
-        Catalog.JSON.fromJson(changes.get("audio.presetTrackPool"), String[].class)));
+    if (changes.containsKey("audio.playlist")) s.playlist = changes.get("audio.playlist").getAsString();
+    if (changes.containsKey("audio.menuPlaylist")) s.menuPlaylist = changes.get("audio.menuPlaylist").getAsString();
+    if (changes.containsKey("audio.playlistTracks")) s.playlistTracks = new ArrayList<>(Arrays.asList(
+        Catalog.JSON.fromJson(changes.get("audio.playlistTracks"), String[].class)));
     if (changes.containsKey("audio.exclusions")) s.disabledTracks = new TreeSet<>(Arrays.asList(
         Catalog.JSON.fromJson(changes.get("audio.exclusions"), String[].class)));
     for (var e : changes.entrySet()) {
@@ -306,9 +314,13 @@ public final class AudioBackend implements Backend {
           case "underwaterRareAdditions" -> s.underwaterRareAdditions = v.getAsBoolean();
           case "underwaterUltraRareAdditions" -> s.underwaterUltraRareAdditions = v.getAsBoolean();
           case "exclusions" -> { }
-          case "presetTrackPool" -> { }
-          case "preset" -> s.preset = v.getAsString();
-          case "presets" -> s.presets = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, MusicPreset[].class)));
+          case "playlistTracks" -> { }
+          case "playlist" -> s.playlist = v.getAsString();
+          case "playlists" -> s.playlists = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, MusicPlaylist[].class)));
+          case "menuPlaylist" -> s.menuPlaylist = v.getAsString();
+          case "menuPlaylistTracks" -> s.menuPlaylistTracks = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
+          case "menuGroupVolumes" -> s.menuGroupVolumes = Catalog.JSON.fromJson(v,
+              new com.google.gson.reflect.TypeToken<TreeMap<String, Integer>>() {}.getType());
           case "groupVolumes" -> s.groupVolumes = Catalog.JSON.fromJson(v,
               new com.google.gson.reflect.TypeToken<TreeMap<String, Integer>>() {}.getType());
           case "favourites" -> s.favourites = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));

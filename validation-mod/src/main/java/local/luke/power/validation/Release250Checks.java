@@ -130,7 +130,7 @@ final class Release250Checks {
           if(Catalog.text(Catalog.metadata(setting.id),"unit","").equals("%")) check(setting.display().endsWith("%"),"percent suffix missing "+setting.id);
         }
         check(loaded.settings().stream().filter(s -> s.id.equals("native.guiScale")).findFirst().orElseThrow().value.getAsInt() == 4,"GUI scale changed for " + base);
-        for (var setting : loaded.settings()) if (!Set.of("audio.presets", "audio.favourites", "logo.presets", "interface.debugPresets", "interface.colours", "defaults.base", "defaults.setupComplete").contains(setting.id)) {
+        for (var setting : loaded.settings()) if (!Set.of("audio.playlists", "audio.favourites", "logo.playlists", "interface.debugPresets", "interface.colours", "defaults.base", "defaults.setupComplete").contains(setting.id)) {
           check(same(setting.value, DefaultBases.value(base, setting.id, setting.powerBetaDefault)), "load mismatch " + base + " " + setting.id + " = " + setting.value + " expected " + DefaultBases.value(base, setting.id, setting.powerBetaDefault));
         }
       }

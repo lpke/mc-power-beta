@@ -83,7 +83,7 @@ class SettingTest {
     JsonArray tracks = new JsonArray();
     for (int i = 0; i < 4096; i++) tracks.add("music:custom/" + "a".repeat(64) + i + ".ogg");
     assertTrue(tracks.toString().length() > 16384);
-    for (String id : List.of("audio.exclusions", "audio.favourites", "audio.presets", "other")) {
+    for (String id : List.of("audio.exclusions", "audio.favourites", "audio.playlists", "other")) {
       Setting s = new Setting(id, "audio", "Audio", "Music data", "Music selection", "",
           Setting.Kind.LIST, new JsonArray(), new JsonArray(), 0, 0, 1, List.of(), false);
       if (id.equals("other")) assertThrows(IllegalArgumentException.class, () -> s.validate(tracks));

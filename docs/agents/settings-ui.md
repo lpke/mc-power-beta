@@ -4,9 +4,8 @@
   Rule groups identify world scope without repeated row labels.
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
-  track and preset IDs. Global schema 7 and world-rule/template format 4 are the
-  supported formats. Older configuration schemas, rule formats and pre-rule worlds
-  must first be upgraded with Power Beta 4.4.1. Reject them with recovery guidance;
+  track and preset IDs. Global schema 8 and world-rule/template format 4 are the
+  supported formats. Older configuration schemas require an explicit backed-up conversion to schema 8 and music-data format 1. Older rule formats and pre-rule worlds require separate native validation. Reject unsupported data with recovery guidance;
   never reconstruct permissions from retired global settings. Retain opaque historical
   evidence already stored in configuration documents without consuming it.
   Validate converted values and verify durable backups before replacing originals.

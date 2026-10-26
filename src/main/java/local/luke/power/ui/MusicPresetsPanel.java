@@ -2,11 +2,11 @@ package local.luke.power.ui;
 
 import java.util.*;
 import local.luke.power.audio.AudioController;
-import local.luke.power.audio.MusicPreset;
+import local.luke.power.audio.MusicPlaylist;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-/** Preset list and editor header, embedded in the same Audio content area. */
+/** Playlist list and editor header, embedded in the same Audio content area. */
 final class MusicPresetsPanel extends UiScreen {
   private final PowerOptionsScreen parent;
   private final MusicEdits edits;
@@ -22,7 +22,7 @@ final class MusicPresetsPanel extends UiScreen {
   private String error = "", deleting = "";
   private int scroll;
   private Runnable pending;
-  private List<MusicPreset> countedPresets;
+  private List<MusicPlaylist> countedPresets;
   private int countedRevision = -1;
   private Map<String, Integer> includedCounts = Map.of();
 
@@ -61,7 +61,7 @@ final class MusicPresetsPanel extends UiScreen {
     error = "";
   }
 
-  void edit(MusicPreset preset) {
+  void edit(MusicPlaylist preset) {
     draft = new MusicPresetDraft(preset, AudioController.music(minecraft));
     hideExcluded = !draft.creating();
     name.setText(draft.name());
@@ -122,8 +122,12 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   private int nameWidth() {
-    return right() - nameX() - (span() >= 640 ? 326 : 0);
+    return right() - nameX() - (span() >= 640 ? 378 : 52);
   }
+
+  private int orderX() { return span() >= 640 ? right() - 372 : right() - 48; }
+
+  private int createWidth() { return Math.min(150, Math.max(60, span() - 114)); }
 
   private int saveX() {
     return span() >= 640 ? right() - 320 : left();
@@ -202,6 +206,9 @@ final class MusicPresetsPanel extends UiScreen {
     if (!editing()) return listClick(x, y, b);
     name.focused = inside(x, y, nameX(), top(), nameWidth(), 18);
     if (name.focused) name.click(x, b);
+    if (b == 0 && !draft.tracks().isEmpty() && inside(x,y,orderX(),top(),48,18)) {
+      click(); minecraft.setScreen(new MusicPlaylistOrderScreen(parent,draft)); return true;
+    }
     if (b == 0 && inside(x, y, saveX(), editButtonY(), saveWidth(), 18)) {
       save();
       return true;
@@ -232,8 +239,15 @@ final class MusicPresetsPanel extends UiScreen {
       scroll = (int) scrollbar.drag(track(), y, true);
       return true;
     }
-    if (inside(x, y, left(), top(), Math.min(150, span()), 20)) {
+    if (inside(x, y, left(), top(), createWidth(), 20)) {
       edit(null);
+      return true;
+    }
+    if (inside(x,y,right()-108,top(),108,20)) {
+      List<String> choices = edits.selected().isEmpty() ? List.of("Save as new playlist")
+          : List.of("Update " + edits.name(edits.selected()), "Save as new playlist");
+      parent.choose(choices,List.of(),-1,right()-108,top(),108,index ->
+          edit(edits.current(edits.selected().isEmpty() || index==1)));
       return true;
     }
     if (y < rowTop() || y >= bottom()) return true;
@@ -249,7 +263,7 @@ final class MusicPresetsPanel extends UiScreen {
     }
     var values = edits.presets();
     if (index > values.size()) return true;
-    MusicPreset p = values.get(index - 1);
+    MusicPlaylist p = values.get(index - 1);
     if (inside(x, y, right() - 54, cy, 54, 18)) {
       edits.load(p.id());
       parent.closeAudioPanel();
@@ -258,12 +272,12 @@ final class MusicPresetsPanel extends UiScreen {
     return true;
   }
 
-  private Map<String, Integer> includedCounts(List<MusicPreset> values) {
+  private Map<String, Integer> includedCounts(List<MusicPlaylist> values) {
     int revision = AudioController.libraryRevision();
     if (values != countedPresets || revision != countedRevision) {
       Set<String> available = AudioController.music(minecraft);
       Map<String, Integer> counts = new HashMap<>();
-      for (MusicPreset p : values)
+      for (MusicPlaylist p : values)
         counts.put(
             p.id(),
             (int) available.stream().filter(p::includes).count());
@@ -276,8 +290,9 @@ final class MusicPresetsPanel extends UiScreen {
 
   void renderHeader(int mx, int my) {
     if (editing()) {
+      button("Order",orderX(),top(),48,18,mx,my,!draft.tracks().isEmpty());
       text(actionLabel(), left(), top() + 5, 0xffffff);
-      input(name, nameX(), top(), nameWidth(), mx, my, "Preset name");
+      input(name, nameX(), top(), nameWidth(), mx, my, "Playlist name");
       button("Save", saveX(), editButtonY(), saveWidth(), 18, mx, my, true);
       button(
           fit(hideExcluded ? "Show excluded" : "Hide excluded", hideWidth() - 4),
@@ -291,9 +306,10 @@ final class MusicPresetsPanel extends UiScreen {
       button(span() < 326 ? "All" : "Include all", includeX(), bulkY(), bulkWidth(), 18, mx, my, true);
       button(span() < 326 ? "None" : "Exclude all", excludeX(), bulkY(), bulkWidth(), 18, mx, my, true);
     } else {
-      button("Create new preset", left(), top(), Math.min(150, span()), 20, mx, my, true);
+      button("New playlist", left(), top(), createWidth(), 20, mx, my, true);
+      button("Save current",right()-108,top(),108,20,mx,my,true);
       text(
-          fit("Loading replaces includes, excludes and group volumes.", span()),
+          fit("Load copies tracks and group volumes into the current selection.", span()),
           left(),
           top() + 28,
           0xaaaaaa);
@@ -308,13 +324,13 @@ final class MusicPresetsPanel extends UiScreen {
       for (int i = 0; i <= presets.size(); i++) {
         int y = rowTop() + i * rowHeight() - scroll;
         if (y + rowHeight() <= rowTop() || y >= bottom()) continue;
-        MusicPreset p = i == 0 ? null : presets.get(i - 1);
-        text(fit(p == null ? "None" : p.name(), textWidth()), left() + 2, y + 5, 0xdddddd);
+        MusicPlaylist p = i == 0 ? null : presets.get(i - 1);
+        text(fit(p == null ? "Default rotation" : p.name(), textWidth()), left() + 2, y + 5, 0xdddddd);
         text(
             fit(
                 p == null
-                    ? "Clear exclusions; use soundtrack settings"
-                    : counts.get(p.id()) + " included tracks",
+                    ? "Use soundtrack settings and default exclusions"
+                    : p.tracks().size() + " tracks" + (counts.get(p.id()) < p.tracks().size() ? ", " + (p.tracks().size()-counts.get(p.id())) + " unavailable" : ""),
                 textWidth()),
             left() + 2,
             y + 19,
@@ -336,10 +352,11 @@ final class MusicPresetsPanel extends UiScreen {
     if (!modal()) return;
     fill(0, 0, width, height, 0xd0000000);
     int w = Math.min(312, width - 20), x = (width - w) / 2, y = height / 2 - 35;
-    text(pending != null ? "Save changes to this preset?" : "Delete this preset?", x, y, 0xffffff);
+    text(pending != null ? "Save changes to this playlist?" : "Delete this playlist?", x, y, 0xffffff);
     if (!error.isEmpty()) text(fit(error, w), x, y + 15, 0xff8888);
     else if (!deleting.isEmpty())
-      text("Current track exclusions will stay unchanged.", x, y + 15, 0xaaaaaa);
+      text(fit(deleting.equals(edits.selected()) ? "World selection will return to Default rotation."
+          : "Music files and other playlists stay unchanged.",w), x, y + 15, 0xaaaaaa);
     for (int i = 0; i < (pending != null ? 3 : 2); i++)
       button(
           pending != null

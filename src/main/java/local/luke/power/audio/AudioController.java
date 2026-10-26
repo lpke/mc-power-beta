@@ -39,13 +39,14 @@ public final class AudioController {
       menuMusic = "",
       status = "";
   private static int cleanup, menuCooldown, libraryRevision, conversionRevision;
-  private static boolean trackWasPlaying;
+  private static boolean trackWasPlaying, currentUsesMenuVolumes;
   private static final MusicProgress progress = new MusicProgress();
   private static AudioSettings rotationConfig;
   private static List<MusicLibrary.Track> enabledWorld = List.of(), enabledMenu = List.of();
   private record Context(boolean world, int dimension, String biome) {}
   private record PoolKey(AudioSettings settings, MusicRules rules, Context context, int revision) {}
-  private static PoolKey activeKey, nextKey;
+  private static PoolKey activeKey, nextKey, volumeKey;
+  private static Set<String> volumeWorldIds = Set.of();
   private static class_267 upcoming;
   private static Set<String> activeTracks = Set.of();
   private static List<MusicLibrary.Track> custom = List.of();
@@ -115,6 +116,7 @@ public final class AudioController {
     system.stop("PowerBetaMenu");
     menuMusic = "";
     currentMusic = trackId(track);
+    currentUsesMenuVolumes = usesMenuVolumes(currentMusic, context(client));
     paused = false;
     silenced = false;
     status = "";
@@ -306,43 +308,96 @@ public final class AudioController {
     return new Context(mc != null && mc.world != null, dimension, biome);
   }
 
-  /** The same background candidates feed automatic selection and the library's Active filter. */
+  private static boolean menuSelection(Context context, AudioSettings settings) {
+    return !context.world && settings.menuMusic != AudioSettings.MenuMusic.WORLD
+        && !MusicPlaylist.SAME_AS_WORLD.equals(settings.menuPlaylist);
+  }
+
+  private static String selectionContext(Context context, AudioSettings settings) {
+    String world = settings.playlist.isEmpty() ? "default" : "playlist:" + settings.playlist;
+    if (!menuSelection(context, settings)) return world;
+    return "menu:" + settings.menuMusic + ":" + settings.menuPlaylist + ":" + world;
+  }
+
+  private static List<class_267> orderedTracks(List<String> ids) {
+    List<class_267> result = new ArrayList<>();
+    for (String id : ids) try {
+      class_267 track = resolveTrack(id);
+      if (track != null) result.add(track);
+    } catch (java.io.IOException ignored) { /* Missing IDs remain in the stored selection. */ }
+    return result;
+  }
+
+  private static List<class_267> defaultTracks(List<class_267> vanilla,
+      List<MusicLibrary.Track> imported, Context context, boolean includeExcluded) {
+    AudioSettings settings = AudioConfig.current();
+    List<class_267> customTracks = new ArrayList<>();
+    if (settings.customMusic != AudioSettings.CustomMusic.OFF)
+      for (var track : imported) try {
+        class_267 selected = entry(track);
+        if (selected != null) customTracks.add(selected);
+      } catch (java.io.IOException ignored) { }
+    List<class_267> tracks = new ArrayList<>();
+    if (settings.customMusic != AudioSettings.CustomMusic.ONLY || customTracks.isEmpty())
+      tracks.addAll(vanilla);
+    tracks.addAll(customTracks);
+    tracks.removeIf(track -> !includeExcluded && settings.disabledTracks.contains(trackId(track))
+        || !TrackRules.eligible(track.field_2126, context.dimension, context.biome));
+    return tracks;
+  }
+
+  private static List<class_267> defaultMenuTracks(List<class_267> vanilla, Context context,
+      boolean includeExcluded) {
+    AudioSettings settings = AudioConfig.current();
+    List<class_267> tracks = defaultTracks(vanilla, enabledWorld, context, includeExcluded);
+    List<class_267> menu = new ArrayList<>();
+    // The customMusic preference applies to world folders. Menu folders have their own policy.
+    for (var track : enabledMenu) try {
+      class_267 selected = entry(track);
+      if (selected != null) menu.add(selected);
+    } catch (java.io.IOException ignored) { }
+    return MusicRotation.menu(tracks, menu, settings.menuMusic == AudioSettings.MenuMusic.CUSTOM,
+        track -> (includeExcluded || !settings.disabledTracks.contains(trackId(track)))
+            && TrackRules.eligible(track.field_2126, context.dimension, context.biome));
+  }
+
+  /** Automatic playback and the Active filter share the same ordered candidates. */
   private static List<class_267> backgroundPool(List<class_267> vanilla, Context context,
       boolean includeExcluded) {
     updateRotation();
-    AudioSettings s = AudioConfig.current();
-    List<class_267> tracks = new ArrayList<>();
-    List<class_267> worldCustom = new ArrayList<>();
-    if (s.customMusic != AudioSettings.CustomMusic.OFF)
-      for (var track : enabledWorld)
-        try {
-          if (track.playable()) { class_267 selected = entry(track); if (selected != null) worldCustom.add(selected); }
-        } catch (java.io.IOException ignored) { /* A removed file cannot enter automatic rotation. */ }
-    if (s.customMusic != AudioSettings.CustomMusic.ONLY || worldCustom.isEmpty()) tracks.addAll(vanilla);
-    tracks.addAll(worldCustom);
-    if (!context.world && rules().menuEnabled()) {
-      List<class_267> menu = new ArrayList<>();
-      for (var t : enabledMenu) try {
-        if (t.playable()) { var selected = entry(t); if (selected != null) menu.add(selected); }
-      } catch (java.io.IOException ignored) { }
-      if (!menu.isEmpty() && rules().menuOverrides()) tracks.clear();
-      tracks.addAll(menu);
+    AudioSettings settings = AudioConfig.current();
+    List<class_267> tracks = settings.playlist.isEmpty()
+        ? defaultTracks(vanilla, enabledWorld, context, includeExcluded)
+        : orderedTracks(settings.playlistTracks);
+    tracks = new ArrayList<>(tracks);
+    if (!context.world && settings.menuMusic != AudioSettings.MenuMusic.WORLD) {
+      if (menuSelection(context, settings)) {
+        List<class_267> menu = MusicPlaylist.DEFAULT.equals(settings.menuPlaylist)
+            ? defaultMenuTracks(vanilla, context, includeExcluded)
+            : orderedTracks(settings.menuPlaylistTracks);
+        if (settings.menuMusic == AudioSettings.MenuMusic.CUSTOM) tracks.clear();
+        tracks.addAll(menu);
+      } else if (settings.playlist.isEmpty()) {
+        // Same as world preserves the original dedicated menu-folder policy.
+        tracks = defaultMenuTracks(vanilla, context, includeExcluded);
+      }
     }
-    if (!s.preset.isEmpty()) {
-      tracks.clear();
-      for (var builtin : BuiltinMusic.TRACKS) tracks.add(BundledMusic.entry(builtin.id()));
-      for (var track : custom) try {
-        var selected = entry(track); if (selected != null) tracks.add(selected);
-      } catch (java.io.IOException ignored) { /* Keep missing tracks out of playback. */ }
-    }
-    // Overlapping world/menu folders should not increase a track's chance of selection.
+    // Overlapping folders and MIX selections must not increase a track's probability.
     Map<String, class_267> unique = new LinkedHashMap<>();
-    tracks.forEach(t -> unique.putIfAbsent(trackId(t), t));
-    tracks = new ArrayList<>(unique.values());
-    tracks.removeIf(track -> !s.preset.isEmpty() && !s.presetTrackPool.contains(trackId(track))
-        || !includeExcluded && s.disabledTracks.contains(trackId(track))
-        || s.preset.isEmpty() && !TrackRules.eligible(track.field_2126, context.dimension, context.biome));
-    return tracks;
+    tracks.forEach(track -> unique.putIfAbsent(trackId(track), track));
+    return new ArrayList<>(unique.values());
+  }
+
+  /** Snapshot world candidates even when the editor is open at the title screen. */
+  public static List<String> worldMusicSelection(Minecraft mc) {
+    updateRotation();
+    AudioSettings settings = AudioConfig.current();
+    Context actual = context(mc);
+    Context world = new Context(true, actual.dimension, actual.biome);
+    List<class_267> tracks = settings.playlist.isEmpty()
+        ? defaultTracks(BundledMusic.selection(settings.musicMode), enabledWorld, world, true)
+        : orderedTracks(settings.playlistTracks);
+    return tracks.stream().map(AudioController::trackId).toList();
   }
 
   /** Ignore per-track exclusions and volume, so users can re-enable tracks within their pool. */
@@ -560,6 +615,7 @@ public final class AudioController {
     if (requested != null) { remember(requested); currentMusic = trackId(requested); musicStarted = System.nanoTime(); trackWasPlaying = false; return requested; }
     Context context = context(client);
     class_267 chosen = upcoming();
+    if (chosen != null) WORLD.played(selectionContext(context, s), trackId(chosen));
     upcoming = null;
     if (chosen != null) {
       remember(chosen);
@@ -584,7 +640,7 @@ public final class AudioController {
       var pool = backgroundPool(BundledMusic.selection(s.musicMode), key.context, false);
       // Volume, timing and UI edits replace the settings snapshot, but do not revoke a valid reservation.
       if (upcoming == null || pool.stream().noneMatch(t -> trackId(t).equals(trackId(upcoming))))
-        upcoming = WORLD.choose(pool, s.shuffle, s.avoidRepeats, RANDOM, t -> t.field_2127.toExternalForm());
+        upcoming = WORLD.reserve(selectionContext(key.context, s), pool, s.shuffle, s.avoidRepeats, RANDOM, AudioController::trackId);
       nextKey = key;
     }
     return upcoming;
@@ -621,16 +677,41 @@ public final class AudioController {
     return MusicGroups.id(id, customById.get(id));
   }
 
+  private static boolean usesMenuVolumes(String id, Context context) {
+    AudioSettings settings = AudioConfig.current();
+    if (!menuSelection(context, settings) || MusicPlaylist.DEFAULT.equals(settings.menuPlaylist)) return false;
+    if (settings.menuMusic == AudioSettings.MenuMusic.CUSTOM) return true;
+    if (!settings.menuPlaylistTracks.contains(id)) return false;
+    if (!settings.playlist.isEmpty()) return !settings.playlistTracks.contains(id);
+    PoolKey key = new PoolKey(settings, rules(), context, libraryRevision);
+    if (!key.equals(volumeKey)) {
+      updateRotation();
+      Set<String> ids = new HashSet<>();
+      defaultTracks(BundledMusic.selection(settings.musicMode), enabledWorld, context, false)
+          .forEach(track -> ids.add(trackId(track)));
+      volumeWorldIds = Set.copyOf(ids);
+      volumeKey = key;
+    }
+    return !volumeWorldIds.contains(id);
+  }
+
+  private static Map<String, Integer> volumeGroups(String id) {
+    AudioSettings settings = AudioConfig.current();
+    boolean menu = id.equals(currentMusic) && !MusicPreview.active()
+        ? currentUsesMenuVolumes : usesMenuVolumes(id, context(client));
+    return menu ? settings.menuGroupVolumes : settings.groupVolumes;
+  }
+
   public static float musicVolume(String id) {
     float base = client == null ? 1 : client.options.musicVolume;
     AudioSettings s = AudioConfig.current();
-    return base * s.master / 100f * trackVolume(id) / 100f * MusicGroups.gain(s.groupVolumes, musicGroup(id));
+    return base * s.master / 100f * trackVolume(id) / 100f * MusicGroups.gain(volumeGroups(id), musicGroup(id));
   }
 
   public static float backgroundVolume(float original) {
     if (MusicPreview.active() || paused) return 0;
     AudioSettings s = AudioConfig.current();
-    return original * s.master / 100f * trackVolume(currentMusic) / 100f * MusicGroups.gain(s.groupVolumes, musicGroup(currentMusic));
+    return original * s.master / 100f * trackVolume(currentMusic) / 100f * MusicGroups.gain(volumeGroups(currentMusic), musicGroup(currentMusic));
   }
 
   private static SoundSystem system() {

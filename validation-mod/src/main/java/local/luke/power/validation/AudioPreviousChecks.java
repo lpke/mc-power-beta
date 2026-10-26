@@ -28,7 +28,7 @@ final class AudioPreviousChecks {
         s.gapMinSeconds = s.gapMaxSeconds = 600; s.menuMusic = AudioSettings.MenuMusic.WORLD;
         s.musicDirectories = List.of("power-beta-data/validation/audio-previous-152");
         s.menuDirectories = List.of(); s.customMusic = AudioSettings.CustomMusic.ONLY;
-        s.preset = ""; s.disabledTracks.clear(); s.disabledMusicDirectories.clear();
+        s.playlist = ""; s.disabledTracks.clear(); s.disabledMusicDirectories.clear();
         AudioConfig.preview(s); mc.options.musicVolume = .2F;
         MusicRequests.edit(q -> { q.tracks.clear(); q.tracks.add(QUEUED); });
       }

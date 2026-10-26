@@ -4,9 +4,9 @@
   World/menu transitions preserve streams and pause state in WORLD/MIX modes;
   only CUSTOM resets playback. Preview restoration must not revive old jukeboxes.
   Synchronize sound-source cleanup with decoder reads on the sound threads.
-  Never scan folders or decode audio from a render loop. Preset drafts and saved
-  snapshots must stay separate from live library edits; only Load copies a preset
-  into live state. Track pools prevent new folders silently expanding presets.
+  Never scan folders or decode audio from a render loop. Playlist drafts and saved
+  snapshots must stay separate from live library edits; only Load copies a playlist
+  into the working selection. Ordered positive track IDs prevent imported folders silently expanding playlists. Music data lives in `power-beta/music.json`, while playback preferences stay in the shared config; both paths join the Options transaction. Queue snapshots merge independently of editor drafts.
   Keep missing track IDs, queues and user music files intact.
   Previous during a between-track gap replays the last played track without
   moving back in history or consuming queued tracks. Paused tracks remain current.
@@ -40,7 +40,7 @@
   the sound engine, reading terrain or consuming sound-pool randomness. UI and music
   never create guessed captions; semantic scopes apply once and remain thread-local.
 - Music-library collapse/expand-all acts on groups in the current view, including search,
-  without changing inclusion, volume, presets or queues. Menu scrub tracks reserve equal
+  without changing inclusion, volume, playlists or queues. Menu scrub tracks reserve equal
   space on either side so the track itself stays centered with the menu.
 
 - Optional fluid sounds follow verified official assets and native movement/display events.

@@ -17,6 +17,29 @@
 
 # Runtime checks
 
+- `music-playlists-460 capture` captures unfiltered Audio settings at the Music library
+  header, the native library, playlist list, existing
+  and empty editors, Save current popup, order screen, queue and menu assignment at
+  320x240 and 640x420.
+  Capture before acceptance, then run `music-playlists-460 run` for real Options
+  auto-apply, manual Apply/Discard, saved/working/editor separation, ordered missing
+  references, group and per-track gains, Save current, independent menu assignment,
+  Default/empty selections and queue changes made after Options opened.
+  Use a muted disposable world with a client window of at least 1280x840.
+  Images are under `power-beta-data/reports/music-playlists-460`.
+  `music-playlists-460 view settings|library|playlists|save-current|editor|order|empty|queue|menu` stages a
+  native screen for inspection; `music-playlists-460 stop` restores it.
+  The fixture restores runtime audio/queue/preferences, both configuration and music
+  files byte-for-byte, and removes only backups created by the fixture.
+  Run `audio-maintenance` as well for native folder import and playlist isolation.
+  `music-playlists-460 menu-pools`, also included in `run`, calls the actual native
+  menu candidate builder with a synthetic menu context for all twelve WORLD/CUSTOM/MIX
+  and same-as-world/Default/saved/empty combinations. It checks exact order,
+  exclusions, overlap deduplication, gain ownership and native current-source gain
+  multiplication. It starts no audio and never unloads the world. These checks do
+  not simulate a real menu transition or preview playback; keep the existing native
+  audio transition and `audio-groups-gain-*` playback checks separate.
+
 - `map-449 run` checks open-menu map mouse ownership, other modals, Pause label eligibility and session-only World Map visibility. `prepare inventory|pause-wheel|right|middle|left`, actual pointer action, `check`, then `stop` covers native mouse batches. The prepare token is combined, for example `prepare inventory-wheel`.
 - `waypoint-449` covers relative command/editor coordinates, one commit-time reported origin, bounds, invalid drafts and retained data.
 - `photo-449 check|open|view ROTATION TILT [ZOOM]|capture|close` checks fitted native projection, renderer-grid ownership and normal screenshot capture. Use a focused muted disposable client with loaded water and at least 1280×720 for captures.
@@ -98,7 +121,7 @@
   `creative-443-movement sorting` checks current immediate-editor Escape and
   screen-change cleanup, then confirms a stale sorting close preserves recipe-search focus.
 
-- `current-formats-442` validates schema 7, both format-4 templates and every saved
+- `current-formats-442` validates schema 8, both format-4 templates and every saved
   world metadata/previous/dimension file, including native offhand/kept-item decoding
   after registry initialization. It checks byte preservation, old/future rejection
   and fresh native-world creation. Requires a muted disposable singleplayer clone.
@@ -767,6 +790,10 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   expects FFmpeg on PATH; the unit suite covers an unavailable executable.
 - `audio-presets-setup`, `audio-presets-ui`, `audio-presets-finish`: preset editing.
   Playback steps in `AudioPresetChecks` need separate ticks between commands.
+  Scrubber/editor coverage needs `audio-presets-setup`, `audio-presets-play`, wait
+  for decoding, then `audio-presets-duration`, `audio-presets-editor` and
+  `audio-presets-finish`. Keep playback on the verified silent sink; Finish restores
+  the native music volume captured by Setup.
 - `audio-groups-setup`, `audio-groups-ui`, `audio-groups-menu`,
   `audio-groups-finish`: group gains, layout and pause controls.
 - `new-world`: create an isolated test world; `options PAGE`, `pause`, `title`

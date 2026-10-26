@@ -47,6 +47,7 @@ def main():
  shutil.copy2(ROOT/'build/libs'/jar_name,mods/jar_name)
  defaults=ROOT/'src/main/resources/assets/powerbeta/defaults/power-beta.json'
  target=stage/'.minecraft/config/power-beta.json';target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(defaults,target)
+ music=stage/'.minecraft/power-beta/music.json';music.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(defaults.with_name('music.json'),music)
  assert len(list(mods.glob('*.jar')))==7
  shutil.copy2(ROOT/'LICENSE',stage/'LICENSE.txt');export_markdown('README.md',stage/'README.md')
  shutil.copy2(ROOT/'vendor/manifest.json',stage/'COMPONENTS.json')

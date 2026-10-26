@@ -11,7 +11,7 @@ public final class MusicRequests {
 
   private static MusicQueue load() {
     try {
-      var value = PowerConfig.read("musicQueue", MusicQueue.class);
+      var value = PowerConfig.readMusicQueue(MusicQueue.class);
       value.validate();
       return value;
     } catch (Exception e) {
@@ -28,7 +28,7 @@ public final class MusicRequests {
     MusicQueue next = Catalog.JSON.fromJson(Catalog.JSON.toJson(queue), MusicQueue.class);
     edit.accept(next);
     next.validate();
-    PowerConfig.save("musicQueue", next);
+    PowerConfig.saveMusicQueueDeferred(next);
     queue = next;
   }
 }

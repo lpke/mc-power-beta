@@ -782,6 +782,8 @@ public final class PowerOptionsScreen extends UiScreen {
     }
   }
 
+  net.minecraft.client.Minecraft client() { return minecraft; }
+
   public void changed(Setting setting) { changed(setting, false); }
 
   boolean acceptEditor(SettingsDraft draft) {
@@ -1182,7 +1184,18 @@ public final class PowerOptionsScreen extends UiScreen {
       minecraft.setScreen(new TitleLetteringScreen(this));
       return;
     }
-    if (s.id.equals("audio.preset")) {
+    if (s.id.equals("audio.menuPlaylist")) {
+      MusicEdits edits = new MusicEdits(this);
+      List<String> ids = new ArrayList<>(List.of(local.luke.power.audio.MusicPlaylist.SAME_AS_WORLD,
+          local.luke.power.audio.MusicPlaylist.DEFAULT));
+      edits.presets().forEach(p -> ids.add(p.id()));
+      Row row = rows.stream().filter(r -> r.setting == s).findFirst().orElseThrow();
+      choose(ids.stream().map(edits::name).toList(), List.of(), ids.indexOf(s.value.getAsString()),
+          mainControlLeft(row), top()+row.y-(int)scroll+SettingRows.buttonOffset(span()),
+          controlEnd(s)-mainControlLeft(row), index -> edits.loadMenu(ids.get(index)));
+      return;
+    }
+    if (s.id.equals("audio.playlist")) {
       libraryOpen = true; library.openPresets(); layout(); return;
     }
     if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) {
@@ -1403,7 +1416,8 @@ public final class PowerOptionsScreen extends UiScreen {
     if (s.id.equals(HudEditorSettings.ENTRY) || s.id.equals("maps.hudEditor") || s.id.equals("maps.worldMapEditor") || s.id.equals("logo.logo.lines")) return "Edit...";
     if (!SettingAccess.reason(session, s).isEmpty()) return SettingAccess.lockedValue(s);
     if (s.id.equals("power_controls:userinterface.panoramaConfig.panoramaFolder")) return local.luke.power.input.PanoramaCatalog.label(s.value.getAsString());
-    if (s.id.equals("audio.preset")) return new MusicEdits(this).name(s.value.getAsString());
+    if (s.id.equals("audio.playlist")) return new MusicEdits(this).currentName();
+    if (s.id.equals("audio.menuPlaylist")) return new MusicEdits(this).name(s.value.getAsString());
     if (capture == s) return modifierLabel(Bindings.heldModifiers()) + "Press key...";
     if (ItemEditors.accepts(s)) return ItemEditors.display(s);
     if (s.kind != Setting.Kind.KEY) return s.display();

@@ -37,21 +37,21 @@ final class AudioMaintenanceChecks {
         }
       }
       AudioSettings config = new AudioSettings();
-      config.presets.add(new MusicPreset("one", "One", Set.of(), Map.of(), Set.of("music:calm1.ogg")));
-      MusicPreset.load(config, "one");
+      config.playlists.add(new MusicPlaylist("one", "One", List.of("music:calm1.ogg"), Map.of()));
+      MusicPlaylist.load(config, "one");
       AudioConfig.preview(config);
       PowerOptionsScreen options = MenuUpdateChecks.open(mc, "Audio");
       test("loaded preset admissions survive previews and rollback without mutating saved presets", () -> {
         Setting enabled = find(options.session(), "audio.trackEnabled.music:calm2.ogg");
         check(!enabled.value.getAsBoolean(), "new track already admitted");
         enabled.value = new JsonPrimitive(true); options.changed(enabled);
-        check(AudioConfig.current().presetTrackPool.contains("music:calm2.ogg"), "preview missed admission");
-        check(!AudioConfig.current().presets.get(0).includes("music:calm2.ogg"), "live edit mutated preset");
+        check(AudioConfig.current().playlistTracks.contains("music:calm2.ogg"), "preview missed admission");
+        check(!AudioConfig.current().playlists.get(0).includes("music:calm2.ogg"), "live edit mutated preset");
         Setting favourite = find(options.session(), "audio.favourites");
         favourite.value = Catalog.JSON.toJsonTree(Set.of("music:calm1.ogg")); options.changed(favourite);
-        check(AudioConfig.current().presetTrackPool.contains("music:calm2.ogg"), "next edit lost admission");
+        check(AudioConfig.current().playlistTracks.contains("music:calm2.ogg"), "next edit lost admission");
         options.session().discard();
-        check(!AudioConfig.current().presetTrackPool.contains("music:calm2.ogg"), "discard retained admission");
+        check(!AudioConfig.current().playlistTracks.contains("music:calm2.ogg"), "discard retained admission");
       });
       Setting folders = find(options.session(), "audio.musicDirectories");
       test("multi-select browse adds unique children and folder drafts require Save or Discard", () -> {
@@ -73,7 +73,8 @@ final class AudioMaintenanceChecks {
         escape(folder); clickScreen(folder, folder.width/2 - 80, folder.height/2 + 16);
         check(mc.currentScreen == options, "Save did not return");
         check(AudioConfig.current().musicDirectories.size() == 2, "Save lost imported folders");
-        check(AudioConfig.current().presets.get(0).trackPool().equals(Set.of("music:calm1.ogg")), "folders mutated preset");
+        check(AudioConfig.current().playlists.get(0).tracks().equals(List.of("music:calm1.ogg")), "folders mutated preset");
+        check(AudioConfig.current().playlistTracks.equals(List.of("music:calm1.ogg")), "folder import expanded working playlist");
         folder = new FolderScreen(options, folders); mc.setScreen(folder);
         clickScreen(folder, (int)call(folder,"panelRight") - 30, 80);
         check(((List<?>)field(folder,"folders")).size() == 1, "row remove missed");

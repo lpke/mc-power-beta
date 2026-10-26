@@ -58,7 +58,8 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.equals("world-metadata-450")) WorldMetadata450Checks.run(mc);
+      if (command.startsWith("music-playlists-460 ")) MusicPlaylists460Checks.run(mc, command.substring("music-playlists-460 ".length()));
+      else if (command.equals("world-metadata-450")) WorldMetadata450Checks.run(mc);
       else if (command.equals("offhand-torch-451")) OffhandTorch451Checks.run(mc);
       else if (command.equals("sprint-stairs-451")) SprintStairs451Checks.run(mc);
       else if (command.equals("inventory-451") || command.startsWith("inventory-451 ")) Inventory451Checks.run(mc,command.length()==13 ? "test" : command.substring(14));

@@ -225,7 +225,7 @@ public final class MusicLibraryScreen extends UiScreen {
     if (span() < 380) {
       String label = folderSelected() ? "Folder" : switch (folder) {
         case "active" -> "Active"; case "custom" -> "All folders"; case "favourites" -> "Favorites";
-        case "presets" -> "Preset"; default -> "Everything";
+        case "presets" -> "Playlist"; default -> "Everything";
       };
       boolean selector = folderSelected() || folder.equals("presets");
       int selectorWidth = selector ? Math.min(120, span() / 2) : 0;
@@ -585,10 +585,10 @@ public final class MusicLibraryScreen extends UiScreen {
         if (tab.id().equals("cycle")) {
           var choices=List.of("active","","favourites","presets","custom","folder");
           String current=folderSelected()?"folder":folder;
-          parent.choose(List.of("Active", "Everything", "Favorites", "Preset", "All folders", "Folder"),
+          parent.choose(List.of("Active", "Everything", "Favorites", "Playlist", "All folders", "Folder"),
               List.of("Tracks allowed by your current soundtrack, folders and playback context.",
                   "All available built-in and custom tracks.", "Starred tracks. Favorites do not change automatic rotation.",
-                  "Browse a saved preset without loading it.", "Tracks found in all your music folders.",
+                  "Browse a saved playlist without loading it.", "Tracks found in all your music folders.",
                   "Tracks in one folder and its subfolders."),
               choices.indexOf(current), tab.x(), tab.y(), tab.width(), i -> selectFilter(choices.get(i)));
         } else selectFilter(tab.id());
@@ -672,7 +672,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
 
   public void renderSearch(int x, int y, int w, int mx, int my) {
-    if (presetsOpen && !presets.editing()) text("Music presets",x+2,y+5,0xdddddd);
+    if (presetsOpen && !presets.editing()) text("Music playlists",x+2,y+5,0xdddddd);
     else if (queue) {
       text("Music queue", x + 2, y + 5, 0xdddddd);
     } else input(search, x, y, w, mx, my, "Search tracks or folders...");
@@ -707,7 +707,7 @@ public final class MusicLibraryScreen extends UiScreen {
           : (row.group.startsWith("folder:") ? row.group.substring(7) : row.label + " soundtrack")
               + "\n" + included + " of " + total + " tracks included.";
       if (inside(mx,my,groupVolumeX(),y+3,groupVolumeWidth(),18))
-        tip = presetsOpen ? "Group volume multiplier, saved with this preset. Takes effect when loaded."
+        tip = presetsOpen ? "Group volume multiplier, saved with this playlist. Takes effect when loaded."
             : "Multiplies every track volume in this group, including previews and queued music.";
     }
     return new GroupHover(tip, key);
@@ -760,8 +760,8 @@ public final class MusicLibraryScreen extends UiScreen {
             case "" -> "All available built-in and custom music.";
             case "custom" -> "All tracks found in your music folders.";
             case "favourites" -> "Tracks you have starred. Favorites do not change automatic rotation.";
-            case "presets" -> "Browse a saved preset without loading or changing it.";
-            case "cycle" -> "Choose Active, Everything, Favorites, Preset, All folders or Folder.";
+            case "presets" -> "Browse a saved playlist without loading or changing it.";
+            case "cycle" -> "Choose Active, Everything, Favorites, Playlist, All folders or Folder.";
             default -> "Tracks in the selected folder and its subfolders.";
           };
       }
@@ -771,7 +771,7 @@ public final class MusicLibraryScreen extends UiScreen {
             tabs.folderX(), tabs.folderY(), tabs.folderWidth(), mx, my,
             presetFilter ? !edits.presets().isEmpty() : !folders.isEmpty(), false);
         if (inside(mx, my, tabs.folderX(), tabs.folderY(), tabs.folderWidth(), 18))
-          tip = presetFilter ? "Browse another saved preset without loading it." : folders.isEmpty() ? "Add music folders in Audio settings." : folder;
+          tip = presetFilter ? "Browse another saved playlist without loading it." : folders.isEmpty() ? "Add music folders in Audio settings." : folder;
       }
     }
     if (queue) renderedQueue = List.copyOf(tracks);
@@ -860,7 +860,7 @@ public final class MusicLibraryScreen extends UiScreen {
     if (!trackStatusVisible()) text(fit(status, span() - (conversionVisible() ? 92 : 0)), left(), statusTop() + 4, error.isEmpty() ? 0xaaaaaa : 0xff8888);
     if (!tip.isEmpty() && (key.endsWith(":volume") || key.endsWith(":include") || key.endsWith(":favorite") || key.startsWith("group:")))
       tip = local.luke.power.config.Tooltips.paragraphs(tip, presetsOpen
-          ? "Saved in this preset. Loading a preset applies it across worlds."
+          ? "Saved in this playlist. Load copies it into the current selection."
           : "Global music setting. Shared across worlds and menus.");
     hoverHelp = tip;
     hoverKey = key.isEmpty() ? tip : key;

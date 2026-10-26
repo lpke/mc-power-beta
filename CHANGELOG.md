@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [4.6.0] - 2026-10-26
+
+- Store imported music, favourites, track volumes and ordered playlists separately from playback preferences.
+- Replace music presets with explicit playlists while retaining the familiar library, group controls and isolated editors. Save the current selection or arrange a playlist's playback order.
+- Choose a separate menu playlist or follow the world selection, preserving playback continuity, queue priority and configurable gaps.
+- Keep saved playlists unchanged when importing or rescanning folders, and retain unavailable tracks for later recovery.
+- Use configuration schema 8 and music-data format 1; existing installations require an explicit backed-up conversion before updating.
+
 ## [4.5.1] - 2026-10-26
 
 - Offhand torches now place on monster spawners while holding a pickaxe.

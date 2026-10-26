@@ -43,4 +43,23 @@ class BuiltinMusicTest {
       assertEquals(track.sha1(), HexFormat.of().formatHex(MessageDigest.getInstance("SHA-1").digest(data)), track.file());
     }
   }
+  @Test void purchasedAlbumExtrasBelongToBothAllModesOnly() {
+    var extras = BuiltinMusic.TRACKS.stream().filter(t -> t.usage().equals("Album extras")).toList();
+    assertEquals(15, extras.size());
+    for (var track : extras) {
+      assertTrue(track.included(AudioSettings.MusicMode.ALPHA_BETA));
+      assertTrue(track.included(AudioSettings.MusicMode.ALL_MINECRAFT));
+      assertFalse(track.included(AudioSettings.MusicMode.VANILLA));
+      assertFalse(track.included(AudioSettings.MusicMode.ALPHA_BETA_SURVIVAL));
+      assertFalse(track.included(AudioSettings.MusicMode.MINECRAFT_SURVIVAL));
+    }
+  }
+  @Test void everyDimensionTrackIsLibraryOnlyForEveryWorldMode() {
+    var dimensions = BuiltinMusic.TRACKS.stream()
+        .filter(t -> java.util.Set.of("Nether", "End").contains(t.usage())).toList();
+    assertEquals(9, dimensions.size());
+    for (var track : dimensions)
+      for (var mode : AudioSettings.MusicMode.values()) assertFalse(track.included(mode), track.file());
+  }
+
 }

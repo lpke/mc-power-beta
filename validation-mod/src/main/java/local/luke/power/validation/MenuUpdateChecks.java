@@ -33,7 +33,6 @@ public final class MenuUpdateChecks {
     field(s, "libraryOpen", false);
     field(s, "changedOnly", false);
     field(s, "conflictIds", List.of());
-    field(s, "relatedIds", List.of());
     ((Set<?>) field(s, "collapsed")).clear();
     search(s, "");
     return s;

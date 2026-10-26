@@ -11,8 +11,8 @@ public final class MusicFilters {
 
   public static Layout layout(int left, int top, int width, String selector) {
     String[] ids = {"active", "", "favourites", "presets", "custom", "folder"};
-    String[] labels = {"Active", "Everything", "Favorites", "Preset", "All folders", "Folder"};
-    int[] sizes = {42, 66, 66, 48, 68, 50};
+    String[] labels = {"Active", "Everything", "Favorites", "Playlist", "All folders", "Folder"};
+    int[] sizes = {42, 66, 66, 58, 68, 50};
     List<Tab> tabs = new ArrayList<>();
     int x = left, y = top, selectorX = left, selectorY = top, selectorWidth = 0;
     for (int i = 0; i < ids.length; i++) {
