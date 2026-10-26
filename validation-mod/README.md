@@ -17,6 +17,13 @@
 
 # Runtime checks
 
+- `release-463 capture|check` verifies full-size Audio sliders, HUD editor actions,
+  saved-playlist row playback, ordered manual/queue continuation, isolated drafts,
+  pause/resume and now-playing navigation at 854x480 and 320x240. It also checks
+  a distinct menu playlist. Use a focused muted disposable singleplayer client
+  of at least 1708x960; capture before check. Images are written under
+  `power-beta-data/reports/release-463/ui`.
+
 - `release-462 capture|check` covers active-playlist navigation and draft guards,
   individual song additions, stable grouped counts, dropdown/song hover colors,
   playing and paused names, Audio defaults and color/recipe spacing at 854x480 and

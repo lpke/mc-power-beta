@@ -60,4 +60,15 @@ public final class TrackSelector {
     cursor.order = cursor.pendingOrder;
     previous = id;
   }
+
+  /** Explicit song choices continue from the saved order without consuming a reservation. */
+  public boolean align(String context, List<String> order, String id) {
+    if (!order.contains(id)) return false;
+    Cursor cursor = cursor(context);
+    cursor.previous = id;
+    cursor.order = List.copyOf(order);
+    cursor.pendingOrder = cursor.order;
+    previous = id;
+    return true;
+  }
 }

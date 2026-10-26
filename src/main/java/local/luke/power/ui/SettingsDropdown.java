@@ -27,7 +27,8 @@ final class SettingsDropdown {
   private PopupLayout.Rows layout;
 
   static boolean accepts(Setting setting) {
-    return setting.kind == Setting.Kind.CHOICE || setting.kind == Setting.Kind.BOOLEAN && setting.choices.equals(List.of("Hold", "Toggle"));
+    return !setting.id.equals(HudEditorSettings.ENTRY) && (setting.kind == Setting.Kind.CHOICE
+        || setting.kind == Setting.Kind.BOOLEAN && setting.choices.equals(List.of("Hold", "Toggle")));
   }
   private static int index(Setting setting, com.google.gson.JsonElement value) {
     return setting.kind == Setting.Kind.BOOLEAN ? value.getAsBoolean() ? 1 : 0 : value.getAsInt();

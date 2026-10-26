@@ -498,8 +498,12 @@ public final class PowerOptionsScreen extends UiScreen {
         : !ControlLinks.controls(session, setting).isEmpty();
   }
   private int mainControlLeft(Row row) {
-    return controlLeft(row) + (row.setting.id.equals("native.music") || row.setting.id.equals("native.sound") ? 48 : customise(row.setting) ? 66 : soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
+    return controlLeft(row) + (audioVolumeAction(row.setting) ? 0 : customise(row.setting) ? 66 : soundPreview(row.setting) || hasLink(row.setting) ? 22 : 0);
   }
+  private boolean audioVolumeAction(Setting s) { return s.id.equals("native.music") || s.id.equals("native.sound"); }
+  private int audioActionX(Row row) { return row.height == 40 ? right() - 58 : controlLeft(row) - 48; }
+  private int audioActionY(Row row, int y) { return y + (row.height == 40 ? 0 : SettingRows.buttonOffset(span())); }
+  private int audioActionHeight(Row row) { return row.height == 40 ? 14 : 18; }
   private boolean auxiliaryControl(Setting s) {
     return s.id.equals("native.music") || s.id.equals("native.sound") || customise(s) || soundPreview(s) || hasLink(s);
   }
@@ -1163,6 +1167,11 @@ public final class PowerOptionsScreen extends UiScreen {
         highlightedId = "";
         Setting s = r.setting;
         if (!SettingAccess.reason(session, s).isEmpty()) return;
+        if (audioVolumeAction(s) && inside(x, y, audioActionX(r), audioActionY(r, ry), 44, audioActionHeight(r))) {
+          click();
+          if (s.id.equals("native.music")) openMusicEditor(); else openAllSounds();
+          return;
+        }
         int controlY = ry + SettingRows.buttonOffset(span());
         if (y < controlY) return;
         if (!s.id.equals(HudEditorSettings.ENTRY) && x >= right() - 34) {
@@ -1181,9 +1190,7 @@ public final class PowerOptionsScreen extends UiScreen {
           search.setText(""); changedOnly = false; scroll = 0; layout(); return;
         }
         if (x >= controlLeft(r) && x < mainControlLeft(r)) {
-          if (s.id.equals("native.music")) { click(); openMusicEditor(); }
-          else if (s.id.equals("native.sound")) { click(); openAllSounds(); }
-          else if (customise(s)) { click(); minecraft.setScreen(new TitleLetteringScreen(this)); }
+          if (customise(s)) { click(); minecraft.setScreen(new TitleLetteringScreen(this)); }
           else if (soundPreview(s)) local.luke.power.audio.AudioController.previewSound(previewId(s));
           else if (hasLink(s)) { click(); if (s.kind == Setting.Kind.KEY) related(s); else linkedControls(s); }
           return;
@@ -1596,8 +1603,8 @@ public final class PowerOptionsScreen extends UiScreen {
   private Row musicVolumeRow() {
     return rows.stream().filter(row -> row.setting != null && row.setting.id.equals("native.music")).findFirst().orElseThrow();
   }
-  private int musicEditX() { return controlLeft(musicVolumeRow()); }
-  private int musicEditY() { return top() + musicVolumeRow().y - (int) scroll + SettingRows.buttonOffset(span()); }
+  private int musicEditX() { return audioActionX(musicVolumeRow()); }
+  private int musicEditY() { return audioActionY(musicVolumeRow(), top() + musicVolumeRow().y - (int) scroll); }
   private AudioToolbar.Button playlistButton() {
     return musicButtons().stream().filter(button -> button.action() == AudioToolbar.Action.PLAYLIST).findFirst().orElseThrow();
   }
@@ -1764,6 +1771,7 @@ public final class PowerOptionsScreen extends UiScreen {
       int cy = y + SettingRows.buttonOffset(span()),
           controlLeft = mainControlLeft(row);
       int textWidth = narrow ? span() - 4 : controlLeft(row) - left() - 13;
+      if (audioVolumeAction(s)) textWidth = audioActionX(row) - left() - 13;
       int indent = search.text().isBlank() ? (int)Catalog.number(Catalog.metadata(s.id), "indent", 0) : 0;
       String label = fit(settingLabel(s), textWidth - indent - (s.restart ? 9 : 0));
       text(
@@ -1796,18 +1804,19 @@ public final class PowerOptionsScreen extends UiScreen {
           && ColorSettings.atDefault(s, session.settings()) && (!s.id.equals("interface.debugOrder")
           || session.settings().stream().filter(value -> value.id.equals("interface.debugRightOrder")).allMatch(value -> value.value.equals(value.defaultValue)));
       if (!s.id.equals(HudEditorSettings.ENTRY)) button("R", right() - 34, cy, 20, 18, mx, listMouseY, editable && !defaultValue);
-      if (s.id.equals("native.music")) button("Edit...", controlLeft(row), cy, 44, 18, mx, listMouseY, editable);
-      else if (s.id.equals("native.sound")) button("All...", controlLeft(row), cy, 44, 18, mx, listMouseY, editable);
+      if (audioVolumeAction(s)) button(s.id.equals("native.music") ? "Edit..." : "All...",
+          audioActionX(row), audioActionY(row, y), 44, audioActionHeight(row), mx, listMouseY, editable);
       else if (customise(s)) button("Customize", controlLeft(row), cy, 62, 18, mx, listMouseY, editable);
       else if (soundPreview(s) || hasLink(s)) iconButton(soundPreview(s) ? "speaker" : s.kind == Setting.Kind.KEY ? "settings" : "controls", controlLeft(row), cy, 20, mx, listMouseY, editable, soundPreview(s) && local.luke.power.audio.AudioController.previewing(previewId(s)));
       if (!conflicts.isEmpty()) text("!", controlLeft(row) - 7, cy + 5, 0xff8855);
       if (hover) {
         hoverId = s.id;
         if (!editable) tip = Tooltips.setting(s, lock);
-        else if (!s.id.equals(HudEditorSettings.ENTRY) && mx >= right() - 34) { tip = "Reset to " + DefaultBases.current().label + " default"; hoverId += ".reset"; }
+        else if (!s.id.equals(HudEditorSettings.ENTRY) && inside(mx, listMouseY, right() - 34, cy, 20, 18)) { tip = "Reset to " + DefaultBases.current().label + " default"; hoverId += ".reset"; }
         else if (!conflicts.isEmpty() && inside(mx, listMouseY, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
-        } else if (auxiliaryControl(s) && mx >= controlLeft(row) && mx < controlLeft) {
+        } else if (audioVolumeAction(s) && inside(mx, listMouseY, audioActionX(row), audioActionY(row, y), 44, audioActionHeight(row))
+            || auxiliaryControl(s) && mx >= controlLeft(row) && mx < controlLeft) {
           tip = s.id.equals("native.music") ? "Music library and playlists" : s.id.equals("native.sound") ? "Individual game sounds" : customise(s) ? "Paint and customize the retro title lettering." : soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = Tooltips.setting(s, valueEditor.editing(s) ? valueEditor.help()
             : ItemEditors.accepts(s) ? "Choose from the item or block list." : "");

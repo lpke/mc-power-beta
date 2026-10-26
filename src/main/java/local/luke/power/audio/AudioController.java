@@ -77,9 +77,17 @@ public final class AudioController {
 
   public static void toggleTrack(String id) {
     if (MusicPreview.active()) { playNow(id); return; }
-    if (playingTrack(id)) pause();
-    else if (paused && (id.equals(currentMusic) || id.equals(menuMusic))) togglePause();
+    if (playingTrack(id)) { alignExplicitTrack(id); pause(); }
+    else if (paused && (id.equals(currentMusic) || id.equals(menuMusic))) { alignExplicitTrack(id); togglePause(); }
     else playNow(id);
+  }
+
+  private static void alignExplicitTrack(String id) {
+    AudioSettings settings = AudioConfig.current();
+    boolean aligned = WORLD.align("playlist:" + settings.playlist, MusicPlaylist.rotation(settings, false), id);
+    if (client != null && client.world == null && !MusicPlaylist.selectionId(settings, true).equals(settings.playlist))
+      aligned |= WORLD.align("playlist:" + MusicPlaylist.selectionId(settings, true), MusicPlaylist.rotation(settings, true), id);
+    if (aligned) { upcoming = null; nextKey = null; }
   }
 
   private static void stopSoundPreview() {
@@ -134,6 +142,7 @@ public final class AudioController {
     system.stop("PowerBetaMenu");
     menuMusic = "";
     currentMusic = trackId(track);
+    if (explicit) alignExplicitTrack(currentMusic);
     currentExplicitMusic = explicit;
     currentUsesMenuVolumes = usesMenuVolumes(currentMusic, context(client));
     paused = false;
@@ -602,6 +611,7 @@ public final class AudioController {
     class_267 requested = queued();
     if (requested != null) {
       remember(requested, true); currentMusic = trackId(requested); currentExplicitMusic = true;
+      alignExplicitTrack(currentMusic);
       currentUsesMenuVolumes = usesMenuVolumes(currentMusic, context(client));
       musicStarted = System.nanoTime(); trackWasPlaying = false; return requested;
     }

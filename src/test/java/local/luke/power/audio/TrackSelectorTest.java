@@ -54,4 +54,29 @@ class TrackSelectorTest {
     selector.played("world", "a");
     assertEquals("b", selector.reserve("world", List.of("a", "b"), true, true, fixed, id -> id));
   }
+
+  @Test void explicitMiddleTrackReplacesAnyOldReservationAndWrapsInSavedOrder() {
+    assertEquals("a", reserve("world", "a", "b", "c", "d"));
+    assertTrue(selector.align("world", List.of("a", "b", "c", "d"), "c"));
+    assertEquals("d", reserve("world", "a", "b", "c", "d"));
+    selector.played("world", "d");
+    assertEquals("a", reserve("world", "a", "b", "c", "d"));
+  }
+
+  @Test void explicitOutsideSongLeavesPositionReservationAndRepeatStateAlone() {
+    assertTrue(selector.align("world", List.of("a", "b", "c"), "a"));
+    assertEquals("b", reserve("world", "a", "b", "c"));
+    assertFalse(selector.align("world", List.of("a", "b", "c"), "outside"));
+    assertEquals("b", reserve("world", "a", "b", "c"));
+    Random fixed = new Random() { @Override public int nextInt(int bound) { return 0; } };
+    assertEquals("b", selector.reserve("world", List.of("a", "b"), true, true, fixed, id -> id));
+  }
+
+  @Test void explicitChoiceUsesFullSavedOrderForMissingOrFilteredSuccessors() {
+    assertTrue(selector.align("world", List.of("a", "b", "c", "d"), "b"));
+    assertEquals("c", reserve("world", "d", "a", "c"));
+    assertEquals("d", reserve("world", "d", "a"));
+    assertEquals("x", reserve("menu", "x", "y"));
+    assertEquals("c", reserve("world", "a", "c", "d"));
+  }
 }

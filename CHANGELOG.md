@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [4.6.3] - 2026-10-27
+
+- Keep the HUD editor action free of a dropdown chevron and preserve full-size Music and Game sounds sliders beside their editor buttons.
+- Playing a song from a saved playlist selects it as the world playlist. Continue ordered playback from manually chosen or queued member songs without saving unfinished playlist edits.
+- Keep the current playlist when playing from Library, and open previews or songs outside the world playlist directly in Library from the now-playing name.
+
 ## [4.6.2] - 2026-10-27
 
 - Apply dropdown hover color to selected choices, and use muted playlist dividers that meet adjacent item backgrounds.

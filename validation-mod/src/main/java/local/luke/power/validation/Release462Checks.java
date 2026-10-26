@@ -343,7 +343,7 @@ final class Release462Checks {
   private static Object call(Object owner, String name) throws Exception { return call(owner, name, new Class<?>[0]); }
   private static Object call(Object owner, String name, Class<?>[] types, Object... args) throws Exception { for (Class<?> type = owner.getClass(); type != null; type = type.getSuperclass()) try { var method = type.getDeclaredMethod(name, types); method.setAccessible(true); return method.invoke(owner, args); } catch (NoSuchMethodException ignored) {} throw new NoSuchMethodException(name); }
 
-  private static final class State implements AutoCloseable {
+  static final class State implements AutoCloseable {
     final Minecraft mc; final MusicPlaylists460Checks.State previous;
     final boolean automatic, grabbed; final Object scope; final int guiScale;
     final Field customScale, realScale; final float custom, real; final int matrix;

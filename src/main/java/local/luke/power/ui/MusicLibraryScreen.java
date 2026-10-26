@@ -226,9 +226,10 @@ public final class MusicLibraryScreen extends UiScreen {
   public void showTrack(String id) { guard(() -> { selectFilter("library"); revealTrack(id); }); }
   public void showActiveTrack(String id) {
     guard(() -> {
-      selectFilter("active");
-      if (presets.editing() && presets.draft().included(id)) revealTrack(id);
-      else error = "This song is outside the world playlist.";
+      boolean active = !AudioController.previewing(id)
+          && MusicPlaylist.contains(AudioConfig.current(), edits.selected(), id);
+      selectFilter(active ? "active" : "library");
+      revealTrack(id);
     });
   }
   private void revealTrack(String id) {
@@ -452,7 +453,17 @@ public final class MusicLibraryScreen extends UiScreen {
       if (b == 0) { click(); toggleFavorite(row.id); }
       return;
     }
-    if (inside(x, y, layout.playX(), cy, layout.buttonWidth(), 18)) { if (b == 0 && playable(row.id)) { click(); AudioController.toggleTrack(row.id); } return; }
+    if (inside(x, y, layout.playX(), cy, layout.buttonWidth(), 18)) {
+      if (b == 0 && playable(row.id)) {
+        click();
+        try {
+          if (playlistView() && !presets.draft().creating() && !edits.selected().equals(presets.draft().id()))
+            edits.load(presets.draft().id());
+          AudioController.toggleTrack(row.id);
+        } catch (RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Could not play this song."); }
+      }
+      return;
+    }
     if (b == 1) { context(row, x, y); return; }
     if (canOrderTracks()) {
       List<String> ids = queue ? MusicRequests.tracks() : presets.draft().tracks();

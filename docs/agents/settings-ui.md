@@ -51,8 +51,9 @@
   setting, toolbar control or row so only that owner retains its open highlight.
   Map, minimap and photo checklist panels keep their existing toggle layout and
   persistent-open behavior; their colors and text spacing follow the same menu style.
-  Master and category volume sliders retain their full control width. Only Music
-  and Game sounds reserve space for their Edit and All buttons. Search results omit
+  All Audio/Volume sliders retain their full control width. Music and Game sounds
+  place Edit and All before the control column, or beside the label at compact widths.
+  Keep their render, pointer and tooltip bounds identical. Search results omit
   normal row indentation. Extra sounds starts collapsed in Audio.
   Parent and child music group sliders share horizontal bounds. Place group counts
   after the slider, anchored to the right. Playlist catalog rows use the Defaults picker's

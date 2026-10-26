@@ -23,6 +23,12 @@
   moving back in history or consuming queued tracks. Paused tracks remain current.
   Keep the advertised next track reserved through settings previews while it remains
   eligible; volume, gap and menu-control edits must not consume the selector.
+  Explicit playback of a saved playlist member aligns its cursor to the song's
+  position in the saved order, including pause/resume and queued acceptance. Keep
+  outside songs and auditions from moving that cursor. Playlist row playback selects
+  the saved world playlist without saving editor drafts. Now-playing navigation
+  opens Library for auditions or songs outside the world playlist; other songs open
+  the active playlist tab.
 - New and imported Ogg sounds must retain complete playback through Beta's decoder.
   Native `CodecJOrbis` mistakes `SyncState.pageout() == 0` for EOF when a buffered
   page needs more input, and can stop before draining buffered pages. It can also
