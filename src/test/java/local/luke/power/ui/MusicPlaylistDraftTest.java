@@ -51,4 +51,42 @@ class MusicPlaylistDraftTest {
     assertEquals(80, second.length());
     assertDoesNotThrow(() -> new MusicPlaylist("copy", second, List.of(), Map.of()));
   }
+
+  @Test void appendingAnotherPlaylistKeepsExistingOrderMissingIdsAndTargetGains() {
+    var saved = new MusicPlaylist("target", "Quiet", List.of(B), Map.of("Alpha", 35));
+    var source = new MusicPlaylist("source", "Other", List.of(A, B, MISSING), Map.of("Alpha", 80));
+    var draft = new MusicPresetDraft(saved, List.of(A, B));
+    draft.appendTracks(source.tracks());
+    draft.appendTracks(source.tracks());
+    assertEquals(List.of(B, A, MISSING), draft.tracks());
+    assertEquals(35, draft.volume("Alpha"));
+    assertEquals(List.of(B), saved.tracks());
+    assertEquals(List.of(A, B, MISSING), source.tracks());
+    assertEquals(List.of(B), draft.original().tracks());
+  }
+
+  @Test void invalidAppendDoesNotLeaveAPartlyChangedDraft() {
+    var draft = new MusicPresetDraft(new MusicPlaylist("target", "Quiet", List.of(B), Map.of()));
+    assertThrows(IllegalArgumentException.class, () -> draft.appendTracks(List.of(A, "invalid")));
+    assertEquals(List.of(B), draft.tracks());
+    assertFalse(draft.changed("Quiet"));
+  }
+
+  @Test void favoritesKeepTheirReservedIdAndNameWhileEditsStayIsolated() {
+    var saved = new MusicPlaylist(MusicPlaylist.FAVORITES, "Favorites", List.of(A, MISSING), Map.of("Alpha", 40));
+    var draft = new MusicPresetDraft(saved, List.of(A, B));
+    assertTrue(draft.favorites());
+    assertFalse(draft.creating());
+    assertFalse(draft.changed("Another name"));
+    draft.include(B, true);
+    draft.include(A, false);
+    draft.volume("Alpha", 25);
+    var edited = draft.snapshot("Another name");
+    assertEquals(MusicPlaylist.FAVORITES, edited.id());
+    assertEquals("Favorites", edited.name());
+    assertEquals(List.of(MISSING, B), edited.tracks());
+    assertEquals(List.of(A, MISSING), saved.tracks());
+    assertEquals(40, saved.groupVolumes().get("Alpha"));
+    assertEquals(25, edited.groupVolumes().get("Alpha"));
+  }
 }

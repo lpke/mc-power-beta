@@ -10,6 +10,7 @@ public final class MusicPresetDraft {
   private final boolean creating;
   private final List<String> original, tracks, available;
   private final Map<String, Integer> originalVolumes, volumes;
+  private List<String> cachedTracks;
 
   public MusicPresetDraft(MusicPlaylist playlist) { this(playlist, List.of()); }
 
@@ -29,7 +30,10 @@ public final class MusicPresetDraft {
     this.available = List.copyOf(new LinkedHashSet<>(available));
   }
 
+  public String id() { return id; }
   public String name() { return originalName; }
+  public boolean favorites() { return MusicPlaylist.FAVORITES.equals(id); }
+  public MusicPlaylist original() { return new MusicPlaylist(id, originalName, original, originalVolumes); }
 
   public static String copyName(String source, Collection<String> existing) {
     Set<String> names = new HashSet<>();
@@ -44,21 +48,29 @@ public final class MusicPresetDraft {
   }
   public boolean creating() { return creating; }
   public boolean included(String id) { return tracks.contains(id); }
-  public List<String> tracks() { return List.copyOf(tracks); }
-  public void include(String id, boolean value) {
-    if (value) { if (!tracks.contains(id)) tracks.add(id); }
-    else tracks.remove(id);
+  public List<String> tracks() { if (cachedTracks == null) cachedTracks = List.copyOf(tracks); return cachedTracks; }
+  /** Append a saved source in its own order, retaining missing IDs and this draft's gains. */
+  public void appendTracks(Collection<String> source) {
+    LinkedHashSet<String> merged = new LinkedHashSet<>(tracks);
+    merged.addAll(source);
+    List<String> next = List.copyOf(merged);
+    MusicPlaylist.validateTracks(next);
+    if (!tracks.equals(next)) { tracks.clear(); tracks.addAll(next); cachedTracks = null; }
   }
-  public void includeAll() { for (String id : available) include(id, true); }
-  public void excludeAll(Collection<String> ids) { tracks.removeAll(ids); }
+  public void include(String id, boolean value) {
+    if (value) { if (!tracks.contains(id)) { tracks.add(id); cachedTracks = null; } }
+    else if (tracks.remove(id)) cachedTracks = null;
+  }
+  public void includeAll() { appendTracks(available); }
+  public void excludeAll(Collection<String> ids) { if (tracks.removeAll(ids)) cachedTracks = null; }
   public void move(String id, int offset) {
     int index = tracks.indexOf(id), next = index + offset;
-    if (index >= 0 && next >= 0 && next < tracks.size()) Collections.swap(tracks, index, next);
+    if (index >= 0 && next >= 0 && next < tracks.size()) { Collections.swap(tracks, index, next); cachedTracks = null; }
   }
   public void order(List<String> order) {
     MusicPlaylist.validateTracks(order);
     if (!new HashSet<>(order).equals(new HashSet<>(tracks))) throw new IllegalArgumentException("Playlist membership changed");
-    tracks.clear(); tracks.addAll(order);
+    if (!tracks.equals(order)) { tracks.clear(); tracks.addAll(order); cachedTracks = null; }
   }
   public int volume(String group) { return volumes.getOrDefault(group, 100); }
   public void volume(String group, int volume) {
@@ -66,8 +78,10 @@ public final class MusicPresetDraft {
     if (volume == 100) volumes.remove(group); else volumes.put(group, volume);
   }
   public boolean changed(String name) {
-    return creating || !originalName.equals(name.strip()) || !original.equals(tracks)
+    return creating || !originalName.equals(favorites() ? originalName : name.strip()) || !original.equals(tracks)
         || !originalVolumes.equals(volumes);
   }
-  public MusicPlaylist snapshot(String name) { return new MusicPlaylist(id, name, tracks, volumes); }
+  public MusicPlaylist snapshot(String name) {
+    return new MusicPlaylist(id, favorites() ? originalName : name, tracks, volumes);
+  }
 }

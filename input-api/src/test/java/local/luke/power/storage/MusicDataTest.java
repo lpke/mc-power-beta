@@ -17,7 +17,8 @@ class MusicDataTest {
          "playlists":[{"id":"quiet","name":"Quiet","tracks":["music:missing","music:a"],"groupVolumes":{"folder:/missing":20}}],
          "favourites":["music:missing"],
          "musicDirectories":["/missing"],
-         "disabledMusicDirectories":["/missing"],
+         "libraryOrder":["source:/missing","Alpha"],
+         "favoritesGroupVolumes":{"Alpha":19},
          "sounds":{"random.click":33,"music:missing":100}}
         """);
     JsonObject music = MusicData.split(audio), preferences = MusicData.preferences(audio);
@@ -39,13 +40,13 @@ class MusicDataTest {
     for (String bad : new String[]{
         "{\"formatVersion\":1,\"audio\":{},\"queue\":{\"tracks\":[]}}",
         "{\"formatVersion\":1.5,\"audio\":{},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":2,\"audio\":{\"future\":true},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":2,\"audio\":{\"playlistTracks\":[\"music:a\",\"music:a\"]},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":2,\"audio\":{\"sounds\":{\"random.click\":50}},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":2,\"audio\":{\"groupVolumes\":{\"World\":101}},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":2,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[\"music:a\",\"music:a\"],\"groupVolumes\":{}}]},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":2,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[],\"groupVolumes\":{\"World\":101}}]},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":2,\"audio\":{\"disabledMusicDirectories\":[\"/gone\"]},\"queue\":{\"tracks\":[]}}"})
+        "{\"formatVersion\":3,\"audio\":{\"future\":true},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":3,\"audio\":{\"playlistTracks\":[\"music:a\",\"music:a\"]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":3,\"audio\":{\"sounds\":{\"random.click\":50}},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":3,\"audio\":{\"groupVolumes\":{\"World\":101}},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":3,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[\"music:a\",\"music:a\"],\"groupVolumes\":{}}]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":3,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[],\"groupVolumes\":{\"World\":101}}]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":3,\"audio\":{\"disabledMusicDirectories\":[\"/gone\"]},\"queue\":{\"tracks\":[]}}"})
       assertThrows(IllegalArgumentException.class, () -> MusicData.validate(json(bad)), bad);
     JsonObject data = MusicData.empty(); JsonArray tracks = new JsonArray();
     for (int i = 0; i < 257; i++) tracks.add("music:a"); data.getAsJsonObject("queue").add("tracks", tracks);
@@ -82,10 +83,12 @@ class MusicDataTest {
     Path linkedDirectory = directory.resolve("linked"); Files.createSymbolicLink(linkedDirectory, directory);
     assertThrows(java.io.IOException.class, () -> MusicData.write(linkedDirectory.resolve("new.json"), MusicData.empty()));
   }
-  @Test void betaAndWorldAreTheOnlyBuiltinSelectors() {
+  @Test void betaFavoritesAndWorldAreBuiltinSelectors() {
     JsonObject preferences = json("{\"playlist\":\"beta\",\"menuPlaylist\":\"@world\"}");
     assertDoesNotThrow(() -> MusicData.validatePreferences(preferences));
     assertDoesNotThrow(() -> MusicData.validateSelections(preferences, MusicData.empty().getAsJsonObject("audio")));
+    preferences.addProperty("playlist", "favorites");
+    assertDoesNotThrow(() -> MusicData.validateSelections(preferences, new JsonObject()));
     for (String invalid : new String[]{"", "@default", "missing"}) {
       preferences.addProperty("playlist", invalid);
       assertThrows(IllegalArgumentException.class, () -> MusicData.validateSelections(preferences, new JsonObject()));

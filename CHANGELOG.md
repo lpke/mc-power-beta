@@ -5,15 +5,16 @@
 ## [4.6.0] - 2026-10-26
 
 - Store imported music, favourites, track volumes and ordered playlists separately from playback preferences.
-- Open Edit music beside the Music volume slider. Browse Library, Playlists and Favorites while keeping the existing playback controls in place.
-- Manage imported folders directly in their Library groups: add, switch On/Off or remove a folder without changing its files or saved playlists. Keep empty, missing and switched-off folders visible.
-- Place Add folder and Reload beside the dark tabs when space permits, or on the row below. Group nested tracks under their imported source while preserving playlist group volumes.
-- Keep music settings in Audio under Music playback, Music gaps and Music menu controls.
-- Select the current playlist from the Audio toolbar. Create, copy, edit and remove playlists with isolated drafts, exact membership and per-playlist group volumes.
-- Drag tracks to reorder a playlist or use the arrow controls. Toggle Shuffle from Playlists; switching it off plays tracks in saved order.
-- Include a protected Beta playlist with the 12 original Beta 1.7.3 tracks, while keeping the full bundled Minecraft catalog available.
-- Choose a separate menu playlist or follow the world selection. Preserve playback continuity, queue priority, configurable gaps and unavailable track references; importing or rescanning never expands saved playlists.
-- Use configuration schema 9 and music-data format 2. Existing personal data requires a verified backed-up conversion before updating.
+- Open Edit music beside the Music volume slider. Keep Library, Playlists and Favorites tabs, familiar playback controls and music settings in Audio.
+- Manage imported folders directly in Library: add or remove folders and drag groups into a saved display order. Keep empty and missing sources visible, preserving music files and playlist entries.
+- Give song rows a volume slider and one play button. Right-click the row for queue, favourite and preview actions; right-click the slider for an exact volume.
+- Create playlists from individual songs, whole Library groups or another playlist. Use isolated drafts with Save/Discard and per-playlist group volumes.
+- Edit playlists as flat draggable lists. A grouped view preserves relative song order without changing playback order. Shuffle off plays the saved order.
+- Treat Favorites as an ordered playlist with the same editing controls and its own group volumes. Select it for world or menu playback.
+- Include a protected Beta playlist with the twelve original Beta 1.7.3 tracks while keeping the full bundled Minecraft catalog available.
+- Simplify the folder picker with Select all and Deselect all for the current directory, direct path entry and batch imports.
+- Preserve playback continuity, queue priority, configurable gaps and unavailable track references. Importing or rescanning never expands saved playlists.
+- Use configuration schema 9 and music-data format 3. Convert earlier personal music data with the explicit backed-up converter before updating.
 
 ## [4.5.1] - 2026-10-26
 

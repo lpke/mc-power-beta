@@ -10,10 +10,10 @@ import java.util.*;
 
 /** Validated music user data. Called only while PowerConfig owns its disk lock. */
 final class MusicData {
-  static final int VERSION = 2;
+  static final int VERSION = 3;
   static final int MAX_BYTES = 4 * 1024 * 1024;
   private static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
-  static final Set<String> FIELDS = Set.of("playlists", "favourites", "musicDirectories", "disabledMusicDirectories");
+  static final Set<String> FIELDS = Set.of("playlists", "favourites", "musicDirectories", "libraryOrder", "favoritesGroupVolumes");
 
   static Path path(Path config) { return config.getParent().getParent().resolve("power-beta/music.json"); }
 
@@ -29,19 +29,26 @@ final class MusicData {
     } catch (RuntimeException failure) { throw new IOException("Unsupported or invalid music data; original file preserved: " + failure.getMessage(), failure); }
   }
 
-  static void validate(JsonObject root) {
+  static void validate(JsonObject root) { validate(root, VERSION); }
+
+  static void validatePrevious(JsonObject root) { validate(root, 2); }
+
+  private static void validate(JsonObject root, int version) {
     require(root != null, "Music data must be an object");
-    require(root.has("formatVersion") && integer(root.get("formatVersion")) == VERSION,
-        "Supported music data version: " + VERSION);
+    require(root.has("formatVersion") && integer(root.get("formatVersion")) == version,
+        "Supported music data version: " + version + ". Convert older data with MusicDataUpgrade before starting Minecraft");
     require(root.has("audio") && root.get("audio").isJsonObject(), "Music audio must be an object");
     require(root.has("queue") && root.get("queue").isJsonObject(), "Music queue must be an object");
     for (String key : root.keySet()) require(Set.of("formatVersion", "audio", "queue").contains(key), "Unknown music data field " + key);
     JsonObject audio = root.getAsJsonObject("audio");
-    for (String key : audio.keySet()) require(FIELDS.contains(key) || key.equals("sounds"), "Unknown music audio field " + key);
+    Set<String> fields = version == 2 ? Set.of("playlists", "favourites", "musicDirectories", "disabledMusicDirectories") : FIELDS;
+    for (String key : audio.keySet()) require(fields.contains(key) || key.equals("sounds"), "Unknown music audio field " + key);
     if (audio.has("favourites")) tracks(audio.get("favourites"), 8192, true);
     for (String key : List.of("musicDirectories", "disabledMusicDirectories"))
       if (audio.has(key)) strings(audio.get(key), 32, 4096, true, false);
-    if (audio.has("disabledMusicDirectories")) {
+    if (version == 3 && audio.has("libraryOrder")) strings(audio.get("libraryOrder"), 8192, 4103, true, false);
+    if (version == 3 && audio.has("favoritesGroupVolumes")) volumes(audio.get("favoritesGroupVolumes"), 8192, false);
+    if (version == 2 && audio.has("disabledMusicDirectories")) {
       Set<String> all = audio.has("musicDirectories") ? strings(audio.get("musicDirectories"), 32, 4096, true, false) : Set.of();
       require(all.containsAll(strings(audio.get("disabledMusicDirectories"), 32, 4096, true, false)),
           "Disabled folders must remain in the folder list");
@@ -55,7 +62,7 @@ final class MusicData {
         JsonObject playlist = value.getAsJsonObject();
         require(playlist.keySet().equals(Set.of("id", "name", "tracks", "groupVolumes")), "Unsupported playlist data");
         String id = text(playlist.get("id"), 64);
-        require(id.matches("[a-zA-Z0-9_-]{1,64}") && !id.equals("beta") && ids.add(id), "Invalid or duplicate playlist identifier");
+        require(id.matches("[a-zA-Z0-9_-]{1,64}") && !id.equals("beta") && (version == 2 || !id.equals("favorites")) && ids.add(id), "Invalid or duplicate playlist identifier");
         text(playlist.get("name"), 80);
         tracks(playlist.get("tracks"), 8192, true);
         volumes(playlist.get("groupVolumes"), 8192, false);
@@ -108,7 +115,7 @@ final class MusicData {
   }
 
   static void validateSelections(JsonObject preferences, JsonObject music) {
-    Set<String> ids = new HashSet<>(); ids.add("beta");
+    Set<String> ids = new HashSet<>(); ids.add("beta"); ids.add("favorites");
     if (music.has("playlists")) for (JsonElement value : music.getAsJsonArray("playlists")) ids.add(value.getAsJsonObject().get("id").getAsString());
     for (String key : List.of("playlist", "menuPlaylist")) if (preferences.has(key)) {
       String id = string(preferences.get(key));
@@ -118,7 +125,7 @@ final class MusicData {
 
   static void validatePreferences(JsonObject audio) {
     require(FIELDS.stream().noneMatch(audio::has), "Music user data belongs in power-beta/music.json");
-    require(Set.of("presets", "preset", "presetTrackPool", "musicDataVersion", "playlistTracks", "menuPlaylistTracks", "disabledTracks", "groupVolumes", "menuGroupVolumes", "musicMode", "customMusic", "menuDirectories", "disabledMenuDirectories").stream().noneMatch(audio::has), "Legacy audio fields are unsupported; original configuration preserved");
+    require(Set.of("presets", "preset", "presetTrackPool", "musicDataVersion", "playlistTracks", "menuPlaylistTracks", "disabledTracks", "groupVolumes", "menuGroupVolumes", "musicMode", "customMusic", "menuDirectories", "disabledMenuDirectories", "disabledMusicDirectories").stream().noneMatch(audio::has), "Legacy audio fields are unsupported; original configuration preserved");
     if (audio.has("sounds")) require(object(audio.get("sounds"), "Sound overrides").keySet().stream().noneMatch(key -> key.startsWith("music:")), "Song gains belong in power-beta/music.json");
     for (String key : List.of("playlist", "menuPlaylist")) if (audio.has(key)) {
       String id = string(audio.get(key));
@@ -126,13 +133,14 @@ final class MusicData {
     }
   }
 
-  static void backup(Path source, String prefix) throws IOException {
+  static Path backup(Path source, String prefix) throws IOException {
     checkPath(source);
-    if (!Files.exists(source, LinkOption.NOFOLLOW_LINKS)) return;
+    if (!Files.exists(source, LinkOption.NOFOLLOW_LINKS)) return null;
     requireFile(source);
     Path directory = source.getParent().resolve("backups"); checkPath(directory); DurableFiles.createDirectories(directory);
     Path backup = Files.createTempFile(directory, prefix, ".json");
     durableWrite(backup, Files.readAllBytes(source));
+    return backup;
   }
 
   static void write(Path path, JsonObject root) throws IOException {
@@ -161,7 +169,7 @@ final class MusicData {
   private static void requireFile(Path path) throws IOException {
     if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS) || Files.size(path) > MAX_BYTES) throw new IOException("Unsafe or oversized music source");
   }
-  private static void durableWrite(Path path, byte[] bytes) throws IOException {
+  static void durableWrite(Path path, byte[] bytes) throws IOException {
     try (FileChannel output = FileChannel.open(path, StandardOpenOption.WRITE)) {
       ByteBuffer buffer = ByteBuffer.wrap(bytes); while (buffer.hasRemaining()) output.write(buffer); output.force(true);
     }

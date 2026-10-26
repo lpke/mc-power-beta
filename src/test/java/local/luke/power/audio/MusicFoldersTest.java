@@ -52,57 +52,22 @@ class MusicFoldersTest {
         () -> MusicFolders.additions(game, List.of(), List.of(" "), false));
   }
 
-  @Test void folderStatesRoundTripAndPlainPathsStayEnabled() {
-    var original = JsonParser.parseString("[\"a\",\"b\",\"a\"]");
-    var enabled = MusicFolders.decode(original);
-    assertEquals(List.of("a","b"),enabled.paths());
-    assertTrue(enabled.disabled().isEmpty());
-    var encoded = MusicFolders.encode(enabled.paths(),Set.of("b"));
-    var decoded = MusicFolders.decode(encoded);
-    assertEquals(enabled.paths(),decoded.paths());
-    assertEquals(Set.of("b"),decoded.disabled());
-    assertEquals("[\"a\",\"b\",\"a\"]",original.toString());
-  }
-
-  @Test void disabledSourcesAreExcludedBeforeScanningAndDoNotChangeSavedMembership() {
-    AudioSettings settings = new AudioSettings();
-    settings.musicDirectories.addAll(List.of("on", "off"));
-    settings.disabledMusicDirectories.add("off");
-    settings.playlists.add(new MusicPlaylist("saved", "Saved", List.of("music:custom/unavailable"), Map.of()));
-    assertEquals(List.of("on"), MusicFolders.enabled(settings));
-    settings.disabledMusicDirectories.clear();
-    assertEquals(List.of("on", "off"), MusicFolders.enabled(settings));
-    assertEquals(List.of("music:custom/unavailable"), settings.playlists.get(0).tracks());
-  }
-
-  @Test void invalidFolderStatesNeverCoerceOrLosePaths() {
-    for (String bad : List.of("{}", "[null]", "[false]", "[{\"path\":\"a\"}]",
-        "[{\"path\":\"a\",\"enabled\":\"false\"}]"))
+  @Test void foldersRoundTripAsExactPathsAndRejectRetiredSourceFlags() {
+    var original = JsonParser.parseString("[\"a\",\"b/../b\"]");
+    var paths = MusicFolders.decode(original);
+    assertEquals(List.of("a", "b/../b"), paths);
+    assertEquals(original, MusicFolders.encode(paths));
+    for (String bad : List.of("{}", "[null]", "[false]", "[\"a\",\"a\"]",
+        "[{\"path\":\"a\",\"enabled\":false}]"))
       assertThrows(IllegalArgumentException.class, () -> MusicFolders.decode(JsonParser.parseString(bad)));
-    var settings = new AudioSettings();
-    settings.disabledMusicDirectories.add("a");
-    assertThrows(IllegalArgumentException.class, settings::validate);
   }
 
-  @Test void olderAudioConfigAcquiresEnabledFolderDefaults() {
-    var settings = new Gson().fromJson("{\"musicDirectories\":[\"a\"]}",AudioSettings.class);
-    assertDoesNotThrow(settings::validate);
-    assertTrue(settings.disabledMusicDirectories.isEmpty());
-  }
-
-  @Test void overlappingRootsAndContextsRespectTheirOwnSwitches() throws Exception {
-    var root = Files.createDirectory(game.resolve("a"));
-    var sub = Files.createDirectory(root.resolve("sub"));
-    byte[] header = {'O','g','g','S',0,0,0,0,0,0,0,0};
-    Files.write(root.resolve("one.ogg"),header);
-    Files.write(sub.resolve("two.ogg"),header);
-    var scan = MusicLibrary.scan(game,List.of("a","a/sub"),true);
-    assertEquals(2,scan.tracks().size());
-    assertEquals(0,MusicFolders.enabledTracks(game,scan,List.of("a"),Set.of("a"),true).size());
-    assertEquals(1,MusicFolders.enabledTracks(game,scan,List.of("a","a/sub"),Set.of("a"),true).size());
-    assertEquals(2,MusicFolders.enabledTracks(game,scan,List.of("a","a/sub"),Set.of("a/sub"),true).size());
-    assertEquals(1,MusicFolders.enabledTracks(game,scan,List.of("a"),Set.of(),false).size());
-    assertArrayEquals(header,Files.readAllBytes(root.resolve("one.ogg")));
-    assertArrayEquals(header,Files.readAllBytes(sub.resolve("two.ogg")));
+  @Test void sourceRemovalNeverChangesSavedMembership() {
+    AudioSettings settings = new AudioSettings();
+    settings.musicDirectories.addAll(List.of("first", "second"));
+    settings.playlists.add(new MusicPlaylist("saved", "Saved", List.of("music:custom/unavailable"), Map.of()));
+    settings.musicDirectories.remove("first");
+    assertEquals(List.of("music:custom/unavailable"), settings.playlists.get(0).tracks());
+    assertEquals(List.of("second"), settings.musicDirectories);
   }
 }

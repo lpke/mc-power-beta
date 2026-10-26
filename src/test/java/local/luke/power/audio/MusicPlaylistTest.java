@@ -19,7 +19,8 @@ class MusicPlaylistTest {
     assertEquals("beta", settings.playlist);
     assertEquals(12, MusicPlaylist.beta().tracks().size());
     assertEquals(BuiltinMusic.VANILLA, MusicPlaylist.world(settings).tracks());
-    assertEquals(List.of(MusicPlaylist.beta()), MusicPlaylist.all(settings));
+    assertEquals(List.of(MusicPlaylist.BETA, MusicPlaylist.FAVORITES),
+        MusicPlaylist.all(settings).stream().map(MusicPlaylist::id).toList());
     assertTrue(settings.playlists.isEmpty());
     assertThrows(UnsupportedOperationException.class, () -> MusicPlaylist.beta().tracks().clear());
     settings.playlists.add(new MusicPlaylist("beta", "Fake Beta", List.of(), Map.of()));
@@ -122,4 +123,108 @@ class MusicPlaylistTest {
     settings.playlists.add(new MusicPlaylist("one", "Duplicate", List.of(), Map.of()));
     assertThrows(IllegalArgumentException.class, settings::validate);
   }
+  @Test void favoritesIsReservedOrderedAndReadsCurrentMembershipAndOwnVolumes() {
+    AudioSettings settings = selected();
+    settings.favourites.addAll(List.of("music:z", "music:missing", "music:a"));
+    settings.favoritesGroupVolumes.put("Alpha", 23);
+    MusicPlaylist.load(settings, MusicPlaylist.FAVORITES);
+    MusicPlaylist.loadMenu(settings, MusicPlaylist.FAVORITES);
+    assertEquals(List.of("music:z", "music:missing", "music:a"), MusicPlaylist.rotation(settings, false));
+    assertEquals(23, MusicPlaylist.world(settings).groupVolumes().get("Alpha"));
+    settings.favourites.remove("music:missing");
+    settings.favourites.add("music:missing");
+    assertEquals(List.of("music:z", "music:a", "music:missing"), MusicPlaylist.menu(settings).tracks());
+    AudioSettings restored = new Gson().fromJson(new Gson().toJson(settings), AudioSettings.class);
+    restored.validate();
+    assertEquals(MusicPlaylist.world(settings).tracks(), MusicPlaylist.world(restored).tracks());
+    assertEquals(23, MusicPlaylist.menu(restored).groupVolumes().get("Alpha"));
+    settings.favourites.clear();
+    assertTrue(MusicPlaylist.rotation(settings, false).isEmpty());
+    settings.playlists.add(new MusicPlaylist(MusicPlaylist.FAVORITES, "Fake", List.of(), Map.of()));
+    assertThrows(IllegalArgumentException.class, settings::validate);
+  }
+
+  @Test void favoriteMenuSelectionUsesItsOwnGainsForItsExclusiveTracks() {
+    AudioSettings settings = selected();
+    settings.favourites.addAll(List.of("music:a", "music:favorite"));
+    settings.favoritesGroupVolumes.put("Alpha", 12);
+    MusicPlaylist.loadMenu(settings, MusicPlaylist.FAVORITES);
+    settings.menuMusic = AudioSettings.MenuMusic.MIX;
+    assertEquals(List.of("music:z", "music:missing", "music:a", "music:favorite"), MusicPlaylist.rotation(settings, true));
+    assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:favorite", true));
+    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
+    assertEquals(12, MusicPlaylist.menu(settings).groupVolumes().get("Alpha"));
+    assertEquals(40, MusicPlaylist.world(settings).groupVolumes().get("Alpha"));
+  }
+
+  @Test void volumeSettingsKeepUnavailablePlaylistFavoriteAndOverrideReferences() {
+    AudioSettings settings = selected();
+    settings.playlists.add(new MusicPlaylist("other", "Other", List.of("music:other", "music:z"), Map.of()));
+    settings.favourites.addAll(List.of("music:favorite", "music:z"));
+    settings.sounds.put("music:retained", 42);
+    settings.sounds.put("random.click", 55);
+    List<String> playlistBefore = MusicPlaylist.world(settings).tracks();
+    List<String> favoritesBefore = List.copyOf(settings.favourites);
+    List<String> ids = settings.musicTrackIds(List.of("music:available", "music:z"));
+    assertEquals("music:available", ids.get(0));
+    assertTrue(ids.containsAll(List.of("music:missing", "music:other", "music:favorite", "music:retained")));
+    assertTrue(ids.containsAll(BuiltinMusic.VANILLA));
+    assertEquals(ids.size(), new HashSet<>(ids).size());
+    assertFalse(ids.contains("random.click"));
+    assertEquals(playlistBefore, MusicPlaylist.world(settings).tracks());
+    assertEquals(favoritesBefore, List.copyOf(settings.favourites));
+    assertEquals(42, settings.sounds.get("music:retained"));
+    assertThrows(UnsupportedOperationException.class, () -> ids.add("music:mutated"));
+  }
+
+  @Test void playbackLookupsReadLiveFavoritesWithoutReplacingSnapshotsOrPhysicalGainKeys() {
+    AudioSettings settings = selected();
+    String physicalFolder = "folder:/music/album";
+    settings.favourites.add("music:custom/missing");
+    settings.favoritesGroupVolumes.put(physicalFolder, 24);
+    settings.favoritesGroupVolumes.put("Alpha", 31);
+    settings.libraryOrder.add("source:/music");
+    MusicPlaylist.load(settings, MusicPlaylist.FAVORITES);
+    MusicPlaylist snapshot = MusicPlaylist.find(settings, MusicPlaylist.FAVORITES);
+    assertTrue(MusicPlaylist.contains(settings, MusicPlaylist.SAME_AS_WORLD, "music:custom/missing"));
+    assertSame(settings.favoritesGroupVolumes, MusicPlaylist.groupVolumes(settings, MusicPlaylist.SAME_AS_WORLD));
+    assertEquals(.24f, MusicGroups.gain(MusicPlaylist.groupVolumes(settings, settings.playlist), physicalFolder), .00001f);
+    assertEquals(1f, MusicGroups.gain(MusicPlaylist.groupVolumes(settings, settings.playlist), "source:/music"));
+    settings.favourites.remove("music:custom/missing");
+    settings.favourites.add("music:custom/new");
+    settings.favoritesGroupVolumes.put(physicalFolder, 58);
+    assertFalse(MusicPlaylist.contains(settings, settings.playlist, "music:custom/missing"));
+    assertTrue(MusicPlaylist.contains(settings, settings.playlist, "music:custom/new"));
+    assertEquals(.58f, MusicGroups.gain(MusicPlaylist.groupVolumes(settings, settings.playlist), physicalFolder), .00001f);
+    assertEquals(List.of("music:custom/missing"), snapshot.tracks());
+    assertEquals(24, snapshot.groupVolumes().get(physicalFolder));
+    assertEquals(List.of("music:custom/new"), MusicPlaylist.find(settings, settings.playlist).tracks());
+  }
+
+  @Test void directPlaybackLookupsKeepWorldPriorityInMixAndResolveSharedMenuSelection() {
+    AudioSettings settings = selected();
+    settings.favourites.addAll(List.of("music:a", "music:favorite"));
+    settings.favoritesGroupVolumes.put("Alpha", 12);
+    MusicPlaylist.loadMenu(settings, MusicPlaylist.FAVORITES);
+    settings.menuMusic = AudioSettings.MenuMusic.MIX;
+    assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:favorite", true));
+    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
+    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:favorite", false));
+    assertEquals(12, MusicPlaylist.groupVolumes(settings, settings.menuPlaylist).get("Alpha"));
+    assertEquals(40, MusicPlaylist.groupVolumes(settings, settings.playlist).get("Alpha"));
+    settings.favourites.remove("music:favorite");
+    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:favorite", true));
+    settings.menuMusic = AudioSettings.MenuMusic.CUSTOM;
+    assertTrue(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
+    settings.menuMusic = AudioSettings.MenuMusic.WORLD;
+    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
+    MusicPlaylist.load(settings, MusicPlaylist.FAVORITES);
+    MusicPlaylist.loadMenu(settings, MusicPlaylist.SAME_AS_WORLD);
+    settings.menuMusic = AudioSettings.MenuMusic.CUSTOM;
+    assertFalse(MusicPlaylist.usesMenuVolumes(settings, "music:a", true));
+    assertSame(settings.favoritesGroupVolumes, MusicPlaylist.groupVolumes(settings, settings.menuPlaylist));
+    assertTrue(MusicPlaylist.contains(settings, settings.menuPlaylist, "music:a"));
+    assertFalse(MusicPlaylist.contains(settings, settings.menuPlaylist, "music:z"));
+  }
+
 }

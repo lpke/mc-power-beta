@@ -154,7 +154,8 @@ public final class Setting {
       if (!next.isJsonArray() && !next.isJsonObject())
         throw new IllegalArgumentException("Enter a list or object");
       int limit = switch (id) {
-        case "audio.playlists", "audio.favourites", "logo.presets", "interface.debugPresets", "creativeTabs.tabs" -> 1048576;
+        case "audio.playlists", "audio.favourites", "audio.musicDirectories", "audio.favoritesGroupVolumes", "audio.libraryOrder" -> 4194304;
+        case "logo.presets", "interface.debugPresets", "creativeTabs.tabs" -> 1048576;
         default -> 16384;
       };
       if (next.toString().length() > limit)

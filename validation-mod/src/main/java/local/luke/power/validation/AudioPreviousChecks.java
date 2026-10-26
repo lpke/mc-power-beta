@@ -27,7 +27,6 @@ final class AudioPreviousChecks {
         var s = AudioConfig.copy(); s.master = 100; s.waitBetweenTracks = s.delayQueuedTracks = true;
         s.gapMinSeconds = s.gapMaxSeconds = 600; s.menuMusic = AudioSettings.MenuMusic.WORLD;
         s.musicDirectories = List.of("power-beta-data/validation/audio-previous-152"); MusicFixtureSupport.imported(s, false);
-        s.disabledMusicDirectories.clear();
         AudioConfig.preview(s); mc.options.musicVolume = .2F;
         MusicRequests.edit(q -> { q.tracks.clear(); q.tracks.add(QUEUED); });
       }

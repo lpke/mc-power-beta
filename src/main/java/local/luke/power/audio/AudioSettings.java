@@ -37,13 +37,24 @@ public final class AudioSettings {
   public int master = 100;
   public Map<String, Integer> categories = new LinkedHashMap<>();
   public Map<String, Integer> sounds = new TreeMap<>();
-  public Set<String> favourites = new TreeSet<>();
+  public Set<String> favourites = new LinkedHashSet<>();
+  public Map<String, Integer> favoritesGroupVolumes = new TreeMap<>();
+  public List<String> libraryOrder = new ArrayList<>();
   public String playlist = MusicPlaylist.BETA, menuPlaylist = MusicPlaylist.SAME_AS_WORLD;
   public List<MusicPlaylist> playlists = new ArrayList<>();
   public List<String> musicDirectories = new ArrayList<>();
-  public Set<String> disabledMusicDirectories = new LinkedHashSet<>();
   public boolean recursive = false, shuffle = true, avoidRepeats = true;
   public boolean waitBetweenTracks = true, delayQueuedTracks = false;
+
+  /** Settings discovery retains controls for unavailable songs without querying files. */
+  public List<String> musicTrackIds(Collection<String> available) {
+    LinkedHashSet<String> tracks = new LinkedHashSet<>(available);
+    tracks.addAll(MusicPlaylist.beta().tracks());
+    for (MusicPlaylist saved : playlists) tracks.addAll(saved.tracks());
+    tracks.addAll(favourites);
+    sounds.keySet().stream().filter(id -> id.startsWith("music:")).forEach(tracks::add);
+    return List.copyOf(tracks);
+  }
 
   public boolean continuesAcrossMenus() { return menuMusic != MenuMusic.CUSTOM; }
   public boolean showMenuControls(boolean mainMenu) {
@@ -69,6 +80,8 @@ public final class AudioSettings {
         || Math.abs((long) menuControlsOffsetY) > 4096)
       throw new IllegalArgumentException("Menu control offsets must be -4096 to 4096 pixels");
     MusicPlaylist.validateTrackIds(favourites);
+    MusicGroups.copy(favoritesGroupVolumes);
+    MusicLibrarySources.validateOrder(libraryOrder);
     volume(master);
     if (gapMinSeconds < 0 || gapMaxSeconds < gapMinSeconds || gapMaxSeconds > 86400)
       throw new IllegalArgumentException("Music gaps must be 0 to 86400 seconds, with maximum at least minimum");
@@ -76,8 +89,7 @@ public final class AudioSettings {
       throw new IllegalArgumentException("Music selection is incomplete");
     if (categories == null
         || sounds == null
-        || musicDirectories == null
-        || disabledMusicDirectories == null) throw new IllegalArgumentException("Audio settings are incomplete");
+        || musicDirectories == null) throw new IllegalArgumentException("Audio settings are incomplete");
     for (var e : categories.entrySet()) {
       if (!new AudioSettings().categories.containsKey(e.getKey()))
         throw new IllegalArgumentException("Unknown audio category");
@@ -97,8 +109,8 @@ public final class AudioSettings {
     for (String dir : musicDirectories)
         if (dir == null || dir.isBlank() || dir.length() > 4096 || dir.indexOf('\0') >= 0)
           throw new IllegalArgumentException("Invalid music folder");
-    if (!musicDirectories.containsAll(disabledMusicDirectories))
-      throw new IllegalArgumentException("Disabled music folders must remain in the folder list");
+    if (new HashSet<>(musicDirectories).size() != musicDirectories.size())
+      throw new IllegalArgumentException("Music folders must be unique");
   }
 
   private static void volume(Integer value) {

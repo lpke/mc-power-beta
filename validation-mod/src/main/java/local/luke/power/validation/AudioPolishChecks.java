@@ -33,7 +33,7 @@ public final class AudioPolishChecks {
         before = AudioConfig.copy(); queueBefore = MusicRequests.tracks(); volumeBefore = mc.options.musicVolume;
         var config = AudioConfig.copy(); config.master = 100;
         config.musicDirectories = List.of("audio-polish");
-        config.disabledMusicDirectories.clear(); MusicFixtureSupport.imported(config, false);
+        MusicFixtureSupport.imported(config, false);
         config.waitBetweenTracks = true; config.delayQueuedTracks = true;
         MusicRequests.edit(q -> q.tracks.clear()); AudioConfig.preview(config); AudioController.pause();
         mc.options.musicVolume = .15f;

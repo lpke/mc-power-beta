@@ -4,7 +4,7 @@ import java.util.*;
 
 /** An immutable saved playlist. Playback reads the selected object directly. */
 public final class MusicPlaylist {
-  public static final String SAME_AS_WORLD = "@world", BETA = "beta";
+  public static final String SAME_AS_WORLD = "@world", BETA = "beta", FAVORITES = "favorites";
   private final String id, name;
   private final List<String> tracks;
   private final Map<String, Integer> groupVolumes;
@@ -46,9 +46,16 @@ public final class MusicPlaylist {
 
   public static MusicPlaylist beta() { return BETA_PLAYLIST; }
 
+  public static MusicPlaylist favorites(AudioSettings settings) {
+    return new MusicPlaylist(FAVORITES, "Favorites", List.copyOf(settings.favourites), settings.favoritesGroupVolumes);
+  }
+
+  public static boolean reserved(String id) { return BETA.equals(id) || FAVORITES.equals(id); }
+
   public static List<MusicPlaylist> all(AudioSettings settings) {
     List<MusicPlaylist> result = new ArrayList<>();
     result.add(beta());
+    result.add(favorites(settings));
     result.addAll(settings.playlists);
     return Collections.unmodifiableList(result);
   }
@@ -58,6 +65,7 @@ public final class MusicPlaylist {
       throw new IllegalArgumentException("Invalid music playlists");
     Set<String> ids = new HashSet<>();
     ids.add(BETA);
+    ids.add(FAVORITES);
     for (MusicPlaylist p : playlists) {
       if (p == null) throw new IllegalArgumentException("Invalid music playlist");
       new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
@@ -69,6 +77,7 @@ public final class MusicPlaylist {
 
   public static MusicPlaylist find(AudioSettings settings, String id) {
     if (BETA.equals(id)) return beta();
+    if (FAVORITES.equals(id)) return favorites(settings);
     MusicPlaylist p = settings.playlists.stream().filter(value -> value.id.equals(id)).findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Music playlist is missing"));
     return p;
@@ -90,11 +99,22 @@ public final class MusicPlaylist {
     return List.copyOf(tracks);
   }
 
+  /** Playback lookups read validated settings without constructing a Favorites snapshot. */
+  public static boolean contains(AudioSettings settings, String selection, String track) {
+    String id = SAME_AS_WORLD.equals(selection) ? settings.playlist : selection;
+    return FAVORITES.equals(id) ? settings.favourites.contains(track) : find(settings, id).includes(track);
+  }
+
+  public static Map<String, Integer> groupVolumes(AudioSettings settings, String selection) {
+    String id = SAME_AS_WORLD.equals(selection) ? settings.playlist : selection;
+    return FAVORITES.equals(id) ? settings.favoritesGroupVolumes : find(settings, id).groupVolumes();
+  }
+
   public static boolean usesMenuVolumes(AudioSettings settings, String id, boolean inMenu) {
     if (!inMenu || settings.menuMusic == AudioSettings.MenuMusic.WORLD
         || SAME_AS_WORLD.equals(settings.menuPlaylist)) return false;
     return settings.menuMusic == AudioSettings.MenuMusic.CUSTOM
-        || menu(settings).includes(id) && !world(settings).includes(id);
+        || contains(settings, settings.menuPlaylist, id) && !contains(settings, settings.playlist, id);
   }
 
   public static void load(AudioSettings settings, String id) {

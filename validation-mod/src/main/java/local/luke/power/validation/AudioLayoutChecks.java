@@ -51,7 +51,6 @@ public final class AudioLayoutChecks {
         rules(new MusicRules(true,true,12000,12000,1,1,1,1));
         AudioSettings next=AudioConfig.copy();next.musicDirectories=new ArrayList<>(List.of("audio-layout/a", "audio-layout/b", "audio-layout/menu"));
         next.menuMusic=AudioSettings.MenuMusic.CUSTOM;
-        next.disabledMusicDirectories.clear();
         MusicPlaylist.load(next, MusicPlaylist.BETA);
         AudioConfig.preview(next);AudioController.pause();
       }
@@ -85,17 +84,13 @@ public final class AudioLayoutChecks {
           var tabs=(MusicFilters.Layout)call(library,"filters");
           check(tabs.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library","playlists","favorites")),"editor tabs missing");
         });
-        test("Library folder toggles preview immediately and Options discard restores them", () -> {
+        test("Library source Remove confirmation and Options discard preserve folders", () -> {
           library.showTracks();
-          String group=MusicLibrarySources.id(FOLDERS.get(0));
-          int y=MusicFolderChecks.sourceY(library,group);
-          click(options,(int)call(library,"sourceToggleX")+5,y+8);
-          check(AudioConfig.current().disabledMusicDirectories.contains(FOLDERS.get(0)),"On/Off did not preview switch");
-          check(AudioConfig.current().musicDirectories.containsAll(FOLDERS),"switch erased path");
-          check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of(b)),"switch erased track choice");
+          MusicFolderChecks.sourceClick(options, library, FOLDERS.get(0), "sourceRemoveX");
+          check(library.modal(), "Remove skipped confirmation");
+          ((ScreenInput)(Object)options).power$key('\0',org.lwjgl.input.Keyboard.KEY_ESCAPE);
+          check(AudioConfig.current().musicDirectories.contains(FOLDERS.get(0)), "Remove cancel changed source");
           options.session().discard();
-          check(AudioConfig.current().disabledMusicDirectories.isEmpty(),"discard did not restore enabled folder");
-          check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of(b)),"rollback erased track choice");
         });
         test("Queue shortcut opens directly and queue controls share one line", () -> {
           AudioController.pause();MusicRequests.edit(q -> {q.tracks.clear();q.add(a);q.add(b);});
@@ -105,18 +100,16 @@ public final class AudioLayoutChecks {
           check(mc.currentScreen==options && library.state().queue(),"Queue shortcut opened wrong view");
           options.render(-1,-1,0);
           check((int)call(library,"rowHeight")==24,"queue is not one line");
-          check((int)call(library,"right")-(int)call(library,"filterX")<=82,"Clear queue stretched");
-          click(options,((MusicRowLayout)call(library,"rowLayout")).downX()+3,(int)call(library,"listTop")+8);
-          check(MusicRequests.tracks().equals(List.of(b,a)),"inline down arrow missed");
-          options.render(-1,-1,0);
+          int x=(int)call(library,"left")+22, top=(int)call(library,"listTop");
+          ((ScreenInput)(Object)options).power$click(x,top+8,0);
+          ((ScreenInput)(Object)options).power$release(x,top+46,0);
+          check(MusicRequests.tracks().equals(List.of(b,a)),"queue row drag missed");
+          MusicPlaylists460Checks.context(options,library,b,List.of("Add to queue","Favourite","Preview","Remove from queue"));
           MusicRequests.edit(q -> q.tracks.remove(0));
-          int oldVolume=AudioController.trackVolume(a);
-          click(options,(int)call(library,"volumeX")+4,(int)call(library,"listTop")+8);
-          check(AudioController.trackVolume(a)==oldVolume,"stale volume click changed another track");
-          click(options,((MusicRowLayout)call(library,"rowLayout")).queueX()+3,(int)call(library,"listTop")+8);
-          check(MusicRequests.tracks().equals(List.of(a)),"stale click removed different request");
-          options.render(-1,-1,0);
-          click(options,(int)call(library,"filterX")+3,(int)call(library,"controlsTop")+8);
+          MusicPlaylists460Checks.choose(options,3);
+          check(MusicRequests.tracks().equals(List.of(a)),"stale context removed different request");
+          call(library,"refresh");
+          click(options,(int)call(library,"right")-79,(int)call(library,"controlsTop")+8);
           check(MusicRequests.tracks().isEmpty(),"Clear queue missed");
           check(((List<AudioToolbar.Button>)call(options,"musicButtons")).stream()
               .noneMatch(v -> v.action()==AudioToolbar.Action.QUEUE),"empty Queue remains visible");

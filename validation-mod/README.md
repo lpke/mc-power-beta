@@ -18,28 +18,33 @@
 # Runtime checks
 
 - `music-playlists-460 prepare` stages two temporary imported folders with valid bundled Ogg samples.
-  Wait for the scanner, then `music-playlists-460 capture` writes 18 native screenshots at 320x240 and 640x420.
+  Wait for the scanner, then `music-playlists-460 capture` writes 32 native screenshots at 320x240 and 854x480.
   Captured views are `library`, `favorites`, `playlists`, `audio-playback`,
-  `audio-controls`, `menu`, `library-expanded`, `folder-picker` and `folder-remove`.
-  Other staging views include `settings`, `selector`, `beta`, `new`, `editor`, `group-gain`, `order` and `queue`. Use a muted disposable
+  `audio-controls`, `menu`, `library-expanded`, `folder-picker`, `folder-remove`,
+  `new`, `editor`, `grouped`, `add-library`, `from-playlist` and `context`.
+  Two extra 320x240 captures, `grouped-scrolled` and `add-library-scrolled`, show
+  full song controls after scrolling the heading away in the smallest viewport.
+  Other staging views include `settings`, `selector`, `beta`, `group-gain` and `queue`. Use a muted disposable
   singleplayer world, the verified silent Pulse sink and a client window of at least
-  1280x840. Images and `captures.json` go to `power-beta-data/reports/music-playlists-460`.
+  1708x960. Images and `captures.json` go to `power-beta-data/reports/music-playlists-460`.
   `music-playlists-460 view VIEW` stages one view at 640x420; `stop` restores it.
   After reviewing captures, `music-playlists-460 run` checks native main Audio
   selection/Edit, all editor tabs, Library folder/reload controls, collapsed groups,
-  isolated membership/order/group gains and exact entry, native drag/release/cancel,
+  isolated membership/order/group gains and exact entry, direct flat drag/release/cancel,
+  grouped/filter drag guards, ordered From playlist append, group Add, fixed-name Favorites drafts,
+  parent song context actions, separate Library group order,
   Shuffle and ordered reservations, Save/Discard, fixed Beta originals and Copy,
   saved empty/missing references, menu assignments, auto/manual Options and independent
   queue persistence, selected-playlist deletion, dirty-draft modals, global-search Back
   and ordinary Audio settings keyboard controls. It restores configuration, music and options.txt byte-for-byte,
   runtime audio/queue/preferences, and only removes backups and sample folders that it created.
-  To check disabled-source ownership, use `prepare`, wait, `source-start`, `source-off`,
-  wait, `source-check`, then `stop`. The check verifies current ID, label, group, song gain
-  and duration while the disabled source disappears from future track resolution.
+  To check removed-source ownership, use `prepare`, wait, `source-start`, `source-sticky`,
+  `source-remove`, wait, `source-check`, `source-restore`, wait, `source-restored-check`, then `stop`. The check verifies current ID, label, group, song gain
+  and duration while the removed source disappears from future track resolution.
   `menu-pools`, also included in `run`, checks native candidate order, overlap and gain
   ownership for all WORLD/CUSTOM/MIX and same-world/Beta/saved/empty combinations.
   It starts no playback and keeps the loaded world. Run `audio-maintenance` for native
-  multi-folder import, inline source controls, Options Apply/Discard, failed-save rollback and source-file preservation. Existing
+  multi-folder import selection, inline source removal, Options Apply/Discard, failed-save rollback and source-file preservation. Existing
   `audio-groups-gain-*`, seek, history and pause/resume steps check actual playback.
 
 - `map-449 run` checks open-menu map mouse ownership, other modals, Pause label eligibility and session-only World Map visibility. `prepare inventory|pause-wheel|right|middle|left`, actual pointer action, `check`, then `stop` covers native mouse batches. The prepare token is combined, for example `prepare inventory-wheel`.
@@ -90,7 +95,7 @@
   committed on the owning release, unknown-ID retention and one-step Undo.
   It captures a three-item group preview and checks the spaced group drop, plus
   photo framing across resolutions and zoom/daylight retention through resizing.
-  Requires a focused, muted disposable singleplayer client at least 1280x840.
+  Requires a focused, muted disposable singleplayer client at least 1708x960.
   Configuration and native inventory snapshots must remain unchanged.
 
 - `gui-items-444` compares custom GUI and shared picker/editor icons against native

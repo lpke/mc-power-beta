@@ -7,7 +7,7 @@ import java.util.*;
 public final class MusicLibrarySources {
   private MusicLibrarySources() {}
 
-  public record Folder(String id, String path, String label, boolean enabled, String status,
+  public record Folder(String id, String path, String label, String status,
       List<String> trackIds, List<String> warnings) {
     public Folder {
       trackIds = List.copyOf(trackIds);
@@ -24,13 +24,32 @@ public final class MusicLibrarySources {
     }
   }
 
-  private record Root(String path, String label, Path root, boolean enabled,
+  private record Root(String path, String label, Path root,
       String status, List<String> warnings) {}
 
   public static String id(String path) { return "source:" + path; }
 
-  /** Most-specific enabled root owns each track; equal roots retain configured order. */
-  public static Snapshot build(Path game, List<String> configured, Set<String> disabled,
+  /** Only presentation order changes; source ownership retains configured precedence. */
+  public static List<String> order(AudioSettings settings) {
+    LinkedHashSet<String> available = new LinkedHashSet<>();
+    settings.musicDirectories.forEach(path -> available.add(id(path)));
+    available.addAll(BuiltinMusic.GROUPS);
+    List<String> ordered = new ArrayList<>();
+    for (String group : settings.libraryOrder) if (available.remove(group)) ordered.add(group);
+    ordered.addAll(available);
+    return List.copyOf(ordered);
+  }
+
+  public static void validateOrder(List<String> order) {
+    if (order == null || order.size() > 8192 || order.size() != new HashSet<>(order).size()
+        || order.stream().anyMatch(id -> id == null || id.isBlank() || id.length() > 4103
+            || id.codePoints().anyMatch(Character::isISOControl)
+            || !BuiltinMusic.GROUPS.contains(id) && (!id.startsWith("source:") || id.substring(7).isBlank())))
+      throw new IllegalArgumentException("Invalid music library order");
+  }
+
+  /** Most-specific imported root owns each track; equal roots retain configured order. */
+  public static Snapshot build(Path game, List<String> configured,
       MusicLibrary.Scan scan, boolean recursive) {
     Map<String, MusicLibrary.SourceFolder> observed = new LinkedHashMap<>();
     for (var source : scan.sources()) observed.putIfAbsent(source.path(), source);
@@ -40,12 +59,11 @@ public final class MusicLibrarySources {
       try { lexical = MusicLibrary.resolve(game, path).toAbsolutePath().normalize(); }
       catch (RuntimeException ignored) { /* Invalid saved paths remain manageable. */ }
       String label = lexical == null ? path : Objects.toString(lexical.getFileName(), lexical.toString());
-      boolean enabled = !disabled.contains(path);
-      var source = enabled ? observed.get(path) : null;
-      String status = !enabled ? "Off" : source == null ? "Scanning" : source.available() ? "Ready" : "Unavailable";
+      var source = observed.get(path);
+      String status = source == null ? "Scanning" : source.available() ? "Ready" : "Unavailable";
       roots.add(new Root(path, label,
-          !enabled || source != null && !source.available() ? null : source == null ? lexical : source.root(),
-          enabled, status, source == null ? List.of() : source.warnings()));
+          source != null && !source.available() ? null : source == null ? lexical : source.root(),
+          status, source == null ? List.of() : source.warnings()));
     }
     Set<String> covered = new HashSet<>();
     Map<String, String> owners = new LinkedHashMap<>();
@@ -81,7 +99,7 @@ public final class MusicLibrarySources {
         if (incomplete) status = "Incomplete";
         else if (members.isEmpty()) status = covered.contains(group) ? "Shared" : "Empty";
       }
-      folders.add(new Folder(group, root.path(), root.label(), root.enabled(), status, members, root.warnings()));
+      folders.add(new Folder(group, root.path(), root.label(), status, members, root.warnings()));
     }
     return new Snapshot(folders, owners, tracks);
   }

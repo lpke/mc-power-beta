@@ -44,7 +44,7 @@ public final class AudioPresetChecks {
             check((boolean)call(options,"musicControlsVisible"),"editor transport hidden");
             check((int)call(library,"bottom")-(int)call(library,"listTop")>=24,"editor has no room for rows");
             var tabs=(MusicFilters.Layout)call(library,"filters");
-            check(tabs.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library","playlists","settings")),"editor tabs changed");
+            check(tabs.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library","playlists","favorites")),"editor tabs changed");
             check((int)call(panel,"top")>=tabs.tabs().get(0).y()+18,"draft header overlaps tabs");
             check(GL11.glGetError()==0,"editor GL error");
           }

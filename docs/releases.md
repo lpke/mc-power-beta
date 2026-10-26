@@ -129,6 +129,22 @@ by the client, including every `level.dat` and `level.dat_old` under `saves`:
 ```
 
 Add `-PinstanceDefaults` only when resetting preferences to pack defaults. It retains
-FOV, GUI scale and the frame limit. Version 4.6.0 accepts configuration schema 9, music-data format 2 and world-rule format 4. Convert earlier personal configuration with verified backups before installation; the client does not import legacy presets. This command refuses running
-clients, validates every metadata file before writing worlds, and restores its
-transaction if any required update fails.
+FOV, GUI scale and the frame limit. Version 4.6.0 accepts configuration schema 9,
+music-data format 3 and world-rule format 4. The client refuses earlier music
+formats instead of silently converting them. Convert earlier personal configuration
+with verified backups before installation; the client does not import legacy presets.
+
+For a format-2 music document, first verify the instance is idle. Run the built
+input API or pack JAR with Gson 2.8.9 on the Java classpath:
+
+```sh
+java -cp /path/to/power-beta-input-1.0.0.jar:/path/to/gson-2.8.9.jar \
+  local.luke.power.storage.MusicDataUpgrade --idle-instance \
+  /path/to/.minecraft/power-beta/music.json
+```
+
+The converter verifies a durable backup, preserves list order and queue data, and
+removes retired source Off flags. Verify the converted document and unrelated
+settings before installing. The world-upgrade task refuses running clients,
+validates every metadata file before writing worlds, and restores its transaction
+if any required update fails.

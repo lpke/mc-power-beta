@@ -51,7 +51,9 @@ class AudioConfigLoadTest {
       healthy.playlists.add(new MusicPlaylist("saved", "Saved songs", List.of("music:missing", "music:calm1.ogg"), Map.of("Alpha", 40)));
       MusicPlaylist.load(healthy, "saved");
       healthy.musicDirectories.add("personal-music");
-      healthy.favourites.add("music:calm1.ogg");
+      healthy.favourites.addAll(List.of("music:missing", "music:calm1.ogg"));
+      healthy.favoritesGroupVolumes.put("Alpha", 27);
+      healthy.libraryOrder.addAll(List.of("Alpha", "source:personal-music"));
       healthy.sounds.put("music:calm1.ogg", 35);
       PowerConfig.saveAudio(healthy);
       MusicQueue queue = new MusicQueue();
@@ -88,6 +90,9 @@ class AudioConfigLoadTest {
       assertArrayEquals(originalMusic, Files.readAllBytes(PowerConfig.musicPath()));
       AudioSettings reloaded = (AudioSettings) load.invoke(null);
       assertEquals(MusicPlaylist.world(healthy).tracks(), MusicPlaylist.world(reloaded).tracks());
+      assertEquals(List.copyOf(healthy.favourites), List.copyOf(reloaded.favourites));
+      assertEquals(healthy.favoritesGroupVolumes, reloaded.favoritesGroupVolumes);
+      assertEquals(healthy.libraryOrder, reloaded.libraryOrder);
       Field problem = AudioConfig.class.getDeclaredField("loadProblem");
       problem.setAccessible(true);
       assertEquals("", problem.get(null));

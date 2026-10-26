@@ -25,7 +25,7 @@ final class MusicCollapseChecks {
         for(int[] size:new int[][]{{320,240},{854,480}})
           test("music collapse overrides individual groups only in current view "+filter+" "+size[0],()->{
             library.showTracks();options.init(mc,size[0],size[1]);
-            field(library,"favouritesOnly",false);((TextInput)field(library,"search")).setText("");
+            ((TextInput)field(library,"search")).setText("");
             select.invoke(library,filter);
             check(library.hasSections(),"filter has no sections");
             var groups=List.copyOf((List<String>)field(library,"sectionKeys"));

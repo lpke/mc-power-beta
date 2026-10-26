@@ -809,6 +809,11 @@ public final class PowerOptionsScreen extends UiScreen {
 
   public void changed(Setting setting) { changed(setting, false); }
 
+  void musicActions(List<String> labels, List<Boolean> enabled, int x, int y, java.util.function.IntConsumer action) {
+    valueEditor.cancel();
+    choices.openActions(this, labels, enabled, x, y, width, height, action);
+  }
+
   boolean acceptEditor(SettingsDraft draft) {
     Map<Setting, com.google.gson.JsonElement> before = new LinkedHashMap<>();
     for (Setting copy : draft.settings()) {
@@ -879,7 +884,7 @@ public final class PowerOptionsScreen extends UiScreen {
     int wheel = Mouse.getEventDWheel();
     if (choices.wheel(wheel)) return;
     if (hidden || wheel == 0 || capture != null || confirmClose || confirmReset) return;
-    if (libraryVisible() && library.modal()) return;
+    if (libraryVisible() && library.modal()) { library.wheel(wheel); return; }
     valueEditor.cancel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     if (!isolatedRules() && !embedded() && x < origin() + sidebar() + 8) scrollViewport(wheel, true);
@@ -891,6 +896,7 @@ public final class PowerOptionsScreen extends UiScreen {
   @Override
   protected void mouseReleased(int x, int y, int button) {
     choices.release(y, button);
+    if (libraryVisible()) library.mouseReleased(x, y, button);
     super.mouseReleased(x, y, button);
   }
 

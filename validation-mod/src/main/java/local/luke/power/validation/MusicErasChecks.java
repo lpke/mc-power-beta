@@ -63,12 +63,12 @@ public final class MusicErasChecks {
         test("Library row controls preserve saved playlist membership", () -> {
           options.render(-1,-1,0);
           String saved=Catalog.JSON.toJson(AudioConfig.current().playlists);
-          Object first=((List<?>)field(library,"rows")).stream().filter(r->{try{return "music:calm1.ogg".equals(call(r,"id"));}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
-          int y=(int)call(library,"listTop")+(int)call(first,"y")-library.state().trackScroll();
-          var row=(MusicRowLayout)call(library,"rowLayout");
-          click(options,row.favouriteX()+5,y+row.controlsY()+5);
-          check(saved.equals(Catalog.JSON.toJson(AudioConfig.current().playlists)),"star edited playlist membership");
-          click(options,row.favouriteX()+5,y+row.controlsY()+5);
+          boolean favorite=AudioConfig.current().favourites.contains("music:calm1.ogg");
+          MusicPlaylists460Checks.context(options,library,"music:calm1.ogg",List.of("Add to queue",favorite ? "Remove favourite" : "Favourite","Preview"));
+          MusicPlaylists460Checks.choose(options,1);
+          check(saved.equals(Catalog.JSON.toJson(AudioConfig.current().playlists)),"favourite edited playlist membership");
+          MusicPlaylists460Checks.context(options,library,"music:calm1.ogg",List.of("Add to queue",favorite ? "Favourite" : "Remove favourite","Preview"));
+          MusicPlaylists460Checks.choose(options,1);
         });
         MusicGroupChecks.run(mc, options, library);
         test("queue controls remain usable at compact and wide sizes", () -> {
@@ -76,7 +76,7 @@ public final class MusicErasChecks {
           library.showQueue();
           for(int[] size:new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
             options.init(mc,size[0],size[1]);options.render(-1,-1,0);
-            check((int)call(library,"rowHeight")==((int)call(library,"span")>=320?24:44),"wrong responsive queue layout");
+            check((int)call(library,"rowHeight")==24,"wrong responsive queue layout");
             check((int)call(library,"volumeEnd")-(int)call(library,"volumeX")>=36,"volume too narrow");
             if ((int)call(library,"rowHeight")==24) check((int)call(library,"volumeX")-(int)call(library,"left")>=40,"name has no space");
             check(GL11.glGetError()==0,"GL error");

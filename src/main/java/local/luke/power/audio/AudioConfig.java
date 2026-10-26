@@ -41,7 +41,6 @@ public final class AudioConfig {
   public static void preview(AudioSettings next) {
     next.validate();
     boolean library = !current.musicDirectories.equals(next.musicDirectories)
-        || !current.disabledMusicDirectories.equals(next.disabledMusicDirectories)
         || current.recursive != next.recursive;
     boolean mode = current.menuMusic != next.menuMusic;
     boolean timing = current.gapMinSeconds != next.gapMinSeconds || current.gapMaxSeconds != next.gapMaxSeconds;

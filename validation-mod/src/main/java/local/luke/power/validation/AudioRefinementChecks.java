@@ -115,7 +115,7 @@ final class AudioRefinementChecks {
           s.init(mc,size[0],size[1]);s.render(-1,-1,0);
           int left=(int)call(panel,"left"),right=(int)call(panel,"right");
           int nx=(int)call(panel,"nameX"),nw=(int)call(panel,"nameWidth");
-          check(nx>=left&&nw>=40&&nx+nw<=(int)call(panel,"orderX"),"name input overlaps Order");
+          check(nx>=left&&nw>=40&&nx+nw<=(int)call(panel,"saveX"),"name input overlaps Save");
           check((int)call(panel,"saveX")+40<=right,"Save clipped");
           check(draft.tracks().isEmpty(),"new draft expanded implicitly");
           check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(selected),"draft changed selected saved membership");

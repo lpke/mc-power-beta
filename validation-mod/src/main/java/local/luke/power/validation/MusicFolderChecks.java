@@ -91,8 +91,8 @@ final class MusicFolderChecks {
         test("MUSIC460 clipped sticky source control bounds size=" + size[0] + "x" + size[1], () -> {
           options.init(mc, size[0], size[1]);
           var pinned = pinSource(options, library, path);
-          if (size[1] == 240) {
-            check(pinned == null, "small viewport ignored shared sticky-header height guard");
+          if (pinned == null) {
+            check((int)call(library, "bottom") - (int)call(library, "listTop") < 24 + (int)call(library, "rowHeight"), "source header failed to pin with room for a song row");
             sourceClick(options, library, path, "sourceRemoveX");
             check(library.modal(), "ordinary source controls missed in short viewport");
             ((ScreenInput)(Object)options).power$key('\0', Keyboard.KEY_ESCAPE);
@@ -100,18 +100,11 @@ final class MusicFolderChecks {
             return;
           }
           check(pinned != null, "source did not pin in supported viewport");
-          int top = (int)call(library, "listTop"), toggleX = (int)call(library, "sourceToggleX"), removeX = (int)call(library, "sourceRemoveX");
-          click(options, toggleX + 5, top - 1);
+          int top = (int)call(library, "listTop"), removeX = (int)call(library, "sourceRemoveX");
           click(options, removeX + 5, top - 1);
-          check(!AudioConfig.current().disabledMusicDirectories.contains(path) && !library.modal(), "clipped source controls accepted a click above list");
-          click(options, toggleX + 28, top);
-          check(!AudioConfig.current().disabledMusicDirectories.contains(path), "toggle accepted exclusive right edge");
-          pinSource(options, library, path);
-          click(options, toggleX + 27, top);
-          check(AudioConfig.current().disabledMusicDirectories.contains(path), "visible pinned Off control missed last horizontal pixel");
-          // Off has no track rows to pin. Its ordinary header must turn it back On.
-          sourceClick(options, library, path, "sourceToggleX");
-          check(!AudioConfig.current().disabledMusicDirectories.contains(path), "On did not restore source after pinned Off");
+          check(!library.modal(), "clipped Remove accepted a click above list");
+          click(options, removeX + 18, top);
+          check(!library.modal(), "Remove accepted exclusive right edge");
           pinSource(options, library, path);
           click(options, removeX + 5, top + 13);
           check(!library.modal(), "Remove accepted exclusive lower edge of clipped button");
@@ -132,6 +125,7 @@ final class MusicFolderChecks {
       Path second = Files.createDirectory(root.resolve("second"));
       Path empty = Files.createDirectory(root.resolve("empty"));
       Path missing = root.resolve("missing");
+      for (int i=0;i<20;i++) Files.createDirectory(root.resolve("browser-row-" + i));
       for (Path folder : List.of(first, second)) try (var in = MusicFolderChecks.class.getResourceAsStream("/assets/powerbeta/music/calm1.ogg")) {
         Files.copy(Objects.requireNonNull(in), folder.resolve("song.ogg"));
       }
@@ -158,38 +152,27 @@ final class MusicFolderChecks {
           ((ScreenInput)(Object)picker).power$click(picker.width / 2 - 100, picker.height - 20, 0);
           check(mc.currentScreen == options, "typed Add did not return to Library");
           check(AudioConfig.current().musicDirectories.contains(second.toString()), "typed Add did not preview source");
-          check(source(library, second.toString()).enabled(), "added source has no On header");
+          check(source(library, second.toString()) != null, "added source header missing");
           check(PowerConfig.readAudio(AudioSettings.class).musicDirectories.contains(second.toString()) == automatic, "Add crossed Options persistence boundary");
           check(Catalog.JSON.toJson(AudioConfig.current().playlists).equals(Catalog.JSON.toJson(baseline.playlists)), "Add changed saved playlist entries");
           if (!automatic) {
             options.session().discard();
             check(!AudioConfig.current().musicDirectories.contains(second.toString()), "Options Discard retained added source");
             picker = add(mc, options, library); typePath(picker, root);
-            ((ScreenInput)(Object)picker).power$click(picker.width / 2 + 10, picker.height - 20, 0);
-            check(mc.currentScreen == options && AudioConfig.current().musicDirectories.size() == 4, "child import did not add exactly the unlisted audio folder");
-            picker = add(mc, options, library); typePath(picker, root);
-            ((ScreenInput)(Object)picker).power$click(picker.width / 2 + 10, picker.height - 20, 0);
-            check(mc.currentScreen == picker && field(picker, "error").toString().contains("No new"), "duplicate child import lacked feedback");
+            ((ScreenInput)(Object)picker).power$key('\0', Keyboard.KEY_RETURN);
+            ((ScreenInput)(Object)picker).power$click((int)call(picker, "selectX") + 5, (int)call(picker, "selectY") + 5, 0);
+            check(((Set<?>)field(picker, "selected")).size() == ((List<?>)field(picker, "children")).size(), "Select all missed visible folders");
+            ((ScreenInput)(Object)picker).power$click((int)call(picker, "selectX") + 75, (int)call(picker, "selectY") + 5, 0);
+            check(((Set<?>)field(picker, "selected")).isEmpty(), "Deselect all retained visible folders");
+            var bounds=(ScrollBar.Track)call(picker,"track");
+            check(bounds.visible(),"picker fixture has no scrollbar");
+            var input=(ScreenInput)(Object)picker;
+            input.power$click(bounds.x(),bounds.top()+2,0);
+            input.power$release(bounds.x(),bounds.top()+bounds.height()-1,-1);
+            check((boolean)field(field(picker,"scrollbar"),"dragging"),"native motion ended picker scrollbar ownership");
+            input.power$release(bounds.x(),bounds.top()+bounds.height()-1,0);
+            check((int)field(picker,"scroll")>0 && !(boolean)field(field(picker,"scrollbar"),"dragging"),"picker release ignored final position or retained ownership");
             ((ScreenInput)(Object)picker).power$key('\0', Keyboard.KEY_ESCAPE); options.session().discard();
-          }
-        });
-        test("MUSIC460 inline On/Off and Options Apply auto=" + automatic, () -> {
-          sourceClick(options, library, first.toString(), "sourceToggleX");
-          check(AudioConfig.current().disabledMusicDirectories.contains(first.toString()), "Off did not preview immediately");
-          var off = source(library, first.toString());
-          check(!off.enabled() && off.status().equals("Off") && off.trackIds().isEmpty(), "Off source retained visible tracks");
-          check(Catalog.JSON.toJson(AudioConfig.current().playlists).equals(Catalog.JSON.toJson(baseline.playlists)), "Off removed saved track references");
-          check(PowerConfig.readAudio(AudioSettings.class).disabledMusicDirectories.contains(first.toString()) == automatic, "Off crossed Options persistence boundary");
-          if (!automatic) {
-            int applyX = (int)Dropdown450Screens.invoke(options, "actionX", new Class<?>[]{int.class}, 1);
-            click(options, applyX + 8, options.height - 20);
-            check(PowerConfig.readAudio(AudioSettings.class).disabledMusicDirectories.contains(first.toString()), "Options Apply did not persist Off");
-          }
-          sourceClick(options, library, first.toString(), "sourceToggleX");
-          check(source(library, first.toString()).enabled(), "On did not update header immediately");
-          if (!automatic) {
-            options.session().discard();
-            check(!source(library, first.toString()).enabled(), "Options Discard did not restore committed Off");
           }
         });
         test("MUSIC460 inline Remove modal preserves files and playlists auto=" + automatic, () -> {
@@ -207,8 +190,16 @@ final class MusicFolderChecks {
           check(Files.isRegularFile(first.resolve("song.ogg")), "Remove deleted source file");
           check(Catalog.JSON.toJson(AudioConfig.current().playlists).equals(Catalog.JSON.toJson(baseline.playlists)), "Remove changed playlist references");
           if (!automatic) {
+            check(PowerConfig.readAudio(AudioSettings.class).musicDirectories.contains(first.toString()), "manual Remove persisted before Apply");
             options.session().discard();
             check(source(library, first.toString()) != null, "Options Discard did not restore source header");
+            sourceClick(options, library, first.toString(), "sourceRemoveX");
+            click(options, options.width / 2 - 60, options.height / 2 + 20);
+            int applyX=(int)Dropdown450Screens.invoke(options,"actionX",new Class<?>[]{int.class},1);
+            click(options,applyX+8,options.height-20);
+            check(!PowerConfig.readAudio(AudioSettings.class).musicDirectories.contains(first.toString()), "Apply did not persist source removal");
+            options.session().discard();
+            check(!AudioConfig.current().musicDirectories.contains(first.toString()), "Discard restored removal committed by Apply");
           }
         });
         options.session().discard(); options.removed();
@@ -218,14 +209,14 @@ final class MusicFolderChecks {
         var options = MusicPlaylists460Checks.open(mc); var library = MusicPlaylists460Checks.library(options);
         var picker = add(mc, options, library); typePath(picker, second);
         Setting setting = find(options.session(), "audio.musicDirectories");
-        var concurrent = MusicFolders.encode(baseline.musicDirectories, Set.of(missing.toString()));
+        var concurrent = MusicFolders.encode(List.of(first.toString(), missing.toString()));
         setting.value = concurrent.deepCopy(); options.changed(setting);
         try {
           ((ScreenInput)(Object)picker).power$click(picker.width / 2 - 100, picker.height - 20, 0);
           check(mc.currentScreen == picker && field(picker, "error").toString().contains("Folders changed"), "stale Add callback lacked rejection feedback");
-          check(setting.value.equals(concurrent) && AudioConfig.current().disabledMusicDirectories.contains(missing.toString()), "stale Add overwrote newer source edit");
+          check(setting.value.equals(concurrent) && AudioConfig.current().musicDirectories.equals(List.of(first.toString(), missing.toString())), "stale Add overwrote newer source edit");
           check(!AudioConfig.current().musicDirectories.contains(second.toString()), "stale Add imported its old draft");
-          check(PowerConfig.readAudio(AudioSettings.class).disabledMusicDirectories.isEmpty(), "rejected Add persisted source changes");
+          check(PowerConfig.readAudio(AudioSettings.class).musicDirectories.equals(baseline.musicDirectories), "rejected Add persisted source changes");
         } finally { ((ScreenInput)(Object)picker).power$key('\0', Keyboard.KEY_ESCAPE); options.session().discard(); }
       });
       test("MUSIC460 stale Remove confirmation preserves newer source settings", () -> {
@@ -233,14 +224,14 @@ final class MusicFolderChecks {
         var options = MusicPlaylists460Checks.open(mc); var library = MusicPlaylists460Checks.library(options);
         sourceClick(options, library, first.toString(), "sourceRemoveX");
         Setting setting = find(options.session(), "audio.musicDirectories");
-        var concurrent = MusicFolders.encode(baseline.musicDirectories, Set.of(missing.toString()));
+        var concurrent = MusicFolders.encode(List.of(first.toString(), missing.toString()));
         setting.value = concurrent.deepCopy(); options.changed(setting);
         try {
           click(options, options.width / 2 - 60, options.height / 2 + 20);
           check(library.modal() && call(field(library, "folders"), "error").toString().contains("Folders changed"), "stale Remove confirmation lacked rejection feedback");
-          check(setting.value.equals(concurrent) && AudioConfig.current().disabledMusicDirectories.contains(missing.toString()), "stale Remove overwrote newer source edit");
+          check(setting.value.equals(concurrent) && AudioConfig.current().musicDirectories.equals(List.of(first.toString(), missing.toString())), "stale Remove overwrote newer source edit");
           check(AudioConfig.current().musicDirectories.contains(first.toString()) && Files.isRegularFile(first.resolve("song.ogg")), "stale Remove lost source or file");
-          check(PowerConfig.readAudio(AudioSettings.class).disabledMusicDirectories.isEmpty(), "rejected Remove persisted source changes");
+          check(PowerConfig.readAudio(AudioSettings.class).musicDirectories.equals(baseline.musicDirectories), "rejected Remove persisted source changes");
         } finally { ((ScreenInput)(Object)options).power$key('\0', Keyboard.KEY_ESCAPE); options.session().discard(); }
       });
       test("MUSIC460 failed auto-save leaves source state and durable files intact", () -> {
@@ -259,9 +250,10 @@ final class MusicFolderChecks {
         failure.value = new JsonPrimitive(true);
         byte[] saved = Files.readAllBytes(PowerConfig.musicPath());
         try {
-          sourceClick(options, library, first.toString(), "sourceToggleX");
-          check(!AudioConfig.current().disabledMusicDirectories.contains(first.toString()), "failed save retained Off preview");
-          check(MusicFolders.decode(find(options.session(), "audio.musicDirectories").value).disabled().isEmpty(), "failed save retained Off draft");
+          sourceClick(options, library, first.toString(), "sourceRemoveX");
+          click(options, options.width / 2 - 60, options.height / 2 + 20);
+          check(AudioConfig.current().musicDirectories.equals(baseline.musicDirectories), "failed save retained Remove preview");
+          check(MusicFolders.decode(find(options.session(), "audio.musicDirectories").value).equals(baseline.musicDirectories), "failed save retained Remove draft");
           check(Arrays.equals(saved, Files.readAllBytes(PowerConfig.musicPath())), "failed save changed durable music data");
           check(!call(field(library, "folders"), "error").toString().isEmpty(), "failed source save lacked feedback");
         } finally { options.session().removeBackend("folder-save-failure"); options.session().discard(); }

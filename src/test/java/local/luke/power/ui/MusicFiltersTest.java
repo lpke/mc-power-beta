@@ -23,9 +23,18 @@ class MusicFiltersTest {
         assertEquals(111, layout.actionsY());
         assertEquals(18, layout.height());
       } else {
-        assertEquals(133, layout.actionsY());
-        assertEquals(40, layout.height());
+        assertEquals(137, layout.actionsY());
+        assertEquals(44, layout.height());
       }
+    }
+  }
+
+  @Test void selectingTabsNeverChangesTheirWidthsOrPositions() {
+    for (int width : List.of(180, 192, 200, 320, 700)) {
+      var tabs = MusicFilters.layout(31, 111, width, "library").tabs();
+      assertEquals(tabs, MusicFilters.layout(31, 111, width, "playlists").tabs());
+      assertEquals(tabs, MusicFilters.layout(31, 111, width, "favorites").tabs());
+      if (width >= 192) assertEquals(List.of(54, 64, 70), tabs.stream().map(MusicFilters.Tab::width).toList());
     }
   }
 

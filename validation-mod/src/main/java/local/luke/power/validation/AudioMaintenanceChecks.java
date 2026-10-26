@@ -29,12 +29,19 @@ final class AudioMaintenanceChecks {
         options.session().discard();
       });
       MusicFolderChecks.run(mc);
-      test("library sections start collapsed and pause scrub option defaults off", () -> {
+      test("fresh library sections start collapsed and tab switches retain expanded groups", () -> {
         check(!new AudioSettings().menuControlsScrub,"scrubber enabled by default");
-        mc.setScreen(options);field(options,"libraryOpen",false);call(options,"layout");
-        var library = MusicPlaylists460Checks.library(options);
-        MusicPlaylists460Checks.tab(options,library,"library");
-        check(library.sectionsCollapsed(),"library starts expanded");
+        var fresh=MusicPlaylists460Checks.open(mc);
+        var library=MusicPlaylists460Checks.library(fresh);
+        MusicPlaylists460Checks.tab(fresh,library,"library");
+        check(library.sectionsCollapsed(),"fresh library starts expanded");
+        library.toggleSections();
+        check(!library.sectionsCollapsed(),"library expand all missed");
+        var expanded=library.state().collapsed();
+        MusicPlaylists460Checks.tab(fresh,library,"playlists");
+        MusicPlaylists460Checks.tab(fresh,library,"library");
+        check(!library.sectionsCollapsed() && library.state().collapsed().equals(expanded),"tab switch reset expanded groups");
+        fresh.session().discard();
       });
       test("ffmpeg was discovered without a conversion process", () -> check(Mp3Converter.available(),"ffmpeg probe failed"));
     }

@@ -25,6 +25,8 @@ When a visible feature is close to final, take a basic screenshot in the disposa
 client and add it before running its acceptance tests. Capture only key UI changes;
 skip behavior that a static image cannot show. Never interrupt the owner's instance.
 Store captures with the private HTML report, not in the public modpack repository.
+Use mostly large-screen captures in the owner report, with only one or two small-screen
+examples. Give small layouts equal attention in native testing and independent UI review.
 Give each applicable review item a small, subtle button that reveals its related
 screenshots. Leave screenshots hidden by default, with concise captions and responsive
 images. Do not attach unfinished mockups or imply a screenshot proves runtime behavior.

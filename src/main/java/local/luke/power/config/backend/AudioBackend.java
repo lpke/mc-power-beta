@@ -76,6 +76,10 @@ public final class AudioBackend implements Backend {
         Catalog.JSON.toJsonTree(s.playlists), new JsonArray(), "Saved ordered music selections.", List.of());
     add("favourites", "Music data", "Favorite tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.favourites), new JsonArray(), "Starred music tracks.", List.of());
+    add("favoritesGroupVolumes", "Music data", "Favorites group volumes", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.favoritesGroupVolumes), new JsonObject(), "Group volumes for Favorites.", List.of());
+    add("libraryOrder", "Music data", "Library group order", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.libraryOrder), new JsonArray(), "Display order of library groups.", List.of());
     add("menuMusic", "Music playback", "Menu music", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(2),
         "Choose the world playlist, menu playlist or both. World and Mix keep music playing across world transitions. Empty playlists stay silent.",
@@ -89,9 +93,9 @@ public final class AudioBackend implements Backend {
         "Music playback",
         "Music folders",
         Setting.Kind.LIST,
-        MusicFolders.encode(s.musicDirectories, s.disabledMusicDirectories),
+        MusicFolders.encode(s.musicDirectories),
         new JsonArray(),
-        "Choose OGG, WAV, MUS or MP3 folders. Off stops scanning and makes their tracks unavailable until switched On. Saved playlist membership stays intact. Convert MP3 in the library; original files stay intact.",
+        "Import OGG, WAV, MUS or MP3 folders. Removing a folder preserves its files and saved playlist membership. Convert MP3 in the library; original files stay intact.",
         List.of());
     add(
         "recursive",
@@ -178,7 +182,10 @@ public final class AudioBackend implements Backend {
 
   private static List<Setting> musicEntries(Minecraft mc) {
     List<Setting> result = new ArrayList<>();
-    for (String track : AudioController.music(mc)) {
+    AudioSettings settings = AudioConfig.current();
+    Set<String> referenced = new LinkedHashSet<>(AudioController.music(mc));
+    referenced.addAll(MusicRequests.tracks());
+    for (String track : settings.musicTrackIds(referenced)) {
       String label = AudioController.musicLabel(track);
       result.add(new Setting("audio.sound." + track, "audio", "Audio", "Individual music tracks", label,
           "Track volume in percent, multiplied by the music and master volumes.",
@@ -271,7 +278,17 @@ public final class AudioBackend implements Backend {
           case "playlist" -> s.playlist = v.getAsString();
           case "playlists" -> s.playlists = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, MusicPlaylist[].class)));
           case "menuPlaylist" -> s.menuPlaylist = v.getAsString();
-          case "favourites" -> s.favourites = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
+          case "favourites" -> {
+            List<String> tracks = Arrays.asList(Catalog.JSON.fromJson(v, String[].class));
+            MusicPlaylist.validateTracks(tracks);
+            s.favourites = new LinkedHashSet<>(tracks);
+          }
+          case "favoritesGroupVolumes" -> {
+            Map<String, Integer> volumes = new TreeMap<>();
+            v.getAsJsonObject().entrySet().forEach(entry -> volumes.put(entry.getKey(), entry.getValue().getAsInt()));
+            s.favoritesGroupVolumes = MusicGroups.copy(volumes);
+          }
+          case "libraryOrder" -> s.libraryOrder = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
           case "menuControls" -> s.menuControls = v.getAsBoolean();
           case "menuControlsMainMenu" -> s.menuControlsMainMenu = v.getAsBoolean();
           case "menuControlsScrub" -> s.menuControlsScrub = v.getAsBoolean();
@@ -289,9 +306,7 @@ public final class AudioBackend implements Backend {
           case "shuffle" -> s.shuffle = v.getAsBoolean();
           case "avoidRepeats" -> s.avoidRepeats = v.getAsBoolean();
           case "musicDirectories" -> {
-            var folders = MusicFolders.decode(v);
-            s.musicDirectories = new ArrayList<>(folders.paths());
-            s.disabledMusicDirectories = new LinkedHashSet<>(folders.disabled());
+            s.musicDirectories = new ArrayList<>(MusicFolders.decode(v));
           }
           default -> throw new IllegalArgumentException("Unknown audio setting");
         }

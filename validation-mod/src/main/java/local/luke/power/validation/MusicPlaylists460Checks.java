@@ -23,7 +23,7 @@ final class MusicPlaylists460Checks {
   private static final Path REPORT = Path.of("power-beta-data/reports/music-playlists-460");
   private static final String FIRST = "music:calm1.ogg", SECOND = "music:calm2.ogg";
   private static final String MISSING = "music:playlist-fixture-missing.ogg";
-  private static final List<String> VIEWS = List.of("library", "library-expanded", "folder-picker", "folder-remove", "favorites", "playlists", "audio-playback", "audio-controls", "menu");
+  private static final List<String> VIEWS = List.of("library", "library-expanded", "folder-picker", "folder-remove", "favorites", "playlists", "new", "editor", "grouped", "add-library", "from-playlist", "context", "audio-playback", "audio-controls", "menu");
   private static State staged;
   private static PowerOptionsScreen activeOptions;
   private static List<String> fixtureFolders=List.of();
@@ -54,7 +54,7 @@ final class MusicPlaylists460Checks {
       prepareImports(state);
       if (action.equals("capture")) capture(mc);
       else if (action.equals("menu-pools")) menuPools();
-      else { selections(mc); sessions(mc); editor(mc); libraryControls(mc); routes(mc); orderedPlayback(mc); menuAssignment(mc); menuPools(); MusicFolderChecks.run(mc); }
+      else { selections(mc); sessions(mc); editor(mc); MusicPlaylistRevisionChecks.run(mc); libraryControls(mc); routes(mc); orderedPlayback(mc); menuAssignment(mc); menuPools(); MusicFolderChecks.run(mc); }
     }
     log("MUSIC460 " + action + " FAILURES " + failures + " directory=" + REPORT);
     check(failures == 0, "playlist failures=" + failures);
@@ -95,25 +95,27 @@ final class MusicPlaylists460Checks {
         importedLabel=AudioController.musicLabel(importedTrack);importedGroup=AudioController.musicGroup(importedTrack);
         AudioController.playNow(importedTrack);AudioController.pause();AudioController.duration();
         check(AudioController.currentTrackId().equals(importedTrack),"imported current identity missing");
-        log("MUSIC460 source started paused; source-off then wait for scan, source-check");
+        log("MUSIC460 source started paused; source-remove then wait for scan, source-check");
       }
-      case "source-off" -> {
+      case "source-remove" -> {
         MenuPreferences.update(value -> value.autoApply = false);
         var options = open(mc); var library = library(options);
-        MusicFolderChecks.sourceClick(options, library, fixtureFolders.get(0), "sourceToggleX");
-        check(AudioConfig.current().disabledMusicDirectories.contains(fixtureFolders.get(0)), "native Off did not change source");
-        log("MUSIC460 source disabled inline; wait for scan then source-check");
+        MusicFolderChecks.sourceClick(options, library, fixtureFolders.get(0), "sourceRemoveX");
+        check(library.modal(), "native Remove skipped confirmation");
+        click(options, options.width / 2 - 60, options.height / 2 + 20);
+        check(!AudioConfig.current().musicDirectories.contains(fixtureFolders.get(0)), "native Remove retained source");
+        log("MUSIC460 source removed inline; wait for scan then source-check");
       }
       case "source-check" -> {
-        check(AudioController.customTracks().stream().noneMatch(t->t.id().equals(importedTrack)),"Off source still scanned");
-        check(AudioController.resolveTrack(importedTrack)==null,"Off source still available to future selection");
+        check(AudioController.customTracks().stream().noneMatch(t->t.id().equals(importedTrack)),"Removed source still scanned");
+        check(AudioController.resolveTrack(importedTrack)==null,"Removed source still available to future selection");
         check(AudioController.trackId(importedEntry).equals(importedTrack),"owned stream/history entry lost stable identity after rescan");
-        check(AudioController.currentTrackId().equals(importedTrack),"Off rescan replaced current stream");
-        check(AudioController.musicLabel(importedTrack).equals(importedLabel),"Off rescan lost current label");
-        check(AudioController.musicGroup(importedTrack).equals(importedGroup),"Off rescan lost current group");
-        check(AudioController.trackVolume(importedTrack)==37,"Off rescan lost owned per-track gain");
-        check(AudioController.duration()>0,"Off current stream lost duration");
-        log("MUSIC460 source Off retains owned identity/label/group/gain/duration and blocks future selection PASS");
+        check(AudioController.currentTrackId().equals(importedTrack),"Remove rescan replaced current stream");
+        check(AudioController.musicLabel(importedTrack).equals(importedLabel),"Remove rescan lost current label");
+        check(AudioController.musicGroup(importedTrack).equals(importedGroup),"Remove rescan lost current group");
+        check(AudioController.trackVolume(importedTrack)==37,"Remove rescan lost owned per-track gain");
+        check(AudioController.duration()>0,"Removed current stream lost duration");
+        log("MUSIC460 source Remove retains owned identity/label/group/gain/duration and blocks future selection PASS");
       }
       case "source-sticky" -> {
         failures = 0;
@@ -121,19 +123,19 @@ final class MusicPlaylists460Checks {
         check(failures == 0, "sticky source control failures=" + failures);
         log("MUSIC460 clipped sticky source native controls PASS");
       }
-      case "source-on" -> {
-        check(AudioConfig.current().disabledMusicDirectories.contains(fixtureFolders.get(0)), "source must be Off before source-on");
-        var options = open(mc); var library = library(options);
-        MusicFolderChecks.sourceClick(options, library, fixtureFolders.get(0), "sourceToggleX");
-        check(!AudioConfig.current().disabledMusicDirectories.contains(fixtureFolders.get(0)), "native On did not change source");
-        log("MUSIC460 source enabled inline; wait for scan then source-on-check");
+      case "source-restore" -> {
+        check(!AudioConfig.current().musicDirectories.contains(fixtureFolders.get(0)), "source must be removed before restore");
+        check(activeOptions != null, "source Options session missing");
+        activeOptions.session().discard();
+        check(AudioConfig.current().musicDirectories.contains(fixtureFolders.get(0)), "Discard did not restore source");
+        log("MUSIC460 source restored by Options Discard; wait for scan then source-restored-check");
       }
-      case "source-on-check" -> {
-        check(AudioController.resolveTrack(importedTrack) != null, "On source did not become available after scan");
+      case "source-restored-check" -> {
+        check(AudioController.resolveTrack(importedTrack) != null, "restored source unavailable after scan");
         var source = AudioController.sourceLibrary().folders().stream().filter(value -> value.path().equals(fixtureFolders.get(0))).findFirst().orElseThrow();
-        check(source.enabled() && source.status().equals("Ready") && source.trackIds().contains(importedTrack), "On source did not regain track rows");
-        check(AudioController.currentTrackId().equals(importedTrack), "On rescan replaced owned stream");
-        log("MUSIC460 native source On rescans and restores track rows PASS");
+        check(source.status().equals("Ready") && source.trackIds().contains(importedTrack), "restored source did not regain rows");
+        check(AudioController.currentTrackId().equals(importedTrack), "restore rescan replaced owned stream");
+        log("MUSIC460 source restore rescans and restores rows PASS");
       }
       default -> throw new IllegalArgumentException(action);
     }
@@ -154,7 +156,7 @@ final class MusicPlaylists460Checks {
     activeOptions = MenuUpdateChecks.open(mc, "Audio");
     // Each case starts with a fresh editor rather than another case's remembered collapse state.
     field(activeOptions,"library",new MusicLibraryScreen(activeOptions));field(activeOptions,"libraryState",null);
-    activeOptions.init(mc,activeOptions.width,activeOptions.height);
+    activeOptions.init(mc,640,420);
     ((Set<?>)field(activeOptions, "collapsed")).clear(); call(activeOptions, "layout"); return activeOptions;
   }
 
@@ -211,10 +213,35 @@ final class MusicPlaylists460Checks {
     click(options,x,y);check((boolean)call(field(options,"choices"),"active"),"music setting dropdown missed "+id);
   }
 
-  private static void choose(PowerOptionsScreen options, int index) {
+  static void choose(PowerOptionsScreen options, int index) {
     var input = (ScreenInput)(Object)options; input.power$key('\0', Keyboard.KEY_HOME);
     for (int i = 0; i < index; i++) input.power$key('\0', Keyboard.KEY_DOWN);
     input.power$key('\0', Keyboard.KEY_RETURN);
+  }
+
+  private static void choosePlaylist(PowerOptionsScreen options, String id) {
+    var values = MusicPlaylist.all(AudioConfig.current());
+    int index = java.util.stream.IntStream.range(0, values.size()).filter(i -> values.get(i).id().equals(id)).findFirst().orElseThrow();
+    choose(options, index);
+  }
+
+  static void context(PowerOptionsScreen options, MusicLibraryScreen library, String id, List<String> labels) throws Exception {
+    ((Set<?>)field(library, "collapsed")).clear(); call(library, "rebuildRows");
+    int y = trackY(library, id);
+    options.render(-1,-1,0);
+    ((ScreenInput)(Object)options).power$click((int)call(library, "left") + 22, y + 8, 1);
+    Object choices = field(options, "choices");
+    check((boolean)call(choices, "active"), "song right click did not open parent dropdown");
+    check(field(choices, "labels").equals(labels), "song context action order changed: " + field(choices, "labels"));
+  }
+
+  static void adding(PowerOptionsScreen options, MusicLibraryScreen library) throws Exception {
+    var panel = field(library, "presets");
+    click(options, (int)call(panel, "addX") + 5, (int)call(panel, "actionY") + 5);
+    check((boolean)call(field(panel, "choices"), "active"), "Add songs selector missed");
+    choose(options, 0);
+    check((boolean)call(panel, "adding"), "From Library did not enter nested Add view");
+    call(library,"refresh");
   }
 
   static void edit(PowerOptionsScreen options, MusicLibraryScreen library, String id) throws Exception {
@@ -231,7 +258,7 @@ final class MusicPlaylists460Checks {
     check((boolean)call(panel, "editing"), "Edit missed playlist " + id);
   }
 
-  private static PowerOptionsScreen stage(Minecraft mc, String view, int width, int height) throws Exception {
+  static PowerOptionsScreen stage(Minecraft mc, String view, int width, int height) throws Exception {
     MenuPreferences.update(v -> v.autoApply = false); AudioConfig.preview(seed());
     var options = open(mc); options.init(mc, width, height);
     if (view.equals("settings")) { revealMusic(options); options.render(-1, -1, 0); return options; }
@@ -271,19 +298,28 @@ final class MusicPlaylists460Checks {
         click(options, (int)call(panel, "left") + 8, (int)call(panel, "top") + 8);
         check(((MusicPresetDraft)call(panel, "draft")).tracks().isEmpty(), "new playlist did not start empty");
       }
-      case "editor", "group-gain", "order" -> {
+      case "editor", "group-gain", "grouped", "grouped-scrolled", "add-library", "add-library-scrolled", "from-playlist", "context" -> {
         edit(options, library, "quiet"); var panel = field(library, "presets");
         ((Set<?>)field(library, "collapsed")).clear(); call(library, "rebuildRows");
-        if (view.equals("group-gain")) {
-          int y=MusicGroupChecks.groupY(library,"Alpha");
-          ((ScreenInput)(Object)options).power$click((int)call(library,"groupVolumeX")+8,y+8,1);
-          check((boolean)call(field(options,"valueEditor"),"active"),"group exact entry did not open");
+        if (view.equals("group-gain") || view.startsWith("grouped")) {
+          click(options, (int)call(panel, "groupedX") + 5, (int)call(panel, "actionY") + 5);
+          if (view.equals("group-gain")) {
+            int y=MusicGroupChecks.groupY(library,"Alpha");
+            ((ScreenInput)(Object)options).power$click((int)call(library,"groupVolumeX")+8,y+8,1);
+            check((boolean)call(field(options,"valueEditor"),"active"),"group exact entry did not open");
+          }
         }
-        if (view.equals("order")) {
-          click(options, (int)call(panel, "orderX") + 5, (int)call(panel, "editButtonY") + 5);
-          check(mc.currentScreen instanceof MusicPlaylistOrderScreen, "Order did not open native screen");
-          mc.currentScreen.init(mc, width, height);
+        if (view.startsWith("add-library")) { adding(options, library); ((Set<?>)field(library, "collapsed")).clear(); call(library, "rebuildRows"); }
+        if (view.equals("from-playlist")) {
+          click(options, (int)call(panel, "addX") + 5, (int)call(panel, "actionY") + 5); choose(options, 1);
+          check((boolean)call(field(panel, "choices"), "active"), "From playlist dropdown missing");
         }
+        if (view.endsWith("-scrolled")) {
+          ((Set<?>)field(library, "collapsed")).clear(); call(library, "rebuildRows");
+          Object row=((List<?>)field(library,"rows")).stream().filter(r->{try{return FIRST.equals(call(r,"id"));}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
+          Dropdown450Screens.invoke(library,"scroll",new Class<?>[]{int.class},(int)call(row,"y"));
+        }
+        if (view.equals("context")) context(options, library, SECOND, List.of("Add to queue", "Favourite", "Preview", "Remove from playlist"));
       }
       case "queue" -> {
         MusicRequests.edit(q -> { q.tracks.clear(); q.add(FIRST); q.add(SECOND); q.add(FIRST); }); library.showQueue();
@@ -298,7 +334,7 @@ final class MusicPlaylists460Checks {
     int mode = GL11.glGetInteger(GL11.GL_MATRIX_MODE); GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPushMatrix(); GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPushMatrix();
     try {
-      for (int[] size : new int[][]{{320, 240}, {640, 420}})
+      for (int[] size : new int[][]{{320, 240}, {854, 480}})
         for (String view : VIEWS) {
           var screen = stage(mc, view, size[0], size[1]); Screen captured = mc.currentScreen;
           if (captured != screen) captured.init(mc, size[0], size[1]);
@@ -306,6 +342,12 @@ final class MusicPlaylists460Checks {
           String file = view + "-" + size[0] + ".png"; SettingsSnapshot.render(mc, captured, size[0], size[1], REPORT.resolve(file));
           captures.add(file); screen.session().discard(); screen.removed();
         }
+      for (String view : List.of("grouped-scrolled", "add-library-scrolled")) {
+        var screen=stage(mc,view,320,240);
+        String file=view+"-320.png";
+        SettingsSnapshot.render(mc,screen,320,240,REPORT.resolve(file));
+        captures.add(file);screen.session().discard();screen.removed();
+      }
     } finally {
       GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPopMatrix(); GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPopMatrix();
       GL11.glPopAttrib(); GL11.glMatrixMode(mode);
@@ -318,7 +360,7 @@ final class MusicPlaylists460Checks {
       test("MUSIC460 native top selector Apply/Discard auto=" + automatic, () -> {
         MenuPreferences.update(v -> v.autoApply = automatic); AudioConfig.save(seed()); var options = open(mc);
         MusicRequests.edit(q -> { q.tracks.clear(); q.add(FIRST); q.add(FIRST); q.add(MISSING); }); var queued = MusicRequests.tracks();
-        openSelector(options); choose(options, 2);
+        openSelector(options); choosePlaylist(options, "building");
         check(AudioConfig.current().playlist.equals("building"), "top selector did not choose the saved world playlist");
         check(PowerConfig.readAudio(AudioSettings.class).playlist.equals(automatic ? "building" : "quiet"), "auto/manual persistence boundary failed");
         check(MusicPlaylist.find(AudioConfig.current(), "quiet").tracks().equals(seed().playlists.get(0).tracks()), "selection edited saved membership");
@@ -346,59 +388,52 @@ final class MusicPlaylists460Checks {
       MenuPreferences.update(v -> v.autoApply = false); AudioConfig.preview(seed());
       var options = open(mc); var library = library(options); edit(options, library, "quiet");
       var panel = field(library, "presets"); var draft = (MusicPresetDraft)call(panel, "draft"); var original = draft.tracks();
+      check(!(boolean)call(panel, "grouped") && ((List<?>)field(library, "tracks")).equals(original), "editor did not start in saved flat order");
+      check(org.lwjgl.opengl.Display.isActive(), "focus disposable client for drag checks");
+      int x=(int)call(library, "left")+22, firstY=trackY(library, SECOND), lastY=trackY(library, MISSING);
+      var input=(ScreenInput)(Object)options;
+      input.power$click(x, firstY+8, 0); input.power$release(x,lastY+22,-1);
+      check((boolean)call(field(library, "reorder"), "active"), "native motion release ended row drag");
+      input.power$release(x,lastY+22,0);
+      check(draft.tracks().equals(List.of(FIRST,MISSING,SECOND)), "flat drag ignored final release coordinates: " + draft.tracks());
+      check(selected(AudioConfig.current()).tracks().equals(original), "row drag edited playback before Save");
+      firstY=trackY(library,FIRST);input.power$click(x,firstY+8,0);input.power$key('\0',Keyboard.KEY_ESCAPE);
+      input.power$release(x,lastY+22,0);
+      check(draft.tracks().equals(List.of(FIRST,MISSING,SECOND)), "Escape failed to cancel row drag");
+      firstY=trackY(library,FIRST);input.power$click(x,firstY+8,0);input.power$release(0,0,0);
+      check(draft.tracks().equals(List.of(FIRST,MISSING,SECOND)), "outside release changed row order");
+      draft.order(original);call(library, "rebuildRows");
+      click(options,(int)call(panel,"groupedX")+5,(int)call(panel,"actionY")+5);
+      check((boolean)call(panel,"grouped") && draft.tracks().equals(original), "Grouped changed stored order");
       ((Set<?>)field(library,"collapsed")).clear();call(library,"rebuildRows");
-      int memberY=trackY(library,SECOND);
-      click(options,(int)call(library,"left")+8,memberY+8);
-      check(!draft.included(SECOND),"native draft membership checkbox missed");
-      check(selected(AudioConfig.current()).tracks().equals(original),"native checkbox edited playback before Save");
-      click(options,(int)call(library,"left")+8,memberY+8);draft.order(original);
       int groupY=MusicGroupChecks.groupY(library,"Alpha");
-      click(options,(int)call(library,"right")-10,groupY+8);
-      check(BuiltinMusic.TRACKS.stream().filter(t->t.group().equals("Alpha")).allMatch(t->draft.included(t.id())),"native group checkbox missed hidden members");
-      check(draft.included(MISSING),"group checkbox removed unavailable entry");
-      draft.excludeAll(draft.tracks());original.forEach(id->draft.include(id,true));
       int gainX=(int)call(library,"groupVolumeX"),gainWidth=(int)call(library,"groupVolumeWidth");
-      click(options,gainX+4+(int)Math.round((gainWidth-8)*.25),MusicGroupChecks.groupY(library,"Alpha")+8);
-      library.removed();check(Math.abs(draft.volume("Alpha")-25)<=1,"native group gain missed");
-      check(selected(AudioConfig.current()).groupVolumes().equals(Map.of("Alpha",40)),"native group gain edited playback before Save");
-      ((ScreenInput)(Object)options).power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
-      Object exact=field(options,"valueEditor");check((boolean)call(exact,"active"),"group right-click exact entry missed");
-      ((TextInput)field(exact,"input")).setText("31");((ScreenInput)(Object)options).power$key('\0',Keyboard.KEY_RETURN);
-      check(draft.volume("Alpha")==31,"group exact Enter did not commit draft");
-      ((ScreenInput)(Object)options).power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
-      ((TextInput)field(exact,"input")).setText("99");((ScreenInput)(Object)options).power$key('\0',Keyboard.KEY_ESCAPE);
+      click(options,gainX+4+(int)Math.round((gainWidth-8)*.25),groupY+8);
+      input.power$release(gainX+4+(int)Math.round((gainWidth-8)*.25),groupY+8,0);
+      check(Math.abs(draft.volume("Alpha")-25)<=1,"native group gain missed");
+      check(selected(AudioConfig.current()).groupVolumes().equals(Map.of("Alpha",40)),"group gain leaked before Save");
+      input.power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
+      Object exact=field(options,"valueEditor");check((boolean)call(exact,"active"),"group exact entry missed");
+      ((TextInput)field(exact,"input")).setText("31");input.power$key('\0',Keyboard.KEY_RETURN);
+      check(draft.volume("Alpha")==31,"group exact Enter did not commit");
+      input.power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
+      ((TextInput)field(exact,"input")).setText("99");input.power$key('\0',Keyboard.KEY_ESCAPE);
       check(draft.volume("Alpha")==31,"group exact Escape changed draft");
       click(options,(int)call(library,"groupResetX")+5,MusicGroupChecks.groupY(library,"Alpha")+8);
-      check(draft.volume("Alpha")==100,"group reset did not restore default gain");
-      draft.volume("Alpha",40);
-      click(options, (int)call(panel, "orderX") + 5, (int)call(panel, "editButtonY") + 5); var order = mc.currentScreen;
-      check(org.lwjgl.opengl.Display.isActive(),"focus the disposable client for order drag checks");
-      var orderInput=(ScreenInput)(Object)order;int dragX=(int)call(order,"left")+20;
-      int firstY=(int)Dropdown450Screens.invoke(order,"rowY",new Class<?>[]{int.class},0)+5;
-      int endY=(int)Dropdown450Screens.invoke(order,"rowY",new Class<?>[]{int.class},2)+20;
-      orderInput.power$click(dragX,firstY,0);orderInput.power$release(dragX,endY,-1);
-      check((int)field(order,"dragIndex")==0,"native motion release ended order drag");
-      orderInput.power$release(dragX,endY,0);
-      check(field(order,"tracks").equals(List.of(FIRST,MISSING,SECOND)),"native final-coordinate drag did not move to end");
-      check(draft.tracks().equals(original),"native drag changed parent before Done");
-      orderInput.power$click(dragX,firstY,0);orderInput.power$key('\0',Keyboard.KEY_ESCAPE);
-      check(mc.currentScreen==order&&(int)field(order,"dragIndex")==-1,"Escape did not cancel active order drag");
-      orderInput.power$release(dragX,endY,0);check(field(order,"tracks").equals(List.of(FIRST,MISSING,SECOND)),"cancelled drag changed local order");
-      ((ScreenInput)(Object)order).power$click((int)call(order, "right") - 14, 62, 0);
-      check(draft.tracks().equals(original), "order editor changed parent before Done");
-      ((ScreenInput)(Object)order).power$click(order.width / 2 + 12, order.height - 20, 0);
-      check(draft.tracks().equals(original), "order Cancel changed parent draft");
-      click(options, (int)call(panel, "orderX") + 5, (int)call(panel, "editButtonY") + 5); order = mc.currentScreen;
-      orderInput=(ScreenInput)(Object)order;dragX=(int)call(order,"left")+20;
-      firstY=(int)Dropdown450Screens.invoke(order,"rowY",new Class<?>[]{int.class},0)+5;
-      int secondBottom=(int)Dropdown450Screens.invoke(order,"rowY",new Class<?>[]{int.class},1)+20;
-      orderInput.power$click(dragX,firstY,0);orderInput.power$release(dragX,secondBottom,0);
-      ((ScreenInput)(Object)order).power$click(order.width / 2 - 94, order.height - 20, 0);
-      check(mc.currentScreen == options, "order Done did not return");
-      check(draft.tracks().equals(List.of(FIRST, SECOND, MISSING)), "order Done lost row edit");
-      draft.include(SECOND, false); draft.move(MISSING, -1); draft.volume("Alpha", 25);
-      check(selected(AudioConfig.current()).tracks().equals(original), "unsaved membership leaked into selected playback");
-      check(selected(AudioConfig.current()).groupVolumes().equals(Map.of("Alpha", 40)), "unsaved group gain leaked");
+      check(draft.volume("Alpha")==100,"group reset missed");
+      int groupedY=trackY(library,FIRST);input.power$click(x,groupedY+8,0);
+      check(!(boolean)call(field(library,"reorder"),"active"),"Grouped allowed drag");input.power$release(x,groupedY+24,0);
+      click(options,(int)call(panel,"groupedX")+5,(int)call(panel,"actionY")+5);
+      check(draft.tracks().equals(original),"List/Grouped toggling changed order");
+      context(options,library,SECOND,List.of("Add to queue","Favourite","Preview","Remove from playlist"));choose(options,3);
+      check(!draft.included(SECOND) && draft.included(MISSING),"context removal changed wrong membership");
+      adding(options, library);
+      context(options,library,SECOND,List.of("Add to queue","Favourite","Preview","Add to playlist"));choose(options,3);
+      check(draft.tracks().equals(List.of(FIRST,MISSING,SECOND)),"From Library did not append one ID");
+      click(options,(int)call(panel,"addX")+5,(int)call(panel,"actionY")+5);
+      check(!(boolean)call(panel,"adding"),"Back to playlist did not leave Add view");
+      draft.include(SECOND,false);draft.order(List.of(MISSING,FIRST));draft.volume("Alpha",25);
+      check(selected(AudioConfig.current()).tracks().equals(original),"unsaved membership leaked into playback");
       click(options, (int)call(panel, "saveX") + 5, (int)call(panel, "editButtonY") + 5);
       check(AudioConfig.current().playlist.equals("quiet"), "Save changed selected identity");
       check(selected(AudioConfig.current()).tracks().equals(List.of(MISSING, FIRST)), "Save lost membership/order/missing entry");
@@ -439,7 +474,8 @@ final class MusicPlaylists460Checks {
     });
   }
 
-  private static int trackY(MusicLibraryScreen library,String id) throws Exception {
+  static int trackY(MusicLibraryScreen library,String id) throws Exception {
+    call(library,"refresh");
     Object row=((List<?>)field(library,"rows")).stream().filter(r->{try{return id.equals(call(r,"id"));}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
     int y=(int)call(row,"y");Dropdown450Screens.invoke(library,"scroll",new Class<?>[]{int.class},Math.max(0,y-24));
     return (int)call(library,"listTop")+y-(int)call(library,"scroll");
@@ -451,12 +487,13 @@ final class MusicPlaylists460Checks {
       String saved = Catalog.JSON.toJson(AudioConfig.current().playlists); var queue = MusicRequests.tracks();
       for (int[] size : new int[][]{{320, 240}, {640, 420}}) {
         options.init(mc, size[0], size[1]); tab(options, library, "library");
-        check(library.sectionsCollapsed(), "Library did not start collapsed");
+        if (!library.sectionsCollapsed()) library.toggleSections();
+        check(library.sectionsCollapsed(), "Library collapse all did not collapse current view");
         library.toggleSections(); check(!library.sectionsCollapsed(), "Library expand all failed");
         library.toggleSections(); check(library.sectionsCollapsed(), "Library collapse all failed");
         tab(options, library, "playlists"); tab(options, library, "favorites");
         check(((List<?>)field(library, "tracks")).equals(List.of(FIRST)), "Favorites tab did not filter starred tracks");
-        check(((Map<?,?>)field(library, "groupTracks")).get("Alpha").equals(List.of(FIRST)), "Favorites group count includes unstarred tracks");
+        check((boolean)call(field(library,"presets"),"favorites"), "Favorites did not open isolated fixed-name draft");
         var header = (MusicFilters.Layout)call(library, "filters");
         check(header.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library", "playlists", "favorites")), "unexpected editor tabs");
         int finalTabRight = header.tabs().get(2).x() + header.tabs().get(2).width();
@@ -467,8 +504,9 @@ final class MusicPlaylists460Checks {
       library.showTrack(FIRST);int y=trackY(library,FIRST);var geometry=(MusicRowLayout)call(library,"rowLayout");
       click(options,geometry.volumeX()+4,y+geometry.controlsY()+5);library.removed();
       check(AudioConfig.current().sounds.get(FIRST)==0,"Library song gain slider missed");
-      y=trackY(library,FIRST);click(options,geometry.favouriteX()+5,y+geometry.controlsY()+5);
-      check(!AudioConfig.current().favourites.contains(FIRST),"Library global star missed");
+      check(geometry.favouriteX()==-1 && geometry.previewX()==-1 && geometry.queueX()==-1 && geometry.upX()==-1 && geometry.downX()==-1,"song row retained obsolete controls");
+      context(options,library,FIRST,List.of("Add to queue","Remove favourite","Preview"));choose(options,1);
+      check(!AudioConfig.current().favourites.contains(FIRST),"Library context favourite action missed");
       click(options,(int)call(library,"addFolderX")+5,(int)call(library,"actionTop")+5);
       check(mc.currentScreen instanceof DirectoryScreen,"Library Add folder button missed");
       ((ScreenInput)(Object)mc.currentScreen).power$key('\0',Keyboard.KEY_ESCAPE);

@@ -32,26 +32,16 @@ final class MusicFolderActions extends UiScreen {
     minecraft.setScreen(new DirectoryScreen(parent, additions -> {
       if (!expected.equals(setting().value))
         throw new IllegalArgumentException("Folders changed. Reopen Add folder.");
-      List<String> paths = new ArrayList<>(sources.paths());
+      List<String> paths = new ArrayList<>(sources);
       paths.addAll(additions);
       if (paths.size() > MusicFolders.MAX_FOLDERS || paths.size() != new HashSet<>(paths).size())
         throw new IllegalArgumentException("Use at most 32 unique folders. Nothing was added.");
-      apply(MusicFolders.encode(paths, sources.disabled()));
-    }, sources.paths()));
-  }
-
-  void toggle(String path) {
-    try {
-      var sources = MusicFolders.decode(setting().value);
-      if (!sources.paths().contains(path)) throw new IllegalArgumentException("Folder changed. Select it again.");
-      Set<String> disabled = new LinkedHashSet<>(sources.disabled());
-      if (!disabled.remove(path)) disabled.add(path);
-      apply(MusicFolders.encode(sources.paths(), disabled));
-    } catch (RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Could not change this folder."); }
+      apply(MusicFolders.encode(paths));
+    }, sources));
   }
 
   void remove(String path, String label) {
-    if (!MusicFolders.decode(setting().value).paths().contains(path)) {
+    if (!MusicFolders.decode(setting().value).contains(path)) {
       error = "Folder changed. Select it again.";
       return;
     }
@@ -90,10 +80,9 @@ final class MusicFolderActions extends UiScreen {
       if (!removalValue.equals(setting().value))
         throw new IllegalArgumentException("Folders changed. Cancel and select Remove again.");
       var sources = MusicFolders.decode(setting().value);
-      List<String> paths = new ArrayList<>(sources.paths());
-      Set<String> disabled = new LinkedHashSet<>(sources.disabled());
-      paths.remove(removing); disabled.remove(removing);
-      apply(MusicFolders.encode(paths, disabled));
+      List<String> paths = new ArrayList<>(sources);
+      paths.remove(removing);
+      apply(MusicFolders.encode(paths));
       cancel();
     } catch (RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Could not remove this folder."); }
   }

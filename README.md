@@ -35,7 +35,7 @@ improvements and optional tweaks in one searchable Options menu.
 - Fully lit rendering with a full-bright hotkey and optional automatic spectator lighting. Mob spawning and simulated light remain unchanged.
 - Entity visibility controls for items, mobs, players, vehicles, projectiles and TNT. Entity and block-entity culling skips hidden rendering work.
 - Dropped-item merging and global TNT work limits available before loading a struggling world. Separate world rules control TNT and explosion damage to dropped items.
-- Music libraries, custom tracks and folders, era selections, favorites, inclusion filters, per-track and per-folder volume, queues and saved presets.
+- Imported music libraries, ordered playlists and Favorites, per-track and playlist group volumes, queues, previews and configurable gaps between songs.
 - Music previews, seeking and playback controls in Options and the pause menu, with separate sound categories, ambience controls and optional extra interaction sounds.
 - Flexible block placement with offset, adjacent, rotation, reverse and into-face modes, target overlays and destination previews.
 - Fast placement with placement restrictions, item filters, orientation retention and slab rules. Complete slabs through adjacent faces.

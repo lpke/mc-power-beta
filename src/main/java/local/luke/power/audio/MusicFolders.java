@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 
-/** Enabled folders use path strings; disabled folders include their Off state. */
+/** Imported folders use exact saved path strings. */
 public final class MusicFolders {
   public static final int MAX_FOLDERS = 32;
 
@@ -15,7 +15,7 @@ public final class MusicFolders {
     catch (IOException ignored) { return path; }
   }
 
-  /** Validate the whole batch before changing the draft. Existing entries keep their On/Off state. */
+  /** Validate the whole batch before changing the draft. Existing entries retain their path identity. */
   public static List<String> additions(Path game, List<String> existing, Collection<String> selected,
       boolean childFolders) throws IOException {
     Set<Path> known = new HashSet<>();
@@ -67,59 +67,22 @@ public final class MusicFolders {
     } catch (java.nio.file.AccessDeniedException | SecurityException ignored) { }
     return false;
   }
-  public record Selection(List<String> paths, Set<String> disabled) {
-    public Selection {
-      paths = List.copyOf(paths);
-      disabled = Set.copyOf(disabled);
-    }
-  }
-
-  public static JsonArray encode(List<String> paths, Set<String> disabled) {
+  public static JsonArray encode(List<String> paths) {
     JsonArray result = new JsonArray();
-    for (String path : paths) {
-      if (!disabled.contains(path)) result.add(path);
-      else {
-        JsonObject entry = new JsonObject();
-        entry.addProperty("path", path);
-        entry.addProperty("enabled", false);
-        result.add(entry);
-      }
-    }
+    paths.forEach(result::add);
     return result;
   }
 
-  public static Selection decode(JsonElement value) {
-    if (!value.isJsonArray()) throw new IllegalArgumentException("Use a list of music folders");
+  public static List<String> decode(JsonElement value) {
+    if (value == null || !value.isJsonArray()) throw new IllegalArgumentException("Use a list of music folders");
     List<String> paths = new ArrayList<>();
-    Set<String> disabled = new LinkedHashSet<>();
     for (JsonElement entry : value.getAsJsonArray()) {
-      boolean enabled = true;
-      JsonElement path = entry;
-      if (entry.isJsonObject()) {
-        JsonObject object = entry.getAsJsonObject();
-        path = object.get("path");
-        JsonElement flag = object.get("enabled");
-        if (flag == null || !flag.isJsonPrimitive() || !flag.getAsJsonPrimitive().isBoolean())
-          throw new IllegalArgumentException("Folder state must be On or Off");
-        enabled = flag.getAsBoolean();
-      }
-      if (path == null || !path.isJsonPrimitive() || !path.getAsJsonPrimitive().isString())
+      if (!entry.isJsonPrimitive() || !entry.getAsJsonPrimitive().isString())
         throw new IllegalArgumentException("Folder paths must be text");
-      String text = path.getAsString();
-      if (!paths.contains(text)) paths.add(text);
-      if (!enabled) disabled.add(text);
+      String path = entry.getAsString();
+      if (paths.contains(path)) throw new IllegalArgumentException("Music folders must be unique");
+      paths.add(path);
     }
-    return new Selection(paths, disabled);
-  }
-
-  /** Disabled sources do no filesystem work until switched back on. */
-  public static List<String> enabled(AudioSettings settings) {
-    return settings.musicDirectories.stream().filter(path -> !settings.disabledMusicDirectories.contains(path)).toList();
-  }
-
-  /** Evaluate membership once per settings change, not for each audio tick or track. */
-  public static List<MusicLibrary.Track> enabledTracks(Path game, MusicLibrary.Scan scan,
-      List<String> folders, Set<String> disabled, boolean recursive) {
-    return MusicLibrarySources.build(game, folders, disabled, scan, recursive).tracks();
+    return List.copyOf(paths);
   }
 }

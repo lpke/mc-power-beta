@@ -313,14 +313,12 @@ public final class AudioController {
     AudioSettings config = AudioConfig.current();
     if (rotationConfig != config) {
       if (rotationConfig != null && rotationConfig.musicDirectories.equals(config.musicDirectories)
-          && rotationConfig.disabledMusicDirectories.equals(config.disabledMusicDirectories)
           && rotationConfig.recursive == config.recursive) {
         rotationConfig = config;
         return;
       }
       Path game = FabricLoader.getInstance().getGameDir();
-      sourceLibrary = MusicLibrarySources.build(game, config.musicDirectories,
-          config.disabledMusicDirectories, library, config.recursive);
+      sourceLibrary = MusicLibrarySources.build(game, config.musicDirectories, library, config.recursive);
       enabledTracks = sourceLibrary.tracks();
       rotationConfig = config;
     }
@@ -446,7 +444,7 @@ public final class AudioController {
     pending =
         CompletableFuture.supplyAsync(
             () ->
-                MusicLibrary.scan(game, MusicFolders.enabled(s), s.recursive),
+                MusicLibrary.scan(game, s.musicDirectories, s.recursive),
             SCANNER);
   }
 
@@ -670,7 +668,7 @@ public final class AudioController {
     AudioSettings settings = AudioConfig.current();
     boolean menu = id.equals(currentMusic) && !MusicPreview.active()
         ? currentUsesMenuVolumes : usesMenuVolumes(id, context(client));
-    return (menu ? MusicPlaylist.menu(settings) : MusicPlaylist.world(settings)).groupVolumes();
+    return MusicPlaylist.groupVolumes(settings, menu ? settings.menuPlaylist : settings.playlist);
   }
 
   public static float musicVolume(String id) {

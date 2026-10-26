@@ -15,6 +15,7 @@ final class SettingsDropdown {
   private final ScrollBar bar = new ScrollBar();
   private final HoverDelay hover = new HoverDelay();
   private List<String> labels = List.of(), help = List.of();
+  private List<Boolean> enabled = List.of();
   private IntConsumer accepted;
   private int selected, focus, defaultIndex, x, y, width, rows;
   private double scroll;
@@ -53,6 +54,7 @@ final class SettingsDropdown {
     close();
     if (options.isEmpty()) return;
     labels = List.copyOf(options); help = List.copyOf(hints);
+    enabled = java.util.Collections.nCopies(options.size(), true);
     selected = focus = Math.max(0, Math.min(options.size() - 1, current)); defaultIndex = reset;
     width = Math.max(40, Math.min(Math.max(span, 150), screenWidth - 12));
     x = Math.max(6, Math.min(left, screenWidth - width - 6));
@@ -61,6 +63,15 @@ final class SettingsDropdown {
     y = below >= rows ? top + 21 : Math.max(4, top - rows * 20 - 3);
     accepted = changed;
     reveal();
+  }
+
+  void openActions(UiScreen screen, List<String> options, List<Boolean> available,
+      int left, int top, int screenWidth, int screenHeight, IntConsumer action) {
+    int span = options.stream().mapToInt(screen::textWidth).max().orElse(120) + 20;
+    open(options, List.of(), 0, -1, left, top - 21, span, screenWidth, screenHeight, action);
+    enabled = List.copyOf(available);
+    selected = -1;
+    y = Math.max(6, Math.min(top, screenHeight - rows * 20 - 6));
   }
 
   void close() { accepted = null; owner = null; bar.release(); hover.clear(); }
@@ -91,6 +102,7 @@ final class SettingsDropdown {
     return true;
   }
   private void select(UiScreen screen, int index) {
+    if (!enabled.get(index)) return;
     IntConsumer action = accepted; close(); screen.click(); action.accept(index);
   }
   boolean press(UiScreen screen, int mx, int my, int button) {
@@ -123,8 +135,9 @@ final class SettingsDropdown {
         boolean over = screen.inside(mx, my, x, Math.max(y, top), rowWidth, Math.min(y + rows * 20, top + 20) - Math.max(y, top));
         if (over) hovered = i;
         int reserve = i == defaultIndex ? screen.textWidth("Default") + 12 : 0;
-        WaypointSetDropdown.row(screen, labels.get(i), x, top,
+        if (enabled.get(i)) WaypointSetDropdown.row(screen, labels.get(i), x, top,
             rowWidth, mx, my, i == selected, i == focus, reserve);
+        else screen.text(screen.fit(labels.get(i), rowWidth - 18), x + 9, top + 6, 0x777777);
         if (i == defaultIndex) screen.text("Default", x + rowWidth - screen.textWidth("Default") - 7, top + 6, 0x888888);
       }
       screen.unclip(); bar.render(screen, track());
