@@ -5,6 +5,10 @@ then keep it current through implementation, testing and delivery. Read its dest
 instructions and save a separate project document for that version, such as
 `main--4.4.0-review.html`. Keep earlier reports as historical records.
 
+Replacement history belongs only in this private report. Public changelogs and
+GitHub notes fold all changes into the existing release without replacement labels;
+GitHub retains no public original or superseded release/tag copies.
+
 For a re-release, update that version's existing report. Mark every added or revised
 item with a visible **Re-released** label and a short note explaining the revision.
 Keep this label separate from development status so it remains visible after

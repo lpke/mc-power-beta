@@ -55,7 +55,6 @@ public final class SettingAccess {
   }
   /** The gate changes presentation, never the stored preference beneath it. */
   public static String lockedValue(Setting setting) {
-    if (setting.id.equals("audio.musicMode") || setting.id.equals("audio.customMusic")) return "Using playlist";
     return setting.kind == Setting.Kind.BOOLEAN ? "Off" : "Disabled";
   }
 
@@ -69,15 +68,6 @@ public final class SettingAccess {
         return "Choose Combined in HUD positioning to move the whole HUD together.";
       if (setting.id.contains(".ADVANCED_HUD_POSITIONS_CONFIG.") && mode != 2)
         return "Choose Separate in HUD positioning to move this element.";
-    }
-    if (setting.id.equals("audio.musicMode") || setting.id.equals("audio.customMusic")) {
-      Setting preset = session.settings().stream().filter(s -> s.id.equals("audio.playlist")).findFirst().orElse(null);
-      boolean menuDefault = session.settings().stream().filter(s -> s.id.equals("audio.menuPlaylist"))
-          .anyMatch(s -> s.value.getAsString().equals(local.luke.power.audio.MusicPlaylist.DEFAULT))
-          && session.settings().stream().filter(s -> s.id.equals("audio.menuMusic"))
-              .anyMatch(s -> s.value.getAsInt() != local.luke.power.audio.AudioSettings.MenuMusic.WORLD.ordinal());
-      if (preset != null && !preset.value.getAsString().isEmpty() && !menuDefault)
-        return "Using the selected World playlist. Choose Default rotation for world or menu playback to use these settings.";
     }
     if (visible(session, setting)) return "";
     var rule = owner(setting);

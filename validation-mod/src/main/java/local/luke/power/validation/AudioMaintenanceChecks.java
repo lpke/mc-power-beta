@@ -28,6 +28,7 @@ final class AudioMaintenanceChecks {
     String oldBrowser = MenuPreferences.current().musicBrowserDirectory;
     var parent = mc.currentScreen;
     Path root = Files.createTempDirectory(Path.of(".").toAbsolutePath(), "audio-import-test-");
+    var preserved = new MusicPlaylists460Checks.State(mc);
     try {
       MenuPreferences.update(v -> { v.autoApply = false; v.musicBrowserDirectory = root.toString(); });
       for (String child : List.of("first", "second")) {
@@ -41,17 +42,15 @@ final class AudioMaintenanceChecks {
       MusicPlaylist.load(config, "one");
       AudioConfig.preview(config);
       PowerOptionsScreen options = MenuUpdateChecks.open(mc, "Audio");
-      test("loaded preset admissions survive previews and rollback without mutating saved presets", () -> {
-        Setting enabled = find(options.session(), "audio.trackEnabled.music:calm2.ogg");
-        check(!enabled.value.getAsBoolean(), "new track already admitted");
-        enabled.value = new JsonPrimitive(true); options.changed(enabled);
-        check(AudioConfig.current().playlistTracks.contains("music:calm2.ogg"), "preview missed admission");
-        check(!AudioConfig.current().playlists.get(0).includes("music:calm2.ogg"), "live edit mutated preset");
+      test("saved playlist membership survives global favourites edits and rollback", () -> {
+        var draft = new MusicPresetDraft(config.playlists.get(0), List.of("music:calm1.ogg", "music:calm2.ogg"));
+        draft.include("music:calm2.ogg", true);
+        check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of("music:calm1.ogg")), "unsaved membership leaked");
         Setting favourite = find(options.session(), "audio.favourites");
         favourite.value = Catalog.JSON.toJsonTree(Set.of("music:calm1.ogg")); options.changed(favourite);
-        check(AudioConfig.current().playlistTracks.contains("music:calm2.ogg"), "next edit lost admission");
+        check(draft.tracks().contains("music:calm2.ogg"), "global edit replaced isolated draft");
+        check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of("music:calm1.ogg")), "global edit expanded saved playlist");
         options.session().discard();
-        check(!AudioConfig.current().playlistTracks.contains("music:calm2.ogg"), "discard retained admission");
       });
       Setting folders = find(options.session(), "audio.musicDirectories");
       test("multi-select browse adds unique children and folder drafts require Save or Discard", () -> {
@@ -74,7 +73,7 @@ final class AudioMaintenanceChecks {
         check(mc.currentScreen == options, "Save did not return");
         check(AudioConfig.current().musicDirectories.size() == 2, "Save lost imported folders");
         check(AudioConfig.current().playlists.get(0).tracks().equals(List.of("music:calm1.ogg")), "folders mutated preset");
-        check(AudioConfig.current().playlistTracks.equals(List.of("music:calm1.ogg")), "folder import expanded working playlist");
+        check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of("music:calm1.ogg")), "folder import expanded selected saved playlist");
         folder = new FolderScreen(options, folders); mc.setScreen(folder);
         clickScreen(folder, (int)call(folder,"panelRight") - 30, 80);
         check(((List<?>)field(folder,"folders")).size() == 1, "row remove missed");
@@ -82,7 +81,7 @@ final class AudioMaintenanceChecks {
         check(AudioConfig.current().musicDirectories.size() == 2, "Discard removed a folder");
       });
       test("child import checks every selected parent and skips already listed directories", () -> {
-        var fresh = find(options.session(), "audio.menuDirectories");
+        var fresh = new Setting(folders.id, folders.backend, folders.page, folders.group, folders.label, folders.description, folders.kind, Catalog.JSON.toJsonTree(List.of()), folders.defaultValue, folders.min, folders.max, folders.step, folders.choices, folders.restart);
         FolderScreen folder = new FolderScreen(options, fresh); mc.setScreen(folder);
         clickScreen(folder, (int)call(folder,"panelRight") - 40, 50);
         DirectoryScreen browser = (DirectoryScreen)mc.currentScreen;
@@ -105,15 +104,12 @@ final class AudioMaintenanceChecks {
           check(GL11.glGetError()==0,"GL error at " + size[0]);
         }
       });
-      test("single-section library filter expands and pause scrub option defaults off", () -> {
+      test("library sections start collapsed and pause scrub option defaults off", () -> {
         check(!new AudioSettings().menuControlsScrub,"scrubber enabled by default");
-        mc.setScreen(options); field(options,"libraryOpen",true);
-        var library = (MusicLibraryScreen)field(options,"library");
-        Setting favourites = find(options.session(),"audio.favourites");
-        favourites.value=Catalog.JSON.toJsonTree(Set.of("music:calm1.ogg")); options.changed(favourites);
-        var select=MusicLibraryScreen.class.getDeclaredMethod("selectFilter",String.class);
-        select.setAccessible(true); select.invoke(library,"favourites");
-        check(((List<?>)field(library,"rows")).size()==2,"single section starts collapsed");
+        mc.setScreen(options);field(options,"libraryOpen",false);call(options,"layout");
+        var library = MusicPlaylists460Checks.library(options);
+        MusicPlaylists460Checks.tab(options,library,"library");
+        check(library.sectionsCollapsed(),"library starts expanded");
       });
       test("ffmpeg was discovered without a conversion process", () -> check(Mp3Converter.available(),"ffmpeg probe failed"));
     } finally {
@@ -121,6 +117,7 @@ final class AudioMaintenanceChecks {
       MenuPreferences.update(v -> { v.autoApply=automatic; v.musicBrowserDirectory=oldBrowser; });
       mc.setScreen(parent);
       try(var files=Files.walk(root)) { for(Path p:files.sorted(Comparator.reverseOrder()).toList())Files.delete(p); }
+      preserved.close();
     }
     log("AUDIO MAINTENANCE FAILURES " + failures);
   }

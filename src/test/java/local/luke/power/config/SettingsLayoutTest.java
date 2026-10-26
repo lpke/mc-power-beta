@@ -121,11 +121,11 @@ class SettingsLayoutTest {
       assertEquals(entries.indexOf(sleep) - 1, entries.indexOf(entries.stream().filter(s -> s.id.equals(prefix + "allow_sleep")).findFirst().orElseThrow()));
     }
   }
-  @Test void playlistControlsKeepTheirPlaceAboveTheExistingSoundtrackRows() {
+  @Test void playlistChoicesLeadTheRemainingMusicSettings() {
     var ids=List.of("audio.dimensionMusic", "audio.musicDirectories", "audio.menuPlaylist",
-        "audio.customMusic", "audio.playlist", "audio.musicMode");
+        "audio.menuMusic", "audio.playlist", "audio.recursive");
     var entries=ids.stream().map(id -> setting(id,"Audio","Music library")).toList();
-    assertEquals(List.of("audio.playlist","audio.menuPlaylist","audio.musicMode","audio.customMusic",
-        "audio.musicDirectories","audio.dimensionMusic"),SettingsLayout.ordered(entries).stream().map(s -> s.id).toList());
+    assertEquals(List.of("audio.playlist","audio.menuPlaylist","audio.musicDirectories","audio.menuMusic",
+        "audio.recursive","audio.dimensionMusic"),SettingsLayout.ordered(entries).stream().map(s -> s.id).toList());
   }
 }

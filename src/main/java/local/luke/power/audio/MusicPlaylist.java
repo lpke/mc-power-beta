@@ -2,9 +2,9 @@ package local.luke.power.audio;
 
 import java.util.*;
 
-/** An ordered saved selection. Loading copies it into the independent working selection. */
+/** An immutable saved playlist. Playback reads the selected object directly. */
 public final class MusicPlaylist {
-  public static final String SAME_AS_WORLD = "@world", DEFAULT = "@default";
+  public static final String SAME_AS_WORLD = "@world", BETA = "beta";
   private final String id, name;
   private final List<String> tracks;
   private final Map<String, Integer> groupVolumes;
@@ -42,49 +42,72 @@ public final class MusicPlaylist {
       throw new IllegalArgumentException("Invalid music selection");
   }
 
+  private static final MusicPlaylist BETA_PLAYLIST = new MusicPlaylist(BETA, "Beta", BuiltinMusic.VANILLA, Map.of());
+
+  public static MusicPlaylist beta() { return BETA_PLAYLIST; }
+
+  public static List<MusicPlaylist> all(AudioSettings settings) {
+    List<MusicPlaylist> result = new ArrayList<>();
+    result.add(beta());
+    result.addAll(settings.playlists);
+    return Collections.unmodifiableList(result);
+  }
+
   public static void validate(List<MusicPlaylist> playlists, String world, String menu) {
     if (playlists == null || playlists.size() > 128 || world == null || menu == null)
       throw new IllegalArgumentException("Invalid music playlists");
     Set<String> ids = new HashSet<>();
+    ids.add(BETA);
     for (MusicPlaylist p : playlists) {
       if (p == null) throw new IllegalArgumentException("Invalid music playlist");
       new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
-      if (!ids.add(p.id)) throw new IllegalArgumentException("Duplicate playlist identifier");
+      if (!ids.add(p.id)) throw new IllegalArgumentException("Duplicate or reserved playlist identifier");
     }
-    if (!world.isEmpty() && !ids.contains(world)
-        || !menu.equals(SAME_AS_WORLD) && !menu.equals(DEFAULT) && !ids.contains(menu))
+    if (!ids.contains(world) || !menu.equals(SAME_AS_WORLD) && !ids.contains(menu))
       throw new IllegalArgumentException("Selected music playlist is missing");
   }
 
-  private static MusicPlaylist find(AudioSettings settings, String id) {
-    return settings.playlists.stream().filter(p -> p.id.equals(id)).findFirst()
+  public static MusicPlaylist find(AudioSettings settings, String id) {
+    if (BETA.equals(id)) return beta();
+    MusicPlaylist p = settings.playlists.stream().filter(value -> value.id.equals(id)).findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Music playlist is missing"));
+    return p;
+  }
+
+  public static MusicPlaylist world(AudioSettings settings) { return find(settings, settings.playlist); }
+
+  public static MusicPlaylist menu(AudioSettings settings) {
+    return SAME_AS_WORLD.equals(settings.menuPlaylist) ? world(settings) : find(settings, settings.menuPlaylist);
+  }
+
+  /** Selection order is also the non-shuffled playback order. */
+  public static List<String> rotation(AudioSettings settings, boolean inMenu) {
+    LinkedHashSet<String> tracks = new LinkedHashSet<>();
+    if (!inMenu || settings.menuMusic != AudioSettings.MenuMusic.CUSTOM)
+      tracks.addAll(world(settings).tracks());
+    if (inMenu && settings.menuMusic != AudioSettings.MenuMusic.WORLD)
+      tracks.addAll(menu(settings).tracks());
+    return List.copyOf(tracks);
+  }
+
+  public static boolean usesMenuVolumes(AudioSettings settings, String id, boolean inMenu) {
+    if (!inMenu || settings.menuMusic == AudioSettings.MenuMusic.WORLD
+        || SAME_AS_WORLD.equals(settings.menuPlaylist)) return false;
+    return settings.menuMusic == AudioSettings.MenuMusic.CUSTOM
+        || menu(settings).includes(id) && !world(settings).includes(id);
   }
 
   public static void load(AudioSettings settings, String id) {
-    if (id.isEmpty()) {
-      settings.playlist = "";
-      settings.playlistTracks = new ArrayList<>();
-      return;
-    }
     MusicPlaylist p = find(settings, id);
-    MusicPlaylist checked = new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
-    settings.playlistTracks = new ArrayList<>(checked.tracks);
-    settings.groupVolumes = new TreeMap<>(checked.groupVolumes);
-    settings.playlist = checked.id;
+    new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
+    settings.playlist = id;
   }
 
   public static void loadMenu(AudioSettings settings, String id) {
-    if (SAME_AS_WORLD.equals(id) || DEFAULT.equals(id)) {
-      settings.menuPlaylist = id;
-      settings.menuPlaylistTracks = new ArrayList<>();
-      settings.menuGroupVolumes = new TreeMap<>();
-      return;
+    if (!SAME_AS_WORLD.equals(id)) {
+      MusicPlaylist p = find(settings, id);
+      new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
     }
-    MusicPlaylist p = find(settings, id);
-    MusicPlaylist checked = new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
-    settings.menuPlaylistTracks = new ArrayList<>(checked.tracks);
-    settings.menuGroupVolumes = new TreeMap<>(checked.groupVolumes);
-    settings.menuPlaylist = checked.id;
+    settings.menuPlaylist = id;
   }
 }

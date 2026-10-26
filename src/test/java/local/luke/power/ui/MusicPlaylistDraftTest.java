@@ -29,4 +29,26 @@ class MusicPlaylistDraftTest {
     draft.order(List.of(B,A));assertTrue(draft.changed("Quiet"));
     assertEquals(List.of(B,A),draft.snapshot("Quiet").tracks());
   }
+  @Test void copyingBetaProducesAnIndependentDraftWithItsOriginalTwelveTracks() {
+    var beta = MusicPlaylist.beta();
+    var draft = new MusicPresetDraft(beta, beta.tracks());
+    assertTrue(draft.creating());
+    assertTrue(draft.changed(draft.name()));
+    var copy = draft.snapshot("My Beta");
+    assertNotEquals(MusicPlaylist.BETA, copy.id());
+    assertEquals(beta.tracks(), copy.tracks());
+    draft.include(beta.tracks().get(0), false);
+    assertEquals(12, beta.tracks().size());
+    assertEquals(11, draft.tracks().size());
+  }
+
+  @Test void copiedNamesFitTheLimitAndAvoidCaseInsensitiveCollisions() {
+    String original = "A".repeat(80);
+    String first = MusicPresetDraft.copyName(original, List.of(original));
+    assertEquals("A".repeat(75) + " copy", first);
+    String second = MusicPresetDraft.copyName(original, List.of(original, first.toUpperCase(Locale.ROOT)));
+    assertEquals("A".repeat(73) + " copy 2", second);
+    assertEquals(80, second.length());
+    assertDoesNotThrow(() -> new MusicPlaylist("copy", second, List.of(), Map.of()));
+  }
 }

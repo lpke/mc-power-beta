@@ -13,18 +13,14 @@ public final class BuiltinMusic {
     public boolean creative() { return usage.equals("Creative"); }
     public boolean background() { return usage.equals("Overworld") || creative(); }
     public String group() { return era + (usage.equals("Overworld") ? "" : " / " + usage); }
-    public boolean included(AudioSettings.MusicMode mode) {
-      if (usage.equals("Nether") || usage.equals("End")) return false;
-      boolean early = era.equals("Alpha") || era.equals("Beta");
-      return switch (mode) {
-        case VANILLA -> era.equals("Alpha") && usage.equals("Overworld");
-        case ALPHA_BETA_SURVIVAL -> early && usage.equals("Overworld");
-        case ALPHA_BETA -> early;
-        case MINECRAFT_SURVIVAL -> usage.equals("Overworld");
-        case ALL_MINECRAFT -> true;
-      };
-    }
+
   }
+  /** The twelve original Beta 1.7.3 world tracks, in native filename order. */
+  public static final List<String> VANILLA = List.of(
+      "music:calm1.ogg", "music:calm2.ogg", "music:calm3.ogg",
+      "music:hal1.ogg", "music:hal2.ogg", "music:hal3.ogg", "music:hal4.ogg",
+      "music:nuance1.ogg", "music:nuance2.ogg",
+      "music:piano1.ogg", "music:piano2.ogg", "music:piano3.ogg");
   public static final List<Track> TRACKS = load();
   /** Manifest order is chronological; shared survival/creative tracks appear only once. */
   public static final List<String> GROUPS = groups();

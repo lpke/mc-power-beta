@@ -147,32 +147,4 @@ class SettingAccessTest {
       assertTrue(SettingAccess.visible(session, style));
     }
   }
-  @Test void defaultSoundtrackControlsFollowTheirWorldAndMenuConsumers() {
-    var session = new ConfigSession();
-    var world = new Setting("audio.playlist", "test", "Audio", "", "", "", Setting.Kind.TEXT,
-        new JsonPrimitive("quiet"), new JsonPrimitive(""), 0, 1, 1, List.of(), false);
-    var menu = new Setting("audio.menuPlaylist", "test", "Audio", "", "", "", Setting.Kind.TEXT,
-        new JsonPrimitive("@world"), new JsonPrimitive("@world"), 0, 1, 1, List.of(), false);
-    var mode = new Setting("audio.menuMusic", "test", "Audio", "", "", "", Setting.Kind.CHOICE,
-        new JsonPrimitive(2), new JsonPrimitive(2), 0, 2, 1, List.of("World", "Custom", "Mix"), false);
-    session.add(new Backend() {
-      public String id() { return "test"; }
-      public List<java.nio.file.Path> files() { return List.of(); }
-      public void validate(Map<String,JsonElement> values) {}
-      public void apply(Map<String,JsonElement> values) {}
-    }, List.of(world,menu,mode));
-    for (String id : List.of("audio.musicMode", "audio.customMusic")) {
-      assertFalse(SettingAccess.reason(session, entry(id)).isEmpty());
-      menu.value = new JsonPrimitive("@default");
-      for (int consumer : List.of(1,2)) {
-        mode.value = new JsonPrimitive(consumer);
-        assertEquals("", SettingAccess.reason(session, entry(id)));
-      }
-      mode.value = new JsonPrimitive(0);
-      assertFalse(SettingAccess.reason(session, entry(id)).isEmpty());
-      world.value = new JsonPrimitive("");
-      assertEquals("", SettingAccess.reason(session, entry(id)));
-      world.value = new JsonPrimitive("quiet"); menu.value = new JsonPrimitive("@world"); mode.value = new JsonPrimitive(2);
-    }
-  }
 }

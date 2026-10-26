@@ -17,7 +17,4 @@ final class BundledMusic {
     return Collections.unmodifiableMap(result);
   }
   static class_267 entry(String id) { return ENTRIES.get(id); }
-  static List<class_267> selection(AudioSettings.MusicMode mode) {
-    return BuiltinMusic.TRACKS.stream().filter(t -> t.included(mode)).map(t -> ENTRIES.get(t.id())).toList();
-  }
 }

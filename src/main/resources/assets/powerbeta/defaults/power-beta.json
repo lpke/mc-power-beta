@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "settings": {
     "power_capture:config": {
       "addBasicScreenshotsToClipboard": false,
@@ -314,7 +314,6 @@
         "records": 100
       },
       "sounds": {},
-      "musicMode": "VANILLA",
       "recursive": false,
       "shuffle": true,
       "avoidRepeats": true,
@@ -340,7 +339,7 @@
       "underwaterUltraRareAdditions": false,
       "lavaBucketSounds": true,
       "lavaAmbientSounds": true,
-      "playlist": "",
+      "playlist": "beta",
       "menuPlaylist": "@world"
     },
     "visual": {

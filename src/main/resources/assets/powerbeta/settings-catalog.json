@@ -3413,20 +3413,11 @@
   "audio.menuPlaylist": {
     "order": 0.5
   },
-  "audio.musicMode": {
-    "order": 1
-  },
-  "audio.customMusic": {
-    "order": 2
-  },
   "audio.musicDirectories": {
     "order": 3
   },
   "audio.menuMusic": {
     "order": 4
-  },
-  "audio.menuDirectories": {
-    "order": 5
   },
   "audio.recursive": {
     "order": 6

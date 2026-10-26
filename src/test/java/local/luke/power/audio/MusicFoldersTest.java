@@ -64,6 +64,17 @@ class MusicFoldersTest {
     assertEquals("[\"a\",\"b\",\"a\"]",original.toString());
   }
 
+  @Test void disabledSourcesAreExcludedBeforeScanningAndDoNotChangeSavedMembership() {
+    AudioSettings settings = new AudioSettings();
+    settings.musicDirectories.addAll(List.of("on", "off"));
+    settings.disabledMusicDirectories.add("off");
+    settings.playlists.add(new MusicPlaylist("saved", "Saved", List.of("music:custom/unavailable"), Map.of()));
+    assertEquals(List.of("on"), MusicFolders.enabled(settings));
+    settings.disabledMusicDirectories.clear();
+    assertEquals(List.of("on", "off"), MusicFolders.enabled(settings));
+    assertEquals(List.of("music:custom/unavailable"), settings.playlists.get(0).tracks());
+  }
+
   @Test void invalidFolderStatesNeverCoerceOrLosePaths() {
     for (String bad : List.of("{}", "[null]", "[false]", "[{\"path\":\"a\"}]",
         "[{\"path\":\"a\",\"enabled\":\"false\"}]"))

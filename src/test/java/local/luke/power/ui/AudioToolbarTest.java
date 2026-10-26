@@ -24,7 +24,7 @@ class AudioToolbarTest {
         assertEquals(AudioToolbar.bottom(width,library),layout.bottom());
         var last=buttons.get(buttons.size()-1);
         assertEquals(37+width,last.x()+last.width());
-        assertEquals(AudioToolbar.Action.RELOAD,last.action());
+        assertEquals(AudioToolbar.Action.PLAYLIST,last.action());
       }
     }
   }
@@ -34,7 +34,7 @@ class AudioToolbarTest {
       for(boolean library : new boolean[]{false,true}) {
         var empty = AudioToolbar.layout(0,width,0,false,library).buttons();
         var full = AudioToolbar.layout(0,width,256,false,library).buttons();
-        assertEquals(6,empty.size());
+        assertEquals(5,empty.size());
         assertTrue(empty.stream().noneMatch(b -> b.action()==AudioToolbar.Action.QUEUE));
         for(var a : empty) {
           var b=full.stream().filter(v -> v.action()==a.action()).findFirst().orElseThrow();
@@ -42,10 +42,25 @@ class AudioToolbarTest {
           assertTrue(a.enabled());assertTrue(b.enabled());
         }
         assertEquals("Queue (256)",full.stream().filter(b -> b.action()==AudioToolbar.Action.QUEUE).findFirst().orElseThrow().label());
-        assertEquals(AudioToolbar.Action.LIBRARY,empty.get(empty.size()-2).action());
+        assertEquals(AudioToolbar.Action.PLAYLIST,empty.get(empty.size()-1).action());
         assertEquals(AudioToolbar.Action.PLAY,empty.get(0).action());
         assertEquals("",empty.get(0).label());
       }
+    }
+  }
+  @Test void editorRetainsPlaybackPositionsAndKeepsTheQueueOnTheSameRow() {
+    for (int width : new int[]{200, 244, 342, 380, 465, 640}) {
+      var main = AudioToolbar.layout(37, width, 3, true, false);
+      var editor = AudioToolbar.editor(37, width, 3, true);
+      for (var playback : AudioToolbar.playback(37, width, true).buttons()) {
+        assertEquals(playback, main.buttons().stream().filter(b -> b.action() == playback.action()).findFirst().orElseThrow());
+        assertEquals(playback, editor.buttons().stream().filter(b -> b.action() == playback.action()).findFirst().orElseThrow());
+      }
+      var queue = editor.buttons().get(editor.buttons().size() - 1);
+      var quiet = editor.buttons().get(3);
+      assertTrue(queue.x() > quiet.x() + quiet.width());
+      assertEquals(52, queue.y());
+      assertEquals(70, editor.bottom());
     }
   }
 }

@@ -519,8 +519,12 @@ public final class Validation {
         "cached music resources loaded",
         () -> check(AudioController.music(mc).size() >= 3, "No vanilla playlist"));
     test(
-        "empty playlists are safe",
-        () -> check(AudioController.choose(List.of()) == null, "Expected empty playlist"));
+        "empty saved playlists keep an empty automatic pool",
+        () -> {
+          var empty=AudioConfig.copy();MusicFixtureSupport.selection(empty,List.of());
+          try { AudioConfig.preview(empty);check(AudioController.activeMusic(mc).isEmpty(),"Empty saved playlist expanded"); }
+          finally {AudioConfig.preview(old);}
+        });
     try {
       AudioSettings draft = AudioConfig.copy();
       draft.master = 50;
@@ -555,7 +559,7 @@ public final class Validation {
       volumeBefore = mc.options.musicVolume;
       AudioSettings s = AudioConfig.copy();
       s.musicDirectories = List.of("validation-music");
-      s.customMusic = AudioSettings.CustomMusic.ONLY;
+      MusicFixtureSupport.imported(s, false);
       s.master = 100;
       s.shuffle = false;
       s.sounds.put("music:Test song été.wav", 50);
@@ -607,7 +611,7 @@ public final class Validation {
           "music resumes without replacing stream",
           () -> check(system.playing("BgMusic"), "Resume ignored"));
       AudioSettings s = AudioConfig.copy();
-      s.customMusic = AudioSettings.CustomMusic.ADD;
+      MusicFixtureSupport.imported(s, true);
       AudioConfig.save(s);
     } else if (action.equals("add")) {
       var pool = ((SoundManagerAccessor) mc.soundManager).power$music();
@@ -617,12 +621,12 @@ public final class Validation {
       }
       Set<String> found = new HashSet<>();
       for (int i = 0; i < nativeTracks.size() + 2; i++)
-        found.add(AudioController.choose(nativeTracks).field_2127.toExternalForm());
+        found.add(AudioController.choose().field_2127.toExternalForm());
       test(
-          "add mode retains every native and custom track",
-          () -> check(found.size() == nativeTracks.size() + 2, "Only " + found.size()));
+          "saved playlist retains every Beta and imported track",
+          () -> check(found.size() == BuiltinMusic.VANILLA.size() + 2, "Only " + found.size()));
       AudioSettings s = AudioConfig.copy();
-      s.customMusic = AudioSettings.CustomMusic.ONLY;
+      MusicFixtureSupport.imported(s, false);
       s.musicDirectories = List.of("missing-validation-folder");
       AudioConfig.save(s);
     } else if (action.equals("fallback")) {
@@ -632,10 +636,10 @@ public final class Validation {
         nativeTracks = List.copyOf(((SoundPoolAccessor) pool).power$tracks());
       }
       test(
-          "missing replacement library falls back to native music",
+          "missing imported references do not expand saved playlist",
           () ->
               check(
-                  nativeTracks.contains(AudioController.choose(nativeTracks)), "Missing fallback"));
+                  AudioController.choose() == null, "Missing references admitted unrelated tracks"));
       test(
           "scanner never creates missing folders",
           () -> check(!Files.exists(Path.of("missing-validation-folder")), "Folder was created"));

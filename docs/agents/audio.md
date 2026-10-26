@@ -4,9 +4,16 @@
   World/menu transitions preserve streams and pause state in WORLD/MIX modes;
   only CUSTOM resets playback. Preview restoration must not revive old jukeboxes.
   Synchronize sound-source cleanup with decoder reads on the sound threads.
-  Never scan folders or decode audio from a render loop. Playlist drafts and saved
-  snapshots must stay separate from live library edits; only Load copies a playlist
-  into the working selection. Ordered positive track IDs prevent imported folders silently expanding playlists. Music data lives in `power-beta/music.json`, while playback preferences stay in the shared config; both paths join the Options transaction. Queue snapshots merge independently of editor drafts.
+  Never scan folders or decode audio from a render loop. Playlist editor drafts
+  stay separate from saved playlists until Save. Playback reads the selected saved
+  playlist directly; selecting one changes its ID without making a working copy. The
+  reserved `beta` playlist contains exactly the twelve original Beta 1.7.3 tracks and
+  cannot be edited or removed. Ordered positive track IDs prevent imported folders
+  silently expanding playlists. Global music folders supply the Library; playlist
+  membership and group gains belong to each saved playlist. Track gains and favorites
+  remain global. Music data format 2 lives in `power-beta/music.json`, while playback
+  preferences stay in the shared config; both paths join the Options transaction.
+  Queue snapshots merge independently of editor drafts.
   Keep missing track IDs, queues and user music files intact.
   Previous during a between-track gap replays the last played track without
   moving back in history or consuming queued tracks. Paused tracks remain current.

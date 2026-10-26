@@ -124,7 +124,7 @@ class WorldSnapshotsTest {
   @Test void backupIncludesConfigByDefaultWithoutChangingItsBytes() throws Exception {
     Path config = game.resolve("config/power-beta.json");
     Files.createDirectories(config.getParent());
-    byte[] before = "{\"schemaVersion\":8,\"settings\":{},\"preserved\":true}\n".getBytes(StandardCharsets.UTF_8);
+    byte[] before = "{\"schemaVersion\":9,\"settings\":{},\"preserved\":true}\n".getBytes(StandardCharsets.UTF_8);
     Files.write(config, before);
     try (ZipFile zip = new ZipFile(run(WorldSnapshots.Action.BACKUP).path().toFile())) {
       assertArrayEquals(before, zip.getInputStream(zip.getEntry("external/config/power-beta.json")).readAllBytes());
@@ -179,7 +179,7 @@ class WorldSnapshotsTest {
     var active = data.layout(id); active.add("protectedSlots", JsonParser.parseString("[35]"));
     active.add("presets", JsonParser.parseString("{\"format\":999,\"future\":true}")); data = data.replace(id, active);
     settings.add(local.luke.power.inventory.tools.WorldSortingLayoutsData.SECTION, data.json());
-    JsonObject config = new JsonObject(); config.addProperty("schemaVersion", 8); config.add("settings", settings);
+    JsonObject config = new JsonObject(); config.addProperty("schemaVersion", 9); config.add("settings", settings);
     Path path = game.resolve("config/power-beta.json"); Files.createDirectories(path.getParent()); Files.writeString(path, config.toString()); byte[] original = Files.readAllBytes(path);
     Path first = run(WorldSnapshots.Action.DUPLICATE).path();
     var firstAccess = new SavedWorldAccess(game, first.getFileName().toString(), () -> true);

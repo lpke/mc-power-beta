@@ -46,10 +46,10 @@ class PowerConfigTest {
     assertEquals("broken",Files.readString(PowerConfig.path()));
   }
   @Test void retiredAndFutureFormatsBlockEveryWriterAndPreserveExactBytes() throws Exception {
-    for (int version : new int[]{3, 4, 5, 6, 7, 9, 99}) {
+    for (int version : new int[]{3, 4, 5, 6, 7, 8, 10, 99}) {
       String original = "{\"schemaVersion\":" + version + ",\"settings\":{\"keep\":{\"value\":true}}}";
       Files.writeString(PowerConfig.path(), original);
-      JsonObject fresh = JsonParser.parseString("{\"schemaVersion\":8,\"settings\":{}}").getAsJsonObject();
+      JsonObject fresh = JsonParser.parseString("{\"schemaVersion\":9,\"settings\":{}}").getAsJsonObject();
       assertThrows(IllegalStateException.class, PowerConfig::document);
       assertThrows(IllegalStateException.class, () -> PowerConfig.write(fresh));
       assertThrows(IllegalStateException.class, () -> PowerConfig.put("test", new JsonObject()));
@@ -114,7 +114,7 @@ class PowerConfigTest {
     } finally { if (child.isAlive()) child.destroyForcibly(); }
   }
   @Test void incompatibleTemplatesArePreservedForReviewWithoutBlockingUnrelatedPreferences() throws Exception {
-    JsonObject root = new JsonObject(); root.addProperty("schemaVersion", 8);
+    JsonObject root = new JsonObject(); root.addProperty("schemaVersion", 9);
     JsonObject settings = new JsonObject(), templates = new JsonObject(), future = new JsonObject();
     future.addProperty("version", 99); future.add("values", new JsonObject()); templates.add("survival", future);
     settings.add("gameRules", templates); root.add("settings", settings); PowerConfig.write(root);
@@ -128,7 +128,6 @@ class PowerConfigTest {
     JsonObject initial = JsonParser.parseString("""
         {"master":60,"playlist":"quiet","menuPlaylist":"@world",
          "playlists":[{"id":"quiet","name":"Quiet","tracks":["music:missing","music:a"],"groupVolumes":{"World":30}}],
-         "playlistTracks":["music:a"],"menuPlaylistTracks":[],"disabledTracks":[],
          "sounds":{"random.click":35,"music:missing":100},"favourites":["music:missing"]}
         """).getAsJsonObject();
     PowerConfig.saveAudio(initial); JsonObject staleDraft = PowerConfig.audio();

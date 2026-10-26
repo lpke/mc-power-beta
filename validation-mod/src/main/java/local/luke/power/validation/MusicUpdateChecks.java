@@ -43,12 +43,10 @@ public final class MusicUpdateChecks {
         mp3 = Files.readAllBytes(Path.of("menu-update-music/mp3/Test.mp3"));
         MusicRequests.edit(q -> q.tracks.clear());
         AudioSettings next = AudioConfig.copy();
-        next.customMusic = AudioSettings.CustomMusic.ONLY;
         next.musicDirectories =
             List.of("menu-update-music/a", "menu-update-music/b", "menu-update-music/mp3");
-        next.menuDirectories = List.of();
         next.master = 100;
-        next.disabledTracks.clear();
+        MusicFixtureSupport.imported(next, false);
         AudioConfig.preview(next);
         mc.options.musicVolume = .15f;
         mc.setScreen(new PowerOptionsScreen(null));
@@ -80,13 +78,11 @@ public final class MusicUpdateChecks {
                   AudioController.trackVolume(id("/a/")) == 35
                       && AudioController.trackVolume(id("/b/")) == 100,
                   "track gains not independent");
-              Setting enabled = find(parent.session(), "audio.trackEnabled." + id("/a/"));
-              enabled.value = new JsonPrimitive(false);
-              parent.changed(enabled);
+              Setting playlists=find(parent.session(),"audio.playlists");
+              var updated=AudioConfig.copy();MusicFixtureSupport.selection(updated,List.of(id("/b/")));
+              playlists.value=Catalog.JSON.toJsonTree(updated.playlists);parent.changed(playlists);
               for (int i = 0; i < 8; i++)
-                check(
-                    AudioController.trackId(AudioController.choose(List.of())).equals(id("/b/")),
-                    "excluded or unconverted track selected");
+                check(AudioController.trackId(AudioController.choose()).equals(id("/b/")), "playlist nonmember or unconverted track selected");
               screen.render(0, 0, 0);
             });
         AudioController.playNow(id("/b/"));
@@ -100,7 +96,7 @@ public final class MusicUpdateChecks {
                     "music waits for menu exit"));
         playing = (String) state("currentMusic");
         AudioSettings next = AudioConfig.copy();
-        next.customMusic = AudioSettings.CustomMusic.ADD;
+        MusicFixtureSupport.imported(next, true);
         AudioConfig.preview(next);
       }
       case "paused" -> {

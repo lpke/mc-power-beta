@@ -49,11 +49,10 @@ public final class AudioLayoutChecks {
         MenuPreferences.update(v -> v.autoApply=false);
         MusicRequests.edit(q -> q.tracks.clear());
         rules(new MusicRules(true,true,12000,12000,1,1,1,1));
-        AudioSettings next=AudioConfig.copy();next.musicDirectories=new ArrayList<>(FOLDERS);
-        next.menuDirectories=new ArrayList<>(List.of("audio-layout/menu"));
+        AudioSettings next=AudioConfig.copy();next.musicDirectories=new ArrayList<>(List.of("audio-layout/a", "audio-layout/b", "audio-layout/menu"));
         next.menuMusic=AudioSettings.MenuMusic.CUSTOM;
-        next.disabledMusicDirectories.clear();next.disabledMenuDirectories.clear();next.disabledTracks.clear();
-        next.musicMode=AudioSettings.MusicMode.VANILLA;next.customMusic=AudioSettings.CustomMusic.OFF;
+        next.disabledMusicDirectories.clear();
+        MusicPlaylist.load(next, MusicPlaylist.BETA);
         AudioConfig.preview(next);AudioController.pause();
       }
       case "checks" -> {
@@ -61,51 +60,30 @@ public final class AudioLayoutChecks {
         // A completed settings-triggered scan refreshes these rules from the environment backend.
         rules(new MusicRules(true,true,12000,12000,1,1,1,1));
         String a=id("/a/"),b=id("/b/"),menu=id("/menu/");
-        var vanilla=AudioController.activeMusic(mc);
-        test("Active tracks shares soundtrack rules but retains individually excluded tracks", () -> {
-          check(!vanilla.isEmpty() && vanilla.stream().noneMatch(s -> s.startsWith("music:custom/")),"Vanilla includes custom");
-          var next=AudioConfig.copy();next.customMusic=AudioSettings.CustomMusic.ADD;
-          next.disabledTracks.add(a);AudioConfig.preview(next);
-          check(AudioController.activeMusic(mc).containsAll(List.of(a,b)),"Add missing tracks");
-          check(!AudioController.activeMusic(mc).contains(menu),"menu-only track included in world");
-          check(AudioController.activeMusic(mc)==AudioController.activeMusic(mc),"pool not cached");
-          next.customMusic=AudioSettings.CustomMusic.ONLY;AudioConfig.preview(next);
-          check(AudioController.activeMusic(mc).equals(Set.of(a,b)),"Replace keeps vanilla");
-          for(int i=0;i<8;i++) check(AudioController.trackId(AudioController.choose(List.of())).equals(b),"excluded track enters natural rotation");
-        });
-        test("folder switches exclude natural selection and preserve manual preview and queue", () -> {
-          var next=AudioConfig.copy();next.disabledMusicDirectories.add(FOLDERS.get(1));AudioConfig.preview(next);
-          check(AudioController.activeMusic(mc).equals(Set.of(a)),"disabled folder still active");
-          check(AudioController.choose(List.of())==null,"disabled folder or excluded track selected");
-          check(AudioController.resolveTrack(b)!=null,"disabled folder removed preview");
-          MusicRequests.edit(q -> q.add(b));
-          check(AudioController.trackId(AudioController.choose(List.of())).equals(b),"explicit queue blocked by folder");
+        test("selected saved tracks stay ordered and library membership remains independent", () -> {
+          var next=AudioConfig.copy();MusicFixtureSupport.selection(next,List.of(b));AudioConfig.preview(next);
+          check(new ArrayList<>(AudioController.activeMusic(mc)).equals(List.of(b)),"saved imported membership ignored");
+          check(AudioController.resolveTrack(a)!=null,"nonmember unavailable for manual playback");
+          MusicRequests.edit(q->q.add(a));
+          check(AudioController.trackId(AudioController.choose()).equals(a),"explicit nonmember request blocked");
+          check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of(b)),"queue expanded saved playlist");
           check(Files.mismatch(Path.of("preview-check-music/preview-test.wav"),Path.of("audio-layout/b/Track.wav"))==-1,"source track changed");
-          next.disabledMusicDirectories.add(FOLDERS.get(0));AudioConfig.preview(next);
-          check(AudioController.activeMusic(mc).equals(vanilla),"empty enabled folders do not fall back");
-          next.disabledMusicDirectories.clear();AudioConfig.preview(next);
         });
-        test("Active tracks follows menu overrides independently of world folders", () -> {
-          var world=mc.world;var player=mc.player;
-          try {
-            mc.world=null;mc.player=null;
-            check(AudioController.activeMusic(mc).equals(Set.of(menu)),"menu override pool incorrect");
-            var next=AudioConfig.copy();next.disabledMenuDirectories.add("audio-layout/menu");AudioConfig.preview(next);
-            check(AudioController.activeMusic(mc).equals(Set.of(a,b)),"disabled menu did not fall back to background pool");
-            next.disabledMenuDirectories.clear();AudioConfig.preview(next);
-          } finally {mc.world=world;mc.player=player;}
+        test("world and menu saved memberships are independent in the shared import library", () -> {
+          var next=AudioConfig.copy();
+          next.playlists.add(new MusicPlaylist("layout-menu","Menu fixture",List.of(menu),Map.of()));
+          MusicPlaylist.loadMenu(next,"layout-menu");AudioConfig.preview(next);
+          check(MusicFixtureSupport.menuTracks(next).equals(List.of(menu)),"menu saved membership lost");
+          check(MusicFixtureSupport.tracks(next).equals(List.of(b)),"menu assignment changed world membership");
         });
         var options=MenuUpdateChecks.open(mc,"Audio");
         field(options,"library",new MusicLibraryScreen(options));
         mc.setScreen(options);
         var library=(MusicLibraryScreen)field(options,"library");
-        test("new library defaults to Active and all filter modes remain reachable", () -> {
-          check(library.state().folder().equals("active"),"new filter is not Active");
-          var cycle=MusicLibraryScreen.class.getDeclaredMethod("selectFilter",String.class);cycle.setAccessible(true);
-          cycle.invoke(library,"");check(library.state().folder().isEmpty(),"missing All");
-          cycle.invoke(library,"custom");check(library.state().folder().equals("custom"),"missing Custom");
-          cycle.invoke(library,"folder");check(((List<?>)field(library,"folders")).contains(library.state().folder()),"missing folder");
-          cycle.invoke(library,"custom");check(library.state().folder().equals("custom"),"reverse filter broken");
+        test("new library has fixed Library Playlists Settings tabs", () -> {
+          library.showTracks();
+          var tabs=(MusicFilters.Layout)call(library,"filters");
+          check(tabs.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library","playlists","settings")),"editor tabs missing");
         });
         test("folder toggles are local until Done and preserve rollback", () -> {
           Setting folders=find(options.session(),"audio.musicDirectories");var original=folders.value.deepCopy();
@@ -118,11 +96,11 @@ public final class AudioLayoutChecks {
           click(screen,(int)call(screen,"panelLeft")+25,80);
           click(screen,(int)call(screen,"panelRight")-140,screen.height-20);
           check(AudioConfig.current().disabledMusicDirectories.contains(FOLDERS.get(0)),"Done did not preview switch");
-          check(AudioConfig.current().musicDirectories.equals(FOLDERS),"switch erased path");
-          check(AudioConfig.current().disabledTracks.contains(a),"switch erased track choice");
+          check(AudioConfig.current().musicDirectories.containsAll(FOLDERS),"switch erased path");
+          check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of(b)),"switch erased track choice");
           options.session().discard();
           check(AudioConfig.current().disabledMusicDirectories.isEmpty(),"discard did not restore enabled folder");
-          check(AudioConfig.current().disabledTracks.contains(a),"rollback erased track choice");
+          check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of(b)),"rollback erased track choice");
         });
         test("Queue shortcut opens directly and queue controls share one line", () -> {
           AudioController.pause();MusicRequests.edit(q -> {q.tracks.clear();q.add(a);q.add(b);});
@@ -133,14 +111,14 @@ public final class AudioLayoutChecks {
           options.render(-1,-1,0);
           check((int)call(library,"rowHeight")==24,"queue is not one line");
           check((int)call(library,"right")-(int)call(library,"filterX")<=82,"Clear queue stretched");
-          click(options,indexed(library,"queueX",1)+3,(int)call(library,"listTop")+8);
+          click(options,((MusicRowLayout)call(library,"rowLayout")).downX()+3,(int)call(library,"listTop")+8);
           check(MusicRequests.tracks().equals(List.of(b,a)),"inline down arrow missed");
           options.render(-1,-1,0);
           MusicRequests.edit(q -> q.tracks.remove(0));
           int oldVolume=AudioController.trackVolume(a);
           click(options,(int)call(library,"volumeX")+4,(int)call(library,"listTop")+8);
           check(AudioController.trackVolume(a)==oldVolume,"stale volume click changed another track");
-          click(options,indexed(library,"queueX",3)+3,(int)call(library,"listTop")+8);
+          click(options,((MusicRowLayout)call(library,"rowLayout")).queueX()+3,(int)call(library,"listTop")+8);
           check(MusicRequests.tracks().equals(List.of(a)),"stale click removed different request");
           options.render(-1,-1,0);
           click(options,(int)call(library,"filterX")+3,(int)call(library,"controlsTop")+8);
@@ -150,14 +128,14 @@ public final class AudioLayoutChecks {
         });
         test("direct view navigation preserves filters and positions without hiding empty queue", () -> {
           MusicRequests.edit(q -> {for(int i=0;i<16;i++)q.add(a);});
-          library.restore(new MusicLibraryScreen.State(false,"custom","Track",24,0));
+          library.restore(new MusicLibraryScreen.State(false,"library","Track",24,0));
           call(library,"rebuild");
           var tracksBefore=library.state();
           musicClick(options,AudioToolbar.Action.QUEUE);library.wheel(-3);
           int queueScroll=library.state().queueScroll();
           check(queueScroll>0,"queue fixture cannot scroll");
-          musicClick(options,AudioToolbar.Action.LIBRARY);
-          check(!library.queueVisible() && library.state().folder().equals("custom")
+          musicEditor(options);
+          check(!library.queueVisible() && library.state().folder().equals("library")
               && library.state().query().equals("Track")
               && library.state().trackScroll()==tracksBefore.trackScroll(),"library state lost");
           musicClick(options,AudioToolbar.Action.QUEUE);
@@ -167,7 +145,7 @@ public final class AudioLayoutChecks {
           MusicRequests.edit(q -> q.tracks.clear());
           check(((List<AudioToolbar.Button>)call(options,"musicButtons")).stream()
               .noneMatch(v -> v.action()==AudioToolbar.Action.QUEUE),"empty Queue remains visible");
-          musicClick(options,AudioToolbar.Action.LIBRARY);
+          musicEditor(options);
           check(!library.queueVisible() && library.state().query().equals("Track"),"Library returned to queue or lost search");
           library.showQueue();
           check(!library.hasQuery(),"hidden track search leaks into queue Clear button");
@@ -177,11 +155,11 @@ public final class AudioLayoutChecks {
         });
         test("audio views toggle closed through buttons Escape and the Audio tab", () -> {
           field(options,"libraryOpen",false);call(options,"layout");
-          musicClick(options,AudioToolbar.Action.LIBRARY);
+          musicEditor(options);
           library.focus();
           ((ScreenInput)(Object)options).power$key('\0',org.lwjgl.input.Keyboard.KEY_ESCAPE);
           check(mc.currentScreen==options && !(boolean)field(options,"libraryOpen"),"Escape closed Options or stayed in library");
-          musicClick(options,AudioToolbar.Action.LIBRARY);musicClick(options,AudioToolbar.Action.LIBRARY);
+          musicEditor(options);musicEditor(options);
           check(!(boolean)field(options,"libraryOpen"),"Library did not toggle closed");
           MusicRequests.edit(q -> q.add(a));
           musicClick(options,AudioToolbar.Action.QUEUE);musicClick(options,AudioToolbar.Action.QUEUE);
@@ -189,11 +167,11 @@ public final class AudioLayoutChecks {
           musicClick(options,AudioToolbar.Action.QUEUE);MusicRequests.edit(q -> q.tracks.clear());
           click(options,(int)call(options,"left")+3,32);
           check(!(boolean)field(options,"libraryOpen"),"empty active Queue could not close via Back");
-          musicClick(options,AudioToolbar.Action.LIBRARY);
+          musicEditor(options);
           field(options,"sideScroll",0d);
           click(options,(int)call(options,"origin")+10,24+2*22+8);
           check(!(boolean)field(options,"libraryOpen") && field(options,"page").equals("Audio"),"Audio tab did not return to settings");
-          musicClick(options,AudioToolbar.Action.LIBRARY);
+          musicEditor(options);
         });
         test("audio toolbar queue and folders render at compact and wide sizes", () -> {
           for(int[] size : new int[][]{{320,240},{427,240},{550,380},{854,480}}) {
@@ -202,7 +180,7 @@ public final class AudioLayoutChecks {
               check(mc.textRenderer.getWidth(button.label())<=button.width()-4,"truncated button "+button.label()+" at "+size[0]);
             library.showQueue();options.render(-1,-1,0);
             click(options,(int)call(options,"left")+3,32);options.render(-1,-1,0);
-            musicClick(options,AudioToolbar.Action.LIBRARY);
+            musicEditor(options);
             check(!library.queueVisible(),"Library button failed at "+size[0]);
             var folders=new FolderScreen(options,find(options.session(),"audio.musicDirectories"));
             folders.init(mc,size[0],size[1]);folders.render(-1,-1,0);

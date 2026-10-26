@@ -4,7 +4,7 @@ import com.google.gson.*;
 
 /** Current-format validation, independent of the release version. */
 public final class ConfigVersions {
-  public static final int CURRENT = 8;
+  public static final int CURRENT = 9;
   private ConfigVersions() {}
 
   public static int version(JsonObject root) {
@@ -12,12 +12,12 @@ public final class ConfigVersions {
       JsonPrimitive version = root.getAsJsonPrimitive("schemaVersion");
       if (!version.isNumber()) throw new IllegalArgumentException();
       return version.getAsBigDecimal().intValueExact();
-    } catch (RuntimeException e) { throw new IllegalArgumentException("Missing or invalid schemaVersion. Supported configuration version: 8. Restore a matching schema-8 configuration and music document, or use the release that saved this file.", e); }
+    } catch (RuntimeException e) { throw new IllegalArgumentException("Missing or invalid schemaVersion. Supported configuration version: 9. Restore a matching schema-9 configuration and music document, or use the release that saved this file.", e); }
   }
   public static JsonObject convert(JsonObject source) {
     int version = version(source);
     if (version != CURRENT)
-      throw new IllegalArgumentException("Configuration version " + version + " is unsupported. Supported version: 8. Restore a matching schema-8 configuration and music document, or use the release that saved this file; original file is preserved.");
+      throw new IllegalArgumentException("Configuration version " + version + " is unsupported. Supported version: 9. Restore a matching schema-9 configuration and music document, or use the release that saved this file; original file is preserved.");
     if (!source.has("settings") || !source.get("settings").isJsonObject())
       throw new IllegalArgumentException("Configuration settings must be an object.");
     JsonObject root = source.deepCopy();

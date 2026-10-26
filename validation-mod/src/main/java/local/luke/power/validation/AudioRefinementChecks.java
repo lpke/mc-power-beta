@@ -67,7 +67,7 @@ final class AudioRefinementChecks {
     MenuPreferences.update(v->v.autoApply=false);
     try {
       var config=new AudioSettings();
-      config.musicMode=AudioSettings.MusicMode.ALL_MINECRAFT;
+      MusicFixtureSupport.allBuiltin(config);
       config.playlists.add(new MusicPlaylist("test","Test",AudioController.music(mc).stream().filter(id -> !id.equals("music:calm1.ogg")).toList(), Map.of()));
       AudioConfig.preview(config);
       AudioController.pause();
@@ -102,65 +102,29 @@ final class AudioRefinementChecks {
       }
       test("unchanged editor Back returns through the list with no stale panel state",()->{
         var library=open(s);var panel=field(library,"presets");
-        click(s,(int)call(panel,"right")-145,presetRowY(panel,1));
+        MusicPlaylists460Checks.edit(s,library,"test");
         check((boolean)call(panel,"editing"),"Edit missed");
         back(s);check(!library.dirtyPreset()&&library.presetVisible(),"editor did not return to list");
         back(s);toolbar(s);
       });
-      for(int row:new int[]{0,1}) test("loading preset selector row "+row+" restores toolbar",()->{
-        var library=open(s);var panel=field(library,"presets");
-        click(s,(int)call(panel,"right")-25,presetRowY(panel,row));
-        toolbar(s);
-      });
-      test("library Exclude all covers hidden filter results and preserves volumes and queue",()->{
-        musicClick(s,AudioToolbar.Action.LIBRARY);
-        var library=(MusicLibraryScreen)field(s,"library");
-        library.restore(new MusicLibraryScreen.State(false,"","calm1",0,0));call(library,"rebuild");
-        var volumes=new TreeMap<>(AudioConfig.current().sounds);
-        click(s,(int)call(library,"excludeX")+8,(int)call(library,"bulkTop")+8);
-        check(AudioConfig.current().disabledTracks.containsAll(AudioController.music(mc)),"hidden tracks were not excluded");
-        check(AudioConfig.current().sounds.equals(volumes),"volumes changed");
-        check(MusicRequests.tracks().equals(queue),"queue changed");
-        click(s,(int)call(library,"includeX")+8,(int)call(library,"bulkTop")+8);
-        check(AudioConfig.current().disabledTracks.isEmpty(),"Include all missed exclusions");
-        s.session().discard();
-        check(AudioConfig.current().disabledTracks.isEmpty(),"discard retained bulk changes");
-      });
-      test("library bulk buttons never overlap filter tabs at supported sizes",()->{
-        var library=(MusicLibraryScreen)field(s,"library");
-        library.showTracks();
-        library.restore(new MusicLibraryScreen.State(false,"","",0,0));
-        for(int[] size:new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
-          s.init(mc,size[0],size[1]);s.render(-1,-1,0);
-          var filters=(MusicFilters.Layout)call(library,"filters");
-          int bulkY=(int)call(library,"bulkTop"),includeX=(int)call(library,"includeX");
-          for(var tab:filters.tabs()) if(tab.y()==bulkY)
-            check(tab.x()+tab.width()<includeX,"filter overlaps bulk buttons");
-          check((int)call(library,"listTop")>=bulkY+18,"tracks overlap bulk buttons");
-        }
-        mc.setScreen(s);
-      });
-      test("preset bulk edits stay isolated and headers fit narrow/wide screens",()->{
-        var library=open(s);field(library,"trackScroll",100);var panel=create(s,library);
-        check(library.state().trackScroll()==0,"editor inherited library scroll");
+      test("library tabs and playlist header fit supported sizes without bulk controls",()->{
+        var library=open(s);var panel=create(s,library);
+        var draft=(MusicPresetDraft)call(panel,"draft");
+        var selected=List.copyOf(MusicFixtureSupport.tracks(AudioConfig.current()));
         for(int[] size:new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
           s.init(mc,size[0],size[1]);s.render(-1,-1,0);
           int left=(int)call(panel,"left"),right=(int)call(panel,"right");
           int nx=(int)call(panel,"nameX"),nw=(int)call(panel,"nameWidth");
-          check(nx>left&&nw>=60&&nx+nw<=right,"name input clipped");
-          check((int)call(panel,"includeX")>=left,"bulk buttons clipped");
-          click(s,(int)call(panel,"excludeX")+8,(int)call(panel,"bulkY")+8);
-          var draft=(MusicPresetDraft)call(panel,"draft");
-          check(draft.snapshot("Test").tracks().isEmpty(),"preset Exclude all missed tracks");
-          check(AudioConfig.current().disabledTracks.isEmpty(),"preset edit changed live selection");
-          click(s,(int)call(panel,"includeX")+8,(int)call(panel,"bulkY")+8);
-          check(draft.snapshot("Test").tracks().containsAll(AudioController.music(mc)),"preset Include all missed tracks");
+          check(nx>=left&&nw>=40&&nx+nw<=(int)call(panel,"orderX"),"name input overlaps Order");
+          check((int)call(panel,"saveX")+40<=right,"Save clipped");
+          check(draft.tracks().isEmpty(),"new draft expanded implicitly");
+          check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(selected),"draft changed selected saved membership");
           check(GL11.glGetError()==0,"GL error");
         }
         mc.setScreen(s);sidebar(s,"Audio");dialog(s,1);toolbar(s);
       });
       test("conversion button is absent without pending MP3 files and hidden in queue/presets",()->{
-        musicClick(s,AudioToolbar.Action.LIBRARY);
+        musicEditor(s);
         var library=(MusicLibraryScreen)field(s,"library");
         field(library,"conversionNeeded",false);
         check(!library.conversionVisible(),"empty conversion button shown");

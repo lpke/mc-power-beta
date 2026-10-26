@@ -6,19 +6,13 @@ import local.luke.power.audio.MusicPlaylist;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-/** Playlist list and editor header, embedded in the same Audio content area. */
+/** Saved playlists and their isolated membership, order and group-volume drafts. */
 final class MusicPresetsPanel extends UiScreen {
   private final PowerOptionsScreen parent;
   private final MusicEdits edits;
   private final ScrollBar scrollbar = new ScrollBar();
   private final TextInput name = new TextInput("", 80);
   private MusicPresetDraft draft;
-  private boolean hideExcluded;
-
-  boolean hideExcluded() {
-    return hideExcluded;
-  }
-
   private String error = "", deleting = "";
   private int scroll;
   private Runnable pending;
@@ -31,25 +25,13 @@ final class MusicPresetsPanel extends UiScreen {
     edits = new MusicEdits(parent);
   }
 
-  MusicPresetDraft draft() {
-    return draft;
-  }
-
-  void unfocus() {
-    name.focused = false;
-  }
-
-  boolean editing() {
-    return draft != null;
-  }
-
-  boolean modal() {
-    return pending != null || !deleting.isEmpty();
-  }
-
-  boolean dirty() {
-    return draft != null && draft.changed(name.text());
-  }
+  MusicPresetDraft draft() { return draft; }
+  boolean hideExcluded() { return false; }
+  void unfocus() { name.focused = false; }
+  boolean editing() { return draft != null; }
+  boolean modal() { return pending != null || !deleting.isEmpty(); }
+  boolean dirty() { return draft != null && draft.changed(name.text()); }
+  String error() { return error; }
 
   void open() {
     pending = null;
@@ -61,9 +43,13 @@ final class MusicPresetsPanel extends UiScreen {
     error = "";
   }
 
-  void edit(MusicPlaylist preset) {
-    draft = new MusicPresetDraft(preset, AudioController.music(minecraft));
-    hideExcluded = !draft.creating();
+  void edit(MusicPlaylist playlist) { edit(playlist, false); }
+
+  private void edit(MusicPlaylist playlist, boolean copy) {
+    if (playlist != null && MusicPlaylist.BETA.equals(playlist.id()) && !copy) return;
+    draft = copy
+        ? new MusicPresetDraft(edits.copy(playlist), AudioController.music(minecraft), true)
+        : new MusicPresetDraft(playlist, AudioController.music(minecraft));
     name.setText(draft.name());
     name.focused = false;
     error = "";
@@ -71,10 +57,7 @@ final class MusicPresetsPanel extends UiScreen {
 
   void guard(Runnable action) {
     if (dirty()) pending = action;
-    else {
-      draft = null;
-      action.run();
-    }
+    else { draft = null; action.run(); }
   }
 
   private boolean save() {
@@ -89,146 +72,69 @@ final class MusicPresetsPanel extends UiScreen {
     }
   }
 
-  private int left() {
-    return parent.contentLeft();
-  }
+  private int left() { return parent.contentLeft(); }
+  private int right() { return parent.contentRight(); }
+  private int top() { return parent.audioContentTop() + 40; }
+  private int bottom() { return parent.contentBottom(); }
+  private int span() { return right() - left(); }
+  int headerHeight() { return 22; }
+  private int nameX() { return left(); }
+  private int nameWidth() { return span() - 96; }
+  private int orderX() { return right() - 92; }
+  private int createWidth() { return Math.min(94, span() - shuffleWidth() - 4); }
+  private int newX() { return left(); }
+  private int shuffleWidth() { return 96; }
+  private int shuffleX() { return right() - shuffleWidth(); }
+  private int saveX() { return right() - 40; }
+  private int saveWidth() { return 40; }
+  private int editButtonY() { return top(); }
+  private int rowTop() { return top() + headerHeight() + 4; }
+  private int rowHeight() { return span() < 400 ? 60 : 40; }
+  private int actionsY(int row) { return row + (span() < 400 ? 34 : 7); }
+  private int textWidth() { return span() - (span() < 400 ? 4 : 208); }
+  private int actionWidth() { return span() < 260 ? 40 : 48; }
+  private int editX() { return right() - 4 * (actionWidth() + 2) + 2; }
+  private int copyX() { return right() - 3 * (actionWidth() + 2) + 2; }
+  private int deleteX() { return right() - 2 * (actionWidth() + 2) + 2; }
+  private int playX() { return right() - actionWidth(); }
+  private int editX(int index) { return editX(); }
+  private int actionY(int index) { return actionsY(rowTop() + index * rowHeight() - scroll); }
 
-  private int right() {
-    return parent.contentRight();
-  }
-
-  private int top() {
-    return parent.audioContentTop() + 22;
-  }
-
-  private int bottom() {
-    return parent.contentBottom();
-  }
-
-  private int span() {
-    return right() - left();
-  }
-
-  int headerHeight() {
-    return editing() ? (span() >= 640 ? 26 : 48) : 50;
-  }
-
-  private String actionLabel() {
-    return draft.creating() ? "Creating" : "Editing";
-  }
-
-  private int nameX() {
-    return left() + textRenderer.getWidth(actionLabel()) + 6;
-  }
-
-  private int nameWidth() {
-    return right() - nameX() - (span() >= 640 ? 378 : 52);
-  }
-
-  private int orderX() { return span() >= 640 ? right() - 372 : right() - 48; }
-
-  private int createWidth() { return Math.min(150, Math.max(60, span() - 114)); }
-
-  private int saveX() {
-    return span() >= 640 ? right() - 320 : left();
-  }
-
-  private int hideX() {
-    return saveX() + saveWidth() + 4;
-  }
-
-  private int saveWidth() { return span() < 326 ? 40 : 62; }
-  private int bulkWidth() { return span() < 326 ? 34 : 72; }
-  private int hideWidth() { return span() < 326 ? span() - saveWidth() - 2 * bulkWidth() - 12 : 102; }
-
-  private int editButtonY() {
-    return top() + (span() >= 640 ? 0 : 22);
-  }
-
-  private int includeX() {
-    return right() - 2 * bulkWidth() - 4;
-  }
-
-  private int excludeX() {
-    return right() - bulkWidth();
-  }
-
-  private int bulkY() {
-    return editButtonY();
-  }
-
-  private int rowTop() {
-    return top() + headerHeight();
-  }
-
-  private int rowHeight() {
-    return span() < 360 ? 60 : 40;
-  }
-
-  private int actionsY(int row) {
-    return row + (span() < 360 ? 34 : 7);
-  }
-
-  private int textWidth() {
-    return span() - (span() < 360 ? 4 : 178);
+  String help(int x, int y) {
+    if (!editing() && inside(x, y, shuffleX(), top(), shuffleWidth(), 18))
+      return "Shuffle automatic playback for all playlists. Off follows each playlist's saved order.";
+    if (editing() && inside(x, y, orderX(), top(), 48, 18))
+      return "Drag tracks or use the arrows to change their order. Used when Shuffle is Off.";
+    return "";
   }
 
   private ScrollBar.Track track() {
-    return new ScrollBar.Track(
-        right() + 5,
-        rowTop(),
-        Math.max(0, bottom() - rowTop()),
-        (edits.presets().size() + 1) * rowHeight(),
-        scroll);
+    return new ScrollBar.Track(right() + 5, rowTop(), Math.max(0, bottom() - rowTop()),
+        edits.presets().size() * rowHeight(), scroll);
   }
 
   void wheel(int delta) {
-    scroll =
-        (int) Math.max(0, Math.min(track().maximum(), scroll - Math.signum(delta) * rowHeight()));
+    scroll = (int) Math.max(0, Math.min(track().maximum(), scroll - Math.signum(delta) * rowHeight()));
   }
 
   void key(char c, int key) {
     if (modal()) {
-      if (key == Keyboard.KEY_ESCAPE) {
-        pending = null;
-        deleting = "";
-      }
+      if (key == Keyboard.KEY_ESCAPE) { pending = null; deleting = ""; }
       return;
     }
     if (editing()) name.key(c, key);
   }
 
   boolean headerClick(int x, int y, int b) {
-    if (modal()) {
-      dialogClick(x, y, b);
-      return true;
-    }
+    if (modal()) { dialogClick(x, y, b); return true; }
     if (!editing()) return listClick(x, y, b);
     name.focused = inside(x, y, nameX(), top(), nameWidth(), 18);
     if (name.focused) name.click(x, b);
-    if (b == 0 && !draft.tracks().isEmpty() && inside(x,y,orderX(),top(),48,18)) {
-      click(); minecraft.setScreen(new MusicPlaylistOrderScreen(parent,draft)); return true;
+    if (b == 0 && !draft.tracks().isEmpty() && inside(x, y, orderX(), top(), 48, 18)) {
+      click(); minecraft.setScreen(new MusicPlaylistOrderScreen(parent, draft)); return true;
     }
     if (b == 0 && inside(x, y, saveX(), editButtonY(), saveWidth(), 18)) {
-      save();
-      return true;
-    }
-    if (inside(x, y, hideX(), editButtonY(), hideWidth(), 18)) {
-      hideExcluded = !hideExcluded;
-      return true;
-    }
-    if (inside(x, y, includeX(), bulkY(), bulkWidth(), 18)) {
-      draft.includeAll();
-      return true;
-    }
-    if (inside(x, y, excludeX(), bulkY(), bulkWidth(), 18)) {
-      try {
-        draft.excludeAll(AudioController.music(minecraft));
-        error = "";
-      } catch (IllegalArgumentException e) {
-        error = e.getMessage();
-      }
-      return true;
+      click(); save(); return true;
     }
     return y < top() + headerHeight();
   }
@@ -239,36 +145,32 @@ final class MusicPresetsPanel extends UiScreen {
       scroll = (int) scrollbar.drag(track(), y, true);
       return true;
     }
-    if (inside(x, y, left(), top(), createWidth(), 20)) {
-      edit(null);
-      return true;
+    if (inside(x, y, newX(), top(), createWidth(), 18)) {
+      click(); edit(null); return true;
     }
-    if (inside(x,y,right()-108,top(),108,20)) {
-      List<String> choices = edits.selected().isEmpty() ? List.of("Save as new playlist")
-          : List.of("Update " + edits.name(edits.selected()), "Save as new playlist");
-      parent.choose(choices,List.of(),-1,right()-108,top(),108,index ->
-          edit(edits.current(edits.selected().isEmpty() || index==1)));
+    if (inside(x, y, shuffleX(), top(), shuffleWidth(), 18)) {
+      click();
+      var setting = edits.setting("shuffle");
+      setting.cycle(1);
+      parent.changed(setting);
       return true;
     }
     if (y < rowTop() || y >= bottom()) return true;
     int index = (y - rowTop() + scroll) / rowHeight();
-    int row = rowTop() + index * rowHeight() - scroll;
-    int cy = actionsY(row);
-    if (index == 0) {
-      if (inside(x, y, right() - 54, cy, 54, 18)) {
-        edits.load("");
-        parent.closeAudioPanel();
-      }
-      return true;
-    }
     var values = edits.presets();
-    if (index > values.size()) return true;
-    MusicPlaylist p = values.get(index - 1);
-    if (inside(x, y, right() - 54, cy, 54, 18)) {
-      edits.load(p.id());
-      parent.closeAudioPanel();
-    } else if (inside(x, y, right() - 170, cy, 54, 18)) edit(p);
-    else if (inside(x, y, right() - 112, cy, 54, 18)) deleting = p.id();
+    if (index < 0 || index >= values.size()) return true;
+    int row = rowTop() + index * rowHeight() - scroll, cy = actionsY(row);
+    MusicPlaylist p = values.get(index);
+    boolean builtin = MusicPlaylist.BETA.equals(p.id());
+    if (inside(x, y, playX(), cy, actionWidth(), 18)) {
+      if (!p.id().equals(edits.selected())) { click(); edits.load(p.id()); }
+    } else if (!builtin && inside(x, y, editX(), cy, actionWidth(), 18)) {
+      click(); edit(p);
+    } else if (inside(x, y, copyX(), cy, actionWidth(), 18)) {
+      click(); edit(p, true);
+    } else if (!builtin && inside(x, y, deleteX(), cy, actionWidth(), 18)) {
+      click(); deleting = p.id();
+    }
     return true;
   }
 
@@ -278,9 +180,7 @@ final class MusicPresetsPanel extends UiScreen {
       Set<String> available = AudioController.music(minecraft);
       Map<String, Integer> counts = new HashMap<>();
       for (MusicPlaylist p : values)
-        counts.put(
-            p.id(),
-            (int) available.stream().filter(p::includes).count());
+        counts.put(p.id(), (int) available.stream().filter(p::includes).count());
       includedCounts = Map.copyOf(counts);
       countedPresets = values;
       countedRevision = revision;
@@ -290,62 +190,39 @@ final class MusicPresetsPanel extends UiScreen {
 
   void renderHeader(int mx, int my) {
     if (editing()) {
-      button("Order",orderX(),top(),48,18,mx,my,!draft.tracks().isEmpty());
-      text(actionLabel(), left(), top() + 5, 0xffffff);
       input(name, nameX(), top(), nameWidth(), mx, my, "Playlist name");
+      button("Order", orderX(), top(), 48, 18, mx, my, !draft.tracks().isEmpty());
       button("Save", saveX(), editButtonY(), saveWidth(), 18, mx, my, true);
-      button(
-          fit(hideExcluded ? "Show excluded" : "Hide excluded", hideWidth() - 4),
-          hideX(),
-          editButtonY(),
-          hideWidth(),
-          18,
-          mx,
-          my,
-          true);
-      button(span() < 326 ? "All" : "Include all", includeX(), bulkY(), bulkWidth(), 18, mx, my, true);
-      button(span() < 326 ? "None" : "Exclude all", excludeX(), bulkY(), bulkWidth(), 18, mx, my, true);
     } else {
-      button("New playlist", left(), top(), createWidth(), 20, mx, my, true);
-      button("Save current",right()-108,top(),108,20,mx,my,true);
-      text(
-          fit("Load copies tracks and group volumes into the current selection.", span()),
-          left(),
-          top() + 28,
-          0xaaaaaa);
-      scroll =
-          (int)
-              Math.max(
-                  0,
-                  Math.min(track().maximum(), scrollbar.drag(track(), my, Mouse.isButtonDown(0))));
+      button("New playlist", newX(), top(), createWidth(), 18, mx, my, true);
+      button("Shuffle: " + (edits.setting("shuffle").value.getAsBoolean() ? "On" : "Off"),
+          shuffleX(), top(), shuffleWidth(), 18, mx, my, true);
+      scroll = (int) Math.max(0, Math.min(track().maximum(), scrollbar.drag(track(), my, Mouse.isButtonDown(0))));
       clip(left(), rowTop(), span(), Math.max(0, bottom() - rowTop()));
-      var presets = edits.presets();
-      var counts = includedCounts(presets);
-      for (int i = 0; i <= presets.size(); i++) {
+      var values = edits.presets();
+      var counts = includedCounts(values);
+      for (int i = 0; i < values.size(); i++) {
         int y = rowTop() + i * rowHeight() - scroll;
         if (y + rowHeight() <= rowTop() || y >= bottom()) continue;
-        MusicPlaylist p = i == 0 ? null : presets.get(i - 1);
-        text(fit(p == null ? "Default rotation" : p.name(), textWidth()), left() + 2, y + 5, 0xdddddd);
-        text(
-            fit(
-                p == null
-                    ? "Use soundtrack settings and default exclusions"
-                    : p.tracks().size() + " tracks" + (counts.get(p.id()) < p.tracks().size() ? ", " + (p.tracks().size()-counts.get(p.id())) + " unavailable" : ""),
-                textWidth()),
-            left() + 2,
-            y + 19,
-            0xaaaaaa);
-        button("Load", right() - 54, actionsY(y), 54, 18, mx, my, true);
-        if (p != null) {
-          button("Edit", right() - 170, actionsY(y), 54, 18, mx, my, true);
-          button("Delete", right() - 112, actionsY(y), 54, 18, mx, my, true);
+        MusicPlaylist p = values.get(i);
+        boolean builtin = MusicPlaylist.BETA.equals(p.id());
+        boolean selected = p.id().equals(edits.selected());
+        int unavailable = p.tracks().size() - counts.get(p.id());
+        text(fit(p.name(), textWidth()), left() + 2, y + 5, selected ? 0xffdd88 : 0xdddddd);
+        text(fit(p.tracks().size() + " tracks" + (builtin ? " / Built-in" : "")
+            + (unavailable > 0 ? " / " + unavailable + " unavailable" : ""), textWidth()), left() + 2, y + 19, 0xaaaaaa);
+        int cy = actionsY(y);
+        if (!builtin) {
+          button("Edit", editX(), cy, actionWidth(), 18, mx, my, true);
+          button("Delete", deleteX(), cy, actionWidth(), 18, mx, my, true);
         }
+        button("Copy", copyX(), cy, actionWidth(), 18, mx, my, true);
+        button(selected ? "Active" : "Use", playX(), cy, actionWidth(), 18, mx, my, !selected);
         fill(left(), y + rowHeight() - 4, right(), y + rowHeight() - 3, 0x40555555);
       }
       unclip();
       scrollbar.render(this, track());
     }
-    if (!error.isEmpty()) text(fit(error, span()), left(), bottom() - 10, 0xff8888);
   }
 
   void renderDialog(int mx, int my) {
@@ -355,20 +232,11 @@ final class MusicPresetsPanel extends UiScreen {
     text(pending != null ? "Save changes to this playlist?" : "Delete this playlist?", x, y, 0xffffff);
     if (!error.isEmpty()) text(fit(error, w), x, y + 15, 0xff8888);
     else if (!deleting.isEmpty())
-      text(fit(deleting.equals(edits.selected()) ? "World selection will return to Default rotation."
-          : "Music files and other playlists stay unchanged.",w), x, y + 15, 0xaaaaaa);
+      text(fit(deleting.equals(edits.selected()) ? "The world playlist will return to Beta."
+          : "Music files and other playlists stay unchanged.", w), x, y + 15, 0xaaaaaa);
     for (int i = 0; i < (pending != null ? 3 : 2); i++)
-      button(
-          pending != null
-              ? new String[] {"Save", "Discard", "Cancel"}[i]
-              : new String[] {"Delete", "Cancel"}[i],
-          x + i * (w / 3),
-          y + 36,
-          w / 3 - 4,
-          20,
-          mx,
-          my,
-          true);
+      button(pending != null ? new String[]{"Save", "Discard", "Cancel"}[i]
+          : new String[]{"Delete", "Cancel"}[i], x + i * (w / 3), y + 36, w / 3 - 4, 20, mx, my, true);
   }
 
   private void dialogClick(int x, int y, int b) {
@@ -376,14 +244,12 @@ final class MusicPresetsPanel extends UiScreen {
     int w = Math.min(312, width - 20), left = (width - w) / 2, top = height / 2 + 1;
     for (int i = 0; i < (pending != null ? 3 : 2); i++)
       if (inside(x, y, left + i * (w / 3), top, w / 3 - 4, 20)) {
+        click();
         if (pending != null) {
           Runnable next = pending;
           if (i == 0 && !save()) return;
           pending = null;
-          if (i != 2) {
-            draft = null;
-            next.run();
-          }
+          if (i != 2) { draft = null; next.run(); }
         } else {
           if (i == 0) edits.delete(deleting);
           deleting = "";

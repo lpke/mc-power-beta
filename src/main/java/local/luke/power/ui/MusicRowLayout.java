@@ -19,6 +19,13 @@ public record MusicRowLayout(
     return Math.max(54, Math.min(120, width / 4));
   }
 
+  public static MusicRowLayout playlist(int left, int width) {
+    int button = width < 260 ? 14 : 20;
+    int preview = left + width - 2 * button - 2;
+    return new MusicRowLayout(left + 24, Math.max(12, preview - left - 28), 3,
+        0, 0, -1, preview, preview + button + 2, -1, -1, -1, 24, button);
+  }
+
   public static MusicRowLayout at(int left, int width, boolean queue) {
     boolean inline = width >= (queue ? 320 : 440);
     int button = width < 260 ? 14 : 20, gap = 2;
@@ -31,7 +38,7 @@ public record MusicRowLayout(
     return new MusicRowLayout(
         nameX,
         nameWidth,
-        inline ? 3 : 23,
+        inline ? 3 : 20,
         volumeX,
         volumeWidth,
         actions,
@@ -40,7 +47,7 @@ public record MusicRowLayout(
         actions + (button + gap) * (queue ? 4 : 3),
         queue ? actions + button + gap : -1,
         queue ? actions + (button + gap) * 2 : -1,
-        inline ? 24 : 44,
+        inline ? 24 : 40,
         button);
   }
 }

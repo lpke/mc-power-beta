@@ -36,6 +36,15 @@ public final class UiChecks {
     ((ScreenInput)(Object)picker).power$click((int)call(picker, "left") + (int)call(picker, "span") - 1,
         top + index * 24 - (int)scroll + 8, 0);
   }
+  static void musicEditor(PowerOptionsScreen screen) throws Exception {
+    if ((boolean)call(screen,"libraryVisible")) {
+      var library=(local.luke.power.ui.MusicLibraryScreen)field(screen,"library");
+      if(library.queueVisible())library.showTracks();else click(screen,(int)call(screen,"left")+5,35);
+    } else {
+      ((Set<?>)field(screen,"collapsed")).clear();call(screen,"layout");
+      MusicPlaylists460Checks.library(screen);
+    }
+  }
   static AudioToolbar.Button musicButton(PowerOptionsScreen screen, AudioToolbar.Action action) throws Exception {
     return ((List<AudioToolbar.Button>)call(screen,"musicButtons")).stream()
         .filter(button -> button.action()==action).findFirst().orElseThrow();
@@ -89,14 +98,12 @@ public final class UiChecks {
       check(!mc.field_2768.field_1175.field_1137.equals("Default"), "base pack not previewed");
       check(Arrays.equals(options, Files.readAllBytes(local.luke.power.storage.PowerConfig.path())), "pack preview saved options");
     });
-    test("soundtrack selection applies without reopening Options", () -> {
-      Setting mode = find(s.session(), "audio.musicMode");
-      mode.value = new JsonPrimitive(local.luke.power.audio.AudioSettings.MusicMode.ALL_MINECRAFT.ordinal()); s.changed(mode);
-      check(local.luke.power.audio.AudioConfig.current().musicMode == local.luke.power.audio.AudioSettings.MusicMode.ALL_MINECRAFT,
-          "soundtrack mode was not live");
-      mode.value = new JsonPrimitive(0); s.changed(mode);
-      check(local.luke.power.audio.AudioConfig.current().musicMode == local.luke.power.audio.AudioSettings.MusicMode.VANILLA,
-          "soundtrack needs restart to restore");
+    test("selected soundtrack identity applies without reopening Options", () -> {
+      Setting playlist = find(s.session(), "audio.playlist");
+      playlist.value = new JsonPrimitive(local.luke.power.audio.MusicPlaylist.BETA); s.changed(playlist);
+      check(local.luke.power.audio.AudioConfig.current().playlist.equals(local.luke.power.audio.MusicPlaylist.BETA),
+          "playlist selection was not live");
+      check(local.luke.power.audio.AudioController.activeMusic(mc).size() == 12, "Beta lost original pool");
     });
     test("changes filter includes only changed values", () -> {
       field(s, "changedOnly", true); call(s,"layout");

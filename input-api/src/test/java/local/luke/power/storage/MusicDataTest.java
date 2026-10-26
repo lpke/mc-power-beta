@@ -15,10 +15,9 @@ class MusicDataTest {
     JsonObject audio = json("""
         {"master":71,"playlist":"quiet","menuPlaylist":"@world",
          "playlists":[{"id":"quiet","name":"Quiet","tracks":["music:missing","music:a"],"groupVolumes":{"folder:/missing":20}}],
-         "playlistTracks":["music:a","music:missing"],"menuPlaylistTracks":[],"disabledTracks":["music:default"],
-         "favourites":["music:missing"],"groupVolumes":{"World":40},"menuGroupVolumes":{},
-         "musicDirectories":["/missing"],"menuDirectories":["/missing"],
-         "disabledMusicDirectories":["/missing"],"disabledMenuDirectories":[],
+         "favourites":["music:missing"],
+         "musicDirectories":["/missing"],
+         "disabledMusicDirectories":["/missing"],
          "sounds":{"random.click":33,"music:missing":100}}
         """);
     JsonObject music = MusicData.split(audio), preferences = MusicData.preferences(audio);
@@ -27,7 +26,7 @@ class MusicDataTest {
     assertFalse(preferences.has("playlists")); assertFalse(preferences.has("musicDirectories"));
     assertEquals(json("{\"random.click\":33}"), preferences.getAsJsonObject("sounds"));
     assertEquals(json("{\"music:missing\":100}"), music.getAsJsonObject("sounds"));
-    assertEquals("music:a", music.getAsJsonArray("playlistTracks").get(0).getAsString());
+    assertEquals("music:missing", music.getAsJsonArray("playlists").get(0).getAsJsonObject().getAsJsonArray("tracks").get(0).getAsString());
   }
 
   @Test void queueKeepsOrderDuplicatesAndMissingTrackIds() {
@@ -38,13 +37,15 @@ class MusicDataTest {
 
   @Test void strictFormatsRejectUnknownFieldsDuplicateMembershipAndInvalidValues() {
     for (String bad : new String[]{
-        "{\"formatVersion\":2,\"audio\":{},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":1,\"audio\":{},\"queue\":{\"tracks\":[]}}",
         "{\"formatVersion\":1.5,\"audio\":{},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":1,\"audio\":{\"future\":true},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":1,\"audio\":{\"playlistTracks\":[\"music:a\",\"music:a\"]},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":1,\"audio\":{\"sounds\":{\"random.click\":50}},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":1,\"audio\":{\"groupVolumes\":{\"World\":101}},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":1,\"audio\":{\"disabledMusicDirectories\":[\"/gone\"]},\"queue\":{\"tracks\":[]}}"})
+        "{\"formatVersion\":2,\"audio\":{\"future\":true},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":2,\"audio\":{\"playlistTracks\":[\"music:a\",\"music:a\"]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":2,\"audio\":{\"sounds\":{\"random.click\":50}},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":2,\"audio\":{\"groupVolumes\":{\"World\":101}},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":2,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[\"music:a\",\"music:a\"],\"groupVolumes\":{}}]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":2,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[],\"groupVolumes\":{\"World\":101}}]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":2,\"audio\":{\"disabledMusicDirectories\":[\"/gone\"]},\"queue\":{\"tracks\":[]}}"})
       assertThrows(IllegalArgumentException.class, () -> MusicData.validate(json(bad)), bad);
     JsonObject data = MusicData.empty(); JsonArray tracks = new JsonArray();
     for (int i = 0; i < 257; i++) tracks.add("music:a"); data.getAsJsonObject("queue").add("tracks", tracks);
@@ -81,13 +82,25 @@ class MusicDataTest {
     Path linkedDirectory = directory.resolve("linked"); Files.createSymbolicLink(linkedDirectory, directory);
     assertThrows(java.io.IOException.class, () -> MusicData.write(linkedDirectory.resolve("new.json"), MusicData.empty()));
   }
-  @org.junit.jupiter.api.Test void menuSelectionCannotUseTheWorldOnlyEmptySentinel() {
-    var preferences = new com.google.gson.JsonObject();
-    preferences.addProperty("playlist", ""); preferences.addProperty("menuPlaylist", "");
-    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> MusicData.validatePreferences(preferences));
-    org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
-        () -> MusicData.validateSelections(preferences, MusicData.empty().getAsJsonObject("audio")));
-    preferences.addProperty("menuPlaylist", "@world");
-    org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> MusicData.validatePreferences(preferences));
+  @Test void betaAndWorldAreTheOnlyBuiltinSelectors() {
+    JsonObject preferences = json("{\"playlist\":\"beta\",\"menuPlaylist\":\"@world\"}");
+    assertDoesNotThrow(() -> MusicData.validatePreferences(preferences));
+    assertDoesNotThrow(() -> MusicData.validateSelections(preferences, MusicData.empty().getAsJsonObject("audio")));
+    for (String invalid : new String[]{"", "@default", "missing"}) {
+      preferences.addProperty("playlist", invalid);
+      assertThrows(IllegalArgumentException.class, () -> MusicData.validateSelections(preferences, new JsonObject()));
+    }
+    JsonObject data = MusicData.empty();
+    data.getAsJsonObject("audio").add("playlists", JsonParser.parseString("[{\"id\":\"beta\",\"name\":\"Beta copy\",\"tracks\":[],\"groupVolumes\":{}}]"));
+    assertThrows(IllegalArgumentException.class, () -> MusicData.validate(data));
+  }
+
+  @Test void workingCopiesAndRetiredSelectionModesCannotEnterCurrentDocuments() {
+    for (String field : new String[]{"playlistTracks", "menuPlaylistTracks", "disabledTracks", "groupVolumes", "menuGroupVolumes", "customMusic", "musicMode", "menuDirectories", "disabledMenuDirectories"}) {
+      JsonObject audio = new JsonObject(); audio.add(field, new JsonArray());
+      assertThrows(IllegalArgumentException.class, () -> MusicData.validatePreferences(audio), field);
+      JsonObject data = MusicData.empty(); data.add("audio", audio);
+      assertThrows(IllegalArgumentException.class, () -> MusicData.validate(data), field);
+    }
   }
 }

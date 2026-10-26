@@ -68,7 +68,7 @@ public final class DefaultBases {
     Set<String> libraries = Set.of("logo.presets", "interface.debugPresets", "interface.colours");
     for (Setting setting : session.settings()) {
       if (libraries.contains(setting.id) || setting.backend.equals("audio") && (setting.group.equals("Music data")
-          || setting.id.equals("audio.musicDirectories") || setting.id.equals("audio.menuDirectories")
+          || setting.id.equals("audio.musicDirectories")
           || setting.id.startsWith("audio.sound.music:")) || Set.of("inventoryTools.protectedSlots", "inventoryTools.preferredItems").contains(setting.id)) continue;
       setting.value = value(base, setting.id, setting.powerBetaDefault);
     }

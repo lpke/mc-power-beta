@@ -94,7 +94,12 @@ After validation and the primary update, remove only that release and tag with
 `gh release delete vX.Y.Z --cleanup-tag`,
 then run the documented publisher on the reviewed clean commit. Retain the verified
 backup until the replacement download, notes and website are checked. Update the
-existing changelog and review HTML, marking revised items as Re-released.
+existing version's public changelog and GitHub notes as one tidy release, merging
+and rewording overlapping bullets. Do not label public changes as re-released or
+mention replacement history, earlier builds or original versions. Never keep public
+"original", "before" or archived copies of superseded releases/tags. Keep verified
+backups private. Only the existing private review HTML marks revised items as
+Re-released and records the replacement history.
 
 The two repositories are configured in `tools/publish_config.json`. Public release
 metadata is copied to the website's `public/release.json`; `tools/sync_release.py`
@@ -124,6 +129,6 @@ by the client, including every `level.dat` and `level.dat_old` under `saves`:
 ```
 
 Add `-PinstanceDefaults` only when resetting preferences to pack defaults. It retains
-FOV, GUI scale and the frame limit. Version 4.6.0 accepts configuration schema 8, music-data format 1 and world-rule format 4. Convert earlier personal configuration with verified backups before installation; the client does not import legacy presets. This command refuses running
+FOV, GUI scale and the frame limit. Version 4.6.0 accepts configuration schema 9, music-data format 2 and world-rule format 4. Convert earlier personal configuration with verified backups before installation; the client does not import legacy presets. This command refuses running
 clients, validates every metadata file before writing worlds, and restores its
 transaction if any required update fails.

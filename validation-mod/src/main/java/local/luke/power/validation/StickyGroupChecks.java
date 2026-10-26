@@ -46,7 +46,7 @@ final class StickyGroupChecks {
     MenuPreferences.update(v -> v.autoApply = false);
     try {
       var settings = new AudioSettings();
-      settings.musicMode = AudioSettings.MusicMode.ALL_MINECRAFT;
+      MusicFixtureSupport.allBuiltin(settings);
       AudioConfig.preview(settings);
       var options = MenuUpdateChecks.open(mc,"Audio");
       options.init(mc,640,420);
@@ -107,40 +107,22 @@ final class StickyGroupChecks {
       field(options,"libraryOpen",true);
       library.restore(new MusicLibraryScreen.State(false,"","",0,0));
       library.showTrack("music:calm1.ogg");
-      test("pinned music volume and inclusion target the group, not covered tracks", () -> {
-        field(library,"trackScroll",30);
-        var sticky=(StickyHeader)call(library,"stickyHeader");
-        check(sticky != null,"no music sticky header");
-        var volumes=new TreeMap<>(AudioConfig.current().sounds);
-        int x=(int)call(library,"groupVolumeX"),w=(int)call(library,"groupVolumeWidth");
-        click(options,x+w/2,sticky.y()+8);options.render(-1,-1,0);
-        check(Math.abs(AudioConfig.current().groupVolumes.get("Alpha")-50)<=1,"pinned group slider missed");
-        check(AudioConfig.current().sounds.equals(volumes),"group changed track volume");
+      test("pinned Library heading consumes covered row clicks without editing playlists", () -> {
+        field(library,"trackScroll",30);var sticky=(StickyHeader)call(library,"stickyHeader");
+        check(sticky!=null,"no music sticky header");
+        String saved=local.luke.power.config.Catalog.JSON.toJson(AudioConfig.current().playlists);
+        var gains=new TreeMap<>(AudioConfig.current().sounds);
         click(options,(int)call(library,"right")-10,sticky.y()+8);
-        check(AudioConfig.current().disabledTracks.contains("music:calm1.ogg"),"pinned include missed");
-        check(group(library,"Alpha"),"excluded group hidden by default");
+        check(saved.equals(local.luke.power.config.Catalog.JSON.toJson(AudioConfig.current().playlists)),"library heading edited membership");
+        check(gains.equals(AudioConfig.current().sounds),"heading edited covered song gain");
       });
-      test("library Hide excluded changes visibility only and survives view restore", () -> {
-        var excluded=Set.copyOf(AudioConfig.current().disabledTracks);
-        click(options,(int)call(library,"hideX")+5,(int)call(library,"hideY")+8);
-        check(!group(library,"Alpha"),"excluded group remains visible");
-        check(AudioConfig.current().disabledTracks.equals(excluded),"visibility changed rotation");
-        var state=library.state();library.restore(state);call(library,"rebuild");
-        check(state.hideExcluded()&&!group(library,"Alpha"),"visibility choice lost");
-        click(options,(int)call(library,"hideX")+5,(int)call(library,"hideY")+8);
-        check(group(library,"Alpha"),"Show excluded missed group");
-        check(AudioConfig.current().disabledTracks.equals(excluded),"Show changed rotation");
-      });
-      test("library filter and bulk controls never overlap at supported sizes", () -> {
+      test("fixed editor tabs remain separate from rows at supported sizes", () -> {
         for(int[] size:new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
-          options.init(mc,size[0],size[1]);options.render(-1,-1,0);
-          int hy=(int)call(library,"hideY"),hx=(int)call(library,"hideX");
-          int by=(int)call(library,"bulkTop"),ix=(int)call(library,"includeX");
-          check(hx>=(int)call(library,"left"),"Hide clipped");
-          if(hy==by)check(hx+102<ix,"Hide overlaps Include all");
+          options.init(mc,size[0],size[1]);library.showTracks();options.render(-1,-1,0);
           var tabs=(MusicFilters.Layout)call(library,"filters");
-          for(var tab:tabs.tabs()) if(tab.y()==hy) check(tab.x()+tab.width()<hx,"Hide overlaps tabs");
-          check((int)call(library,"listTop")>=by+18,"rows overlap bulk controls");
+          check(tabs.tabs().size()==3,"editor tabs disappeared");
+          for(var tab:tabs.tabs())check(tab.x()>= (int)call(library,"left") && tab.x()+tab.width()<=(int)call(library,"right"),"tab clipped");
+          check((int)call(library,"listTop")>=tabs.tabs().get(0).y()+18,"rows cover tabs");
           check(org.lwjgl.opengl.GL11.glGetError()==0,"GL error");
         }
         mc.setScreen(options);

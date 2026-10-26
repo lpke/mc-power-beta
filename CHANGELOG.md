@@ -5,10 +5,13 @@
 ## [4.6.0] - 2026-10-26
 
 - Store imported music, favourites, track volumes and ordered playlists separately from playback preferences.
-- Replace music presets with explicit playlists while retaining the familiar library, group controls and isolated editors. Save the current selection or arrange a playlist's playback order.
-- Choose a separate menu playlist or follow the world selection, preserving playback continuity, queue priority and configurable gaps.
-- Keep saved playlists unchanged when importing or rescanning folders, and retain unavailable tracks for later recovery.
-- Use configuration schema 8 and music-data format 1; existing installations require an explicit backed-up conversion before updating.
+- Open Edit music beside the Music volume slider. Browse Library, Playlists and Settings while keeping the existing playback controls in place.
+- Group the Library by imported folders and included soundtracks, with Reload and folder management in the Library tab.
+- Select the current playlist from the Audio toolbar. Create, copy, edit and remove playlists with isolated drafts, exact membership and per-playlist group volumes.
+- Drag tracks to reorder a playlist or use the arrow controls. Toggle Shuffle from Playlists; switching it off plays tracks in saved order.
+- Include a protected Beta playlist with the 12 original Beta 1.7.3 tracks, while keeping the full bundled Minecraft catalog available.
+- Choose a separate menu playlist or follow the world selection. Preserve playback continuity, queue priority, configurable gaps and unavailable track references; importing or rescanning never expands saved playlists.
+- Use configuration schema 9 and music-data format 2. Existing personal data requires a verified backed-up conversion before updating.
 
 ## [4.5.1] - 2026-10-26
 
@@ -19,15 +22,13 @@
 
 ## [4.5.0] - 2026-10-25
 
-- Replace multi-value settings buttons with dropdowns, including selected/default markers, short option tooltips and scrolling lists.
+- Replace multi-value settings buttons with centered dropdowns, selected/default markers, short option tooltips and scrolling lists. Keep list items left-aligned and hovered items dimmer than the selected item.
 - Add photo-mode waypoint markers, middle-click location actions and a Show/Hide Toggles menu for items, mobs, waypoints, surface chunk borders and spawnable terrain.
+- Open photo toggles beside Center by default, match their buttons to World Map controls and place Show rendered area directly below Chunk borders. Start photo waypoints off in pack defaults, preserving saved choices.
+- Use Power Beta photo sliders, put Show player first and Close at the bottom right. Hide unavailable teleport actions and refresh the paused view immediately after teleporting.
 - Allow full bright and relevant overlay hotkeys in photo mode, and restore normal lighting before returning to Pause.
 - Add an optional gold rendered-area border to the minimap and World Map.
 - Stop light-overlay surveys while their views are hidden.
-- Re-release: open the photo toggles menu by default, place its button beside Center and match button spacing and height to World Map controls. Start photo waypoints off in pack defaults, preserving saved choices.
-- Re-release: center settings dropdown button text, keep list items left-aligned and place Show rendered area directly below Chunk borders in the World Map menu.
-- Re-release: use Power Beta photo sliders, put Show player first in the toggles menu and move Close to the bottom-right corner. Hide unavailable teleport actions and refresh the paused view immediately after teleporting.
-- Re-release: give hovered dropdown items a dimmer background than the selected item.
 
 ## [4.4.9] - 2026-10-25
 
@@ -36,7 +37,7 @@
 - Accept relative waypoint coordinates in commands and the editor, including ~ for the current reported position and ~offset values.
 - Remove Cave mode from World Map checkbox controls and remember Show/Hide Toggles for the session. Keep minimap cave controls and saved middle-click action IDs.
 - Remove photo mode's bright blue lower-sky square while retaining the native sky-colored surroundings.
-- Re-release: restore photo mode's full manual zoom range and choose an initial zoom from rendered terrain and screen size only when opening. Later zoom and camera controls stay unrestricted.
+- Restore photo mode's full manual zoom range and choose an initial zoom from rendered terrain and screen size only when opening. Later zoom and camera controls stay unrestricted.
 
 ## [4.4.8] - 2026-10-25
 

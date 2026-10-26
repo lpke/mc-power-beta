@@ -12,7 +12,7 @@ final class MusicCollapseChecks {
     failures=0;var before=AudioConfig.copy();var parent=mc.currentScreen;
     PowerOptionsScreen screen=null;
     try {
-      var settings=new AudioSettings();settings.musicMode=AudioSettings.MusicMode.ALL_MINECRAFT;
+      var settings=new AudioSettings();MusicFixtureSupport.allBuiltin(settings);
       settings.favourites=new TreeSet<>(Set.of("music:calm1.ogg","music:creative1.ogg"));
       settings.playlists.add(new MusicPlaylist("collapse-fixture","Collapse fixture",new ArrayList<>(settings.favourites),Map.of()));
       AudioConfig.preview(settings);
@@ -21,13 +21,12 @@ final class MusicCollapseChecks {
       var select=MusicLibraryScreen.class.getDeclaredMethod("selectFilter",String.class);select.setAccessible(true);
       byte[] config=Files.readAllBytes(local.luke.power.storage.PowerConfig.path());
       String audio=local.luke.power.config.Catalog.JSON.toJson(AudioConfig.current());
-      for(String filter:List.of("active","","favourites","presets"))
+      for(String filter:List.of("library"))
         for(int[] size:new int[][]{{320,240},{854,480}})
           test("music collapse overrides individual groups only in current view "+filter+" "+size[0],()->{
             library.showTracks();options.init(mc,size[0],size[1]);
-            field(library,"hideExcluded",false);((TextInput)field(library,"search")).setText("");
+            field(library,"favouritesOnly",false);((TextInput)field(library,"search")).setText("");
             select.invoke(library,filter);
-            if(filter.equals("presets")){field(library,"selectedPreset","collapse-fixture");call(library,"rebuild");}
             check(library.hasSections(),"filter has no sections");
             var groups=List.copyOf((List<String>)field(library,"sectionKeys"));
             var collapsed=(Set<String>)field(library,"collapsed");collapsed.clear();collapsed.add("unrelated-group");
@@ -41,7 +40,7 @@ final class MusicCollapseChecks {
             check(((List<?>)field(library,"rows")).size()>groups.size(),"tracks not restored");
           });
       test("music search supports collapse and clearing keeps ordinary group state",()->{
-        select.invoke(library,"");var query=(TextInput)field(library,"search");query.setText("calm");call(library,"rebuild");
+        select.invoke(library,"library");var query=(TextInput)field(library,"search");query.setText("calm");call(library,"rebuild");
         check(library.hasSections(),"missing search groups");
         library.toggleSections();check(library.sectionsCollapsed(),"search collapse ignored");
         check(query.text().equals("calm"),"query changed");

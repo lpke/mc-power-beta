@@ -10,11 +10,14 @@ Install and verify the exact final artifacts and required backed-up migrations,
 then tell the owner the instance is ready. Only then start publication and website
 deployment. Never postpone the instance update until after publication.
 
-For a re-release, update that version's `CHANGELOG.md` entries, GitHub release notes
-and deployed website changelog to describe the revised behavior. Verify the live
-GitHub and website text, even when the version number stays the same. Update the
-existing owner review HTML and mark each re-released item as required by
-[Owner review HTML](release-report.md). These updates are part of release completion.
+For a re-release, merge changes into that version's existing `CHANGELOG.md` entry,
+GitHub notes and website changelog, rewording overlapping bullets into one tidy
+release. Public notes must not label changes as re-released or mention earlier
+builds, replacements or original versions. Keep one canonical GitHub release and
+tag; replace it completely after verified private backups. Never create public
+"original", "before" or archived replacement releases/tags. Verify the final public
+notes and release list. Replacement history belongs only in the existing private
+owner review HTML, following [Owner review HTML](release-report.md).
 
 - This project does not accept external contributions. Keep that policy in the
   README and encourage forks under the AGPL; do not add a contribution guide.
@@ -27,8 +30,9 @@ existing owner review HTML and mark each re-released item as required by
 - Follow `docs/releases.md`. Publishing requires explicit user permission in the
   current task. A code push alone does not authorize publishing a release.
 - Owner-requested display renumbering uses the GitHub release title. Retain the
-  immutable build version, tag, assets and checksums, and show the original number
-  beside a different display version. Both numbers may resolve to the same download.
+  package identity, tag, assets and checksums so download links stay valid. Show
+  the approved display version without an original-version notice. Both numbers
+  may resolve to the same download.
 - `python3 tools/release.py --check` validates release notes and versioning.
   The publish command builds and tests sequentially, verifies the export, publishes
   GitHub release assets and notes, and updates/deploys the website from the same data.

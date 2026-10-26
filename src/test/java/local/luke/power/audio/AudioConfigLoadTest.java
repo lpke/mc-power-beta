@@ -39,7 +39,7 @@ class AudioConfigLoadTest {
       PowerConfig.configure(game.resolve("config/power-beta.json"));
       Files.createDirectories(PowerConfig.path().getParent());
       JsonObject config = new JsonObject();
-      config.addProperty("schemaVersion", 8);
+      config.addProperty("schemaVersion", 9);
       JsonObject settings = new JsonObject();
       JsonObject preferences = new JsonObject();
       preferences.addProperty("master", 100);
@@ -57,7 +57,7 @@ class AudioConfigLoadTest {
       MusicQueue queue = new MusicQueue();
       queue.add("music:missing"); queue.add("music:calm1.ogg"); queue.add("music:missing");
       PowerConfig.saveMusicQueue(queue);
-      assertEquals(healthy.playlistTracks, PowerConfig.readAudio(AudioSettings.class).playlistTracks);
+      assertEquals(MusicPlaylist.world(healthy).tracks(), MusicPlaylist.world(PowerConfig.readAudio(AudioSettings.class)).tracks());
 
       JsonObject invalid = JsonParser.parseString(Files.readString(PowerConfig.path())).getAsJsonObject();
       invalid.getAsJsonObject("settings").getAsJsonObject("audio").addProperty("master", 101);
@@ -87,7 +87,7 @@ class AudioConfigLoadTest {
       assertArrayEquals(repairedConfig, Files.readAllBytes(PowerConfig.path()));
       assertArrayEquals(originalMusic, Files.readAllBytes(PowerConfig.musicPath()));
       AudioSettings reloaded = (AudioSettings) load.invoke(null);
-      assertEquals(healthy.playlistTracks, reloaded.playlistTracks);
+      assertEquals(MusicPlaylist.world(healthy).tracks(), MusicPlaylist.world(reloaded).tracks());
       Field problem = AudioConfig.class.getDeclaredField("loadProblem");
       problem.setAccessible(true);
       assertEquals("", problem.get(null));

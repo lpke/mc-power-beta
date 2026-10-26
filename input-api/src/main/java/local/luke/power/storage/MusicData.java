@@ -10,11 +10,10 @@ import java.util.*;
 
 /** Validated music user data. Called only while PowerConfig owns its disk lock. */
 final class MusicData {
-  static final int VERSION = 1;
+  static final int VERSION = 2;
   static final int MAX_BYTES = 4 * 1024 * 1024;
   private static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
-  static final Set<String> FIELDS = Set.of("playlists", "playlistTracks", "menuPlaylistTracks", "disabledTracks", "favourites",
-      "groupVolumes", "menuGroupVolumes", "musicDirectories", "menuDirectories", "disabledMusicDirectories", "disabledMenuDirectories");
+  static final Set<String> FIELDS = Set.of("playlists", "favourites", "musicDirectories", "disabledMusicDirectories");
 
   static Path path(Path config) { return config.getParent().getParent().resolve("power-beta/music.json"); }
 
@@ -39,19 +38,14 @@ final class MusicData {
     for (String key : root.keySet()) require(Set.of("formatVersion", "audio", "queue").contains(key), "Unknown music data field " + key);
     JsonObject audio = root.getAsJsonObject("audio");
     for (String key : audio.keySet()) require(FIELDS.contains(key) || key.equals("sounds"), "Unknown music audio field " + key);
-    for (String key : List.of("playlistTracks", "menuPlaylistTracks", "disabledTracks", "favourites")) if (audio.has(key)) tracks(audio.get(key), 8192, true);
-    for (String key : List.of("musicDirectories", "menuDirectories", "disabledMusicDirectories", "disabledMenuDirectories"))
+    if (audio.has("favourites")) tracks(audio.get("favourites"), 8192, true);
+    for (String key : List.of("musicDirectories", "disabledMusicDirectories"))
       if (audio.has(key)) strings(audio.get(key), 32, 4096, true, false);
-    for (String key : List.of("Music", "Menu")) {
-      String directories = Character.toLowerCase(key.charAt(0)) + key.substring(1) + "Directories";
-      String disabled = "disabled" + key + "Directories";
-      if (audio.has(disabled)) {
-        Set<String> all = audio.has(directories) ? strings(audio.get(directories), 32, 4096, true, false) : Set.of();
-        require(all.containsAll(strings(audio.get(disabled), 32, 4096, true, false)), "Disabled folders must remain in the folder list");
-      }
+    if (audio.has("disabledMusicDirectories")) {
+      Set<String> all = audio.has("musicDirectories") ? strings(audio.get("musicDirectories"), 32, 4096, true, false) : Set.of();
+      require(all.containsAll(strings(audio.get("disabledMusicDirectories"), 32, 4096, true, false)),
+          "Disabled folders must remain in the folder list");
     }
-    if (audio.has("groupVolumes")) volumes(audio.get("groupVolumes"), 8192, false);
-    if (audio.has("menuGroupVolumes")) volumes(audio.get("menuGroupVolumes"), 8192, false);
     if (audio.has("sounds")) volumes(audio.get("sounds"), 4096, true);
     if (audio.has("playlists")) {
       require(audio.get("playlists").isJsonArray() && audio.getAsJsonArray("playlists").size() <= 128, "Use at most 128 playlists");
@@ -61,7 +55,7 @@ final class MusicData {
         JsonObject playlist = value.getAsJsonObject();
         require(playlist.keySet().equals(Set.of("id", "name", "tracks", "groupVolumes")), "Unsupported playlist data");
         String id = text(playlist.get("id"), 64);
-        require(id.matches("[a-zA-Z0-9_-]{1,64}") && ids.add(id), "Invalid or duplicate playlist identifier");
+        require(id.matches("[a-zA-Z0-9_-]{1,64}") && !id.equals("beta") && ids.add(id), "Invalid or duplicate playlist identifier");
         text(playlist.get("name"), 80);
         tracks(playlist.get("tracks"), 8192, true);
         volumes(playlist.get("groupVolumes"), 8192, false);
@@ -95,7 +89,7 @@ final class MusicData {
   static JsonObject preferences(JsonObject audio) {
     JsonObject result = audio.deepCopy();
     FIELDS.forEach(result::remove);
-    if (!result.has("playlist")) result.addProperty("playlist", "");
+    if (!result.has("playlist")) result.addProperty("playlist", "beta");
     if (!result.has("menuPlaylist")) result.addProperty("menuPlaylist", "@world");
     JsonObject sounds = new JsonObject();
     if (audio.has("sounds")) object(audio.get("sounds"), "Sound overrides").entrySet().stream().filter(e -> !e.getKey().startsWith("music:")).forEach(e -> sounds.add(e.getKey(), e.getValue().deepCopy()));
@@ -114,21 +108,21 @@ final class MusicData {
   }
 
   static void validateSelections(JsonObject preferences, JsonObject music) {
-    Set<String> ids = new HashSet<>();
+    Set<String> ids = new HashSet<>(); ids.add("beta");
     if (music.has("playlists")) for (JsonElement value : music.getAsJsonArray("playlists")) ids.add(value.getAsJsonObject().get("id").getAsString());
     for (String key : List.of("playlist", "menuPlaylist")) if (preferences.has(key)) {
       String id = string(preferences.get(key));
-      require(key.equals("playlist") && id.isEmpty() || key.equals("menuPlaylist") && Set.of("@world", "@default").contains(id) || ids.contains(id), "Selected playlist is missing");
+      require(key.equals("menuPlaylist") && id.equals("@world") || ids.contains(id), "Selected playlist is missing");
     }
   }
 
   static void validatePreferences(JsonObject audio) {
     require(FIELDS.stream().noneMatch(audio::has), "Music user data belongs in power-beta/music.json");
-    require(Set.of("presets", "preset", "presetTrackPool", "musicDataVersion").stream().noneMatch(audio::has), "Legacy audio fields are unsupported; original configuration preserved");
+    require(Set.of("presets", "preset", "presetTrackPool", "musicDataVersion", "playlistTracks", "menuPlaylistTracks", "disabledTracks", "groupVolumes", "menuGroupVolumes", "musicMode", "customMusic", "menuDirectories", "disabledMenuDirectories").stream().noneMatch(audio::has), "Legacy audio fields are unsupported; original configuration preserved");
     if (audio.has("sounds")) require(object(audio.get("sounds"), "Sound overrides").keySet().stream().noneMatch(key -> key.startsWith("music:")), "Song gains belong in power-beta/music.json");
     for (String key : List.of("playlist", "menuPlaylist")) if (audio.has(key)) {
       String id = string(audio.get(key));
-      require(key.equals("playlist") && id.isEmpty() || id.matches("[a-zA-Z0-9_-]{1,64}") || key.equals("menuPlaylist") && Set.of("@world", "@default").contains(id), "Invalid playlist selection");
+      require(id.matches("[a-zA-Z0-9_-]{1,64}") || key.equals("menuPlaylist") && id.equals("@world"), "Invalid playlist selection");
     }
   }
 

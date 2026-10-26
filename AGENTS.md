@@ -62,6 +62,9 @@ review their changes. Never run Loom builds concurrently, including in subagents
 
 The website keeps its normal GitHub-derived changelog. Detailed owner review belongs
 in the separate HTML checklist, not in an extra website release-notes section.
-Re-releases must update both changelog destinations and the existing review HTML,
-with re-released items clearly marked.
+For a re-release, merge changes into that version's existing public changelog and
+GitHub notes as one tidy release. Never call out re-releases or keep public
+"original", "before" or archived replacement releases/tags. Replace the canonical
+GitHub release completely after verified private backups. Mark replacement history
+only in the existing private owner review HTML.
 Keep lasting instructions in these documents rather than appending session history.

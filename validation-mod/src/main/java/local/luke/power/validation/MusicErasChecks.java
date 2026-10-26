@@ -20,20 +20,23 @@ public final class MusicErasChecks {
     switch (action) {
       case "setup" -> {
         failures = 0; before = AudioConfig.copy(); queueBefore = MusicRequests.tracks(); volumeBefore = mc.options.musicVolume;
-        var config = AudioConfig.copy(); config.master = 100; config.musicMode = AudioSettings.MusicMode.ALL_MINECRAFT;
-        config.customMusic = AudioSettings.CustomMusic.OFF; config.menuMusic = AudioSettings.MenuMusic.WORLD;
-        config.disabledTracks.clear(); config.waitBetweenTracks = true; config.delayQueuedTracks = true;
+        var config = AudioConfig.copy(); config.master = 100; MusicFixtureSupport.allBuiltin(config);
+        config.menuMusic = AudioSettings.MenuMusic.WORLD;
+        config.waitBetweenTracks = true; config.delayQueuedTracks = true;
         MusicRequests.edit(q -> q.tracks.clear()); AudioConfig.preview(config); AudioController.pause(); mc.options.musicVolume = .1f;
       }
       case "ui" -> {
-        test("soundtrack pools separate survival, extras and dimensions", () -> {
-          int[] counts={12,12,50,50,98};
-          for(var mode : AudioSettings.MusicMode.values()) {
-            var config=AudioConfig.copy();config.musicMode=mode;AudioConfig.preview(config);
-            check(AudioController.activeMusic(mc).size()==counts[mode.ordinal()], mode.toString());
+        test("saved soundtrack pools retain explicit order independently of era", () -> {
+          var config=AudioConfig.copy();
+          for(var group : BuiltinMusic.GROUPS) {
+            var ids=BuiltinMusic.TRACKS.stream().filter(t->t.group().equals(group)).map(BuiltinMusic.Track::id).toList();
+            MusicFixtureSupport.selection(config,ids);AudioConfig.preview(config);
+            check(new ArrayList<>(AudioController.activeMusic(mc)).equals(ids),group);
           }
         });
         options=MenuUpdateChecks.open(mc,"Audio");
+        var library=MusicPlaylists460Checks.library(options);
+        MusicPlaylists460Checks.tab(options,library,"settings");
         test("music settings have seconds and one gap section without duplicate playback switches", () -> {
           field(options,"collapsed",new HashSet<>()); call(options,"layout");
           var gaps=options.session().settings().stream().filter(s->s.group.equals("Music gaps")).toList();
@@ -42,11 +45,10 @@ public final class MusicErasChecks {
           for(Setting s:options.session().settings()) check(!s.id.contains("disableBackgroundMusic") && !s.id.contains("musicCoundown"),s.id);
           var groups=new ArrayList<String>();
           for(Object row:(List<?>)field(options,"rows")) if(call(row,"setting")==null) groups.add((String)call(row,"group"));
-          check(groups.indexOf("Music gaps")==groups.indexOf("Music library")+1,groups.toString());
+          check(groups.contains("Music gaps"),groups.toString());
           check(!groups.contains("Individual music tracks"),"duplicate track controls");
         });
-        musicClick(options,AudioToolbar.Action.LIBRARY);
-        var library=(MusicLibraryScreen)field(options,"library");
+        MusicPlaylists460Checks.tab(options,library,"library");
         library.restore(new MusicLibraryScreen.State(false,"","",0,0));call(library,"rebuild");options.render(-1,-1,0);
         test("era accordions collapse, locate playing tracks and remember collapse state", () -> {
           var headings=new ArrayList<String>();
@@ -60,16 +62,15 @@ public final class MusicErasChecks {
           library.showTrack("music:calm1.ogg");
           check(!library.state().collapsed().contains("Alpha"),"located track still collapsed");
         });
-        test("inclusion icon changes rotation without removing the track", () -> {
+        test("Library row controls preserve saved playlist membership", () -> {
           options.render(-1,-1,0);
+          String saved=Catalog.JSON.toJson(AudioConfig.current().playlists);
           Object first=((List<?>)field(library,"rows")).stream().filter(r->{try{return "music:calm1.ogg".equals(call(r,"id"));}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
-          String id=(String)call(first,"id");
           int y=(int)call(library,"listTop")+(int)call(first,"y")-library.state().trackScroll();
-          click(options,(int)call(library,"left")+8,y+8);
-          check(AudioConfig.current().disabledTracks.contains(id),"note icon did not exclude");
-          check(AudioController.activeMusic(mc).contains(id),"excluded track disappeared from Active pool");
-          click(options,(int)call(library,"left")+8,y+8);
-          check(!AudioConfig.current().disabledTracks.contains(id),"note icon did not reinclude");
+          var row=(MusicRowLayout)call(library,"rowLayout");
+          click(options,row.favouriteX()+5,y+row.controlsY()+5);
+          check(saved.equals(Catalog.JSON.toJson(AudioConfig.current().playlists)),"star edited playlist membership");
+          click(options,row.favouriteX()+5,y+row.controlsY()+5);
         });
         MusicGroupChecks.run(mc, options, library);
         test("queue controls remain usable at compact and wide sizes", () -> {
@@ -96,7 +97,7 @@ public final class MusicErasChecks {
         options=MenuUpdateChecks.open(mc,action.equals("view-controls")?"Controls":"Audio");
         AudioController.pause();
         if(action.equals("view-library")) {
-          musicClick(options,AudioToolbar.Action.LIBRARY);
+          musicEditor(options);
           var library=(MusicLibraryScreen)field(options,"library");
           library.restore(new MusicLibraryScreen.State(false,"","",0,0,"",Set.of("Alpha")));
           call(library,"rebuild");

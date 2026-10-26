@@ -20,7 +20,7 @@ final class CurrentFormats442Checks {
     byte[] config = Files.readAllBytes(PowerConfig.path());
     JsonObject document = PowerConfig.document();
     test("FORMATS442 current configuration and templates preserve exact stored data", () -> {
-      check(ConfigVersions.version(document) == 8, "current schema is not 8");
+      check(ConfigVersions.version(document) == 9, "current schema is not 9");
       check(ConfigVersions.convert(document).equals(document), "current validation changed global data");
       JsonObject templates = document.getAsJsonObject("settings").getAsJsonObject("gameRules");
       for (String name : List.of("survival", "cheats"))
@@ -46,11 +46,11 @@ final class CurrentFormats442Checks {
       log("FORMATS442 native validation worlds=" + worlds + " metadataFiles=" + files);
     });
     test("FORMATS442 old and future formats reject with preserved documents", () -> {
-      for (int version : new int[]{3, 4, 5, 6, 7, 9, 99}) {
+      for (int version : new int[]{3, 4, 5, 6, 7, 8, 10, 99}) {
         JsonObject old = document.deepCopy(); old.addProperty("schemaVersion", version); JsonObject before = old.deepCopy();
         boolean blocked = false;
         try { ConfigVersions.convert(old); }
-        catch (IllegalArgumentException expected) { blocked = expected.getMessage().contains("8"); }
+        catch (IllegalArgumentException expected) { blocked = expected.getMessage().contains("9"); }
         check(blocked && old.equals(before), "unsupported global data admitted or rewritten");
       }
       for (int version : new int[]{0, 1, 2, 3, 5, 99}) {

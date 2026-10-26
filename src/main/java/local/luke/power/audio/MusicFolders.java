@@ -112,6 +112,11 @@ public final class MusicFolders {
     return new Selection(paths, disabled);
   }
 
+  /** Disabled sources do no filesystem work until switched back on. */
+  public static List<String> enabled(AudioSettings settings) {
+    return settings.musicDirectories.stream().filter(path -> !settings.disabledMusicDirectories.contains(path)).toList();
+  }
+
   /** Evaluate membership once per settings change, not for each audio tick or track. */
   public static List<MusicLibrary.Track> enabledTracks(Path game, MusicLibrary.Scan scan,
       List<String> folders, Set<String> disabled, boolean recursive) {

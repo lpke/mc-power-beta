@@ -27,37 +27,20 @@ class MenuMusicTest {
     assertTrue(s.showMenuControls(false));
     assertFalse(s.showMenuControls(true));
   }
-  @Test void onlySeparateMenuFoldersResetPlaybackOnWorldTransitions() {
+  @Test void onlySeparateMenuSelectionResetsPlaybackOnWorldTransitions() {
     AudioSettings s = new AudioSettings();
     for (var mode : AudioSettings.MenuMusic.values()) {
       s.menuMusic = mode;
       assertEquals(mode != AudioSettings.MenuMusic.CUSTOM, s.continuesAcrossMenus());
     }
   }
-  @Test void excludedDedicatedMenuTracksDoNotRestoreWorldFallback() {
-    List<String> world = List.of("calm1.ogg"), menu = List.of("menu.ogg");
-    Set<String> excluded = Set.of("music:menu.ogg");
-    assertTrue(MusicRotation.menu(world, menu, true,
-        track -> !excluded.contains("music:" + track)).isEmpty());
-    // Active ignores exclusions, but must agree that the dedicated menu replaces world music.
-    assertEquals(menu, MusicRotation.menu(world, menu, true, track -> true));
+  @Test void emptyCustomMenuPlaylistNeverFallsBackToWorldMusic() {
+    AudioSettings settings = new AudioSettings();
+    settings.playlists.add(new MusicPlaylist("empty", "Empty", List.of(), Map.of()));
+    MusicPlaylist.loadMenu(settings, "empty");
+    settings.menuMusic = AudioSettings.MenuMusic.CUSTOM;
+    assertTrue(MusicPlaylist.rotation(settings, true).isEmpty());
+    settings.menuMusic = AudioSettings.MenuMusic.MIX;
+    assertEquals(BuiltinMusic.VANILLA, MusicPlaylist.rotation(settings, true));
   }
-
-  @Test void contextIneligibleDedicatedMenuTracksDoNotRestoreWorldFallback() {
-    List<String> world = List.of("calm1.ogg");
-    List<String> menu = List.of("song-nether-specific.ogg");
-    assertTrue(MusicRotation.menu(world, menu, true,
-        track -> TrackRules.eligible(track, 0, "Forest")).isEmpty());
-    assertEquals(menu, MusicRotation.menu(world, menu, true,
-        track -> TrackRules.eligible(track, -1, "Hell")));
-  }
-
-  @Test void missingDedicatedMenuSourcesKeepFallbackAndMixKeepsWorldTracks() {
-    List<String> world = List.of("calm1.ogg");
-    assertEquals(world, MusicRotation.menu(world, List.<String>of(), true, track -> true));
-    assertEquals(world, MusicRotation.menu(world, List.of("excluded.ogg"), false, track -> false));
-    assertEquals(List.of("calm1.ogg", "first.ogg", "second.ogg"),
-        MusicRotation.menu(world, List.of("first.ogg", "second.ogg"), false, track -> true));
-  }
-
 }

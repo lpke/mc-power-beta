@@ -14,17 +14,34 @@ public final class MusicPresetDraft {
   public MusicPresetDraft(MusicPlaylist playlist) { this(playlist, List.of()); }
 
   public MusicPresetDraft(MusicPlaylist playlist, Collection<String> available) {
-    creating = playlist == null;
-    id = creating ? UUID.randomUUID().toString() : playlist.id();
-    originalName = creating ? "New playlist" : playlist.name();
-    original = creating ? List.of() : List.copyOf(playlist.tracks());
+    this(playlist, available, playlist == null);
+  }
+
+  public MusicPresetDraft(MusicPlaylist playlist, Collection<String> available, boolean creating) {
+    boolean builtin = playlist != null && MusicPlaylist.BETA.equals(playlist.id());
+    this.creating = creating || builtin;
+    id = playlist == null || builtin ? UUID.randomUUID().toString() : playlist.id();
+    originalName = playlist == null ? "New playlist" : builtin ? "Beta copy" : playlist.name();
+    original = playlist == null ? List.of() : List.copyOf(playlist.tracks());
     tracks = new ArrayList<>(original);
-    originalVolumes = creating ? Map.of() : Map.copyOf(playlist.groupVolumes());
+    originalVolumes = playlist == null ? Map.of() : Map.copyOf(playlist.groupVolumes());
     volumes = new TreeMap<>(originalVolumes);
     this.available = List.copyOf(new LinkedHashSet<>(available));
   }
 
   public String name() { return originalName; }
+
+  public static String copyName(String source, Collection<String> existing) {
+    Set<String> names = new HashSet<>();
+    existing.forEach(name -> names.add(name.toLowerCase(Locale.ROOT)));
+    for (int number = 1; ; number++) {
+      String suffix = number == 1 ? " copy" : " copy " + number;
+      int end = Math.min(source.length(), 80 - suffix.length());
+      if (end > 0 && end < source.length() && Character.isHighSurrogate(source.charAt(end - 1))) end--;
+      String name = source.substring(0, end).stripTrailing() + suffix;
+      if (!names.contains(name.toLowerCase(Locale.ROOT))) return name;
+    }
+  }
   public boolean creating() { return creating; }
   public boolean included(String id) { return tracks.contains(id); }
   public List<String> tracks() { return List.copyOf(tracks); }

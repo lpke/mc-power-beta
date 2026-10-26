@@ -67,41 +67,18 @@ public final class AudioBackend implements Backend {
           "Volume in percent, multiplied by Master volume and Game sounds.",
           List.of());
     add("playlist", "Music library", "World playlist", Setting.Kind.TEXT,
-        new JsonPrimitive(s.playlist), new JsonPrimitive(""),
-        "Load a saved playlist or use Default rotation. Library edits change the current selection; saved playlists change only in their editor.", List.of());
+        new JsonPrimitive(s.playlist), new JsonPrimitive(MusicPlaylist.BETA),
+        "Choose Beta or a saved playlist for world playback.", List.of());
     add("menuPlaylist", "Music library", "Menu playlist", Setting.Kind.TEXT,
         new JsonPrimitive(s.menuPlaylist), new JsonPrimitive(MusicPlaylist.SAME_AS_WORLD),
-        "Use the world selection, Default rotation or a saved playlist for menu music. Menu music still controls continuity between menus and worlds.", List.of());
+        "Use the world playlist, Beta or a saved playlist for menu music.", List.of());
     add("playlists", "Music data", "Music playlists", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.playlists), new JsonArray(), "Saved ordered music selections.", List.of());
-    add("playlistTracks", "Music data", "Current playlist tracks", Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.playlistTracks), new JsonArray(), "Ordered tracks in the current world selection.", List.of());
-    add("menuPlaylistTracks", "Music data", "Menu playlist tracks", Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.menuPlaylistTracks), new JsonArray(), "Ordered tracks in the current menu selection.", List.of());
-    add("menuGroupVolumes", "Music data", "Menu group volumes", Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.menuGroupVolumes), new JsonObject(), "Current menu playlist group gains.", List.of());
-    add("exclusions", "Music data", "Excluded tracks", Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.disabledTracks), new JsonArray(), "Excluded music identifiers.", List.of());
-    add("groupVolumes", "Music data", "Music group volumes", Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.groupVolumes), new JsonObject(), "Volume multipliers for music groups.", List.of());
     add("favourites", "Music data", "Favorite tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.favourites), new JsonArray(), "Starred music tracks.", List.of());
-    add(
-        "musicMode",
-        "Music library",
-        "World music",
-        Setting.Kind.CHOICE,
-        new JsonPrimitive(s.musicMode.ordinal()),
-        new JsonPrimitive(0),
-        "Survival uses in-game survival music. All also includes creative, menu, records and credits. Nether and End music are available in the library and playlists.",
-        List.of("Vanilla", "Alpha and Beta survival", "Alpha and Beta all", "Minecraft survival", "Minecraft all"));
-    add("customMusic", "Music library", "Custom music handling", Setting.Kind.CHOICE,
-        new JsonPrimitive(s.customMusic.ordinal()), new JsonPrimitive(0),
-        "Add folder tracks to the world soundtrack, or replace it with folder tracks. Empty folders fall back to World music.",
-        List.of("Off", "Add to soundtrack", "Custom only"));
     add("menuMusic", "Music library", "Menu music", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(2),
-        "Choose the world soundtrack, menu selection or both. World soundtrack and Mix both keep music playing across world transitions. Default rotation uses menu folders with soundtrack fallback; an empty saved playlist stays silent.",
+        "Choose the world playlist, menu playlist or both. World and Mix keep music playing across world transitions. Empty playlists stay silent.",
         List.of("World soundtrack", "Menu selection", "Mix both"));
     add("dimensionMusic", "Music library", "On dimension change", Setting.Kind.CHOICE,
         new JsonPrimitive(s.dimensionMusic.ordinal()), new JsonPrimitive(0),
@@ -110,20 +87,11 @@ public final class AudioBackend implements Backend {
     add(
         "musicDirectories",
         "Music library",
-        "World music folders",
+        "Music folders",
         Setting.Kind.LIST,
         MusicFolders.encode(s.musicDirectories, s.disabledMusicDirectories),
         new JsonArray(),
-        "Choose OGG, WAV, MUS or MP3 folders. Switch folders On or Off without removing them. Convert MP3 in the library; original files stay intact.",
-        List.of());
-    add(
-        "menuDirectories",
-        "Music library",
-        "Menu music folders",
-        Setting.Kind.LIST,
-        MusicFolders.encode(s.menuDirectories, s.disabledMenuDirectories),
-        new JsonArray(),
-        "Used when menu music is enabled. Each folder has its own On/Off switch. Supports OGG, WAV, MUS and converted MP3.",
+        "Choose OGG, WAV, MUS or MP3 folders. Off stops scanning and makes their tracks unavailable until switched On. Saved playlist membership stays intact. Convert MP3 in the library; original files stay intact.",
         List.of());
     add(
         "recursive",
@@ -141,7 +109,7 @@ public final class AudioBackend implements Backend {
         Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.shuffle),
         new JsonPrimitive(true),
-        "Off follows playlist order, or filename order for Default rotation.",
+        "Off follows the saved playlist order.",
         List.of());
     add(
         "avoidRepeats",
@@ -209,7 +177,6 @@ public final class AudioBackend implements Backend {
   }
 
   private static List<Setting> musicEntries(Minecraft mc) {
-    AudioSettings config = AudioConfig.current();
     List<Setting> result = new ArrayList<>();
     for (String track : AudioController.music(mc)) {
       String label = AudioController.musicLabel(track);
@@ -217,11 +184,6 @@ public final class AudioBackend implements Backend {
           "Track volume in percent, multiplied by the music and master volumes.",
           Setting.Kind.INTEGER, new JsonPrimitive(AudioController.trackVolume(track)),
           new JsonPrimitive(100), 0, 100, 5, List.of(), false));
-      result.add(new Setting("audio.trackEnabled." + track, "audio", "Audio", "Track rotation", label + " in rotation",
-          "Include this track in automatic selection. You can still preview or explicitly queue excluded tracks.",
-          Setting.Kind.BOOLEAN, new JsonPrimitive(config.playlist.isEmpty() ? !config.disabledTracks.contains(track)
-              : config.playlistTracks.contains(track)),
-          new JsonPrimitive(true), 0, 1, 1, List.of(), false));
     }
     return result;
   }
@@ -279,17 +241,10 @@ public final class AudioBackend implements Backend {
     AudioSettings s = AudioConfig.copy();
     if (changes.containsKey("audio.playlist")) s.playlist = changes.get("audio.playlist").getAsString();
     if (changes.containsKey("audio.menuPlaylist")) s.menuPlaylist = changes.get("audio.menuPlaylist").getAsString();
-    if (changes.containsKey("audio.playlistTracks")) s.playlistTracks = new ArrayList<>(Arrays.asList(
-        Catalog.JSON.fromJson(changes.get("audio.playlistTracks"), String[].class)));
-    if (changes.containsKey("audio.exclusions")) s.disabledTracks = new TreeSet<>(Arrays.asList(
-        Catalog.JSON.fromJson(changes.get("audio.exclusions"), String[].class)));
     for (var e : changes.entrySet()) {
       String key = e.getKey().substring(6);
       JsonElement v = e.getValue();
       if (key.startsWith("category.")) s.categories.put(key.substring(9), v.getAsInt());
-      // ConfigSession.link keeps these display rows in sync with the authoritative sets.
-      // Replaying them during Load/Discard would wrongly exclude tracks outside a preset pool.
-      else if (key.startsWith("trackEnabled.")) { }
       else if (key.startsWith("sound.")) {
         String sound = key.substring(6);
         if (v.getAsInt() == 100 && !sound.startsWith("music:custom/")) s.sounds.remove(sound);
@@ -313,16 +268,9 @@ public final class AudioBackend implements Backend {
           case "underwaterAdditions" -> s.underwaterAdditions = v.getAsBoolean();
           case "underwaterRareAdditions" -> s.underwaterRareAdditions = v.getAsBoolean();
           case "underwaterUltraRareAdditions" -> s.underwaterUltraRareAdditions = v.getAsBoolean();
-          case "exclusions" -> { }
-          case "playlistTracks" -> { }
           case "playlist" -> s.playlist = v.getAsString();
           case "playlists" -> s.playlists = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, MusicPlaylist[].class)));
           case "menuPlaylist" -> s.menuPlaylist = v.getAsString();
-          case "menuPlaylistTracks" -> s.menuPlaylistTracks = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
-          case "menuGroupVolumes" -> s.menuGroupVolumes = Catalog.JSON.fromJson(v,
-              new com.google.gson.reflect.TypeToken<TreeMap<String, Integer>>() {}.getType());
-          case "groupVolumes" -> s.groupVolumes = Catalog.JSON.fromJson(v,
-              new com.google.gson.reflect.TypeToken<TreeMap<String, Integer>>() {}.getType());
           case "favourites" -> s.favourites = new TreeSet<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
           case "menuControls" -> s.menuControls = v.getAsBoolean();
           case "menuControlsMainMenu" -> s.menuControlsMainMenu = v.getAsBoolean();
@@ -331,8 +279,6 @@ public final class AudioBackend implements Backend {
           case "menuControlsOffsetX" -> s.menuControlsOffsetX = v.getAsInt();
           case "menuControlsOffsetY" -> s.menuControlsOffsetY = v.getAsInt();
           case "master" -> s.master = v.getAsInt();
-          case "musicMode" -> s.musicMode = AudioSettings.MusicMode.values()[v.getAsInt()];
-          case "customMusic" -> s.customMusic = AudioSettings.CustomMusic.values()[v.getAsInt()];
           case "menuMusic" -> s.menuMusic = AudioSettings.MenuMusic.values()[v.getAsInt()];
           case "dimensionMusic" -> s.dimensionMusic = AudioSettings.DimensionMusic.values()[v.getAsInt()];
           case "gapMinSeconds" -> s.gapMinSeconds = v.getAsInt();
@@ -346,11 +292,6 @@ public final class AudioBackend implements Backend {
             var folders = MusicFolders.decode(v);
             s.musicDirectories = new ArrayList<>(folders.paths());
             s.disabledMusicDirectories = new LinkedHashSet<>(folders.disabled());
-          }
-          case "menuDirectories" -> {
-            var folders = MusicFolders.decode(v);
-            s.menuDirectories = new ArrayList<>(folders.paths());
-            s.disabledMenuDirectories = new LinkedHashSet<>(folders.disabled());
           }
           default -> throw new IllegalArgumentException("Unknown audio setting");
         }

@@ -31,9 +31,9 @@ public final class AudioPolishChecks {
       case "setup" -> {
         failures = 0;
         before = AudioConfig.copy(); queueBefore = MusicRequests.tracks(); volumeBefore = mc.options.musicVolume;
-        var config = AudioConfig.copy(); config.master = 100; config.customMusic = AudioSettings.CustomMusic.ONLY;
-        config.musicDirectories = List.of("audio-polish"); config.menuDirectories = List.of();
-        config.disabledMusicDirectories.clear(); config.disabledMenuDirectories.clear(); config.disabledTracks.clear();
+        var config = AudioConfig.copy(); config.master = 100;
+        config.musicDirectories = List.of("audio-polish");
+        config.disabledMusicDirectories.clear(); MusicFixtureSupport.imported(config, false);
         config.waitBetweenTracks = true; config.delayQueuedTracks = true;
         MusicRequests.edit(q -> q.tracks.clear()); AudioConfig.preview(config); AudioController.pause();
         mc.options.musicVolume = .15f;
@@ -66,7 +66,7 @@ public final class AudioPolishChecks {
         AudioController.playNow(b);
         test("playing status opens All tracks and locates song", () -> {
           click(options,(int)call(options,"left")+2,(int)call(options,"audioContentTop")+4);
-          check(!library.queueVisible() && library.state().folder().isEmpty(),"wrong view");
+          check(!library.queueVisible() && library.state().folder().equals("library"),"wrong view");
           var rows=(List<?>)field(library,"rows");
           Object match=rows.stream().filter(r -> {try{return b.equals(call(r,"id"));}catch(Exception e){throw new RuntimeException(e);}}).findFirst().orElseThrow();
           int offset=(int)call(match,"y")-library.state().trackScroll();

@@ -165,7 +165,7 @@ final class Release242Checks {
         String id=AudioController.trackId(reserved);
         for(int i=1;i<=80;i++) {
           var next=AudioConfig.copy(); next.master=10+i; next.gapMinSeconds=100+i; next.menuControlsOffsetX=i;
-          next.sounds.put("random.click",i); next.groupVolumes.put("minecraft",i);
+          next.sounds.put("random.click",i); MusicFixtureSupport.volume(next,"Alpha",i);
           AudioConfig.preview(next);
           check(audio("upcoming")==reserved,"settings re-rolled "+id+" at edit "+i);
         }
@@ -175,11 +175,11 @@ final class Release242Checks {
       });
       test("excluded reservations change once and playback consumes the advertised track", () -> {
         var first=(class_267)audio("upcoming"); var next=AudioConfig.copy();
-        next.disabledTracks.add(AudioController.trackId(first)); AudioConfig.preview(next);
+        MusicFixtureSupport.omit(next,AudioController.trackId(first)); AudioConfig.preview(next);
         var replacement=(class_267)audio("upcoming");
         check(replacement!=null && !AudioController.trackId(replacement).equals(AudioController.trackId(first)), "excluded track retained");
         check(audio("upcoming")==replacement,"replacement did not stay reserved");
-        check(AudioController.choose(List.of())==replacement,"playback differed from advertised track");
+        check(AudioController.choose()==replacement,"playback differed from advertised track");
       });
     } finally { AudioController.quiet(); AudioConfig.preview(original); mc.options.musicVolume=volume; }
   }

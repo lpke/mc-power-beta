@@ -50,7 +50,7 @@ final class AudioGroupChecks {
         auto = MenuPreferences.current().autoApply;
         MenuPreferences.update(v -> v.autoApply = false);
         AudioSettings s = new AudioSettings();
-        s.musicMode = AudioSettings.MusicMode.ALL_MINECRAFT;
+        MusicFixtureSupport.allBuiltin(s);
         Set<String> excluded = new TreeSet<>();
         BuiltinMusic.TRACKS.stream()
             .filter(t -> t.group().equals("Alpha"))
@@ -62,91 +62,7 @@ final class AudioGroupChecks {
         AudioController.pause();
       }
       case "ui" -> {
-        options = MenuUpdateChecks.open(mc, "Audio");
-        var library = (MusicLibraryScreen) field(options, "library");
-        test(
-            "library group multiplier affects only that group and Cancel restores it",
-            () -> {
-              field(options, "libraryOpen", true);
-              library.showTrack("music:calm1.ogg");
-              setGroupVolume(library, "Alpha", 50);
-              check(
-                  Math.abs(AudioController.musicVolume("music:calm1.ogg") - .05) < .002,
-                  "group gain missing");
-              check(
-                  Math.abs(AudioController.musicVolume("music:creative1.ogg") - .1) < .001,
-                  "other group gain changed");
-              options.session().discard();
-              check(AudioConfig.current().groupVolumes.isEmpty(), "Cancel kept group gain");
-            });
-        test(
-            "existing preset hides excluded groups and songs and draft volumes stay isolated",
-            () -> {
-              library.openPresets();
-              var panel = field(library, "presets");
-              int y = presetRowY(panel, 1);
-              click(options, (int) call(panel, "right") - 145, y);
-              check((boolean) call(panel, "editing"), "Edit missed");
-              check((boolean) call(panel, "hideExcluded"), "existing preset exclusions not hidden");
-              check(header(library, "Alpha") == null, "fully excluded group visible");
-              String mixed = AudioController.musicGroup("music:creative1.ogg");
-              check(header(library, mixed) != null, "partial exclusion hid entire group");
-              y = groupY(library, mixed);
-              click(options, (int) call(library, "left") + 10, y);
-              boolean found = false;
-              for (Object row : (List<?>) field(library, "rows"))
-                if ("music:creative1.ogg".equals(call(row, "id"))) found = true;
-              check(!found, "individual excluded song visible");
-              click(options, (int) call(panel, "hideX") + 8, (int) call(panel, "editButtonY") + 8);
-              check(header(library, "Alpha") != null, "Show excluded missed group");
-              check(((List<?>)field(library,"rows")).stream().anyMatch(row -> {
-                try { return "music:creative1.ogg".equals(call(row,"id")); }
-                catch(Exception e) { throw new RuntimeException(e); }
-              }), "Show excluded missed individual song");
-              setGroupVolume(library, "Alpha", 25);
-              MusicPresetDraft draft = (MusicPresetDraft) call(panel, "draft");
-              check(Math.abs(draft.volume("Alpha") - 25) <= 1, "draft slider missed");
-              check(AudioConfig.current().groupVolumes.isEmpty(), "draft volume leaked");
-              click(options, (int) call(panel, "saveX") + 8, (int) call(panel, "editButtonY") + 8);
-              check(AudioConfig.current().groupVolumes.isEmpty(), "Save applied draft gain");
-              int volume = AudioConfig.current().playlists.get(0).groupVolumes().get("Alpha");
-              click(options, (int) call(panel, "right") - 25, presetRowY(panel, 1));
-              check(
-                  AudioConfig.current().groupVolumes.get("Alpha") == volume,
-                  "Load missed group volume");
-              check((boolean) call(options, "musicControlsVisible"), "Load kept toolbar hidden");
-            });
-        test(
-            "new presets show excluded groups and hiding never changes the draft",
-            () -> {
-              field(options, "libraryOpen", true);
-              library.openPresets();
-              var panel = field(library, "presets");
-              click(options, (int) call(panel, "left") + 10, (int) call(panel, "top") + 8);
-              check(!(boolean) call(panel, "hideExcluded"), "new draft hides exclusions");
-              click(options, (int) call(panel, "excludeX") + 8, (int) call(panel, "bulkY") + 8);
-              var draft = (MusicPresetDraft) call(panel, "draft");
-              var saved = draft.snapshot("New");
-              click(options, (int) call(panel, "hideX") + 8, (int) call(panel, "editButtonY") + 8);
-              check(((List<?>) field(library, "rows")).isEmpty(), "excluded groups not hidden");
-              check(
-                  saved.tracks().equals(draft.snapshot("New").tracks()),
-                  "visibility changed exclusions");
-              for (int[] size : new int[][] {{320, 240}, {427, 240}, {640, 420}, {854, 480}}) {
-                options.init(mc, size[0], size[1]);
-                options.render(-1, -1, 0);
-                int saveX = (int) call(panel, "saveX"), hideX = (int) call(panel, "hideX");
-                int hideWidth=(int)call(panel,"hideWidth");
-                check(hideX == saveX + (int)call(panel,"saveWidth") + 4, "hide button not beside Save");
-                check(hideX + hideWidth <= (int) call(panel, "right"), "hide button clipped");
-                if ((int) call(panel, "bulkY") == (int) call(panel, "editButtonY"))
-                  check(hideX + hideWidth < (int) call(panel, "includeX"), "bulk overlaps Hide excluded");
-                check(GL11.glGetError() == 0, "GL error");
-              }
-              mc.setScreen(options);
-              library.showTracks();
-              options.session().discard();
-            });
+        MusicPlaylists460Checks.editor(mc);
         log("AUDIO GROUP UI FAILURES " + failures);
       }
       case "menu" -> {
@@ -205,7 +121,7 @@ final class AudioGroupChecks {
       case "gain-play" -> {
         var s = AudioConfig.copy();
         s.master = 80;
-        s.groupVolumes.put("Alpha", 50);
+        MusicFixtureSupport.volume(s,"Alpha",50);
         s.sounds.put("music:calm1.ogg", 50);
         AudioConfig.preview(s);
         mc.options.musicVolume = .1f;
@@ -234,7 +150,7 @@ final class AudioGroupChecks {
               });
       case "gain-mute" -> {
         var s = AudioConfig.copy();
-        s.groupVolumes.put("Alpha", 0);
+        MusicFixtureSupport.volume(s,"Alpha",0);
         AudioConfig.preview(s);
       }
       case "gain-check-mute" ->
@@ -249,7 +165,7 @@ final class AudioGroupChecks {
               });
       case "gain-queue" -> {
         var s = AudioConfig.copy();
-        s.groupVolumes.put("Alpha", 50);
+        MusicFixtureSupport.volume(s,"Alpha",50);
         AudioConfig.preview(s);
         MusicRequests.edit(
             q -> {

@@ -103,7 +103,7 @@ public final class CommandsLibraryChecks {
         test(
             "music library opens inside the same Options screen",
             () -> {
-              musicClick(options,AudioToolbar.Action.LIBRARY);
+              musicEditor(options);
               check(
                   mc.currentScreen == options && (boolean) field(options, "libraryOpen"),
                   "opened separate screen");

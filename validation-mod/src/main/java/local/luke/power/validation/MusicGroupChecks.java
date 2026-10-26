@@ -24,42 +24,18 @@ final class MusicGroupChecks {
   }
 
   static void run(Minecraft mc, PowerOptionsScreen options, MusicLibraryScreen library) throws Exception {
-    var before = AudioConfig.copy();
-    var queue = MusicRequests.tracks();
-    test("group toggle includes hidden matches, preserves other eras, volumes and queue", () -> {
-      library.restore(new MusicLibraryScreen.State(false, "", "aria", 0, 0));
-      call(library, "rebuild"); options.render(-1, -1, 0);
-      int x = (int) call(library, "right") - 10, y = (int) call(library, "listTop") + 9;
-      click(options, x, y);
-      check(AudioConfig.current().disabledTracks.size() == 6, "filtered bulk edit missed hidden creative tracks");
-      for (var track : BuiltinMusic.TRACKS)
-        check(AudioConfig.current().disabledTracks.contains(track.id()) == track.creative(), track.file());
-      check(AudioConfig.current().sounds.equals(before.sounds), "group edited volumes");
-      check(MusicRequests.tracks().equals(queue), "group edited queue");
-      check(!library.state().query().isEmpty(), "toggle lost search");
-      // An individual edit produces a mixed group; bulk click includes all members.
-      Setting aria = find(options.session(), "audio.trackEnabled.music:creative4.ogg");
-      aria.cycle(1); options.changed(aria);
-      options.render(-1, -1, 0); click(options, x, y);
-      check(AudioConfig.current().disabledTracks.isEmpty(), "mixed group did not include all");
-    });
-    test("collapsed group toggle works at all supported UI widths and can be discarded", () -> {
-      library.restore(new MusicLibraryScreen.State(false, "", "", 0, 0, "", Set.copyOf(BuiltinMusic.GROUPS)));
-      call(library, "rebuild");
-      for (int[] size : new int[][]{{320,240},{427,240},{640,420},{854,480}}) {
-        options.init(mc,size[0],size[1]); options.render(-1,-1,0);
-        int x=(int)call(library,"right")-10, y=groupY(library,"Alpha")+9;
-        click(options,x,y);
-        check(AudioConfig.current().disabledTracks.size()==12,"collapsed Alpha edit failed");
-        check(library.state().collapsed().contains("Alpha"),"group unexpectedly expanded");
-        check(GL11.glGetError()==0,"group rendering GL error");
-        click(options,x,y);
-      }
-      click(options,(int)call(library,"right")-10,groupY(library,"Alpha")+9);
-      options.session().discard();
-      check(AudioConfig.current().disabledTracks.equals(before.disabledTracks),"Cancel left group exclusions");
-      mc.setScreen(options);
-      library.restore(new MusicLibraryScreen.State(false,"","",0,0)); call(library,"rebuild");
+    var saved=local.luke.power.config.Catalog.JSON.toJson(AudioConfig.current().playlists);
+    var queue=MusicRequests.tracks();
+    test("group draft edits retain other groups, gains and unavailable references",()->{
+      var settings=MusicPlaylists460Checks.seed();
+      var draft=new MusicPresetDraft(settings.playlists.get(0),BuiltinMusic.TRACKS.stream().map(BuiltinMusic.Track::id).toList());
+      for(var track:BuiltinMusic.TRACKS)if(track.group().equals("Beta / Creative"))draft.include(track.id(),true);
+      for(var track:BuiltinMusic.TRACKS)if(track.group().equals("Alpha"))draft.include(track.id(),false);
+      check(draft.tracks().contains("music:playlist-fixture-missing.ogg"),"group edit dropped missing ID");
+      check(draft.tracks().containsAll(BuiltinMusic.TRACKS.stream().filter(t->t.group().equals("Beta / Creative")).map(BuiltinMusic.Track::id).toList()),"creative group incomplete");
+      check(draft.volume("Alpha")==40,"group inclusion changed gain");
+      check(saved.equals(local.luke.power.config.Catalog.JSON.toJson(AudioConfig.current().playlists)),"draft changed saved list");
+      check(MusicRequests.tracks().equals(queue),"draft changed queue");
     });
   }
 }

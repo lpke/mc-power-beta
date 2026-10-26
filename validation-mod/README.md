@@ -17,28 +17,29 @@
 
 # Runtime checks
 
-- `music-playlists-460 capture` captures unfiltered Audio settings at the Music library
-  header, the native library, playlist list, existing
-  and empty editors, Save current popup, order screen, queue and menu assignment at
-  320x240 and 640x420.
-  Capture before acceptance, then run `music-playlists-460 run` for real Options
-  auto-apply, manual Apply/Discard, saved/working/editor separation, ordered missing
-  references, group and per-track gains, Save current, independent menu assignment,
-  Default/empty selections and queue changes made after Options opened.
-  Use a muted disposable world with a client window of at least 1280x840.
-  Images are under `power-beta-data/reports/music-playlists-460`.
-  `music-playlists-460 view settings|library|playlists|save-current|editor|order|empty|queue|menu` stages a
-  native screen for inspection; `music-playlists-460 stop` restores it.
-  The fixture restores runtime audio/queue/preferences, both configuration and music
-  files byte-for-byte, and removes only backups created by the fixture.
-  Run `audio-maintenance` as well for native folder import and playlist isolation.
-  `music-playlists-460 menu-pools`, also included in `run`, calls the actual native
-  menu candidate builder with a synthetic menu context for all twelve WORLD/CUSTOM/MIX
-  and same-as-world/Default/saved/empty combinations. It checks exact order,
-  exclusions, overlap deduplication, gain ownership and native current-source gain
-  multiplication. It starts no audio and never unloads the world. These checks do
-  not simulate a real menu transition or preview playback; keep the existing native
-  audio transition and `audio-groups-gain-*` playback checks separate.
+- `music-playlists-460 prepare` stages two temporary imported folders with valid bundled Ogg samples.
+  Wait for the scanner, then `music-playlists-460 capture` writes 26 native screenshots at 320x240 and 640x420.
+  Views are `settings`, `selector`, `library`, `library-expanded`, `playlists`, `beta`,
+  `new`, `editor`, `group-gain`, `order`, `editor-settings`, `menu` and `queue`. Use a muted disposable
+  singleplayer world, the verified silent Pulse sink and a client window of at least
+  1280x840. Images and `captures.json` go to `power-beta-data/reports/music-playlists-460`.
+  `music-playlists-460 view VIEW` stages one view at 640x420; `stop` restores it.
+  After reviewing captures, `music-playlists-460 run` checks native main Audio
+  selection/Edit, all editor tabs, Library folder/reload controls, collapsed groups,
+  isolated membership/order/group gains and exact entry, native drag/release/cancel,
+  Shuffle and ordered reservations, Save/Discard, fixed Beta originals and Copy,
+  saved empty/missing references, menu assignments, auto/manual Options and independent
+  queue persistence, selected-playlist deletion, dirty-draft modals, global-search Back
+  and unfocused Settings keyboard controls. It restores configuration, music and options.txt byte-for-byte,
+  runtime audio/queue/preferences, and only removes backups and sample folders that it created.
+  To check disabled-source ownership, use `prepare`, wait, `source-start`, `source-off`,
+  wait, `source-check`, then `stop`. The check verifies current ID, label, group, song gain
+  and duration while the disabled source disappears from future track resolution.
+  `menu-pools`, also included in `run`, checks native candidate order, overlap and gain
+  ownership for all WORLD/CUSTOM/MIX and same-world/Beta/saved/empty combinations.
+  It starts no playback and keeps the loaded world. Run `audio-maintenance` for native
+  multi-folder import, local Save/Discard and source-file preservation. Existing
+  `audio-groups-gain-*`, seek, history and pause/resume steps check actual playback.
 
 - `map-449 run` checks open-menu map mouse ownership, other modals, Pause label eligibility and session-only World Map visibility. `prepare inventory|pause-wheel|right|middle|left`, actual pointer action, `check`, then `stop` covers native mouse batches. The prepare token is combined, for example `prepare inventory-wheel`.
 - `waypoint-449` covers relative command/editor coordinates, one commit-time reported origin, bounds, invalid drafts and retained data.
@@ -121,7 +122,7 @@
   `creative-443-movement sorting` checks current immediate-editor Escape and
   screen-change cleanup, then confirms a stale sorting close preserves recipe-search focus.
 
-- `current-formats-442` validates schema 8, both format-4 templates and every saved
+- `current-formats-442` validates schema 9, both format-4 templates and every saved
   world metadata/previous/dimension file, including native offhand/kept-item decoding
   after registry initialization. It checks byte preservation, old/future rejection
   and fresh native-world creation. Requires a muted disposable singleplayer clone.
@@ -633,9 +634,9 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
   detached camera, including player movement mode, exit and disabling the feature.
   Run after `new-world`. `worldedit-navigation` also checks pillar sides, top faces
   and a corner crossing that the old quarter-block ray missed.
-- `audio-exclusions`: library and preset filters hide individual excluded songs,
-  preserve live and draft selections, retain queue requests, restore view state and
-  share row geometry across narrow and wide layouts.
+- `audio-exclusions`: Library retains playlist nonmembers without exposing global
+  inclusion controls; explicit queue requests remain independent, and playlist
+  membership changes stay in the isolated draft.
 
 - `world-settings-check`: difficulty transactions, scope notes, permission-gated rows/tabs,
   command exemptions, input priority and Peaceful behavior. Run after `new-world`.
@@ -785,10 +786,10 @@ Write a command to `.minecraft/power-beta-validation.command`. Results append to
 - `movement-keys`, then `new-world`, `movement-setup`, `movement-checks`: key mapping,
   container reach and item conservation. `movement-inventory`, `movement-chest` and
   `movement-state` support physical-input checks in the disposable client.
-- `audio-maintenance`: preset-pool isolation, folder browsing, draft confirmation,
-  duplicate imports, single-group expansion and FFmpeg detection. This fixture
+- `audio-maintenance`: saved-playlist isolation, folder browsing, draft confirmation,
+  duplicate imports, collapsed library groups and FFmpeg detection. This fixture
   expects FFmpeg on PATH; the unit suite covers an unavailable executable.
-- `audio-presets-setup`, `audio-presets-ui`, `audio-presets-finish`: preset editing.
+- `audio-presets-setup`, `audio-presets-ui`, `audio-presets-finish`: playlist editing.
   Playback steps in `AudioPresetChecks` need separate ticks between commands.
   Scrubber/editor coverage needs `audio-presets-setup`, `audio-presets-play`, wait
   for decoding, then `audio-presets-duration`, `audio-presets-editor` and

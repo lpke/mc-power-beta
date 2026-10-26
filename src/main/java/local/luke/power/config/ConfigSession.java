@@ -56,26 +56,7 @@ public final class ConfigSession {
   }
 
   public void link(Setting changed) {
-    if (changed.id.startsWith("audio.trackEnabled.")) {
-      String id = changed.id.substring("audio.trackEnabled.".length());
-      boolean playlist = settings.stream().filter(s -> s.id.equals("audio.playlist"))
-          .anyMatch(s -> !s.value.getAsString().isEmpty());
-      if (playlist) {
-        settings.stream().filter(s -> s.id.equals("audio.playlistTracks")).findFirst().ifPresent(s -> {
-          var tracks = new ArrayList<String>();
-          s.value.getAsJsonArray().forEach(v -> tracks.add(v.getAsString()));
-          if (changed.value.getAsBoolean()) { if (!tracks.contains(id)) tracks.add(id); }
-          else tracks.remove(id);
-          var value = new JsonArray(); tracks.forEach(value::add); s.value = value;
-        });
-      } else settings.stream().filter(s -> s.id.equals("audio.exclusions")).findFirst().ifPresent(s -> {
-        var excluded = new TreeSet<String>();
-        s.value.getAsJsonArray().forEach(v -> excluded.add(v.getAsString()));
-        if (changed.value.getAsBoolean()) excluded.remove(id); else excluded.add(id);
-        var value = new JsonArray(); excluded.forEach(value::add); s.value = value;
-      });
-    }
-
+    // Each music playlist is now its own authoritative selection.
   }
 
   private final Map<String, JsonElement> previewed = new HashMap<>();
