@@ -108,17 +108,14 @@ final class Dropdown450Screens {
       var first = layout.tabs().get(0); input(library).power$click(first.x() + 8, first.y() + 8, 0);
     }
     capture(mc, options, size, "music-filters"); close(get(options, "choices"));
-    invoke(library, "selectFilter", new Class<?>[]{String.class}, "presets");
+    library.openPresets();
+    capture(mc, options, size, "music-presets");
+    library.showTracks();
     layout = (MusicFilters.Layout)invoke(library, "filters", new Class<?>[]{});
-    input(library).power$click(layout.folderX() + 8, layout.folderY() + 8, 0);
-    check((boolean)invoke(get(options, "choices"), "active", new Class<?>[]{}), "music preset selector did not open");
-    capture(mc, options, size, "music-presets"); close(get(options, "choices"));
-    set(library, "folders", List.of("music/Building", "music/Travel", "music/Quiet evenings"));
-    invoke(library, "selectFilter", new Class<?>[]{String.class}, "folder");
-    layout = (MusicFilters.Layout)invoke(library, "filters", new Class<?>[]{});
-    input(library).power$click(layout.folderX() + 8, layout.folderY() + 8, 0);
-    check((boolean)invoke(get(options, "choices"), "active", new Class<?>[]{}), "music folder selector did not open");
-    capture(mc, options, size, "music-folders"); close(get(options, "choices"));
+    input(library).power$click(layout.foldersX() + 8, layout.actionsY() + 8, 0);
+    check(mc.currentScreen instanceof FolderScreen, "music folder manager did not open");
+    capture(mc, mc.currentScreen, size, "music-folders");
+    mc.setScreen(options);
   }
 
   private static void waypoints(Minecraft mc, Screen previous, int[] size) throws Exception {

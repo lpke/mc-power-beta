@@ -192,11 +192,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
   private boolean libraryVisible() { return libraryOpen && audio(); }
   private boolean musicControlsVisible() { return audio(); }
-  private boolean musicSettingsVisible() { return libraryVisible() && library.settingsVisible(); }
-  private boolean settingRowsVisible() { return !libraryVisible() || musicSettingsVisible(); }
-  private boolean musicSetting(Setting setting) {
-    return Set.of("Music library", "Music gaps", "Menu music controls").contains(setting.group);
-  }
+  private boolean settingRowsVisible() { return !libraryVisible(); }
   void refreshMusicEditor() {
     if (session == null || minecraft == null) return;
     scroll = 0;
@@ -472,9 +468,9 @@ public final class PowerOptionsScreen extends UiScreen {
   private List<String> sections() {
     return sectionKeys;
   }
-  private boolean hasSections() { return libraryVisible() && !musicSettingsVisible() ? library.hasSections() : !sections().isEmpty(); }
+  private boolean hasSections() { return libraryVisible() ? library.hasSections() : !sections().isEmpty(); }
   private void toggleSections() {
-    if (libraryVisible() && !musicSettingsVisible()) { library.toggleSections(); return; }
+    if (libraryVisible()) { library.toggleSections(); return; }
     SectionCollapse.toggleAll(sections(), collapsed);
     selected = -1;
     layout();
@@ -611,7 +607,6 @@ public final class PowerOptionsScreen extends UiScreen {
     return session.settings().stream()
         .filter(this::inMapScope)
         .filter(s -> !s.group.equals("Music data") && !s.id.equals("audio.musicDirectories"))
-        .filter(s -> !musicSettingsVisible() || musicSetting(s))
         .filter(s -> changedOnly ? settingChanged(s) : listed.isEmpty() ? embedded() ? localMapView(s) : s.page.equals(page) : listed.contains(s.id))
         .filter(this::selectedPreset)
         .filter(s -> SettingAccess.visible(session, s) && SettingAccess.reason(session, s).isEmpty())
@@ -653,7 +648,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private int top() {
-    return musicSettingsVisible() ? library.settingsTop() : audio() ? audioContentTop() + 20 : rulesToolbar() ? 78 : 52;
+    return audio() ? audioContentTop() + 20 : rulesToolbar() ? 78 : 52;
   }
 
   private int bottom() {
@@ -666,8 +661,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   private void groupHeading(Row row, int y) {
-    String label = musicSettingsVisible() && row.group.equals("Music library") ? "Playback" : row.group;
-    SettingsGroup.draw(this, label, collapsed.contains(sectionKey(row.group)), left(), right() - 14, y);
+    SettingsGroup.draw(this, row.group, collapsed.contains(sectionKey(row.group)), left(), right() - 14, y);
   }
 
   private int groupChevronWidth() { return Math.max(textRenderer.getWidth("> "), textRenderer.getWidth("v ")); }
@@ -689,7 +683,7 @@ public final class PowerOptionsScreen extends UiScreen {
     if (capture != null && !SettingAccess.visible(session, capture)) { capture = null; captureModifier = 0; }
     if (dragging != null && !SettingAccess.visible(session, dragging)) dragging = null;
     mapAppearanceDestination = mapAppearanceAvailable();
-    String query = (musicSettingsVisible() ? library.query() : search.text()).strip().toLowerCase(Locale.ROOT);
+    String query = search.text().strip().toLowerCase(Locale.ROOT);
     int cluster = session.settings().stream().filter(s -> s.id.equals("infoHud.selectedCluster"))
         .mapToInt(s -> s.value.getAsInt()).findFirst().orElse(0);
     int hudMode = session.settings().stream().filter(s -> s.id.equals(HudEditorSettings.ENTRY))
@@ -700,7 +694,6 @@ public final class PowerOptionsScreen extends UiScreen {
         .map(id -> session.settings().stream().filter(s -> s.id.equals(id)).findFirst().orElse(null))
         .filter(Objects::nonNull).toList();
     candidates = candidates.stream().filter(this::inMapScope)
-        .filter(s -> !musicSettingsVisible() || musicSetting(s))
         .filter(s -> SettingAccess.pageVisible(session, s.page))
         .filter(s -> !s.id.equals("maps.worldMapEditor") || mapAppearanceDestination)
         .filter(s -> !controls() || s.kind == Setting.Kind.KEY)
@@ -726,7 +719,6 @@ public final class PowerOptionsScreen extends UiScreen {
       if (query.isEmpty() && !changedOnly && listed.isEmpty()
           && !local.luke.power.config.backend.InfoHudBackend.selected(s, cluster)) continue;
       if (s.group.equals("Music data")) continue;
-      if (audio() && !musicSettingsVisible() && !changedOnly && listed.isEmpty() && query.isEmpty() && musicSetting(s)) continue;
       if (query.isEmpty() && !changedOnly && listed.isEmpty() && (s.group.equals("Track rotation") || s.id.startsWith("audio.sound.music:"))) continue;
       if (listed.isEmpty() && s.kind == Setting.Kind.KEY && !showDisabled && !ControlLinks.enabled(session, s)) continue;
       if ((!changedOnly || settingChanged(s)) && (!listed.isEmpty() || (query.isEmpty()
@@ -892,7 +884,7 @@ public final class PowerOptionsScreen extends UiScreen {
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
     if (!isolatedRules() && !embedded() && x < origin() + sidebar() + 8) scrollViewport(wheel, true);
     else if (page.equals("Defaults")) { defaultsPanel.wheel(wheel, left(), span()); return; }
-    else if (libraryVisible() && !musicSettingsVisible()) library.wheel(wheel);
+    else if (libraryVisible()) library.wheel(wheel);
     else scrollViewport(wheel, false);
   }
 
@@ -1041,7 +1033,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (libraryVisible() && (!musicSettingsVisible() || y < top()) && x >= left() && y >= audioContentTop() && y < bottom()) {
+    if (libraryVisible() && x >= left() && y >= audioContentTop() && y < bottom()) {
       library.mouseClicked(x, y, button); return;
     }
     if (settingRowsVisible() && y >= top() && y < bottom() && x >= left() && x < right() - 10) {
@@ -1397,7 +1389,7 @@ public final class PowerOptionsScreen extends UiScreen {
       search.selectAll();
       return;
     }
-    if (libraryVisible() && (!musicSettingsVisible() || library.focused())) { library.keyPressed(c, key); return; }
+    if (libraryVisible()) { library.keyPressed(c, key); return; }
     if (search.focused) {
       String before = search.text();
       View searchOrigin = embedded() && before.isBlank() ? view() : null;
@@ -1601,7 +1593,7 @@ public final class PowerOptionsScreen extends UiScreen {
         : searchScopeVisible() && OptionsSearchScope.thisTab(page) ? "Search settings in this tab..." : "Search all settings...");
     if (canClear()) iconButton("remove", clearSearchX(), 27, 20, 20, mx, my, true, false);
     if (searchScopeVisible()) button(OptionsSearchScope.thisTab(page) ? "T" : "A", searchScopeX(), 27, 20, 20, mx, my, true);
-    boolean expandSections = libraryVisible() && !musicSettingsVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
+    boolean expandSections = libraryVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
     iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 20, 20, mx, my,
         hasSections(), false);
     if (rulesToolbar()) {
@@ -1709,7 +1701,7 @@ public final class PowerOptionsScreen extends UiScreen {
         else if (!conflicts.isEmpty() && inside(mx, listMouseY, controlLeft(row) - 12, cy, 12, 18)) {
           tip = conflictTip(s, conflicts); hoverId += ".conflicts";
         } else if (mx >= controlLeft(row) && mx < controlLeft) {
-          tip = s.id.equals("native.music") ? "Edit your music library, playlists and playback settings." : customise(s) ? "Paint and customize the retro title lettering." : soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
+          tip = s.id.equals("native.music") ? "Edit your music library and playlists." : customise(s) ? "Paint and customize the retro title lettering." : soundPreview(s) ? s.id.startsWith("audio.sound.music:") ? "Preview track; click again to stop" : "Preview sound; click again to stop" : s.kind == Setting.Kind.KEY ? "Related settings" : "Related controls"; hoverId += ".related";
         } else tip = Tooltips.setting(s, valueEditor.editing(s) ? valueEditor.help()
             : ItemEditors.accepts(s) ? "Choose from the item or block list."
             : numeric && mx >= controlLeft ? s.slider() ? "Right-click to enter an exact value." : "Click to enter an exact value." : "");
@@ -1724,9 +1716,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (libraryVisible()) {
       library.render(mx, my, delta);
-      if (!musicSettingsVisible() || !library.hoverHelp().isEmpty()) {
-        tip = library.hoverHelp(); hoverId = "library:" + library.hoverKey();
-      }
+      tip = library.hoverHelp(); hoverId = "library:" + library.hoverKey();
     }
     valueEditor.endFrame();
     if (musicControlsVisible()) {
@@ -1739,7 +1729,7 @@ public final class PowerOptionsScreen extends UiScreen {
           case PREVIOUS -> "Previous track, or replay the last track while waiting between tracks.";
           case NEXT -> "Next track, or end the preview and resume the previous track. Queued tracks take priority outside previews.";
           case QUEUE -> item.enabled() ? "Open the music queue" : "Queue is empty. Add tracks from the library.";
-          case PLAYLIST -> "World playlist. Choose a saved playlist for automatic playback. Menu playback has its own settings in Edit music.";
+          case PLAYLIST -> "World playlist. Choose a saved playlist for automatic playback. Menu playback has its own settings in Audio.";
         };
         hoverId = "music." + action;
       }

@@ -35,8 +35,6 @@ public final class MusicErasChecks {
           }
         });
         options=MenuUpdateChecks.open(mc,"Audio");
-        var library=MusicPlaylists460Checks.library(options);
-        MusicPlaylists460Checks.tab(options,library,"settings");
         test("music settings have seconds and one gap section without duplicate playback switches", () -> {
           field(options,"collapsed",new HashSet<>()); call(options,"layout");
           var gaps=options.session().settings().stream().filter(s->s.group.equals("Music gaps")).toList();
@@ -48,7 +46,7 @@ public final class MusicErasChecks {
           check(groups.contains("Music gaps"),groups.toString());
           check(!groups.contains("Individual music tracks"),"duplicate track controls");
         });
-        MusicPlaylists460Checks.tab(options,library,"library");
+        var library=MusicPlaylists460Checks.library(options);
         library.restore(new MusicLibraryScreen.State(false,"","",0,0));call(library,"rebuild");options.render(-1,-1,0);
         test("era accordions collapse, locate playing tracks and remember collapse state", () -> {
           var headings=new ArrayList<String>();

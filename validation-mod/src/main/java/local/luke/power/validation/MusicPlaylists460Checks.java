@@ -23,8 +23,7 @@ final class MusicPlaylists460Checks {
   private static final Path REPORT = Path.of("power-beta-data/reports/music-playlists-460");
   private static final String FIRST = "music:calm1.ogg", SECOND = "music:calm2.ogg";
   private static final String MISSING = "music:playlist-fixture-missing.ogg";
-  private static final List<String> VIEWS = List.of("settings", "selector", "library", "library-expanded",
-      "playlists", "beta", "new", "editor", "group-gain", "order", "editor-settings", "menu", "queue");
+  private static final List<String> VIEWS = List.of("library", "favorites", "playlists", "audio-playback", "audio-controls", "menu");
   private static State staged;
   private static PowerOptionsScreen activeOptions;
   private static List<String> fixtureFolders=List.of();
@@ -157,6 +156,16 @@ final class MusicPlaylists460Checks {
     check((boolean)call(field(options, "choices"), "active"), "top playlist selector did not open");
   }
 
+  private static void showGroup(PowerOptionsScreen options, String group) throws Exception {
+    check(!(boolean)call(options, "libraryVisible"), "music settings unexpectedly inside editor");
+    check(field(options, "page").equals("Audio"), "music settings left Audio");
+    Object heading = ((List<?>)field(options, "rows")).stream().filter(row -> {
+      try { return (boolean)call(row, "heading") && group.equals(call(row, "group")); }
+      catch (Exception e) { throw new RuntimeException(e); }
+    }).findFirst().orElseThrow(() -> new AssertionError("Audio group missing " + group));
+    field(options, "scroll", (double)(int)call(heading, "y")); call(options, "layout");
+  }
+
   private static void openSetting(PowerOptionsScreen options, String id) throws Exception {
     Object target=null;
     for(Object row:(List<?>)field(options,"rows")) {
@@ -195,11 +204,20 @@ final class MusicPlaylists460Checks {
     var options = open(mc); options.init(mc, width, height);
     if (view.equals("settings")) { revealMusic(options); options.render(-1, -1, 0); return options; }
     if (view.equals("selector")) { openSelector(options); options.render(-1, -1, 0); return options; }
+    if (Set.of("audio-playback", "audio-controls", "menu").contains(view)) {
+      showGroup(options, view.equals("audio-controls") ? "Music menu controls" : "Music playback");
+      if (view.equals("menu")) openSetting(options, "audio.menuPlaylist");
+      options.render(-1, -1, 0); return options;
+    }
     var library = library(options);
     switch (view) {
       case "library", "library-expanded" -> {
         tab(options, library, "library");
         if (view.equals("library-expanded")) { ((Set<?>)field(library, "collapsed")).clear(); call(library, "rebuildRows"); }
+      }
+      case "favorites" -> {
+        tab(options, library, "favorites");
+        ((Set<?>)field(library, "collapsed")).clear(); call(library, "rebuildRows");
       }
       case "playlists", "beta" -> {
         tab(options, library, "playlists");
@@ -223,10 +241,6 @@ final class MusicPlaylists460Checks {
           check(mc.currentScreen instanceof MusicPlaylistOrderScreen, "Order did not open native screen");
           mc.currentScreen.init(mc, width, height);
         }
-      }
-      case "editor-settings", "menu" -> {
-        tab(options, library, "settings");
-        if (view.equals("menu")) openSetting(options, "audio.menuPlaylist");
       }
       case "queue" -> {
         MusicRequests.edit(q -> { q.tracks.clear(); q.add(FIRST); q.add(SECOND); q.add(FIRST); }); library.showQueue();
@@ -396,7 +410,14 @@ final class MusicPlaylists460Checks {
         check(library.sectionsCollapsed(), "Library did not start collapsed");
         library.toggleSections(); check(!library.sectionsCollapsed(), "Library expand all failed");
         library.toggleSections(); check(library.sectionsCollapsed(), "Library collapse all failed");
-        tab(options, library, "playlists"); tab(options, library, "settings"); tab(options, library, "library");
+        tab(options, library, "playlists"); tab(options, library, "favorites");
+        check(((List<?>)field(library, "tracks")).equals(List.of(FIRST)), "Favorites tab did not filter starred tracks");
+        check(((Map<?,?>)field(library, "groupTracks")).get("Alpha").equals(List.of(FIRST)), "Favorites group count includes unstarred tracks");
+        var header = (MusicFilters.Layout)call(library, "filters");
+        check(header.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library", "playlists", "favorites")), "unexpected editor tabs");
+        int finalTabRight = header.tabs().get(2).x() + header.tabs().get(2).width();
+        check(header.actionsY() == header.tabs().get(0).y() ? header.foldersX() - finalTabRight >= 8 : header.actionsY() > header.tabs().get(0).y() + 18, "catalog actions overlap tabs");
+        tab(options, library, "library");
         options.render(-1, -1, 0); check(GL11.glGetError() == 0, "native editor GL error");
       }
       library.showTrack(FIRST);int y=trackY(library,FIRST);var geometry=(MusicRowLayout)call(library,"rowLayout");
@@ -510,14 +531,15 @@ final class MusicPlaylists460Checks {
         check(((TextInput)field(options,"search")).text().equals("Music")&&(double)field(options,"scroll")==scroll,"Back lost Music query/scroll");
       } finally {staticField(scope,"choice",previousScope);options.session().discard();}
     });
-    test("MUSIC460 editor Settings accepts arrow Tab and Enter with search unfocused",()->{
-      AudioConfig.preview(seed());var options=open(mc);var library=library(options);tab(options,library,"settings");library.unfocus();
+    test("MUSIC460 Audio playback settings accept arrow Tab and Enter",()->{
+      AudioConfig.preview(seed());var options=open(mc);showGroup(options,"Music playback");
       ((TextInput)field(options,"search")).focused=false;field(options,"selected",-1);
       var input=(ScreenInput)(Object)options;input.power$key('\0',Keyboard.KEY_DOWN);int first=(int)field(options,"selected");
       input.power$key('\0',Keyboard.KEY_TAB);check((int)field(options,"selected")!=first,"Settings Tab did not move selection");
       var rows=(List<?>)field(options,"rows");int index=-1;
       for(int i=0;i<rows.size();i++){var setting=(Setting)call(rows.get(i),"setting");if(setting!=null&&setting.id.equals("audio.menuMusic")){index=i;break;}}
-      check(index>=0,"menu behavior row missing");field(options,"selected",index);int before=find(options.session(),"audio.menuMusic").value.getAsInt();
+      check(index>=0,"menu behavior row missing");field(options,"selected",index);
+      field(options,"scroll",Math.max(0d,(int)call(rows.get(index),"y")-24d));call(options,"layout");int before=find(options.session(),"audio.menuMusic").value.getAsInt();
       input.power$key('\0',Keyboard.KEY_RIGHT);check((boolean)call(field(options,"choices"),"active"),"Settings Right did not open shared dropdown");
       input.power$key('\0',Keyboard.KEY_DOWN);input.power$key('\0',Keyboard.KEY_RETURN);
       check(find(options.session(),"audio.menuMusic").value.getAsInt()!=before,"Settings dropdown Down/Enter did not choose next value");
@@ -532,7 +554,7 @@ final class MusicPlaylists460Checks {
 
   static void menuAssignment(Minecraft mc) throws Exception {
     test("MUSIC460 native menu selector keeps world identity and empty membership", () -> {
-      AudioConfig.preview(seed()); var options = open(mc); var library = library(options); tab(options, library, "settings");
+      AudioConfig.preview(seed()); var options = open(mc); showGroup(options, "Music playback");
       openSetting(options, "audio.menuPlaylist");
       ((ScreenInput)(Object)options).power$key('\0', Keyboard.KEY_END); ((ScreenInput)(Object)options).power$key('\0', Keyboard.KEY_RETURN);
       check(AudioConfig.current().menuPlaylist.equals("empty"), "menu selector missed final saved playlist");

@@ -66,27 +66,27 @@ public final class AudioBackend implements Backend {
           new JsonPrimitive(100),
           "Volume in percent, multiplied by Master volume and Game sounds.",
           List.of());
-    add("playlist", "Music library", "World playlist", Setting.Kind.TEXT,
+    add("playlist", "Music playback", "World playlist", Setting.Kind.TEXT,
         new JsonPrimitive(s.playlist), new JsonPrimitive(MusicPlaylist.BETA),
         "Choose Beta or a saved playlist for world playback.", List.of());
-    add("menuPlaylist", "Music library", "Menu playlist", Setting.Kind.TEXT,
+    add("menuPlaylist", "Music playback", "Menu playlist", Setting.Kind.TEXT,
         new JsonPrimitive(s.menuPlaylist), new JsonPrimitive(MusicPlaylist.SAME_AS_WORLD),
         "Use the world playlist, Beta or a saved playlist for menu music.", List.of());
     add("playlists", "Music data", "Music playlists", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.playlists), new JsonArray(), "Saved ordered music selections.", List.of());
     add("favourites", "Music data", "Favorite tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.favourites), new JsonArray(), "Starred music tracks.", List.of());
-    add("menuMusic", "Music library", "Menu music", Setting.Kind.CHOICE,
+    add("menuMusic", "Music playback", "Menu music", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuMusic.ordinal()), new JsonPrimitive(2),
         "Choose the world playlist, menu playlist or both. World and Mix keep music playing across world transitions. Empty playlists stay silent.",
         List.of("World soundtrack", "Menu selection", "Mix both"));
-    add("dimensionMusic", "Music library", "On dimension change", Setting.Kind.CHOICE,
+    add("dimensionMusic", "Music playback", "On dimension change", Setting.Kind.CHOICE,
         new JsonPrimitive(s.dimensionMusic.ordinal()), new JsonPrimitive(0),
         "Continue music, end only dimension-specific custom tracks, or end any track when using a portal.",
         List.of("Continue", "Stop dimension tracks", "Stop all"));
     add(
         "musicDirectories",
-        "Music library",
+        "Music playback",
         "Music folders",
         Setting.Kind.LIST,
         MusicFolders.encode(s.musicDirectories, s.disabledMusicDirectories),
@@ -95,7 +95,7 @@ public final class AudioBackend implements Backend {
         List.of());
     add(
         "recursive",
-        "Music library",
+        "Music playback",
         "Include subfolders",
         Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.recursive),
@@ -104,7 +104,7 @@ public final class AudioBackend implements Backend {
         List.of());
     add(
         "shuffle",
-        "Music library",
+        "Music playback",
         "Shuffle tracks",
         Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.shuffle),
@@ -113,7 +113,7 @@ public final class AudioBackend implements Backend {
         List.of());
     add(
         "avoidRepeats",
-        "Music library",
+        "Music playback",
         "Avoid consecutive repeats",
         Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.avoidRepeats),
@@ -134,23 +134,23 @@ public final class AudioBackend implements Backend {
           Setting.Kind.INTEGER, new JsonPrimitive(minimum ? s.gapMinSeconds : s.gapMaxSeconds),
           new JsonPrimitive(minimum ? 600 : 1200), 0, 86400, 1, List.of(), false));
     }
-    add("menuControls", "Menu music controls", "Show music controls", Setting.Kind.BOOLEAN,
+    add("menuControls", "Music menu controls", "Show music controls", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.menuControls), new JsonPrimitive(true),
         "Show play/pause, previous, next, quiet and track information on menus.", List.of());
-    add("menuControlsMainMenu", "Menu music controls", "Show in main menu", Setting.Kind.BOOLEAN,
+    add("menuControlsMainMenu", "Music menu controls", "Show in main menu", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.menuControlsMainMenu), new JsonPrimitive(true),
         "Also show the controls on the title screen when Show music controls is on.", List.of());
-    add("menuControlsScrub", "Menu music controls", "Show scrub bar", Setting.Kind.BOOLEAN,
+    add("menuControlsScrub", "Music menu controls", "Show scrub bar", Setting.Kind.BOOLEAN,
         new JsonPrimitive(s.menuControlsScrub), new JsonPrimitive(false),
         "Show playback position and seek within the current song on menus.", List.of());
-    add("menuControlsPosition", "Menu music controls", "Position", Setting.Kind.CHOICE,
+    add("menuControlsPosition", "Music menu controls", "Position", Setting.Kind.CHOICE,
         new JsonPrimitive(s.menuControlsPosition.ordinal()), new JsonPrimitive(1),
         "Anchor the music panel beside the menu or at a screen edge. Offsets adjust its position.",
         List.of("Above menu", "Below menu", "Top left", "Top center", "Top right",
             "Middle left", "Middle right", "Bottom left", "Bottom center", "Bottom right"));
     for (boolean horizontal : new boolean[]{true, false}) {
       String key = horizontal ? "menuControlsOffsetX" : "menuControlsOffsetY";
-      entries.add(new Setting("audio." + key, id(), "Audio", "Menu music controls",
+      entries.add(new Setting("audio." + key, id(), "Audio", "Music menu controls",
           horizontal ? "Horizontal offset" : "Vertical offset",
           horizontal ? "Move right with positive values, left with negative values. Uses scaled GUI pixels."
               : "Move down with positive values, up with negative values. Uses scaled GUI pixels.",

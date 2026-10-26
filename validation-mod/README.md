@@ -18,9 +18,10 @@
 # Runtime checks
 
 - `music-playlists-460 prepare` stages two temporary imported folders with valid bundled Ogg samples.
-  Wait for the scanner, then `music-playlists-460 capture` writes 26 native screenshots at 320x240 and 640x420.
-  Views are `settings`, `selector`, `library`, `library-expanded`, `playlists`, `beta`,
-  `new`, `editor`, `group-gain`, `order`, `editor-settings`, `menu` and `queue`. Use a muted disposable
+  Wait for the scanner, then `music-playlists-460 capture` writes 12 native screenshots at 320x240 and 640x420.
+  Captured views are `library`, `favorites`, `playlists`, `audio-playback`,
+  `audio-controls` and `menu`. Other staging views include `settings`, `selector`,
+  `library-expanded`, `beta`, `new`, `editor`, `group-gain`, `order` and `queue`. Use a muted disposable
   singleplayer world, the verified silent Pulse sink and a client window of at least
   1280x840. Images and `captures.json` go to `power-beta-data/reports/music-playlists-460`.
   `music-playlists-460 view VIEW` stages one view at 640x420; `stop` restores it.
@@ -30,7 +31,7 @@
   Shuffle and ordered reservations, Save/Discard, fixed Beta originals and Copy,
   saved empty/missing references, menu assignments, auto/manual Options and independent
   queue persistence, selected-playlist deletion, dirty-draft modals, global-search Back
-  and unfocused Settings keyboard controls. It restores configuration, music and options.txt byte-for-byte,
+  and ordinary Audio settings keyboard controls. It restores configuration, music and options.txt byte-for-byte,
   runtime audio/queue/preferences, and only removes backups and sample folders that it created.
   To check disabled-source ownership, use `prepare`, wait, `source-start`, `source-off`,
   wait, `source-check`, then `stop`. The check verifies current ID, label, group, song gain

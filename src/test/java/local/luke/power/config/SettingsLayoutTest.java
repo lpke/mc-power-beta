@@ -124,7 +124,7 @@ class SettingsLayoutTest {
   @Test void playlistChoicesLeadTheRemainingMusicSettings() {
     var ids=List.of("audio.dimensionMusic", "audio.musicDirectories", "audio.menuPlaylist",
         "audio.menuMusic", "audio.playlist", "audio.recursive");
-    var entries=ids.stream().map(id -> setting(id,"Audio","Music library")).toList();
+    var entries=ids.stream().map(id -> setting(id,"Audio","Music playback")).toList();
     assertEquals(List.of("audio.playlist","audio.menuPlaylist","audio.musicDirectories","audio.menuMusic",
         "audio.recursive","audio.dimensionMusic"),SettingsLayout.ordered(entries).stream().map(s -> s.id).toList());
   }

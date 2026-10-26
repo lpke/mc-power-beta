@@ -5,8 +5,9 @@
 ## [4.6.0] - 2026-10-26
 
 - Store imported music, favourites, track volumes and ordered playlists separately from playback preferences.
-- Open Edit music beside the Music volume slider. Browse Library, Playlists and Settings while keeping the existing playback controls in place.
-- Group the Library by imported folders and included soundtracks, with Reload and folder management in the Library tab.
+- Open Edit music beside the Music volume slider. Browse Library, Playlists and Favorites while keeping the existing playback controls in place.
+- Group the Library by imported folders and included soundtracks, with Folders and Reload beside the dark tabs when space permits, or on the row below.
+- Keep music settings in Audio under Music playback, Music gaps and Music menu controls.
 - Select the current playlist from the Audio toolbar. Create, copy, edit and remove playlists with isolated drafts, exact membership and per-playlist group volumes.
 - Drag tracks to reorder a playlist or use the arrow controls. Toggle Shuffle from Playlists; switching it off plays tracks in saved order.
 - Include a protected Beta playlist with the 12 original Beta 1.7.3 tracks, while keeping the full bundled Minecraft catalog available.
