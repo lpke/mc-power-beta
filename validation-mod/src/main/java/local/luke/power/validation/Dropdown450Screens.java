@@ -112,9 +112,9 @@ final class Dropdown450Screens {
     capture(mc, options, size, "music-presets");
     library.showTracks();
     layout = (MusicFilters.Layout)invoke(library, "filters", new Class<?>[]{});
-    input(library).power$click(layout.foldersX() + 8, layout.actionsY() + 8, 0);
-    check(mc.currentScreen instanceof FolderScreen, "music folder manager did not open");
-    capture(mc, mc.currentScreen, size, "music-folders");
+    input(library).power$click(layout.addFolderX() + 8, layout.actionsY() + 8, 0);
+    check(mc.currentScreen instanceof DirectoryScreen, "Add folder did not open the directory picker");
+    capture(mc, mc.currentScreen, size, "music-add-folder");
     mc.setScreen(options);
   }
 

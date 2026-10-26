@@ -80,22 +80,17 @@ public final class AudioLayoutChecks {
         field(options,"library",new MusicLibraryScreen(options));
         mc.setScreen(options);
         var library=(MusicLibraryScreen)field(options,"library");
-        test("new library has fixed Library Playlists Settings tabs", () -> {
+        test("new library has fixed Library Playlists Favorites tabs", () -> {
           library.showTracks();
           var tabs=(MusicFilters.Layout)call(library,"filters");
-          check(tabs.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library","playlists","settings")),"editor tabs missing");
+          check(tabs.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library","playlists","favorites")),"editor tabs missing");
         });
-        test("folder toggles are local until Done and preserve rollback", () -> {
-          Setting folders=find(options.session(),"audio.musicDirectories");var original=folders.value.deepCopy();
-          var screen=new FolderScreen(options,folders);mc.setScreen(screen);
-          click(screen,(int)call(screen,"panelLeft")+25,80);
-          check(folders.value.equals(original),"toggle escaped local draft");
-          click(screen,(int)call(screen,"panelRight")-70,screen.height-20);
-          check(folders.value.equals(original),"Cancel changed folders");
-          screen=new FolderScreen(options,folders);mc.setScreen(screen);
-          click(screen,(int)call(screen,"panelLeft")+25,80);
-          click(screen,(int)call(screen,"panelRight")-140,screen.height-20);
-          check(AudioConfig.current().disabledMusicDirectories.contains(FOLDERS.get(0)),"Done did not preview switch");
+        test("Library folder toggles preview immediately and Options discard restores them", () -> {
+          library.showTracks();
+          String group=MusicLibrarySources.id(FOLDERS.get(0));
+          int y=MusicFolderChecks.sourceY(library,group);
+          click(options,(int)call(library,"sourceToggleX")+5,y+8);
+          check(AudioConfig.current().disabledMusicDirectories.contains(FOLDERS.get(0)),"On/Off did not preview switch");
           check(AudioConfig.current().musicDirectories.containsAll(FOLDERS),"switch erased path");
           check(MusicFixtureSupport.tracks(AudioConfig.current()).equals(List.of(b)),"switch erased track choice");
           options.session().discard();
@@ -182,8 +177,8 @@ public final class AudioLayoutChecks {
             click(options,(int)call(options,"left")+3,32);options.render(-1,-1,0);
             musicEditor(options);
             check(!library.queueVisible(),"Library button failed at "+size[0]);
-            var folders=new FolderScreen(options,find(options.session(),"audio.musicDirectories"));
-            folders.init(mc,size[0],size[1]);folders.render(-1,-1,0);
+            var picker=new DirectoryScreen(options,values -> {},List.of());
+            picker.init(mc,size[0],size[1]);picker.render(-1,-1,0);picker.removed();
             check(GL11.glGetError()==0,"OpenGL error at "+size[0]);
           }
           mc.setScreen(options);

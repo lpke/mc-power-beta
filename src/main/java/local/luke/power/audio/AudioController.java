@@ -39,6 +39,8 @@ public final class AudioController {
   private static final MusicProgress progress = new MusicProgress();
   private static AudioSettings rotationConfig;
   private static List<MusicLibrary.Track> enabledTracks = List.of();
+  private static MusicLibrarySources.Snapshot sourceLibrary =
+      new MusicLibrarySources.Snapshot(List.of(), Map.of(), List.of());
   private record Context(boolean world, int dimension, String biome) {}
   private record PoolKey(AudioSettings settings, MusicRules rules, Context context, int revision) {}
   private static PoolKey activeKey, nextKey;
@@ -249,6 +251,11 @@ public final class AudioController {
 
   public static List<MusicLibrary.Track> customTracks() { return custom; }
 
+  public static MusicLibrarySources.Snapshot sourceLibrary() {
+    updateRotation();
+    return sourceLibrary;
+  }
+
   private static void indexLibrary() {
     rotationConfig = null;
     Set<String> owned = new HashSet<>(List.of(currentMusic, menuMusic, MusicPreview.track()));
@@ -312,8 +319,9 @@ public final class AudioController {
         return;
       }
       Path game = FabricLoader.getInstance().getGameDir();
-      enabledTracks = MusicFolders.enabledTracks(game, library, config.musicDirectories,
-          config.disabledMusicDirectories, config.recursive);
+      sourceLibrary = MusicLibrarySources.build(game, config.musicDirectories,
+          config.disabledMusicDirectories, library, config.recursive);
+      enabledTracks = sourceLibrary.tracks();
       rotationConfig = config;
     }
   }
@@ -384,13 +392,13 @@ public final class AudioController {
 
   private static class_267 resolveCurrentTrack(String id) throws java.io.IOException {
     class_267 track = resolveTrack(id);
-    MusicLibrary.Track owned = detachedCustom.get(id);
+    MusicLibrary.Track owned = trackMetadata(id);
     return track != null || owned == null || !id.equals(currentTrackId()) ? track : entry(owned);
   }
 
   public static class_267 resolveTrack(String id) throws java.io.IOException {
     MusicLibrary.Track customTrack = customById.get(id);
-    if (customTrack != null) return entry(customTrack);
+    if (customTrack != null) return sourceLibrary().trackSources().containsKey(id) ? entry(customTrack) : null;
     class_267 builtin = BundledMusic.entry(id);
     if (builtin != null) return builtin;
     if (client == null) return null;
@@ -791,7 +799,7 @@ public final class AudioController {
   public static Set<String> music(Minecraft mc) {
     Set<String> ids = new TreeSet<>();
     for (var track : BuiltinMusic.TRACKS) ids.add(track.id());
-    for (var track : customTracks()) ids.add(track.id());
+    for (var track : sourceLibrary().tracks()) ids.add(track.id());
     return ids;
   }
 }

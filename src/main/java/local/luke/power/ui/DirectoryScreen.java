@@ -88,8 +88,17 @@ public final class DirectoryScreen extends UiScreen {
   }
 
   private void choose(boolean childrenOnly) {
-    List<String> roots = selected.isEmpty() ? List.of(directory.toString()) : selected.stream().map(Path::toString).toList();
     try {
+      if (selected.isEmpty() && !path.text().equals(directory.toString())) {
+        if (path.text().isBlank()) { error = "Enter a folder path."; return; }
+        Path entered = MusicLibrary.resolve(FabricLoader.getInstance().getGameDir(), path.text());
+        if (!Files.isDirectory(entered, LinkOption.NOFOLLOW_LINKS) || !Files.isReadable(entered)) {
+          error = "Folder unavailable."; return;
+        }
+        go(entered);
+        if (!error.isEmpty()) return;
+      }
+      List<String> roots = selected.isEmpty() ? List.of(directory.toString()) : selected.stream().map(Path::toString).toList();
       var added = MusicFolders.additions(FabricLoader.getInstance().getGameDir(), existing, roots, childrenOnly);
       if (added.isEmpty()) {
         error = childrenOnly ? "No new child folders containing audio." : "Those folders are already listed.";

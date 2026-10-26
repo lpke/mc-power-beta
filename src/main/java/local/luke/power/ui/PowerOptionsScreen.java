@@ -1260,7 +1260,7 @@ public final class PowerOptionsScreen extends UiScreen {
           minecraft.setScreen(new IntegerArrayScreen(this, s,
               new IntegerArrayDraft.Rules(2, 32, 16, true), "Distance", "chunks"));
         else if (s.id.equals("audio.musicDirectories"))
-          minecraft.setScreen(new FolderScreen(this, s));
+          openMusicEditor();
         else minecraft.setScreen(new ValueScreen(s, returnScreen(), () -> changed(s)));
       }
       default -> {

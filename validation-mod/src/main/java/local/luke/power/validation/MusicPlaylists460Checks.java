@@ -23,7 +23,7 @@ final class MusicPlaylists460Checks {
   private static final Path REPORT = Path.of("power-beta-data/reports/music-playlists-460");
   private static final String FIRST = "music:calm1.ogg", SECOND = "music:calm2.ogg";
   private static final String MISSING = "music:playlist-fixture-missing.ogg";
-  private static final List<String> VIEWS = List.of("library", "favorites", "playlists", "audio-playback", "audio-controls", "menu");
+  private static final List<String> VIEWS = List.of("library", "library-expanded", "folder-picker", "folder-remove", "favorites", "playlists", "audio-playback", "audio-controls", "menu");
   private static State staged;
   private static PowerOptionsScreen activeOptions;
   private static List<String> fixtureFolders=List.of();
@@ -38,7 +38,7 @@ final class MusicPlaylists460Checks {
     check(mc.world != null && !mc.world.isRemote && mc.player != null, "open a disposable singleplayer world");
     if(action.equals("prepare")) {
       stop();staged=new State(mc);prepareImports(staged);AudioConfig.preview(seed());
-      log("MUSIC460 prepared two imported folders; wait for scanner, then capture|run|source-start|view VIEW");return;
+      log("MUSIC460 prepared two audio folders plus empty/missing sources; wait for scanner, then capture|run|source-start|view VIEW");return;
     }
     if(action.startsWith("source-")){source(mc,action);return;}
     if (action.startsWith("view ")) {
@@ -54,7 +54,7 @@ final class MusicPlaylists460Checks {
       prepareImports(state);
       if (action.equals("capture")) capture(mc);
       else if (action.equals("menu-pools")) menuPools();
-      else { selections(mc); sessions(mc); editor(mc); libraryControls(mc); routes(mc); orderedPlayback(mc); menuAssignment(mc); menuPools(); }
+      else { selections(mc); sessions(mc); editor(mc); libraryControls(mc); routes(mc); orderedPlayback(mc); menuAssignment(mc); menuPools(); MusicFolderChecks.run(mc); }
     }
     log("MUSIC460 " + action + " FAILURES " + failures + " directory=" + REPORT);
     check(failures == 0, "playlist failures=" + failures);
@@ -66,14 +66,19 @@ final class MusicPlaylists460Checks {
 
   private static void prepareImports(State state) throws Exception {
     if(state.imports!=null)return;
-    state.imports=Files.createTempDirectory(Path.of(".").toAbsolutePath(),"music-playlists-460-");
+    state.imports=Files.createTempDirectory(Path.of(".").toAbsolutePath(),"music-playlists-460-").toRealPath();
     List<String> folders=new ArrayList<>();
     String[] names={"Imported quiet","Imported building"},tracks={"calm1.ogg","creative1.ogg"};
     for(int i=0;i<names.length;i++) {
       Path folder=Files.createDirectory(state.imports.resolve(names[i]));Path song=folder.resolve(i==0?"Quiet sample.ogg":"Building sample.ogg");
       try(var in=MusicPlaylists460Checks.class.getResourceAsStream("/assets/powerbeta/music/"+tracks[i])){Files.copy(Objects.requireNonNull(in),song);}
-      folders.add(folder.toString());if(i==0)importedTrack=new MusicLibrary.Track(song.toRealPath(),song.getFileName().toString()).id();
+      folders.add(folder.toString());if(i==0) {
+        importedTrack=new MusicLibrary.Track(song.toRealPath(),song.getFileName().toString()).id();
+        for(int copy=1;copy<8;copy++)Files.copy(song,folder.resolve("Quiet sample " + copy + ".ogg"));
+      }
     }
+    folders.add(Files.createDirectory(state.imports.resolve("Empty source")).toString());
+    folders.add(state.imports.resolve("Missing source").toString());
     fixtureFolders=List.copyOf(folders);
   }
 
@@ -82,6 +87,10 @@ final class MusicPlaylists460Checks {
     switch(action) {
       case "source-start" -> {
         importedEntry=AudioController.resolveTrack(importedTrack);check(importedEntry!=null,"import scan pending");
+        var sources = AudioController.sourceLibrary();
+        check(MusicLibrarySources.id(fixtureFolders.get(0)).equals(sources.trackSources().get(importedTrack)), "catalog source ownership uses physical parent group");
+        check(sources.folders().stream().anyMatch(source -> source.path().equals(fixtureFolders.get(2)) && source.status().equals("Empty")), "empty source status missing after scan");
+        check(sources.folders().stream().anyMatch(source -> source.path().equals(fixtureFolders.get(3)) && source.status().equals("Unavailable")), "missing source status missing after scan");
         var settings=AudioConfig.copy();settings.sounds.put(importedTrack,37);AudioConfig.preview(settings);
         importedLabel=AudioController.musicLabel(importedTrack);importedGroup=AudioController.musicGroup(importedTrack);
         AudioController.playNow(importedTrack);AudioController.pause();AudioController.duration();
@@ -89,8 +98,11 @@ final class MusicPlaylists460Checks {
         log("MUSIC460 source started paused; source-off then wait for scan, source-check");
       }
       case "source-off" -> {
-        var settings=AudioConfig.copy();settings.disabledMusicDirectories.add(fixtureFolders.get(0));AudioConfig.preview(settings);
-        log("MUSIC460 source disabled; wait for scan then source-check");
+        MenuPreferences.update(value -> value.autoApply = false);
+        var options = open(mc); var library = library(options);
+        MusicFolderChecks.sourceClick(options, library, fixtureFolders.get(0), "sourceToggleX");
+        check(AudioConfig.current().disabledMusicDirectories.contains(fixtureFolders.get(0)), "native Off did not change source");
+        log("MUSIC460 source disabled inline; wait for scan then source-check");
       }
       case "source-check" -> {
         check(AudioController.customTracks().stream().noneMatch(t->t.id().equals(importedTrack)),"Off source still scanned");
@@ -102,6 +114,26 @@ final class MusicPlaylists460Checks {
         check(AudioController.trackVolume(importedTrack)==37,"Off rescan lost owned per-track gain");
         check(AudioController.duration()>0,"Off current stream lost duration");
         log("MUSIC460 source Off retains owned identity/label/group/gain/duration and blocks future selection PASS");
+      }
+      case "source-sticky" -> {
+        failures = 0;
+        MusicFolderChecks.sticky(mc, fixtureFolders.get(0));
+        check(failures == 0, "sticky source control failures=" + failures);
+        log("MUSIC460 clipped sticky source native controls PASS");
+      }
+      case "source-on" -> {
+        check(AudioConfig.current().disabledMusicDirectories.contains(fixtureFolders.get(0)), "source must be Off before source-on");
+        var options = open(mc); var library = library(options);
+        MusicFolderChecks.sourceClick(options, library, fixtureFolders.get(0), "sourceToggleX");
+        check(!AudioConfig.current().disabledMusicDirectories.contains(fixtureFolders.get(0)), "native On did not change source");
+        log("MUSIC460 source enabled inline; wait for scan then source-on-check");
+      }
+      case "source-on-check" -> {
+        check(AudioController.resolveTrack(importedTrack) != null, "On source did not become available after scan");
+        var source = AudioController.sourceLibrary().folders().stream().filter(value -> value.path().equals(fixtureFolders.get(0))).findFirst().orElseThrow();
+        check(source.enabled() && source.status().equals("Ready") && source.trackIds().contains(importedTrack), "On source did not regain track rows");
+        check(AudioController.currentTrackId().equals(importedTrack), "On rescan replaced owned stream");
+        log("MUSIC460 native source On rescans and restores track rows PASS");
       }
       default -> throw new IllegalArgumentException(action);
     }
@@ -215,6 +247,17 @@ final class MusicPlaylists460Checks {
         tab(options, library, "library");
         if (view.equals("library-expanded")) { ((Set<?>)field(library, "collapsed")).clear(); call(library, "rebuildRows"); }
       }
+      case "folder-picker" -> {
+        tab(options, library, "library");
+        click(options, (int)call(library, "addFolderX") + 5, (int)call(library, "actionTop") + 5);
+        check(mc.currentScreen instanceof DirectoryScreen, "Add folder did not open picker");
+      }
+      case "folder-remove" -> {
+        tab(options, library, "library");
+        int y = MusicFolderChecks.sourceY(library, MusicLibrarySources.id(fixtureFolders.get(0)));
+        click(options, (int)call(library, "sourceRemoveX") + 5, y + 8);
+        check(library.modal(), "Remove did not open confirmation");
+      }
       case "favorites" -> {
         tab(options, library, "favorites");
         ((Set<?>)field(library, "collapsed")).clear(); call(library, "rebuildRows");
@@ -258,6 +301,7 @@ final class MusicPlaylists460Checks {
       for (int[] size : new int[][]{{320, 240}, {640, 420}})
         for (String view : VIEWS) {
           var screen = stage(mc, view, size[0], size[1]); Screen captured = mc.currentScreen;
+          if (captured != screen) captured.init(mc, size[0], size[1]);
           if (view.equals("menu") || view.equals("selector")) check((boolean)call(field(screen, "choices"), "active"), view + " lost its dropdown");
           String file = view + "-" + size[0] + ".png"; SettingsSnapshot.render(mc, captured, size[0], size[1], REPORT.resolve(file));
           captures.add(file); screen.session().discard(); screen.removed();
@@ -416,7 +460,7 @@ final class MusicPlaylists460Checks {
         var header = (MusicFilters.Layout)call(library, "filters");
         check(header.tabs().stream().map(MusicFilters.Tab::id).toList().equals(List.of("library", "playlists", "favorites")), "unexpected editor tabs");
         int finalTabRight = header.tabs().get(2).x() + header.tabs().get(2).width();
-        check(header.actionsY() == header.tabs().get(0).y() ? header.foldersX() - finalTabRight >= 8 : header.actionsY() > header.tabs().get(0).y() + 18, "catalog actions overlap tabs");
+        check(header.actionsY() == header.tabs().get(0).y() ? header.reloadX() - finalTabRight >= 8 : header.actionsY() > header.tabs().get(0).y() + 18, "catalog actions overlap tabs");
         tab(options, library, "library");
         options.render(-1, -1, 0); check(GL11.glGetError() == 0, "native editor GL error");
       }
@@ -425,10 +469,10 @@ final class MusicPlaylists460Checks {
       check(AudioConfig.current().sounds.get(FIRST)==0,"Library song gain slider missed");
       y=trackY(library,FIRST);click(options,geometry.favouriteX()+5,y+geometry.controlsY()+5);
       check(!AudioConfig.current().favourites.contains(FIRST),"Library global star missed");
-      click(options,(int)call(library,"foldersX")+5,(int)call(library,"actionTop")+5);
-      check(mc.currentScreen instanceof FolderScreen,"Library Folders button missed");
+      click(options,(int)call(library,"addFolderX")+5,(int)call(library,"actionTop")+5);
+      check(mc.currentScreen instanceof DirectoryScreen,"Library Add folder button missed");
       ((ScreenInput)(Object)mc.currentScreen).power$key('\0',Keyboard.KEY_ESCAPE);
-      check(mc.currentScreen==options,"folder Cancel did not return to editor");
+      check(mc.currentScreen==options,"picker Cancel did not return to editor");
       click(options,(int)call(library,"reloadX")+5,(int)call(library,"actionTop")+5);
       check(saved.equals(Catalog.JSON.toJson(AudioConfig.current().playlists)), "library browsing edited saved playlists");
       check(queue.equals(MusicRequests.tracks()), "library browsing edited queue"); options.session().discard();

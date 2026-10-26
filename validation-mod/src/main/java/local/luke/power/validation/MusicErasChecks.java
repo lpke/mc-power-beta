@@ -51,7 +51,7 @@ public final class MusicErasChecks {
         test("era accordions collapse, locate playing tracks and remember collapse state", () -> {
           var headings=new ArrayList<String>();
           for(Object row:(List<?>)field(library,"rows")) if(call(row,"id")==null) headings.add((String)call(row,"group"));
-          check(headings.stream().filter(h -> !h.startsWith("folder:")).toList().equals(BuiltinMusic.GROUPS),headings.toString());
+          check(headings.stream().filter(h -> !h.startsWith("folder:") && !h.startsWith("source:")).toList().equals(BuiltinMusic.GROUPS),headings.toString());
           int count=((List<?>)field(library,"rows")).size();
           int alphaY=MusicGroupChecks.groupY(library,"Alpha");
           click(options,(int)call(library,"left")+3,alphaY+9);

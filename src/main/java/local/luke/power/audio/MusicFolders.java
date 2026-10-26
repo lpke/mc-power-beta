@@ -120,15 +120,6 @@ public final class MusicFolders {
   /** Evaluate membership once per settings change, not for each audio tick or track. */
   public static List<MusicLibrary.Track> enabledTracks(Path game, MusicLibrary.Scan scan,
       List<String> folders, Set<String> disabled, boolean recursive) {
-    Set<Path> roots = new HashSet<>();
-    for (String folder : folders) {
-      if (disabled.contains(folder)) continue;
-      try {
-        Path root = MusicLibrary.resolve(game, folder);
-        if (!Files.isSymbolicLink(root)) roots.add(root.toRealPath());
-      } catch (IOException | RuntimeException ignored) { /* Unavailable folders stay in settings. */ }
-    }
-    return scan.tracks().stream().filter(track -> roots.stream().anyMatch(root ->
-        recursive ? track.path().startsWith(root) : root.equals(track.path().getParent()))).toList();
+    return MusicLibrarySources.build(game, folders, disabled, scan, recursive).tracks();
   }
 }

@@ -6,7 +6,8 @@
 
 - Store imported music, favourites, track volumes and ordered playlists separately from playback preferences.
 - Open Edit music beside the Music volume slider. Browse Library, Playlists and Favorites while keeping the existing playback controls in place.
-- Group the Library by imported folders and included soundtracks, with Folders and Reload beside the dark tabs when space permits, or on the row below.
+- Manage imported folders directly in their Library groups: add, switch On/Off or remove a folder without changing its files or saved playlists. Keep empty, missing and switched-off folders visible.
+- Place Add folder and Reload beside the dark tabs when space permits, or on the row below. Group nested tracks under their imported source while preserving playlist group volumes.
 - Keep music settings in Audio under Music playback, Music gaps and Music menu controls.
 - Select the current playlist from the Audio toolbar. Create, copy, edit and remove playlists with isolated drafts, exact membership and per-playlist group volumes.
 - Drag tracks to reorder a playlist or use the arrow controls. Toggle Shuffle from Playlists; switching it off plays tracks in saved order.

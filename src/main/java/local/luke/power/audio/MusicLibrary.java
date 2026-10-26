@@ -16,10 +16,17 @@ public final class MusicLibrary {
     public String playbackName() { return mp3() ? name.substring(0, name.length() - 4) + ".wav" : name; }
   }
 
-  public record Scan(List<Track> tracks, List<String> warnings) {
+  /** Filesystem observations collected only on the scanner thread. */
+  public record SourceFolder(String path, Path root, boolean available, List<String> warnings) {
+    public SourceFolder { warnings = List.copyOf(warnings); }
+  }
+
+  public record Scan(List<Track> tracks, List<String> warnings, List<SourceFolder> sources) {
+    public Scan(List<Track> tracks, List<String> warnings) { this(tracks, warnings, List.of()); }
     public Scan {
       tracks = List.copyOf(tracks);
       warnings = List.copyOf(warnings);
+      sources = List.copyOf(sources);
     }
   }
 
@@ -28,52 +35,76 @@ public final class MusicLibrary {
   public static Scan scan(Path game, List<String> folders, boolean recursive) {
     Map<Path, Track> tracks = new TreeMap<>();
     List<String> warnings = new ArrayList<>();
-    int visited = 0;
+    List<SourceFolder> sources = new ArrayList<>();
+    // Resolve every enabled root before walking. Even an overlapping root reached
+    // after the scan budget runs out needs a canonical identity for attribution.
     for (String folder : folders) {
-      Path dir;
+      Path dir = null;
+      String warning = "";
       try {
-        dir = resolve(game, folder);
-        if (!Files.isDirectory(dir) || Files.isSymbolicLink(dir)) {
-          warnings.add("Folder unavailable: " + folder);
-          continue;
-        }
+        dir = resolve(game, folder).toAbsolutePath().normalize();
+        if (!Files.isDirectory(dir) || Files.isSymbolicLink(dir) || !Files.isReadable(dir))
+          warning = "Folder unavailable: " + folder;
+        else dir = dir.toRealPath();
+      } catch (IOException | SecurityException e) {
+        warning = "Folder unavailable: " + folder;
       } catch (RuntimeException e) {
-        warnings.add("Invalid folder: " + folder);
+        warning = "Invalid folder: " + folder;
+      }
+      sources.add(new SourceFolder(folder, dir, warning.isEmpty(),
+          warning.isEmpty() ? List.of() : List.of(warning)));
+      if (!warning.isEmpty()) warnings.add(warning);
+    }
+    int visited = 0;
+    boolean limited = false;
+    for (int index = 0; index < sources.size(); index++) {
+      SourceFolder source = sources.get(index);
+      if (!source.available()) continue;
+      List<String> sourceWarnings = new ArrayList<>();
+      if (limited) {
+        sources.set(index, new SourceFolder(source.path(), source.root(), true,
+            List.of("Folder scan incomplete: music scan limit reached")));
         continue;
       }
-      try (var paths = Files.walk(dir, recursive ? 12 : 1)) {
+      try (var paths = Files.walk(source.root(), recursive ? 12 : 1)) {
         Iterator<Path> it = paths.iterator();
         while (it.hasNext()) {
           Path file = it.next();
           if (++visited > MAX_VISITED) {
-            warnings.add("Music scan reached the 20,000 file limit");
-            return new Scan(new ArrayList<>(tracks.values()), warnings);
+            sourceWarnings.add("Music scan reached the 20,000 file limit");
+            limited = true;
+            break;
           }
           if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) continue;
           String name = file.getFileName().toString();
           String lower = name.toLowerCase(Locale.ROOT);
           if (!lower.endsWith(".ogg") && !lower.endsWith(".wav") && !lower.endsWith(".mus") && !lower.endsWith(".mp3"))
             continue;
-          if (tracks.size() >= MAX_TRACKS) {
-            warnings.add("Music library reached the 2,048 track limit");
-            return new Scan(new ArrayList<>(tracks.values()), warnings);
-          }
-          if (Files.size(file) < 4 || Files.size(file) > 256L * 1024 * 1024) {
-            warnings.add("Skipped empty or oversized track: " + name);
+          long bytes = Files.size(file);
+          if (bytes < 4 || bytes > 256L * 1024 * 1024) {
+            sourceWarnings.add("Skipped empty or oversized track: " + name);
             continue;
           }
           if (!validHeader(file, lower)) {
-            warnings.add("Skipped invalid audio: " + name);
+            sourceWarnings.add("Skipped invalid audio: " + name);
             continue;
           }
           Path canonical = file.toRealPath();
-          tracks.putIfAbsent(canonical, new Track(canonical, name, lower.endsWith(".mp3") ? Mp3Converter.cached(game, canonical) : canonical));
+          if (tracks.containsKey(canonical)) continue;
+          if (tracks.size() >= MAX_TRACKS) {
+            sourceWarnings.add("Music library reached the 2,048 track limit");
+            limited = true;
+            break;
+          }
+          tracks.put(canonical, new Track(canonical, name, lower.endsWith(".mp3") ? Mp3Converter.cached(game, canonical) : canonical));
         }
       } catch (IOException | UncheckedIOException | SecurityException e) {
-        warnings.add("Could not finish reading: " + folder);
+        sourceWarnings.add("Could not finish reading: " + source.path());
       }
+      warnings.addAll(sourceWarnings);
+      sources.set(index, new SourceFolder(source.path(), source.root(), true, sourceWarnings));
     }
-    return new Scan(new ArrayList<>(tracks.values()), warnings);
+    return new Scan(new ArrayList<>(tracks.values()), warnings, sources);
   }
 
   public static Path resolve(Path game, String path) {

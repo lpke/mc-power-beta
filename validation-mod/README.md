@@ -18,10 +18,10 @@
 # Runtime checks
 
 - `music-playlists-460 prepare` stages two temporary imported folders with valid bundled Ogg samples.
-  Wait for the scanner, then `music-playlists-460 capture` writes 12 native screenshots at 320x240 and 640x420.
+  Wait for the scanner, then `music-playlists-460 capture` writes 18 native screenshots at 320x240 and 640x420.
   Captured views are `library`, `favorites`, `playlists`, `audio-playback`,
-  `audio-controls` and `menu`. Other staging views include `settings`, `selector`,
-  `library-expanded`, `beta`, `new`, `editor`, `group-gain`, `order` and `queue`. Use a muted disposable
+  `audio-controls`, `menu`, `library-expanded`, `folder-picker` and `folder-remove`.
+  Other staging views include `settings`, `selector`, `beta`, `new`, `editor`, `group-gain`, `order` and `queue`. Use a muted disposable
   singleplayer world, the verified silent Pulse sink and a client window of at least
   1280x840. Images and `captures.json` go to `power-beta-data/reports/music-playlists-460`.
   `music-playlists-460 view VIEW` stages one view at 640x420; `stop` restores it.
@@ -39,7 +39,7 @@
   `menu-pools`, also included in `run`, checks native candidate order, overlap and gain
   ownership for all WORLD/CUSTOM/MIX and same-world/Beta/saved/empty combinations.
   It starts no playback and keeps the loaded world. Run `audio-maintenance` for native
-  multi-folder import, local Save/Discard and source-file preservation. Existing
+  multi-folder import, inline source controls, Options Apply/Discard, failed-save rollback and source-file preservation. Existing
   `audio-groups-gain-*`, seek, history and pause/resume steps check actual playback.
 
 - `map-449 run` checks open-menu map mouse ownership, other modals, Pause label eligibility and session-only World Map visibility. `prepare inventory|pause-wheel|right|middle|left`, actual pointer action, `check`, then `stop` covers native mouse batches. The prepare token is combined, for example `prepare inventory-wheel`.
