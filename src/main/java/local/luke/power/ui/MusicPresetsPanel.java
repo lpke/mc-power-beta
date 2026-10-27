@@ -459,7 +459,7 @@ final class MusicPresetsPanel extends UiScreen {
         if (!reorder.dragging() && (hovered || parent.musicActionsOpen(playlist)))
           fill(hoverLeft, y, hoverRight, y + rowHeight, 0x60000000);
         boolean selected = playlist.id().equals(edits.selected());
-        if (selected) fill(layout.activeX(), y + 7, layout.activeX() + 2, y + 21, 0xffffdd66);
+        if (selected) fill(layout.activeX(), y + 9, layout.activeX() + 2, y + 19, 0xffffdd66);
         if (playlist == renaming) {
           int inputWidth = layout.nameWidth() - 24;
           input(rename, layout.nameX(), y + 5, inputWidth, mx, my, "Playlist name");

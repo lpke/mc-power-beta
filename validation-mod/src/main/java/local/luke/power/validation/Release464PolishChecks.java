@@ -142,13 +142,15 @@ final class Release464PolishChecks {
       hoverMask(mc, options, "song", size, left, right, y, left + 5, y + 10);
       library.cancelPlaylist(); library.openPresets(); Object panel = panel(library), layout = call(panel, "catalogLayout");
       y = catalogY(library, CUSTOM); int cy = n(layout, "controlsY", new Class<?>[]{int.class}, y);
-      check(n(layout, "nameX") == left + 8 && n(layout, "activeX") == left + 2, "catalog still reserves a radio column");
+      check(n(layout, "nameX") == left + 8 && n(layout, "activeX") == left + 1, "catalog marker differs from Defaults text spacing");
       check(n(layout, "useX") + n(layout, "useWidth") + 4 == n(layout, "duplicateX")
           && n(layout, "duplicateX") + n(layout, "duplicateWidth") + 4 == n(layout, "deleteX"), "Use/Duplicate/Delete order or spacing changed");
       hoverMask(mc, options, "catalog", size, left, right, y, n(layout, "duplicateX") + 5, cy + 8);
       BufferedImage active = shot(mc, options, "catalog-active", size, -1, -1, false);
-      for (int py = y + 7; py < y + 21; py++) for (int px = left + 2; px < left + 4; px++)
-        check(color(active, px, py) == 0xffdd66, "active playlist lost its two-pixel gold bar");
+      for (int py = y + 7; py < y + 21; py++) for (int px = left; px < left + 4; px++) {
+        boolean marker = px >= left + 1 && px < left + 3 && py >= y + 9 && py < y + 19;
+        check((color(active, px, py) == 0xffdd66) == marker, "active playlist marker does not match Defaults 2 by 10 bounds");
+      }
       int betaY = catalogY(library, MusicPlaylist.BETA), use = n(layout, "useX");
       cy = n(layout, "controlsY", new Class<?>[]{int.class}, betaY);
       press(options, use, cy + 8, 0);

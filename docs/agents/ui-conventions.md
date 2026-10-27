@@ -90,9 +90,11 @@ Keep these rules here rather than adding style details to the top-level instruct
 
 - Playlist catalog rows use `MusicRowLayout` for their hover, clipping and
   pointer bounds. The hover area runs from content left minus two pixels to
-  content right plus four pixels. Place the first marker four pixels inside
-  that area and the last action four pixels from its right edge.
-- Active playlist names use gold text and a two-pixel gold marker; other names
+  content right plus four pixels. Keep the last action four pixels from its
+  right edge.
+- Active playlist names use gold text and the Defaults base marker: two pixels
+  wide, ten pixels high, starting at content left plus one and one pixel above
+  the text. Keep text at content left plus eight. Other names
   use white text. Keep trailing Use, Duplicate and Delete controls. Disable Use
   for the active playlist and Delete for protected playlists. Choice popups
   retain their blue active indicator.

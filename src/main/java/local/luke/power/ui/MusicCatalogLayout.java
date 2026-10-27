@@ -9,7 +9,7 @@ record MusicCatalogLayout(int left, int right, boolean inline, int rowHeight, in
     boolean inline = width >= NAME_INSET + 140 + 4 + use + 4 + duplicate + 4 + 20;
     return new MusicCatalogLayout(left, left + width, inline, inline ? 28 : 48, use, duplicate);
   }
-  int activeX() { return left + 2; }
+  int activeX() { return left + 1; }
   int nameX() { return left + NAME_INSET; }
   int nameWidth() { return (inline ? useX() - 4 : right) - nameX(); }
   int useX() { return duplicateX() - 4 - useWidth; }
