@@ -14,7 +14,7 @@ final class MusicCollapseChecks {
     try {
       var settings=new AudioSettings();MusicFixtureSupport.allBuiltin(settings);
       settings.favourites=new TreeSet<>(Set.of("music:calm1.ogg","music:creative1.ogg"));
-      settings.playlists.add(new MusicPlaylist("collapse-fixture","Collapse fixture",new ArrayList<>(settings.favourites),Map.of()));
+      settings.playlists.add(new MusicPlaylist("collapse-fixture","Collapse fixture",new ArrayList<>(settings.favourites)));
       AudioConfig.preview(settings);
       screen=MenuUpdateChecks.open(mc,"Audio");field(screen,"libraryOpen",true);call(screen,"layout");
       var options=screen;var library=(MusicLibraryScreen)field(screen,"library");

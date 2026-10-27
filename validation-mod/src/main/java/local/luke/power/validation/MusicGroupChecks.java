@@ -33,7 +33,7 @@ final class MusicGroupChecks {
       for(var track:BuiltinMusic.TRACKS)if(track.group().equals("Alpha"))draft.include(track.id(),false);
       check(draft.tracks().contains("music:playlist-fixture-missing.ogg"),"group edit dropped missing ID");
       check(draft.tracks().containsAll(BuiltinMusic.TRACKS.stream().filter(t->t.group().equals("Beta / Creative")).map(BuiltinMusic.Track::id).toList()),"creative group incomplete");
-      check(draft.volume("Alpha")==40,"group inclusion changed gain");
+      check(settings.libraryGroupVolumes.getOrDefault("Alpha",100)==40,"group inclusion changed gain");
       check(saved.equals(local.luke.power.config.Catalog.JSON.toJson(AudioConfig.current().playlists)),"draft changed saved list");
       check(MusicRequests.tracks().equals(queue),"draft changed queue");
     });

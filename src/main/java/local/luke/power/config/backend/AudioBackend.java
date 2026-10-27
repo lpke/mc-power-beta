@@ -76,8 +76,10 @@ public final class AudioBackend implements Backend {
         Catalog.JSON.toJsonTree(s.playlists), new JsonArray(), "Saved ordered music selections.", List.of());
     add("favourites", "Music data", "Favorite tracks", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.favourites), new JsonArray(), "Starred music tracks.", List.of());
-    add("favoritesGroupVolumes", "Music data", "Favorites group volumes", Setting.Kind.LIST,
-        Catalog.JSON.toJsonTree(s.favoritesGroupVolumes), new JsonObject(), "Group volumes for Favorites.", List.of());
+    add("libraryGroupVolumes", "Music data", "Library group volumes", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.libraryGroupVolumes), new JsonObject(), "Global group volumes for all music.", List.of());
+    add("playlistOrder", "Music data", "Playlist order", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.playlistOrder), new JsonArray(), "Display order of saved playlists.", List.of());
     add("libraryOrder", "Music data", "Library group order", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.libraryOrder), new JsonArray(), "Display order of library groups.", List.of());
     add("dimensionMusic", "Music playback", "On dimension change", Setting.Kind.CHOICE,
@@ -270,11 +272,12 @@ public final class AudioBackend implements Backend {
             MusicPlaylist.validateTracks(tracks);
             s.favourites = new LinkedHashSet<>(tracks);
           }
-          case "favoritesGroupVolumes" -> {
+          case "libraryGroupVolumes" -> {
             Map<String, Integer> volumes = new TreeMap<>();
             v.getAsJsonObject().entrySet().forEach(entry -> volumes.put(entry.getKey(), entry.getValue().getAsInt()));
-            s.favoritesGroupVolumes = MusicGroups.copy(volumes);
+            s.libraryGroupVolumes = MusicGroups.copy(volumes);
           }
+          case "playlistOrder" -> s.playlistOrder = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
           case "libraryOrder" -> s.libraryOrder = new ArrayList<>(Arrays.asList(Catalog.JSON.fromJson(v, String[].class)));
           case "menuControls" -> s.menuControls = v.getAsBoolean();
           case "menuControlsMainMenu" -> s.menuControlsMainMenu = v.getAsBoolean();

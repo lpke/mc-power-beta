@@ -127,9 +127,10 @@ class PowerConfigTest {
     PowerConfig.initializeMusicData();
     JsonObject initial = JsonParser.parseString("""
         {"master":60,"playlist":"quiet","menuPlaylist":"@world",
-         "playlists":[{"id":"quiet","name":"Quiet","tracks":["music:missing","music:a"],"groupVolumes":{"World":30}}],
+         "playlists":[{"id":"quiet","name":"Quiet","tracks":["music:missing","music:a"]}],
          "sounds":{"random.click":35,"music:missing":100},"favourites":["music:missing","music:a"],
-         "favoritesGroupVolumes":{"Alpha":23},"libraryOrder":["Alpha","source:/unavailable"],
+         "playlistOrder":["quiet","favorites","beta"],
+         "libraryGroupVolumes":{"Alpha":23},"libraryOrder":["Alpha","source:/unavailable"],
          "musicDirectories":["/unavailable"]}
         """).getAsJsonObject();
     PowerConfig.saveAudio(initial); JsonObject staleDraft = PowerConfig.audio();
@@ -145,7 +146,7 @@ class PowerConfigTest {
     assertFalse(music.has("master")); assertFalse(music.getAsJsonObject("sounds").has("random.click"));
     assertEquals(100, music.getAsJsonObject("sounds").get("music:missing").getAsInt());
     assertFalse(PowerConfig.document().getAsJsonObject("settings").has("musicQueue"));
-    for (String field : new String[]{"favourites", "favoritesGroupVolumes", "libraryOrder", "musicDirectories"}) {
+    for (String field : new String[]{"favourites", "libraryGroupVolumes", "libraryOrder", "playlistOrder", "musicDirectories"}) {
       assertFalse(preferences.has(field));
       assertEquals(initial.get(field), music.get(field));
       assertEquals(initial.get(field), PowerConfig.audio().get(field));
@@ -211,7 +212,7 @@ class PowerConfigTest {
     invalid.add("playlistTracks", JsonParser.parseString("[\"music:a\",\"music:a\"]"));
     assertThrows(IllegalArgumentException.class, () -> PowerConfig.saveAudio(invalid));
     assertArrayEquals(config, Files.readAllBytes(PowerConfig.path())); assertArrayEquals(music, Files.readAllBytes(PowerConfig.musicPath()));
-    for (String bad : new String[]{"{\"favoritesGroupVolumes\":{\"Alpha\":101}}",
+    for (String bad : new String[]{"{\"libraryGroupVolumes\":{\"Alpha\":101}}",
         "{\"libraryOrder\":[\"Alpha\",\"Alpha\"]}", "{\"disabledMusicDirectories\":[]}"}) {
       JsonObject badDraft = PowerConfig.audio();
       JsonParser.parseString(bad).getAsJsonObject().entrySet().forEach(e -> badDraft.add(e.getKey(), e.getValue()));

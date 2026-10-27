@@ -102,11 +102,11 @@ final class MusicPlaylistRevisionChecks {
       check(MusicRequests.tracks().equals(List.of(missing,FIRST,SECOND)),"Remove from queue removed the first matching ID instead of selected occurrence: " + MusicRequests.tracks());
       options.session().discard();MusicRequests.edit(q->{q.tracks.clear();q.tracks.addAll(originalQueue);});
     });
-    test("MUSIC460 From playlist appends only absent IDs in source order and retains destination gains", () -> {
+    test("MUSIC460 From playlist appends only absent IDs in source order and retains Library gains", () -> {
       MenuPreferences.update(v->v.autoApply=false);AudioConfig.preview(MusicPlaylists460Checks.seed());
       var options=MusicPlaylists460Checks.open(mc);var library=MusicPlaylists460Checks.library(options);
       MusicPlaylists460Checks.edit(options,library,"building");var panel=field(library,"presets");
-      var draft=(MusicPresetDraft)call(panel,"draft");var initial=draft.tracks();var gains=draft.snapshot(draft.name()).groupVolumes();
+      var draft=(MusicPresetDraft)call(panel,"draft");var initial=draft.tracks();var gains=new TreeMap<>(AudioConfig.current().libraryGroupVolumes);
       String saved=Catalog.JSON.toJson(AudioConfig.current().playlists);
       click(options,(int)call(panel,"addX")+5,(int)call(panel,"actionY")+5);MusicPlaylists460Checks.choose(options,1);
       var choices=field(panel,"choices");var labels=(List<?>)field(choices,"labels");
@@ -114,7 +114,7 @@ final class MusicPlaylistRevisionChecks {
       MusicPlaylists460Checks.choose(options,labels.indexOf("Quiet afternoons"));
       var expected=new ArrayList<>(initial);expected.addAll(List.of(SECOND,FIRST,MISSING));
       check(draft.tracks().equals(expected),"From playlist changed append order or dropped missing ID");
-      check(draft.snapshot(draft.name()).groupVolumes().equals(gains),"From playlist copied source gains");
+      check(AudioConfig.current().libraryGroupVolumes.equals(gains),"From playlist changed Library gains");
       click(options,(int)call(panel,"addX")+5,(int)call(panel,"actionY")+5);MusicPlaylists460Checks.choose(options,1);
       MusicPlaylists460Checks.choose(options,((List<?>)field(choices,"labels")).indexOf("Quiet afternoons"));
       check(draft.tracks().equals(expected),"repeated From playlist duplicated tracks");
@@ -132,7 +132,7 @@ final class MusicPlaylistRevisionChecks {
           .map(BuiltinMusic.Track::id).sorted(Comparator.comparing(AudioController::musicLabel,String.CASE_INSENSITIVE_ORDER).thenComparing(Comparator.naturalOrder()))
           .forEach(expected::add);
       check(draft.tracks().equals(expected),"group Add reordered existing IDs or missed its songs");
-      check(draft.volume("Alpha")==40,"group Add changed destination gain");
+      check(AudioConfig.current().libraryGroupVolumes.getOrDefault("Alpha",100)==40,"group Add changed Library gain");
       click(options,(int)call(panel,"addX")+5,(int)call(panel,"actionY")+5);
       ((TextInput)field(library,"search")).setText("calm");call(library,"rebuild");
       for(Object row:(List<?>)field(library,"rows")) {

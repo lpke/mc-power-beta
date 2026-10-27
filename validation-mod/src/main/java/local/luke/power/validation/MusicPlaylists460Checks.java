@@ -144,9 +144,10 @@ final class MusicPlaylists460Checks {
   static AudioSettings seed() {
     var settings = new AudioSettings();
     settings.musicDirectories=new ArrayList<>(fixtureFolders);
-    settings.playlists.add(new MusicPlaylist("quiet", "Quiet afternoons", List.of(SECOND, FIRST, MISSING), Map.of("Alpha", 40)));
-    settings.playlists.add(new MusicPlaylist("building", "Building", List.of("music:creative4.ogg", "music:creative1.ogg"), Map.of("Beta / Creative", 65)));
-    settings.playlists.add(new MusicPlaylist("empty", "Empty", List.of(), Map.of()));
+    settings.libraryGroupVolumes.putAll(Map.of("Alpha", 40, "Beta / Creative", 65));
+    settings.playlists.add(new MusicPlaylist("quiet", "Quiet afternoons", List.of(SECOND, FIRST, MISSING)));
+    settings.playlists.add(new MusicPlaylist("building", "Building", List.of("music:creative4.ogg", "music:creative1.ogg")));
+    settings.playlists.add(new MusicPlaylist("empty", "Empty", List.of()));
     settings.favourites.add(FIRST); settings.sounds.put(FIRST, 35);
     MusicPlaylist.load(settings, "quiet"); MusicPlaylist.loadMenu(settings, "building"); return settings;
   }
@@ -406,22 +407,8 @@ final class MusicPlaylists460Checks {
       click(options,(int)call(panel,"groupedX")+5,(int)call(panel,"actionY")+5);
       check((boolean)call(panel,"grouped") && draft.tracks().equals(original), "Grouped changed stored order");
       ((Set<?>)field(library,"collapsed")).clear();call(library,"rebuildRows");
-      int groupY=MusicGroupChecks.groupY(library,"Alpha");
-      int gainX=(int)call(library,"groupVolumeX"),gainWidth=(int)call(library,"groupVolumeWidth");
-      click(options,gainX+4+(int)Math.round((gainWidth-8)*.25),groupY+8);
-      input.power$release(gainX+4+(int)Math.round((gainWidth-8)*.25),groupY+8,0);
-      check(Math.abs(draft.volume("Alpha")-25)<=1,"native group gain missed");
-      check(selected(AudioConfig.current()).groupVolumes().equals(Map.of("Alpha",40)),"group gain leaked before Save");
-      input.power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
-      Object exact=field(options,"valueEditor");check((boolean)call(exact,"active"),"group exact entry missed");
-      ((TextInput)field(exact,"input")).setText("31");input.power$key('\0',Keyboard.KEY_RETURN);
-      check(draft.volume("Alpha")==31,"group exact Enter did not commit");
-      input.power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
-      ((TextInput)field(exact,"input")).setText("99");input.power$key('\0',Keyboard.KEY_ESCAPE);
-      check(draft.volume("Alpha")==31,"group exact Escape changed draft");
-      input.power$click(gainX+8,MusicGroupChecks.groupY(library,"Alpha")+8,1);
-      ((TextInput)field(exact,"input")).setText("100");input.power$key('\0',Keyboard.KEY_RETURN);
-      check(draft.volume("Alpha")==100,"group exact default value missed");
+      check(AudioConfig.current().libraryGroupVolumes.getOrDefault("Alpha",100)==40,
+          "playlist grouping changed global Library gain");
       int groupedY=trackY(library,FIRST);input.power$click(x,groupedY+8,0);
       check(!(boolean)call(field(library,"reorder"),"active"),"Grouped allowed drag");input.power$release(x,groupedY+24,0);
       click(options,(int)call(panel,"groupedX")+5,(int)call(panel,"actionY")+5);
@@ -433,13 +420,13 @@ final class MusicPlaylists460Checks {
       check(draft.tracks().equals(List.of(FIRST,MISSING,SECOND)),"From Library did not append one ID");
       click(options,(int)call(panel,"addX")+5,(int)call(panel,"actionY")+5);
       check(!(boolean)call(panel,"adding"),"Back to playlist did not leave Add view");
-      draft.include(SECOND,false);draft.order(List.of(MISSING,FIRST));draft.volume("Alpha",25);
+      draft.include(SECOND,false);draft.order(List.of(MISSING,FIRST));
       check(selected(AudioConfig.current()).tracks().equals(original),"unsaved membership leaked into playback");
       AudioUi461Checks.savePlaylist(options);
       check(AudioConfig.current().playlist.equals("quiet"), "Save changed selected identity");
       check(selected(AudioConfig.current()).tracks().equals(List.of(MISSING, FIRST)), "Save lost membership/order/missing entry");
       check(new ArrayList<>(AudioController.activeMusic(mc)).equals(List.of(FIRST)), "selected saved playlist edit did not affect playback after Save");
-      check(selected(AudioConfig.current()).groupVolumes().equals(Map.of("Alpha", 25)), "Save did not apply selected group gain");
+      check(AudioConfig.current().libraryGroupVolumes.getOrDefault("Alpha",100)==40, "playlist Save changed Library gain");
       check(AudioConfig.current().sounds.get(FIRST) == 35 && AudioConfig.current().favourites.contains(FIRST), "playlist Save changed global song values");
       check(AudioConfig.current().menuPlaylist.equals("building"), "world Save changed menu assignment");
       options.session().discard(); check(selected(AudioConfig.current()).tracks().equals(original), "Options Discard retained previewed playlist save");
@@ -465,7 +452,7 @@ final class MusicPlaylists460Checks {
       var copy = new MusicPresetDraft(MusicPlaylist.beta(), BuiltinMusic.VANILLA).snapshot("Beta copy");
       check(!copy.id().equals(MusicPlaylist.BETA), "Beta draft reused reserved identity");
       check(copy.tracks().equals(BuiltinMusic.VANILLA), "Beta copy lost native order");
-      settings.playlists.add(new MusicPlaylist(MusicPlaylist.BETA, "Invalid", List.of(), Map.of()));
+      settings.playlists.add(new MusicPlaylist(MusicPlaylist.BETA, "Invalid", List.of()));
       boolean rejected = false; try { settings.validate(); } catch (IllegalArgumentException expected) { rejected = true; }
       check(rejected, "saved list accepted a replacement Beta entry");
     });
@@ -523,7 +510,7 @@ final class MusicPlaylists460Checks {
     test("MUSIC460 native Shuffle toggle and saved order replace stale random reservations",()->{
       String third="music:calm3.ogg",id="native-order-fixture";
       var settings=seed();settings.shuffle=true;settings.avoidRepeats=false;
-      settings.playlists.add(new MusicPlaylist(id,"Ordered native fixture",List.of(FIRST,SECOND,third),Map.of()));MusicPlaylist.load(settings,id);AudioConfig.preview(settings);
+      settings.playlists.add(new MusicPlaylist(id,"Ordered native fixture",List.of(FIRST,SECOND,third)));MusicPlaylist.load(settings,id);AudioConfig.preview(settings);
       var options=open(mc);var library=library(options);tab(options,library,"playlists");var panel=field(library,"presets");
       TrackSelector selector=(TrackSelector)staticField(AudioController.class,"WORLD");
       @SuppressWarnings("unchecked") var cursors=(Map<Object,Object>)field(selector,"cursors");var cursorSnapshot=new LinkedHashMap<>(cursors);
@@ -545,7 +532,7 @@ final class MusicPlaylists460Checks {
         var gain=find(options.session(),"audio.sound."+FIRST);gain.value=new JsonPrimitive(12);options.changed(gain);
         check(upcoming.invoke(null)==next,"gain preview consumed/replaced ordered reservation");
         var reordered=AudioConfig.copy();int index=0;while(!reordered.playlists.get(index).id().equals(id))index++;
-        reordered.playlists.set(index,new MusicPlaylist(id,"Ordered native fixture",List.of(FIRST,third,SECOND),Map.of()));
+        reordered.playlists.set(index,new MusicPlaylist(id,"Ordered native fixture",List.of(FIRST,third,SECOND)));
         var saved=find(options.session(),"audio.playlists");saved.value=Catalog.JSON.toJsonTree(reordered.playlists);options.changed(saved);
         check(AudioController.trackId((class_267)upcoming.invoke(null)).equals(third),"saved same-membership reorder kept old successor");
       } finally {
@@ -668,29 +655,27 @@ final class MusicPlaylists460Checks {
     var constructor = contextType.getDeclaredConstructor(boolean.class, int.class, String.class); constructor.setAccessible(true);
     Object menuContext = constructor.newInstance(false, 0, null);
     var pool = AudioController.class.getDeclaredMethod("backgroundPool", contextType);
-    var origin = AudioController.class.getDeclaredMethod("usesMenuVolumes", String.class, contextType); pool.setAccessible(true); origin.setAccessible(true);
-    List<String> world = List.of(SECOND, FIRST); String creative = "music:creative4.ogg";
+    pool.setAccessible(true);
+    String creative = "music:creative4.ogg";
     List<String> menu = List.of(FIRST, creative, SECOND, "music:creative1.ogg");
     for (String assignment : List.of(MusicPlaylist.SAME_AS_WORLD, MusicPlaylist.BETA, "building", "empty"))
-        test("MUSIC460 native menu pool and source gain " + assignment, () -> {
+        test("MUSIC460 native menu pool and Library gain " + assignment, () -> {
           var settings = seed(); settings.master = 80; settings.sounds.put(creative, 50);
-          settings.playlists.set(1, new MusicPlaylist("building", "Building", menu, Map.of("Alpha", 25, "Beta / Creative", 65)));
+          settings.playlists.set(1, new MusicPlaylist("building", "Building", menu));
+          settings.libraryGroupVolumes.putAll(Map.of("Alpha",25,"Beta / Creative",65));
           MusicPlaylist.loadMenu(settings, assignment); AudioConfig.preview(settings);
-          boolean separate = !assignment.equals(MusicPlaylist.SAME_AS_WORLD) && !assignment.equals(settings.playlist);
+          String playlistId = MusicPlaylist.selectionId(settings, true);
           List<String> expected = MusicPlaylist.menu(settings).tracks();
           @SuppressWarnings("unchecked") List<class_267> tracks = (List<class_267>)pool.invoke(null, menuContext);
           check(tracks.stream().map(AudioController::trackId).toList().equals(expected), "menu pool changed order/membership");
           for (String id : expected) {
-            boolean menuGain = separate;
-            check((boolean)origin.invoke(null, id, menuContext) == menuGain, "wrong source gain owner " + id);
-            float group = menuGain ? MusicPlaylist.find(settings, assignment).groupVolumes().getOrDefault(AudioController.musicGroup(id), 100) / 100f
-                : selected(settings).groupVolumes().getOrDefault(AudioController.musicGroup(id), 100) / 100f;
+            float group = settings.libraryGroupVolumes.getOrDefault(AudioController.musicGroup(id),100) / 100f;
             float expectedGain = .8f * group * settings.sounds.getOrDefault(id, 100) / 100f;
-            Object old = staticField(AudioController.class, "currentMusic"), oldOrigin = staticField(AudioController.class, "currentUsesMenuVolumes"), paused = staticField(AudioController.class, "paused");
+            Object old = staticField(AudioController.class, "currentMusic"), oldOrigin = staticField(AudioController.class, "currentPlaylistId"), paused = staticField(AudioController.class, "paused");
             try {
-              staticField(AudioController.class, "currentMusic", id); staticField(AudioController.class, "currentUsesMenuVolumes", menuGain); staticField(AudioController.class, "paused", false);
+              staticField(AudioController.class, "currentMusic", id); staticField(AudioController.class, "currentPlaylistId", playlistId); staticField(AudioController.class, "paused", false);
               check(Math.abs(AudioController.backgroundVolume(1f) - expectedGain) < .00001f, "native source gain differs " + id);
-            } finally { staticField(AudioController.class, "currentMusic", old); staticField(AudioController.class, "currentUsesMenuVolumes", oldOrigin); staticField(AudioController.class, "paused", paused); }
+            } finally { staticField(AudioController.class, "currentMusic", old); staticField(AudioController.class, "currentPlaylistId", oldOrigin); staticField(AudioController.class, "paused", paused); }
           }
         });
   }

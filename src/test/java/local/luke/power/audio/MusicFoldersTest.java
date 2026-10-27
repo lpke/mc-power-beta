@@ -65,7 +65,7 @@ class MusicFoldersTest {
   @Test void sourceRemovalNeverChangesSavedMembership() {
     AudioSettings settings = new AudioSettings();
     settings.musicDirectories.addAll(List.of("first", "second"));
-    settings.playlists.add(new MusicPlaylist("saved", "Saved", List.of("music:custom/unavailable"), Map.of()));
+    settings.playlists.add(new MusicPlaylist("saved", "Saved", List.of("music:custom/unavailable")));
     settings.musicDirectories.remove("first");
     assertEquals(List.of("music:custom/unavailable"), settings.playlists.get(0).tracks());
     assertEquals(List.of("second"), settings.musicDirectories);

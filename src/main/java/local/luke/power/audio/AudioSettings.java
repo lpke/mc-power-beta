@@ -36,8 +36,9 @@ public final class AudioSettings {
   public Map<String, Integer> categories = new LinkedHashMap<>();
   public Map<String, Integer> sounds = new TreeMap<>();
   public Set<String> favourites = new LinkedHashSet<>();
-  public Map<String, Integer> favoritesGroupVolumes = new TreeMap<>();
+  public Map<String, Integer> libraryGroupVolumes = new TreeMap<>();
   public List<String> libraryOrder = new ArrayList<>();
+  public List<String> playlistOrder = new ArrayList<>();
   public String playlist = MusicPlaylist.BETA, menuPlaylist = MusicPlaylist.SAME_AS_WORLD;
   public List<MusicPlaylist> playlists = new ArrayList<>();
   public List<String> musicDirectories = new ArrayList<>();
@@ -73,11 +74,12 @@ public final class AudioSettings {
 
   public void validate() {
     MusicPlaylist.validate(playlists, playlist, menuPlaylist);
+    MusicPlaylist.validateOrder(playlists, playlistOrder);
     if (menuControlsPosition == null || Math.abs((long) menuControlsOffsetX) > 4096
         || Math.abs((long) menuControlsOffsetY) > 4096)
       throw new IllegalArgumentException("Menu control offsets must be -4096 to 4096 pixels");
     MusicPlaylist.validateTrackIds(favourites);
-    MusicGroups.copy(favoritesGroupVolumes);
+    MusicGroups.copy(libraryGroupVolumes);
     MusicLibrarySources.validateOrder(libraryOrder);
     volume(master);
     if (gapMinSeconds < 0 || gapMaxSeconds < gapMinSeconds || gapMaxSeconds > 86400)

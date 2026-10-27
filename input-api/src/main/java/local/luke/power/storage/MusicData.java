@@ -10,10 +10,10 @@ import java.util.*;
 
 /** Validated music user data. Called only while PowerConfig owns its disk lock. */
 final class MusicData {
-  static final int VERSION = 3;
+  static final int VERSION = 4;
   static final int MAX_BYTES = 4 * 1024 * 1024;
   private static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
-  static final Set<String> FIELDS = Set.of("playlists", "favourites", "musicDirectories", "libraryOrder", "favoritesGroupVolumes");
+  static final Set<String> FIELDS = Set.of("playlists", "favourites", "musicDirectories", "libraryOrder", "libraryGroupVolumes", "playlistOrder");
 
   static Path path(Path config) { return config.getParent().getParent().resolve("power-beta/music.json"); }
 
@@ -31,7 +31,12 @@ final class MusicData {
 
   static void validate(JsonObject root) { validate(root, VERSION); }
 
-  static void validatePrevious(JsonObject root) { validate(root, 2); }
+  static void validatePrevious(JsonObject root) {
+    require(root != null && root.has("formatVersion"), "Music format is missing");
+    int version = integer(root.get("formatVersion"));
+    require(version == 2 || version == 3, "Only music formats 2 and 3 can be converted");
+    validate(root, version);
+  }
 
   private static void validate(JsonObject root, int version) {
     require(root != null, "Music data must be an object");
@@ -41,13 +46,18 @@ final class MusicData {
     require(root.has("queue") && root.get("queue").isJsonObject(), "Music queue must be an object");
     for (String key : root.keySet()) require(Set.of("formatVersion", "audio", "queue").contains(key), "Unknown music data field " + key);
     JsonObject audio = root.getAsJsonObject("audio");
-    Set<String> fields = version == 2 ? Set.of("playlists", "favourites", "musicDirectories", "disabledMusicDirectories") : FIELDS;
+    Set<String> fields = switch (version) {
+      case 2 -> Set.of("playlists", "favourites", "musicDirectories", "disabledMusicDirectories");
+      case 3 -> Set.of("playlists", "favourites", "musicDirectories", "libraryOrder", "favoritesGroupVolumes");
+      default -> FIELDS;
+    };
     for (String key : audio.keySet()) require(fields.contains(key) || key.equals("sounds"), "Unknown music audio field " + key);
     if (audio.has("favourites")) tracks(audio.get("favourites"), 8192, true);
     for (String key : List.of("musicDirectories", "disabledMusicDirectories"))
       if (audio.has(key)) strings(audio.get(key), 32, 4096, true, false);
-    if (version == 3 && audio.has("libraryOrder")) strings(audio.get("libraryOrder"), 8192, 4103, true, false);
+    if (version >= 3 && audio.has("libraryOrder")) strings(audio.get("libraryOrder"), 8192, 4103, true, false);
     if (version == 3 && audio.has("favoritesGroupVolumes")) volumes(audio.get("favoritesGroupVolumes"), 8192, false);
+    if (version == 4 && audio.has("libraryGroupVolumes")) volumes(audio.get("libraryGroupVolumes"), 8192, false);
     if (version == 2 && audio.has("disabledMusicDirectories")) {
       Set<String> all = audio.has("musicDirectories") ? strings(audio.get("musicDirectories"), 32, 4096, true, false) : Set.of();
       require(all.containsAll(strings(audio.get("disabledMusicDirectories"), 32, 4096, true, false)),
@@ -60,13 +70,20 @@ final class MusicData {
       for (JsonElement value : audio.getAsJsonArray("playlists")) {
         require(value.isJsonObject(), "Playlist must be an object");
         JsonObject playlist = value.getAsJsonObject();
-        require(playlist.keySet().equals(Set.of("id", "name", "tracks", "groupVolumes")), "Unsupported playlist data");
+        require(playlist.keySet().equals(version < 4 ? Set.of("id", "name", "tracks", "groupVolumes") : Set.of("id", "name", "tracks")), "Unsupported playlist data");
         String id = text(playlist.get("id"), 64);
         require(id.matches("[a-zA-Z0-9_-]{1,64}") && !id.equals("beta") && (version == 2 || !id.equals("favorites")) && ids.add(id), "Invalid or duplicate playlist identifier");
         text(playlist.get("name"), 80);
         tracks(playlist.get("tracks"), 8192, true);
-        volumes(playlist.get("groupVolumes"), 8192, false);
+        if (version < 4) volumes(playlist.get("groupVolumes"), 8192, false);
       }
+    }
+    if (version == 4 && audio.has("playlistOrder")) {
+      Set<String> order = strings(audio.get("playlistOrder"), 130, 64, true, false);
+      Set<String> ids = new HashSet<>(List.of("beta", "favorites"));
+      if (audio.has("playlists")) for (JsonElement value : audio.getAsJsonArray("playlists"))
+        ids.add(value.getAsJsonObject().get("id").getAsString());
+      require(ids.containsAll(order), "Playlist order contains a missing playlist");
     }
     validateQueue(root.getAsJsonObject("queue"));
   }
@@ -125,7 +142,7 @@ final class MusicData {
 
   static void validatePreferences(JsonObject audio) {
     require(FIELDS.stream().noneMatch(audio::has), "Music user data belongs in power-beta/music.json");
-    require(Set.of("presets", "preset", "presetTrackPool", "musicDataVersion", "playlistTracks", "menuPlaylistTracks", "disabledTracks", "groupVolumes", "menuGroupVolumes", "musicMode", "customMusic", "menuDirectories", "disabledMenuDirectories", "disabledMusicDirectories").stream().noneMatch(audio::has), "Legacy audio fields are unsupported; original configuration preserved");
+    require(Set.of("presets", "preset", "presetTrackPool", "musicDataVersion", "playlistTracks", "menuPlaylistTracks", "disabledTracks", "groupVolumes", "menuGroupVolumes", "musicMode", "customMusic", "menuDirectories", "disabledMenuDirectories", "disabledMusicDirectories", "favoritesGroupVolumes").stream().noneMatch(audio::has), "Legacy audio fields are unsupported; original configuration preserved");
     if (audio.has("sounds")) require(object(audio.get("sounds"), "Sound overrides").keySet().stream().noneMatch(key -> key.startsWith("music:")), "Song gains belong in power-beta/music.json");
     for (String key : List.of("playlist", "menuPlaylist")) if (audio.has(key)) {
       String id = string(audio.get(key));
@@ -189,7 +206,7 @@ final class MusicData {
   private static void volumes(JsonElement value, int limit, boolean music) {
     JsonObject volumes = object(value, "Volume overrides"); require(volumes.size() <= limit, "Too many volume overrides");
     for (var entry : volumes.entrySet()) {
-      String key = text(new JsonPrimitive(entry.getKey()), music ? 512 : 4096); require(!music || key.startsWith("music:"), "Only music gains belong in music data");
+      String key = text(new JsonPrimitive(entry.getKey()), music ? 512 : 4103); require(!music || key.startsWith("music:"), "Only music gains belong in music data");
       int gain = integer(entry.getValue()); require(gain >= 0 && gain <= 100, "Volume must be 0 to 100%");
     }
   }

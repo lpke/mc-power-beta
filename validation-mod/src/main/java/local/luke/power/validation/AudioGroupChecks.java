@@ -50,13 +50,14 @@ final class AudioGroupChecks {
         auto = MenuPreferences.current().autoApply;
         MenuPreferences.update(v -> v.autoApply = false);
         AudioSettings s = new AudioSettings();
+        s.libraryGroupVolumes.put("Alpha", 40);
         MusicFixtureSupport.allBuiltin(s);
         Set<String> excluded = new TreeSet<>();
         BuiltinMusic.TRACKS.stream()
             .filter(t -> t.group().equals("Alpha"))
             .forEach(t -> excluded.add(t.id()));
         excluded.add("music:creative1.ogg");
-        s.playlists.add(new MusicPlaylist("draft", "Quiet afternoons", AudioController.music(mc).stream().filter(id -> !excluded.contains(id)).toList(), Map.of("Alpha", 40)));
+        s.playlists.add(new MusicPlaylist("draft", "Quiet afternoons", AudioController.music(mc).stream().filter(id -> !excluded.contains(id)).toList()));
         AudioConfig.preview(s);
         mc.options.musicVolume = .1f;
         AudioController.pause();

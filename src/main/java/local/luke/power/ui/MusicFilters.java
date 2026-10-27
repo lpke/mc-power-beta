@@ -21,18 +21,17 @@ public final class MusicFilters {
 
   public static Layout layout(int left, int top, int width, String selector, String activeName,
       ToIntFunction<String> measure) {
-    String[] ids = {"active", "library", "playlists", "favorites"};
-    String[] labels = {activeName, "Library", "Playlists", "Favorites"};
-    int[] sizes = {Math.max(56, Math.min(110, measure.applyAsInt(activeName) + 12)), 54, 64, 70};
+    String[] ids = {"library", "playlists", "favorites", "active"};
+    String[] labels = {"Library", "Playlists", "Favorites", activeName};
+    int[] sizes = {54, 64, 70, Math.max(56, Math.min(110, measure.applyAsInt(activeName) + 12))};
     int tabsWidth = sizes[0] + sizes[1] + sizes[2] + sizes[3] + 6;
     boolean overflow = tabsWidth + 126 > width;
     boolean hideTabs = tabsWidth + 26 > width;
     List<Tab> tabs = new ArrayList<>(), hidden = new ArrayList<>();
-    int secondary = selector.equals("playlists") ? 2 : selector.equals("favorites") ? 3 : 1;
+    int secondary = selector.equals("playlists") ? 1 : selector.equals("favorites") ? 2 : 3;
     if (hideTabs) {
-      sizes[0] = Math.min(sizes[0], Math.max(56, width - 102));
-      // A fixed secondary slot prevents its active edge shifting when the label changes.
-      sizes[1] = sizes[2] = sizes[3] = Math.max(36, Math.min(70, width - sizes[0] - 30));
+      // The Library and selected destination occupy fixed slots at compact widths.
+      sizes[1] = sizes[2] = sizes[3] = Math.max(36, Math.min(110, width - sizes[0] - 30));
     }
     int x = left;
     for (int i = 0; i < ids.length; i++) {

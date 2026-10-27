@@ -12,10 +12,12 @@
   reserved `beta` playlist contains exactly the twelve original Beta 1.7.3 tracks and
   cannot be edited or removed. Ordered positive track IDs prevent imported folders
   silently expanding playlists. Global music folders supply the Library; playlist
-  membership and group gains belong to each saved playlist. Track gains remain global. The reserved `favorites` playlist has ordered membership
-  and independent group gains; it can be selected but not renamed or removed. Library
+  membership belongs to each saved playlist. Group and track gains belong to the
+  Library and apply in every playlist. Imported group gains use their configured
+  source-root identity, matching Library headings. The reserved `favorites` playlist has ordered membership;
+  it can be selected but not renamed or removed. Library
   group order is presentation data, separate from scan priority and playlist order.
-  Imported sources have no On/Off state. Music data format 3 lives in `power-beta/music.json`, while playback
+  Imported sources have no On/Off state. Music data format 4 lives in `power-beta/music.json`, while playback
   preferences stay in the shared config; both paths join the Options transaction.
   Queue snapshots merge independently of editor drafts.
   Keep missing track IDs, queues and user music files intact.
@@ -28,7 +30,12 @@
   outside songs and auditions from moving that cursor. Playlist row playback selects
   the saved world playlist without saving editor drafts. Now-playing navigation
   opens Library for auditions or songs outside the world playlist; other songs open
-  the active playlist tab.
+  their actual playlist. Paused background songs remain gold; playing and paused
+  auditions are blue and their row transport toggles the audition without selecting
+  another world playlist. Between-song links use the reserved next song and its
+  world/menu origin without consuming a request or advancing the selector.
+  Catalog order is persisted separately from each playlist's song order. Rename,
+  duplicate, reorder and Play use saved objects and never save isolated editor drafts.
 - New and imported Ogg sounds must retain complete playback through Beta's decoder.
   Native `CodecJOrbis` mistakes `SyncState.pageout() == 0` for EOF when a buffered
   page needs more input, and can stop before draining buffered pages. It can also

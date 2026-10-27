@@ -137,7 +137,7 @@ final class MusicFolderChecks {
       String track = new MusicLibrary.Track(first.resolve("song.ogg").toRealPath(), "song.ogg").id();
       var baseline = new AudioSettings();
       baseline.musicDirectories = new ArrayList<>(List.of(first.toString(), empty.toString(), missing.toString()));
-      baseline.playlists.add(new MusicPlaylist("folder-fixture", "Folder fixture", List.of(track, "music:calm1.ogg"), Map.of()));
+      baseline.playlists.add(new MusicPlaylist("folder-fixture", "Folder fixture", List.of(track, "music:calm1.ogg")));
       MusicPlaylist.load(baseline, "folder-fixture");
       for (boolean automatic : new boolean[]{false, true}) {
         MenuPreferences.update(value -> { value.autoApply = automatic; value.musicBrowserDirectory = root.toString(); });

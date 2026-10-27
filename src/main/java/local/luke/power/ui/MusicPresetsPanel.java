@@ -7,12 +7,15 @@ import local.luke.power.audio.MusicLibrarySources;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
-/** Saved playlists and their isolated membership, order and group-volume drafts. */
+/** Saved playlists and their isolated membership and order drafts. */
 final class MusicPresetsPanel extends UiScreen {
   private final PowerOptionsScreen parent;
   private final MusicEdits edits;
   private final ScrollBar scrollbar = new ScrollBar();
   private final TextInput name = new TextInput("", 80);
+  private final TextInput rename = new TextInput("", 80);
+  private final MusicListDrag reorder = new MusicListDrag();
+  private MusicPlaylist renaming, pressedPlaylist;
   private final SettingsDropdown choices = new SettingsDropdown();
   private MusicPresetDraft draft;
   private MusicPlaylist sourcePlaylist;
@@ -37,15 +40,19 @@ final class MusicPresetsPanel extends UiScreen {
   boolean grouped() { return editing() && grouped; }
   boolean favorites() { return editing() && draft.favorites(); }
   boolean hideExcluded() { return editing() && !adding(); }
-  void unfocus() { name.focused = false; }
+  void unfocus() { name.focused = false; cancelRename(); }
+  boolean dragging() { return reorder.active(); }
+  boolean inlineRename() { return renaming != null; }
+  void cancelPointer() { reorder.cancel(); pressedPlaylist = null; scrollbar.release(); }
   boolean editing() { return draft != null; }
   boolean editable() { return editing() && !draft.readOnly(); }
   boolean readOnly() { return editing() && draft.readOnly(); }
-  boolean modal() { return choices.active() || pending != null || !deleting.isEmpty(); }
+  boolean modal() { return choices.active() || pending != null || !deleting.isEmpty() || renaming != null; }
   boolean dirty() { return editable() && draft.changed(name.text()); }
   String error() { return error; }
 
   void open() {
+    cancelPointer(); cancelRename();
     pending = null;
     deleting = "";
     name.focused = false;
@@ -57,13 +64,12 @@ final class MusicPresetsPanel extends UiScreen {
     error = "";
   }
 
-  void edit(MusicPlaylist playlist) { edit(playlist, false); }
-
   void newPlaylist() { edit(null); }
 
   void filter(String value) {
     String next = value.strip().toLowerCase(Locale.ROOT);
     if (next.equals(query)) return;
+    cancelPointer(); cancelRename();
     query = next;
     filteredSource = null;
     resetScroll();
@@ -81,9 +87,7 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   static List<MusicPlaylist> filterPresets(List<MusicPlaylist> source, String query) {
-    String match = query.strip().toLowerCase(Locale.ROOT);
-    return match.isEmpty() ? source : source.stream()
-        .filter(p -> p.name().toLowerCase(Locale.ROOT).contains(match)).toList();
+    return MusicSearch.filter(source, query, MusicPlaylist::name);
   }
 
   void showSelected() {
@@ -106,7 +110,7 @@ final class MusicPresetsPanel extends UiScreen {
 
   private static boolean samePlaylist(MusicPlaylist first, MusicPlaylist second) {
     return first.id().equals(second.id()) && first.name().equals(second.name())
-        && first.tracks().equals(second.tracks()) && first.groupVolumes().equals(second.groupVolumes());
+        && first.tracks().equals(second.tracks());
   }
 
   void showFavorites() {
@@ -131,11 +135,10 @@ final class MusicPresetsPanel extends UiScreen {
     } catch (IllegalArgumentException e) { error = e.getMessage(); }
   }
 
-  private void edit(MusicPlaylist playlist, boolean copy) {
-    sourcePlaylist = copy ? null : playlist;
-    draft = copy
-        ? new MusicPresetDraft(edits.copy(playlist), AudioController.music(minecraft), true)
-        : playlist != null && MusicPlaylist.BETA.equals(playlist.id()) ? MusicPresetDraft.readOnly(playlist)
+  void edit(MusicPlaylist playlist) {
+    cancelPointer(); cancelRename();
+    sourcePlaylist = playlist;
+    draft = playlist != null && MusicPlaylist.BETA.equals(playlist.id()) ? MusicPresetDraft.readOnly(playlist)
         : new MusicPresetDraft(playlist, AudioController.music(minecraft));
     name.setText(draft.name());
     name.focused = false;
@@ -145,7 +148,7 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   void guard(Runnable action) {
-    choices.close();
+    choices.close(); cancelPointer(); cancelRename();
     name.focused = false;
     if (dirty()) pending = action;
     else { draft = null; action.run(); }
@@ -164,6 +167,7 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   void cancelPlaylist() {
+    cancelPointer(); cancelRename();
     draft = null;
     adding = grouped = false;
     name.focused = false;
@@ -193,16 +197,10 @@ final class MusicPresetsPanel extends UiScreen {
   private int groupedX() { return header().viewX(); }
   private int actionY() { return header().actionsY(); }
   private int rowTop() { return top() + headerHeight() + 4; }
-  private int actionsWidth() { return 4 * (actionWidth() + 2) - 2; }
-  private boolean inlineRows() { return span() >= actionsWidth() + 140; }
-  private int rowHeight() { return inlineRows() ? 28 : 48; }
-  private int actionsY(int row) { return row + (inlineRows() ? 5 : 24); }
-  private int textWidth() { return span() - (inlineRows() ? actionsWidth() + 8 : 4); }
-  private int actionWidth() { return span() < 260 ? 40 : 48; }
-  private int editX() { return right() - 4 * (actionWidth() + 2) + 2; }
-  private int copyX() { return right() - 3 * (actionWidth() + 2) + 2; }
-  private int deleteX() { return right() - 2 * (actionWidth() + 2) + 2; }
-  private int playX() { return right() - actionWidth(); }
+  private MusicCatalogLayout catalogLayout() {
+    return MusicCatalogLayout.at(left(), span(), textWidth("Duplicate") + 16);
+  }
+  private int rowHeight() { return catalogLayout().rowHeight(); }
 
   private ScrollBar.Track track() {
     return new ScrollBar.Track(right() + 5, rowTop(), Math.max(0, bottom() - rowTop()),
@@ -216,10 +214,39 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   void tickChoices() { choices.tick(); }
-  void release(int y, int button) { choices.release(y, button); }
+  boolean release(int x, int y, int button) {
+    choices.release(y, button);
+    if (button != 0 || editing()) return false;
+    scroll = (int) scrollbar.drag(track(), y, true); scrollbar.release();
+    if (pressedPlaylist == null) return false;
+    MusicPlaylist pressed = pressedPlaylist;
+    try {
+      if (modal() || !org.lwjgl.opengl.Display.isActive()
+          || !inside(x, y, left(), rowTop(), span(), bottom() - rowTop())) return true;
+      if (reorder.active()) reorder.update(x, y);
+      if (reorder.active() && reorder.moved()) {
+        List<String> next = new ArrayList<>(reorder.original());
+        int slot = reorder.slot(y - rowTop() + scroll);
+        if (ListReorder.move(next, reorder.index(), slot)) edits.reorderPresets(reorder.original(), next);
+      } else {
+        var values = filteredPresets();
+        int index = (y - rowTop() + scroll) / rowHeight();
+        if (index >= 0 && index < values.size() && values.get(index) == pressed) { click(); edit(pressed); }
+      }
+    } catch (IllegalArgumentException failure) { error = failure.getMessage(); }
+    finally { cancelPointer(); }
+    return true;
+  }
 
   void key(char c, int key) {
     if (choices.key(this, key)) return;
+    if (renaming != null) {
+      if (key == Keyboard.KEY_ESCAPE) cancelRename();
+      else if (key == Keyboard.KEY_RETURN || key == Keyboard.KEY_NUMPADENTER) commitRename();
+      else { rename.key(c, key); error = ""; }
+      return;
+    }
+    if (reorder.active() && key == Keyboard.KEY_ESCAPE) { cancelPointer(); return; }
     if (modal()) {
       if (key == Keyboard.KEY_ESCAPE) { pending = null; deleting = ""; }
       return;
@@ -229,6 +256,7 @@ final class MusicPresetsPanel extends UiScreen {
 
   boolean headerClick(int x, int y, int b) {
     if (choices.press(this, x, y, b)) return true;
+    if (renaming != null) { renameClick(x, y, b); return true; }
     if (modal()) { dialogClick(x, y, b); return true; }
     if (!editing()) return listClick(x, y, b);
     name.focused = editable() && !favorites() && inside(x, y, nameX(), top(), nameWidth(), 18);
@@ -264,28 +292,85 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   private boolean listClick(int x, int y, int b) {
-    if (b != 0) return true;
-    if (scrollbar.press(track(), x, y)) {
+    if (b != 0 && b != 1) return true;
+    cancelPointer();
+    if (b == 0 && scrollbar.press(track(), x, y)) {
       scroll = (int) scrollbar.drag(track(), y, true);
       return true;
     }
-    if (y < rowTop() || y >= bottom()) return true;
+    if (!inside(x, y, left(), rowTop(), span(), bottom() - rowTop())) return true;
     int index = (y - rowTop() + scroll) / rowHeight();
     var values = filteredPresets();
     if (index < 0 || index >= values.size()) return true;
-    int row = rowTop() + index * rowHeight() - scroll, cy = actionsY(row);
-    MusicPlaylist p = values.get(index);
-    boolean reserved = MusicPlaylist.reserved(p.id());
-    if (inside(x, y, playX(), cy, actionWidth(), 18)) {
-      if (!p.id().equals(edits.selected())) { click(); edits.load(p.id()); }
-    } else if (inside(x, y, editX(), cy, actionWidth(), 18)) {
-      click(); edit(p);
-    } else if (inside(x, y, copyX(), cy, actionWidth(), 18)) {
-      click(); edit(p, true);
-    } else if (!reserved && inside(x, y, deleteX(), cy, actionWidth(), 18)) {
-      click(); deleting = p.id();
+    int row = rowTop() + index * rowHeight() - scroll;
+    MusicPlaylist playlist = values.get(index);
+    if (b == 1) { context(playlist, x, y); return true; }
+    var layout = catalogLayout();
+    int cy = layout.controlsY(row);
+    if (inside(x, y, layout.useX(), row + 5, layout.useWidth(), 18)) {
+      if (!playlist.id().equals(edits.selected())) { click(); act(() -> edits.load(playlist.id())); }
+    } else if (inside(x, y, layout.duplicateX(), cy, layout.duplicateWidth(), 18)) {
+      click(); duplicate(playlist);
+    } else if (inside(x, y, layout.deleteX(), cy, 20, 18)) {
+      if (!MusicPlaylist.reserved(playlist.id())) { click(); deleting = playlist.id(); }
+    } else {
+      pressedPlaylist = playlist;
+      if (query.isBlank()) {
+        var ids = values.stream().map(MusicPlaylist::id).toList();
+        var slots = java.util.stream.IntStream.range(0, values.size())
+            .mapToObj(i -> new MusicListDrag.Slot(ids.get(i), i * rowHeight(), rowHeight())).toList();
+        reorder.begin(MusicListDrag.Kind.CATALOG, playlist, ids, slots, index, x, y);
+      }
     }
     return true;
+  }
+
+  private void context(MusicPlaylist playlist, int x, int y) {
+    boolean editable = !MusicPlaylist.reserved(playlist.id());
+    parent.musicActions(playlist, List.of("Play", "Rename", "Duplicate", "Delete"),
+        List.of(!playlist.tracks().isEmpty(), editable, true, editable), x, y, action -> {
+          if (editing()) return;
+          switch (action) {
+            case 0 -> act(() -> edits.play(playlist.id()));
+            case 1 -> beginRename(playlist);
+            case 2 -> duplicate(playlist);
+            case 3 -> deleting = playlist.id();
+          }
+        });
+  }
+
+  private void act(Runnable action) {
+    try { action.run(); error = ""; }
+    catch (IllegalArgumentException failure) { error = failure.getMessage(); }
+  }
+  private void duplicate(MusicPlaylist playlist) { act(() -> edits.save(edits.copy(playlist))); }
+  private void beginRename(MusicPlaylist playlist) {
+    if (MusicPlaylist.reserved(playlist.id())) return;
+    cancelPointer(); renaming = playlist; rename.setText(playlist.name());
+    rename.focused = true; rename.selectAll(); error = "";
+  }
+  private void cancelRename() {
+    if (renaming != null) error = "";
+    renaming = null; rename.focused = false;
+  }
+  private void commitRename() {
+    if (renaming == null) return;
+    if (rename.text().strip().equals(renaming.name())) { cancelRename(); return; }
+    try { edits.rename(renaming, rename.text()); click(); cancelRename(); error = ""; }
+    catch (IllegalArgumentException failure) { error = failure.getMessage(); }
+  }
+  private void renameClick(int x, int y, int button) {
+    var values = filteredPresets();
+    int index = values.indexOf(renaming);
+    if (index < 0) { cancelRename(); return; }
+    int row = rowTop() + index * rowHeight() - scroll;
+    var layout = catalogLayout();
+    int inputWidth = layout.nameWidth() - 24;
+    if (inside(x, y, layout.nameX(), row + 5, inputWidth, 18)) {
+      rename.focused = true; rename.click(x, button);
+    } else if (button == 0 && inside(x, y, layout.nameX() + inputWidth + 4, row + 5, 20, 18)) {
+      if (!rename.text().strip().equals(renaming.name())) commitRename();
+    } else cancelRename();
   }
 
   private Map<String, Integer> includedCounts(List<MusicPlaylist> values) {
@@ -309,17 +394,31 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   private void renderCatalogName(MusicPlaylist playlist, int missing, int y, boolean selected) {
+    var layout = catalogLayout();
     String count = trackCount(playlist);
     String detail = count + (missing > 0 ? " / " + missing + " unavailable" : "");
-    if (textWidth(detail) + 72 <= textWidth()) count = detail;
-    int nameSpan = Math.max(12, textWidth() - textWidth(count) - 14);
+    if (textWidth(detail) + 72 <= layout.nameWidth()) count = detail;
+    if (textWidth(count) + 48 > layout.nameWidth()) count = "";
+    int nameSpan = Math.max(12, layout.nameWidth() - (count.isEmpty() ? 0 : textWidth(count) + 8));
     String label = fit(playlist.name(), nameSpan);
-    if (selected) rectangle(left() + 1, y - 1, left() + 3, y + 9, 0xffffdd66);
-    text(label, left() + 8, y, selected ? 0xffffdd66 : 0xdddddd);
-    text(count, left() + 8 + textWidth(label) + 8, y, 0xaaaaaa);
+    text(label, layout.nameX(), y, selected ? 0xffffdd66 : 0xffffff);
+    if (!count.isEmpty()) text(count, layout.nameX() + textWidth(label) + 8, y, 0xaaaaaa);
+  }
+
+  private void renderUse(boolean selected, int row, int mx, int my) {
+    var layout = catalogLayout();
+    int x = layout.useX() + 2, y = row + 10;
+    int colour = selected ? 0xffffdd66 : inside(mx, my, layout.useX(), row + 5, layout.useWidth(), 18)
+        ? 0xffffa0 : 0xdddddd;
+    rectangle(x, y + 1, x + 8, y + 7, 0xff000000 | colour);
+    rectangle(x + 1, y, x + 7, y + 8, 0xff000000 | colour);
+    rectangle(x + 1, y + 1, x + 7, y + 7, 0xff202020);
+    if (selected) rectangle(x + 3, y + 3, x + 5, y + 5, colour);
+    text("Use", x + 13, y, colour);
   }
 
   void renderHeader(int mx, int my) {
+    if (!org.lwjgl.opengl.Display.isActive()) cancelPointer();
     if (editing()) {
       if (favorites() || readOnly()) text(fit(draft.name(), nameWidth()), nameX() + 2, top() + 5, 0xdddddd);
       else input(name, nameX(), top(), nameWidth(), mx, my, "Playlist name");
@@ -328,25 +427,40 @@ final class MusicPresetsPanel extends UiScreen {
       button(fit(viewLabel(), viewWidth() - 8), groupedX(), actionY(), viewWidth(), 18, mx, my, true,
           choices.editing("playlist-source") ? 0xffffa0 : -1);
     } else {
+      int hoverX = modal() ? -1000 : mx, hoverY = modal() ? -1000 : my;
       scroll = (int) Math.max(0, Math.min(track().maximum(), scrollbar.drag(track(), my, Mouse.isButtonDown(0))));
+      reorder.update(mx, my);
+      if (reorder.active() && reorder.moved() && inside(mx, my, left(), rowTop(), span(), bottom() - rowTop()) && reorder.scrollDue()) {
+        if (my < rowTop() + 14) scroll = Math.max(0, scroll - rowHeight());
+        else if (my >= bottom() - 14) scroll = (int) Math.min(track().maximum(), scroll + rowHeight());
+      }
       clip(left(), rowTop(), span(), Math.max(0, bottom() - rowTop()));
       var values = filteredPresets();
       var counts = includedCounts(values);
+      var layout = catalogLayout();
       for (int i = 0; i < values.size(); i++) {
         int y = rowTop() + i * rowHeight() - scroll;
         if (y + rowHeight() <= rowTop() || y >= bottom()) continue;
-        MusicPlaylist p = values.get(i);
-        boolean builtin = MusicPlaylist.BETA.equals(p.id());
-        boolean reserved = MusicPlaylist.reserved(p.id());
-        boolean selected = p.id().equals(edits.selected());
-        int unavailable = p.tracks().size() - counts.get(p.id());
-        renderCatalogName(p, unavailable, y + (inlineRows() ? 10 : 7), selected);
-        int cy = actionsY(y);
-        button(builtin ? "View" : "Edit", editX(), cy, actionWidth(), 18, mx, my, true);
-        button("Delete", deleteX(), cy, actionWidth(), 18, mx, my, !reserved);
-        button("Copy", copyX(), cy, actionWidth(), 18, mx, my, true);
-        button(selected ? "Active" : "Use", playX(), cy, actionWidth(), 18, mx, my, !selected);
-        fill(left(), y + rowHeight() - 4, right(), y + rowHeight() - 3, 0x40555555);
+        MusicPlaylist playlist = values.get(i);
+        boolean hovered = inside(hoverX, hoverY, left(), y, span(), rowHeight())
+            && hoverY >= rowTop() && hoverY < bottom();
+        if (hovered || parent.musicActionsOpen(playlist)) fill(left(), y, right(), y + rowHeight(), 0x60000000);
+        boolean selected = playlist.id().equals(edits.selected());
+        renderUse(selected, y, hoverX, hoverY);
+        if (playlist == renaming) {
+          int inputWidth = layout.nameWidth() - 24;
+          input(rename, layout.nameX(), y + 5, inputWidth, mx, my, "Playlist name");
+          iconButton("check", layout.nameX() + inputWidth + 4, y + 5, 20, mx, my,
+              !rename.text().strip().equals(playlist.name()));
+        } else renderCatalogName(playlist, playlist.tracks().size() - counts.get(playlist.id()), y + 10, selected);
+        int cy = layout.controlsY(y);
+        button("Duplicate", layout.duplicateX(), cy, layout.duplicateWidth(), 18, hoverX, hoverY, true);
+        iconButton("remove", layout.deleteX(), cy, 20, hoverX, hoverY, !MusicPlaylist.reserved(playlist.id()));
+        fill(left(), y + rowHeight() - 1, right(), y + rowHeight(), 0x40555555);
+      }
+      if (reorder.active() && reorder.moved() && inside(mx, my, left(), rowTop(), span(), bottom() - rowTop())) {
+        int line = rowTop() + reorder.lineY(reorder.slot(my - rowTop() + scroll)) - scroll;
+        fill(left(), Math.max(rowTop(), line - 1), right(), Math.min(bottom(), line + 1), 0xff268bff);
       }
       if (values.isEmpty()) text("No matching playlists", left() + 4, rowTop() + 12, 0xaaaaaa);
       unclip();
@@ -356,7 +470,7 @@ final class MusicPresetsPanel extends UiScreen {
 
   void renderDialog(int mx, int my) {
     if (choices.active()) { choices.render(this, mx, my); return; }
-    if (!modal()) return;
+    if (!modal() || renaming != null) return;
     fill(0, 0, width, height, 0xd0000000);
     int w = Math.min(312, width - 20), x = (width - w) / 2, y = height / 2 - 35;
     text(pending != null ? "Save changes to this playlist?" : "Delete this playlist?", x, y, 0xffffff);

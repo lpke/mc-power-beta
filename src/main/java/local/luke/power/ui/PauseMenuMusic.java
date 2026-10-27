@@ -48,7 +48,7 @@ public final class PauseMenuMusic extends UiScreen {
     if (inside(x, y, bounds.x(), bounds.y() + 21, bounds.width(), 12)) {
       minecraft.soundManager.method_2009("random.click", 1, 1);
       scrub.cancel();
-      PowerOptionsScreen.openMusic(minecraft, minecraft.currentScreen, false, AudioController.currentTrackId());
+      PowerOptionsScreen.openMusic(minecraft, minecraft.currentScreen, false, AudioController.navigationTrackId());
       return true;
     }
     return false;

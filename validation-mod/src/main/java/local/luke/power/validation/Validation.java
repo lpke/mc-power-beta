@@ -298,6 +298,10 @@ public final class Validation {
       else if (command.startsWith("audio-ui-461")) AudioUi461Checks.run(mc, command.substring("audio-ui-461".length()).trim());
       else if (command.startsWith("release-462")) Release462Checks.run(mc, command.substring("release-462".length()).trim());
       else if (command.startsWith("release-463")) Release463Checks.run(mc, command.substring("release-463".length()).trim());
+      else if (command.startsWith("release-464-audio")) Release464AudioChecks.run(mc, command.substring("release-464-audio".length()).trim());
+      else if (command.startsWith("release-464-map-logo")) Release464MapLogoChecks.run(mc, command.substring("release-464-map-logo".length()).trim());
+      else if (command.startsWith("release-464-music-ui")) Release464MusicUiChecks.run(mc, command.substring("release-464-music-ui".length()).trim());
+      else if (command.startsWith("release-464-shared-ui")) Release464SharedUiChecks.run(mc, command.substring("release-464-shared-ui".length()).trim());
       else if (command.startsWith("audio-transition-461")) AudioTransition461Checks.run(mc, command.substring("audio-transition-461".length()).trim());
       else if (command.startsWith("minimap-444")) Minimap444Checks.run(mc,command.substring("minimap-444".length()).trim());
       else if (command.startsWith("inventory-look-445")) InventoryLook445Checks.run(mc, command.substring("inventory-look-445".length()).trim());

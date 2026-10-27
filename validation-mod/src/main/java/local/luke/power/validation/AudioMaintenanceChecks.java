@@ -14,7 +14,7 @@ final class AudioMaintenanceChecks {
     try (var preserved = new MusicPlaylists460Checks.State(mc)) {
       MenuPreferences.update(v -> v.autoApply = false);
       AudioSettings config = new AudioSettings();
-      config.playlists.add(new MusicPlaylist("one", "One", List.of("music:calm1.ogg"), Map.of()));
+      config.playlists.add(new MusicPlaylist("one", "One", List.of("music:calm1.ogg")));
       MusicPlaylist.load(config, "one");
       AudioConfig.preview(config);
       PowerOptionsScreen options = MenuUpdateChecks.open(mc, "Audio");

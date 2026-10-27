@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.6.3",
+    "default": "Power Beta 4.6.4",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {

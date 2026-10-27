@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class MusicFiltersTest {
-  private static final List<String> VIEWS = List.of("active", "library", "playlists", "favorites");
+  private static final List<String> VIEWS = List.of("library", "playlists", "favorites", "active");
 
   private static MusicFilters.Layout layout(int width, String selected, String activeName) {
     return MusicFilters.layout(31, 95, width, selected, activeName, label -> label.length() * 6);
@@ -16,7 +16,7 @@ class MusicFiltersTest {
     for (int width = 180; width <= 1600; width++) for (String selected : VIEWS)
       for (String name : List.of("Beta 1.7.3", "Favorites", "A very long world playlist name")) {
         var layout = layout(width, selected, name);
-        assertEquals("active", layout.tabs().get(0).id());
+        assertEquals("library", layout.tabs().get(0).id());
         assertTrue(layout.tabs().stream().anyMatch(tab -> tab.id().equals(selected)));
         var ids = new HashSet<>(layout.tabs().stream().map(MusicFilters.Tab::id).toList());
         layout.hiddenTabs().forEach(tab -> assertTrue(ids.add(tab.id())));
@@ -72,7 +72,7 @@ class MusicFiltersTest {
       assertEquals(VIEWS, layout.tabs().stream().map(MusicFilters.Tab::id).toList());
       assertFalse(layout.overflow());
       assertTrue(layout.hiddenTabs().isEmpty());
-      assertEquals("World playlist", layout.tabs().get(0).label());
+      assertEquals("World playlist", layout.tabs().get(3).label());
     }
   }
 }

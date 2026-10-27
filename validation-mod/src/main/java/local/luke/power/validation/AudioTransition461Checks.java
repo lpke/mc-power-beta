@@ -53,8 +53,8 @@ final class AudioTransition461Checks {
   private static AudioSettings settings(boolean oldWorldPool) {
     var settings = AudioConfig.copy();
     settings.playlists = new ArrayList<>(List.of(
-        new MusicPlaylist("transition461-world", "Transition world", List.of(oldWorldPool ? SECOND : FIRST), Map.of()),
-        new MusicPlaylist("transition461-menu", "Transition menu", List.of(SECOND), Map.of())));
+        new MusicPlaylist("transition461-world", "Transition world", List.of(oldWorldPool ? SECOND : FIRST)),
+        new MusicPlaylist("transition461-menu", "Transition menu", List.of(SECOND))));
     settings.playlist = "transition461-world"; settings.menuPlaylist = "transition461-menu";
     settings.shuffle = false; settings.avoidRepeats = false; settings.master = 100;
     settings.waitBetweenTracks = settings.delayQueuedTracks = true;

@@ -70,7 +70,7 @@ public final class AudioLayoutChecks {
         });
         test("world and menu saved memberships are independent in the shared import library", () -> {
           var next=AudioConfig.copy();
-          next.playlists.add(new MusicPlaylist("layout-menu","Menu fixture",List.of(menu),Map.of()));
+          next.playlists.add(new MusicPlaylist("layout-menu","Menu fixture",List.of(menu)));
           MusicPlaylist.loadMenu(next,"layout-menu");AudioConfig.preview(next);
           check(MusicFixtureSupport.menuTracks(next).equals(List.of(menu)),"menu saved membership lost");
           check(MusicFixtureSupport.tracks(next).equals(List.of(b)),"menu assignment changed world membership");

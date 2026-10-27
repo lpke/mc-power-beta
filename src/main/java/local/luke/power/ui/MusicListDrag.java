@@ -5,7 +5,7 @@ import org.lwjgl.opengl.Display;
 
 /** One pointer-owned reorder gesture; callers validate its immutable source before commit. */
 final class MusicListDrag {
-  enum Kind { GROUPS, PLAYLIST, QUEUE }
+  enum Kind { GROUPS, PLAYLIST, QUEUE, CATALOG }
   record Slot(String id, int y, int height) {}
   private Kind kind;
   private Object owner;

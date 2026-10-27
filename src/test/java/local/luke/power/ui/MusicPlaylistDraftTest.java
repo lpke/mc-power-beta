@@ -14,15 +14,15 @@ class MusicPlaylistDraftTest {
     assertEquals(List.of(B,A),draft.snapshot("Selected").tracks());
   }
   @Test void editsAndReorderNeverMutateSavedSnapshotOrDiscardUnavailableEntries() {
-    var saved=new MusicPlaylist("stable","Quiet",List.of(A,MISSING,B),Map.of("Alpha",40));
+    var saved=new MusicPlaylist("stable","Quiet",List.of(A,MISSING,B));
     var draft=new MusicPresetDraft(saved,List.of(A,B));
-    draft.move(B,-2);draft.volume("Alpha",20);draft.excludeAll(List.of(A));
+    draft.move(B,-2);draft.excludeAll(List.of(A));
     assertEquals(List.of(B,MISSING),draft.tracks());
-    assertEquals(List.of(A,MISSING,B),saved.tracks());assertEquals(40,saved.groupVolumes().get("Alpha"));
+    assertEquals(List.of(A,MISSING,B),saved.tracks());
     draft.includeAll();assertEquals(List.of(B,MISSING,A),draft.tracks());
   }
   @Test void orderEditAcceptsOnlyTheSameUniqueMembership() {
-    var draft=new MusicPresetDraft(new MusicPlaylist("stable","Quiet",List.of(A,B),Map.of()));
+    var draft=new MusicPresetDraft(new MusicPlaylist("stable","Quiet",List.of(A,B)));
     assertThrows(IllegalArgumentException.class,()->draft.order(List.of(A)));
     assertThrows(IllegalArgumentException.class,()->draft.order(List.of(A,A)));
     assertEquals(List.of(A,B),draft.tracks());
@@ -49,45 +49,41 @@ class MusicPlaylistDraftTest {
     String second = MusicPresetDraft.copyName(original, List.of(original, first.toUpperCase(Locale.ROOT)));
     assertEquals("A".repeat(73) + " copy 2", second);
     assertEquals(80, second.length());
-    assertDoesNotThrow(() -> new MusicPlaylist("copy", second, List.of(), Map.of()));
+    assertDoesNotThrow(() -> new MusicPlaylist("copy", second, List.of()));
   }
 
-  @Test void appendingAnotherPlaylistKeepsExistingOrderMissingIdsAndTargetGains() {
-    var saved = new MusicPlaylist("target", "Quiet", List.of(B), Map.of("Alpha", 35));
-    var source = new MusicPlaylist("source", "Other", List.of(A, B, MISSING), Map.of("Alpha", 80));
+  @Test void appendingAnotherPlaylistKeepsExistingOrderAndMissingIds() {
+    var saved = new MusicPlaylist("target", "Quiet", List.of(B));
+    var source = new MusicPlaylist("source", "Other", List.of(A, B, MISSING));
     var draft = new MusicPresetDraft(saved, List.of(A, B));
     draft.appendTracks(source.tracks());
     draft.appendTracks(source.tracks());
     assertEquals(List.of(B, A, MISSING), draft.tracks());
-    assertEquals(35, draft.volume("Alpha"));
     assertEquals(List.of(B), saved.tracks());
     assertEquals(List.of(A, B, MISSING), source.tracks());
     assertEquals(List.of(B), draft.original().tracks());
   }
 
   @Test void invalidAppendDoesNotLeaveAPartlyChangedDraft() {
-    var draft = new MusicPresetDraft(new MusicPlaylist("target", "Quiet", List.of(B), Map.of()));
+    var draft = new MusicPresetDraft(new MusicPlaylist("target", "Quiet", List.of(B)));
     assertThrows(IllegalArgumentException.class, () -> draft.appendTracks(List.of(A, "invalid")));
     assertEquals(List.of(B), draft.tracks());
     assertFalse(draft.changed("Quiet"));
   }
 
   @Test void favoritesKeepTheirReservedIdAndNameWhileEditsStayIsolated() {
-    var saved = new MusicPlaylist(MusicPlaylist.FAVORITES, "Favorites", List.of(A, MISSING), Map.of("Alpha", 40));
+    var saved = new MusicPlaylist(MusicPlaylist.FAVORITES, "Favorites", List.of(A, MISSING));
     var draft = new MusicPresetDraft(saved, List.of(A, B));
     assertTrue(draft.favorites());
     assertFalse(draft.creating());
     assertFalse(draft.changed("Another name"));
     draft.include(B, true);
     draft.include(A, false);
-    draft.volume("Alpha", 25);
     var edited = draft.snapshot("Another name");
     assertEquals(MusicPlaylist.FAVORITES, edited.id());
     assertEquals("Favorites", edited.name());
     assertEquals(List.of(MISSING, B), edited.tracks());
     assertEquals(List.of(A, MISSING), saved.tracks());
-    assertEquals(40, saved.groupVolumes().get("Alpha"));
-    assertEquals(25, edited.groupVolumes().get("Alpha"));
   }
 
   @Test void protectedBetaViewKeepsItsIdentityAndRejectsEveryKindOfEdit() {
@@ -106,9 +102,7 @@ class MusicPlaylistDraftTest {
     var reversed = new java.util.ArrayList<>(beta.tracks());
     java.util.Collections.reverse(reversed);
     assertThrows(IllegalStateException.class, () -> view.order(reversed));
-    assertThrows(IllegalStateException.class, () -> view.volume("Alpha", 25));
     assertEquals(beta.tracks(), view.tracks());
     assertEquals(beta.tracks(), view.original().tracks());
-    assertEquals(Map.of(), view.snapshot("Another name").groupVolumes());
   }
 }

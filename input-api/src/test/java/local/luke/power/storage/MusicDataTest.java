@@ -14,11 +14,12 @@ class MusicDataTest {
   @Test void splitAndMergePreserveMusicAndPreferencesWithoutDuplicatingOwnership() {
     JsonObject audio = json("""
         {"master":71,"playlist":"quiet","menuPlaylist":"@world",
-         "playlists":[{"id":"quiet","name":"Quiet","tracks":["music:missing","music:a"],"groupVolumes":{"folder:/missing":20}}],
+         "playlists":[{"id":"quiet","name":"Quiet","tracks":["music:missing","music:a"]}],
          "favourites":["music:missing"],
          "musicDirectories":["/missing"],
          "libraryOrder":["source:/missing","Alpha"],
-         "favoritesGroupVolumes":{"Alpha":19},
+         "libraryGroupVolumes":{"Alpha":19},
+         "playlistOrder":["quiet","favorites","beta"],
          "sounds":{"random.click":33,"music:missing":100}}
         """);
     JsonObject music = MusicData.split(audio), preferences = MusicData.preferences(audio);
@@ -40,19 +41,37 @@ class MusicDataTest {
     for (String bad : new String[]{
         "{\"formatVersion\":1,\"audio\":{},\"queue\":{\"tracks\":[]}}",
         "{\"formatVersion\":1.5,\"audio\":{},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":3,\"audio\":{\"future\":true},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":3,\"audio\":{\"playlistTracks\":[\"music:a\",\"music:a\"]},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":3,\"audio\":{\"sounds\":{\"random.click\":50}},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":3,\"audio\":{\"groupVolumes\":{\"World\":101}},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":3,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[\"music:a\",\"music:a\"],\"groupVolumes\":{}}]},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":3,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[],\"groupVolumes\":{\"World\":101}}]},\"queue\":{\"tracks\":[]}}",
-        "{\"formatVersion\":3,\"audio\":{\"disabledMusicDirectories\":[\"/gone\"]},\"queue\":{\"tracks\":[]}}"})
+        "{\"formatVersion\":4,\"audio\":{\"future\":true},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":4,\"audio\":{\"playlistTracks\":[\"music:a\",\"music:a\"]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":4,\"audio\":{\"sounds\":{\"random.click\":50}},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":4,\"audio\":{\"groupVolumes\":{\"World\":101}},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":4,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[\"music:a\",\"music:a\"],\"groupVolumes\":{}}]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":4,\"audio\":{\"playlists\":[{\"id\":\"one\",\"name\":\"One\",\"tracks\":[],\"groupVolumes\":{\"World\":101}}]},\"queue\":{\"tracks\":[]}}",
+        "{\"formatVersion\":4,\"audio\":{\"disabledMusicDirectories\":[\"/gone\"]},\"queue\":{\"tracks\":[]}}"})
       assertThrows(IllegalArgumentException.class, () -> MusicData.validate(json(bad)), bad);
     JsonObject data = MusicData.empty(); JsonArray tracks = new JsonArray();
     for (int i = 0; i < 257; i++) tracks.add("music:a"); data.getAsJsonObject("queue").add("tracks", tracks);
     assertThrows(IllegalArgumentException.class, () -> MusicData.validate(data));
     assertThrows(IllegalArgumentException.class, () -> MusicData.validatePreferences(json("{\"preset\":\"old\"}")));
     assertThrows(IllegalArgumentException.class, () -> MusicData.validatePreferences(json("{\"playlistTracks\":[]}")));
+  }
+
+  @Test void currentFormatProtectsPreviousDocumentsAndValidatesCatalogOrder() {
+    JsonObject data = MusicData.empty(); data.addProperty("formatVersion", 3);
+    assertThrows(IllegalArgumentException.class, () -> MusicData.validate(data));
+    data.addProperty("formatVersion", 4);
+    JsonObject audio = data.getAsJsonObject("audio");
+    for (String order : new String[]{"[\"beta\",\"beta\"]", "[\"missing\"]", "[null]"}) {
+      audio.add("playlistOrder", JsonParser.parseString(order));
+      assertThrows(IllegalArgumentException.class, () -> MusicData.validate(data));
+    }
+    audio.add("playlistOrder", JsonParser.parseString("[\"favorites\",\"beta\"]"));
+    assertDoesNotThrow(() -> MusicData.validate(data));
+    audio.add("favoritesGroupVolumes", new JsonObject());
+    assertThrows(IllegalArgumentException.class, () -> MusicData.validate(data));
+    audio.remove("favoritesGroupVolumes");
+    audio.add("libraryGroupVolumes", JsonParser.parseString("{\"source:/personal/library\":37}"));
+    assertDoesNotThrow(() -> MusicData.validate(data));
   }
 
   @Test void durableReadWriteAndVerifiedBackupPreserveExactBytes() throws Exception {

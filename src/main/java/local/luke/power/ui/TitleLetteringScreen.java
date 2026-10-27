@@ -13,8 +13,7 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
   private final Map<Integer, ItemCatalogue.Entry> blocks = new HashMap<>();
   private final TitlePreview.Renderer renderer;
   private final Setting brush = temporary("brush", "Brush block", Setting.Kind.TEXT, 1, 1, 1);
-  private final Setting columns = temporary("columns", "Grid columns", Setting.Kind.INTEGER, 38, 1, 80);
-  private final Setting rows = temporary("rows", "Grid rows", Setting.Kind.INTEGER, 5, 1, 12);
+  private final TitleGridDimensions dimensions;
   private final Setting presetName = new Setting("titleEditor.name", "", "", "", "Preset name", "", Setting.Kind.TEXT,
       new JsonPrimitive(""), new JsonPrimitive(""), 0, 0, 1, List.of(), false);
   private final List<Setting> rotation = new ArrayList<>();
@@ -23,6 +22,7 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
 
   public TitleLetteringScreen(PowerOptionsScreen parent) {
     super(parent, new SettingsDraft(parent.session().settings(), HudEditorSettings::lettering));
+    dimensions = new TitleGridDimensions(draft.get(LINES));
     renderer = TitlePreview.factory == null ? null : TitlePreview.factory.get();
     for (var entry : ItemCatalogue.entries(ItemCatalogue.Domain.BLOCK)) if (TitlePreview.renderableBlock.test(entry.id())) blocks.put(entry.id(), entry);
     for (int axis = 0; axis < 3; axis++) {
@@ -30,8 +30,6 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
       rotation.add(new Setting("titleEditor.rotation" + axis, "", "", "", "Rotate " + "XYZ".charAt(axis), "",
           Setting.Kind.DECIMAL, angle, angle, -360, 360, 1, List.of(), false));
     }
-    columns.validator(v -> TitleTiles.resize(lines(), v.getAsInt(), lines().size()));
-    rows.validator(v -> TitleTiles.resize(lines(), TitleTiles.width(lines()), v.getAsInt()));
     presetName.validator(v -> { if (v.getAsString().isBlank() || v.getAsString().length() > 48
         || v.getAsString().chars().anyMatch(Character::isISOControl)) throw new IllegalArgumentException("Use a name up to 48 characters"); });
     afterEdit();
@@ -47,7 +45,7 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
   private JsonArray presets() { return draft.get("logo.presets").value.getAsJsonArray(); }
   private JsonArray swatches() { return draft.get("logo.swatches").value.getAsJsonArray(); }
   protected List<Setting> controls() {
-    if (tab == 0) return List.of(brush, columns, rows);
+    if (tab == 0) return List.of(brush, dimensions.columns, dimensions.rows);
     if (tab == 2) return List.of();
     List<Setting> controls = new ArrayList<>(rotation);
     draft.settings().stream().filter(s -> !Set.of(LINES, PALETTE, "logo.logo.rotation", "logo.presets", "logo.swatches", "logo.selectedPreset", "logo.retroBase").contains(s.id)).forEach(controls::add);
@@ -58,20 +56,22 @@ public final class TitleLetteringScreen extends DraftEditorScreen {
     int minimumPreview = Math.min(170, Math.max(90, height / 3));
     return Math.max(controlsTop() + (tab == 2 ? 42 : 23), Math.min(controlsTop() + desired, previewBottom() - minimumPreview - 12));
   }
-  protected boolean usesSlider(Setting s) { return s == rows || s == columns || rotation.contains(s) || !s.id.startsWith("titleEditor.") && super.usesSlider(s); }
-  protected boolean resettable(Setting s) { return s == rows || s == columns || rotation.contains(s) || !s.id.startsWith("titleEditor."); }
+  protected boolean usesSlider(Setting s) { return dimensions.owns(s) || rotation.contains(s) || !s.id.startsWith("titleEditor.") && super.usesSlider(s); }
+  protected boolean resettable(Setting s) { return dimensions.owns(s) || rotation.contains(s) || !s.id.startsWith("titleEditor."); }
   protected String display(Setting s) {
     if (s == brush) { var block = blocks.get(s.value.getAsInt()); return block == null ? "Choose..." : block.name(); }
     return super.display(s);
   }
   protected void afterEdit() {
-    columns.value = new JsonPrimitive(TitleTiles.width(lines())); rows.value = new JsonPrimitive(lines().size());
+    dimensions.sync();
     JsonArray angles = draft.get("logo.logo.rotation").value.getAsJsonArray();
     for (int axis = 0; axis < 3; axis++) rotation.get(axis).value = angles.get(axis).deepCopy();
   }
   protected void valueChanged(Setting s) {
-    if (s == columns || s == rows) draft.get(LINES).value = TitleTiles.resize(lines(),
-        s == columns ? s.value.getAsInt() : TitleTiles.width(lines()), s == rows ? s.value.getAsInt() : lines().size());
+    if (dimensions.owns(s)) {
+      error = dimensions.apply(s);
+      if (!error.isEmpty()) return;
+    }
     else if (rotation.contains(s)) draft.get("logo.logo.rotation").value.getAsJsonArray().set(rotation.indexOf(s), s.value.deepCopy());
     markCustom();
     if (s.id.equals("logo.logo.animation.enabled") && !s.value.getAsBoolean()) replaying = false;

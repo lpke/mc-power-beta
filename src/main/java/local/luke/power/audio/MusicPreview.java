@@ -41,7 +41,7 @@ final class MusicPreview {
 
   static void start(Minecraft mc, SoundSystem system, class_267 selected, boolean backgroundStarting) {
     String id = AudioController.trackId(selected);
-    if (track.equals(id)) { stop(system, true); return; }
+    if (track.equals(id)) { if (paused) resume(system); else pause(system); return; }
     if (!active()) {
       restoreBackground = true;
       restoreRecords = true;

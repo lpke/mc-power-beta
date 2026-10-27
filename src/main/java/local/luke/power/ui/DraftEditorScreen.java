@@ -118,7 +118,7 @@ abstract class DraftEditorScreen extends UiScreen {
     collapsed.remove(groupKey(controlGroup(setting)));
     if (!controlsVisible()) return;
     int y = controlY(setting);
-    int visibleTop = controlsTop() + SettingsGroup.HEIGHT;
+    int visibleTop = controlsTop() + (controlGroup(setting).isBlank() ? 0 : SettingsGroup.HEIGHT);
     if (y < visibleTop) scroll -= visibleTop - y;
     else if (y + 19 > controlsBottom()) scroll += y + 19 - controlsBottom();
     scroll = Math.max(0, Math.min(track().maximum(), scroll));

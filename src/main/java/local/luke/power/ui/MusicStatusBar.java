@@ -12,9 +12,9 @@ final class MusicStatusBar {
   private boolean available;
 
   boolean overTrack(int x, int y) {
-    return !AudioController.currentTrackId().isEmpty()
-        && x >= labelX && x < labelX + labelWidth && y >= top && y < top + 15;
+    return overLabel(x, y) && !AudioController.navigationTrackId().isEmpty();
   }
+  boolean overLabel(int x, int y) { return x >= labelX && x < labelX + labelWidth && y >= top && y < top + 15; }
 
   boolean press(int x, int y, int button) {
     if (button != 0 || !available || x < barX || x >= barX + barWidth || y < top || y >= top + 16)

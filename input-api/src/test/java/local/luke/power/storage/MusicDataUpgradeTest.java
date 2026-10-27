@@ -13,7 +13,7 @@ class MusicDataUpgradeTest {
     return JsonParser.parseString("""
         {"formatVersion":2,"audio":{
           "playlists":[{"id":"one","name":"One","tracks":["music:z","music:missing","music:a"],
-            "groupVolumes":{"folder:/personal/album":37,"Alpha":100}}],
+            "groupVolumes":{"Alpha":37,"Beta / Creative":100}}],
           "favourites":["music:z","music:missing","music:a"],
           "musicDirectories":["relative/../music","/personal/missing"],
           "disabledMusicDirectories":["/personal/missing"],
@@ -22,16 +22,47 @@ class MusicDataUpgradeTest {
         """).getAsJsonObject();
   }
 
-  @Test void conversionOnlyRemovesRetiredFlagsAndChangesTheVersion() throws Exception {
+  @Test void conversionMovesGainsToLibraryAndPreservesMembershipAndQueue() throws Exception {
     JsonObject original = previous(), untouched = original.deepCopy();
     JsonObject next = MusicDataUpgrade.convert(original);
     JsonObject expected = original.deepCopy();
-    expected.addProperty("formatVersion", 3);
+    expected.addProperty("formatVersion", 4);
+    var expectedAudio = expected.getAsJsonObject("audio");
+    expectedAudio.getAsJsonArray("playlists").get(0).getAsJsonObject().remove("groupVolumes");
+    expectedAudio.add("libraryGroupVolumes", JsonParser.parseString("{\"Alpha\":37}"));
+    expectedAudio.add("playlistOrder", JsonParser.parseString("[\"beta\",\"favorites\",\"one\"]"));
     expected.getAsJsonObject("audio").remove("disabledMusicDirectories");
     assertEquals(expected, next);
     assertEquals(untouched, original);
     assertDoesNotThrow(() -> MusicData.validate(next));
     assertThrows(IllegalArgumentException.class, () -> MusicData.validate(original));
+  }
+
+  @Test void formatThreeConversionPreservesLibraryOrderAndMergesOnlyConsistentNondefaultGains() {
+    JsonObject previous = previous(); previous.addProperty("formatVersion", 3);
+    JsonObject audio = previous.getAsJsonObject("audio"); audio.remove("disabledMusicDirectories");
+    audio.add("libraryOrder", JsonParser.parseString("[\"Alpha\",\"source:/personal/missing\"]"));
+    audio.add("favoritesGroupVolumes", JsonParser.parseString("{\"Beta / Creative\":23}"));
+    JsonObject converted = MusicDataUpgrade.convert(previous);
+    assertEquals(audio.get("libraryOrder"), converted.getAsJsonObject("audio").get("libraryOrder"));
+    assertEquals(JsonParser.parseString("{\"Alpha\":37,\"Beta / Creative\":23}"),
+        converted.getAsJsonObject("audio").get("libraryGroupVolumes"));
+    assertFalse(converted.getAsJsonObject("audio").has("favoritesGroupVolumes"));
+    audio.getAsJsonObject("favoritesGroupVolumes").addProperty("Alpha", 50);
+    JsonObject unchanged = previous.deepCopy();
+    assertThrows(IllegalArgumentException.class, () -> MusicDataUpgrade.convert(previous));
+    assertEquals(unchanged, previous);
+  }
+
+  @Test void physicalFolderGainsRequireAnExplicitSourceMappingBeforeAnyReplacement() throws Exception {
+    JsonObject previous = previous();
+    previous.getAsJsonObject("audio").getAsJsonArray("playlists").get(0).getAsJsonObject()
+        .getAsJsonObject("groupVolumes").addProperty("folder:/personal/album", 37);
+    Path file = directory.resolve("music.json"); Files.writeString(file, previous.toString());
+    byte[] unchanged = Files.readAllBytes(file);
+    var failure = assertThrows(java.io.IOException.class, () -> MusicDataUpgrade.convert(file));
+    assertTrue(failure.getMessage().contains("explicit Library source mapping"));
+    assertArrayEquals(unchanged, Files.readAllBytes(file));
   }
 
   @Test void explicitDiskConversionVerifiesBackupAndLeavesConfigurationAndOtherFilesIdentical() throws Exception {
@@ -59,7 +90,7 @@ class MusicDataUpgradeTest {
 
   @Test void unsupportedMalformedAndReservedDataCannotBePartlyConverted() throws Exception {
     Path music = directory.resolve("music.json");
-    for (int version : new int[]{1, 3, 99}) {
+    for (int version : new int[]{1, 4, 99}) {
       JsonObject value = previous(); value.addProperty("formatVersion", version);
       Files.writeString(music, value.toString());
       String original = Files.readString(music);
@@ -89,7 +120,7 @@ class MusicDataUpgradeTest {
     var injected = new java.io.IOException("Injected directory sync failure after replacement");
     var failure = assertThrows(java.io.IOException.class, () -> MusicDataUpgrade.convert(music, (stage, file) -> {
       if (stage.equals("replaced")) {
-        assertEquals(3, MusicData.read(file).get("formatVersion").getAsInt());
+        assertEquals(4, MusicData.read(file).get("formatVersion").getAsInt());
         throw injected;
       }
     }));

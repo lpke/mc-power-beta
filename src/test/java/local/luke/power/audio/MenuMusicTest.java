@@ -31,7 +31,7 @@ class MenuMusicTest {
   }
   @Test void emptyCustomMenuPlaylistNeverFallsBackToWorldMusic() {
     AudioSettings settings = new AudioSettings();
-    settings.playlists.add(new MusicPlaylist("empty", "Empty", List.of(), Map.of()));
+    settings.playlists.add(new MusicPlaylist("empty", "Empty", List.of()));
     MusicPlaylist.loadMenu(settings, "empty");
     assertTrue(MusicPlaylist.rotation(settings, true).isEmpty());
     assertEquals(BuiltinMusic.VANILLA, MusicPlaylist.rotation(settings, false));

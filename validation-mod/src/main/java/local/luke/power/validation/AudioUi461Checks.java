@@ -54,8 +54,9 @@ final class AudioUi461Checks {
 
   private static AudioSettings seed() {
     var settings = new AudioSettings();
-    settings.playlists.add(new MusicPlaylist(QUIET, "Quiet afternoons", List.of(SECOND, FIRST, THIRD), Map.of("Alpha", 40)));
-    settings.playlists.add(new MusicPlaylist("ui461-building", "Building", List.of(THIRD, FIRST), Map.of()));
+    settings.libraryGroupVolumes.put("Alpha", 40);
+    settings.playlists.add(new MusicPlaylist(QUIET, "Quiet afternoons", List.of(SECOND, FIRST, THIRD)));
+    settings.playlists.add(new MusicPlaylist("ui461-building", "Building", List.of(THIRD, FIRST)));
     settings.favourites.add(FIRST); settings.sounds.put(FIRST, 35);
     MusicPlaylist.load(settings, QUIET); MusicPlaylist.loadMenu(settings, MusicPlaylist.SAME_AS_WORLD);
     return settings;
@@ -179,7 +180,7 @@ final class AudioUi461Checks {
     check(groupRight == layout.volumeX() + layout.volumeWidth()
         && number(library, "groupVolumeX") == layout.volumeX(), "group slider does not align with child sliders");
     check(number(library, "groupHeight", "Alpha") == 20, "playlist group heading is taller than normal settings headings");
-    check(draft.volume("Alpha") == 40, "changing view replaced the playlist's group gain");
+    check(AudioConfig.current().libraryGroupVolumes.getOrDefault("Alpha", 100) == 40, "changing view replaced the Library group gain");
     for (int queued : new int[]{0, 1}) {
       MusicRequests.edit(queue -> { queue.tracks.clear(); if (queued > 0) queue.add(FIRST); });
       for (String view : List.of("grouped", "add-songs")) {

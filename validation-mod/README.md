@@ -17,6 +17,13 @@
 
 # Runtime checks
 
+- `release-464-audio`, `release-464-map-logo`, `release-464-music-ui` and
+  `release-464-shared-ui` accept `capture|check` in a muted disposable singleplayer
+  client. Capture changed views before acceptance checks, using a focused window
+  of at least 1708x960. Native screenshots and observations go under
+  `power-beta-data/reports/release-464`. The fixtures restore their owned settings,
+  drafts, queue, files and runtime state. Do not install them in the primary.
+
 - `release-463 capture|check` verifies full-size Audio sliders, HUD editor actions,
   saved-playlist row playback, ordered manual/queue continuation, isolated drafts,
   pause/resume and now-playing navigation at 854x480 and 320x240. It also checks

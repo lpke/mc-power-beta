@@ -52,8 +52,9 @@ final class Release462Checks {
 
   private static AudioSettings seed(String active) {
     var audio = new AudioSettings();
-    audio.playlists.add(new MusicPlaylist(CUSTOM, LONG_NAME, List.of(FIRST, SECOND, THIRD), Map.of("Alpha", 40)));
-    audio.playlists.add(new MusicPlaylist("ui462-empty", "Empty playlist", List.of(), Map.of()));
+    audio.libraryGroupVolumes.put("Alpha", 40);
+    audio.playlists.add(new MusicPlaylist(CUSTOM, LONG_NAME, List.of(FIRST, SECOND, THIRD)));
+    audio.playlists.add(new MusicPlaylist("ui462-empty", "Empty playlist", List.of()));
     audio.favourites.add(FIRST); audio.sounds.put(FIRST, 35);
     MusicPlaylist.load(audio, active); MusicPlaylist.loadMenu(audio, MusicPlaylist.SAME_AS_WORLD);
     return audio;
@@ -163,15 +164,15 @@ final class Release462Checks {
     check(call(library, "activeTabLabel").equals(owner.name()), "external selection change mislabeled the retained dirty draft");
     options = state.open(SIZES[0], CUSTOM, false); library = library(options); active(library); edits = get(library, "edits");
     String renamed = "Renamed quiet afternoons";
-    call(edits, "save", new Class<?>[]{MusicPlaylist.class}, new MusicPlaylist(CUSTOM, renamed, List.of(FIRST, SECOND, THIRD), Map.of("Alpha", 40))); library.tick();
+    call(edits, "save", new Class<?>[]{MusicPlaylist.class}, new MusicPlaylist(CUSTOM, renamed, List.of(FIRST, SECOND, THIRD))); library.tick();
     var tabs = (MusicFilters.Layout)call(library, "filters");
     check(tabs.tabs().stream().anyMatch(t -> t.id().equals("active") && t.label().equals(renamed)) && draft(library).name().equals(renamed), "saved active rename did not update tab and clean draft");
     call(edits, "delete", new Class<?>[]{String.class}, CUSTOM); library.tick();
     check(AudioConfig.current().playlist.equals(MusicPlaylist.BETA) && draft(library).id().equals(MusicPlaylist.BETA), "deleting selected playlist did not fall back to Beta");
     options = state.open(SIZES[0], MusicPlaylist.FAVORITES, false); library = library(options); active(library); edits = get(library, "edits");
-    var favorites = new MusicPlaylist(MusicPlaylist.FAVORITES, "Favorites", List.of(SECOND, FIRST), Map.of("Alpha", 25));
+    var favorites = new MusicPlaylist(MusicPlaylist.FAVORITES, "Favorites", List.of(SECOND, FIRST));
     call(edits, "save", new Class<?>[]{MusicPlaylist.class}, favorites); library.tick();
-    check(draft(library).tracks().equals(favorites.tracks()) && draft(library).volume("Alpha") == 25, "active Favorites refresh lost membership or gains");
+    check(draft(library).tracks().equals(favorites.tracks()) && AudioConfig.current().libraryGroupVolumes.getOrDefault("Alpha", 100) == 40, "active Favorites refresh lost membership or changed Library gains");
     options = state.open(SIZES[0], CUSTOM, false); library = library(options); active(library); var before = draft(library).tracks();
     library.showActiveTrack("music:creative2.ogg");
     check(draft(library).tracks().equals(before) && !((String)get(library, "error")).isEmpty(), "outside-song jump appended a member or lost its notice");

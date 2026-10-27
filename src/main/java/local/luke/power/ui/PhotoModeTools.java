@@ -239,7 +239,7 @@ public final class PhotoModeTools extends UiScreen implements PhotoModeHooks.Too
     return false;
   }
   @Override public void renderScene(Object screen,int x,int y) {
-    if(screen==host&&layer==null)WaypointMarkers.render(minecraft,x,y);
+    if(screen==host&&layer==null)WaypointMarkers.render(minecraft,context?-1000:x,context?-1000:y);
   }
   @Override public void render(Object screen,int x,int y,float delta) {
     if(screen!=host)return;

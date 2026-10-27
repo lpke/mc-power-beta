@@ -390,7 +390,7 @@ public final class WorldMapScreen extends UiScreen {
 
   protected void mouseClicked(int x, int y, int button) {
     if (coordinates.press(this,x,y,button)) return;
-    if (panelOwns(x)) {
+    if (panelOwns(x) && (!context || settingsPanel.panelModal())) {
       if (!panelPress) { panelPress = true; panelPressButton = button; }
       settingsPanel.mouseClicked(x, y, button); return;
     }
@@ -408,14 +408,15 @@ public final class WorldMapScreen extends UiScreen {
       if(button==0&&row>=0) { click(); toggleOverlay(togglePanel().toggle(row)); }
       return;
     }
-    if (settingsPanel != null && minimapHit != null && button == 1 && settingsPanel.minimapWheelAllowed()
-        && !context && !dragging && !scaleDragging
+    if (settingsPanel != null && minimapHit != null
         && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
-      click(); settingsPanel.resetMinimapZoom(); return;
-    }
-    if (settingsPanel != null && minimapHit != null && button == 0
-        && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) {
-      click(); settingsPanel.minimapAppearance(""); return;
+      if (settingsPanel.minimapWheelAllowed() && !dragging && !scaleDragging) {
+        WorldMapMinimapInput.press(button, MapConfig.current().middleClickAction,
+            () -> { click(); settingsPanel.resetMinimapZoom(); },
+            toggle -> { click(); settingsPanel.toggleMapQuickSetting(toggle); },
+            () -> { click(); MapToggle.HEADS.toggleMinimap(); });
+      }
+      return;
     }
     if ((button == 0 || button == 1) && minecraft.world.isRemote
         && inside(x, y, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), 18)) {
@@ -548,7 +549,7 @@ public final class WorldMapScreen extends UiScreen {
       } finally { GL11.glPopAttrib(); }
     }
     if (mapLeft() == width) {
-      settingsPanel.render(coordinates.active()?-1000:mx, coordinates.active()?-1000:my, delta);
+      settingsPanel.render(coordinates.active() || context ? -1000 : mx, coordinates.active() || context ? -1000 : my, delta);
       coordinates.render(this,mx,my); return;
     }
     drawMinimap(delta);
@@ -632,7 +633,7 @@ public final class WorldMapScreen extends UiScreen {
       if (control != null && control.action()==WorldMapControls.Action.SETTINGS && settingsPanel!=null)
         tooltip("Close settings",mx,my);
     }
-    if (settingsPanel != null) settingsPanel.render(coordinates.active()?-1000:mx, coordinates.active()?-1000:my, delta);
+    if (settingsPanel != null) settingsPanel.render(coordinates.active() || context ? -1000 : mx, coordinates.active() || context ? -1000 : my, delta);
     coordinates.render(this,mx,my);
   }
 

@@ -5,7 +5,9 @@
   Defaults and interrupted-save recovery run from the language adapter **before**
   mixin plugins and configuration entrypoints. Preserve stable setting, world,
   track and preset IDs. Global schema 9 and world-rule/template format 4 are the
-  supported formats. Older configuration schemas require an explicit backed-up conversion to schema 9 and music-data format 3. Older rule formats and pre-rule worlds require separate native validation. Reject unsupported data with recovery guidance;
+  supported formats. Music data format 4 is current. Earlier configuration/music
+  documents require an explicit backed-up conversion before installation. Older
+  rule formats and pre-rule worlds require separate native validation. Reject unsupported data with recovery guidance;
   never reconstruct permissions from retired global settings. Retain opaque historical
   evidence already stored in configuration documents without consuming it.
   Validate converted values and verify durable backups before replacing originals.
@@ -51,17 +53,27 @@
   setting, toolbar control or row so only that owner retains its open highlight.
   Map, minimap and photo checklist panels keep their existing toggle layout and
   persistent-open behavior; their colors and text spacing follow the same menu style.
-  All Audio/Volume sliders retain their full control width. Music and Game sounds
+  Volume sliders use `VolumeControls`: a 150-pixel column where space permits,
+  shared by rendering, drag hit bounds, tooltips and exact entry. Place preview,
+  related-control and editor buttons before the column rather than shortening it.
+  Compact form rows place adjacent actions beside the label. Song and Library-group
+  rows share an adaptive 54–150-pixel column to retain readable song names; their
+  bounds must match independently of nearby buttons. Normal Audio category rows
+  use a 16-pixel left inset beneath Game sounds. Search results remove that inset.
+  Music and Game sounds
   place Edit and All before the control column, or beside the label at compact widths.
   Keep their render, pointer and tooltip bounds identical. Search results omit
   normal row indentation. Extra sounds starts collapsed in Audio.
   Parent and child music group sliders share horizontal bounds. Place group counts
-  after the slider, anchored to the right. Playlist catalog rows use the Defaults picker's
-  gold bar and text for the active playlist, and retain disabled Delete buttons for
+  after the slider, anchored to the right. Playlist catalog rows use a left radio
+  selector and gold text for the active playlist, white text otherwise, and retain disabled Delete controls for
   protected playlists. Choice popups retain their shared blue active indicator.
   Shared sliders use an eight-pixel thumb contained within the track at both
   endpoints. Exact-entry inputs and their check button occupy the same outer
   bounds, including the input border, and the check ends at the slider's right edge.
+  Dropdowns and context menus own pointer hover while open, including nested
+  editor popups and map/photo labels. Suppress the underlay pointer while rendering
+  the popup with its real coordinates. Truncated playlist choices show full names.
 - Reset values depend on the user's Defaults base: Power Beta, Refined Beta 1.7.3
   or Beta 1.7.3. Power Beta keeps the `power_beta` ID; retired base IDs are rejected
   without reloading or resetting settings. Keep the backend/catalog

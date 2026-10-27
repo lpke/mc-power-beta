@@ -19,6 +19,8 @@ final class SettingsDropdown {
   private List<String> labels = List.of(), help = List.of();
   private List<Boolean> enabled = List.of();
   private IntConsumer accepted;
+  private IntConsumer secondary;
+  private boolean fullNameTooltips;
   private Object owner;
   private int selected, focus, defaultIndex, x, y, width, rows, rowHeight = 18, viewportHeight;
   private int anchorLeft, anchorTop, anchorWidth, screenWidth, screenHeight;
@@ -37,6 +39,8 @@ final class SettingsDropdown {
   boolean active() { return accepted != null; }
   boolean editing(Object candidate) { return active() && Objects.equals(owner, candidate); }
   boolean editing(Setting setting) { return editing((Object)setting); }
+  void onSecondary(IntConsumer action) { if (active()) secondary = Objects.requireNonNull(action); }
+  void fullNameTooltips() { fullNameTooltips = active(); }
 
   void open(Setting setting, int left, int top, int span, int screenWidth, int screenHeight,
       Runnable changed) {
@@ -118,7 +122,7 @@ final class SettingsDropdown {
   }
 
   void close() {
-    accepted = null; owner = null; context = keyboardFocus = false; scroll = 0;
+    accepted = secondary = null; owner = null; context = keyboardFocus = fullNameTooltips = false; scroll = 0;
     bar.release(); hover.clear();
   }
   void tick() { if (active()) hover.tick(); }
@@ -160,20 +164,35 @@ final class SettingsDropdown {
     return true;
   }
   private void select(UiScreen screen, int index) {
+    select(screen, index, false);
+  }
+  private void select(UiScreen screen, int index, boolean rightClick) {
     if (index < 0 || index >= labels.size() || !enabled.get(index)) return;
-    IntConsumer action = accepted; close(); screen.click(); action.accept(index);
+    IntConsumer action = rightClick ? secondary : accepted;
+    if (action == null) return;
+    close(); screen.click(); action.accept(index);
   }
   boolean press(UiScreen screen, int mx, int my, int button) {
     if (!active()) return false;
     if (button != 0 && button != 1) return true;
     if (button == 0 && bar.press(track(), mx, my)) { scroll = bar.drag(track(), my, true); return true; }
     if (screen.inside(mx, my, x, y, width, viewportHeight)) {
-      if (button == 0 && mx < x + rowWidth()) select(screen, layout.indexAt((int)scroll + my - y));
+      if (mx < x + rowWidth()) select(screen, layout.indexAt((int)scroll + my - y), button == 1);
     } else close();
     return true;
   }
   void release(int my, int button) {
     if (active() && button == 0) { scroll = bar.drag(track(), my, true); bar.release(); }
+  }
+  String helpAt(UiScreen screen, int index) {
+    if (index < 0 || index >= labels.size()) return "";
+    String tip = index < help.size() ? help.get(index) : "";
+    if (fullNameTooltips) {
+      int reserve = index == defaultIndex ? screen.textWidth("Default") + 3 : 0;
+      if (screen.textWidth(labels.get(index)) > rowWidth() - 2 * PopupStyle.PADDING - reserve)
+        return labels.get(index);
+    } else if (!tip.isBlank() && index == defaultIndex) return "Default - " + tip;
+    return tip;
   }
   void render(UiScreen screen, int mx, int my) {
     if (!active()) return;
@@ -200,8 +219,7 @@ final class SettingsDropdown {
             top + (rowHeight - 8) / 2, 0x888888);
       }
       screen.unclip(); bar.render(screen, track());
-      String tip = hovered >= 0 && hovered < help.size() ? help.get(hovered) : "";
-      if (!tip.isBlank() && hovered == defaultIndex) tip = "Default - " + tip;
+      String tip = helpAt(screen, hovered);
       if (hover.ready(hovered < 0 || tip.isBlank() ? "" : Integer.toString(hovered))) screen.tooltip(tip, mx, my);
     } finally { GL11.glPopAttrib(); }
   }

@@ -18,7 +18,7 @@ final class MusicFixtureSupport {
   }
 
   static void selection(AudioSettings settings, Collection<String> tracks) {
-    replace(settings, List.copyOf(new LinkedHashSet<>(tracks)), volumes(settings));
+    replace(settings, List.copyOf(new LinkedHashSet<>(tracks)));
   }
 
   static void allBuiltin(AudioSettings settings) {
@@ -34,22 +34,22 @@ final class MusicFixtureSupport {
     selection(settings, tracks);
   }
 
-  private static void replace(AudioSettings settings, List<String> tracks, Map<String, Integer> gains) {
+  private static void replace(AudioSettings settings, List<String> tracks) {
     String id = settings.playlist.equals(MusicPlaylist.BETA) ? "native-fixture" : settings.playlist;
     String name = settings.playlist.equals(MusicPlaylist.BETA) ? "Native fixture"
         : MusicPlaylist.find(settings, settings.playlist).name();
-    var playlist = new MusicPlaylist(id, name, tracks, gains);
+    var playlist = new MusicPlaylist(id, name, tracks);
     for (int i = 0; i < settings.playlists.size(); i++)
       if (settings.playlists.get(i).id().equals(id)) { settings.playlists.set(i, playlist); settings.playlist = id; return; }
     settings.playlists.add(playlist); settings.playlist = id;
   }
 
   static void volumes(AudioSettings settings, Map<String, Integer> gains) {
-    replace(settings, tracks(settings), new TreeMap<>(gains));
+    settings.libraryGroupVolumes = new TreeMap<>(MusicGroups.copy(gains));
   }
 
   static Map<String, Integer> volumes(AudioSettings settings) {
-    return MusicPlaylist.find(settings, settings.playlist).groupVolumes();
+    return settings.libraryGroupVolumes;
   }
 
   static void volume(AudioSettings settings, String group, int gain) {

@@ -22,7 +22,7 @@ public final class MusicGroups {
       Integer volume = entry.getValue();
       if (id == null
           || id.isBlank()
-          || id.length() > 4096
+          || id.length() > 4103
           || id.codePoints().anyMatch(Character::isISOControl)
           || volume == null
           || volume < 0

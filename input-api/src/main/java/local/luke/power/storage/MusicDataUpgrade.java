@@ -6,22 +6,48 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.Arrays;
 
-/** Explicit format-2 conversion. Call only after confirming the instance is idle. */
+/** Explicit previous-format conversion. Call only after confirming the instance is idle. */
 public final class MusicDataUpgrade {
   private MusicDataUpgrade() {}
 
   @FunctionalInterface
   interface Faults { void at(String stage, Path file) throws IOException; }
 
-  /** Preserve list order and every value except the retired source Off flags. */
+  /** Preserve membership, source order and nonconflicting gains as Library preferences. */
   public static JsonObject convert(JsonObject previous) {
     MusicData.validatePrevious(previous);
     JsonObject next = previous.deepCopy();
     next.addProperty("formatVersion", MusicData.VERSION);
     JsonObject audio = next.getAsJsonObject("audio");
     audio.remove("disabledMusicDirectories");
+    JsonObject gains = new JsonObject();
+    if (audio.has("favoritesGroupVolumes")) mergeGains(gains, audio.getAsJsonObject("favoritesGroupVolumes"));
+    JsonArray order = new JsonArray(); order.add("beta"); order.add("favorites");
+    if (audio.has("playlists")) for (JsonElement value : audio.getAsJsonArray("playlists")) {
+      JsonObject playlist = value.getAsJsonObject();
+      mergeGains(gains, playlist.getAsJsonObject("groupVolumes"));
+      playlist.remove("groupVolumes");
+      order.add(playlist.get("id").getAsString());
+    }
+    audio.remove("favoritesGroupVolumes");
+    audio.add("libraryGroupVolumes", gains);
+    audio.add("playlistOrder", order);
     MusicData.validate(next);
     return next;
+  }
+
+  private static void mergeGains(JsonObject target, JsonObject source) {
+    for (var entry : source.entrySet()) {
+      int value = entry.getValue().getAsInt();
+      if (value == 100) continue;
+      if (entry.getKey().startsWith("folder:"))
+        throw new IllegalArgumentException("Folder gain " + entry.getKey()
+            + " needs an explicit Library source mapping before conversion; original file preserved");
+      if (target.has(entry.getKey()) && target.get(entry.getKey()).getAsInt() != value)
+        throw new IllegalArgumentException("Conflicting playlist gains for " + entry.getKey()
+            + "; choose the Library gain explicitly before conversion");
+      target.add(entry.getKey(), entry.getValue().deepCopy());
+    }
   }
 
   /** Return the durable, byte-verified backup. The shared configuration is never edited. */
@@ -42,7 +68,7 @@ public final class MusicDataUpgrade {
       throw new IOException("Music conversion refused; original file preserved: " + failure.getMessage(), failure);
     }
     byte[] converted = MusicData.bytes(next);
-    Path backup = MusicData.backup(file, "music-format-2-");
+    Path backup = MusicData.backup(file, "music-format-previous-");
     if (!Arrays.equals(original, Files.readAllBytes(backup)))
       throw new IOException("Music changed before backup completed; original file preserved");
     Path temporary = Files.createTempFile(file.getParent(), ".music-upgrade-", ".tmp");
@@ -104,6 +130,6 @@ public final class MusicDataUpgrade {
   public static void main(String[] args) throws IOException {
     if (args.length != 2 || !args[0].equals("--idle-instance"))
       throw new IllegalArgumentException("Usage: MusicDataUpgrade --idle-instance /path/to/power-beta/music.json");
-    System.out.println("Music data converted to format 3. Verified backup: " + convert(Path.of(args[1])));
+    System.out.println("Music data converted to format 4. Verified backup: " + convert(Path.of(args[1])));
   }
 }

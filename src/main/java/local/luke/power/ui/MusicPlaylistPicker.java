@@ -26,5 +26,10 @@ final class MusicPlaylistPicker {
             parent.changeWorldPlaylist(() -> edits.load(ids.get(index)));
         });
     popup.separatorsBefore(1);
+    popup.fullNameTooltips();
+    popup.onSecondary(index -> {
+      if (index == 0) parent.editMusic();
+      else parent.openPlaylist(MusicPlaylist.SAME_AS_WORLD.equals(ids.get(index)) ? edits.selected() : ids.get(index));
+    });
   }
 }

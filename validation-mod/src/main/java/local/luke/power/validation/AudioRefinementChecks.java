@@ -68,7 +68,7 @@ final class AudioRefinementChecks {
     try {
       var config=new AudioSettings();
       MusicFixtureSupport.allBuiltin(config);
-      config.playlists.add(new MusicPlaylist("test","Test",AudioController.music(mc).stream().filter(id -> !id.equals("music:calm1.ogg")).toList(), Map.of()));
+      config.playlists.add(new MusicPlaylist("test","Test",AudioController.music(mc).stream().filter(id -> !id.equals("music:calm1.ogg")).toList()));
       AudioConfig.preview(config);
       AudioController.pause();
       PowerOptionsScreen s=MenuUpdateChecks.open(mc,"Audio");

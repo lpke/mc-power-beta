@@ -7,9 +7,8 @@ public final class MusicPlaylist {
   public static final String SAME_AS_WORLD = "@world", BETA = "beta", FAVORITES = "favorites";
   private final String id, name;
   private final List<String> tracks;
-  private final Map<String, Integer> groupVolumes;
 
-  public MusicPlaylist(String id, String name, List<String> tracks, Map<String, Integer> groupVolumes) {
+  public MusicPlaylist(String id, String name, List<String> tracks) {
     if (id == null || !id.matches("[a-zA-Z0-9_-]{1,64}"))
       throw new IllegalArgumentException("Invalid playlist identifier");
     if (name == null || name.isBlank() || name.length() > 80
@@ -19,13 +18,11 @@ public final class MusicPlaylist {
     this.id = id;
     this.name = name.strip();
     this.tracks = new ArrayList<>(tracks);
-    this.groupVolumes = MusicGroups.copy(groupVolumes);
   }
 
   public String id() { return id; }
   public String name() { return name; }
   public List<String> tracks() { return Collections.unmodifiableList(tracks); }
-  public Map<String, Integer> groupVolumes() { return Collections.unmodifiableMap(groupVolumes); }
   public boolean includes(String track) { return tracks.contains(track); }
 
   public static void validateTracks(List<String> tracks) {
@@ -42,12 +39,12 @@ public final class MusicPlaylist {
       throw new IllegalArgumentException("Invalid music selection");
   }
 
-  private static final MusicPlaylist BETA_PLAYLIST = new MusicPlaylist(BETA, "Beta 1.7.3", BuiltinMusic.VANILLA, Map.of());
+  private static final MusicPlaylist BETA_PLAYLIST = new MusicPlaylist(BETA, "Beta 1.7.3", BuiltinMusic.VANILLA);
 
   public static MusicPlaylist beta() { return BETA_PLAYLIST; }
 
   public static MusicPlaylist favorites(AudioSettings settings) {
-    return new MusicPlaylist(FAVORITES, "Favorites", List.copyOf(settings.favourites), settings.favoritesGroupVolumes);
+    return new MusicPlaylist(FAVORITES, "Favorites", List.copyOf(settings.favourites));
   }
 
   public static boolean reserved(String id) { return BETA.equals(id) || FAVORITES.equals(id); }
@@ -57,7 +54,15 @@ public final class MusicPlaylist {
     result.add(beta());
     result.add(favorites(settings));
     result.addAll(settings.playlists);
-    return Collections.unmodifiableList(result);
+    Map<String, MusicPlaylist> byId = new LinkedHashMap<>();
+    result.forEach(p -> byId.put(p.id(), p));
+    List<MusicPlaylist> ordered = new ArrayList<>();
+    for (String id : settings.playlistOrder) {
+      MusicPlaylist saved = byId.remove(id);
+      if (saved != null) ordered.add(saved);
+    }
+    ordered.addAll(byId.values());
+    return Collections.unmodifiableList(ordered);
   }
 
   public static void validate(List<MusicPlaylist> playlists, String world, String menu) {
@@ -68,11 +73,19 @@ public final class MusicPlaylist {
     ids.add(FAVORITES);
     for (MusicPlaylist p : playlists) {
       if (p == null) throw new IllegalArgumentException("Invalid music playlist");
-      new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
+      new MusicPlaylist(p.id, p.name, p.tracks);
       if (!ids.add(p.id)) throw new IllegalArgumentException("Duplicate or reserved playlist identifier");
     }
     if (!ids.contains(world) || !menu.equals(SAME_AS_WORLD) && !ids.contains(menu))
       throw new IllegalArgumentException("Selected music playlist is missing");
+  }
+
+  public static void validateOrder(List<MusicPlaylist> playlists, List<String> order) {
+    if (order == null || order.size() > 130 || new HashSet<>(order).size() != order.size())
+      throw new IllegalArgumentException("Invalid playlist catalog order");
+    Set<String> ids = new HashSet<>(List.of(BETA, FAVORITES));
+    playlists.forEach(p -> ids.add(p.id()));
+    if (!ids.containsAll(order)) throw new IllegalArgumentException("Playlist order contains a missing playlist");
   }
 
   public static MusicPlaylist find(AudioSettings settings, String id) {
@@ -104,26 +117,16 @@ public final class MusicPlaylist {
     return FAVORITES.equals(id) ? settings.favourites.contains(track) : find(settings, id).includes(track);
   }
 
-  public static Map<String, Integer> groupVolumes(AudioSettings settings, String selection) {
-    String id = SAME_AS_WORLD.equals(selection) ? settings.playlist : selection;
-    return FAVORITES.equals(id) ? settings.favoritesGroupVolumes : find(settings, id).groupVolumes();
-  }
-
-  public static boolean usesMenuVolumes(AudioSettings settings, String id, boolean inMenu) {
-    return inMenu && !SAME_AS_WORLD.equals(settings.menuPlaylist)
-        && !settings.playlist.equals(settings.menuPlaylist);
-  }
-
   public static void load(AudioSettings settings, String id) {
     MusicPlaylist p = find(settings, id);
-    new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
+    new MusicPlaylist(p.id, p.name, p.tracks);
     settings.playlist = id;
   }
 
   public static void loadMenu(AudioSettings settings, String id) {
     if (!SAME_AS_WORLD.equals(id)) {
       MusicPlaylist p = find(settings, id);
-      new MusicPlaylist(p.id, p.name, p.tracks, p.groupVolumes);
+      new MusicPlaylist(p.id, p.name, p.tracks);
     }
     settings.menuPlaylist = id;
   }
