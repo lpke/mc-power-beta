@@ -11,7 +11,9 @@ class MusicCatalogLayoutTest {
       assertTrue(layout.nameWidth() >= 100);
       assertTrue(layout.duplicateX() >= 31);
       assertEquals(layout.duplicateX() + layout.duplicateWidth() + 4, layout.deleteX());
-      assertEquals(31 + width, layout.deleteX() + 20);
+      assertEquals(layout.useX() - 31, 31 + width - layout.deleteX() - 20);
+      assertEquals(8, layout.useX() - 31);
+      assertEquals(18, layout.useWidth());
       assertTrue(layout.controlsY(90) + 18 <= 90 + layout.rowHeight());
       if (layout.inline()) assertTrue(layout.nameX() + layout.nameWidth() < layout.duplicateX());
       else assertTrue(layout.controlsY(90) >= 90 + 23);

@@ -407,14 +407,18 @@ final class MusicPresetsPanel extends UiScreen {
 
   private void renderUse(boolean selected, int row, int mx, int my) {
     var layout = catalogLayout();
-    int x = layout.useX() + 2, y = row + 10;
+    int x = layout.useX() + 2, y = row + 7;
     int colour = selected ? 0xffffdd66 : inside(mx, my, layout.useX(), row + 5, layout.useWidth(), 18)
         ? 0xffffa0 : 0xdddddd;
-    rectangle(x, y + 1, x + 8, y + 7, 0xff000000 | colour);
-    rectangle(x + 1, y, x + 7, y + 8, 0xff000000 | colour);
-    rectangle(x + 1, y + 1, x + 7, y + 7, 0xff202020);
-    if (selected) rectangle(x + 3, y + 3, x + 5, y + 5, colour);
-    text("Use", x + 13, y, colour);
+    rectangle(x + 4, y, x + 10, y + 14, 0xff000000 | colour);
+    rectangle(x + 2, y + 1, x + 12, y + 13, 0xff000000 | colour);
+    rectangle(x + 1, y + 2, x + 13, y + 12, 0xff000000 | colour);
+    rectangle(x, y + 4, x + 14, y + 10, 0xff000000 | colour);
+    rectangle(x + 4, y + 1, x + 10, y + 13, 0xff202020);
+    rectangle(x + 3, y + 2, x + 11, y + 12, 0xff202020);
+    rectangle(x + 2, y + 3, x + 12, y + 11, 0xff202020);
+    rectangle(x + 1, y + 4, x + 13, y + 10, 0xff202020);
+    if (selected) rectangle(x + 5, y + 5, x + 9, y + 9, colour);
   }
 
   void renderHeader(int mx, int my) {

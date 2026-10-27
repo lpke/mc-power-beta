@@ -56,17 +56,19 @@
   Volume sliders use `VolumeControls`: a 150-pixel column where space permits,
   shared by rendering, drag hit bounds, tooltips and exact entry. Place preview,
   related-control and editor buttons before the column rather than shortening it.
-  Compact form rows place adjacent actions beside the label. Song and Library-group
-  rows share an adaptive 54–150-pixel column to retain readable song names; their
-  bounds must match independently of nearby buttons. Normal Audio category rows
+  Compact form rows place adjacent actions beside the label. Song rows use up to
+  134 pixels, matching the child sound category width. Library groups use up to 150
+  pixels with the same right edge. Both adapt down to 54 pixels on compact screens
+  to retain readable names, independently of nearby buttons. Normal Audio category rows
   use a 16-pixel left inset beneath Game sounds. Search results remove that inset.
   Music and Game sounds
   place Edit and All before the control column, or beside the label at compact widths.
   Keep their render, pointer and tooltip bounds identical. Search results omit
   normal row indentation. Extra sounds starts collapsed in Audio.
-  Parent and child music group sliders share horizontal bounds. Place group counts
-  after the slider, anchored to the right. Playlist catalog rows use a left radio
-  selector and gold text for the active playlist, white text otherwise, and retain disabled Delete controls for
+  Parent and child music sliders share their right edge. Place group counts
+  after the slider, anchored to the right. Playlist catalog rows use a left
+  icon-only radio selector, equal eight-pixel horizontal padding and gold text for
+  the active playlist, white text otherwise, and retain disabled Delete controls for
   protected playlists. Choice popups retain their shared blue active indicator.
   Shared sliders use an eight-pixel thumb contained within the track at both
   endpoints. Exact-entry inputs and their check button occupy the same outer

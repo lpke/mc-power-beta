@@ -151,8 +151,8 @@ public final class MusicLibraryScreen extends UiScreen {
   private int rowHeight() { return rowLayout().height(); }
   private int volumeX() { return rowLayout().volumeX(); }
   private int volumeEnd() { return volumeX() + rowLayout().volumeWidth(); }
-  private int groupVolumeWidth() { return rowLayout().volumeWidth(); }
-  private int groupVolumeX() { return rowLayout().volumeX(); }
+  private int groupVolumeWidth() { return VolumeControls.musicGroupWidth(span()); }
+  private int groupVolumeX() { return volumeEnd() - groupVolumeWidth(); }
   private boolean groupHasVolume(String group) { return libraryTab() && !group.equals("Unavailable tracks"); }
   private int reloadX() { return filters().reloadX(); }
   private int addFolderX() { return filters().addFolderX(); }

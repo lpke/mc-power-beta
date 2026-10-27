@@ -7,7 +7,8 @@ public final class VolumeControls {
   public static final int WIDTH = 150, MIN_MUSIC_WIDTH = 54, CHILD_INSET = 16;
   private VolumeControls() {}
   public static int width(int available) { return Math.max(8, Math.min(WIDTH, available)); }
-  public static int musicWidth(int contentWidth) { return Math.max(MIN_MUSIC_WIDTH, width(contentWidth / 4)); }
+  public static int musicGroupWidth(int contentWidth) { return Math.max(MIN_MUSIC_WIDTH, width(contentWidth / 4)); }
+  public static int musicWidth(int contentWidth) { return Math.min(WIDTH - CHILD_INSET, musicGroupWidth(contentWidth)); }
   public static boolean accepts(Setting setting) {
     String id = setting.id;
     return setting.slider() && (id.equals("native.music") || id.equals("native.sound")
