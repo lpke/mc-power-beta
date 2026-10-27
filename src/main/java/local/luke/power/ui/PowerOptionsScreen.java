@@ -363,6 +363,8 @@ public final class PowerOptionsScreen extends UiScreen {
     } : () -> { library.cancelPlaylist(); layout(); };
     Runnable save = isolatedRules() ? () -> save(true, false) : () -> { library.savePlaylist(); layout(); };
     boolean dirty = isolatedRules() ? session.changes() > 0 : library.playlistEditable() && library.playlistDirty();
+    if (playlistEditor() && !dirty)
+      return List.of(new DraftFooter(label, end - saveWidth, saveWidth, false, save));
     return List.of(new DraftFooter("Cancel", end - saveWidth - 4 - cancelWidth, cancelWidth, true, cancel),
         new DraftFooter(label, end - saveWidth, saveWidth, dirty, save));
   }
@@ -1036,7 +1038,7 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (libraryVisible() && library.dirtyPreset()
-        && (y >= bottom() || x < left() && y >= 24 && y < bottom())) {
+        && (y >= bottom() || x < MusicRowLayout.hoverLeft(left()) && y >= 24 && y < bottom())) {
       library.guard(() -> mouseClicked(x,y,button)); return;
     }
     if (button != 0 && button != 1) return;
@@ -1158,7 +1160,7 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (libraryVisible() && x >= left() && y >= audioContentTop() && y < bottom()) {
+    if (libraryVisible() && x >= MusicRowLayout.hoverLeft(left()) && y >= audioContentTop() && y < bottom()) {
       library.mouseClicked(x, y, button); return;
     }
     if (settingRowsVisible() && y >= top() && y < bottom() && x >= left() && x < right() - 10) {
@@ -1676,7 +1678,8 @@ public final class PowerOptionsScreen extends UiScreen {
   public void render(int mx, int my, float delta) {
     int pointerX = mx, pointerY = my;
     boolean libraryModal = libraryVisible() && library.modal();
-    if (choices.active() || libraryModal) { mx = -1000; my = -1000; }
+    if (choices.active() || libraryModal || confirmClose || confirmReset || capture != null
+        || page.equals("Defaults") && defaultsPanel.modal()) { mx = -1000; my = -1000; }
     valueEditor.beginFrame();
     if (!hidden && !confirmClose && !confirmReset && capture == null) {
       if (!isolatedRules() && !embedded()) sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
@@ -1714,13 +1717,13 @@ public final class PowerOptionsScreen extends UiScreen {
       defaultsPanel.draw(confirmClose ? -1000 : mx, confirmClose ? -1000 : my, left(), span());
       if (!error.isEmpty()) text(fit(error, span()), left(), height - 44, 0xffbb88);
       button("Done", actionX(2), height - 28, actionWidth(2), 20, mx, my, true);
-      defaultsPanel.overlay(mx, my);
+      defaultsPanel.overlay(pointerX, pointerY);
       if (confirmClose) {
         fill(0, 0, width, height, 0xc0000000);
-        centeredText("Save your changes?", height / 2 - 18, 0xffffff);
-        button("Save", width / 2 - 102, height / 2 + 12, 100, 20, mx, my, true);
-        button("Discard", width / 2 + 2, height / 2 + 12, 100, 20, mx, my, true);
-        button("Keep editing", width / 2 - 50, height / 2 + 36, 100, 20, mx, my, true);
+        WarningText.draw(this, 312, height / 2, "Save your changes?", "", 0xaaaaaa);
+        button("Save", width / 2 - 102, height / 2 + 12, 100, 20, pointerX, pointerY, true);
+        button("Discard", width / 2 + 2, height / 2 + 12, 100, 20, pointerX, pointerY, true);
+        button("Keep editing", width / 2 - 50, height / 2 + 36, 100, 20, pointerX, pointerY, true);
       }
       return;
     }
@@ -1923,26 +1926,29 @@ public final class PowerOptionsScreen extends UiScreen {
     if (hoverDelay.ready(!choices.active() && dragging == null && !(libraryVisible() && library.draggingSlider()) && !confirmClose && !confirmReset ? hoverId : "") && !tip.isEmpty()) tooltip(tip, mx, my);
     valueEditor.renderError(this);
     choices.render(this, pointerX, pointerY);
+    if (libraryVisible() && !choices.active() && capture == null && !confirmClose && !confirmReset)
+      library.renderDragGhost(pointerX, pointerY);
     if (capture != null || confirmClose || confirmReset) {
       fill(0, 0, width, height, 0xc0000000);
       String message =
           capture != null
               ? "Press a key or mouse button"
               : confirmReset ? "Reset " + (filtered() ? "listed settings" : page) + " to Defaults?" : "Save your changes?";
-      drawCenteredTextWithShadow(textRenderer, message, width / 2, height / 2 - 18, 0xffffff);
       if (capture != null) {
+        drawCenteredTextWithShadow(textRenderer, message, width / 2, height / 2 - 18, 0xffffff);
         drawCenteredTextWithShadow(
             textRenderer, "Allowed modifiers: Ctrl / Shift / Alt", width / 2, height / 2, 0xaaaaaa);
         drawCenteredTextWithShadow(
             textRenderer, "Press Esc to cancel or Del to clear.", width / 2, height / 2 + 14, 0xaaaaaa);
-        button("Cancel", width / 2 - 102, height / 2 + 36, 100, 20, mx, my, true);
-        button("Clear", width / 2 + 2, height / 2 + 36, 100, 20, mx, my, true);
+        button("Cancel", width / 2 - 102, height / 2 + 36, 100, 20, pointerX, pointerY, true);
+        button("Clear", width / 2 + 2, height / 2 + 36, 100, 20, pointerX, pointerY, true);
       }
       else {
+        WarningText.draw(this, 312, height / 2, message, "", 0xaaaaaa);
         int cy = height / 2 + 12;
-        button(confirmReset ? "Reset" : "Save", width / 2 - 102, cy, 100, 20, mx, my, true);
-        button(confirmReset ? "Cancel" : "Discard", width / 2 + 2, cy, 100, 20, mx, my, true);
-        if (confirmClose) button("Keep editing", width / 2 - 50, cy + 24, 100, 20, mx, my, true);
+        button(confirmReset ? "Reset" : "Save", width / 2 - 102, cy, 100, 20, pointerX, pointerY, true);
+        button(confirmReset ? "Cancel" : "Discard", width / 2 + 2, cy, 100, 20, pointerX, pointerY, true);
+        if (confirmClose) button("Keep editing", width / 2 - 50, cy + 24, 100, 20, pointerX, pointerY, true);
       }
     }
     if (libraryVisible()) library.renderDialog(pointerX,pointerY);

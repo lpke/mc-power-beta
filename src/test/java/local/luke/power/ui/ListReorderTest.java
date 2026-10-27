@@ -26,4 +26,45 @@ class ListReorderTest {
     assertThrows(IllegalArgumentException.class, () -> ListReorder.move(tracks, 0, 3));
     assertEquals(List.of("a", "b"), tracks);
   }
+
+  @Test void musicPressesNeedDeliberateMovementAndDoNotBecomeClicksAgain() {
+    for (MusicListDrag.Kind kind : MusicListDrag.Kind.values()) {
+      MusicListDrag drag = new MusicListDrag();
+      drag.begin(kind, this, List.of("a"), List.of(new MusicListDrag.Slot("a", 0, 20)), 0, 100, 100);
+      assertTrue(drag.active()); assertFalse(drag.dragging());
+      drag.update(103, 103, true);
+      assertTrue(drag.active()); assertFalse(drag.dragging());
+      drag.update(107, 100, true); assertFalse(drag.dragging());
+      drag.update(108, 100, true); assertTrue(drag.dragging());
+      drag.update(100, 100, true); assertTrue(drag.dragging());
+      drag.cancel(); assertFalse(drag.active()); assertFalse(drag.dragging());
+    }
+  }
+
+  @Test void diagonalMovementUsesDistanceAndFocusLossReleasesTheSource() {
+    MusicListDrag drag = new MusicListDrag();
+    drag.begin(MusicListDrag.Kind.GROUPS, this, List.of("a"),
+        List.of(new MusicListDrag.Slot("a", 0, 20)), 0, 100, 100);
+    drag.update(105, 105, true); assertFalse(drag.dragging());
+    drag.update(106, 106, true); assertTrue(drag.dragging());
+    drag.update(106, 106, false);
+    assertFalse(drag.active()); assertFalse(drag.dragging());
+    assertNull(drag.owner()); assertTrue(drag.original().isEmpty());
+  }
+
+  @Test void musicDropSlotsRetainSnapshotGeometryAcrossVariableHeightRows() {
+    var ids = new ArrayList<>(List.of("a", "b", "c"));
+    var slots = new ArrayList<>(List.of(new MusicListDrag.Slot("a", 0, 20),
+        new MusicListDrag.Slot("b", 120, 20), new MusicListDrag.Slot("c", 180, 40)));
+    MusicListDrag drag = new MusicListDrag();
+    drag.begin(MusicListDrag.Kind.GROUPS, this, ids, slots, 0, 10, 10);
+    ids.clear(); slots.clear();
+    assertEquals(List.of("a", "b", "c"), drag.original());
+    assertEquals(0, drag.slot(-1)); assertEquals(0, drag.slot(9));
+    assertEquals(1, drag.slot(10)); assertEquals(1, drag.slot(129));
+    assertEquals(2, drag.slot(130)); assertEquals(2, drag.slot(199));
+    assertEquals(3, drag.slot(200)); assertEquals(3, drag.slot(900));
+    assertEquals(0, drag.lineY(0)); assertEquals(120, drag.lineY(1));
+    assertEquals(180, drag.lineY(2)); assertEquals(220, drag.lineY(3));
+  }
 }

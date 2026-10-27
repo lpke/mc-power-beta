@@ -28,54 +28,8 @@
   Creative starting mode lacks permission.
   Update linked values together. Preserve search, scroll, related-view history and
   modifier ownership when rebuilding rows. Share render and hit-test geometry.
-- Settings in other screens and menus reuse the main Options controls and behavior:
-  inline text/numeric editing with check/Enter commit and Escape cancel, bounded
-  sliders with right-click exact entry, individual resets and isolated editor drafts.
-  Play the native UI click sound for buttons, tabs, toggles and confirmations.
-  Slider movement, pointer selection, dragging and silent group chevrons stay quiet.
-  Save/Done controls that commit isolated drafts enable only for changed drafts;
-  rendering, clicks and keyboard acceptance share that condition. Nested F3 saves
-  use the reorder draft, and naming a new preset counts as a change. Navigation-only
-  Done controls stay available, as do Cancel/Discard exits for unchanged drafts.
-- Choice dropdowns and context action menus share `PopupStyle`: background
-  `0xf0202020`, hover/keyboard focus `0xff444444`, selected background `0xff3c3c3c`,
-  active blue indicator `0xff268bff`, nine-pixel text padding and vertically centered
-  eight-pixel text. Choice dropdowns have a one-pixel `0xff777777` border; action
-  menus have no border. Row fills meet the inside of the dropdown border without
-  an inset. Match dropdown row height to its owning control, normally 18 or 20
-  pixels, and share all scroll, separator and hit-test geometry through `PopupLayout`.
-  One-pixel separators use `0xff555555`, span the full popup width and have no vertical
-  margins. Adjacent row fills meet the line; separators never accept input or change callback indices.
-  Hover and keyboard focus override the selected fill while retaining its blue indicator.
-  Mark the active choice with the blue indicator and the selected Defaults-base
-  target with a trailing `Default` label. Context actions open without keyboard
-  focus; arrows, Home and End establish focus. Track popup ownership by the actual
-  setting, toolbar control or row so only that owner retains its open highlight.
-  Map, minimap and photo checklist panels keep their existing toggle layout and
-  persistent-open behavior; their colors and text spacing follow the same menu style.
-  Volume sliders use `VolumeControls`: a 150-pixel column where space permits,
-  shared by rendering, drag hit bounds, tooltips and exact entry. Place preview,
-  related-control and editor buttons before the column rather than shortening it.
-  Compact form rows place adjacent actions beside the label. Song rows use up to
-  134 pixels, matching the child sound category width. Library groups use up to 150
-  pixels with the same right edge. Both adapt down to 54 pixels on compact screens
-  to retain readable names, independently of nearby buttons. Normal Audio category rows
-  use a 16-pixel left inset beneath Game sounds. Search results remove that inset.
-  Music and Game sounds
-  place Edit and All before the control column, or beside the label at compact widths.
-  Keep their render, pointer and tooltip bounds identical. Search results omit
-  normal row indentation. Extra sounds starts collapsed in Audio.
-  Parent and child music sliders share their right edge. Place group counts
-  after the slider, anchored to the right. Playlist catalog rows use a left
-  icon-only radio selector, equal eight-pixel horizontal padding and gold text for
-  the active playlist, white text otherwise, and retain disabled Delete controls for
-  protected playlists. Choice popups retain their shared blue active indicator.
-  Shared sliders use an eight-pixel thumb contained within the track at both
-  endpoints. Exact-entry inputs and their check button occupy the same outer
-  bounds, including the input border, and the check ends at the slider's right edge.
-  Dropdowns and context menus own pointer hover while open, including nested
-  editor popups and map/photo labels. Suppress the underlay pointer while rendering
-  the popup with its real coordinates. Truncated playlist choices show full names.
+- Follow [UI conventions](ui-conventions.md) for controls, menus, warning overlays,
+  sliders, text input and drag behavior across all screens.
 - Reset values depend on the user's Defaults base: Power Beta, Refined Beta 1.7.3
   or Beta 1.7.3. Power Beta keeps the `power_beta` ID; retired base IDs are rejected
   without reloading or resetting settings. Keep the backend/catalog
@@ -105,13 +59,6 @@
   one picker draft and reset/Undo boundary, and hide only the paired opacity row.
   `ColorValue` preserves legacy palette indices 0–3; custom palette colors use
   `0x1000000 | RGB`, including black and RGB values 1–3.
-- Native Beta mouse motion and wheel events call `mouseReleased` with button -1.
-  Scrollbar ownership ends only on its originating button release, focus loss or
-  navigation; apply final release coordinates before clearing the drag.
-- Text inputs share editing and pointer selection through the input bridge. UI cursor
-  blinking is separate from chat. Cancel selection on focus/screen changes; keep native
-  limits, validation and gcapi3 widget methods. Search-only cluster suffixes never change IDs.
-  Search group chevrons toggle silently; collapsed titles expand and expanded titles navigate.
 - Item and block settings use the shared graphical picker. Keep each editor draft local
   until Done, validate custom IDs against loaded registries, retain metadata variants
   where the stored format supports them, and never touch gameplay inventories.
@@ -124,7 +71,6 @@
   The water-material override is scoped to fog rendering on its owning thread, including
   StationAPI's color hooks; it must not affect other fluid queries.
 
-- In-group dividers use catalog `separatorAfter` on the preceding setting; they share row geometry and never act as headings or input targets.
 - Creation-template review revisions are independent of configuration and world-rule
   formats. Preserve unsupported template documents for review while unrelated
   preferences remain readable. Use RuleDefaults for selected-base targets and

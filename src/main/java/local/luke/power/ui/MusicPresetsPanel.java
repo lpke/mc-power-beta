@@ -28,6 +28,7 @@ final class MusicPresetsPanel extends UiScreen {
   private List<MusicPlaylist> countedPresets;
   private int countedRevision = -1;
   private MusicLibrarySources.Snapshot countedLibrary;
+  private final Map<MusicPlaylist, Integer> playlistCounts = new IdentityHashMap<>();
   private Map<String, Integer> includedCounts = Map.of();
 
   MusicPresetsPanel(PowerOptionsScreen parent) {
@@ -198,12 +199,16 @@ final class MusicPresetsPanel extends UiScreen {
   private int actionY() { return header().actionsY(); }
   private int rowTop() { return top() + headerHeight() + 4; }
   private MusicCatalogLayout catalogLayout() {
-    return MusicCatalogLayout.at(left(), span(), textWidth("Duplicate") + 16);
+    return MusicCatalogLayout.at(left(), span(), textWidth("Use") + 16, textWidth("Duplicate") + 16);
   }
   private int rowHeight() { return catalogLayout().rowHeight(); }
+  private boolean inCatalog(int x, int y) {
+    return inside(x, y, MusicRowLayout.hoverLeft(left()), rowTop(),
+        MusicRowLayout.hoverWidth(left(), right()), bottom() - rowTop());
+  }
 
   private ScrollBar.Track track() {
-    return new ScrollBar.Track(right() + 5, rowTop(), Math.max(0, bottom() - rowTop()),
+    return new ScrollBar.Track(right() + 6, rowTop(), Math.max(0, bottom() - rowTop()),
         filteredPresets().size() * rowHeight(), scroll);
   }
 
@@ -221,10 +226,9 @@ final class MusicPresetsPanel extends UiScreen {
     if (pressedPlaylist == null) return false;
     MusicPlaylist pressed = pressedPlaylist;
     try {
-      if (modal() || !org.lwjgl.opengl.Display.isActive()
-          || !inside(x, y, left(), rowTop(), span(), bottom() - rowTop())) return true;
+      if (modal() || !org.lwjgl.opengl.Display.isActive() || !inCatalog(x, y)) return true;
       if (reorder.active()) reorder.update(x, y);
-      if (reorder.active() && reorder.moved()) {
+      if (reorder.dragging()) {
         List<String> next = new ArrayList<>(reorder.original());
         int slot = reorder.slot(y - rowTop() + scroll);
         if (ListReorder.move(next, reorder.index(), slot)) edits.reorderPresets(reorder.original(), next);
@@ -298,7 +302,7 @@ final class MusicPresetsPanel extends UiScreen {
       scroll = (int) scrollbar.drag(track(), y, true);
       return true;
     }
-    if (!inside(x, y, left(), rowTop(), span(), bottom() - rowTop())) return true;
+    if (!inCatalog(x, y)) return true;
     int index = (y - rowTop() + scroll) / rowHeight();
     var values = filteredPresets();
     if (index < 0 || index >= values.size()) return true;
@@ -307,7 +311,7 @@ final class MusicPresetsPanel extends UiScreen {
     if (b == 1) { context(playlist, x, y); return true; }
     var layout = catalogLayout();
     int cy = layout.controlsY(row);
-    if (inside(x, y, layout.useX(), row + 5, layout.useWidth(), 18)) {
+    if (inside(x, y, layout.useX(), cy, layout.useWidth(), 18)) {
       if (!playlist.id().equals(edits.selected())) { click(); act(() -> edits.load(playlist.id())); }
     } else if (inside(x, y, layout.duplicateX(), cy, layout.duplicateWidth(), 18)) {
       click(); duplicate(playlist);
@@ -377,10 +381,23 @@ final class MusicPresetsPanel extends UiScreen {
     int revision = AudioController.libraryRevision();
     var library = AudioController.sourceLibrary();
     if (values != countedPresets || revision != countedRevision || library != countedLibrary) {
-      Set<String> available = AudioController.music(minecraft);
+      if (revision != countedRevision || library != countedLibrary) playlistCounts.clear();
+      Set<MusicPlaylist> saved = Collections.newSetFromMap(new IdentityHashMap<>());
+      saved.addAll(edits.presets());
+      playlistCounts.keySet().retainAll(saved);
+      Set<String> available = null;
       Map<String, Integer> counts = new HashMap<>();
-      for (MusicPlaylist p : values)
-        counts.put(p.id(), (int) p.tracks().stream().filter(available::contains).count());
+      for (MusicPlaylist playlist : values) {
+        Integer count = playlistCounts.get(playlist);
+        if (count == null) {
+          if (available == null) available = AudioController.music(minecraft);
+          int availableCount = 0;
+          for (String id : playlist.tracks()) if (available.contains(id)) availableCount++;
+          count = availableCount;
+          playlistCounts.put(playlist, count);
+        }
+        counts.put(playlist.id(), count);
+      }
       includedCounts = Map.copyOf(counts);
       countedPresets = values;
       countedRevision = revision; countedLibrary = library;
@@ -405,43 +422,44 @@ final class MusicPresetsPanel extends UiScreen {
     if (!count.isEmpty()) text(count, layout.nameX() + textWidth(label) + 8, y, 0xaaaaaa);
   }
 
-  private void renderUse(boolean selected, int row, int mx, int my) {
-    var layout = catalogLayout();
-    int colour = selected ? 0xffffdd66 : inside(mx, my, layout.useX(), row + 5, layout.useWidth(), 18)
-        ? 0xffffa0 : 0xdddddd;
-    RadioButton.draw(layout.useX() + layout.useWidth() / 2d, row + 14, selected, colour);
-  }
-
   void renderHeader(int mx, int my) {
     if (!org.lwjgl.opengl.Display.isActive()) cancelPointer();
     if (editing()) {
-      if (favorites() || readOnly()) text(fit(draft.name(), nameWidth()), nameX() + 2, top() + 5, 0xdddddd);
-      else input(name, nameX(), top(), nameWidth(), mx, my, "Playlist name");
+      if (favorites() || readOnly()) {
+        text(fit(draft.name(), nameWidth() - 8), nameX() + 4, top() + 5, 0xffffff);
+        fill(nameX() - 1, top() + 18, nameX() + nameWidth() + 1, top() + 19, 0xff555555);
+      } else input(name, nameX(), top(), nameWidth(), mx, my, "Playlist name");
       if (editable()) button(fit(addLabel(), addWidth() - 8), addX(), actionY(), addWidth(), 18, mx, my, true,
           choices.editing("playlist-add") ? 0xffffa0 : -1);
       button(fit(viewLabel(), viewWidth() - 8), groupedX(), actionY(), viewWidth(), 18, mx, my, true,
           choices.editing("playlist-source") ? 0xffffa0 : -1);
     } else {
-      int hoverX = modal() ? -1000 : mx, hoverY = modal() ? -1000 : my;
       scroll = (int) Math.max(0, Math.min(track().maximum(), scrollbar.drag(track(), my, Mouse.isButtonDown(0))));
       reorder.update(mx, my);
-      if (reorder.active() && reorder.moved() && inside(mx, my, left(), rowTop(), span(), bottom() - rowTop()) && reorder.scrollDue()) {
+      int hoverX = modal() || reorder.dragging() ? -1000 : mx;
+      int hoverY = modal() || reorder.dragging() ? -1000 : my;
+      if (reorder.dragging() && inCatalog(mx, my) && reorder.scrollDue()) {
         if (my < rowTop() + 14) scroll = Math.max(0, scroll - rowHeight());
         else if (my >= bottom() - 14) scroll = (int) Math.min(track().maximum(), scroll + rowHeight());
       }
-      clip(left(), rowTop(), span(), Math.max(0, bottom() - rowTop()));
+      int hoverLeft = MusicRowLayout.hoverLeft(left()), hoverRight = MusicRowLayout.hoverRight(right());
+      clip(hoverLeft, rowTop(), hoverRight - hoverLeft, Math.max(0, bottom() - rowTop()));
       var values = filteredPresets();
       var counts = includedCounts(values);
       var layout = catalogLayout();
-      for (int i = 0; i < values.size(); i++) {
-        int y = rowTop() + i * rowHeight() - scroll;
-        if (y + rowHeight() <= rowTop() || y >= bottom()) continue;
+      int rowHeight = layout.rowHeight(), listTop = rowTop(), visibleHeight = Math.max(0, bottom() - listTop);
+      int first = Math.min(values.size(), scroll / rowHeight);
+      int limit = visibleHeight == 0 ? first
+          : Math.min(values.size(), (scroll + visibleHeight + rowHeight - 1) / rowHeight);
+      for (int i = first; i < limit; i++) {
+        int y = listTop + i * rowHeight - scroll;
         MusicPlaylist playlist = values.get(i);
-        boolean hovered = inside(hoverX, hoverY, left(), y, span(), rowHeight())
+        boolean hovered = inside(hoverX, hoverY, hoverLeft, y, hoverRight - hoverLeft, rowHeight)
             && hoverY >= rowTop() && hoverY < bottom();
-        if (hovered || parent.musicActionsOpen(playlist)) fill(left(), y, right(), y + rowHeight(), 0x60000000);
+        if (!reorder.dragging() && (hovered || parent.musicActionsOpen(playlist)))
+          fill(hoverLeft, y, hoverRight, y + rowHeight, 0x60000000);
         boolean selected = playlist.id().equals(edits.selected());
-        renderUse(selected, y, hoverX, hoverY);
+        if (selected) fill(layout.activeX(), y + 7, layout.activeX() + 2, y + 21, 0xffffdd66);
         if (playlist == renaming) {
           int inputWidth = layout.nameWidth() - 24;
           input(rename, layout.nameX(), y + 5, inputWidth, mx, my, "Playlist name");
@@ -449,13 +467,14 @@ final class MusicPresetsPanel extends UiScreen {
               !rename.text().strip().equals(playlist.name()));
         } else renderCatalogName(playlist, playlist.tracks().size() - counts.get(playlist.id()), y + 10, selected);
         int cy = layout.controlsY(y);
+        button("Use", layout.useX(), cy, layout.useWidth(), 18, hoverX, hoverY, !selected);
         button("Duplicate", layout.duplicateX(), cy, layout.duplicateWidth(), 18, hoverX, hoverY, true);
         iconButton("remove", layout.deleteX(), cy, 20, hoverX, hoverY, !MusicPlaylist.reserved(playlist.id()));
-        fill(left(), y + rowHeight() - 1, right(), y + rowHeight(), 0x40555555);
+        fill(left(), y + rowHeight - 1, right(), y + rowHeight, 0x40555555);
       }
-      if (reorder.active() && reorder.moved() && inside(mx, my, left(), rowTop(), span(), bottom() - rowTop())) {
+      if (reorder.dragging() && inCatalog(mx, my)) {
         int line = rowTop() + reorder.lineY(reorder.slot(my - rowTop() + scroll)) - scroll;
-        fill(left(), Math.max(rowTop(), line - 1), right(), Math.min(bottom(), line + 1), 0xff268bff);
+        reorder.renderLine(this, hoverLeft, hoverRight, rowTop(), bottom(), line);
       }
       if (values.isEmpty()) text("No matching playlists", left() + 4, rowTop() + 12, 0xaaaaaa);
       unclip();
@@ -463,26 +482,39 @@ final class MusicPresetsPanel extends UiScreen {
     }
   }
 
+  void renderDragGhost(int x, int y) {
+    if (pressedPlaylist != null) reorder.renderGhost(this, pressedPlaylist.name(), x, y);
+  }
+
+  private int dialogWidth() { return Math.min(312, width - 20); }
+  private int dialogCount() { return pending != null ? 3 : 2; }
+  private int dialogButtonWidth() { return (dialogWidth() - (dialogCount() - 1) * 4) / dialogCount(); }
+  private int dialogButtonX(int index) {
+    int span = dialogButtonWidth() * dialogCount() + (dialogCount() - 1) * 4;
+    return (width - span) / 2 + index * (dialogButtonWidth() + 4);
+  }
+  private int dialogButtonY() { return height / 2 + 1; }
+
   void renderDialog(int mx, int my) {
     if (choices.active()) { choices.render(this, mx, my); return; }
     if (!modal() || renaming != null) return;
-    fill(0, 0, width, height, 0xd0000000);
-    int w = Math.min(312, width - 20), x = (width - w) / 2, y = height / 2 - 35;
-    text(pending != null ? "Save changes to this playlist?" : "Delete this playlist?", x, y, 0xffffff);
-    if (!error.isEmpty()) text(fit(error, w), x, y + 15, 0xff8888);
-    else if (!deleting.isEmpty())
-      text(fit(deleting.equals(edits.selected()) ? "The world playlist will return to Beta 1.7.3."
-          : "Music files and other playlists stay unchanged.", w), x, y + 15, 0xaaaaaa);
-    for (int i = 0; i < (pending != null ? 3 : 2); i++)
+    fill(0, 0, width, height, 0xc0000000);
+    int w = dialogWidth();
+    String message = !error.isEmpty() ? error : deleting.isEmpty() ? ""
+        : deleting.equals(edits.selected()) ? "The world playlist will return to Beta 1.7.3."
+        : "Music files and other playlists stay unchanged.";
+    WarningText.draw(this, w, dialogButtonY() - 12,
+        pending != null ? "Save changes to this playlist?" : "Delete this playlist?", message,
+        error.isEmpty() ? 0xaaaaaa : 0xff8888);
+    for (int i = 0; i < dialogCount(); i++)
       button(pending != null ? new String[]{"Save", "Discard", "Cancel"}[i]
-          : new String[]{"Delete", "Cancel"}[i], x + i * (w / 3), y + 36, w / 3 - 4, 20, mx, my, true);
+          : new String[]{"Delete", "Cancel"}[i], dialogButtonX(i), dialogButtonY(), dialogButtonWidth(), 20, mx, my, true);
   }
 
   private void dialogClick(int x, int y, int b) {
     if (b != 0) return;
-    int w = Math.min(312, width - 20), left = (width - w) / 2, top = height / 2 + 1;
-    for (int i = 0; i < (pending != null ? 3 : 2); i++)
-      if (inside(x, y, left + i * (w / 3), top, w / 3 - 4, 20)) {
+    for (int i = 0; i < dialogCount(); i++)
+      if (inside(x, y, dialogButtonX(i), dialogButtonY(), dialogButtonWidth(), 20)) {
         click();
         if (pending != null) {
           Runnable next = pending;

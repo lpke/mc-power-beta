@@ -385,7 +385,7 @@ abstract class DraftEditorScreen extends UiScreen {
       GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING);
       GL11.glDepthMask(false);
       fill(0, 0, width, height, 0xc0000000);
-      drawCenteredTextWithShadow(textRenderer, fit(resetQuestion(), width - 20), width / 2, height / 2 - 43, 0xffffff);
+      WarningText.draw(this, 312, height / 2 - 28, resetQuestion(), "", 0xaaaaaa);
       for (ResetButton f : resetButtons()) button(fit(f.label, f.width - 8), f.x, f.y, f.width, 20, pointerX, pointerY, f.enabled);
       } finally { GL11.glPopAttrib(); }
     }

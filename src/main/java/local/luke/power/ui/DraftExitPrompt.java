@@ -46,7 +46,7 @@ final class DraftExitPrompt {
       GL11.glDisable(GL11.GL_DEPTH_TEST);
       GL11.glDisable(GL11.GL_LIGHTING);
       screen.rectangle(0, 0, screen.width, screen.height, 0xc0000000);
-      screen.centeredText(screen.fit(title, screen.width - 24), screen.height / 2 - 16, 0xffffff);
+      WarningText.draw(screen, 312, screen.height / 2 - 4, title, "", 0xaaaaaa);
       String[] labels = {"Save", "Discard", "Keep editing"};
       for (int i = 0; i < labels.length; i++)
         screen.button(labels[i], buttonX(screen, i), screen.height / 2 + 8, buttonWidth(screen), 20, x, y, true);

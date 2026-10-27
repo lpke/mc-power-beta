@@ -115,9 +115,8 @@ final class DefaultsPanel extends UiScreen {
       try {
         GL11.glDisable(GL11.GL_DEPTH_TEST); GL11.glDisable(GL11.GL_LIGHTING);
         rectangle(0, 0, width, height, 0xc0000000);
-        centeredText("Load " + pending.label + "?", height / 2 - 32, 0xffffff);
-        centeredText(fit("All settings and new-world defaults will be reset.", width - 24), height / 2 - 13, 0xdddddd);
-        centeredText(fit("Worlds, recovery records and saved presets are kept.", width - 24), height / 2 + 1, 0xaaaaaa);
+        WarningText.draw(this, 312, height / 2 + 12, "Load " + pending.label + "?",
+            "All settings and new-world defaults will be reset.\nWorlds, recovery records and saved presets are kept.", 0xaaaaaa);
         button("Load", width / 2 - 102, height / 2 + 24, 100, 20, x, y, true);
         button("Cancel", width / 2 + 2, height / 2 + 24, 100, 20, x, y, true);
       } finally { GL11.glPopAttrib(); }

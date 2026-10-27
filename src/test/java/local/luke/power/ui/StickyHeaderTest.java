@@ -59,4 +59,66 @@ class StickyHeaderTest {
     assertNull(StickyHeader.at(ROWS, Row::heading, Row::y, Row::height, 30, 50, 70));
     assertNull(StickyHeader.at(ROWS, Row::heading, Row::y, Row::height, 30, 50, 95));
   }
+
+  @Test void indexedMusicHeadingsMatchMixedGroupsAndEveryScrollBoundary() {
+    var rows = new java.util.ArrayList<Row>();
+    int y = 0;
+    for (int children : new int[]{0, 7, 8, 1, 18, 0, 9}) {
+      rows.add(new Row(true, y, 20)); y += 20;
+      for (int i = 0; i < children; i++) {
+        int height = i % 2 == 0 ? 24 : 40;
+        rows.add(new Row(false, y, height)); y += height;
+      }
+    }
+    MusicRowIndex index = MusicRowIndex.of(rows, Row::heading, Row::y, Row::height);
+    for (int visibleHeight : new int[]{0, 20, 43, 44, 120, 300})
+      for (int scroll = -1; scroll <= y + 1; scroll++) {
+        StickyHeader expected = StickyHeader.at(rows, Row::heading, Row::y, Row::height,
+            scroll, 50, 50 + visibleHeight);
+        assertEquals(expected, index.sticky(scroll, 50, 50 + visibleHeight),
+            "scroll=" + scroll + ", height=" + visibleHeight);
+      }
+  }
+
+  @Test void musicViewportAndHitTestsUseTheSameHalfOpenRowBounds() {
+    var rows = List.of(new Row(true, 0, 20), new Row(false, 20, 24), new Row(false, 50, 40));
+    MusicRowIndex index = MusicRowIndex.of(rows, Row::heading, Row::y, Row::height);
+    assertEquals(0, index.firstVisible(-1));
+    assertEquals(0, index.firstVisible(19));
+    assertEquals(1, index.firstVisible(20));
+    assertEquals(2, index.firstVisible(44));
+    assertEquals(3, index.firstVisible(90));
+    assertEquals(0, index.limitVisible(0));
+    assertEquals(1, index.limitVisible(20));
+    assertEquals(2, index.limitVisible(44));
+    assertEquals(2, index.limitVisible(50));
+    assertEquals(3, index.limitVisible(51));
+    for (int y = -1; y <= 91; y++) {
+      int expected = -1;
+      for (int i = 0; i < rows.size(); i++) {
+        Row row = rows.get(i);
+        if (y >= row.y && y < row.y + row.height) { expected = i; break; }
+      }
+      assertEquals(expected, index.at(y), "y=" + y);
+    }
+  }
+
+  @Test void indexedMusicLookupsNeverRevisitOrRetainTheSourceRows() {
+    var rows = new java.util.ArrayList<>(ROWS);
+    int[] reads = {0};
+    MusicRowIndex index = MusicRowIndex.of(rows, row -> { reads[0]++; return row.heading; },
+        row -> { reads[0]++; return row.y; }, row -> { reads[0]++; return row.height; });
+    int buildReads = reads[0];
+    rows.clear();
+    for (int i = 0; i < 100; i++) {
+      assertEquals(1, index.firstVisible(30));
+      assertEquals(9, index.limitVisible(216));
+      assertEquals(1, index.at(30));
+      assertEquals(new StickyHeader(0, 50, 24), index.sticky(30, 50, 210));
+    }
+    assertEquals(buildReads, reads[0]);
+    MusicRowIndex empty = MusicRowIndex.of(rows, Row::heading, Row::y, Row::height);
+    assertEquals(0, empty.firstVisible(0)); assertEquals(0, empty.limitVisible(0));
+    assertEquals(-1, empty.at(0)); assertNull(empty.sticky(30, 50, 210));
+  }
 }

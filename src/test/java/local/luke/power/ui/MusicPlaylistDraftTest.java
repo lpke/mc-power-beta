@@ -105,4 +105,37 @@ class MusicPlaylistDraftTest {
     assertEquals(beta.tracks(), view.tracks());
     assertEquals(beta.tracks(), view.original().tracks());
   }
+
+  @Test void membershipAndDirtyReadsRefreshAfterEveryEditAndRestoringOrderBecomesClean() {
+    var saved = new MusicPlaylist("stable", "Quiet", List.of(A, MISSING, B));
+    var draft = new MusicPresetDraft(saved, List.of(A, B));
+    List<String> first = draft.tracks();
+    assertSame(first, draft.tracks());
+    assertTrue(draft.included(MISSING)); assertFalse(draft.changed("Quiet"));
+
+    draft.include(MISSING, false);
+    assertFalse(draft.included(MISSING)); assertTrue(draft.changed("Quiet"));
+    assertEquals(saved.tracks(), first);
+    draft.include(MISSING, true);
+    assertTrue(draft.included(MISSING)); assertTrue(draft.changed("Quiet"));
+    draft.order(saved.tracks()); assertFalse(draft.changed("Quiet"));
+
+    draft.move(B, -2); assertTrue(draft.changed("Quiet"));
+    assertTrue(draft.included(B));
+    draft.move(B, 2); assertFalse(draft.changed("Quiet"));
+
+    draft.excludeAll(List.of(A, B));
+    assertFalse(draft.included(A)); assertTrue(draft.included(MISSING));
+    assertTrue(draft.changed("Quiet"));
+    draft.includeAll();
+    assertTrue(draft.included(A)); assertTrue(draft.included(B));
+    assertTrue(draft.changed("Quiet"));
+    draft.order(saved.tracks()); assertFalse(draft.changed("Quiet"));
+    assertTrue(draft.changed("Renamed")); assertFalse(draft.changed("Quiet"));
+
+    draft.excludeAll(saved.tracks());
+    assertTrue(draft.tracks().isEmpty()); assertFalse(draft.included(MISSING));
+    draft.appendTracks(saved.tracks()); assertFalse(draft.changed("Quiet"));
+    assertEquals(saved.tracks(), draft.tracks());
+  }
 }

@@ -15,6 +15,8 @@ class MusicRowLayoutTest {
         assertEquals(4, l.favouriteX() - l.volumeX() - l.volumeWidth());
         assertEquals(2, l.playX() - l.favouriteX() - l.buttonWidth());
         assertEquals(30 + width, l.playX() + l.buttonWidth());
+        assertEquals(4, l.nameX() - MusicRowLayout.hoverLeft(30));
+        assertEquals(4, MusicRowLayout.hoverRight(30 + width) - l.playX() - l.buttonWidth());
         assertTrue(l.nameWidth() > 0);
         if (l.height() == 24) assertTrue(l.nameX() + l.nameWidth() < l.volumeX());
         assertEquals(-1, l.previewX());

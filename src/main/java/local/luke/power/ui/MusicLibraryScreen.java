@@ -44,6 +44,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private final Map<String, MusicLibrary.Track> custom = new HashMap<>();
   private final Map<String, List<String>> groupTracks = new LinkedHashMap<>();
   private final Map<String, Integer> libraryGroupCounts = new HashMap<>();
+  private final Map<String, Integer> includedGroupCounts = new HashMap<>();
   private final Map<String, MusicLibrarySources.Folder> sourceFolders = new LinkedHashMap<>();
   private MusicLibrarySources.Snapshot sourceLibrary;
   private com.google.gson.JsonElement sourceValue, orderValue;
@@ -52,6 +53,8 @@ public final class MusicLibraryScreen extends UiScreen {
   private List<String> tracks = List.of(), renderedQueue = List.of(), sectionKeys = List.of(), groupOrder = List.of();
   private record Row(String group, String label, String id, int index, int y, int height) {}
   private List<Row> rows = List.of();
+  private MusicRowIndex rowIndex = MusicRowIndex.of(rows, row -> row.id == null, Row::y, Row::height);
+  private String dragLabel = "";
   private String folder = "library", error = "", hoverHelp = "", hoverKey = "";
   private boolean queue, presetsOpen, conversionNeeded, previousAdding, previousGrouped;
   private int revision = -1, conversionRevision, conversionTicks, trackScroll, queueScroll, contentHeight, playlistScroll;
@@ -131,6 +134,9 @@ public final class MusicLibraryScreen extends UiScreen {
   private int left() { return parent.contentLeft(); }
   private int right() { return parent.contentRight(); }
   private int span() { return right() - left(); }
+  private int hoverLeft() { return MusicRowLayout.hoverLeft(left()); }
+  private int hoverRight() { return MusicRowLayout.hoverRight(right()); }
+  private int hoverWidth() { return MusicRowLayout.hoverWidth(left(), right()); }
   private int bottom() { return parent.contentBottom(); }
   private int statusTop() { return parent.audioContentTop(); }
   private int controlsTop() { return statusTop() + (showMusicStatus() ? 18 : 0); }
@@ -146,13 +152,16 @@ public final class MusicLibraryScreen extends UiScreen {
         : controlsTop() + filters().height() + (actionTop() == controlsTop() ? 10 : 6);
   }
   private int groupHeight(String group) { return 20; }
-  private int sourceRemoveX() { return groupVolumeX() - 24; }
+  private int sourceRemoveX() { return right() - 18; }
   private MusicRowLayout rowLayout() { return MusicRowLayout.at(left(), span(), queue); }
   private int rowHeight() { return rowLayout().height(); }
   private int volumeX() { return rowLayout().volumeX(); }
   private int volumeEnd() { return volumeX() + rowLayout().volumeWidth(); }
   private int groupVolumeWidth() { return VolumeControls.musicGroupWidth(span()); }
   private int groupVolumeX() { return volumeEnd() - groupVolumeWidth(); }
+  private int countRight(String group) {
+    return groupHasVolume(group) ? groupVolumeX() - 8 : presets.adding() ? right() - 46 : right() - 4;
+  }
   private boolean groupHasVolume(String group) { return libraryTab() && !group.equals("Unavailable tracks"); }
   private int reloadX() { return filters().reloadX(); }
   private int addFolderX() { return filters().addFolderX(); }
@@ -192,12 +201,17 @@ public final class MusicLibraryScreen extends UiScreen {
     int bounded = Math.max(0, Math.min(value, Math.max(0, contentHeight - (bottom() - listTop()))));
     if (queue) queueScroll = bounded; else trackScroll = bounded;
   }
-  private ScrollBar.Track track() { return new ScrollBar.Track(right() + 5, listTop(), Math.max(0, bottom() - listTop()), contentHeight, scroll()); }
-  private boolean inList(int x, int y) { return inside(x, y, left(), listTop(), span(), bottom() - listTop()); }
+  private ScrollBar.Track track() { return new ScrollBar.Track(right() + 6, listTop(), Math.max(0, bottom() - listTop()), contentHeight, scroll()); }
+  private boolean inList(int x, int y) { return inside(x, y, hoverLeft(), listTop(), hoverWidth(), bottom() - listTop()); }
 
   public void guard(Runnable action) { finishDrag(); if (presetsOpen) presets.guard(action); else action.run(); }
   public void dialogClick(int x, int y, int b) { if (folders.modal()) folders.dialogClick(x, y, b); else { presets.headerClick(x, y, b); syncPanel(); } }
   public void renderDialog(int x, int y) { if (folders.modal()) folders.renderDialog(x, y); else if (presetsOpen) presets.renderDialog(x, y); }
+  public void renderDragGhost(int x, int y) {
+    if (modal()) return;
+    if (catalog()) presets.renderDragGhost(x, y);
+    else reorder.renderGhost(this, dragLabel, x, y);
+  }
   public void openPresets() { selectFilter("playlists"); }
   public void showTracks() { selectFilter("library"); }
   public void showQueue() {
@@ -261,7 +275,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
   public void removed() { finishDrag(); scrollbar.release(); }
   private void finishDrag() {
-    dragging = null; draggingGroup = null; reorder.cancel(); presets.cancelPointer();
+    dragging = null; draggingGroup = null; reorder.cancel(); dragLabel = ""; presets.cancelPointer();
     parent.finishContinuousChange();
   }
   private void refresh() {
@@ -303,10 +317,14 @@ public final class MusicLibraryScreen extends UiScreen {
     if (presetsOpen && !presets.editing()) {
       presets.filter(search.text());
       tracks = List.of(); rows = List.of(); sectionKeys = List.of(); groupTracks.clear(); contentHeight = 0;
+      includedGroupCounts.clear(); rowIndex = MusicRowIndex.of(rows, row -> row.id == null, Row::y, Row::height);
       return;
     }
     List<String> source = queue ? MusicRequests.tracks() : playlistView() ? presets.draft().tracks() : new ArrayList<>(available);
     groupTracks.clear(); source.forEach(id -> groupTracks.computeIfAbsent(group(id), key -> new ArrayList<>()).add(id));
+    includedGroupCounts.clear();
+    if (presets.editing()) groupTracks.forEach((group, members) -> includedGroupCounts.put(group,
+        playlistView() ? members.size() : (int)members.stream().filter(presets.draft()::included).count()));
     libraryGroupCounts.clear();
     if (groupedView() && (playlistView() || presets.adding()))
       available.forEach(id -> libraryGroupCounts.merge(group(id), 1, Integer::sum));
@@ -331,7 +349,7 @@ public final class MusicLibraryScreen extends UiScreen {
     return group.startsWith("folder:") ? Objects.toString(Path.of(group.substring(7)).getFileName(), group.substring(7)) : group;
   }
   private List<String> members(String group) { return groupTracks.getOrDefault(group, List.of()); }
-  private int includedCount(String group) { return presets.editing() ? (int)members(group).stream().filter(presets.draft()::included).count() : 0; }
+  private int includedCount(String group) { return includedGroupCounts.getOrDefault(group, 0); }
   private void addGroup(String group) {
     if (!presets.editable() || !presets.adding()) return;
     presets.draft().appendTracks(members(group).stream().sorted(Comparator.comparing(AudioController::musicLabel, String.CASE_INSENSITIVE_ORDER).thenComparing(Comparator.naturalOrder())).toList()); syncPanel();
@@ -361,6 +379,7 @@ public final class MusicLibraryScreen extends UiScreen {
       }
     }
     rows = List.copyOf(result); sectionKeys = rows.stream().filter(row -> row.id == null).map(row -> collapseKey(row.group)).toList(); contentHeight = y;
+    rowIndex = MusicRowIndex.of(rows, row -> row.id == null, Row::y, Row::height);
   }
   private String path(String id) {
     MusicLibrary.Track t = custom.get(id);
@@ -372,8 +391,15 @@ public final class MusicLibraryScreen extends UiScreen {
     if (conversionRevision != Mp3Converter.revision()) { conversionRevision = Mp3Converter.revision(); conversionTicks = 200; }
     else if (conversionTicks > 0) conversionTicks--;
     if (revision != AudioController.libraryRevision() || sourceLibrary != AudioController.sourceLibrary()
-        || sourceValue != edits.setting("musicDirectories").value || orderValue != edits.setting("libraryOrder").value) refresh();
-    else { syncPanel(); if (queue && !tracks.equals(MusicRequests.tracks())) { reorder.cancel(); rebuild(); } }
+        || sourceValue != edits.setting("musicDirectories").value) refresh();
+    else {
+      if (orderValue != edits.setting("libraryOrder").value) {
+        orderValue = edits.setting("libraryOrder").value;
+        groupOrder = MusicLibrarySources.order(AudioConfig.current());
+        reorder.cancel(); rebuildRows(); scroll(scroll());
+      }
+      syncPanel(); if (queue && !tracks.equals(MusicRequests.tracks())) { reorder.cancel(); rebuild(); }
+    }
   }
   public void wheel(int amount) {
     if (folders.modal()) return;
@@ -406,11 +432,12 @@ public final class MusicLibraryScreen extends UiScreen {
     if (presetsOpen && !search.focused) presets.key(c, key);
     if (!queue && search.focused) { reorder.cancel(); search.key(c, key); scroll(0); rebuild(); }
   }
-  private StickyHeader stickyHeader() { return StickyHeader.at(rows, row -> row.id == null, Row::y, Row::height, scroll(), listTop(), bottom()); }
+  private StickyHeader stickyHeader() { return rowIndex.sticky(scroll(), listTop(), bottom()); }
   private Row rowAt(int y) {
     StickyHeader sticky = stickyHeader();
     if (sticky != null && sticky.contains(y, listTop())) return rows.get(sticky.index());
-    return rows.stream().filter(row -> y - listTop() + scroll() >= row.y && y - listTop() + scroll() < row.y + row.height).findFirst().orElse(null);
+    int index = rowIndex.at(y - listTop() + scroll());
+    return index < 0 ? null : rows.get(index);
   }
   private int rowY(Row row) {
     var sticky = stickyHeader(); return sticky != null && rows.get(sticky.index()) == row ? sticky.y() : listTop() + row.y - scroll();
@@ -482,6 +509,7 @@ public final class MusicLibraryScreen extends UiScreen {
       List<String> ids = queue ? MusicRequests.tracks() : presets.draft().tracks();
       if (queue && !renderedQueue.equals(ids)) { rebuild(); error = "Queue changed. Select the track again."; return; }
       var slots = rows.stream().filter(r -> r.id != null).map(r -> new MusicListDrag.Slot(r.id, r.y, r.height)).toList();
+      dragLabel = AudioController.musicLabel(row.id);
       reorder.begin(queue ? MusicListDrag.Kind.QUEUE : MusicListDrag.Kind.PLAYLIST, queue ? null : presets.draft(), ids, slots, row.index, x, y);
     }
   }
@@ -504,8 +532,9 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     if (b != 0) return;
-    if (libraryTab() && search.text().isBlank() && x >= left() + 14) {
+    if (libraryTab() && search.text().isBlank()) {
       List<Row> headings = rows.stream().filter(r -> r.id == null).toList(); List<String> ids = headings.stream().map(Row::group).toList();
+      dragLabel = row.label;
       reorder.begin(MusicListDrag.Kind.GROUPS, sourceLibrary, ids,
           headings.stream().map(r -> new MusicListDrag.Slot(r.group, r.y, r.height)).toList(), ids.indexOf(row.group), x, y);
     } else toggleHeading(row.group);
@@ -552,7 +581,12 @@ public final class MusicLibraryScreen extends UiScreen {
     });
   }
   protected void mouseReleased(int x, int y, int b) {
-    if (presets.release(x, y, b)) { syncPanel(); rebuild(); parent.refreshMusicEditor(); return; }
+    boolean wasEditing = presets.editing();
+    if (presets.release(x, y, b)) {
+      syncPanel();
+      if (wasEditing != presets.editing()) parent.refreshMusicEditor();
+      return;
+    }
     if (b != 0) return;
     if (dragging != null || draggingGroup != null) {
       if (dragging != null) slide(x); else slideGroup(x);
@@ -564,7 +598,12 @@ public final class MusicLibraryScreen extends UiScreen {
     if (!reorder.active()) return;
     try {
       if (!inList(x, y) || !Display.isActive()) return;
-      if (!reorder.moved()) { if (reorder.kind() == MusicListDrag.Kind.GROUPS) toggleHeading(reorder.original().get(reorder.index())); return; }
+      if (!reorder.moved()) {
+        Row released = rowAt(y);
+        if (reorder.kind() == MusicListDrag.Kind.GROUPS && released != null && released.id == null
+            && released.group.equals(reorder.original().get(reorder.index()))) toggleHeading(released.group);
+        return;
+      }
       List<String> next = new ArrayList<>(reorder.original()); int slot = reorder.slot(y - listTop() + scroll());
       if (reorder.kind() == MusicListDrag.Kind.GROUPS) {
         var current = rows.stream().filter(r -> r.id == null).map(Row::group).toList();
@@ -579,7 +618,15 @@ public final class MusicLibraryScreen extends UiScreen {
       }
       error = "";
     } catch (RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Could not reorder this list."); }
-    finally { reorder.cancel(); groupOrder = MusicLibrarySources.order(AudioConfig.current()); syncPanel(); rebuild(); }
+    finally {
+      reorder.cancel(); dragLabel = "";
+      List<String> nextOrder = MusicLibrarySources.order(AudioConfig.current());
+      if (!groupOrder.equals(nextOrder)) {
+        groupOrder = nextOrder; orderValue = edits.setting("libraryOrder").value;
+        rebuildRows(); scroll(scroll());
+      }
+      syncPanel();
+    }
   }
   public void renderSearch(int x, int y, int w, int mx, int my) {
     if (queue) text("Music queue", x + 2, y + 5, 0xdddddd);
@@ -589,12 +636,12 @@ public final class MusicLibraryScreen extends UiScreen {
   }
   private record GroupHover(String tip, String key) {}
   private GroupHover groupHeading(Row row, int y, int mx, int my) {
-    boolean hover = inside(mx, my, left(), y, span(), row.height) && my >= listTop() && my < bottom();
+    boolean hover = inside(mx, my, hoverLeft(), y, hoverWidth(), row.height) && my >= listTop() && my < bottom();
     boolean closed = collapsed.contains(collapseKey(row.group)); int total = members(row.group).size();
     var source = sourceFolders.get(row.group); boolean managed = managedSource(row.group);
     String count = presets.adding() || playlistView()
         ? includedCount(row.group) + "/" + libraryGroupCounts.getOrDefault(row.group, 0) : Integer.toString(total);
-    int countRight = presets.adding() ? right() - 46 : right() - 4;
+    int countRight = countRight(row.group);
     if (managed) iconButton("remove", sourceRemoveX(), y + 1, 18, mx, my, true);
     if (presets.editable() && presets.adding()) button("Add", right() - 40, y + 1, 40, 18, mx, my, includedCount(row.group) < total);
     if (groupHasVolume(row.group)) {
@@ -602,7 +649,7 @@ public final class MusicLibraryScreen extends UiScreen {
       if (parent.valueEditor.editing("musicGroup/" + row.group)) parent.valueEditor.render(this, groupVolumeX(), y + 1, groupVolumeWidth(), mx, my, listTop(), bottom());
       else slider(volume + "%", groupVolumeX(), y + 1, groupVolumeWidth(), mx, my, volume / 100d);
     }
-    int labelRight = managed ? sourceRemoveX() - 6 : groupHasVolume(row.group) ? groupVolumeX() - 6 : countRight - textWidth(count) - 6;
+    int labelRight = countRight - textWidth(count) - 6;
     text((closed ? "> " : "v ") + fit(row.label, Math.max(12, labelRight - left() - 12)), left() + 2, y + 6, 0xffffff);
     text(count, countRight - textWidth(count), y + 6, 0xaaaaaa); fill(left(), y + row.height - 1, right(), y + row.height, 0x50555555);
     if (!hover) return new GroupHover("", "");
@@ -629,8 +676,8 @@ public final class MusicLibraryScreen extends UiScreen {
     if (!modal()) scroll((int)scrollbar.drag(track(), my, Mouse.isButtonDown(0)));
     if (dragging != null) { if (Mouse.isButtonDown(0)) slide(mx); else { dragging = null; parent.finishContinuousChange(); } }
     if (draggingGroup != null) { if (Mouse.isButtonDown(0)) slideGroup(mx); else { draggingGroup = null; parent.finishContinuousChange(); } }
-    reorder.update(mx, my);
-    if (reorder.active() && reorder.moved() && inList(mx, my) && reorder.scrollDue()) {
+    reorder.update(pointerX, pointerY);
+    if (reorder.dragging() && inList(pointerX, pointerY) && reorder.scrollDue()) {
       if (my >= bottom() - 14) scroll(scroll() + rowHeight()); else if (my < listTop() + 14) scroll(scroll() - rowHeight());
     }
     if (queue) { text("Up next", left() + 2, controlsTop() + 5, 0xdddddd); button("Clear queue", right() - 82, controlsTop(), 82, 18, mx, my, !tracks.isEmpty()); renderedQueue = List.copyOf(tracks); }
@@ -649,18 +696,21 @@ public final class MusicLibraryScreen extends UiScreen {
     boolean playingPreview = !playingId.isEmpty() && AudioController.previewing(playingId);
     boolean playing = AudioController.musicPlaying();
     StickyHeader sticky = stickyHeader(); int rowsTop = sticky == null ? listTop() : Math.max(listTop(), sticky.y() + sticky.height());
-    clip(left() - 2, rowsTop, span() + 4, Math.max(0, bottom() - rowsTop)); int listMouseY = sticky != null && sticky.contains(my, listTop()) ? -1 : my;
-    for (Row row : rows) {
-      int y = listTop() + row.y - scroll(); if (y + row.height <= listTop() || y >= bottom()) continue;
-      if (row.id == null) { if (sticky == null || row != rows.get(sticky.index())) { var h = groupHeading(row, y, mx, listMouseY); if (!h.tip.isEmpty()) { tip = h.tip; key = h.key; } } continue; }
+    int rowMouseX = reorder.dragging() ? -1000 : mx;
+    clip(hoverLeft(), rowsTop, hoverWidth(), Math.max(0, bottom() - rowsTop));
+    int listMouseY = reorder.dragging() || sticky != null && sticky.contains(my, listTop()) ? -1 : my;
+    int visibleEnd = rowIndex.limitVisible(scroll() + bottom() - listTop());
+    for (int index = rowIndex.firstVisible(scroll()); index < visibleEnd; index++) {
+      Row row = rows.get(index); int y = listTop() + row.y - scroll();
+      if (row.id == null) { if (sticky == null || row != rows.get(sticky.index())) { var h = groupHeading(row, y, rowMouseX, listMouseY); if (!h.tip.isEmpty()) { tip = h.tip; key = h.key; } } continue; }
       String id = row.id; var layout = rowLayout(); int cy = y + layout.controlsY();
-      boolean hover = inside(mx, listMouseY, left(), y, span(), row.height) && listMouseY >= rowsTop && listMouseY < bottom();
+      boolean hover = inside(rowMouseX, listMouseY, hoverLeft(), y, hoverWidth(), row.height) && listMouseY >= rowsTop && listMouseY < bottom();
       if (hover) { tip = path(id); key = "track:" + id; }
-      if (hover && !reorder.active()) fill(left() - 2, y, right(), y + row.height, 0x60000000);
+      if (hover) fill(hoverLeft(), y, hoverRight(), y + row.height, 0x60000000);
       int nameX = layout.nameX();
       if (presets.adding()) {
         boolean included = presets.draft().included(id);
-        button(included ? "x" : "+", nameX, cy, 18, 18, mx, listMouseY, true, included ? 0xffffdd66 : -1);
+        button(included ? "x" : "+", nameX, cy, 18, 18, rowMouseX, listMouseY, true, included ? 0xffffdd66 : -1);
         nameX += 22;
         if (hover && inside(mx, listMouseY, layout.nameX(), cy, 18, 18))
           tip = included ? "Remove from playlist" : "Add to playlist";
@@ -670,19 +720,19 @@ public final class MusicLibraryScreen extends UiScreen {
           id.equals(playingId) ? playingPreview ? 0xff77baff : 0xffffdd66 : playable(id) ? 0xdddddd : 0xffbb77);
       Setting volume = settings.get("audio.sound." + id);
       if (volume != null) {
-        if (parent.valueEditor.editing(row)) parent.valueEditor.render(this, volumeX(), cy, layout.volumeWidth(), mx, listMouseY, rowsTop, bottom());
-        else slider(volume.display(), volumeX(), cy, layout.volumeWidth(), mx, listMouseY, volume.value.getAsDouble() / 100);
+        if (parent.valueEditor.editing(row)) parent.valueEditor.render(this, volumeX(), cy, layout.volumeWidth(), rowMouseX, listMouseY, rowsTop, bottom());
+        else slider(volume.display(), volumeX(), cy, layout.volumeWidth(), rowMouseX, listMouseY, volume.value.getAsDouble() / 100);
       }
-      iconButton("star", layout.favouriteX(), cy, layout.buttonWidth(), mx, listMouseY, true, favorite(id));
-      iconButton(playing && id.equals(playingId) ? "pause" : "play", layout.playX(), cy, layout.buttonWidth(), mx, listMouseY, playable(id));
+      iconButton("star", layout.favouriteX(), cy, layout.buttonWidth(), rowMouseX, listMouseY, true, favorite(id));
+      iconButton(playing && id.equals(playingId) ? "pause" : "play", layout.playX(), cy, layout.buttonWidth(), rowMouseX, listMouseY, playable(id));
       if (hover && inside(mx, listMouseY, volumeX(), cy, layout.volumeWidth(), 18)) tip = "";
       else if (hover && inside(mx, listMouseY, layout.favouriteX(), cy, layout.buttonWidth(), 18)) tip = favorite(id) ? "Remove favourite" : "Favourite";
       else if (hover && inside(mx, listMouseY, layout.playX(), cy, layout.buttonWidth(), 18)) tip = "";
     }
-    if (sticky != null) { clip(left() - 2, listTop(), span() + 4, Math.max(0, bottom() - listTop())); var h = groupHeading(rows.get(sticky.index()), sticky.y(), mx, my); if (!h.tip.isEmpty()) { tip = h.tip; key = h.key; } }
-    if (reorder.active() && reorder.moved() && inList(mx, my)) {
-      int slot = reorder.slot(my - listTop() + scroll()); int natural = slot == reorder.original().size() ? contentHeight : reorder.lineY(slot);
-      int line = Math.max(listTop(), Math.min(bottom() - 2, listTop() + natural - scroll())); fill(left(), line, right(), line + 2, 0xffffdd88);
+    if (sticky != null) { clip(hoverLeft(), listTop(), hoverWidth(), Math.max(0, bottom() - listTop())); var h = groupHeading(rows.get(sticky.index()), sticky.y(), rowMouseX, reorder.dragging() ? -1 : my); if (!h.tip.isEmpty()) { tip = h.tip; key = h.key; } }
+    if (reorder.dragging() && inList(pointerX, pointerY)) {
+      int slot = reorder.slot(pointerY - listTop() + scroll()); int natural = slot == reorder.original().size() ? contentHeight : reorder.lineY(slot);
+      reorder.renderLine(this, hoverLeft(), hoverRight(), listTop(), bottom(), listTop() + natural - scroll());
     }
     if (rows.isEmpty()) text(fit(queue ? "Queue is empty" : playlistView() && search.text().isBlank() ? "No songs. Use Add songs." : "No matching songs", span() - 8), left() + 4, listTop() + 12, 0xaaaaaa);
     unclip(); scrollbar.render(this, track());

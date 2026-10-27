@@ -297,8 +297,9 @@ public final class WaypointsScreen extends UiScreen {
     setDialog.render(this, mx, my);
     if (!deletingSet.isEmpty()) {
       fill(0, 0, width, height, 0xc0000000);
-      centeredText(fit("Delete set \"" + deletingSet + "\"?", width - 24), height / 2 - 26, 0xffffff);
-      centeredText(deletingCount == 0 ? "This set is empty." : deletingCount + (deletingCount == 1 ? " waypoint will move to Default." : " waypoints will move to Default."), height / 2 - 10, 0xcccccc);
+      WarningText.draw(this, 312, height / 2 + 8, "Delete set \"" + deletingSet + "\"?",
+          deletingCount == 0 ? "This set is empty." : deletingCount
+              + (deletingCount == 1 ? " waypoint will move to Default." : " waypoints will move to Default."), 0xaaaaaa);
       button("Delete set", width / 2 - 112, height / 2 + 20, 108, 20, mx, my, true);
       button("Cancel", width / 2 + 4, height / 2 + 20, 108, 20, mx, my, true);
     } else if (!modal() && ready && store.selectedSet().equalsIgnoreCase("Default")

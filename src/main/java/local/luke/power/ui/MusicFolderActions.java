@@ -89,12 +89,11 @@ final class MusicFolderActions extends UiScreen {
 
   void renderDialog(int mx, int my) {
     if (!modal()) return;
-    fill(0, 0, width, height, 0xd0000000);
-    int x = dialogLeft(), y = height / 2 - 42, w = dialogWidth();
-    text("Remove \"" + fit(removalLabel, w - textWidth("Remove \"\"?")) + "\"?", x, y, 0xffffff);
-    text(fit(removing, w), x, y + 15, 0xaaaaaa);
-    text(fit(error.isEmpty() ? "Files and playlist entries stay unchanged." : error, w),
-        x, y + 31, error.isEmpty() ? 0xaaaaaa : 0xff8888);
+    fill(0, 0, width, height, 0xc0000000);
+    int x = dialogLeft(), w = dialogWidth();
+    WarningText.draw(this, w, buttonY() - 12, "Remove \"" + removalLabel + "\"?",
+        error.isEmpty() ? "Files and playlist entries stay unchanged.\n" + removing : error,
+        error.isEmpty() ? 0xaaaaaa : 0xff8888);
     button("Remove", x, buttonY(), buttonWidth(), 20, mx, my, true);
     button("Cancel", x + buttonWidth() + 4, buttonY(), buttonWidth(), 20, mx, my, true);
   }

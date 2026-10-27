@@ -24,6 +24,18 @@
   `power-beta-data/reports/release-464`. The fixtures restore their owned settings,
   drafts, queue, files and runtime state. Do not install them in the primary.
 
+- `release-464-polish capture|check` captures catalog controls, row hovers, drag
+  labels, Library folders, readonly titles, clean/dirty footers and warnings at
+  854x480 and 320x240 before acceptance checks. It checks pointer ownership,
+  the 8-pixel drag threshold, shared hover/drop bounds, centered warning text and
+  visible-row indexing. Options Save/Reset and Defaults Load warnings also check
+  button hover, blocked underlay hover and pointer cancellation. Use the same
+  focused, muted disposable client. Actual
+  images are listed in `power-beta-data/reports/release-464/polish/captures.json`;
+  font references and acceptance images stay in its `probes` directory. Folder
+  ownership is synthetic and uses existing songs, without importing files.
+  Native 4096-row render timings are observations, not comparative FPS claims.
+
 - `release-463 capture|check` verifies full-size Audio sliders, HUD editor actions,
   saved-playlist row playback, ordered manual/queue continuation, isolated drafts,
   pause/resume and now-playing navigation at 854x480 and 320x240. It also checks

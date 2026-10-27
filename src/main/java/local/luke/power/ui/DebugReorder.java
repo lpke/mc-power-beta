@@ -178,7 +178,9 @@ final class DebugReorder extends UiScreen {
   void drawPrompt(int mx, int my) {
     if (!prompt()) return;
     rectangle(0, 0, width, height, 0xc0000000);
-    centeredText(naming ? "Save F3 preset" : remove ? "Remove saved preset?" : "Reset F3 layout to defaults?", height / 2 - 32, 0xffffff);
+    if (naming) centeredText("Save F3 preset", height / 2 - 32, 0xffffff);
+    else WarningText.draw(this, 312, height / 2 + 8,
+        remove ? "Remove saved preset?" : "Reset F3 layout to defaults?", "", 0xaaaaaa);
     if (naming) input(name, width / 2 - 110, height / 2 - 10, 220, mx, my, "Preset name");
     button(naming ? "Save" : remove ? "Remove" : "Reset", width / 2 - 102, height / 2 + 20, 100, 20, mx, my, true);
     button("Cancel", width / 2 + 2, height / 2 + 20, 100, 20, mx, my, true);

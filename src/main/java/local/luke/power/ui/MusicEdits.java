@@ -8,25 +8,43 @@ import local.luke.power.config.*;
 /** Saved playlists and library preferences share the surrounding Options transaction. */
 final class MusicEdits {
   private final PowerOptionsScreen parent;
+  private ConfigSession cachedSession;
+  private final Map<String, Setting> settings = new HashMap<>();
   private JsonElement cachedFavourites, cachedPlaylists, cachedOrder;
   private Set<String> favouriteIds = Set.of();
-  private List<MusicPlaylist> playlistValues = List.of();
+  private List<MusicPlaylist> savedValues = List.of(), playlistValues = List.of();
+  private MusicPlaylist favoritesPlaylist;
+  private Map<String, MusicPlaylist> playlistById = Map.of();
 
   MusicEdits(PowerOptionsScreen parent) { this.parent = parent; }
   Setting setting(String id) {
-    return parent.session().settings().stream().filter(s -> s.id.equals("audio." + id)).findFirst().orElseThrow();
+    ConfigSession session = parent.session();
+    if (session != cachedSession) {
+      settings.clear(); cachedSession = session;
+      cachedPlaylists = cachedFavourites = cachedOrder = null;
+    }
+    return settings.computeIfAbsent(id, key -> session.settings().stream()
+        .filter(s -> s.id.equals("audio." + key)).findFirst().orElseThrow());
   }
   List<MusicPlaylist> presets() {
     JsonElement value = setting("playlists").value, favorites = setting("favourites").value,
         order = setting("playlistOrder").value;
     if (value != cachedPlaylists || favorites != cachedFavourites || order != cachedOrder) {
-      List<MusicPlaylist> values = new ArrayList<>();
-      values.add(MusicPlaylist.beta());
-      values.add(new MusicPlaylist(MusicPlaylist.FAVORITES, "Favorites",
-          Arrays.asList(Catalog.JSON.fromJson(favorites, String[].class))));
-      values.addAll(Arrays.asList(Catalog.JSON.fromJson(value, MusicPlaylist[].class)));
-      Map<String, MusicPlaylist> byId = new LinkedHashMap<>();
-      values.forEach(p -> byId.put(p.id(), p));
+      if (value != cachedPlaylists)
+        savedValues = List.copyOf(Arrays.asList(Catalog.JSON.fromJson(value, MusicPlaylist[].class)));
+      if (favorites != cachedFavourites) {
+        favoritesPlaylist = new MusicPlaylist(MusicPlaylist.FAVORITES, "Favorites",
+            Arrays.asList(Catalog.JSON.fromJson(favorites, String[].class)));
+        favouriteIds = Collections.unmodifiableSet(new LinkedHashSet<>(favoritesPlaylist.tracks()));
+      }
+      if (value != cachedPlaylists || favorites != cachedFavourites) {
+        Map<String, MusicPlaylist> values = new LinkedHashMap<>();
+        values.put(MusicPlaylist.BETA, MusicPlaylist.beta());
+        values.put(MusicPlaylist.FAVORITES, favoritesPlaylist);
+        savedValues.forEach(p -> values.put(p.id(), p));
+        playlistById = Collections.unmodifiableMap(values);
+      }
+      Map<String, MusicPlaylist> byId = new LinkedHashMap<>(playlistById);
       List<MusicPlaylist> sorted = new ArrayList<>();
       for (String id : Catalog.JSON.fromJson(order, String[].class)) {
         MusicPlaylist playlist = byId.remove(id);
@@ -34,7 +52,6 @@ final class MusicEdits {
       }
       sorted.addAll(byId.values());
       playlistValues = List.copyOf(sorted);
-      favouriteIds = Collections.unmodifiableSet(new LinkedHashSet<>(Arrays.asList(Catalog.JSON.fromJson(favorites, String[].class))));
       cachedPlaylists = value; cachedFavourites = favorites; cachedOrder = order;
     }
     return playlistValues;
@@ -42,7 +59,9 @@ final class MusicEdits {
   String selected() { return setting("playlist").value.getAsString(); }
   String name(String id) {
     if (MusicPlaylist.SAME_AS_WORLD.equals(id)) return "Same as world";
-    return presets().stream().filter(p -> p.id().equals(id)).map(MusicPlaylist::name).findFirst().orElse("Unavailable playlist");
+    presets();
+    MusicPlaylist playlist = playlistById.get(id);
+    return playlist != null ? playlist.name() : "Unavailable playlist";
   }
   String currentName() { return name(selected()); }
   Set<String> favourites() { presets(); return favouriteIds; }
@@ -60,7 +79,8 @@ final class MusicEdits {
     if (MusicPlaylist.BETA.equals(playlist.id())) throw new IllegalArgumentException("Copy Beta to make your own playlist");
     List<MusicPlaylist> values = new ArrayList<>(presets());
     MusicPlaylist current = values.stream().filter(p -> p.id().equals(playlist.id())).findFirst().orElse(null);
-    if (expected != null && (current == null || !Catalog.JSON.toJson(current).equals(Catalog.JSON.toJson(expected))))
+    if (expected != null && (current == null || !current.id().equals(expected.id())
+        || !current.name().equals(expected.name()) || !current.tracks().equals(expected.tracks())))
       throw new IllegalArgumentException("This playlist changed. Reopen it before saving.");
     if (MusicPlaylist.FAVORITES.equals(playlist.id())) {
       if (!playlist.name().equals("Favorites")) throw new IllegalArgumentException("Favorites cannot be renamed");
@@ -105,6 +125,7 @@ final class MusicEdits {
   void groupVolume(String group, int volume) { groupVolume(group, volume, false); }
   void groupVolume(String group, int volume, boolean continuous) {
     MusicGroups.copy(Map.of(group, volume));
+    if (groupVolume(group) == volume) return;
     JsonObject volumes = setting("libraryGroupVolumes").value.deepCopy().getAsJsonObject();
     if (volume == 100) volumes.remove(group); else volumes.addProperty(group, volume);
     apply(Map.of("libraryGroupVolumes", volumes), continuous);
@@ -122,8 +143,14 @@ final class MusicEdits {
   }
   private void apply(Map<String, JsonElement> values) { apply(values, false); }
   private void apply(Map<String, JsonElement> values, boolean continuous) {
-    var draft = new SettingsDraft(values.keySet().stream().map(this::setting).toList(), ignored -> true);
-    values.forEach((id, value) -> { setting(id).validate(value); draft.get("audio." + id).value = value.deepCopy(); });
+    Map<Setting, JsonElement> changes = new LinkedHashMap<>();
+    values.forEach((id, value) -> {
+      Setting target = setting(id); target.validate(value);
+      if (!target.value.equals(value)) changes.put(target, value);
+    });
+    if (changes.isEmpty()) return;
+    var draft = new SettingsDraft(changes.keySet(), ignored -> true);
+    changes.forEach((target, value) -> draft.get(target.id).value = value.deepCopy());
     if (!parent.acceptEditor(draft, continuous)) throw new IllegalArgumentException(parent.editorError());
   }
   void load(String id) {

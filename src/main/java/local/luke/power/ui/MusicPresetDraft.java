@@ -9,6 +9,8 @@ public final class MusicPresetDraft {
   private final boolean creating, readOnly;
   private final List<String> original, tracks, available;
   private List<String> cachedTracks;
+  private Set<String> cachedMembership;
+  private boolean cachedOrderChanged;
 
   public MusicPresetDraft(MusicPlaylist playlist) { this(playlist, List.of()); }
 
@@ -53,8 +55,14 @@ public final class MusicPresetDraft {
     }
   }
   public boolean creating() { return creating; }
-  public boolean included(String id) { return tracks.contains(id); }
-  public List<String> tracks() { if (cachedTracks == null) cachedTracks = List.copyOf(tracks); return cachedTracks; }
+  public boolean included(String id) { refreshSnapshot(); return cachedMembership.contains(id); }
+  public List<String> tracks() { refreshSnapshot(); return cachedTracks; }
+  private void refreshSnapshot() {
+    if (cachedTracks != null) return;
+    cachedTracks = List.copyOf(tracks);
+    cachedMembership = Set.copyOf(tracks);
+    cachedOrderChanged = !original.equals(tracks);
+  }
   /** Append a saved source in its own order, retaining missing IDs. */
   public void appendTracks(Collection<String> source) {
     requireEditable();
@@ -66,11 +74,14 @@ public final class MusicPresetDraft {
   }
   public void include(String id, boolean value) {
     requireEditable();
-    if (value) { if (!tracks.contains(id)) { tracks.add(id); cachedTracks = null; } }
+    if (value) { if (!included(id)) { tracks.add(id); cachedTracks = null; } }
     else if (tracks.remove(id)) cachedTracks = null;
   }
   public void includeAll() { appendTracks(available); }
-  public void excludeAll(Collection<String> ids) { requireEditable(); if (tracks.removeAll(ids)) cachedTracks = null; }
+  public void excludeAll(Collection<String> ids) {
+    requireEditable();
+    if (tracks.removeAll(ids instanceof Set<?> ? ids : new HashSet<>(ids))) cachedTracks = null;
+  }
   public void move(String id, int offset) {
     requireEditable();
     int index = tracks.indexOf(id), next = index + offset;
@@ -84,7 +95,8 @@ public final class MusicPresetDraft {
   }
   public boolean changed(String name) {
     if (readOnly) return false;
-    return creating || !originalName.equals(favorites() ? originalName : name.strip()) || !original.equals(tracks);
+    refreshSnapshot();
+    return creating || !originalName.equals(favorites() ? originalName : name.strip()) || cachedOrderChanged;
   }
   public MusicPlaylist snapshot(String name) {
     return new MusicPlaylist(id, readOnly || favorites() ? originalName : name, tracks);
