@@ -75,6 +75,9 @@ Make a compact checklist the owner can read from top to bottom while testing:
 - Add optional interactive checkboxes that remember this report's review progress locally.
 - Keep technical notes brief. Explain practical behavior before implementation details.
 - End with concise validation, release and instance-update status. Do not claim unrun tests.
+  Record the primary update attempt before publication. If the instance was running
+  or unavailable, keep its update visibly pending while publication proceeds; do not
+  label the instance updated merely because GitHub and the website are live.
 
 Do not repeat the prompt or turn the file into a session diary. Avoid long tables,
 performance claims without measurements, filler and explanatory text that adds no

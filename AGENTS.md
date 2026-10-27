@@ -9,10 +9,13 @@ existing worlds, player data, music and recovery records. Apply required migrati
 with the shared backed-up converters. Other requests keep Git read-only unless the
 user explicitly authorizes Git changes. Never publish without release authorization.
 
-Finish validation and review, then update and verify the idle primary instance
-with the exact release artifacts **before** publishing GitHub assets or deploying
-the website. Tell the owner as soon as the instance is ready so they can test while
-publication runs. If artifacts change, validate and install the final build first.
+Finish validation and review, then try to update and verify the primary instance
+with the exact release artifacts before publishing GitHub assets or deploying the
+website. If it is running or otherwise unavailable, leave it untouched, report the
+update as pending and continue authorized publication without waiting. Never edit a
+running instance. Tell the owner as soon as the instance is ready so they can test
+while publication runs. If artifacts change, validate the final build and try the
+instance update again before publishing.
 
 Use plain, short progress updates and state the files/approach before substantial
 edits. Finish authorized work without repeatedly asking for permission. Report facts

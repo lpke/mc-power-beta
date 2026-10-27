@@ -21,11 +21,14 @@ The original unversioned work is collected under 1.0.0.
    project. Keep credentials in the CLIs, never in Git.
 5. Build the exact clean commit with `python3 tools/build_pack.py --offline`.
    Complete runtime validation and final review before installing it.
-6. Update and verify the idle primary instance using the instructions below.
-   Tell the owner it is ready before starting publication, so they can test while
-   uploads and deployment run. If artifacts change, validate and install them again.
+6. Attempt the primary instance update using the instructions below before starting
+   publication. If idle, update and verify it, then immediately tell the owner it is
+   ready so they can test while uploads and deployment run. If running or otherwise
+   unavailable, leave it untouched, report the update as pending and continue
+   publication without waiting. If artifacts change, validate the final build and
+   attempt its installation again before publishing.
 
-## Install before publishing
+## Try the primary update first
 
 For an idle existing instance with the same platform dependencies:
 
@@ -38,7 +41,10 @@ checks that settings and worlds remain byte-identical. A failed copy restores th
 previous artifacts. Keep the backup until verification finishes. Apply required
 migrations with the shared backed-up converters, and refresh creation templates
 as described in [Builds and runtime testing](agents/build-testing.md).
-Verify the installed JAR matches the validated release candidate before publishing.
+Verify the installed JAR matches the validated release candidate. If the primary
+is running or otherwise unavailable, defer its update and proceed with authorized
+publication. Never edit a running instance. Record a deferred update as pending
+until the exact validated artifacts are installed and verified while idle.
 
 ## Publish
 
@@ -90,7 +96,7 @@ Ordinary fixes get a new version. Replacing a published version requires the
 owner's explicit re-release request. Save the existing release metadata,
 tag commit, ZIP and checksum in a private
 backup. Verify both asset hashes and the archive before removing anything.
-After validation and the primary update, remove only that release and tag with
+After validation and attempting the primary update, remove only that release and tag with
 `gh release delete vX.Y.Z --cleanup-tag`,
 then run the documented publisher on the reviewed clean commit. Retain the verified
 backup until the replacement download, notes and website are checked. Update the
@@ -110,7 +116,8 @@ uses a temporary, private file for its credentials and removes it when finished.
 ## Verify publication
 
 Check the GitHub release, website version, changelog, download and checksum.
-The primary instance is already installed and verified before this step.
+Report whether the primary was installed and verified or its update remains pending.
+An unavailable primary does not block authorized publication.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 versioned modpack notes such as [Fabulously Optimized](https://github.com/Fabulously-Optimized/fabulously-optimized/blob/main/CHANGELOG.md).

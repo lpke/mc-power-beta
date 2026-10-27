@@ -50,8 +50,10 @@
   templates to the latest selected Defaults base using `upgradeInstance -PinstanceRuleDefaults`.
   This operation must verify a durable backup and preserve all other preferences,
   existing world rules, player data and recovery records.
-  For releases, finish validation and review first, then install and verify the
-  exact final build before any publication. Notify the owner when it is ready.
+  For releases, finish validation and review first, then attempt to install and
+  verify the exact final build before publication. Notify the owner when it is
+  ready. If the primary is running or otherwise unavailable, leave it untouched,
+  report the update as pending and continue authorized publication without waiting.
 - Verify the final export contains seven enabled JARs and no test fixtures, accounts,
   worlds, logs or disabled mods. Keep README human-facing; add lasting implementation
   constraints here rather than another session diary.

@@ -5,10 +5,13 @@ A user request listing changes and a release version authorizes implementation, 
 commit, push, publishing and the instance update described in AGENTS.md. A code-only
 request does not authorize publication.
 
-Complete validation and review before updating the idle primary Prism instance.
-Install and verify the exact final artifacts and required backed-up migrations,
-then tell the owner the instance is ready. Only then start publication and website
-deployment. Never postpone the instance update until after publication.
+Complete validation and review, then attempt the primary Prism instance update
+before publication. When idle, install and verify the exact final artifacts and
+required backed-up migrations, then immediately tell the owner it is ready.
+If the primary is running or otherwise unavailable, leave it untouched, report the
+update as pending and continue authorized publication and website deployment.
+Do not wait for it to close or ask again for release permission. A deferred update
+still requires an idle instance and the exact validated artifacts when performed.
 
 For a re-release, merge changes into that version's existing `CHANGELOG.md` entry,
 GitHub notes and website changelog, rewording overlapping bullets into one tidy
