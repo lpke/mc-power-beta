@@ -7,7 +7,7 @@
 - Keep minimap left clicks inside the world map and apply the configured middle-click action while map settings are open.
 - Prevent retro logo dimension edits from crashing when painted blocks would be clipped; retain the paint and previous size.
 - Standardize volume slider columns and exact-entry bounds, use the shorter child sound width for music tracks, inset child sound categories outside search, and center pause icons.
-- Simplify evenly padded playlist rows with larger icon-only radio selection, full-row editing, Duplicate and delete controls, inline rename, context actions and saved drag ordering. Reorder Music tabs and use ranked fuzzy search for songs and playlists.
+- Simplify evenly padded playlist rows with smooth icon-only radio selection, full-row editing, Duplicate and delete controls, inline rename, context actions and saved drag ordering. Reorder Music tabs and use ranked fuzzy search for songs and playlists.
 - Keep paused songs highlighted, distinguish previews in blue, and let preview row controls pause and resume auditions. Navigate directly from playlist choices and from the next-song label during a gap.
 - Keep dropdown hover inside its popup and show full names for truncated playlist choices. Rename the Music and All game sounds views.
 - Move group volume controls to Library so they apply across playlists. Music data uses format 4; existing formats need the backed-up one-time converter before installation.
