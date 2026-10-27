@@ -76,11 +76,13 @@ Keep these rules here rather than adding style details to the top-level instruct
   related-control and editor buttons before the column rather than shortening it.
   Compact form rows place adjacent actions beside the label.
 - Song rows use up to 134 pixels, matching the child sound category width.
-  Library groups use up to 150 pixels with the same right edge. Both adapt down
-  to 54 pixels on compact screens to retain readable names, independently of
-  nearby buttons. Parent and child music sliders share their right edge.
-  Library groups place their count before the slider and the folder delete
-  button at the far right. Grouped playlists retain their X/Y count at the right.
+  They adapt down to 54 pixels on compact screens to retain readable names.
+  Library group sliders start at the song slider's left edge and end four pixels
+  before the far-right folder delete button, matching the song slider's gap to
+  its favourite button. Reserve the delete slot for included music groups too
+  so every Library group shares these columns. Show `1 track` or `X tracks`
+  before the slider and shorten group titles before they reach the count.
+  Grouped playlists retain their X/Y count at the right.
 - Normal Audio category rows use a 16-pixel left inset beneath Game sounds.
   Search results omit normal row indentation. Music and Game sounds place Edit
   and All before the control column, or beside the label at compact widths.

@@ -157,8 +157,8 @@ public final class MusicLibraryScreen extends UiScreen {
   private int rowHeight() { return rowLayout().height(); }
   private int volumeX() { return rowLayout().volumeX(); }
   private int volumeEnd() { return volumeX() + rowLayout().volumeWidth(); }
-  private int groupVolumeWidth() { return VolumeControls.musicGroupWidth(span()); }
-  private int groupVolumeX() { return volumeEnd() - groupVolumeWidth(); }
+  private int groupVolumeWidth() { return sourceRemoveX() - 4 - groupVolumeX(); }
+  private int groupVolumeX() { return volumeX(); }
   private int countRight(String group) {
     return groupHasVolume(group) ? groupVolumeX() - 8 : presets.adding() ? right() - 46 : right() - 4;
   }
@@ -640,7 +640,8 @@ public final class MusicLibraryScreen extends UiScreen {
     boolean closed = collapsed.contains(collapseKey(row.group)); int total = members(row.group).size();
     var source = sourceFolders.get(row.group); boolean managed = managedSource(row.group);
     String count = presets.adding() || playlistView()
-        ? includedCount(row.group) + "/" + libraryGroupCounts.getOrDefault(row.group, 0) : Integer.toString(total);
+        ? includedCount(row.group) + "/" + libraryGroupCounts.getOrDefault(row.group, 0)
+        : total + (total == 1 ? " track" : " tracks");
     int countRight = countRight(row.group);
     if (managed) iconButton("remove", sourceRemoveX(), y + 1, 18, mx, my, true);
     if (presets.editable() && presets.adding()) button("Add", right() - 40, y + 1, 40, 18, mx, my, includedCount(row.group) < total);

@@ -341,11 +341,18 @@ final class Release464PolishChecks {
       var options = open(state, size); var library = library(options); library.showTracks(); expand(library);
       int y = groupY(library, GROUP), x = n(library, "groupVolumeX"), width = n(library, "groupVolumeWidth"), remove = n(library, "sourceRemoveX");
       int countRight = n(library, "countRight", new Class<?>[]{String.class}, GROUP);
-      check(countRight + 6 <= x && x + width + 4 <= remove && remove + 18 <= n(library, "right"), "Library count/volume/remove order overlaps");
+      MusicRowLayout track = (MusicRowLayout)call(library, "rowLayout");
+      check(x == track.volumeX() && x + width + 4 == remove && remove + 18 == n(library, "right"), "Library group slider does not share song left edge and four-pixel delete gap");
+      check(countRight == x - 8 && n(library, "countRight", new Class<?>[]{String.class}, "Alpha") == countRight,
+          "Library source and included group count columns differ");
       BufferedImage actual = shot(mc, options, "group-controls", size, -1, -1, false);
-      var probe = new TextProbe("2", countRight - mc.textRenderer.getWidth("2"), y + 6, 0xaaaaaa); probe.init(mc, size[0], size[1]);
+      String count = "2 tracks"; int countWidth = mc.textRenderer.getWidth(count);
+      var probe = new TextProbe(count, countRight - countWidth, y + 6, 0xaaaaaa); probe.init(mc, size[0], size[1]);
       BufferedImage reference = shot(mc, probe, "reference-group-count", size, -1, -1, false);
-      textMask(actual, reference, countRight - mc.textRenderer.getWidth("2"), y + 6, mc.textRenderer.getWidth("2"), 8, 0xaaaaaa, "Library count");
+      textMask(actual, reference, countRight - countWidth, y + 6, countWidth, 8, 0xaaaaaa, "Library count");
+      int longestCountX = countRight - mc.textRenderer.getWidth(MusicLibrary.MAX_TRACKS + " tracks"), left = n(library, "left");
+      String longestHeading = "v " + call(library, "fit", new Class<?>[]{String.class, int.class}, SOURCE_NAME, Math.max(12, longestCountX - 6 - left - 12));
+      check(left + 2 + mc.textRenderer.getWidth(longestHeading) <= longestCountX - 6, "compact group title overlaps the maximum source track count");
       for (int edge : new int[]{x, x + width - 1}) {
         press(options, edge, y + 8, 0); release(options, edge, y + 8, 0);
         check(AudioConfig.current().libraryGroupVolumes.getOrDefault(GROUP, 100) == (edge == x ? 0 : 100), "group slider endpoint missed drawn bounds");
@@ -358,6 +365,12 @@ final class Release464PolishChecks {
       library.showPlaylist(CUSTOM); grouped(library);
       check(!((List<?>)get(library, "rows")).isEmpty(), "grouped playlist lost rows");
       check(!(boolean)call(library, "groupHasVolume", new Class<?>[]{String.class}, GROUP), "Library group gain leaked into playlist view");
+      check(n(library, "countRight", new Class<?>[]{String.class}, GROUP) == n(library, "right") - 4, "grouped playlist count lost its right edge");
+      int groupedY = groupY(library, GROUP), groupedX = n(library, "right") - 4 - mc.textRenderer.getWidth("2/2");
+      BufferedImage grouped = shot(mc, options, "grouped-membership-count", size, -1, -1, false);
+      var groupedProbe = new TextProbe("2/2", groupedX, groupedY + 6, 0xaaaaaa); groupedProbe.init(mc, size[0], size[1]);
+      textMask(grouped, shot(mc, groupedProbe, "reference-grouped-membership-count", size, -1, -1, false),
+          groupedX, groupedY + 6, mc.textRenderer.getWidth("2/2"), 8, 0xaaaaaa, "grouped playlist X/Y count");
     }
   }
 
