@@ -78,5 +78,6 @@ public final class PanoramaScreen extends UiScreen {
     button("Blur panorama: " + (blur != null && blur.value.getAsBoolean() ? "On" : "Off"),
         left(), height - 52, span(), 20, x, y, blur != null);
     button("Back", width / 2 - 50, height - 28, 100, 20, x, y, true);
+    backTooltip(parent.navigationDestination(), width / 2 - 50, height - 28, 100, 20, x, y);
   }
 }

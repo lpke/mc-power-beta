@@ -80,6 +80,7 @@ public final class HudEditorScreen extends DraftEditorScreen {
   protected String doneLabel() { return reorder.active() ? "Save F3" : "Done"; }
   protected boolean doneEnabled() { return reorder.active() ? reorder.changed() : super.doneEnabled(); }
   protected String cancelLabel() { return reorder.active() ? "Back" : "Cancel"; }
+  protected String backDestination() { return reorder.active() ? "HUD editor" : ""; }
   public void tick() { super.tick(); reorder.tick(); }
   public void init() {
     reorder.closePicker();

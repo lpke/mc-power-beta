@@ -124,6 +124,10 @@ public abstract class UiScreen extends Screen {
 
   protected void iconButton(String icon, int x, int y, int w, int h, int mx, int my, boolean enabled, boolean active) {
     button("", x, y, w, h, mx, my, enabled);
+    icon(icon, x, y, w, h, enabled, active);
+  }
+
+  protected void icon(String icon, int x, int y, int w, int h, boolean enabled, boolean active) {
     int color = !enabled ? 0xff777777 : icon.startsWith("eye") ? 0xffffffff : active ? icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
     String[] pixels = switch (icon) {
       case "eye" -> new String[]{"   ###   ", " ##   ## ", "#   #   #", "#  ###  #", "#   #   #", " ##   ## ", "   ###   "};
@@ -260,6 +264,11 @@ public abstract class UiScreen extends Screen {
       fill(caret, textTop - 2, caret + 1, textTop + 9, 0xffffffff);
     }
     GL11.glPopAttrib();
+  }
+
+  /** Call after content, using the same pointer and bounds as the Back control. */
+  protected void backTooltip(String destination, int left, int top, int span, int h, int mx, int my) {
+    if (inside(mx, my, left, top, span, h)) foregroundTooltip("Back to " + destination, mx, my);
   }
 
   protected void foregroundTooltip(String message, int mx, int my) {

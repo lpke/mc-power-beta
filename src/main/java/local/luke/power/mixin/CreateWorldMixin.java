@@ -31,7 +31,7 @@ public abstract class CreateWorldMixin extends Screen {
     if (power$draft == null) {
       if (local.luke.power.ui.RuleDefaultsScreen.openIfNeeded(minecraft, this,
           this::power$initializeDraft,
-          () -> minecraft.setScreen(new net.minecraft.client.gui.screen.TitleScreen()))) return;
+          () -> minecraft.setScreen(new net.minecraft.client.gui.screen.TitleScreen()), "Title screen")) return;
       power$initializeDraft();
     }
     if (power$recreation != null) {

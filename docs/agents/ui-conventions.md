@@ -17,6 +17,14 @@ Keep these rules here rather than adding style details to the top-level instruct
   Navigation-only Done controls stay available, as do Cancel and Discard exits
   for unchanged drafts. The playlist footer hides Cancel for a clean draft;
   Back remains available for navigation.
+- Every Back control names its actual destination on hover, such as
+  `Back to Audio settings`. Derive the destination from the navigation action or
+  saved view, including related controls, nested editor drafts and return history.
+  Use `UiScreen.backTooltip` with the control's exact bounds and the same pointer
+  suppression as its owner. Draw tooltips after content and suppress them behind
+  popups and warnings. Within-tab Back controls belong beside the nested content
+  when that makes the route clear without crowding compact layouts. Preserve dirty
+  draft prompts and navigation history.
 - Share rendering, pointer, tooltip and clipping geometry. Check compact layouts
   at 320 by 240 as well as wider screens. Keep actionable text and controls inside
   the screen bounds.
@@ -55,7 +63,11 @@ Keep these rules here rather than adding style details to the top-level instruct
   vertical margins. Adjacent row fills meet the line. Separators never accept
   input or change callback indices.
 - Hover and keyboard focus override the selected fill while retaining its blue
-  indicator. Mark the active choice with the blue indicator and the selected
+  indicator. Enabled labels use yellow `0xffffa0` while hovered or keyboard-focused,
+  including the active choice. Unhovered selected labels stay white, disabled labels
+  stay muted and the trailing `Default` label stays grey. Dropdown button labels
+  and chevrons share yellow while hovered or while their own popup is open.
+  Mark the active choice with the blue indicator and the selected
   Defaults-base target with a trailing `Default` label. Context actions open
   without keyboard focus; arrows, Home and End establish focus.
 - Track popup ownership by its actual setting, toolbar control or row so only
@@ -64,7 +76,8 @@ Keep these rules here rather than adding style details to the top-level instruct
   Suppress the underlay pointer and render the popup with real coordinates.
   Truncated playlist choices show their full names.
 - Map, minimap and photo checklists retain their toggle layout and stay open
-  after a choice. Their colors and text spacing follow the same menu style.
+  after a choice. Keep their native checkbox and grey labels that turn white on
+  hover, with the shared dark background and full-row hover fill.
 
 ## Sliders and audio rows
 
@@ -76,12 +89,14 @@ Keep these rules here rather than adding style details to the top-level instruct
   related-control and editor buttons before the column rather than shortening it.
   Compact form rows place adjacent actions beside the label.
 - Song rows use up to 134 pixels, matching the child sound category width.
-  They adapt down to 54 pixels on compact screens to retain readable names.
-  Library group sliders start at the song slider's left edge and end four pixels
-  before the far-right folder delete button, matching the song slider's gap to
-  its favourite button. Reserve the delete slot for included music groups too
-  so every Library group shares these columns. Show `1 track` or `X tracks`
-  before the slider and shorten group titles before they reach the count.
+  Library group sliders use up to 150 pixels and share the song slider's right
+  edge, extending 16 pixels to its left. Compact layouts retain the 16-pixel
+  difference, down to 70 pixels for groups and 54 pixels for songs. Put `1 track`
+  or `X tracks` before the group slider and shorten group titles before the count.
+  Place the folder delete button at the far right, aligned with the song play
+  button's outer right edge, using the same adaptive button size. Reserve that
+  column for included music groups too. `VolumeControls` and `MusicRowLayout`
+  share these widths and bounds across rendering, dragging, exact entry and hover.
   Grouped playlists retain their X/Y count at the right.
 - Normal Audio category rows use a 16-pixel left inset beneath Game sounds.
   Search results omit normal row indentation. Music and Game sounds place Edit

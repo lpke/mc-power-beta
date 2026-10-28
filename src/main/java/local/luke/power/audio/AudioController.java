@@ -35,6 +35,7 @@ public final class AudioController {
       menuMusic = "",
       status = "";
   private static String currentPlaylistId = "";
+  private static class_267 currentEntry;
   private static int cleanup, menuCooldown, libraryRevision, conversionRevision;
   private static boolean trackWasPlaying, currentExplicitMusic;
   private static final MusicProgress progress = new MusicProgress();
@@ -67,6 +68,7 @@ public final class AudioController {
   }
 
   public static boolean musicPlaying() {
+    if (musicMuted()) return false;
     SoundSystem s = system();
     return s != null && (MusicPreview.active() && !MusicPreview.paused() || !MusicPreview.active() && !paused && !silenced && !currentMusic.isBlank() && (s.playing("BgMusic") || s.playing("PowerBetaMenu")
         || !currentMusic.isEmpty() && System.nanoTime() - musicStarted < 1_000_000_000L));
@@ -136,39 +138,66 @@ public final class AudioController {
     SoundSystem system = system();
     if (system == null || client == null) return;
     if (track == null) {
-      system.stop("BgMusic"); system.stop("PowerBetaMenu");
+      MusicStream.stop(system, "BgMusic"); MusicStream.stop(system, "PowerBetaMenu");
       currentMusic = ""; menuMusic = "";
+      currentEntry = null;
       currentExplicitMusic = false;
       currentPlaylistId = "";
-      paused = false; silenced = false;
-      MusicSeeking.cancel(); progress.reset(0, System.nanoTime());
+      paused = musicMuted(); silenced = false;
+      MusicSeeking.cancelPending(); progress.reset(0, System.nanoTime());
       return;
     }
-    MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
+    MusicSeeking.cancelPending(); progress.reset(0,System.nanoTime());
     upcoming = null; nextKey = null;
-    system.stop("PowerBetaMenu");
+    MusicStream.stop(system, "PowerBetaMenu");
     menuMusic = "";
     currentMusic = trackId(track);
+    currentEntry = track;
     if (explicit) alignExplicitTrack(currentMusic);
     currentExplicitMusic = explicit;
     currentPlaylistId = playbackPlaylist(currentMusic, explicit);
-    paused = false;
+    paused = musicMuted();
     silenced = false;
     status = "";
     menuCooldown = 0;
     int dimension = client.player == null ? 0 : client.player.dimensionId;
     MusicStream.start(system, "BgMusic", track.field_2127, track.field_2126,
-        musicVolume(currentMusic), false);
+        musicVolume(currentMusic), paused);
     musicStarted = System.nanoTime(); trackWasPlaying = false;
     nextDelay((SoundManagerAccessor) client.soundManager);
   }
 
   public static void previous() {
-    if (system() != null) MusicPreview.stop(system(), true);
+    SoundSystem system = system();
+    if (system == null) return;
+    if (previousRestartsCurrent()) {
+      restartCurrent(system);
+      return;
+    }
+    MusicPreview.stop(system, true);
     if (history.isEmpty()) { next(); return; }
     boolean waiting = currentMusic.isEmpty() && menuMusic.isEmpty();
     historyIndex = Math.max(0, historyIndex - (waiting ? 0 : 1));
     playHistory(historyIndex);
+  }
+
+  static boolean restartOnPrevious(double seconds) { return seconds > 10; }
+
+  public static boolean previousRestartsCurrent() {
+    return !currentTrackId().isEmpty() && restartOnPrevious(position());
+  }
+
+  private static void restartCurrent(SoundSystem system) {
+    if (MusicPreview.active()) { MusicPreview.restart(system); return; }
+    if (currentEntry == null) { status = "Track unavailable. Reload music folders."; return; }
+    MusicSeeking.cancelPending();
+    progress.reset(0, System.nanoTime());
+    paused = musicMuted();
+    MusicStream.start(system, menuMusic.isEmpty() ? "BgMusic" : "PowerBetaMenu",
+        currentEntry.field_2127, currentEntry.field_2126, musicVolume(currentTrackId()), paused);
+    resuming();
+    nextDelay((SoundManagerAccessor) client.soundManager);
+    // Keep the same history entry, saved-order cursor, queue and reserved successor.
   }
 
   public static void previewSound(String id) {
@@ -205,6 +234,7 @@ public final class AudioController {
       class_267 selected = resolveTrack(id);
       if (selected == null) { status = "Track unavailable. Reload music folders."; return; }
       stopSoundPreview();
+      progress.update(false, System.nanoTime());
       MusicPreview.start(client, system(), selected, !paused && !currentMusic.isEmpty()
           && System.nanoTime() - musicStarted < 1_000_000_000L);
     } catch (RuntimeException | java.io.IOException e) {
@@ -306,10 +336,9 @@ public final class AudioController {
   }
 
   public static String status() {
+    if (musicMuted()) return "Music muted";
     if (MusicPreview.active()) return (MusicPreview.paused() ? "Paused: " : "Previewing: ") + musicLabel(MusicPreview.track());
     if (paused) return currentTrackId().isEmpty() ? "Music paused" : "Paused: " + musicLabel(currentTrackId());
-    if (AudioConfig.current().master == 0 || client != null && client.options.musicVolume == 0)
-      return "Music muted";
     // Source commands are queued on the sound thread. The chosen track owns the
     // label throughout that handoff, even before playing() observes the new source.
     if (!silenced && !currentTrackId().isBlank()) return "Playing: " + musicLabel(currentTrackId());
@@ -554,10 +583,12 @@ public final class AudioController {
     SoundSystem system = system();
     UNDERWATER.context(mc, system);
     if (system == null) return;
+    if (musicMuted()) muteMusic(system);
     progress.update(!paused && !MusicPreview.active() && system.playing("BgMusic"), System.nanoTime());
     MusicSeeking.Prepared seek = MusicSeeking.take();
     if (seek != null) {
-      if (!seek.id().equals(currentTrackId())) seek.codec().cleanup();
+      String source = MusicPreview.active() ? MusicPreview.SOURCE : "BgMusic";
+      if (!seek.id().equals(currentTrackId()) || !seek.source().equals(source)) MusicSeeking.discard(seek);
       else {
         MusicStream.start(system, seek.source(), MusicSeeking.publish(seek), "position.pbseek",
             musicVolume(seek.id()), MusicPreview.active() ? MusicPreview.paused() : paused);
@@ -580,10 +611,11 @@ public final class AudioController {
           .equals(MusicPlaylist.selectionId(settings, !inWorld));
       if (differentPlaylist && !currentExplicitMusic && !currentMusic.isEmpty() && backgroundPool(context(mc)).stream()
           .noneMatch(track -> trackId(track).equals(currentMusic))) {
-        MusicSeeking.cancel(); progress.reset(0, System.nanoTime());
-        system.stop("PowerBetaMenu");
-        system.stop("BgMusic");
+        MusicStream.stop(system, "PowerBetaMenu");
+        MusicStream.stop(system, "BgMusic");
+        progress.reset(0, System.nanoTime());
         currentMusic = "";
+        currentEntry = null;
         currentExplicitMusic = false;
         menuMusic = "";
         trackWasPlaying = false;
@@ -601,11 +633,6 @@ public final class AudioController {
       if (system.playing("PowerBetaMenu")) system.pause("PowerBetaMenu");
       return;
     }
-    if (AudioConfig.current().master == 0) {
-      system.stop("BgMusic");
-      system.stop("PowerBetaMenu");
-      return;
-    }
     automaticMusic(mc, system);
     if (++cleanup >= 100) {
       cleanup = 0;
@@ -619,7 +646,7 @@ public final class AudioController {
       // SoundSystem may finish an older queued Play after Quiet's Stop.
       if (system.playing("BgMusic")) {
         system.setVolume("BgMusic", 0);
-        system.stop("BgMusic");
+        MusicStream.stop(system, "BgMusic");
       }
     } else {
       if (system.playing("BgMusic") || system.playing("PowerBetaMenu")) {
@@ -631,6 +658,7 @@ public final class AudioController {
           || !trackWasPlaying && elapsed < 5_000_000_000L)) return;
     }
     currentMusic = "";
+    currentEntry = null;
     currentExplicitMusic = false;
     menuMusic = "";
     if (system.playing("streaming") || mc.options.musicVolume <= 0) return;
@@ -654,12 +682,13 @@ public final class AudioController {
     SoundSystem s = system();
     if (s == null || client == null) return;
     MusicPreview.stop(s, false);
-    MusicSeeking.cancel();
+    MusicSeeking.cancelPending();
     s.setVolume("BgMusic", 0); s.setVolume("PowerBetaMenu", 0);
-    s.stop("BgMusic"); s.stop("PowerBetaMenu");
+    MusicStream.stop(s, "BgMusic"); MusicStream.stop(s, "PowerBetaMenu");
     currentMusic = ""; menuMusic = "";
+    currentEntry = null;
     currentExplicitMusic = false;
-    trackWasPlaying = false; paused = false; silenced = true;
+    trackWasPlaying = false; paused = musicMuted(); silenced = true;
     status = ""; menuCooldown = 0;
     nextDelay((SoundManagerAccessor) client.soundManager);
   }
@@ -669,6 +698,7 @@ public final class AudioController {
     class_267 requested = queued();
     if (requested != null) {
       remember(requested, true); currentMusic = trackId(requested); currentExplicitMusic = true;
+      currentEntry = requested;
       alignExplicitTrack(currentMusic);
       currentPlaylistId = playbackPlaylist(currentMusic, true);
       musicStarted = System.nanoTime(); trackWasPlaying = false; return requested;
@@ -680,6 +710,7 @@ public final class AudioController {
     if (chosen != null) {
       remember(chosen, false);
       currentMusic = trackId(chosen);
+      currentEntry = chosen;
       currentExplicitMusic = false;
       currentPlaylistId = playbackPlaylist(currentMusic, false);
       musicStarted = System.nanoTime(); trackWasPlaying = false;
@@ -756,6 +787,26 @@ public final class AudioController {
     return original * s.master / 100f * trackVolume(currentMusic) / 100f * MusicGroups.gain(s.libraryGroupVolumes, musicGroup(currentMusic));
   }
 
+  static boolean musicMuted() {
+    return AudioConfig.current().master == 0 || client != null && client.options.musicVolume <= 0;
+  }
+
+  static boolean backgroundPaused() { return paused; }
+
+  /** Native Music=0 and live Master previews must retain the existing stream. */
+  public static void muteMusic(SoundSystem system) {
+    boolean newlyPaused = !paused;
+    paused = true;
+    progress.update(false, System.nanoTime());
+    for (String source : List.of("BgMusic", "PowerBetaMenu")) {
+      if (newlyPaused || system.playing(source)) {
+        system.setVolume(source, 0);
+        system.pause(source);
+      }
+    }
+    if (MusicPreview.active() && !MusicPreview.paused()) MusicPreview.pause(system);
+  }
+
   private static SoundSystem system() {
     return SoundManagerAccessor.power$started() ? SoundManagerAccessor.power$system() : null;
   }
@@ -783,6 +834,7 @@ public final class AudioController {
     UNDERWATER.refresh();
     SoundSystem s = system();
     if (s == null) return;
+    if (musicMuted()) muteMusic(s);
     float effects = client == null ? 1 : client.options.soundVolume;
     for (var e : SOURCES.entrySet()) {
       Source source = e.getValue();
@@ -816,6 +868,7 @@ public final class AudioController {
   public static void pause() {
     if (MusicPreview.active() && system() != null) { MusicPreview.pause(system()); return; }
     paused = true;
+    progress.update(false, System.nanoTime());
     SoundSystem s = system();
     if (s != null) {
       MusicPreview.pause(s);
@@ -827,6 +880,7 @@ public final class AudioController {
   public static void togglePause() {
     SoundSystem s = system();
     if (s == null) return;
+    if (musicMuted()) { muteMusic(s); return; }
     if (MusicPreview.active()) {
       if (MusicPreview.paused()) MusicPreview.resume(s); else MusicPreview.pause(s);
       return;
@@ -846,7 +900,7 @@ public final class AudioController {
       MusicPreview.stop(system(), true);
       return;
     }
-    paused = false;
+    paused = musicMuted();
     if (!MusicRequests.tracks().isEmpty()) { playQueue(); return; }
     if (historyIndex + 1 < history.size()) { playHistory(++historyIndex); return; }
     class_267 track = choose();

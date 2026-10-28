@@ -14,8 +14,10 @@ final class WaypointSetDropdown {
   static void button(UiScreen screen, String label, int x, int y, int width, int height,
       int mx, int my, boolean enabled, boolean open) {
     screen.button("", x, y, width, height, mx, my, enabled);
-    centeredLabel(screen, label, x, y + (height - 8) / 2, width, 19, enabled ? 0xe0e0e0 : 0xa0a0a0);
-    screen.chevron(x + width - 11, y + (height - 4) / 2, open, 0xffdddddd);
+    boolean highlighted = enabled && (open || screen.inside(mx, my, x, y, width, height));
+    int color = !enabled ? 0xa0a0a0 : highlighted ? PopupStyle.HOVER_TEXT : 0xe0e0e0;
+    centeredLabel(screen, label, x, y + (height - 8) / 2, width, 19, color);
+    screen.chevron(x + width - 11, y + (height - 4) / 2, open, 0xff000000 | color);
   }
 
   static void render(UiScreen screen, List<String> labels, int selected, int focus, int scroll,

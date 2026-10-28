@@ -4,7 +4,7 @@ package local.luke.power.ui;
 public final class PopupStyle {
   public static final int BACKGROUND = 0xf0202020, BORDER = 0xff777777, SEPARATOR = 0xff555555,
       HOVER = 0xff444444, SELECTED = 0xff3c3c3c, ACTIVE = 0xff268bff,
-      TEXT = 0xcccccc, BRIGHT_TEXT = 0xffffff, DISABLED_TEXT = 0x777777, PADDING = 9;
+      TEXT = 0xcccccc, BRIGHT_TEXT = 0xffffff, HOVER_TEXT = 0xffffa0, DISABLED_TEXT = 0x777777, PADDING = 9;
 
   private PopupStyle() {}
 
@@ -28,6 +28,6 @@ public final class PopupStyle {
     String fitted = screen.fit(label, available);
     if (screen.textWidth(fitted) <= available)
       screen.text(fitted, x + PADDING, top + (height - 8) / 2,
-          !enabled ? DISABLED_TEXT : hover || selected || focused ? BRIGHT_TEXT : TEXT);
+          !enabled ? DISABLED_TEXT : hover || focused ? HOVER_TEXT : selected ? BRIGHT_TEXT : TEXT);
   }
 }

@@ -202,6 +202,7 @@ public final class InventoryToolsOverlay extends UiScreen {
       }
       button("Back", box.x() + 8, box.y() + InventoryToolsLayout.MODAL_BACK_TOP, box.width() - 16, 18, x, y, true);
       if (!hoverError.isEmpty()) foregroundTooltip(hoverError, x, y);
+      backTooltip("inventory", box.x() + 8, box.y() + InventoryToolsLayout.MODAL_BACK_TOP, box.width() - 16, 18, x, y);
     } finally { GL11.glPopMatrix(); GL11.glPopAttrib(); }
   }
   public void renderHeader() {

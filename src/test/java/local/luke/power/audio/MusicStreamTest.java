@@ -52,4 +52,40 @@ class MusicStreamTest {
     system.play("PowerBetaMusicPreview");
     assertEquals(1, system.commands.stream().filter(c -> c.Command == PLAY).count());
   }
+
+  @Test void idleMusicNeverGetsTheNativePausedFlagThatWouldSkipItsFirstPreload() {
+    SoundSystemConfig.setLogger(new SoundSystemLogger());
+    for (String name : List.of("BgMusic", "PowerBetaMenu", "PowerBetaMusicPreview")) {
+      Source source = nativeSource(name, true);
+      assertTrue(source.stopped()); assertFalse(source.paused());
+      assertFalse(MusicStream.canPause(source));
+      if (MusicStream.canPause(source)) source.pause();
+      assertTrue(source.stopped()); assertFalse(source.paused());
+      Channel channel = new Channel(SoundSystemConfig.TYPE_STREAMING);
+      // Native command order: a queued Play before Pause has already attached its channel.
+      source.play(channel);
+      assertTrue(MusicStream.canPause(source)); source.pause();
+      assertSame(channel, source.channel);
+      assertFalse(source.stopped()); assertTrue(source.paused());
+      assertTrue(MusicStream.canPause(source), "an initialized paused stream keeps native resume behavior");
+      source.play(channel);
+      assertFalse(source.stopped()); assertFalse(source.paused());
+    }
+  }
+
+  @Test void stoppedJukeboxesOtherModsAndNonStreamingSourcesKeepNativePauseBehavior() {
+    SoundSystemConfig.setLogger(new SoundSystemLogger());
+    for (Source source : List.of(nativeSource("streaming", true), nativeSource("another-mod", true), nativeSource("BgMusic", false))) {
+      Channel channel = new Channel(SoundSystemConfig.TYPE_STREAMING);
+      source.play(channel); source.stop();
+      assertTrue(source.stopped()); assertFalse(source.paused());
+      assertTrue(MusicStream.canPause(source)); source.pause();
+      assertTrue(source.paused()); assertTrue(source.stopped()); assertSame(channel, source.channel);
+    }
+  }
+
+  private static Source nativeSource(String name, boolean streamed) {
+    return new Source(true, streamed, false, name, new FilenameURL("fixture.ogg"), null,
+        0, 0, 0, SoundSystemConfig.ATTENUATION_NONE, 0, false);
+  }
 }

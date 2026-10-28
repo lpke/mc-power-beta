@@ -106,6 +106,7 @@ public final class WorldOperationScreen extends UiScreen {
     if (!error.isEmpty()) lines(error, action == WorldSnapshots.Action.BACKUP ? 141 : 94, 0xff8888);
     button(running() ? task.cancelling() ? "Canceling..." : "Cancel" : "Back", backLeft(), height - 30, footerSpan(), 20, mx, my, task == null || !task.cancelling());
     inline.endFrame(); inline.renderError(this);
+    if (!running()) backTooltip("Edit world", backLeft(), height - 30, footerSpan(), 20, mx, my);
     if (task == null && action == WorldSnapshots.Action.BACKUP) {
       if (inside(mx, my, left(), 70, span(), 18)) foregroundTooltip("Map tiles and saved waypoints for this world.", mx, my);
       else if (inside(mx, my, left(), 92, span(), 18)) foregroundTooltip("A snapshot of config/power-beta.json, including global preferences and creation presets. Restoring the world does not apply these settings automatically.", mx, my);

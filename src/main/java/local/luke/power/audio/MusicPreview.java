@@ -9,6 +9,7 @@ import paulscode.sound.SoundSystem;
 final class MusicPreview {
   static final String SOURCE = "PowerBetaMusicPreview";
   private static String track = "";
+  private static class_267 entry;
   private static Object world;
   private static long started;
   private static boolean playing, paused, restoreBackground, restoreRecords;
@@ -35,11 +36,22 @@ final class MusicPreview {
   static boolean paused() { return paused; }
   static void resume(SoundSystem system) {
     if (!active()) return;
+    if (AudioController.musicMuted()) { AudioController.muteMusic(system); return; }
     paused = false; playing = false; started = System.nanoTime();
     system.setVolume(SOURCE, AudioController.musicVolume(track)); system.play(SOURCE);
   }
 
+  static void restart(SoundSystem system) {
+    if (!active() || entry == null) return;
+    MusicSeeking.cancelPending();
+    progress.reset(0, System.nanoTime());
+    playing = false; paused = AudioController.musicMuted(); started = System.nanoTime();
+    MusicStream.start(system, SOURCE, entry.field_2127, entry.field_2126,
+        AudioController.musicVolume(track), paused);
+  }
+
   static void start(Minecraft mc, SoundSystem system, class_267 selected, boolean backgroundStarting) {
+    if (AudioController.musicMuted()) AudioController.muteMusic(system);
     String id = AudioController.trackId(selected);
     if (track.equals(id)) { if (paused) resume(system); else pause(system); return; }
     if (!active()) {
@@ -53,10 +65,10 @@ final class MusicPreview {
         system.pause(name);
       }
     }
-    MusicSeeking.cancel(); progress.reset(0,System.nanoTime());
-    track = id; world = mc.world; playing = false; paused = false; started = System.nanoTime();
+    MusicSeeking.cancelPending(); progress.reset(0,System.nanoTime());
+    track = id; entry = selected; world = mc.world; playing = false; paused = AudioController.musicMuted(); started = System.nanoTime();
     MusicStream.start(system, SOURCE, selected.field_2127, selected.field_2126,
-        AudioController.musicVolume(track), false);
+        AudioController.musicVolume(track), paused);
   }
 
   static void tick(Minecraft mc, SoundSystem system) {
@@ -85,6 +97,7 @@ final class MusicPreview {
 
   static boolean pause(SoundSystem system) {
     if (!active()) return false;
+    progress.update(false, System.nanoTime());
     paused = true; system.setVolume(SOURCE, 0); system.pause(SOURCE);
     return true;
   }
@@ -92,13 +105,13 @@ final class MusicPreview {
   private static boolean stop(SoundSystem system, boolean restoreMusic, boolean restoreJukeboxes) {
     if (!active()) return false;
     boolean hadMusic = resume.contains("BgMusic") || resume.contains("PowerBetaMenu");
-    MusicSeeking.cancel();
-    system.stop(SOURCE); system.removeSource(SOURCE);
-    track = ""; world = null; paused = false;
-    if (restoreMusic && hadMusic) AudioController.resuming();
+    MusicStream.stop(system, SOURCE);
+    track = ""; entry = null; world = null; paused = false;
+    boolean resumeMusic = restoreMusic && !AudioController.backgroundPaused() && !AudioController.musicMuted();
+    if (resumeMusic && hadMusic) AudioController.resuming();
     AudioController.refresh();
     for (String name : resume)
-      if (name.equals("streaming") ? restoreJukeboxes && restoreRecords : restoreMusic)
+      if (name.equals("streaming") ? restoreJukeboxes && restoreRecords : resumeMusic && restoreBackground)
         system.play(name);
     resume.clear();
     return hadMusic;

@@ -29,6 +29,15 @@ public class SoundMixin {
   }
 
   @WrapOperation(
+      method = "method_2008",
+      at = @At(value = "INVOKE",
+          target = "Lpaulscode/sound/SoundSystem;stop(Ljava/lang/String;)V", remap = false))
+  private void power$pauseMutedMusic(SoundSystem system, String channel, Operation<Void> original) {
+    if (channel.equals("BgMusic")) AudioController.muteMusic(system);
+    else original.call(system, channel);
+  }
+
+  @WrapOperation(
       method = "method_2015",
       at =
           @At(

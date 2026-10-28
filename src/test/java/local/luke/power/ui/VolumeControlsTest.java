@@ -16,7 +16,7 @@ class VolumeControlsTest {
       assertEquals(song.volumeX(), queue.volumeX());
       assertEquals(song.volumeWidth(), queue.volumeWidth());
       assertTrue(song.volumeWidth() >= 54 && song.volumeWidth() <= 134);
-      assertTrue(VolumeControls.musicGroupWidth(span) >= song.volumeWidth());
+      assertEquals(16, VolumeControls.musicGroupWidth(span) - song.volumeWidth());
       assertTrue(song.nameWidth() >= 12);
       assertEquals(12 + span, song.playX() + song.buttonWidth());
     }

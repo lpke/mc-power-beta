@@ -76,6 +76,7 @@ abstract class DraftEditorScreen extends UiScreen {
   protected String doneLabel() { return "Done"; }
   protected boolean doneEnabled() { return draft.changed(); }
   protected String cancelLabel() { return "Cancel"; }
+  protected String backDestination() { return ""; }
   protected String resetLabel() { return "Reset..."; }
   protected String resetQuestion() { return "Reset to defaults?"; }
   protected String extraFooterLabel() { return ""; }
@@ -379,6 +380,8 @@ abstract class DraftEditorScreen extends UiScreen {
     if (hover.ready(!choices.active() && slider == null && !modal() && Display.isActive() ? hoverId : "") && !tip.isBlank()) tooltip(tip, mx, my);
     inline.renderError(this);
     choices.render(this, pointerX, pointerY);
+    if (!modal() && !backDestination().isEmpty()) for (Footer f : footer())
+      if (f.label.equals("Back")) backTooltip(backDestination(), f.x, height - 29, f.width, 20, mx, my);
     if (resetPrompt) {
       GL11.glPushAttrib(GL11.GL_ENABLE_BIT | GL11.GL_CURRENT_BIT | GL11.GL_DEPTH_BUFFER_BIT);
       try {

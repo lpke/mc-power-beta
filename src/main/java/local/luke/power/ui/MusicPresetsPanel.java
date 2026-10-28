@@ -10,7 +10,10 @@ import org.lwjgl.input.Mouse;
 /** Saved playlists and their isolated membership and order drafts. */
 final class MusicPresetsPanel extends UiScreen {
   private final PowerOptionsScreen parent;
+  private final MusicLibraryScreen library;
   private final MusicEdits edits;
+  private final net.minecraft.client.render.item.ItemRenderer icons = new net.minecraft.client.render.item.ItemRenderer();
+  private final net.minecraft.item.ItemStack grass = new net.minecraft.item.ItemStack(net.minecraft.block.Block.GRASS.id, 1, 0);
   private final ScrollBar scrollbar = new ScrollBar();
   private final TextInput name = new TextInput("", 80);
   private final TextInput rename = new TextInput("", 80);
@@ -31,12 +34,17 @@ final class MusicPresetsPanel extends UiScreen {
   private final Map<MusicPlaylist, Integer> playlistCounts = new IdentityHashMap<>();
   private Map<String, Integer> includedCounts = Map.of();
 
-  MusicPresetsPanel(PowerOptionsScreen parent) {
+  MusicPresetsPanel(PowerOptionsScreen parent, MusicLibraryScreen library) {
     this.parent = parent;
+    this.library = library;
     edits = new MusicEdits(parent);
   }
 
   MusicPresetDraft draft() { return draft; }
+  String displayedName() {
+    String value = name.text().strip();
+    return value.isEmpty() ? draft.name() : value;
+  }
   boolean adding() { return editing() && adding; }
   boolean grouped() { return editing() && grouped; }
   boolean favorites() { return editing() && draft.favorites(); }
@@ -77,6 +85,10 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   void resetScroll() { scroll = 0; scrollbar.release(); }
+  int catalogScroll() { return scroll; }
+  void catalogScroll(int value) { scroll = Math.max(0, value); scrollbar.release(); }
+  void grouped(boolean value) { grouped = editing() && value; }
+  void adding(boolean value) { adding = editable() && value; }
 
   List<MusicPlaylist> filteredPresets() {
     List<MusicPlaylist> source = edits.presets();
@@ -186,8 +198,9 @@ final class MusicPresetsPanel extends UiScreen {
   private String addLabel() { return adding() ? height < 300 ? "Back" : "Back to playlist" : "Add songs"; }
   private String viewLabel() { return adding() ? "From playlist" : "View: " + (grouped() ? "Grouped" : "List"); }
   private MusicEditorHeader header() {
-    return MusicEditorHeader.at(left(), top(), span(), editable() ? textWidth(addLabel()) + 16 : 0,
-        textWidth(viewLabel()) + 16, height < 300 ? 32 : editable() ? 100 : 40);
+    int minimumName = favorites() || readOnly() ? textWidth(draft.name()) + 28 : height < 300 ? 32 : 100;
+    return MusicEditorHeader.withBack(left(), top(), span(), editable() ? textWidth(addLabel()) + 16 : 0,
+        textWidth(viewLabel()) + 16, minimumName);
   }
   int headerHeight() { return editing() ? header().height() : 0; }
   private int nameX() { return header().nameX(); }
@@ -235,7 +248,9 @@ final class MusicPresetsPanel extends UiScreen {
       } else {
         var values = filteredPresets();
         int index = (y - rowTop() + scroll) / rowHeight();
-        if (index >= 0 && index < values.size() && values.get(index) == pressed) { click(); edit(pressed); }
+        if (index >= 0 && index < values.size() && values.get(index) == pressed) {
+          click(); library.rememberView(); edit(pressed);
+        }
       }
     } catch (IllegalArgumentException failure) { error = failure.getMessage(); }
     finally { cancelPointer(); }
@@ -263,6 +278,9 @@ final class MusicPresetsPanel extends UiScreen {
     if (renaming != null) { renameClick(x, y, b); return true; }
     if (modal()) { dialogClick(x, y, b); return true; }
     if (!editing()) return listClick(x, y, b);
+    if (b == 0 && inside(x, y, header().backX(), top(), header().backWidth(), 18)) {
+      click(); library.back(parent::closeAudioPanel); return true;
+    }
     name.focused = editable() && !favorites() && inside(x, y, nameX(), top(), nameWidth(), 18);
     if (name.focused) name.click(x, b);
     if (b == 0 && editable() && inside(x, y, addX(), actionY(), addWidth(), 18)) {
@@ -425,8 +443,11 @@ final class MusicPresetsPanel extends UiScreen {
   void renderHeader(int mx, int my) {
     if (!org.lwjgl.opengl.Display.isActive()) cancelPointer();
     if (editing()) {
+      button("Back", header().backX(), top(), header().backWidth(), 18, mx, my, true);
       if (favorites() || readOnly()) {
-        text(fit(draft.name(), nameWidth() - 8), nameX() + 4, top() + 5, 0xffffff);
+        if (favorites()) icon("star", nameX() + 2, top(), 16, 18, true, true);
+        else GuiItems.draw(icons, minecraft, grass, nameX() + 2, top() + 1, false);
+        text(fit(draft.name(), nameWidth() - 28), nameX() + 24, top() + 5, 0xffffff);
         fill(nameX() - 1, top() + 18, nameX() + nameWidth() + 1, top() + 19, 0xff555555);
       } else input(name, nameX(), top(), nameWidth(), mx, my, "Playlist name");
       if (editable()) button(fit(addLabel(), addWidth() - 8), addX(), actionY(), addWidth(), 18, mx, my, true,
@@ -480,6 +501,12 @@ final class MusicPresetsPanel extends UiScreen {
       unclip();
       scrollbar.render(this, track());
     }
+  }
+
+  void renderBackTooltip(int mx, int my) {
+    if (!editing() || modal()) return;
+    backTooltip(library.backDestination(), header().backX(), top(), header().backWidth(), 18, mx, my);
+    if (adding()) backTooltip(displayedName(), addX(), actionY(), addWidth(), 18, mx, my);
   }
 
   void renderDragGhost(int x, int y) {

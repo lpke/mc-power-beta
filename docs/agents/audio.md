@@ -23,6 +23,25 @@
   Keep missing track IDs, queues and user music files intact.
   Previous during a between-track gap replays the last played track without
   moving back in history or consuming queued tracks. Paused tracks remain current.
+  Previous restarts the visible song after more than ten seconds, including an
+  audition, while keeping its background snapshot, history, queue and ordered
+  playlist cursor. At ten seconds or earlier, keep the existing previous-song
+  behavior, ending an audition before navigating background history.
+  Master or native Music at zero pauses background music and auditions without
+  stopping or replacing their sources. Muted status takes precedence over playback
+  labels. Unmuting, including Options preview rollback, leaves both paused until
+  manual resume. Seek completion and preview restoration must honor that pause.
+  Native Music's zero-volume callback must pause rather than stop the stream.
+  Accepted paused seeks retain their published decoder handoff until that source
+  first plays. Cancelling a pending seek, starting an audition or seeking another
+  source must not clear that handoff. Source replacement retires only its own
+  obsolete handoffs and preserves its incoming token. Claim and disposal transfer
+  cleanup ownership under one lock; unclaimed decoder cleanup runs on the seek
+  worker, while claimed streams use the native stream cleanup lock.
+  Pause commands for owned music streams skip stopped native sources on the sound
+  command thread. Marking an unstarted seek source paused makes Beta skip its first
+  preload. Preserve command ordering so a queued Play followed by Pause still pauses
+  the initialized stream; leave jukeboxes and other sources unchanged.
   Keep the advertised next track reserved through settings previews while it remains
   eligible; volume, gap and menu-control edits must not consume the selector.
   Explicit playback of a saved playlist member aligns its cursor to the song's

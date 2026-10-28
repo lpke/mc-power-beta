@@ -32,22 +32,53 @@ public final class MusicSeeking {
   public record Prepared(
       String id, String source, double seconds, ICodec codec, SoundBuffer first) {}
 
-  public static synchronized void cancel() {
+  /** Retire the visible seek request without touching streams already handed to SoundSystem. */
+  public static synchronized void cancelPending() {
     GENERATION.incrementAndGet();
     if (pending != null)
-      pending.thenAccept(
+      pending.thenAcceptAsync(
           p -> {
             if (p != null) p.codec.cleanup();
-          });
+          }, WORKER);
     pending = null;
     target = null;
-    READY.values().forEach(p -> p.codec.cleanup());
+  }
+
+  /** Full teardown. Ordinary preview and transport actions release only their own source. */
+  public static synchronized void cancel() {
+    cancelPending();
+    READY.values().forEach(MusicSeeking::discard);
     READY.clear();
   }
 
+  public static synchronized void discardSource(String source) {
+    if (target != null && target.source.equals(source)) cancelPending();
+    releaseReady(source, null);
+  }
+
+  /** A prepared URL is published before start queues replacement of its old native source. */
+  static synchronized void replacing(String source, URL incoming) {
+    releaseReady(source, incoming);
+  }
+
+  private static void releaseReady(String source, URL keep) {
+    var entries = READY.entrySet().iterator();
+    while (entries.hasNext()) {
+      var entry = entries.next();
+      if (entry.getValue().source.equals(source)
+          && (keep == null || !keep.getPath().equals("/" + entry.getKey()))) {
+        Prepared prepared = entry.getValue();
+        entries.remove();
+        discard(prepared);
+      }
+    }
+  }
+
+  static void discard(Prepared prepared) { WORKER.execute(prepared.codec::cleanup); }
+
   public static synchronized void request(
       String id, String source, URL url, String filename, double seconds) {
-    cancel();
+    cancelPending();
     if (!registered) {
       SoundSystemConfig.setCodec("pbseek", SeekCodec.class);
       registered = true;
@@ -123,13 +154,14 @@ public final class MusicSeeking {
   }
 
   public static synchronized URL publish(Prepared prepared) {
+    releaseReady(prepared.source, null);
     String token = UUID.randomUUID().toString();
     READY.put(token, prepared);
     try {
       return new URL("file", "", "/" + token);
     } catch (MalformedURLException e) {
       READY.remove(token);
-      prepared.codec.cleanup();
+      discard(prepared);
       throw new IllegalArgumentException(e);
     }
   }

@@ -31,6 +31,8 @@ public final class DataProblemScreen extends UiScreen {
     for (String line : lines) { text(line, left(), y, 0xdddddd); y += 12; }
     unclip(); bar.render(this, track());
     button(configuration ? "Close game" : "Back", width / 2 - 60, height - 30, 120, 20, mx, my, true);
+    if (!configuration) backTooltip(minecraft.world == null ? "Title screen" : "game",
+        width / 2 - 60, height - 30, 120, 20, mx, my);
   }
   public void onMouseEvent() {
     super.onMouseEvent();

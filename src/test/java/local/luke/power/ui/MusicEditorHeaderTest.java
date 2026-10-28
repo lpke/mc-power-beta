@@ -4,6 +4,27 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 class MusicEditorHeaderTest {
+  @Test void localBackStaysBeforeTheNameWithoutTakingTheCompactActionRow() {
+    for (int width = 180; width <= 1600; width++) {
+      var h = MusicEditorHeader.withBack(31, 90, width, 74, 101, 32);
+      assertEquals(31, h.backX());
+      assertEquals(44, h.backWidth());
+      assertEquals(h.backX() + h.backWidth() + 4, h.nameX());
+      assertTrue(h.nameWidth() >= 32);
+      assertTrue(h.nameX() + h.nameWidth() <= 31 + width);
+      assertTrue(h.viewX() + h.viewWidth() <= 31 + width);
+      if (!h.inline()) {
+        assertEquals(31, h.addX());
+        assertEquals(112, h.actionsY());
+        assertEquals(44, h.height());
+      }
+    }
+    var compact = MusicEditorHeader.withBack(106, 121, 200, 67, 84, 32);
+    assertFalse(compact.inline());
+    assertEquals(152, compact.nameWidth());
+    assertEquals(143, compact.actionsY());
+  }
+
   @Test void headerUsesOneRowWhenTheNameAndMeasuredControlsFit() {
     for (int width = 180; width <= 1600; width++) {
       var h = MusicEditorHeader.at(31, 90, width, 74, 101);

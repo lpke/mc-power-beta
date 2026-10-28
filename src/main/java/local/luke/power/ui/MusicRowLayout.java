@@ -7,6 +7,8 @@ public record MusicRowLayout(int nameX, int nameWidth, int controlsY, int volume
   public static int hoverRight(int right) { return right + 4; }
   public static int hoverWidth(int left, int right) { return hoverRight(right) - hoverLeft(left); }
   public static int sliderWidth(int width) { return VolumeControls.musicWidth(width); }
+  public int groupVolumeWidth() { return volumeWidth + VolumeControls.CHILD_INSET; }
+  public int groupVolumeX() { return volumeX - VolumeControls.CHILD_INSET; }
   public static MusicRowLayout playlist(int left, int width) { return at(left, width, false); }
   public static MusicRowLayout at(int left, int width, boolean queue) {
     int button = width < 260 ? 18 : 20, play = left + width - button;

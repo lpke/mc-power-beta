@@ -17,6 +17,25 @@
 
 # Runtime checks
 
+- `release-465-ui capture|check` captures Music local/top Back controls, protected
+  title icons, group sliders, Back destination tooltips and yellow dropdown states
+  at 854x480 and 320x240 before checking navigation, dirty drafts and exact bounds.
+  Use focused, muted, idle singleplayer with silent routing and a window at least
+  1708x960. Actual screenshots and observations are listed under
+  `power-beta-data/reports/release-465/ui`; reference images remain in `probes`.
+- `release-465-audio` uses staged real OpenAL checks on the same silent output.
+  Run `start`, `mute-native`, `unmute-native`, `resume-native`, `preview-start`,
+  `mute-master`, `unmute-master`, `resume-preview`, `end-preview`,
+  `resume-background`, `seek-start`, `resume-seek`, `check-seek`, allowing one or
+  two seconds of native ticks between commands. For each `previous MODE`, use
+  `background-ten`, `background-over`, `preview-ten`, `preview-over` or `gap`;
+  preview modes additionally need `previous-preview` before `previous-press` and
+  `previous-result`. After `preview-over`, run `previous-restore` and
+  `previous-restored` to check the retained seek stream. End with `stop`, then
+  `finish` after source removal. The fixture temporarily unmutes its own native
+  sources, verifies the silent sink and restores settings and runtime state.
+  It writes `power-beta-data/reports/release-465/audio.json`.
+
 - `release-464-audio`, `release-464-map-logo`, `release-464-music-ui` and
   `release-464-shared-ui` accept `capture|check` in a muted disposable singleplayer
   client. Capture changed views before acceptance checks, using a focused window

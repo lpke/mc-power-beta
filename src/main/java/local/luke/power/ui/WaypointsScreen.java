@@ -212,9 +212,9 @@ public final class WaypointsScreen extends UiScreen {
     if (store == null || !store.ready()) return;
     if (button == 0 && inside(x, y, layout().newX(), height - 26, layout().footerWidth(), 20)) { click(); minecraft.setScreen(new WaypointEditorScreen(this, MapKeys.newWaypoint())); return; }
     if (inside(x, y, layout().sortX(), 27, layout().sortWidth(), 18)) {
-      click(); choices.open(List.of("Name", "Distance", "Newest"),
+      click(); choices.open("sort", List.of("Name", "Distance", "Newest"),
           List.of("Sort alphabetically by waypoint name.", "Put the nearest waypoints first.", "Put recently created waypoints first."),
-          sort, -1, layout().sortX(), 27, layout().sortWidth(), width, height, i -> sort = i); return;
+          sort, -1, layout().sortX(), 27, layout().sortWidth(), 18, width, height, i -> sort = i); return;
     }
     if (inside(x, y, layout().filterX(), 27, layout().filterWidth(), 18)) { click(); store.allSets(!store.allSets()); scroll = 0; return; }
     if (inside(x, y, layout().createX(), 49, layout().createWidth(), 18) && button == 0) { click(); beginNewSet(); return; }
@@ -224,8 +224,8 @@ public final class WaypointsScreen extends UiScreen {
     }
     if (inside(x, y, left(), 49, layout().setWidth(), 18)) {
       click(); var sets = store.sets(); search.focused = false; TextDrag.cancel(); bar.release();
-      choices.open(sets, List.of(), sets.indexOf(store.selectedSet()), -1,
-          left(), 49, layout().setWidth(), width, height, i -> selectSet(sets.get(i))); return;
+      choices.open("set", sets, List.of(), sets.indexOf(store.selectedSet()), -1,
+          left(), 49, layout().setWidth(), 18, width, height, i -> selectSet(sets.get(i))); return;
     }
     if (button == 0 && bar.press(track(), x, y)) { scroll = (int)bar.drag(track(), y, true); return; }
     if (inside(x, y, left(), 72, layout().rowWidth(), rowBottom() - 72)) {
@@ -258,9 +258,9 @@ public final class WaypointsScreen extends UiScreen {
     var store = Maps.waypoints(); boolean ready = store != null && store.ready();
     int hoverX = modal() ? -1000 : mx, hoverY = modal() ? -1000 : my;
     input(search, left(), 27, layout().searchWidth(), hoverX, hoverY, "Search waypoints");
-    WaypointSetDropdown.button(this, "Sort: " + new String[]{"Name", "Distance", "Newest"}[sort], layout().sortX(), 27, layout().sortWidth(), hoverX, hoverY, ready, choices.active());
+    WaypointSetDropdown.button(this, "Sort: " + new String[]{"Name", "Distance", "Newest"}[sort], layout().sortX(), 27, layout().sortWidth(), hoverX, hoverY, ready, choices.editing("sort"));
     button(ready && store.allSets() ? "All sets" : "This set", layout().filterX(), 27, layout().filterWidth(), 18, hoverX, hoverY, ready);
-    WaypointSetDropdown.button(this, "Set: " + (store == null ? "Default" : store.selectedSet()), left(), 49, layout().setWidth(), hoverX, hoverY, ready, choices.active());
+    WaypointSetDropdown.button(this, "Set: " + (store == null ? "Default" : store.selectedSet()), left(), 49, layout().setWidth(), hoverX, hoverY, ready, choices.editing("set"));
     button("Delete set", layout().deleteX(), 49, layout().deleteWidth(), 18, hoverX, hoverY, ready && !store.selectedSet().equalsIgnoreCase("Default"));
     button("New set", layout().createX(), 49, layout().createWidth(), 18, hoverX, hoverY, ready);
     List<Waypoint> rows = rows(); scroll = (int)Math.max(0, Math.min(track().maximum(), bar.drag(track(), my, Mouse.isButtonDown(0))));

@@ -11,26 +11,28 @@ public final class RuleDefaultsScreen extends UiScreen {
   private final Screen parent;
   private final RuleDefaults.Review review;
   private final Runnable accepted, cancelled;
+  private final String backDestination;
   private final ScrollBar bar = new ScrollBar();
   private boolean expanded;
   private double scroll;
   private String error = "";
-  private RuleDefaultsScreen(Screen parent, RuleDefaults.Review review, Runnable accepted, Runnable cancelled) {
+  private RuleDefaultsScreen(Screen parent, RuleDefaults.Review review, Runnable accepted, Runnable cancelled, String backDestination) {
     this.parent = parent; this.review = review; this.accepted = accepted; this.cancelled = cancelled;
+    this.backDestination = backDestination;
   }
-  public static boolean openIfNeeded(Minecraft mc, Screen parent, Runnable accepted, Runnable cancelled) {
+  public static boolean openIfNeeded(Minecraft mc, Screen parent, Runnable accepted, Runnable cancelled, String backDestination) {
     var review = RuleDefaults.review();
     if (!review.required()) {
       if (review.needsAcknowledgement()) {
         try { review.commit(false); }
         catch (Exception failure) {
-          var screen = new RuleDefaultsScreen(parent, review, accepted, cancelled);
+          var screen = new RuleDefaultsScreen(parent, review, accepted, cancelled, backDestination);
           screen.error = failure.getMessage(); mc.setScreen(screen); return true;
         }
       }
       return false;
     }
-    mc.setScreen(new RuleDefaultsScreen(parent, review, accepted, cancelled)); return true;
+    mc.setScreen(new RuleDefaultsScreen(parent, review, accepted, cancelled, backDestination)); return true;
   }
   private int left() { return (width - span()) / 2; }
   private int span() { return Math.min(680, width - 24); }
@@ -92,5 +94,6 @@ public final class RuleDefaultsScreen extends UiScreen {
     button("Reset", start, height - 28, w, 20, x, y, true);
     if (review.compatible()) button("Keep current", start + w + 4, height - 28, w, 20, x, y, true);
     button("Back", start + 2 * (w + 4), height - 28, w, 20, x, y, true);
+    backTooltip(backDestination, start + 2 * (w + 4), height - 28, w, 20, x, y);
   }
 }

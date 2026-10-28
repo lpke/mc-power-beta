@@ -107,8 +107,8 @@ public final class WaypointEditorScreen extends UiScreen {
   private void beginSet() {
     fields.forEach(field -> field.focused = false); TextDrag.cancel();
     var sets = sets(); var labels = new ArrayList<>(sets); labels.add("New set...");
-    choices.open(labels, List.of(), sets.indexOf(fields.get(1).text()), -1,
-        fieldLeft(1), row(1), fieldWidth(1), width, height, index -> chooseSet(sets, index));
+    choices.open("set", labels, List.of(), sets.indexOf(fields.get(1).text()), -1,
+        fieldLeft(1), row(1), fieldWidth(1), 18, width, height, index -> chooseSet(sets, index));
   }
   protected void keyPressed(char c, int key) {
     if (choices.key(this, key)) return;
@@ -154,8 +154,8 @@ public final class WaypointEditorScreen extends UiScreen {
     }
     if (inside(x, y, left() + 72, row(5), dimensionWidth(), 18)) {
       click(); List<String> dimensions = List.of("0", "-1");
-      choices.open(List.of("Overworld", "Nether"), List.of(), dimensions.indexOf(fields.get(5).text()), -1,
-          left() + 72, row(5), dimensionWidth(), width, height, i -> fields.get(5).setText(dimensions.get(i)));
+      choices.open("dimension", List.of("Overworld", "Nether"), List.of(), dimensions.indexOf(fields.get(5).text()), -1,
+          left() + 72, row(5), dimensionWidth(), 18, width, height, i -> fields.get(5).setText(dimensions.get(i)));
     }
     if (inside(x, y, left() + 72, row(VISIBLE), span() - 72, 18)) { click(); enabled = !enabled; }
     if (inside(x, y, left() + 72, row(ALWAYS), span() - 72, 18)) { click(); global = !global; }
@@ -187,9 +187,9 @@ public final class WaypointEditorScreen extends UiScreen {
     for (int i = 0; i < fields.size(); i++) {
       text(labels[i], left(), row(i) + 5, 0xcccccc);
       if (i == 1) {
-        WaypointSetDropdown.button(this, fields.get(i).text(), fieldLeft(i), row(i), fieldWidth(i), hoverX, hoverY, true, choices.active());
+        WaypointSetDropdown.button(this, fields.get(i).text(), fieldLeft(i), row(i), fieldWidth(i), hoverX, hoverY, true, choices.editing("set"));
       } else input(fields.get(i), fieldLeft(i), row(i), fieldWidth(i), hoverX, hoverY, i == ABBREVIATION ? "Automatic" : "");
-      if (i == 5) WaypointSetDropdown.button(this, dimensionName(), left() + 72, row(i), dimensionWidth(), hoverX, hoverY, true, choices.active());
+      if (i == 5) WaypointSetDropdown.button(this, dimensionName(), left() + 72, row(i), dimensionWidth(), hoverX, hoverY, true, choices.editing("dimension"));
       button("R", left() + span() - 20, row(i), 20, 18, hoverX, hoverY, true);
     }
     try { colourButton(fields.get(6).text(), left() + 45, row(6), 22, hoverX, hoverY); } catch (RuntimeException ignored) {}

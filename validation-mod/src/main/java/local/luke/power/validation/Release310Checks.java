@@ -99,7 +99,7 @@ final class Release310Checks {
         templates.remove("review"); templates.getAsJsonObject("survival").getAsJsonObject("values").addProperty("allow_sprinting",false);
         PowerConfig.write(document); check(RuleDefaults.review().required(),"old defaults not detected");
         var reviewParent = new PowerOptionsScreen(null); mc.setScreen(reviewParent);
-        check(RuleDefaultsScreen.openIfNeeded(mc,reviewParent,()->{},()->mc.setScreen(reviewParent)),"review did not open");
+        check(RuleDefaultsScreen.openIfNeeded(mc,reviewParent,()->{},()->mc.setScreen(reviewParent),"General settings"),"review did not open");
         var screen = mc.currentScreen; field(screen,"expanded",true); render(mc,screen,"rule-review",640,360);
         invoke(screen,"commit",new Class<?>[]{boolean.class},false);
         check(!RuleDefaults.review().required(),"Keep did not acknowledge version");

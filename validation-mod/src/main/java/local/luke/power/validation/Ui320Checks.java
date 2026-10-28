@@ -108,9 +108,9 @@ final class Ui320Checks {
         screens.put("defaults-setup", new DefaultsSetupScreen(options));
         screens.put("hud-editor", new HudEditorScreen(options, HudEditorSettings.ENTRY));
         screens.put("title-lettering", new TitleLetteringScreen(options));
-        var constructor = RuleDefaultsScreen.class.getDeclaredConstructor(Screen.class, RuleDefaults.Review.class, Runnable.class, Runnable.class);
+        var constructor = RuleDefaultsScreen.class.getDeclaredConstructor(Screen.class, RuleDefaults.Review.class, Runnable.class, Runnable.class, String.class);
         constructor.setAccessible(true);
-        screens.put("rule-review", constructor.newInstance(options, RuleDefaults.review(), (Runnable)() -> {}, (Runnable)() -> {}));
+        screens.put("rule-review", constructor.newInstance(options, RuleDefaults.review(), (Runnable)() -> {}, (Runnable)() -> {}, "General settings"));
         for (var entry : screens.entrySet()) {
           open(mc, entry.getValue(), WIDE, SHORT);
           fullHeader(baseline, render(mc, entry.getValue(), entry.getKey() + "-wide", WIDE, SHORT), entry.getKey());

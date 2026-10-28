@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [4.6.5] - 2026-10-28
+
+- Previous restarts the current song after ten seconds, including previews; earlier presses go to the previous song.
+- Muting Master or Music retains the current song and position, shows Music muted and leaves playback paused until manually resumed after unmuting. Keep paused seek streams intact through previews.
+- Separate playlist Back navigation from the Music view's return to Audio, preserving local search and scroll while clearing its history on exit. Add grass and favorite-star icons to the protected playlist headers.
+- Align group and track slider right edges, retain the parent/child width difference, and place folder removal controls at the row edge.
+- Show actual Back destinations in concise hover text across editors. Restore yellow hover text on dropdown buttons, choices and context actions.
+
 ## [4.6.4] - 2026-10-27
 
 - Keep minimap left clicks inside the world map and apply the configured middle-click action while map settings are open.
