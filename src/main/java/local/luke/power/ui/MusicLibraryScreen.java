@@ -61,8 +61,8 @@ public final class MusicLibraryScreen extends UiScreen {
   private String playlistQuery = "", catalogQuery = "";
   private MusicPresetDraft previousDraft;
   private record View(State state, String playlist, String label, boolean grouped, int catalogScroll,
-      boolean adding, String playlistQuery, int playlistScroll) {}
-  private final Deque<View> history = new ArrayDeque<>();
+      boolean adding, String playlistQuery, int playlistScroll, String catalogQuery) {}
+  private final MusicTabNavigation<View> navigation = new MusicTabNavigation<>();
   private List<String> previousTracks = List.of();
   private Setting dragging;
   private String draggingGroup;
@@ -140,8 +140,8 @@ public final class MusicLibraryScreen extends UiScreen {
   }
   public String backDestination() {
     if (presets.adding()) return presets.displayedName();
-    if (history.isEmpty()) return playlistEditor() ? "Playlists" : "Audio settings";
-    View previous = history.peek();
+    if (history().isEmpty()) return "Audio settings";
+    View previous = history().peek();
     return previous.playlist().isEmpty() ? previous.label() : edits.presets().stream()
         .filter(p -> p.id().equals(previous.playlist())).map(MusicPlaylist::name).findFirst().orElse("Playlists");
   }
@@ -149,24 +149,31 @@ public final class MusicLibraryScreen extends UiScreen {
     boolean editor = playlistEditor();
     return new View(state(), editor ? presets.draft().id() : "",
         editor ? navigationDestination() : destination(state()), presets.grouped(), presets.catalogScroll(),
-        presets.adding(), playlistQuery, playlistScroll);
+        presets.adding(), playlistQuery, playlistScroll, catalogQuery);
   }
+  private static String tab(State state) { return state.queue() ? "queue" : state.folder(); }
+  private String tab() { return queue ? "queue" : folder; }
+  private Deque<View> history() { return navigation.history(tab()); }
+  public boolean localBackVisible() { return presets.adding() || !history().isEmpty(); }
   void rememberView() { rememberView(view()); }
-  private void rememberView(View view) {
-    if (history.size() == 32) history.removeLast();
-    history.push(view);
+  private void rememberView(View view) { navigation.remember(tab(view.state()), view); }
+  private void navigate(View previous, String target) {
+    if (tab(previous.state()).equals(target)) rememberView(previous);
+    else navigation.leave(tab(previous.state()), previous);
   }
-  public void clearHistory() { history.clear(); }
+  public void clearHistory() { navigation.clear(); }
   private void restoreView(View view) {
     restore(view.state());
+    boolean missing = false;
     if (!view.playlist().isEmpty()) {
       var playlist = edits.presets().stream().filter(p -> p.id().equals(view.playlist())).findFirst().orElse(null);
       if (playlist != null) { presets.edit(playlist); presets.grouped(view.grouped()); presets.adding(view.adding()); }
-      else { folder = "playlists"; presetsOpen = true; }
+      else { folder = "playlists"; presetsOpen = true; missing = true; }
     }
     previousDraft = presets.draft(); previousTracks = previousDraft == null ? List.of() : previousDraft.tracks();
     previousAdding = presets.adding(); previousGrouped = presets.grouped();
-    playlistQuery = view.playlistQuery(); playlistScroll = view.playlistScroll();
+    playlistQuery = view.playlistQuery(); playlistScroll = view.playlistScroll(); catalogQuery = view.catalogQuery();
+    if (missing) { search.setText(catalogQuery); trackScroll = 0; playlistQuery = ""; playlistScroll = 0; }
     refresh(); presets.catalogScroll(view.catalogScroll()); parent.refreshMusicEditor();
   }
   public void restore(State state) {
@@ -199,7 +206,7 @@ public final class MusicLibraryScreen extends UiScreen {
         : controlsTop() + filters().height() + (actionTop() == controlsTop() ? 10 : 6);
   }
   private int groupHeight(String group) { return 20; }
-  private int sourceRemoveX() { return rowLayout().playX(); }
+  private int sourceRemoveX() { return rowLayout().groupRemoveX(); }
   private int sourceRemoveWidth() { return rowLayout().buttonWidth(); }
   private MusicRowLayout rowLayout() { return MusicRowLayout.at(left(), span(), queue); }
   private int rowHeight() { return rowLayout().height(); }
@@ -208,7 +215,8 @@ public final class MusicLibraryScreen extends UiScreen {
   private int groupVolumeWidth() { return rowLayout().groupVolumeWidth(); }
   private int groupVolumeX() { return rowLayout().groupVolumeX(); }
   private int countRight(String group) {
-    return groupHasVolume(group) ? groupVolumeX() - 8 : presets.adding() ? right() - 46 : right() - 4;
+    return groupHasVolume(group) ? sourceRemoveX() - 8
+        : presets.adding() ? right() - 46 : right() - 4;
   }
   private boolean groupHasVolume(String group) { return libraryTab() && !group.equals("Unavailable tracks"); }
   private int reloadX() { return filters().reloadX(); }
@@ -240,7 +248,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private void newPlaylist() {
     View previous = view();
     guard(() -> {
-      rememberView(previous);
+      navigate(previous, "playlists");
       finishDrag(); closePresets(); queue = false; folder = "playlists"; presetsOpen = true;
       search.setText(""); search.focused = false; error = "";
       presets.newPlaylist(); syncPanel(); rebuild(); parent.refreshMusicEditor();
@@ -267,16 +275,23 @@ public final class MusicLibraryScreen extends UiScreen {
   public void showQueue() {
     View previous = view();
     guard(() -> {
-      if (!queue) rememberView(previous);
+      if (!queue) navigation.leave(tab(previous.state()), previous);
       finishDrag(); closePresets(); queue = true; search.focused = false; search.setText("");
       error = ""; refresh(); parent.refreshMusicEditor();
     });
   }
   private void selectFilter(String id) {
     View previous = view();
-    boolean remember = queue || !folder.equals(id) || folder.equals("playlists") && playlistEditor();
-    Runnable navigate = () -> { if (remember) rememberView(previous); selectFilterView(id); };
-    if (dirtyPreset()) guard(navigate); else navigate.run();
+    Runnable action = () -> {
+      if (!tab(previous.state()).equals(id)) {
+        navigation.leave(tab(previous.state()), previous);
+        View saved = navigation.view(id);
+        if (!id.equals("active") && saved != null) { restoreView(saved); return; }
+      } else if (id.equals("playlists")) navigation.reset(id);
+      if (id.equals("active")) navigation.reset(id);
+      selectFilterView(id);
+    };
+    if (dirtyPreset()) guard(action); else action.run();
   }
   private void selectFilterView(String id) {
     finishDrag(); closePresets(); queue = false;
@@ -292,27 +307,32 @@ public final class MusicLibraryScreen extends UiScreen {
     if (presets.dragging()) { presets.cancelPointer(); return; }
     finishDrag();
     if (presets.backFromAdd()) { syncPanel(); return; }
-    if (!history.isEmpty()) guard(() -> restoreView(history.pop()));
-    else if (playlistEditor()) guard(() -> { selectFilterView("playlists"); });
+    if (!history().isEmpty()) guard(() -> restoreView(history().pop()));
     else guard(exit);
   }
   private void closePresets() { presetsOpen = false; presets.open(); previousDraft = null; previousTracks = List.of(); }
-  public void close() { removed(); folders.cancel(); closePresets(); clearHistory(); }
+  public void close() {
+    removed(); folders.cancel(); closePresets(); clearHistory();
+    queue = false; folder = "library"; search.setText(""); search.focused = false;
+    trackScroll = queueScroll = playlistScroll = 0; playlistQuery = catalogQuery = "";
+    collapsed.clear(); initializedFilters.clear(); error = "";
+  }
   public void showTrack(String id) {
     View previous = view();
-    guard(() -> { rememberView(previous); selectFilterView("library"); revealTrack(id); });
+    guard(() -> { navigate(previous, "library"); selectFilterView("library"); revealTrack(id); });
   }
   public void showPlaylist(String id) {
     View previous = view();
     guard(() -> {
-      rememberView(previous);
+      navigate(previous, playlistTab(id));
       showPlaylistView(id);
     });
   }
+  private String playlistTab(String id) { return id.equals(edits.selected()) ? "active" : "playlists"; }
   private void showPlaylistView(String id) {
     MusicPlaylist playlist = edits.presets().stream().filter(p -> p.id().equals(id)).findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Playlist is unavailable"));
-    selectFilterView(id.equals(edits.selected()) ? "active" : "playlists");
+    selectFilterView(playlistTab(id));
     presets.edit(playlist);
     syncPanel(); rebuild(); parent.refreshMusicEditor();
   }
@@ -321,7 +341,7 @@ public final class MusicLibraryScreen extends UiScreen {
     guard(() -> {
       String selection = id.equals(AudioController.navigationTrackId()) ? AudioController.navigationPlaylistId()
           : MusicPlaylist.contains(AudioConfig.current(), edits.selected(), id) ? edits.selected() : "";
-      rememberView(previous);
+      navigate(previous, AudioController.previewing(id) || selection.isEmpty() ? "library" : playlistTab(selection));
       if (AudioController.previewing(id) || selection.isEmpty()) selectFilterView("library");
       else showPlaylistView(selection);
       revealTrack(id);
@@ -474,7 +494,11 @@ public final class MusicLibraryScreen extends UiScreen {
   public void wheel(int amount) {
     if (folders.modal()) return;
     if (presetsOpen && (presets.modal() || !presets.editing())) { presets.wheel(amount); return; }
-    if (amount != 0) scroll(scroll() - (int)Math.signum(amount) * rowHeight());
+    if (amount != 0) {
+      int direction = -(int)Math.signum(amount);
+      scroll(groupedView() && bottom() - listTop() < groupHeight("") + rowHeight()
+          ? rowIndex.scrollByRow(scroll(), direction) : scroll() + direction * rowHeight());
+    }
   }
   private void slide(int x) {
     if (dragging == null) return;
@@ -588,7 +612,7 @@ public final class MusicLibraryScreen extends UiScreen {
     else Mp3Converter.start(FabricLoader.getInstance().getGameDir(), sourceLibrary.tracks());
   }
   private void headingClick(Row row, int x, int y, int cy, int b) {
-    if (managedSource(row.group) && b == 0 && inside(x, y, sourceRemoveX(), cy, sourceRemoveWidth(), 18)) { click(); var source = sourceFolders.get(row.group); folders.remove(source.path(), source.label()); return; }
+    if (managedSource(row.group) && b == 0 && inside(x, y, sourceRemoveX(), cy, sourceRemoveWidth(), 18)) { click(); var source = sourceFolders.get(row.group); folders.remove(source.path()); return; }
     if (presets.editable() && presets.adding() && inside(x, y, right() - 40, cy, 40, 18)) { if (b == 0 && includedCount(row.group) < members(row.group).size()) { click(); addGroup(row.group); } return; }
     if (groupHasVolume(row.group) && inside(x, y, groupVolumeX(), cy, groupVolumeWidth(), 18)) {
       if (b == 0) { draggingGroup = row.group; slideGroup(x); }
@@ -724,7 +748,10 @@ public final class MusicLibraryScreen extends UiScreen {
     int labelWidth = Math.max(0, labelRight - left() - 2);
     if (labelWidth >= textWidth("...")) text(fit((closed ? "> " : "v ") + row.label, labelWidth), left() + 2, y + 6, 0xffffff);
     text(count, countRight - textWidth(count), y + 6, 0xaaaaaa); fill(left(), y + row.height - 1, right(), y + row.height, 0x50555555);
-    if (!hover) return new GroupHover("", "");
+    if (!hover || groupHasVolume(row.group) && inside(mx, my, groupVolumeX(), y + 1, groupVolumeWidth(), 18)
+        || managed && inside(mx, my, sourceRemoveX(), y + 1, sourceRemoveWidth(), 18)
+        || presets.editable() && presets.adding() && inside(mx, my, right() - 40, y + 1, 40, 18))
+      return new GroupHover("", "");
     String tip = source != null ? source.path() : row.group.startsWith("folder:") ? row.group.substring(7) : row.label;
     return new GroupHover(total + (total == 1 ? " song in " : " songs in ") + tip, "group:" + row.group);
   }

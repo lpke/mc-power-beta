@@ -53,6 +53,27 @@ class SettingTest {
     assertThrows(IllegalArgumentException.class,()->ambient.parse("101"));
   }
 
+  @Test void ambienceVolumesAcceptEveryWholePercentagePoint() {
+    for (String suffix : List.of("NetherPortal", "Rain", "Ghast", "Cave")) {
+      String id = "power_environment:config.MUSIC_CONFIG.volume" + suffix + "Ambient";
+      Setting s = Catalog.setting(id, "test", "", "", "", "", Setting.Kind.DECIMAL,
+          new JsonPrimitive(0), new JsonPrimitive(1), 0, 1, .05, List.of(), false);
+      assertEquals(.01, s.step, id);
+      for (int percent = 0; percent <= 100; percent++) {
+        s.slide(percent / 100.0);
+        assertEquals(percent / 100.0, s.value.getAsDouble(), 1e-9, id);
+        assertDoesNotThrow(() -> s.validate(s.value), id);
+        assertEquals(percent + "%", s.display(), id);
+        s.parse(Integer.toString(percent));
+        assertEquals(percent / 100.0, s.value.getAsDouble(), 1e-9, id);
+        if (percent < 100) {
+          s.cycle(1);
+          assertEquals((percent + 1) / 100.0, s.value.getAsDouble(), 1e-9, id);
+        }
+      }
+    }
+  }
+
   @Test void durationEditorsUseSecondsWithoutChangingStorageOrPrecision() {
     Setting s = new Setting("creative.doubleTapTicks", "creative", "", "", "", "",
         Setting.Kind.INTEGER, new JsonPrimitive(7), new JsonPrimitive(7), 2, 20, 1, List.of(), false);

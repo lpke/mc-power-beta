@@ -11,7 +11,7 @@ final class MusicFolderActions extends UiScreen {
   private final PowerOptionsScreen parent;
   private final MusicEdits edits;
   private final Runnable changed;
-  private String removing = "", removalLabel = "", error = "";
+  private String removing = "", error = "";
   private JsonElement removalValue;
 
   MusicFolderActions(PowerOptionsScreen parent, Runnable changed) {
@@ -23,7 +23,7 @@ final class MusicFolderActions extends UiScreen {
   private Setting setting() { return edits.setting("musicDirectories"); }
   String error() { return error; }
   boolean modal() { return !removing.isEmpty(); }
-  void cancel() { removing = removalLabel = ""; removalValue = null; error = ""; }
+  void cancel() { removing = ""; removalValue = null; error = ""; }
 
   void add() {
     error = "";
@@ -40,13 +40,12 @@ final class MusicFolderActions extends UiScreen {
     }, sources));
   }
 
-  void remove(String path, String label) {
+  void remove(String path) {
     if (!MusicFolders.decode(setting().value).contains(path)) {
       error = "Folder changed. Select it again.";
       return;
     }
     removing = path;
-    removalLabel = label;
     removalValue = setting().value.deepCopy();
     error = "";
   }
@@ -91,9 +90,9 @@ final class MusicFolderActions extends UiScreen {
     if (!modal()) return;
     fill(0, 0, width, height, 0xc0000000);
     int x = dialogLeft(), w = dialogWidth();
-    WarningText.draw(this, w, buttonY() - 12, "Remove \"" + removalLabel + "\"?",
-        error.isEmpty() ? "Files and playlist entries stay unchanged.\n" + removing : error,
-        error.isEmpty() ? 0xaaaaaa : 0xff8888);
+    int span = Math.max(1, Math.min(w, width - 24));
+    for (var line : MusicFolderWarning.layout(span, buttonY() - 12, removing, error, this::textWidth))
+      centeredText(line.text(), line.y(), line.color());
     button("Remove", x, buttonY(), buttonWidth(), 20, mx, my, true);
     button("Cancel", x + buttonWidth() + 4, buttonY(), buttonWidth(), 20, mx, my, true);
   }

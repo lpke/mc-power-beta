@@ -54,6 +54,15 @@ final class MusicRowIndex {
     return row < starts.length && starts[row] <= documentY ? row : -1;
   }
 
+  /** Tiny viewports need whole-row alignment when headings and songs have different heights. */
+  int scrollByRow(int scroll, int direction) {
+    if (starts.length == 0 || direction == 0) return scroll;
+    int row = Arrays.binarySearch(starts, scroll);
+    if (row >= 0) row += Integer.signum(direction);
+    else row = direction > 0 ? -row - 1 : -row - 2;
+    return starts[Math.max(0, Math.min(starts.length - 1, row))];
+  }
+
   StickyHeader sticky(int scroll, int top, int bottom) {
     int low = 0, high = headings.length;
     while (low < high) {

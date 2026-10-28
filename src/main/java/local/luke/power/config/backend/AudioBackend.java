@@ -179,7 +179,7 @@ public final class AudioBackend implements Backend {
       result.add(new Setting("audio.sound." + track, "audio", "Audio", "Individual music tracks", label,
           "Track volume in percent, multiplied by the music and master volumes.",
           Setting.Kind.INTEGER, new JsonPrimitive(AudioController.trackVolume(track)),
-          new JsonPrimitive(100), 0, 100, 5, List.of(), false));
+          new JsonPrimitive(100), 0, 100, 1, List.of(), false));
     }
     return result;
   }
@@ -210,7 +210,7 @@ public final class AudioBackend implements Backend {
             defaults,
             0,
             100,
-            5,
+            1,
             choices,
             false));
   }

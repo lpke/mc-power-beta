@@ -17,6 +17,13 @@
 
 # Runtime checks
 
+- `release-466-ui capture|check` captures tab-local Back buttons, remembered playlist
+  views, group control order, pointer tooltips and folder warnings at 854x480 and
+  320x240. Run capture before check in a focused, muted, idle disposable world
+  with silent routing and a window at least 1708x960. The checks cover tab state,
+  dirty-draft guards, visit cleanup, slider geometry and every whole-percent volume
+  value. Screenshots and observations go under `power-beta-data/reports/release-466/ui`.
+
 - `release-465-ui capture|check` captures Music local/top Back controls, protected
   title icons, group sliders, Back destination tooltips and yellow dropdown states
   at 854x480 and 320x240 before checking navigation, dirty drafts and exact bounds.

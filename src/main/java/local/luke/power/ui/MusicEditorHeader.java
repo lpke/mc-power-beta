@@ -17,7 +17,7 @@ record MusicEditorHeader(int backX, int backWidth, int nameX, int nameWidth, int
         view, inline ? top : top + 22, inline ? 22 : 44, inline);
   }
   static MusicEditorHeader withBack(int left, int top, int width, int addWidth, int viewWidth, int minimumNameWidth) {
-    int back = 44, inset = back + 4;
+    int back = 18, inset = back + 4;
     var controls = at(left + inset, top, width - inset, addWidth, viewWidth, minimumNameWidth);
     if (controls.inline())
       return new MusicEditorHeader(left, back, controls.nameX, controls.nameWidth, controls.addX,

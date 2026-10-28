@@ -33,7 +33,7 @@ final class WarningText {
     return lines;
   }
 
-  private static List<String> wrap(String text, int span, ToIntFunction<String> measure) {
+  static List<String> wrap(String text, int span, ToIntFunction<String> measure) {
     List<String> lines = new ArrayList<>();
     for (String paragraph : text.split("\n", -1)) {
       String line = "";

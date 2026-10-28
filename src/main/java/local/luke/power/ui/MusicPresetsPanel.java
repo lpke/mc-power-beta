@@ -195,12 +195,15 @@ final class MusicPresetsPanel extends UiScreen {
   private int top() { return parent.musicEditorTop(); }
   private int bottom() { return parent.contentBottom(); }
   private int span() { return right() - left(); }
-  private String addLabel() { return adding() ? height < 300 ? "Back" : "Back to playlist" : "Add songs"; }
   private String viewLabel() { return adding() ? "From playlist" : "View: " + (grouped() ? "Grouped" : "List"); }
   private MusicEditorHeader header() {
     int minimumName = favorites() || readOnly() ? textWidth(draft.name()) + 28 : height < 300 ? 32 : 100;
-    return MusicEditorHeader.withBack(left(), top(), span(), editable() ? textWidth(addLabel()) + 16 : 0,
-        textWidth(viewLabel()) + 16, minimumName);
+    int add = editable() && !adding() ? textWidth("Add songs") + 16 : 0;
+    return library.localBackVisible()
+        ? MusicEditorHeader.withBack(left(), top(), span(), add,
+            textWidth(viewLabel()) + 16, minimumName)
+        : MusicEditorHeader.at(left(), top(), span(), add,
+            textWidth(viewLabel()) + 16, minimumName);
   }
   int headerHeight() { return editing() ? header().height() : 0; }
   private int nameX() { return header().nameX(); }
@@ -283,10 +286,9 @@ final class MusicPresetsPanel extends UiScreen {
     }
     name.focused = editable() && !favorites() && inside(x, y, nameX(), top(), nameWidth(), 18);
     if (name.focused) name.click(x, b);
-    if (b == 0 && editable() && inside(x, y, addX(), actionY(), addWidth(), 18)) {
+    if (b == 0 && editable() && !adding() && inside(x, y, addX(), actionY(), addWidth(), 18)) {
       click();
-      if (adding()) backFromAdd();
-      else choices.open("playlist-add", List.of("From Library", "From playlist"), List.of(), -1, -1,
+      choices.open("playlist-add", List.of("From Library", "From playlist"), List.of(), -1, -1,
           addX(), actionY(), addWidth(), 18, width, height, index -> {
             if (index == 0) adding = true;
             else choosePlaylist();
@@ -443,14 +445,14 @@ final class MusicPresetsPanel extends UiScreen {
   void renderHeader(int mx, int my) {
     if (!org.lwjgl.opengl.Display.isActive()) cancelPointer();
     if (editing()) {
-      button("Back", header().backX(), top(), header().backWidth(), 18, mx, my, true);
+      if (library.localBackVisible()) iconButton("back", header().backX(), top(), header().backWidth(), mx, my, true);
       if (favorites() || readOnly()) {
         if (favorites()) icon("star", nameX() + 2, top(), 16, 18, true, true);
         else GuiItems.draw(icons, minecraft, grass, nameX() + 2, top() + 1, false);
         text(fit(draft.name(), nameWidth() - 28), nameX() + 24, top() + 5, 0xffffff);
         fill(nameX() - 1, top() + 18, nameX() + nameWidth() + 1, top() + 19, 0xff555555);
       } else input(name, nameX(), top(), nameWidth(), mx, my, "Playlist name");
-      if (editable()) button(fit(addLabel(), addWidth() - 8), addX(), actionY(), addWidth(), 18, mx, my, true,
+      if (editable() && !adding()) button(fit("Add songs", addWidth() - 8), addX(), actionY(), addWidth(), 18, mx, my, true,
           choices.editing("playlist-add") ? 0xffffa0 : -1);
       button(fit(viewLabel(), viewWidth() - 8), groupedX(), actionY(), viewWidth(), 18, mx, my, true,
           choices.editing("playlist-source") ? 0xffffa0 : -1);
@@ -504,9 +506,8 @@ final class MusicPresetsPanel extends UiScreen {
   }
 
   void renderBackTooltip(int mx, int my) {
-    if (!editing() || modal()) return;
+    if (!editing() || modal() || !library.localBackVisible()) return;
     backTooltip(library.backDestination(), header().backX(), top(), header().backWidth(), 18, mx, my);
-    if (adding()) backTooltip(displayedName(), addX(), actionY(), addWidth(), 18, mx, my);
   }
 
   void renderDragGhost(int x, int y) {
@@ -534,7 +535,7 @@ final class MusicPresetsPanel extends UiScreen {
         pending != null ? "Save changes to this playlist?" : "Delete this playlist?", message,
         error.isEmpty() ? 0xaaaaaa : 0xff8888);
     for (int i = 0; i < dialogCount(); i++)
-      button(pending != null ? new String[]{"Save", "Discard", "Cancel"}[i]
+      button(pending != null ? new String[]{"Save", "Discard", "Keep editing"}[i]
           : new String[]{"Delete", "Cancel"}[i], dialogButtonX(i), dialogButtonY(), dialogButtonWidth(), 20, mx, my, true);
   }
 

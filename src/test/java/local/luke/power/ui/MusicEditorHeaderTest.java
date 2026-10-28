@@ -8,7 +8,7 @@ class MusicEditorHeaderTest {
     for (int width = 180; width <= 1600; width++) {
       var h = MusicEditorHeader.withBack(31, 90, width, 74, 101, 32);
       assertEquals(31, h.backX());
-      assertEquals(44, h.backWidth());
+      assertEquals(18, h.backWidth());
       assertEquals(h.backX() + h.backWidth() + 4, h.nameX());
       assertTrue(h.nameWidth() >= 32);
       assertTrue(h.nameX() + h.nameWidth() <= 31 + width);
@@ -21,7 +21,7 @@ class MusicEditorHeaderTest {
     }
     var compact = MusicEditorHeader.withBack(106, 121, 200, 67, 84, 32);
     assertFalse(compact.inline());
-    assertEquals(152, compact.nameWidth());
+    assertEquals(178, compact.nameWidth());
     assertEquals(143, compact.actionsY());
   }
 
@@ -71,5 +71,14 @@ class MusicEditorHeaderTest {
     assertEquals(180, h.nameWidth());
     assertEquals(190, h.viewX() + h.viewWidth());
     assertTrue(h.addWidth() > 0);
+  }
+
+  @Test void addBrowserUsesOneBackAndReturnsTheFormerAddButtonSpaceToTheName() {
+    var browser = MusicEditorHeader.withBack(106, 121, 200, 0, 84, 32);
+    assertEquals(18, browser.backWidth());
+    assertEquals(0, browser.addWidth());
+    assertEquals(90, browser.nameWidth());
+    assertTrue(browser.inline());
+    assertEquals(306, browser.viewX() + browser.viewWidth());
   }
 }

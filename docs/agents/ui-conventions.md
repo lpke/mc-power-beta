@@ -24,7 +24,11 @@ Keep these rules here rather than adding style details to the top-level instruct
   suppression as its owner. Draw tooltips after content and suppress them behind
   popups and warnings. Within-tab Back controls belong beside the nested content
   when that makes the route clear without crowding compact layouts. Preserve dirty
-  draft prompts and navigation history.
+  draft prompts and navigation history. Music uses an 18-pixel square `<` button
+  beside a playlist title only when there is a deeper route within that tab.
+  Clicking the active-playlist tab opens its root without a title Back. Each tab
+  retains its own view when switching tabs; clicking Playlists while already in
+  that tab returns to its catalog. Leaving Music for Audio clears this visit state.
 - Share rendering, pointer, tooltip and clipping geometry. Check compact layouts
   at 320 by 240 as well as wider screens. Keep actionable text and controls inside
   the screen bounds.
@@ -43,6 +47,9 @@ Keep these rules here rather than adding style details to the top-level instruct
 - Wrap warnings before shortening them. Keep at least 12 pixels of horizontal
   screen padding. Long names and paths must stay inside the overlay; preserve
   the action's consequence before optional identifying details.
+- Folder removal warnings place the path immediately below the title, followed
+  by a paragraph explaining retained files and playlist entries, remaining imports
+  and playability. Preserve the consequence when shortening long paths.
 - Modal input and hover must not reach the editor behind the warning. Escape
   cancels the warning. Do not add Enter acceptance to destructive actions or
   change draft commit, rollback or callback validation behavior as a style fix.
@@ -84,18 +91,21 @@ Keep these rules here rather than adding style details to the top-level instruct
 - Shared sliders use an eight-pixel thumb contained within the track at both
   endpoints. Exact-entry inputs and their check button occupy the same outer
   bounds, including the input border. The check ends at the slider's right edge.
+- Every volume slider accepts one-percentage-point changes: use step `1` for
+  stored 0–100 values and `0.01` for stored 0–1 values. Dragging, cycling and exact
+  entry share the same range and step. Do not round volumes to five-percent steps.
 - Volume sliders use `VolumeControls`: a 150-pixel column where space permits,
   shared by rendering, drag hit bounds, tooltips and exact entry. Place preview,
   related-control and editor buttons before the column rather than shortening it.
   Compact form rows place adjacent actions beside the label.
 - Song rows use up to 134 pixels, matching the child sound category width.
-  Library group sliders use up to 150 pixels and share the song slider's right
-  edge, extending 16 pixels to its left. Compact layouts retain the 16-pixel
-  difference, down to 70 pixels for groups and 54 pixels for songs. Put `1 track`
-  or `X tracks` before the group slider and shorten group titles before the count.
-  Place the folder delete button at the far right, aligned with the song play
-  button's outer right edge, using the same adaptive button size. Reserve that
-  column for included music groups too. `VolumeControls` and `MusicRowLayout`
+  Library group sliders use up to 150 pixels and end at the row's right edge.
+  Compact layouts retain the 16-pixel width difference, down to 70 pixels for
+  groups and 54 pixels for songs. Order group controls as `1 track` or `X tracks`,
+  optional folder delete button, then the slider. Keep the native adaptive button
+  size and gaps; reserve its column for included groups so counts line up. Shorten
+  group titles before the count. Group tooltips exclude sliders and action buttons.
+  `VolumeControls` and `MusicRowLayout`
   share these widths and bounds across rendering, dragging, exact entry and hover.
   Grouped playlists retain their X/Y count at the right.
 - Normal Audio category rows use a 16-pixel left inset beneath Game sounds.
@@ -124,6 +134,9 @@ Keep these rules here rather than adding style details to the top-level instruct
 - Reordering captures immutable source IDs and validates the owning list before
   committing on release. Motion alone never changes the saved order. Cancel on
   focus loss, navigation or an invalid source. Preserve scrolling while dragging.
+- When a grouped Music list is too short for a heading and a full song row,
+  wheel navigation snaps to row boundaries so a song's controls can fit in view.
+  Keep normal row-sized scrolling in larger or ungrouped lists.
 - Native Beta mouse motion and wheel events call `mouseReleased` with button -1.
   End scrollbar ownership only on its originating button release, focus loss or
   navigation. Apply final release coordinates before clearing the drag.

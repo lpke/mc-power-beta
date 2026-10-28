@@ -478,7 +478,6 @@ public final class PowerOptionsScreen extends UiScreen {
   void closeAudioPanel() { closeLibrary(); }
   private void closeLibrary() {
     if (library != null && library.dirtyPreset()) { library.guard(this::closeLibrary); return; }
-    if (library != null) library.close();
     libraryOpen = false;
     if (musicEditorReturn && !history.isEmpty()) restore(history.pop());
     history.removeIf(View::libraryOpen);
@@ -489,6 +488,8 @@ public final class PowerOptionsScreen extends UiScreen {
       changedOnly = false; conflictIds = List.of(); highlightedId = ""; focusAnchorId = "";
       scroll = positions.getOrDefault("Audio", 0d);
     }
+    libraryState = null;
+    if (library != null) library.close();
     layout();
   }
 

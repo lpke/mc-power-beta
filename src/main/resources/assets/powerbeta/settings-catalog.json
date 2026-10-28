@@ -1290,7 +1290,7 @@
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05,
+    "step": 0.01,
     "unit": "%",
     "displayDivisor": 0.01,
     "displayPrecision": 0
@@ -1304,7 +1304,7 @@
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05,
+    "step": 0.01,
     "unit": "%",
     "displayDivisor": 0.01,
     "displayPrecision": 0
@@ -1318,7 +1318,7 @@
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05,
+    "step": 0.01,
     "unit": "%",
     "displayDivisor": 0.01,
     "displayPrecision": 0
@@ -1332,7 +1332,7 @@
     "restart": false,
     "min": 0,
     "max": 1,
-    "step": 0.05,
+    "step": 0.01,
     "unit": "%",
     "displayDivisor": 0.01,
     "displayPrecision": 0
@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.6.5",
+    "default": "Power Beta 4.6.6",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
