@@ -215,7 +215,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private int groupVolumeWidth() { return rowLayout().groupVolumeWidth(); }
   private int groupVolumeX() { return rowLayout().groupVolumeX(); }
   private int countRight(String group) {
-    return groupHasVolume(group) ? sourceRemoveX() - 8
+    return groupHasVolume(group) ? (managedSource(group) ? sourceRemoveX() : groupVolumeX()) - 8
         : presets.adding() ? right() - 46 : right() - 4;
   }
   private boolean groupHasVolume(String group) { return libraryTab() && !group.equals("Unavailable tracks"); }

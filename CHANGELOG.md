@@ -5,7 +5,7 @@
 ## [4.6.6] - 2026-10-28
 
 - Remember each Music tab's view across tab changes. Return to the playlist catalog by clicking Playlists again, and show the square local Back control only for navigation within a tab.
-- Put Library group controls in count, delete and volume order, with the slider at the right edge. Keep group tooltips off sliders and buttons.
+- Put Library group controls in count, delete and volume order, with the slider at the right edge. Place built-in group counts directly beside their sliders. Keep group tooltips off sliders and buttons.
 - Clarify folder removal warnings with the path below the title and an explanation of retained files, playlist entries and track availability.
 - Allow one-percent volume adjustments across master, categories, individual sounds, songs, groups and ambience.
 - Keep a single Back control in Add songs and scroll compact grouped lists to full song rows.

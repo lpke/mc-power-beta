@@ -103,8 +103,8 @@ Keep these rules here rather than adding style details to the top-level instruct
   Compact layouts retain the 16-pixel width difference, down to 70 pixels for
   groups and 54 pixels for songs. Order group controls as `1 track` or `X tracks`,
   optional folder delete button, then the slider. Keep the native adaptive button
-  size and gaps; reserve its column for included groups so counts line up. Shorten
-  group titles before the count. Group tooltips exclude sliders and action buttons.
+  size and gaps; groups without a delete button place the count beside the slider.
+  Shorten group titles before the count. Group tooltips exclude sliders and action buttons.
   `VolumeControls` and `MusicRowLayout`
   share these widths and bounds across rendering, dragging, exact entry and hover.
   Grouped playlists retain their X/Y count at the right.
