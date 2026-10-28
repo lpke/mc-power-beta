@@ -805,7 +805,8 @@ public final class MusicLibraryScreen extends UiScreen {
       String id = row.id; var layout = rowLayout(); int cy = y + layout.controlsY();
       boolean hover = inside(rowMouseX, listMouseY, hoverLeft(), y, hoverWidth(), row.height) && listMouseY >= rowsTop && listMouseY < bottom();
       if (hover) { tip = path(id); key = "track:" + id; }
-      if (hover) fill(hoverLeft(), y, hoverRight(), y + row.height, 0x60000000);
+      if (hover || !reorder.dragging() && parent.musicActionsOpen(row))
+        fill(hoverLeft(), y, hoverRight(), y + row.height, 0x60000000);
       int nameX = layout.nameX();
       if (presets.adding()) {
         boolean included = presets.draft().included(id);

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [4.6.7] - 2026-10-28
+
+- Keep a music track highlighted while its right-click context menu is open.
+
 ## [4.6.6] - 2026-10-28
 
 - Remember each Music tab's view across tab changes. Return to the playlist catalog by clicking Playlists again, and show the square local Back control only for navigation within a tab.

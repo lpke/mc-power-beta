@@ -17,6 +17,12 @@
 
 # Runtime checks
 
+- `release-467-ui capture|check` captures track context ownership at 854x480 and
+  320x240 in Library, playlists, Favorites and Queue. Run capture before check in
+  a focused muted disposable world at least 1708x960. It verifies retained owner
+  highlight, blocked underlay hover, duplicate queue rows and dismissal by Escape
+  and outside click. Reports go under `power-beta-data/reports/release-467/ui`.
+
 - `release-466-ui capture|check` captures tab-local Back buttons, remembered playlist
   views, group control order, pointer tooltips and folder warnings at 854x480 and
   320x240. Run capture before check in a focused, muted, idle disposable world
