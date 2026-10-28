@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [4.6.8] - 2026-10-28
+
+- Separate Shift-click into crafting table from Shift-click into 2x2 grid; personal-grid transfers default off.
+- Leave partial-transfer leftovers in their source slot after topping up the hotbar or storage, even when 2x2 transfers are enabled.
+
 ## [4.6.7] - 2026-10-28
 
 - Keep a music track highlighted while its right-click context menu is open.

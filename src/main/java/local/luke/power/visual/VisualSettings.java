@@ -14,6 +14,7 @@ public final class VisualSettings {
   public boolean containerCarry = true;
   public boolean inventoryInPortals = true;
   public boolean shiftClickIntoCraftingGrid = true;
+  public boolean shiftClickIntoPlayerCraftingGrid;
   public boolean damageCameraShake = true, fireDamageCameraShake = true;
   public boolean swapEquipment = true;
   public boolean limitCapeRotation = true;

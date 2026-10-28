@@ -70,6 +70,13 @@ final class Inventory451Checks {
             mc.player.playerContainer.onSlotClick(36, 0, true, mc.player);
             check(mc.player.inventory.main[0] == null && sourceData.equals(bytes(mc.player.inventory.main[9]))
                 && state.inputs().stream().allMatch(slot -> slot.getStack() == null), "normal storage transfer used personal grid");
+          } else {
+            mc.player.playerContainer.onSlotClick(36, 0, true, mc.player);
+            state.finish();
+            check(bytes(copy(source, 6)).equals(bytes(mc.player.inventory.main[0]))
+                && bytes(copy(source, 64)).equals(bytes(mc.player.inventory.main[9]))
+                && state.inputs().stream().allMatch(slot -> slot.getStack() == null),
+                "partial native storage merge sent its remainder to the personal grid");
           }
         }
       });
@@ -91,7 +98,7 @@ final class Inventory451Checks {
         String before = state.inventory.inventory.snapshot(); mc.player.playerContainer.onSlotClick(36, 0, true, mc.player);
         check(before.equals(state.inventory.inventory.snapshot()) && !NativeInventoryPlan.busy(), "full grid changed source");
         state.reset(false); mc.player.inventory.main[0] = DeathChecks.tagged(4, 7, 0, "disabled-grid");
-        var settings = VisualConfig.copy(); settings.shiftClickIntoCraftingGrid = false; VisualConfig.preview(settings);
+        var settings = VisualConfig.copy(); settings.shiftClickIntoPlayerCraftingGrid = false; VisualConfig.preview(settings);
         before = state.inventory.inventory.snapshot(); mc.player.playerContainer.onSlotClick(36, 0, true, mc.player);
         check(before.equals(state.inventory.inventory.snapshot()) && !NativeInventoryPlan.busy(), "disabled fallback moved items");
       });

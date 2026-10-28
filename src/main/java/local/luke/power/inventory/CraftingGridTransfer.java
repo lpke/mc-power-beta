@@ -20,6 +20,7 @@ public final class CraftingGridTransfer {
   private static long queuedRevision;
   public static void tick(Minecraft mc) {
     if (queued.isEmpty()) return;
+    if (!VisualConfig.current().shiftClickIntoPlayerCraftingGrid) { queued.clear(); return; }
     Queued first = queued.values().iterator().next();
     if (InventoryActions.revision() != queuedRevision || mc.player != first.player || mc.currentScreen != first.screen || mc.world != first.player.world
         || !org.lwjgl.opengl.Display.isActive() || NativeInventoryPlan.failed()
@@ -96,7 +97,7 @@ public final class CraftingGridTransfer {
     } catch (java.io.IOException unavailable) { return false; }
   }
   private static boolean playerGridFallback(Container container, int sourceId, PlayerEntity player) {
-    if (!VisualConfig.current().shiftClickIntoCraftingGrid || sourceId < 9 || sourceId >= 45 || player.world == null || player.world.isRemote
+    if (!VisualConfig.current().shiftClickIntoPlayerCraftingGrid || sourceId < 9 || sourceId >= 45 || player.world == null || player.world.isRemote
         || player.container != container || player.inventory.getCursorStack() != null) return false;
     var mc = (Minecraft)net.fabricmc.loader.api.FabricLoader.getInstance().getGameInstance();
     if (mc == null || mc.player != player || !(mc.currentScreen instanceof net.minecraft.client.gui.screen.container.ContainerScreen screen)) return false;
@@ -138,7 +139,7 @@ public final class CraftingGridTransfer {
       ItemStack left = remaining == 0 ? null : ItemStack.clone(stack); if (left != null) left.count = remaining;
       changes.add(0, NativeInventoryPlan.Change.main(player.inventory, access.power$deathIndex(), left));
       NativeInventoryPlan.submit(mc, "crafting_grid_transfer", true, changes,
-          () -> VisualConfig.current().shiftClickIntoCraftingGrid && context.writable(mc) && output.matches(),
+          () -> VisualConfig.current().shiftClickIntoPlayerCraftingGrid && context.writable(mc) && output.matches(),
           () -> {
             if (!output.matches()) throw new IllegalStateException("Crafting output changed during transfer");
             if (mc.currentScreen instanceof local.luke.power.input.InventoryDrag drag) {

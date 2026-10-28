@@ -62,6 +62,8 @@ class ConfigDefaultsTest {
     assertTrue(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).inventoryInPortals);
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get("shiftClickIntoCraftingGrid").getAsBoolean());
     assertTrue(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).shiftClickIntoCraftingGrid);
+    assertFalse(root.getAsJsonObject("settings").getAsJsonObject("visual").get("shiftClickIntoPlayerCraftingGrid").getAsBoolean());
+    assertFalse(Catalog.JSON.fromJson("{}", local.luke.power.visual.VisualSettings.class).shiftClickIntoPlayerCraftingGrid);
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("visual").get("lowFire").getAsBoolean());
     assertTrue(settings.getAsJsonObject("visual").get("damageCameraShake").getAsBoolean());
     assertFalse(settings.getAsJsonObject("visual").get("fireDamageCameraShake").getAsBoolean());

@@ -2469,7 +2469,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.6.7",
+    "default": "Power Beta 4.6.8",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -3255,9 +3255,17 @@
   "visual.shiftClickIntoCraftingGrid": {
     "page": "Inventory",
     "group": "Quick transfer",
-    "label": "Shift-click into crafting grid",
-    "description": "Shift-click or Shift-drag inventory stacks into a crafting-table grid, or into your personal 2x2 grid when their normal storage or hotbar destination is full. Works independently of crafting-grid storage. Preserves leftovers and normal transfers when the grid is full.",
+    "label": "Shift-click into crafting table",
+    "description": "Shift-click or Shift-drag inventory stacks into a crafting table. Works independently of the 2x2 setting and crafting-grid storage. Preserves leftovers and normal transfers when the grid is full.",
     "default": true,
+    "restart": false
+  },
+  "visual.shiftClickIntoPlayerCraftingGrid": {
+    "page": "Inventory",
+    "group": "Quick transfer",
+    "label": "Shift-click into 2x2 grid",
+    "description": "Shift-click or Shift-drag inventory stacks into your 2x2 crafting grid when their normal storage or hotbar destination has no space. Completing an existing stack leaves any remainder in its source slot. Works independently of the crafting-table setting and crafting-grid storage.",
+    "default": false,
     "restart": false
   },
   "power_compat:config.addBlockLightToDebugOverlay": {

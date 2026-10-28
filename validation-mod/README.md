@@ -17,6 +17,14 @@
 
 # Runtime checks
 
+- `release-468 capture|check` captures the split crafting preferences at 854x480
+  and 320x240, then checks native recursive partial transfers in both directions,
+  independent table/personal toggles, full NBT/count retention, journal stalling,
+  cancellation and exception cleanup. Use a focused muted disposable singleplayer
+  world with display at least 1708x960. Run capture before check. Reports are in
+  `power-beta-data/reports/release-468`. Also run `inventory-451 test` for queued
+  personal-grid transfers and stale-owner regression checks.
+
 - `release-467-ui capture|check` captures track context ownership at 854x480 and
   320x240 in Library, playlists, Favorites and Queue. Run capture before check in
   a focused muted disposable world at least 1708x960. It verifies retained owner

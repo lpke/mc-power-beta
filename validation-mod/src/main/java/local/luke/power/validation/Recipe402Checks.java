@@ -130,7 +130,7 @@ public final class Recipe402Checks {
         var stored = compatibility.getClass().getField("allowCraftingInventorySlots"); Object previous = stored.get(compatibility);
         var visual = local.luke.power.visual.VisualConfig.copy();
         try {
-          var transfer = local.luke.power.visual.VisualConfig.copy(); transfer.shiftClickIntoCraftingGrid = true; local.luke.power.visual.VisualConfig.preview(transfer);
+          var transfer = local.luke.power.visual.VisualConfig.copy(); transfer.shiftClickIntoPlayerCraftingGrid = true; local.luke.power.visual.VisualConfig.preview(transfer);
           stored.set(compatibility, false); mc.player.inventory.main[9] = DeathChecks.tagged(4, 7, 0, "stored-grid");
           state.context.handler.onSlotClick(9, 0, true, mc.player);
           check(mc.player.inventory.main[0] != null && mc.player.inventory.main[9] == null

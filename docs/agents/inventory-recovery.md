@@ -143,3 +143,9 @@
   the migration seed; never overwrite an existing world entry. Preserve unknown
   presets and block unsafe sorting when data is unsupported. World copies and backups
   retain the scoped layout, including copies made before their first load.
+
+- Crafting-table and personal 2x2 Shift-click transfers have independent preferences.
+  Keep the stable table ID `visual.shiftClickIntoCraftingGrid`; the personal-grid
+  preference defaults off. Only the outer native click may claim a grid transfer.
+  Recursive retries after normal partial storage/hotbar merges leave leftovers in
+  the source. Preserve native recursion, stack data and existing journal guards.

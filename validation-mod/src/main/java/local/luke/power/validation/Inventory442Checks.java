@@ -238,7 +238,7 @@ final class Inventory442Checks {
     void reset(boolean creativeMode, boolean nativeSize) throws Exception {
       AccessRules.set(mc, local.luke.power.rules.GameRule.ALLOW_CREATIVE_MODE, true); CreativeVehicleChecks.mode(mc, creativeMode ? "CREATIVE" : "SURVIVAL");
       destroy.setBoolean(creative, true); clear.setBoolean(creative, true); storage.set(compatibility, false);
-      var settings = VisualConfig.copy(); settings.shiftClickIntoCraftingGrid = true; VisualConfig.preview(settings);
+      var settings = VisualConfig.copy(); settings.shiftClickIntoPlayerCraftingGrid = true; VisualConfig.preview(settings);
       inventory.reset(640); open((ContainerScreen)mc.currentScreen, nativeSize);
       if (creativeMode) field(screen, "creative_normalGUI", true);
     }
