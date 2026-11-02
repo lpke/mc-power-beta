@@ -14,6 +14,8 @@ public final class DirectoryScreen extends UiScreen {
   private final Screen parent;
   private final Consumer<List<String>> chosen;
   private final List<String> existing;
+  private final String replacing;
+  private List<String> relinkContext = List.of();
   private final Set<Path> selected = new LinkedHashSet<>();
   private Path directory = Path.of(System.getProperty("user.home"));
   private List<Path> children = List.of();
@@ -24,7 +26,11 @@ public final class DirectoryScreen extends UiScreen {
   private final ScrollBar scrollbar = new ScrollBar();
 
   public DirectoryScreen(Screen parent, Consumer<List<String>> chosen, List<String> existing) {
+    this(parent, chosen, existing, "");
+  }
+  public DirectoryScreen(Screen parent, Consumer<List<String>> chosen, List<String> existing, String replacing) {
     this.parent = parent; this.chosen = chosen; this.existing = List.copyOf(existing);
+    this.replacing = Objects.requireNonNull(replacing);
     try {
       String saved = MenuPreferences.current().musicBrowserDirectory;
       if (!saved.isEmpty()) {
@@ -38,13 +44,28 @@ public final class DirectoryScreen extends UiScreen {
   private int panelWidth() { return Math.min(width, height * 16 / 9); }
   private int panelLeft() { return (width - panelWidth()) / 2; }
   private int panelRight() { return panelLeft() + panelWidth(); }
-  private boolean selectionWraps() { return panelWidth() < 432; }
+  private boolean selectionWraps() { return singleFolder() || panelWidth() < 432; }
+  private boolean singleFolder() { return !replacing.isEmpty(); }
+  private List<String> sourceContext() { return relinkContext; }
+  private List<String> buildSourceContext() {
+    if (!singleFolder()) return List.of();
+    String name;
+    try { name = Objects.toString(Path.of(replacing).getFileName(), replacing); } catch (RuntimeException invalid) { name = replacing; }
+    List<String> lines = new ArrayList<>(); lines.add(fit("Replace: " + name, panelWidth() - 28));
+    var pathLines = WarningText.wrap(replacing, panelWidth() - 28, this::textWidth);
+    lines.addAll(pathLines.subList(0, Math.min(2, pathLines.size())));
+    if (pathLines.size() > 2) lines.set(lines.size() - 1, fit(lines.get(lines.size() - 1) + "...", panelWidth() - 28));
+    return List.copyOf(lines);
+  }
+  private int contextHeight() { return singleFolder() ? sourceContext().size() * 11 + 8 : 0; }
+  private int pathY() { return 38 + contextHeight(); }
+  private int navigationY() { return 62 + contextHeight(); }
   private int selectX() { return selectionWraps() ? panelLeft() + 14 : panelRight() - 164; }
-  private int selectY() { return selectionWraps() ? 86 : 62; }
-  private int listTop() { return selectionWraps() ? 110 : 86; }
+  private int selectY() { return (selectionWraps() ? 86 : 62) + contextHeight(); }
+  private int listTop() { return (selectionWraps() ? 110 : 86) + contextHeight(); }
   private int listBottom() { return height - 52; }
   private ScrollBar.Track track() { return new ScrollBar.Track(panelRight() - 10, listTop(), Math.max(0, listBottom() - listTop()), children.size() * 20, scroll); }
-  public void init() { Keyboard.enableRepeatEvents(true); }
+  public void init() { relinkContext = buildSourceContext(); Keyboard.enableRepeatEvents(true); }
   public void removed() { scrollbar.release(); path.focused = false; Keyboard.enableRepeatEvents(false); }
 
   private void read() {
@@ -76,6 +97,7 @@ public final class DirectoryScreen extends UiScreen {
         enterPath(); if (!error.isEmpty()) return;
       }
       List<String> roots = selected.isEmpty() ? List.of(directory.toString()) : selected.stream().map(Path::toString).toList();
+      if (singleFolder() && roots.size() != 1) { error = "Choose one replacement folder."; return; }
       var added = MusicFolders.additions(FabricLoader.getInstance().getGameDir(), existing, roots, false);
       if (added.isEmpty()) { error = "Those folders are already imported."; return; }
       chosen.accept(added); close();
@@ -97,21 +119,23 @@ public final class DirectoryScreen extends UiScreen {
   protected void mouseClicked(int x, int y, int b) {
     if (b != 0 && b != 1) return;
     if (b == 0 && scrollbar.press(track(), x, y)) { scroll = (int)scrollbar.drag(track(), y, true); return; }
-    if (inside(x, y, panelLeft() + 14, 38, panelWidth() - 76, 18)) { path.focused = true; path.click(x, b); return; }
+    if (inside(x, y, panelLeft() + 14, pathY(), panelWidth() - 76, 18)) { path.focused = true; path.click(x, b); return; }
     if (b != 0) return;
     path.focused = false;
-    if (inside(x, y, panelRight() - 54, 37, 40, 20)) { click(); enterPath(); return; }
-    if (inside(x, y, panelLeft() + 14, 62, 40, 20)) { if (directory.getParent() != null) { click(); go(directory.getParent()); } return; }
-    if (inside(x, y, panelLeft() + 58, 62, 44, 20)) { click(); go(Path.of(System.getProperty("user.home"))); return; }
-    if (inside(x, y, panelLeft() + 106, 62, 76, 20)) { click(); go(FabricLoader.getInstance().getGameDir()); return; }
-    if (inside(x, y, panelLeft() + 186, 62, 72, 20)) { click(); hidden = !hidden; read(); return; }
-    if (inside(x, y, selectX(), selectY(), 66, 20)) { if (!selected.containsAll(children)) { click(); selected.addAll(children); } return; }
-    if (inside(x, y, selectX() + 70, selectY(), 80, 20)) { if (children.stream().anyMatch(selected::contains)) { click(); selected.removeAll(children); } return; }
+    if (inside(x, y, panelRight() - 54, pathY() - 1, 40, 20)) { click(); enterPath(); return; }
+    if (inside(x, y, panelLeft() + 14, navigationY(), 40, 20)) { if (directory.getParent() != null) { click(); go(directory.getParent()); } return; }
+    if (inside(x, y, panelLeft() + 58, navigationY(), 44, 20)) { click(); go(Path.of(System.getProperty("user.home"))); return; }
+    if (inside(x, y, panelLeft() + 106, navigationY(), 76, 20)) { click(); go(FabricLoader.getInstance().getGameDir()); return; }
+    if (inside(x, y, panelLeft() + 186, navigationY(), 72, 20)) { click(); hidden = !hidden; read(); return; }
+    if (!singleFolder() && inside(x, y, selectX(), selectY(), 66, 20)) { if (!selected.containsAll(children)) { click(); selected.addAll(children); } return; }
+    if (!singleFolder() && inside(x, y, selectX() + 70, selectY(), 80, 20)) { if (children.stream().anyMatch(selected::contains)) { click(); selected.removeAll(children); } return; }
     if (inside(x, y, panelLeft() + 14, listTop(), panelWidth() - 34, listBottom() - listTop())) {
       int i = (y - listTop() + scroll) / 20;
       if (i >= 0 && i < children.size()) {
         Path child = children.get(i); click();
-        if (x < panelLeft() + 34) { if (!selected.remove(child)) selected.add(child); }
+        if (x < panelLeft() + 34) {
+          if (!selected.remove(child)) { if (singleFolder()) selected.clear(); selected.add(child); }
+        }
         else go(child);
       }
       return;
@@ -121,15 +145,19 @@ public final class DirectoryScreen extends UiScreen {
   }
   public void render(int x, int y, float delta) {
     scroll = (int)Math.max(0, Math.min(track().maximum(), scrollbar.drag(track(), y, Mouse.isButtonDown(0))));
-    renderBackground(); drawCenteredTextWithShadow(textRenderer, "Choose music folders", width / 2, 14, 0xffffff);
-    input(path, panelLeft() + 14, 38, panelWidth() - 76, x, y, "Folder path");
-    button("Go", panelRight() - 54, 37, 40, 20, x, y, true);
-    button("Up", panelLeft() + 14, 62, 40, 20, x, y, directory.getParent() != null);
-    button("Home", panelLeft() + 58, 62, 44, 20, x, y, true);
-    button("Game folder", panelLeft() + 106, 62, 76, 20, x, y, true);
-    button("Hidden: " + (hidden ? "On" : "Off"), panelLeft() + 186, 62, 72, 20, x, y, true);
-    button("Select all", selectX(), selectY(), 66, 20, x, y, !children.isEmpty() && !selected.containsAll(children));
-    button("Deselect all", selectX() + 70, selectY(), 80, 20, x, y, children.stream().anyMatch(selected::contains));
+    renderBackground(); drawCenteredTextWithShadow(textRenderer, singleFolder() ? "Relink music folder" : "Choose music folders", width / 2, 14, 0xffffff);
+    var context = sourceContext(); for (int line = 0; line < context.size(); line++) text(context.get(line), panelLeft() + 14, 30 + line * 11, 0xaaaaaa);
+    input(path, panelLeft() + 14, pathY(), panelWidth() - 76, x, y, "Folder path");
+    button("Go", panelRight() - 54, pathY() - 1, 40, 20, x, y, true);
+    button("Up", panelLeft() + 14, navigationY(), 40, 20, x, y, directory.getParent() != null);
+    button("Home", panelLeft() + 58, navigationY(), 44, 20, x, y, true);
+    button("Game folder", panelLeft() + 106, navigationY(), 76, 20, x, y, true);
+    button("Hidden: " + (hidden ? "On" : "Off"), panelLeft() + 186, navigationY(), 72, 20, x, y, true);
+    if (singleFolder()) text("Select one replacement folder.", panelLeft() + 14, selectY() + 6, 0xaaaaaa);
+    else {
+      button("Select all", selectX(), selectY(), 66, 20, x, y, !children.isEmpty() && !selected.containsAll(children));
+      button("Deselect all", selectX() + 70, selectY(), 80, 20, x, y, children.stream().anyMatch(selected::contains));
+    }
     clip(panelLeft() + 14, listTop(), panelWidth() - 28, Math.max(0, listBottom() - listTop()));
     for (int i = 0; i < children.size(); i++) {
       int yy = listTop() + i * 20 - scroll;
@@ -143,7 +171,8 @@ public final class DirectoryScreen extends UiScreen {
     unclip(); scrollbar.render(this, track());
     String status = !error.isEmpty() ? error : selected.isEmpty() ? "" : selected.size() + " selected";
     if (!status.isEmpty()) text(fit(status, panelWidth() - 28), panelLeft() + 14, height - 44, error.isEmpty() ? 0xaaaaaa : 0xff8888);
-    button(selected.isEmpty() ? "Use this folder" : "Use selected (" + selected.size() + ")", width / 2 - 102, height - 28, 130, 20, x, y, true);
+    button(selected.isEmpty() ? "Use this folder" : singleFolder() ? "Use selected folder" : "Use selected (" + selected.size() + ")", width / 2 - 102, height - 28, 130, 20, x, y, true);
     button("Cancel", width / 2 + 32, height - 28, 70, 20, x, y, true);
+    if (singleFolder() && inside(x, y, panelLeft() + 14, 27, panelWidth() - 28, contextHeight())) foregroundTooltip(replacing, x, y);
   }
 }

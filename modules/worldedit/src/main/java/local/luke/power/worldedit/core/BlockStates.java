@@ -19,6 +19,10 @@ public final class BlockStates {
   private static Map<String, Property> properties(int id) {
     Map<String, Property> p = new LinkedHashMap<>();
     switch (id) {
+      case 52 -> {
+        Map<String,Integer> mobs=new LinkedHashMap<>();SpawnerMobs.names().forEach(name->mobs.put(name,0));
+        p.put("mob",new Property(0,mobs));
+      }
       case 27, 28, 66 -> {
         p.put("shape", id == 66
             ? values(15, "north_south", "east_west", "ascending_east", "ascending_west", "ascending_north", "ascending_south", "south_east", "south_west", "north_west", "north_east")
@@ -68,9 +72,10 @@ public final class BlockStates {
     return result;
   }
   public static BlockValue apply(BlockValue block, Map<String, String> states) {
-    int id = block.id, meta = block.meta;
+    int id = block.id, meta = block.meta;String mob=block.spawnerMob;
     var available = properties(id);
     for (var state : states.entrySet()) {
+      if(id==52 && state.getKey().equals("mob")) {mob=SpawnerMobs.registryName(state.getValue());continue;}
       Property property = available.get(state.getKey());
       Integer bits = property == null ? null : property.values.get(state.getValue());
       if (bits == null) throw new IllegalArgumentException("Unsupported Beta state: " + state.getKey() + "=" + state.getValue());
@@ -80,7 +85,7 @@ public final class BlockStates {
         id = switch (id) { case 75, 76 -> lit ? 76 : 75; case 61, 62 -> lit ? 62 : 61; default -> id; };
       } else if (state.getKey().equals("powered") && (id == 93 || id == 94)) id = state.getValue().equals("true") ? 94 : 93;
     }
-    return new BlockValue(id, meta, block.nbt());
+    return new BlockValue(id, meta, block.nbt(),mob);
   }
   public static int mask(int id, Set<String> states) {
     int mask = 0; var properties = properties(id);
@@ -97,6 +102,10 @@ public final class BlockStates {
       if (!used.contains(name)) for (String value : property.values.keySet()) {
         String entry = name + "=" + value;
         if (local.luke.power.chat.ChatCompletion.startsWith(entry, tail)) choices.add(keep + entry + "]");
+        if(name.equals("mob") && tail.toLowerCase(Locale.ROOT).startsWith("mob=minecraft:")) {
+          String qualified=name+"=minecraft:"+value;
+          if(local.luke.power.chat.ChatCompletion.startsWith(qualified,tail))choices.add(keep+qualified+"]");
+        }
       }
     });
     return choices.stream().sorted().toList();

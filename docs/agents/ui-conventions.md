@@ -11,6 +11,8 @@ Keep these rules here rather than adding style details to the top-level instruct
   Editors keep isolated drafts.
 - Play the native UI click sound for buttons, tabs, toggles and confirmations.
   Slider movement, pointer selection, dragging and group chevrons stay quiet.
+  Sound-starting controls and preview stops stay quiet; actual music Pause and
+  Quiet retain clicks. Context menus opt out for those actions only.
 - Save and Done controls that commit drafts enable only for changed drafts.
   Rendering, clicks and keyboard acceptance use the same condition. Nested F3
   saves use the reorder draft; naming a new preset counts as a change.
@@ -91,6 +93,13 @@ Keep these rules here rather than adding style details to the top-level instruct
 - Shared sliders use an eight-pixel thumb contained within the track at both
   endpoints. Exact-entry inputs and their check button occupy the same outer
   bounds, including the input border. The check ends at the slider's right edge.
+- Catalog `sliderStep` controls pointer dragging independently of `step`, exact
+  entry and saved values. Explicit drag steps use multiples from zero while
+  retaining both range endpoints. Exact entry keeps native whole-number and range
+  validation; never quantize it to the drag step. Wide pixel offsets drag by 10px;
+  displayed chat/item/leaf timers use whole seconds. Work limits use their catalog
+  count multiples. Percentages, volumes, FOV and sensitivity retain their existing
+  precision.
 - Every volume slider accepts one-percentage-point changes: use step `1` for
   stored 0–100 values and `0.01` for stored 0–1 values. Dragging, cycling and exact
   entry share the same range and step. Do not round volumes to five-percent steps.

@@ -21,7 +21,8 @@ public final class CommandHelp {
     add("contract", "<amount> [direction]", "Contract the selection.");
     add("shift", "<amount> [direction]", "Move the selection without moving blocks.");
     for (String name : List.of("outset", "inset")) add(name, "[-hv] <amount>", "Resize every side; -h horizontal, -v vertical.");
-    for (String name : List.of("set", "walls", "faces", "center", "overlay")) add(name, "<pattern>", "Place a block pattern in the selection.");
+    add("set","<pattern>","Place a block pattern. Use spawner[mob=zombie] for a Beta mob spawner; mob values support Tab completion.");
+    for (String name : List.of("walls", "faces", "center", "overlay")) add(name, "<pattern>", "Place a block pattern in the selection.");
     add("replace", "[mask] <pattern>", "Replace matching blocks."); add("hollow", "[thickness] [pattern]", "Hollow the selection.");
     for (String name : List.of("fill", "fillr")) add(name, "<pattern> <radius> [depth]", "Fill connected empty space.");
     add("gmask", "[mask]", "Set or clear the edit mask."); add("count", "<mask>", "Count matching blocks."); add("distr", "", "Show the selected block distribution.");

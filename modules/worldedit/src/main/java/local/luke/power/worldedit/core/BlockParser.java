@@ -289,7 +289,8 @@ public final class BlockParser {
       String base = bracket < 0 ? name : name.substring(0, bracket);
       boolean exact = base.equals("hand") || base.contains(":") || (defaultMeta.containsKey(base) && !base.contains("torch"));
       int bits = bracket >= 0 ? BlockStates.mask(v.id, BlockStates.parse(name.substring(bracket + 1, name.length() - 1)).keySet()) : exact ? 15 : 0;
-      result = result.or(b -> b.id == v.id && (b.meta & bits) == (v.meta & bits));
+      result = result.or(b -> b.id == v.id && (b.meta & bits) == (v.meta & bits)
+          && (v.spawnerMob==null || v.spawnerMob.equals(b.spawnerMob)));
     }
     return invert ? result.negate() : result;
   }

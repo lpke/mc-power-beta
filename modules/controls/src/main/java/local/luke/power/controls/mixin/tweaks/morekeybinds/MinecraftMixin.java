@@ -30,8 +30,14 @@ public class MinecraftMixin {
         return local.luke.power.input.Bindings.down(KeyBindingListener.takeScreenshot);
     }
 
-    // F3
-    @ModifyConstant(method = "tick", constant = @Constant(intValue = 61))
+    // F3 appears first in the legacy F3+S held poll, then in the HUD event comparison.
+    // eventCode can return an inactive sentinel and must never reach LWJGL's state buffer.
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lorg/lwjgl/input/Keyboard;isKeyDown(I)Z", ordinal = 0, remap = false))
+    public boolean power$resourceReload(int code, Operation<Boolean> original) {
+        return local.luke.power.input.Bindings.down(KeyBindingListener.debugHud);
+    }
+
+    @ModifyConstant(method = "tick", constant = @Constant(intValue = 61, ordinal = 1))
     public int modifyDebugHudKeybind(int constant) {
         return local.luke.power.input.Bindings.eventCode(KeyBindingListener.debugHud);
     }

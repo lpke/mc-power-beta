@@ -268,6 +268,7 @@
       "enableMultiplayerServerChanges": true
     },
     "title": {
+      "showSplashText": true,
       "logo": {
         "lines": [
           " *   * * *   * *** *** *** *** *** ***",
@@ -341,7 +342,7 @@
       "ladderSounds": true,
       "musicDoubleClickPreview": false,
       "showMusicPreviewButton": false,
-      "musicFadeMillis": 0,
+      "musicFadeMillis": 1000,
       "mp3ConversionLimit": 500
     },
     "visual": {
@@ -583,7 +584,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.7.0"
+        "customVersionText": "Power Beta 4.7.1"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -737,6 +738,7 @@
       "key_power_beta.clickMining": "0",
       "key_powerbeta.debugGraph": "61",
       "key_powerbeta.openCommands": "53",
+      "key_powerbeta.executePreviousCommand": "0",
       "key_powerbeta.infoHud": "62"
     },
     "video": {
@@ -830,7 +832,8 @@
       "modernWaterMovement": true,
       "modernCrawling": true,
       "crouchCameraHeight": false,
-      "modernBowHandling": false
+      "modernBowHandling": false,
+      "modernBowFov": true
     },
     "infoHud": {
       "enabled": false,

@@ -64,6 +64,50 @@ class MusicRelinkTest {
     assertTrue(MusicLibrary.scan(game, List.of("old")).tracks().isEmpty());
   }
 
+  @Test void multipleMissingRootsKeepSeparateCachesAndRelinkIndependentlyWithoutChangingMembership() throws Exception {
+    var paths=List.of("old/alpha/music","old/beta/music","old/missing");
+    Path alpha=song(paths.get(0),"track.mp3"),beta=song(paths.get(1),"track.mp3");
+    Path alphaCache=cache(alpha),betaCache=cache(beta);
+    var original=MusicLibrary.scan(game,paths);
+    String alphaId=original.tracks().stream().filter(track->track.path().equals(alpha)).findFirst().orElseThrow().id();
+    String betaId=original.tracks().stream().filter(track->track.path().equals(beta)).findFirst().orElseThrow().id();
+    assertNotEquals(alphaId,betaId);assertNotEquals(alphaCache,betaCache);
+    var settings=new AudioSettings();settings.musicDirectories.addAll(paths);
+    settings.playlists.add(new MusicPlaylist("saved","Saved",List.of(betaId,alphaId)));
+    settings.playlist="saved";settings.favourites.addAll(List.of(alphaId,betaId));
+    settings.sounds.put(alphaId,65);settings.sounds.put(betaId,35);
+    settings.libraryOrder.addAll(paths.stream().map(MusicLibrarySources::id).toList());
+    settings.libraryGroupVolumes.put(MusicLibrarySources.id(paths.get(0)),72);
+    settings.libraryGroupVolumes.put(MusicLibrarySources.id(paths.get(1)),44);
+    Files.createDirectories(game.resolve("moved/alpha"));Files.createDirectories(game.resolve("moved/beta"));
+    Files.move(alpha.getParent(),game.resolve("moved/alpha/music"));Files.move(beta.getParent(),game.resolve("moved/beta/music"));
+    var missing=MusicLibrary.scan(game,paths);
+    var model=MusicLibrarySources.build(game,paths,missing);
+    assertEquals(paths.stream().map(path->"Folder unavailable: "+path).toList(),missing.warnings());
+    assertEquals(List.of("Unavailable","Unavailable","Unavailable"),model.folders().stream().map(MusicLibrarySources.Folder::status).toList());
+    assertEquals(List.of(alphaId),model.folders().get(0).trackIds());
+    assertEquals(List.of(betaId),model.folders().get(1).trackIds());assertTrue(model.folders().get(2).trackIds().isEmpty());
+    assertEquals(Set.of(alphaCache,betaCache),new HashSet<>(model.tracks().stream().map(MusicLibrary.Track::playbackPath).toList()));
+    var first=MusicFolders.relink(game,settings,paths.get(0),"moved/alpha/music");
+    var partly=MusicLibrarySources.build(game,first.musicDirectories,MusicLibrary.scan(game,first.musicDirectories,first.musicSourceIdentities));
+    assertEquals(List.of("Ready","Unavailable","Unavailable"),partly.folders().stream().map(MusicLibrarySources.Folder::status).toList());
+    assertEquals(List.of(betaId),partly.folders().get(1).trackIds());
+    var second=MusicFolders.relink(game,first,paths.get(1),"moved/beta/music");
+    var gson=new com.google.gson.Gson();second=gson.fromJson(gson.toJson(second),AudioSettings.class);second.validate();
+    var restored=MusicLibrary.scan(game,second.musicDirectories,second.musicSourceIdentities);
+    assertEquals(Set.of(alphaId,betaId),new HashSet<>(restored.tracks().stream().map(MusicLibrary.Track::id).toList()));
+    assertEquals(Set.of(alphaCache,betaCache),new HashSet<>(restored.tracks().stream().map(MusicLibrary.Track::playbackPath).toList()));
+    assertEquals(gson.toJsonTree(settings.playlists),gson.toJsonTree(second.playlists));assertEquals(settings.playlist,second.playlist);
+    assertEquals(settings.favourites,second.favourites);assertEquals(settings.sounds,second.sounds);
+    assertEquals(game.resolve(paths.get(0)).toString(),second.musicSourceIdentities.get(game.resolve("moved/alpha/music").toString()));
+    assertEquals(game.resolve(paths.get(1)).toString(),second.musicSourceIdentities.get(game.resolve("moved/beta/music").toString()));
+    assertEquals(72,second.libraryGroupVolumes.get(MusicLibrarySources.id(game.resolve("moved/alpha/music").toString())));
+    assertEquals(44,second.libraryGroupVolumes.get(MusicLibrarySources.id(game.resolve("moved/beta/music").toString())));
+    assertEquals(List.of(MusicLibrarySources.id(game.resolve("moved/alpha/music").toString()),
+        MusicLibrarySources.id(game.resolve("moved/beta/music").toString()),MusicLibrarySources.id(paths.get(2))),second.libraryOrder);
+    assertEquals(paths,settings.musicDirectories);assertTrue(settings.musicSourceIdentities.isEmpty());
+  }
+
   @Test void changedSourceDoesNotReuseOldConversionAndUnimportingHidesCache() throws Exception {
     Path source = song("music", "track.mp3"); cache(source);
     MusicLibrary.scan(game, List.of("music"));

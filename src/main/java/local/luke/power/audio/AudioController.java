@@ -100,6 +100,8 @@ public final class AudioController {
     if (s != null) { s.stop("PowerBetaPreview"); s.removeSource("PowerBetaPreview"); }
     soundPreview = "";
     soundPreviewWorld = null;
+    soundPreviewPlaying = false;
+    soundPreviewStarted = 0;
   }
 
   private static void tickSoundPreview() {
@@ -205,8 +207,8 @@ public final class AudioController {
 
   public static void previewSound(String id) {
     if (client == null || system() == null) return;
+    if (previewing(id)) { stopPreview(id); return; }
     if (id.startsWith("music:")) { previewMusic(id); return; }
-    if (id.equals(soundPreview)) { stopSoundPreview(); return; }
     MusicPreview.stop(system(), true);
     var manager = (SoundManagerAccessor) client.soundManager;
     boolean record = id.startsWith("records.");
@@ -230,6 +232,13 @@ public final class AudioController {
     soundPreviewPlaying = false;
     soundPreviewWorld = client.world;
     system.play("PowerBetaPreview");
+  }
+
+  /** Stop this audition completely, retaining native background restoration rules. */
+  public static void stopPreview(String id) {
+    if (id == null || id.isBlank()) return;
+    if (id.equals(soundPreview)) stopSoundPreview();
+    if (MusicPreview.active() && id.equals(MusicPreview.track()) && system() != null) MusicPreview.stop(system(), true);
   }
 
   private static void previewMusic(String id) {
@@ -270,6 +279,10 @@ public final class AudioController {
 
   public static String currentTrackId() {
     if (MusicPreview.active()) return MusicPreview.track();
+    return backgroundTrackId();
+  }
+
+  public static String backgroundTrackId() {
     if (currentMusic.isEmpty() && menuMusic.isEmpty()) return "";
     return !menuMusic.isEmpty() ? menuMusic : currentMusic;
   }
@@ -629,7 +642,10 @@ public final class AudioController {
         indexLibrary();
         libraryRevision++;
         List<String> errors = new ArrayList<>(library.warnings());
-        status = errors.isEmpty() ? "" : errors.get(0);
+        long missing = sourceLibrary.folders().stream().filter(source -> source.status().equals("Unavailable")).count();
+        status = missing > 1 ? missing + " music source folders unavailable. Open Music Library to relink them."
+            : errors.size() > 1 ? errors.size() + " music library warnings. Open Music Library to review sources."
+            : errors.isEmpty() ? "" : errors.get(0);
         errors.forEach(PowerBeta.LOG::warn);
       } catch (RuntimeException e) {
         PowerBeta.LOG.error("Music scan failed", e);

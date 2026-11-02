@@ -19,13 +19,11 @@ public final class ModernBow {
   private static HandUse.Hand hand;
   private static int slot, ticks;
   private static long swap;
+  private static final BowFov fov = new BowFov();
   static {
-    TweakLifecycle.register("modern_bow", ModernBow::cancel);
-    BowView.register(() -> enabled() && owner != null, delta -> {
-      if (!enabled() || owner == null) return 1;
-      double draw = Math.min(1, Math.max(0, ticks - 1 + delta) / 20);
-      return 1 - draw * draw * .15;
-    });
+    TweakLifecycle.register("modern_bow", () -> { cancel(); fov.reset(); });
+    BowView.register(() -> fov.active() && enabled() && GameplayConfig.current().modernBowFov,
+        delta -> fov.factor((float)delta, SprintView.fov((float)delta)));
   }
   private ModernBow() {}
   public static boolean enabled() { return GameplayConfig.current().modernBowHandling; }
@@ -44,6 +42,20 @@ public final class ModernBow {
   }
   public static int ticks(PlayerEntity player, ItemStack stack) { return using(player, stack) ? ticks : 0; }
   public static HandUse.Hand hand(PlayerEntity player) { return enabled() && owner == player ? hand : null; }
+  /** A live local draw owns Attack as well as Use, independently of the drawing hand. */
+  public static boolean ownsAttack(Minecraft mc) {
+    return owner != null && enabled() && mc != null && mc.player == owner
+        && mc.world != null && mc.world == owner.world && !mc.world.isRemote;
+  }
+  /** Native Camera.tick runs after input, once per unpaused gameplay tick. */
+  public static void tickFov(Minecraft mc) {
+    if (!enabled() || !GameplayConfig.current().modernBowFov) { if (fov.active()) fov.reset(); return; }
+    if (mc.world == null || mc.player == null) { if (fov.active()) fov.reset(); return; }
+    if (mc.paused) return;
+    int elapsed = owner == mc.player ? Math.max(0, ticks - 1) : -1;
+    if (elapsed <= 0 && !fov.active()) return;
+    fov.tick(elapsed, local.luke.power.sprint.SprintController.targetFov(), SprintView.fov(0), SprintView.fov(1));
+  }
   /** Called only after the native block/entity use path passes to this bow. */
   public static void begin(PlayerEntity player, ItemStack stack) {
     Minecraft mc = client();
@@ -88,7 +100,10 @@ public final class ModernBow {
     final Object world = mc.world;
     final int selected = player.inventory.selectedSlot;
     final long revision = HandUse.manualRevision();
-    final double x = player.x, y = player.y + player.method_1378() - .1, z = player.z;
+    // Beta stores an eye-based native position. Its render eye also accounts for
+    // the selected crouch camera and pose easing, independently of physical height.
+    float cameraOffset = local.luke.power.gameplay.ModernSwimming.cameraOffset(player, 1, player.field_1631) - 1.62f;
+    final double x = player.x, y = player.y - cameraOffset - (double).1f, z = player.z;
     final float yaw = player.yaw, pitch = player.pitch;
     final double vx = player.velocityX, vy = player.field_1623 ? 0 : player.velocityY, vz = player.velocityZ;
     final boolean breaks = !creative && weapon.getDamage() + 1 >= BowPhysics.DURABILITY;

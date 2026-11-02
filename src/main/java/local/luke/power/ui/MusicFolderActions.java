@@ -16,6 +16,7 @@ final class MusicFolderActions extends UiScreen {
   private final MusicEdits edits;
   private final Runnable changed;
   private static final Set<String> warnedMissing = new HashSet<>();
+  private final MissingSourceWarnings warnings = new MissingSourceWarnings(warnedMissing);
   private String removing = "", error = "";
   private boolean missing;
   private JsonElement removalValue;
@@ -30,12 +31,19 @@ final class MusicFolderActions extends UiScreen {
   String error() { return error; }
   boolean modal() { return !removing.isEmpty(); }
   void cancel() { removing = ""; removalValue = null; error = ""; missing = false; }
-  void reload() { warnedMissing.clear(); local.luke.power.audio.AudioController.reload(); }
+  void reload() { warnings.reset(); local.luke.power.audio.AudioController.reload(); }
   void noticeMissing(Collection<MusicLibrarySources.Folder> sources) {
-    if (modal()) return;
-    for (var source : sources) if (source.status().equals("Unavailable") && warnedMissing.add(source.path())) {
-      removing = source.path(); missing = true; removalValue = setting().value.deepCopy(); return;
-    }
+    warnings.observe(sources);
+    if (!modal()) nextMissing();
+  }
+  private void nextMissing() {
+    String path = warnings.next();
+    if (path == null) return;
+    removing = path; missing = true; removalValue = setting().value.deepCopy();
+  }
+  private void dismiss() {
+    cancel();
+    nextMissing();
   }
 
   void add() {
@@ -94,10 +102,10 @@ final class MusicFolderActions extends UiScreen {
           "libraryOrder", local.luke.power.config.Catalog.JSON.toJsonTree(next.libraryOrder),
           "libraryGroupVolumes", local.luke.power.config.Catalog.JSON.toJsonTree(next.libraryGroupVolumes)));
       changed.run();
-    }, current.musicDirectories));
+    }, current.musicDirectories, path));
   }
 
-  void key(int key) { if (key == Keyboard.KEY_ESCAPE) cancel(); }
+  void key(int key) { if (key == Keyboard.KEY_ESCAPE) dismiss(); }
 
   private int dialogWidth() { return Math.min(312, width - 20); }
   private int dialogLeft() { return (width - dialogWidth()) / 2; }
@@ -107,7 +115,7 @@ final class MusicFolderActions extends UiScreen {
   void dialogClick(int x, int y, int button) {
     if (!modal() || button != 0) return;
     if (inside(x, y, dialogLeft() + buttonWidth() + 4, buttonY(), buttonWidth(), 20)) {
-      click(); cancel(); return;
+      click(); dismiss(); return;
     }
     if (!inside(x, y, dialogLeft(), buttonY(), buttonWidth(), 20)) return;
     click();
@@ -133,10 +141,11 @@ final class MusicFolderActions extends UiScreen {
     int span = Math.max(1, Math.min(w, width - 24));
     for (var line : missing
         ? MusicFolderWarning.layout(span, buttonY() - 12, "Music source unavailable", removing,
-            "Cached tracks and playlist entries stay unchanged. Relink the source path if the folder moved, or remove it from Library.", error, this::textWidth)
+            "Cached tracks and playlist entries stay unchanged. Relink the source path if the folder moved, or remove it from Library."
+                + (warnings.remaining() == 0 ? "" : " " + warnings.remaining() + " more source folders unavailable."), error, this::textWidth)
         : MusicFolderWarning.layout(span, buttonY() - 12, removing, error, this::textWidth))
       centeredText(line.text(), line.y(), line.color());
     button(missing ? "Relink source path" : "Remove", x, buttonY(), buttonWidth(), 20, mx, my, true);
-    button(missing ? "Close" : "Cancel", x + buttonWidth() + 4, buttonY(), buttonWidth(), 20, mx, my, true);
+    button(missing ? warnings.remaining() > 0 ? "Next" : "Close" : "Cancel", x + buttonWidth() + 4, buttonY(), buttonWidth(), 20, mx, my, true);
   }
 }

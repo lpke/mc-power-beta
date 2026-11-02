@@ -17,6 +17,7 @@ public class TitleFeatures implements ModInitializer {
     public static final List<String> TITLE_STYLES = List.of(
             "Retro", "Beta", "Java Edition (2017)", "Java Edition (2020)", "Modern");
     public static ConfigKey<Integer> style = ConfigKey.integer("style", 0);
+    public static ConfigKey<Boolean> showSplashText = ConfigKey.bool("showSplashText", true);
 
     public static ConfigKey<String[]> logo = ConfigKey.stringArray("logo.lines", new String[]{
             " *   * * *   * *** *** *** *** *** ***",

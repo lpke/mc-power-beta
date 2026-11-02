@@ -1,6 +1,7 @@
 package local.luke.power.worldedit.core;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.*;
 import local.luke.power.worldedit.chat.CommandCatalog;
 import org.junit.jupiter.api.Test;
 
@@ -45,5 +46,32 @@ class BlockStatesTest {
     assertTrue(CommandCatalog.complete("//set rail[sh").contains("//set rail[shape=east_west]"));
     assertTrue(CommandCatalog.complete("//set powered_rail[shape=east_west,pow").contains("//set powered_rail[shape=east_west,powered=true]"));
     assertTrue(CommandCatalog.complete("//replace redstone_torch[lit=f").contains("//replace redstone_torch[lit=false]"));
+  }
+
+  @Test void spawnerMobsUseSummonNamesAndStayDistinctInPatternsAndMasks() {
+    for(String input:List.of("spawner[mob=zombie]","minecraft:spawner[mob=minecraft:zombie]","52[mob=Zombie]"))
+      assertEquals("Zombie",parser.block(input).spawnerMob);
+    for(String name:List.of("PigZombie","pig_zombie","zombie_pigman","minecraft:zombified_piglin"))
+      assertEquals("PigZombie",parser.block("spawner[mob="+name+"]").spawnerMob);
+    assertEquals("Squid",parser.block("spawner[mob=squid]").spawnerMob);
+    var mask=parser.mask("spawner[mob=zombie]");
+    assertTrue(mask.test(new BlockValue(52,0,null,"Zombie")));
+    assertFalse(mask.test(new BlockValue(52,0,null,"Pig")));
+    assertTrue(parser.mask("spawner").test(new BlockValue(52,0,null,"Pig")));
+    var pattern=parser.pattern("50%spawner[mob=zombie],50%spawner[mob=skeleton]");
+    for(int i=0;i<40;i++)assertTrue(Set.of("Zombie","Skeleton").contains(pattern.apply(new Pos(i,65,0)).spawnerMob));
+    for(String mob:List.of("all","player","mob","monster","@e","item","boat","arrow","creaking","magma_cube"))
+      assertThrows(IllegalArgumentException.class,()->parser.block("spawner[mob="+mob+"]"));
+    assertThrows(IllegalArgumentException.class,()->parser.block("stone[mob=zombie]"));
+  }
+
+  @Test void spawnerMobValuesCompleteIncludingQualifiedNamesAndWeightedPatterns() {
+    assertTrue(CommandCatalog.complete("//set spawner[mo").contains("//set spawner[mob=zombie]"));
+    assertTrue(CommandCatalog.complete("//set spawner[mob=zo").contains("//set spawner[mob=zombie]"));
+    assertTrue(CommandCatalog.complete("//set spawner[mob=zom").contains("//set spawner[mob=zombified_piglin]"));
+    assertTrue(CommandCatalog.complete("//set spawner[mob=minecraft:sq").contains("//set spawner[mob=minecraft:squid]"));
+    assertTrue(CommandCatalog.complete("//set 20%stone,80%spawner[mob=sk").contains("//set 20%stone,80%spawner[mob=skeleton]"));
+    assertTrue(CommandCatalog.complete("//replace spawner[mob=co").contains("//replace spawner[mob=cow]"));
+    assertFalse(CommandCatalog.complete("//set spawner[mob=").stream().anyMatch(value->value.contains("mob=player")||value.contains("mob=item")));
   }
 }

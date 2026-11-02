@@ -9,6 +9,26 @@ import org.junit.jupiter.api.Test;
 import org.lwjgl.input.Keyboard;
 
 class SettingsDropdownTest {
+  @Test void soundStartingActionsCanSuppressClickWithoutChangingOtherMenusOrKeyboardSelection() throws Exception {
+    var popup = new SettingsDropdown();
+    var screen = new PopupStyleTest.Host();
+    var accepted = new AtomicInteger(-1);
+    popup.open("music", List.of("Preview", "Quiet"), List.of(), -1, -1,
+        40, 30, 160, 18, 320, 240, accepted::set);
+    popup.clickSound(index -> index != 0);
+    popup.key(screen, Keyboard.KEY_HOME); popup.key(screen, Keyboard.KEY_RETURN);
+    assertEquals(0, accepted.get()); assertEquals(0, screen.clicks); assertFalse(popup.active());
+    popup.open("ordinary", List.of("Edit", "Delete"), List.of(), -1, -1,
+        40, 30, 160, 18, 320, 240, accepted::set);
+    popup.key(screen, Keyboard.KEY_HOME); popup.key(screen, Keyboard.KEY_RETURN);
+    assertEquals(0, accepted.get()); assertEquals(1, screen.clicks);
+    popup.open("music", List.of("Preview", "Quiet"), List.of(), -1, -1,
+        40, 30, 160, 18, 320, 240, accepted::set);
+    popup.clickSound(index -> index != 0);
+    popup.key(screen, Keyboard.KEY_END); popup.key(screen, Keyboard.KEY_RETURN);
+    assertEquals(1, accepted.get()); assertEquals(2, screen.clicks);
+  }
+
   private SettingsDropdown open(Object owner, int current, int reset, int height) {
     var popup = new SettingsDropdown();
     popup.open(owner, List.of("Edit playlists", "Beta", "World", "Menu"), List.of(), current, reset,

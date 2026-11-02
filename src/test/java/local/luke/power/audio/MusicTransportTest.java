@@ -86,6 +86,18 @@ class MusicTransportTest {
     assertFalse(AudioController.previousRestartsCurrent(), "a gap must replay history even with retained clock data");
   }
 
+  @Test void previewIdentityDoesNotHideTheRetainedBackgroundSong() throws Exception {
+    assertEquals("music:calm1.ogg", AudioController.backgroundTrackId());
+    set(MusicPreview.class, "track", "music:calm2.ogg");
+    assertEquals("music:calm2.ogg", AudioController.currentTrackId());
+    assertEquals("music:calm1.ogg", AudioController.backgroundTrackId());
+    set(MusicPreview.class, "paused", true);
+    assertEquals("music:calm2.ogg", AudioController.currentTrackId());
+    assertEquals("music:calm1.ogg", AudioController.backgroundTrackId());
+    set(AudioController.class, "menuMusic", "music:calm3.ogg");
+    assertEquals("music:calm3.ogg", AudioController.backgroundTrackId());
+  }
+
   @Test void relocatedCurrentSongsRefreshRestartUrlsWithoutChangingPlaybackIdentityOrPosition() throws Exception {
     Path old = Files.write(game.resolve("old.wav"), new byte[100]);
     String id = MusicLibrary.trackId(old);

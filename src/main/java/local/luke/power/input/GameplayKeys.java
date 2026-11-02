@@ -16,6 +16,7 @@ public final class GameplayKeys {
   public static final KeyBinding LIGHT = new KeyBinding("powerbeta.lightOverlay", Keyboard.KEY_F7);
   public static final KeyBinding INFO_HUD = new KeyBinding("powerbeta.infoHud", Keyboard.KEY_F4);
   public static final KeyBinding COMMANDS = new KeyBinding("powerbeta.openCommands", Keyboard.KEY_SLASH);
+  public static final KeyBinding PREVIOUS_COMMAND = new KeyBinding("powerbeta.executePreviousCommand", 0);
   public static final KeyBinding GRAPH = new KeyBinding("powerbeta.debugGraph", Keyboard.KEY_F3);
   public static final KeyBinding SPRINT = new KeyBinding("powerbeta.sprint", Keyboard.KEY_LCONTROL);
   public static final KeyBinding SWAP_HANDS = new KeyBinding("powerbeta.swapHands", 0);
@@ -35,6 +36,9 @@ public final class GameplayKeys {
     event.keyBindings.add(LIGHT);
     event.keyBindings.add(INFO_HUD);
     event.keyBindings.add(COMMANDS);
+    event.keyBindings.add(PREVIOUS_COMMAND);
+    TweakLifecycle.register("previous-command", local.luke.power.chat.PreviousCommand::clear);
+    Bindings.onRelease("previous-command", local.luke.power.chat.PreviousCommand::releasePress);
     event.keyBindings.add(GRAPH);
     event.keyBindings.add(SPRINT);
     event.keyBindings.add(SWAP_HANDS);
@@ -91,6 +95,16 @@ public final class GameplayKeys {
   private static void interfaceKey(int code) {
     Minecraft mc = (Minecraft)FabricLoader.getInstance().getGameInstance();
     if (mc.world == null || mc.player == null || mc.currentScreen != null || !Display.isActive()) return;
+    if (!mc.paused && !mc.player.dead && mc.player.health > 0 && Bindings.matches(PREVIOUS_COMMAND, code)) {
+      try {
+        var result = local.luke.power.chat.PreviousCommand.execute(mc.world, command -> {
+          if (!mc.isCommand(command)) mc.player.sendChatMessage(command);
+        });
+        if (result == local.luke.power.chat.PreviousCommand.Result.EMPTY)
+          mc.inGameHud.addChatMessage("No previous command in this world.");
+      } finally { local.luke.power.chat.PreviousCommand.consumePress(code); }
+      return;
+    }
     if (Bindings.matches(GRAPH, code)) {
       graph = !mc.options.debugHud || !graph;
       mc.options.debugHud = true;

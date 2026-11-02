@@ -13,6 +13,7 @@
     "SavedWorldMenuMixin",
     "BoatPlacementMixin",
     "ModernBowItemMixin",
+    "CreativeSwordMiningMixin",
     "ModernBowDurabilityMixin",
     "ModernBowClientMixin",
     "ModernBowMovementMixin",
@@ -198,9 +199,6 @@
     "InventoryMinimapOverlayMixin",
     "HeldLightRegionMixin",
     "FishingBobberPoseMixin",
-    "LadderPlaceSoundMixin",
-    "LadderHitSoundMixin",
-    "LadderBreakSoundMixin",
     "LadderFallSoundMixin"
   ],
   "injectors": {

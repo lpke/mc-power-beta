@@ -66,6 +66,16 @@
   auditions are blue and their row transport toggles the audition without selecting
   another world playlist. Between-song links use the reserved next song and its
   world/menu origin without consuming a request or advancing the selector.
+  Starting/resuming music, changing tracks and starting/stopping previews produce
+  no UI click. Actual Pause and Quiet actions retain their click. Preview buttons
+  and Stop preview context actions remove the audition completely, preserving
+  background-source identity, pause state, position, history and queue; they never
+  pause/resume the audition. Keep the retained background song gold while another
+  song is previewed, and use the same blue for the preview title and active speaker.
+  Add songs removal uses the current editable playlist draft from both row X and
+  context menu. Included rows retain a red X through hover, offer active Remove
+  from playlist, and never modify source files, the Library or saved playlists
+  before Save. Read-only playlists expose no membership edits.
   Catalog order is persisted separately from each playlist's song order. Rename,
   duplicate, reorder and Play use saved objects and never save isolated editor drafts.
 - New and imported Ogg sounds must retain complete playback through Beta's decoder.
@@ -115,7 +125,17 @@
   sources retain indexed cache playback and report Unavailable. Read sources only during
   startup, explicit reload, conversion completion or folder edits. Old unindexed caches
   cannot recover a missing original's filenames; relink the folder to restore discovery.
+  Queue every missing source path from the immutable scanner snapshot, showing each
+  once per session. Compact Library headings retain the gray folder name, red
+  Source missing status, square relink magnifier, delete and volume controls with
+  shared hit bounds. The magnifier and context action open the same single-folder
+  chooser, displaying the exact old path and basename. Add folder keeps its
+  independent multi-selection. Rendering never checks source availability on disk.
 - Music fades apply to song openings and endings, using accumulated native playback time
   and asynchronously read duration. Zero skips fade work and duration discovery for this
   feature. Pause and mute remain immediate; explicit transport keeps its existing timing.
   Unknown durations can fade in but cannot schedule an ending fade.
+  The default is 1000ms, with a 0–10000ms range and 10ms pointer steps. Existing
+  saved values, including zero, stay intact; exact entry accepts every whole
+  millisecond. MP3 batch counts likewise drag by 10 while exact entry accepts
+  every whole count within the existing range.

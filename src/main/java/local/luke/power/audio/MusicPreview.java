@@ -57,7 +57,7 @@ final class MusicPreview {
   static void start(Minecraft mc, SoundSystem system, class_267 selected, boolean backgroundStarting) {
     if (AudioController.musicMuted()) AudioController.muteMusic(system);
     String id = AudioController.trackId(selected);
-    if (track.equals(id)) { if (paused) resume(system); else pause(system); return; }
+    if (track.equals(id)) { stop(system, true); return; }
     if (!active()) {
       restoreBackground = true;
       restoreRecords = true;
@@ -110,7 +110,8 @@ final class MusicPreview {
     if (!active()) return false;
     boolean hadMusic = resume.contains("BgMusic") || resume.contains("PowerBetaMenu");
     MusicStream.stop(system, SOURCE);
-    track = ""; entry = null; world = null; paused = false;
+    track = ""; entry = null; world = null; paused = playing = false; started = 0;
+    progress.reset(0, System.nanoTime());
     boolean resumeMusic = restoreMusic && !AudioController.backgroundPaused() && !AudioController.musicMuted();
     if (resumeMusic && hadMusic) AudioController.resuming();
     AudioController.refresh();
@@ -118,6 +119,7 @@ final class MusicPreview {
       if (name.equals("streaming") ? restoreJukeboxes && restoreRecords : resumeMusic && restoreBackground)
         system.play(name);
     resume.clear();
+    restoreBackground = restoreRecords = false;
     return hadMusic;
   }
 }

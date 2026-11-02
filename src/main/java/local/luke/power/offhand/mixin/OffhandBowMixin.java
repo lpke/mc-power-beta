@@ -13,6 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 public class OffhandBowMixin {
   @WrapOperation(method="method_451",at=@At(value="INVOKE",target="Lnet/minecraft/entity/player/PlayerInventory;method_676(I)Z"))
   private boolean power$oppositeHandAmmo(PlayerInventory inventory,int item,Operation<Boolean> original) {
+    // Beta combines the ammo check and removal. Bypass both before either hand
+    // or storage is touched, retaining its native instant shot and arrow physics.
+    if(!inventory.player.world.isRemote&&local.luke.power.bow.ModernBow.creative(inventory.player))return true;
     if(!Offhand.enabled(inventory.player))return original.call(inventory,item);
     boolean off=HandUse.hand(inventory)==HandUse.Hand.OFF;
     ItemStack ammunition=off?inventory.main[inventory.selectedSlot]:Offhand.get(inventory);

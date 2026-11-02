@@ -105,6 +105,7 @@ public final class EditEngine {
             if (value == null) continue;
             // Preflight every existing block entity before making any changes.
             BlockValue before = world.get(p);
+            value=world.prepare(p,value,before);
             if (value.satisfiedBy(before)) continue;
             BlockValue old = j.plan.put(p, value);
             if (old != null) j.bytes -= old.bytes();

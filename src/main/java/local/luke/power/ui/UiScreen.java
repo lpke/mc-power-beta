@@ -77,7 +77,7 @@ public abstract class UiScreen extends Screen {
     }
     if (overlay != null) overlay.run();
     drawCenteredTextWithShadow(textRenderer, label, left + w / 2, top + (h - 8) / 2,
-        !enabled ? 0xa0a0a0 : labelColour >= 0 ? labelColour : hovered ? 0xffffa0 : 0xe0e0e0);
+        !enabled ? 0xa0a0a0 : labelColour != -1 ? labelColour : hovered ? 0xffffa0 : 0xe0e0e0);
   }
 
   protected void tabButton(String label, int x, int y, int w, int mx, int my, boolean selected) {
@@ -128,8 +128,10 @@ public abstract class UiScreen extends Screen {
   }
 
   protected void icon(String icon, int x, int y, int w, int h, boolean enabled, boolean active) {
-    int color = !enabled ? 0xff777777 : icon.startsWith("eye") ? 0xffffffff : active ? icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
+    int color = !enabled ? 0xff777777 : icon.startsWith("eye") ? 0xffffffff : active ? icon.equals("speaker") ? 0xff77baff : icon.equals("star") ? 0xffffcc33 : 0xffffff55 : 0xffdddddd;
     String[] pixels = switch (icon) {
+      case "searchName" -> new String[]{"#########", "#   #   #", "    #    ", "    #    ", "    #    ", "    #    ", "    #    ", "   ###   ", "  #####  "};
+      case "searchKey" -> new String[]{"#########", "#       #", "#       #", "#       #", "#       #", "#########", "#       #", "#########"};
       case "eye" -> new String[]{"   ###   ", " ##   ## ", "#   #   #", "#  ###  #", "#   #   #", " ##   ## ", "   ###   "};
       case "eyeClosed" -> new String[]{"         ", "         ", "#       #", " #     # ", "  #####  ", " #  #  # ", "         "};
       case "collapse" -> new String[]{"  #   #  ", "   # #   ", "    #    ", "         ", "         ", "    #    ", "   # #   ", "  #   #  "};
@@ -145,6 +147,7 @@ public abstract class UiScreen extends Screen {
       case "pause" -> new String[]{" ##  ## ", " ##  ## ", " ##  ## ", " ##  ## ", " ##  ## ", " ##  ## ", " ##  ## "};
       case "reload" -> new String[]{"  ####  #", " #    # #", "#      ##", "#    ####", "#        ", " #    #  ", "  ####   "};
       case "speaker" -> new String[]{"   #   # ", "  ## #  #", "####  # #", "####  # #", "####  # #", "  ## #  #", "   #   # "};
+      case "magnifier" -> new String[]{"  ###    ", " #   #   ", "#     #  ", "#     #  ", " #   #   ", "  ###    ", "     ##  ", "      ## ", "       ##"};
       case "up" -> new String[]{"    #    ", "   ###   ", "  #####  ", "    #    ", "    #    ", "    #    ", "         "};
       case "down" -> new String[]{"    #    ", "    #    ", "    #    ", "  #####  ", "   ###   ", "    #    ", "         "};
       case "controls" -> new String[]{"#########", "# # # # #", "#########", "# # # # #", "#########", "# ##### #", "#########"};

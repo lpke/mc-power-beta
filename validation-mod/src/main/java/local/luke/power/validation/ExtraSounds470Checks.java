@@ -108,23 +108,29 @@ public final class ExtraSounds470Checks {
         check(ladders().size() == count, "disabled ladder emitted a new sound");
         off.ladderSounds = true; AudioConfig.preview(off);
       });
-      test("AUDIO470 successful native ladder placement, hit, break and fall select official action sounds", () -> {
-        clear(mc, blocks, y); reset(mc, x + .5, y + 3, z + .5);
-        mc.world.method_154(x + 3, y + 1, z, 1, 0); p.inventory.selectedSlot = 0; p.inventory.main[0] = new ItemStack(65, 4, 0);
-        SOUNDS.clear(); recording = true;
-        check(mc.interactionManager.method_1713(p, mc.world, p.inventory.main[0], x + 3, y + 1, z, 4), "native ladder placement failed");
-        check(ladders().stream().anyMatch(sound -> sound.id.equals("power_beta:block.ladder.place") && sound.volume == 1 && sound.pitch == .8f), "wrong ladder placement event");
-        mc.worldRenderer.method_1152(p, 2001, x + 2, y + 1, z, 65);
-        check(ladders().stream().anyMatch(sound -> sound.id.equals("power_beta:block.ladder.break") && sound.volume == 1 && sound.pitch == .8f), "wrong ladder break event");
-        var interaction = mc.interactionManager; mc.interactionManager = new SingleplayerInteractionManager(mc);
-        try {
-          mc.interactionManager.method_1707(x + 2, y + 1, z, 5);
-          // The first held tick installs the new target; the second emits its first hit.
-          mc.interactionManager.method_1721(x + 2, y + 1, z, 5);
-          mc.interactionManager.method_1721(x + 2, y + 1, z, 5);
+      test("AUDIO471 ladder placement, hit and break retain Beta audio; landing stays modern", () -> {
+        List<String> nativeActions = null;
+        for (boolean enabled : new boolean[]{false, true}) {
+          var options = AudioConfig.copy(); options.ladderSounds = enabled; AudioConfig.preview(options);
+          clear(mc, blocks, y); reset(mc, x + .5, y + 3, z + .5);
+          mc.world.method_154(x + 3, y + 1, z, 1, 0); p.inventory.selectedSlot = 0; p.inventory.main[0] = new ItemStack(65, 4, 0);
+          SOUNDS.clear(); recording = true;
+          check(mc.interactionManager.method_1713(p, mc.world, p.inventory.main[0], x + 3, y + 1, z, 4), "native ladder placement failed");
+          int placed = SOUNDS.size(); check(placed > 0, "native placement sound missing");
+          mc.worldRenderer.method_1152(p, 2001, x + 2, y + 1, z, 65);
+          int broken = SOUNDS.size(); check(broken > placed, "native break sound missing");
+          var interaction = mc.interactionManager; mc.interactionManager = new SingleplayerInteractionManager(mc);
+          try {
+            mc.interactionManager.method_1707(x + 2, y + 1, z, 5);
+            mc.interactionManager.method_1721(x + 2, y + 1, z, 5);
+            mc.interactionManager.method_1721(x + 2, y + 1, z, 5);
+          } finally { mc.interactionManager = interaction; }
+          check(SOUNDS.size() > broken, "native mining hit sound missing");
+          check(ladders().isEmpty(), "modern ladder action leaked into native block sounds");
+          List<String> actions = SOUNDS.stream().map(sound -> sound.id + ":" + sound.volume + ":" + sound.pitch).toList();
+          if (!enabled) nativeActions = actions;
+          else check(actions.equals(nativeActions), "enabled ladder option changed Beta action sounds: " + actions + " expected " + nativeActions);
         }
-        finally { mc.interactionManager = interaction; }
-        check(ladders().stream().anyMatch(sound -> sound.id.equals("power_beta:block.ladder.hit") && sound.volume == .25f && sound.pitch == .5f), "wrong native ladder hit event " + ladders());
         mc.world.method_154(x, y, z, 65, 4); reset(mc, x + .5, y + .3, z + .5);
         // Fall callback is invoked directly after native collision in the game; reflection reaches its protected API.
         Method callback = net.minecraft.entity.LivingEntity.class.getDeclaredMethod("method_1389", float.class); callback.setAccessible(true);

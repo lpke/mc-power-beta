@@ -50,8 +50,8 @@ class ExtraSoundsTest {
       var manifest = JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject();
       Set<String> expected = Set.of("item.crop.plant", "item.hoe.till", "item.bucket.fill", "item.bucket.fill_lava",
           "item.bucket.empty", "item.bucket.empty_lava", "entity.cow.milk", "item.bone_meal.use",
-          "entity.arrow.shoot", "entity.arrow.hit", "entity.item.break", "block.ladder.break", "block.ladder.place",
-          "block.ladder.hit", "block.ladder.step", "block.ladder.fall",
+          "entity.arrow.shoot", "entity.arrow.hit", "entity.item.break",
+          "block.ladder.step", "block.ladder.fall",
           "block.lava.pop", "block.lava.ambient", "entity.generic.extinguish_fire", "entity.generic.splash", "entity.hostile.splash", "entity.player.swim", "entity.player.splash", "entity.player.splash.high_speed", "ambient.underwater.enter", "ambient.underwater.exit",
           "ambient.underwater.loop", "ambient.underwater.loop.additions", "ambient.underwater.loop.additions.rare",
           "ambient.underwater.loop.additions.ultra_rare");
@@ -82,10 +82,11 @@ class ExtraSoundsTest {
         }
         assertEquals(official, assets.get(event), event);
       }
-      assertEquals(111, manifest.getAsJsonArray("assets").size());
+      assertEquals(98, manifest.getAsJsonArray("assets").size());
       assertEquals(14, manifest.getAsJsonObject("events").getAsJsonObject("entity.player.swim").getAsJsonArray("sounds").size());
     }
     assertFalse(ExtraSounds.contains("power_beta:unknown"));
+    for (String event : List.of("place", "hit", "break")) assertFalse(ExtraSounds.contains("power_beta:block.ladder." + event));
   }
 
   @Test void modernBowCuesUseOfficialCategoriesIncludingIndividualPreviews() {
@@ -116,7 +117,7 @@ class ExtraSoundsTest {
     assertEquals(.5, settings.gain("power_beta:block.lava.ambient", false), 1e-9);
     settings.categories.put("players", 60);
     assertEquals(.15f, ExtraSounds.previewVolume("power_beta:block.ladder.step"));
-    for (String event : List.of("step", "fall", "place", "hit", "break")) {
+    for (String event : List.of("step", "fall")) {
       assertEquals("blocks", AudioSettings.category("power_beta:block.ladder." + event, false));
       assertEquals(.1, settings.gain("power_beta:block.ladder." + event, false), 1e-9);
     }

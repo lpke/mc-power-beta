@@ -13,6 +13,10 @@
   configurable hold key and own their action presses until release. Keep the mode
   picker independent and preserve plain F3 and performance graph handling. Gameplay acts on key-down.
   Test both release orders, held movement, focus loss and open menus.
+  Keep event-code sentinels out of native keyboard polling. Beta's F3 constant
+  occurs in both a held F3+S poll and the HUD event comparison; remap those paths
+  separately, using `Bindings.down` for the poll. Verify Ctrl+S with debug actions
+  enabled and disabled, and retain plain F3 and Ctrl+F3 graph behavior.
   Linux key repairs must update native events and polling together. F20–F24 use
   reserved LWJGL codes 114–118. Inventory movement only admits known screens without
   text input, excludes mouse/Shift, and uses normal container closure for item cleanup.
@@ -40,6 +44,11 @@
 - WorldEdit selection/query commands use the reported camera position and current-view
   ray in Spectator/freecam. Keep rays loaded-terrain-only and separate from interaction
   targets; explicit WorldEdit commands may edit or navigate with their normal individual permissions while freecam remains active. Physical world/inventory interactions remain blocked.
+  `spawner[mob=...]` patterns and masks use concrete native Beta mobs with shared
+  summon-name normalization and value completion. Resolve the requested mob into
+  full native spawner NBT during edit preflight, retaining existing Delay and all
+  native payload fields. Placement, rollback, copy/paste and undo/redo keep the
+  ordinary full-state transaction and world-edit permission boundaries.
 - Boat placement facing is a global Fixes preference, independent of speed, steering
   and world permissions. Set the new boat's current/previous yaw before native spawn;
   preserve placement eligibility, item use, existing boats and multiplayer authority.
@@ -48,6 +57,10 @@
 - Chat editing shares a buffer across input and completion. History keeps arrow
   ownership until editing or explicit completion; rendering must not change text.
   Wrapped chat keeps the last Beta color code from the preceding line.
+  Execute previous command starts unbound, recalls only slash commands submitted
+  during the current world visit and uses the native client/server dispatch path.
+  It never opens chat, adds repeated history entries or repeats from key auto-repeat.
+  Clear recall on world exit and retain normal command permission checks.
   Help and completion share command availability. Group WorldEdit under //help,
   retain aliases, and keep per-command help free of gameplay changes.
   Added, removed and changed commands must stay consistent in /help, individual help and completion.
@@ -107,6 +120,10 @@
   chosen perspective when free look ends.
 - Creative vehicle placement uses press events only; holding use must not spawn extra
   boats or minecarts. Preserve native item use and other held-button actions.
+- Creative swords suppress local block mining at the native press, held and final
+  break callbacks while retaining native swings and entity attacks. Clear pending
+  mining progress. Mining remains main-hand owned; offhand swords do not block an
+  empty hand or tool. Keep Survival mining and multiplayer authority native.
 - Modern water movement is a global player-only singleplayer preference, enabled
   only in Power Beta defaults. Keep native collision, limb interpolation, other
   fluids, mobs, vehicles and flight; see `docs/water-movement.md`. Bound current

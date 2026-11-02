@@ -28,6 +28,7 @@ public final class PowerBeta {
     local.luke.power.hud.InfoHud.tick(mc);
     local.luke.power.map.Maps.tick(mc);
     local.luke.power.sprint.SprintController.tick(mc);
+    local.luke.power.bow.ModernBow.tickFov(mc);
     local.luke.power.mining.VeinMining.tick(mc);
     if (!ready && mc.options != null) {
       ready = true;

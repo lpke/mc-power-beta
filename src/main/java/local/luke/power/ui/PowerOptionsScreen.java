@@ -53,7 +53,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private record View(String page, double scroll, double sideScroll, String query,
       boolean changedOnly, List<String> conflicts, String highlighted, String mapView, Set<String> collapsed,
-      boolean showDisabled, int selected, boolean libraryOpen, MusicLibraryScreen.State library, boolean musicEditorReturn, boolean allSounds) {}
+      boolean showDisabled, int selected, boolean libraryOpen, MusicLibraryScreen.State library, boolean musicEditorReturn, boolean allSounds, boolean keySearch, Integer exactKeySearch) {}
   private WorldMapScreen mapHost;
   private PowerOptionsScreen mapOwner;
   private Map<String, JsonElement> mapEntry;
@@ -137,11 +137,11 @@ public final class PowerOptionsScreen extends UiScreen {
     for (Setting setting : edited) setting.value = Catalog.JSON.toJsonTree(changes.get(setting.id.substring(5)));
     changed(edited, false);
   }
-  boolean panelModal() { return capture != null || confirmClose || confirmReset || choices.active(); }
+  boolean panelModal() { return capturingBinding() || confirmClose || confirmReset || choices.active(); }
   boolean minimapWheelAllowed() { return !panelModal() && !valueEditor.active() && dragging == null; }
   boolean radarIconsAllowed() { return !panelModal() && !valueEditor.active() && !search.focused; }
   void panelCancelGesture() {
-    capture = null; captureModifier = 0; dragging = null; contentBar.release(); sidebarBar.release();
+    capture = null; searchCapture = false; captureModifier = 0; dragging = null; contentBar.release(); sidebarBar.release();
     valueEditor.cancel(); choices.close(); hoverDelay.clear(); TextDrag.cancel();
     finishContinuousChange();
   }
@@ -265,6 +265,8 @@ public final class PowerOptionsScreen extends UiScreen {
   private double scroll, sideScroll;
   private Setting capture;
   private int captureModifier;
+  private boolean searchCapture, keySearch;
+  private Integer exactKeySearch;
   private boolean confirmClose, confirmReset, savedRestart, changedOnly;
   private Setting dragging;
   private double dragLeft, dragSpan;
@@ -462,6 +464,7 @@ public final class PowerOptionsScreen extends UiScreen {
   }
 
   public void removed() {
+    cancelCapture();
     choices.close(); valueEditor.cancel();
     rememberPosition();
     musicStatus.cancel();
@@ -472,7 +475,7 @@ public final class PowerOptionsScreen extends UiScreen {
 
   private View view() {
     return new View(page, scroll, sideScroll, search.text(), changedOnly, conflictIds,
-        highlightedId, mapView, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state(), musicEditorReturn, allSounds);
+        highlightedId, mapView, Set.copyOf(collapsed), showDisabled, selected, libraryOpen, library == null ? libraryState : library.state(), musicEditorReturn, allSounds, keySearch, exactKeySearch);
   }
 
   private void rememberPosition() {
@@ -552,8 +555,16 @@ public final class PowerOptionsScreen extends UiScreen {
   }
   private int sectionButtonX() { return right() - 34; }
   private int searchScopeX() { return sectionButtonX() - 24; }
-  private int clearSearchX() { return (searchScopeVisible() ? searchScopeX() : sectionButtonX()) - 24; }
-  private int searchWidth() { return (canClear() ? clearSearchX() : searchScopeVisible() ? searchScopeX() : sectionButtonX()) - 4 - searchLeft(); }
+  private boolean searchHotkeyVisible() { return controls() && !canClear(); }
+  private int searchModeX() { return searchScopeX(); }
+  private int searchHotkeyWidth() { return textRenderer.getWidth("Search hotkey") + 8; }
+  private int searchHotkeyX() { return searchModeX() - 4 - searchHotkeyWidth(); }
+  private int clearSearchX() { return (controls() || searchScopeVisible() ? searchScopeX() : sectionButtonX()) - 24; }
+  private int searchWidth() {
+    int end = canClear() ? clearSearchX() : searchHotkeyVisible() ? searchHotkeyX()
+        : controls() || searchScopeVisible() ? searchScopeX() : sectionButtonX();
+    return end - 4 - searchLeft();
+  }
   private boolean mapAppearanceAvailable() {
     boolean enabled = session.settings().stream().filter(s -> s.id.equals("maps.worldMap"))
         .anyMatch(s -> s.value.getAsBoolean());
@@ -619,7 +630,8 @@ public final class PowerOptionsScreen extends UiScreen {
     return history.isEmpty() ? exitDestination() : destination(history.peek());
   }
 
-  private int searchLeft() { return left() + (history.isEmpty() && !libraryVisible() ? 0 : 48); }
+  private int backWidth() { return controls() && span() < 300 ? 32 : 44; }
+  private int searchLeft() { return left() + (history.isEmpty() && !libraryVisible() ? 0 : backWidth() + 4); }
   private void pushView() { pushView(view()); }
   private void pushView(View previous) {
     if (history.size() == 32) history.removeLast();
@@ -643,6 +655,7 @@ public final class PowerOptionsScreen extends UiScreen {
     showDisabled = view.showDisabled; selected = view.selected;
     libraryOpen = view.libraryOpen; libraryState = view.library; musicEditorReturn = view.musicEditorReturn;
     allSounds = view.allSounds;
+    keySearch = view.keySearch; exactKeySearch = view.exactKeySearch;
     if (library != null) library.restore(libraryState);
   }
   /** Visit Controls without publishing or replacing the isolated editor draft. */
@@ -819,6 +832,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private void layout() {
     if (session == null) return;
     if (!page.equals("Audio")) allSounds = false;
+    if (!controls() || search.text().isBlank()) exactKeySearch = null;
     boolean revealTarget = !focusAnchorId.isEmpty() && focusAnchorId.equals(highlightedId)
         && search.text().isBlank() && !filtered()
         && Double.compare(scroll, focusAnchorScroll) == 0
@@ -857,7 +871,9 @@ public final class PowerOptionsScreen extends UiScreen {
         !s.group.equals("Individual music tracks") && !s.group.equals("Track rotation")
             && !s.id.startsWith("audio.sound.music:")).toList();
     if (!query.isEmpty() && listed.isEmpty()) {
-      for (Setting s : candidates) scores.put(s.id, FuzzySearch.score(query, s.label, s.description + " " + s.group + " " + s.page
+      for (Setting s : candidates) scores.put(s.id, controls() && (keySearch || exactKeySearch != null)
+          ? ControlKeySearch.score(query, bindingLabel(s.value.getAsInt()), s.value.getAsInt(), exactKeySearch)
+          : FuzzySearch.score(query, s.label, s.description + " " + s.group + " " + s.page
           + (ColorSettings.opacity(s, session.settings()) != null ? " color opacity transparency" : "")
           + (HudEditorSettings.contains(s) ? " HUD editor " + HudEditorSettings.tabLabel(HudEditorSettings.tab(s, hudMode)) : "")));
       candidates = candidates.stream().sorted(Comparator.comparingInt(s -> scores.get(s.id))).toList();
@@ -966,8 +982,13 @@ public final class PowerOptionsScreen extends UiScreen {
     musicActions(null, labels, enabled, x, y, action);
   }
   void musicActions(Object owner, List<String> labels, List<Boolean> enabled, int x, int y, java.util.function.IntConsumer action) {
+    musicActions(owner, labels, enabled, x, y, index -> true, action);
+  }
+  void musicActions(Object owner, List<String> labels, List<Boolean> enabled, int x, int y,
+      java.util.function.IntPredicate clickSound, java.util.function.IntConsumer action) {
     valueEditor.cancel();
     choices.openActions(owner, this, labels, enabled, x, y, width, height, action);
+    choices.clickSound(clickSound);
   }
   boolean musicActionsOpen(Object owner) { return choices.editing(owner); }
 
@@ -1043,7 +1064,7 @@ public final class PowerOptionsScreen extends UiScreen {
     super.onMouseEvent();
     int wheel = Mouse.getEventDWheel();
     if (choices.wheel(wheel)) return;
-    if (hidden || wheel == 0 || capture != null || confirmClose || confirmReset) return;
+    if (hidden || wheel == 0 || capturingBinding() || confirmClose || confirmReset) return;
     if (libraryVisible() && library.modal()) { library.wheel(wheel); return; }
     valueEditor.cancel();
     int x = Mouse.getEventX() * width / minecraft.displayWidth;
@@ -1072,15 +1093,15 @@ public final class PowerOptionsScreen extends UiScreen {
       if (y > height - 30) minecraft.setScreen(parent);
       return;
     }
-    if (capture != null) {
-      if (button == 0 && inside(x, y, width / 2 - 102, height / 2 + 36, 100, 20)) {
-        click(); capture = null; captureModifier = 0; return;
+    if (capturingBinding()) {
+      int cancelX = width / 2 - (searchCapture ? 50 : 102);
+      if (button == 0 && inside(x, y, cancelX, height / 2 + 36, 100, 20)) {
+        click(); cancelCapture(); return;
       }
-      if (button == 0 && inside(x, y, width / 2 + 2, height / 2 + 36, 100, 20)) {
+      if (!searchCapture && button == 0 && inside(x, y, width / 2 + 2, height / 2 + 36, 100, 20)) {
         click(); clearBinding(); return;
       }
-      capture.value = new JsonPrimitive(new Chord(button - 100, Bindings.heldModifiers()).encoded());
-      Setting bound = capture; capture = null; changed(bound);
+      completeCapture(new Chord(button - 100, Bindings.heldModifiers()).encoded());
       return;
     }
     if (confirmClose || confirmReset) {
@@ -1108,7 +1129,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (!isolatedRules() && !embedded() && button == 0 && sidebarBar.press(sidebarTrack(), x, y)) { sideScroll = sidebarBar.drag(sidebarTrack(), y, true); return; }
     if (settingRowsVisible() && button == 0 && contentBar.press(contentTrack(), x, y)) { scroll = contentBar.drag(contentTrack(), y, true); return; }
-    if (button == 0 && (libraryVisible() || !history.isEmpty()) && inside(x, y, left(), 27, 44, 20)) {
+    if (button == 0 && (libraryVisible() || !history.isEmpty()) && inside(x, y, left(), 27, backWidth(), 20)) {
       click(); if (libraryVisible()) closeLibrary(); else back(); return;
     }
     if (inside(x, y, searchLeft(), 27, searchWidth(), 20)) {
@@ -1118,10 +1139,19 @@ public final class PowerOptionsScreen extends UiScreen {
       String previous = search.text();
       search.click(x, button);
       if (!previous.equals(search.text())) {
+        exactKeySearch = null;
         scroll = 0;
         layout();
       }
       return;
+    }
+    if (button == 0 && searchHotkeyVisible() && inside(x, y, searchHotkeyX(), 27, searchHotkeyWidth(), 20)) {
+      click(); searchCapture = true; captureModifier = 0; search.focused = false;
+      hoverDelay.clear(); return;
+    }
+    if (button == 0 && controls() && inside(x, y, searchModeX(), 27, 20, 20)) {
+      click(); keySearch = !keySearch; exactKeySearch = null;
+      scroll = 0; selected = -1; layout(); return;
     }
     if (button == 0 && searchScopeVisible() && inside(x, y, searchScopeX(), 27, 20, 20)) {
       click(); OptionsSearchScope.toggle(page); scroll = 0; selected = -1; layout(); return;
@@ -1184,7 +1214,8 @@ public final class PowerOptionsScreen extends UiScreen {
       if (!item.enabled() && !(item.action() == AudioToolbar.Action.QUEUE
           && libraryVisible() && library.queueVisible())) return;
       AudioToolbar.Action action = item.action();
-      click();
+      if (action == AudioToolbar.Action.PLAY ? local.luke.power.audio.AudioController.musicPlaying()
+          : action != AudioToolbar.Action.PREVIOUS && action != AudioToolbar.Action.NEXT) click();
       switch (action) {
         case QUIET -> local.luke.power.audio.AudioController.quiet();
         case PLAY -> local.luke.power.audio.AudioController.togglePause();
@@ -1295,8 +1326,9 @@ public final class PowerOptionsScreen extends UiScreen {
           if (button == 0 && s.slider()) {
             dragging = s;
             double pixels = (double) minecraft.displayWidth / width;
-            dragLeft = (mainControlLeft(r) + 4) * pixels;
-            dragSpan = Math.max(1, right() - 38 - mainControlLeft(r) - 8) * pixels;
+            var track = SliderGeometry.physicalTrack(mainControlLeft(r), right() - 38 - mainControlLeft(r), pixels);
+            dragLeft = track.left();
+            dragSpan = track.span();
             drag((int) (x * pixels));
           } else {
             search.focused = false; dragging = null;
@@ -1528,7 +1560,28 @@ public final class PowerOptionsScreen extends UiScreen {
     }
   }
 
-  public boolean capturingBinding() { return capture != null; }
+  public boolean capturingBinding() { return capture != null || searchCapture; }
+  private void cancelCapture() { capture = null; searchCapture = false; captureModifier = 0; }
+  private void completeCapture(int encoded) {
+    if (searchCapture) {
+      pushView();
+      cancelCapture();
+      exactKeySearch = encoded;
+      keySearch = true;
+      search.setText(bindingLabel(encoded));
+      changedOnly = false; conflictIds = List.of(); highlightedId = "";
+      showDisabled = true;
+      scroll = 0; selected = -1;
+      // Search results start expanded even if an earlier query collapsed their groups.
+      collapsed.removeIf(group -> group.startsWith("filtered/"));
+      layout();
+    } else {
+      Setting bound = capture;
+      cancelCapture();
+      bound.value = new JsonPrimitive(encoded);
+      changed(bound);
+    }
+  }
   private void clearBinding() {
     Setting bound = capture; bound.value = new JsonPrimitive(0);
     capture = null; captureModifier = 0; changed(bound);
@@ -1539,21 +1592,20 @@ public final class PowerOptionsScreen extends UiScreen {
     if (page.equals("Defaults") && defaultsPanel.key(key)) return;
     if (valueEditor.key(c, key)) return;
     if (hidden) { if (key == Keyboard.KEY_ESCAPE || key == Keyboard.KEY_F1) hidden = false; return; }
-    if (capture != null) {
+    if (capturingBinding()) {
       // Unmapped platform events must not silently clear an existing binding.
       if (key == Keyboard.KEY_NONE) return;
       if (key == Keyboard.KEY_ESCAPE) {
-        capture = null; captureModifier = 0;
+        cancelCapture();
         return;
       }
-      if (key == Keyboard.KEY_DELETE) { clearBinding(); return; }
+      if (!searchCapture && key == Keyboard.KEY_DELETE) { clearBinding(); return; }
       if (Chord.modifier(key) != 0) {
         captureModifier = key;
         return;
       }
-      int modifiers = Bindings.heldModifiers();
-      capture.value = new JsonPrimitive(key == Keyboard.KEY_DELETE && modifiers == 0 ? 0 : new Chord(key, modifiers).encoded());
-      Setting bound = capture; capture = null; changed(bound);
+      int modifiers = local.luke.power.input.KeyEventModifiers.mask(Bindings.heldModifiers());
+      completeCapture(new Chord(key, modifiers).encoded());
       return;
     }
     if (confirmClose || confirmReset) {
@@ -1588,11 +1640,12 @@ public final class PowerOptionsScreen extends UiScreen {
     if (libraryVisible()) { library.keyPressed(c, key); return; }
     if (search.focused) {
       String before = search.text();
-      View searchOrigin = embedded() && before.isBlank() ? view() : null;
+      View searchOrigin = (embedded() || controls()) && before.isBlank() ? view() : null;
       search.key(c, key);
       if (!before.equals(search.text())) {
         if (searchOrigin != null && !search.text().isBlank()) { pushView(searchOrigin); search.focused = true; }
         conflictIds = List.of();
+        exactKeySearch = null;
         highlightedId = "";
         scroll = 0;
         selected = -1;
@@ -1642,7 +1695,10 @@ public final class PowerOptionsScreen extends UiScreen {
     if (capture == s) return modifierLabel(Bindings.heldModifiers()) + "Press key...";
     if (ItemEditors.accepts(s)) return ItemEditors.display(s);
     if (s.kind != Setting.Kind.KEY) return s.display();
-    Chord chord = Chord.decode(s.value.getAsInt());
+    return bindingLabel(s.value.getAsInt());
+  }
+  private static String bindingLabel(int encoded) {
+    Chord chord = Chord.decode(encoded);
     int code = chord.key();
     return modifierLabel(chord.modifiers()) + (code == 0
         ? "Unbound"
@@ -1735,19 +1791,16 @@ public final class PowerOptionsScreen extends UiScreen {
   public void render(int mx, int my, float delta) {
     int pointerX = mx, pointerY = my;
     boolean libraryModal = libraryVisible() && library.modal();
-    if (choices.active() || libraryModal || confirmClose || confirmReset || capture != null
+    if (choices.active() || libraryModal || confirmClose || confirmReset || capturingBinding()
         || page.equals("Defaults") && defaultsPanel.modal()) { mx = -1000; my = -1000; }
     valueEditor.beginFrame();
-    if (!hidden && !confirmClose && !confirmReset && capture == null) {
+    if (!hidden && !confirmClose && !confirmReset && !capturingBinding()) {
       if (!isolatedRules() && !embedded()) sideScroll = sidebarBar.drag(sidebarTrack(), my, Mouse.isButtonDown(0));
       if (settingRowsVisible()) scroll = contentBar.drag(contentTrack(), my, Mouse.isButtonDown(0));
     }
     // This wait belongs only to binding capture, never gameplay input.
-    if (capture != null && captureModifier != 0 && !Bindings.physical(captureModifier)) {
-      capture.value = new JsonPrimitive(captureModifier);
-      Setting bound = capture; capture = null;
-      captureModifier = 0; changed(bound);
-    }
+    if (capturingBinding() && captureModifier != 0 && !Bindings.physical(captureModifier))
+      completeCapture(captureModifier);
     if (dragging != null) {
       if (Mouse.isButtonDown(0)) drag(Mouse.getX());
       else { dragging = null; finishContinuousChange(); }
@@ -1785,13 +1838,15 @@ public final class PowerOptionsScreen extends UiScreen {
       }
       return;
     }
-    if (libraryVisible() || !history.isEmpty()) button("Back", left(), 27, 44, 20, mx, my, true);
+    if (libraryVisible() || !history.isEmpty()) button("Back", left(), 27, backWidth(), 20, mx, my, true);
     if (libraryVisible()) library.renderSearch(searchLeft(), 28, searchWidth(), mx, my);
     else input(search, searchLeft(), 28, searchWidth(), mx, my,
         !conflictIds.isEmpty() ? "Conflicting bindings"
-        : allSounds ? "Search all game sounds..." : controls() ? "Search controls..." : changedOnly ? "Search changed settings..." : embedded() ? "Search maps and controls..."
+        : allSounds ? "Search all game sounds..." : controls() ? keySearch ? "Search assigned keys..." : "Search controls..." : changedOnly ? "Search changed settings..." : embedded() ? "Search maps and controls..."
         : searchScopeVisible() && OptionsSearchScope.thisTab(page) ? "Search settings in this tab..." : "Search all settings...");
     if (canClear()) iconButton("remove", clearSearchX(), 27, 20, 20, mx, my, true, false);
+    if (searchHotkeyVisible()) button("Search hotkey", searchHotkeyX(), 27, searchHotkeyWidth(), 20, mx, my, true);
+    if (controls()) iconButton(keySearch ? "searchKey" : "searchName", searchModeX(), 27, 20, 20, mx, my, true, false);
     if (searchScopeVisible()) button(OptionsSearchScope.thisTab(page) ? "T" : "A", searchScopeX(), 27, 20, 20, mx, my, true);
     boolean expandSections = libraryVisible() ? library.sectionsCollapsed() : SectionCollapse.allCollapsed(sections(), collapsed);
     iconButton(expandSections ? "expand" : "collapse", sectionButtonX(), 27, 20, 20, mx, my,
@@ -1986,32 +2041,40 @@ public final class PowerOptionsScreen extends UiScreen {
           : "Searching all settings. Click to search only this tab.";
       hoverId = "searchScope";
     }
+    if (controls() && inside(mx, my, searchModeX(), 27, 20, 20)) {
+      tip = keySearch ? "Swap to control name search" : "Swap to control key search";
+      hoverId = "controlSearchMode";
+    }
+    if (searchHotkeyVisible() && inside(mx, my, searchHotkeyX(), 27, searchHotkeyWidth(), 20)) {
+      tip = "Press a hotkey to find controls assigned to it.";
+      hoverId = "searchHotkey";
+    }
     if (canClear() && inside(mx, my, clearSearchX(), 27, 20, 20)) { tip = "Clear search"; hoverId = "clearSearch"; }
     if (hoverDelay.ready(!choices.active() && dragging == null && !(libraryVisible() && library.draggingSlider()) && !confirmClose && !confirmReset ? hoverId : "") && !tip.isEmpty()) tooltip(tip, mx, my);
     valueEditor.renderError(this);
     choices.render(this, pointerX, pointerY);
-    if (libraryVisible() || !history.isEmpty()) backTooltip(backDestination(), left(), 27, 44, 20, mx, my);
+    if (libraryVisible() || !history.isEmpty()) backTooltip(backDestination(), left(), 27, backWidth(), 20, mx, my);
     if (isolatedFooter()) {
       for (DraftFooter item : draftFooter()) if (item.label.equals("Back"))
         backTooltip(library.backDestination(), item.x, height - 28, item.width, 20, mx, my);
     } else if (editorReturn != null)
       backTooltip(editorDestination(), actionX(0), height - 28, actionWidth(0), 20, mx, my);
-    if (libraryVisible() && !choices.active() && capture == null && !confirmClose && !confirmReset)
+    if (libraryVisible() && !choices.active() && !capturingBinding() && !confirmClose && !confirmReset)
       library.renderDragGhost(pointerX, pointerY);
-    if (capture != null || confirmClose || confirmReset) {
+    if (capturingBinding() || confirmClose || confirmReset) {
       fill(0, 0, width, height, 0xc0000000);
       String message =
-          capture != null
-              ? "Press a key or mouse button"
+          capturingBinding()
+              ? searchCapture ? "Press a hotkey to search" : "Press a key or mouse button"
               : confirmReset ? "Reset " + (filtered() ? "listed settings" : page) + " to Defaults?" : "Save your changes?";
-      if (capture != null) {
+      if (capturingBinding()) {
         drawCenteredTextWithShadow(textRenderer, message, width / 2, height / 2 - 18, 0xffffff);
         drawCenteredTextWithShadow(
             textRenderer, "Allowed modifiers: Ctrl / Shift / Alt", width / 2, height / 2, 0xaaaaaa);
         drawCenteredTextWithShadow(
-            textRenderer, "Press Esc to cancel or Del to clear.", width / 2, height / 2 + 14, 0xaaaaaa);
-        button("Cancel", width / 2 - 102, height / 2 + 36, 100, 20, pointerX, pointerY, true);
-        button("Clear", width / 2 + 2, height / 2 + 36, 100, 20, pointerX, pointerY, true);
+            textRenderer, searchCapture ? "Press Esc to cancel." : "Press Esc to cancel or Del to clear.", width / 2, height / 2 + 14, 0xaaaaaa);
+        button("Cancel", width / 2 - (searchCapture ? 50 : 102), height / 2 + 36, 100, 20, pointerX, pointerY, true);
+        if (!searchCapture) button("Clear", width / 2 + 2, height / 2 + 36, 100, 20, pointerX, pointerY, true);
       }
       else {
         WarningText.draw(this, 312, height / 2, message, "", 0xaaaaaa);

@@ -150,6 +150,23 @@ class MusicLibrarySourcesTest {
     assertEquals("Unavailable", model.folders().get(0).status());
   }
 
+  @Test void allMissingRootsRemainVisibleUntilAnExplicitNewScanObservesRecovery() throws Exception {
+    var paths=List.of("first/music","second/music","third/empty");
+    var scan=MusicLibrary.scan(game,paths);
+    assertEquals(paths.stream().map(path->"Folder unavailable: "+path).toList(),scan.warnings());
+    assertEquals(paths,scan.sources().stream().map(MusicLibrary.SourceFolder::path).toList());
+    Files.createDirectories(game.resolve(paths.get(1)));
+    // A filesystem change after scanning must not cause the UI model to probe or clear its warning.
+    var cached=sources(paths,scan);
+    assertEquals(paths,cached.folders().stream().map(MusicLibrarySources.Folder::path).toList());
+    assertEquals(List.of("Unavailable","Unavailable","Unavailable"),
+        cached.folders().stream().map(MusicLibrarySources.Folder::status).toList());
+    assertEquals(List.of("music","music","empty"),cached.folders().stream().map(MusicLibrarySources.Folder::label).toList());
+    var reloaded=sources(paths,MusicLibrary.scan(game,paths));
+    assertEquals(List.of("Unavailable","Empty","Unavailable"),
+        reloaded.folders().stream().map(MusicLibrarySources.Folder::status).toList());
+  }
+
   @Test void trackLimitRetainsMetadataForEveryRootAndNeverAddsDuplicateTracks() throws Exception {
     Path root = Files.createDirectory(game.resolve("many"));
     for (int index = 0; index <= MusicLibrary.MAX_TRACKS; index++)

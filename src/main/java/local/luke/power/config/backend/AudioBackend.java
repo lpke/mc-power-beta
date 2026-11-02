@@ -32,7 +32,7 @@ public final class AudioBackend implements Backend {
     extra("playerFireExtinguish", "Player fire extinguish", s.playerFireExtinguish,
         "Play the modern extinguishing sound when water puts out your fire in singleplayer. Uses Players volume.");
     extra("ladderSounds", "Ladder sounds", s.ladderSounds,
-        "Use modern ladder sounds for climbing, placing, breaking and landing in singleplayer.");
+        "Use modern climbing, descending and landing sounds in singleplayer. Placing, hitting and breaking ladders keep Beta sounds.");
     extra("waterSplashSounds", "Water splash sounds", s.waterSplashSounds,
         "Use modern water entry sounds for players, creatures, items and vehicles in singleplayer. Uses each entity sound category.");
     extra("swimmingSounds", "Swimming sounds", s.swimmingSounds,
@@ -93,8 +93,8 @@ public final class AudioBackend implements Backend {
         new JsonPrimitive(s.showMusicPreviewButton), new JsonPrimitive(false),
         "Show a speaker button between Play and Favorite in the Music library.", List.of());
     entries.add(new Setting("audio.musicFadeMillis", id(), "Audio", "Music playback", "Song fade time (milliseconds)",
-        "Fade each song's opening and ending. Zero disables fading. Pausing and muting remain immediate.",
-        Setting.Kind.INTEGER, new JsonPrimitive(s.musicFadeMillis), new JsonPrimitive(0), 0, 5000, 1, List.of(), false));
+        "Fade each song's opening and ending for up to 10000 milliseconds. Zero disables fading. Pausing and muting remain immediate.",
+        Setting.Kind.INTEGER, new JsonPrimitive(s.musicFadeMillis), new JsonPrimitive(AudioSettings.DEFAULT_MUSIC_FADE_MILLIS), 0, AudioSettings.MAX_MUSIC_FADE_MILLIS, 1, List.of(), false));
     entries.add(new Setting("audio.mp3ConversionLimit", id(), "Audio", "Music playback", "MP3 conversion batch limit",
         "Maximum songs converted per click. Conversion creates local WAV copies and never changes your originals.",
         Setting.Kind.INTEGER, new JsonPrimitive(s.mp3ConversionLimit), new JsonPrimitive(500), 1, MusicLibrary.MAX_TRACKS, 1, List.of(), false));

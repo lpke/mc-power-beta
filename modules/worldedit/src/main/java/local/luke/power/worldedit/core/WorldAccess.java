@@ -5,5 +5,8 @@ public interface WorldAccess {
 
   BlockValue get(Pos pos);
 
+  /** Resolve desired native properties before planning, equality checks and history accounting. */
+  default BlockValue prepare(Pos pos, BlockValue desired, BlockValue existing) { return desired; }
+
   void set(Pos pos, BlockValue state);
 }

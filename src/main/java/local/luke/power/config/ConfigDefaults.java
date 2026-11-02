@@ -40,6 +40,7 @@ public final class ConfigDefaults {
         initializeMaps(game);
         initializeExtraSounds(game);
         initializeInterface(game);
+        initializeTitle(game);
         initializeModernFeatures(game);
       }
     }
@@ -130,11 +131,21 @@ public final class ConfigDefaults {
     }
   }
 
+  private static void initializeTitle(Path game) throws IOException {
+    JsonObject title = PowerConfig.section("title");
+    if (title.has("showSplashText")) return;
+    title.add("showSplashText", DefaultBases.value("logo.showSplashText", new JsonPrimitive(true)));
+    try (FileTransaction transaction = FileTransaction.begin(game, java.util.List.of(PowerConfig.path()))) {
+      PowerConfig.put("title", title);
+      transaction.commit();
+    }
+  }
+
   private static void initializeGameplay(Path game) throws IOException {
     JsonObject gameplay = PowerConfig.section("gameplay");
     boolean changed = false;
     // Freeze the first value so later reset-base changes cannot change it on restart.
-    for (String key : java.util.List.of("boatPlacementFacing", "modernWaterMovement", "modernCrawling", "modernBowHandling")) {
+    for (String key : java.util.List.of("boatPlacementFacing", "modernWaterMovement", "modernCrawling", "modernBowHandling", "modernBowFov")) {
       if (gameplay.has(key)) continue;
       gameplay.add(key, DefaultBases.value("gameplay." + key, new JsonPrimitive(!key.equals("modernCrawling") && !key.equals("modernBowHandling"))));
       changed = true;

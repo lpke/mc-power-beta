@@ -60,7 +60,18 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("release-470-music-audio ")) Release470MusicAudioChecks.run(mc, command.substring("release-470-music-audio ".length()));
+      if (command.startsWith("input-471 ")) Input471Checks.run(mc, command.substring("input-471 ".length()));
+      else if (command.startsWith("previous-command-471 ")) PreviousCommand471Checks.run(mc,command.substring(21));
+      else if (command.startsWith("controls-search-471 ")) ControlsSearch471Checks.run(mc,command.substring("controls-search-471 ".length()));
+      else if (command.startsWith("title-splash-471 ")) TitleSplash471Checks.run(mc,command.substring("title-splash-471 ".length()));
+      else if (command.equals("music-folders-471") || command.startsWith("music-folders-471 ")) MusicFolders471Checks.run(mc,command.equals("music-folders-471") ? "run" : command.substring("music-folders-471 ".length()));
+      else if (command.equals("audio-transport-471") || command.startsWith("audio-transport-471 ")) AudioTransport471Checks.run(mc,command.equals("audio-transport-471") ? "run" : command.substring("audio-transport-471 ".length()));
+      else if (command.equals("spawner-471")) Spawner471Checks.run(mc);
+      else if (command.equals("bow-471")) Bow471Checks.run(mc);
+      else if (command.startsWith("numeric-sliders-471 ")) NumericSliders471Checks.run(mc,command.substring("numeric-sliders-471 ".length()));
+      else if (command.equals("creative-bow-471")) CreativeBow471Checks.run(mc);
+      else if (command.equals("creative-sword-471")) CreativeSword471Checks.run(mc);
+      else if (command.startsWith("release-470-music-audio ")) Release470MusicAudioChecks.run(mc, command.substring("release-470-music-audio ".length()));
       else if (command.startsWith("terrain-dirty-470 ")) TerrainDirty470Checks.run(mc, command.substring("terrain-dirty-470 ".length()));
       else if (command.startsWith("music-admission-470 ")) MusicAdmission470Checks.run(mc, command.substring("music-admission-470 ".length()));
       else if (command.startsWith("music-playlists-460 ")) MusicPlaylists460Checks.run(mc, command.substring("music-playlists-460 ".length()));

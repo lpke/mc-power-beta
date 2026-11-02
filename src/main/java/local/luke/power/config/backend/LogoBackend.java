@@ -33,6 +33,7 @@ public final class LogoBackend implements Backend {
       String label =
           switch (f.getName()) {
             case "style" -> "Title style";
+            case "showSplashText" -> "Show splash text";
             case "logo" -> "Title lettering";
             case "logoRotation" -> "Title rotation";
             case "blockMap" -> "Letter block palette";

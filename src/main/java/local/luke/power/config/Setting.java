@@ -21,11 +21,12 @@ public final class Setting {
   public final List<String> choices;
   public final JsonElement powerBetaDefault;
   public JsonElement defaultValue;
-  public final double min, max, step;
+  public final double min, max, step, sliderStep;
   public final boolean restart;
   private final double displayDivisor;
   private final int displayPrecision;
   private final String unit, control;
+  private final boolean sliderFromZero;
   private transient java.util.function.Consumer<JsonElement> checkValue = value -> {};
   public JsonElement value;
   private JsonElement original;
@@ -67,6 +68,9 @@ public final class Setting {
     this.min = min;
     this.max = max;
     this.step = step;
+    this.sliderStep = Catalog.number(metadata, "sliderStep", step);
+    this.sliderFromZero = metadata.has("sliderStep");
+    if (sliderFromZero && (!Double.isFinite(sliderStep) || sliderStep <= 0)) throw new IllegalArgumentException("Invalid slider step: " + id);
     this.choices = List.copyOf(choices);
     this.restart = restart;
   }
@@ -112,8 +116,11 @@ public final class Setting {
   public void slide(double fraction) {
     if (kind != Kind.INTEGER && kind != Kind.DECIMAL) return;
     double raw = min + Math.max(0, Math.min(1, fraction)) * (max - min);
+    // Coarse pointer steps never quantize exact entry, cycling or existing saves.
+    // Explicit drag steps use natural multiples, with both range endpoints retained.
+    double origin = sliderFromZero ? 0 : min;
     double next = fraction <= 0 ? min : fraction >= 1 ? max
-        : Math.max(min, Math.min(max, min + Math.round((raw - min) / step) * step));
+        : Math.max(min, Math.min(max, origin + Math.round((raw - origin) / sliderStep) * sliderStep));
     value = kind == Kind.INTEGER ? new JsonPrimitive((int) Math.round(next))
         : new JsonPrimitive(BigDecimal.valueOf(next).setScale(6, java.math.RoundingMode.HALF_UP).stripTrailingZeros());
   }

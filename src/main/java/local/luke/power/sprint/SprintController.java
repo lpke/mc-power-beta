@@ -13,7 +13,7 @@ import net.minecraft.entity.player.ClientPlayerEntity;
 import org.lwjgl.opengl.Display;
 
 public final class SprintController {
-  private static float previousFov = 1, fov = 1;
+  private static float previousFov = 1, fov = 1, targetFov = 1;
   private static Object owner;
   private static boolean minorCollision;
 
@@ -207,8 +207,9 @@ public final class SprintController {
       } else if (settings.dynamicFov) ratio = SprintView.ratio(SprintView.Kind.GROUND);
     } else SprintView.publish(SprintView.Kind.GROUND, false, 1);
     double strength = DetachedCamera.isActive() ? 1 : settings.fovStrength / 100;
-    double target = 1 + (ratio - 1) * .5 * strength;
-    fov += (Math.max(1, Math.min(1.5, target)) - fov) * .5;
+    double target = Math.max(1, Math.min(1.5, 1 + (ratio - 1) * .5 * strength));
+    targetFov = (float)target;
+    fov += (target - fov) * .5;
     if (Math.abs(fov - 1) < 1e-5) fov = 1;
   }
 
@@ -228,12 +229,13 @@ public final class SprintController {
   public static double fov(double delta) {
     return previousFov + (fov - previousFov) * delta;
   }
+  public static float targetFov() { return targetFov; }
 
   public static void reset() {
     SprintView.clearLanding();
     owner = null;
     minorCollision = false;
-    previousFov = fov = 1;
+    previousFov = fov = targetFov = 1;
     SprintView.publish(SprintView.Kind.GROUND, false, 1);
   }
 }

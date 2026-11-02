@@ -17,6 +17,37 @@
 
 # Runtime checks
 
+- `spawner-471` verifies `//set spawner[mob=...]`, mob completion and native living
+  registry values, new-spawner defaults, existing Delay preservation, exact NBT
+  undo/redo, mob replacement masks, invalid-pattern atomicity and edit permissions.
+  Use a focused muted disposable singleplayer world with loaded air at two adjacent
+  chunk-center cells at Y112. The fixture isolates its command history and restores
+  rules, editor session, terrain and native block entities.
+
+- `bow-471` verifies modern bow ownership of both left-click and held mining in
+  either hand, exact eye-minus-0.1f launches for native/modern crouching and compact
+  poses in both perspectives, and source-derived FOV drawing/release/partial-tick,
+  pause, toggle and world-reset behavior. Use a focused, muted disposable singleplayer
+  world with both mouse buttons released. It restores settings, inventory, pose,
+  input providers and owned entities/terrain. Also run `modern-bow-470` and
+  `creative-bow-471` for the established durability/physics and native Creative paths.
+
+- `previous-command-471 setup|seed|chat|state|menu|close|clear|ordinary-chat|finish` checks native
+  slash submission followed by a physical F9 repeat. The input-471 driver runs it
+  after keyboard checks. It verifies one execution per press, no chat opening even
+  when Chat and Open commands share F9, ordinary-chat retention, unchanged recall history,
+  two queued taps, menu suppression, empty-state feedback and clearing the world visit.
+  Unbinding repeat restores ordinary Chat on that same key. It restores
+  bindings, notes and saved settings; use only in a muted disposable singleplayer world.
+
+- `input-471 setup|state|reset|debug BOOL|bind CODE MASK|menu|close|finish` observes
+  native keyboard events and held state without saving preferences. Run
+  `python3 validation-mod/tools/input_471_regressions.py /disposable/.minecraft --display :N`
+  against a muted singleplayer clone on its separate Xvfb display. It checks Ctrl+S
+  with both Ctrl keys, both release orders, held W, menus and focus loss; plain F3
+  and Ctrl+F3; native F13–F24 polling/events; and backslash/pipe. `finish` restores
+  bindings, modifier masks and debug preferences and checks unchanged saved settings.
+
 - `release-468 capture|check` captures the split crafting preferences at 854x480
   and 320x240, then checks native recursive partial transfers in both directions,
   independent table/personal toggles, full NBT/count retention, journal stalling,
@@ -1118,7 +1149,7 @@ Keep screenshots and generated inventories with the private review report; never
 
 - `release-470-music-ui capture` writes independent playlist/footer/preview/missing-source screenshots at 854x480 and 320x240. Run it before acceptance. `release-470-music-ui check`: in a focused, muted disposable singleplayer world, checks actual Music row double-click playback through the saved playlist path, unsaved draft preservation, the shared Play/Preview preference, optional speaker icon placement and one-per-session missing-source warnings at 854x480 and 320x240. Captures footer and warning views in `power-beta-data/reports/release-470/music-ui`.
 
-`smart-slabs-470` checks native Smart placements, material variants, held raycast continuation and stroke direction changes. `extra-sounds-470` runs real 10/15-block sprint jumps into one-deep water, ladder ascent/descent and native ladder actions. Both restore the disposable world and preferences. Run with sound/music muted and verified silent output. `extra-sound-decoders-432` now covers all 118 bundled/current extra-effect resource entries.
+`smart-slabs-470` checks native Smart placements, material variants, held raycast continuation and stroke direction changes. `extra-sounds-470` runs real 10/15-block sprint jumps into one-deep water, ladder ascent/descent and native ladder actions. Both restore the disposable world and preferences. Run with sound/music muted and verified silent output. `extra-sound-decoders-432` now covers all 105 bundled/current extra-effect resource entries.
 
 - `release-470-music-audio start`, `opening`, `ending-arm`, `ending`, `preview-arm`,
   `preview`, `pause`, `paused`, `off`, `off-check`, `stop` checks real native streaming
@@ -1136,6 +1167,63 @@ first/third-person pull-frame checks.
 in first/third person, with armor and a clear-air daylight camera. `status` reports
 progress; `stop` restores the fixture early. Capture automatically restores its
 state after four framesets. Images are in `power-beta-data/reports/modern-bow-470`.
+
+`creative-bow-471` checks Creative firing in both hands with Modern bow handling
+on/off, no ammunition, and single/oversized tagged arrows in the opposite hand or
+storage. It verifies unchanged complete item bytes and identity, native instant
+fire/flight, saved pickup prevention, Survival ammo/durability, remote authority
+and main-hand Creative use with offhand disabled. Use a focused, muted disposable
+singleplayer clone. It restores native items, settings and owned terrain/entities.
+
+`creative-sword-471` checks all five sword materials against stone, instant-break
+tall grass and TNT through actual native attack presses, held mining and final
+block callbacks. It verifies native swings, retained tagged sword data, pending
+mining cancellation, offhand swords with empty/tool main hands, entity attacks
+and Survival mining/wear. Use a focused, muted disposable singleplayer clone;
+items, settings, animation state and owned terrain/entities are restored.
+
+`title-splash-471 capture|run` runs from the focused, muted disposable title screen
+with no loaded world. Both commands first capture all five title styles with
+splash text on/off at 854x480 and 320x240, plus the setting row. Native title
+rendering uses a neutral background to isolate splash pixels. `run` then checks
+pixel changes, hidden-text equivalence, preserved custom/date splash strings,
+all Defaults bases and manual draft Cancel/Apply persistence. It retains custom
+title design data and restores preferences. Reports are under
+`power-beta-data/reports/release-471/title-splash`.
+First load a disposable world, then run `title` to unload it. This initializes
+StationAPI's item models for the fixture's Settings-row captures.
+
+`numeric-sliders-471 capture|run` captures song fade and MP3 batch sliders at
+854x480 and 320x240. `run` checks actual pointer drags in tens, range endpoints,
+right-click precise entry, Cancel, fractional rejection and fade values above
+5000ms. Use a focused, muted disposable client with a display of at least
+1708x960. Options drafts and preferences are restored. Reports are under
+`power-beta-data/reports/release-471/numeric-sliders`.
+
+`audio-transport-471 capture|run` requires a focused, muted disposable world on its verified
+silent Pulse sink. It enables music only inside the fixture and counts native UI
+click requests for Audio/title/pause transports, row playback, double-clicks,
+sample/preview buttons and preview context actions. Real stream checks cover
+playing/paused audition removal, background-source restoration, preserved paused
+backgrounds, history/queue ownership and blue-preview/gold-background screenshots.
+Add songs checks red X pixels with/without hover, active context Add/Remove,
+isolated draft Cancel and read-only Beta. Runs at 854x480 and 320x240 and restores
+preferences. Captures are in `power-beta-data/reports/release-471/audio-transport`.
+Run `capture` before `run`: its separate path prepares and captures Audio controls,
+blue preview/gold background rows and included-song red/context controls without
+running acceptance assertions. The bare command remains a `run` alias.
+
+`music-folders-471 capture|run` scans two missing sources with the same basename and checks
+both warning dialogs, one notice per path, gray names/red status, relink icon hit
+bounds/tooltip and the retained context action. At 854x480 and 320x240 it captures
+old-path chooser context, enforces a single replacement selection and verifies
+ordinary Add folder still permits multiple selections. Creating a source between
+frames must not trigger filesystem polling. Use a focused, muted disposable world
+on a display of at least1708x960. Reports are under
+`power-beta-data/reports/release-471/music-folders`; settings and scratch folders
+are restored. Multi-root cached playback/relink preservation also has unit coverage.
+Run `capture` first for independent missing-folder, heading, tooltip and relink
+picker views before acceptance. The bare command remains a `run` alias.
 
 `camera-jitter-470 raw` checks the actual loaded raw mouse helper under contention
 and preserves its native polling lifecycle. `stage`, `orbit`, `stop`, `restore`

@@ -83,7 +83,8 @@
     "Smoothness470TerrainCapture",
     "Smoothness470UpdatesCapture",
     "Smoothness470VboCapture",
-    "Smoothness470UseCapture"
+    "Smoothness470UseCapture",
+    "TitleSplash471Access"
   ],
   "injectors": {
     "defaultRequire": 1

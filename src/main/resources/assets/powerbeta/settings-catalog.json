@@ -294,7 +294,8 @@
     "max": 12000,
     "step": 1,
     "displayDivisor": 10,
-    "unit": "seconds"
+    "unit": "seconds",
+    "sliderStep": 10
   },
   "power_hud:config.coordinateDisplay": {
     "page": "Interface",
@@ -355,7 +356,8 @@
     "max": 12000,
     "step": 1,
     "displayDivisor": 20,
-    "unit": "seconds"
+    "unit": "seconds",
+    "sliderStep": 20
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.enableVisibility": {
     "page": "Interface",
@@ -382,7 +384,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HOTBAR_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
@@ -401,7 +404,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.enableVisibility": {
     "page": "Interface",
@@ -428,7 +432,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.HEARTS_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
@@ -447,7 +452,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.enableVisibility": {
     "page": "Interface",
@@ -474,7 +480,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.ARMOR_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
@@ -493,7 +500,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.enableVisibility": {
     "page": "Interface",
@@ -520,7 +528,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OXYGEN_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
@@ -539,7 +548,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.enableVisibility": {
     "page": "Interface",
@@ -566,7 +576,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OVERLAY_MESSAGE_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
@@ -585,7 +596,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.enableVisibility": {
     "page": "Interface",
@@ -612,7 +624,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.SIMPLE_HUD_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
@@ -631,7 +644,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.hudPositioningSystem": {
     "page": "General",
@@ -1230,7 +1244,8 @@
     "restart": false,
     "min": 0,
     "max": 1024,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_PASSIVE": {
     "page": "Gameplay",
@@ -1241,7 +1256,8 @@
     "restart": false,
     "min": 0,
     "max": 1024,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_environment:config.ENTITY_SPAWN_MECHANICS_CONFIG.MAX_SPAWN_CAPACITY_SQUID": {
     "page": "Gameplay",
@@ -1252,7 +1268,8 @@
     "restart": false,
     "min": 0,
     "max": 1024,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_environment:config.MUSIC_CONFIG.overlayForMusicInDebug": {
     "page": "Interface",
@@ -1846,7 +1863,8 @@
     "max": 1200.0,
     "step": 1,
     "displayDivisor": 20,
-    "unit": "seconds"
+    "unit": "seconds",
+    "sliderStep": 20
   },
   "power_controls:features.fastLeafDecay.maximumDecayTime": {
     "page": "Gameplay",
@@ -1859,7 +1877,8 @@
     "max": 1200.0,
     "step": 1,
     "displayDivisor": 20,
-    "unit": "seconds"
+    "unit": "seconds",
+    "sliderStep": 20
   },
   "power_controls:features.stepAssist": {
     "page": "Movement",
@@ -2461,7 +2480,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.7.0",
+    "default": "Power Beta 4.7.1",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -3074,14 +3093,16 @@
     "group": "Hotbar swapping",
     "label": "Horizontal offset",
     "description": "Move the row preview horizontally from its anchor, in scaled GUI pixels.",
-    "order": 8
+    "order": 8,
+    "sliderStep": 10
   },
   "tweaks.hotbar.offsetY": {
     "page": "Inventory",
     "group": "Hotbar swapping",
     "label": "Vertical offset",
     "description": "Move the row preview vertically from its anchor, in scaled GUI pixels.",
-    "order": 9
+    "order": 9,
+    "sliderStep": 10
   },
   "tweaks.freeLookToggle": {
     "page": "Camera",
@@ -4032,7 +4053,8 @@
     "order": 12,
     "min": 16,
     "max": 16384,
-    "step": 16
+    "step": 16,
+    "sliderStep": 64
   },
   "gameplay.limitTnt": {
     "page": "Video",
@@ -4236,10 +4258,12 @@
     "order": 18
   },
   "infoHud.clusters.0.offsetX": {
-    "order": 19
+    "order": 19,
+    "sliderStep": 10
   },
   "infoHud.clusters.0.offsetY": {
-    "order": 20
+    "order": 20,
+    "sliderStep": 10
   },
   "infoHud.clusters.0.hideWithDebug": {
     "order": 21
@@ -4282,10 +4306,12 @@
     "order": 118
   },
   "infoHud.clusters.1.offsetX": {
-    "order": 119
+    "order": 119,
+    "sliderStep": 10
   },
   "infoHud.clusters.1.offsetY": {
-    "order": 120
+    "order": 120,
+    "sliderStep": 10
   },
   "infoHud.clusters.1.hideWithDebug": {
     "order": 121
@@ -4328,10 +4354,12 @@
     "order": 218
   },
   "infoHud.clusters.2.offsetX": {
-    "order": 219
+    "order": 219,
+    "sliderStep": 10
   },
   "infoHud.clusters.2.offsetY": {
-    "order": 220
+    "order": 220,
+    "sliderStep": 10
   },
   "infoHud.clusters.2.hideWithDebug": {
     "order": 221
@@ -4374,10 +4402,12 @@
     "order": 318
   },
   "infoHud.clusters.3.offsetX": {
-    "order": 319
+    "order": 319,
+    "sliderStep": 10
   },
   "infoHud.clusters.3.offsetY": {
-    "order": 320
+    "order": 320,
+    "sliderStep": 10
   },
   "infoHud.clusters.3.hideWithDebug": {
     "order": 321
@@ -4461,7 +4491,8 @@
     "order": 5,
     "min": 1,
     "max": 512,
-    "step": 1
+    "step": 1,
+    "sliderStep": 16
   },
   "veinMining.radius": {
     "page": "Building",
@@ -4481,7 +4512,8 @@
     "order": 7,
     "min": 1,
     "max": 16384,
-    "step": 1
+    "step": 1,
+    "sliderStep": 64
   },
   "veinMining.checksPerTick": {
     "page": "Building",
@@ -4491,7 +4523,8 @@
     "order": 8,
     "min": 1,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 16
   },
   "veinMining.blocksPerTick": {
     "page": "Building",
@@ -4727,6 +4760,14 @@
     "default": 0,
     "order": 0
   },
+  "logo.showSplashText": {
+    "page": "Interface",
+    "group": "Title screen",
+    "label": "Show splash text",
+    "description": "Show the yellow splash beside the main menu title.",
+    "default": true,
+    "order": 1
+  },
   "activeTweaks.enabled": {
     "order": 0
   },
@@ -4734,10 +4775,12 @@
     "order": 1
   },
   "activeTweaks.offsetX": {
-    "order": 2
+    "order": 2,
+    "sliderStep": 10
   },
   "activeTweaks.offsetY": {
-    "order": 3
+    "order": 3,
+    "sliderStep": 10
   },
   "activeTweaks.textColor": {
     "order": 4
@@ -4938,7 +4981,8 @@
     "min": 0.0,
     "max": 500.0,
     "step": 1.0,
-    "order": 7
+    "order": 7,
+    "sliderStep": 10
   },
   "maps.offsetY": {
     "page": "Interface",
@@ -4948,7 +4992,8 @@
     "min": 0.0,
     "max": 500.0,
     "step": 1.0,
-    "order": 8
+    "order": 8,
+    "sliderStep": 10
   },
   "maps.opacity": {
     "page": "Interface",
@@ -5250,7 +5295,8 @@
     "min": 0.0,
     "max": 1000000.0,
     "step": 100.0,
-    "order": 36
+    "order": 36,
+    "sliderStep": 1000
   },
   "maps.deathpoints": {
     "page": "Map",
@@ -5623,6 +5669,12 @@
     "group": "Interface",
     "label": "Open commands",
     "order": 1
+  },
+  "keys.powerbeta.executePreviousCommand": {
+    "page": "Controls",
+    "group": "Interface",
+    "label": "Execute previous command",
+    "order": 1.5
   },
   "keys.powerbeta.debugGraph": {
     "page": "Controls",
@@ -6117,7 +6169,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.STAMINA_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
@@ -6136,7 +6189,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "maps.radarDimming": {
     "page": "Interface",
@@ -6162,7 +6216,7 @@
     "page": "Map",
     "group": "World map",
     "label": "Map light shading radius",
-    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0–7, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
     "min": 8,
     "max": 128,
     "step": 1,
@@ -6606,7 +6660,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "power_hud:hudpositions.ADVANCED_HUD_POSITIONS_CONFIG.OFFHAND_POSITION_CONFIG.verticalPosition": {
     "page": "Interface",
@@ -6625,7 +6680,8 @@
     "restart": false,
     "min": -2048,
     "max": 2048,
-    "step": 1
+    "step": 1,
+    "sliderStep": 10
   },
   "offhand.enabled": {
     "page": "Inventory",
@@ -6925,11 +6981,20 @@
     "default": false,
     "restart": false
   },
+  "gameplay.modernBowFov": {
+    "page": "Gameplay",
+    "group": "Equipment",
+    "label": "Bow field of view",
+    "description": "Narrow the view while drawing a modern bow, with smooth drawing and release transitions.",
+    "default": true,
+    "restart": false
+  },
   "audio.ladderSounds": {
     "page": "Audio",
     "group": "Extra sounds",
     "label": "Ladder sounds",
-    "order": 10
+    "order": 10,
+    "description": "Use modern climbing, descending, footstep and landing sounds. Placing, hitting and breaking ladders keep Beta sounds."
   },
   "audio.musicDoubleClickPreview": {
     "page": "Audio",
@@ -6947,12 +7012,27 @@
     "page": "Audio",
     "group": "Music playback",
     "label": "Song fade time (milliseconds)",
-    "order": 22
+    "order": 22,
+    "sliderStep": 10,
+    "default": 1000
   },
   "audio.mp3ConversionLimit": {
     "page": "Audio",
     "group": "Music playback",
     "label": "MP3 conversion batch limit",
-    "order": 23
+    "order": 23,
+    "sliderStep": 10
+  },
+  "subtitles.offsetX": {
+    "sliderStep": 10
+  },
+  "subtitles.offsetY": {
+    "sliderStep": 10
+  },
+  "audio.menuControlsOffsetX": {
+    "sliderStep": 10
+  },
+  "audio.menuControlsOffsetY": {
+    "sliderStep": 10
   }
 }

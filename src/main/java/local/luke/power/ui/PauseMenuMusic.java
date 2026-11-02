@@ -36,7 +36,7 @@ public final class PauseMenuMusic extends UiScreen {
     if (AudioConfig.current().menuControlsScrub && scrub.press(x, y, button)) return true;
     for (int i = 0; i < 4; i++) {
       if (!inside(x, y, controlsX() + i * BUTTON_STEP, bounds.y(), BUTTON_WIDTH, 18)) continue;
-      minecraft.soundManager.method_2009("random.click", 1, 1);
+      if (i == 3 || i == 0 && AudioController.musicPlaying()) minecraft.soundManager.method_2009("random.click", 1, 1);
       switch (i) {
         case 0 -> AudioController.togglePause();
         case 1 -> AudioController.previous();

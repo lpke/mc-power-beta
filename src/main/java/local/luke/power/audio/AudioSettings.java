@@ -3,6 +3,8 @@ package local.luke.power.audio;
 import java.util.*;
 
 public final class AudioSettings {
+  public static final int MAX_MUSIC_FADE_MILLIS = 10000;
+  public static final int DEFAULT_MUSIC_FADE_MILLIS = 1000;
   public boolean redstonePlacementSound = true;
   public boolean seedPlantingSounds = false;
   public boolean hoeTillingSounds = false;
@@ -45,7 +47,7 @@ public final class AudioSettings {
   public List<String> musicDirectories = new ArrayList<>();
   public Map<String, String> musicSourceIdentities = new TreeMap<>();
   public boolean musicDoubleClickPreview = false, showMusicPreviewButton = false;
-  public int musicFadeMillis = 0, mp3ConversionLimit = 500;
+  public int musicFadeMillis = DEFAULT_MUSIC_FADE_MILLIS, mp3ConversionLimit = 500;
   public boolean shuffle = true, avoidRepeats = true;
   public boolean waitBetweenTracks = true, delayQueuedTracks = false;
 
@@ -86,8 +88,8 @@ public final class AudioSettings {
     MusicGroups.copy(libraryGroupVolumes);
     MusicLibrarySources.validateOrder(libraryOrder);
     MusicFolders.validateIdentities(musicDirectories, musicSourceIdentities);
-    if (musicFadeMillis < 0 || musicFadeMillis > 5000)
-      throw new IllegalArgumentException("Music fade must be 0 to 5000 milliseconds");
+    if (musicFadeMillis < 0 || musicFadeMillis > MAX_MUSIC_FADE_MILLIS)
+      throw new IllegalArgumentException("Music fade must be 0 to " + MAX_MUSIC_FADE_MILLIS + " milliseconds");
     if (mp3ConversionLimit < 1 || mp3ConversionLimit > MusicLibrary.MAX_TRACKS)
       throw new IllegalArgumentException("Conversion limit must be 1 to " + MusicLibrary.MAX_TRACKS);
     volume(master);

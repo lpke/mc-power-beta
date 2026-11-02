@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [4.7.1] - 2026-11-02
+
+- Find assigned controls by capturing a hotkey, or switch Controls search from names to assigned keys and combinations. Keep Back navigation when viewing results.
+- Fix the Ctrl+S crash caused by the legacy F3+S check reading an invalid remapped key number.
+- Fire bows without arrows in Creative, without consuming carried arrows, in either hand with Beta or modern handling.
+- Add an unbound Execute previous command control to repeat the last slash command from the current world visit without opening chat.
+- Keep Creative sword swings from breaking blocks while preserving entity attacks and Survival mining.
+- Set WorldEdit spawner types with spawner[mob=zombie], including mob-name completion and undo/redo.
+- Add Show splash text to title-screen settings, enabled by default.
+- Block attacks and mining while drawing a modern bow, correct crouched arrow origins for both camera-height settings, and add optional bow FOV with modern zoom-in and release smoothing.
+- Extend song fades to 10000 milliseconds, default new settings to 1000, and use 10-unit steps for fade time and MP3 conversion batches. Give other wide-range sliders practical steps while retaining exact right-click entry.
+- Keep music starts, resumes, track changes and previews free of button clicks. Fully stop previews from their button or context action, show them in blue, and retain the background song's gold highlight.
+- Restore red playlist-removal icons and offer Remove from playlist in included songs' context menus.
+- Limit modern ladder sounds to movement and landings; retain Beta placement, hit and break sounds.
+- Show every missing music source, add a relink button beside each missing folder, and identify the old path in a single-selection replacement picker. Preserve cached tracks and playlist links.
+
 ## [4.7.0] - 2026-11-02
 
 - Add Smart fast slab placement. Vertical runs use double slabs; horizontal runs follow the starting slab shape, or use double slabs when starting from another block.

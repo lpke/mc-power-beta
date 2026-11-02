@@ -32,6 +32,7 @@ public final class ControlLinks {
     link("key.inventory", "", "", "Open or close your inventory.");
     link("key.chat", "", "", "Open chat to write a message or command.");
     link("powerbeta.openCommands", "", "", "Open chat with / ready to enter a command.");
+    link("powerbeta.executePreviousCommand", "", "", "Repeat the last command entered during this world visit without opening chat. Uses the command's normal permissions.");
     link("powerbeta.debugGraph", "", "", "Toggle the performance graph and show the debug overlay.");
     link("key.fog", "video.fogCycle", "", "Cycle the configured render distances. Shift reverses the cycle.");
     link("Auto-walk (toggle)", "tweaks.autoWalkHoldToWalk", "", "Start or stop walking forward. Player forward/back input stops it. Focus loss stops it only when configured. Freecam controls the camera while your player keeps walking. Inventories keep walking when Inventory while moving is on.");

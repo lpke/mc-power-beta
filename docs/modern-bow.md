@@ -14,7 +14,9 @@ and [resource index](https://piston-meta.mojang.com/v1/packages/0c8f43b28f837869
 The client SHA-1 is `e877b6a07acd633fb3bb475002175cec036e7b87`.
 Checked methods include `BowItem.use`, `releaseUsing`, `getPowerForTime`,
 `ProjectileWeaponItem.shoot`, `Projectile.getMovementToShoot`, `shootFromRotation`,
-`AbstractArrow.tick`, `onHitEntity`, `HumanoidModel` bow poses and
+`AbstractArrow.tick`, `onHitEntity`, `HumanoidModel` bow poses,
+`AbstractArrow`'s shooter constructor, `Minecraft.handleKeybinds`/`continueAttack`,
+`AbstractClientPlayer.getFieldOfViewModifier`, `Camera.tickFov`/`calculateFov` and
 `FirstPersonHandsAndItemsRenderer` bow transforms and `CritParticle`/`Particle`/
 `SingleQuadParticle` critical trail behavior. `assets/minecraft/items/bow.json`
 defines the pull-frame thresholds. Bow release and break use Players volume; arrow impacts use Neutral, mapped to
@@ -28,8 +30,19 @@ Full draw takes 20 ticks. Launch speed is three times power, with triangular
 uncertainty 0.0172275 per axis and the shooter's horizontal velocity, plus vertical
 velocity when airborne. The normal bow holds for at most 72000 ticks.
 Pull textures change at ticks 13 and 18. First-person stretch, shake, mirrored
-hand transforms, movement slowdown and the 15% full-draw field-of-view reduction
-follow the official formulas. Third-person poses include both arms and native bob.
+hand transforms and movement slowdown follow the official formulas. Third-person
+poses include both arms and native bob.
+
+Bow field of view starts on in all Defaults bases and applies only with Modern bow
+handling. The official whole-tick target is `1f - min(useTicks / 20f, 1f)^2 * .15f`.
+The camera copies the previous multiplier, moves halfway toward the combined
+movement/bow target each unpaused game tick and interpolates those two float samples
+for rendered partial ticks. Release and cancellation target the normal movement
+multiplier with the same timing. The bow filter stops after convergence. Switching
+either bow preference off immediately bypasses and resets it, including while paused,
+without rendering further bow FOV calculations. World exit clears
+its samples. This keeps the official response when sprint FOV changes simultaneously,
+without changing the existing sprint preferences or hand projection.
 
 Air inertia is the exact float 0.99 promoted to double. Water inertia is the exact
 float 0.6 promoted to double and applies before collision damage. The current tick's
@@ -42,6 +55,13 @@ Bows break on the 384th successful shot. Canceled and undercharged uses consume
 nothing. Creative needs no ammunition and does not wear its bow; its arrows do
 not become survival pickup ammunition.
 
+Creative also needs no arrows with Modern bow handling off, in either hand.
+The native ammo check/removal is bypassed before it touches either hand or storage,
+so existing arrow counts, damage and NBT stay intact. Beta still fires instantly
+and owns its normal launch, flight, damage and sound. Its native saved pickup flag
+prevents these free arrows from becoming survival ammunition. Multiplayer keeps
+the original native item path.
+
 ## Integration and limits
 
 Main-hand use keeps its native block/entity interaction priority. Once a bow starts
@@ -50,6 +70,16 @@ the offhand, then main hand, then ordinary inventory storage. Either hand can dr
 The exact hand, selected slot, inventory owner and manual-swap revision remain
 bound to the draw. Menus, focus loss, a replaced stack, death, detached cameras,
 world changes and disabling cancel the draw. Rendering reads tick-owned state.
+While either hand draws, native left-click attacks, arm swings and held block mining
+are suppressed, matching modern item-use ownership. Canceling restores native attacks.
+
+The reference shooter constructor launches at `getEyeY() - (double)0.1f`. Beta's
+native position is already eye-based; its small `method_1378` offset is not that
+first-person camera height. Modern releases therefore use the current native/pose
+camera eye, including the selected Beta or modern crouch height and pose easing,
+then subtract the exact official float offset. Both hands and all perspectives use
+that same physical launch origin. Camera bob, free look and third-person displacement
+do not steer or displace shots. Other projectile origins remain native.
 
 Successful survival releases use the shared inventory plan. Complete native bow
 and arrow data are copied on the game thread, the immutable recovery journal
@@ -103,6 +133,20 @@ closed-form reference; water ordering; block containment/collision; speed damage
 and critical damage bounds. The existing `offhand-actions-400 native` remains a
 regression check for the default disabled mode. Decoder validation includes every
 registered bow sound variant.
+
+`bow-471` covers both-hand native attack/held-mining suppression and restored attack,
+standing and native sneak, both crouch camera choices, crouch/standing easing,
+forced low-ceiling crouch, crawl and swim origins in both perspectives. It checks
+the installed FOV bridge against source-derived float tick/partial-tick sequences,
+release, paused ticks, preference cancellation, convergence and world-exit reset.
+The focused `BowFovTest` also checks simultaneous sprint/draw target changes.
+
+`creative-bow-471` exercises actual Creative item use in both hands with the
+preference on and off, with no ammo, opposite-hand ammo and storage ammo. It checks
+single and oversized tagged stacks, retained native item bytes and identity,
+native instant launch/flight, saved pickup prevention, Survival ammo/durability,
+remote native authority and main-hand use with offhand disabled. Run in the same
+focused, muted disposable clone; it restores settings, items and owned entities.
 
 Check normal frames manually in both perspectives with the bow in either hand:
 all three pull frames, full-draw shake, left/right aim, crouch, armor, movement,

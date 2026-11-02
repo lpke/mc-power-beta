@@ -1,6 +1,8 @@
 package local.luke.power.title.mixin;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import local.luke.power.title.*;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.TitleScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -12,6 +14,11 @@ public class TitleScreenMixin extends net.minecraft.client.gui.screen.Screen {
     @Unique private final TitleLogoRenderer power$titleRenderer = new TitleLogoRenderer();
     @Unique private boolean power$initialised, power$animate;
     @Unique private long power$selection;
+    @WrapWithCondition(method = "render(IIF)V", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/client/gui/screen/TitleScreen;drawCenteredTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)V"))
+    private boolean power$titleSplash(TitleScreen screen, TextRenderer renderer, String text, int x, int y, int colour) {
+        return TitleFeatures.showSplashText.get();
+    }
     @Unique private boolean power$animation() {
         return power$animate && power$selection == local.luke.power.ui.TitlePreview.selectionRevision()
             && TitleFeatures.animation.get();

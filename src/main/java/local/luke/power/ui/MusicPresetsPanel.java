@@ -352,7 +352,7 @@ final class MusicPresetsPanel extends UiScreen {
   private void context(MusicPlaylist playlist, int x, int y) {
     boolean editable = !MusicPlaylist.reserved(playlist.id());
     parent.musicActions(playlist, List.of("Play", "Rename", "Duplicate", "Delete"),
-        List.of(!playlist.tracks().isEmpty(), editable, true, editable), x, y, action -> {
+        List.of(!playlist.tracks().isEmpty(), editable, true, editable), x, y, action -> action != 0, action -> {
           if (editing()) return;
           switch (action) {
             case 0 -> act(() -> edits.play(playlist.id()));

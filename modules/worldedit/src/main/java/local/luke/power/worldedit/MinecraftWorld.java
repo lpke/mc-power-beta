@@ -6,6 +6,7 @@ import local.luke.power.worldedit.mixin.BlockEntityFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.class_395;
+import net.minecraft.class_104;
 import net.minecraft.nbt.*;
 import net.minecraft.world.World;
 
@@ -40,10 +41,16 @@ public final class MinecraftWorld implements WorldAccess {
         throw new IllegalArgumentException("Could not save block entity at " + p, e);
       }
     }
-    return new BlockValue(id, meta, bytes);
+    return new BlockValue(id, meta, bytes,entity instanceof class_104 spawner?spawner.method_2037():null);
+  }
+
+  public BlockValue prepare(Pos pos,BlockValue desired,BlockValue existing) {
+    return SpawnerState.prepare(pos,desired,existing);
   }
 
   public void set(Pos p, BlockValue state) {
+    if(state.spawnerMob!=null && state.nbt()==null)
+      throw new IllegalArgumentException("Prepare spawner data before writing at "+p);
     if (!p.valid()
         || state.id < 0
         || state.id >= Block.BLOCKS.length
@@ -54,6 +61,8 @@ public final class MinecraftWorld implements WorldAccess {
     if (bytes != null) {
       try {
         NbtCompound tag = NbtIo.read(new DataInputStream(new ByteArrayInputStream(bytes)));
+        if(state.spawnerMob!=null && !tag.getString("EntityId").equals(state.spawnerMob))
+          throw new IllegalArgumentException("Prepare the changed spawner mob before writing at "+p);
         tag.putInt("x", p.x());
         tag.putInt("y", p.y());
         tag.putInt("z", p.z());

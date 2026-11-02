@@ -64,6 +64,7 @@ public class ChatScreenMixin extends Screen implements ChatScreenAccessor {
                 if (CHAT_HISTORY.size() > local.luke.power.chat.ChatNotes.ownLimit()) CHAT_HISTORY.remove(0);
             }
             local.luke.power.chat.ChatNotes.record(message);
+            local.luke.power.chat.PreviousCommand.record(minecraft.world, message);
             if (key == Keyboard.KEY_NUMPADENTER) {
                 if (!message.isEmpty() && !minecraft.isCommand(message)) minecraft.player.sendChatMessage(message);
                 if (minecraft.currentScreen == (Object)this) minecraft.setScreen(null);

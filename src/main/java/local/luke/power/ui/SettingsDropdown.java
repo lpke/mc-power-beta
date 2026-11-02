@@ -20,6 +20,7 @@ final class SettingsDropdown {
   private List<Boolean> enabled = List.of();
   private IntConsumer accepted;
   private IntConsumer secondary;
+  private java.util.function.IntPredicate clickSound = index -> true;
   private boolean fullNameTooltips;
   private Object owner;
   private int selected, focus, defaultIndex, x, y, width, rows, rowHeight = 18, viewportHeight;
@@ -41,6 +42,7 @@ final class SettingsDropdown {
   boolean editing(Setting setting) { return editing((Object)setting); }
   void onSecondary(IntConsumer action) { if (active()) secondary = Objects.requireNonNull(action); }
   void fullNameTooltips() { fullNameTooltips = active(); }
+  void clickSound(java.util.function.IntPredicate enabled) { if (active()) clickSound = Objects.requireNonNull(enabled); }
 
   void open(Setting setting, int left, int top, int span, int screenWidth, int screenHeight,
       Runnable changed) {
@@ -123,6 +125,7 @@ final class SettingsDropdown {
 
   void close() {
     accepted = secondary = null; owner = null; context = keyboardFocus = fullNameTooltips = false; scroll = 0;
+    clickSound = index -> true;
     bar.release(); hover.clear();
   }
   void tick() { if (active()) hover.tick(); }
@@ -170,7 +173,8 @@ final class SettingsDropdown {
     if (index < 0 || index >= labels.size() || !enabled.get(index)) return;
     IntConsumer action = rightClick ? secondary : accepted;
     if (action == null) return;
-    close(); screen.click(); action.accept(index);
+    boolean audible = clickSound.test(index);
+    close(); if (audible) screen.click(); action.accept(index);
   }
   boolean press(UiScreen screen, int mx, int my, int button) {
     if (!active()) return false;

@@ -165,9 +165,8 @@ substitute fall distance or the previous tick's impact speed. The
 from 10 and 15 blocks into one-deep water, logging entry motion and gain.
 
 Ladder sounds use the same pinned client, resource index and `sounds.json`.
-`SoundType.LADDER` has volume 1 and pitch 1. Native placement/break use the four
-`dig/wood` variants at volume 1, pitch 0.8; mining hits use the five `step/ladder`
-variants at volume 0.25, pitch 0.5. Climbing steps use those five variants at
+`SoundType.LADDER` has volume 1 and pitch 1. Power Beta imports only movement sounds. Placement, mining hits and breaking
+keep native Beta audio. Climbing steps use the five `step/ladder` variants at
 volume 0.15, pitch 1, and native fall callbacks use volume 0.5, pitch 0.75.
 `Entity.applyMovementEmissionAndPlaySound`,
 `vibrationAndSoundEffectsFromBlock`, `getOnPos`, and `Player.getMovementEmission`
@@ -180,5 +179,4 @@ Audio > Extra sounds > Ladder sounds controls these events independently.
 Power Beta enables it by default; the other bases leave it off. Disabling it
 stops its movement work and terrain reads. Native ladder collision, movement,
 placement eligibility, breaking, item consumption and fall damage stay native.
-Ladder steps and fall sounds retain the source entity's volume category; block
-actions use Blocks. Preview uses the same 0.15 step gain.
+Ladder steps and fall sounds retain the source entity's volume category. Preview uses the same 0.15 step gain.

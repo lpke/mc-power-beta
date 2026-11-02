@@ -32,6 +32,9 @@
   camera height. Native bucket/boat rays have their own standing-eye offset. Keep
   these targeting corrections out of world-render translations, collision, saved
   positions, physical head-water checks, HUD coordinates and projectile origins.
+  Modern bow releases explicitly adapt the official eye-minus-0.1f origin to the
+  selected native/pose first-person camera height, without using targeting rays or
+  bob/perspective/free-look transforms. Ordinary Beta projectiles retain native origins.
   Free-look/bob/third-person matrices do not steer normal gameplay targeting.
 
 - Held-item lighting uses render-only terrain endpoints and the existing 32-byte

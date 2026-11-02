@@ -83,6 +83,8 @@ public final class Bindings {
   }
 
   public static int eventCode(Object keyBinding) {
+    if (local.luke.power.chat.PreviousCommand.hasPress() && keyBinding instanceof Binding b
+        && b.power$id().equals("key.chat") && local.luke.power.chat.PreviousCommand.ownsPress(b.power$code())) return -1000;
     return keyBinding instanceof Binding b && active(b) ? b.power$code() : -1000;
   }
 

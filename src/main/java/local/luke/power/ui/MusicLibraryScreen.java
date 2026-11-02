@@ -208,9 +208,12 @@ public final class MusicLibraryScreen extends UiScreen {
     return queue ? controlsTop() + 24 : presetsOpen ? actionTop() + presets.headerHeight() + 4
         : controlsTop() + filters().height() + (actionTop() == controlsTop() ? 10 : 6);
   }
-  private int groupHeight(String group) { return 20; }
+  private int groupHeight(String group) { return managedSource(group) && span() < 300 ? 40 : 20; }
   private int sourceRemoveX() { return rowLayout().groupRemoveX(); }
   private int sourceRemoveWidth() { return rowLayout().buttonWidth(); }
+  private int sourceRelinkWidth() { return 18; }
+  private int sourceRelinkX() { return sourceRemoveX() - sourceRelinkWidth() - 4; }
+  private int groupControlsY(Row row, int y) { return y + (row.height > 20 ? 21 : 1); }
   private MusicRowLayout rowLayout() { return MusicRowLayout.at(left(), span(), queue, edits.setting("showMusicPreviewButton").value.getAsBoolean()); }
   public boolean doubleClickPreview() { return edits.setting("musicDoubleClickPreview").value.getAsBoolean(); }
   public void toggleDoubleClick() {
@@ -224,7 +227,7 @@ public final class MusicLibraryScreen extends UiScreen {
   private int groupVolumeWidth() { return rowLayout().groupVolumeWidth(); }
   private int groupVolumeX() { return rowLayout().groupVolumeX(); }
   private int countRight(String group) {
-    return groupHasVolume(group) ? (managedSource(group) ? sourceRemoveX() : groupVolumeX()) - 8
+    return groupHasVolume(group) ? (managedSource(group) ? sourceRelinkX() : groupVolumeX()) - 8
         : presets.adding() ? right() - 46 : right() - 4;
   }
   private boolean groupHasVolume(String group) { return libraryTab() && !group.equals("Unavailable tracks"); }
@@ -593,7 +596,7 @@ public final class MusicLibraryScreen extends UiScreen {
     if (conversionVisible() && showMusicStatus() && b == 0 && inside(x, y, right() - 88, statusTop(), 88, 14)) { click(); convertMp3(); return; }
     if (!inList(x, y)) return;
     Row row = rowAt(y); if (row == null) return;
-    if (row.id == null) { headingClick(row, x, y, rowY(row) + 1, b); return; }
+    if (row.id == null) { headingClick(row, x, y, groupControlsY(row, rowY(row)), b); return; }
     var layout = rowLayout(); Setting volume = settings.get("audio.sound." + row.id);
     int cy = rowY(row) + layout.controlsY();
     if (presets.adding() && inside(x, y, layout.nameX(), cy, 18, 18)) {
@@ -636,7 +639,7 @@ public final class MusicLibraryScreen extends UiScreen {
   }
   private void playTrack(String id) {
     if (!playable(id)) return;
-    click();
+    if (AudioController.musicPlaying() && (AudioController.previewing(id) || AudioController.playingTrack(id))) click();
     try {
       if (!AudioController.previewing(id) && playlistView() && !presets.draft().creating() && !edits.selected().equals(presets.draft().id()))
         edits.load(presets.draft().id());
@@ -645,7 +648,6 @@ public final class MusicLibraryScreen extends UiScreen {
   }
   private void previewTrack(String id) {
     if (!playable(id) && !AudioController.previewing(id)) return;
-    click();
     try { AudioController.previewSound(id); }
     catch (RuntimeException failure) { error = Objects.toString(failure.getMessage(), "Could not preview this song."); }
   }
@@ -661,6 +663,7 @@ public final class MusicLibraryScreen extends UiScreen {
       return;
     }
     if (managedSource(row.group) && b == 0 && inside(x, y, sourceRemoveX(), cy, sourceRemoveWidth(), 18)) { click(); var source = sourceFolders.get(row.group); folders.remove(source.path()); return; }
+    if (managedSource(row.group) && b == 0 && inside(x, y, sourceRelinkX(), cy, sourceRelinkWidth(), 18)) { click(); var source = sourceFolders.get(row.group); folders.relink(source.path()); return; }
     if (presets.editable() && presets.adding() && inside(x, y, right() - 40, cy, 40, 18)) { if (b == 0 && includedCount(row.group) < members(row.group).size()) { click(); addGroup(row.group); } return; }
     if (groupHasVolume(row.group) && inside(x, y, groupVolumeX(), cy, groupVolumeWidth(), 18)) {
       if (b == 0) { draggingGroup = row.group; slideGroup(x); }
@@ -696,12 +699,14 @@ public final class MusicLibraryScreen extends UiScreen {
     List<String> queueSnapshot = queue ? List.copyOf(renderedQueue) : List.of();
     boolean favorite = owner != null && owner.favorites() ? owner.included(id) : edits.favourites().contains(id);
     boolean stopPreview = AudioController.previewing(id);
+    boolean adding = presets.editable() && presets.adding();
+    boolean included = adding && owner.included(id);
     List<String> labels = new ArrayList<>(List.of("Add to queue", favorite ? "Remove favourite" : "Favourite", stopPreview ? "Stop preview" : "Preview"));
     List<Boolean> enabled = new ArrayList<>(List.of(true, true, stopPreview || playable(id)));
-    if (presets.editable() && presets.adding()) { labels.add("Add to playlist"); enabled.add(!owner.included(id)); }
+    if (adding) { labels.add(included ? "Remove from playlist" : "Add to playlist"); enabled.add(true); }
     else if (playlistView() && presets.editable() && !owner.favorites()) { labels.add("Remove from playlist"); enabled.add(true); }
     else if (queue) { labels.add("Remove from queue"); enabled.add(true); }
-    parent.musicActions(row, labels, enabled, x, y, action -> {
+    parent.musicActions(row, labels, enabled, x, y, action -> action != 2, action -> {
       if (owner != null && (presets.draft() != owner || !presetsOpen)) { error = "Playlist changed. Select the song again."; return; }
       if (queue && !queueSnapshot.equals(MusicRequests.tracks())) { error = "Queue changed. Select the song again."; rebuild(); return; }
       try {
@@ -711,9 +716,15 @@ public final class MusicLibraryScreen extends UiScreen {
             if (owner != null && owner.favorites() && presets.editable()) owner.include(id, !favorite);
             else if (edits.favourites().contains(id) == favorite) edits.favourite(id);
           }
-          case 2 -> { if (stopPreview ? AudioController.previewing(id) : playable(id)) AudioController.previewSound(id); }
+          case 2 -> {
+            if (stopPreview) AudioController.stopPreview(id);
+            else if (playable(id)) AudioController.previewSound(id);
+          }
           default -> {
-            if (presets.editable() && presets.adding()) owner.appendTracks(List.of(id));
+            if (presets.editable() && presets.adding()) {
+              if (owner.included(id) != included) { error = "Playlist changed. Select the song again."; return; }
+              owner.include(id, !included);
+            }
             else if (playlistView() && presets.editable()) owner.include(id, false);
             else if (queue) queueEdit(q -> q.tracks.remove(row.index));
           }
@@ -782,24 +793,31 @@ public final class MusicLibraryScreen extends UiScreen {
     boolean hover = inside(mx, my, hoverLeft(), y, hoverWidth(), row.height) && my >= listTop() && my < bottom();
     boolean closed = collapsed.contains(collapseKey(row.group)); int total = members(row.group).size();
     var source = sourceFolders.get(row.group); boolean managed = managedSource(row.group);
+    boolean missing = source != null && source.status().equals("Unavailable");
+    int cy = groupControlsY(row, y);
     String count = presets.adding() || playlistView()
         ? includedCount(row.group) + "/" + libraryGroupCounts.getOrDefault(row.group, 0)
         : total + (total == 1 ? " track" : " tracks");
     int countRight = countRight(row.group);
-    if (managed) iconButton("remove", sourceRemoveX(), y + 1, sourceRemoveWidth(), mx, my, true);
+    if (managed) {
+      iconButton("magnifier", sourceRelinkX(), cy, sourceRelinkWidth(), 18, mx, my, true, false);
+      iconButton("remove", sourceRemoveX(), cy, sourceRemoveWidth(), mx, my, true);
+    }
     if (presets.editable() && presets.adding()) button("Add", right() - 40, y + 1, 40, 18, mx, my, includedCount(row.group) < total);
     if (groupHasVolume(row.group)) {
       int volume = edits.groupVolume(row.group);
-      if (parent.valueEditor.editing("musicGroup/" + row.group)) parent.valueEditor.render(this, groupVolumeX(), y + 1, groupVolumeWidth(), mx, my, listTop(), bottom());
-      else slider(volume + "%", groupVolumeX(), y + 1, groupVolumeWidth(), mx, my, volume / 100d);
+      if (parent.valueEditor.editing("musicGroup/" + row.group)) parent.valueEditor.render(this, groupVolumeX(), cy, groupVolumeWidth(), mx, my, listTop(), bottom());
+      else slider(volume + "%", groupVolumeX(), cy, groupVolumeWidth(), mx, my, volume / 100d);
     }
-    if (source != null && source.status().equals("Unavailable")) count = span() < 300 ? "Missing" : "Source missing";
-    int labelRight = countRight - textWidth(count) - 6;
+    if (missing) count = "Source missing";
+    int labelRight = row.height > 20 ? right() - 4 : countRight - textWidth(count) - 6;
     int labelWidth = Math.max(0, labelRight - left() - 2);
-    if (labelWidth >= textWidth("...")) text(fit((closed ? "> " : "v ") + row.label, labelWidth), left() + 2, y + 6, 0xffffff);
-    text(count, countRight - textWidth(count), y + 6, 0xaaaaaa); fill(left(), y + row.height - 1, right(), y + row.height, 0x50555555);
-    if (!hover || groupHasVolume(row.group) && inside(mx, my, groupVolumeX(), y + 1, groupVolumeWidth(), 18)
-        || managed && inside(mx, my, sourceRemoveX(), y + 1, sourceRemoveWidth(), 18)
+    if (labelWidth >= textWidth("...")) text(fit((closed ? "> " : "v ") + row.label, labelWidth), left() + 2, y + 6, missing ? 0xaaaaaa : 0xffffff);
+    text(count, countRight - textWidth(count), cy + 5, missing ? 0xff8888 : 0xaaaaaa); fill(left(), y + row.height - 1, right(), y + row.height, 0x50555555);
+    if (hover && managed && inside(mx, my, sourceRelinkX(), cy, sourceRelinkWidth(), 18))
+      return new GroupHover("Relink source path", "groupRelink:" + row.group);
+    if (!hover || groupHasVolume(row.group) && inside(mx, my, groupVolumeX(), cy, groupVolumeWidth(), 18)
+        || managed && inside(mx, my, sourceRemoveX(), cy, sourceRemoveWidth(), 18)
         || presets.editable() && presets.adding() && inside(mx, my, right() - 40, y + 1, 40, 18))
       return new GroupHover("", "");
     String tip = source != null ? source.path() : row.group.startsWith("folder:") ? row.group.substring(7) : row.label;
@@ -844,6 +862,7 @@ public final class MusicLibraryScreen extends UiScreen {
       else if (!libraryActionsMenu() && inside(mx, my, reloadX(), actionTop(), reloadWidth(), 18)) tip = "Reload";
     }
     String playingId = AudioController.currentTrackId();
+    String backgroundId = AudioController.backgroundTrackId();
     boolean playingPreview = !playingId.isEmpty() && AudioController.previewing(playingId);
     boolean playing = AudioController.musicPlaying();
     StickyHeader sticky = stickyHeader(); int rowsTop = sticky == null ? listTop() : Math.max(listTop(), sticky.y() + sticky.height());
@@ -869,7 +888,7 @@ public final class MusicLibraryScreen extends UiScreen {
       }
       String label = AudioController.musicLabel(id);
       text(fit(label, volumeX() - nameX - 6), nameX, y + 7,
-          id.equals(playingId) ? playingPreview ? 0xff77baff : 0xffffdd66 : playable(id) ? 0xdddddd : 0xffbb77);
+          id.equals(playingId) && playingPreview ? 0xff77baff : id.equals(backgroundId) ? 0xffffdd66 : playable(id) ? 0xdddddd : 0xffbb77);
       Setting volume = settings.get("audio.sound." + id);
       if (volume != null) {
         if (parent.valueEditor.editing(row)) parent.valueEditor.render(this, volumeX(), cy, layout.volumeWidth(), rowMouseX, listMouseY, rowsTop, bottom());

@@ -56,6 +56,8 @@ Use `block[property=value]` for named states. Examples:
 //set oak_stairs[facing=west]
 //set furnace[facing=south,lit=true]
 //set oak_sign[rotation=8]
+//set spawner[mob=zombie]
+//set spawner[mob=minecraft:zombified_piglin]
 ```
 
 Tab completes supported properties and values. Rails support straight, ascending
@@ -63,6 +65,10 @@ and curved shapes; powered and detector rails cannot curve. Other supported
 states include piston facing/extension, ladder and wall-sign facing, button and
 pressure-plate power, redstone wire power, crop age and farmland moisture.
 Only states available in Beta are accepted. `ID:metadata` remains available.
+
+Spawner mob values use native Beta names or the same modern names as `/summon`,
+including `minecraft:` names. Only concrete Beta living mobs are accepted. Changing
+a spawner's mob keeps its spawn delay; newly placed spawners use the native default.
 
 Patterns can mix states, such as `rail[shape=east_west],stone`. A replacement mask
 with named states matches only the properties you specify. Edits retain undo/redo.
