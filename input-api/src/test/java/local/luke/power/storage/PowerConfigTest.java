@@ -85,6 +85,33 @@ class PowerConfigTest {
     assertEquals(2, JsonParser.parseString(persisted).getAsJsonObject().getAsJsonObject("settings")
         .getAsJsonObject("toggle").get("value").getAsInt());
   }
+  @Test void deferredFieldPatchesPreserveOpaqueDiskValuesAndFollowSnapshotAndSynchronousOrder() throws Exception {
+    JsonObject original = JsonParser.parseString("""
+        {"target":0,"opaque":{"nested":[1,{"future":true}]},"retainedNull":null}
+        """).getAsJsonObject();
+    JsonObject other = JsonParser.parseString("{\"unchanged\":[\"private\",42]}").getAsJsonObject();
+    PowerConfig.put("patched", original); PowerConfig.put("other", other);
+    JsonObject fields = new JsonObject(); fields.addProperty("target", 1);
+    PowerConfig.patchDeferred("patched", fields); fields.addProperty("target", 99);
+    PowerConfig.flushPending();
+    JsonObject disk = JsonParser.parseString(Files.readString(PowerConfig.path())).getAsJsonObject().getAsJsonObject("settings");
+    JsonObject expected = original.deepCopy(); expected.addProperty("target", 1);
+    assertEquals(expected, disk.get("patched")); assertEquals(other, disk.get("other"));
+
+    JsonObject snapshot = JsonParser.parseString("{\"target\":2,\"snapshotOnly\":true}").getAsJsonObject();
+    PowerConfig.saveDeferred("patched", snapshot);
+    fields = new JsonObject(); fields.addProperty("target", 3); fields.addProperty("patchOnly", true);
+    PowerConfig.patchDeferred("patched", fields); PowerConfig.flushPending();
+    expected = snapshot.deepCopy(); expected.addProperty("target", 3); expected.addProperty("patchOnly", true);
+    disk = JsonParser.parseString(Files.readString(PowerConfig.path())).getAsJsonObject().getAsJsonObject("settings");
+    assertEquals(expected, disk.get("patched")); assertEquals(other, disk.get("other"));
+
+    PowerConfig.saveDeferred("patched", snapshot); PowerConfig.patchDeferred("patched", fields);
+    JsonObject finalValue = original.deepCopy(); finalValue.addProperty("target", 4);
+    PowerConfig.put("patched", finalValue);
+    disk = JsonParser.parseString(Files.readString(PowerConfig.path())).getAsJsonObject().getAsJsonObject("settings");
+    assertEquals(finalValue, disk.get("patched")); assertEquals(other, disk.get("other"));
+  }
   @Test void deferredFailurePreservesTheOriginalAndRetriesAfterRepair() throws Exception {
     JsonObject saved = new JsonObject(); saved.addProperty("value", 1);
     PowerConfig.put("unrelated", saved); String original = Files.readString(PowerConfig.path());

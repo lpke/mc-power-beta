@@ -22,7 +22,9 @@ class DeferredSavesTest {
     var writes = new ArrayList<Map<String, JsonObject>>();
     var queue = new DeferredSaves(batch -> {
       if (writes.isEmpty()) { entered.countDown(); await(release); }
-      writes.add(batch);
+      var values = new LinkedHashMap<String, JsonObject>();
+      batch.forEach((id, change) -> values.put(id, change.apply(new JsonObject())));
+      writes.add(values);
     });
     var caller = Executors.newSingleThreadExecutor();
     try {
@@ -57,7 +59,7 @@ class DeferredSavesTest {
     var broken = new AtomicBoolean(true); var restored = new HashMap<String, JsonObject>();
     var queue = new DeferredSaves(batch -> {
       if (broken.get()) { entered.countDown(); await(release); throw new IOException("injected failure"); }
-      restored.putAll(batch);
+      batch.forEach((id, change) -> restored.put(id, change.apply(restored.getOrDefault(id, new JsonObject()))));
     });
     queue.submit("a", value(1)); await(entered);
     queue.submit("a", value(2)); queue.submit("b", value(3)); release.countDown();
@@ -67,5 +69,48 @@ class DeferredSavesTest {
     assertEquals(2, restored.get("a").get("value").getAsInt());
     assertEquals(3, restored.get("b").get("value").getAsInt());
     queue.flush();
+  }
+
+  @Test void fieldEditsComposeWithSnapshotsInSubmissionOrderWithoutWaitingForDisk() throws Exception {
+    var entered = new CountDownLatch(1); var release = new CountDownLatch(1);
+    var stored = new HashMap<String, JsonObject>();
+    JsonObject previous = value(0); previous.addProperty("retained", true); stored.put("fields", previous);
+    var queue = new DeferredSaves(batch -> {
+      if (batch.containsKey("blocker")) { entered.countDown(); await(release); }
+      batch.forEach((id, change) -> stored.put(id, change.apply(stored.getOrDefault(id, new JsonObject()))));
+    });
+    var caller = Executors.newSingleThreadExecutor();
+    try {
+      queue.submit("blocker", value(0)); await(entered);
+      caller.submit(() -> {
+        JsonObject fields = value(1); queue.patch("fields", fields); fields.addProperty("value", 99);
+        JsonObject extra = new JsonObject(); extra.addProperty("second", 2); queue.patch("fields", extra);
+        queue.submit("snapshot", value(3)); queue.patch("snapshot", extra);
+        queue.patch("replacement", extra); queue.submit("replacement", value(4));
+      }).get(1, TimeUnit.SECONDS);
+      release.countDown(); queue.flush();
+      assertTrue(stored.get("fields").get("retained").getAsBoolean());
+      assertEquals(1, stored.get("fields").get("value").getAsInt());
+      assertEquals(2, stored.get("fields").get("second").getAsInt());
+      assertEquals(3, stored.get("snapshot").get("value").getAsInt());
+      assertEquals(2, stored.get("snapshot").get("second").getAsInt());
+      assertEquals(value(4), stored.get("replacement"));
+    } finally { release.countDown(); caller.shutdownNow(); queue.flush(); }
+  }
+
+  @Test void failedSnapshotAndNewerFieldEditsRetainBothOnRetry() throws Exception {
+    var entered = new CountDownLatch(1); var release = new CountDownLatch(1);
+    var broken = new AtomicBoolean(true); var stored = new HashMap<String, JsonObject>();
+    var queue = new DeferredSaves(batch -> {
+      if (broken.get()) { entered.countDown(); await(release); throw new IOException("injected failure"); }
+      batch.forEach((id, change) -> stored.put(id, change.apply(stored.getOrDefault(id, new JsonObject()))));
+    });
+    JsonObject initial = value(1); initial.addProperty("retained", true);
+    queue.submit("section", initial); await(entered);
+    queue.patch("section", value(2)); release.countDown();
+    assertThrows(IOException.class, queue::flush);
+    broken.set(false); queue.flush();
+    assertTrue(stored.get("section").get("retained").getAsBoolean());
+    assertEquals(2, stored.get("section").get("value").getAsInt());
   }
 }

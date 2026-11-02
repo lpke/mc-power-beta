@@ -62,7 +62,7 @@ public final class MusicLibrarySources {
       var source = observed.get(path);
       String status = source == null ? "Scanning" : source.available() ? "Ready" : "Unavailable";
       roots.add(new Root(path, label,
-          source != null && !source.available() ? null : source == null ? lexical : source.root(),
+          source == null ? lexical : source.root(),
           status, source == null ? List.of() : source.warnings()));
     }
     Set<String> covered = new HashSet<>();
@@ -75,6 +75,8 @@ public final class MusicLibrarySources {
       Path file = track.path().toAbsolutePath().normalize();
       for (var root : roots) {
         if (root.root() == null) continue;
+        if (root.status().equals("Unavailable") && !(track.mp3() && track.playable()
+            && !track.path().equals(track.playbackPath()))) continue;
         boolean contains = file.startsWith(root.root());
         if (contains) {
           covered.add(id(root.path()));

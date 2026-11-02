@@ -23,6 +23,7 @@ dependencies {
     modImplementation 'babric:fabric-loader:0.15.6-babric.2'
     modImplementation files("../build/libs/power-beta-${packProperties.getProperty('mod_version')}.jar")
     modCompileOnly files('../source-build/build/power_commands/libs/power_commands-0.5.10+powerbeta.1.jar')
+    modCompileOnly files('../source-build/build/power_controls/libs/power_controls-0.31.0+powerbeta.1.jar')
     modCompileOnly files('../modules/worldedit/build/libs/power-worldedit-1.2.1.jar','../modules/building/build/libs/power_building-1.2.1.jar')
     modCompileOnly files('../vendor/jars/GlassConfigAPI-3.2.5.jar')
     modCompileOnly files('../build/platform-compile/station-gui-api-v0-2.0.0-alpha.6.4-1.0.0.jar')

@@ -142,6 +142,11 @@ public final class HeldItemTransforms {
 
   public static void render(PlayerEntity player, class_556 nativeRenderer, ItemStack stack,
       boolean firstPerson, int side) {
+    if (local.luke.power.bow.ModernBow.using(player, stack)) {
+      display(GL, Kind.BOW, firstPerson, side);
+      local.luke.power.bow.ModernBowRenderer.sprite(player, stack);
+      return;
+    }
     var access = RendererAccess.INSTANCE;
     if (access.hasRenderer()) {
       var renderer = access.getRenderer().bakedModelRenderer();

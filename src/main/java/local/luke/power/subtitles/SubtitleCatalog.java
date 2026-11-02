@@ -167,6 +167,14 @@ public final class SubtitleCatalog {
     SOUNDS.put("portal.portal", CAPTIONS.get("subtitles.block.portal.ambient"));
     SOUNDS.put("portal.travel", CAPTIONS.get("subtitles.block.portal.travel"));
     SOUNDS.put("portal.trigger", CAPTIONS.get("subtitles.block.portal.trigger"));
+    SOUNDS.put("power_beta:entity.arrow.shoot", CAPTIONS.get("subtitles.entity.arrow.shoot"));
+    SOUNDS.put("power_beta:entity.arrow.hit", CAPTIONS.get("subtitles.entity.arrow.hit"));
+    SOUNDS.put("power_beta:entity.item.break", CAPTIONS.get("subtitles.entity.item.break"));
+    SOUNDS.put("power_beta:block.ladder.break", CAPTIONS.get("subtitles.block.generic.break"));
+    SOUNDS.put("power_beta:block.ladder.place", CAPTIONS.get("subtitles.block.generic.place"));
+    SOUNDS.put("power_beta:block.ladder.hit", CAPTIONS.get("subtitles.block.generic.hit"));
+    SOUNDS.put("power_beta:block.ladder.step", CAPTIONS.get("subtitles.block.generic.footsteps"));
+    SOUNDS.put("power_beta:block.ladder.fall", CAPTIONS.get("subtitles.block.generic.footsteps"));
     SOUNDS.put("random.bow", CAPTIONS.get("subtitles.entity.arrow.shoot"));
     SOUNDS.put("random.breath", null);
     SOUNDS.put("random.click", null);

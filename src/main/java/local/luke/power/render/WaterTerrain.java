@@ -15,28 +15,26 @@ public final class WaterTerrain {
   private static final Slot[] slots = {new Slot(), new Slot()};
   private static final TerrainBlockCache blockIds = new TerrainBlockCache();
   private static ByteBuffer packed;
-  private static World owner;
+  private static final WaterTerrainPreparation preparation = new WaterTerrainPreparation();
   private static Thread thread, meshThread, mutationThread;
-  private static boolean prepared, building, affected, waterColumn, overflow, uploading;
+  private static boolean building, affected, waterColumn, overflow, uploading;
   private static boolean held, baseDiffers, clearDiffers, clearRan, mismatch, neutralComplete;
   private static int count, phase, meshDepth, buildingDepth, mutationDepth;
-  private static long sections, secondPasses, neutralPasses, mismatches, neutralStarted, maxNeutralNanos;
+  private static long preparations, sections, secondPasses, neutralPasses, mismatches, neutralStarted, maxNeutralNanos;
   private WaterTerrain() {}
 
   public static void reset() {
-    owner = null; prepared = false;
+    preparation.reset();
     for (Slot slot : slots) { slot.buffer = null; slot.data = null; }
     packed = null;
     HeldLighting.reset();
   }
 
   public static void prepare(Minecraft mc) {
-    boolean changedWorld = owner != mc.world;
-    if (changedWorld) { owner = mc.world; prepared = false; }
     var s = VisualConfig.current();
-    if (!prepared && mc.world != null && (s.underwaterDarkness < 100 || s.underwaterDarknessOutside < 100)) {
-      prepared = true;
-      if (!changedWorld && mc.worldRenderer instanceof WaterTerrainUpdates updates) updates.power$prepareWaterColors();
+    boolean enabled = s.underwaterDarkness < 100 || s.underwaterDarknessOutside < 100;
+    if (preparation.update(mc.world, enabled) && mc.worldRenderer instanceof WaterTerrainUpdates updates) {
+      preparations++; updates.power$prepareWaterColors();
     }
   }
 
@@ -46,6 +44,7 @@ public final class WaterTerrain {
     if (meshDepth != 0 && meshThread != Thread.currentThread()) return;
     if (meshDepth == 0) meshThread = Thread.currentThread();
     meshDepth++;
+    preparation.invalidate(world);
     blockIds.begin(world, x, y, z);
   }
   public static void endMesh() {
@@ -95,12 +94,13 @@ public final class WaterTerrain {
   public static boolean mutating() { return mutationDepth != 0 && mutationThread == Thread.currentThread(); }
 
   public static void invalidateBlocks(World world, int x, int y, int z, int maxX, int maxY, int maxZ) {
+    preparation.invalidate(world);
     blockIds.invalidate(world, x, y, z, maxX, maxY, maxZ);
     if (RenderControls.rendering()) WaterLighting.clear();
   }
 
   public static boolean begin(boolean captureHeld) {
-    if (building || (!prepared && !captureHeld) || !RenderControls.rendering() || RenderControls.fullBright()) return false;
+    if (building || (!preparation.active() && !captureHeld) || !RenderControls.rendering() || RenderControls.fullBright()) return false;
     thread = Thread.currentThread(); building = true; buildingDepth = meshDepth;
     phase = BASE; held = captureHeld;
     affected = waterColumn = overflow = baseDiffers = clearDiffers = clearRan = mismatch = neutralComplete = false;
@@ -111,12 +111,13 @@ public final class WaterTerrain {
   private static boolean current() { return building && thread == Thread.currentThread() && meshDepth == buildingDepth; }
   public static boolean neutral() { return current() && phase == NEUTRAL; }
   public static boolean observing() { return current() && held && phase != NEUTRAL; }
-  public static boolean detecting() { return current() && prepared && phase == BASE; }
+  public static boolean detecting() { return current() && preparation.active() && phase == BASE; }
   public static int buildDarkness(int fallback) { return current() ? phase == CLEAR ? 0 : 100 : fallback; }
   public static void affected() { if (detecting()) affected = true; }
   public static void waterColumn() { if (current() && phase != NEUTRAL) waterColumn = true; }
   public static boolean dependsOnWaterColumn() { return waterColumn; }
-  public static boolean prepared() { return prepared; }
+  public static boolean prepared() { return preparation.active(); }
+  public static long preparations() { return preparations; }
 
   public static void observe(float shade, float neutralShade) {
     if (!current() || !held || shade == neutralShade) return;

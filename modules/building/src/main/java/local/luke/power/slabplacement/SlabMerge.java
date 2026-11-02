@@ -23,6 +23,7 @@ public final class SlabMerge {
         || face < 0
         || face > 5
         || !loaded(world, x, y, z)) return null;
+    if (local.luke.power.fastplace.FastPlace.singleSlabStroke(world, x, y, z, face)) return null;
     if (face == 1 && matches(world, stack, x, y, z)) return new int[] {x, y, z};
     int[] d = OFFSETS[face];
     x += d[0];

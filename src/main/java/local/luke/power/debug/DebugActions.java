@@ -26,10 +26,10 @@ public final class DebugActions {
         var type=Class.forName("local.luke.power.controls.util.ModOptions");
         type.getMethod("cycleRenderDistance").invoke(null);
         int chunks=(int)type.getMethod("getRenderDistanceChunks").invoke(null);
-        var section=PowerConfig.section("native");
+        var section=new com.google.gson.JsonObject();
         // Native option storage keeps the slider's normalized text representation.
         section.addProperty("render_distance",type.getField("renderDistance").getFloat(null));
-        PowerConfig.saveDeferred("native",section); mc.worldRenderer.method_1537();
+        PowerConfig.patchDeferred("native",section); mc.worldRenderer.method_1537();
         message(mc,"Render distance: "+chunks+" chunks");
       }
       case LOCATION -> {
@@ -51,7 +51,7 @@ public final class DebugActions {
       case FOCUS -> {
         Object config=Class.forName("local.luke.power.controls.ControlFeatures").getField("GENERAL_CONFIG").get(null);
         var field=config.getClass().getField("pauseOnLostFocus"); boolean next=!Boolean.TRUE.equals(field.get(config)); field.set(config,next);
-        var section=PowerConfig.section("power_controls:general"); section.addProperty("pauseOnLostFocus",next); PowerConfig.saveDeferred("power_controls:general",section);
+        var section=new com.google.gson.JsonObject(); section.addProperty("pauseOnLostFocus",next); PowerConfig.patchDeferred("power_controls:general",section);
         toggle(mc,"Pause on lost focus",next);
       }
       case HELP -> help(mc);

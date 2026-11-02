@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OffhandUseMixin {
   @WrapMethod(method="method_2107")
   private void power$hands(int button, Operation<Void> original) {
+    if(button == 1 && local.luke.power.bow.ModernBow.hand(((Minecraft)(Object)this).player) != null)return;
     if(button == 1 && local.luke.power.inventory.tools.Restock.waitingForUse((Minecraft)(Object)this))return;
     if(OffhandEquipment.pending((Minecraft)(Object)this,button))return;
     OffhandUse use = OffhandUse.begin((Minecraft)(Object)this, button);

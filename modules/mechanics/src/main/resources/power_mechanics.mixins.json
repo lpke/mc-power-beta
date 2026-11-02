@@ -6,7 +6,6 @@
   "plugin": "local.luke.power.mechanics.MechanicFeaturesMixinPlugin",
   "mixins": [
     "ArmorMixin",
-    "BowItemMixin",
     "ChestMixin",
     "DeadBushMixin",
     "DyeMixin",

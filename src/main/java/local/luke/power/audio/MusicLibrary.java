@@ -8,7 +8,7 @@ import java.util.*;
 public final class MusicLibrary {
   public record Track(Path path, String name, Path playbackPath, String id) {
     public Track(Path path, String name, Path playbackPath) {
-      this(path, name, playbackPath, "music:custom/" + Mp3Converter.hash(path.toAbsolutePath().normalize().toString()));
+      this(path, name, playbackPath, trackId(path));
     }
     public Track(Path path, String name) { this(path, name, path); }
     public boolean mp3() { return name.toLowerCase(Locale.ROOT).endsWith(".mp3"); }
@@ -32,10 +32,22 @@ public final class MusicLibrary {
 
   public static final int MAX_TRACKS = 2048, MAX_VISITED = 20000;
 
+  static String trackId(Path identity) {
+    return "music:custom/" + Mp3Converter.hash(identity.toAbsolutePath().normalize().toString());
+  }
+
   public static Scan scan(Path game, List<String> folders) {
+    return scan(game, folders, Map.of());
+  }
+
+  public static Scan scan(Path game, List<String> folders, Map<String, String> identities) {
+    if (folders.isEmpty()) return new Scan(List.of(), List.of(), List.of());
     Map<Path, Track> tracks = new TreeMap<>();
     List<String> warnings = new ArrayList<>();
     List<SourceFolder> sources = new ArrayList<>();
+    MusicCacheIndex cache = null;
+    try { cache = MusicCacheIndex.read(game); }
+    catch (IOException failure) { warnings.add(failure.getMessage()); }
     // Resolve every imported root before walking. Even an overlapping root reached
     // after the scan budget runs out needs a canonical identity for attribution.
     for (String folder : folders) {
@@ -59,7 +71,16 @@ public final class MusicLibrary {
     boolean limited = false;
     for (int index = 0; index < sources.size(); index++) {
       SourceFolder source = sources.get(index);
-      if (!source.available()) continue;
+      Path identityRoot = source.root() == null ? null : identity(source.root(), sources, identities);
+      if (!source.available()) {
+        if (cache != null && source.root() != null && identityRoot != null) try {
+          for (Track cached : cache.missing(source.root(), identityRoot)) {
+            if (tracks.size() >= MAX_TRACKS) break;
+            tracks.putIfAbsent(cached.path(), cached);
+          }
+        } catch (IOException failure) { warnings.add(failure.getMessage()); }
+        continue;
+      }
       List<String> sourceWarnings = new ArrayList<>();
       if (limited) {
         sources.set(index, new SourceFolder(source.path(), source.root(), true,
@@ -96,7 +117,13 @@ public final class MusicLibrary {
             limited = true;
             break;
           }
-          tracks.put(canonical, new Track(canonical, name, lower.endsWith(".mp3") ? Mp3Converter.cached(game, canonical) : canonical));
+          Path identity = identity(canonical, sources, identities);
+          String id = trackId(identity);
+          Path playback = lower.endsWith(".mp3") ? Mp3Converter.cached(game, canonical) : canonical;
+          if (playback == null && cache != null) playback = cache.cached(id, canonical);
+          Track track = new Track(canonical, name, playback, id);
+          tracks.put(canonical, track);
+          if (cache != null) cache.remember(track, identity);
         }
       } catch (IOException | UncheckedIOException | SecurityException e) {
         sourceWarnings.add("Could not finish reading: " + source.path());
@@ -104,6 +131,8 @@ public final class MusicLibrary {
       warnings.addAll(sourceWarnings);
       sources.set(index, new SourceFolder(source.path(), source.root(), true, sourceWarnings));
     }
+    if (cache != null) try { cache.save(); }
+    catch (IOException failure) { warnings.add(failure.getMessage()); }
     return new Scan(new ArrayList<>(tracks.values()), warnings, sources);
   }
 
@@ -113,6 +142,15 @@ public final class MusicLibrary {
       return Path.of(System.getProperty("user.home")).resolve(path.substring(2)).normalize();
     Path p = Path.of(path);
     return (p.isAbsolute() ? p : game.resolve(p)).normalize();
+  }
+
+  static Path identity(Path file, List<SourceFolder> sources, Map<String, String> identities) {
+    SourceFolder owner = null;
+    for (SourceFolder source : sources) {
+      if (!identities.containsKey(source.path()) || source.root() == null || !file.startsWith(source.root())) continue;
+      if (owner == null || source.root().getNameCount() > owner.root().getNameCount()) owner = source;
+    }
+    return owner == null ? file : Path.of(identities.get(owner.path())).resolve(owner.root().relativize(file)).normalize();
   }
 
   static boolean audioFile(Path file) throws IOException {

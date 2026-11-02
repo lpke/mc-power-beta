@@ -5,12 +5,14 @@ import static paulscode.sound.CommandObject.*;
 
 import java.lang.reflect.Field;
 import java.net.URI;
+import java.nio.file.*;
 import java.util.*;
 import net.minecraft.class_267;
 import org.junit.jupiter.api.*;
 import paulscode.sound.*;
 
 class MusicTransportTest {
+  @org.junit.jupiter.api.io.TempDir Path game;
   /** Observe source commands without creating an audio device or sound thread. */
   private static final class Commands extends SoundSystem {
     final List<CommandObject> commands = new ArrayList<>();
@@ -42,7 +44,8 @@ class MusicTransportTest {
   private void set(Class<?> type, String name, Object value) throws Exception { field(type, name).set(null, value); }
 
   @BeforeEach void isolatePlayback() throws Exception {
-    retain(AudioController.class, null, "client", "paused", "currentMusic", "menuMusic", "historyIndex", "rotationConfig");
+    retain(AudioController.class, null, "client", "paused", "currentMusic", "menuMusic", "historyIndex", "rotationConfig",
+        "currentEntry", "library", "custom", "customById", "detachedCustom", "customByUrl");
     retain(MusicPreview.class, null, "track", "entry", "paused", "playing", "started");
     retain(AudioConfig.class, null, "current");
     background = (MusicProgress) field(AudioController.class, "progress").get(null);
@@ -81,6 +84,27 @@ class MusicTransportTest {
     set(MusicPreview.class, "track", "");
     set(AudioController.class, "currentMusic", "");
     assertFalse(AudioController.previousRestartsCurrent(), "a gap must replay history even with retained clock data");
+  }
+
+  @Test void relocatedCurrentSongsRefreshRestartUrlsWithoutChangingPlaybackIdentityOrPosition() throws Exception {
+    Path old = Files.write(game.resolve("old.wav"), new byte[100]);
+    String id = MusicLibrary.trackId(old);
+    var before = new MusicLibrary.Track(old, "old.wav", old, id);
+    var original = new class_267("old.wav", old.toUri().toURL());
+    set(AudioController.class, "currentMusic", id); set(AudioController.class, "currentEntry", original);
+    set(AudioController.class, "customById", Map.of(id, before));
+    set(AudioController.class, "detachedCustom", Map.of());
+    set(MusicPreview.class, "track", id); set(MusicPreview.class, "entry", original);
+    Path moved = Files.move(old, game.resolve("moved.wav"));
+    var relocated = new MusicLibrary.Track(moved, "moved.wav", moved, id);
+    set(AudioController.class, "library", new MusicLibrary.Scan(List.of(relocated), List.of()));
+    var reindex = AudioController.class.getDeclaredMethod("indexLibrary"); reindex.setAccessible(true); reindex.invoke(null);
+    var current = (class_267)field(AudioController.class, "currentEntry").get(null);
+    var audition = (class_267)field(MusicPreview.class, "entry").get(null);
+    assertEquals(moved.toUri().toURL(), current.field_2127);
+    assertEquals(moved.toUri().toURL(), audition.field_2127);
+    assertEquals(id, AudioController.currentTrackId());
+    assertEquals(42, background.seconds()); assertEquals(13, preview.seconds());
   }
 
   @Test void nativeMutePausesWithoutReplacingTheSourceOrLosingSongPosition() throws Exception {

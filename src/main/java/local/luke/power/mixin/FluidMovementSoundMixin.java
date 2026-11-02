@@ -19,20 +19,24 @@ public abstract class FluidMovementSoundMixin {
   @WrapMethod(method = "move")
   private void power$swimMovement(double dx, double dy, double dz, Operation<Void> original) {
     Entity entity = (Entity)(Object)this;
-    boolean moving = FluidSounds.movement(entity); double x = entity.x, y = entity.boundingBox.minY, z = entity.z;
+    boolean moving = FluidSounds.movement(entity) || LadderSounds.movement(entity);
+    double x = entity.x, y = entity.boundingBox.minY, z = entity.z;
     boolean priorMoving = power$soundMoving; double priorY = power$soundMoveY;
     power$soundMoving = moving; power$soundMoveY = y;
     try { original.call(dx, dy, dz); }
     finally { power$soundMoving = priorMoving; power$soundMoveY = priorY; }
     // Modern moveDist survives flight, riding and quiet crouching. Returning to
     // ordinary movement resumes that cadence rather than starting a new stride.
-    if (!moving || !FluidSounds.movement(entity)) return;
+    if (!moving || !(FluidSounds.movement(entity) || LadderSounds.movement(entity))) return;
     int stepBlock = FluidSounds.stepBlock(entity);
     double vertical = entity.boundingBox.minY - y;
     power$soundDistance += FluidSoundMath.distance(entity.x - x,
         stepBlock == net.minecraft.block.Block.field_1854.id ? vertical : 0, entity.z - z);
     if (power$soundDistance > power$nextSwimSound && stepBlock > 0) {
-      if (FluidSounds.swimStep(entity, stepBlock, vertical)) {
+      if (LadderSounds.step(entity, stepBlock)) {
+        power$nextSwimSound = (float)FluidSoundMath.nextStep(power$soundDistance);
+        LadderSounds.step(entity);
+      } else if (FluidSounds.movement(entity) && FluidSounds.swimStep(entity, stepBlock, vertical)) {
         power$nextSwimSound = (float)FluidSoundMath.nextStep(power$soundDistance);
         FluidSounds.swim(entity, power$swimRandom);
       } else if (entity.field_1623 || stepBlock == net.minecraft.block.Block.field_1854.id
@@ -44,6 +48,7 @@ public abstract class FluidMovementSoundMixin {
   @WrapOperation(method = "move", at = @At(value = "INVOKE",
       target = "Lnet/minecraft/world/World;method_191(Lnet/minecraft/entity/Entity;Ljava/lang/String;FF)V"))
   private void power$waterStep(World world, Entity entity, String sound, float volume, float pitch, Operation<Void> original) {
+    if (power$soundMoving && sound.startsWith("step.") && LadderSounds.step(entity, FluidSounds.stepBlock(entity))) return;
     if (power$soundMoving && sound.startsWith("step.") && FluidSounds.movement(entity)
         && FluidSounds.swimStep(entity, FluidSounds.stepBlock(entity), entity.boundingBox.minY - power$soundMoveY)) return;
     original.call(world, entity, sound, volume, pitch);

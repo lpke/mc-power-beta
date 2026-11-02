@@ -11,6 +11,17 @@ class MusicDataTest {
   @TempDir Path directory;
   private static JsonObject json(String value) { return JsonParser.parseString(value).getAsJsonObject(); }
 
+  @Test void relinkIdentitiesLiveWithMusicAndLeaveQueueUntouchedAcrossDurableRestart() throws Exception {
+    JsonObject data = MusicData.empty();
+    data.add("audio", json("{\"musicDirectories\":[\"/new\"],\"musicSourceIdentities\":{\"/new\":\"/original\"}}"));
+    data.add("queue", json("{\"tracks\":[\"music:a\",\"music:a\"]}"));
+    Path file = directory.resolve("power-beta/music.json"); MusicData.write(file, data);
+    assertEquals(data, MusicData.read(file));
+    assertFalse(MusicData.preferences(data.getAsJsonObject("audio")).has("musicSourceIdentities"));
+    data.getAsJsonObject("audio").getAsJsonObject("musicSourceIdentities").addProperty("/missing", "/old");
+    assertThrows(IllegalArgumentException.class, () -> MusicData.validate(data));
+  }
+
   @Test void splitAndMergePreserveMusicAndPreferencesWithoutDuplicatingOwnership() {
     JsonObject audio = json("""
         {"master":71,"playlist":"quiet","menuPlaylist":"@world",

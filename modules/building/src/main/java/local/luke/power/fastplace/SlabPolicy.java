@@ -4,6 +4,13 @@ package local.luke.power.fastplace;
 public final class SlabPolicy {
   private SlabPolicy() {}
 
+  /** Vertical clicks build full blocks; horizontal strokes keep their original slab anchor. */
+  public static SlabMode effective(SlabMode mode, int face, boolean halfSlabAnchor) {
+    return mode == SlabMode.SMART
+        ? face >= 2 && face <= 5 && halfSlabAnchor ? SlabMode.CONTINUOUS : SlabMode.DOUBLE
+        : mode;
+  }
+
   public static boolean allows(
       SlabMode mode, boolean firstMerge, boolean nextMerge, int firstY, int nextY) {
     return mode != SlabMode.MATCH_FIRST || (firstMerge == nextMerge && firstY == nextY);

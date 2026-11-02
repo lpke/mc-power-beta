@@ -8,7 +8,19 @@ import java.util.concurrent.Executors;
 
 /** A single writer coalesces gameplay snapshots without holding the disk lock on input. */
 final class DeferredSaves {
-  interface Writer { void write(Map<String, JsonObject> changes) throws IOException; }
+  interface Writer { void write(Map<String, Change> changes) throws IOException; }
+
+  /** Ordered field edits compose with full snapshots without reading settings on input. */
+  record Change(JsonObject value, boolean patch) {
+    JsonObject apply(JsonObject previous) {
+      JsonObject result = patch ? previous.deepCopy() : new JsonObject();
+      value.entrySet().forEach(entry -> result.add(entry.getKey(), entry.getValue().deepCopy()));
+      return result;
+    }
+    Change then(Change newer) {
+      return newer.patch ? new Change(newer.apply(value), patch) : newer;
+    }
+  }
 
   private final Writer writer;
   private final java.util.concurrent.ExecutorService executor = Executors.newSingleThreadExecutor(job -> {
@@ -16,14 +28,19 @@ final class DeferredSaves {
     thread.setDaemon(true);
     return thread;
   });
-  private final Map<String, JsonObject> pending = new LinkedHashMap<>();
+  private final Map<String, Change> pending = new LinkedHashMap<>();
   private boolean running;
   private IOException failure, notification;
 
   DeferredSaves(Writer writer) { this.writer = writer; }
 
   synchronized void submit(String id, JsonObject value) {
-    pending.put(id, value.deepCopy());
+    pending.put(id, new Change(value.deepCopy(), false));
+    start();
+  }
+
+  synchronized void patch(String id, JsonObject fields) {
+    pending.merge(id, new Change(fields.deepCopy(), true), Change::then);
     start();
   }
 
@@ -35,7 +52,7 @@ final class DeferredSaves {
 
   private void drain() {
     while (true) {
-      Map<String, JsonObject> batch;
+      Map<String, Change> batch;
       synchronized (this) {
         if (pending.isEmpty()) {
           running = false;
@@ -51,7 +68,7 @@ final class DeferredSaves {
       } catch (Exception e) {
         synchronized (this) {
           // Keep unsaved values for a later toggle or explicit flush. Newer edits win.
-          batch.forEach(pending::putIfAbsent);
+          batch.forEach((id, older) -> pending.merge(id, older, (newer, failed) -> failed.then(newer)));
           failure = e instanceof IOException io ? io : new IOException("Cannot save gameplay settings", e);
           notification = failure;
           running = false;

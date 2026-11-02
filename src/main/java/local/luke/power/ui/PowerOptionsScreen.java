@@ -279,6 +279,7 @@ public final class PowerOptionsScreen extends UiScreen {
   private int right() { return origin() + uiWidth(); }
   private boolean pauseActions() { return directPause && editorReturn == null; }
   private int footerY() {
+    if (libraryVisible()) return musicFooter().y();
     if (isolatedFooter()) return height - 28;
     int actions = controls() || video() ? disabledX() : actionX(0);
     return height - (resetX() + 92 <= actions ? 28 : 51);
@@ -352,9 +353,21 @@ public final class PowerOptionsScreen extends UiScreen {
   private boolean playlistEditor() { return libraryVisible() && library.playlistEditor(); }
   private boolean isolatedFooter() { return isolatedRules() || playlistEditor(); }
 
+  private MusicFooterLayout musicFooter() {
+    int actionsX = playlistEditor() ? draftFooter().get(0).x() : actionX(0);
+    return MusicFooterLayout.at(origin() + 8, actionsX, height - 28,
+        textWidth(MusicFooterLayout.LABEL), Math.max(textWidth("Preview"), textWidth("Play")) + 16);
+  }
+  private boolean musicFooterClick(int x, int y, int mouseButton) {
+    if (!libraryVisible()) return false;
+    var footer = musicFooter();
+    if (!inside(x, y, footer.buttonX(), footer.y(), footer.buttonWidth(), 20)) return false;
+    if (mouseButton == 0) { click(); library.toggleDoubleClick(); }
+    return true;
+  }
   private record DraftFooter(String label, int x, int width, boolean enabled, Runnable action) {}
   private List<DraftFooter> draftFooter() {
-    int cancelWidth = 76, end = right() - 8;
+    int cancelWidth = playlistEditor() && uiWidth() < 400 ? Math.max(52, textWidth("Cancel") + 12) : 76, end = right() - 8;
     if (playlistEditor() && library.readOnly())
       return List.of(new DraftFooter("Back", end - cancelWidth, cancelWidth, true, () -> { library.back(this::closeLibrary); layout(); }));
     String label = isolatedRules() ? "Save rules" : "Save playlist";
@@ -1075,6 +1088,7 @@ public final class PowerOptionsScreen extends UiScreen {
       return;
     }
     if (libraryVisible() && library.modal()) { library.dialogClick(x,y,button); return; }
+    if (musicFooterClick(x, y, button)) return;
     if (isolatedFooter() && y >= height - 30) {
       if (button == 0) for (DraftFooter item : draftFooter())
         if (inside(x, y, item.x, height - 28, item.width, 20)) {
@@ -1303,7 +1317,7 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     if (button != 0) return;
     if (video() && minecraft.world != null && inside(x, y, disabledX(), height - 28, 90, 20)) { click(); hidden = true; return; }
-    if (pauseActions() && inside(x, y, origin() + 8, footerY(), 46, 20)) {
+    if (!libraryVisible() && pauseActions() && inside(x, y, origin() + 8, footerY(), 46, 20)) {
       if (MenuPreferences.current().autoApply && session.changes() > 0) save(false, false);
       click(); exitTarget = new net.minecraft.class_525();
       if (session.changes() > 0) confirmClose = true; else minecraft.setScreen(exitTarget);
@@ -1312,14 +1326,14 @@ public final class PowerOptionsScreen extends UiScreen {
     if (controls() && inside(x, y, disabledX(), height - 28, 90, 20)) {
       click(); showDisabled = !showDisabled; layout(); return;
     }
-    if (inside(x, y, resetX(), footerY(), 88, 20)) {
+    if (!libraryVisible() && inside(x, y, resetX(), footerY(), 88, 20)) {
       click();
       confirmReset = true;
       return;
     }
     int changesEnd = changesEnd();
     if ((session.changes() > 0 || changedOnly) && changesEnd - changesX() >= 18
-        && inside(x, y, changesX(), footerY(), changesEnd - changesX(), 20)) {
+        && !libraryVisible() && inside(x, y, changesX(), footerY(), changesEnd - changesX(), 20)) {
       click();
       conflictIds = List.of();
       highlightedId = "";
@@ -1937,17 +1951,22 @@ public final class PowerOptionsScreen extends UiScreen {
     }
     String footerError = !error.isEmpty() ? error : libraryVisible() ? library.footerError() : "";
     if (!footerError.isEmpty()) text(fit(footerError, uiWidth() - 16), origin() + 8, footerY() - 12, 0xffbb88);
+    if (libraryVisible()) {
+      var footer = musicFooter();
+      text(MusicFooterLayout.LABEL, footer.labelX(), footer.y() + 6, 0xaaaaaa);
+      button(library.doubleClickPreview() ? "Preview" : "Play", footer.buttonX(), footer.y(), footer.buttonWidth(), 20, mx, my, true);
+    }
     if (isolatedFooter()) {
       for (DraftFooter item : draftFooter()) button(item.label, item.x, height - 28, item.width, 20, mx, my, item.enabled);
     } else {
-    button(filtered() ? "Reset listed..." : "Reset page...", resetX(), footerY(), 88, 20, mx, my, true);
+    if (!libraryVisible()) button(filtered() ? "Reset listed..." : "Reset page...", resetX(), footerY(), 88, 20, mx, my, true);
     int changesEnd = changesEnd();
-    if ((session.changes() > 0 || changedOnly) && changesEnd - changesX() >= 18) {
+    if (!libraryVisible() && (session.changes() > 0 || changedOnly) && changesEnd - changesX() >= 18) {
       boolean hover = inside(mx, my, changesX(), footerY(), changesEnd - changesX(), 20);
       text(fit(session.changes() + (session.changes() == 1 ? " unsaved change" : " unsaved changes"), changesEnd - changesX() - 2),
           changesX(), footerY() + 6, hover || changedOnly ? 0xffffa0 : 0xffdd88);
     }
-    if (pauseActions()) button("Menu", origin() + 8, footerY(), 46, 20, mx, my, true);
+    if (pauseActions() && !libraryVisible()) button("Menu", origin() + 8, footerY(), 46, 20, mx, my, true);
     if (video()) button("Hide options", disabledX(), height - 28, 90, 20, mx, my, minecraft.world != null);
     if (controls()) button(showDisabled ? "Hide Disabled" : "Show Disabled", disabledX(), height - 28, 90, 20, mx, my, true);
     button(editorReturn == null ? "Cancel" : "Back", actionX(0), height - 28, actionWidth(0), 20, mx, my, true);

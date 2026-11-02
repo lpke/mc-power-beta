@@ -58,7 +58,7 @@ public final class DebugPerformance {
     if(monitoring()) {
       long now=System.nanoTime();if(frameTime!=0)FRAME[frameIndex++%FRAME.length]=Math.min(1000,(now-frameTime)/1_000_000f);frameTime=now;
     }
-    if(mc.options.hideHud) return;
+    if(mc.options.hideHud || !DebugActions.frames && !DebugActions.profiler && !DebugActions.network && !DebugActions.light) return;
     var size=new net.minecraft.class_564(mc.options,mc.displayWidth,mc.displayHeight);
     int w=size.method_1857(),h=size.method_1858(),x=w-125,y=h-88;
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);

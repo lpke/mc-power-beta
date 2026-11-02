@@ -10,6 +10,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class OffhandModelMixin {
   @Inject(method="setAngles",at=@At("TAIL"))
   private void power$leftSwing(float limb,float stride,float age,float yaw,float pitch,float scale,CallbackInfo ci) {
-    OffhandPose.apply((BipedEntityModel)(Object)this);
+    OffhandPose.apply((BipedEntityModel)(Object)this,age);
   }
 }

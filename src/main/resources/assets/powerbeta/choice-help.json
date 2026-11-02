@@ -75,7 +75,8 @@
     "items": {
       "Continuous layers": "Continue half-slab rows across exposed side faces.",
       "Double slabs": "Combine slab halves into double slabs.",
-      "Match first placement": "Repeat the first slab configuration and keep its placement height."
+      "Match first placement": "Repeat the first slab configuration and keep its placement height.",
+      "Smart": "Use double slabs vertically. Horizontal placement follows the starting slab shape; other starting blocks use double slabs."
     }
   },
   "tweaks.placement.restrictionMode": {

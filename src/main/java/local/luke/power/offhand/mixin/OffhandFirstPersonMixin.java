@@ -21,6 +21,8 @@ public class OffhandFirstPersonMixin {
   private void power$equip(CallbackInfo ci) { OffhandRenderer.tick(field_2401); }
   @WrapMethod(method="method_1860")
   private void power$render(float delta, Operation<Void> original) {
+    if (local.luke.power.bow.ModernBow.enabled() && local.luke.power.bow.ModernBowRenderer.firstPerson(field_2401,(class_556)(Object)this,delta,
+        field_2404+(field_2403-field_2404)*delta)) return;
     // Both hands keep their outgoing rendered stacks until their equip animations lower them.
     boolean map = OffhandRenderer.splitMap(field_2401, field_2402);
     if (!map) original.call(delta);

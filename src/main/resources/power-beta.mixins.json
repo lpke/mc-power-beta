@@ -7,9 +7,16 @@
     "SpectatorInventoryMixin",
     "SpectatorSlotMixin",
     "ClientMixin",
+    "FramePresentationMixin",
+    "FrameSwapMixin",
     "MinimapWheelMixin",
     "SavedWorldMenuMixin",
     "BoatPlacementMixin",
+    "ModernBowItemMixin",
+    "ModernBowDurabilityMixin",
+    "ModernBowClientMixin",
+    "ModernBowMovementMixin",
+    "ModernArrowMixin",
     "PlayerWaterContactMixin",
     "PlayerWaterTravelMixin",
     "PlayerSwimmingMixin",
@@ -190,7 +197,11 @@
     "InventoryMinimapSpaceMixin",
     "InventoryMinimapOverlayMixin",
     "HeldLightRegionMixin",
-    "FishingBobberPoseMixin"
+    "FishingBobberPoseMixin",
+    "LadderPlaceSoundMixin",
+    "LadderHitSoundMixin",
+    "LadderBreakSoundMixin",
+    "LadderFallSoundMixin"
   ],
   "injectors": {
     "defaultRequire": 1

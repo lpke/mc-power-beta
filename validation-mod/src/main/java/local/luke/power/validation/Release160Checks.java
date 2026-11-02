@@ -181,7 +181,8 @@ final class Release160Checks {
     test("collapse all covers every tab, mixed states, search and narrow widths", () -> {
       PowerOptionsScreen screen = new PowerOptionsScreen(null); mc.setScreen(screen);
       field(screen, "libraryOpen", false); field(screen, "changedOnly", false);
-      field(screen, "relatedIds", List.of()); field(screen, "conflictIds", List.of());
+      field(screen, "conflictIds", List.of());
+      try {
       for (int[] size : new int[][]{{320,240},{427,240},{854,480}}) {
         screen.init(mc, size[0], size[1]);
         for (String page : screen.visiblePages()) {
@@ -197,7 +198,10 @@ final class Release160Checks {
           click(screen, x + 8, 35); check(!collapsed.containsAll(groups), "tab did not expand " + page);
           screen.render(-1,-1,0); check(GL11.glGetError() == 0, "options GL state");
         }
-        search(screen, "time");
+        // Defaults has no search controls. Test search on a real settings page,
+        // with a match whether the owner's search scope is this tab or all tabs.
+        field(screen, "page", "Video"); search(screen, "brightness");
+        screen.render(-1,-1,0);
         Set<String> collapsed = (Set<String>)field(screen,"collapsed");
         check(((List<?>)field(screen,"rows")).stream().anyMatch(r -> { try { return call(r,"setting") != null; } catch(Exception e) {throw new RuntimeException(e);} }), "search hid matches from collapsed tabs");
         int x = (int)call(screen, "sectionButtonX"), clear = (int)call(screen, "clearSearchX");
@@ -207,9 +211,9 @@ final class Release160Checks {
         click(screen,(int)call(screen,"left")+8,(int)call(screen,"top")+8);
         check(!collapsed.containsAll((List<String>)call(screen,"sections")),"collapsed search header cannot expand");
         click(screen,x+8,35);click(screen,x+8,35);
-        check(((TextInput)field(screen,"search")).text().equals("time"), "collapse cleared search");
+        check(((TextInput)field(screen,"search")).text().equals("brightness"), "collapse cleared search");
       }
-      screen.session().discard(); mc.setScreen(null);
+      } finally { screen.session().discard(); mc.setScreen(null); }
     });
     test("cluster selector preserves drafts and shows only the chosen cluster", () -> {
       var screen = MenuUpdateChecks.open(mc, "Interface"); search(screen, "");
@@ -249,9 +253,9 @@ final class Release160Checks {
     });
     test("F3 clock uses frozen daylight and custom HUD restores GL state", () -> {
       var cycles = (WorldCycles)mc.world.method_262(); long before = cycles.power$daylightTime();
-      var hud = InfoHudConfig.copy(); boolean debug = mc.options.debugHud, pref = MenuPreferences.debugTimeOfDay();
+      var hud = InfoHudConfig.copy(); boolean debug = mc.options.debugHud, hiddenHud = mc.options.hideHud, pref = MenuPreferences.debugTimeOfDay();
       try {
-        cycles.power$daylightTime(18000); MenuPreferences.previewDebugTime(true);
+        cycles.power$daylightTime(18000); MenuPreferences.previewDebugTime(true); mc.options.debugHud = true; mc.options.hideHud = false;
         InfoHud.tick(mc); check(InfoHud.timeLine().equals("Time: 12:00 AM"),"clock used simulation time");
         mc.options.debugHud = true; mc.inGameHud.render(0,false,0,0);
         check(DebugOverlay.lastLayout().stream().anyMatch(l -> l.text().equals("Time: 12:00 AM")),"F3 clock missing");
@@ -261,7 +265,7 @@ final class Release160Checks {
         boolean depth=GL11.glIsEnabled(GL11.GL_DEPTH_TEST),blend=GL11.glIsEnabled(GL11.GL_BLEND);
         InfoHud.render(mc);
         check(depth==GL11.glIsEnabled(GL11.GL_DEPTH_TEST) && blend==GL11.glIsEnabled(GL11.GL_BLEND) && GL11.glGetError()==0,"custom HUD GL leak");
-      } finally { cycles.power$daylightTime(before); InfoHudConfig.preview(hud); mc.options.debugHud=debug; MenuPreferences.previewDebugTime(pref); }
+      } finally { cycles.power$daylightTime(before); InfoHudConfig.preview(hud); mc.options.debugHud=debug; mc.options.hideHud=hiddenHud; MenuPreferences.previewDebugTime(pref); }
     });
     lava(mc);
     MenuPreferences.update(v -> v.autoApply = autoApply);

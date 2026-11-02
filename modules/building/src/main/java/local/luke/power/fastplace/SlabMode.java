@@ -3,7 +3,8 @@ package local.luke.power.fastplace;
 public enum SlabMode {
   CONTINUOUS("Continuous layers"),
   DOUBLE("Double slabs"),
-  MATCH_FIRST("Match first placement");
+  MATCH_FIRST("Match first placement"),
+  SMART("Smart");
   public final String label;
 
   SlabMode(String label) {

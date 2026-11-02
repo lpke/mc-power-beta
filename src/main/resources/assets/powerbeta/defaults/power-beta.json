@@ -197,7 +197,7 @@
       "freeLookPerspective": "FIRST_PERSON",
       "placement": {
         "restrictionTiedToFast": true,
-        "slabMode": "DOUBLE",
+        "slabMode": "SMART",
         "attemptsPerTick": 2,
         "listMode": "BLACKLIST",
         "whitelist": [],
@@ -226,7 +226,6 @@
     },
     "power_mechanics:config": {
       "EQUIPMENT_CONFIG": {
-        "bowsHaveDurability": false,
         "equalizeBaseArmorDurability": false,
         "modernArmorDefensePoints": false
       },
@@ -338,7 +337,12 @@
       "lavaBucketSounds": true,
       "lavaAmbientSounds": true,
       "playlist": "beta",
-      "menuPlaylist": "@world"
+      "menuPlaylist": "@world",
+      "ladderSounds": true,
+      "musicDoubleClickPreview": false,
+      "showMusicPreviewButton": false,
+      "musicFadeMillis": 0,
+      "mp3ConversionLimit": 500
     },
     "visual": {
       "softRain": true,
@@ -579,7 +583,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.6.8"
+        "customVersionText": "Power Beta 4.7.0"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -825,7 +829,8 @@
       "boatPlacementFacing": true,
       "modernWaterMovement": true,
       "modernCrawling": true,
-      "crouchCameraHeight": false
+      "crouchCameraHeight": false,
+      "modernBowHandling": false
     },
     "infoHud": {
       "enabled": false,

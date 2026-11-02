@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class ExtraSoundsTest {
   @Test void extraSoundRowsPreviewRegisteredSoundsWithoutChangingTheirEnablement() {
     assertEquals("step.stone", ExtraSounds.previewId("audio.redstonePlacementSound"));
-    for (String setting : List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "lavaBucketSounds", "boneMealSounds", "lavaPopSounds", "lavaAmbientSounds", "playerFireExtinguish", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds", "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions"))
+    for (String setting : List.of("ladderSounds", "seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "lavaBucketSounds", "boneMealSounds", "lavaPopSounds", "lavaAmbientSounds", "playerFireExtinguish", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds", "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions"))
       assertTrue(ExtraSounds.contains(ExtraSounds.previewId("audio." + setting)), setting);
     for (String key : List.of("eatingSounds", "shearingSounds", "toolBreakSounds", "armorBreakSounds", "moreSoundsChests"))
       assertTrue(BetaSounds.contains(ExtraSounds.previewId("power_controls:features." + key)), key);
@@ -28,16 +28,19 @@ class ExtraSoundsTest {
     assertFalse(settings.boneMealSounds);
     assertFalse(settings.lavaBucketSounds || settings.lavaAmbientSounds);
     assertFalse(settings.playerFireExtinguish);
+    assertFalse(settings.ladderSounds);
     assertFalse(settings.lavaPopSounds || settings.waterSplashSounds || settings.swimmingSounds);
     settings.seedPlantingSounds = settings.hoeTillingSounds = settings.bucketSounds = settings.boneMealSounds = true;
     settings.lavaPopSounds = settings.waterSplashSounds = settings.swimmingSounds = true;
     settings.lavaBucketSounds = settings.lavaAmbientSounds = true;
     settings.playerFireExtinguish = true;
+    settings.ladderSounds = true;
     AudioSettings restored = gson.fromJson(gson.toJson(settings), AudioSettings.class);
     assertTrue(restored.seedPlantingSounds && restored.hoeTillingSounds && restored.bucketSounds && restored.boneMealSounds);
     assertTrue(restored.lavaPopSounds && restored.waterSplashSounds && restored.swimmingSounds);
     assertTrue(restored.lavaBucketSounds && restored.lavaAmbientSounds);
     assertTrue(restored.playerFireExtinguish);
+    assertTrue(restored.ladderSounds);
     assertDoesNotThrow(restored::validate);
   }
 
@@ -47,6 +50,8 @@ class ExtraSoundsTest {
       var manifest = JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject();
       Set<String> expected = Set.of("item.crop.plant", "item.hoe.till", "item.bucket.fill", "item.bucket.fill_lava",
           "item.bucket.empty", "item.bucket.empty_lava", "entity.cow.milk", "item.bone_meal.use",
+          "entity.arrow.shoot", "entity.arrow.hit", "entity.item.break", "block.ladder.break", "block.ladder.place",
+          "block.ladder.hit", "block.ladder.step", "block.ladder.fall",
           "block.lava.pop", "block.lava.ambient", "entity.generic.extinguish_fire", "entity.generic.splash", "entity.hostile.splash", "entity.player.swim", "entity.player.splash", "entity.player.splash.high_speed", "ambient.underwater.enter", "ambient.underwater.exit",
           "ambient.underwater.loop", "ambient.underwater.loop.additions", "ambient.underwater.loop.additions.rare",
           "ambient.underwater.loop.additions.ultra_rare");
@@ -77,10 +82,22 @@ class ExtraSoundsTest {
         }
         assertEquals(official, assets.get(event), event);
       }
-      assertEquals(82, manifest.getAsJsonArray("assets").size());
+      assertEquals(111, manifest.getAsJsonArray("assets").size());
       assertEquals(14, manifest.getAsJsonObject("events").getAsJsonObject("entity.player.swim").getAsJsonArray("sounds").size());
     }
     assertFalse(ExtraSounds.contains("power_beta:unknown"));
+  }
+
+  @Test void modernBowCuesUseOfficialCategoriesIncludingIndividualPreviews() {
+    assertEquals("players",AudioSettings.category("power_beta:entity.arrow.shoot",false));
+    assertEquals("players",AudioSettings.category("power_beta:entity.item.break",false));
+    assertEquals("passive",AudioSettings.category("power_beta:entity.arrow.hit",false));
+    assertEquals("players",AudioSettings.category("power_beta:entity.arrow.shoot",true));
+    assertEquals("passive",AudioSettings.category("power_beta:entity.arrow.hit",true));
+    var settings=new AudioSettings();settings.categories.put("hostile",0);settings.categories.put("players",50);settings.categories.put("passive",25);
+    assertEquals(.5,settings.gain("power_beta:entity.arrow.shoot",false),1e-9);
+    assertEquals(.5,settings.gain("power_beta:entity.item.break",false),1e-9);
+    assertEquals(.25,settings.gain("power_beta:entity.arrow.hit",false),1e-9);
   }
 
   @Test void actionSoundsUseTheAdvertisedCategoriesAndAllVolumeControls() {
@@ -98,6 +115,11 @@ class ExtraSoundsTest {
     assertEquals(.5, settings.gain("power_beta:block.lava.pop", false), 1e-9);
     assertEquals(.5, settings.gain("power_beta:block.lava.ambient", false), 1e-9);
     settings.categories.put("players", 60);
+    assertEquals(.15f, ExtraSounds.previewVolume("power_beta:block.ladder.step"));
+    for (String event : List.of("step", "fall", "place", "hit", "break")) {
+      assertEquals("blocks", AudioSettings.category("power_beta:block.ladder." + event, false));
+      assertEquals(.1, settings.gain("power_beta:block.ladder." + event, false), 1e-9);
+    }
     assertEquals(.7f, ExtraSounds.previewVolume("power_beta:entity.generic.extinguish_fire"));
     assertEquals(1.6f, ExtraSounds.previewPitch("power_beta:entity.generic.extinguish_fire"));
     assertEquals(.3, settings.gain("power_beta:entity.generic.extinguish_fire", false), 1e-9);

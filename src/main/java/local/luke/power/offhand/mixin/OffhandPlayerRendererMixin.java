@@ -29,6 +29,16 @@ public abstract class OffhandPlayerRendererMixin extends LivingEntityRenderer {
   }
   @Inject(method="method_827",at=@At("TAIL"))
   private void power$item(PlayerEntity player,float delta,CallbackInfo ci) {
+    if(local.luke.power.bow.ModernBow.hand(player)==local.luke.power.inventory.HandUse.Hand.MAIN){
+      GL11.glPushAttrib(GL11.GL_ENABLE_BIT|GL11.GL_CURRENT_BIT|GL11.GL_POLYGON_BIT|GL11.GL_LIGHTING_BIT|GL11.GL_TEXTURE_BIT);
+      GL11.glPushMatrix();
+      try{
+        bipedModel.rightArm.transform(1f/16);GL11.glEnable(org.lwjgl.opengl.GL12.GL_RESCALE_NORMAL);
+        HeldItemTransforms.thirdPersonHand(1);
+        HeldItemTransforms.render(player,dispatcher.field_2494,player.inventory.main[player.inventory.selectedSlot],false,1);
+      }finally{GL11.glPopMatrix();GL11.glPopAttrib();}
+      return;
+    }
     if(!Offhand.enabled(player))return;
     ItemStack stack=Offhand.get(player.inventory);if(stack==null)return;
     GL11.glPushAttrib(GL11.GL_ENABLE_BIT|GL11.GL_CURRENT_BIT|GL11.GL_POLYGON_BIT|GL11.GL_LIGHTING_BIT|GL11.GL_TEXTURE_BIT);
@@ -39,6 +49,10 @@ public abstract class OffhandPlayerRendererMixin extends LivingEntityRenderer {
       HeldItemTransforms.thirdPersonHand(-1);
       HeldItemTransforms.render(player, dispatcher.field_2494, stack, false, -1);
     } finally { GL11.glPopMatrix();GL11.glPopAttrib(); }
+  }
+  @WrapOperation(method="method_827",at=@At(value="INVOKE",target="Lnet/minecraft/entity/player/PlayerInventory;getSelectedItem()Lnet/minecraft/item/ItemStack;"))
+  private ItemStack power$drawOwnsHands(net.minecraft.entity.player.PlayerInventory inventory,Operation<ItemStack> original){
+    return local.luke.power.bow.ModernBow.hand(inventory.player)!=null?null:original.call(inventory);
   }
   @WrapOperation(method="method_827",at=@At(value="FIELD",target="Lnet/minecraft/entity/player/PlayerEntity;fishHook:Lnet/minecraft/entity/projectile/FishingBobberEntity;"))
   private FishingBobberEntity power$mainRodOnly(PlayerEntity player,Operation<FishingBobberEntity> original) {

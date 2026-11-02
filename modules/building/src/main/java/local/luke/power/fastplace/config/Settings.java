@@ -38,7 +38,7 @@ public final class Settings {
   public boolean announceToggle, announceRestrictionToggle;
   public int attemptsPerTick = 2;
   public boolean rememberOrientation = true;
-  public local.luke.power.fastplace.SlabMode slabMode = local.luke.power.fastplace.SlabMode.DOUBLE;
+  public local.luke.power.fastplace.SlabMode slabMode = local.luke.power.fastplace.SlabMode.SMART;
   public transient boolean restrictionEnabled;
   public boolean restrictionTiedToFast = true;
   public RestrictionMode restrictionMode = RestrictionMode.FACE;

@@ -72,7 +72,7 @@ public record PlacementTarget(
     if (position.y() < 0
         || position.y() >= 128
         || !world.method_239(position.x(), position.y(), position.z())) return null;
-    if (expected == 44 && local.luke.power.building.SlabPairs.configured(stack)) expected = 43;
+    if (expected == 44 && local.luke.power.building.SlabPairs.configured(world, stack, x, y, z, face)) expected = 43;
     return new PlacementTarget(
         position,
         expected,

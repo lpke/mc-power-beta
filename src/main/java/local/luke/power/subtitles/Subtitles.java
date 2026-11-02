@@ -76,10 +76,10 @@ public final class Subtitles {
   public static void render(Minecraft mc) {
     if (!enabled()) return;
     if (world != mc.world) { tick(mc); }
-    List<SubtitleState.Visible> visible = drain(now(), true);
     var settings = SubtitleConfig.current();
     if (mc.world == null || mc.player == null || mc.options.hideHud || settings.hideWithDebug && mc.options.debugHud
         || !settings.showInInventory && mc.currentScreen instanceof ContainerScreen) return;
+    List<SubtitleState.Visible> visible = drain(now(), true);
     var size = new class_564(mc.options, mc.displayWidth, mc.displayHeight);
     int width = size.method_1857(), height = size.method_1858();
     var layout = SubtitleLayout.at(settings, visible, width, height, mc.textRenderer::getWidth);

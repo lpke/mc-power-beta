@@ -5,17 +5,10 @@ album-only songs converted from the owner's purchased C418 MP3s. Game assets wer
 checked through 26.3 and 26.4-snapshot-2. This is the pinned catalog, not a claim
 that future releases contain no more music.
 
-| World music | Tracks |
-| --- | ---: |
-| Vanilla | 12 |
-| Alpha and Beta survival | 12 |
-| Alpha and Beta all | 50 |
-| Minecraft survival | 50 |
-| Minecraft all | 98 |
-
-Nether/End music is available in Everything and presets, never the five World
-music sets. Records and credits remain eligible. The six creative-exclusive songs
-have their own group. Volume Beta is C418's 2013 album, not Minecraft's Beta era.
+The Library groups bundled and imported songs by source. Playback uses an explicit
+saved playlist; the protected Beta 1.7.3 playlist contains exactly the twelve
+original tracks. Creative, Nether, End, record and credits songs are available for
+custom playlists. Volume Beta is C418's 2013 album, not Minecraft's Beta era.
 
 ## Updating assets
 
@@ -52,19 +45,52 @@ disable seeking, not playback. Pausing any source must preserve its track identi
 temporary previews restore the interrupted song. The countdown reserves the song
 that Next will play.
 
-Menu music defaults to Mix both. WORLD and MIX keep the playing or paused stream
-across world/menu transitions, including previews and their interrupted tracks.
-CUSTOM ends playback on transitions to switch pools. Queues remain intact.
+Menu music defaults to Same as world. World and menu playback read their selected
+saved playlists directly. Eligible playing or paused streams survive world/menu
+transitions; changing to a playlist that excludes the background song ends that
+stream without interrupting a preview. Explicit pause, gaps and queues remain
+intact.
 
-Saved presets contain a track-pool snapshot, exclusions and group volumes.
-New folders and new tracks stay outside saved pools until explicitly
-included. Editing a preset cannot change the live pool. Loading copies its state;
-library edits then affect that copy. Include all admits every currently known track.
-Missing IDs remain saved so returning files retain their selection.
+Saved playlists contain ordered track IDs. Selecting one changes its ID without
+copying or saving an editor draft. Editing a playlist changes only that draft
+until Save; row playback selects the saved playlist without publishing draft
+membership. New folders and tracks enter the Library but never expand playlists
+automatically. Favorites has its own ordered membership. Group and track volumes
+belong to the Library and apply in every playlist. Missing track IDs and queued
+entries stay saved so returning files retain their membership and order.
 
-Runtime MP3 conversion writes PCM WAV files to
+Playlist, folder, group-order, gain and queue data use music format 4 in
+`power-beta/music.json`; playback preferences stay in `config/power-beta.json`.
+Both paths join the Options transaction; queue edits merge independently of
+playlist drafts. Catalog display order is independent of playlist playback order.
+
+Runtime MP3 conversion writes stereo 44.1 kHz, 16-bit PCM WAV files to
 `power-beta-data/music-cache/<source-fingerprint>.wav`. The fingerprint includes
 path, size and modification time. The optional FFmpeg executable is probed once at
-startup; the conversion button also requires unconverted tracks. Conversion is
-bounded to 256 files per batch, three minutes and 1 GiB per file. Never modify
-original music or delete a cache while it is playing.
+startup; conversion requires unconverted MP3 tracks. Each click converts up to the
+MP3 conversion batch limit, which defaults to 500 and accepts 1 through 2048 in
+Audio settings. Each source is limited to 256 MiB; each conversion is limited to
+three minutes and 1 GiB of output. Originals remain unchanged. Never delete a cache
+while it is playing.
+
+The scanner records converted songs in
+`power-beta-data/music-cache/index.json`. Its entries retain stable track IDs,
+source identity, original name, size, modification time and cache filename.
+Indexed converted songs remain playable when their imported source folder is
+missing. A changed source fingerprint requires conversion again. Removing the
+folder hides its cached songs from the Library without deleting cache files or
+playlist entries. Invalid indexes stay untouched and produce a warning; ordinary
+source scanning continues.
+
+A missing-source warning offers Relink source path. The same action is available
+from an imported folder's context menu, including folders that still exist.
+Relinking changes the folder location while preserving its original identity root,
+so track IDs, playlist membership, favorites, track gains and queues stay unchanged.
+Group order and gain follow the new folder location. Availability checks run during
+the session's scan and explicit Reload, never while rendering.
+
+Older WAV caches have no index until their source tracks are scanned by this
+version. If a source folder disappeared before that scan, cache filenames alone
+cannot recover its song names and identities. Restore the original source path and
+reload to index those conversions. Relinking to a new location preserves saved IDs
+but may require converting again. Existing WAV files remain untouched.

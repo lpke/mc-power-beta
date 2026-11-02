@@ -1,13 +1,36 @@
 package local.luke.power.audio;
 
-import java.net.URL;
+import java.net.*;
 import paulscode.sound.Source;
 import paulscode.sound.SoundSystem;
 import paulscode.sound.SoundSystemConfig;
 
 /** Creates a non-positional stream, sets its volume, then starts it exactly once. */
 public final class MusicStream {
+  record Observation(Object source, String url, Object request) {}
+  private static volatile Observation background;
   private MusicStream() {}
+
+  static Observation background() { return background; }
+
+  /** Native FilenameURL retains this reference, identifying this attempt even for the same song. */
+  static URL requestUrl(URL url) throws MalformedURLException {
+    // The context preserves custom protocol handlers as well as the exact external URL.
+    return new URL(url, url.toExternalForm());
+  }
+
+  /** Called after native Play on the command thread, never under a render-thread I/O lock. */
+  public static void played(Source source) {
+    if (source != null && "BgMusic".equals(source.sourcename) && source.filenameURL != null) {
+      var url = source.filenameURL.getURL();
+      if (url != null) background = new Observation(source, url.toExternalForm(), url);
+    }
+  }
+
+  public static void removing(Source source) {
+    Observation observed = background;
+    if (observed != null && observed.source == source) background = null;
+  }
 
   static void start(SoundSystem system, String source, URL url, String filename,
       float volume, boolean paused) {

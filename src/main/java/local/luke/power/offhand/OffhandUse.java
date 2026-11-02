@@ -105,7 +105,8 @@ public final class OffhandUse implements AutoCloseable {
     finally { use.callback = false; }
     if(!use.ownsNative()){use.consumed=true;return result;}
     ItemStack after = Offhand.stack(mc.player, use.hand);
-    use.consumed |= result || use.effect || !before.equals(data(after)) || !nativeType(stack.getItem());
+    use.consumed |= result || use.effect || !before.equals(data(after)) || !nativeType(stack.getItem())
+        || local.luke.power.bow.ModernBow.using(mc.player, stack);
     // Casting/reeling is successful even when creative durability/count protection hides its change.
     if (stack.getItem() instanceof class_607) use.consumed = true;
     if(use.consumed&&(stack.getItem() instanceof class_483||stack.getItem() instanceof class_381))use.vehicle();

@@ -6,6 +6,7 @@ public final class PlacementSession {
   public final int face, itemId, damage, slot;
   public final float yaw;
   public final boolean firstWasMerge;
+  public boolean halfSlabAnchor;
   public boolean offhand;
   public String nativeItem;
   public Object sourceStack;

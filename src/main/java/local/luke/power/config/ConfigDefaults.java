@@ -103,7 +103,7 @@ public final class ConfigDefaults {
     for (String key : java.util.List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds",
         "lavaPopSounds", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds",
         "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions",
-        "lavaBucketSounds", "lavaAmbientSounds", "playerFireExtinguish")) {
+        "lavaBucketSounds", "lavaAmbientSounds", "playerFireExtinguish", "ladderSounds")) {
       if (audio.has(key)) continue;
       audio.add(key, DefaultBases.value("audio." + key, new JsonPrimitive(false)));
       changed = true;
@@ -134,9 +134,9 @@ public final class ConfigDefaults {
     JsonObject gameplay = PowerConfig.section("gameplay");
     boolean changed = false;
     // Freeze the first value so later reset-base changes cannot change it on restart.
-    for (String key : java.util.List.of("boatPlacementFacing", "modernWaterMovement", "modernCrawling")) {
+    for (String key : java.util.List.of("boatPlacementFacing", "modernWaterMovement", "modernCrawling", "modernBowHandling")) {
       if (gameplay.has(key)) continue;
-      gameplay.add(key, DefaultBases.value("gameplay." + key, new JsonPrimitive(!key.equals("modernCrawling"))));
+      gameplay.add(key, DefaultBases.value("gameplay." + key, new JsonPrimitive(!key.equals("modernCrawling") && !key.equals("modernBowHandling"))));
       changed = true;
     }
     if (!changed) return;

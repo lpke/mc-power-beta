@@ -10,10 +10,12 @@ import java.nio.file.*;
 /** Shared settings and user-data writer for every owned module. */
 public final class PowerConfig {
   private static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
+  // Preserve opaque JSON fields without adding null POJO fields to settings snapshots.
+  private static final Gson DOCUMENT_JSON = new GsonBuilder().setPrettyPrinting().serializeNulls().create();
   private static final Object DISK = new Object();
   private static final DeferredSaves DEFERRED = new DeferredSaves(PowerConfig::writeDeferred);
   private static final DeferredSaves MUSIC_DEFERRED = new DeferredSaves(changes -> {
-    synchronized (DISK) { writeMusicQueue(changes.get("queue")); }
+    synchronized (DISK) { writeMusicQueue(changes.get("queue").apply(new JsonObject())); }
   });
   private static Path file;
   private static JsonObject recoveryDefaults;
@@ -208,7 +210,7 @@ public final class PowerConfig {
   private static byte[] configurationBytes(JsonObject root) throws IOException {
     ConfigVersions.convert(root);
     MusicData.validatePreferences(audioPreferences(root));
-    byte[] bytes = (JSON.toJson(root) + "\n").getBytes(StandardCharsets.UTF_8);
+    byte[] bytes = (DOCUMENT_JSON.toJson(root) + "\n").getBytes(StandardCharsets.UTF_8);
     if (bytes.length > 4 * 1024 * 1024) throw new IOException("Configuration exceeds 4 MiB");
     return bytes;
   }
@@ -222,6 +224,10 @@ public final class PowerConfig {
   public static void saveDeferred(String id, Object value) {
     DEFERRED.submit(id, JSON.toJsonTree(value).getAsJsonObject());
   }
+  /** Gameplay edits publish immutable fields; the same worker preserves unrelated saved fields. */
+  public static void patchDeferred(String id, JsonObject fields) {
+    DEFERRED.patch(id, fields);
+  }
   public static void flushPending() throws IOException {
     IOException failure = null;
     try { DEFERRED.flush(); } catch (IOException e) { failure = e; }
@@ -233,10 +239,13 @@ public final class PowerConfig {
     return failure == null ? MUSIC_DEFERRED.takeFailure() : failure;
   }
 
-  private static void writeDeferred(java.util.Map<String, JsonObject> changes) throws IOException {
+  private static void writeDeferred(java.util.Map<String, DeferredSaves.Change> changes) throws IOException {
     synchronized (DISK) {
       JsonObject root = readDocument(), settings = root.getAsJsonObject("settings");
-      changes.forEach((id, value) -> settings.add(id, value.deepCopy()));
+      changes.forEach((id, change) -> {
+        JsonObject previous = settings.has(id) ? settings.getAsJsonObject(id) : new JsonObject();
+        settings.add(id, change.apply(previous));
+      });
       writeDocument(root);
     }
   }

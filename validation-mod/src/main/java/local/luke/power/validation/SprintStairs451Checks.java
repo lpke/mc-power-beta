@@ -27,12 +27,16 @@ final class SprintStairs451Checks {
     var p = mc.player; var saved = new NbtCompound(); p.write(saved);
     var input = p.field_161; var screen = mc.currentScreen; boolean paused = mc.paused;
     float stepHeight = p.field_1641;
+    Object features = Class.forName("local.luke.power.controls.ControlFeatures").getField("FEATURES_CONFIG").get(null);
+    var stepAssist = features.getClass().getField("stepAssist");
+    boolean savedAssist = (Boolean)stepAssist.get(features);
     var gameplay = GameplayConfig.copy(); var sprint = SprintConfig.copy(); var rules = AccessRules.copy(mc);
     String mode = Class.forName("local.luke.power.creative.api.ModePlayer").getMethod("power_mode").invoke(p).toString();
     byte[] disk = Files.readAllBytes(PowerConfig.path());
     int x = ((int)Math.floor(p.x) >> 4) * 16 + 8, z = ((int)Math.floor(p.z) >> 4) * 16 + 8;
     var blocks = new ArrayList<int[]>();
     try {
+      stepAssist.set(features, false);
       check(mc.world.method_155(x - 3, 0, z - 3, x + 15, 127, z + 15), "stair scene needs already loaded neighboring chunks");
       for (int bx = x - 2; bx <= x + 13; bx++) for (int bz = z - 2; bz <= z + 13; bz++)
         for (int by = Y - 1; by <= Y + 15; by++)
@@ -80,7 +84,53 @@ final class SprintStairs451Checks {
       });
       test("sprint stair fixture leaves durable preferences unchanged", () ->
           check(Arrays.equals(disk, Files.readAllBytes(PowerConfig.path())), "stair fixture wrote preferences"));
+      test("primitive step assist preserves OFF, ON and sneaking collision heights", () -> {
+        for (boolean assist : new boolean[]{false, true}) for (boolean sneaking : new boolean[]{false, true}) {
+          stepAssist.set(features, assist);
+          scene(mc, x, z, 0, 0); mc.world.method_154(x + 1, Y, z, 1, 0);
+          reset(mc, x, z, 0, false); p.field_161.field_2536 = sneaking;
+          p.move(.8, -.0784, 0);
+          boolean climbs = assist && !sneaking;
+          near(p.boundingBox.minY, Y + (climbs ? 1 : 0), 1e-6, "step assist height");
+          check(climbs ? p.x > x + 1 : p.x <= x + .70001, "step assist changed wall collision");
+          near(p.field_1641, .5, 0, "step assist mutated native height");
+          log("STEP ASSIST on=" + assist + " sneak=" + sneaking + " feet=" + p.boundingBox.minY + " x=" + p.x);
+        }
+      });
+      test("native movement allocation measurement uses warmed owned terrain", () -> {
+        var bean = (com.sun.management.ThreadMXBean)java.lang.management.ManagementFactory.getThreadMXBean();
+        check(bean.isThreadAllocatedMemorySupported(), "thread allocation measurement unavailable");
+        if (!bean.isThreadAllocatedMemoryEnabled()) bean.setThreadAllocatedMemoryEnabled(true);
+        var compiler = java.lang.management.ManagementFactory.getCompilationMXBean();
+        long thread = Thread.currentThread().getId();
+        var measurements = new ArrayList<java.util.Map<String, Object>>();
+        scene(mc, x, z, 0, 0);
+        for (boolean assist : new boolean[]{false, true}) {
+          stepAssist.set(features, assist); reset(mc, x, z, 0, false);
+          moves(p, 100000);
+          log("STEP ASSIST WARMUP on=" + assist + " moves=100000");
+        }
+        for (int sample = 0; sample < 6; sample++) {
+          boolean assist = (sample & 1) != 0;
+          stepAssist.set(features, assist); reset(mc, x, z, 0, false);
+          long compiledBefore = compiler.isCompilationTimeMonitoringSupported() ? compiler.getTotalCompilationTime() : -1;
+          long bytes = bean.getThreadAllocatedBytes(thread), start = System.nanoTime();
+          moves(p, 10000);
+          long elapsed = System.nanoTime() - start, allocated = bean.getThreadAllocatedBytes(thread) - bytes;
+          long compiledAfter = compiler.isCompilationTimeMonitoringSupported() ? compiler.getTotalCompilationTime() : -1;
+          near(p.boundingBox.minY, Y, 1e-6, "movement measurement left owned floor");
+          measurements.add(java.util.Map.of("assist", assist, "sample", sample, "moves", 10000,
+              "warmupMovesPerMode", 100000, "allocatedBytes", allocated, "bytesPerMove", allocated / 10000.0,
+              "nanosPerMove", elapsed / 10000.0, "compilationMillisBefore", compiledBefore, "compilationMillisAfter", compiledAfter));
+          log("STEP ASSIST ALLOCATION on=" + assist + " sample=" + sample + " bytesPerMove=" + allocated / 10000.0
+              + " compilationMillis=" + compiledBefore + "->" + compiledAfter);
+        }
+        var report = java.nio.file.Path.of("power-beta-data/reports/release-470/step-assist-allocation.json");
+        Files.createDirectories(report.getParent());
+        Files.writeString(report, local.luke.power.config.Catalog.JSON.toJson(measurements));
+      });
     } finally {
+      stepAssist.set(features, savedAssist);
       mc.world.isRemote = false;
       for (int[] b : blocks) mc.world.method_154(b[0], b[1], b[2], b[3], b[4]);
       AccessRules.restore(mc, RuleSet.cheats()); CreativeVehicleChecks.mode(mc, mode);
@@ -134,6 +184,15 @@ final class SprintStairs451Checks {
       if (p.field_1624) collisions++;
     }
     return collisions;
+  }
+
+  private static void moves(Entity player, int count) {
+    for (int i = 0; i < count; i++) {
+      // Match the native frame's reusable collision-box lifecycle. No borrowed
+      // collision boxes survive a completed move; the entity owns its own box.
+      net.minecraft.util.math.Box.resetCacheCount();
+      player.move((i & 1) == 0 ? .04 : -.04, -.0784, 0);
+    }
   }
 
   private static void near(double actual, double expected, double tolerance, String label) {

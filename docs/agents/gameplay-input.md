@@ -215,3 +215,8 @@
   Beta's native sneak movement when off, the deeper modern drop when on, collision-safe
   low-ceiling cameras and both native perspectives consistent. Retaining native sneak/step
   smoothing during pose resizing must preserve collision-box feet and saved positions.
+
+- Raw mouse input transfers both signed axes atomically from the polling worker to
+  one rendered frame. Preserve exact counts, sensitivity and GUI/grab discards.
+  Never use separate counter reads/resets or smoothing to conceal lost movement;
+  see [Raw mouse input](../raw-input.md).

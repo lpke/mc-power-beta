@@ -29,7 +29,7 @@ public final class NativeInventoryPlan {
   };
   private static boolean failed;
   private static Path journalPath;
-  private enum Replacement { NONE, CREATIVE_HOTBAR, CREATIVE_EQUIPMENT, CREATIVE_DELETION }
+  private enum Replacement { NONE, CREATIVE_HOTBAR, CREATIVE_EQUIPMENT, CREATIVE_DELETION, BOW_SHOT }
   private NativeInventoryPlan() {}
 
   public record Change(String label, Object owner, int index, Supplier<ItemStack> get,
@@ -76,6 +76,36 @@ public final class NativeInventoryPlan {
     return submit(mc, action, manual, changes, eligible, committed, Replacement.NONE, rollback);
   }
 
+  /** One native bow release consumes exactly one arrow and advances only its exact bow's damage. */
+  public static boolean submitBowShot(Minecraft mc, HandUse.Hand hand, ItemStack bow, ItemStack ammunition,
+      BooleanSupplier eligible, Runnable fired, Runnable rollback) {
+    if (mc.player == null || !local.luke.power.bow.ModernBow.enabled()
+        || local.luke.power.bow.ModernBow.creative(mc.player) || bow == null || bow.count <= 0
+        || bow.getItem().getClass() != net.minecraft.class_367.class || ammunition == null
+        || ammunition.itemId != net.minecraft.Item.field_475.id || ammunition.count <= 0
+        || Offhand.stack(mc.player, hand) != bow || bow == ammunition) return false;
+    var inventory = mc.player.inventory;
+    try {
+      ItemStack nextBow = decode(encode(bow)), nextAmmo = decode(encode(ammunition));
+      nextAmmo.count--;
+      int damage = nextBow.getDamage() + 1;
+      if (damage >= local.luke.power.bow.BowPhysics.DURABILITY) { nextBow.count--;nextBow.setDamage(0); }
+      else nextBow.setDamage(damage);
+      List<Change> changes = new ArrayList<>();
+      changes.add(hand == HandUse.Hand.OFF ? Change.offhand(inventory,nextBow.count <= 0 ? null : nextBow)
+          : Change.main(inventory,inventory.selectedSlot,nextBow.count <= 0 ? null : nextBow));
+      if (Offhand.enabled(mc.player) && Offhand.get(inventory) == ammunition)
+        changes.add(Change.offhand(inventory,nextAmmo.count <= 0 ? null : nextAmmo));
+      else {
+        int source = -1;
+        for (int i = 0; i < inventory.main.length; i++) if (inventory.main[i] == ammunition) { source = i;break; }
+        if (source < 0) return false;
+        changes.add(Change.main(inventory,source,nextAmmo.count <= 0 ? null : nextAmmo));
+      }
+      return submit(mc,"release_bow",true,changes,eligible,fired,Replacement.BOW_SHOT,rollback);
+    } catch (IOException invalid) { return false; }
+  }
+
   /** Creative equipment may copy exactly one accepted armor piece, while returning old equipment intact. */
   public static boolean submitEquipment(Minecraft mc, String action, List<Change> changes,
       BooleanSupplier eligible, Runnable committed, boolean copiesEquipment) {
@@ -106,7 +136,7 @@ public final class NativeInventoryPlan {
       local.luke.power.recipes.RecipeCrafts.Exchange exchange) {
     if (failed || mc.player == null || mc.world == null || mc.world.isRemote
         || !WorldCompatibility.ready(mc.world) || !Display.isActive() || !eligible.getAsBoolean()) return false;
-    if (replacement != Replacement.NONE && !creative(mc)) return false;
+    if (replacement != Replacement.NONE && replacement != Replacement.BOW_SHOT && !creative(mc)) return false;
     if (pending != null) {
       if (!manual || retired.size() >= 4) return false;
       InventoryActions.cancel(); pending.cancelled = true;
@@ -280,7 +310,7 @@ public final class NativeInventoryPlan {
         for (var item : exchange.consumed()) total(totals, local.luke.power.recipes.RecipeNative.nativeStack(item), -1);
         for (var item : exchange.produced()) total(totals, local.luke.power.recipes.RecipeNative.nativeStack(item), 1);
       }
-      if (replacement != Replacement.CREATIVE_HOTBAR && replacement != Replacement.CREATIVE_DELETION
+      if (replacement != Replacement.CREATIVE_HOTBAR && replacement != Replacement.CREATIVE_DELETION && replacement != Replacement.BOW_SHOT
           && totals.values().stream().anyMatch(value -> value != 0))
         throw new IOException("Inventory plan does not conserve native items");
       for (int i = 0; i < changes.size(); i++) {
@@ -318,7 +348,7 @@ public final class NativeInventoryPlan {
           && mc.player != null && lease.valid(mc.world, mc.player, mc.player.container, mc.player.inventory)
           && mc.player.inventory == inventory && inventory.main == main && inventory.armor == armor
           && inventory.selectedSlot == selected && mc.player.health > 0 && !mc.player.dead
-          && WorldCompatibility.ready(mc.world) && eligible.getAsBoolean() && (replacement == Replacement.NONE || creative(mc));
+          && WorldCompatibility.ready(mc.world) && eligible.getAsBoolean() && (replacement == Replacement.NONE || replacement == Replacement.BOW_SHOT || creative(mc));
     }
     boolean matchesBefore(Minecraft mc) throws IOException {
       ItemStack[] current = DeathItems.snapshot(inventory, mc.player.playerContainer);
@@ -381,7 +411,7 @@ public final class NativeInventoryPlan {
         try {
           // Derived recipe output may be restored only after every owned input was restored.
           // A callback that replaced an input or changed its owner retains its recovery evidence.
-          if (restoredBefore(mc)) rollback.run();
+          if (replacement == Replacement.BOW_SHOT || restoredBefore(mc)) rollback.run();
           else failure.addSuppressed(new IOException("Inventory rollback lost ownership; derived output was not restored"));
         } catch (Exception | LinkageError rollbackFailure) { failure.addSuppressed(rollbackFailure); }
         throw new IOException("Inventory publication failed; original recovery evidence retained", failure);

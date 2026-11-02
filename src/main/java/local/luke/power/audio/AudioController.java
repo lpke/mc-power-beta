@@ -22,6 +22,7 @@ public final class AudioController {
   private static final Random RANDOM = new Random();
   private static final Map<String, Source> SOURCES = new HashMap<>();
   private static final UnderwaterAudio UNDERWATER = new UnderwaterAudio();
+  private static final MusicQueueAdmission QUEUE_ADMISSION = new MusicQueueAdmission();
 
   private record Source(String sound, float base, boolean ui, String category) {}
 
@@ -137,6 +138,7 @@ public final class AudioController {
   private static void play(class_267 track, boolean explicit) {
     SoundSystem system = system();
     if (system == null || client == null) return;
+    QUEUE_ADMISSION.cancel();
     if (track == null) {
       MusicStream.stop(system, "BgMusic"); MusicStream.stop(system, "PowerBetaMenu");
       currentMusic = ""; menuMusic = "";
@@ -170,6 +172,7 @@ public final class AudioController {
   public static void previous() {
     SoundSystem system = system();
     if (system == null) return;
+    QUEUE_ADMISSION.cancel();
     if (previousRestartsCurrent()) {
       restartCurrent(system);
       return;
@@ -233,6 +236,7 @@ public final class AudioController {
     try {
       class_267 selected = resolveTrack(id);
       if (selected == null) { status = "Track unavailable. Reload music folders."; return; }
+      QUEUE_ADMISSION.cancel();
       stopSoundPreview();
       progress.update(false, System.nanoTime());
       MusicPreview.start(client, system(), selected, !paused && !currentMusic.isEmpty()
@@ -330,6 +334,7 @@ public final class AudioController {
     String id=currentTrackId();
     try {
       var track=resolveCurrentTrack(id); if(track==null)return;
+      QUEUE_ADMISSION.cancel();
       MusicSeeking.request(id,MusicPreview.active()?MusicPreview.SOURCE:"BgMusic",track.field_2127,track.field_2126,
           Math.min(Math.max(0,fraction)*length,Math.max(0,length-0.1)));
     } catch (Exception e) { status="Could not seek this track"; PowerBeta.LOG.warn(status,e); }
@@ -369,20 +374,30 @@ public final class AudioController {
     // Detached metadata never makes a track available to the catalog or rotation.
     prior.entrySet().removeIf(entry -> byId.containsKey(entry.getKey())
         || !owned.contains(entry.getKey()) && (entry.getValue().playbackPath() == null
-            || !historyUrls.contains(entry.getValue().playbackPath().toUri().toString())));
+            || !historyUrls.contains(MusicTrackUrls.key(entry.getValue().playbackPath()))));
     detachedCustom = Map.copyOf(prior);
     custom = List.copyOf(byId.values()); customById = Map.copyOf(byId);
     Map<String, String> urls = new HashMap<>();
-    for (var track : custom) if (track.playable()) urls.put(track.playbackPath().toUri().toString(), track.id());
+    for (var track : custom) if (track.playable()) urls.put(MusicTrackUrls.key(track.playbackPath()), track.id());
     for (var track : detachedCustom.values()) if (track.playable())
-      urls.putIfAbsent(track.playbackPath().toUri().toString(), track.id());
+      urls.putIfAbsent(MusicTrackUrls.key(track.playbackPath()), track.id());
     customByUrl = Map.copyOf(urls);
+    // Relinking keeps the playing source intact, but future restarts and seeks need its new URL.
+    for (String id : owned) {
+      var track = byId.get(id);
+      if (track == null || !track.playable()) continue;
+      try {
+        var relocated = new class_267(track.playbackName(), MusicTrackUrls.of(track.playbackPath()));
+        if (id.equals(currentMusic) || id.equals(menuMusic)) currentEntry = relocated;
+        MusicPreview.relocated(id, relocated);
+      } catch (java.net.MalformedURLException invalid) {
+        PowerBeta.LOG.warn("Could not refresh relocated music metadata", invalid);
+      }
+    }
   }
 
   private static String trackUrl(class_267 track) {
-    // URL external forms use file:/ while Path URIs use file:///.
-    try { return Path.of(track.field_2127.toURI()).toUri().toString(); }
-    catch (Exception ignored) { return track.field_2127.toExternalForm(); }
+    return track.field_2127.toExternalForm();
   }
 
   public static String trackId(class_267 track) {
@@ -405,8 +420,9 @@ public final class AudioController {
   }
 
   private static class_267 entry(MusicLibrary.Track track) throws java.io.IOException {
-    if (!track.playable() || !Files.isRegularFile(track.playbackPath())) return null;
-    return new class_267(track.playbackName(), track.playbackPath().toUri().toURL());
+    // Availability belongs to the scanner. Playback/menus must never stat source files.
+    if (!track.playable()) return null;
+    return new class_267(track.playbackName(), MusicTrackUrls.of(track.playbackPath()));
   }
 
   private static void updateRotation() {
@@ -523,19 +539,64 @@ public final class AudioController {
 
   private static class_267 queued() {
     // Unavailable requests remain visible for repair instead of silently disappearing.
-    if (MusicRequests.tracks().isEmpty()) return null;
+    List<String> queue = MusicRequests.tracks();
+    if (queue.isEmpty() || QUEUE_ADMISSION.blocked(queue, libraryRevision)) return null;
     try {
-      class_267 track = resolveTrack(MusicRequests.tracks().get(0));
-      if (track == null) { status = "First queued track unavailable. Check the music library."; return null; }
-      MusicRequests.edit(q -> q.tracks.remove(0));
-      return track;
-    } catch (Exception e) { status = "Could not read or save music queue"; PowerBeta.LOG.warn(status, e); return null; }
+      class_267 track = resolveTrack(queue.get(0));
+      if (track == null) {
+        QUEUE_ADMISSION.reject(queue, libraryRevision);
+        status = "First queued track unavailable. Reload folders or edit the queue.";
+      }
+      return track == null ? null : new class_267(track.field_2126, MusicStream.requestUrl(track.field_2127));
+    } catch (Exception e) {
+      QUEUE_ADMISSION.reject(queue, libraryRevision);
+      status = "Could not read music queue"; PowerBeta.LOG.warn(status, e); return null;
+    }
   }
 
   public static void playQueue() {
     if (system() == null) return;
     class_267 track = queued();
-    if (track != null) { MusicPreview.stop(system(), false); remember(track, true); play(track, true); }
+    if (track != null) {
+      MusicStream.Observation previous = MusicStream.background();
+      MusicPreview.stop(system(), false);
+      remember(track, true);
+      play(track, true);
+      awaitQueued(track, previous);
+    }
+  }
+
+  private static void awaitQueued(class_267 track, MusicStream.Observation previous) {
+    QUEUE_ADMISSION.begin(MusicRequests.tracks(), libraryRevision,
+        previous == null ? null : previous.source(), track.field_2127);
+  }
+
+  private static boolean waitingForQueued(SoundSystem system) {
+    List<String> queue = MusicRequests.tracks();
+    if (!QUEUE_ADMISSION.pending(queue, libraryRevision)) return false;
+    MusicStream.Observation source = MusicStream.background();
+    // The command thread publishes identity. Recheck it after the existing native
+    // playing query so an old channel cannot acknowledge its queued replacement.
+    boolean playing = source != null && system.playing("BgMusic") && source == MusicStream.background();
+    var result = QUEUE_ADMISSION.observe(queue, libraryRevision,
+        source == null ? null : source.source(), source == null ? null : source.request(),
+        playing, System.nanoTime() - musicStarted);
+    if (result == MusicQueueAdmission.Result.PLAYING) {
+      try {
+        MusicRequests.consume(queue);
+      } catch (java.io.IOException failure) {
+        QUEUE_ADMISSION.reject(queue, libraryRevision);
+        status = "Could not save music queue";
+        PowerBeta.LOG.warn(status, failure);
+      }
+    } else if (result == MusicQueueAdmission.Result.FAILED) {
+      MusicStream.stop(system, "BgMusic");
+      currentMusic = ""; currentEntry = null; currentExplicitMusic = false;
+      trackWasPlaying = false;
+      status = "Queued track could not start. Reload folders or edit the queue.";
+      return true;
+    }
+    return result == MusicQueueAdmission.Result.WAITING;
   }
 
   public static void reload() {
@@ -549,7 +610,7 @@ public final class AudioController {
     pending =
         CompletableFuture.supplyAsync(
             () ->
-                MusicLibrary.scan(game, s.musicDirectories),
+                MusicLibrary.scan(game, s.musicDirectories, s.musicSourceIdentities),
             SCANNER);
   }
 
@@ -619,6 +680,7 @@ public final class AudioController {
         currentExplicitMusic = false;
         menuMusic = "";
         trackWasPlaying = false;
+        QUEUE_ADMISSION.cancel();
         MusicPreview.discardBackground();
       }
       refresh();
@@ -634,6 +696,8 @@ public final class AudioController {
       return;
     }
     automaticMusic(mc, system);
+    if (AudioConfig.current().musicFadeMillis > 0 && !silenced && !currentMusic.isEmpty())
+      system.setVolume("BgMusic", musicVolume(currentMusic));
     if (++cleanup >= 100) {
       cleanup = 0;
       SOURCES.keySet().removeIf(source -> !system.playing(source));
@@ -641,6 +705,7 @@ public final class AudioController {
   }
 
   private static void automaticMusic(Minecraft mc, SoundSystem system) {
+    if (waitingForQueued(system)) return;
     if (menuCooldown > 0) menuCooldown--;
     if (silenced) {
       // SoundSystem may finish an older queued Play after Quiet's Stop.
@@ -681,6 +746,7 @@ public final class AudioController {
   public static void quiet() {
     SoundSystem s = system();
     if (s == null || client == null) return;
+    QUEUE_ADMISSION.cancel();
     MusicPreview.stop(s, false);
     MusicSeeking.cancelPending();
     s.setVolume("BgMusic", 0); s.setVolume("PowerBetaMenu", 0);
@@ -697,12 +763,14 @@ public final class AudioController {
     AudioSettings s = AudioConfig.current();
     class_267 requested = queued();
     if (requested != null) {
+      awaitQueued(requested, MusicStream.background());
       remember(requested, true); currentMusic = trackId(requested); currentExplicitMusic = true;
       currentEntry = requested;
       alignExplicitTrack(currentMusic);
       currentPlaylistId = playbackPlaylist(currentMusic, true);
       musicStarted = System.nanoTime(); trackWasPlaying = false; return requested;
     }
+    if (!MusicRequests.tracks().isEmpty()) return null;
     Context context = context(client);
     class_267 chosen = upcoming();
     if (chosen != null) WORLD.played(selectionContext(context, s), trackId(chosen));
@@ -778,13 +846,23 @@ public final class AudioController {
   public static float musicVolume(String id) {
     float base = client == null ? 1 : client.options.musicVolume;
     AudioSettings s = AudioConfig.current();
-    return base * s.master / 100f * trackVolume(id) / 100f * MusicGroups.gain(s.libraryGroupVolumes, musicGroup(id));
+    return base * s.master / 100f * trackVolume(id) / 100f * MusicGroups.gain(s.libraryGroupVolumes, musicGroup(id)) * fadeGain(id);
+  }
+
+  private static float fadeGain(String id) {
+    int milliseconds = AudioConfig.current().musicFadeMillis;
+    if (milliseconds == 0 || id.isEmpty()) return 1;
+    if (MusicPreview.active() && id.equals(MusicPreview.track()))
+      return MusicFade.gain(milliseconds, MusicPreview.position(), MusicPreview.duration());
+    if (!id.equals(currentMusic) || currentEntry == null) return 1;
+    return MusicFade.gain(milliseconds, progress.seconds(),
+        MusicSeeking.duration(id, currentEntry.field_2127, currentEntry.field_2126));
   }
 
   public static float backgroundVolume(float original) {
     if (MusicPreview.active() || paused) return 0;
     AudioSettings s = AudioConfig.current();
-    return original * s.master / 100f * trackVolume(currentMusic) / 100f * MusicGroups.gain(s.libraryGroupVolumes, musicGroup(currentMusic));
+    return original * s.master / 100f * trackVolume(currentMusic) / 100f * MusicGroups.gain(s.libraryGroupVolumes, musicGroup(currentMusic)) * fadeGain(currentMusic);
   }
 
   static boolean musicMuted() {

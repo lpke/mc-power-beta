@@ -17,10 +17,12 @@ public class InteractionManagerMixin {
   private boolean power$first(PlayerEntity player,World world,ItemStack stack,int x,int y,int z,int face,Operation<Boolean> original) {
     Minecraft mc=(Minecraft)FabricLoader.getInstance().getGameInstance();
     boolean first=FastPlace.observingFirst();
-    PlacementTarget target=first&&FastPlace.eligible(mc,stack)?PlacementTarget.at(world,stack,x,y,z,face):null;
+    boolean eligible=first&&FastPlace.eligible(mc,stack);
+    boolean halfSlabAnchor=eligible&&FastPlace.halfSlabAnchor(world,stack,x,y,z,face);
+    PlacementTarget target=eligible?PlacementTarget.at(world,stack,x,y,z,face):null;
     int slot=player.inventory.selectedSlot;float yaw=player.yaw;
     boolean result=original.call(player,world,stack,x,y,z,face);
-    if(first)FastPlace.firstPlacement(mc,stack,slot,face,yaw,target,result);
+    if(first)FastPlace.firstPlacement(mc,stack,slot,face,yaw,target,halfSlabAnchor,result);
     return result;
   }
 }

@@ -13,7 +13,7 @@ final class MusicData {
   static final int VERSION = 4;
   static final int MAX_BYTES = 4 * 1024 * 1024;
   private static final Gson JSON = new GsonBuilder().setPrettyPrinting().create();
-  static final Set<String> FIELDS = Set.of("playlists", "favourites", "musicDirectories", "libraryOrder", "libraryGroupVolumes", "playlistOrder");
+  static final Set<String> FIELDS = Set.of("playlists", "favourites", "musicDirectories", "libraryOrder", "libraryGroupVolumes", "playlistOrder", "musicSourceIdentities");
 
   static Path path(Path config) { return config.getParent().getParent().resolve("power-beta/music.json"); }
 
@@ -55,6 +55,15 @@ final class MusicData {
     if (audio.has("favourites")) tracks(audio.get("favourites"), 8192, true);
     for (String key : List.of("musicDirectories", "disabledMusicDirectories"))
       if (audio.has(key)) strings(audio.get(key), 32, 4096, true, false);
+    if (audio.has("musicSourceIdentities")) {
+      JsonObject identities = object(audio.get("musicSourceIdentities"), "Music source identities");
+      require(identities.size() <= 32, "Too many music source identities");
+      Set<String> folders = audio.has("musicDirectories") ? strings(audio.get("musicDirectories"), 32, 4096, true, false) : Set.of();
+      for (var entry : identities.entrySet()) {
+        require(folders.contains(entry.getKey()), "Music identity belongs to a missing folder");
+        require(Path.of(text(entry.getValue(), 4096)).isAbsolute(), "Music source identity must be absolute");
+      }
+    }
     if (version >= 3 && audio.has("libraryOrder")) strings(audio.get("libraryOrder"), 8192, 4103, true, false);
     if (version == 3 && audio.has("favoritesGroupVolumes")) volumes(audio.get("favoritesGroupVolumes"), 8192, false);
     if (version == 4 && audio.has("libraryGroupVolumes")) volumes(audio.get("libraryGroupVolumes"), 8192, false);

@@ -36,6 +36,7 @@ class MusicStreamTest {
       assertArrayEquals(new boolean[] {true, true, false}, create.boolArgs);
       assertEquals(SoundSystemConfig.ATTENUATION_NONE, create.intArgs[0]);
       assertEquals(url, ((FilenameURL) create.objectArgs[0]).getURL());
+      assertSame(url, ((FilenameURL) create.objectArgs[0]).getURL(), "native commands must retain the admission token");
       assertEquals(.3f, system.commands.get(3).floatArgs[0]);
       assertTrue(system.commands.stream().allMatch(c -> c.stringArgs[0].equals("BgMusic")));
     }
@@ -82,6 +83,49 @@ class MusicStreamTest {
       assertTrue(MusicStream.canPause(source)); source.pause();
       assertTrue(source.paused()); assertTrue(source.stopped()); assertSame(channel, source.channel);
     }
+  }
+
+  @Test void commandThreadPublishesIdentityAndUrlWithoutExposingTheMutableSourceMap() throws Exception {
+    SoundSystemConfig.setLogger(new SoundSystemLogger());
+    var url = URI.create("file:/music/duplicate.wav").toURL();
+    Source first = new Source(true, true, false, "BgMusic", new FilenameURL(url, "duplicate.wav"), null,
+        0, 0, 0, SoundSystemConfig.ATTENUATION_NONE, 0, false);
+    Source next = new Source(true, true, false, "BgMusic", new FilenameURL(url, "duplicate.wav"), null,
+        0, 0, 0, SoundSystemConfig.ATTENUATION_NONE, 0, false);
+    try {
+      MusicStream.played(first);
+      assertSame(first, MusicStream.background().source());
+      assertEquals(url.toExternalForm(), MusicStream.background().url());
+      assertSame(url, MusicStream.background().request());
+      MusicStream.played(next);
+      MusicStream.removing(first);
+      assertSame(next, MusicStream.background().source());
+      MusicStream.removing(next);
+      assertNull(MusicStream.background());
+    } finally { MusicStream.removing(first); MusicStream.removing(next); }
+  }
+
+  @Test void attemptUrlsKeepFileJarAndCustomHandlerSemanticsWithoutOpeningThem() throws Exception {
+    for (String address : List.of("file:/music/space%20and%23.wav", "jar:file:/game/music.jar!/music/calm.ogg")) {
+      var original = new java.net.URL(address);
+      var request = MusicStream.requestUrl(original);
+      assertNotSame(original, request);
+      assertEquals(original.toExternalForm(), request.toExternalForm());
+    }
+    var opens = new java.util.concurrent.atomic.AtomicInteger();
+    var handler = new java.net.URLStreamHandler() {
+      @Override protected java.net.URLConnection openConnection(java.net.URL url) {
+        opens.incrementAndGet();
+        return new java.net.URLConnection(url) { @Override public void connect() {} };
+      }
+    };
+    var original = new java.net.URL(null, "musicfixture:/stream?id=4#part", handler);
+    var request = MusicStream.requestUrl(original);
+    assertNotSame(original, request);
+    assertEquals(original.toExternalForm(), request.toExternalForm());
+    assertEquals(0, opens.get(), "copying a queued URL must not touch its source");
+    assertEquals(request, request.openConnection().getURL());
+    assertEquals(1, opens.get(), "custom protocol handler must survive the copy");
   }
 
   private static Source nativeSource(String name, boolean streamed) {

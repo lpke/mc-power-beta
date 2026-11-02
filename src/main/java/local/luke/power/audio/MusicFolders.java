@@ -9,6 +9,50 @@ import java.util.*;
 public final class MusicFolders {
   public static final int MAX_FOLDERS = 32;
 
+  public static void validateIdentities(List<String> folders, Map<String, String> identities) {
+    if (folders == null || identities == null || identities.size() > MAX_FOLDERS
+        || !folders.containsAll(identities.keySet()))
+      throw new IllegalArgumentException("Music source identities must belong to imported folders");
+    for (String identity : identities.values()) {
+      if (identity == null || identity.isBlank() || identity.length() > 4096
+          || identity.codePoints().anyMatch(Character::isISOControl)
+          || !Path.of(identity).isAbsolute())
+        throw new IllegalArgumentException("Invalid music source identity");
+    }
+  }
+
+  /** One explicit folder edit. Stable song identities leave playlists and queues untouched. */
+  public static AudioSettings relink(Path game, AudioSettings current, String oldPath, String newPath)
+      throws IOException {
+    current.validate();
+    if (!current.musicDirectories.contains(oldPath)) throw new IOException("Folder changed. Reopen Relink.");
+    Path replacement = canonical(game, newPath);
+    if (!Files.isDirectory(replacement, LinkOption.NOFOLLOW_LINKS) || !Files.isReadable(replacement))
+      throw new IOException("Replacement folder unavailable.");
+    for (String folder : current.musicDirectories)
+      if (!folder.equals(oldPath) && canonical(game, folder).equals(replacement))
+        throw new IOException("That folder is already imported.");
+    String path = replacement.toString();
+    AudioSettings next = new Gson().fromJson(new Gson().toJson(current), AudioSettings.class);
+    next.musicDirectories.set(next.musicDirectories.indexOf(oldPath), path);
+    String identity = next.musicSourceIdentities.remove(oldPath);
+    if (identity == null) {
+      // A nested import can already inherit song IDs from a previously relinked parent.
+      var sources = current.musicSourceIdentities.keySet().stream()
+          .map(folder -> new MusicLibrary.SourceFolder(folder, canonical(game, folder), true, List.of()))
+          .toList();
+      identity = MusicLibrary.identity(canonical(game, oldPath), sources, current.musicSourceIdentities).toString();
+    }
+    next.musicSourceIdentities.put(path, identity);
+    String oldGroup = MusicLibrarySources.id(oldPath), newGroup = MusicLibrarySources.id(path);
+    next.libraryOrder.replaceAll(group -> group.equals(oldGroup) ? newGroup : group);
+    next.libraryOrder = new ArrayList<>(new LinkedHashSet<>(next.libraryOrder));
+    Integer gain = next.libraryGroupVolumes.remove(oldGroup);
+    if (gain != null) next.libraryGroupVolumes.put(newGroup, gain);
+    next.validate();
+    return next;
+  }
+
   public static Path canonical(Path game, String folder) {
     Path path = MusicLibrary.resolve(game, folder).toAbsolutePath().normalize();
     try { return path.toRealPath(); }

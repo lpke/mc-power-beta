@@ -12,10 +12,14 @@ public record MusicRowLayout(int nameX, int nameWidth, int controlsY, int volume
   public int groupRemoveX() { return groupVolumeX() - buttonWidth - 4; }
   public static MusicRowLayout playlist(int left, int width) { return at(left, width, false); }
   public static MusicRowLayout at(int left, int width, boolean queue) {
+    return at(left, width, queue, false);
+  }
+  public static MusicRowLayout at(int left, int width, boolean queue, boolean preview) {
     int button = width < 260 ? 18 : 20, play = left + width - button;
-    int favorite = play - button - 2;
+    int previewX = preview ? play - button - 2 : -1;
+    int favorite = (preview ? previewX : play) - button - 2;
     int volume = favorite - 4 - sliderWidth(width);
     return new MusicRowLayout(left + 2, Math.max(12, volume - left - 8), 3,
-        volume, sliderWidth(width), favorite, -1, play, -1, -1, -1, 24, button);
+        volume, sliderWidth(width), favorite, previewX, play, -1, -1, -1, 24, button);
   }
 }

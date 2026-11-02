@@ -45,9 +45,11 @@ public final class Validation {
   }
 
   public static void tick(Minecraft mc) {
+    TerrainDirty470Checks.tick(mc);
     Minimap441Checks.observe(mc);
     AutoMineChecks.observe(mc);
     Performance420Checks.tick(mc);
+    Smoothness470Checks.tick(mc);
     HeldLight400Checks.tick(mc);
     Forest241Capture.tick(mc);
     Release300Checks.observe(mc);
@@ -58,7 +60,15 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("music-playlists-460 ")) MusicPlaylists460Checks.run(mc, command.substring("music-playlists-460 ".length()));
+      if (command.startsWith("release-470-music-audio ")) Release470MusicAudioChecks.run(mc, command.substring("release-470-music-audio ".length()));
+      else if (command.startsWith("terrain-dirty-470 ")) TerrainDirty470Checks.run(mc, command.substring("terrain-dirty-470 ".length()));
+      else if (command.startsWith("music-admission-470 ")) MusicAdmission470Checks.run(mc, command.substring("music-admission-470 ".length()));
+      else if (command.startsWith("music-playlists-460 ")) MusicPlaylists460Checks.run(mc, command.substring("music-playlists-460 ".length()));
+      else if (command.startsWith("camera-jitter-470 ")) CameraJitter470Checks.run(mc,command.substring("camera-jitter-470 ".length()));
+      else if (command.startsWith("presentation-470 ")) FramePresentation470Checks.run(mc,command.substring("presentation-470 ".length()));
+      else if (command.startsWith("smoothness-470 ")) Smoothness470Checks.run(mc,command.substring("smoothness-470 ".length()));
+      else if (command.equals("debug-save-470")) DebugSave470Checks.run(mc);
+      else if (command.equals("smoothness-470-audio-hud check")) Smoothness470AudioHudChecks.run(mc,"check");
       else if (command.equals("world-metadata-450")) WorldMetadata450Checks.run(mc);
       else if (command.equals("offhand-torch-451")) OffhandTorch451Checks.run(mc);
       else if (command.equals("sprint-stairs-451")) SprintStairs451Checks.run(mc);
@@ -148,6 +158,8 @@ public final class Validation {
       else if (command.startsWith("creative-443-containers")) Creative443ContainerChecks.run(mc, command.substring(23).trim());
       else if (command.startsWith("inventory-442")) Inventory442Checks.run(mc, command.substring(13).trim());
       else if (command.equals("player-fire-extinguish-448")) PlayerFireExtinguish448Checks.run(mc);
+      else if (command.equals("extra-sounds-470")) ExtraSounds470Checks.run(mc);
+      else if (command.equals("smart-slabs-470")) SmartSlabs470Checks.run(mc);
       else if (command.equals("fluid-sounds-440")) FluidSounds440Checks.run(mc);
       else if (command.equals("fluid-sounds-420")) FluidSounds420Checks.run(mc);
       else if (command.equals("water-sounds-432")) WaterSounds432Checks.run(mc);
@@ -300,6 +312,8 @@ public final class Validation {
       else if (command.startsWith("release-463")) Release463Checks.run(mc, command.substring("release-463".length()).trim());
       else if (command.startsWith("release-464-audio")) Release464AudioChecks.run(mc, command.substring("release-464-audio".length()).trim());
       else if (command.startsWith("release-464-map-logo")) Release464MapLogoChecks.run(mc, command.substring("release-464-map-logo".length()).trim());
+      else if (command.startsWith("modern-bow-470")) ModernBow470Checks.run(mc, command.substring("modern-bow-470".length()).trim());
+      else if (command.startsWith("release-470-music-ui")) Release470MusicUiChecks.run(mc, command.substring("release-470-music-ui".length()).trim());
       else if (command.startsWith("release-464-music-ui")) Release464MusicUiChecks.run(mc, command.substring("release-464-music-ui".length()).trim());
       else if (command.startsWith("release-464-shared-ui")) Release464SharedUiChecks.run(mc, command.substring("release-464-shared-ui".length()).trim());
       else if (command.startsWith("release-464-polish")) Release464PolishChecks.run(mc, command.substring("release-464-polish".length()).trim());

@@ -127,7 +127,14 @@
     "audio.lavaBucketSounds": true,
     "audio.lavaAmbientSounds": true,
     "visual.containerBlockReach": 5,
-    "visual.containerEntityReach": 5
+    "visual.containerEntityReach": 5,
+    "gameplay.modernBowHandling": false,
+    "audio.ladderSounds": true,
+    "audio.musicDoubleClickPreview": false,
+    "audio.showMusicPreviewButton": false,
+    "audio.musicFadeMillis": 0,
+    "audio.mp3ConversionLimit": 500,
+    "tweaks.placement.slabMode": 3
   },
   "beta": {
     "activeTweaks.enabled": false,
@@ -373,7 +380,14 @@
     "audio.lavaBucketSounds": false,
     "audio.lavaAmbientSounds": false,
     "visual.containerBlockReach": 5,
-    "visual.containerEntityReach": 5
+    "visual.containerEntityReach": 5,
+    "gameplay.modernBowHandling": false,
+    "audio.ladderSounds": false,
+    "audio.musicDoubleClickPreview": false,
+    "audio.showMusicPreviewButton": false,
+    "audio.musicFadeMillis": 0,
+    "audio.mp3ConversionLimit": 500,
+    "tweaks.placement.slabMode": 3
   },
   "refined_beta": {
     "activeTweaks.enabled": false,
@@ -581,6 +595,13 @@
     "audio.lavaBucketSounds": false,
     "audio.lavaAmbientSounds": false,
     "visual.containerBlockReach": 5,
-    "visual.containerEntityReach": 5
+    "visual.containerEntityReach": 5,
+    "gameplay.modernBowHandling": false,
+    "audio.ladderSounds": false,
+    "audio.musicDoubleClickPreview": false,
+    "audio.showMusicPreviewButton": false,
+    "audio.musicFadeMillis": 0,
+    "audio.mp3ConversionLimit": 500,
+    "tweaks.placement.slabMode": 3
   }
 }

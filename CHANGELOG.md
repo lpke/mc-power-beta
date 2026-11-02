@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [4.7.0] - 2026-11-02
+
+- Add Smart fast slab placement. Vertical runs use double slabs; horizontal runs follow the starting slab shape, or use double slabs when starting from another block.
+- Replace Bows have durability with optional Modern bow handling, including charged shots, draw animations, modern sounds, durability and arrow physics in either hand. It starts off and retains native Beta handling when disabled.
+- Add modern ladder sounds, enabled in Power Beta defaults, and an optional 0–5000 millisecond fade for song openings and endings.
+- Double-click songs to play them or choose Preview from the Music footer and Audio settings. Restore the optional speaker preview button between Play and Favorite.
+- Show remove-song icons in red, put newly imported folders first, explain MP3 conversion where needed, and make the conversion batch limit configurable with a default of 500.
+- Warn when music folders are missing and allow relinking while preserving song identities, playlists, favorites, volumes and queues. Keep indexed converted songs playable when their source folder is unavailable.
+- Fix raw-mouse count transfer and rapid off/on toggling, stop disabled polling, and discard old movement across input sessions.
+- Present capped frames after the frame limiter to reduce tick-related timing variation. Reduce movement and HUD allocations, remove music-file checks from rendering, stop disabled water-lighting preparation, and save debug shortcut changes without waiting for disk.
+- Keep queued songs until native playback starts; failed songs remain available for repair and retry after reloading folders or editing the queue.
+
 ## [4.6.8] - 2026-10-28
 
 - Separate Shift-click into crafting table from Shift-click into 2x2 grid; personal-grid transfers default off.

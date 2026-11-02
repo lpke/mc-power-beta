@@ -21,18 +21,18 @@ public final class SlabPairs {
     }
   }
 
-  public static boolean active(Minecraft mc, ItemStack stack) {
-    return configured(stack) && FastPlace.eligible(mc, stack);
+  public static boolean active(Minecraft mc, ItemStack stack, int x, int y, int z, int face) {
+    return configured(mc.world, stack, x, y, z, face) && FastPlace.eligible(mc, stack);
   }
 
-  public static boolean configured(ItemStack stack) {
+  public static boolean configured(World world, ItemStack stack, int x, int y, int z, int face) {
     return stack != null
         && stack.count > 0
         && stack.itemId == 44
         && stack.getDamage() >= 0
         && stack.getDamage() <= 3
         && Config.current().placement.enabled
-        && Config.current().placement.slabMode == SlabMode.DOUBLE
+        && FastPlace.slabMode(world, x, y, z, face) == SlabMode.DOUBLE
         && Config.current().placement.permits(stack.itemId, stack.getDamage());
   }
 
@@ -49,7 +49,7 @@ public final class SlabPairs {
   private record Pair(BlockPos position, int cost, boolean creative) {}
 
   private static Pair plan(Minecraft mc, ItemStack stack, int x, int y, int z, int face) {
-    if (!active(mc, stack)) return null;
+    if (!active(mc, stack, x, y, z, face)) return null;
     World w = mc.world;
     PlacementTarget target = PlacementTarget.nativeAt(w, stack, x, y, z, face);
     if (target == null) return null;

@@ -11,6 +11,7 @@ public final class GameplaySettings {
   public boolean fastItemCollisions = true;
   public boolean boatPlacementFacing = true;
   public boolean modernWaterMovement = true;
+  public boolean modernBowHandling;
   public boolean modernCrawling;
   public boolean crouchCameraHeight;
 

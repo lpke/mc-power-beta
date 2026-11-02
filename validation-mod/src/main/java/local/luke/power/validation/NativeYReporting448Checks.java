@@ -28,7 +28,7 @@ final class NativeYReporting448Checks {
     var saved = snapshot(DetachedCamera.class, MenuPreferences.class, InfoHud.class);
     var map = snapshotFields(Maps.class, "world", "x", "y", "z", "yaw", "dimension");
     var report = snapshot(ReportedPosition.class);
-    boolean debug = mc.options.debugHud;
+    boolean debug = mc.options.debugHud, hiddenHud = mc.options.hideHud;
     Object creative = Class.forName("local.luke.power.creative.config.Config").getMethod("current").invoke(null);
     Field flight = creative.getClass().getField("flight"); Object previousFlight = flight.get(creative);
     Object compat = Class.forName("local.luke.power.compat.Config").getField("config").get(null);
@@ -40,13 +40,13 @@ final class NativeYReporting448Checks {
     byte[] disk = Files.readAllBytes(PowerConfig.path());
     var probe = new ClientPlayerEntity(mc, mc.world, mc.session, owner.dimensionId);
     try {
-      mc.player = probe; mc.field_2807 = probe; mc.options.debugHud = true;
+      mc.player = probe; mc.field_2807 = probe; mc.options.debugHud = true; mc.options.hideHud = false;
       AccessRules.restore(mc, RuleSet.cheats()); flight.set(creative, true);
       for (Field field : compatFields.keySet()) field.set(compat, field.getName().equals("addBlockLightToDebugOverlay"));
       log("YREPORT448 compat handler "+debugHandler(mc).getName());
       DetachedCamera.register(() -> false);
       var style = InfoHudConfig.copy(); style.enabled = true;
-      for (var cluster : style.clusters) { cluster.enabled = cluster.coordinates = true; cluster.biome = false; }
+      for (var cluster : style.clusters) { cluster.enabled = cluster.coordinates = true; cluster.biome = cluster.hideWithDebug = false; }
       InfoHudConfig.preview(style); field(Maps.class,"world").set(null,mc.world);
       for (String mode : List.of("SURVIVAL", "CREATIVE", "SPECTATOR")) {
         applyMode(probe, mode);
@@ -96,7 +96,7 @@ final class NativeYReporting448Checks {
     } finally {
       restore(report); restore(map); restore(saved); InfoHudConfig.preview(hud);
       flight.set(creative,previousFlight);for(var entry:compatFields.entrySet())entry.getKey().set(compat,entry.getValue());
-      AccessRules.restore(mc,rules);mc.player=owner;mc.field_2807=camera;mc.options.debugHud=debug;DebugOverlay.begin();
+      AccessRules.restore(mc,rules);mc.player=owner;mc.field_2807=camera;mc.options.debugHud=debug;mc.options.hideHud=hiddenHud;DebugOverlay.begin();
     }
     log("YREPORT448 FAILURES "+failures);check(failures==0,"native Y reporting failures="+failures);
   }

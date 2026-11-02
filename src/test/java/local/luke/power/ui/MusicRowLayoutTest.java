@@ -6,6 +6,21 @@ import org.junit.jupiter.api.Test;
 
 class MusicRowLayoutTest {
   @Test
+  void optionalPreviewKeepsTheSliderWidthAndSitsBetweenFavouriteAndPlay() {
+    for (int width = 180; width <= 1600; width++) {
+      var normal = MusicRowLayout.at(30, width, false);
+      var preview = MusicRowLayout.at(30, width, false, true);
+      assertEquals(normal.volumeWidth(), preview.volumeWidth());
+      assertEquals(normal.groupVolumeX(), preview.groupVolumeX());
+      assertEquals(normal.playX(), preview.playX());
+      assertEquals(2, preview.previewX() - preview.favouriteX() - preview.buttonWidth());
+      assertEquals(2, preview.playX() - preview.previewX() - preview.buttonWidth());
+      assertTrue(preview.nameX() + preview.nameWidth() < preview.volumeX());
+      assertTrue(preview.nameWidth() > 0);
+    }
+  }
+
+  @Test
   void actionsAndVolumesDoNotOverlapAtSupportedSizes() {
     for (int width = 180; width <= 1600; width++)
       for (boolean queue : new boolean[] {false, true}) {

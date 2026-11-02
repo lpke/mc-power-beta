@@ -42,13 +42,6 @@ public class Config {
 
     public static class EquipmentConfig {
         @ConfigEntry(
-                name = "Bows Have Durability",
-                description = "Restart required for changes to take effect",
-                multiplayerSynced = true
-        )
-        public Boolean bowsHaveDurability = false;
-
-        @ConfigEntry(
                 name = "Equalize Base Armor Durability",
                 description = "Restart required for changes to take effect",
                 multiplayerSynced = true

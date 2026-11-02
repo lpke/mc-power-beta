@@ -31,7 +31,7 @@ def main():
         sounds = fetch(f"https://resources.download.minecraft.net/{sound['hash'][:2]}/{sound['hash']}", sound['hash'])
         sources[name] = (index, sounds)
     for event, definition in manifest['events'].items():
-        index, sounds = sources['waterSource' if event.startswith(('ambient.underwater.', 'entity.player.', 'entity.generic.', 'entity.hostile.')) or event == 'block.lava.ambient'
+        index, sounds = sources['waterSource' if event.startswith(('ambient.underwater.', 'entity.player.', 'entity.generic.', 'entity.hostile.', 'block.ladder.', 'entity.arrow.', 'entity.item.')) or event == 'block.lava.ambient'
                                 else 'bucketSource' if 'bucket' in event else 'source']
         assert sounds[event] == definition, event
         expected = {'minecraft/sounds/' + (entry if isinstance(entry, str) else entry['name']) + '.ogg'

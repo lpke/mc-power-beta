@@ -9,6 +9,8 @@ public final class ExtraSounds {
   private static final Set<String> EVENTS = Set.of("item.crop.plant", "item.hoe.till",
       "item.bucket.fill", "item.bucket.fill_lava", "item.bucket.empty", "item.bucket.empty_lava",
       "entity.cow.milk", "item.bone_meal.use", "block.lava.pop", "block.lava.ambient", "entity.generic.extinguish_fire", "entity.generic.splash", "entity.hostile.splash", "entity.player.swim",
+      "entity.arrow.shoot", "entity.arrow.hit", "entity.item.break", "block.ladder.break", "block.ladder.place",
+      "block.ladder.hit", "block.ladder.step", "block.ladder.fall",
       "entity.player.splash", "entity.player.splash.high_speed", "ambient.underwater.enter", "ambient.underwater.exit",
       "ambient.underwater.loop", "ambient.underwater.loop.additions", "ambient.underwater.loop.additions.rare",
       "ambient.underwater.loop.additions.ultra_rare");
@@ -27,6 +29,7 @@ public final class ExtraSounds {
       case "power_controls:features.toolBreakSounds", "power_controls:features.armorBreakSounds" -> "power_controls:random.break";
       case "power_controls:features.moreSoundsChests" -> "power_controls:random.chestopen";
       case "audio.redstonePlacementSound" -> "step.stone";
+      case "audio.ladderSounds" -> "power_beta:block.ladder.step";
       case "audio.seedPlantingSounds" -> "power_beta:item.crop.plant";
       case "audio.hoeTillingSounds" -> "power_beta:item.hoe.till";
       case "audio.bucketSounds" -> "power_beta:item.bucket.fill";
@@ -48,7 +51,8 @@ public final class ExtraSounds {
   }
 
   public static float previewVolume(String id) {
-    return "power_beta:entity.generic.extinguish_fire".equals(id) ? .7f : 1;
+    return "power_beta:entity.generic.extinguish_fire".equals(id) ? .7f
+        : "power_beta:block.ladder.step".equals(id) ? .15f : 1;
   }
 
   public static float previewPitch(String id) {

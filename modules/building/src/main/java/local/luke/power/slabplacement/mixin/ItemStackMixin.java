@@ -31,7 +31,7 @@ public abstract class ItemStackMixin {
       Operation<Boolean> original) {
     Minecraft mc = MinecraftAccessor.instance();
     if (mc != null && player == mc.player && mc.world == world && !Compatibility.freecam()) {
-      if (local.luke.power.building.SlabPairs.active(mc, stack))
+      if (local.luke.power.building.SlabPairs.active(mc, stack, x, y, z, face))
         return local.luke.power.building.SlabPairs.place(mc, stack, x, y, z, face);
       int[] target = SlabMerge.target(world, stack, x, y, z, face);
       if (target != null) return SlabMerge.complete(world, stack, target);

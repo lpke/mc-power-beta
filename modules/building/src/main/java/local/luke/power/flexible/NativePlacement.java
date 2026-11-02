@@ -39,7 +39,7 @@ public final class NativePlacement {
         && Compatibility.adjacentSlabs()
         && w.getBlockId(pos.x(), pos.y(), pos.z()) == 44
         && w.method_1778(pos.x(), pos.y(), pos.z()) == s.getDamage()) expected = 43;
-    if (expected == 44 && local.luke.power.building.SlabPairs.configured(s)) expected = 43;
+    if (expected == 44 && local.luke.power.building.SlabPairs.configured(w, s, clicked.x(), clicked.y(), clicked.z(), face.ordinal())) expected = 43;
     return new Target(pos, expected);
   }
 }

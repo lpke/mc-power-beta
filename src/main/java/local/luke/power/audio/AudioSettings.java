@@ -12,6 +12,7 @@ public final class AudioSettings {
   public boolean lavaPopSounds = false;
   public boolean lavaAmbientSounds = false;
   public boolean playerFireExtinguish = false;
+  public boolean ladderSounds = false;
   public boolean waterSplashSounds = false;
   public boolean swimmingSounds = false;
   public boolean underwaterEnterSounds = false;
@@ -42,6 +43,9 @@ public final class AudioSettings {
   public String playlist = MusicPlaylist.BETA, menuPlaylist = MusicPlaylist.SAME_AS_WORLD;
   public List<MusicPlaylist> playlists = new ArrayList<>();
   public List<String> musicDirectories = new ArrayList<>();
+  public Map<String, String> musicSourceIdentities = new TreeMap<>();
+  public boolean musicDoubleClickPreview = false, showMusicPreviewButton = false;
+  public int musicFadeMillis = 0, mp3ConversionLimit = 500;
   public boolean shuffle = true, avoidRepeats = true;
   public boolean waitBetweenTracks = true, delayQueuedTracks = false;
 
@@ -81,6 +85,11 @@ public final class AudioSettings {
     MusicPlaylist.validateTrackIds(favourites);
     MusicGroups.copy(libraryGroupVolumes);
     MusicLibrarySources.validateOrder(libraryOrder);
+    MusicFolders.validateIdentities(musicDirectories, musicSourceIdentities);
+    if (musicFadeMillis < 0 || musicFadeMillis > 5000)
+      throw new IllegalArgumentException("Music fade must be 0 to 5000 milliseconds");
+    if (mp3ConversionLimit < 1 || mp3ConversionLimit > MusicLibrary.MAX_TRACKS)
+      throw new IllegalArgumentException("Conversion limit must be 1 to " + MusicLibrary.MAX_TRACKS);
     volume(master);
     if (gapMinSeconds < 0 || gapMaxSeconds < gapMinSeconds || gapMaxSeconds > 86400)
       throw new IllegalArgumentException("Music gaps must be 0 to 86400 seconds, with maximum at least minimum");
@@ -132,6 +141,8 @@ public final class AudioSettings {
 
   public static String category(String id, boolean interfaceSound) {
     if (id == null) return "ambient";
+    if (id.equals("power_beta:entity.arrow.shoot") || id.equals("power_beta:entity.item.break")) return "players";
+    if (id.equals("power_beta:entity.arrow.hit")) return "passive";
     id = id.substring(id.indexOf(':') + 1);
     if (id.startsWith("ambient.weather") || id.contains("thunder")) return "weather";
     if (id.startsWith("ambient") || id.startsWith("portal") || id.equals("block.lava.pop") || id.equals("block.lava.ambient")) return "ambient";
@@ -142,7 +153,7 @@ public final class AudioSettings {
           ? "passive"
           : "hostile";
     }
-    if (id.startsWith("step.")
+    if (id.startsWith("block.ladder.") || id.startsWith("step.")
         || id.equals("item.crop.plant")
         || id.equals("item.hoe.till")
         || id.startsWith("item.bucket.")

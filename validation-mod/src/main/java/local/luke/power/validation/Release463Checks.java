@@ -37,11 +37,11 @@ final class Release463Checks {
     try (var state = new Release462Checks.State(mc)) {
       if (action.equals("capture")) capture(mc, state);
       else {
-        test("RELEASE463 full-size sliders and editor action hit bounds at both sizes", () -> controls(mc, state));
+        test("RELEASE463 parent/child volume widths and editor action hit bounds at both sizes", () -> controls(mc, state));
         test("RELEASE463 saved playlist play selects the world playlist and advances from that song", () -> playlist(state));
         test("RELEASE463 Library and queue member plays align order while outside songs do not", () -> libraryAndQueue(state));
-        test("RELEASE463 dirty drafts, same-song pause/resume and manual Cancel retain ownership", () -> drafts(state));
-        test("RELEASE463 now-playing links route members, outsiders and auditions with gold names", () -> navigation(mc, state));
+        test("RELEASE463 dirty drafts, muted same-song clicks and manual Cancel retain ownership", () -> drafts(state));
+        test("RELEASE463 now-playing links preserve gold song and blue preview names", () -> navigation(mc, state));
         test("RELEASE463 separate menu assignment retains both playlist cursors", () -> menu(mc, state));
       }
     } finally {
@@ -95,8 +95,10 @@ final class Release463Checks {
       var options = open(state, size, MusicPlaylist.BETA);
       for (String id : List.of("audio.master", "native.music", "native.sound", "audio.category.blocks")) {
         Object row = row(options, id);
-        int base = (int)call(options, "controlLeft", new Class<?>[]{row.getClass()}, row);
-        check(base == (int)call(options, "mainControlLeft", new Class<?>[]{row.getClass()}, row), "slider shortened: " + id);
+        int base = (int)call(options, "mainControlLeft", new Class<?>[]{row.getClass()}, row);
+        int end = (int)call(options, "controlEnd", new Class<?>[]{Setting.class}, setting(options, id));
+        check(end - base == VolumeControls.WIDTH - (id.startsWith("audio.category.") ? VolumeControls.CHILD_INSET : 0),
+            "volume width changed: " + id);
         if (!id.startsWith("native.")) continue;
         int y = n(options, "top") + (int)call(row, "y") - ((Number)get(options, "scroll")).intValue();
         int x = (int)call(options, "audioActionX", new Class<?>[]{row.getClass()}, row);
@@ -149,11 +151,20 @@ final class Release463Checks {
     open(state, SIZES[0], CUSTOM);
     MusicRequests.edit(q -> { q.add(SECOND); q.add(FIRST); });
     AudioController.playQueue(); check(AudioController.currentTrackId().equals(SECOND), "queued member did not play");
-    AudioController.next(); check(AudioController.currentTrackId().equals(FIRST) && MusicRequests.tracks().isEmpty(), "queue priority or consumption changed");
+    AudioController.next(); check(AudioController.currentTrackId().equals(SECOND)
+        && MusicRequests.tracks().equals(List.of(SECOND, FIRST)), "unconfirmed muted playback consumed a queued request");
+    // This synchronous UI fixture cannot confirm a muted native decoder. Explicit
+    // queue edits exercise cursor continuity; MusicAdmission470Checks confirms playback.
+    MusicRequests.edit(q -> q.tracks.remove(0));
+    AudioController.next(); check(AudioController.currentTrackId().equals(FIRST)
+        && MusicRequests.tracks().equals(List.of(FIRST)), "edited queue priority changed");
+    MusicRequests.edit(q -> q.tracks.clear());
     AudioController.next(); check(AudioController.currentTrackId().equals(SECOND), "queue member did not align cursor");
     open(state, SIZES[0], CUSTOM); MusicRequests.edit(q -> q.add(SECOND));
-    check(AudioController.trackId(AudioController.choose()).equals(SECOND), "native queued acceptance did not choose member");
-    AudioController.next(); check(AudioController.currentTrackId().equals(THIRD), "native queued acceptance did not align cursor");
+    check(AudioController.trackId(AudioController.choose()).equals(SECOND), "queued selection did not choose member");
+    check(MusicRequests.tracks().equals(List.of(SECOND)), "selection consumed an unplayed request");
+    MusicRequests.edit(q -> q.tracks.clear());
+    AudioController.next(); check(AudioController.currentTrackId().equals(THIRD), "queued selection did not align cursor");
   }
   private static void drafts(Release462Checks.State state) throws Exception {
     var options = open(state, SIZES[0], MusicPlaylist.BETA); var library = library(options); edit(library, CUSTOM);
@@ -162,7 +173,8 @@ final class Release463Checks {
     call(library, "syncPanel"); AudioController.playNow(SECOND);
     play(options, library, SECOND);
     check(AudioConfig.current().playlist.equals(CUSTOM) && (boolean)stat("paused"), "same-song cross-playlist click lost pause behavior");
-    play(options, library, SECOND); check(!(boolean)stat("paused"), "same-song click did not resume");
+    play(options, library, SECOND); check((boolean)stat("paused") && AudioController.status().equals("Music muted"),
+        "same-song click resumed music while muted");
     AudioController.next(); check(AudioController.currentTrackId().equals(THIRD), "unsaved reorder leaked into playback order");
     check(draft(library) == draft && library.playlistDirty() && MusicPlaylist.find(AudioConfig.current(), CUSTOM).tracks().equals(saved),
         "playing saved the draft or replaced its owner");
@@ -193,13 +205,13 @@ final class Release463Checks {
       check((boolean)call(library, "activePlaylistTab") == (mode == 0), "Options now-playing jump chose wrong destination: "
           + size[0] + " mode=" + mode + " folder=" + get(library, "folder") + " current=" + AudioController.currentTrackId());
       check(((String)get(library, "error")).isEmpty(), "now-playing jump shows outside-playlist error");
-      checkGold(mc, options, library, id, size, "link-" + mode);
+      checkColor(mc, options, library, id, size, "link-" + mode, mode == 2 ? 0x77baff : 0xffdd66);
       options.session().discard();
       PowerOptionsScreen.openMusic(mc, options, false, id);
       var linked = (PowerOptionsScreen)mc.currentScreen; state.options = linked; linked.init(mc, size[0], size[1]);
       var target = (MusicLibraryScreen)get(linked, "library");
       check((boolean)call(target, "activePlaylistTab") == (mode == 0), "menu now-playing entrypoint chose wrong destination");
-      checkGold(mc, linked, target, id, size, "menu-link-" + mode);
+      checkColor(mc, linked, target, id, size, "menu-link-" + mode, mode == 2 ? 0x77baff : 0xffdd66);
     }
   }
   private static void menu(Minecraft mc, Release462Checks.State state) throws Exception {
@@ -232,14 +244,14 @@ final class Release463Checks {
     var layout = (MusicRowLayout)call(library, "rowLayout");
     click(options, layout.playX() + 5, trackY(library, id) + layout.controlsY() + 5);
   }
-  private static void checkGold(Minecraft mc, PowerOptionsScreen options, MusicLibraryScreen library, String id, int[] size, String label) throws Exception {
+  private static void checkColor(Minecraft mc, PowerOptionsScreen options, MusicLibraryScreen library, String id, int[] size, String label, int color) throws Exception {
     int y = trackY(library, id); shot(mc, options, label, size, null);
     var image = ImageIO.read(REPORT.resolve(label + "-" + size[0] + ".png").toFile());
     var row = (MusicRowLayout)call(library, "rowLayout"); int ink = 0;
     for (int py = (y + 7) * 2; py < (y + 15) * 2; py++)
       for (int px = row.nameX() * 2; px < (row.nameX() + row.nameWidth()) * 2; px++)
-        if ((image.getRGB(px, py) & 0xffffff) == 0xffdd66) ink++;
-    check(ink > 0, "playing name is not gold at navigation destination");
+        if ((image.getRGB(px, py) & 0xffffff) == color) ink++;
+    check(ink > 0, "wrong track-name color at navigation destination " + label);
   }
   private static Object row(PowerOptionsScreen options, String id) throws Exception {
     for (Object row : (List<?>)get(options, "rows")) { var value = (Setting)call(row, "setting"); if (value != null && value.id.equals(id)) return row; }

@@ -818,14 +818,6 @@
     "default": true,
     "restart": false
   },
-  "power_mechanics:config.EQUIPMENT_CONFIG.bowsHaveDurability": {
-    "page": "Gameplay",
-    "group": "Equipment",
-    "label": "Bows have durability",
-    "description": "Restart required for changes to take effect",
-    "default": false,
-    "restart": true
-  },
   "power_mechanics:config.EQUIPMENT_CONFIG.equalizeBaseArmorDurability": {
     "page": "Gameplay",
     "group": "Equipment",
@@ -2469,7 +2461,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.6.8",
+    "default": "Power Beta 4.7.0",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -2960,8 +2952,8 @@
     "page": "Building",
     "group": "Fast placement",
     "label": "Vertical slab placement",
-    "description": "Continuous layers, double slabs, or repeat the first slab configuration.",
-    "default": 1
+    "description": "Smart uses double slabs vertically. Horizontal runs keep the starting slab shape, or double slabs when starting from another block.",
+    "default": 3
   },
   "tweaks.placement.rememberOrientation": {
     "page": "Building",
@@ -6170,7 +6162,7 @@
     "page": "Map",
     "group": "World map",
     "label": "Map light shading radius",
-    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0–7, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
+    "description": "Survey loaded map terrain within this many blocks of the player or detached camera, independently of the in-world Light overlay radius. Red marks valid spawning floors with block light 0\u20137, predicting nighttime darkness even during the day. Lower values reduce survey and drawing work; higher values cover more terrain. Does not load chunks.",
     "min": 8,
     "max": 128,
     "step": 1,
@@ -6924,5 +6916,43 @@
     "max": 10,
     "step": 0.5,
     "order": 1
+  },
+  "gameplay.modernBowHandling": {
+    "page": "Gameplay",
+    "group": "Equipment",
+    "label": "Modern bow handling",
+    "description": "Use modern bow drawing, animations, sounds, durability and arrow physics in singleplayer. Off keeps native Beta bow handling.",
+    "default": false,
+    "restart": false
+  },
+  "audio.ladderSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Ladder sounds",
+    "order": 10
+  },
+  "audio.musicDoubleClickPreview": {
+    "page": "Audio",
+    "group": "Music playback",
+    "label": "Double-click to preview",
+    "order": 20
+  },
+  "audio.showMusicPreviewButton": {
+    "page": "Audio",
+    "group": "Music playback",
+    "label": "Show preview button",
+    "order": 21
+  },
+  "audio.musicFadeMillis": {
+    "page": "Audio",
+    "group": "Music playback",
+    "label": "Song fade time (milliseconds)",
+    "order": 22
+  },
+  "audio.mp3ConversionLimit": {
+    "page": "Audio",
+    "group": "Music playback",
+    "label": "MP3 conversion batch limit",
+    "order": 23
   }
 }

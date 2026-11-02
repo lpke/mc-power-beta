@@ -11,7 +11,11 @@ final class MusicFolderWarning {
 
   static List<WarningText.Line> layout(int span, int bottom, String path, String error,
       ToIntFunction<String> measure) {
-    List<String> detail = WarningText.wrap(error.isEmpty() ? CONSEQUENCE : error, span, measure);
+    return layout(span, bottom, "Remove folder?", path, CONSEQUENCE, error, measure);
+  }
+  static List<WarningText.Line> layout(int span, int bottom, String title, String path, String consequence,
+      String error, ToIntFunction<String> measure) {
+    List<String> detail = WarningText.wrap(error.isEmpty() ? consequence : error, span, measure);
     int pathLines = Math.max(1, (bottom - MARGIN + 3 - GAP) / LINE_HEIGHT - detail.size() - 1);
     List<String> identity = new ArrayList<>(WarningText.wrap(path, span, measure));
     if (identity.size() > pathLines) {
@@ -24,7 +28,7 @@ final class MusicFolderWarning {
     int height = (1 + identity.size() + detail.size()) * LINE_HEIGHT - 3 + GAP;
     int y = Math.max(MARGIN, bottom - height);
     List<WarningText.Line> lines = new ArrayList<>();
-    lines.add(new WarningText.Line("Remove folder?", y, 0xffffff));
+    lines.add(new WarningText.Line(title, y, 0xffffff));
     y += LINE_HEIGHT;
     for (String line : identity) { lines.add(new WarningText.Line(line, y, 0xaaaaaa)); y += LINE_HEIGHT; }
     y += GAP;

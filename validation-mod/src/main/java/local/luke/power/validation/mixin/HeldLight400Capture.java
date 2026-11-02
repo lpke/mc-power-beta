@@ -18,7 +18,10 @@ public class HeldLight400Capture {
     try { original.call(delta, deadline); }
     finally {
       try { HeldLight400Checks.afterFrame(field_2349, delta); }
-      finally { OffhandActions400Checks.afterFrame(field_2349, delta); }
+      finally {
+        try { OffhandActions400Checks.afterFrame(field_2349, delta); }
+        finally { local.luke.power.validation.ModernBow470Checks.afterFrame(field_2349, delta); }
+      }
     }
   }
 }

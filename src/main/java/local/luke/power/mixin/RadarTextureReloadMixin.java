@@ -10,5 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(TextureManager.class)
 public final class RadarTextureReloadMixin {
   @Inject(method = "method_1096", at = @At("TAIL"))
-  private void power$radarTextures(CallbackInfo ci) { RadarIcons.invalidate(); }
+  private void power$radarTextures(CallbackInfo ci) {
+    RadarIcons.invalidate();
+    local.luke.power.hud.InfoHud.invalidateFrames();
+  }
 }

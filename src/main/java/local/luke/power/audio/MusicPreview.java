@@ -15,6 +15,7 @@ final class MusicPreview {
   private static boolean playing, paused, restoreBackground, restoreRecords;
   private static final MusicProgress progress = new MusicProgress();
   static double position() { return progress.seconds(); }
+  static double duration() { return entry == null ? 0 : MusicSeeking.duration(track, entry.field_2127, entry.field_2126); }
   static void seeked(double offset) { progress.reset(offset,System.nanoTime());playing=false;started=System.nanoTime(); }
   private static final List<String> resume = new ArrayList<>();
 
@@ -33,6 +34,9 @@ final class MusicPreview {
     resume.remove("PowerBetaMenu");
   }
   static String track() { return track; }
+  static void relocated(String id, class_267 selected) {
+    if (active() && track.equals(id)) entry = selected;
+  }
   static boolean paused() { return paused; }
   static void resume(SoundSystem system) {
     if (!active()) return;

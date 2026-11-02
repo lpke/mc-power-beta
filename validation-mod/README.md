@@ -1115,3 +1115,115 @@ Keep screenshots and generated inventories with the private review report; never
   comparing normal descent with actual Sneak holding and safe standing restoration.
 - `sprint-stairs-451` compares flat and wood/stone stair pace in both axes at
   several sprint speeds, native walking, revoked permission, camera smoothing and walls.
+
+- `release-470-music-ui capture` writes independent playlist/footer/preview/missing-source screenshots at 854x480 and 320x240. Run it before acceptance. `release-470-music-ui check`: in a focused, muted disposable singleplayer world, checks actual Music row double-click playback through the saved playlist path, unsaved draft preservation, the shared Play/Preview preference, optional speaker icon placement and one-per-session missing-source warnings at 854x480 and 320x240. Captures footer and warning views in `power-beta-data/reports/release-470/music-ui`.
+
+`smart-slabs-470` checks native Smart placements, material variants, held raycast continuation and stroke direction changes. `extra-sounds-470` runs real 10/15-block sprint jumps into one-deep water, ladder ascent/descent and native ladder actions. Both restore the disposable world and preferences. Run with sound/music muted and verified silent output. `extra-sound-decoders-432` now covers all 118 bundled/current extra-effect resource entries.
+
+- `release-470-music-audio start`, `opening`, `ending-arm`, `ending`, `preview-arm`,
+  `preview`, `pause`, `paused`, `off`, `off-check`, `stop` checks real native streaming
+  gain for opening/ending fades, previews, immediate pause and zero-fade bypass.
+  Allow roughly one second between stages on the verified silent output.
+
+`modern-bow-470 native` checks native bow use and release in both hands, undercharge,
+full draw, durability, Creative, cancellation, stale durable plans, 25 flight
+positions/velocities, water, solid containment and entity damage. Run in a focused,
+muted disposable singleplayer client. It restores native items, settings and owned
+terrain/entities. See `docs/modern-bow.md` for the pinned 26.3 reference and manual
+first/third-person pull-frame checks.
+
+`modern-bow-470 capture` saves actual ordinary-frame full-draw images for main/offhand
+in first/third person, with armor and a clear-air daylight camera. `status` reports
+progress; `stop` restores the fixture early. Capture automatically restores its
+state after four framesets. Images are in `power-beta-data/reports/modern-bow-470`.
+
+`camera-jitter-470 raw` checks the actual loaded raw mouse helper under contention
+and preserves its native polling lifecycle. `stage`, `orbit`, `stop`, `restore`
+record native Survival strafing around a loaded log pillar and actual GL target
+angles, with bobbing disabled for the baseline. `record`/`stop` can also observe
+ordinary movement. Use a focused, muted disposable client; restore the staged
+scene before other fixtures. Reports go under `release-470/camera-jitter`.
+
+`smoothness-470 observe LABEL [SECONDS]` profiles ordinary native frames and any
+manual block actions for 2..30 seconds, after two seconds of warmup.
+`smoothness-470 edits LABEL [SECONDS] [BLOCK_ID]` alternates real native Creative
+placement/breaking on owned air cells once per tick, then restores native inventory,
+mode, camera and terrain. Allowed IDs are cobblestone4, planks5, glass20, slab44 and
+torch50. Run only in the focused, muted disposable client on its verified silent
+output. `status` reports progress and `stop` ends sampling with restoration.
+Reports in `power-beta-data/reports/smoothness-470` include render/present/frame
+interval p50/p95/p99 and >8.33/16.67/33.33ms counts, native place/break costs, block
+notifications, complete terrain meshes, VBO upload/compaction/growth, allocations
+and per-frame edit/build correlation. Sampling uses primitive bounded buffers and
+never waits on GPU queries or writes reports during a frame sample.
+
+Compare idle against cobblestone edits, then torch lighting updates, glass and
+slabs on the same loaded terrain and window/render-distance/frame-cap settings.
+Repeat each pair in ABBA order. Repeat near water with darkness100, darkness0 and
+0→100, then with held lighting off/on. `water-off-check` checks that0→100 stops
+optional water mesh/column work and re-enabling prepares endpoints again. Use the
+existing `performance-420 travel/turn` observers for loaded travel versus new-chunk
+traversal; motion/input timing belongs to the camera smoothness fixtures. Report
+worst-frame work and interval tails separately from average FPS.
+
+`music-admission-470` tests queue admission with real asynchronous native streams.
+Run `start`, wait for the folder scan, `arm`, wait for old music playback, then
+`missing`. After six seconds, `failed` confirms that the deleted scanned WAV kept
+its queued rows and repeated Next attempts did not reopen it. Run `reload`, wait for
+the scan, `retry`, wait for playback, `played`, wait for playback, then `duplicate`.
+Wait six seconds before `paused`, then wait for resumed playback before `resumed`.
+After another playback yield, run `edited`, wait for the audition, then `previewed`
+and `stop`. The fixture checks old-source rejection even for identical duplicate
+requests, startup grace while muted, queue edits during replacement, and cancellation
+by manual playback, Previous, Quiet and previews. It restores the queue and settings
+and removes its silent WAV. Use only the disposable client on its verified silent
+output. Results are saved in `power-beta-data/reports/release-470/music-admission.json`.
+
+`terrain-dirty-470 start LABEL [SECONDS]` records 10..30 seconds of native section
+marks, clean-to-dirty transitions, dirty mesh entries and no-op entries. Start it
+before travel to retain the initial work, then repeat at rest. It records bounded
+section/coordinate counts, up to 24 distinct sampled marking stacks, grid and queue
+occupancy, daylight subtraction, and water/held-light pass counters. The diagnostic
+does not change the scene or settings. `status` reports live progress; `stop` ends
+early with an invalid result. Accept only an `END` result with `valid: true` and
+positive native frame/tick counts. A stopped game leaves `status: running` and
+`valid: false`; zero counters alone prove nothing. These counters and stack samples
+explain work sources, and are not frame benchmarks.
+
+`sprint-stairs-451` also verifies step-assist OFF/ON and sneaking collisions. Its
+warmed native move samples report thread-allocated bytes per move in
+`release-470/step-assist-allocation.json`. Compare the same fixture against both
+artifacts; JFR allocation sample weights alone do not establish a byte reduction.
+
+`presentation-470 native|legacy|status` compares production pacing against the
+legacy swap location without changing saved preferences. Native (the default,
+also accepted as `production` or `late`) is labeled `production-late-swap-only`:
+a main-thread scope around the native run-loop `Display.update()` calls defers
+only their internal buffer swap. The complete original update keeps its resize
+bookkeeping, event/input polling and AFTER hooks at the native location. The swap
+runs after the existing Post-render limiter. Uncapped rendering bypasses deferral
+and is labeled `production-native-uncapped-bypass`. Other Display calls and threads
+stay native. `legacy` bypasses the production scope only in this validation mod.
+
+`presentation-470 check` verifies one actual swap per active, visible frame with one
+native update, no scope leaks and no uncapped deferrals. `reset-stats` starts a fresh
+acceptance window; `status` reports counters. Exercise chat typing, inventory drags,
+focus changes, window resize and F7. `fullscreen` invokes the real native fullscreen
+method (key bindings may differ); run it twice to return. `outside-update` executes
+an explicit unscoped native Display.update and counts its swap separately.
+`vsync-on` / `vsync-off` request a swap interval; reports record the requested interval
+and actual swap-call durations, without claiming physical monitor synchronization.
+`off` / `stop`, interruptions/errors, lifecycle reset and shutdown restore production
+pacing and the fullscreen/interval states saved by these validation commands.
+Completed profiles retain the selected pacing mode for pairing.
+
+Smoothness reports label `presentationMode` and record actual
+`Display.swapBuffers` entry/return timestamps, render-end timestamps and cumulative
+native tick/render sequences in `swapSamples`. `presentIntervalsMs` measures actual
+swap entry intervals. `work` adds whole client ticks, full renders, event polling,
+frame-limiter waits and actual swap durations. Percentiles include p1/p5/p50/p95/p99
+and standard deviation. These are software swap calls, not measured monitor scanout.
+Compare legacy/native/legacy/native at identical caps, terrain and scripted actions,
+then check uncapped and VSync separately. Repeat screenshots and native GUI/input
+fixtures. The older performance-420 update-site metric retains its historical
+meaning; use the new actual-swap samples.

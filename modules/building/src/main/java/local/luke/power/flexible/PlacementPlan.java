@@ -101,7 +101,7 @@ public record PlacementPlan(
       NativePlacement.Target target,
       BlockPos anchor,
       Direction face) {
-    if (local.luke.power.building.SlabPairs.active(mc, stack))
+    if (local.luke.power.building.SlabPairs.active(mc, stack, anchor.x(), anchor.y(), anchor.z(), face.ordinal()))
       return local.luke.power.building.SlabPairs.canPlace(
           mc, stack, anchor.x(), anchor.y(), anchor.z(), face.ordinal());
     BlockPos p = target.pos();

@@ -16,6 +16,8 @@
   Document current/supported formats in release notes whenever either format changes.
   Gameplay hotkeys queue settings snapshots through `PowerConfig`; never flush files
   on the input or render path. Flush queued saves before menu backups and on shutdown.
+  Single-field gameplay edits use deferred patches rather than reading a section first.
+  Patches share snapshot ordering and failed-write retries, and retain unrelated fields.
   The config API retains its `gcapi3` binary identity for external dependencies.
 - Saved-world rule edits use the shared registry and editor without loading a world. Back up and verify metadata, reject concurrent changes and unsupported data, and preserve player data, game mode, the previous metadata file.
 - The game uses Gson 2.8.9. Do not rely on record deserialization without an explicit

@@ -5,6 +5,11 @@
   Keep background work only for a concrete player benefit, such as map exploration
   history, and document that choice. Check both disabled and temporarily hidden
   states when testing performance-sensitive features.
+- Keep native display-update polling, resize work and callbacks in place. Capped
+  frame presentation defers only scoped buffer swaps until after the existing
+  limiter; uncapped and outside updates remain native. Read
+  [frame presentation](../frame-pacing.md) before changing this path, and validate
+  actual swaps, focus, resize, fullscreen, capture and GUI input.
 
 - Coordinate reporting uses `HudCoordinates` through the shared `ReportedPosition`
   provider. Survival and Creative use collision-box feet Y when Use feet Y coordinates
@@ -98,7 +103,12 @@
   stereo and zoom. Inside/outside water darkness affects rendering only. Terrain retains native
   and water-clear vertex colors in one 32-byte vertex, with one shader uniform choosing
   brightness. After the first opt-in prepares existing meshes, surface crossings and
-  slider previews must never queue terrain rebuilds. Day/night updates must also include
+  active slider previews must never queue terrain rebuilds. Both darkness values at100
+  stop water endpoint detection, column scans and dependent rebuild queuing, retaining
+  existing endpoint buffers and independent held lighting. Re-enabling unchanged
+  retained meshes queues nothing. Native mesh builds or block/light invalidations
+  skipped while disabled set one bounded catch-up flag; the next opt-in refreshes
+  the existing native render grid once. Day/night updates must also include
   compensated deep water whose native skylight is zero.
   Roof and water-column edits must invalidate dependent meshes below native light's reach,
   using the existing bounded render grid and update queue without loading terrain.

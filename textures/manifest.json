@@ -199,6 +199,11 @@
       "source": "window/icons",
       "project": "modules/window",
       "target": "assets/power_window/icons"
+    },
+    {
+      "source": "bow",
+      "project": ".",
+      "target": "assets/powerbeta/textures/bow"
     }
   ]
 }

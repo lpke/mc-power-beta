@@ -59,7 +59,6 @@
   "power_inventory:config.MODERN_MINECRAFT_CONFIG.LCtrlStackDrop": "Holding Left Ctrl with the drop key drops the selected stack instead of one item.",
   "power_inventory:config.MOUSE_TWEAKS_CONFIG.RMBTweak": "Adds one item to compatible occupied slots as you drag the held stack over them.",
   "power_inventory:config.MOUSE_TWEAKS_CONFIG.LMBTweakPickUp": "Collects matching stacks while dragging with the left mouse button.",
-  "power_mechanics:config.EQUIPMENT_CONFIG.bowsHaveDurability": "Firing arrows wears out bows instead of allowing unlimited use.",
   "power_mechanics:config.EQUIPMENT_CONFIG.equalizeBaseArmorDurability": "Makes armor durability independent of the material's usual base durability multiplier.",
   "power_mechanics:config.EQUIPMENT_CONFIG.modernArmorDefensePoints": "Uses material-dependent armor protection instead of Beta's durability-based protection.",
   "power_mechanics:config.EXPLOSION_AND_FIRE_CONFIG.enableSnowballsExtinguishFire": "Thrown snowballs put out fire where they land.",

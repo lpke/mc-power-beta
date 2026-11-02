@@ -11,22 +11,19 @@ public class RawMouseHelper extends net.minecraft.client.Mouse {
     @Override
     public void poll() {
         if (net.minecraft.client.Minecraft.INSTANCE.currentScreen != null) {
-            // GUI looking follows the visible cursor; raw device polling pauses in menus.
+            // GUI looking follows the visible cursor; raw movement is ignored in menus.
             super.poll();
-            RawInputHandler.dx = 0;
-            RawInputHandler.dy = 0;
+            RawInputHandler.motion.clear();
             return;
         }
-        this.deltaX = RawInputHandler.dx;
-        RawInputHandler.dx = 0;
-        this.deltaY = -RawInputHandler.dy;
-        RawInputHandler.dy = 0;
+        long sample = RawInputHandler.motion.drain();
+        this.deltaX = RawMouseMotion.x(sample);
+        this.deltaY = -RawMouseMotion.y(sample);
     }
 
     @Override
     public void lockCursor() {
         super.lockCursor();
-        RawInputHandler.dx = 0;
-        RawInputHandler.dy = 0;
+        RawInputHandler.motion.discard();
     }
 }

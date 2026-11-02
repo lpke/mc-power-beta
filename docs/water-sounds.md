@@ -151,3 +151,34 @@ The disposable runtime fixtures compare every bundled extra effect with the
 unchanged decoder on the same bytes, verify its full source sample count through
 both registered playback resources and streaming reads, and export PCM for an
 independent FFmpeg comparison. No derived audio replaces the official assets.
+
+## Shallow landings and ladders
+
+The pinned 26.3 client checks fluid entry in `Entity.baseTick`, before that
+tick's travel. Its `move` collision response clears downward velocity when the
+body reaches a solid bottom. A fast fall can cross a one-block-deep water surface
+and reach the bottom during one movement. The following entry cue then uses the
+remaining motion, so it can be a quiet normal splash. Power Beta keeps that
+current-velocity rule and the official 0.25 heavy-splash threshold. It does not
+substitute fall distance or the previous tick's impact speed. The
+`extra-sounds-470` disposable fixture checks actual sprint run-up and jumping
+from 10 and 15 blocks into one-deep water, logging entry motion and gain.
+
+Ladder sounds use the same pinned client, resource index and `sounds.json`.
+`SoundType.LADDER` has volume 1 and pitch 1. Native placement/break use the four
+`dig/wood` variants at volume 1, pitch 0.8; mining hits use the five `step/ladder`
+variants at volume 0.25, pitch 0.5. Climbing steps use those five variants at
+volume 0.15, pitch 1, and native fall callbacks use volume 0.5, pitch 0.75.
+`Entity.applyMovementEmissionAndPlaySound`,
+`vibrationAndSoundEffectsFromBlock`, `getOnPos`, and `Player.getMovementEmission`
+own the reference cadence and exclusions. Climbable blocks count actual movement
+on all three axes, multiplied by the modern float-rounded 0.6 stride scale.
+Crossing the next whole stride emits one step, including descending; idle,
+riding, flight, grounded sneaking and modern sprint swimming emit none.
+
+Audio > Extra sounds > Ladder sounds controls these events independently.
+Power Beta enables it by default; the other bases leave it off. Disabling it
+stops its movement work and terrain reads. Native ladder collision, movement,
+placement eligibility, breaking, item consumption and fall damage stay native.
+Ladder steps and fall sounds retain the source entity's volume category; block
+actions use Blocks. Preview uses the same 0.15 step gain.

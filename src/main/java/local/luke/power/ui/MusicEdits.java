@@ -141,7 +141,7 @@ final class MusicEdits {
     if (setting("menuPlaylist").value.getAsString().equals(id)) changes.put("menuPlaylist", new JsonPrimitive(MusicPlaylist.SAME_AS_WORLD));
     apply(changes);
   }
-  private void apply(Map<String, JsonElement> values) { apply(values, false); }
+  void apply(Map<String, JsonElement> values) { apply(values, false); }
   private void apply(Map<String, JsonElement> values, boolean continuous) {
     Map<Setting, JsonElement> changes = new LinkedHashMap<>();
     values.forEach((id, value) -> {

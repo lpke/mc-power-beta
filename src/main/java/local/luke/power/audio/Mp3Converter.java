@@ -99,15 +99,19 @@ public final class Mp3Converter {
   }
 
   public static synchronized void start(Path game, List<MusicLibrary.Track> tracks) {
+    start(game, tracks, AudioConfig.current().mp3ConversionLimit);
+  }
+
+  static List<Path> batch(List<MusicLibrary.Track> tracks, int limit) {
+    if (limit < 1 || limit > MusicLibrary.MAX_TRACKS) throw new IllegalArgumentException("Invalid conversion limit");
+    return tracks.stream().filter(t -> t.mp3() && !t.playable())
+        .map(MusicLibrary.Track::path).distinct().limit(limit).toList();
+  }
+
+  public static synchronized void start(Path game, List<MusicLibrary.Track> tracks, int limit) {
     if (busy) return;
     if (!available) { status = "FFmpeg is unavailable"; return; }
-    List<Path> sources =
-        tracks.stream()
-            .filter(t -> t.mp3() && !t.playable())
-            .map(MusicLibrary.Track::path)
-            .distinct()
-            .limit(256)
-            .toList();
+    List<Path> sources = batch(tracks, limit);
     if (sources.isEmpty()) {
       status = "No MP3 files need conversion";
       return;

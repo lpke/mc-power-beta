@@ -24,6 +24,7 @@ public final class ModTextureReload implements SynchronousResourceReloader {
 
   @Override
   public void reload(ResourceManager resources) {
+    local.luke.power.hud.InfoHud.invalidateFrames();
     var mc = (Minecraft) FabricLoader.getInstance().getGameInstance();
     var textures = mc.textureManager;
     if (textures == null) return;

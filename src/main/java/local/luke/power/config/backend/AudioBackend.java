@@ -31,6 +31,8 @@ public final class AudioBackend implements Backend {
         "Play modern bubbling at exposed lava surfaces in singleplayer. Uses Ambient volume.");
     extra("playerFireExtinguish", "Player fire extinguish", s.playerFireExtinguish,
         "Play the modern extinguishing sound when water puts out your fire in singleplayer. Uses Players volume.");
+    extra("ladderSounds", "Ladder sounds", s.ladderSounds,
+        "Use modern ladder sounds for climbing, placing, breaking and landing in singleplayer.");
     extra("waterSplashSounds", "Water splash sounds", s.waterSplashSounds,
         "Use modern water entry sounds for players, creatures, items and vehicles in singleplayer. Uses each entity sound category.");
     extra("swimmingSounds", "Swimming sounds", s.swimmingSounds,
@@ -82,6 +84,20 @@ public final class AudioBackend implements Backend {
         Catalog.JSON.toJsonTree(s.playlistOrder), new JsonArray(), "Display order of saved playlists.", List.of());
     add("libraryOrder", "Music data", "Library group order", Setting.Kind.LIST,
         Catalog.JSON.toJsonTree(s.libraryOrder), new JsonArray(), "Display order of library groups.", List.of());
+    add("musicSourceIdentities", "Music data", "Music source identities", Setting.Kind.LIST,
+        Catalog.JSON.toJsonTree(s.musicSourceIdentities), new JsonObject(), "Preserve song identities when relinking music folders.", List.of());
+    add("musicDoubleClickPreview", "Music playback", "Double-click to preview", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.musicDoubleClickPreview), new JsonPrimitive(false),
+        "Off plays the song normally. On previews it while retaining the current song and playlist.", List.of());
+    add("showMusicPreviewButton", "Music playback", "Show preview button", Setting.Kind.BOOLEAN,
+        new JsonPrimitive(s.showMusicPreviewButton), new JsonPrimitive(false),
+        "Show a speaker button between Play and Favorite in the Music library.", List.of());
+    entries.add(new Setting("audio.musicFadeMillis", id(), "Audio", "Music playback", "Song fade time (milliseconds)",
+        "Fade each song's opening and ending. Zero disables fading. Pausing and muting remain immediate.",
+        Setting.Kind.INTEGER, new JsonPrimitive(s.musicFadeMillis), new JsonPrimitive(0), 0, 5000, 1, List.of(), false));
+    entries.add(new Setting("audio.mp3ConversionLimit", id(), "Audio", "Music playback", "MP3 conversion batch limit",
+        "Maximum songs converted per click. Conversion creates local WAV copies and never changes your originals.",
+        Setting.Kind.INTEGER, new JsonPrimitive(s.mp3ConversionLimit), new JsonPrimitive(500), 1, MusicLibrary.MAX_TRACKS, 1, List.of(), false));
     add("dimensionMusic", "Music playback", "On dimension change", Setting.Kind.CHOICE,
         new JsonPrimitive(s.dimensionMusic.ordinal()), new JsonPrimitive(0),
         "Continue music, end only dimension-specific custom tracks, or end any track when using a portal.",
@@ -256,6 +272,15 @@ public final class AudioBackend implements Backend {
           case "lavaPopSounds" -> s.lavaPopSounds = v.getAsBoolean();
           case "lavaAmbientSounds" -> s.lavaAmbientSounds = v.getAsBoolean();
           case "playerFireExtinguish" -> s.playerFireExtinguish = v.getAsBoolean();
+          case "ladderSounds" -> s.ladderSounds = v.getAsBoolean();
+          case "musicDoubleClickPreview" -> s.musicDoubleClickPreview = v.getAsBoolean();
+          case "showMusicPreviewButton" -> s.showMusicPreviewButton = v.getAsBoolean();
+          case "musicFadeMillis" -> s.musicFadeMillis = v.getAsInt();
+          case "mp3ConversionLimit" -> s.mp3ConversionLimit = v.getAsInt();
+          case "musicSourceIdentities" -> {
+            s.musicSourceIdentities = new TreeMap<>();
+            v.getAsJsonObject().entrySet().forEach(entry -> s.musicSourceIdentities.put(entry.getKey(), entry.getValue().getAsString()));
+          }
           case "waterSplashSounds" -> s.waterSplashSounds = v.getAsBoolean();
           case "swimmingSounds" -> s.swimmingSounds = v.getAsBoolean();
           case "underwaterEnterSounds" -> s.underwaterEnterSounds = v.getAsBoolean();

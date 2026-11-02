@@ -21,6 +21,19 @@
   preferences stay in the shared config; both paths join the Options transaction.
   Queue snapshots merge independently of editor drafts.
   Keep missing track IDs, queues and user music files intact.
+  Publish an immutable queue list only on load or edit; reads retain its identity.
+  A queued song keeps its row until a new native `BgMusic` source with the requested
+  URL is playing. The previous source, including the same song, cannot acknowledge
+  an asynchronous replacement. Each attempt also retains a distinct URL object through
+  native `FilenameURL`, so an older unpublished same-song start cannot claim it.
+  Preserve the URL text and handler when copying that token. Admission owns the exact queue snapshot and library
+  revision; edits or rescans invalidate it. Pause and mute retain pending admission
+  without expiring its startup grace. Manual replacement, Previous, Quiet, seeking
+  and auditions cancel it. Failed starts keep the request and suppress retries until
+  the queue changes or a new scan completes. Publish immutable source identity and
+  URL observations from the sound command thread; do not read its mutable source map
+  or acquire decoder locks from the render thread. File availability belongs to the
+  scanner, and source startup confirms playback without per-frame filesystem probes.
   Previous during a between-track gap replays the last played track without
   moving back in history or consuming queued tracks. Paused tracks remain current.
   Previous restarts the visible song after more than ten seconds, including an
@@ -93,3 +106,16 @@
   categories and source categories through live volume edits.
   Audio randomness must not advance native entity/display random generators.
   See `docs/water-sounds.md` for the pinned modern source and Beta differences.
+
+- Music source relinking keeps a canonical original-root identity per configured folder.
+  Hash the original root plus relative filename for stable track IDs. Move only source
+  group order/gain keys; never rebuild playlists, favorites or queues. Keep those aliases
+  in the format-4 music document and include them in the Options transaction.
+  The scanner maintains a bounded derived cache index for converted MP3 files. Missing
+  sources retain indexed cache playback and report Unavailable. Read sources only during
+  startup, explicit reload, conversion completion or folder edits. Old unindexed caches
+  cannot recover a missing original's filenames; relink the folder to restore discovery.
+- Music fades apply to song openings and endings, using accumulated native playback time
+  and asynchronously read duration. Zero skips fade work and duration discovery for this
+  feature. Pause and mute remain immediate; explicit transport keeps its existing timing.
+  Unknown durations can fade in but cannot schedule an ending fade.

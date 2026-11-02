@@ -340,6 +340,75 @@
         "random/fizz"
       ],
       "subtitle": "subtitles.entity.generic.extinguish_fire"
+    },
+    "entity.arrow.shoot": {
+      "sounds": [
+        "random/bow"
+      ],
+      "subtitle": "subtitles.entity.arrow.shoot"
+    },
+    "entity.arrow.hit": {
+      "sounds": [
+        "random/bowhit1",
+        "random/bowhit2",
+        "random/bowhit3",
+        "random/bowhit4"
+      ],
+      "subtitle": "subtitles.entity.arrow.hit"
+    },
+    "entity.item.break": {
+      "sounds": [
+        "random/break"
+      ],
+      "subtitle": "subtitles.entity.item.break"
+    },
+    "block.ladder.break": {
+      "sounds": [
+        "dig/wood1",
+        "dig/wood2",
+        "dig/wood3",
+        "dig/wood4"
+      ],
+      "subtitle": "subtitles.block.generic.break"
+    },
+    "block.ladder.place": {
+      "sounds": [
+        "dig/wood1",
+        "dig/wood2",
+        "dig/wood3",
+        "dig/wood4"
+      ],
+      "subtitle": "subtitles.block.generic.place"
+    },
+    "block.ladder.hit": {
+      "sounds": [
+        "step/ladder1",
+        "step/ladder2",
+        "step/ladder3",
+        "step/ladder4",
+        "step/ladder5"
+      ],
+      "subtitle": "subtitles.block.generic.hit"
+    },
+    "block.ladder.step": {
+      "sounds": [
+        "step/ladder1",
+        "step/ladder2",
+        "step/ladder3",
+        "step/ladder4",
+        "step/ladder5"
+      ],
+      "subtitle": "subtitles.block.generic.footsteps"
+    },
+    "block.ladder.fall": {
+      "sounds": [
+        "step/ladder1",
+        "step/ladder2",
+        "step/ladder3",
+        "step/ladder4",
+        "step/ladder5"
+      ],
+      "subtitle": "subtitles.block.generic.fall"
     }
   },
   "assets": [
@@ -1257,6 +1326,325 @@
       "source": "waterSource",
       "frames": 59919,
       "sampleRate": 48000,
+      "channels": 1
+    },
+    {
+      "event": "entity.arrow.shoot",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/arrow/shoot1.ogg",
+      "asset": "minecraft/sounds/random/bow.ogg",
+      "sha1": "4a6c47aa4f8c2cfe3237b250ed19b8714d611fd2",
+      "size": 7282,
+      "source": "waterSource",
+      "frames": 21056,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "entity.arrow.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/arrow/hit1.ogg",
+      "asset": "minecraft/sounds/random/bowhit1.ogg",
+      "sha1": "8648a8dcbe82c047b60d74783f7b1c9eb5826290",
+      "size": 11818,
+      "source": "waterSource",
+      "frames": 32386,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "entity.arrow.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/arrow/hit2.ogg",
+      "asset": "minecraft/sounds/random/bowhit2.ogg",
+      "sha1": "f4e487a5fdbf864c782a09090aca709548183f44",
+      "size": 11630,
+      "source": "waterSource",
+      "frames": 33075,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "entity.arrow.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/arrow/hit3.ogg",
+      "asset": "minecraft/sounds/random/bowhit3.ogg",
+      "sha1": "cc1872c0c02461eab4e70141cd7f29e512756e7a",
+      "size": 14307,
+      "source": "waterSource",
+      "frames": 39277,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "entity.arrow.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/arrow/hit4.ogg",
+      "asset": "minecraft/sounds/random/bowhit4.ogg",
+      "sha1": "6bb2c7d902f930fa17c1df0739ae2cbeb452151f",
+      "size": 16869,
+      "source": "waterSource",
+      "frames": 44100,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "entity.item.break",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/item/break1.ogg",
+      "asset": "minecraft/sounds/random/break.ogg",
+      "sha1": "8abcbed843fff26146330dde170862e64b8491ab",
+      "size": 7010,
+      "source": "waterSource",
+      "frames": 16992,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.break",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/break1.ogg",
+      "asset": "minecraft/sounds/dig/wood1.ogg",
+      "sha1": "ef59a7ee4163d8b06fcda67e356ffe717756adda",
+      "size": 7283,
+      "source": "waterSource",
+      "frames": 21922,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.break",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/break2.ogg",
+      "asset": "minecraft/sounds/dig/wood2.ogg",
+      "sha1": "e6c0a8a18eb9c866042b44595ba9f40e3a691153",
+      "size": 7110,
+      "source": "waterSource",
+      "frames": 21922,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.break",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/break3.ogg",
+      "asset": "minecraft/sounds/dig/wood3.ogg",
+      "sha1": "8e7b1f82f4d68c04e8fdd43fb631079e4e36badc",
+      "size": 7371,
+      "source": "waterSource",
+      "frames": 21922,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.break",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/break4.ogg",
+      "asset": "minecraft/sounds/dig/wood4.ogg",
+      "sha1": "be74b375d7adfe9470afec83707cda6f35275fa1",
+      "size": 7497,
+      "source": "waterSource",
+      "frames": 21922,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.place",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/place1.ogg",
+      "asset": "minecraft/sounds/dig/wood1.ogg",
+      "sha1": "ef59a7ee4163d8b06fcda67e356ffe717756adda",
+      "size": 7283,
+      "source": "waterSource",
+      "frames": 21922,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.place",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/place2.ogg",
+      "asset": "minecraft/sounds/dig/wood2.ogg",
+      "sha1": "e6c0a8a18eb9c866042b44595ba9f40e3a691153",
+      "size": 7110,
+      "source": "waterSource",
+      "frames": 21922,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.place",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/place3.ogg",
+      "asset": "minecraft/sounds/dig/wood3.ogg",
+      "sha1": "8e7b1f82f4d68c04e8fdd43fb631079e4e36badc",
+      "size": 7371,
+      "source": "waterSource",
+      "frames": 21922,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.place",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/place4.ogg",
+      "asset": "minecraft/sounds/dig/wood4.ogg",
+      "sha1": "be74b375d7adfe9470afec83707cda6f35275fa1",
+      "size": 7497,
+      "source": "waterSource",
+      "frames": 21922,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/hit1.ogg",
+      "asset": "minecraft/sounds/step/ladder1.ogg",
+      "sha1": "3fdd5aa55541d43545c6f0a32a46bcfcbddb5275",
+      "size": 6571,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/hit2.ogg",
+      "asset": "minecraft/sounds/step/ladder2.ogg",
+      "sha1": "12735079a45c835d19ca8bd415fc76027b525973",
+      "size": 6692,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/hit3.ogg",
+      "asset": "minecraft/sounds/step/ladder3.ogg",
+      "sha1": "d1c7aa522ea479249af889356d5a3166fc08a407",
+      "size": 6879,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/hit4.ogg",
+      "asset": "minecraft/sounds/step/ladder4.ogg",
+      "sha1": "3ffc1f0a10482ab25ef24d0a618aba0289dbb827",
+      "size": 6885,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.hit",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/hit5.ogg",
+      "asset": "minecraft/sounds/step/ladder5.ogg",
+      "sha1": "929a486c3d4b8c67cde7a04c6a9f1966864c772d",
+      "size": 6923,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.step",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/step1.ogg",
+      "asset": "minecraft/sounds/step/ladder1.ogg",
+      "sha1": "3fdd5aa55541d43545c6f0a32a46bcfcbddb5275",
+      "size": 6571,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.step",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/step2.ogg",
+      "asset": "minecraft/sounds/step/ladder2.ogg",
+      "sha1": "12735079a45c835d19ca8bd415fc76027b525973",
+      "size": 6692,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.step",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/step3.ogg",
+      "asset": "minecraft/sounds/step/ladder3.ogg",
+      "sha1": "d1c7aa522ea479249af889356d5a3166fc08a407",
+      "size": 6879,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.step",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/step4.ogg",
+      "asset": "minecraft/sounds/step/ladder4.ogg",
+      "sha1": "3ffc1f0a10482ab25ef24d0a618aba0289dbb827",
+      "size": 6885,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.step",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/step5.ogg",
+      "asset": "minecraft/sounds/step/ladder5.ogg",
+      "sha1": "929a486c3d4b8c67cde7a04c6a9f1966864c772d",
+      "size": 6923,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.fall",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/fall1.ogg",
+      "asset": "minecraft/sounds/step/ladder1.ogg",
+      "sha1": "3fdd5aa55541d43545c6f0a32a46bcfcbddb5275",
+      "size": 6571,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.fall",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/fall2.ogg",
+      "asset": "minecraft/sounds/step/ladder2.ogg",
+      "sha1": "12735079a45c835d19ca8bd415fc76027b525973",
+      "size": 6692,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.fall",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/fall3.ogg",
+      "asset": "minecraft/sounds/step/ladder3.ogg",
+      "sha1": "d1c7aa522ea479249af889356d5a3166fc08a407",
+      "size": 6879,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.fall",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/fall4.ogg",
+      "asset": "minecraft/sounds/step/ladder4.ogg",
+      "sha1": "3ffc1f0a10482ab25ef24d0a618aba0289dbb827",
+      "size": 6885,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
+      "channels": 1
+    },
+    {
+      "event": "block.ladder.fall",
+      "file": "assets/power_beta/stationapi/sounds/sound/block/ladder/fall5.ogg",
+      "asset": "minecraft/sounds/step/ladder5.ogg",
+      "sha1": "929a486c3d4b8c67cde7a04c6a9f1966864c772d",
+      "size": 6923,
+      "source": "waterSource",
+      "frames": 13654,
+      "sampleRate": 44100,
       "channels": 1
     }
   ],

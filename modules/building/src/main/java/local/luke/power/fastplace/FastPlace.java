@@ -186,6 +186,7 @@ public final class FastPlace {
       int face,
       float yaw,
       PlacementTarget target,
+      boolean halfSlabAnchor,
       boolean success) {
     if (success && target != null && eligible(mc, stack) && target.changedAsExpected(mc.world)) {
       session =
@@ -198,6 +199,7 @@ public final class FastPlace {
               slot,
               target.expectedBlock() == 43 && target.previousId() == 44);
       session.offhand = HandUse.hand(mc.player.inventory) == HandUse.Hand.OFF;
+      session.halfSlabAnchor = halfSlabAnchor;
       session.nativeItem = nativeItem(stack);
       session.sourceStack = stack;
       session.handRevision = HandUse.manualRevision();
@@ -206,6 +208,31 @@ public final class FastPlace {
   }
 
   public static boolean observingFirst() { return session == null && !releaseRequired; }
+
+  public static boolean halfSlabAnchor(net.minecraft.world.World world, ItemStack stack, int x, int y, int z, int face) {
+    if (stack == null || stack.itemId != 44
+        || local.luke.power.building.config.Config.current().placement.slabMode != SlabMode.SMART) return false;
+    int[] adjusted = Compatibility.flexibleClick(world, stack, x, y, z, face);
+    if (adjusted != null) {
+      if (adjusted.length != 4) return false;
+      x = adjusted[0]; y = adjusted[1]; z = adjusted[2];
+    }
+    return world.method_239(x, y, z) && world.getBlockId(x, y, z) == 44;
+  }
+
+  public static boolean singleSlabStroke(net.minecraft.world.World world, int x, int y, int z, int face) {
+    var placement = local.luke.power.building.config.Config.current().placement;
+    return placement.enabled && placement.slabMode == SlabMode.SMART
+        && slabMode(world, x, y, z, face) == SlabMode.CONTINUOUS;
+  }
+
+  public static SlabMode slabMode(net.minecraft.world.World world, int x, int y, int z, int face) {
+    SlabMode mode = local.luke.power.building.config.Config.current().placement.slabMode;
+    if (mode != SlabMode.SMART || face < 2 || face > 5) return SlabPolicy.effective(mode, face, false);
+    boolean half = session != null ? session.halfSlabAnchor
+        : world.method_239(x, y, z) && world.getBlockId(x, y, z) == 44;
+    return SlabPolicy.effective(mode, face, half);
+  }
 
   @SuppressWarnings("unchecked") private static ItemStack held(Minecraft mc) {
     return session != null && session.offhand
@@ -258,7 +285,7 @@ public final class FastPlace {
       if (target == null) break;
       boolean slab = stack.itemId == 44;
       boolean merge = slab && target.expectedBlock() == 43 && target.previousId() == 44;
-      SlabMode mode = local.luke.power.building.config.Config.current().placement.slabMode;
+      SlabMode mode = slabMode(mc.world, hit.field_1984, hit.field_1985, hit.field_1986, hit.field_1987);
       if (slab
           && !SlabPolicy.allows(
               mode, session.firstWasMerge, merge, session.first.y(), target.position().y())) break;

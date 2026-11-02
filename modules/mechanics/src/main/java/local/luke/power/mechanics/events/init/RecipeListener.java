@@ -27,7 +27,7 @@ public class RecipeListener {
                 int recipeItemId = recipe.getOutput().itemId;
 
                 if (recipeItemId == Block.DISPENSER.asItem().id) {
-                    if (Config.config.EQUIPMENT_CONFIG.bowsHaveDurability) {
+                    { // Damage is retained when modern bow handling is switched off.
                         ItemStack[] inputArray = new ItemStack[9];
                         inputArray[0] = new ItemStack(Block.COBBLESTONE, 1);
                         inputArray[1] = new ItemStack(Block.COBBLESTONE, 1);
