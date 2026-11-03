@@ -6,7 +6,11 @@
   stack until release; hidden hover coordinates must never drive the player model.
   Restore the originating position inside the native grab transition, without a
   second warp. Restore on release, lost focus, screen/world changes or lost eligibility;
-  holding the button must not restart a canceled drag. Leave events and polling to
+  holding the button must not restart a canceled drag.
+  Linux GUI releases publish the requested origin before Mouse.poll and discard
+  pre-release motion through the ordered native warp marker. Never repeatedly
+  recenter after opening; deliberate post-open movement must remain responsive.
+  Leave events and polling to
   unrelated screens, including photo mode. Right-click looking must not drop items.
   Dispatch complete mouse batches before changing capture. Preserve each drag's
   press coordinates/deltas, send final motion through the native camera renderer,
@@ -97,6 +101,9 @@
   Text-focus claims belong to individual overlays on their host screen; disabled
   recipe-book cleanup must never release Creative Search or another editor's claim.
 - Item merging preserves native NBT, damage, normal stack limits and total counts.
+  Optional sort restocking tops up existing hotbar stacks from unprotected main
+  storage in the same durable plan. External container sorting never restocks;
+  empty hotbar slots, protected sources and oversized stacks stay untouched.
   TNT limits retain native entities and saved fuses, bound work each tick and stay
   available from the main menu for recovery. Both leave multiplayer server-owned.
 

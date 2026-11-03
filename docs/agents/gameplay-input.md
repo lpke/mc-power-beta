@@ -41,6 +41,12 @@
   scheduled updates, pause/resume, save/reload and access permissions being disabled.
 - Flight sprint covers all three movement axes in creative, spectator and freecam.
   Opposing inputs cancel; stopping movement resets Toggle sprint.
+- Multidirectional sprinting applies to on-foot input. Retain forward-only swimming,
+  sprint permissions, activation modes, stamina and combat limits. Normalize the
+  movement-aligned jump impulse so diagonals gain no extra speed.
+- Snow layer replacement keeps native block placement and filled-bucket permissions,
+  evaporation, callbacks and item exchange. Filled buckets target the clicked native
+  snow directly. Do not introduce snow stacking, extra layers or new support rules.
 - WorldEdit selection/query commands use the reported camera position and current-view
   ray in Spectator/freecam. Keep rays loaded-terrain-only and separate from interaction
   targets; explicit WorldEdit commands may edit or navigate with their normal individual permissions while freecam remains active. Physical world/inventory interactions remain blocked.
@@ -113,6 +119,10 @@
   never rewrite slots or clear carry state during generic cleanup. Carrying still
   requires safe placement before revocation. Queue changed persistent preferences.
   Flexible placement is always available through its unbound-by-default hold controls.
+  Block breaking particles has its own saved particle preference and visit-local
+  inversion. Reset the inversion on exit, preserve the saved preference and unrelated
+  effects, and let global particle suppression take priority. Gate native hit/break
+  emitters before their block reads, random sampling and allocation.
   Complete slabs retains its saved enablement; only temporary placement operations
   and held modifiers clear. Slab completion has no hotkey,
   toggle messages or Active tweaks entry.

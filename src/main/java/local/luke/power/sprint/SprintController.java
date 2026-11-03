@@ -83,7 +83,8 @@ public final class SprintController {
         || ModernWater.eligible(player) && player.method_1334()
             && (player.field_161.field_2535 || player.field_161.field_2536);
     state.tick(
-        settings, eligible, water && forward > 0 ? 1 : forward, key, player.field_1623 || water,
+        settings, eligible, SprintState.movementInput(forward, water), water ? 0 : player.field_161.field_2532,
+        key, player.field_1623 || water,
         stopsAtWall(player, water), usesStamina(player), moving);
     ModernSwimming.tick(player);
     SprintView.publish(SprintView.Kind.GROUND, state.sprinting, settings.speed / 100);
@@ -94,7 +95,7 @@ public final class SprintController {
     boolean water = ModernSwimming.canSprint(player);
     float forward = player.field_161.field_2533;
     ((SprintPlayer)player).power$sprint().land(SprintConfig.current(), eligible(player),
-        water && forward > 0 ? 1 : forward, sprintKey(mc()),
+        SprintState.movementInput(forward, water), water ? 0 : player.field_161.field_2532, sprintKey(mc()),
         stopsAtWall(player, water), usesStamina(player));
   }
 
@@ -134,8 +135,12 @@ public final class SprintController {
   public static void jumped(Entity entity) {
     if (!active(entity) || entity.method_1334() && !ModernWater.shallowJump(entity)) return;
     if (SprintConfig.current().jumpBoost) {
-      entity.velocityX += SprintState.jumpX(entity.yaw);
-      entity.velocityZ += SprintState.jumpZ(entity.yaw);
+      var input = ((ClientPlayerEntity) entity).field_161;
+      boolean directional = SprintConfig.current().multidirectional && !entity.method_1334();
+      float forward = directional ? input.field_2533 : 1,
+          sideways = directional ? input.field_2532 : 0;
+      entity.velocityX += SprintState.jumpX(entity.yaw, forward, sideways);
+      entity.velocityZ += SprintState.jumpZ(entity.yaw, forward, sideways);
     }
     ((SprintPlayer) entity).power$sprint().jump(SprintConfig.current(), usesStamina((ClientPlayerEntity)entity));
   }

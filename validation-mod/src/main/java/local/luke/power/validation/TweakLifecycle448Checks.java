@@ -54,6 +54,7 @@ final class TweakLifecycle448Checks {
       InventoryAutomation.registerIndicators(mc);
       var tools = InventoryToolsConfig.copy(); tools.restock = tools.toolSwitch = true; InventoryToolsConfig.preview(tools);
       var building = Config.current().copy(); building.sneak.enabled = true; Config.preview(building);
+      BlockBreakingParticles.toggle();
       check(InventoryToolsConfig.current().restock && InventoryToolsConfig.current().toolSwitch
           && Config.current().sneak.enabled, "fixture did not arm temporary automation and fake sneak");
       mc.setWorld(null);
@@ -181,6 +182,7 @@ final class TweakLifecycle448Checks {
       }
       case HOLD_USE -> { field(HoldUse.class, "active").setBoolean(null, true); UseInput.press(); }
       case CLICK_MINING -> ClickMining.toggle();
+      case BLOCK_BREAKING_PARTICLES -> BlockBreakingParticles.toggle();
       case FREE_LOOK -> FreeLook.begin(mc);
       case CINEMATIC_CAMERA -> mc.options.cinematicMode = true;
       case FREECAM, FREECAM_PLAYER_MOVEMENT -> {
@@ -198,7 +200,7 @@ final class TweakLifecycle448Checks {
     check(!InventoryToolsConfig.current().restock && !InventoryToolsConfig.current().toolSwitch, "automation remained active");
     check(!AutoWalk.lineLocked() && !AttackInput.held() && !UseInput.held() && !UseInput.consumePress(), "native held action remained active");
     check(!camera.getClass().getField("allowPlayerMovement").getBoolean(camera), "freecam retained player movement");
-    check(!ClickMining.inverted() && !mc.options.cinematicMode, "memory-only inversion/cinematic remained active");
+    check(!ClickMining.inverted() && !BlockBreakingParticles.inverted() && !mc.options.cinematicMode, "memory-only inversion/cinematic remained active");
   }
   private static String preferences() {
     return Catalog.JSON.toJson(Config.current()) + Catalog.JSON.toJson(InventoryToolsConfig.current())
@@ -210,6 +212,7 @@ final class TweakLifecycle448Checks {
       case FAST_PLACEMENT -> "fastPlacement"; case PLACEMENT_RESTRICTION -> "placementRestriction";
       case AUTO_WALK -> "autoWalk"; case AUTO_MINE -> "autoMine"; case HOLD_USE -> "holdUse";
       case CLICK_MINING -> "clickMining"; case FREE_LOOK -> "freeLook"; case CINEMATIC_CAMERA -> "cinematicCamera";
+      case BLOCK_BREAKING_PARTICLES -> "blockBreakingParticles";
       case FREECAM -> "freecam"; case FREECAM_PLAYER_MOVEMENT -> "freecamPlayerMovement";
       case HIDDEN_ENTITIES -> "hiddenEntities"; case FULL_BRIGHT -> "fullBright";
     };

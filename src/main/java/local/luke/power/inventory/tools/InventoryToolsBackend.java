@@ -19,6 +19,7 @@ public final class InventoryToolsBackend implements Backend {
         case "sortingButton" -> "Show sorting button";
         case "depositMatchingButton" -> "Show deposit button";
         case "creativeHotbarsButton" -> "Show saved hotbars button";
+        case "restockHotbarWhenSorting" -> "Restock hotbar when sorting inventory";
         case "sortDescending" -> "Reverse item order";
         case "protectedSlots" -> "Protected storage slots";
         case "preferredItems" -> "Sorting layout";
@@ -35,6 +36,7 @@ public final class InventoryToolsBackend implements Backend {
         default -> "Tool durability reserve";
       };
       String help = switch (key) {
+        case "restockHotbarWhenSorting" -> "Top up existing hotbar stacks from unprotected main storage when sorting your inventory. Keeps empty hotbar slots empty and matches complete item data. Sorting chests or dispensers never restocks the hotbar.";
         case "sortDescending" -> "Sort higher item IDs first. Preferred slot items and protected slots keep their positions.";
         case "protectedSlots" -> "Keep selected main-storage slots untouched by sorting and Deposit matching. Configure them in the sorting layout.";
         case "preferredItems" -> "Choose protected slots and preferred items in a main-storage layout. Preferences move only existing items, preserving all native data.";
@@ -54,7 +56,7 @@ public final class InventoryToolsBackend implements Backend {
         case "toolWhitelist" -> "Choose tools automatic switching may select. All tools includes newly registered tools. An empty selection disables switching to any tool. Your current hand is always retained when it is already suitable.";
         default -> "Do not automatically choose tools with this many durability uses left or fewer. Lower values use tools longer; higher values protect them earlier. Zero allows the final use.";
       };
-      String group = Set.of("sorting", "sortingButton", "depositMatching", "depositMatchingButton", "sortDescending", "protectedSlots", "preferredItems").contains(key) ? "Sorting"
+      String group = Set.of("sorting", "sortingButton", "depositMatching", "depositMatchingButton", "restockHotbarWhenSorting", "sortDescending", "protectedSlots", "preferredItems").contains(key) ? "Sorting"
           : key.startsWith("creativeHotbars") ? "Saved Creative hotbars" : key.startsWith("tool") ? "Automatic tool switching" : "Automatic restocking";
       boolean numeric = field.getType() == int.class;
       entries.add(new Setting("inventoryTools." + key, "inventoryTools", "Inventory", group, label, help,

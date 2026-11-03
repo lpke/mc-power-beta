@@ -13,6 +13,7 @@ public class RenderKeysMixin {
   private void power$renderKey(CallbackInfo ci) {
     if (Keyboard.getEventKeyState() && !Keyboard.isRepeatEvent()) {
       RenderControls.press(Keyboard.getEventKey());
+      local.luke.power.render.BlockBreakingParticleControls.press(Keyboard.getEventKey());
       local.luke.power.gameplay.MiningControls.press(Keyboard.getEventKey());
     }
   }

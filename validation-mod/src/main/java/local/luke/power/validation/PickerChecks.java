@@ -34,6 +34,17 @@ final class PickerChecks {
     byte[] config=Files.readAllBytes(local.luke.power.storage.PowerConfig.path());
     var inventory=mc.player.inventory.main.clone();int[] counts=Arrays.stream(inventory).mapToInt(s->s==null?0:s.count).toArray();
     try {
+      test("PICKER472 block/item searches accept typing immediately at narrow and wide sizes",()->{
+        for(var domain:ItemCatalogue.Domain.values())for(int width:new int[]{320,640}){
+          var picker=new ItemPickerScreen(parent,"Choose blocks and items",domain,List.of(),false,v->{});
+          mc.setScreen(picker);picker.init(mc,width,240);
+          var search=(TextInput)field(picker,"search");check(search.focused,"search did not focus on open");
+          for(char c:"stone".toCharArray())((ScreenInput)(Object)picker).power$key(c,Keyboard.KEY_NONE);
+          check(search.text().equals("stone")&&!((List<?>)field(picker,"shown")).isEmpty(),"typing required a search click");
+          check(!local.luke.power.input.InventoryTextInput.active(picker),"standalone picker acquired a native inventory text claim");
+          key(picker,Keyboard.KEY_ESCAPE);check(mc.currentScreen==parent&&!search.focused,"picker exit retained text focus");
+        }
+      });
       test("catalog includes alternate block IDs, metadata and technical names",()->{
         var blocks=ItemCatalogue.entries(ItemCatalogue.Domain.BLOCK);
         for(int id:new int[]{8,9,10,11,43,51,61,62,63,68,73,74,75,76,93,94})

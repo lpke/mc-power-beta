@@ -52,8 +52,8 @@ public final class ItemPickerScreen extends UiScreen {
   private int right(){return left()+span();}
   private int bottom(){return height-58;}
   private ScrollBar.Track track(){return new ScrollBar.Track(right()-4,66,Math.max(0,bottom()-66),shown.size()*24,scroll);}
-  public void init(){Keyboard.enableRepeatEvents(true);}
-  public void removed(){Keyboard.enableRepeatEvents(false);scrollbar.release();}
+  public void init(){search.focused=true;Keyboard.enableRepeatEvents(true);}
+  public void removed(){search.focused=false;Keyboard.enableRepeatEvents(false);scrollbar.release();}
   private void filter(){
     String query=search.text().strip().toLowerCase(Locale.ROOT);
     record Match(ItemCatalogue.Entry entry, int score) {}

@@ -415,6 +415,30 @@
   After saving Mobs On and restarting the clone, `release-322 lock-read` checks persistence.
 
 Build after the root JAR with `./gradlew -p validation-mod --no-daemon build`.
+`sorting-472 capture` captures the Inventory sorting group at large and 320-wide
+GUI sizes and checks the new restock row's order and default in all three bases.
+Run it before `inventory-tools-400 native`, which also checks hotbar top-ups,
+empty/full/oversized slots, native data, protected/preferred slots, reverse order,
+chest/dispenser exclusions and canceled/stale durable plans.
+`particles-472 capture` records the unassigned control and saved particle setting.
+`particles-472 native` checks both native emitters, saved/temporary state combinations,
+unrelated effects, global suppression, HUD state and menu isolation. For physical
+input run `arm`, tap F10, `off`, tap F10, `on`, then `finish`. The lifecycle fixture
+includes this override and its real world-exit reset.
+`python3 validation-mod/tools/gui_cursor_472.py GAME --display :N` checks queued
+gameplay motion at native chest, inventory, pause and chat openings with both mouse
+helpers. It compares immediate/later logical and physical positions, post-open
+movement, inventory-looking restoration and menu navigation. `--observe --skip-drags`
+records baseline failures. Run only against a focused, muted disposable Xvfb clone.
+`release-171 picker` checks search autofocus and immediate typing in every block/item
+domain at narrow/wide sizes. `sorting-403` also checks the embedded preferred-item picker.
+`particles-472 positive` checks all17 live positive values, previews and Cancel;
+`positive-save` checks native Apply/reopen and restores the original document.
+`snow-472 capture|native` checks direct snow replacement, bucket exchanges,
+Nether evaporation, clicked-face orientation and unchanged snow-layer behavior.
+`sprint-472 capture` checks the multidirectional setting and base defaults. Run
+`arm`, hold F9, `native`, release F9, then `finish` for eight native movement/jump
+directions, disabled behavior and permission revocation.
 Install the resulting validation JAR only in a disposable Power Beta clone.
 Fixtures can replace settings and edit worlds. They are never part of the export.
 Mute the clone before launch and route any audio checks to a silent sink or capture device.

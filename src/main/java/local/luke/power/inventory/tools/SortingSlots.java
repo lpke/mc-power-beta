@@ -20,8 +20,8 @@ import org.lwjgl.opengl.Display;
 
 /** Exact native backing owners and indices, rather than transport slot-count arithmetic. */
 public final class SortingSlots {
-  public record Regions(List<Slot> player, List<Slot> storage) {
-    public Regions { player = List.copyOf(player); storage = List.copyOf(storage); }
+  public record Regions(List<Slot> player, List<Slot> storage, List<Slot> hotbar) {
+    public Regions { player = List.copyOf(player); storage = List.copyOf(storage); hotbar = List.copyOf(hotbar); }
   }
   private SortingSlots() {}
   public static boolean screen(Screen screen) {
@@ -50,7 +50,7 @@ public final class SortingSlots {
       throw new IOException("This container does not have a supported native layout.");
     if (handler.slots.size() < 36 || handler.slots.size() > 128 || mc.player.inventory.main.length != 36)
       throw new IOException("This inventory layout is unsupported.");
-    Map<Integer, Slot> main = new TreeMap<>(), storage = new TreeMap<>(); Inventory storageOwner = null;
+    Map<Integer, Slot> main = new TreeMap<>(), storage = new TreeMap<>(), hotbar = new TreeMap<>(); Inventory storageOwner = null;
     Set<Integer> allMain = new HashSet<>();
     var offhand = OffhandContainers.slot(handler, mc.player.inventory);
     for (Object entry : handler.slots) {
@@ -65,7 +65,7 @@ public final class SortingSlots {
       }
       if (owner == mc.player.inventory && index >= 0 && index < 36) {
         if (slot.getClass() != Slot.class || !allMain.add(index)) throw new IOException("Custom or aliased player storage slots.");
-        if (index >= 9) main.put(index, slot);
+        if (index >= 9) main.put(index, slot); else hotbar.put(index, slot);
       } else if (storage(mc.currentScreen) && owner != mc.player.inventory) {
         if (slot.getClass() != Slot.class || !owner(owner, screen) || index < 0 || index >= owner.size()
             || storage.put(index, slot) != null || storageOwner != null && storageOwner != owner)
@@ -79,12 +79,12 @@ public final class SortingSlots {
     int nativeSize = screen == class_585.class ? 45 : screen == class_516.class ? 46 : screen == class_524.class ? 39 : -1;
     if (nativeSize >= 0 && handler.slots.size() != nativeSize + (offhand == null ? 0 : 1))
       throw new IOException("This inventory has unsupported custom slots.");
-    return new Regions(new ArrayList<>(main.values()), new ArrayList<>(storage.values()));
+    return new Regions(new ArrayList<>(main.values()), new ArrayList<>(storage.values()), new ArrayList<>(hotbar.values()));
   }
   public static boolean owns(Minecraft mc, Regions expected) {
     try {
       Regions current = read(mc);
-      return same(current.player, expected.player) && same(current.storage, expected.storage);
+      return same(current.player, expected.player) && same(current.storage, expected.storage) && same(current.hotbar, expected.hotbar);
     } catch (IOException | RuntimeException unavailable) { return false; }
   }
   private static boolean same(List<Slot> first, List<Slot> second) {

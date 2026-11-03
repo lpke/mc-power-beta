@@ -13,6 +13,7 @@ public final class StatusSettings {
       autoWalk = true, autoMine = true, holdUse = true, freeLook = true, cinematicCamera = true, freecamPlayerMovement = true;
   public boolean freecam = true;
   public boolean hiddenEntities = true, fullBright = true, clickMining = true;
+  public boolean blockBreakingParticles = true;
   public boolean restock = true, toolSwitch = true;
   public boolean cinematicCameraMessages;
 
@@ -27,6 +28,7 @@ public final class StatusSettings {
       case AUTO_MINE -> autoMine;
       case HOLD_USE -> holdUse;
       case CLICK_MINING -> clickMining;
+      case BLOCK_BREAKING_PARTICLES -> blockBreakingParticles;
       case FREE_LOOK -> freeLook;
       case CINEMATIC_CAMERA -> cinematicCamera;
       case FREECAM -> freecam;

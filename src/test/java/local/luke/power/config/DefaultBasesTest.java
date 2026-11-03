@@ -10,6 +10,76 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class DefaultBasesTest {
+  @Test void multidirectionalSprintUsesItsInitialBaseOnceAndPreservesExplicitValues() throws Exception {
+    ConfigDefaults.prepare(game);
+    assertTrue(PowerConfig.section("sprint").get("multidirectional").getAsBoolean());
+    assertFalse(new local.luke.power.sprint.SprintSettings().multidirectional);
+    assertFalse(Catalog.metadata("sprint.multidirectional").get("default").getAsBoolean());
+    for (var base : DefaultBases.Base.values()) {
+      var old = PowerConfig.document();
+      var settings = old.getAsJsonObject("settings");
+      settings.getAsJsonObject("defaults").addProperty("base", base.id);
+      settings.getAsJsonObject("sprint").remove("multidirectional");
+      settings.getAsJsonObject("sprint").addProperty("futureSprintEvidence", "keep");
+      PowerConfig.write(old);
+      byte[] original = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      boolean enabled = base == DefaultBases.Base.POWER_BETA;
+      var expected = old.deepCopy();
+      expected.getAsJsonObject("settings").getAsJsonObject("sprint").addProperty("multidirectional", enabled);
+      assertEquals(expected, PowerConfig.document());
+      assertEquals(enabled, DefaultBases.value(base, "sprint.multidirectional", new JsonPrimitive(false)).getAsBoolean());
+      try (var dirs = Files.list(game.resolve("power-beta-data/settings-backups"))) {
+        assertTrue(dirs.anyMatch(dir -> {
+          try { return Arrays.equals(original, Files.readAllBytes(dir.resolve("file-0"))) && Files.exists(dir.resolve("complete.json")); }
+          catch (Exception e) { return false; }
+        }));
+      }
+      DefaultBases.use(enabled ? DefaultBases.Base.BETA : DefaultBases.Base.POWER_BETA, game);
+      byte[] saved = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      assertArrayEquals(saved, Files.readAllBytes(PowerConfig.path()));
+      assertEquals(enabled, PowerConfig.section("sprint").get("multidirectional").getAsBoolean());
+      for (boolean explicit : new boolean[] {false, true}) {
+        var document = PowerConfig.document();
+        document.getAsJsonObject("settings").getAsJsonObject("sprint").addProperty("multidirectional", explicit);
+        PowerConfig.write(document);
+        byte[] preferences = Files.readAllBytes(PowerConfig.path());
+        ConfigDefaults.prepare(game);
+        assertArrayEquals(preferences, Files.readAllBytes(PowerConfig.path()));
+      }
+    }
+  }
+
+  @Test void snowPlacementUsesItsInitialBaseOnceAndPreservesUnknownSettings() throws Exception {
+    ConfigDefaults.prepare(game);
+    for (var base : DefaultBases.Base.values()) {
+      var old = PowerConfig.document();
+      var settings = old.getAsJsonObject("settings");
+      settings.getAsJsonObject("defaults").addProperty("base", base.id);
+      settings.getAsJsonObject("gameplay").remove("modernSnowPlacement");
+      settings.getAsJsonObject("gameplay").addProperty("unknownSnowEvidence", "keep");
+      PowerConfig.write(old);
+      byte[] original = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      boolean enabled = base == DefaultBases.Base.POWER_BETA;
+      var expected = old.deepCopy();
+      expected.getAsJsonObject("settings").getAsJsonObject("gameplay").addProperty("modernSnowPlacement", enabled);
+      assertEquals(expected, PowerConfig.document());
+      assertEquals(enabled, DefaultBases.value(base, "gameplay.modernSnowPlacement", new JsonPrimitive(false)).getAsBoolean());
+      try (var dirs = Files.list(game.resolve("power-beta-data/settings-backups"))) {
+        assertTrue(dirs.anyMatch(dir -> {
+          try { return Arrays.equals(original, Files.readAllBytes(dir.resolve("file-0"))) && Files.exists(dir.resolve("complete.json")); }
+          catch (Exception e) { return false; }
+        }));
+      }
+      DefaultBases.use(enabled ? DefaultBases.Base.BETA : DefaultBases.Base.POWER_BETA, game);
+      byte[] saved = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      assertArrayEquals(saved, Files.readAllBytes(PowerConfig.path()));
+      assertEquals(enabled, PowerConfig.section("gameplay").get("modernSnowPlacement").getAsBoolean());
+    }
+  }
   @Test void newMovementAndSoundPreferencesAreFrozenOnceWithoutChangingExistingPreferences() throws Exception {
     ConfigDefaults.prepare(game);
     for (var base : DefaultBases.Base.values()) {

@@ -41,6 +41,7 @@ public final class StatusBackend implements Backend {
         case "autoWalk" -> "Show while auto-walk is running, rather than whenever the feature is available.";
         case "autoMine" -> "Show while auto-mine is holding the attack and block-breaking action.";
         case "holdUse" -> "Show while Hold use is repeating the native use action.";
+        case "blockBreakingParticles" -> "Show Block breaking particles enabled or disabled while the temporary override is active.";
         default -> "Include " + label.toLowerCase(Locale.ROOT) + " while it is enabled.";
       };
       if (toggle && !name.equals("enabled") && !name.endsWith("Messages")) label = "Include " + label;

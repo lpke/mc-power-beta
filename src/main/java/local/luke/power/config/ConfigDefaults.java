@@ -49,7 +49,7 @@ public final class ConfigDefaults {
   private static void initializeSprint(Path game) throws IOException {
     JsonObject sprint = PowerConfig.section("sprint");
     boolean changed = false;
-    for (String key : java.util.List.of("sprintLadders", "stopAtWalls")) {
+    for (String key : java.util.List.of("sprintLadders", "stopAtWalls", "multidirectional")) {
       if (sprint.has(key)) continue;
       sprint.add(key, DefaultBases.value("sprint." + key, new JsonPrimitive(key.equals("stopAtWalls"))));
       changed = true;
@@ -145,9 +145,9 @@ public final class ConfigDefaults {
     JsonObject gameplay = PowerConfig.section("gameplay");
     boolean changed = false;
     // Freeze the first value so later reset-base changes cannot change it on restart.
-    for (String key : java.util.List.of("boatPlacementFacing", "modernWaterMovement", "modernCrawling", "modernBowHandling", "modernBowFov")) {
+    for (String key : java.util.List.of("boatPlacementFacing", "modernSnowPlacement", "modernWaterMovement", "modernCrawling", "modernBowHandling", "modernBowFov")) {
       if (gameplay.has(key)) continue;
-      gameplay.add(key, DefaultBases.value("gameplay." + key, new JsonPrimitive(!key.equals("modernCrawling") && !key.equals("modernBowHandling"))));
+      gameplay.add(key, DefaultBases.value("gameplay." + key, new JsonPrimitive(!key.equals("modernSnowPlacement") && !key.equals("modernCrawling") && !key.equals("modernBowHandling"))));
       changed = true;
     }
     if (!changed) return;

@@ -45,6 +45,10 @@ final class Sorting403Checks {
         s.open(new int[]{640,360});String items=s.inventory();var editor=s.editor();
         s.press(left(editor)+10,controls(editor)+9,0);check(s.page() instanceof ItemPickerScreen,"Item did not open the picker");
         var picker=(ItemPickerScreen)s.page();@SuppressWarnings("unchecked") var shown=(List<ItemCatalogue.Entry>)UiChecks.field(picker,"shown");
+        var search=(TextInput)UiChecks.field(picker,"search");check(search.focused,"embedded preferred-item search did not focus");
+        for(char c:"stone".toCharArray())s.key(c,Keyboard.KEY_NONE);
+        check(search.text().equals("stone"),"embedded picker typing did not reach search");
+        shown=(List<ItemCatalogue.Entry>)UiChecks.field(picker,"shown");
         String chosen=shown.get(0).value();s.press((int)UiChecks.call(picker,"left")+12,78,0);
         check(s.page()==editor&&chosen.equals(InventoryToolsConfig.current().preferredItems.get(9)),"selection waited for Done");
         s.key('\0',Keyboard.KEY_ESCAPE);s.closed();s.unchanged(items);

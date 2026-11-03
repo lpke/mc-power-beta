@@ -11,7 +11,8 @@ public final class TweakIndicators {
     FAKE_SNEAK("Fake sneak"), FAST_PLACEMENT("Fast placement"),
     PLACEMENT_RESTRICTION("Placement restriction"), AUTO_WALK("Auto-walk", " "),
     AUTO_MINE("Auto-mine"), HOLD_USE("Hold use"), CLICK_MINING("Click mining", " "), FREE_LOOK("Free look"), CINEMATIC_CAMERA("Cinematic camera"),
-    FREECAM("Freecam"), FREECAM_PLAYER_MOVEMENT("Freecam player movement"), HIDDEN_ENTITIES("Hidden entities"), FULL_BRIGHT("Full bright");
+    FREECAM("Freecam"), FREECAM_PLAYER_MOVEMENT("Freecam player movement"), HIDDEN_ENTITIES("Hidden entities"), FULL_BRIGHT("Full bright"),
+    BLOCK_BREAKING_PARTICLES("Block breaking particles", " ");
 
     public final String label;
     public final String separator;

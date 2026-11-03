@@ -39,9 +39,6 @@ public final class GlassBackend implements Backend {
             });
   }
 
-  private static boolean inverted(String key) { return Set.of("power_hud:config.disableVignette", "entityculling:config.disableEntityCulling", "entityculling:config.disableBlockEntityCulling", "power_hud:config.disableCrosshair", "power_controls:userinterface.hideAchievementToast", "power_controls:userinterface.disableDebugEntityIdTags").contains(key); }
-  private static JsonElement encode(String key, Object value) { return inverted(key) ? new JsonPrimitive(!(Boolean)value) : Catalog.JSON.toJsonTree(value); }
-
   private void visit(String prefix, ConfigCategoryHandler category) {
     for (ConfigHandlerBase child : category.values.values()) {
       if (child instanceof ConfigCategoryHandler nested) {
@@ -86,8 +83,8 @@ public final class GlassBackend implements Backend {
               h.name,
               h.description,
               kind,
-              encode(key, h.value),
-              encode(key, h.defaultValue),
+              GlassValues.encode(key, h.value),
+              GlassValues.encode(key, h.defaultValue),
               m.minValue() == 0 ? m.minLength() : m.minValue(),
               m.maxValue() == 32 ? m.maxLength() : m.maxValue(),
               kind == Setting.Kind.DECIMAL ? .05 : 1,
@@ -151,7 +148,7 @@ public final class GlassBackend implements Backend {
     for (var e : panoramaValues(values).entrySet()) {
       ConfigEntryHandler h = handlers.get(e.getKey());
       Class<?> type = h.parentField.getType();
-      h.value = inverted(e.getKey()) ? !e.getValue().getAsBoolean() : Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
+      h.value = GlassValues.decode(e.getKey(), e.getValue(), type);
       h.saveToField();
     }
     local.luke.power.audio.AudioController.rulesChanged();
@@ -162,7 +159,7 @@ public final class GlassBackend implements Backend {
     for (var e : panoramaValues(values).entrySet()) {
       ConfigEntryHandler h = handlers.get(e.getKey());
       Class<?> type = h.parentField.getType();
-      h.value = inverted(e.getKey()) ? !e.getValue().getAsBoolean() : Catalog.JSON.fromJson(e.getValue(), type.isEnum() ? Integer.class : type);
+      h.value = GlassValues.decode(e.getKey(), e.getValue(), type);
     }
     GCCore.saveConfig(
         root.modContainer(), root.configCategoryHandler(), EventStorage.EventSource.USER_SAVE);

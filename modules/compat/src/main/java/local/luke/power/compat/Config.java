@@ -7,6 +7,12 @@ public class Config {
     @ConfigRoot(value = "config", visibleName = "CompatibilityFeatures")
     public static ConfigFields config = new ConfigFields();
 
+    static {
+        local.luke.power.input.BlockBreakingParticles.configure(
+                () -> config.PARTICLES_CONFIG.blockBreakingParticles,
+                () -> config.PARTICLES_CONFIG.disableAllParticles);
+    }
+
     public static class ConfigFields {
         @ConfigCategory(name = "Particles Config")
         public ParticlesConfig PARTICLES_CONFIG = new ParticlesConfig();
@@ -125,6 +131,9 @@ public class Config {
     public static class ParticlesConfig {
         @ConfigEntry(name = "Disable All Particles")
         public Boolean disableAllParticles = false;
+
+        @ConfigEntry(name = "Block breaking particles", description = "Show particles while digging and when blocks break. The temporary control inverts this preference until world exit. All particles must be on.")
+        public Boolean blockBreakingParticles = true;
 
         @ConfigEntry(name = "Disable Water Bubble Particle")
         public Boolean disableWaterBubbleParticle = false;

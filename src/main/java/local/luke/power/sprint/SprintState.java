@@ -5,14 +5,20 @@ public final class SprintState {
   public boolean sprinting, exhausted;
   public double stamina = 100;
   public int combatTicks, rechargeTicks;
-  private boolean keyWasDown, forwardWasDown, latched, tapped;
-  private int doubleTap;
+  private boolean keyWasDown, latched, tapped;
+  private int directionWasDown, doubleTap, doubleTapDirection;
 
   /** Continue an already-active flight gesture; normal tick validation still owns permission/stamina. */
   public void land(SprintSettings settings, boolean eligible, float forward, boolean sprintKey,
       boolean collision, boolean usesStamina) {
+    land(settings, eligible, forward, 0, sprintKey, collision, usesStamina);
+  }
+
+  public void land(SprintSettings settings, boolean eligible, float forward, float sideways,
+      boolean sprintKey, boolean collision, boolean usesStamina) {
     cancel(sprintKey);
-    sprinting = tapped = canSprint(settings, eligible, usesStamina) && forward >= .8f && !collision;
+    sprinting = tapped = canSprint(settings, eligible, usesStamina)
+        && direction(settings, forward, sideways) != 0 && !collision;
   }
 
   private boolean canSprint(SprintSettings settings, boolean eligible, boolean usesStamina) {
@@ -25,8 +31,9 @@ public final class SprintState {
     latched = false;
     tapped = false;
     keyWasDown = keyDown;
-    forwardWasDown = true;
+    directionWasDown = 5; // Suppress a held direction until its next release/change.
     doubleTap = 0;
+    doubleTapDirection = 0;
   }
 
   public void combat(SprintSettings settings) {
@@ -50,16 +57,23 @@ public final class SprintState {
 
   public void tick(SprintSettings s, boolean eligible, float forward, boolean sprintKey,
       boolean onGround, boolean collision, boolean usesStamina, boolean moving) {
+    tick(s, eligible, forward, 0, sprintKey, onGround, collision, usesStamina, moving);
+  }
+
+  public void tick(SprintSettings s, boolean eligible, float forward, float sideways,
+      boolean sprintKey, boolean onGround, boolean collision, boolean usesStamina, boolean moving) {
     boolean staminaEnabled = s.stamina && usesStamina;
     if (usesStamina) stamina = Math.max(0, Math.min(s.capacity, stamina));
     if (doubleTap > 0) doubleTap--;
+    int direction = direction(s, forward, sideways);
     boolean pressed = sprintKey && !keyWasDown,
-        forwardDown = forward >= .8f,
-        forwardPress = forwardDown && !forwardWasDown;
+        directionDown = direction != 0,
+        directionPress = directionDown && directionWasDown != direction && directionWasDown != 5;
     boolean tap = false;
-    if (eligible && s.doubleTap && onGround && forwardPress) {
-      tap = doubleTap > 0;
+    if (eligible && s.doubleTap && onGround && directionPress) {
+      tap = doubleTap > 0 && doubleTapDirection == direction;
       doubleTap = s.doubleTapTicks;
+      doubleTapDirection = direction;
     }
     if (tap) tapped = true;
     if (s.activation == 2 && pressed) {
@@ -67,18 +81,19 @@ public final class SprintState {
       tapped = false;
     }
     boolean can = canSprint(s, eligible, usesStamina);
-    if (!can || forward <= 0 || collision) {
+    if (!can || (s.multidirectional ? forward == 0 && sideways == 0 : forward <= 0) || collision) {
       sprinting = false;
       latched = false;
       tapped = false;
-    } else if (s.activation == 1) sprinting = forwardDown && (sprintKey || tapped);
-    else if (s.activation == 2) sprinting = forwardDown && (latched || tapped);
-    else if (forwardDown && (sprintKey || tap)) sprinting = true;
+    } else if (s.activation == 1) sprinting = directionDown && (sprintKey || tapped);
+    else if (s.activation == 2) sprinting = directionDown && (latched || tapped);
+    else if (directionDown && (sprintKey || tap)) sprinting = true;
     if (!eligible) {
       sprinting = false;
       latched = false;
       tapped = false;
       doubleTap = 0;
+      doubleTapDirection = 0;
     }
     if (staminaEnabled) {
       if (sprinting) {
@@ -97,8 +112,19 @@ public final class SprintState {
         exhausted = false;
     } else if (usesStamina) exhausted = false;
     keyWasDown = sprintKey;
-    forwardWasDown = forwardDown;
+    directionWasDown = direction;
     if (combatTicks > 0) combatTicks--;
+  }
+
+  private static int direction(SprintSettings settings, float forward, float sideways) {
+    if (!settings.multidirectional) return forward >= .8f ? 1 : 0;
+    if (forward * forward + sideways * sideways < .8f * .8f) return 0;
+    return 3 * (int) Math.signum(forward) + (int) Math.signum(sideways);
+  }
+
+  /** Swimming keeps its forward-only sprint threshold independently of on-foot preferences. */
+  public static float movementInput(float forward, boolean swimming) {
+    return swimming ? forward > 0 ? 1 : 0 : forward;
   }
 
   public void jump(SprintSettings s) {
@@ -122,10 +148,24 @@ public final class SprintState {
   }
 
   public static double jumpX(float yaw) {
-    return -Math.sin(yaw * (float) (Math.PI / 180)) * .2;
+    return jumpX(yaw, 1, 0);
+  }
+
+  public static double jumpX(float yaw, float forward, float sideways) {
+    double length = Math.hypot(forward, sideways);
+    if (length == 0) return 0;
+    double angle = yaw * (float) (Math.PI / 180);
+    return (sideways * Math.cos(angle) - forward * Math.sin(angle)) * .2 / length;
   }
 
   public static double jumpZ(float yaw) {
-    return Math.cos(yaw * (float) (Math.PI / 180)) * .2;
+    return jumpZ(yaw, 1, 0);
+  }
+
+  public static double jumpZ(float yaw, float forward, float sideways) {
+    double length = Math.hypot(forward, sideways);
+    if (length == 0) return 0;
+    double angle = yaw * (float) (Math.PI / 180);
+    return (forward * Math.cos(angle) + sideways * Math.sin(angle)) * .2 / length;
   }
 }

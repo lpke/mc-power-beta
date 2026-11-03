@@ -584,7 +584,7 @@
         "showVersionTextIngame": false,
         "unlicensedCopy": false,
         "enableCustomVersionText": false,
-        "customVersionText": "Power Beta 4.7.1"
+        "customVersionText": "Power Beta 4.7.2"
       },
       "panoramaConfig": {
         "enablePanorma": true,
@@ -599,6 +599,7 @@
     "power_compat:config": {
       "PARTICLES_CONFIG": {
         "disableAllParticles": false,
+        "blockBreakingParticles": true,
         "disableWaterBubbleParticle": false,
         "disableFireSmokeParticle": false,
         "disableNoteParticle": false,
@@ -736,6 +737,7 @@
       "key_power_beta.entities": 0,
       "key_power_beta.fullBright": 0,
       "key_power_beta.clickMining": "0",
+      "key_power_beta.blockBreakingParticles": "0",
       "key_powerbeta.debugGraph": "61",
       "key_powerbeta.openCommands": "53",
       "key_powerbeta.executePreviousCommand": "0",
@@ -762,6 +764,7 @@
       "hiddenEntities": true,
       "fullBright": true,
       "clickMining": true,
+      "blockBreakingParticles": true,
       "freecam": true,
       "restock": true,
       "toolSwitch": true
@@ -829,6 +832,7 @@
       "torchShovel": true,
       "axesSlashLeaves": true,
       "boatPlacementFacing": true,
+      "modernSnowPlacement": true,
       "modernWaterMovement": true,
       "modernCrawling": true,
       "crouchCameraHeight": false,
@@ -1185,6 +1189,7 @@
       "jumpBoost": true,
       "stopAtWalls": true,
       "sprintLadders": true,
+      "multidirectional": true,
       "particles": true,
       "sprintKnockback": true,
       "speed": 130,
@@ -1242,6 +1247,7 @@
       "toolsFromInventory": true,
       "restockThreshold": 6,
       "toolDurabilityReserve": 1,
+      "restockHotbarWhenSorting": false,
       "sortDescending": false,
       "protectedSlots": [],
       "preferredItems": {}

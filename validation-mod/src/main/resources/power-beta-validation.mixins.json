@@ -84,7 +84,8 @@
     "Smoothness470UpdatesCapture",
     "Smoothness470VboCapture",
     "Smoothness470UseCapture",
-    "TitleSplash471Access"
+    "TitleSplash471Access",
+    "GuiCursor472StaleQueryFaultMixin"
   ],
   "injectors": {
     "defaultRequire": 1

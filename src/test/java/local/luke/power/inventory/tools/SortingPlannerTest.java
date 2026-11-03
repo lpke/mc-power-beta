@@ -49,6 +49,61 @@ class SortingPlannerTest {
     var source = List.of(item("a", 1, 3), item("b", 2, 4)); var empty = List.of(empty(), empty());
     var plan = SortingPlanner.deposit(source, empty); assertEquals(source, plan.source()); assertEquals(empty, plan.destination());
   }
+  @Test void restockTopsUpExistingStacksInOrderWithoutFillingEmptySlots() {
+    var source = List.of(item("a", 1, 20), item("a", 1, 50), item("b", 2, 12));
+    var hotbar = List.of(item("a", 1, 10), empty(), item("a", 1, 60), item("c", 3, 3));
+    var plan = SortingPlanner.restock(source, hotbar);
+    assertEquals(64, plan.destination().get(0).item().count());
+    assertNull(plan.destination().get(1).item()); assertEquals(64, plan.destination().get(2).item().count());
+    assertEquals(hotbar.get(3), plan.destination().get(3));
+    assertNull(plan.source().get(0).item()); assertEquals(12, plan.source().get(1).item().count());
+    assertEquals(source.get(2), plan.source().get(2));
+    assertEquals(source.get(0).item().count(), 20);
+  }
+  @Test void restockPreservesPinnedOversizedUnstackableAndDifferentNativeData() {
+    var tool = new SortingPlanner.Cell(new SortingPlanner.Item("tool", "native-tool", 257, 80, 1, 1, false), 64, false);
+    var source = List.of(item("a:nbt1", 35, 7, 64, true), item("a:nbt1", 35, 1000),
+        item("a:nbt2", 35, 30), item("a:nbt1", 35, 3), tool);
+    var hotbar = List.of(item("a:nbt1", 35, 60), item("a:nbt1", 35, 10, 64, true), item("a:nbt1", 35, 1000), tool, empty());
+    var plan = SortingPlanner.restock(source, hotbar);
+    assertEquals(63, plan.destination().get(0).item().count());
+    assertEquals(hotbar.subList(1, 5), plan.destination().subList(1, 5));
+    assertEquals(source.subList(0, 3), plan.source().subList(0, 3));
+    assertNull(plan.source().get(3).item()); assertEquals(tool, plan.source().get(4));
+  }
+  @Test void restockRespectsNativeItemAndSlotLimitsAndInsufficientSupply() {
+    var eggs = new SortingPlanner.Cell(new SortingPlanner.Item("egg", "native-egg", 344, 0, 15, 16, true), 64, false);
+    var plan = SortingPlanner.restock(List.of(item("egg", 344, 8), item("a", 1, 2)),
+        List.of(eggs, item("a", 1, 3, 4, false), item("a", 1, 1)));
+    assertEquals(16, plan.destination().get(0).item().count());
+    assertEquals(4, plan.destination().get(1).item().count()); assertEquals(2, plan.destination().get(2).item().count());
+    assertEquals(7, plan.source().get(0).item().count()); assertNull(plan.source().get(1).item());
+  }
+  @Test void randomizedRestockThenSortConservesItemsAndNeverCreatesHotbarStacks() {
+    Random random = new Random(472);
+    for (int attempt = 0; attempt < 256; attempt++) {
+      List<SortingPlanner.Cell> source = new ArrayList<>(), hotbar = new ArrayList<>();
+      for (int i = 0; i < 36; i++) {
+        int id = random.nextInt(5);
+        var cell = id == 0 ? empty() : item("id" + id + ":tag" + random.nextInt(2), id, 1 + random.nextInt(64), 64, random.nextInt(8) == 0);
+        (i < 27 ? source : hotbar).add(cell);
+      }
+      var plan = SortingPlanner.restock(source, hotbar);
+      var sorted = SortingPlanner.sort(plan.source(), random.nextBoolean(), Map.of(0, new SortingPlanner.Preference(2, -1)));
+      List<SortingPlanner.Cell> before = new ArrayList<>(source); before.addAll(hotbar);
+      List<SortingPlanner.Cell> after = new ArrayList<>(sorted); after.addAll(plan.destination());
+      assertEquals(totals(before), totals(after));
+      for (int i = 0; i < hotbar.size(); i++) {
+        var previous = hotbar.get(i); var next = plan.destination().get(i);
+        if (previous.item() == null || previous.pinned()) assertEquals(previous, next);
+        else {
+          assertEquals(previous.item().identity(), next.item().identity());
+          assertTrue(next.item().count() >= previous.item().count() && next.item().count() <= 64);
+        }
+      }
+      assertEquals(plan, SortingPlanner.restock(plan.source(), plan.destination()));
+    }
+  }
   @Test void fullDestinationLeavesRemaindersAndOversizedSourceUntouched() {
     var source = List.of(item("a", 1, 10), item("a", 1, 1000)); var destination = List.of(item("a", 1, 63));
     var plan = SortingPlanner.deposit(source, destination); assertEquals(9, plan.source().get(0).item().count());

@@ -134,6 +134,11 @@ public final class Validation {
       else if (command.equals("kept-load-420")) KeptLoad420Checks.run(mc);
       else if (command.equals("tool-whitelist-420")) ToolWhitelist420Checks.run(mc);
       else if (command.equals("sorting-worlds-440")) Sorting440Checks.run(mc);
+      else if (command.equals("sorting-472 capture")) Sorting472Checks.capture(mc);
+      else if (command.startsWith("particles-472 ")) Particles472Checks.run(mc, command.substring(14));
+      else if (command.startsWith("gui-cursor-472 ")) GuiCursor472Checks.run(mc, command.substring("gui-cursor-472 ".length()));
+      else if (command.startsWith("snow-472 ")) Snow472Checks.run(mc, command.substring("snow-472 ".length()));
+      else if (command.startsWith("sprint-472 ")) Sprint472Checks.run(mc, command.substring("sprint-472 ".length()));
       else if (command.startsWith("settings-400 ")) HudSettings400Checks.run(mc,command.substring(13));
       else if (command.startsWith("input-400 ")) Input400Checks.run(mc,command.substring(10));
       else if (command.startsWith("offhand-actions-400 ")) OffhandActions400Checks.run(mc,command.substring(20));

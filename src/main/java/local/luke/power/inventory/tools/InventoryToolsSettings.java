@@ -1,6 +1,7 @@
 package local.luke.power.inventory.tools;
 
 public final class InventoryToolsSettings {
+  public boolean restockHotbarWhenSorting;
   public boolean sortDescending;
   public java.util.List<Integer> protectedSlots = new java.util.ArrayList<>();
   public java.util.Map<Integer, String> preferredItems = new java.util.LinkedHashMap<>();

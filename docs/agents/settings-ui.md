@@ -57,11 +57,15 @@
   through the same display units. Duration editors use seconds;
   processing budgets remain per tick. Validate item/filter IDs before accepting
   drafts, and keep temporary errors outside row layout.
+- Particle options use positive On/Off presentation. Keep existing negative
+  `disable*` storage IDs and values stable through the shared Glass conversion;
+  preview, Apply, Cancel and defaults must use the same inversion.
 - Paired color and opacity controls keep their original storage IDs and types, share
   one picker draft and reset/Undo boundary, and hide only the paired opacity row.
   `ColorValue` preserves legacy palette indices 0–3; custom palette colors use
   `0x1000000 | RGB`, including black and RGB values 1–3.
-- Item and block settings use the shared graphical picker. Keep each editor draft local
+- Item and block settings use the shared graphical picker and focus its search on
+  opening, including embedded preferred-item pickers. Keep each editor draft local
   until Done, validate custom IDs against loaded registries, retain metadata variants
   where the stored format supports them, and never touch gameplay inventories.
 

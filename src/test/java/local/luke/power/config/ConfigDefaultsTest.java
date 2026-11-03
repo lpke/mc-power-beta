@@ -48,6 +48,14 @@ class ConfigDefaultsTest {
     assertFalse(settings.getAsJsonObject("gameplay").has("fireSpread"));
     assertTrue(local.luke.power.rules.RulePresets.survival().enabled(local.luke.power.rules.GameRule.FIRE_SPREAD));
     assertTrue(settings.getAsJsonObject("activeTweaks").get("clickMining").getAsBoolean());
+    assertTrue(settings.getAsJsonObject("activeTweaks").get("blockBreakingParticles").getAsBoolean());
+    String blockParticles = "power_compat:config.PARTICLES_CONFIG.blockBreakingParticles";
+    assertTrue(settings.getAsJsonObject("power_compat:config").getAsJsonObject("PARTICLES_CONFIG").get("blockBreakingParticles").getAsBoolean());
+    assertTrue(Catalog.metadata(blockParticles).get("default").getAsBoolean());
+    for (var base : DefaultBases.Base.values())
+      assertTrue(DefaultBases.value(base, blockParticles, new JsonPrimitive(true)).getAsBoolean());
+    assertEquals(0, settings.getAsJsonObject("native").get("key_power_beta.blockBreakingParticles").getAsInt());
+    assertEquals("Block breaking particles (toggle)", Catalog.metadata("keys.power_beta.blockBreakingParticles").get("label").getAsString());
     assertTrue(settings.getAsJsonObject("veinMining").get("enabled").getAsBoolean());
     assertEquals(25, settings.getAsJsonObject("veinMining").get("timePercent").getAsInt());
     assertTrue(root.getAsJsonObject("settings").getAsJsonObject("building").get("inventoryMouseLook").getAsBoolean());

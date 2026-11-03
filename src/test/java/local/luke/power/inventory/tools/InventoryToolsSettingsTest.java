@@ -21,7 +21,13 @@ class InventoryToolsSettingsTest {
     var settings = new Gson().fromJson("{}", InventoryToolsSettings.class);
     settings.validate();
     assertFalse(settings.restock); assertFalse(settings.toolSwitch); assertFalse(settings.sortDescending);
+    assertFalse(settings.restockHotbarWhenSorting);
     assertTrue(settings.protectedSlots.isEmpty()); assertTrue(settings.preferredItems.isEmpty());
+  }
+  @Test void sortingRestockIsAnIndependentPersistentPreference() {
+    var settings = new InventoryToolsSettings(); settings.restockHotbarWhenSorting = true;
+    var restored = new Gson().fromJson(new Gson().toJson(settings), InventoryToolsSettings.class);
+    restored.validate(); assertTrue(restored.restockHotbarWhenSorting); assertFalse(restored.restock);
   }
   @Test void layoutRoundTripsThroughTheGameGsonVersionWithIntegerSlotKeys() {
     var settings = new InventoryToolsSettings();

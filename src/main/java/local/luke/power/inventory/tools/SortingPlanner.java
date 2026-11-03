@@ -70,6 +70,29 @@ public final class SortingPlanner {
     conservation(before, result); return List.copyOf(result);
   }
 
+  /** Fill existing destination stacks in slot order without creating or moving stacks. */
+  public static Deposit restock(List<Cell> source, List<Cell> destination) {
+    check(source); check(destination);
+    ArrayList<Cell> from = new ArrayList<>(source), to = new ArrayList<>(destination);
+    for (int j = 0; j < to.size(); j++) {
+      Cell target = to.get(j); Item existing = target.item;
+      if (target.pinned || existing == null || !existing.stackable) continue;
+      int capacity = Math.min(existing.limit, target.limit) - existing.count;
+      for (int i = 0; i < from.size() && capacity > 0; i++) {
+        Cell cell = from.get(i); Item item = cell.item;
+        if (cell.pinned || item == null || !item.stackable || !existing.identity.equals(item.identity)) continue;
+        int move = Math.min(item.count, capacity);
+        existing = existing.count(existing.count + move);
+        from.set(i, new Cell(move == item.count ? null : item.count(item.count - move), cell.limit, false));
+        capacity -= move;
+      }
+      to.set(j, new Cell(existing, target.limit, false));
+    }
+    ArrayList<Cell> before = new ArrayList<>(source); before.addAll(destination);
+    ArrayList<Cell> after = new ArrayList<>(from); after.addAll(to); conservation(before, after);
+    return new Deposit(from, to);
+  }
+
   public static Deposit deposit(List<Cell> source, List<Cell> destination) {
     check(source); check(destination);
     Set<String> original = new HashSet<>();

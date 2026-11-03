@@ -7,6 +7,7 @@ public final class SprintSettings {
   public boolean doubleTap = true, jumpBoost = true, particles = true, sprintKnockback = true;
   public boolean stopAtWalls = true;
   public boolean sprintLadders;
+  public boolean multidirectional;
   public double speed = 130;
   public boolean stamina, noSprintInCombat;
   public double capacity = 100,

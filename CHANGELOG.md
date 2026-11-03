@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [4.7.2] - 2026-11-03
+
+- Add Restock hotbar when sorting inventory above Reverse item order. It defaults off and tops up existing hotbar stacks from unprotected main storage without filling empty hotbar slots or restocking during chest or dispenser sorting.
+- Add an unassigned Block breaking particles toggle and a saved particle setting. The temporary toggle inverts the saved preference, shows its effective state in Active tweaks by default, and resets on world exit.
+- Fix Linux mouse-motion races that could leave the cursor off-center when opening a GUI, while preserving deliberate movement after opening.
+- Focus search when opening a block or item selector, including preferred sorting-slot items.
+- Add Snow layer replacement under Fixes, enabled in Power Beta defaults. Filled water and lava buckets replace the clicked snow layer directly, and block items keep their clicked-face orientation.
+- Use positive On/Off labels for all particle options. They default On while preserving existing effect preferences.
+- Add Multidirectional sprinting on foot, enabled in Power Beta defaults, with backwards and sideways sprinting and movement-aligned sprint jumps.
+
 ## [4.7.1] - 2026-11-02
 
 - Find assigned controls by capturing a hotkey, or switch Controls search from names to assigned keys and combinations. Keep Back navigation when viewing results.

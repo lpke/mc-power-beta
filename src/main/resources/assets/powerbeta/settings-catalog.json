@@ -2480,7 +2480,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.7.1",
+    "default": "Power Beta 4.7.2",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -2520,129 +2520,129 @@
   "power_compat:config.PARTICLES_CONFIG.disableAllParticles": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable all particles",
-    "description": "",
-    "default": false,
+    "label": "All particles",
+    "description": "Show particle effects. Turning this off suppresses particles regardless of individual particle settings or the temporary block-breaking toggle.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableWaterBubbleParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable water bubble particle",
-    "description": "",
-    "default": false,
+    "label": "Water bubble particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableFireSmokeParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable smoke particle",
-    "description": "",
-    "default": false,
+    "label": "Smoke particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableNoteParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable note particle",
-    "description": "",
-    "default": false,
+    "label": "Note particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disablePortalParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable portal particle",
-    "description": "",
-    "default": false,
+    "label": "Portal particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableExplosionParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable explosion particle",
-    "description": "",
-    "default": false,
+    "label": "Explosion particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableFlameParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable flame particle",
-    "description": "",
-    "default": false,
+    "label": "Flame particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableLavaEmberParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable lava ember particle",
-    "description": "",
-    "default": false,
+    "label": "Lava ember particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableFootstepParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable footstep particle",
-    "description": "",
-    "default": false,
+    "label": "Footstep particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableWaterSplashParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable water splash particle",
-    "description": "",
-    "default": false,
+    "label": "Water splash particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableLargeFireSmokeParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable large smoke particle",
-    "description": "",
-    "default": false,
+    "label": "Large smoke particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableRedDustParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable redstone dust particle",
-    "description": "",
-    "default": false,
+    "label": "Redstone dust particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableSnowballParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable snowball particle",
-    "description": "",
-    "default": false,
+    "label": "Snowball particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableSnowShovelParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable snow shovel particle",
-    "description": "",
-    "default": false,
+    "label": "Snow shovel particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableSlimeParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable slime particle",
-    "description": "",
-    "default": false,
+    "label": "Slime particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.PARTICLES_CONFIG.disableHeartParticle": {
     "page": "Video",
     "group": "Particles",
-    "label": "Disable heart particle",
-    "description": "",
-    "default": false,
+    "label": "Heart particles",
+    "description": "Show this particle effect without changing the event that produces it. All particles must be on.",
+    "default": true,
     "restart": false
   },
   "power_compat:config.STACK_SIZE_CONFIG.enableModernWoodDoorStackSize": {
@@ -4880,6 +4880,15 @@
     "label": "Text size",
     "order": -9
   },
+  "gameplay.modernSnowPlacement": {
+    "page": "Fixes",
+    "group": "Items and blocks",
+    "label": "Snow layer replacement",
+    "description": "Place blocks and empty water or lava buckets directly into the snow layer you click. Block placement keeps the clicked face. Singleplayer only.",
+    "default": false,
+    "restart": false,
+    "order": 46
+  },
   "gameplay.boatPlacementFacing": {
     "page": "Fixes",
     "group": "Entities",
@@ -5436,8 +5445,8 @@
   "sprint.doubleTap": {
     "page": "Gameplay",
     "group": "Sprinting",
-    "label": "Double-tap forward",
-    "description": "Start sprinting by pressing forward twice while grounded, as in modern Minecraft.",
+    "label": "Double-tap sprint",
+    "description": "Start sprinting by pressing forward twice while grounded. Multidirectional sprinting also allows double-tapping other movement directions.",
     "min": 0.0,
     "max": 1.0,
     "step": 1.0,
@@ -5447,7 +5456,7 @@
     "page": "Gameplay",
     "group": "Sprinting",
     "label": "Double-tap interval",
-    "description": "Maximum game ticks between forward presses. Modern Minecraft uses seven ticks.",
+    "description": "Maximum game ticks between presses of the same movement direction. Modern Minecraft uses seven ticks.",
     "min": 1.0,
     "max": 20.0,
     "step": 1.0,
@@ -6806,6 +6815,10 @@
   "inventoryTools.sortDescending": {
     "order": 1
   },
+  "inventoryTools.restockHotbarWhenSorting": {
+    "default": false,
+    "order": 0.5
+  },
   "keys.powerbeta.sortingLayout": {
     "page": "Controls",
     "group": "Inventory",
@@ -6836,6 +6849,14 @@
     "label": "Sprint up ladders",
     "description": "Use the ground sprint speed multiplier while climbing ladders. Sprint permissions, stamina and combat limits still apply.",
     "order": 26
+  },
+  "sprint.multidirectional": {
+    "page": "Gameplay",
+    "group": "Sprinting",
+    "label": "Multidirectional sprinting",
+    "description": "Sprint in any direction on foot using the normal activation, stamina and combat limits. Swimming still sprints forwards only.",
+    "default": false,
+    "order": 24
   },
   "gameplay.modernCrawling": {
     "page": "Gameplay",
@@ -7034,5 +7055,27 @@
   },
   "audio.menuControlsOffsetY": {
     "sliderStep": 10
+  },
+  "power_compat:config.PARTICLES_CONFIG.blockBreakingParticles": {
+    "page": "Video",
+    "group": "Particles",
+    "label": "Block breaking particles",
+    "description": "Show particles while digging and when blocks break. The temporary control inverts this preference until world exit. All particles must be on.",
+    "default": true,
+    "restart": false
+  },
+  "keys.power_beta.blockBreakingParticles": {
+    "page": "Controls",
+    "group": "Building",
+    "label": "Block breaking particles (toggle)",
+    "description": "Temporarily invert Block breaking particles. Press again to restore the saved preference. Leaving the world clears the temporary state. All particles must be on.",
+    "order": 22
+  },
+  "activeTweaks.blockBreakingParticles": {
+    "page": "Interface",
+    "group": "Active tweaks HUD",
+    "label": "Include Block breaking particles",
+    "description": "Show Block breaking particles enabled or disabled while the temporary override is active.",
+    "order": 103
   }
 }

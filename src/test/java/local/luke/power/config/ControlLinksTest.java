@@ -31,6 +31,7 @@ class ControlLinksTest {
         Map.entry("keys.power_creative.sprint", "creative.sprintToggle"),
         Map.entry("keys.Change Freecam Speed", "power_camera:config.speed"),
         Map.entry("keys.power_beta.clickMining", "tweaks.clickMining"),
+        Map.entry("keys.power_beta.blockBreakingParticles", "power_compat:config.PARTICLES_CONFIG.blockBreakingParticles"),
         Map.entry("keys.powerbeta.lightOverlay", "lightOverlay.enabled"),
         Map.entry("keys.powerbeta.infoHud", "infoHud.enabled"),
         Map.entry("keys.key.fog", "video.fogCycle"),

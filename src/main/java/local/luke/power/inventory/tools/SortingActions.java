@@ -29,6 +29,9 @@ public final class SortingActions {
     try {
       var regions = SortingSlots.read(mc); List<Slot> slots = playerStorage || regions.storage().isEmpty() ? regions.player() : regions.storage();
       var before = capture(mc, slots);
+      boolean restock = slots == regions.player() && InventoryToolsConfig.current().restockHotbarWhenSorting;
+      var hotbarBefore = restock ? capture(mc, regions.hotbar()) : List.<SortingPlanner.Cell>of();
+      var restocked = restock ? SortingPlanner.restock(before, hotbarBefore) : null;
       Map<Integer, SortingPlanner.Preference> preferences = new LinkedHashMap<>();
       if (slots == regions.player()) for (int i = 0; i < slots.size(); i++) {
         int nativeIndex = ((DeathSlotAccessor)(Object)slots.get(i)).power$deathIndex();
@@ -38,8 +41,9 @@ public final class SortingActions {
           preferences.put(i, new SortingPlanner.Preference(item.id(), item.damage()));
         }
       }
-      var after = SortingPlanner.sort(before, InventoryToolsConfig.current().sortDescending, preferences);
+      var after = SortingPlanner.sort(restock ? restocked.source() : before, InventoryToolsConfig.current().sortDescending, preferences);
       List<NativeInventoryPlan.Change> changes = changes(mc, slots, before, after);
+      if (restock) changes.addAll(changes(mc, regions.hotbar(), hotbarBefore, restocked.destination()));
       return NativeInventoryPlan.submit(mc, "inventory_sort", true, changes,
           () -> WorldSortingLayouts.available() && SortingSlots.owns(mc, regions), () -> {});
     } catch (IOException | RuntimeException failure) { feedback(mc, failure.getMessage()); return false; }

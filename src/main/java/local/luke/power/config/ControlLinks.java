@@ -22,7 +22,7 @@ public final class ControlLinks {
     link("key.drop", "", "", "Drop one item from the selected hotbar slot.");
     link("powerbeta.recipeBook", "recipeBook.enabled", "", "Toggle the recipe book in an eligible inventory. Does nothing during gameplay. Search fields and modal windows keep keyboard ownership.");
     link("powerbeta.sortingLayout", "inventoryTools.preferredItems", "", "Edit your sorting layout over the open inventory. Keeps the inventory open and changes settings only.");
-    link("powerbeta.sortInventory", "inventoryTools.sortingButton", "", "Sort player storage when pointing over your inventory; otherwise sort the open chest or dispenser. Excludes hotbar, equipment and crafting slots.");
+    link("powerbeta.sortInventory", "inventoryTools.sortingButton", "", "Sort player storage when pointing over your inventory; otherwise sort the open chest or dispenser. Can top up existing hotbar stacks when enabled in Sorting settings. Keeps equipment and crafting slots separate.");
     link("powerbeta.depositMatching", "inventoryTools.depositMatchingButton", "", "Deposit matching main-storage items into the supported open chest or dispenser.");
     link("powerbeta.saveCreativeHotbar", "inventoryTools.creativeHotbars", "", "Hold with a hotbar number to save one of nine Creative hotbars. Saved presets stay outside defaults resets.");
     link("powerbeta.loadCreativeHotbar", "inventoryTools.creativeHotbars", "", "Hold with a hotbar number to load one of nine Creative hotbars. Requires singleplayer Creative access.");
@@ -52,10 +52,11 @@ public final class ControlLinks {
     link("powerbeta.clearMapDestination", "", "", "Clear the current map destination.");
     link("powerbeta.mapSettings", "", "", "Open Map settings.");
     link("powerbeta.mapZoomReset", "maps.zoom", "maps.minimap", "Reset the minimap zoom.");
-    link("powerbeta.sprint", "sprint.activation", "rules.world.allow_sprinting", "Sprint forward when Allow sprinting is enabled in this world's Game rules, using the global activation and stamina preferences.");
+    link("powerbeta.sprint", "sprint.activation", "rules.world.allow_sprinting", "Sprint when Allow sprinting is enabled in this world's Game rules, using the global direction, activation and stamina preferences.");
     link("powerbeta.infoHud", "infoHud.enabled", "", "Toggle all custom HUD clusters together. Each cluster keeps its contents, appearance and F3 visibility preference.");
     // These settings are live toggle states, not feature-availability switches.
     link("power_beta.clickMining", "tweaks.clickMining", "", "Temporarily invert Continuous click mining until the next press or world exit.");
+    link("power_beta.blockBreakingParticles", "power_compat:config.PARTICLES_CONFIG.blockBreakingParticles", "", "Temporarily invert Block breaking particles until the next press or world exit. All particles must be on.");
     link("Auto-mine (toggle)", "", "", "Toggle holding Attack / Break. Menus, focus loss, world changes and detached-camera control stop it.");
     link("Hold use (toggle)", "", "", "Toggle holding Use. Menus, focus loss, world changes, Spectator and detached-camera control stop it.");
     link("Auto-walk line lock (toggle)", "", "", "While auto-walking, keep your player inside the current block lane. Does not turn the player or start auto-walk.");

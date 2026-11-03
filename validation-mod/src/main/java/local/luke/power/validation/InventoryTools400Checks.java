@@ -88,6 +88,7 @@ public final class InventoryTools400Checks {
         check(pinned.equals(encode(mc.player.inventory.main[9])) && hotbar.equals(encode(mc.player.inventory.main[0])), "protected slot changed");
         check(Objects.equals(offhand, encode(Offhand.get(mc.player.inventory))), "offhand changed");
       });
+      Sorting472Checks.nativeChecks(mc, List.of(player, chest, doubleChest, dispenserScreen));
       install(mc, chest);
       test("matching deposit freezes native full-data identities and excludes the hotbar", () -> {
         Arrays.fill(mc.player.inventory.main, null); for (int i = 0; i < first.size(); i++) first.setStack(i, null);
