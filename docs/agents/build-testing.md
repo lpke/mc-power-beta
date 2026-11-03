@@ -25,12 +25,9 @@
 - Test in a disposable clone outside the user's normal instance list. Never launch
   or edit an active instance. Stop only the exact process you started, verified by
   PID and game directory. Preserve worlds, recovery journals and original music.
-- Clean up generated files when their task is finished: obsolete build JARs/ZIPs,
-  accumulated Loom remap copies, disposable test clones, temporary exports and captures.
-  Check disk usage during long build/test runs. Before removing anything, verify that
-  no active process or pending check needs it; do not clean shared mapping caches
-  during builds. Keep current artifacts, source, user files, worlds, recovery journals,
-  original music and required backups. Do not delete unrelated application caches.
+- Check disk usage during long builds/tests and follow the mandatory release cleanup
+  below when the work finishes. Cache and temporary-directory cleanup is part of
+  delivery, not an optional follow-up.
 - Mute every test instance before launch. Route audio tests to a silent output or
   capture device so they never play through the user's speakers or headphones.
   Never mute or change the audio routing of the user's own instances.
@@ -58,3 +55,43 @@
   worlds, logs or disabled mods. Keep README human-facing; add lasting implementation
   constraints here rather than another session diary.
 - Commit and push only when the current user request authorizes it.
+
+## Mandatory release cleanup
+
+A release or re-release is not finished until its disposable development residue
+has been removed. After final validation, publication and live verification, audit
+and clean leftovers from earlier cycles as well as the current one. Repeat this
+after completing a deferred instance update. Do the cleanup before the final
+response; do not merely list files or offer to remove them later.
+
+1. Measure allocated disk use before cleanup. Confirm no build, test, renderer,
+   browser or other active process needs each candidate, including open files and
+   working directories. Never clean Loom caches while a build is running or remove
+   files needed by a pending check. Verify the current release and required backups
+   before removing superseded copies.
+2. Inspect every build, including the root, `validation-mod`, `source-build`,
+   `input-api` and independent modules. Remove accumulated `build/loom-cache/`
+   remapping intermediates, abandoned `zipfstmp*.tmp` files and project-local
+   `.gradle/loom-cache/remapped_mods/` derivatives after their last use. Check
+   `build/devlibs/`, `build/libs/` and module output directories for obsolete
+   development, source and release JARs. Do not leave dozens of full-pack remaps
+   merely because Gradle calls them a cache; they are rebuildable output.
+3. Remove obsolete exports/staging copies, agent-created disposable Prism clones,
+   temporary browser profiles, screenshots already saved with the private owner
+   report, logs, crash dumps, extracted research assets and one-off helper/compile
+   directories. Inspect task-owned paths outside the repository, including system
+   temporary directories. Identify ownership from their contents and creation
+   context, not from a broad filename wildcard. Do not follow symlinks into shared
+   libraries or the owner's instance.
+4. Keep the exact current release JAR, ZIP, checksum, build receipt and manifest,
+   current module/API artifacts needed by the build, pinned vendor/dependency inputs,
+   source assets and committed review evidence. Preserve all owner worlds, player
+   data, preferences, music, recovery journals and required verified backups.
+   Historical release/rollback backups need a separate retention decision; they
+   are not ordinary temporary output. Leave unrelated application/global dependency
+   caches alone.
+5. Measure actual allocated space reclaimed and remaining free space. Verify the
+   retained release hashes and that only intended generated paths were removed.
+   Record the totals and any retained development residue with its concrete reason
+   in the private owner report and final response. If an active process or pending
+   check prevents removal, name the path and keep cleanup explicitly pending.

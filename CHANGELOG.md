@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [4.7.4] - 2026-11-03
+
+- Stop falling immediately and smoothly settle the camera when resuming Creative flight with a double tap of Space.
+- Match item and block picker row highlights to Settings, including selected items and the Required tools picker.
+- Smooth the boat rider's torso during full-speed turns and camera movement in third person.
+- Keep capes steadier and closer to the back while walking backward or sideways.
+- Climb seamlessly through qualifying open trapdoors above matching ladders without a backing block, stalls or forced crouching.
+- Separate Modern crouching from its optional Lower camera when crouching setting, retaining three-block-down wall building with either camera height.
+- Remove cave-height slider and reset tooltips on the world map and keep the reset button square with the standard slider gap.
+
 ## [4.7.3] - 2026-11-03
 
 - Match the Blocks and required tools row hover background to Settings and keep it visible over every row action.

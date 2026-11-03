@@ -16,8 +16,8 @@ import org.lwjgl.opengl.*;
 
 /** Native model/cape contact sheets; isolated actors never enter the world or replace its player. */
 final class CapeGallery473Checks {
-  private static final String CAPE = "power-beta-validation:cape-gallery-473";
-  private static final Path REPORT = Path.of("power-beta-data/reports/release-473/cape-gallery");
+  private static final String CAPE = "power-beta-validation:cape-gallery-474";
+  private static final Path REPORT = Path.of("power-beta-data/reports/release-474/cape-gallery");
   private static final int WIDTH = 800, HEIGHT = 450;
 
   static void run(Minecraft mc) throws Exception {
@@ -51,11 +51,11 @@ final class CapeGallery473Checks {
       renderer.setDispatcher(EntityRenderDispatcher.field_2489);
       var settings = VisualConfig.copy(); settings.limitCapeRotation = true; VisualConfig.preview(settings);
       Files.createDirectories(REPORT);
-      for (boolean minecart : new boolean[]{false, true}) {
-        var screen = new Gallery(mc, actor, renderer, building, minecart, panels);
+      for (String direction : List.of("backward", "sideways", "minecart")) {
+        var screen = new Gallery(mc, actor, renderer, building, direction, panels);
         screen.init(mc, WIDTH, HEIGHT);
         SettingsSnapshot.render(mc, screen, WIDTH, HEIGHT,
-            REPORT.resolve(minecart ? "minecart-fast-off-on.png" : "backward-walk-sprint.png"));
+            REPORT.resolve(direction.equals("minecart") ? "minecart-fast-off-on.png" : direction + "-walk-sprint.png"));
       }
       Files.writeString(REPORT.resolve("panels.json"), Catalog.JSON.toJson(panels));
       check(GL11.glGetError() == GL11.GL_NO_ERROR, "cape gallery OpenGL error");
@@ -73,7 +73,7 @@ final class CapeGallery473Checks {
       GL20.glUseProgram(program);
       GL11.glPopAttrib(); GL11.glMatrixMode(matrix);
     }
-    log("CAPE GALLERY473 two native contact sheets and " + panels.size() + " observed poses written");
+    log("CAPE GALLERY474 three native contact sheets and " + panels.size() + " observed poses written");
   }
 
   private static BufferedImage capeTexture() {
@@ -106,15 +106,17 @@ final class CapeGallery473Checks {
     private final GalleryRenderer renderer;
     private final local.luke.power.building.config.Settings building;
     private final boolean minecart;
+    private final boolean sideways;
     private final List<Map<String,Object>> panels;
     Gallery(Minecraft mc, ClientPlayerEntity actor, GalleryRenderer renderer,
-        local.luke.power.building.config.Settings building, boolean minecart, List<Map<String,Object>> panels) {
+        local.luke.power.building.config.Settings building, String direction, List<Map<String,Object>> panels) {
       this.mc = mc; this.actor = actor; this.renderer = renderer; this.building = building;
-      this.minecart = minecart; this.panels = panels;
+      this.minecart = direction.equals("minecart"); this.sideways = direction.equals("sideways"); this.panels = panels;
     }
     @Override public void render(int mx, int my, float delta) {
       fill(0, 0, width, height, 0xff20252d);
-      text(minecart ? "Minecart cape / Faster minecarts off and on" : "Backward movement / walking and sprinting", 16, 12, 0xffffff);
+      text(minecart ? "Minecart cape / Faster minecarts off and on"
+          : (sideways ? "Sideways" : "Backward") + " movement / walking and sprinting", 16, 12, 0xffffff);
       text("Native player model and cape - rear three-quarter view", 16, 28, 0xbfc8d5);
       for (int row = 0; row < 2; row++) for (int column = 0; column < 3; column++) panel(row, column);
       text("Diagnostic cape: gold border, cyan center stripe. Production cape correction enabled.", 16, 433, 0xbfc8d5);
@@ -131,9 +133,9 @@ final class CapeGallery473Checks {
       actor.pitch = actor.prevPitch = 0;
       actor.field_1048 = actor.field_1049 = minecart ? 0 : amplitude;
       actor.field_1050 = phase + actor.field_1049 * .5f;
-      actor.field_530 = actor.field_533 = minecart ? actor.x - trail : actor.x;
+      actor.field_530 = actor.field_533 = minecart || sideways ? actor.x - trail : actor.x;
       actor.field_531 = actor.field_534 = actor.y + (minecart ? .05 : -.6);
-      actor.field_532 = actor.field_535 = minecart ? actor.z : actor.z + trail;
+      actor.field_532 = actor.field_535 = minecart || sideways ? actor.z : actor.z + trail;
       actor.field_524 = actor.field_525 = minecart ? 0 : .2f;
       actor.field_1634 = actor.field_1635 = phase / 6;
       if (minecart) {
@@ -166,8 +168,9 @@ final class CapeGallery473Checks {
         GL11.glPopMatrix(); GL11.glPopAttrib();
       }
       var model = ((CapeRenderAccess)(Object)renderer).power$capeModel();
-      if (minecart) check(observed.get(1) == 0 && observed.get(2) == 0, "gallery rider cape tilted laterally");
+      check(observed.get(1) == 0 && observed.get(2) == 0, "gallery cape pulled sideways from the back");
       var entry = new LinkedHashMap<String,Object>();
+      entry.put("direction", minecart ? "minecart" : sideways ? "sideways" : "backward");
       entry.put("panel", title); entry.put("capeAngles", observed);
       entry.put("rightLegPitch", model.rightLeg.pitch); entry.put("leftLegPitch", model.leftLeg.pitch);
       entry.put("controlledTrailBlocks", trail); panels.add(entry);

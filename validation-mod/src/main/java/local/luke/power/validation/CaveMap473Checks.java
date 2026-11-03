@@ -64,6 +64,10 @@ final class CaveMap473Checks {
           int sx=n(slider,"x"), sy=n(slider,"y"), sw=n(slider,"width");
           check(sx > n(call(modeButton(screen),"bounds"),"x"),"slider is not right of Caves");
           check(n(reset,"x")==sx+sw+4 && n(reset,"y")==sy,"reset does not follow slider");
+          check(n(reset,"width")==18 && n(reset,"height")==n(reset,"width"),"cave reset is not an 18-pixel square");
+          check(n(reset,"height")==n(slider,"height"),"cave reset does not match slider height");
+          SettingsSnapshot.render(mc,screen,size[0],size[1],REPORT.resolve("cave-slider-hover-"+size[0]+".png"),sx+sw/2,sy+8);
+          SettingsSnapshot.render(mc,screen,size[0],size[1],REPORT.resolve("cave-reset-hover-"+size[0]+".png"),n(reset,"x")+8,sy+8);
           click(screen,sx+4,sy+8,0);
           check(screen.caveWindow().reference()==0,"slider minimum endpoint lost");
           release(screen,sx+sw-4,sy+8,-1);
@@ -94,8 +98,7 @@ final class CaveMap473Checks {
             exact(screen,Integer.toString(selected),true);
             var window=screen.caveWindow();
             var key=MapMath.key(Maps.dimension(),window.layer(),0,x,z,window.context());
-            memory.sample(key); MapIO.awaitQueued(); memory.publish(4,Long.MAX_VALUE);
-            MapTile tile=memory.peek(key); check(tile!=null,"fixture tile was not admitted");
+            MapTile tile=admitted(memory,key);
             for(int dx=0;dx<16;dx++)for(int dz=0;dz<16;dz++)sample.invoke(nativeSampler,mc.world,chunk,tile,x+dx,z+dz,window);
             int index=MapMath.index(x+4,z+4);
             check(tile.height(index)==selected-1 && tile.block(index)==(selected==89?1:5),"selected Y reused the wrong native floor");
@@ -147,6 +150,15 @@ final class CaveMap473Checks {
 
   private static void shot(Minecraft mc,WorldMapScreen screen,int[] size,String name)throws Exception {
     SettingsSnapshot.render(mc,screen,size[0],size[1],REPORT.resolve(name+"-"+size[0]+".png"));
+  }
+  private static MapTile admitted(MapCache memory,MapMath.Key key) {
+    // Rendering shares bounded admission with sampling. Complete its older reads before asserting residency.
+    for(int attempt=0;attempt<16;attempt++) {
+      memory.sample(key); MapIO.awaitQueued(); memory.publish(16,Long.MAX_VALUE);
+      MapTile tile=memory.peek(key); if(tile!=null)return tile;
+      memory.tick();
+    }
+    throw new AssertionError("fixture tile was not admitted: resident="+memory.size()+" pending="+memory.pending()+" canSample="+memory.canSample());
   }
   private static Object controls(WorldMapScreen screen)throws Exception {return call(screen,"controls");}
   private static Object modeButton(WorldMapScreen screen)throws Exception {

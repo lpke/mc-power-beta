@@ -34,6 +34,11 @@ Keep these rules here rather than adding style details to the top-level instruct
 - Share rendering, pointer, tooltip and clipping geometry. Check compact layouts
   at 320 by 240 as well as wider screens. Keep actionable text and controls inside
   the screen bounds.
+- Settings-style list rows, including block rules and all shared item/block pickers,
+  use the Options hover fill `0x60000000` across the full row hit bounds, including
+  adjacent actions. Hover overrides the selected background while retaining selection
+  markers. Keep the same paint in nested pickers such as Required tools. Dropdowns
+  and context menus retain their separate `PopupStyle` colors below.
 - In-group dividers use catalog `separatorAfter` on the preceding setting.
   They share row geometry and never act as headings or input targets.
 

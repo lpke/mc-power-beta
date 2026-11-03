@@ -7,7 +7,6 @@
     "ClientInteractionManagerMixin",
     "AbstractClientPlayerMixin",
     "LevelPropertiesMixin",
-    "GameRendererMixin",
     "PlayerScreenMixin",
     "ContainerScreenMixin",
     "ScreenMixin",

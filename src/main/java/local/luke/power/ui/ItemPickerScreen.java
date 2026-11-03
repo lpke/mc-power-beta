@@ -130,7 +130,7 @@ public final class ItemPickerScreen extends UiScreen {
     for(int i=first;i<last;i++){
       var entry=shown.get(i);int y=66+i*24-scroll;boolean chosen=selected.contains(entry.value());
       boolean hover=inside(mx,my,left(),y,span()-10,24) && my>=66 && my<bottom();
-      if(chosen || hover)fill(left(),y,right()-10,y+23,chosen?0x80445566:0x50333333);
+      if(chosen || hover)fill(left(),y,right()-10,y+24,hover?0x60000000:0x80445566);
       icons.draw(this,minecraft,entry,left()+5,y+4);
       text(fit(entry.name(),span()-62),left()+28,y+8,hover?0xffffa0:0xeeeeee);
       if(chosen)text("+",right()-23,y+8,0xffff88);

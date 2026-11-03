@@ -1,6 +1,8 @@
 package local.luke.power.validation;
 
 import static local.luke.power.validation.Validation.*;
+import java.lang.reflect.Method;
+import java.nio.FloatBuffer;
 import java.nio.file.*;
 import java.util.*;
 import local.luke.power.building.camera.FreeLook;
@@ -15,6 +17,7 @@ import net.minecraft.client.render.entity.*;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 
@@ -41,7 +44,7 @@ public final class BoatTurn473Checks {
         : ((local.luke.power.input.PlayerMode)p).power$creative() ? "CREATIVE" : "SURVIVAL";
     float body = p.field_1012, previousBody = p.field_1013;
     int cx = (int)Math.floor(p.x), cz = (int)Math.floor(p.z), water = 112;
-    check(mc.world.method_155(cx - 10, water - 1, cz - 10, cx + 10, water + 5, cz + 10), "load the fixture area first");
+    check(mc.world.method_155(cx - 38, 0, cz - 38, cx + 38, 128, cz + 38), "load the fixture area and native vehicle tick radius first");
     List<int[]> blocks = new ArrayList<>();
     for (int x = cx - 10; x <= cx + 10; x++) for (int z = cz - 10; z <= cz + 10; z++) for (int y = water - 1; y <= water + 5; y++) {
       check(mc.world.method_1777(x, y, z) == null, "fixture overlaps a block entity");
@@ -58,6 +61,8 @@ public final class BoatTurn473Checks {
       p.field_161 = new class_41();
       for (int[] b : blocks) mc.world.method_154(b[0], b[1], b[2], b[1] < water ? 1 : b[1] == water ? 9 : 0, 0);
       var renderer = new RiderRenderer(); renderer.setDispatcher(EntityRenderDispatcher.field_2489);
+      Method cameraTransform = net.minecraft.class_555.class.getDeclaredMethod("method_1851", float.class);
+      cameraTransform.setAccessible(true); FloatBuffer cameraMatrix = BufferUtils.createFloatBuffer(16);
       for (boolean steering : new boolean[]{false, true}) for (boolean fast : new boolean[]{false, true})
         for (boolean protection : new boolean[]{false, true}) for (boolean placement : new boolean[]{false, true}) for (int direction : new int[]{-1, 1}) {
           String scenario = "steering=" + steering + " speed=" + fast + " protection=" + protection + " placement=" + placement + " direction=" + direction;
@@ -68,25 +73,43 @@ public final class BoatTurn473Checks {
           p.field_1012 = p.field_1013 = p.yaw;
           p.method_1376(boat); boat.method_1382();
           double speed = fast ? .75 : .35; boat.velocityX = -Math.cos(Math.toRadians(boat.yaw)) * speed; boat.velocityZ = -Math.sin(Math.toRadians(boat.yaw)) * speed;
-          double maxBody = 0, maxHead = 0, maxCamera = 0, maxBoat = 0; int wraps = 0, recenters = 0;
+          double maxBody = 0, maxHead = 0, maxCamera = 0, maxBoat = 0, maxBodyAcceleration = 0, maxBoundary = 0, maxCameraBoundary = 0, maxRenderedBoundary = 0;
+          float previousBodyStep = Float.NaN; int wraps = 0, recenters = 0;
           float[] lastBody = new float[3], lastHead = new float[3], lastCamera = new float[3], lastBoat = new float[3];
           boolean[] sampled = new boolean[3];
+          double[][] lastCameraOffset = new double[3][];
           for (int tick = 0; tick < 180; tick++) {
             // Translate the whole rig between ticks on a uniform pool. Motion and angles stay native.
             if (Math.hypot(boat.x - cx - .5, boat.z - cz - .5) > 5) {
               double dx = cx + .5 - boat.x, dz = cz + .5 - boat.z;
               boat.method_1340(boat.x + dx, boat.y, boat.z + dz); p.method_1340(p.x + dx, p.y, p.z + dz); recenters++;
             }
-            boat.field_1637 = boat.x; boat.field_1638 = boat.y; boat.field_1639 = boat.z;
-            p.field_1637 = p.x; p.field_1638 = p.y; p.field_1639 = p.z;
             p.field_161.field_2533 = 1; p.field_161.field_2532 = -direction;
-            boat.tick(); p.method_1384();
+            float priorBody = p.field_1012, priorYaw = p.yaw;
+            double priorX = p.x, priorY = p.y, priorZ = p.z;
+            int priorAge = p.field_1645;
+            mc.world.method_241(boat);
+            check(p.field_1645 == priorAge + 1, "native world tick skipped or repeated its rider");
+            if (tick > 12) {
+              maxBoundary = Math.max(maxBoundary, Math.abs(wrap(p.field_1013 - priorBody)));
+              maxBoundary = Math.max(maxBoundary, Math.abs(wrap(p.prevYaw - priorYaw)));
+              maxBoundary = Math.max(maxBoundary, Math.abs(p.field_1637 - priorX));
+              maxBoundary = Math.max(maxBoundary, Math.abs(p.field_1638 - priorY));
+              maxBoundary = Math.max(maxBoundary, Math.abs(p.field_1639 - priorZ));
+              float bodyStep = wrap(p.field_1012 - priorBody);
+              if (Float.isFinite(previousBodyStep)) maxBodyAcceleration = Math.max(maxBodyAcceleration, Math.abs(bodyStep - previousBodyStep));
+              previousBodyStep = bodyStep;
+            }
             if (Math.abs(boat.yaw - boat.prevYaw) > 180) wraps++;
             if (boat.dead || p.field_1595 != boat) { errors.add(scenario + " lost its boat at tick " + tick); break; }
-            float[] angles = {boat.yaw, boat.prevYaw, p.yaw, p.prevYaw, p.field_1012, p.field_1013};
-            for (int perspective = 0; perspective < 3; perspective++) {
-              mc.options.thirdPerson = perspective != 0; frontField.setBoolean(null, perspective == 2);
-              for (float delta : new float[]{0, .25f, .5f, .75f, 1}) {
+            for (float delta : new float[]{0, .25f, .5f, .75f, 1}) {
+              // The native frame mouse path changes both current and previous view angles.
+              // Start each tick at the preceding endpoint before supplying any fresh input.
+              if (delta > 0) p.method_1362((float)(Math.sin(tick * .13 + delta) * .8), (float)(Math.cos(tick * .09 + delta) * .25));
+              float[] frameAngles = {boat.yaw, boat.prevYaw, p.yaw, p.prevYaw, p.field_1012, p.field_1013};
+              for (int perspective = 0; perspective < 3; perspective++) {
+                mc.options.thirdPerson = perspective != 0; frontField.setBoolean(null, perspective == 2);
+                double[] cameraOffset = cameraOffset(mc, delta, cameraTransform, cameraMatrix);
                 var dispatcher = EntityRenderDispatcher.field_2489;
                 dispatcher.method_1917(mc.world, mc.textureManager, mc.textRenderer, p, mc.options, delta);
                 renderedBoatYaw = Float.NaN; capture = true;
@@ -95,21 +118,29 @@ public final class BoatTurn473Checks {
                 float head = renderer.headYaw(), camera = dispatcher.field_2497;
                 check(Float.isFinite(renderedBoatYaw) && Float.isFinite(renderer.bodyYaw) && Float.isFinite(head), "native render capture missing");
                 if (sampled[perspective] && tick > 12) {
+                  if (delta == 0) {
+                    for (int axis = 0; axis < 3; axis++) maxCameraBoundary = Math.max(maxCameraBoundary, Math.abs(cameraOffset[axis] - lastCameraOffset[perspective][axis]));
+                    maxRenderedBoundary = Math.max(maxRenderedBoundary, Math.abs(wrap(renderedBoatYaw - lastBoat[perspective])));
+                    maxRenderedBoundary = Math.max(maxRenderedBoundary, Math.abs(wrap(renderer.bodyYaw - lastBody[perspective])));
+                    maxRenderedBoundary = Math.max(maxRenderedBoundary, Math.abs(wrap(head - lastHead[perspective])));
+                    maxRenderedBoundary = Math.max(maxRenderedBoundary, Math.abs(wrap(camera - lastCamera[perspective])));
+                  }
                   maxBoat = Math.max(maxBoat, Math.abs(wrap(renderedBoatYaw - lastBoat[perspective])));
                   maxBody = Math.max(maxBody, Math.abs(wrap(renderer.bodyYaw - lastBody[perspective])));
                   maxHead = Math.max(maxHead, Math.abs(wrap(head - lastHead[perspective])));
                   maxCamera = Math.max(maxCamera, Math.abs(wrap(camera - lastCamera[perspective])));
                 }
+                lastCameraOffset[perspective] = cameraOffset;
                 lastBoat[perspective] = renderedBoatYaw; lastBody[perspective] = renderer.bodyYaw; lastHead[perspective] = head; lastCamera[perspective] = camera; sampled[perspective] = true;
                 if (steering && fast && protection && placement) frames.add(scenario.replace(' ', ';') + "," + tick + "," + perspective + "," + delta + "," + boat.yaw + "," + boat.prevYaw + "," + renderedBoatYaw + "," + p.yaw + "," + p.prevYaw + "," + p.field_1012 + "," + p.field_1013 + "," + renderer.bodyYaw + "," + head + "," + camera);
               }
+              check(Arrays.equals(frameAngles, new float[]{boat.yaw, boat.prevYaw, p.yaw, p.prevYaw, p.field_1012, p.field_1013}), "render changed boat/rider angles");
             }
-            check(Arrays.equals(angles, new float[]{boat.yaw, boat.prevYaw, p.yaw, p.prevYaw, p.field_1012, p.field_1013}), "render changed boat/rider angles");
           }
           var report = new LinkedHashMap<String, Object>(); report.put("scenario", scenario); report.put("wraps", wraps); report.put("recenters", recenters);
-          report.put("maxBoatFrameDegrees", maxBoat); report.put("maxBodyFrameDegrees", maxBody); report.put("maxHeadFrameDegrees", maxHead); report.put("maxCameraFrameDegrees", maxCamera); reports.add(report);
+          report.put("maxCameraOffsetBoundaryBlocks", maxCameraBoundary); report.put("maxRenderedBoundaryDegrees", maxRenderedBoundary); report.put("maxBodyTickAcceleration", maxBodyAcceleration); report.put("maxTickBoundaryError", maxBoundary); report.put("maxBoatFrameDegrees", maxBoat); report.put("maxBodyFrameDegrees", maxBody); report.put("maxHeadFrameDegrees", maxHead); report.put("maxCameraFrameDegrees", maxCamera); reports.add(report);
           if (steering && wraps == 0) errors.add(scenario + " never crossed a full-turn boundary");
-          if (maxBoat > 5.1 || maxBody > 10 || maxHead > 10 || maxCamera > 5.1) errors.add(scenario + " frame jumps: " + report);
+          if (maxBoundary > .0001 || maxCameraBoundary > .0001 || maxRenderedBoundary > .0001 || (steering && maxBodyAcceleration > 1.5) || maxBoat > 5.1 || maxBody > 3 || maxHead > 3 || maxCamera > 5.1) errors.add(scenario + " frame jumps: " + report);
           p.method_1376(null); boat.markDead(); boat.method_1340(cx + 40, water + 8, cz + 40);
           log("BOAT473 " + report);
         }
@@ -127,6 +158,19 @@ public final class BoatTurn473Checks {
     check(Arrays.equals(config, Files.readAllBytes(PowerConfig.path())), "boat fixture changed saved settings");
     log("BOAT473 errors=" + errors.size());
     if (action.equals("native")) check(errors.isEmpty(), "boat turn failures: " + errors);
+  }
+
+  private static double[] cameraOffset(Minecraft mc, float delta, Method transform, FloatBuffer matrix) throws Exception {
+    GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPushMatrix();
+    try {
+      GL11.glLoadIdentity(); transform.invoke(mc.field_2818, delta);
+      matrix.clear(); GL11.glGetFloat(GL11.GL_MODELVIEW_MATRIX, matrix);
+      // Invert the native rigid camera transform relative to the interpolated rider.
+      return new double[]{
+          -(matrix.get(0) * matrix.get(12) + matrix.get(1) * matrix.get(13) + matrix.get(2) * matrix.get(14)),
+          -(matrix.get(4) * matrix.get(12) + matrix.get(5) * matrix.get(13) + matrix.get(6) * matrix.get(14)),
+          -(matrix.get(8) * matrix.get(12) + matrix.get(9) * matrix.get(13) + matrix.get(10) * matrix.get(14))};
+    } finally { GL11.glPopMatrix(); }
   }
 
   private static float wrap(float angle) { angle %= 360; if (angle < -180) angle += 360; if (angle >= 180) angle -= 360; return angle; }

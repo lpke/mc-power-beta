@@ -1,5 +1,6 @@
 package local.luke.power.creative.inventory.mixin.common;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import local.luke.power.creative.Modes;
 import local.luke.power.creative.api.*;
 import local.luke.power.creative.config.Config;
@@ -55,8 +56,22 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Creative
     if (!power$restoringFlight)
       local.luke.power.creative.FlightController.flightChanged((PlayerEntity) (Object) this, next);
     dataTracker.setData(CreativeInventory.IS_FLYING_ID, CreativeInventory.toByte(next));
-    if (!next) velocityY = 0;
+    if (!next || !power$restoringFlight) velocityY = 0;
     fallDistance = 0;
+  }
+
+  // Keep native interpolation when flight takes over from falling or walking.
+  // Cancelling the renderer's bob transform drops its previous tilt in one frame.
+  @ModifyExpressionValue(method = "processMovement", at = @At(value = "INVOKE",
+      target = "Lnet/minecraft/util/maths/MCMath;sqrt(D)F"))
+  private float power$flightWalkBob(float speed) {
+    return Modes.flying((PlayerEntity) (Object) this) ? 0 : speed;
+  }
+
+  @ModifyExpressionValue(method = "processMovement", at = @At(value = "INVOKE",
+      target = "Ljava/lang/Math;atan(D)D"))
+  private double power$flightTilt(double tilt) {
+    return Modes.flying((PlayerEntity) (Object) this) ? 0 : tilt;
   }
 
   @Override

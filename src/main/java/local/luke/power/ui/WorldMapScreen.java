@@ -627,7 +627,7 @@ public final class WorldMapScreen extends UiScreen {
       if (caveEditor.active()) caveEditor.render(this,caveBounds.x(),caveBounds.y(),caveBounds.width(),hoverX,hoverY,0,height);
       else slider("Y: " + caveWindow().reference(),caveBounds.x(),caveBounds.y(),caveBounds.width(),hoverX,hoverY,caveWindow().reference()/127d);
       var reset = controls().caveReset();
-      button("R",reset.x(),reset.y(),reset.width(),18,hoverX,hoverY,true);
+      button("R",reset.x(),reset.y(),reset.width(),reset.height(),hoverX,hoverY,true);
     }
     if (togglesVisible) MapTogglePanel.draw(minecraft,togglePanel(),hoverX,hoverY,false);
     if (minecraft.world != null && minecraft.world.isRemote)
@@ -693,11 +693,6 @@ public final class WorldMapScreen extends UiScreen {
       }
     }
     if (!coordinates.active() && !context) {
-      if (caveBounds != null && !caveDragging) {
-        if (controls().caveReset().contains(mx,my)) tooltip("Reset to current Y and follow your position",mx,my);
-        else if (caveBounds.contains(mx,my) && !caveEditor.active()) tooltip("Cave Y: " + caveWindow().reference()
-            + (caves.following() ? " (following)" : "") + "\nDrag or scroll to change. Right-click to type.",mx,my);
-      }
       caveEditor.renderError(this);
       var control=controls().at(mx,my);
       if (control != null && control.action()==WorldMapControls.Action.SETTINGS && settingsPanel!=null)

@@ -41,6 +41,11 @@
   scheduled updates, pause/resume, save/reload and access permissions being disabled.
 - Flight sprint covers all three movement axes in creative, spectator and freecam.
   Opposing inputs cancel; stopping movement resets Toggle sprint.
+- Actual flight transitions clear vertical velocity and fall distance; repeated
+  writes of the current flight state leave movement untouched. Restoring saved
+  flight retains its saved motion. Flight suppresses
+  new native walk/fall bob targets while retaining their interpolation, so resuming
+  flight during a fall never drops the camera transform in one frame.
 - Multidirectional sprinting applies to on-foot input. Retain forward-only swimming,
   sprint permissions, activation modes, stamina and combat limits. Normalize the
   movement-aligned jump impulse so diagonals gain no extra speed.
@@ -243,14 +248,34 @@
   Ladder sprint uses normal ground permission, stamina and combat ownership.
 - Modern trapdoor climbing extends native ladder detection in singleplayer only.
   Match 26.3's open trapdoor, ladder immediately below and equal facing predicate.
-  Beta trapdoor orientations 0–3 match ladder metadata 2–5. Preserve native climbing,
-  fall/sneak limits, trapdoor placement, orientation, support and collision geometry.
+  Beta trapdoor orientations 0–3 match ladder metadata 2–5. Keep player passage
+  through qualifying open leaves continuous without a backing block. Modern ladders
+  and open leaves share a 3/16 wall; Beta ladders use 2/16. Continue the native Beta
+  ladder wall through only the qualifying leaf in player movement and pose-clearance
+  queries. Keep the native axis solver, ascent contact, retreat and descent; never
+  bypass an axis or pin an embedded player. Preserve disabled, invalid, mob and
+  multiplayer collisions, native fall/sneak limits, placement and world geometry.
+  Compare complete tick trajectories against native ladder continuation in all four
+  directions, including held input and real roof clearance, rather than final height alone.
 - Spectator crosshair checks use loaded-only read-only rays and Creative reach. Detect
   native use overrides without invoking them or changing the player's interaction target.
-- Optional crouch camera height affects open-space sneaking only with Modern crawling. Keep
-  Beta's native sneak movement when off, the deeper modern drop when on, collision-safe
-  low-ceiling cameras and both native perspectives consistent. Retaining native sneak/step
-  smoothing during pose resizing must preserve collision-box feet and saved positions.
+- Modern crouching retains the saved `gameplay.crouchCameraHeight` ID and owns modern
+  crouch reach. Its default-on `gameplay.lowerCrouchCamera` child controls only the
+  additional open-space camera lowering with Modern crawling. Hide the child when
+  Modern crouching is off without changing its saved preference. Child Off retains
+  Beta's native sneak/step camera motion and modern reach. Forced low-ceiling and
+  compact poses always keep a safe lower camera. Preserve physical feet, saved
+  positions, projectile contracts and the shared logical-eye interpolation through
+  every combination and transition.
+  Verify actual native three-block-down placement and Flexible placement with the
+  child On and Off in all four directions and while switching it. Compensate only
+  Survival's downward block range for the chosen higher eye, bounded by the modern
+  crouch-eye reach sphere; keep the actual ray origin and direction. Retain ordinary
+  upward/horizontal, entity, Creative, custom, compact and detached-camera reach.
+  Rendered picking must use its actual partial-tick view angle and selected eye
+  height. Scope that context with exception-safe restoration; ordinary interaction
+  queries use current values. Never infer camera height by subtracting current feet
+  from an interpolated world position, which adds vertical movement to reach.
 
 - Raw mouse input transfers both signed axes atomically from the polling worker to
   one rendered frame. Preserve exact counts, sensitivity and GUI/grab discards.

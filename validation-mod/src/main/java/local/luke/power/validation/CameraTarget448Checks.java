@@ -129,7 +129,7 @@ public final class CameraTarget448Checks {
     log("CAMERA TARGET 448 FAILURES "+failures);
   }
 
-  private static void checkOrigins(Minecraft mc,float delta) throws Exception {
+  static void checkOrigins(Minecraft mc,float delta) throws Exception {
     var p=mc.player;double raw=p.prevY+(p.y-p.prevY)*delta;
     near(p.method_931(delta).y,raw,1e-9,"render-position method changed its physical origin");
     double logical=raw+InteractionEye.offset(p,delta,0);

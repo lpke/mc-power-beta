@@ -1,6 +1,9 @@
 package local.luke.power.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import local.luke.power.gameplay.CrouchReach;
 import local.luke.power.gameplay.ModernSwimming;
 import local.luke.power.input.InteractionEye;
 import net.minecraft.class_555;
@@ -16,6 +19,14 @@ import net.minecraft.util.math.Vec3d;
 @Mixin(class_555.class)
 public class SwimmingCameraMixin {
   @Shadow private Minecraft field_2349;
+
+  @WrapMethod(method="method_1838")
+  private void power$pickReach(float delta, Operation<Void> original) {
+    if (!CrouchReach.active(field_2349.field_2807)) { original.call(delta); return; }
+    var previous = CrouchReach.beginPick(field_2349.field_2807, delta);
+    try { original.call(delta); }
+    finally { CrouchReach.endPick(previous); }
+  }
 
   @ModifyExpressionValue(method="method_1851",at=@At(value="FIELD",
       target="Lnet/minecraft/entity/LivingEntity;field_1631:F"))

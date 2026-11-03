@@ -104,7 +104,8 @@ public final class ModernSwimming {
 
   private static boolean loweredCamera(SwimState state) {
     return state.compact || state.crouched && (state.lowCeiling
-        || GameplayConfig.current().modernCrawling && GameplayConfig.current().crouchCameraHeight);
+        || GameplayConfig.current().modernCrawling && GameplayConfig.current().crouchCameraHeight
+            && GameplayConfig.current().lowerCrouchCamera);
   }
 
   public static void cancel(ClientPlayerEntity player) {
@@ -183,7 +184,8 @@ public final class ModernSwimming {
     if (x1 - x0 > 2 || z1 - z0 > 2 || !player.world.method_155(x0-3, y0, z0-3, x1+3, y1, z1+3)) return false;
     Box standing = Box.getOrCreate(box.minX + 1e-7, box.minY + 1e-7, box.minZ + 1e-7,
         box.maxX - 1e-7, box.minY + height - 1e-7, box.maxZ - 1e-7);
-    return player.world.method_190(player, standing).isEmpty();
+    // Pose clearance uses the same ladder continuation as native movement.
+    return TrapdoorClimbing.canFit(player, standing, player.world.method_190(player, standing));
   }
 
   private static void resize(ClientPlayerEntity player, boolean compact,boolean crouched) {

@@ -21,6 +21,11 @@ Use plain, short progress updates and state the files/approach before substantia
 edits. Finish authorized work without repeatedly asking for permission. Report facts
 and test limits. Do not commit personal paths, credentials, logs or runtime reports.
 
+Release completion includes [mandatory disk cleanup](docs/agents/build-testing.md#mandatory-release-cleanup).
+Remove disposable residue from the current and earlier release cycles before the
+final response, including accumulated remap caches. Report measured space reclaimed
+and any retained residue with its reason. Repeat cleanup after a deferred instance update.
+
 Subagents are optional when they save meaningful time. Use only **GPT-6.1 Sol with
 high reasoning**, or **GPT-6 Astra with xhigh reasoning**. Astra requires the user's
 explicit request. Sol is encouraged for focused audits, research and checking how

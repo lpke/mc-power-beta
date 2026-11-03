@@ -125,6 +125,27 @@ class SettingAccessTest {
     }
   }
 
+  @Test void crouchCameraChildFollowsParentDraftWithoutChangingItsPreference() {
+    var session = new ConfigSession();
+    Setting parent = entry("gameplay.crouchCameraHeight");
+    Setting child = entry("gameplay.lowerCrouchCamera");
+    Setting crawling = entry("gameplay.modernCrawling");
+    session.add(new Backend() {
+      public String id() { return "test"; }
+      public List<java.nio.file.Path> files() { return List.of(); }
+      public void validate(Map<String, JsonElement> values) {}
+      public void apply(Map<String, JsonElement> values) {}
+    }, List.of(parent, child, crawling));
+    child.value = new JsonPrimitive(false);
+    for (boolean enabled : new boolean[]{false, true, false, true}) for (boolean crawl : new boolean[]{false, true}) {
+      parent.value = new JsonPrimitive(enabled); crawling.value = new JsonPrimitive(crawl);
+      assertEquals(enabled, SettingAccess.visible(session, child));
+      assertTrue(SettingAccess.visible(session, parent));
+      assertFalse(child.value.getAsBoolean());
+      assertTrue(child.changed());
+    }
+  }
+
   @Test void titleStylesRetainRetroDraftsWhileHidingTheirEditors() {
     var session = world();
     Setting style = new Setting("logo.style", "test", "Interface", "Title screen", "Title style", "",

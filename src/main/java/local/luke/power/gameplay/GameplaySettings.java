@@ -17,6 +17,7 @@ public final class GameplaySettings {
   public boolean modernCrawling;
   public boolean modernTrapdoorClimbing;
   public boolean crouchCameraHeight;
+  public boolean lowerCrouchCamera = true;
 
   public void validate() {
     if (mergeThreshold < 16 || mergeThreshold > 16384 || tntPerTick < 1 || tntPerTick > 64

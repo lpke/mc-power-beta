@@ -2480,7 +2480,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.7.3",
+    "default": "Power Beta 4.7.4",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -6911,9 +6911,16 @@
   "gameplay.crouchCameraHeight": {
     "page": "Gameplay",
     "group": "Interaction",
-    "label": "Lower camera when crouching",
-    "description": "With Modern crawling enabled, lower the camera while crouching and use modern 4.5-block Survival block reach from that eye height. Works in first and third person. Off keeps Beta's crouch camera and reach. Low ceilings and crawling always use a safe lower camera.",
+    "label": "Modern crouching",
+    "description": "With Modern crawling enabled, use modern 4.5-block Survival block reach while crouching. Lower camera when crouching controls the extra camera lowering separately. Off keeps Beta's crouch camera and reach. Low ceilings and crawling always keep a safe lower camera.",
     "order": 41.1
+  },
+  "gameplay.lowerCrouchCamera": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Lower camera when crouching",
+    "description": "With Modern crouching and Modern crawling enabled, lower the crouch camera to the modern eye height in first and third person. Off keeps Beta's native crouch camera motion and retains modern block reach. Low ceilings and crawling always keep a safe lower camera.",
+    "order": 41.2
   },
   "audio.underwaterEnterSounds": {
     "page": "Audio",

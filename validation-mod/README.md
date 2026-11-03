@@ -587,6 +587,16 @@ restores the original preferences. `zoom-watch`, a physical Zoom in press, then
 
 Inspect failure counts as well as `COMMAND DONE`. Keep ownership records until fixture cleanup completes.
 
+4.7.4 checks in a muted, focused disposable client at least 1708×960 pixels:
+
+- `picker-474 capture`, then `picker-474 check` covers nested Required tools and all item/block picker domains, selected/unselected hover, full row bounds, isolated drafts and modal hover suppression at 320/854.
+- `flight-474 native` checks real native bob matrices, walk/fall interpolation, flight velocity handoff, no-op writes, save restoration and ordinary falling. `flight-474 arm`, double-tap the native Jump binding, then `flight-474 check` covers actual input while falling. Arm temporarily grants the required world rules and restores them on check; finish the armed check before another fixture.
+- `boat-turn-473 observe` records a baseline; `boat-turn-473 native` requires smooth torso acceleration, native recursive vehicle ticks, partial-frame mouse movement, full-turn wraps and exact camera/position/render boundary continuity across 32 settings/direction combinations.
+- `cape-gallery-473` captures backward, sideways and minecart native poses before `cape-checks` validates actual starts/stops, full strides, armor clearance, disabled native transforms and rendering without simulation writes. Both fixtures use deterministic bundled textures.
+- `trapdoor-climb-473 native` includes unsupported four-direction passage through open leaves, descent/retreat, disabled/invalid/nonplayer/multiplayer collisions and unchanged placement.
+- `crouch-474 capture`, then `crouch-474` covers conditional settings/search at 320/854, all Modern crouching/camera combinations, native perspectives, press/release/live changes, reach, targeting, flexible placement, physical projectiles, modern bow release, reload and forced low-pose safety. Also run `camera-target-448`, `physical-pose-448`, `placement-pose-448`, `native-y-reporting-448` and `mining-overlay-448 run` for the shared contracts and crack geometry.
+- `cave-map-473 capture`, then `cave-map-473 run` includes square reset/standard gap checks and tooltip-free slider/reset captures at 320/854, plus native cave sampling, height controls and freecam behavior.
+
 Write a command to `.minecraft/power-beta-validation.command`. Results append to
 `power-beta-validation.log`; wait for `COMMAND DONE` and inspect failures.
 

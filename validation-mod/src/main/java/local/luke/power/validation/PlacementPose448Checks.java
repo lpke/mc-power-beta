@@ -29,6 +29,7 @@ final class PlacementPose448Checks {
   private static final Pose[] POSES = {
     new Pose("standing", false, false, false, false, 1.62f, 1.62f, 0),
     new Pose("crouch native camera", true, false, false, false, 1.62f, 1.62f, .08f),
+    new Pose("modern crouch native camera", true, false, false, false, 1.62f, 1.62f, .08f),
     new Pose("crouch lowered camera", true, false, false, true, 1.27f, 1.27f, 0),
     new Pose("forced crouch", true, false, true, false, 1.27f, 1.27f, 0),
     new Pose("compact", false, true, true, false, .4f, .4f, 0),
@@ -160,7 +161,9 @@ final class PlacementPose448Checks {
 
   private static void pose(Minecraft mc, Pose pose) {
     var player = mc.player; var state = ((SwimPlayer)player).power$swim();
-    var settings = GameplayConfig.copy(); settings.crouchCameraHeight = pose.lowerCamera();
+    var settings = GameplayConfig.copy();
+    settings.crouchCameraHeight = pose.lowerCamera() || pose.name().equals("modern crouch native camera");
+    settings.lowerCrouchCamera = pose.lowerCamera();
     GameplayConfig.preview(settings);
     state.swimming = false; state.crouched = pose.crouched(); state.compact = pose.compact();
     state.lowCeiling = pose.lowCeiling(); state.previousEyeHeight = pose.previousEye(); state.eyeHeight = pose.eye();

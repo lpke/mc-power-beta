@@ -36,8 +36,9 @@
   selected native/pose first-person camera height, without using targeting rays or
   bob/perspective/free-look transforms. Ordinary Beta projectiles retain native origins.
   Free-look/bob/third-person matrices do not steer normal gameplay targeting.
-  Lower camera when crouching also uses modern 4.5-block Survival block reach only
-  during the actual local crouched pose with Modern crawling enabled. Preserve
+  Modern crouching uses modern 4.5-block Survival block reach during the actual
+  local crouched pose with Modern crawling enabled, including when its Lower camera
+  when crouching child is off. All targeting follows the chosen logical eye. Preserve
   entity reach, Creative/custom ranges, remote authority and detached-camera behavior.
 
 - Held-item lighting uses render-only terrain endpoints and the existing 32-byte

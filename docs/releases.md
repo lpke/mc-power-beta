@@ -119,6 +119,13 @@ Check the GitHub release, website version, changelog, download and checksum.
 Report whether the primary was installed and verified or its update remains pending.
 An unavailable primary does not block authorized publication.
 
+Finish with the [mandatory local cleanup](agents/build-testing.md#mandatory-release-cleanup),
+including accumulated output from previous release cycles. Keep the exact current
+release and required backups. Record measured space reclaimed and any remaining
+development residue with its reason in the private owner report and final response.
+Repeat this step when a deferred instance update is completed. Publication alone
+does not complete the release workflow.
+
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 versioned modpack notes such as [Fabulously Optimized](https://github.com/Fabulously-Optimized/fabulously-optimized/blob/main/CHANGELOG.md).
 

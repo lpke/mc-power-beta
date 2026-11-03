@@ -14,8 +14,12 @@ class WorldMapControlsTest {
       var slider = layout.caveSlider(); var reset = layout.caveReset();
       assertEquals(mode.x()+mode.width()+4,slider.x());
       assertEquals(slider.x()+slider.width()+4,reset.x());
+      assertEquals(18,reset.width()); assertEquals(reset.width(),reset.height());
+      assertEquals(slider.height(),reset.height());
       assertEquals(mode.y(),slider.y()); assertEquals(mode.y(),reset.y());
       assertTrue(slider.width()>=70);
+      assertTrue(reset.contains(reset.x()+reset.width()-1,reset.y()+reset.height()-1));
+      assertFalse(reset.contains(reset.x()+reset.width(),reset.y()+reset.height()-1));
       var boxes = new java.util.ArrayList<WorldMapControls.Box>();
       layout.buttons().forEach(button->boxes.add(button.bounds()));
       boxes.add(slider); boxes.add(reset); boxes.add(layout.scale());

@@ -189,6 +189,41 @@ class DefaultBasesTest {
       }));
     }
   }
+  @Test void crouchCameraSplitPreservesParentAndFreezesChildWithVerifiedBackup() throws Exception {
+    ConfigDefaults.prepare(game);
+    for (var base : DefaultBases.Base.values()) for (boolean parent : new boolean[]{false, true}) {
+      JsonObject old = PowerConfig.document();
+      var settings = old.getAsJsonObject("settings");
+      settings.getAsJsonObject("defaults").addProperty("base", base.id);
+      settings.getAsJsonObject("gameplay").addProperty("crouchCameraHeight", parent);
+      settings.getAsJsonObject("gameplay").remove("lowerCrouchCamera");
+      settings.getAsJsonObject("gameplay").addProperty("futureCrouchEvidence", "preserve");
+      PowerConfig.write(old); byte[] original = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      var expected = old.deepCopy();
+      expected.getAsJsonObject("settings").getAsJsonObject("gameplay").addProperty("lowerCrouchCamera", true);
+      assertEquals(expected, PowerConfig.document());
+      try (var backups = Files.list(game.resolve("power-beta-data/settings-backups"))) {
+        assertTrue(backups.anyMatch(dir -> {
+          try { return Arrays.equals(original, Files.readAllBytes(dir.resolve("file-0"))) && Files.exists(dir.resolve("complete.json")); }
+          catch (Exception failure) { return false; }
+        }));
+      }
+      var saved = PowerConfig.document();
+      saved.getAsJsonObject("settings").getAsJsonObject("gameplay").addProperty("lowerCrouchCamera", false);
+      PowerConfig.write(saved);
+      DefaultBases.use(base == DefaultBases.Base.BETA ? DefaultBases.Base.POWER_BETA : DefaultBases.Base.BETA, game);
+      byte[] explicit = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game);
+      assertArrayEquals(explicit, Files.readAllBytes(PowerConfig.path()));
+      var roundTrip = PowerConfig.read("gameplay", local.luke.power.gameplay.GameplaySettings.class);
+      assertEquals(parent, roundTrip.crouchCameraHeight);
+      assertFalse(roundTrip.lowerCrouchCamera);
+    }
+    assertTrue(new local.luke.power.gameplay.GameplaySettings().lowerCrouchCamera);
+    assertEquals("Modern crouching", Catalog.metadata("gameplay.crouchCameraHeight").get("label").getAsString());
+  }
+
   @Test void missingBoatDirectionIsInitializedOnceAndResetBaseNeverChangesItsSavedValue() throws Exception {
     ConfigDefaults.prepare(game);
     for (var base : DefaultBases.Base.values()) {
@@ -295,6 +330,7 @@ class DefaultBasesTest {
       assertEquals(base == DefaultBases.Base.POWER_BETA ? 300 : 30,
           DefaultBases.value(base, "power_controls:general.autosaveInterval", new JsonPrimitive(30)).getAsInt());
       assertFalse(DefaultBases.value(base, "gameplay.crouchCameraHeight", new JsonPrimitive(false)).getAsBoolean());
+      assertTrue(DefaultBases.value(base, "gameplay.lowerCrouchCamera", new JsonPrimitive(false)).getAsBoolean());
       assertTrue(DefaultBases.value(base, "gameplay.modernBowFov", new JsonPrimitive(false)).getAsBoolean());
       assertTrue(DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.blurBackground", blurDefault).getAsBoolean());
       assertEquals(base == DefaultBases.Base.POWER_BETA ? "b1_8_1" : "b1_7_3",

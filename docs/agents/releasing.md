@@ -13,6 +13,11 @@ update as pending and continue authorized publication and website deployment.
 Do not wait for it to close or ask again for release permission. A deferred update
 still requires an idle instance and the exact validated artifacts when performed.
 
+After publication and live verification, perform the [mandatory release cleanup](build-testing.md#mandatory-release-cleanup)
+before declaring delivery complete. Include old remap caches and development
+artifacts, not just the latest test clone. Report measured space reclaimed and any
+blocked cleanup. A deferred primary update must also finish with this cleanup.
+
 For a re-release, merge changes into that version's existing `CHANGELOG.md` entry,
 GitHub notes and website changelog, rewording overlapping bullets into one tidy
 release. Public notes must not label changes as re-released or mention earlier
