@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import local.luke.power.client_fixes.client.gui.CallbackButtonWidget;
 import local.luke.power.client_fixes.client.gui.CallbackConfirmScreen;
+import org.lwjgl.input.Keyboard;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -106,6 +107,15 @@ public class MultiplayerScreen extends Screen {
     @Override
     protected void buttonClicked(ButtonWidget button) {
         this.serverListWidget.buttonClicked(button);
+    }
+
+    @Override
+    protected void keyPressed(char character, int keyCode) {
+        if (keyCode == Keyboard.KEY_ESCAPE) {
+            this.minecraft.setScreen(this.parent);
+            return;
+        }
+        super.keyPressed(character, keyCode);
     }
 
     public void selectServer(int slot, boolean join) {

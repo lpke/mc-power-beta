@@ -2,7 +2,6 @@ package local.luke.power.controls.mixin.tweaks.rawinput;
 
 import local.luke.power.controls.ControlFeatures;
 import local.luke.power.controls.tweaks.rawinput.RawInputHandler;
-import local.luke.power.controls.tweaks.rawinput.RawMouseHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Mouse;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,7 +31,6 @@ public class MinecraftMixin {
     public void replaceMouseHelper(CallbackInfo ci) {
         if (ControlFeatures.GENERAL_CONFIG.rawInput) {
             ControlFeatures.LOGGER.info("Enabling Raw Input");
-            mouse = new RawMouseHelper(this.canvas);
             RawInputHandler.rawInputEnabled = true;
             RawInputHandler.init();
         }
@@ -58,4 +56,10 @@ public class MinecraftMixin {
             RawInputHandler.onJoinWorld();
         }
     }
+
+    @Inject(method = "setScreen", at = @At("HEAD"))
+    private void power$retireRawScreenSession(CallbackInfo ci) { RawInputHandler.suspendCapture(); }
+
+    @Inject(method = "setScreen", at = @At("RETURN"))
+    private void power$rawScreenSession(CallbackInfo ci) { RawInputHandler.refreshCapture(); }
 }

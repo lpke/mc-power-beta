@@ -27,6 +27,9 @@ dependencies {
     modCompileOnly files('../modules/worldedit/build/libs/power-worldedit-1.2.1.jar','../modules/building/build/libs/power_building-1.2.1.jar')
     modCompileOnly files('../vendor/jars/GlassConfigAPI-3.2.5.jar')
     modCompileOnly files('../build/platform-compile/station-gui-api-v0-2.0.0-alpha.6.4-1.0.0.jar')
+    modCompileOnly files('../build/platform-compile/station-api-base-2.0.0-alpha.6.4-1.0.0.jar',
+            '../build/platform-compile/station-player-api-v0-2.0.0-alpha.6.4-1.0.0.jar')
+    compileOnly files('../build/platform-compile/UnsafeEvents-e31096e.jar')
     compileOnly 'com.google.code.gson:gson:2.8.9'
     compileOnly files('../vendor/jars/SmoothBeta-1.1.8.jar')
     compileOnly 'org.apache.logging.log4j:log4j-api:2.17.1'

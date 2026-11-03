@@ -8,9 +8,10 @@ import org.lwjgl.input.Mouse;
 
 /** Owns ordered GUI mouse events; the renderer owns sensitivity and camera rotation. */
 public final class InventoryLook {
+  public static final int WARP_EVENT = -2;
   private static final InventoryLookDrag DRAG = new InventoryLookDrag();
   private static final InventoryPointer POINTER = new InventoryPointer();
-  private static boolean captured, previouslyGrabbed, events, capturing;
+  private static boolean captured, previouslyGrabbed, events, capturing, restoring;
   private static Object motionScreen, motionWorld, motionPlayer;
   private InventoryLook() {}
 
@@ -22,6 +23,7 @@ public final class InventoryLook {
 
   public static boolean active() { return DRAG.active(); }
   public static boolean capturing() { return capturing; }
+  public static boolean restoring() { return restoring; }
   public static boolean hasMotion() { return POINTER.hasMotion(); }
   public static int cursorX(Screen screen, Minecraft mc) { return POINTER.x() * screen.width / mc.displayWidth; }
   public static int cursorY(Screen screen, Minecraft mc) { return screen.height - POINTER.y() * screen.height / mc.displayHeight - 1; }
@@ -30,6 +32,11 @@ public final class InventoryLook {
 
   /** Called for every event, before the normal screen handler, without changing the native queue. */
   public static boolean mouseEvent(Minecraft mc, Screen screen) {
+    if (Mouse.getEventButton() == WARP_EVENT) {
+      if (motionScreen == screen && motionWorld == mc.world && motionPlayer == mc.player)
+        POINTER.warp(Mouse.getEventX(), Mouse.getEventY());
+      return true;
+    }
     if (!Config.current().inventoryMouseLook || !InventoryMovement.allows(mc, screen)) return active();
     events = true;
     POINTER.event(Mouse.getEventX(), Mouse.getEventY(), Mouse.getEventDX(), Mouse.getEventDY(), Mouse.isGrabbed());
@@ -59,7 +66,9 @@ public final class InventoryLook {
       // Xwayland can ignore visible-cursor warps. Even a complete quick gesture needs
       // the native hidden-cursor transition, after all queued clicks are dispatched.
       if (!captured && !Mouse.isGrabbed()) captureMouse();
-      restoreCursor();
+      restoring = true;
+      try { restoreCursor(); }
+      finally { restoring = false; }
     }
     POINTER.batchFinished(captured);
   }

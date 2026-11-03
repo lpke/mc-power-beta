@@ -10,6 +10,7 @@ public final class ExtraSounds {
       "item.bucket.fill", "item.bucket.fill_lava", "item.bucket.empty", "item.bucket.empty_lava",
       "entity.cow.milk", "item.bone_meal.use", "block.lava.pop", "block.lava.ambient", "entity.generic.extinguish_fire", "entity.generic.splash", "entity.hostile.splash", "entity.player.swim",
       "entity.arrow.shoot", "entity.arrow.hit", "entity.item.break",
+      "entity.player.attack.strong", "entity.player.attack.weak", "entity.player.attack.sweep", "entity.player.attack.knockback",
       "block.ladder.step", "block.ladder.fall",
       "entity.player.splash", "entity.player.splash.high_speed", "ambient.underwater.enter", "ambient.underwater.exit",
       "ambient.underwater.loop", "ambient.underwater.loop.additions", "ambient.underwater.loop.additions.rare",
@@ -29,6 +30,7 @@ public final class ExtraSounds {
       case "power_controls:features.toolBreakSounds", "power_controls:features.armorBreakSounds" -> "power_controls:random.break";
       case "power_controls:features.moreSoundsChests" -> "power_controls:random.chestopen";
       case "audio.redstonePlacementSound" -> "step.stone";
+      case "audio.vehicleAttackSounds" -> "power_beta:entity.player.attack.strong";
       case "audio.ladderSounds" -> "power_beta:block.ladder.step";
       case "audio.seedPlantingSounds" -> "power_beta:item.crop.plant";
       case "audio.hoeTillingSounds" -> "power_beta:item.hoe.till";

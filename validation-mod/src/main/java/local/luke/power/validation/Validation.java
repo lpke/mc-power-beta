@@ -136,8 +136,17 @@ public final class Validation {
       else if (command.equals("sorting-worlds-440")) Sorting440Checks.run(mc);
       else if (command.equals("sorting-472 capture")) Sorting472Checks.capture(mc);
       else if (command.startsWith("particles-472 ")) Particles472Checks.run(mc, command.substring(14));
+      else if (command.startsWith("cave-map-473 ")) CaveMap473Checks.run(mc, command.substring("cave-map-473 ".length()));
+      else if (command.startsWith("gui-cursor-473 ")) GuiCursor473Checks.run(mc, command.substring("gui-cursor-473 ".length()));
+      else if (command.startsWith("cursor-latency-473 ")) CursorLatency473Checks.run(mc, command.substring("cursor-latency-473 ".length()));
+      else if (command.equals("raw-ownership-473")) RawOwnership473Checks.run(mc);
       else if (command.startsWith("gui-cursor-472 ")) GuiCursor472Checks.run(mc, command.substring("gui-cursor-472 ".length()));
       else if (command.startsWith("snow-472 ")) Snow472Checks.run(mc, command.substring("snow-472 ".length()));
+      else if (command.equals("ui-473")) Ui473Checks.run(mc);
+      else if (command.startsWith("boat-turn-473 ")) BoatTurn473Checks.run(mc, command.substring("boat-turn-473 ".length()));
+      else if (command.startsWith("trapdoor-climb-473 ")) TrapdoorClimb473Checks.run(mc, command.substring("trapdoor-climb-473 ".length()));
+      else if (command.equals("crouch-reach-473")) CrouchReach473Checks.run(mc);
+      else if (command.equals("vein-progress-473")) VeinProgress473Checks.run(mc);
       else if (command.startsWith("sprint-472 ")) Sprint472Checks.run(mc, command.substring("sprint-472 ".length()));
       else if (command.startsWith("settings-400 ")) HudSettings400Checks.run(mc,command.substring(13));
       else if (command.startsWith("input-400 ")) Input400Checks.run(mc,command.substring(10));
@@ -174,6 +183,7 @@ public final class Validation {
       else if (command.startsWith("creative-443-containers")) Creative443ContainerChecks.run(mc, command.substring(23).trim());
       else if (command.startsWith("inventory-442")) Inventory442Checks.run(mc, command.substring(13).trim());
       else if (command.equals("player-fire-extinguish-448")) PlayerFireExtinguish448Checks.run(mc);
+      else if (command.equals("vehicle-sounds-473")) VehicleSounds473Checks.run(mc);
       else if (command.equals("extra-sounds-470")) ExtraSounds470Checks.run(mc);
       else if (command.equals("smart-slabs-470")) SmartSlabs470Checks.run(mc);
       else if (command.equals("fluid-sounds-440")) FluidSounds440Checks.run(mc);
@@ -224,6 +234,7 @@ public final class Validation {
       else if (command.startsWith("freecam-motion ")) FreecamMotionChecks.run(mc, command.substring(15));
       else if (command.startsWith("freecam-preview ")) FreecamPreviewChecks.run(mc, command.substring(16));
       else if (command.equals("cape-checks")) CapeChecks.run(mc);
+      else if (command.equals("cape-gallery-473")) CapeGallery473Checks.run(mc);
       else if (command.equals("music-collapse")) MusicCollapseChecks.run(mc);
       else if (command.equals("cactus-items")) CactusChecks.run(mc);
       else if (command.equals("menu-scrub")) MenuScrubChecks.run(mc);

@@ -32,7 +32,7 @@ class ExtraSoundDefaultsTest {
     }
   }
   private static final List<String> KEYS = List.of("seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "boneMealSounds",
-      "lavaPopSounds", "playerFireExtinguish", "waterSplashSounds", "swimmingSounds");
+      "lavaPopSounds", "vehicleAttackSounds", "playerFireExtinguish", "waterSplashSounds", "swimmingSounds");
   @TempDir Path game;
   private Object priorFile, priorBase, priorSetup;
 

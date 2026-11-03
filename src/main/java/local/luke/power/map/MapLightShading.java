@@ -36,7 +36,8 @@ public final class MapLightShading {
         ? screen.lightLayer(Maps.dimension()) : Maps.layer();
     if (selected == Integer.MIN_VALUE) { clear(); return; }
     int x = (int)Math.floor(Maps.x()), z = (int)Math.floor(Maps.z());
-    String nextContext = selected < 0 ? "" : Maps.cache().viewContext();
+    String nextContext = selected < 0 ? "" : mc.currentScreen instanceof WorldMapScreen screen
+        ? screen.caveContext() : Maps.cache().viewContext();
     if (world != mc.world || layer != selected || radius != settings.lightRadius || !context.equals(nextContext)) {
       clear(); world = mc.world; context = nextContext; layer = selected; radius = settings.lightRadius; cx = x; cz = z;
     }
@@ -52,7 +53,7 @@ public final class MapLightShading {
       if (dx * dx + dz * dz > radius * radius) continue;
       int bx = cx + dx, bz = cz + dz;
       if (MapSampler.loaded(world, bx >> 4, bz >> 4) == null) continue;
-      MapTile tile = Maps.cache().peek(MapMath.key(Maps.dimension(), layer, 0, bx, bz));
+      MapTile tile = Maps.cache().peek(MapMath.key(Maps.dimension(), layer, 0, bx, bz, context));
       int i = MapMath.index(bx, bz);
       if (tile == null || !tile.known(i)) continue;
       // Native support/clearance checks exclude leaves, fluids, slabs and low ceilings.
@@ -82,7 +83,9 @@ public final class MapLightShading {
     if (!settings.lightOverlay || world == null || dimension != Maps.dimension() || cells.isEmpty()) return;
     int shown = !mini && mc.currentScreen instanceof WorldMapScreen screen
         ? screen.lightLayer(dimension) : Maps.layer();
-    if (shown != layer) return;
+    String shownContext = shown < 0 ? "" : !mini && mc.currentScreen instanceof WorldMapScreen screen
+        ? screen.caveContext() : Maps.cache().viewContext();
+    if (shown != layer || !context.equals(shownContext)) return;
     GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     try {
       GL11.glDisable(GL11.GL_TEXTURE_2D); GL11.glDisable(GL11.GL_DEPTH_TEST);

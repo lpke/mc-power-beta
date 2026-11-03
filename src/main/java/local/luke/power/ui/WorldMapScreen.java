@@ -18,6 +18,10 @@ public final class WorldMapScreen extends UiScreen {
   private final TextInput serverMap = new TextInput(Maps.submap(), 48);
   private final MapCoordinatesDialog coordinates = new MapCoordinatesDialog();
   private int dimension = Maps.dimension(), layer = Maps.layer();
+  private final WorldMapCaves caves = new WorldMapCaves();
+  private final InlineValueEditor caveEditor = new InlineValueEditor();
+  private boolean caveDragging;
+  private SliderGeometry.PhysicalTrack caveTrack;
   private boolean dragging, context, scaleDragging, screenshot;
   private double dragX, dragZ, scaleDx, scaleDy;
   private long deleteUntil;
@@ -57,6 +61,7 @@ public final class WorldMapScreen extends UiScreen {
     if (optionsOwner != null || !MapConfig.current().worldMap) closeMap();
   }
   private void toggleSettings() {
+    cancelCaveGesture();
     if (settingsPanel != null) { settingsPanel.requestPanelClose(this::closeSettings); return; }
     if (optionsOwner == null && MapSettingsScope.panelWidth(width, height) == width) { PowerOptionsScreen.openMap(minecraft, this); return; }
     var entryStyle = MapConfig.current();
@@ -76,10 +81,10 @@ public final class WorldMapScreen extends UiScreen {
   public boolean minimapRadarActive() { return settingsPanel != null && mapWidth() >= 200; }
   public boolean terrainVisible() { return mapLeft() < width; }
   public boolean radarIconsAllowed() {
-    return !coordinates.active() && !serverMap.focused && !context
+    return !caveEditor.active() && !coordinates.active() && !serverMap.focused && !context
         && (settingsPanel == null || settingsPanel.radarIconsAllowed());
   }
-  private boolean panelOwns(int x) { return settingsPanel != null && (settingsPanel.panelModal() || panelPress || !dragging && !scaleDragging && x < mapLeft()); }
+  private boolean panelOwns(int x) { return settingsPanel != null && (settingsPanel.panelModal() || panelPress || !dragging && !scaleDragging && !caveDragging && x < mapLeft()); }
   private void drawMinimap(float delta) {
     minimapHit = null;
     if (settingsPanel == null || mapWidth() < 200) return;
@@ -142,6 +147,7 @@ public final class WorldMapScreen extends UiScreen {
 
   /** Read-only interest for tick-owned sampling; only the currently loaded dimension/layer qualifies. */
   public MapProjection samplingView(int dimension, int layer) {
+    syncLayer();
     return this.dimension == dimension && this.layer == layer ? projection() : null;
   }
 
@@ -158,19 +164,59 @@ public final class WorldMapScreen extends UiScreen {
         0);
   }
 
-  public int lightLayer(int dimension) { return this.dimension == dimension ? layer : Integer.MIN_VALUE; }
+  public int lightLayer(int dimension) { syncLayer(); return this.dimension == dimension ? layer : Integer.MIN_VALUE; }
+  public CaveWindow caveWindow() { return caves.window(MapConfig.current(), Maps.y()); }
+  public String caveContext() { return layer < 0 ? "" : caveWindow().context(); }
+  private void syncLayer() {
+    layer = caves.shown(Maps.layer() >= 0) ? caveWindow().layer() : -1;
+    if (layer < 0) { caveDragging = false; caveEditor.cancel(); }
+  }
+  private MapMath.Key terrainKey(int x, int z) {
+    syncLayer();
+    return MapMath.key(dimension, layer, 0, x, z, caveContext());
+  }
+  private void cancelCaveGesture() { caveDragging = false; caveEditor.cancel(); }
+  private void caveDrag(double physicalX) { caves.select((int)Math.round(caveTrack.fraction(physicalX) * 127)); syncLayer(); }
+  private boolean caveWheel(int x, int y, int wheel) {
+    var bounds = controls().caveSlider();
+    if (wheel == 0 || bounds == null || !bounds.contains(x,y) || caveEditor.active()) return false;
+    caves.select(caveWindow().reference() + Integer.signum(wheel)); syncLayer(); return true;
+  }
+  private boolean cavePress(int x, int y, int button) {
+    if (caveEditor.press(x,y,button)) return true;
+    var slider = controls().caveSlider(); var reset = controls().caveReset();
+    if (reset != null && reset.contains(x,y)) {
+      serverMap.focused = false;
+      if (button == 0) { click(); caves.reset(); syncLayer(); }
+      return true;
+    }
+    if (slider == null || !slider.contains(x,y)) return false;
+    serverMap.focused = false;
+    if (button == 0) {
+      caveTrack = SliderGeometry.physicalTrack(slider.x(),slider.width(),(double)minecraft.displayWidth/width);
+      caveDragging = true; caveDrag(Math.floor((double)x*minecraft.displayWidth/width));
+    } else if (button == 1) {
+      var value = new com.google.gson.JsonPrimitive(caveWindow().reference());
+      var setting = new local.luke.power.config.Setting("worldMap.caveY", "", "", "", "Cave Y", "",
+          local.luke.power.config.Setting.Kind.INTEGER, value, value, 0, 127, 1, List.of(), false);
+      caveEditor.begin(caves, setting, () -> { caves.select(setting.value.getAsInt()); syncLayer(); },
+          slider.x(),slider.y(),slider.width(),0,height);
+    }
+    return true;
+  }
 
   private WorldMapControls controls() {
+    syncLayer();
     var style = MapConfig.current();
     boolean panel = settingsPanel != null;
     if (controls == null || controlsLeft != mapLeft() || controlsWidth != mapWidth() || controlsHeight != height
         || controlsLayer != layer || controlsDimension != dimension || controlsSettings != panel || controlsStyle != style) {
       String[] labels = {togglesVisible ? "Hide Toggles" : "Show Toggles", "Waypoints", panel ? "Close settings" : "Settings",
-          layer < 0 ? "Caves" : "Surface", MapDimensions.name(dimension), "Center", "Go to", "Close"};
+          layer < 0 ? "Surface" : "Caves", MapDimensions.name(dimension), "Center", "Go to", "Close"};
       int bottomWidth = 16;
       for (int i = 0; i < 5; i++) bottomWidth += textRenderer.getWidth(labels[i]) + 12;
       if (bottomWidth > mapWidth() - 16) labels[2] = "Settings";
-      controls = WorldMapControls.at(mapLeft(), mapWidth(), height, labels, textRenderer::getWidth);
+      controls = WorldMapControls.at(mapLeft(), mapWidth(), height, labels, textRenderer::getWidth, layer >= 0);
       controlsLeft = mapLeft(); controlsWidth = mapWidth(); controlsHeight = height;
       controlsLayer = layer; controlsDimension = dimension; controlsSettings = panel; controlsStyle = style;
     }
@@ -194,7 +240,9 @@ public final class WorldMapScreen extends UiScreen {
   private int scaleY() { return controls().scale().y() + 16; }
   private WorldMapControls.Box scaleBounds() { return controls().scale().translated((int)scaleDx, (int)scaleDy); }
   private boolean overControls(int x, int y) {
-    if (controls().at(x,y) != null || togglesVisible && togglePanel().bounds().contains(x,y)) return true;
+    var navigation = controls();
+    if (navigation.caveSlider() != null && (navigation.caveSlider().contains(x,y) || navigation.caveReset().contains(x,y))) return true;
+    if (navigation.at(x,y) != null || togglesVisible && togglePanel().bounds().contains(x,y)) return true;
     if (settingsPanel != null && minimapHit != null
         && inside(x, y, (int)minimapHit.x(), (int)minimapHit.y(), (int)minimapHit.width(), (int)minimapHit.height())) return true;
     if (minecraft.world != null && minecraft.world.isRemote
@@ -270,7 +318,7 @@ public final class WorldMapScreen extends UiScreen {
     view.x = Maps.x();
     view.z = Maps.z();
     dimension = Maps.dimension();
-    layer = Maps.layer();
+    caves.center(); syncLayer(); cancelCaveGesture();
   }
 
   public void init() {
@@ -291,10 +339,11 @@ public final class WorldMapScreen extends UiScreen {
     message = "";
     context = dragging = scaleDragging = panelPress = false;
     scaleDx = scaleDy = 0;
-    controls = null; TextDrag.cancel();
+    controls = null; TextDrag.cancel(); cancelCaveGesture();
   }
 
   public void removed() {
+    cancelCaveGesture();
     dragging = scaleDragging = panelPress = false;
     if (settingsPanel != null) settingsPanel.panelCancelGesture();
     buffer.clear();
@@ -305,6 +354,7 @@ public final class WorldMapScreen extends UiScreen {
 
   protected void keyPressed(char c, int key) {
     if (coordinates.key(this,c,key)) return;
+    if (caveEditor.key(c,key)) return;
     if (radarIconsAllowed() && local.luke.power.input.Bindings.matches(MapKeys.RADAR_ICONS, key)) return;
     if (settingsPanel != null) { settingsPanel.keyPressed(c, key); return; }
     if (context) {
@@ -348,6 +398,7 @@ public final class WorldMapScreen extends UiScreen {
   }
 
   private void goTo() {
+    cancelCaveGesture();
     zoom.cancel(); context = dragging = scaleDragging = panelPress = false;
     scaleDx = scaleDy = 0; serverMap.focused = false;
     if (settingsPanel != null) settingsPanel.panelCancelGesture();
@@ -368,7 +419,7 @@ public final class WorldMapScreen extends UiScreen {
       case TOGGLES -> { togglesVisible = !togglesVisible; rememberedTogglesVisible=togglesVisible; controls = null; }
       case WAYPOINTS -> minecraft.setScreen(new WaypointsScreen(this));
       case SETTINGS -> toggleSettings();
-      case LAYER -> layer = layer < 0 ? MapSampler.window(MapConfig.current(),Maps.y()).layer() : -1;
+      case LAYER -> { caves.toggle(Maps.layer() >= 0); syncLayer(); cancelCaveGesture(); }
       case DIMENSION -> dimension = dimension == 0 ? -1 : 0;
       case CENTER -> center();
       case GO_TO -> goTo();
@@ -382,7 +433,7 @@ public final class WorldMapScreen extends UiScreen {
     p.z = (int) Math.floor(z);
     p.dimension = dimension;
     MapTile tile =
-        Maps.cache() == null ? null : Maps.cache().peek(MapMath.key(dimension, layer, 0, p.x, p.z));
+        Maps.cache() == null ? null : Maps.cache().peek(terrainKey(p.x, p.z));
     if (tile != null && tile.known(MapMath.index(p.x, p.z)))
       p.y = Math.min(127, tile.height(MapMath.index(p.x, p.z)) + 1);
     minecraft.setScreen(new WaypointEditorScreen(this, p));
@@ -391,9 +442,11 @@ public final class WorldMapScreen extends UiScreen {
   protected void mouseClicked(int x, int y, int button) {
     if (coordinates.press(this,x,y,button)) return;
     if (panelOwns(x) && (!context || settingsPanel.panelModal())) {
+      cancelCaveGesture();
       if (!panelPress) { panelPress = true; panelPressButton = button; }
       settingsPanel.mouseClicked(x, y, button); return;
     }
+    if (caveDragging) return;
     zoom.cancel();
     if (context) {
       var actions = contextActions();
@@ -403,6 +456,7 @@ public final class WorldMapScreen extends UiScreen {
       } else context = false;
       return;
     }
+    if (cavePress(x,y,button)) return;
     if (togglesVisible && togglePanel().bounds().contains(x,y)) {
       int row=togglePanel().rowAt(x,y);
       if(button==0&&row>=0) { click(); toggleOverlay(togglePanel().toggle(row)); }
@@ -443,7 +497,7 @@ public final class WorldMapScreen extends UiScreen {
       target.x = (int) Math.floor(position.x());
       target.z = (int) Math.floor(position.y());
       target.dimension = dimension;
-      MapTile tile = Maps.cache().peek(MapMath.key(dimension, layer, 0, target.x, target.z));
+      MapTile tile = Maps.cache().peek(terrainKey(target.x, target.z));
       if (tile != null && tile.known(MapMath.index(target.x, target.z)))
         target.y = Math.min(127, tile.height(MapMath.index(target.x, target.z)) + 1);
       Waypoint hovered = hoveredWaypoint(x, y);
@@ -469,6 +523,7 @@ public final class WorldMapScreen extends UiScreen {
       return;
     }
     if (button == 0) {
+      if (caveDragging) { caveDrag(Math.floor((double)x*minecraft.displayWidth/width)); caveDragging = false; return; }
       if (dragging) panTo(x, y);
       dragging = scaleDragging = false;
       scaleDx = scaleDy = 0;
@@ -479,7 +534,7 @@ public final class WorldMapScreen extends UiScreen {
     int x = Mouse.getEventX() * width / minecraft.displayWidth,
         y = height - Mouse.getEventY() * height / minecraft.displayHeight - 1;
     if (!Display.isActive()) {
-      dragging = scaleDragging = panelPress = false; scaleDx = scaleDy = 0;
+      dragging = scaleDragging = panelPress = caveDragging = false; scaleDx = scaleDy = 0;
       if (settingsPanel != null) settingsPanel.panelCancelGesture();
     }
     if (coordinates.active()) { super.onMouseEvent(); return; }
@@ -488,16 +543,18 @@ public final class WorldMapScreen extends UiScreen {
       super.onMouseEvent(); return;
     }
     int wheel = Mouse.getEventDWheel();
-    if (wheel != 0 && Display.isActive() && !context && !dragging && !scaleDragging
+    if (wheel != 0 && Display.isActive() && !context && !dragging && !scaleDragging && !caveDragging
+        && caveWheel(x,y,wheel)) return;
+    if (wheel != 0 && Display.isActive() && !context && !dragging && !scaleDragging && !caveDragging
         && togglesVisible && togglePanel().bounds().contains(x,y)) {
       toggleScroll=togglePanel().scroll(wheel); return;
     }
-    if (wheel != 0 && Display.isActive() && !Mouse.isGrabbed() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !context && !dragging && !scaleDragging && settingsPanel != null
+    if (wheel != 0 && Display.isActive() && !Mouse.isGrabbed() && !Mouse.isButtonDown(0) && !Mouse.isButtonDown(1) && !context && !dragging && !scaleDragging && !caveDragging && settingsPanel != null
         && settingsPanel.minimapWheelAllowed() && minimapLayout != null
         && MinimapGeometry.contains(minimapLayout, minimapStyle.circular, x, y)) {
       settingsPanel.zoomMinimap(wheel); return;
     }
-    if (!context
+    if (!context && !caveDragging
         && (scaleDragging || !overControls(x, y))
         && Mouse.getEventDWheel() != 0
         && y >= top()
@@ -518,13 +575,15 @@ public final class WorldMapScreen extends UiScreen {
 
   public void render(int mx, int my, float delta) {
     if (!MapConfig.current().worldMap && settingsPanel == null) { closeMap(); return; }
+    if (terrainVisible()) syncLayer();
     zoom.update(view, System.nanoTime());
     if (!Display.isActive()) {
-      dragging = scaleDragging = panelPress = false; scaleDx = scaleDy = 0;
+      dragging = scaleDragging = panelPress = caveDragging = false; scaleDx = scaleDy = 0;
       if (settingsPanel != null) settingsPanel.panelCancelGesture();
     }
     double pointerX = Mouse.getX() * (double) width / minecraft.displayWidth;
     double pointerY = height - Mouse.getY() * (double) height / minecraft.displayHeight - 1;
+    if (caveDragging) caveDrag(Mouse.getX());
     if (dragging && !context && !coordinates.active()) panTo(pointerX, pointerY);
     if (scaleDragging) { scaleDx = pointerX - lastX; scaleDy = pointerY - lastY; }
     fill(0, 0, width, height, 0xff101015);
@@ -536,15 +595,16 @@ public final class WorldMapScreen extends UiScreen {
       GL11.glPushAttrib(GL11.GL_SCISSOR_BIT);
       try {
         clip(mapLeft(), top(), mapWidth(), bottom() - top());
-        if (!buffer.draw(minecraft, projection, dimension, layer, style, width, height)) MapRenderer.terrain(
+        if (!buffer.draw(minecraft, projection, dimension, layer, caveContext(), style, width, height)) MapRenderer.terrain(
             Maps.cache(),
             projection,
             dimension,
             layer,
+            caveContext(),
             false,
             style,
             !minecraft.world.isRemote,
-            minecraft.world.getSeed());
+            minecraft.world.getSeed(), MapRenderer.pixelsPerUnit(), true);
         MapRenderer.markers(minecraft, projection, dimension, false, false);
       } finally { GL11.glPopAttrib(); }
     }
@@ -562,6 +622,13 @@ public final class WorldMapScreen extends UiScreen {
         tabButton(label,b.x(),b.y(),b.width(),18,hoverX,hoverY,true,true);
       else button(label,b.x(),b.y(),b.width(),18,hoverX,hoverY,true);
     }
+    var caveBounds = controls().caveSlider();
+    if (caveBounds != null) {
+      if (caveEditor.active()) caveEditor.render(this,caveBounds.x(),caveBounds.y(),caveBounds.width(),hoverX,hoverY,0,height);
+      else slider("Y: " + caveWindow().reference(),caveBounds.x(),caveBounds.y(),caveBounds.width(),hoverX,hoverY,caveWindow().reference()/127d);
+      var reset = controls().caveReset();
+      button("R",reset.x(),reset.y(),reset.width(),18,hoverX,hoverY,true);
+    }
     if (togglesVisible) MapTogglePanel.draw(minecraft,togglePanel(),hoverX,hoverY,false);
     if (minecraft.world != null && minecraft.world.isRemote)
       input(serverMap, mapLeft() + 8, 4, Math.min(180, mapWidth() / 3), hoverX, hoverY, "Map name");
@@ -571,10 +638,7 @@ public final class WorldMapScreen extends UiScreen {
       MapTile tile =
           Maps.cache()
               .peek(
-                  MapMath.key(
-                      dimension,
-                      layer,
-                      0,
+                  terrainKey(
                       (int) Math.floor(cursor.x()),
                       (int) Math.floor(cursor.y())));
       if (tile != null) {
@@ -613,7 +677,7 @@ public final class WorldMapScreen extends UiScreen {
     String status = MapScreenshot.status();
     if (status.isEmpty()) status = message.isEmpty() ? Maps.error() : message;
     if (!status.isEmpty()) overlay(fit(status, width - 16), 8, readoutY + 20, 0xffdd99);
-    if (!context && !coordinates.active() && !dragging && !scaleDragging && mx >= mapLeft() && !overControls(mx, my)) {
+    if (!context && !coordinates.active() && !dragging && !scaleDragging && !caveDragging && mx >= mapLeft() && !overControls(mx, my)) {
       Waypoint hovered = hoveredWaypoint(mx, my);
       if (hovered != null) {
         String caption = hovered.death ? WaypointTimes.detail(hovered.created) : hovered.name;
@@ -629,6 +693,12 @@ public final class WorldMapScreen extends UiScreen {
       }
     }
     if (!coordinates.active() && !context) {
+      if (caveBounds != null && !caveDragging) {
+        if (controls().caveReset().contains(mx,my)) tooltip("Reset to current Y and follow your position",mx,my);
+        else if (caveBounds.contains(mx,my) && !caveEditor.active()) tooltip("Cave Y: " + caveWindow().reference()
+            + (caves.following() ? " (following)" : "") + "\nDrag or scroll to change. Right-click to type.",mx,my);
+      }
+      caveEditor.renderError(this);
       var control=controls().at(mx,my);
       if (control != null && control.action()==WorldMapControls.Action.SETTINGS && settingsPanel!=null)
         tooltip("Close settings",mx,my);

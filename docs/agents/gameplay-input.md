@@ -140,10 +140,11 @@
   sampling to loaded terrain. Ordinary water keeps normal swimming speed. Modern sprint
   swimming additionally requires allow_sprinting; retain compact/crouched collision until
   there is space to stand, Beta-normalized saved positions and render-scoped player/armor poses.
-- Boat riders suppress lateral cape rotations only while rendering, retaining native
-  pitch motion and restoring ordinary cape response immediately on dismount.
+- Boat and minecart riders suppress lateral cape rotations only while rendering,
+  retaining native pitch motion and restoring ordinary cape response immediately on dismount.
 - Cape limits change only rendered cape angles, leaving player interpolation and movement
-  untouched. Lava/cactus item rules affect only dropped items in singleplayer.
+  untouched. Retain a rearward pitch and clearance for the native animated legs and armor,
+  including backward walking and multidirectional sprinting. Lava/cactus item rules affect only dropped items in singleplayer.
   Player and mob trampling use independent world rules, both off in new presets.
   Convert old item protections from frozen evidence, never from changing live settings.
 - Torch shovel uses only owned diamond shovels, most worn first, for sand/gravel in
@@ -152,6 +153,10 @@
   tools, mode and ownership before each native break, stop when the tool breaks, and clear
   jobs on menus, focus loss and world exit. Compose timing after other mining adjustments;
   the configured percentage of whole-vein time never beats one block's normal time.
+  Only a continuously valid plan can claim a partly mined first block. A new plan
+  cannot reuse existing native progress for that target. Preserve that progress and
+  finish the block normally; the next block can qualify from the start. Read only
+  the native target/progress fields for this check, with no scans or render work.
 - Fire spread is a per-world rule, default on. Disabling it suppresses spread, block
   consumption and lava ignition while retaining native fire aging, extinguishing and damage.
   Creeper/ghast griefing affects block destruction only; ghast ignition remains separate.
@@ -236,6 +241,10 @@
   Reuse collision-safe compact/crouched poses, native feet, camera interpolation and
   render-scoped player/armor animation. Never force an unsafe standing pose when disabled.
   Ladder sprint uses normal ground permission, stamina and combat ownership.
+- Modern trapdoor climbing extends native ladder detection in singleplayer only.
+  Match 26.3's open trapdoor, ladder immediately below and equal facing predicate.
+  Beta trapdoor orientations 0–3 match ladder metadata 2–5. Preserve native climbing,
+  fall/sneak limits, trapdoor placement, orientation, support and collision geometry.
 - Spectator crosshair checks use loaded-only read-only rays and Creative reach. Detect
   native use overrides without invoking them or changing the player's interaction target.
 - Optional crouch camera height affects open-space sneaking only with Modern crawling. Keep

@@ -11,6 +11,7 @@ class GameplaySettingsTest {
     assertTrue(settings.flintIgnitesTnt);
     assertTrue(settings.boatPlacementFacing);
     assertFalse(settings.modernSnowPlacement);
+    assertFalse(settings.modernTrapdoorClimbing);
     assertFalse(settings.axesSlashLeaves);
     assertTrue(settings.leavesDropSaplingsInCreative);
     assertEquals(256, settings.mergeThreshold); assertEquals(4, settings.tntPerTick); assertEquals(8, settings.tntMillis);
@@ -19,12 +20,14 @@ class GameplaySettingsTest {
     settings.axesSlashLeaves = true;
     settings.boatPlacementFacing = false;
     settings.modernSnowPlacement = true;
+    settings.modernTrapdoorClimbing = true;
     var loaded = gson.fromJson(gson.toJson(settings), GameplaySettings.class);
     assertFalse(loaded.mergeItems); assertFalse(loaded.limitTnt); loaded.validate();
     assertFalse(loaded.flintIgnitesTnt);
     assertTrue(loaded.axesSlashLeaves);
     assertFalse(loaded.boatPlacementFacing);
     assertTrue(loaded.modernSnowPlacement);
+    assertTrue(loaded.modernTrapdoorClimbing);
     loaded.tntPerTick = 0; assertThrows(IllegalArgumentException.class, loaded::validate);
   }
 }

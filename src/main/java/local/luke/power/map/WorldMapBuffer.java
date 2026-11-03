@@ -31,12 +31,12 @@ public final class WorldMapBuffer {
     long cursor, completed;
     double visibleArea;
 
-    Surface(MapCache source, MapSurfacePlan plan, MapProjection requested, int dimension, int layer) {
+    Surface(MapCache source, MapSurfacePlan plan, MapProjection requested, int dimension, int layer, String context) {
       this.source = source;
       this.plan = plan;
       this.dimension = dimension;
       this.layer = layer;
-      context = layer < 0 ? "" : source.viewContext();
+      this.context = context;
       texture = GL11.glGenTextures();
       framebuffer = EXTFramebufferObject.glGenFramebuffersEXT();
       GL11.glBindTexture(GL11.GL_TEXTURE_2D, texture);
@@ -218,13 +218,17 @@ public final class WorldMapBuffer {
 
   public boolean draw(Minecraft mc, MapProjection view, int dimension, int layer, MapSettings settings,
       int guiWidth, int guiHeight) {
+    return draw(mc, view, dimension, layer, layer < 0 ? "" : Maps.cache().viewContext(), settings, guiWidth, guiHeight);
+  }
+
+  public boolean draw(Minecraft mc, MapProjection view, int dimension, int layer, String context, MapSettings settings,
+      int guiWidth, int guiHeight) {
     if (failed || !GLContext.getCapabilities().GL_EXT_framebuffer_object) return false;
     if (maximum == 0) maximum = GL11.glGetInteger(GL11.GL_MAX_TEXTURE_SIZE);
     var plan = MapSurfacePlan.create(view, MapRenderer.pixelsPerUnit(), maximum, settings.automaticDetail);
     if (plan == null) return false;
     int style = Objects.hash(MapRenderer.style(settings), settings.chunkGrid, settings.slimeChunks,
         mc.world.getSeed());
-    String context = layer < 0 ? "" : Maps.cache().viewContext();
     boolean restyle = this.style != style;
     if (source != Maps.cache() || this.dimension != dimension || this.layer != layer
         || !this.context.equals(context)
@@ -277,7 +281,7 @@ public final class WorldMapBuffer {
       }
       if (need && pending == null) {
         if (spare != null) { pending = spare; spare = null; pending.reset(plan, view); }
-        else pending = new Surface(source, plan, view, dimension, layer);
+        else pending = new Surface(source, plan, view, dimension, layer, context);
         if (active != null && active.plan.level() <= plan.level()) {
           GL11.glDisable(GL11.GL_BLEND);
           active.draw(pending.view, false);
@@ -285,7 +289,7 @@ public final class WorldMapBuffer {
         }
       }
       var filling = pending != null ? pending : active;
-      if (filling != null) source.visibleView(dimension, layer, filling.bounds);
+      if (filling != null) source.visibleView(dimension, layer, context, filling.bounds);
       source.publish(4, deadline);
       if (pending != null) pending.paint(mc, settings, view, deadline);
       else if (active != null) active.paint(mc, settings, view, deadline);

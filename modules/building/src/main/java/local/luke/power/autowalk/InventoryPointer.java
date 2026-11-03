@@ -17,6 +17,10 @@ public final class InventoryPointer {
   }
 
   public void press() { dragging = true; }
+  /** A native warp changes the absolute baseline without moving the logical cursor. */
+  public void warp(int eventX, int eventY) {
+    rawX = eventX; rawY = eventY; absolute = true;
+  }
   public void release() { dragging = false; restore = true; }
   public int x() { return x; }
   public int y() { return y; }

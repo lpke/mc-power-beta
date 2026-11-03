@@ -66,6 +66,10 @@ public final class SubtitleCatalog {
     caption("subtitles.entity.pig.ambient", "Pig oinks");
     caption("subtitles.entity.pig.death", "Pig dies");
     caption("subtitles.entity.pig.hurt", "Pig hurts");
+    caption("subtitles.entity.player.attack.strong", "Strong attack");
+    caption("subtitles.entity.player.attack.weak", "Weak attack");
+    caption("subtitles.entity.player.attack.sweep", "Sweeping attack");
+    caption("subtitles.entity.player.attack.knockback", "Knockback attack");
     caption("subtitles.entity.player.death", "Player dies");
     caption("subtitles.entity.player.hurt", "Player hurts");
     caption("subtitles.entity.sheep.ambient", "Sheep baahs");
@@ -167,6 +171,8 @@ public final class SubtitleCatalog {
     SOUNDS.put("portal.portal", CAPTIONS.get("subtitles.block.portal.ambient"));
     SOUNDS.put("portal.travel", CAPTIONS.get("subtitles.block.portal.travel"));
     SOUNDS.put("portal.trigger", CAPTIONS.get("subtitles.block.portal.trigger"));
+    for (String kind : List.of("strong", "weak", "sweep", "knockback"))
+      SOUNDS.put("power_beta:entity.player.attack." + kind, CAPTIONS.get("subtitles.entity.player.attack." + kind));
     SOUNDS.put("power_beta:entity.arrow.shoot", CAPTIONS.get("subtitles.entity.arrow.shoot"));
     SOUNDS.put("power_beta:entity.arrow.hit", CAPTIONS.get("subtitles.entity.arrow.hit"));
     SOUNDS.put("power_beta:entity.item.break", CAPTIONS.get("subtitles.entity.item.break"));

@@ -47,6 +47,7 @@
       "local.luke.power.gameplay.TorchShovelEvents",
       "local.luke.power.world.SavedWorldMenu",
       "local.luke.power.gameplay.AxesSlashLeavesEvents",
+      "local.luke.power.gameplay.CrouchReach",
       "local.luke.power.debug.DebugTooltips"
     ]
   },

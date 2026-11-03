@@ -15,6 +15,10 @@ import static local.luke.power.mining.VeinSearch.Position;
 
 /** Tick-owned search and native mining. Queued blocks never load terrain or survive a world visit. */
 public final class VeinMining {
+  /** Read the native target's existing progress without changing mining or querying terrain. */
+  public interface ProgressOwner {
+    float power$veinProgress(int x, int y, int z);
+  }
   private static Plan candidate, job;
   private static Plan executing;
   private static Object failedWorld;
@@ -37,7 +41,11 @@ public final class VeinMining {
         && candidate.matches(candidate.origin)) return;
     candidate = null;
     var settings = VeinConfig.current();
-    if (settings.crouchingOnly && !mc.player.method_1373() || !mc.world.method_239(x, y, z)) return;
+    if (settings.crouchingOnly && !mc.player.method_1373()) return;
+    // A new plan cannot claim work already earned outside its timing/ownership.
+    // Keep that native progress, finish this block normally, and qualify the next one.
+    if (mc.interactionManager instanceof ProgressOwner owner && owner.power$veinProgress(x, y, z) > 0) return;
+    if (!mc.world.method_239(x, y, z)) return;
     int id = mc.world.getBlockId(x, y, z);
     if (id <= 0 || id >= Block.BLOCKS.length || Block.BLOCKS[id] == null) return;
     Block block = Block.BLOCKS[id];

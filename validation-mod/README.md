@@ -1,3 +1,7 @@
+`cave-map-473 run|capture` checks cave height, exact selected-level terrain/cache,
+slider/reset/freecam, current layer labels and hidden Surface controls at320/854.
+Use a muted focused disposable world with a1708x960 or larger client.
+
 - `creative-440` checks the six default tabs, seven native fill groups, pinned
   ID-ordered Search and supported variants, silent navigation/deletion, cursor-only
   palette wheel exchange, shared selectable fuzzy search, custom holes, remembered
@@ -16,6 +20,59 @@
   previous screen. Do not press Save while using this pointer fixture.
 
 # Runtime checks
+
+- `cursor-latency-473 arm LABEL [WARMUP_MS] [VERIFIED_X_CLOCK_OFFSET_MS]` starts
+  an in-memory observer in a focused, muted disposable world. Warmup defaults to
+  2000 ms. Use the same fixture JAR, native workload, frame cap, VSync and window
+  size for baseline/candidate runs. Give stock/patched compositor and mod versions
+  separate labels. Record the first release after launch and repeated releases
+  separately so cold setup cannot disappear into warm percentiles. Avoid other
+  validation commands, screenshots, GL readbacks and synchronous report writes
+  during trials. `finish` disarms capture before exporting JSON under
+  `power-beta-data/reports/cursor-latency-473`.
+  Reports include raw monotonic release entry/exit, actual LWJGL swap entry/return,
+  mouse/keyboard dispatch and screen-handler timestamps, plus p50/p95/p99/max
+  durations and frame gaps. Already-free releases are separate from transitions.
+  Each stream holds 65536 samples and reports dropped rows. Swap returns do not
+  prove presentation or scanout. The first queue dispatch after release may be
+  synthetic, stale or idle input. Timestamped queue proxies exclude zero native
+  timestamps and mouse warp events with code -2. Match deliberately injected
+  events in the raw rows to assess input response. A base Screen handler return
+  does not prove that a click succeeded; overrides that skip the base method are
+  absent from those handler samples.
+  Native event ages are omitted unless the caller supplies an independently
+  verified offset in milliseconds, where JVM monotonic milliseconds minus offset
+  matches X server milliseconds modulo 2^32. Zero/synthetic timestamps and ages
+  above ten seconds are excluded. Never assume X event timestamps and JVM
+  `nanoTime` share an epoch. These latency hooks use no newer production cursor
+  classes, allowing the same observer to measure exact 4.7.2 comparison artifacts.
+
+- `gui-cursor-473 prepare native|raw`, `load [gate] LAYERS
+  inventory|pause|chat|chest`, `state`, and `finish` exercise cursor release after
+  a busy rendered frame. Use 0–4096 blended layers in a muted, focused disposable
+  world on a private Wayland compositor. `gate` pauses before release for an external
+  compositor scheduling test. The JSON report includes native coordinates and
+  renderer identity. Independently observe the
+  compositor pointer: XQueryPointer and AWT can both miss the original bug.
+  `chest-prepare` places and aims at a temporary empty native chest for a physical
+  right-click check; the next `prepare` or `finish` restores its terrain.
+  Also run `tools/wayland_drags.py` with the private compositor's fake-input helper
+  for rapid inventory gestures, immediate movement and real inventory clicks.
+
+- `cape-gallery-473` writes two 1600x900 native player/cape contact sheets under
+  `power-beta-data/reports/release-473/cape-gallery`: backward walk/sprint strides
+  and minecart rider directions with Faster minecarts off/on. It uses isolated,
+  unregistered actors, a diagnostic cape and controlled interpolation offsets;
+  `panels.json` records observed cape rotations and actual rendered leg poses.
+  Use a muted disposable singleplayer client at least 1600x900. No skin download,
+  player/inventory edits or world edits are required. Settings and GL state are restored.
+
+- `cape-checks` includes backward walking/sprinting across 128 native leg poses,
+  armor clearance, negative pitch, and moving minecarts with Faster minecarts on/off
+  at five partial ticks and four facing directions. It checks the actual cape GL
+  rotations, unchanged movement and immediate dismount behavior. Use an unmounted,
+  muted disposable singleplayer client with a loaded skin and loaded chunk-center
+  terrain at Y112. Its temporary track, preferences and player animation fields are restored.
 
 - `spawner-471` verifies `//set spawner[mob=...]`, mob completion and native living
   registry values, new-spawner defaults, existing Delay preservation, exact NBT
@@ -436,6 +493,44 @@ domain at narrow/wide sizes. `sorting-403` also checks the embedded preferred-it
 `positive-save` checks native Apply/reopen and restores the original document.
 `snow-472 capture|native` checks direct snow replacement, bucket exchanges,
 Nether evaporation, clicked-face orientation and unchanged snow-layer behavior.
+`ui-473` runs at a muted disposable title screen. It checks the block-rule hover
+paint across labels, tool controls and Remove, plus clean/edited Direct Connect
+and Add Server Escape routes and unchanged server data. Captures include 320x240
+and 854x480 layouts, so the native window must be at least 1708x960.
+`boat-turn-473 native|observe` holds full steering lock in both directions with
+every speed/steering/protection/placement setting combination. It samples the
+actual boat and player renderers at five fractions per tick in first/back/front
+views, records rider body/head and camera angles, and checks render-state isolation.
+Run in a muted, focused disposable world outside free look/freecam and vehicles.
+It temporarily builds and restores an elevated pool, translating the rig between
+ticks to keep the native motion on that uniform test surface. `observe` writes
+the same summary and full-speed improved-steering CSV without failing on jumps.
+`trapdoor-climb-473 native` checks every open/facing/ladder-metadata combination,
+ordinary ladders, missing/mismatched support, multiplayer isolation, native upward
+climbing and ladder fall/sneak limits in all four directions. It also verifies
+that toggling the feature preserves native trapdoor placement eligibility and
+orientation. The backed-up fixture blocks and player state are restored.
+`trapdoor-climb-473 capture` records the setting at 320x240/854x480 and checks all
+base defaults. The rule follows installed 26.3 client SHA-1
+`e877b6a07acd633fb3bb475002175cec036e7b87`: open trapdoor, ladder immediately below,
+same facing. Trapdoor placement and support rules are unchanged.
+`crouch-reach-473` uses real crouch ticks, the native singleplayer interaction
+manager and a native right click to place beside a wall three blocks below its
+supporting top block, in all four directions. It proves the lowered-eye target is
+beyond Beta's four blocks and inside modern Survival's 4.5 blocks, verifies the
+old ray misses, and records native placement, item-data/count and fixed feet.
+It checks feature-off/standing scopes, entity/custom/Creative ranges, foreign and
+remote players, compact poses and detached-camera exclusion. Terrain, owner,
+camera and settings are restored; only the disposable probe inventory changes.
+`vein-progress-473` accumulates real native mining progress to 90% normally, then
+holds crouch and finishes. Only that block may break. It also checks full-cost
+veins, crouch release/reacquire, tool/config/pause/lifecycle ownership loss,
+target changes, native cancel/restart, Crouching only off and a disabled path with
+zero qualification reads. A separate native manager verifies the injected progress
+bridge against actual partial damage, other targets and native cancellation.
+All breaks use native held mining, including native
+wear and coal drops. The disposable probe, original terrain/settings and only
+the fixture's own dropped items are restored or retired.
 `sprint-472 capture` checks the multidirectional setting and base defaults. Run
 `arm`, hold F9, `native`, release F9, then `finish` for eight native movement/jump
 directions, disabled behavior and permission revocation.
@@ -1173,7 +1268,7 @@ Keep screenshots and generated inventories with the private review report; never
 
 - `release-470-music-ui capture` writes independent playlist/footer/preview/missing-source screenshots at 854x480 and 320x240. Run it before acceptance. `release-470-music-ui check`: in a focused, muted disposable singleplayer world, checks actual Music row double-click playback through the saved playlist path, unsaved draft preservation, the shared Play/Preview preference, optional speaker icon placement and one-per-session missing-source warnings at 854x480 and 320x240. Captures footer and warning views in `power-beta-data/reports/release-470/music-ui`.
 
-`smart-slabs-470` checks native Smart placements, material variants, held raycast continuation and stroke direction changes. `extra-sounds-470` runs real 10/15-block sprint jumps into one-deep water, ladder ascent/descent and native ladder actions. Both restore the disposable world and preferences. Run with sound/music muted and verified silent output. `extra-sound-decoders-432` now covers all 105 bundled/current extra-effect resource entries.
+`smart-slabs-470` checks native Smart placements, material variants, held raycast continuation and stroke direction changes. `extra-sounds-470` runs real 10/15-block sprint jumps into one-deep water, ladder ascent/descent and native ladder actions. Both restore the disposable world and preferences. Run with sound/music muted and verified silent output. `extra-sound-decoders-432` now covers all 126 bundled/current extra-effect resource entries.
 
 - `release-470-music-audio start`, `opening`, `ending-arm`, `ending`, `preview-arm`,
   `preview`, `pause`, `paused`, `off`, `off-check`, `stop` checks real native streaming
@@ -1339,3 +1434,7 @@ Compare legacy/native/legacy/native at identical caps, terrain and scripted acti
 then check uncapped and VSync separately. Repeat screenshots and native GUI/input
 fixtures. The older performance-420 update-site metric retains its historical
 meaning; use the new actual-swap samples.
+
+`vehicle-sounds-473` checks modern attack cues through native Creative removal and Survival damage for boats and all three native minecart types. It covers charged and rapid hits, final hits, repeated dead targets, rejected damage, tool swaps, sword sweeps at exact modern displacement thresholds, sprint cue order, disabled sounds, Spectator and remote ownership. Run muted on a verified silent output. The fixture restores settings, player data and its spawned vehicles/drops. `extra-sound-decoders-432` includes all 126 extra-effect resource entries, including all 21 new vehicle attack variants.
+
+After `extra-sound-decoders-432`, run `python3 tools/verify_extra_sound_pcm.py /path/to/power-beta-validation-pcm --output /tmp/extra-sound-comparison.json` for the independent FFmpeg comparison, including official-byte hashes and authoritative Ogg granule checks.

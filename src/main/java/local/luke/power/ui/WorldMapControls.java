@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.ToIntFunction;
 
 /** Bottom navigation shares measured drawing and pointer bounds. */
-record WorldMapControls(List<Button> buttons, Box scale) {
+record WorldMapControls(List<Button> buttons, Box scale, Box caveSlider, Box caveReset) {
   static final int TEXT_PADDING = 8;
   enum Action { TOGGLES, WAYPOINTS, SETTINGS, LAYER, DIMENSION, CENTER, GO_TO, CLOSE }
   record Box(int x, int y, int width, int height) {
@@ -14,10 +14,16 @@ record WorldMapControls(List<Button> buttons, Box scale) {
   }
   record Button(Action action, String label, Box bounds) {}
   static WorldMapControls at(int left, int width, int height, String[] labels, ToIntFunction<String> measure) {
+    return at(left, width, height, labels, measure, false);
+  }
+  static WorldMapControls at(int left, int width, int height, String[] labels, ToIntFunction<String> measure, boolean caves) {
     if (labels.length != Action.values().length) throw new IllegalArgumentException("Missing map control labels");
     int[] sizes=Arrays.stream(labels).mapToInt(label->Math.max(42,measure.applyAsInt(label)+TEXT_PADDING)).toArray();
     int available=Math.max(1,width-16);
     for(int i=0;i<5;i++)sizes[i]=Math.min(sizes[i],available);
+    int layerWidth = sizes[3];
+    int sliderWidth = caves ? Math.max(1, Math.min(132, available - layerWidth - 26)) : 0;
+    if (caves) sizes[3] += sliderWidth + 26;
     fit(sizes,5,8,available);
     int leftWidth=total(sizes,0,5),rightWidth=total(sizes,5,8);
     int rightY=height-24,leftY=rightY-(leftWidth+rightWidth+8<=available?0:22);
@@ -25,7 +31,16 @@ record WorldMapControls(List<Button> buttons, Box scale) {
     var rows=leftRows(sizes,available);
     for(int i=0;i<rows.size();i++)row(buttons,labels,sizes,rows.get(i)[0],rows.get(i)[1],left+8,leftY-i*22);
     row(buttons,labels,sizes,5,8,left+width-8-rightWidth,rightY);
-    return new WorldMapControls(List.copyOf(buttons),new Box(left+width-124,leftY-(rows.size()-1)*22-26,116,20));
+    Box slider = null, reset = null;
+    if (caves) for (int i = 0; i < buttons.size(); i++) {
+      var button = buttons.get(i);
+      if (button.action != Action.LAYER) continue;
+      var box = button.bounds;
+      buttons.set(i, new Button(button.action, button.label, new Box(box.x, box.y, layerWidth, 18)));
+      slider = new Box(box.x + layerWidth + 4, box.y, sliderWidth, 18);
+      reset = new Box(slider.x + slider.width + 4, box.y, 18, 18);
+    }
+    return new WorldMapControls(List.copyOf(buttons),new Box(left+width-124,leftY-(rows.size()-1)*22-26,116,20),slider,reset);
   }
   int navigationTop() { return buttons.stream().mapToInt(button->button.bounds.y()).min().orElse(0); }
   /** Keep the toggle switch in the lowest left row and wrap complete labels above it. */

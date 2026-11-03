@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [4.7.3] - 2026-11-03
+
+- Match the Blocks and required tools row hover background to Settings and keep it visible over every row action.
+- Preserve immediate mouse movement and inventory-look gestures across GUI cursor transitions.
+- Keep raw mouse movement owned by the focused game window and initialize mouse devices in the background.
+- Clarify that Snow layer replacement changes filled water and lava buckets. Ordinary block items replace snow with the option off.
+- Let Escape return from Direct IP and Add server to Multiplayer, and from Multiplayer to its parent menu.
+- Correct boat heading interpolation during full turns without changing movement or steering.
+- Add modern boat and minecart attack sounds for Creative and Survival, enabled in Power Beta defaults.
+- Keep capes behind backwards-walking legs and prevent minecart travel from twisting them sideways.
+- Add Modern trapdoor climbing, enabled in Power Beta defaults, for an open trapdoor above a matching ladder without changing placement.
+- Choose a cave Y level from the world map, reset to the player or freecam height, and show the current Caves or Surface state.
+- Use modern block reach with the lower crouched view so Survival building can reach three blocks down a wall.
+- Prevent late Shift presses from using normal-speed mining progress to trigger slower vein mining.
+
 ## [4.7.2] - 2026-11-03
 
 - Add Restock hotbar when sorting inventory above Reverse item order. It defaults off and tops up existing hotbar stacks from unprotected main storage without filling empty hotbar slots or restocking during chest or dispenser sorting.

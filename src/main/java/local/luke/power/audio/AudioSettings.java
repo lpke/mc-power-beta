@@ -15,6 +15,7 @@ public final class AudioSettings {
   public boolean lavaAmbientSounds = false;
   public boolean playerFireExtinguish = false;
   public boolean ladderSounds = false;
+  public boolean vehicleAttackSounds = false;
   public boolean waterSplashSounds = false;
   public boolean swimmingSounds = false;
   public boolean underwaterEnterSounds = false;

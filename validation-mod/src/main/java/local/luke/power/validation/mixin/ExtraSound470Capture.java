@@ -11,6 +11,7 @@ public abstract class ExtraSound470Capture {
   @Inject(method = "method_2015", at = @At("HEAD"))
   private void validation$sound(String id, float x, float y, float z, float volume, float pitch, CallbackInfo ci) {
     ExtraSounds470Checks.capture(id, volume, pitch);
+    local.luke.power.validation.VehicleSounds473Checks.capture(id,volume,pitch);
     local.luke.power.validation.ModernBow470Checks.captureSound(id,volume,pitch);
   }
 }

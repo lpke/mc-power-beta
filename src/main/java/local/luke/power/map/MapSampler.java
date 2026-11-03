@@ -61,9 +61,12 @@ public final class MapSampler {
     long start = System.nanoTime();
     columnsLastTick = 0;
     MapSettings settings = MapConfig.current();
-    CaveWindow window = selectedLayer < 0 ? null : window(settings, y);
+    var mapScreen = mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen screen
+        && screen.terrainVisible() && screen.lightLayer(mc.world.dimension.id) != Integer.MIN_VALUE ? screen : null;
+    // The visible map owns the existing survey budget. Closing it resumes the live camera survey.
+    if (mapScreen != null) selectedLayer = mapScreen.lightLayer(mc.world.dimension.id);
+    CaveWindow window = selectedLayer < 0 ? null : mapScreen == null ? window(settings, y) : mapScreen.caveWindow();
     String selectedContext = window == null ? "" : window.context();
-    cache.viewContext(window(settings, y).context());
     if (world != mc.world || layer != selectedLayer || !context.equals(selectedContext)
         || paletteRevision != palette.revision()) {
       world = mc.world;
@@ -91,8 +94,7 @@ public final class MapSampler {
       nanosLastTick = System.nanoTime() - start;
       return;
     }
-    var mapView = mc.currentScreen instanceof local.luke.power.ui.WorldMapScreen screen
-        ? screen.samplingView(world.dimension.id, selectedLayer) : null;
+    var mapView = mapScreen == null ? null : mapScreen.samplingView(world.dimension.id, selectedLayer);
     int radius = Math.min(16, local.luke.power.controls.util.ModOptions.getRenderDistanceChunks());
     var nextFocus = MapSamplingFocus.of(mapView, cx, cz, radius);
     if (centerX != cx || centerZ != cz || !nextFocus.equals(focus)

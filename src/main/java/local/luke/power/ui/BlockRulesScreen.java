@@ -124,7 +124,8 @@ public final class BlockRulesScreen extends UiScreen {
       int y=62+i*26-scroll;if(y>=bottom())break;String key=keys.get(i);var block=blocks.get(key);
       int labelEnd=vein?toolsX()-4:right()-34;
       boolean over=inside(mx,my,left(),y,labelEnd-left(),22) && my>=62 && my<bottom();
-      if(over)fill(left(),y,labelEnd,y+22,0x50333333);
+      boolean rowOver=inside(mx,my,left(),y,span()-10,22) && my>=62 && my<bottom();
+      if(rowOver)fill(left(),y,right()-10,y+22,0x60000000);
       if(block!=null)icons.draw(this,minecraft,block,left()+4,y+3);
       String name=(vein?"":"'"+key+"'  ")+(block==null?"ID "+(vein?key:draft.get(key).getAsString()):block.name());
       text(fit(name,labelEnd-left()-30),left()+26,y+7,over?0xffffa0:0xeeeeee);

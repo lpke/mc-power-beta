@@ -381,6 +381,110 @@
         "step/ladder5"
       ],
       "subtitle": "subtitles.block.generic.fall"
+    },
+    "entity.player.attack.strong": {
+      "sounds": [
+        {
+          "name": "entity/player/attack/strong1",
+          "volume": 0.6
+        },
+        {
+          "name": "entity/player/attack/strong2",
+          "volume": 0.6
+        },
+        {
+          "name": "entity/player/attack/strong3",
+          "volume": 0.6
+        },
+        {
+          "name": "entity/player/attack/strong4",
+          "volume": 0.6
+        },
+        {
+          "name": "entity/player/attack/strong5",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/strong6",
+          "volume": 0.7
+        }
+      ],
+      "subtitle": "subtitles.entity.player.attack.strong"
+    },
+    "entity.player.attack.weak": {
+      "sounds": [
+        {
+          "name": "entity/player/attack/weak1",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/weak2",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/weak3",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/weak4",
+          "volume": 0.7
+        }
+      ],
+      "subtitle": "subtitles.entity.player.attack.weak"
+    },
+    "entity.player.attack.sweep": {
+      "sounds": [
+        {
+          "name": "entity/player/attack/sweep1",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/sweep2",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/sweep3",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/sweep4",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/sweep5",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/sweep6",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/sweep7",
+          "volume": 0.7
+        }
+      ],
+      "subtitle": "subtitles.entity.player.attack.sweep"
+    },
+    "entity.player.attack.knockback": {
+      "sounds": [
+        {
+          "name": "entity/player/attack/knockback1",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/knockback2",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/knockback3",
+          "volume": 0.7
+        },
+        {
+          "name": "entity/player/attack/knockback4",
+          "volume": 0.7
+        }
+      ],
+      "subtitle": "subtitles.entity.player.attack.knockback"
     }
   },
   "assets": [
@@ -1475,6 +1579,258 @@
       "frames": 13654,
       "sampleRate": 44100,
       "channels": 1
+    },
+    {
+      "event": "entity.player.attack.strong",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/strong1.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/strong1.ogg",
+      "sha1": "999bdf382687457820f934783e6ef38dc01c508b",
+      "size": 5577,
+      "frames": 8640,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 4
+    },
+    {
+      "event": "entity.player.attack.strong",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/strong2.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/strong2.ogg",
+      "sha1": "f71fa38e886f8a6c60803422c286e347efb65676",
+      "size": 6138,
+      "frames": 10752,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 5
+    },
+    {
+      "event": "entity.player.attack.strong",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/strong3.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/strong3.ogg",
+      "sha1": "cc9728d993ea4ea9e87b86cb7c36459ecd48207d",
+      "size": 5730,
+      "frames": 9664,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 5
+    },
+    {
+      "event": "entity.player.attack.strong",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/strong4.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/strong4.ogg",
+      "sha1": "521749fe4b753428e2ddf3273a7639f95da8524f",
+      "size": 5739,
+      "frames": 9152,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 4
+    },
+    {
+      "event": "entity.player.attack.strong",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/strong5.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/strong5.ogg",
+      "sha1": "bf544e65cfdec0512f9e89320d0453f94a5883e7",
+      "size": 6180,
+      "frames": 10752,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 5
+    },
+    {
+      "event": "entity.player.attack.strong",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/strong6.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/strong6.ogg",
+      "sha1": "46baa8602f9e40edf48f5c0ac7a280474140033b",
+      "size": 5478,
+      "frames": 8576,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 4
+    },
+    {
+      "event": "entity.player.attack.weak",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/weak1.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/weak1.ogg",
+      "sha1": "5bdac09a1d22de188f771f9d9e372440d9e40523",
+      "size": 4684,
+      "frames": 4480,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 2
+    },
+    {
+      "event": "entity.player.attack.weak",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/weak2.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/weak2.ogg",
+      "sha1": "4e441f1e9f9035d97aba12de0bea604d71f47d69",
+      "size": 4687,
+      "frames": 3776,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 2
+    },
+    {
+      "event": "entity.player.attack.weak",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/weak3.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/weak3.ogg",
+      "sha1": "af751e5757eb23cba6e7bec6ecab54339d801a18",
+      "size": 4761,
+      "frames": 4992,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 3
+    },
+    {
+      "event": "entity.player.attack.weak",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/weak4.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/weak4.ogg",
+      "sha1": "0f30dad25ab6d5570ab52bdcc2c03e26cb7cf6cb",
+      "size": 4837,
+      "frames": 4384,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 2
+    },
+    {
+      "event": "entity.player.attack.sweep",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/sweep1.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/sweep1.ogg",
+      "sha1": "89741b2005ca27c98454e0cc000afe33b5af86fb",
+      "size": 6067,
+      "frames": 11136,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 5
+    },
+    {
+      "event": "entity.player.attack.sweep",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/sweep2.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/sweep2.ogg",
+      "sha1": "5350ba0ce6e2d5deeb53849704ce4702c0ee4a85",
+      "size": 5836,
+      "frames": 10192,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 5
+    },
+    {
+      "event": "entity.player.attack.sweep",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/sweep3.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/sweep3.ogg",
+      "sha1": "8740a15ba2100a68975842c571d40edf970f5bef",
+      "size": 5866,
+      "frames": 9184,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 4
+    },
+    {
+      "event": "entity.player.attack.sweep",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/sweep4.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/sweep4.ogg",
+      "sha1": "98dfc1ea33b18d387dfbed5cbdc919250538c42e",
+      "size": 5605,
+      "frames": 7456,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 4
+    },
+    {
+      "event": "entity.player.attack.sweep",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/sweep5.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/sweep5.ogg",
+      "sha1": "bf3558e6fb0cacdf87d0d35f1a470acbe5842af4",
+      "size": 5642,
+      "frames": 9344,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 4
+    },
+    {
+      "event": "entity.player.attack.sweep",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/sweep6.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/sweep6.ogg",
+      "sha1": "2b9277d2e4542d106bca65e63092c6fcaadf40ea",
+      "size": 5586,
+      "frames": 8240,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 4
+    },
+    {
+      "event": "entity.player.attack.sweep",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/sweep7.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/sweep7.ogg",
+      "sha1": "dcbf16528e0835b5638c782cede362aa8743fccd",
+      "size": 5934,
+      "frames": 10720,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 5
+    },
+    {
+      "event": "entity.player.attack.knockback",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/knockback1.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/knockback1.ogg",
+      "sha1": "75d437919fe1cbd8b594762778abe50262adddf6",
+      "size": 8531,
+      "frames": 25856,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 11
+    },
+    {
+      "event": "entity.player.attack.knockback",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/knockback2.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/knockback2.ogg",
+      "sha1": "9c20f972468b42ef0e91d36f163059b8cad93677",
+      "size": 8108,
+      "frames": 24000,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 10
+    },
+    {
+      "event": "entity.player.attack.knockback",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/knockback3.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/knockback3.ogg",
+      "sha1": "3083ff465e1d177eebb73788a43a1855b9ec64ed",
+      "size": 8516,
+      "frames": 27776,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 12
+    },
+    {
+      "event": "entity.player.attack.knockback",
+      "source": "waterSource",
+      "asset": "minecraft/sounds/entity/player/attack/knockback4.ogg",
+      "file": "assets/power_beta/stationapi/sounds/sound/entity/player/attack/knockback4.ogg",
+      "sha1": "93c50c20f4eb2d3f6116f8b354fb5d5090e78712",
+      "size": 8962,
+      "frames": 29184,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationTicks": 13
     }
   ],
   "existingAssets": [

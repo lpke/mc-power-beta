@@ -33,6 +33,8 @@ public final class AudioBackend implements Backend {
         "Play the modern extinguishing sound when water puts out your fire in singleplayer. Uses Players volume.");
     extra("ladderSounds", "Ladder sounds", s.ladderSounds,
         "Use modern climbing, descending and landing sounds in singleplayer. Placing, hitting and breaking ladders keep Beta sounds.");
+    extra("vehicleAttackSounds", "Boat and minecart hit sounds", s.vehicleAttackSounds,
+        "Play modern attack sounds when hitting boats or minecarts in singleplayer. Uses Players volume.");
     extra("waterSplashSounds", "Water splash sounds", s.waterSplashSounds,
         "Use modern water entry sounds for players, creatures, items and vehicles in singleplayer. Uses each entity sound category.");
     extra("swimmingSounds", "Swimming sounds", s.swimmingSounds,
@@ -272,6 +274,7 @@ public final class AudioBackend implements Backend {
           case "lavaPopSounds" -> s.lavaPopSounds = v.getAsBoolean();
           case "lavaAmbientSounds" -> s.lavaAmbientSounds = v.getAsBoolean();
           case "playerFireExtinguish" -> s.playerFireExtinguish = v.getAsBoolean();
+          case "vehicleAttackSounds" -> s.vehicleAttackSounds = v.getAsBoolean();
           case "ladderSounds" -> s.ladderSounds = v.getAsBoolean();
           case "musicDoubleClickPreview" -> s.musicDoubleClickPreview = v.getAsBoolean();
           case "showMusicPreviewButton" -> s.showMusicPreviewButton = v.getAsBoolean();

@@ -117,7 +117,11 @@ public final class MapCache {
 
   /** Retire only queued reads that belonged solely to the previous view. Never discard writes. */
   public void visibleView(int dimension, int layer, MapCoverage.Bounds bounds) {
-    var request = new ViewRequest(dimension, layer, layer < 0 ? "" : viewContext, bounds);
+    visibleView(dimension, layer, layer < 0 ? "" : viewContext, bounds);
+  }
+
+  public void visibleView(int dimension, int layer, String context, MapCoverage.Bounds bounds) {
+    var request = new ViewRequest(dimension, layer, context, bounds);
     if (request.equals(visibleView)) return;
     visibleView = request;
     for (var it = loading.entrySet().iterator(); it.hasNext();) {

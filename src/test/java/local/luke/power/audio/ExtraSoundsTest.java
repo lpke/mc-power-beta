@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class ExtraSoundsTest {
   @Test void extraSoundRowsPreviewRegisteredSoundsWithoutChangingTheirEnablement() {
     assertEquals("step.stone", ExtraSounds.previewId("audio.redstonePlacementSound"));
-    for (String setting : List.of("ladderSounds", "seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "lavaBucketSounds", "boneMealSounds", "lavaPopSounds", "lavaAmbientSounds", "playerFireExtinguish", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds", "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions"))
+    for (String setting : List.of("vehicleAttackSounds", "ladderSounds", "seedPlantingSounds", "hoeTillingSounds", "bucketSounds", "lavaBucketSounds", "boneMealSounds", "lavaPopSounds", "lavaAmbientSounds", "playerFireExtinguish", "waterSplashSounds", "swimmingSounds", "underwaterEnterSounds", "underwaterExitSounds", "underwaterAmbience", "underwaterAdditions", "underwaterRareAdditions", "underwaterUltraRareAdditions"))
       assertTrue(ExtraSounds.contains(ExtraSounds.previewId("audio." + setting)), setting);
     for (String key : List.of("eatingSounds", "shearingSounds", "toolBreakSounds", "armorBreakSounds", "moreSoundsChests"))
       assertTrue(BetaSounds.contains(ExtraSounds.previewId("power_controls:features." + key)), key);
@@ -29,18 +29,21 @@ class ExtraSoundsTest {
     assertFalse(settings.lavaBucketSounds || settings.lavaAmbientSounds);
     assertFalse(settings.playerFireExtinguish);
     assertFalse(settings.ladderSounds);
+    assertFalse(settings.vehicleAttackSounds);
     assertFalse(settings.lavaPopSounds || settings.waterSplashSounds || settings.swimmingSounds);
     settings.seedPlantingSounds = settings.hoeTillingSounds = settings.bucketSounds = settings.boneMealSounds = true;
     settings.lavaPopSounds = settings.waterSplashSounds = settings.swimmingSounds = true;
     settings.lavaBucketSounds = settings.lavaAmbientSounds = true;
     settings.playerFireExtinguish = true;
     settings.ladderSounds = true;
+    settings.vehicleAttackSounds = true;
     AudioSettings restored = gson.fromJson(gson.toJson(settings), AudioSettings.class);
     assertTrue(restored.seedPlantingSounds && restored.hoeTillingSounds && restored.bucketSounds && restored.boneMealSounds);
     assertTrue(restored.lavaPopSounds && restored.waterSplashSounds && restored.swimmingSounds);
     assertTrue(restored.lavaBucketSounds && restored.lavaAmbientSounds);
     assertTrue(restored.playerFireExtinguish);
     assertTrue(restored.ladderSounds);
+    assertTrue(restored.vehicleAttackSounds);
     assertDoesNotThrow(restored::validate);
   }
 
@@ -51,6 +54,7 @@ class ExtraSoundsTest {
       Set<String> expected = Set.of("item.crop.plant", "item.hoe.till", "item.bucket.fill", "item.bucket.fill_lava",
           "item.bucket.empty", "item.bucket.empty_lava", "entity.cow.milk", "item.bone_meal.use",
           "entity.arrow.shoot", "entity.arrow.hit", "entity.item.break",
+          "entity.player.attack.strong", "entity.player.attack.weak", "entity.player.attack.sweep", "entity.player.attack.knockback",
           "block.ladder.step", "block.ladder.fall",
           "block.lava.pop", "block.lava.ambient", "entity.generic.extinguish_fire", "entity.generic.splash", "entity.hostile.splash", "entity.player.swim", "entity.player.splash", "entity.player.splash.high_speed", "ambient.underwater.enter", "ambient.underwater.exit",
           "ambient.underwater.loop", "ambient.underwater.loop.additions", "ambient.underwater.loop.additions.rare",
@@ -82,11 +86,33 @@ class ExtraSoundsTest {
         }
         assertEquals(official, assets.get(event), event);
       }
-      assertEquals(98, manifest.getAsJsonArray("assets").size());
+      assertEquals(119, manifest.getAsJsonArray("assets").size());
       assertEquals(14, manifest.getAsJsonObject("events").getAsJsonObject("entity.player.swim").getAsJsonArray("sounds").size());
     }
     assertFalse(ExtraSounds.contains("power_beta:unknown"));
     for (String event : List.of("place", "hit", "break")) assertFalse(ExtraSounds.contains("power_beta:block.ladder." + event));
+  }
+
+  @Test void vehicleAttackVariantsRetainOfficialGainsAndPlayersCategory() throws Exception {
+    try (var input = getClass().getResourceAsStream("/assets/powerbeta/extra-sounds.json")) {
+      var manifest = JsonParser.parseReader(new InputStreamReader(input, StandardCharsets.UTF_8)).getAsJsonObject();
+      int total = 0;
+      for (String kind : List.of("strong", "weak", "sweep", "knockback")) {
+        String id = "power_beta:entity.player.attack." + kind;
+        assertEquals("players", AudioSettings.category(id, false));
+        var variants = manifest.getAsJsonObject("events").getAsJsonObject(id.substring(11)).getAsJsonArray("sounds");
+        for (int i = 0; i < variants.size(); i++) {
+          assertEquals(Set.of("name", "volume"), variants.get(i).getAsJsonObject().keySet());
+          String filename = "assets/power_beta/stationapi/sounds/sound/entity/player/attack/" + kind + (i + 1) + ".ogg";
+          assertEquals(variants.get(i).getAsJsonObject().get("volume").getAsFloat(), ExtraSoundVariants.volume(id, filename));
+          assertEquals(variants.get(i).getAsJsonObject().get("volume").getAsFloat(), ExtraSoundVariants.volume(id, filename.replace('/', '\\')));
+          assertEquals(1, ExtraSounds.previewPitch(id)); total++;
+        }
+      }
+      assertEquals(21, total);
+    }
+    assertEquals(1, ExtraSoundVariants.volume("random.bow", "entity/player/attack/strong1.ogg"));
+    assertEquals("power_beta:entity.player.attack.strong", ExtraSounds.previewId("audio.vehicleAttackSounds"));
   }
 
   @Test void modernBowCuesUseOfficialCategoriesIncludingIndividualPreviews() {

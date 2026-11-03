@@ -15,6 +15,7 @@ public final class GameplaySettings {
   public boolean modernBowHandling;
   public boolean modernBowFov = true;
   public boolean modernCrawling;
+  public boolean modernTrapdoorClimbing;
   public boolean crouchCameraHeight;
 
   public void validate() {

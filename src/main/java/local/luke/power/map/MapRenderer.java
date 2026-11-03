@@ -114,13 +114,18 @@ public final class MapRenderer {
   /** Secondary previews share admission without replacing or canceling the main view's reads. */
   public static void terrain(MapCache source, MapProjection view, int dimension, int layer,
       boolean circle, MapSettings settings, boolean local, long seed, double pixelScale, boolean ownsInterest) {
+    terrain(source, view, dimension, layer, layer < 0 ? "" : source.viewContext(), circle, settings, local, seed, pixelScale, ownsInterest);
+  }
+
+  public static void terrain(MapCache source, MapProjection view, int dimension, int layer, String context,
+      boolean circle, MapSettings settings, boolean local, long seed, double pixelScale, boolean ownsInterest) {
     pending = false;
     if (source != cache) {
       clear();
       cache = source;
     }
     var coverage = MapCoverage.select(view, circle, settings.cacheTiles, pixelScale);
-    if (ownsInterest) source.visibleView(dimension, layer, coverage);
+    if (ownsInterest) source.visibleView(dimension, layer, context, coverage);
     source.publish(4, System.nanoTime() + 250_000);
     int level = coverage.level(), span = SIZE << level;
     int minX = coverage.minX(),
@@ -152,7 +157,7 @@ public final class MapRenderer {
       int centerZ = Math.max(minZ, Math.min(maxZ, (int)Math.floor(view.z / span)));
       for (var cell : MapTileSweep.nearest(coverage, centerX, centerZ)) {
           int x = cell.x(), z = cell.z();
-          Key key = source.viewKey(new Key(dimension, layer, level, x, z));
+          Key key = new Key(dimension, layer, level, x, z, context);
           double wx = key.minX(), wz = key.minZ();
           var polygon = POLYGON.project(view, wx, wz, wx + span, wz + span, 0, 0, 1, 1).clip(view, circle);
           if (polygon.size() == 0) continue;

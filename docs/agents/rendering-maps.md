@@ -36,6 +36,9 @@
   selected native/pose first-person camera height, without using targeting rays or
   bob/perspective/free-look transforms. Ordinary Beta projectiles retain native origins.
   Free-look/bob/third-person matrices do not steer normal gameplay targeting.
+  Lower camera when crouching also uses modern 4.5-block Survival block reach only
+  during the actual local crouched pose with Modern crawling enabled. Preserve
+  entity reach, Creative/custom ranges, remote authority and detached-camera behavior.
 
 - Held-item lighting uses render-only terrain endpoints and the existing 32-byte
   vertex. Never change world light, material opacity or spawning. Bound endpoint
@@ -194,6 +197,12 @@
   parent merges and writes stay tick-owned. Exact cave windows use versioned cache
   contexts; retain legacy cave files and existing surface paths. Both cave ranges use
   0–64 with defaults 10/10. Keep partially sampled columns when reprioritizing.
+  World Map cave height is visit-local. Follow the current reported player/freecam Y
+  until the slider overrides it; reset resumes following. Its cave button names the
+  current mode, and Surface hides both height controls and their input bounds.
+  The visible world map owns the existing sampling budget; closing it restores the
+  live camera survey. Carry its exact cave context through terrain, lighting and
+  coordinate lookups without replacing the minimap's live cache context.
   Cancel only obsolete queued view-only reads, reserving worker admission for native
   sampling and parent maintenance; durable writes and FIFO flush barriers retain order.
   Minimap live rendering and HUD hit/drag bounds share geometry and cached paired

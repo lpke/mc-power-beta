@@ -58,6 +58,10 @@ public class EditServerScreen extends Screen {
 
     @Override
     protected void keyPressed(char character, int keyCode) {
+        if (keyCode == Keyboard.KEY_ESCAPE) {
+            this.minecraft.setScreen(this.parent);
+            return;
+        }
         this.nameTextField.keyPressed(character, keyCode);
         this.ipTextField.keyPressed(character, keyCode);
         this.updateButton();

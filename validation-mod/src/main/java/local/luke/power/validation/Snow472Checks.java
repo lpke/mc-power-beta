@@ -112,7 +112,15 @@ final class Snow472Checks {
     call(screen, "layout"); Path report = Path.of("power-beta-data/reports/snow-472"); Files.createDirectories(report);
     int mode = GL11.glGetInteger(GL11.GL_MATRIX_MODE); GL11.glPushAttrib(GL11.GL_ALL_ATTRIB_BITS);
     GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPushMatrix(); GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPushMatrix();
-    try { SettingsSnapshot.render(mc, screen, 854, 480, report.resolve("setting-854.png")); }
+    try {
+      SettingsSnapshot.render(mc, screen, 854, 480, report.resolve("setting-854.png"));
+      for (Object row : (List<?>)field(screen, "rows")) if (call(row, "setting") == setting) {
+        int rowY = (int)call(screen, "top") + ((Number)call(row, "y")).intValue()
+            - ((Number)field(screen, "scroll")).intValue();
+        SettingsSnapshot.render(mc, screen, 854, 480, report.resolve("setting-help-854.png"),
+            (int)call(screen, "left") + 5, rowY + 5);
+      }
+    }
     finally { GL11.glMatrixMode(GL11.GL_MODELVIEW); GL11.glPopMatrix(); GL11.glMatrixMode(GL11.GL_PROJECTION); GL11.glPopMatrix(); GL11.glPopAttrib(); GL11.glMatrixMode(mode); mc.setScreen(previous); }
     for (var base : DefaultBases.Base.values()) check(DefaultBases.value(base, setting.id, setting.powerBetaDefault).getAsBoolean() == (base == DefaultBases.Base.POWER_BETA), "snow default for " + base);
     log("SNOW472 settings/defaults capture PASS");

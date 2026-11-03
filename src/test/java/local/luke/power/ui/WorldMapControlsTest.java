@@ -6,6 +6,28 @@ import org.junit.jupiter.api.Test;
 
 class WorldMapControlsTest {
   private static final String[] LABELS = {"Hide Toggles", "Waypoints", "Settings", "Surface", "Overworld", "Center", "Go to", "Close"};
+  @Test void caveSliderAndResetStayBesideTheCurrentModeAtEveryPaneWidth() {
+    for (int[] pane : new int[][] {{0,320},{0,400},{0,640},{0,1920},{336,200},{336,464}}) {
+      var labels = LABELS.clone(); labels[3] = "Caves";
+      var layout = WorldMapControls.at(pane[0],pane[1],240,labels,s->s.length()*6,true);
+      var mode = layout.button(WorldMapControls.Action.LAYER).bounds();
+      var slider = layout.caveSlider(); var reset = layout.caveReset();
+      assertEquals(mode.x()+mode.width()+4,slider.x());
+      assertEquals(slider.x()+slider.width()+4,reset.x());
+      assertEquals(mode.y(),slider.y()); assertEquals(mode.y(),reset.y());
+      assertTrue(slider.width()>=70);
+      var boxes = new java.util.ArrayList<WorldMapControls.Box>();
+      layout.buttons().forEach(button->boxes.add(button.bounds()));
+      boxes.add(slider); boxes.add(reset); boxes.add(layout.scale());
+      for (var box : boxes) {
+        assertTrue(box.x()>=pane[0]+8 && box.x()+box.width()<=pane[0]+pane[1]-8);
+        assertTrue(box.y()>=0 && box.y()+box.height()<=240);
+        for (var other : boxes) if (other != box) assertFalse(box.intersects(other));
+      }
+      var surface = WorldMapControls.at(pane[0],pane[1],240,LABELS,s->s.length()*6,false);
+      assertNull(surface.caveSlider()); assertNull(surface.caveReset());
+    }
+  }
   @Test void navigationAndScaleStayInsideTheirPaneWithoutOverlapping() {
     for(int[] pane:new int[][]{{0,320},{0,400},{0,640},{0,1920},{336,200},{336,464},{403,557}})
       for(int height:new int[]{240,360}) {

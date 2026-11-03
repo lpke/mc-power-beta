@@ -1,7 +1,10 @@
 package local.luke.power.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.*;
+import com.llamalad7.mixinextras.sugar.Local;
 import local.luke.power.audio.AudioController;
+import local.luke.power.audio.ExtraSoundVariants;
+import net.minecraft.class_267;
 import net.minecraft.client.sound.SoundManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -54,8 +57,10 @@ public class SoundMixin {
       float y,
       float z,
       float input,
-      float pitch) {
-    original.call(system, channel, AudioController.mix(channel, id, volume, false));
+      float pitch,
+      @Local class_267 track) {
+    original.call(system, channel, AudioController.mix(channel, id,
+        volume * ExtraSoundVariants.volume(id, track.field_2126), false));
   }
 
   @WrapOperation(

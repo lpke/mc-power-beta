@@ -42,6 +42,9 @@ def main():
         assert index[asset['asset']] == {'hash': asset['sha1'], 'size': asset['size']}, asset['file']
         data = (RESOURCES / asset['file']).read_bytes()
         assert len(data) == asset['size'] and hashlib.sha1(data).hexdigest() == asset['sha1'], asset['file']
+    vehicle_events = {f'entity.player.attack.{kind}' for kind in ('strong', 'weak', 'sweep', 'knockback')}
+    assert vehicle_events <= manifest['events'].keys()
+    assert sum(asset['event'] in vehicle_events for asset in manifest['assets']) == 21
     assert manifest['events']['entity.generic.extinguish_fire'] == {
         'sounds': ['random/fizz'], 'subtitle': 'subtitles.entity.generic.extinguish_fire'}
     index, _ = sources['source']

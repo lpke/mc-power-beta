@@ -48,4 +48,18 @@ class InventoryPointerTest {
     assertEquals(200, p.x()); assertEquals(300, p.y());
     assertEquals(2, p.takeX()); assertEquals(3, p.takeY());
   }
+
+  @Test void aFollowingDragBeforeTheReleaseWarpRetainsItsMotion() {
+    InventoryPointer p = new InventoryPointer();
+    p.event(90, 400, 0, 0, false);
+    p.press(); p.event(114, 412, 0, 0, false); p.release();
+    p.batchFinished(false);
+    p.warp(114, 412); // Previous native baseline, before the delayed warp marker.
+    p.event(114, 412, 0, 0, false); p.press();
+    p.event(138, 424, 0, 0, false); p.release();
+    p.warp(90, 400); // The release warp itself has no movement.
+    p.event(97, 403, 0, 0, false);
+    assertEquals(48, p.takeX()); assertEquals(24, p.takeY());
+    assertEquals(97, p.x()); assertEquals(403, p.y());
+  }
 }

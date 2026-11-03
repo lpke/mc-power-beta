@@ -123,20 +123,27 @@ public final class CameraJitter470Checks {
 
   private static void raw(Minecraft mc) throws Exception {
     Class<?> handler=Class.forName("local.luke.power.controls.tweaks.rawinput.RawInputHandler");
-    Field running=handler.getField("runInputThread"),threadField=handler.getField("inputThread");
+    Field running=handler.getField("runInputThread"),threadField=handler.getField("inputThread"),enabled=handler.getField("rawInputEnabled");
     boolean wasRunning=running.getBoolean(null);Thread thread=(Thread)threadField.get(null);
-    running.setBoolean(null,false);
-    if(thread!=null) { thread.join(2000);check(!thread.isAlive(),"raw polling thread did not stop for isolated handoff check"); }
+    boolean wasEnabled=enabled.getBoolean(null),wasGrabbed=org.lwjgl.input.Mouse.isGrabbed();
     Class<?> helperClass=Class.forName("local.luke.power.controls.tweaks.rawinput.RawMouseHelper");
-    var mouse=(net.minecraft.class_596)helperClass.getConstructor(java.awt.Component.class).newInstance(mc.canvas);
+    Method refresh=null,suspend=null;
+    try { refresh=handler.getMethod("refreshCapture");suspend=handler.getMethod("suspendCapture"); }
+    catch(NoSuchMethodException legacy) { /* Keep this fixture usable against the earlier baseline. */ }
     Class<?> motionClass=null;
     try {motionClass=Class.forName("local.luke.power.controls.tweaks.rawinput.RawMouseMotion");} catch(ClassNotFoundException legacy) {}
     Object motion=motionClass==null?null:handler.getField("motion").get(null);
     Method add=motionClass==null?null:motionClass.getMethod("add",int.class,int.class);
     Method clear=motionClass==null?null:motionClass.getMethod("clear");
     Field dx=motionClass==null?handler.getField("dx"):null,dy=motionClass==null?handler.getField("dy"):null;
-    var screen=mc.currentScreen;mc.currentScreen=null;
+    var screen=mc.currentScreen;var originalHelper=mc.field_2767;
     try {
+      running.setBoolean(null,false);
+      if(thread!=null) { thread.interrupt();thread.join(2000);check(!thread.isAlive(),"raw polling thread did not stop for isolated handoff check"); }
+      var mouse=(net.minecraft.class_596)helperClass.getConstructor(java.awt.Component.class).newInstance(mc.canvas);
+      mc.field_2767=mouse;mc.currentScreen=null;enabled.setBoolean(null,true);
+      org.lwjgl.input.Mouse.setGrabbed(true);
+      if(refresh!=null)check((boolean)refresh.invoke(null),"synthetic raw helper did not acquire focused capture ownership");
       int expected=200000;long totalError=0;
       for(int trial=0;trial<8;trial++) {
         if(clear!=null)clear.invoke(motion);else {dx.setInt(null,0);dy.setInt(null,0);}
@@ -166,8 +173,11 @@ public final class CameraJitter470Checks {
       log("CAMERA RAW total count error="+totalError+" implementation="+(motionClass==null?"legacy":"atomic"));
       Files.writeString(ROOT.resolve(motionClass==null?"raw-before.txt":"raw-after.txt"),"Eight trials, 200000 paired motion samples each; absolute count error="+totalError+"\n");
     } finally {
-      mc.currentScreen=screen;
+      if(suspend!=null)suspend.invoke(null);
+      enabled.setBoolean(null,wasEnabled);mc.currentScreen=screen;mc.field_2767=originalHelper;
+      org.lwjgl.input.Mouse.setGrabbed(wasGrabbed);
       if(clear!=null)clear.invoke(motion);else {dx.setInt(null,0);dy.setInt(null,0);}
+      if(refresh!=null)refresh.invoke(null);
       if(wasRunning)handler.getMethod("startInputThread").invoke(null);
     }
   }

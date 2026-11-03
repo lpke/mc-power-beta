@@ -76,7 +76,7 @@ public class KeyPressedListener {
 
             // Rescan Mouse
             if (keyCode == local.luke.power.input.Bindings.eventCode(KeyBindingListener.rescanMouse)) {
-                RawInputHandler.getMouse("Player Triggered Rescan");
+                RawInputHandler.rescanMouse();
                 Util.notify("Rescanning for Mice", true);
             }
 

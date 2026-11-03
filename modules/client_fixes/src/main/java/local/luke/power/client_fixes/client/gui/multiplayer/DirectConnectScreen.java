@@ -63,6 +63,10 @@ public class DirectConnectScreen extends Screen {
     }
 
     protected void keyPressed(char character, int keyCode) {
+        if (keyCode == Keyboard.KEY_ESCAPE) {
+            this.minecraft.setScreen(this.parent);
+            return;
+        }
         this.addressField.keyPressed(character, keyCode);
         if (keyCode == Keyboard.KEY_RETURN) {
             this.buttonClicked((ButtonWidget) this.buttons.get(0));

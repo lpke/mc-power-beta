@@ -10,6 +10,9 @@
   Linux GUI releases publish the requested origin before Mouse.poll and discard
   pre-release motion through the ordered native warp marker. Never repeatedly
   recenter after opening; deliberate post-open movement must remain responsive.
+  Cursor transitions must not wait for GPU completion, presentation or timers on
+  the game thread. Follow [cursor restoration](../cursor-restoration.md); X/AWT
+  coordinates alone cannot prove the compositor applied a Wayland position hint.
   Leave events and polling to
   unrelated screens, including photo mode. Right-click looking must not drop items.
   Dispatch complete mouse batches before changing capture. Preserve each drag's

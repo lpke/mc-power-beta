@@ -139,3 +139,9 @@
   saved values, including zero, stay intact; exact entry accepts every whole
   millisecond. MP3 batch counts likewise drag by 10 while exact entry accepts
   every whole count within the existing range.
+
+- Optional boat and minecart attack audio follows the pinned modern `Player.attack`
+  events, with native successful damage/removal as the trigger. There is no separate
+  modern vehicle break cue. Keep charge and held-item tracking limited to sound
+  selection, preserve per-variant gains through live mixing and previews, and leave
+  native damage, drops and attack timing intact. See [vehicle sounds](../vehicle-sounds.md).

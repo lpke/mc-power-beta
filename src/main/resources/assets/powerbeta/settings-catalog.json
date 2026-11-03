@@ -2480,7 +2480,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.7.2",
+    "default": "Power Beta 4.7.3",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -4465,7 +4465,7 @@
     "page": "Building",
     "group": "Vein mining",
     "label": "Crouching only",
-    "description": "Require crouching to start and continue vein mining. Off also allows normal mining.",
+    "description": "Crouch before starting a block to vein mine, and keep crouching. Blocks already partly mined normally finish as single blocks. Off allows vein mining without crouching.",
     "order": 1
   },
   "veinMining.tools": {
@@ -4884,7 +4884,7 @@
     "page": "Fixes",
     "group": "Items and blocks",
     "label": "Snow layer replacement",
-    "description": "Place blocks and empty water or lava buckets directly into the snow layer you click. Block placement keeps the clicked face. Singleplayer only.",
+    "description": "Empty a filled water or lava bucket into the snow layer you click instead of the adjacent block. Block items replace snow either way; this also keeps their clicked-face orientation. Singleplayer only.",
     "default": false,
     "restart": false,
     "order": 46
@@ -6865,6 +6865,14 @@
     "description": "Crawl under low ceilings, including closed trapdoors, with modern collision, movement, camera and animation. Independent of modern water movement.",
     "order": 41
   },
+  "gameplay.modernTrapdoorClimbing": {
+    "page": "Gameplay",
+    "group": "Interaction",
+    "label": "Modern trapdoor climbing",
+    "description": "Climb an open trapdoor directly above a ladder facing the same way. Uses normal ladder movement. Singleplayer only.",
+    "default": false,
+    "order": 42
+  },
   "inventoryTools.toolWhitelist": {
     "page": "Inventory",
     "group": "Automatic tool switching",
@@ -6904,7 +6912,7 @@
     "page": "Gameplay",
     "group": "Interaction",
     "label": "Lower camera when crouching",
-    "description": "With Modern crawling enabled, use a deeper camera drop than Beta while sneaking, in first and third person. Off keeps Beta's normal crouch camera movement. Low ceilings and crawling always use a safe lower camera.",
+    "description": "With Modern crawling enabled, lower the camera while crouching and use modern 4.5-block Survival block reach from that eye height. Works in first and third person. Off keeps Beta's crouch camera and reach. Low ceilings and crawling always use a safe lower camera.",
     "order": 41.1
   },
   "audio.underwaterEnterSounds": {
@@ -7009,6 +7017,13 @@
     "description": "Narrow the view while drawing a modern bow, with smooth drawing and release transitions.",
     "default": true,
     "restart": false
+  },
+  "audio.vehicleAttackSounds": {
+    "page": "Audio",
+    "group": "Extra sounds",
+    "label": "Boat and minecart hit sounds",
+    "order": 13,
+    "description": "Play modern attack sounds when hitting boats or minecarts in singleplayer. Uses Players volume."
   },
   "audio.ladderSounds": {
     "page": "Audio",

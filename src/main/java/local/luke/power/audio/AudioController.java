@@ -225,7 +225,8 @@ public final class AudioController {
     else system.newSource(false, "PowerBetaPreview", water == null ? track.field_2127 : water.url(),
         water == null ? track.field_2126 : water.filename(), false, 0, 0, 0, 0, 0);
     system.setVolume("PowerBetaPreview", mix("PowerBetaPreview", id,
-        client.options.soundVolume * (water == null ? ExtraSounds.previewVolume(id) : water.volume()), false));
+        client.options.soundVolume * (water == null ? ExtraSounds.previewVolume(id)
+            * ExtraSoundVariants.volume(id, track.field_2126) : water.volume()), false));
     system.setPitch("PowerBetaPreview", ExtraSounds.previewPitch(id));
     soundPreview = id;
     soundPreviewStarted = System.nanoTime();
