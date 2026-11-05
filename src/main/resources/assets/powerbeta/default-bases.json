@@ -136,6 +136,7 @@
     "visual.containerEntityReach": 5,
     "gameplay.modernBowHandling": false,
     "gameplay.modernBowFov": true,
+    "gameplay.crouchCameraHeight": true,
     "gameplay.lowerCrouchCamera": false,
     "audio.ladderSounds": true,
     "audio.vehicleAttackSounds": true,

@@ -4,7 +4,7 @@
 
 ## [4.7.5] - 2026-11-06
 
-- Keep Modern crawling on and turn Lower camera when crouching off in Power Beta defaults.
+- Enable Modern crawling and Modern crouching, and turn Lower camera when crouching off, in Power Beta defaults.
 - Add Bucket block drops to preserve the normal drops of torches and other non-solid blocks replaced by a filled bucket. Enabled by default in Power Beta and Refined Beta.
 
 ## [4.7.4] - 2026-11-03

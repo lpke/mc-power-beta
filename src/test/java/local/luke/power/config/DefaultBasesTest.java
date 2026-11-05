@@ -329,7 +329,7 @@ class DefaultBasesTest {
       assertEquals(4, DefaultBases.value(base, "native.guiScale", new JsonPrimitive(4)).getAsInt());
       assertEquals(base == DefaultBases.Base.POWER_BETA ? 300 : 30,
           DefaultBases.value(base, "power_controls:general.autosaveInterval", new JsonPrimitive(30)).getAsInt());
-      assertFalse(DefaultBases.value(base, "gameplay.crouchCameraHeight", new JsonPrimitive(false)).getAsBoolean());
+      assertEquals(base == DefaultBases.Base.POWER_BETA, DefaultBases.value(base, "gameplay.crouchCameraHeight", new JsonPrimitive(false)).getAsBoolean());
       assertEquals(base != DefaultBases.Base.POWER_BETA, DefaultBases.value(base, "gameplay.lowerCrouchCamera", new JsonPrimitive(true)).getAsBoolean());
       assertTrue(DefaultBases.value(base, "gameplay.modernBowFov", new JsonPrimitive(false)).getAsBoolean());
       assertTrue(DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.blurBackground", blurDefault).getAsBoolean());

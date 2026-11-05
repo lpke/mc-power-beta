@@ -838,7 +838,7 @@
       "modernWaterMovement": true,
       "modernCrawling": true,
       "modernTrapdoorClimbing": true,
-      "crouchCameraHeight": false,
+      "crouchCameraHeight": true,
       "lowerCrouchCamera": false,
       "modernBowHandling": false,
       "modernBowFov": true

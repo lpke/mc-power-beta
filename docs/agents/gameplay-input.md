@@ -272,8 +272,9 @@
   compact poses always keep a safe lower camera. Preserve physical feet, saved
   positions, projectile contracts and the shared logical-eye interpolation through
   every combination and transition.
-  Power Beta defaults enable Modern crawling and disable Lower camera when
-  crouching; other bases and existing explicit preferences retain their values.
+  Power Beta defaults enable Modern crawling and Modern crouching and disable
+  Lower camera when crouching; other bases and existing explicit preferences
+  retain their values.
   Verify actual native three-block-down placement and Flexible placement with the
   child On and Off in all four directions and while switching it. Compensate only
   Survival's downward block range for the chosen higher eye, bounded by the modern

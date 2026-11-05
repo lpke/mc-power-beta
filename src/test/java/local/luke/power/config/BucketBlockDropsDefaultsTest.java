@@ -52,17 +52,23 @@ class BucketBlockDropsDefaultsTest {
   @Test void powerBetaCameraDefaultsRemainIndependentOfOtherBasesAndSavedPreferences() throws Exception {
     ConfigDefaults.prepare(game);
     assertTrue(PowerConfig.section("gameplay").get("modernCrawling").getAsBoolean());
+    assertTrue(PowerConfig.section("gameplay").get("crouchCameraHeight").getAsBoolean());
     assertFalse(PowerConfig.section("gameplay").get("lowerCrouchCamera").getAsBoolean());
     for (var selected : DefaultBases.Base.values()) {
       assertEquals(selected == DefaultBases.Base.POWER_BETA,
           DefaultBases.value(selected, "gameplay.modernCrawling", new JsonPrimitive(false)).getAsBoolean());
+      assertEquals(selected == DefaultBases.Base.POWER_BETA,
+          DefaultBases.value(selected, "gameplay.crouchCameraHeight", new JsonPrimitive(false)).getAsBoolean());
       assertEquals(selected != DefaultBases.Base.POWER_BETA,
           DefaultBases.value(selected, "gameplay.lowerCrouchCamera", new JsonPrimitive(true)).getAsBoolean());
     }
     var original = PowerConfig.section("gameplay");
     original.addProperty("modernCrawling", false); original.addProperty("lowerCrouchCamera", true);
-    PowerConfig.put("gameplay", original); byte[] before = Files.readAllBytes(PowerConfig.path());
-    ConfigDefaults.prepare(game); assertArrayEquals(before, Files.readAllBytes(PowerConfig.path()));
+    for (boolean crouching : new boolean[]{false, true}) {
+      original.addProperty("crouchCameraHeight", crouching);
+      PowerConfig.put("gameplay", original); byte[] before = Files.readAllBytes(PowerConfig.path());
+      ConfigDefaults.prepare(game); assertArrayEquals(before, Files.readAllBytes(PowerConfig.path()));
+    }
   }
   private static java.lang.reflect.Field field(Class<?> type, String name) throws Exception { var f = type.getDeclaredField(name); f.setAccessible(true); return f; }
 }
