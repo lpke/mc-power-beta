@@ -60,7 +60,9 @@ public final class Validation {
     try {
       String command = Files.readString(COMMAND).trim();
       Files.delete(COMMAND);
-      if (command.startsWith("picker-474 ")) Picker474Checks.run(mc, command.substring("picker-474 ".length()));
+      if (command.equals("bucket-475 capture")) Bucket475Checks.capture(mc);
+      else if (command.equals("bucket-475")) Bucket475Checks.run(mc);
+      else if (command.startsWith("picker-474 ")) Picker474Checks.run(mc, command.substring("picker-474 ".length()));
       else if (command.startsWith("flight-474 ")) Flight474Checks.run(mc, command.substring("flight-474 ".length()));
       else if (command.equals("crouch-474")) Crouch474Checks.run(mc);
       else if (command.equals("crouch-474 capture")) Crouch474Checks.capture(mc);

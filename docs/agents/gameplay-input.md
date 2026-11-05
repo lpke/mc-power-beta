@@ -109,6 +109,11 @@
   Filling and milking exchange one bucket, with inventory insertion or a normal
   overflow drop. Preserve existing stacks when disabled and never split inventories
   while editing settings. Keep creative buckets reusable.
+- Bucket block drops applies only to successful native filled-bucket replacement
+  in singleplayer. Preserve the replaced block's native metadata/drop rules, skip
+  fluids and failed placement, and keep Nether evaporation unchanged. Initialize
+  missing preferences once with a verified backup, on in Power Beta and Refined
+  Beta and off in Beta. Keep the existing flowing-liquid drop fix independent.
 - Leaving, replacing a world, or quitting clears every temporary activation through
   `TweakLifecycle`. Every `TweakIndicators.Tweak` needs an owning reset participant.
   This includes restocking, automatic tool switching, fake sneak, fast placement and
@@ -260,13 +265,15 @@
 - Spectator crosshair checks use loaded-only read-only rays and Creative reach. Detect
   native use overrides without invoking them or changing the player's interaction target.
 - Modern crouching retains the saved `gameplay.crouchCameraHeight` ID and owns modern
-  crouch reach. Its default-on `gameplay.lowerCrouchCamera` child controls only the
+  crouch reach. Its `gameplay.lowerCrouchCamera` child controls only the
   additional open-space camera lowering with Modern crawling. Hide the child when
   Modern crouching is off without changing its saved preference. Child Off retains
   Beta's native sneak/step camera motion and modern reach. Forced low-ceiling and
   compact poses always keep a safe lower camera. Preserve physical feet, saved
   positions, projectile contracts and the shared logical-eye interpolation through
   every combination and transition.
+  Power Beta defaults enable Modern crawling and disable Lower camera when
+  crouching; other bases and existing explicit preferences retain their values.
   Verify actual native three-block-down placement and Flexible placement with the
   child On and Off in all four directions and while switching it. Compensate only
   Survival's downward block range for the chosen higher eye, bounded by the modern

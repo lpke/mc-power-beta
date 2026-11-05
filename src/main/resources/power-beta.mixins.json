@@ -18,6 +18,7 @@
     "TrapdoorClimbingCollisionMixin",
     "ModernSnowPlacementMixin",
     "SnowBucketPlacementMixin",
+    "BucketBlockDropsMixin",
     "ModernBowItemMixin",
     "CreativeSwordMiningMixin",
     "ModernBowDurabilityMixin",

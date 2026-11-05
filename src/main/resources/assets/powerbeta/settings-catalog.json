@@ -2480,7 +2480,7 @@
     "group": "Version label",
     "label": "Version text",
     "description": "Only has effect if custom version text is enabled",
-    "default": "Power Beta 4.7.4",
+    "default": "Power Beta 4.7.5",
     "restart": false
   },
   "power_controls:userinterface.panoramaConfig.enablePanorma": {
@@ -7099,5 +7099,13 @@
     "label": "Include Block breaking particles",
     "description": "Show Block breaking particles enabled or disabled while the temporary override is active.",
     "order": 103
+  },
+  "gameplay.bucketBlockDrops": {
+    "page": "Fixes",
+    "group": "Items and blocks",
+    "label": "Bucket block drops",
+    "description": "Drop torches and other non-solid blocks normally when a filled water or lava bucket replaces them in singleplayer.",
+    "default": true,
+    "restart": false
   }
 }

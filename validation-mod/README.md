@@ -1,3 +1,7 @@
+`bucket-475` checks native water/lava bucket replacement drops with the fix on/off,
+including torches, redstone, flowers and saplings, plus air, water, solid blocks and
+Nether evaporation. Run in a focused, muted disposable world after `new-world`.
+
 `cave-map-473 run|capture` checks cave height, exact selected-level terrain/cache,
 slider/reset/freecam, current layer labels and hidden Surface controls at320/854.
 Use a muted focused disposable world with a1708x960 or larger client.

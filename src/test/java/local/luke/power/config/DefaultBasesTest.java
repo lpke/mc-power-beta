@@ -201,7 +201,7 @@ class DefaultBasesTest {
       PowerConfig.write(old); byte[] original = Files.readAllBytes(PowerConfig.path());
       ConfigDefaults.prepare(game);
       var expected = old.deepCopy();
-      expected.getAsJsonObject("settings").getAsJsonObject("gameplay").addProperty("lowerCrouchCamera", true);
+      expected.getAsJsonObject("settings").getAsJsonObject("gameplay").addProperty("lowerCrouchCamera", base != DefaultBases.Base.POWER_BETA);
       assertEquals(expected, PowerConfig.document());
       try (var backups = Files.list(game.resolve("power-beta-data/settings-backups"))) {
         assertTrue(backups.anyMatch(dir -> {
@@ -330,7 +330,7 @@ class DefaultBasesTest {
       assertEquals(base == DefaultBases.Base.POWER_BETA ? 300 : 30,
           DefaultBases.value(base, "power_controls:general.autosaveInterval", new JsonPrimitive(30)).getAsInt());
       assertFalse(DefaultBases.value(base, "gameplay.crouchCameraHeight", new JsonPrimitive(false)).getAsBoolean());
-      assertTrue(DefaultBases.value(base, "gameplay.lowerCrouchCamera", new JsonPrimitive(false)).getAsBoolean());
+      assertEquals(base != DefaultBases.Base.POWER_BETA, DefaultBases.value(base, "gameplay.lowerCrouchCamera", new JsonPrimitive(true)).getAsBoolean());
       assertTrue(DefaultBases.value(base, "gameplay.modernBowFov", new JsonPrimitive(false)).getAsBoolean());
       assertTrue(DefaultBases.value(base, "power_controls:userinterface.panoramaConfig.blurBackground", blurDefault).getAsBoolean());
       assertEquals(base == DefaultBases.Base.POWER_BETA ? "b1_8_1" : "b1_7_3",

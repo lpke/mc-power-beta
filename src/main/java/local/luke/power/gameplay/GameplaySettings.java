@@ -11,6 +11,7 @@ public final class GameplaySettings {
   public boolean fastItemCollisions = true;
   public boolean boatPlacementFacing = true;
   public boolean modernSnowPlacement;
+  public boolean bucketBlockDrops = true;
   public boolean modernWaterMovement = true;
   public boolean modernBowHandling;
   public boolean modernBowFov = true;

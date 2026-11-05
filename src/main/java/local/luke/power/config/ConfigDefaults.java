@@ -145,7 +145,7 @@ public final class ConfigDefaults {
     JsonObject gameplay = PowerConfig.section("gameplay");
     boolean changed = false;
     // Freeze the first value so later reset-base changes cannot change it on restart.
-    for (String key : java.util.List.of("boatPlacementFacing", "modernSnowPlacement", "modernWaterMovement", "modernCrawling", "modernTrapdoorClimbing", "modernBowHandling", "modernBowFov", "lowerCrouchCamera")) {
+    for (String key : java.util.List.of("boatPlacementFacing", "modernSnowPlacement", "bucketBlockDrops", "modernWaterMovement", "modernCrawling", "modernTrapdoorClimbing", "modernBowHandling", "modernBowFov", "lowerCrouchCamera")) {
       if (gameplay.has(key)) continue;
       gameplay.add(key, DefaultBases.value("gameplay." + key, new JsonPrimitive(!key.equals("modernSnowPlacement") && !key.equals("modernCrawling") && !key.equals("modernTrapdoorClimbing") && !key.equals("modernBowHandling"))));
       changed = true;
